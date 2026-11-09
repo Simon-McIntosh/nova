@@ -21,10 +21,7 @@ import jax.numpy as jnp
 from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
 from nova.linalg.tensor_spline import fit_tensor_spline
 
-
-def _oriented(flux, radius, height):
-    array = np.asarray(flux, dtype=float)
-    return array if array.shape == (len(height), len(radius)) else array.T
+from flux_orientation import analysis_field
 
 
 def _seeds(radius, height, flux, count=24):
@@ -72,7 +69,7 @@ def report(archive: Path, label: str) -> dict:
     with np.load(archive) as data:
         radius = np.asarray(data["radius"], dtype=float)
         height = np.asarray(data["height"], dtype=float)
-        flux = _oriented(data["flux"], radius, height)
+        flux = analysis_field(data["flux"], radius, height)
     surface = fit_tensor_spline(
         jnp.asarray(radius), jnp.asarray(height), jnp.asarray(flux)
     )
@@ -107,13 +104,21 @@ def report(archive: Path, label: str) -> dict:
                 "winding_index": _winding(interp, position[index]) if inside else None,
                 "gradient_at_point": [
                     float(
-                        (interp([[position[index][0] + 1e-4, position[index][1]]])[0]
-                         - interp([[position[index][0] - 1e-4, position[index][1]]])[0])
+                        (
+                            interp([[position[index][0] + 1e-4, position[index][1]]])[0]
+                            - interp([[position[index][0] - 1e-4, position[index][1]]])[
+                                0
+                            ]
+                        )
                         / 2e-4
                     ),
                     float(
-                        (interp([[position[index][0], position[index][1] + 1e-4]])[0]
-                         - interp([[position[index][0], position[index][1] - 1e-4]])[0])
+                        (
+                            interp([[position[index][0], position[index][1] + 1e-4]])[0]
+                            - interp([[position[index][0], position[index][1] - 1e-4]])[
+                                0
+                            ]
+                        )
                         / 2e-4
                     ),
                 ],

@@ -4,8 +4,9 @@ The trip's own solved field (saved by the per-trip driver as
 ``frame-<n>-trip-<k>.npz``) is drawn as line contours against the EFIT label at
 the same physical levels, with both null sets, the governed limiter ring, the
 axis-connected bounding surface the connectivity owner reads, and the measured
-axis position.  A residual strip below the panel carries the relative residual
-at every trip the frame reached.
+axis position.  A narrow residual column beside the panel carries the relative
+residual at every trip the frame reached, so the equal-aspect poloidal geometry
+takes the full canvas height instead of sitting above a full-width strip.
 
 The geometry is not derived here.  The bounding surface comes from
 ``nova.equilibrium.connectivity_boundary.host_boundary_read`` on the trip's flux
@@ -19,6 +20,7 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import json
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -27,10 +29,15 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.collections import Collection
+from matplotlib.text import Text
+from matplotlib.ticker import FixedLocator, FormatStrFormatter
 from scipy.interpolate import RegularGridInterpolator
+from scipy.spatial import cKDTree
 
 import jax.numpy as jnp
 
+from nova.database.filepath import repository_relative
 from nova.equilibrium.connectivity_boundary import host_boundary_read
 from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
 from nova.linalg.tensor_spline import fit_tensor_spline
@@ -42,14 +49,220 @@ from nova.media.poloidal import (
     inside_wall_units,
 )
 
+from check_panel_receipts import PUBLISHED_ROOT
+from flux_orientation import analysis_field
+
+SIBLING = Path(__file__).resolve().parent.parent / "diiid_forward_convergence"
+sys.path.insert(0, str(SIBLING))
+
+from render_panels import _check_text_artists  # noqa: E402
+
 LEVEL_COUNT = 9
 
+NULL_CLEARANCE = 0.14
+"""Separation [m] a solved X-point keeps from the solved axis when they touch."""
 
-def _oriented(flux: np.ndarray, radius: np.ndarray, height: np.ndarray) -> np.ndarray:
-    array = np.asarray(flux, dtype=float)
-    if array.shape == (len(height), len(radius)):
-        return array
-    return array.T
+
+def _draw_x_points(axes, axis, x_points, style=DEFAULT_INK) -> bool:
+    """Draw each solved X-point, stepping clear of the axis with a leader.
+
+    A saddle can sit within a marker width of the axis, and two filled markers
+    then read as one blob.  A marker that would crowd the axis is drawn smaller
+    at a callout position clear of it, joined by a thin leader to a hollow dot
+    at the position the solve actually returned.
+
+    Returns whether any callout was drawn, so the legend names the hollow dot
+    only on a panel that carries one.
+    """
+    points = np.asarray(x_points, dtype=float).reshape(-1, 2)
+    anchor = None if axis is None else np.asarray(axis, dtype=float)
+    callouts = False
+    for point in points:
+        if not np.all(np.isfinite(point)):
+            continue
+        drawn = point
+        callout = False
+        if anchor is not None:
+            offset = point - anchor
+            distance = float(np.hypot(*offset))
+            if distance < NULL_CLEARANCE:
+                direction = (
+                    offset / distance if distance > 1e-9 else np.array([0.0, 1.0])
+                )
+                drawn = point + direction * (NULL_CLEARANCE - distance)
+                callout = True
+                callouts = True
+                axes.plot(
+                    [point[0], drawn[0]],
+                    [point[1], drawn[1]],
+                    color=style.xpoint_color,
+                    linewidth=0.8,
+                    solid_capstyle="butt",
+                    zorder=style.zorder_markers - 1,
+                )
+                axes.plot(
+                    point[0],
+                    point[1],
+                    marker="o",
+                    markersize=2.4,
+                    markerfacecolor="none",
+                    markeredgecolor=style.xpoint_color,
+                    markeredgewidth=0.8,
+                    linestyle="none",
+                    zorder=style.zorder_markers - 1,
+                )
+        axes.plot(
+            drawn[0],
+            drawn[1],
+            marker=style.xpoint_marker,
+            markersize=style.xpoint_markersize * (0.7 if callout else 1.0),
+            markeredgewidth=style.xpoint_markeredgewidth,
+            color=style.xpoint_color,
+            linestyle="none",
+            zorder=style.zorder_markers,
+        )
+    return callouts
+
+
+SOLVED_FLUX_WIDTH = 3.0
+"""Line width [pt] of the solved field, the subject the panel exists to show."""
+
+REFERENCE_FLUX = "#9a9a9a"
+REFERENCE_FLUX_WIDTH = 2.4
+"""Colour and width of the EFIT reference field, drawn beneath the solved one."""
+
+MIN_FLUX_WIDTH = 0.7
+"""Narrowest stroke a crowded solved level is drawn at [pt]."""
+
+RESIDUAL_STEP = 0.05
+"""Residual tick step [dimensionless], shared by every panel so the axes compare."""
+
+CROWD_FRACTION = 0.55
+"""Fraction of the gap to its neighbour a solved level may spend on its stroke."""
+
+LABEL_CLEARANCE = 1.5
+"""Distance [px] a text box keeps from any drawn segment it is checked against."""
+
+
+def _drawn_segments(axes) -> list[np.ndarray]:
+    """Return every drawn polyline in display coordinates.
+
+    The geometry a label must keep clear of is what the panel actually draws:
+    the lines (contours, the bounding surface, the limiter ring, leader lines)
+    and the collection paths (any contour set kept as a collection), plus the
+    markers, which carry their position as a one-point line.  Each artist's own
+    transform places its points, so a collection drawn in axes coordinates is
+    compared where it is actually drawn.
+    """
+
+    polylines = []
+    for line in axes.lines:
+        if not line.get_visible():
+            continue
+        points = np.asarray(line.get_xydata(), dtype=float)
+        if len(points):
+            polylines.append(line.get_transform().transform(points))
+    for artist in axes.get_children():
+        if not isinstance(artist, Collection) or not artist.get_visible():
+            continue
+        transform = artist.get_transform().transform
+        for path in artist.get_paths():
+            vertices = np.asarray(path.vertices, dtype=float)
+            if len(vertices):
+                polylines.append(transform(vertices))
+    return polylines
+
+
+def _segment_hits_box(start, end, bounds) -> bool:
+    """Return whether the segment crosses the axis-aligned box.
+
+    Liang-Barsky clipping: the parametric interval the segment spends inside
+    the box is intersected with the box's four half-planes, and a segment whose
+    endpoints both lie outside still hits the box whenever that interval is
+    non-empty.
+    """
+
+    dx = end[0] - start[0]
+    dy = end[1] - start[1]
+    low, high = 0.0, 1.0
+    for rate, offset in (
+        (-dx, start[0] - bounds.x0),
+        (dx, bounds.x1 - start[0]),
+        (-dy, start[1] - bounds.y0),
+        (dy, bounds.y1 - start[1]),
+    ):
+        if rate == 0.0:
+            if offset < 0.0:
+                return False
+            continue
+        crossing = offset / rate
+        if rate < 0.0:
+            if crossing > high:
+                return False
+            low = max(low, crossing)
+        else:
+            if crossing < low:
+                return False
+            high = min(high, crossing)
+    return low <= high
+
+
+def _labels_over_data(figure, axes) -> list[str]:
+    """Name every text artist whose box a drawn segment passes through.
+
+    A panel carries no axes, so a coordinate written over the contours cannot
+    be read off a scale: a label belongs in clear space beside the field, never
+    on the data it describes.  Whole segments are tested rather than their
+    endpoints, so a contour that crosses a label between two vertices lying
+    outside it is caught as well.
+    """
+
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    polylines = _drawn_segments(axes)
+    if not polylines:
+        return []
+    field = axes.get_window_extent(renderer)
+    problems = []
+    for artist in figure.findobj(Text):
+        if not artist.get_visible() or not artist.get_text().strip():
+            continue
+        box = artist.get_window_extent(renderer)
+        if not box.overlaps(field):
+            continue
+        padded = box.padded(LABEL_CLEARANCE)
+        crossed = 0
+        for points in polylines:
+            steps = (
+                list(zip(points[:-1], points[1:], strict=False))
+                if len(points) > 1
+                else [(points[0], points[0])]
+            )
+            for start, end in steps:
+                if _segment_hits_box(start, end, padded):
+                    crossed += 1
+        if crossed:
+            problems.append(
+                f"over data: {artist.get_text()[:40]!r} crosses "
+                f"{crossed} drawn segments"
+            )
+    return problems
+
+
+def check_panel(figure, axes, output: Path) -> None:
+    """Refuse to write a panel whose text is clipped, crowded or on the data.
+
+    Bounds and text-against-text overlap are the shared renderer's own check,
+    so a panel here and a panel elsewhere in the prototype reject the same
+    faults the same way; the label-over-data rule is what the poloidal panels
+    need on top of it.  The refusal names the offending artists and exits
+    nonzero, so a control run cannot pass silently.
+    """
+
+    problems = _check_text_artists(figure, output)
+    problems += _labels_over_data(figure, axes)
+    if problems:
+        raise SystemExit(f"refusing {output.name}: " + "; ".join(problems))
 
 
 def _point_flux(radius, height, flux) -> RegularGridInterpolator:
@@ -106,6 +319,65 @@ def _gradient_magnitude(radius, height, flux):
     return np.abs(dr) + np.abs(dz)
 
 
+def _level_spacing(figure, axes, radius, height, flux, levels) -> list[float]:
+    """Return the gap [pt] between each level and its nearest neighbour.
+
+    The gap is the short percentile of the distance from the level's own points
+    to the neighbouring level's points, so a set that crowds in one region is
+    measured where it crowds rather than on average.
+    """
+
+    transform = axes.transData.transform
+    paths = []
+    for level in levels:
+        contour = axes.contour(radius, height, flux, levels=[level], colors="none")
+        segments = [
+            np.asarray(segment, dtype=float)
+            for segment in contour.allsegs[0]
+            if len(segment) > 1
+        ]
+        contour.remove()
+        paths.append(transform(np.vstack(segments)) if segments else np.empty((0, 2)))
+    spacing = []
+    for index, points in enumerate(paths):
+        neighbours = [
+            paths[other]
+            for other in (index - 1, index + 1)
+            if 0 <= other < len(paths) and len(paths[other])
+        ]
+        if len(points) < 2 or not neighbours:
+            spacing.append(np.inf)
+            continue
+        sample = points[:: max(1, len(points) // 200)]
+        closest = []
+        for other in neighbours:
+            distances, _ = cKDTree(other).query(sample)
+            closest.append(float(np.percentile(distances, 5)))
+        spacing.append(min(closest) * 72.0 / figure.dpi)
+    return spacing
+
+
+def solved_level_widths(figure, axes, radius, height, flux, levels) -> list[float]:
+    """Return the stroke each solved level is drawn at.
+
+    The solved field is the panel's subject and is normally drawn at the
+    headline weight. Where neighbouring levels fall closer together than that
+    stroke, drawing them all at the headline width fills the space between them
+    and the reader sees one block of colour instead of nine levels, so each
+    level thins to a fraction of the gap it actually has.
+    """
+
+    widths = []
+    for gap in _level_spacing(figure, axes, radius, height, flux, levels):
+        if not np.isfinite(gap):
+            widths.append(SOLVED_FLUX_WIDTH)
+        else:
+            widths.append(
+                float(np.clip(CROWD_FRACTION * gap, MIN_FLUX_WIDTH, SOLVED_FLUX_WIDTH))
+            )
+    return widths
+
+
 def _connected_surface(axes, radius, height, flux, level, axis, colour, width):
     """Draw only the level ring that encloses the axis.
 
@@ -137,12 +409,12 @@ def _connected_surface(axes, radius, height, flux, level, axis, colour, width):
     return kept
 
 
-def render_trip(frame, trip, archive, rows, out) -> dict:
+def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
     with np.load(archive) as data:
         radius = np.asarray(data["radius"], dtype=float)
         height = np.asarray(data["height"], dtype=float)
-        flux = _oriented(np.asarray(data["flux"], dtype=float), radius, height)
-        label = _oriented(np.asarray(data["label"], dtype=float), radius, height)
+        flux = analysis_field(np.asarray(data["flux"], dtype=float), radius, height)
+        label = analysis_field(np.asarray(data["label"], dtype=float), radius, height)
         limiter = np.asarray(data["limiter"], dtype=float)
         wall = np.asarray(data["wall"], dtype=float)
         label_boundary = np.asarray(data["label_boundary"], dtype=float)
@@ -162,12 +434,17 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
     )
 
     boundary = None
-    if axis is not None and inside[
-        int(np.argmin(np.abs(height - axis[1]))),
-        int(np.argmin(np.abs(radius - axis[0]))),
-    ]:
+    if (
+        axis is not None
+        and inside[
+            int(np.argmin(np.abs(height - axis[1]))),
+            int(np.argmin(np.abs(radius - axis[0]))),
+        ]
+    ):
         boundary = host_boundary_read(flux, grid, tuple(axis))
-    bounding = float(boundary.psi_bnd) if boundary is not None and boundary.found else np.nan
+    bounding = (
+        float(boundary.psi_bnd) if boundary is not None and boundary.found else np.nan
+    )
 
     surface = fit_tensor_spline(
         jnp.asarray(radius), jnp.asarray(height), jnp.asarray(flux)
@@ -178,7 +455,9 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
     label_surface = fit_tensor_spline(
         jnp.asarray(radius), jnp.asarray(height), jnp.asarray(label)
     )
-    label_seeds = _candidates(_gradient_magnitude(radius, height, label), radius, height)
+    label_seeds = _candidates(
+        _gradient_magnitude(radius, height, label), radius, height
+    )
     label_saddles, _ = _stationary(label_surface, label_seeds, -1)
     label_axis = _extremum(label, radius, height, label_boundary)
     label_axis_points, _ = (
@@ -202,18 +481,40 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
         )[1:-1]
 
     figure = plt.figure(figsize=(14.0, 7.2))
-    layout = figure.add_gridspec(2, 1, height_ratios=[6.4, 0.9], hspace=0.10)
+    layout = figure.add_gridspec(1, 2, width_ratios=[6.4, 0.9], wspace=0.06)
     axes = figure.add_subplot(layout[0])
     strip = figure.add_subplot(layout[1])
-    figure.subplots_adjust(left=0.03, right=0.97, top=0.86, bottom=0.11)
+    figure.subplots_adjust(left=0.06, right=0.97, top=0.86, bottom=0.10)
     poloidal_axes(axes)
+    axes.set_aspect("equal")
+    axes.set_xlim(float(np.nanmin(radius)), float(np.nanmax(radius)))
+    axes.set_ylim(float(np.nanmin(height)), float(np.nanmax(height)))
+
+    solved_widths = solved_level_widths(figure, axes, radius, height, flux, levels)
 
     draw_flux_contours(
-        axes, radius, height, flux, levels, color=DEFAULT_INK.flux_color, wall=wall
+        axes,
+        radius,
+        height,
+        label,
+        levels,
+        color=REFERENCE_FLUX,
+        linewidth=REFERENCE_FLUX_WIDTH,
+        wall=None,
+        zorder=DEFAULT_INK.zorder_flux,
     )
-    draw_flux_contours(
-        axes, radius, height, label, levels, color="#9a9a9a", linewidth=1.0, wall=None
-    )
+    for level, width in zip(levels, solved_widths, strict=True):
+        draw_flux_contours(
+            axes,
+            radius,
+            height,
+            flux,
+            [level],
+            color=DEFAULT_INK.flux_color,
+            linewidth=width,
+            wall=wall,
+            zorder=DEFAULT_INK.zorder_flux + 1,
+        )
     _connected_surface(
         axes,
         radius,
@@ -233,11 +534,8 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
         axis_marker="o",
         xpoint_marker="o",
     )
-    draw_nulls(
-        axes,
-        magnetic_axis=axis,
-        x_points=saddles if len(saddles) else None,
-    )
+    draw_nulls(axes, magnetic_axis=axis)
+    callout_drawn = bool(len(saddles)) and _draw_x_points(axes, axis, saddles)
     if len(label_axis_points):
         draw_nulls(
             axes,
@@ -275,16 +573,107 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
             zorder=DEFAULT_INK.zorder_separatrix,
         )
 
+    for radius_label, height_label, note in overlays:
+        axes.text(radius_label, height_label, note, fontsize=14, color="#1f1f1f")
+
     handles = [
-        plt.Line2D([], [], color=DEFAULT_INK.flux_color, linewidth=2.6, label="solved flux"),
-        plt.Line2D([], [], color="#9a9a9a", linewidth=2.0, label="EFIT flux"),
-        plt.Line2D([], [], color="#6a4c93", linewidth=2.6, label="bounding surface"),
-        plt.Line2D([], [], color="black", linewidth=2.0, label="limiter"),
-        plt.Line2D([], [], color="#606060", linewidth=1.6, linestyle="--", label="EFIT boundary"),
-        plt.Line2D([], [], marker="^", linestyle="none", color=DEFAULT_INK.axis_color, markersize=7, label="solved axis"),
-        plt.Line2D([], [], marker="X", linestyle="none", color=DEFAULT_INK.xpoint_color, markersize=7, label="solved X-point"),
-        plt.Line2D([], [], marker="^", linestyle="none", markerfacecolor="none", markeredgecolor="#606060", markersize=7, label="EFIT axis"),
-        plt.Line2D([], [], marker="X", linestyle="none", markerfacecolor="none", markeredgecolor="#606060", markersize=7, label="EFIT X-point"),
+        plt.Line2D(
+            [],
+            [],
+            color=DEFAULT_INK.flux_color,
+            linewidth=float(np.median(solved_widths)),
+            label="solved flux",
+        ),
+        plt.Line2D(
+            [],
+            [],
+            color=REFERENCE_FLUX,
+            linewidth=REFERENCE_FLUX_WIDTH,
+            label="EFIT flux",
+        ),
+        *(
+            [
+                plt.Line2D(
+                    [],
+                    [],
+                    color="#6a4c93",
+                    linewidth=DEFAULT_INK.separatrix_linewidth,
+                    label="bounding surface",
+                )
+            ]
+            if np.isfinite(bounding)
+            else []
+        ),
+        plt.Line2D(
+            [],
+            [],
+            color="black",
+            linewidth=DEFAULT_INK.wall_linewidth,
+            label="limiter",
+        ),
+        plt.Line2D(
+            [],
+            [],
+            color="#606060",
+            linewidth=1.0,
+            linestyle="--",
+            label="EFIT boundary",
+        ),
+        plt.Line2D(
+            [],
+            [],
+            marker="^",
+            linestyle="none",
+            color=DEFAULT_INK.axis_color,
+            markersize=7,
+            label="solved axis",
+        ),
+        plt.Line2D(
+            [],
+            [],
+            marker="X",
+            linestyle="none",
+            color=DEFAULT_INK.xpoint_color,
+            markersize=7,
+            label="solved X-point",
+        ),
+        *(
+            [
+                plt.Line2D(
+                    [],
+                    [],
+                    marker="o",
+                    linestyle="none",
+                    markerfacecolor="none",
+                    markeredgecolor=DEFAULT_INK.xpoint_color,
+                    markeredgewidth=0.8,
+                    markersize=4,
+                    label="X-point true position",
+                )
+            ]
+            if callout_drawn
+            else []
+        ),
+        plt.Line2D(
+            [],
+            [],
+            marker="^",
+            linestyle="none",
+            markerfacecolor="none",
+            markeredgecolor="#606060",
+            markersize=7,
+            label="EFIT axis",
+        ),
+        plt.Line2D(
+            [],
+            [],
+            marker="X",
+            linestyle="none",
+            markerfacecolor="none",
+            markeredgecolor="#606060",
+            markersize=7,
+            label="EFIT X-point",
+        ),
         plt.Line2D(
             [],
             [],
@@ -293,7 +682,7 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
             color=DEFAULT_INK.separatrix_color,
             markersize=8,
             label="this trip",
-        )
+        ),
     ]
     figure.legend(
         handles=handles,
@@ -304,11 +693,25 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
         fontsize=12,
     )
 
-    frame_rows = sorted([r for r in rows if r["frame"] == frame], key=lambda r: r["trip"])
+    frame_rows = sorted(
+        [r for r in rows if r["frame"] == frame], key=lambda r: r["trip"]
+    )
     trips = [r["trip"] for r in frame_rows]
     residuals = [r.get("residual", np.nan) for r in frame_rows]
-    strip.plot(trips, [r if r is not None else np.nan for r in residuals], marker="o", color=DEFAULT_INK.flux_color, linewidth=1.6)
-    strip.plot([trip], [row.get("residual", np.nan)], marker="o", markersize=8, color=DEFAULT_INK.separatrix_color)
+    strip.plot(
+        trips,
+        [r if r is not None else np.nan for r in residuals],
+        marker="o",
+        color=DEFAULT_INK.flux_color,
+        linewidth=1.6,
+    )
+    strip.plot(
+        [trip],
+        [row.get("residual", np.nan)],
+        marker="o",
+        markersize=8,
+        color=DEFAULT_INK.separatrix_color,
+    )
     strip.set_xlim(min(trips) - 0.3, max(trips) + 0.3)
     strip.set_xticks(trips)
     strip.set_xlabel("active-set trip", fontsize=14)
@@ -317,12 +720,26 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
     strip.spines[["top", "right"]].set_visible(False)
     finite = [v for v in residuals if v is not None and np.isfinite(v)]
     strip.set_ylim(0, max(finite + [0.1]) * 1.2)
+    axes.apply_aspect()
+    box = axes.get_position()
+    strip.set_position([box.x1 + 0.07, box.y0, 0.08, box.height])
+    strip.yaxis.set_major_locator(
+        FixedLocator(np.arange(0.0, strip.get_ylim()[1], RESIDUAL_STEP))
+    )
+    strip.yaxis.set_major_formatter(FormatStrFormatter("%.2f"))
 
     axes.set_aspect("equal")
     axes.set_xlim(float(np.nanmin(radius)), float(np.nanmax(radius)))
     axes.set_ylim(float(np.nanmin(height)), float(np.nanmax(height)))
 
     out.parent.mkdir(parents=True, exist_ok=True)
+    pointer = repository_relative(out)
+    if Path(pointer).is_absolute() or PUBLISHED_ROOT not in Path(pointer).parents:
+        raise SystemExit(
+            f"refusing to record {out}: a receipt may only name a figure under "
+            f"{PUBLISHED_ROOT}, and this path resolves to {pointer}"
+        )
+    check_panel(figure, axes, out)
     figure.savefig(out, format="svg")
     figure.savefig(out.with_suffix(".check.png"), dpi=110)
     plt.close(figure)
@@ -342,7 +759,7 @@ def render_trip(frame, trip, archive, rows, out) -> dict:
         "saddles_rz_m": saddles.tolist(),
         "saddle_flux": saddle_values.tolist(),
         "residual": row.get("residual"),
-        "svg": str(out),
+        "svg": pointer,
     }
 
 
@@ -378,14 +795,26 @@ def main():
     parser.add_argument("--rows", type=Path, required=True)
     parser.add_argument("--figures", dest="figures", type=Path, required=True)
     parser.add_argument("--panels", nargs="+", default=["146:1", "146:2", "137:2"])
+    parser.add_argument(
+        "--overlay",
+        action="append",
+        default=[],
+        metavar="R,Z,TEXT",
+        help="Place a label at (R, Z) in data coordinates. Used to exercise the "
+        "save guard: every normal run passes no overlay.",
+    )
     arguments = parser.parse_args()
     rows = json.loads(arguments.rows.read_text())["rows"]
+    overlays = []
+    for item in arguments.overlay:
+        radius_label, height_label, note = item.split(",", 2)
+        overlays.append((float(radius_label), float(height_label), note))
     records = []
     for item in arguments.panels:
         frame, trip = (int(part) for part in item.split(":"))
         archive = arguments.run_dir / f"frame-{frame}-trip-{trip}.npz"
         out = arguments.figures / f"frame-{frame}-trip-{trip}-flux-contours.svg"
-        records.append(render_trip(frame, trip, archive, rows, out))
+        records.append(render_trip(frame, trip, archive, rows, out, overlays))
         print(json.dumps(records[-1]))
     (arguments.figures / "per-trip-panels.json").write_text(
         json.dumps({"panels": records}, indent=2) + "\n"

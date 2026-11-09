@@ -89,11 +89,12 @@ populated at <code>nova/equilibrium/forward.py:2738</code>, where
 Each panel below is drawn from that trip's own solved flux grid, saved by the
 trajectory job as <code>frame-&lt;n&gt;-trip-&lt;k&gt;.npz</code>. Blue contours are
 the trip's solved field, grey contours the EFIT label at the same physical
-levels; the thick red curve is the bounding surface read on that trip's grid,
-the black outline the governed limiter, the dashed grey curve the EFIT label
-boundary, and the markers the solved and label nulls. The strip under each
-panel carries the residual at every trip the frame reached, sized to the trips
-present.
+levels; the thick violet curve is the bounding surface read on that trip's
+grid, the black outline the governed limiter, the dashed grey curve the EFIT
+label boundary, and the markers the solved and label nulls &mdash; every red
+mark on these panels is a null, and the violet curve is the only boundary the
+figure draws in violet. The strip under each panel carries the residual at
+every trip the frame reached, sized to the trips present.
 </p>
 <figure>
 <img src="/nova/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg"
@@ -101,7 +102,11 @@ present.
 <figcaption>
 Frame 146, trip 1. The reported axis (triangle) sits at Z=&minus;0.346 m with
 0.912&times;Ip confined, and the polish moves it 0.328 m to the field's true
-maximum at Z=&minus;0.034 m. Mask entries changed on this trip: 27.
+maximum at Z=&minus;0.034 m
+<b>[withdrawn 2026-11-08, see <a href="#correction">Correction</a>: the axis is
+itself a stationary maximum and the polish moves it 3.4e&minus;9 m; the panel
+above is regenerated with the field read in its declared storage order].</b>
+Mask entries changed on this trip: 27.
 </figcaption>
 </figure>
 <figure>
@@ -289,6 +294,245 @@ grid, the governed limiter and the wall.</li>
 presence read and the mask history; the step norm is
 <code>|| flux_k &minus; flux_{k&minus;1} ||</code> over the lattice.</li>
 </ul>
+</section>
+
+<section id="correction">
+<h2>Correction (2026-11-08): the flux grid was read with R and Z swapped</h2>
+
+<p>
+<b>The claim corrected.</b> &sect;2 above states that "the axis the solve
+reports is not a stationary point": that a polish from (1.688, &minus;0.346)
+travels 0.328 m onto a maximum at (1.585, &minus;0.034); that the trip-1 field
+is "genuinely two-lobed" with the reported axis 0.33 m below the field's own
+maximum at the same flux level; that a &minus;1 saddle with flux above the
+reported axis is therefore "fully explained"; and that at trip 2 the reported
+axis "does not converge to any stationary point either (shift 0.073 m,
+converged false)". <b>None of these holds.</b> The reported axis is a stationary
+maximum of the trip-1 field, the polish does not move it, no maximum sits 0.33 m
+away, and the trip-2 axis is also a stationary maximum. The three trip-panel
+captions and the two paragraphs beneath the trip-1 table in &sect;2 report the
+transposed reading; this section supersedes them and they are left in place
+only so the record shows what readers were told.
+</p>
+
+<p>
+<b>The cause.</b> Every reader under
+<code>scripts/prototypes/diiid_vertical_loss/</code> bound its axes by guessing
+from the array shape, <code>array if array.shape == (len(height),
+len(radius)) else array.T</code>. The archive writer flattens its lattice in C
+order over <code>(radius, height)</code> &mdash; the storage order
+<code>nova.equilibrium.conservation.FluxLattice</code> declares, which
+<code>trip_trajectory.py</code> writes through <code>lattice.shape</code>
+&mdash; so a saved map is radius-major. Every reader here
+(<code>fit_tensor_spline</code>, <code>draw_flux_contours</code>,
+<code>RegularGridInterpolator</code> over <code>(height, radius)</code>, and
+<code>host_boundary_read</code>'s <code>(nz, nr)</code> field) declares the
+opposite order. A 33&times;33 lattice has the same extent on both axes, so the
+shape test could not decide it: it kept the array unchanged and every reader
+consumed a transposed field.
+</p>
+
+<p>
+<b>The reproduction.</b> Transposing the trip-1 field before polishing
+reproduces the recorded displacement exactly: 0.3284652 m from the reported
+axis onto 1.5850, &minus;0.0340. Bound the right way, the same seed polishes to
+itself, 3.4&times;10<sup>&minus;9</sup> m, at Hessian eigenvalues
+&minus;7.395 and &minus;5.095 &mdash; a maximum, not a non-stationary point.
+An independent replay of the archived field reached the same three facts:
+gradient (5&times;10<sup>&minus;16</sup>, &minus;1&times;10<sup>&minus;16</sup>)
+at the reported axis, zero displacement, eigenvalues &minus;7.40 and
+&minus;5.10.
+</p>
+
+<p>
+<b>The corrected polish receipt.</b> Every candidate below was seeded and then
+moved by <code>polish_stationary_points</code> on the field's own spline, read
+in the declared storage order. The index is the winding index of the gradient
+on a loop around the polished point. Shift is measured from the reported axis
+where the axis is the seed, and from the grid argmax where that is.
+</p>
+<table>
+<caption>
+Regenerated receipts, radius-major archives read as declared. Shift is the
+distance from the seed to where the polish converged.
+</caption>
+<thead><tr><th>field</th><th>point</th><th>R [m]</th><th>Z [m]</th>
+<th>flux [Wb]</th><th>type</th><th>index</th><th>shift from the reported axis [m]</th></tr></thead>
+<tbody>
+<tr><td>146 trip 1</td><td>solver's reported axis</td><td>1.6881</td>
+<td>&minus;0.3458</td><td>1.9610</td><td>maximum</td><td>+1</td><td>3.4e&minus;9</td></tr>
+<tr><td>146 trip 1</td><td>second maximum</td><td>1.6719</td><td>&minus;0.1977</td>
+<td>1.9588</td><td>maximum</td><td>+1</td><td>0.149</td></tr>
+<tr><td>146 trip 1</td><td>interior saddle</td><td>1.6697</td><td>&minus;0.2755</td>
+<td>1.9570</td><td>saddle</td><td>&minus;1</td><td>0.073</td></tr>
+<tr><td>146 trip 2</td><td>solver's reported axis</td><td>1.2106</td><td>+1.5560</td>
+<td>6.3740</td><td>maximum</td><td>+1</td><td>&lt;1e&minus;4, outside the limiter</td></tr>
+<tr><td>137 trip 1</td><td>solver's reported axis</td><td>1.6106</td><td>&minus;0.3622</td>
+<td>2.0098</td><td>maximum</td><td>+1</td><td>0.0</td></tr>
+<tr><td>137 trip 1</td><td>second maximum</td><td>1.6815</td><td>&minus;0.0377</td>
+<td>1.9711</td><td>maximum</td><td>+1</td><td>0.33</td></tr>
+<tr><td>137 trip 2</td><td>solver's reported axis</td><td>1.6670</td><td>&minus;0.3611</td>
+<td>2.3929</td><td>maximum</td><td>+1</td><td>0.0</td></tr>
+</tbody>
+</table>
+
+<p>
+<b>What the corrected field says.</b> Frame 146's trip-1 reported axis is a
+stationary maximum and carries the highest flux measured inside the limiter
+(1.9610 Wb); the grid argmax inside the limiter is 1.9585 Wb at (1.690,
+&minus;0.200), which polishes to a second maximum at (1.672, &minus;0.198) with
+1.9588 Wb, 0.15 m from the axis and 0.13% lower, and a &minus;1 saddle sits
+between them at 1.9570 Wb, <em>below</em> the axis in flux rather than above
+it. The trip-1 field near the axis is therefore nearly degenerate between
+two maxima, and the transposition inflated that near-degeneracy into a 0.33 m
+displacement and an invented "reported axis is not a stationary point". The
+same near-degeneracy is present in the control frame: frame 137's trip 1
+reported axis is its own maximum at 2.0098 Wb with a second at (1.682,
+&minus;0.038) at 1.9711 Wb.
+</p>
+
+<p>
+At trip 2 the reported axis is a maximum too, at 6.3740 Wb and outside the
+limiter &mdash; it is 0.19 m above the limiter top, not a non-stationary point
+left above the vessel. Frame 137's trip-2 maximum is at its reported axis
+(1.6670, &minus;0.3611) at 2.3929 Wb, which replaces the earlier reading that
+placed the maximum at (1.498, &minus;0.043) while the axis itself held 1.973 Wb.
+</p>
+
+<h3>Which of this record's other claims depended on the swapped field</h3>
+<table>
+<thead><tr><th>claim</th><th>source</th><th>verdict after the correction</th></tr></thead>
+<tbody>
+<tr><td>The trip-2 promotion step is 83.21 Wb against frame 137's 6.156 Wb</td>
+<td>receipt history (<code>promotion_step_norm_wb</code>), a norm of a difference
+between two saved states and therefore invariant under a transpose</td>
+<td><b>holds</b>, unchanged</td></tr>
+<tr><td>That step changes 39 mask entries where frame 137 changes 20</td>
+<td>receipt history (<code>active_set_mask_differences</code>)</td>
+<td><b>holds</b>, unchanged</td></tr>
+<tr><td>The axis reaches Z=+1.556 m, above the limiter top at +1.363 m</td>
+<td>the solver's own reported axis in the receipt, not a regridded field</td>
+<td><b>holds</b>; the corrected polish shows that axis is a genuine maximum,
+which strengthens rather than weakens it</td></tr>
+<tr><td>Confined current 0.046&times;Ip at trip 2 and 0.041&times;Ip at trip 3;
+terminal residual 5.61e&minus;2; the loss happens at trip 1 of neither frame</td>
+<td>receipt history</td><td><b>holds</b>, unchanged</td></tr>
+<tr><td>The trip-1 field is two-lobed with the reported axis 0.33 m below its
+maximum</td><td>the transposed field</td>
+<td><b>withdrawn</b>: the field carries two nearby maxima, the reported axis
+being the higher, 0.15 m from the lower</td></tr>
+<tr><td>A &minus;1 saddle sits above the reported axis in flux</td>
+<td>the transposed field</td>
+<td><b>withdrawn</b>: the saddle sits 0.004 Wb below it, between the two maxima</td></tr>
+<tr><td>The trip-2 reported axis "does not converge to any stationary point"</td>
+<td>the transposed field</td>
+<td><b>withdrawn</b>: it is a maximum at 6.374 Wb, outside the limiter</td></tr>
+<tr><td>"The mechanism is axis identification"</td><td>both of the withdrawn
+claims above</td>
+<td><b>withdrawn</b>: no axis-identification defect is present at either trip.
+The mechanism that survives is &sect;2's first half, the unbounded trip-2
+promotion, which rests on the receipt histories alone</td></tr>
+<tr><td>The recommended step bound in &sect;3</td><td>the receipt histories</td>
+<td><b>holds</b>, and loses its trip-1 preamble: the case now rests entirely on
+the 83 Wb step against a 151 Wb seed, not on a misidentified axis</td></tr>
+</tbody>
+</table>
+
+<p>
+The summary's account of the loss itself is unaffected: the frames are
+indistinguishable at trip 1, frame 146's second promotion moves 83.21 Wb and
+changes 39 mask entries where the control moves 6.156 Wb and changes 20, the
+axis is thrown above the limiter, and the confined fraction collapses. What is
+removed is the claim that trip 1 already showed the axis being misidentified.
+</p>
+
+<h3>The binding, its check and its negative control</h3>
+<p>
+The shape guess is replaced by one helper,
+<code>scripts/prototypes/diiid_vertical_loss/flux_orientation.py</code>, whose
+<code>analysis_field</code> binds a saved map from the declared
+<code>(radius, height)</code> storage order and returns the reader order
+<code>(height, radius)</code>. All four readers &mdash;
+<code>polish_axis_check.py</code>, <code>maxima_census.py</code>,
+<code>core_stationary_probe.py</code> and <code>render_trip_panels.py</code>
+&mdash; import it, and none of them consults an array shape to choose an order.
+</p>
+<p>
+<code>check_orientation.py</code> is the assertion that replaces the shape
+test: it polishes from the axis the solve reported and requires the
+displacement to stay under one lattice spacing (0.0531 m, the finer of the
+two). On the archived native field the shift is 3.4e&times;10<sup>&minus;9</sup>
+m and the check passes. <code>--transpose</code> is its negative control: it
+transposes the field after it has been bound to the declared order, which is
+the misread this record was working from, and the check then fails at 0.328465
+m.
+</p>
+
+<h3>Regenerated evidence</h3>
+<p>
+The regenerated receipts are in the run directory
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/regenerated/</code>,
+the gate log <code>orientation-gate.log</code> beside it, and the inputs are the
+frame-146 run's <code>trip-trajectory/</code> archives.
+</p>
+<ul>
+<li>Binding and check:
+<code>scripts/prototypes/diiid_vertical_loss/flux_orientation.py</code> and
+<code>check_orientation.py</code>, run on the native trip-1 archive and on its
+transpose from a CPU compute node
+(<code>JAX_PLATFORMS=cpu</code>, the shared interpreter, no <code>uv</code>).</li>
+<li>Polished points: <code>polish-axis-check.json</code>, regenerated from the
+archives for frames 146 and 137 at trips 1 and 2.</li>
+<li>Extrema census: <code>maxima-census.json</code>, same fields, with each
+extremum's flux, position, containment and winding index.</li>
+<li>Stationary probe: <code>core-stationary.json</code>, same fields, with the
+Hessian determinant, eigenvalues and the gradient at each point.</li>
+<li>The three trip panels are re-rendered from the corrected binding and
+inspected: the plasma now sits inside the limiter where the limiter puts it,
+with the trip-1 axis at the centre of the closed contours rather than 0.33 m
+below them. A panel whose axis lies outside the limiter draws no bounding
+surface and carries no such legend entry, and a solved X-point that would crowd
+the axis is drawn as a smaller callout joined by a leader to a hollow dot at
+the position the solve returned, so the axis and the saddle both read.</li>
+<li>Contour stroke is set per level from the gap to its neighbour, so a set
+that crowds where the field is nearly flat stays separable: above the limiter
+in frame 146 trip 2 the nine levels are closer together than one 3.0 pt stroke,
+and drawing them all at that weight filled the space between them with a block
+of colour that carried no level information. The stroke is
+<code>0.55 &times; gap</code>, clamped to [0.7, 3.0] pt, so a panel that is not
+crowded still draws its solved field at the headline weight.
+<code>check_contour_legibility.py</code> rasterises a panel and counts pixels
+whose horizontal and vertical runs are both wider than one line, which is what
+a fused band looks like and what a contour does not.</li>
+<li>The panel receipt names each figure by its path inside this repository, so
+a reader resolves it from a fresh clone. A render writes into whatever
+directory it is given, and recording that directory would bake a run scratch
+path &mdash; or a worktree that is later removed &mdash; into a committed
+artefact; the receipt therefore records the repository-relative path, and the
+render refuses to write a receipt for a figure outside any repository rather
+than recording a name that resolves for nobody. Both the name and the check
+call <code>nova.database.filepath.repository_relative</code>, the mapping this
+project produces repository-relative names through, so the receipt, the
+relativiser and the commit hook cannot disagree about what is inside the
+repository. <code>check_panel_receipts.py</code> refuses a receipt whose
+pointers do not resolve, and <code>check_path_mapping_reuse.py</code> refuses a
+module under this directory that walks the parent tree for a <code>.git</code>
+marker instead of calling that mapping.</li>
+<li>The residual column stands beside the poloidal panel rather than under it.
+An equal-aspect panel is height-limited, so a full-width strip below it spent
+two thirds of the canvas on nothing; the column is placed against the panel's
+own drawn box, and the panel now takes the full height of the 14 in canvas. Its
+ticks are one fixed step of 0.05 with two decimals on every panel, so the same
+quantity reads at the same positions whether a frame converged or not.</li>
+<li>The solved-flux legend entry is drawn at the median width its levels are
+actually drawn at, not at the headline weight: on frame 146 trip 2, where the
+crowded levels thin to 0.7&ndash;1.5 pt, the legend sample is 0.80 pt and
+matches the lines it names, while the two separated panels keep a 3.0 pt
+sample. The hollow dot a displaced X-point callout leaves at the solved
+position is now in the legend as "X-point true position", on the panel that
+carries such a callout.</li>
+</ul>
+
 </section>
 
 </main>

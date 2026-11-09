@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="icm-sheet-full-mesh-cpu">
+<meta name="plan-evidence-for" content="iron-core-magnetisation">
+<meta name="plan-verifies" content="iron-core-magnetisation#s3">
+<title>The all-target WEST sheet-tile agreement on CPU</title>
+</head>
+<body>
+<article>
+<h1 id="icm-sheet-full-mesh-cpu-title">The all-target WEST sheet-tile agreement on CPU</h1>
+<p id="icm-sheet-full-mesh-cpu-summary">The device build and the host route were
+compared entry by entry over all 1696 targets of the prototype WEST mesh and all
+1696 cells, on one 36-core node, inside the test's own 3600 s bound. The
+comparison finished in 747 s and printed its receipt. That receipt
+<strong>fails</strong> the section's 1e−13 bound: 3077 of 11,505,664 entries are
+above it, and the worst entry is 2.282e−12, 22.8 times the bound. Every entry is
+finite on both sides. The measurement is reproducible and worker-count
+sufficient; the bound is not met.</p>
+
+<section id="icm-sheet-full-mesh-cpu-receipt">
+<h2>The all-target receipt</h2>
+<p>One job, submitted to <code>sirius</code> and run in place on
+<code>98dci4-clu-5008</code>: job <code>1308778</code>, revision
+<code>969b3f0e694c901980fe66f90e5990d3e3cc8548</code>, 16 worker processes over a
+256-pair block. The test prints its own line, quoted verbatim:</p>
+<pre>sheet tile: 1696 targets x 1696 cells, worst entry 2.282e-12 at (1692, 2116); entries above 1e-13: 3077 of 11505664; p50=0.000e+00 p90=5.099e-17 p99=7.536e-16 p99.9=2.205e-14 p100=2.282e-12</pre>
+<table>
+<thead><tr><th>Quantity</th><th>Measured</th><th>Bound</th></tr></thead>
+<tbody>
+<tr><td>Targets × cells</td><td>1696 × 1696 (a 3392 × 3392 matrix)</td><td>all
+targets, every cell</td></tr>
+<tr><td>Worst entry, relative to the absolute per-end antiderivative terms</td>
+<td>2.282e−12 at (1692, 2116)</td><td>1e−13</td></tr>
+<tr><td>Entries above 1e−13</td><td>3077 of 11,505,664 (0.027 %)</td>
+<td>0</td></tr>
+<tr><td>Percentiles</td><td>p50=0, p90=5.099e−17, p99=7.536e−16,
+p99.9=2.205e−14, p100=2.282e−12</td><td>—</td></tr>
+<tr><td>Every entry finite on both sides</td><td>yes, both assertions hold</td>
+<td>required</td></tr>
+<tr><td>Test wall</td><td>747.31 s</td><td>3600 s, unchanged</td></tr>
+<tr><td>Exit status</td><td><code>EXIT=1</code></td><td>0 required</td></tr>
+</tbody>
+</table>
+<p>The bound is the sum of the absolute values of the per-end antiderivative
+terms that make up each entry, as the section defines it, not the net entry. The
+receipt therefore measures what the section says it measures.</p>
+<p>The same measurement at the same source revision printed a byte-identical
+receipt under job <code>1308770</code> earlier in the same node's work
+(2.282e−12 at (1692, 2116), 3077 of 11,505,664), so the result is deterministic
+across runs and not a transient of one allocation.</p>
+</section>
+
+<section id="icm-sheet-full-mesh-cpu-structure">
+<h2>Where the failing entries are</h2>
+<p>The fixture holds its error matrix in memory and prints only the aggregate, so
+<strong>no per-entry array was persisted</strong> and the 3077 entries cannot be
+classified by target distance, edge slope or sheet route from this run's
+artifacts. The printed coordinate is the only per-entry fact retained:
+<code>(1692, 2116)</code> is, in the fixture's own layout, the B<sub>R</sub> row
+of physical target 1692 against the M<sub>Z</sub> column of cell 420 (column
+2116 is in the M<sub>Z</sub> block that begins at column 1696). That is the
+worst entry only; it says nothing about the distribution of the other 3076.</p>
+<p>Two facts about the distribution are nevertheless recorded. The failure is
+concentrated far out in the tail: p99.9 is 2.205e−14, so the bulk of the matrix
+agrees far below the bound and the 3077 entries sit beyond the 0.1 % percentile.
+And the count is not a property of the eight targets the earlier preflight
+measured: on those eight, no entry exceeds 1e−13 at all.</p>
+</section>
+
+<section id="icm-sheet-full-mesh-cpu-preflight">
+<h2>The eight-target preflight at the head</h2>
+<p>At the head's own source, eight targets against all 1696 cells print</p>
+<pre>sheet tile: 8 targets x 1696 cells, worst entry 4.903e-15 at (11, 799); entries above 1e-13: 0 of 54272; p50=0.000e+00 p90=6.594e-17 p99=2.370e-16 p99.9=1.816e-15 p100=4.903e-15</pre>
+<p>That is 0.049 of the bound, and it is the earlier preflight's finding
+(2.824e−14 and no entry above 1e−13) confirmed at a tighter value on this host.
+The gap between this receipt and the all-target one is the whole point of the
+measurement: the first eight centroids are easy entries, and the section's bound
+was only ever checked against them.</p>
+</section>
+
+<section id="icm-sheet-full-mesh-cpu-control">
+<h2>The subtractive-bracket control</h2>
+<p>The declared control restores the subtractive flat-sheet radial bracket, in
+which the endpoint radial kernel is the difference of nearly equal complete
+integral terms rather than a source-multipole series. It was applied to a
+complete scratch extraction of the committed tree — not to the tracked source —
+and the step refused to run unless the imported module was that extraction's
+copy. The log's header records
+<code>module: /tmp/mcintos-1308778-VjJS/nova/biot/sheet.py</code>, and the mutant
+blob <code>3ac10917783725f2a6f9c4ceb03de36879f2adeb</code> differs from the head
+blob <code>1533f1c3edaffde3df5fffcb0618a715cb6fffee</code>.</p>
+<p>Two witnesses were required to fail. <strong>One did and one did not.</strong></p>
+<table>
+<thead><tr><th>Witness</th><th>Required</th><th>Measured under the mutation</th></tr></thead>
+<tbody>
+<tr><td><code>test_flat_cpu_pair_is_independent_of_batch_size</code></td>
+<td>fail</td><td><strong>failed.</strong> The far flat pair's radial field is
+batch-dependent again: −5.4650984030847755e−12 at n=1 against
+−5.465098408938728e−12 at n=2 and at n=8</td></tr>
+<tr><td><code>test_tile_agrees_with_the_unbatched_closed_form</code>, eight
+targets, one worker</td><td>fail</td><td><strong>passed</strong>, at worst
+4.903e−15 with 0 of 54,272 entries above 1e−13 — the same values the unmutated
+head prints</td></tr>
+</tbody>
+</table>
+<p>So the control is only half a counterexample on this host: the mutation
+restores a batch-dependent radial kernel, which the batch witness catches, but it
+does not move the eight-target agreement at all on <code>98dci4-clu-5008</code>.
+The shape of that non-result matters for reading the failure above. The same
+mutation run as a pre-flight on the fleet allocation
+(<code>98dci4-clu-2068</code>, eight targets, one worker) failed
+<em>both</em> witnesses, in 65 s. A mutation that moves the eight-target
+agreement on one CPU and leaves it untouched on another does not change the
+physics and is not a change of formulation: it changes which arithmetic the
+compiler emits. That is the same mechanism as the all-target failure, whose
+residual is likewise a difference between two evaluations of one closed form at
+different array shapes.</p>
+<p>The tracked source was never edited: the worktree blob and the
+<code>HEAD</code> blob at the end of the job are both
+<code>1533f1c3edaffde3df5fffcb0618a715cb6fffee</code>.</p>
+</section>
+
+<section id="icm-sheet-full-mesh-cpu-verdict">
+<h2>Verdict against the section's clause (1)</h2>
+<p>Clause (1) requires the device build and the host route to agree over the
+1696-cell prototype mesh, entry by entry, to within 1e−13 relative to the sum of
+the absolute per-end antiderivative terms, with every entry finite. Three of
+those four conditions hold: the comparison now runs over every target and every
+cell, it finishes well inside the test's bound, and every entry is finite. The
+fourth does not: 3077 entries are above the bound and the worst is 2.282e−12.</p>
+<p>The measurement is therefore complete and its answer is negative. Nothing in
+this node's work changed product code, so the disagreement stands at the merged
+head and is not a regression introduced here. It is the risk the previous node
+named when it reported itself blocked on the full numerical receipt rather than
+on a measured disagreement: that receipt now exists, and it is a disagreement.
+What remains is a decision this node cannot take — whether the four edge-sheet
+routes (pancake, sloped, cylinder height, flat) each need their residual pinned
+against a per-entry reference, or whether the bound's own definition is what the
+tail is measuring. The per-entry arrays needed to answer that were not persisted
+and would have to be produced by a further measurement.</p>
+</section>
+
+<section id="icm-sheet-full-mesh-cpu-artifacts">
+<h2>Durable artifacts</h2>
+<p>Logs are in
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T071913971640-icm-sheet-full-mesh-cpu</code>:
+<code>full-mesh-gate.log</code> (the all-target receipt, with its revision, tree,
+imported module, command, wall and <code>EXIT</code> line),
+<code>subtractive-bracket-control.log</code>,
+<code>source-blob-check.log</code>, <code>mutation.log</code> and
+<code>slurm-1308778.out</code>. The gate is
+<code>scripts/sheet_tile_cpu_gate/run_gate.sbatch</code>; the mutation helper is
+<code>scripts/sheet_tile_cpu_gate/restore_subtractive_bracket.py</code>.</p>
+</section>
+</article>
+</body>
+</html>

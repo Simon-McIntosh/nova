@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="269">
+<meta name="plan-version" content="270">
 <meta name="plan-modified" content="2026-11-09">
 </head>
 <body>
@@ -902,6 +902,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261109T052344715717-review-of-bank-warm-stall-1661bb3b479a" data-who="reckon-build" data-when="2026-11-09T05:42:00.459Z">
     <div class="r-comment-body"><p>review of r-20261107T133413665344-bank-warm-stall at head 1661bb3b479a1e16ef7e8b76592ebe36387b4dd2, diff read from base 22ca7d05a9abdef7369b69fa856f976bbfe4d1db: parsed, scores goal_fidelity 16, evidence 17, scope_discipline 20, durability 7, fit 16, reuse 19, 0 added failures, 5 non-blocking findings and no blocking one.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261107T133413665344-bank-warm-stall" data-who="reckon-build" data-when="2026-11-07T16:35:09Z">
+    <div class="r-comment-body"><p>sub-millisecond-forward-path section 3 — docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html, with figure /nova/figures/sub-millisecond-forward-path/bank-warm-stall/residual-warm-vs-cold.svg and the reduced record scripts/prototypes/bank_warm_stall/results/bank-warm-stall.json. The stall is not warm-start specific: both arms at the 1e-2 drive fail to converge, agreeing to within 2.4 percent for the first ten updates and diverging after update 11. The mechanism is that the unit Newton trial raises the fresh residual at every update of the warm arm — 1.30 to 25.94 times over the eleven tabulated updates — while the linear solve itself converges to 4e-16.</p></div>
 </div>
 </section>
 </main>

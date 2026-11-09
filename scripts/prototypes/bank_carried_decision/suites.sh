@@ -25,7 +25,8 @@ run_file() {
     command="PYTHONPATH=. JAX_PLATFORMS=cpu $python -m pytest -p no:cacheprovider -q $file ${extra[*]}"
     (
         cd "$tree" || exit 2
-        printf '# revision: %s tree: %s command: %s\n' "$(git -C "$root" rev-parse "$arm" 2>/dev/null || echo "$base")" "$tree" "$command"
+        if [ "$arm" = base ]; then revision=$base; else revision=$(git -C "$root" rev-parse HEAD); fi
+        printf '# revision: %s tree: %s command: %s\n' "$revision" "$tree" "$command"
         export PYTHONPATH="$tree" PYTEST_ADDOPTS="--basetemp=$scratch/$arm-${name%.py}"
         "$python" -c 'import os,nova; from nova.equilibrium import support_read; print("nova",nova.__file__,"module",support_read.__file__,"cwd",os.getcwd(),flush=True)'
         "$python" -m pytest -p no:cacheprovider -q "$file" "${extra[@]}"
@@ -34,7 +35,8 @@ run_file() {
     ) > "$log" 2>&1
 }
 # One fresh process per file; arms share this one scheduler job.
-for file in tests/test_tracked_read.py tests/test_support_read.py tests/test_bank_solve_driver.py tests/test_bank_solve_cycle.py tests/test_candidate_inspection_batched.py; do
+files=${4:-"tests/test_tracked_read.py tests/test_support_read.py tests/test_bank_solve_driver.py tests/test_bank_solve_cycle.py tests/test_candidate_inspection_batched.py"}
+for file in $files; do
     run_file base "$scratch/base" "$file" &
     run_file HEAD "$root" "$file" &
     wait

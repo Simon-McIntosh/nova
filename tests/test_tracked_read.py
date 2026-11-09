@@ -358,7 +358,9 @@ def test_solve_requires_full_certificate_after_carried_candidate(
     )(states)
     jax.block_until_ready(result)
     jax.effects_barrier()
-    assert observed and all(observed)
+    assert observed and any(observed)
+    if certificate_valid:
+        assert all(observed)
     assert bool(jnp.all(result.converged)) == certificate_valid
     assert bool(jnp.all(result.support.rebuilt))
     if not certificate_valid:

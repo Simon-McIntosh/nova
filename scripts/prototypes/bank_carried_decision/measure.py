@@ -105,13 +105,14 @@ def read_cost(parts, state, seeds, previous, output):
     from scripts.prototypes.bank_solve_trace.analyse import events
 
     bank, cache, _, convention, policy, *_ = parts
-    base = jax.block_until_ready(
-        jax.jit(
-            lambda state: support_read.read_batch(
-                bank, cache, state, seeds, previous, convention, policy
-            )
-        )(state)
-    )
+
+    def read(bank, cache, state, seeds, previous, tracking):
+        return support_read.read_batch(
+            bank, cache, state, seeds, previous, convention, policy, tracking=tracking
+        )
+
+    program = jax.jit(read)
+    base = jax.block_until_ready(program(bank, cache, state, seeds, previous, None))
     tracking = support_read.tracking_of(base)
     costs = {}
     for label, tracked in (("full", None), ("carried", tracking)):
@@ -122,19 +123,7 @@ def read_cost(parts, state, seeds, previous, output):
             "refresh_at_stationary_points",
         ):
             continue
-        program = jax.jit(
-            lambda values: support_read.read_batch(
-                bank,
-                cache,
-                values,
-                seeds,
-                previous,
-                convention,
-                policy,
-                tracking=tracked,
-            )
-        )
-        jax.block_until_ready(program(state))
+        jax.block_until_ready(program(bank, cache, state, seeds, previous, tracked))
         options = jax.profiler.ProfileOptions()
         options.python_tracer_level = 0
         options.host_tracer_level = 1
@@ -142,7 +131,9 @@ def read_cost(parts, state, seeds, previous, output):
         options.raise_error_on_start_failure = True
         directory = output / label
         with jax.profiler.trace(directory, profiler_options=options):
-            result = jax.block_until_ready(program(state))
+            result = jax.block_until_ready(
+                program(bank, cache, state, seeds, previous, tracked)
+            )
         gpu, _, _ = events(directory)
         duration = sum(event["duration"] for event in gpu) / 1e6
         assert duration > 0, (label, "profiler saw no device work")
@@ -150,6 +141,29 @@ def read_cost(parts, state, seeds, previous, output):
             device_ms=duration, rebuilt=np.asarray(result.rebuilt).tolist()
         )
     return costs
+
+
+def certificate_program(parts):
+    _, _, _, convention, policy, profile, quadrature, *_ = parts
+
+    def certify(values, seeds, previous, amplitude, bank, cache):
+        terminal = support_read.read_batch(
+            bank, cache, values, seeds, previous, convention, policy
+        )
+        residual = jax.vmap(
+            lambda state, reading: support_read.step_residual(
+                bank,
+                state,
+                state,
+                reading,
+                streams.scaled_profile(profile, amplitude),
+                quadrature,
+            )
+        )(values, terminal)
+        norm = jnp.max(jnp.abs(jnp.concatenate(residual.residual, axis=-1)), axis=-1)
+        return terminal, norm
+
+    return jax.jit(certify)
 
 
 def counted_program(parts):
@@ -202,6 +216,7 @@ def main():
         return
     inputs = np.load(args.inputs, allow_pickle=False)
     program = solve_program(parts)
+    certify = certificate_program(parts)
     rows = []
     payload = {"revision": os.environ["MEASURE_REVISION"], "rows": rows}
     _, _, wall, _, _ = _analytic_inputs("diverted")
@@ -220,23 +235,8 @@ def main():
                 result = jax.block_until_ready(program(*call))
                 walls.append((perf_counter() - start) * 1e3)
             # An independent full read at the returned state certifies the receipt.
-            terminal = jax.jit(
-                lambda values: support_read.read_batch(
-                    bank, cache, values, seeds, previous, convention, policy
-                )
-            )(result.moments)
-            residual = jax.vmap(
-                lambda values, reading: support_read.step_residual(
-                    bank,
-                    values,
-                    values,
-                    reading,
-                    streams.scaled_profile(profile, amplitude),
-                    quadrature,
-                )
-            )(result.moments, terminal)
-            fresh_norm = jnp.max(
-                jnp.abs(jnp.concatenate(residual.residual, axis=-1)), axis=-1
+            terminal, fresh_norm = jax.block_until_ready(
+                certify(result.moments, seeds, previous, amplitude, bank, cache)
             )
             reading = result.support.reading
             oracle, oracle_roots = analytic_oracle(

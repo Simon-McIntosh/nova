@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s2">
+<meta name="plan-recorded-at" content="2026-11-09">
+<meta name="plan-verdict" content="partial">
+<title>Carried support decision | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<section id="bank-carried-decision-result">
+<h1>Carried support decision with fresh geometry</h1>
+<p>The implementation and focused controls are committed; the full paired suites
+and GPU measurement remain open. No performance result or inspected figure has
+been produced yet. The reserved H200 allocation is queued on resources.</p>
+<h2 id="bank-carried-decision-mechanism">Continuous refresh under a fixed decision</h2>
+<p><code>support_read.read_batch</code> still forms the stationary stencil and
+one batch-level <code>rebuild_needed</code> decision. When no lane requires a
+rebuild, <code>topology.refresh_at_stationary_points</code> carries fragment
+selection, connected component and wall labels, admitted saddle slots, and the
+normal-form cell set. It recomputes nodal jets, own-cell coefficients, stationary
+positions and fluxes, saddle normal form, fragment areas, edge intervals and
+fractional membership from the new state. The full and carried routes share
+<code>topology._fragments_at_level</code>; connectivity and candidate inspection
+are skipped on a carry.</p>
+<p>Limited boundaries recompute wall events and follow the contact nearest the
+carried boundary. A tentative converged residual triggers a full fresh read
+before <code>solve_batch</code> can accept it. The last allowed update also
+uses a full read; an invalid search that retains a carried incumbent at the cap
+receives a terminal full read. The residual tolerance remains 1e-10.</p>
+<h2 id="bank-carried-decision-controls">Controls that distinguish the implementation</h2>
+<table><thead><tr><th>Control</th><th>Observed result</th></tr></thead><tbody>
+<tr><td>Base at a moved state with unchanged tracked cells</td>
+<td>The equality test fails on axis, relative error
+<code>2.9542256489575536e-7</code> against the 1e-12 bound.</td></tr>
+<tr><td>Initial focused head gate, before adding the explicit refusal arm</td>
+<td><code>8 passed in 152.60s</code>. The moved-state test reports zero relative
+difference for every checked continuous quantity.</td></tr>
+<tr><td>Scratch mutation carrying the preceding edge intervals</td>
+<td>The equality test fails on <code>edge_interval</code>, relative error
+<code>7.391647964927195e-6</code> against the 1e-12 bound.</td></tr>
+<tr><td>Paired support-read suite</td><td>Base and head each report
+<code>13 passed, 2 skipped</code>.</td></tr>
+</tbody></table>
+<p>The controls include a full rebuild when a tracked cell changes and a full
+certificate even when the discrete decision stays unchanged. The added
+invalid-certificate arm initially over-constrained later backtracking requests;
+its assertion is corrected to permit a non-converged half-trial to skip
+certification while retaining the refusal and fresh-return checks. A paired
+rerun of that test file is pending. A displacement sweep also checks whether the
+existing tracked-cell predicate is sufficient over larger in-cell changes.</p>
+<h2 id="bank-carried-decision-pending">Remaining measurements</h2>
+<p>Sirius job <code>1308719</code> runs the five named files as paired base and
+head arms with one fresh process per file. Job <code>1308723</code> repeats the
+changed tracked-read file after the refusal-test correction. The reserved H200
+job <code>1308720</code> requests four CPUs, one GPU and 96 GB; its recorded
+state is <code>PENDING (Resources)</code>. It remains queued.</p>
+<p>The timing runner builds cold and preceding warm-stream inputs once at base,
+uses separate revision caches, warms each once, and measures two fresh processes
+per arm at 16 and 128 lanes. The wider batch repeats the sixteen physical seed
+lanes eight times. An independent full read recomputes every terminal residual.
+The untimed read-census executable is accepted beside a timing only if its
+per-lane trial and update counts match the timed executable. The report uses
+<code>pair_gaps</code> for the precision budget and draws the required wall figure
+only after receipts exist.</p>
+<p>Complete logs and receipts are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T044945756828-bank-carried-decision</code>.
+The reproducible launchers and reporter are under
+<code>scripts/prototypes/bank_carried_decision</code>.
+The figure and its visual inspection remain required before delivery.</p>
+</section>
+</main></body></html>

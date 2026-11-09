@@ -396,6 +396,22 @@ def _connected_surface(axes, radius, height, flux, level, axis, colour, width):
     return kept
 
 
+def recorded_path(figure_path: Path) -> str:
+    """Name a figure by its path inside the repository.
+
+    The receipt is a committed artefact, so it may not name the directory the
+    render happened to write into: a run scratch directory, a worktree or a
+    temporary tree resolves for no other reader and disappears with the render.
+    A path that sits outside any repository is recorded by name alone.
+    """
+
+    resolved = figure_path.resolve()
+    for parent in resolved.parents:
+        if (parent / ".git").exists():
+            return resolved.relative_to(parent).as_posix()
+    return resolved.name
+
+
 def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
     with np.load(archive) as data:
         radius = np.asarray(data["radius"], dtype=float)
@@ -717,7 +733,7 @@ def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:
         "saddles_rz_m": saddles.tolist(),
         "saddle_flux": saddle_values.tolist(),
         "residual": row.get("residual"),
-        "svg": str(out),
+        "svg": recorded_path(out),
     }
 
 

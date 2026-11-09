@@ -504,6 +504,14 @@ crowded still draws its solved field at the headline weight.
 <code>check_contour_legibility.py</code> rasterises a panel and counts pixels
 whose horizontal and vertical runs are both wider than one line, which is what
 a fused band looks like and what a contour does not.</li>
+<li>The panel receipt names each figure by its path inside this repository, so
+a reader resolves it from a fresh clone. A render writes into whatever
+directory it is given, and recording that directory would bake a run scratch
+path &mdash; or a worktree that is later removed &mdash; into a committed
+artefact; the receipt therefore records the repository-relative path, and the
+bare file name for a figure written outside any repository.
+<code>check_panel_receipts.py</code> refuses a receipt whose pointers do not
+resolve.</li>
 </ul>
 
 </section>

@@ -740,7 +740,7 @@ def test_pancake_endpoint_series_matches_high_precision(
     The constants were evaluated from the two complete poles and first kind
     at high precision, independently of the source and near-axis series.
     """
-    got = sheet_module._pancake_radial_series(np, gamma, radius, source, np.nan)
+    got, _ = sheet_module._pancake_end_series(np, gamma, radius, source, np.nan, np.nan)
     assert np.isfinite(got)
     assert abs(got - expected) <= 5e-15 * abs(expected)
 
@@ -788,3 +788,39 @@ def test_packed_pancake_retains_the_surface_limit():
         np, np.asarray([5e-13]), np.asarray([1.0]), np.asarray([3.0])
     )
     assert radial[0] == 0.0
+
+
+@pytest.mark.parametrize(
+    ("gamma", "radius", "source", "expected"),
+    (
+        (4.4364, 0.09, 0.53, 0.0017607374722479433),
+        (1.0, 1.0, 0.1, 9.323579255191544e-05),
+        (0.001, 1.0, 0.1, -0.0005271571736625841),
+        (1.0, 0.09, 0.13, 0.0022131621116677413),
+        (0.5, 0.5, 0.1, 0.0007619931080212963),
+    ),
+)
+def test_pancake_height_series_matches_high_precision(gamma, radius, source, expected):
+    """The zeta-minus-first-kind endpoint against its 70-digit angular integral."""
+    _, height = sheet_module._pancake_end_series(
+        np, gamma, radius, source, np.nan, np.nan
+    )
+    assert abs(height - expected) <= 5e-15 * abs(expected)
+
+
+@pytest.mark.parametrize(
+    ("gamma", "radius", "source", "expected"),
+    (
+        (0.0337, 0.09, 4.9565, 0.021364957290125615),
+        (-0.0463, 0.09, 4.984, -0.029190417369569316),
+        (0.001, 1.0, 2.0, 0.0019566157278257212),
+        (1.0, 1.0, 2.0, 1.5904821201104593),
+        (4.4, 0.09, 0.53, 3.1190603443383114),
+    ),
+)
+def test_cylinder_height_endpoint_matches_high_precision(
+    gamma, radius, source, expected
+):
+    """The interior cylinder endpoint against 60-digit complete elliptic values."""
+    height = sheet_module._sheet_cylinder_height(np, gamma, radius, source)
+    assert abs(height - expected) <= 5e-15 * abs(expected)

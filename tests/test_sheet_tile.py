@@ -48,11 +48,11 @@ WEST_MESH = os.environ.get(
 #: Pairs evaluated per kernel launch. The unbatched reference is chunked at the
 #: same count as the tile's block, so both sides launch the same number of
 #: programs and the difference is the tile's padding and pair ordering alone.
-#: Bounded blocks keep eight CPU workers within the shared allocation's memory.
-PAIR_BLOCK = 1024
+#: Bounded blocks keep four CPU workers within the shared allocation's memory.
+PAIR_BLOCK = 256
 
 #: Processes the build is sharded over; the allocation is one compute node.
-WORKERS = int(os.environ.get("NOVA_SHEET_TILE_WORKERS", "8"))
+WORKERS = int(os.environ.get("NOVA_SHEET_TILE_WORKERS", "4"))
 
 #: Targets measured, counted from the first cell; 0 measures the whole mesh.
 #: A subset is how the gate is exercised on a fence too short for all 1696
@@ -295,7 +295,7 @@ def test_tile_agrees_with_the_independent_ring_reference():
 
 @pytest.mark.slow
 @pytest.mark.timeout(3600)
-def test_tile_agrees_with_the_unbatched_closed_form(interaction):
+def test_tile_agrees_with_the_unbatched_closed_form(interaction, capsys):
     """Every entry of the tiled build matches the unbatched host evaluation."""
     tiled, reference, scale = interaction
     assert np.all(np.isfinite(tiled)), "the tiled build left an entry undefined"
@@ -308,11 +308,12 @@ def test_tile_agrees_with_the_unbatched_closed_form(interaction):
         f"p{level}={np.percentile(error, level):.3e}"
         for level in (50, 90, 99, 99.9, 100)
     )
-    print(
-        f"\nsheet tile: {tiled.shape[0]} targets x {tiled.shape[1] // 2} cells, "
-        f"worst entry {worst:.3e} at ({row}, {column}); "
-        f"entries above {GATE:.0e}: {counts} of {error.size}; {distribution}"
-    )
+    with capsys.disabled():
+        print(
+            f"\nsheet tile: {tiled.shape[0]} targets x {tiled.shape[1] // 2} cells, "
+            f"worst entry {worst:.3e} at ({row}, {column}); "
+            f"entries above {GATE:.0e}: {counts} of {error.size}; {distribution}"
+        )
     assert worst <= GATE, (
         f"worst entry error {worst:.3e} relative to the absolute per-end "
         f"antiderivative terms, at ({row}, {column}); {counts} entries above "

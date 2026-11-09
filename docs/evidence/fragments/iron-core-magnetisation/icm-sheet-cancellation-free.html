@@ -84,6 +84,37 @@ additional branch contribution when |b g₀|&lt;r; applying the zero-source iden
 there changes the answer. Independent high-precision checks caught this in the
 standalone derivation, before implementation.</p>
 </section>
+<section id="icm-sheet-cancellation-free-height">
+<h2>The height residual exposed by the CPU gate</h2>
+<p>With the two radial identities wired, the eight-target preflight has no radial
+entry above the floor (worst 1.433072834195654e−15), but 69 height entries exceed
+1e−13, with a worst of 3.902241452534746e−13. The worst is target 1 against cell
+985: two vertical edges at radii 4.9565 and 4.984 m. The remaining witnesses
+include flat edges at source radii 0.05 to 0.21 m far above the target. The
+retained <code>residual-probe.log</code> and <code>residual-arrays.npz</code>
+identify every measured entry rather than inferring the component from the
+aggregate norm.</p>
+<p>For a pancake, the same source multipoles give the height endpoint without
+subtracting <code>2 zeta − 2s K/a</code>. The radial Legendre identity is</p>
+<pre>(1/r) ∂r [r c⁻ⁿ⁻¹ Pₙ¹(g/c)] = −n(n+1)c⁻ⁿ⁻² Pₙ₊₁(g/c),
+H_Z = π (s/c)³ Σₖ≥₀ (s/c)²ᵏ C₂ₖ³ᐟ²(0) P₂ₖ₊₂(g/c)/(2k+3).</pre>
+<p>This is evaluated in the same loop as the radial source series at s/c≤1/2.
+Writing Eₖ=C₂ₖ³ᐟ²(t) and Oₖ=C₂ₖ₊₁³ᐟ²(t)/t gives
+P₂ₖ₊₂(t)=(t²Oₖ−Eₖ)/(2k+2). The source-cubed factor is explicit here too.</p>
+<p>For an interior cylinder target the height endpoint has a simpler exact
+identity. Set L²=r²+s²−2rs cos φ and D²=g²+L². Integrating the ring height
+kernel analytically in source height gives</p>
+<pre>H_Z = g ∫₀^π s(s−r cos φ)/(L²D) dφ.
+s(s−r cos φ) = (L²+s²−r²)/2,
+∫₀^π dφ/D = 2K/a,
+∫₀^π dφ/(L²D) = 2Π(n|m)/[a(r+s)²],
+H_Z = (g/a)[K + ((s−r)/(s+r)) Π(n|m)],
+a²=g²+(r+s)², n=4rs/(r+s)², m=4rs/a².</pre>
+<p>For r≤s the two complete-integral terms have the same sign. Both complements
+are formed directly from geometry, and the existing complete-integral owners
+evaluate them. This replaces the cancelling angular projection only for the
+interior cylindrical height endpoint; the independent graded route is retained.</p>
+</section>
 <section id="icm-sheet-cancellation-free-independent-checks">
 <h2>Checks of the identities before wiring</h2>
 <table>
@@ -95,6 +126,11 @@ integrals, including the pole terms</td><td>Worst relative error
 <tr><td>Sloped source multipole, 335 qualified geometries</td><td>60-digit
 angular integral of the original root-plus-arsinh gamma derivative</td><td>Worst
 relative error 2.017559941485094e−15; maximum term-sum condition 14.2922</td></tr>
+<tr><td>Pancake height source series, 27 geometries</td><td>70-digit zeta
+angular integral minus the complete first kind</td><td>Worst relative error
+1.162549362473328e−15</td></tr>
+<tr><td>Interior cylinder height, five geometries</td><td>60-digit complete
+elliptic integrals</td><td>Worst relative error 3.067432792451254e−16</td></tr>
 </tbody>
 </table>
 <p>The first double-precision angular check was ill-conditioned near the plane;
@@ -106,9 +142,16 @@ run directory; none is a second production owner.</p>
 </section>
 <section id="icm-sheet-cancellation-free-gates">
 <h2>Implementation gates</h2>
-<p>Pending: production wiring, CPU batch-size probe, ring-reference floor,
-whole-mesh agreement, and the declared subtractive-bracket negative control.
-The baseline suite is running at the recorded base revision.</p>
+<p>The first implementation checkpoint passes 675 focused tests; the height
+identities bring the focused gate to 686 passes. The fixed WEST pair has
+bit-identical B<sub>R</sub> at batch sizes 1, 2 and 8:
+−5.465098407088696e−12 T. The exact baseline suite completed with 658 passes
+and one fixture timeout after five pool children were killed at the shared
+allocation memory ceiling. The test pair block is reduced from 4096 to 256, with four worker processes,
+with every target and cell retained and the 1e−13 floor unchanged; the bounded
+whole-mesh test timeout is 3600 s. The repeated eight-target preflight passes with a worst of 2.824e−14 and
+zero entries above the floor out of 54,272. Pending: the full head suite and
+declared subtractive-bracket negative control.</p>
 </section>
 </article>
 </body>

@@ -130,13 +130,60 @@ probe gives exactly −5.157871988723156e−13 T for pair (844,906) and
 </section>
 <section id="icm-sheet-tail-entries-gate">
 <h2>Head acceptance gate</h2>
-<p>The source and regression tests are committed at
-<code>bcb3143f0d0b18c704d7da113e415b885f3ea101</code>. Job 1308946 on
-<code>sirius</code> runs the exact after suite over the full mesh, followed in
-the same job by a scratch extraction restoring both exterior-cylinder selectors
-to their angular projection. The job verifies the imported mutant module and
-checks the tracked source blob against HEAD. Its numerical result is pending;
-this record does not yet claim the whole-mesh head measure.</p>
+<p><strong>The node's numerical measure passes.</strong> Job 1308946 on
+<code>sirius</code>, host <code>98dci4-clu-5053</code>, completes with scheduler
+exit 0. The implementation and tests are
+<code>bcb3143f0d0b18c704d7da113e415b885f3ea101</code>; subsequent commits change
+only this evidence record. Both suite arms export 16 worker processes, two
+OpenMP threads and the CPU backend in their job environment. Their literal
+command is the same:</p>
+<pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_edge_sheet.py tests/test_sheet_tile.py</pre>
+<table>
+<thead><tr><th>Measure</th><th>Base</th><th>Head</th></tr></thead>
+<tbody>
+<tr><td>Entries compared</td><td>11,505,664</td><td>11,505,664</td></tr>
+<tr><td>Entries above 1e−13</td><td>3,077</td><td>0</td></tr>
+<tr><td>Worst per-end-relative error</td><td>2.282e−12</td><td>9.712e−14</td></tr>
+<tr><td>99.9th percentile</td><td>2.205e−14</td><td>1.720e−15</td></tr>
+<tr><td>Finiteness of both matrices</td><td>Pass</td><td>Pass</td></tr>
+<tr><td>Exact node suite</td><td>693 passed, 1 failed; 765.63 s</td><td>702 passed; 777.88 s</td></tr>
+<tr><td>Suite exit</td><td>1</td><td>0</td></tr>
+</tbody>
+</table>
+<p>The head maximum is at emitted matrix coordinates (962,1425), below the
+unchanged 1e−13 floor. The 1e−10 independent sheet-reference floor and the
+per-end denominator definition are unchanged. No entry is excluded. The two
+new exterior-cylinder tests require exact equality of the height field at batch
+sizes 1, 2, 8 and 256; both components must also be finite. Six fixtures extend
+the existing high-precision endpoint test, retaining its 5e−15 relative bound
+and its five interior controls.</p>
+<p>The same job then restores the pre-fix scalar and packed exterior selectors
+in a scratch extraction. Its header prints and verifies the imported mutant
+<code>/tmp/mcintos-1308946-Uj1Q/nova/biot/sheet.py</code> and matching working
+directory. Both
+<code>test_exterior_cylinder_cpu_pair_is_independent_of_batch_size[906]</code>
+and <code>[907]</code> fail: <strong>2 failed in 17.45 s; EXIT=1</strong>.
+For the worst witness, edge 907, the restored height field is
+−3.489020893532059e−12, −3.4890208935365288e−12,
+−3.4890208935411865e−12 and −3.4890208935411865e−12 T at the four batch sizes.
+The control therefore exercises the numerical defect that the head tests refuse.</p>
+<p>After the mutation, the tracked source and HEAD both have blob
+<code>2486e8a1dcd7915e4d379674d3b953f6108f0a0d</code>.
+The source check also finds the introduced <code>_cylinder_height_series</code>
+marker (definition and call), and exits 0. The tested product source and test
+files are byte-identical to the later evidence-only head.</p>
+<p>Durable gate receipts in the run directory are <code>baseline_suite.log</code>,
+<code>after_suite.log</code>, <code>negative-control.log</code>,
+<code>mutation.log</code> and <code>source-blob-check.log</code>. Each suite/control
+log ends in its captured <code>EXIT=</code> line. The base scratch arm's header
+records its imported module and working directory. The first base extraction
+omitted <code>scripts/edge_sheet/reference.py</code> and failed during collection;
+<code>baseline-scaffolding.log</code> preserves that rejected attempt. The full
+base arm above follows the corrected extraction.</p>
+<p>This record completes this node's cancellation repair and its own acceptance
+measurement. Integration and the separately dispatched merged-head verification
+remain the coordinator's responsibility; this worker does not close the parent
+plan section.</p>
 </section>
 </article>
 </body>

@@ -630,3 +630,56 @@ def test_class_source_unavailable_when_nothing_records_a_class(tmp_path):
     totals = _bin_slice_totals(_aggregate(tmp_path))
     assert totals["deciles"] == (TOTAL_SLICES, TOTAL_CONDITIONED)
     assert totals["absolute_50ms"] == (TOTAL_SLICES, TOTAL_CONDITIONED)
+
+
+def test_the_labeller_receipt_publishes_the_reduced_support_history():
+    """The receipt carries the per-trip support population the reduced result holds."""
+    from nova.equilibrium.reduced_newton import ReducedNewtonResult
+    from scripts.labeller_batch import shard
+
+    class _Finite:
+        passed = True
+
+    class _Normalisation:
+        amplitude = np.array([1.0, 1.0])
+
+    class _Equilibrium:
+        finite = _Finite()
+        normalisation = _Normalisation()
+        topology = object()
+
+    class _Profile:
+        def _receipt(self, *arguments, **keywords):
+            return _Equilibrium()
+
+    prepared = shard.PreparedLabeller(
+        profile=_Profile(),
+        wall=np.zeros((1, 1)),
+        carrier_evidence={},
+        policy_evidence={},
+        cache_directory="/tmp",
+        setup_wall_seconds=0.0,
+    )
+    result = ReducedNewtonResult(
+        state=np.zeros(2),
+        terminal_residual=1e-6,
+        active_set_iterations=3,
+        converged=True,
+        termination_reason=0,
+        active_set_residuals=[1e-3, 1e-5, 1e-6],
+        active_set_mask_differences=[0, 0, 0],
+        active_set_support_cells=[54, 54, 54],
+    )
+    receipt = shard._forward_receipt(
+        prepared,
+        result,
+        requested_class=None,
+        target_current=1.0,
+        prescribed_current=None,
+        solve_wall_seconds=1.0,
+    )
+    support = np.asarray(receipt.support_cell_count)
+    assert support.ndim == 1
+    assert support.size == len(result.active_set_residuals)
+    assert np.all(support > 0)
+    assert support.tolist() == [54, 54, 54]

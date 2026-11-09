@@ -317,6 +317,7 @@ def _forward_receipt(
     """Lift the reduced result into the public steering-frame receipt."""
     residuals = jnp.asarray(result.active_set_residuals, dtype=jnp.float64)
     differences = jnp.asarray(result.active_set_mask_differences, dtype=jnp.int32)
+    support = jnp.asarray(result.active_set_support_cells, dtype=jnp.int32)
     history = fixed_point.FixedPointResult(
         state=result.state,
         residual=jnp.asarray(result.terminal_residual, dtype=jnp.float64),
@@ -328,6 +329,7 @@ def _forward_receipt(
         ),
         active_set_residuals=residuals,
         active_set_mask_differences=differences,
+        active_set_support_cells=support,
         shadow_mask_changes=differences,
     )
     equilibrium = prepared.profile._receipt(
@@ -352,9 +354,7 @@ def _forward_receipt(
         termination_reason=history.termination_reason,
         residual_history=residuals,
         changed_mask_entries=differences,
-        # A reduced result reports the change history but no per-trip support
-        # population, so this receipt publishes none rather than a proxy.
-        support_cell_count=jnp.empty((0,), dtype=jnp.int32),
+        support_cell_count=support,
         globalisation_decisions=(
             jnp.asarray(history.inner_iteration_decisions),
             jnp.asarray(history.inner_iteration_applied_factors),

@@ -17,8 +17,10 @@
 <section id="bank-carried-decision-result">
 <h1>Carried support decision with fresh geometry</h1>
 <p>The implementation, focused controls and five-file paired suites are complete.
-The paired suites have zero added failures; the GPU measurement remains open. No performance result or inspected figure has
-been produced yet. The reserved H200 allocation is queued on resources.</p>
+The paired suites have zero added failures. Titan P100 job <code>1309317</code>
+failed during the base builder; a paired retry with stronger compiler memory fitting
+is being prepared. Every timing reported by this run will
+be a titan P100 wall; the H200 headline is pending a free card.</p>
 <h2 id="bank-carried-decision-mechanism">Continuous refresh under a fixed decision</h2>
 <p><code>support_read.read_batch</code> still forms the stationary stencil and
 one batch-level <code>rebuild_needed</code> decision, including represented
@@ -104,12 +106,21 @@ stale-edge mutation at that guard head fails all three equality cases, with
 relative edge-interval errors <code>7.391647964927195e-6</code>,
 <code>0.007403997178451971</code> and
 <code>0.07517782408822127</code>; its log ends <code>EXIT=1</code>. The reserved H200
-job <code>1308720</code> requests four CPUs, one GPU and 96 GB; its recorded
-state is <code>PENDING (Resources)</code>. It remains queued.</p>
+job <code>1308720</code> was pending on Resources; under the revised device
+decision it was cancelled by its explicit id. The queue line was printed before
+and after cancellation and accounting confirms <code>CANCELLED</code>.
+Titan job <code>1309317</code> used one P100 with four CPUs, 96 GB host memory
+and a two-hour limit. It failed before producing common inputs or any timing:
+<code>RESOURCE_EXHAUSTED: Out of memory while trying to allocate 14.08GiB</code>
+(15,120,349,440 bytes). The compiler reported 16,672,843,845 temporary bytes
+(15.53 GiB), above its 11,840,517,815-byte fitting target. Builder and parent
+logs both end <code>EXIT=1</code>. A single paired retry uses JAX memory-fitting
+level O3 and effort 1.0 for both revisions, retaining <code>XLA_FLAGS=unset</code>. The H200 headline remains pending a free card.</p>
 <p>The timing runner builds cold and preceding warm-stream inputs once at base,
 uses separate revision caches, warms each once, and measures two fresh processes
-per arm at 16 and 128 lanes. The wider batch repeats the sixteen physical seed
-lanes eight times. An independent full read recomputes every terminal residual.
+per arm at 16 lanes. Width 128 is attempted only if compiled temporary and
+working-buffer receipts fit the P100 allocator budget; its wider batch repeats
+the sixteen physical seed lanes eight times. An independent full read recomputes every terminal residual.
 The untimed read-census executable is accepted beside a timing only if its
 per-lane trial and update counts match the timed executable. The report uses
 <code>pair_gaps</code> for the precision budget and draws the required wall figure

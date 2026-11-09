@@ -9,6 +9,7 @@ root=$1
 run=$2
 base=$3
 export TMPDIR=/tmp
+export JAX_MEMORY_FITTING_LEVEL=O3 JAX_MEMORY_FITTING_EFFORT=1.0
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH XLA_FLAGS
 scratch=$(mktemp -d "$TMPDIR/carried-timing-XXXXXX")
 cleanup() {
@@ -18,6 +19,7 @@ cleanup() {
 }
 trap cleanup EXIT
 printf '# titan P100 paired timing; H200 headline pending a free card; job=%s\n' "$SLURM_JOB_ID"
+printf '# memory fitting: level=%s effort=%s\n' "$JAX_MEMORY_FITTING_LEVEL" "$JAX_MEMORY_FITTING_EFFORT"
 mkdir -p "$scratch/base"
 git -C "$root" archive "$base" | tar -x -C "$scratch/base"
 mkdir -p "$scratch/base/scripts/prototypes/bank_carried_decision"

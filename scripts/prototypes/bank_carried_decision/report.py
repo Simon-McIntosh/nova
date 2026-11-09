@@ -22,6 +22,8 @@ def main():
     parser.add_argument("--figure", type=Path, required=True)
     parser.add_argument("--fragment", type=Path, required=True)
     args = parser.parse_args()
+    parent_log = (args.run / "timing-job.log").read_text()
+    assert parent_log.rstrip().endswith("EXIT=0"), "device job did not finish cleanly"
 
     def receipt(label):
         log = (args.run / f"{label}.log").read_text()
@@ -80,13 +82,19 @@ def main():
                 )
             )
             for name, value in maximum.items():
-                if value > limits[name]:
+                if not np.isfinite(value) or value > limits[name]:
                     problems.append(
                         f"p{process} {before['lanes']} {before['key']} "
                         f"{name}: {value} > {limits[name]}"
                     )
             for arm, row in (("base", before), ("head", after)):
-                if not all(row["converged"]) or max(row["residual"]) > 1e-10:
+                residual = np.asarray(row["residual"])
+                if (
+                    not all(row["converged"])
+                    or residual.size != row["lanes"]
+                    or not np.all(np.isfinite(residual))
+                    or np.max(residual) > 1e-10
+                ):
                     problems.append(f"p{process} {arm} {row['key']}: fresh residual")
                 if not row.get("census_matches"):
                     problems.append(
@@ -279,7 +287,19 @@ def main():
     fragment = fragment.replace("</main>", section + "\n</main>")
     args.fragment.write_text(fragment)
     print(
-        "CHECKS", json.dumps(dict(problems=problems, precision_maxima=pmax)), flush=True
+        "CHECKS",
+        json.dumps(
+            dict(
+                wall_device="titan P100",
+                problems=problems,
+                precision_maxima=pmax,
+                fresh_residual_max=residual_max,
+                widths=widths,
+                inputs_sha256=next(iter(hashes)),
+                paired_rows=len(precision),
+            )
+        ),
+        flush=True,
     )
     return 1 if problems else 0
 

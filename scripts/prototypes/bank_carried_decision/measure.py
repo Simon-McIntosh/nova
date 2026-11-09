@@ -274,6 +274,9 @@ def main():
         x64=jax.config.jax_enable_x64,
         cache=os.environ.get("JAX_COMPILATION_CACHE_DIR"),
         wall_device="titan P100",
+        memory_fitting_level=jax.config.jax_memory_fitting_level,
+        memory_fitting_effort=jax.config.jax_memory_fitting_effort,
+        memory_stats=jax.devices()[0].memory_stats(),
     )
     assert jax.config.jax_enable_x64 and jax.default_backend() == "gpu"
     assert "P100" in jax.devices()[0].device_kind, jax.devices()[0].device_kind

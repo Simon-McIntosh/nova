@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="diiid-warmup-finite-admission">
+<meta name="plan-title" content="Finite warm-up admission: guard verified, device comparison pending">
+<meta name="plan-summary" content="The real fixed-point kernel refuses nonfinite proposals in five focused tests; its unconditional-update control fails four tests. Paired CPU regressions add no failures. Governed-limiter measurements and panels await device admission.">
+<meta name="plan-evidence-for" content="diiid-vertical-force-balance">
+<meta name="plan-recorded-at" content="2026-11-09"><meta name="plan-verdict" content="blocked">
+<title>Finite warm-up admission | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<section id="finite-admission">
+<h1>Finite warm-up admission: numerical guard verified; device comparison pending</h1>
+<p>The warm-up now evaluates each relaxed proposal on its proposed shadow partition before accepting it. A nonfinite proposal, mapped image or relative residual retains the current state, image and partition together and halves the relaxation for the next sweep. The admission is an array selection inside the existing fixed-length scan; it introduces no host iteration or per-state compilation boundary. Newton still receives its state through the existing runtime carry and its finite-residual guard is unchanged.</p>
+<p>Implementation <code>f854a6ba247207db7540b81fdfaf1271b98f49aa</code> changes <code>nova/equilibrium/fixed_point.py:3846</code> and publishes <code>warmup_refused_proposals</code> and <code>warmup_first_nonfinite_index</code> on <code>FixedPointResult</code>. Each ordinary inner solve has one entry; an active-set solve retains one entry per trip, with a preceding entry when topology freezing performs a separate warm-up. Indices are zero-based proposal indices, and −1 means no refused image. These indices name proposals evaluated before admission; the earlier plateau capture indexed input-state map evaluations, so its indices differ by one on the otherwise identical path.</p>
+<h2>Reproduction and refusal</h2>
+<p>The focused map is <code>f(x)=2−x/2</code> for <code>x≤1.5</code>, and NaN beyond that domain. Starting at zero with relaxation one proposes <code>x=2</code>. At dispatch base <code>f419ed4f195771688018a7c9ff0a9707bee0cc5d</code>, the recorded failure shows <code>trajectory_state=Array([nan], dtype=float64)</code> despite a finite best fallback. Both trajectory checks fail on that condition. The third base failure is the absent new history field; it is an API addition, not an independent numerical reproduction.</p>
+<table><thead><tr><th>Check</th><th>Dispatch base</th><th>Repaired head</th><th>Unconditional-update control</th></tr></thead><tbody>
+<tr><td>Finite Newton trajectory after an invalid proposal</td><td>fails: NaN trajectory</td><td>passes; Newton attempts ≥1</td><td>fails</td></tr>
+<tr><td>Retained state and matching shadow partition</td><td>fails: NaN trajectory</td><td>passes; one refusal, index 0</td><td>fails</td></tr>
+<tr><td>All-finite warm-up</td><td>trajectory 1.328125; history absent</td><td>trajectory 1.328125; zero refusals, index −1</td><td>passes</td></tr>
+<tr><td>Finite image with overflowing residual</td><td>not run</td><td>passes; one refusal, index 0</td><td>fails</td></tr>
+<tr><td>History across active-set trips</td><td>not run</td><td>passes; counts [1,0,0], indices [0,−1,−1]</td><td>fails</td></tr>
+</tbody></table>
+<p>The repaired focused gate reports <strong>5 passed in 17.83s</strong>. The declared negative control restores unconditional candidate, image and shadow propagation in an archived head. Its runner reports <strong>4 failed, 1 passed in 24.89s</strong>, <code>EXIT=1</code>, with all four failing test ids in <code>negative-control.log</code>. The all-finite control continues to pass under that mutation. This proves the check sees the guarded event rather than merely a successful solve.</p>
+<h2>Paired CPU regressions</h2>
+<p>Each file ran in a fresh interpreter under one <code>all_debug</code> job per arm, eight CPUs and 64 GB, without an outer timeout. Jobs <code>1308765</code> and <code>1308766</code> both completed. Base source was extracted with <code>git archive</code>; the logs carry the imported module and resolved working directory. The comparison uses dispatch base against <code>af1821f3021e8876fdc5377485c2881f89ea96d8</code>.</p>
+<table><thead><tr><th>File</th><th>Base</th><th>Head</th><th>Added failures</th></tr></thead><tbody>
+<tr><td>test_active_set_telemetry.py</td><td>3 passed</td><td>3 passed</td><td>0</td></tr>
+<tr><td>test_active_set_stagnation.py</td><td>2 passed</td><td>2 passed</td><td>0</td></tr>
+<tr><td>test_amplification_observation.py</td><td>5 failed, 2 passed</td><td>same five ids; 2 passed</td><td>0</td></tr>
+<tr><td>test_equilibrium_solve.py</td><td>6 passed</td><td>6 passed</td><td>0</td></tr>
+<tr><td>test_diverted_300_convergence.py</td><td>1 failed, 5 passed</td><td>same id; 5 passed</td><td>0</td></tr>
+</tbody></table>
+<p>The scoped baseline suite is empty because its only scoped test file is created by this change. The baseline record verifies the product module exists and the test file is absent; it does not run pytest without a target and accidentally measure the whole repository. The head arm runs the exact armed command over <code>tests/test_warmup_finite_admission.py</code>. Complete JSON arms and per-process failure ids are in the manifest and regression receipts.</p>
+<h2>Device evidence still owed</h2>
+<p><strong>No new governed-limiter or MAST solve has been measured.</strong> The one-job ten-row wrapper reuses <code>scripts/prototypes/diiid_material_mask/measure.py</code>'s prepared-frame path with <code>expansion=None</code>, and wraps <code>scripts/prototypes/diiid_residual_plateau/measure.py</code>'s executed operand capture. It asserts 527 DIII-D material cells and explicit radius-height field storage, and writes residual, reason, attempted/accepted Newton counts, warm-up history, connected support, axis, saddle and EFIT-saddle distance for every row. This wrapper has not yet executed on the requested device.</p>
+<p>The requested base/head rows are 179 limited, 137 diverted, 146 limited, 146 diverted, and MAST 21978/35. Their new residuals, reasons, Newton counts, support, landmarks and X-point distances are <strong>unmeasured</strong>. MAST convergence preservation and any DIII-D improvement remain unestablished. The first physical operation producing NaN and any subsequent stopping point also remain unestablished by this change's device evidence. The paired 146/137 contour panels and their visual inspection are consequently still owed; no synthetic before/after panel is substituted.</p>
+<p>The H200 comparison was submitted through <code>scripts/nova_lane/run.sh --rungs h200,titan,cpu --mem 128G --time 03:00:00</code>, job <code>1308763</code>. Both forward regression arms were submitted through <code>scripts/h200_test_lane/run.sh</code>, jobs <code>1308767</code> and <code>1308768</code>. All three remained pending on <code>Priority</code>, with no payload or test execution. The recorded node inventory reports <code>gres/gpu=8</code> allocated out of eight. The brief permits titan on a resource/configuration refusal but requires that reason on the pending job; a ruling was requested on using the actual device allocation as that refusal. Only these three pending jobs were cancelled at the checkpoint, before committing the validation tools; all persistent services and peer jobs were left running.</p>
+<p>The next action is to obtain H200 admission or an explicit ruling permitting the titan fallback, then rerun the ten-row batch and both forward regression arms, inspect the receipts, render and inspect both paired panels, and replace this pending record with measured results. The node is not complete and has not closed its driving plan.</p>
+<h2>Durable record</h2>
+<p>Logs, regression JSON, negative control and the landing record are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T070252336251-diiid-warmup-finite-admission</code>. The decisive files are <code>reproduction.log</code>, <code>focused-expanded.log</code>, <code>negative-control.log</code>, <code>regression-base/results.json</code>, <code>regression-head/results.json</code> and <code>h200-admission.log</code>. The manifest carries exact commands and local commits. No device success or figure review is inferred from scheduler submission.</p>
+</section></main></body></html>

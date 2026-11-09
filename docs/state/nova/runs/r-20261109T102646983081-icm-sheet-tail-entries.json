@@ -1,0 +1,1366 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "e914d02e6ff5ae1f3388a7099a1f1cdb0c6987fe",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries/brief.md",
+    "sha256": "aab647145d6904a8dc14ed5ed69e2d946285045efe1e2a3616080a58980dddc8"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 15839232,
+      "cached_input_tokens_cumulative": 15839232,
+      "input_tokens": 16022458,
+      "input_tokens_cumulative": 16022458,
+      "output_tokens": 73542,
+      "output_tokens_cumulative": 73542,
+      "reasoning_output_tokens": 34462,
+      "reasoning_output_tokens_cumulative": 34462
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 519,
+    "files": 7,
+    "removed": 8
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 112
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "_schema_payload",
+        "path": "tests/imas/test_diiid_dataset_recheck.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 119
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_pf_active_supply_and_circuit_round_trip_without_losing_uncertainty",
+        "path": "tests/imas/test_diiid_description.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 119
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_omissions_and_grid_margins_are_quantified",
+        "path": "tests/imas/test_diiid_geometry_corroboration.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 119
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "test_mast_frame_exposes_exact_shared_helper_surface",
+        "path": "tests/test_efit_parity_warm_neighbour.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 119
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 112
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 112
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 18,
+        "name": "build",
+        "path": "scripts/sheet_tile_cpu_gate/classify.py"
+      },
+      "window_line": 113
+    },
+    {
+      "existing_function": {
+        "line": 392,
+        "name": "test_flat_cpu_pair_is_independent_of_batch_size",
+        "path": "tests/test_sheet_tile.py"
+      },
+      "run_function": {
+        "line": 418,
+        "name": "test_exterior_cylinder_cpu_pair_is_independent_of_batch_size",
+        "path": "tests/test_sheet_tile.py"
+      },
+      "window_line": 423
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "facd4eb36bdfbaac1028f838f36e84d01683cf27",
+    "00c126993187f9c00e8004ff3fda9debf2a22fff",
+    "37f20a446b38efe4836b195e16c1727e4c76db2e",
+    "bcb3143f0d0b18c704d7da113e415b885f3ea101",
+    "664223d4b4cdb2a5d0340b63eaa1775a06e8374e",
+    "f3993dfc53a0dcc13b4b098d48676ba91a1120c3"
+  ],
+  "completed_at": "2026-11-09T11:13:42Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-09T10:29:44Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_edge_sheet.py tests/test_sheet_tile.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries/after_suite.log"
+  },
+  "impl_move": {
+    "at_complete": 0.2885375494071146,
+    "at_dispatch": 0.2885375494071146,
+    "plan": "iron-core-magnetisation",
+    "reason": "this run closes clause (1) of s3; the section moves the plan's impl when its compile-cost node (clauses 2 and 3) lands",
+    "verdict": "waived"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.7980688442795654,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-12T07:58:47Z, which is after this node's 10800s horizon ending 2026-11-09T13:27:00.776709+00:00",
+    "horizon_ends_at": "2026-11-09T13:27:00.776709+00:00",
+    "horizon_seconds": 10800,
+    "metered": true,
+    "observed_at": "2026-11-09T10:26:58Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-12T07:58:47Z",
+    "resets_at": "2026-11-14T15:28:13Z",
+    "seconds_until_reset": 450074,
+    "state": "quiet",
+    "utilisation_pct": 46.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-09T10:26:58Z",
+    "read_at": "2026-11-09T10:27:00Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 46.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-09T11:13:42Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-09T11:13:42Z",
+        "resets_at": 1794670093,
+        "used_percent": 46.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries/manifest.md",
+  "member": "disposable-r-20261109T102646983081-icm-sheet-tail-entries",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_sheet_tile.py::test_exterior_cylinder_cpu_pair_is_independent_of_batch_size[906]",
+      "tests/test_sheet_tile.py::test_exterior_cylinder_cpu_pair_is_independent_of_batch_size[907]"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_sheet_tile.py::test_tile_agrees_with_the_unbatched_closed_form"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_sheet_tile.py::test_exterior_cylinder_cpu_pair_is_independent_of_batch_size[906]",
+      "tests/test_sheet_tile.py::test_exterior_cylinder_cpu_pair_is_independent_of_batch_size[907]"
+    ],
+    "control_run_failed": true,
+    "declaration": "restore the pre-fix form in a scratch extraction: the witness pair must move with batch size",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries/negative-control.log",
+    "test_paths": [
+      "tests/test_edge_sheet.py",
+      "tests/test_sheet_tile.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "icm-sheet-tail-entries",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/dev/shm/39486-fleet-1291586/claude-39486/-home-ITER-mcintos-Code-nova/5b10be66-c69b-456f-9a85-3840909f1723/scratchpad/icm-sheet-tail-entries.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries/brief.md",
+    "brief_sha256": "aab647145d6904a8dc14ed5ed69e2d946285045efe1e2a3616080a58980dddc8",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "standard",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 605,
+          "cached_input_tokens": 286939,
+          "input_tokens": 287546,
+          "output_tokens": 52,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 287598,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "5b10be66-c69b-456f-9a85-3840909f1723",
+      "session_id": "5b10be66-c69b-456f-9a85-3840909f1723"
+    },
+    "done_when": "(1) the 3077 entries above 1e-13 in the all-target CPU comparison are persisted and classified by sheet route, component and geometry in the evidence fragment, with the worst pair named as a witness; (2) nova/biot/sheet.py evaluates that case through a derived form whose terms are of the answer's own size, the witness pair is batch-independent on CPU in a new test, and tests/test_edge_sheet.py stays green at its 1e-10 floor; (3) one sirius job at the head shows all 11505664 entries finite and none above 1e-13, with the restored pre-fix form moving the witness pair with batch size in the same job.",
+    "estimated_hours": 4.0,
+    "goal": "Remove the residual cancellation behind the 3077 failing WEST sheet-tile entries",
+    "id": "icm-sheet-tail-entries",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-09T10:26:58Z",
+      "read_at": "2026-11-09T10:27:00Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 46.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries/manifest.md",
+    "negative_control": "restore the pre-fix form in a scratch extraction: the witness pair must move with batch size",
+    "over_fence_reason": "two sirius whole-mesh jobs of about 13 minutes each plus a closed-form derivation; the lead ruled test time is not node work",
+    "peer_scopes": {
+      "bank-carried-decision": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-carried-decision.html",
+        "docs/figures/sub-millisecond-forward-path/bank-carried-decision",
+        "nova/equilibrium/support_read.py",
+        "nova/equilibrium/topology.py",
+        "scripts/prototypes/bank_carried_decision",
+        "tests/test_tracked_read.py"
+      ],
+      "diiid-frame-146-orientation-correction": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html",
+        "docs/figures/diiid-frame-146-vertical-loss",
+        "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+        "docs/figures/diiid-frame-146-vertical-loss/per-trip-panels.json",
+        "scripts/prototypes/diiid_vertical_loss"
+      ],
+      "diiid-warmup-finite-admission": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-warmup-finite-admission.html",
+        "docs/figures/diiid-warmup-finite-admission",
+        "scripts/prototypes/diiid_warmup_admission",
+        "tests/test_warmup_finite_admission.py"
+      ],
+      "icm-sheet-tile-compile-cost": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile-compile-cost.html",
+        "docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile-compile.html",
+        "docs/figures/iron-core-magnetisation/icm-sheet-tile-compile-cost",
+        "docs/research/compile-cost-evidence.html",
+        "scripts/sheet_tile_census"
+      ],
+      "receipt-mask-history-rename": [
+        "apps/playable/session.py",
+        "benchmarks/scanned_trip_loop_prototype.py",
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html",
+        "nova/equilibrium/fixed_point.py",
+        "nova/equilibrium/forward.py",
+        "nova/equilibrium/solve_request.py",
+        "scripts/labeller_batch/shard.py",
+        "tests/test_equilibrium_constraint_protocol.py",
+        "tests/test_forward_parity_constrained_arm.py",
+        "tests/test_forward_profile_corsica.py",
+        "tests/test_forward_solve_request.py",
+        "tests/test_receipt_support_count.py",
+        "tests/test_reduced_newton_constraints.py",
+        "tests/test_steering_frames.py",
+        "tests/test_transport_coupled_window.py"
+      ]
+    },
+    "plan": "iron-core-magnetisation",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "180m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/biot/sheet.py",
+      "tests/test_edge_sheet.py",
+      "tests/test_sheet_tile.py",
+      "scripts/sheet_tile_cpu_gate",
+      "docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tail-entries.html",
+      "docs/figures/iron-core-magnetisation/icm-sheet-tail-entries"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 1.7967911852676512,
+      "derived": 0.28161313576603836,
+      "drain_hours": 168.0,
+      "effective_limit": 0.28161313576603836,
+      "elapsed_fraction": 0.2560119416054894,
+      "elapsed_hours": 43.01000618972222,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-11-11T09:00:01+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1794082577-c029e5",
+        "pace_multiple": null,
+        "remaining_seconds": 167471.977717,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-11-09T10:28:49+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.54,
+      "remaining_windows": null,
+      "resets_at": "2026-11-14T15:28:13Z",
+      "state": "observed",
+      "utilisation": 0.46,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.440128,
+      "decided_by": "window",
+      "margin": 0.297372,
+      "name": "icm-sheet-tail-entries",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.46
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.022283,
+        "observed_at": "2026-11-09T10:28:49+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-14T15:28:13Z",
+        "state": "observed",
+        "utilisation": 0.46,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1794082577-c029e5",
+    "member": "codex",
+    "node": "icm-sheet-tail-entries",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-09T10:28:49.022283+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "lead 2026-11-07: difficult work to codex sol; closed-form derivation",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5001.883,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.2885375494071146,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f3993dfc53a0dcc13b4b098d48676ba91a1120c3",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "e914d02e6ff5ae1f3388a7099a1f1cdb0c6987fe",
+    "reviewed_head_sha": "f3993dfc53a0dcc13b4b098d48676ba91a1120c3",
+    "scores": {
+      "durability": 19,
+      "evidence": 19,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "reuse": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 116
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261109T102646983081-icm-sheet-tail-entries",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+  "session_harness": "codex",
+  "session_id": "01a1bfdb-a915-7683-aa22-e119c252f177",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_edge_sheet.py tests/test_sheet_tile.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries/after_suite.log",
+      "revision": "bcb3143f0d0b18c704d7da113e415b885f3ea101"
+    },
+    "baseline_measured_nothing": false,
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_edge_sheet.py tests/test_sheet_tile.py",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/test_sheet_tile.py::test_tile_agrees_with_the_unbatched_closed_form"
+      ],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries/baseline_suite.log",
+      "revision": "e914d02e6ff5ae1f3388a7099a1f1cdb0c6987fe"
+    },
+    "failure_attribution": {},
+    "status": "clean",
+    "suite_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_edge_sheet.py tests/test_sheet_tile.py",
+    "waiver_reason": null
+  },
+  "tests_added": 1,
+  "throughput": {
+    "cumulative_cached_input_tokens": 15839232,
+    "cumulative_input_tokens": 16022458,
+    "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+    "generated_tokens": 108004,
+    "generation_seconds": 2123.472,
+    "machine_seconds": 491.581,
+    "tokens_per_second": 50.86
+  },
+  "time_budget": "180m",
+  "tool_steps": 292.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 2638,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-09T11:13:47Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-09T10:29:58Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 65608939,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries/codex-home/cache"
+      },
+      {
+        "bytes": 28836794,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261109T102646983081-icm-sheet-tail-entries",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 700,
+    "worker_pid": 3908334
+  },
+  "worker_seconds": 2615,
+  "worker_seconds_source": "rollout_receipt",
+  "worktree_retention": null
+}

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="icm-sheet-tail-entries">
+<meta name="plan-evidence-for" content="iron-core-magnetisation">
+<meta name="plan-verifies" content="iron-core-magnetisation#s3">
+<title>Exterior-cylinder sheet endpoint cancellation</title>
+</head>
+<body>
+<article>
+<h1 id="icm-sheet-tail-entries-title">Exterior-cylinder sheet endpoint cancellation</h1>
+<section id="icm-sheet-tail-entries-reproduction">
+<h2>Reproduction</h2>
+<p>The recorded matrix maximum maps to target 844, cell 420, height field per
+height magnetisation. Matrix components are stored in blocks, with radial rows
+before height rows within each worker shard, rather than alternating components.
+Target 844 is (4.957, 2.574971493902439) m. Cell 420's vertical edges are 906
+at radius 0.05 m and 907 at radius 0.13 m, each spanning z=2.5624 to 2.6424 m.</p>
+<p>The unchanged endpoint projection reproduces batch dependence for pair
+(844,906): B<sub>Z</sub> is −5.15787198874764e−13 T at batch size 1 and
+−5.157871988714087e−13 T at sizes 2 and 8. At size 256 it is
+−5.157871988736484e−13 T. The retained <code>pair-reproduction.log</code>
+records both edges. The exact base suite reproduces 3,077 of 11,505,664 entries above 1e−13, with a worst error of 2.2815967011827007e−12; its result is 693 passed and one failed in 765.63 s. The failure is the all-target agreement test, after both finiteness assertions passed.</p>
+</section>
+<section id="icm-sheet-tail-entries-classification">
+<h2>All 3,077 persisted failures</h2>
+<p>Job 1308931 compared every target and saved all 16 shard files
+<code>classification/entries-*.npz</code>. Each entry retains its local row,
+column, physical target, field component, cell, magnetisation component, error,
+absolute per-end scale, tiled value, reference value and dominant residual edge.
+The dominant edge is the largest absolute signed edge contribution to the
+matrix residual, computed from the production tile's captured edge fields and
+the unbatched reference. Every saved error reconciles with
+|tiled−reference|/scale.</p>
+<table>
+<thead><tr><th>Classification</th><th>Count</th></tr></thead>
+<tbody>
+<tr><td>Cylinder route</td><td>3,077</td></tr>
+<tr><td>Pancake route</td><td>0</td></tr>
+<tr><td>Sloped route</td><td>0</td></tr>
+<tr><td>B<sub>Z</sub> per M<sub>Z</sub></td><td>3,077</td></tr>
+<tr><td>B<sub>R</sub>, or per M<sub>R</sub></td><td>0</td></tr>
+<tr><td>On or near the edge line, distance ≤0.1 edge lengths</td><td>0</td></tr>
+<tr><td>Within 0.1 edge lengths of the nearer endpoint plane</td><td>19</td></tr>
+<tr><td>Near axis, target radius ≤edge length</td><td>0</td></tr>
+<tr><td>Source cylinder radius ≤edge length</td><td>31</td></tr>
+</tbody>
+</table>
+<p>All ranges below are over the dominant edge of each failing entry; L denotes
+that edge's length. The plane distance is |z_target−z_start|/L, so it states the
+end plane used rather than assigning a unique plane to an entire cylinder.</p>
+<table>
+<thead><tr><th>Geometry</th><th>Minimum</th><th>Median</th><th>Maximum</th></tr></thead>
+<tbody>
+<tr><td>Target-to-segment distance / L</td><td>12.5000</td><td>53.5031</td><td>87.5728</td></tr>
+<tr><td>Target-to-supporting-line distance / L</td><td>0.481928</td><td>42.5000</td><td>71.1801</td></tr>
+<tr><td>Target-to-start-plane distance / L</td><td>0.080525</td><td>0.516830</td><td>88.5600</td></tr>
+<tr><td>Target-to-nearer-endpoint-plane distance / L</td><td>0.080525</td><td>0.500000</td><td>87.5600</td></tr>
+<tr><td>Source radius / L</td><td>0.625000</td><td>2.62500</td><td>19.6250</td></tr>
+<tr><td>Target radius / L</td><td>2.04819</td><td>48.1250</td><td>73.0919</td></tr>
+<tr><td>Source radius / target radius</td><td>0.0101698</td><td>0.142665</td><td>0.840000</td></tr>
+<tr><td>Slope dr′/dz′</td><td>0</td><td>0</td><td>0</td></tr>
+</tbody>
+</table>
+<p>The single worst witness is <strong>(target 844, edge 907)</strong>, belonging
+to cell 420. That entry's tiled value is −2.9732336946628784e−12 T per A/m,
+its reference is −2.9732336946720157e−12, and its unchanged per-end scale is
+4.004808092410357e−12. Edge 907 runs from (0.13,2.5624) to (0.13,2.6424) m;
+the target is 60.3375 L away. The same cell's edge 906 is the companion test.
+For edge 907 the unchanged height field is −3.4890208935320508e−12 T at batch
+size 1 and −3.4890208935365255e−12 at sizes 2, 8 and 256. Both new tests fail
+on that source, as recorded in <code>witness-before.log</code>.</p>
+<p>The collector's auxiliary JSON serialization failed on a NumPy boolean after
+all 16 entry files had been written. This is a failed collector process, not a
+passing gate. The complete entry records already carry the dominant identities:
+<code>recover_geometry.py</code> validates and reconstructs their geometry from
+the same mesh into <code>classification/dominant-edges.json</code> without
+repeating the field comparison. <code>geometry-classification.log</code> records
+the validation and counts. The serializer is corrected and its native-boolean
+round trip checked. A redundant second collector, job 1308944, was cancelled
+after 1 min 42 s once the complete raw receipts were verified.</p>
+</section>
+<section id="icm-sheet-tail-entries-derivation">
+<h2>Source-radius expansion of the exterior cylinder height endpoint</h2>
+<p>Write g=z′−z, target radius r, source radius s, d=√(r²+g²),
+t=g/d and v=s/d. The dimensionless height endpoint carried before μ₀/(2π) is</p>
+<pre>H_Z = g ∫₀^π s(s−r cos φ) / (L² D) dφ,
+L² = r²+s²−2rs cos φ,  D² = g²+L².</pre>
+<p>Its complete-elliptic identity is
+H<sub>Z</sub>=(g/a)[K(m)+(s−r)/(s+r)Π(n|m)], with
+a²=g²+(r+s)², m=4rs/a² and n=4rs/(r+s)².
+For an exterior target the two terms cancel as s/r tends to zero. The angular
+projection of the flux primitive carries the same small remainder.</p>
+<p>Introduce the disk potential V=∫<sub>disk(s)</sub>1/D dA. The planar divergence
+of g(ρ−r)/(L²D) is −g/D³ plus its 2π sign(g) point contribution at ρ=r.
+The divergence theorem therefore gives
+2H<sub>Z</sub>=∂<sub>g</sub>V+2π sign(g)1<sub>r&lt;s</sub>.
+For r&gt;s the point contribution vanishes. The angular addition theorem and
+the analytic source-radius integration give</p>
+<pre>V = 2π Σₖ≥₀ P₂ₖ(0) P₂ₖ(t) s²ᵏ⁺² / [(2k+2)d²ᵏ⁺¹],
+∂g[d⁻ⁿ⁻¹ Pₙ(t)] = −(n+1)d⁻ⁿ⁻² Pₙ₊₁(t),
+H_Z = −π t v² Σₖ≥₀ [(2k+1)/(2k+2)] P₂ₖ(0)
+                         [P₂ₖ₊₁(t)/t] v²ᵏ.</pre>
+<p>The factor tv² is formed before summation. Carrying the odd Legendre
+polynomial divided by t keeps g=0 regular and avoids losing relative accuracy
+near the edge's plane. With E=P₂ₖ(t), O=P₂ₖ₊₁(t)/t and p=P₂ₖ(0), the recurrence is</p>
+<pre>E_next = [(4k+3)t² O − (2k+1)E]/(2k+2),
+O_next = [(4k+5)E_next − (2k+2)O]/(2k+3),
+p_next = −p(2k+1)/(2k+2),   E₀=O₀=p₀=1.</pre>
+<p>The qualified region is r&gt;s and v≤4/5. Ninety-six terms leave a geometric
+tail below double-precision rounding. Elsewhere the complete-elliptic identity
+has no large opposing terms: r≤s gives the same sign, while the remaining
+exterior region bounds (r−s)/(r+s). No source or angular quadrature is added.</p>
+</section>
+<section id="icm-sheet-tail-entries-independent">
+<h2>Independent checks before implementation</h2>
+<p>A 65-digit evaluation of the complete-elliptic identity over 140 exterior
+geometries checks source/target radius ratios 0.001 to 0.79 and height/radius
+ratios zero to 100, including 1e−8 near the plane. The worst relative difference
+from the derived series is 1.0584553134129076e−15. A separate compiled series
+probe gives exactly −5.157871988723156e−13 T for pair (844,906) and
+−3.4890208935350897e−12 T for pair (844,907) at all four batch sizes.</p>
+<p>Logs and numerical receipts are retained under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T102646983081-icm-sheet-tail-entries</code>:
+<code>cylinder-derivation.log</code>, <code>series-batch.log</code>, and
+<code>pair-reproduction.log</code>. The exploratory log initially printed “350” from a hard-coded label: the actual loop has 4×5×7=140 cases, and its appended correction preserves that error. The committed 96-term implementation is separately checked over the same 140 cases in <code>implemented-series-validation.log</code>, whose counter is measured and whose worst relative error is 1.2701463760954892e−15. Its imported module carries the introduced <code>_cylinder_height_series</code> marker. These checks establish the identity; the whole-mesh head gate is recorded separately below.</p>
+</section>
+<section id="icm-sheet-tail-entries-gate">
+<h2>Head acceptance gate</h2>
+<p><strong>The node's numerical measure passes.</strong> Job 1308946 on
+<code>sirius</code>, host <code>98dci4-clu-5053</code>, completes with scheduler
+exit 0. The implementation and tests are
+<code>bcb3143f0d0b18c704d7da113e415b885f3ea101</code>; subsequent commits change
+only this evidence record. Both suite arms export 16 worker processes, two
+OpenMP threads and the CPU backend in their job environment. Their literal
+command is the same:</p>
+<pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_edge_sheet.py tests/test_sheet_tile.py</pre>
+<table>
+<thead><tr><th>Measure</th><th>Base</th><th>Head</th></tr></thead>
+<tbody>
+<tr><td>Entries compared</td><td>11,505,664</td><td>11,505,664</td></tr>
+<tr><td>Entries above 1e−13</td><td>3,077</td><td>0</td></tr>
+<tr><td>Worst per-end-relative error</td><td>2.282e−12</td><td>9.712e−14</td></tr>
+<tr><td>99.9th percentile</td><td>2.205e−14</td><td>1.720e−15</td></tr>
+<tr><td>Finiteness of both matrices</td><td>Pass</td><td>Pass</td></tr>
+<tr><td>Exact node suite</td><td>693 passed, 1 failed; 765.63 s</td><td>702 passed; 777.88 s</td></tr>
+<tr><td>Suite exit</td><td>1</td><td>0</td></tr>
+</tbody>
+</table>
+<p>The head maximum is at emitted matrix coordinates (962,1425), below the
+unchanged 1e−13 floor. The 1e−10 independent sheet-reference floor and the
+per-end denominator definition are unchanged. No entry is excluded. The two
+new exterior-cylinder tests require exact equality of the height field at batch
+sizes 1, 2, 8 and 256; both components must also be finite. Six fixtures extend
+the existing high-precision endpoint test, retaining its 5e−15 relative bound
+and its five interior controls.</p>
+<p>The same job then restores the pre-fix scalar and packed exterior selectors
+in a scratch extraction. Its header prints and verifies the imported mutant
+<code>/tmp/mcintos-1308946-Uj1Q/nova/biot/sheet.py</code> and matching working
+directory. Both
+<code>test_exterior_cylinder_cpu_pair_is_independent_of_batch_size[906]</code>
+and <code>[907]</code> fail: <strong>2 failed in 17.45 s; EXIT=1</strong>.
+For the worst witness, edge 907, the restored height field is
+−3.489020893532059e−12, −3.4890208935365288e−12,
+−3.4890208935411865e−12 and −3.4890208935411865e−12 T at the four batch sizes.
+The control therefore exercises the numerical defect that the head tests refuse.</p>
+<p>After the mutation, the tracked source and HEAD both have blob
+<code>2486e8a1dcd7915e4d379674d3b953f6108f0a0d</code>.
+The source check also finds the introduced <code>_cylinder_height_series</code>
+marker (definition and call), and exits 0. The tested product source and test
+files are byte-identical to the later evidence-only head.</p>
+<p>Durable gate receipts in the run directory are <code>baseline_suite.log</code>,
+<code>after_suite.log</code>, <code>negative-control.log</code>,
+<code>mutation.log</code> and <code>source-blob-check.log</code>. Each suite/control
+log ends in its captured <code>EXIT=</code> line. The base scratch arm's header
+records its imported module and working directory. The first base extraction
+omitted <code>scripts/edge_sheet/reference.py</code> and failed during collection;
+<code>baseline-scaffolding.log</code> preserves that rejected attempt. The full
+base arm above follows the corrected extraction.</p>
+<p>This record completes this node's cancellation repair and its own acceptance
+measurement. Integration and the separately dispatched merged-head verification
+remain the coordinator's responsibility; this worker does not close the parent
+plan section.</p>
+</section>
+</article>
+</body>
+</html>

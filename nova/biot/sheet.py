@@ -311,12 +311,38 @@ def _pancake_end_series(xp, gamma, radius, source, regular, regular_height):
     return radial, height
 
 
-def _sheet_cylinder_height(xp, gamma, radius, source):
-    """Cylinder endpoint height field through same-sign complete kinds inside it.
+def _cylinder_height_series(xp, gamma, radius, source):
+    """Exterior cylinder height endpoint with its source-radius square factored.
 
-    The angular projection of the arsinh remainder cancels near the axis.
-    Reducing it first gives a first kind plus a third kind whose coefficient
-    is nonnegative for an interior target.
+    The disk-potential multipoles give the endpoint as
+    ``-pi*t*v**2 sum (2k+1)/(2k+2) P_2k(0) [P_(2k+1)(t)/t] v**(2k)``.
+    Carrying the odd polynomial divided by ``t`` keeps the sheet plane regular.
+    Here ``t=gamma/distance`` and ``v=source/distance``.
+    """
+    distance = xp.hypot(gamma, radius)
+    eligible = (radius > source) & (source <= 0.8 * distance)
+    t = gamma / distance
+    v = xp.where(eligible, source / distance, 0.0)
+    one = xp.ones_like(distance)
+    zero = xp.zeros_like(distance)
+
+    def step(index, state):
+        even, odd, moment, power, value = state
+        value = value + power * moment * (2 * index + 1) / (2 * index + 2) * odd
+        even = ((4 * index + 3) * t**2 * odd - (2 * index + 1) * even) / (2 * index + 2)
+        odd = ((4 * index + 5) * even - (2 * index + 2) * odd) / (2 * index + 3)
+        moment = -moment * (2 * index + 1) / (2 * index + 2)
+        return even, odd, moment, power * v**2, value
+
+    *_, value = _sheet_series_loop(xp, 96, step, (one, one, one, one, zero))
+    return eligible, -np.pi * t * v**2 * value
+
+
+def _sheet_cylinder_height(xp, gamma, radius, source):
+    """Cylinder height endpoint through complete kinds or exterior multipoles.
+
+    Interior complete kinds have the same sign. For a small source outside it,
+    the source-radius series combines their opposing leading terms analytically.
     """
     gamma, radius, source = map(xp.asarray, (gamma, radius, source))
     span = gamma**2 + (radius + source) ** 2
@@ -324,9 +350,11 @@ def _sheet_cylinder_height(xp, gamma, radius, source):
     pole = ((source - radius) / (source + radius)) ** 2
     first, _ = complete_kind(complement, xp=xp)
     third = complete_pole(pole, complement, xp=xp)
-    return (
+    regular = (
         gamma / xp.sqrt(span) * (first + (source - radius) / (source + radius) * third)
     )
+    eligible, series = _cylinder_height_series(xp, gamma, radius, source)
+    return xp.where(eligible, series, regular)
 
 
 def _sheet_gamma_series(xp, gamma, radius, source, slope, regular):
@@ -796,7 +824,7 @@ class SheetFlux:
         for height, radius, sign in ends:
             value, gamma_value, radial_value = self._closed_gradient(height, r, radius)
             b_r += sign * gamma_value
-            if self._slope == 0.0 and r <= radius:
+            if self._slope == 0.0:
                 b_z += sign * r * float(_sheet_cylinder_height(np, height, r, radius))
             else:
                 b_z += sign * (value + r * radial_value)
@@ -1337,7 +1365,7 @@ def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
         )
         sloped_height.append(
             xp.where(
-                (b1 == 0.0) & (target_r <= source),
+                b1 == 0.0,
                 cylinder_height,
                 height_scale * (value + target_r * radial_value),
             )

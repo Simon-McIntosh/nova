@@ -412,3 +412,29 @@ def test_flat_cpu_pair_is_independent_of_batch_size():
     assert values == [values[0]] * len(values), (
         f"batch-dependent radial field: {values!r}"
     )
+
+
+@pytest.mark.parametrize("edge", [906, 907])
+def test_exterior_cylinder_cpu_pair_is_independent_of_batch_size(edge):
+    """The small exterior cylinder retains its height field in every launch."""
+    polygons, centroids = west_mesh()
+    edges = cell_edges(polygons)
+    target = 844
+    kernel = jax.jit(lambda *values: packed_sheet_field(jnp, *values))
+    pair = (
+        centroids[target, 0],
+        centroids[target, 1],
+        edges.start_r[edge],
+        edges.start_z[edge],
+        edges.end_r[edge],
+        edges.end_z[edge],
+    )
+    values = []
+    for count in (1, 2, 8, 256):
+        radial, height = kernel(*(jnp.full((count,), value) for value in pair))
+        assert np.all(np.isfinite(radial))
+        assert np.all(np.isfinite(height))
+        values.append(float(height[0]))
+    assert values == [values[0]] * len(values), (
+        f"batch-dependent height field: {values!r}"
+    )

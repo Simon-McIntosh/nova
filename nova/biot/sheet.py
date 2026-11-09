@@ -206,6 +206,149 @@ def _closed_root(height, radius, source):
 _closed_root_gradient = jax.jit(jax.value_and_grad(_closed_root, argnums=(0, 1)))
 
 
+def _sheet_series_loop(xp, count, body, initial):
+    """Carry a fixed analytic series without unrolling its traced program."""
+    if xp is np:
+        state = initial
+        for index in range(count):
+            state = body(index, state)
+        return state
+    return jax.lax.fori_loop(0, count, body, initial)
+
+
+@functools.lru_cache(maxsize=None)
+def _pancake_series_constants():
+    """Full-turn even cosine moments and even binomial coefficients."""
+    moment = [np.pi]
+    for order in range(1, 65):
+        moment.append(moment[-1] * (2 * order - 1) / (2 * order))
+    indices = np.arange(32)
+    moments = np.asarray(moment)[indices[:, None] + indices[None, :] + 1]
+    coefficient = [1.0]
+    for order in range(1, 64):
+        coefficient.append(coefficient[-1] * (2 * order - 1) / (2 * order))
+    return moments, np.asarray(coefficient)[2 * indices]
+
+
+def _pancake_radial_series(xp, gamma, radius, source, regular):
+    """Factor the small radial endpoint field before the complete poles cancel.
+
+    The source multipoles converge in source/distance or its inverse; the
+    intermediate source range uses the combined pole integrand's near-axis
+    series. All three carry the radial and cubic source scales explicitly.
+    """
+    gamma, radius, source = map(xp.asarray, (gamma, radius, source))
+    distance = xp.hypot(gamma, radius)
+    t2 = (gamma / distance) ** 2
+    inner = source <= 0.5 * distance
+    outer = distance <= 0.5 * source
+    vin = xp.where(inner, source / distance, 0.0)
+    vout = xp.where(outer, distance / xp.where(source > 0.0, source, 1.0), 0.0)
+    zero = xp.zeros_like(distance)
+    one = xp.ones_like(distance)
+
+    def step(index, state):
+        even, odd, coefficient, pin, pout, inside, outside = state
+        term = coefficient * odd / ((2 * index + 2) * (2 * index + 3))
+        following = -(index + 1.5) / (index + 1)
+        inside = inside + pin * term
+        outside = outside + pout * following * term
+        even = ((4 * index + 5) * t2 * odd - (2 * index + 3) * even) / (2 * index + 2)
+        odd = ((4 * index + 7) * even - (2 * index + 4) * odd) / (2 * index + 3)
+        return (
+            even,
+            odd,
+            coefficient * following,
+            pin * vin**2,
+            pout * vout**2,
+            inside,
+            outside,
+        )
+
+    *_, inside, outside = _sheet_series_loop(
+        xp, 32, step, (one, 3.0 * one, one, one, vout**2, zero, zero)
+    )
+    common = np.pi * (radius / distance) * (gamma / distance)
+    inside = -common * vin**3 * inside
+    outside = (
+        -np.pi * xp.sign(gamma) * radius / (distance + xp.abs(gamma)) - common * outside
+    )
+
+    near_axis = (radius / distance) ** 2 <= 0.25
+    use_axis = near_axis & ~inner & ~outer
+    h = xp.where(use_axis, (radius / distance) ** 2, 0.0)
+    span = distance**2 + source**2
+    q = xp.where(use_axis, 2.0 * radius * source / span, 0.0)
+    moments, coefficients = _pancake_series_constants()
+    order = xp.arange(32)
+    integrals = (h[..., None] ** order) @ xp.asarray(moments)
+    weights = (
+        xp.asarray(coefficients)
+        * q[..., None] ** (2 * xp.maximum(order - 1, 0))
+        * (4.0 * radius**2 / span**2)[..., None]
+        * (
+            (2.0 * order / (2 * order + 1)) * distance[..., None] ** 2
+            - source[..., None] ** 2
+        )
+    )
+    weights = xp.where(order == 0, -1.0, weights)
+    axis = (
+        gamma
+        * radius
+        * source**3
+        / (distance**2 * span**1.5)
+        * xp.sum(weights * integrals, axis=-1)
+    )
+    return xp.where(
+        inner, inside, xp.where(outer, outside, xp.where(use_axis, axis, regular))
+    )
+
+
+def _sheet_gamma_series(xp, gamma, radius, source, slope, regular):
+    """Combine the root and arsinh gamma derivatives as source multipoles.
+
+    The zero-source primitive has zero gamma derivative on the exterior
+    branch. Integrating the differentiated ring addition theorem along the
+    source line then factors out source cubed before the endpoint is evaluated.
+    """
+    gamma, radius, source, slope = map(xp.asarray, (gamma, radius, source, slope))
+    held_slope = xp.where(slope != 0.0, slope, 1.0)
+    a = xp.sqrt(1.0 + slope**2)
+    intercept = gamma - source / held_slope
+    distance = xp.hypot(radius, intercept)
+    ratio = source * a / (xp.abs(held_slope) * distance)
+    eligible = (
+        (slope != 0.0)
+        & (xp.abs(source - slope * gamma) > radius * (1.0 + 1e-12))
+        & (ratio <= 0.5)
+    )
+    v = xp.where(eligible, ratio, 0.0)
+    t = -intercept / distance
+    u = xp.sign(held_slope) / a
+    zero = xp.zeros_like(distance)
+    one = xp.ones_like(distance)
+
+    def step(index, state):
+        n = index + 1
+        ct0, ct1, cu0, cu1, power, value = state
+        value = value + power * ct1 * cu0 / ((n + 1) * (n + 2))
+        ct0, ct1 = ct1, ((2 * n + 3) * t * ct1 - (n + 2) * ct0) / (n + 1)
+        cu0, cu1 = cu1, ((2 * n + 3) * u * cu1 - (n + 2) * cu0) / (n + 1)
+        return ct0, ct1, cu0, cu1, power * v, value
+
+    *_, value = _sheet_series_loop(
+        xp, 80, step, (one, 3.0 * t, one, 3.0 * u, one, zero)
+    )
+    series = (
+        np.pi
+        * (a**3 / held_slope)
+        * (radius / distance)
+        * (source / distance) ** 3
+        * value
+    )
+    return xp.where(eligible, series, regular)
+
+
 class SheetFlux:
     """Poloidal flux of one sheet in the closed form of Part II."""
 
@@ -604,7 +747,16 @@ class SheetFlux:
         arsinh_term, arsinh_gamma, arsinh_radial = self._arsinh_gradient(gamma, r, rp)
         return (
             float(a1 * b1) * float(root) + arsinh_term,
-            float(a1 * b1) * float(gradient[0]) + arsinh_gamma,
+            float(
+                _sheet_gamma_series(
+                    np,
+                    gamma,
+                    r,
+                    rp,
+                    b1,
+                    float(a1 * b1) * float(gradient[0]) + arsinh_gamma,
+                )
+            ),
             float(a1 * b1) * float(gradient[1]) + arsinh_radial,
         )
 
@@ -681,7 +833,9 @@ class SheetFlux:
             third += (-1) ** order * ratio * pole
             radial += (-1) ** order * c * ratio * pole
         potential -= c * gamma**2 / (2.0 * a * r) * third
-        return potential, gamma / (a * r) * (2.0 * rp * big_k - radial), height
+        regular = gamma / (a * r) * (2.0 * rp * big_k - radial)
+        radial = _pancake_radial_series(np, gamma, r, rp, regular)
+        return potential, float(radial), height
 
     def pancake_antiderivative(self, gamma: float, r: float, rp: float) -> float:
         """Eq (26): the flat sheet's antiderivative in the source radius ``r'``.
@@ -878,9 +1032,7 @@ def _sheet_root(gamma, radius, source):
     complement = (gamma * gamma + (radius - source) ** 2) / span
     first, second = complete_kind_traced(complement)
     return (
-        2.0 * span**0.5
-        * (2.0 * (1.0 - k2) * first + (k2 - 2.0) * second)
-        / (3.0 * k2)
+        2.0 * span**0.5 * (2.0 * (1.0 - k2) * first + (k2 - 2.0) * second) / (3.0 * k2)
     )
 
 
@@ -1038,7 +1190,9 @@ def _sheet_closed_gradient(xp, gamma, radius, source, b1):
     )
     return (
         a1 * b1 * root + value,
-        a1 * b1 * gradient[0] + gamma_value,
+        _sheet_gamma_series(
+            xp, gamma, radius, source, b1, a1 * b1 * gradient[0] + gamma_value
+        ),
         a1 * b1 * gradient[1] + radial_value,
     )
 
@@ -1058,9 +1212,9 @@ def _sheet_pancake_terms(xp, gamma, radius, source):
     first, second = complete_kind(complement, xp=xp)
     c = xp.sqrt(gamma**2 + radius**2)
     remainder = traced_zeta(xp, source, radius, gamma, np.pi / 2)
-    potential = (
-        -source / (2.0 * a * radius)
-    ) * ((radius**2 - source**2 - 3.0 * gamma**2) * first + span * second)
+    potential = (-source / (2.0 * a * radius)) * (
+        (radius**2 - source**2 - 3.0 * gamma**2) * first + span * second
+    )
     potential = potential + radius * remainder
     height = 2.0 * remainder - 2.0 * source / a * first
     level = xp.abs(gamma) <= 1e-12 * radius
@@ -1087,6 +1241,9 @@ def _sheet_pancake_terms(xp, gamma, radius, source):
     )
     radial = xp.where(
         level, 0.0, gamma / (a * radius) * (2.0 * source * first - radial)
+    )
+    radial = xp.where(
+        level, 0.0, _pancake_radial_series(xp, gamma, radius, source, radial)
     )
     return potential, radial, height
 
@@ -1157,9 +1314,7 @@ def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
     pancake_radial = []
     pancake_height = []
     for source in (upper, lower):
-        _, end_radial, end_height = _sheet_pancake_terms(
-            xp, gamma, target_r, source
-        )
+        _, end_radial, end_height = _sheet_pancake_terms(xp, gamma, target_r, source)
         pancake_radial.append(MU0 / (2.0 * np.pi) * end_radial)
         pancake_height.append(MU0 / (2.0 * np.pi) * end_height)
     return sloped_radial, sloped_height, pancake_radial, pancake_height, flat
@@ -1178,10 +1333,16 @@ def packed_sheet_field(xp, target_r, target_z, start_r, start_z, end_r, end_z):
         _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z)
     )
     return (
-        xp.where(flat, pancake_radial[0] - pancake_radial[1],
-                 sloped_radial[0] - sloped_radial[1]),
-        xp.where(flat, pancake_height[0] - pancake_height[1],
-                 sloped_height[0] - sloped_height[1]),
+        xp.where(
+            flat,
+            pancake_radial[0] - pancake_radial[1],
+            sloped_radial[0] - sloped_radial[1],
+        ),
+        xp.where(
+            flat,
+            pancake_height[0] - pancake_height[1],
+            sloped_height[0] - sloped_height[1],
+        ),
     )
 
 
@@ -1199,8 +1360,14 @@ def packed_sheet_end_scale(xp, target_r, target_z, start_r, start_z, end_r, end_
         _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z)
     )
     return (
-        xp.where(flat, xp.abs(pancake_radial[0]) + xp.abs(pancake_radial[1]),
-                 xp.abs(sloped_radial[0]) + xp.abs(sloped_radial[1])),
-        xp.where(flat, xp.abs(pancake_height[0]) + xp.abs(pancake_height[1]),
-                 xp.abs(sloped_height[0]) + xp.abs(sloped_height[1])),
+        xp.where(
+            flat,
+            xp.abs(pancake_radial[0]) + xp.abs(pancake_radial[1]),
+            xp.abs(sloped_radial[0]) + xp.abs(sloped_radial[1]),
+        ),
+        xp.where(
+            flat,
+            xp.abs(pancake_height[0]) + xp.abs(pancake_height[1]),
+            xp.abs(sloped_height[0]) + xp.abs(sloped_height[1]),
+        ),
     )

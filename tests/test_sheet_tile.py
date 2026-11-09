@@ -48,7 +48,8 @@ WEST_MESH = os.environ.get(
 #: Pairs evaluated per kernel launch. The unbatched reference is chunked at the
 #: same count as the tile's block, so both sides launch the same number of
 #: programs and the difference is the tile's padding and pair ordering alone.
-PAIR_BLOCK = 4096
+#: Bounded blocks keep eight CPU workers within the shared allocation's memory.
+PAIR_BLOCK = 1024
 
 #: Processes the build is sharded over; the allocation is one compute node.
 WORKERS = int(os.environ.get("NOVA_SHEET_TILE_WORKERS", "8"))
@@ -231,9 +232,7 @@ def interaction():
     _, centroids = west_mesh()
     count = TARGETS or centroids.shape[0]
     step = (count + WORKERS - 1) // WORKERS
-    bounds = [
-        (start, min(start + step, count)) for start in range(0, count, step)
-    ]
+    bounds = [(start, min(start + step, count)) for start in range(0, count, step)]
     if WORKERS == 1:
         built = [build_slice(bound) for bound in bounds]
     else:
@@ -295,7 +294,7 @@ def test_tile_agrees_with_the_independent_ring_reference():
 
 
 @pytest.mark.slow
-@pytest.mark.timeout(1500)
+@pytest.mark.timeout(3600)
 def test_tile_agrees_with_the_unbatched_closed_form(interaction):
     """Every entry of the tiled build matches the unbatched host evaluation."""
     tiled, reference, scale = interaction
@@ -385,3 +384,28 @@ def test_reversed_edge_normals_break_the_agreement():
     assert finite.any(), "the block holds no finite entry to compare"
     worst = float(np.max(error[finite]))
     assert worst > GATE, f"the reversed cell still agrees to {worst:.3e}"
+
+
+def test_flat_cpu_pair_is_independent_of_batch_size():
+    """The far horizontal edge retains its radial field in every flat launch."""
+    polygons, centroids = west_mesh()
+    edges = cell_edges(polygons)
+    target, edge = 0, 1129
+    kernel = jax.jit(lambda *values: packed_sheet_field(jnp, *values))
+    pair = (
+        centroids[target, 0],
+        centroids[target, 1],
+        edges.start_r[edge],
+        edges.start_z[edge],
+        edges.end_r[edge],
+        edges.end_z[edge],
+    )
+    values = []
+    for count in (1, 2, 8):
+        radial, height = kernel(*(jnp.full((count,), value) for value in pair))
+        assert np.all(np.isfinite(radial))
+        assert np.all(np.isfinite(height))
+        values.append(float(radial[0]))
+    assert values == [values[0]] * len(values), (
+        f"batch-dependent radial field: {values!r}"
+    )

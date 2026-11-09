@@ -1,9 +1,15 @@
 """Refuse a committed panel receipt that points outside the repository.
 
 The receipt is read by people and tools that never saw the render, so a figure
-pointer has to resolve from a fresh clone: repository-relative, and naming a
-file that is still there.  A run scratch directory, a worktree or a temporary
-tree satisfies neither, and dies with the render that wrote it.
+pointer has to resolve from a fresh clone: repository-relative, inside the
+published figures tree, and naming a file that is still there. A run scratch
+directory, a worktree or a temporary tree satisfies none of those, and dies
+with the render that wrote it.
+
+Whether a pointer is a name the repository itself would record is decided by
+``nova.database.filepath.repository_relative``, the mapping this project's
+receipts are written through: a pointer that mapping would rewrite is not the
+name of a published figure, and one it leaves alone is.
 """
 
 from __future__ import annotations
@@ -12,16 +18,22 @@ import argparse
 import json
 from pathlib import Path
 
+from nova.database.filepath import repository_relative
 
 PUBLISHED_ROOT = Path("docs/figures")
 """The only place a receipt may point at: figures published in the repository."""
 
 
-def repository_root(start: Path) -> Path:
-    for parent in start.resolve().parents:
-        if (parent / ".git").exists():
-            return parent
-    raise SystemExit(f"{start} is not inside a repository")
+def repository_root(path: Path) -> Path:
+    """Return the root a path relative to this repository is measured from."""
+
+    relative = repository_relative(path)
+    if Path(relative).is_absolute():
+        raise SystemExit(f"{path} is not inside a repository")
+    root = path.resolve()
+    for _ in Path(relative).parts:
+        root = root.parent
+    return root
 
 
 def check(receipt: Path) -> list[str]:
@@ -34,15 +46,14 @@ def check(receipt: Path) -> list[str]:
         if not isinstance(pointer, str) or not pointer:
             faults.append(f"{name} carries no svg pointer")
             continue
-        path = Path(pointer)
-        if path.is_absolute():
-            faults.append(f"{name} names an absolute path: {pointer}")
-        elif PUBLISHED_ROOT not in path.parents:
+        candidate = root / pointer
+        recorded = repository_relative(candidate)
+        if Path(pointer).is_absolute() or recorded != pointer:
+            faults.append(f"{name} is not a repository path: {pointer}")
+        elif PUBLISHED_ROOT not in Path(pointer).parents:
             faults.append(f"{name} names a path outside {PUBLISHED_ROOT}: {pointer}")
-        elif not (root / path).exists():
+        elif not (root / pointer).exists():
             faults.append(f"{name} names a file that does not resolve: {pointer}")
-        elif root not in (root / path).resolve().parents:
-            faults.append(f"{name} resolves outside the repository: {pointer}")
     return faults
 
 

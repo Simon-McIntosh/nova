@@ -509,9 +509,15 @@ a reader resolves it from a fresh clone. A render writes into whatever
 directory it is given, and recording that directory would bake a run scratch
 path &mdash; or a worktree that is later removed &mdash; into a committed
 artefact; the receipt therefore records the repository-relative path, and the
-bare file name for a figure written outside any repository.
-<code>check_panel_receipts.py</code> refuses a receipt whose pointers do not
-resolve.</li>
+render refuses to write a receipt for a figure outside any repository rather
+than recording a name that resolves for nobody. Both the name and the check
+call <code>nova.database.filepath.repository_relative</code>, the mapping this
+project produces repository-relative names through, so the receipt, the
+relativiser and the commit hook cannot disagree about what is inside the
+repository. <code>check_panel_receipts.py</code> refuses a receipt whose
+pointers do not resolve, and <code>check_path_mapping_reuse.py</code> refuses a
+module under this directory that walks the parent tree for a <code>.git</code>
+marker instead of calling that mapping.</li>
 </ul>
 
 </section>

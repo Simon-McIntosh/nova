@@ -35,6 +35,7 @@ from scipy.spatial import cKDTree
 
 import jax.numpy as jnp
 
+from nova.database.filepath import repository_relative
 from nova.equilibrium.connectivity_boundary import host_boundary_read
 from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
 from nova.linalg.tensor_spline import fit_tensor_spline
@@ -402,14 +403,17 @@ def recorded_path(figure_path: Path) -> str:
     The receipt is a committed artefact, so it may not name the directory the
     render happened to write into: a run scratch directory, a worktree or a
     temporary tree resolves for no other reader and disappears with the render.
-    A path that sits outside any repository is recorded by name alone.
+    The name comes from the repository's own mapping; a path it cannot place
+    comes back absolute, and that is refused rather than recorded.
     """
 
-    resolved = figure_path.resolve()
-    for parent in resolved.parents:
-        if (parent / ".git").exists():
-            return resolved.relative_to(parent).as_posix()
-    return resolved.name
+    pointer = repository_relative(figure_path)
+    if Path(pointer).is_absolute():
+        raise SystemExit(
+            f"refusing to record {figure_path}: it is outside the repository, "
+            "so its name would resolve for no other reader"
+        )
+    return pointer
 
 
 def render_trip(frame, trip, archive, rows, out, overlays=()) -> dict:

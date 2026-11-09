@@ -29,6 +29,7 @@ def main() -> None:
     parser.add_argument("--part-dir", type=Path, required=True)
     parser.add_argument("--artifact-dir", type=Path, required=True)
     parser.add_argument("--repository-root", type=Path, required=True)
+    parser.add_argument("--pseudo-wall-expansion", type=float, default=None)
     parser.add_argument(
         "--branches",
         nargs="+",
@@ -60,6 +61,10 @@ def main() -> None:
         ]
         if arguments.branches:
             command.extend(["--branches", *arguments.branches])
+        if arguments.pseudo_wall_expansion is not None:
+            command.extend(
+                ["--pseudo-wall-expansion", str(arguments.pseudo_wall_expansion)]
+            )
         started = time.perf_counter()
         completed = subprocess.run(
             command, cwd=arguments.repository_root, env=environment

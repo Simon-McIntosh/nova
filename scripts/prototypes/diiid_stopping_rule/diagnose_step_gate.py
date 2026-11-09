@@ -73,11 +73,18 @@ def main() -> None:
     parser.add_argument("--frame", type=int, required=True)
     parser.add_argument("--branch", choices=("limited", "diverted"), required=True)
     parser.add_argument("--trips", type=int, default=2)
+    parser.add_argument(
+        "--pseudo-wall-expansion",
+        type=float,
+        default=None,
+        help="explicit pseudo-wall control; omit to use the governed limiter",
+    )
     arguments = parser.parse_args()
 
     _instrument()
-    expansion = float(measure_branches.bench.REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION)
-    prepared = measure_branches._prepare_frame(arguments.frame, expansion)
+    prepared = measure_branches._prepare_frame(
+        arguments.frame, arguments.pseudo_wall_expansion
+    )
     topology_class = TopologyClass[arguments.branch.upper()]
     seed = prepared["cold"].branches.flux[int(topology_class)]
     receipt, seconds = measure_branches._solve(

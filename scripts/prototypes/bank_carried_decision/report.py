@@ -1,9 +1,11 @@
 """Render paired receipts with their per-lane census and precision checks."""
 
 import argparse
+import hashlib
 from html import escape
 import json
 from pathlib import Path
+import re
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -20,17 +22,45 @@ def main():
     parser.add_argument("--figure", type=Path, required=True)
     parser.add_argument("--fragment", type=Path, required=True)
     args = parser.parse_args()
+
+    def receipt(label):
+        log = (args.run / f"{label}.log").read_text()
+        assert log.rstrip().endswith("EXIT=0"), f"incomplete process {label}"
+        assert "XLA_FLAGS=unset" in log and "P100" in log, label
+        result = json.loads((args.run / f"{label}.json").read_text())
+        assert result["wall_device"] == "titan P100", label
+        assert all("P100" in kind for kind in result["device_kinds"]), label
+        return result
+
+    builder = (args.run / "builder.log").read_text()
+    assert builder.rstrip().endswith("EXIT=0") and "COMMON_INPUTS" in builder
     pairs = {
-        process: {
-            arm: json.loads((args.run / f"{arm}-{process}.json").read_text())
-            for arm in ("base", "head")
-        }
-        for process in (1, 2)
+        process: {arm: receipt(f"{arm}-{process}") for arm in ("base", "head")}
+        for process in (0, 1, 2)
     }
+    memory = {}
+    for arm in ("base", "head"):
+        log = (args.run / f"{arm}-memory.log").read_text()
+        assert log.rstrip().endswith("EXIT=0"), f"incomplete memory probe {arm}"
+        memory[arm] = json.loads((args.run / f"{arm}-memory.json").read_text())[
+            "widths"
+        ][0]
+    wide = all(row["fits"] for row in memory.values())
+    if wide:
+        for process, pair in pairs.items():
+            for arm in ("base", "head"):
+                extra = receipt(f"{arm}-wide-{process}")
+                assert extra["inputs_sha256"] == pair[arm]["inputs_sha256"]
+                pair[arm]["rows"].extend(extra["rows"])
+                pair[arm].setdefault("read_device_cost", {}).update(
+                    extra.get("read_device_cost", {})
+                )
     hashes = {
         receipt["inputs_sha256"] for pair in pairs.values() for receipt in pair.values()
     }
-    assert len(hashes) == 1, "paired arms did not load the same seed archive"
+    assert hashes == {
+        hashlib.sha256((args.run / "common-inputs.npz").read_bytes()).hexdigest()
+    }, "paired arms did not load the same seed archive"
     precision = []
     problems = []
     table = []
@@ -81,11 +111,14 @@ def main():
         json.dumps(dict(rows=precision, problems=problems), indent=2)
     )
     plt.style.use("data-ink")
-    fig, axes = plt.subplots(1, 2, figsize=(14, 7.2), dpi=100)
+    widths = (16, 128) if wide else (16,)
+    fig, axes = plt.subplots(1, len(widths), figsize=(14, 7.2), dpi=100, squeeze=False)
     fig.subplots_adjust(left=0.08, right=0.98, bottom=0.16, top=0.82, wspace=0.25)
     color = InkStyle().flux_color
-    for ax, lanes in zip(axes, (16, 128), strict=True):
+    for ax, lanes in zip(axes.flat, widths, strict=True):
         for process, pair in pairs.items():
+            if process == 0:
+                continue
             for arm, ink, marker in (("base", "#929292", "s"), ("head", color, "o")):
                 rows = [row for row in pair[arm]["rows"] if row["lanes"] == lanes]
                 for index, step in enumerate((0.0, 1e-5, 1e-3)):
@@ -114,7 +147,7 @@ def main():
                         zorder=3 if arm == "head" else 2,
                     )
         ax.set_xticks([0, 1, 2], ["cold", "warm\n1e-5 step", "warm\n1e-3 step"])
-        ax.set_ylabel("wall per slice [ms]")
+        ax.set_ylabel("titan P100 wall per slice [ms]")
         ax.set_xlim(-0.5, 2.5)
         ax.set_ylim(bottom=0)
         ax.text(0, 1.05, f"{lanes} slices", transform=ax.transAxes, fontsize=16)
@@ -152,77 +185,99 @@ def main():
         if not problems
         else "Measured checks remain unmet: " + "; ".join(problems)
     )
-    args.fragment.write_text(
-        """<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
-<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
-<meta name="plan-verifies" content="sub-millisecond-forward-path#s2">
-<title>Carried support decision | nova</title>
-<link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet"
-href="/_shared/dashboard.css">
-</head><body><main class="plan-doc"><section id="bank-carried-decision-result">
-<h1>Carried support decision with fresh geometry</h1>
-<p>Fragment ownership, component and wall labels, admitted saddle slots and
-represented normal-form cells are carried while the stationary cells and saddle
-liveness remain unchanged. Nodal jets and own-cell coefficients, stationary positions
-and fluxes, saddle curvature, fragment areas, edge intervals and fractional membership
-are recomputed. A tentative converged residual triggers an unchanged full read before
-acceptance; a capped search also returns a full read.</p>
-<p>"""
-        + escape(verdict)
-        + """</p>
-<p>The moved-state test agrees with the full read within 1e-12 relative per continuous
-quantity. At base it fails on axis with relative error 2.9542256489575536e-7. Carrying
-the preceding edge intervals in scratch fails the same test with edge_interval error
-7.391647964927195e-6. The certificate tests force a full read and refuse an invalid
-fresh certificate.</p>
-<figure id="bank-carried-decision-wall"><img
-src="/nova/figures/sub-millisecond-forward-path/bank-carried-decision/wall-per-slice.svg"
-alt="Wall per slice at sixteen and 128 lanes, base beside carried decisions, cold and
-two warm streams"><figcaption>One reserved H200 allocation. Each marker is one fresh
-process: the cold input's median of three calls, or the mean over seven warm input
-medians. Whiskers span those seven inputs; two processes per revision follow one
-warmup. Both revisions load the same cold and preceding warm-state arrays built at
-base. The 128-lane rows repeat the sixteen physical seed lanes eight times. Panels use
-independent ordinate ranges. These raw solve walls carry the stated read counts;
-revision comparisons use equal-read rows or wall per read from the
-table.</figcaption></figure>
-<h2>Fresh processes and lane telemetry</h2>
-<p>The read census comes from an untimed callback executable in the same process. It
-is admitted beside a timing only when its per-lane trial and update counts match the
-timed executable; every disagreement is listed above. Full plus carried counts include
-the extra full read following a tentative carried certificate. Peak bytes are the
-process's device allocator high-water mark through that row, including setup, earlier
-solves and diagnostics.</p>
-<table><thead><tr><th>Process</th><th>Arm</th><th>Lanes</th><th>Input</th><th>Full
-reads</th><th>Carried reads</th><th>ms/slice</th><th>ms/batch trial read</th><th>Peak
-device bytes</th><th>Per-lane counters</th></tr></thead><tbody>"""
-        + "".join(table)
-        + """</tbody></table>
-<h2>Standalone read device cost</h2><p>Process one profiles one warmed full read and
-one carried read at the cold input, per width. Device milliseconds sum observed GPU
-stream activity and include copies; these are standalone read costs, not an inferred
-decomposition of solve wall.</p>
-<table><thead><tr><th>Arm</th><th>Lanes</th><th>Read</th><th>Device ms</th><th>Rebuilt
-by lane</th></tr></thead><tbody>"""
-        + "".join(cost_rows)
-        + """</tbody></table>
-<h2>Precision maxima</h2><p>pair_gaps supplies the head/base flux budget 1e-8 of span,
-position budgets 5e-4 of minor radius and boundary-flux budget 1e-4 of span. Both arms
-are checked against the independent analytic stationary-point oracle. Each receipt
-also contains a separately recomputed full-read residual, with bound
-1e-10.</p><table><thead><tr><th>Ratio</th><th>Maximum</th></tr></thead><tbody>"""
-        + precision_table
-        + """</tbody></table>
-<p>Receipts, common input arrays, complete logs, profiler traces and precision.json
-are retained at <code>"""
-        + escape(str(args.run))
-        + """</code>. The runner, controls and scheduler recipes are under
-<code>scripts/prototypes/bank_carried_decision</code>. The figure uses the
-repository's data-ink style and checked SVG saver. Its rendered PNG requires
-inspection before delivery.</p>
-</section></main></body></html>"""
+    memory_table = "".join(
+        f"<tr><td>{arm}</td><td>{name}</td>"
+        f"<td>{item['temp_size_in_bytes']}</td>"
+        f"<td>{item['estimated_working_bytes']}</td>"
+        f"<td>{row['device_limit_bytes']}</td><td>{item['fits']}</td></tr>"
+        for arm, row in memory.items()
+        for name, item in row["programs"].items()
     )
+    width_note = (
+        "The compiled 128-lane programs fit, so both widths were measured."
+        if wide
+        else "Width 128 was not run: a compiled program exceeds the admission "
+        "budget of 90% of the allocator's usable device memory. The compiler's "
+        "temporary buffer and total working estimates are tabled below; the P100 "
+        "has 16 GB physical memory."
+    )
+    residual_max = max(
+        max(row["residual"])
+        for pair in pairs.values()
+        for arm in pair.values()
+        for row in arm["rows"]
+    )
+    section = (
+        '<section id="bank-carried-decision-device">'
+        "<h2>Titan P100 paired measurement</h2>"
+        "<p>" + escape(verdict) + " Every wall below is a titan P100 wall. "
+        "The H200 headline remains pending a free card. The pending H200 "
+        "allocation was cancelled by id under the revised device decision; "
+        "the titan allocation uses one P100, four CPUs and 96 GB host memory.</p>"
+        "<p>" + escape(width_note) + "</p>"
+        '<figure id="bank-carried-decision-wall"><img '
+        'src="/nova/figures/sub-millisecond-forward-path/'
+        'bank-carried-decision/wall-per-slice.svg" '
+        'alt="Titan P100 wall per slice, base and carried decision, cold and warm">'
+        "<figcaption>Titan P100 wall per slice. Each marker represents one fresh "
+        "measured process after process zero warmed its revision cache. Cold is "
+        "the median of three calls; warm is the mean of seven input medians, "
+        "with whiskers spanning the seven inputs. Both measured processes are "
+        "shown. Raw walls describe the workload; revision comparisons require "
+        "equal per-lane read counts or the wall per trial read table. "
+        "H200 headline pending a free card.</figcaption></figure>"
+        "<h3>Provenance and precision</h3><p>All processes, including warmup "
+        "process zero, load the same seed and predecessor arrays built once at base. "
+        "Input SHA-256: <code>" + next(iter(hashes)) + "</code>. "
+        "Each revision uses its own persistent compilation cache with XLA_FLAGS "
+        "unset. The report reads each complete process log and checks its terminal "
+        "EXIT=0, device identity and shared-input hash. The independent full-read "
+        "residual maximum is " + f"{residual_max:.8e}" + " against 1e-10. "
+        "Every diagnostic census must match the timed executable’s per-lane "
+        "reads and updates. Process zero is included in the precision checks "
+        "and tables, and excluded from the timing figure.</p>"
+        "<p>pair_gaps checks every lane: head/base flux 1e-8 of span, axis and "
+        "X-point 5e-4 of minor radius, boundary flux 1e-4 of span. Each arm is "
+        "also checked against the independent analytic stationary-point oracle.</p>"
+        "<table><thead><tr><th>Ratio</th><th>Maximum</th></tr></thead><tbody>"
+        + precision_table
+        + "</tbody></table>"
+        "<h3>Fresh processes and lane census</h3>"
+        "<p>All timing columns are titan P100 walls. Full and carried counts "
+        "include the extra fresh certificate after tentative carried convergence. "
+        "Peak device GB is the process allocator high-water mark through the row, "
+        "including setup and diagnostics; it is not incremental solve memory.</p>"
+        "<table><thead><tr><th>Process</th><th>Arm</th><th>Lanes</th><th>Input</th>"
+        "<th>Full reads</th><th>Carried reads</th><th>Titan P100 wall [ms/slice]</th>"
+        "<th>Titan P100 wall [ms/batch trial read]</th><th>Peak device [GB]</th>"
+        "<th>Per-lane counters</th></tr></thead><tbody>"
+        + "".join(table)
+        + "</tbody></table>"
+        "<h3>Standalone read device cost</h3><p>Process one profiles one warmed "
+        "full and carried read at the cold input. Titan P100 device milliseconds "
+        "sum observed GPU stream activity including copies; this is not an inferred "
+        "decomposition of solve wall.</p><table><thead><tr><th>Arm</th><th>Lanes</th>"
+        "<th>Read</th><th>Titan P100 device [ms]</th><th>Rebuilt by lane</th></tr>"
+        "</thead><tbody>" + "".join(cost_rows) + "</tbody></table>"
+        "<h3>Compiler memory admission at 128 lanes</h3>"
+        "<table><thead><tr><th>Arm</th><th>Program</th>"
+        "<th>Temporary buffer [bytes]</th>"
+        "<th>Working estimate [bytes]</th><th>Allocator limit [bytes]</th>"
+        "<th>Admitted</th></tr></thead><tbody>" + memory_table + "</tbody></table>"
+        "<p>Complete logs, receipts, common inputs, profiler traces, precision.json: "
+        "<code>" + escape(str(args.run)) + "</code>. The checked SVG uses the "
+        "repository data-ink style; raster inspection is recorded in the run log.</p>"
+        "</section>"
+    )
+    fragment = args.fragment.read_text()
+    fragment = re.sub(
+        r'<section id="bank-carried-decision-device">.*?</section>',
+        "",
+        fragment,
+        flags=re.S,
+    )
+    fragment = fragment.replace("</main>", section + "\n</main>")
+    args.fragment.write_text(fragment)
     print(
         "CHECKS", json.dumps(dict(problems=problems, precision_maxima=pmax)), flush=True
     )

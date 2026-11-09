@@ -14,7 +14,12 @@ export PYTHONPATH="$repo" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH JAX_COMPILATION_CACHE_DIR
 scratch=$(mktemp -d "$TMPDIR/sheet-tile-${SLURM_JOB_ID}-XXXXXX")
-trap 'rm -rvf "$scratch"' EXIT
+finish() {
+  code=$?
+  rm -rvf "$scratch"
+  printf 'EXIT=%s\n' "$code"
+}
+trap finish EXIT
 export TMPDIR="$scratch"
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 status=0
@@ -39,5 +44,6 @@ export XDG_CACHE_HOME="$NOVA_COMPILATION_CACHE_ROOT"
 code=$?
 printf 'EXIT=%s\n' "$code" >> "$out/control.log"
 [[ $code != 0 ]] || status=1
-printf 'CONTROL_EXIT=%s\nEXIT=%s\n' "$code" "$status"
+"$python" -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r.get("tile_cache_result")=="miss" and r.get("error", "").startswith("AssertionError:")' "$out/control.json" || status=1
+printf 'CONTROL_EXIT=%s\n' "$code"
 exit "$status"

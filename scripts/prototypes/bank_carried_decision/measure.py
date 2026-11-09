@@ -191,6 +191,68 @@ def counted_program(parts):
     return program, observed, original, count
 
 
+def memory_receipt(parts, archive, lanes, census):
+    """Compile each runtime program before admitting a wider device batch."""
+    bank, cache, *_ = parts
+    _, step, index, state, seeds, previous = next(input_rows(archive, lanes))
+    call = (state, seeds, previous, 1 + index * step, bank, cache)
+    stats = jax.devices()[0].memory_stats() or {}
+    limit = int(stats.get("bytes_limit", 16 * 1024**3))
+    programs = {
+        "solve": solve_program(parts),
+        "certificate": certificate_program(parts),
+    }
+    original = None
+    if census:
+        diagnostic, _, original, counter = counted_program(parts)
+        support_read._rebuilt_reading = original
+        programs["census"] = diagnostic
+    rows = {}
+    for name, program in programs.items():
+        if name == "census":
+            support_read._rebuilt_reading = counter
+        try:
+            compiled = program.lower(*call).compile()
+            memory = compiled.memory_analysis()
+            entry = {
+                key: int(getattr(memory, key, 0))
+                for key in (
+                    "temp_size_in_bytes",
+                    "argument_size_in_bytes",
+                    "output_size_in_bytes",
+                    "alias_size_in_bytes",
+                    "generated_code_size_in_bytes",
+                )
+            }
+            working = (
+                entry["temp_size_in_bytes"]
+                + entry["argument_size_in_bytes"]
+                + entry["output_size_in_bytes"]
+                - entry["alias_size_in_bytes"]
+            )
+            entry["estimated_working_bytes"] = working
+            entry["fits"] = working < int(0.9 * limit)
+            rows[name] = entry
+            emit(
+                "COMPILED_MEMORY",
+                lanes=lanes,
+                program=name,
+                device_limit_bytes=limit,
+                wall_device="titan P100",
+                **entry,
+            )
+        finally:
+            if original is not None:
+                support_read._rebuilt_reading = original
+    return dict(
+        lanes=lanes,
+        wall_device="titan P100",
+        programs=rows,
+        device_limit_bytes=limit,
+        fits=all(row["fits"] for row in rows.values()),
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--inputs", type=Path, required=True)
@@ -198,6 +260,8 @@ def main():
     parser.add_argument("--build", action="store_true")
     parser.add_argument("--profile", action="store_true")
     parser.add_argument("--census", action="store_true")
+    parser.add_argument("--widths", type=int, nargs="+", default=[16])
+    parser.add_argument("--probe-memory", action="store_true")
     args = parser.parse_args()
     emit(
         "HEADER",
@@ -209,19 +273,31 @@ def main():
         device_kinds=[device.device_kind for device in jax.devices()],
         x64=jax.config.jax_enable_x64,
         cache=os.environ.get("JAX_COMPILATION_CACHE_DIR"),
+        wall_device="titan P100",
     )
     assert jax.config.jax_enable_x64 and jax.default_backend() == "gpu"
+    assert "P100" in jax.devices()[0].device_kind, jax.devices()[0].device_kind
     parts = machine("diverted")
     bank, cache, roots, convention, policy, profile, quadrature, _, analytic = parts
     if args.build:
         build_inputs(parts, args.inputs)
         return
     inputs = np.load(args.inputs, allow_pickle=False)
+    if args.probe_memory:
+        capacity = [
+            memory_receipt(parts, inputs, width, args.census) for width in args.widths
+        ]
+        args.output.write_text(
+            json.dumps(dict(wall_device="titan P100", widths=capacity))
+        )
+        return
     program = solve_program(parts)
     certify = certificate_program(parts)
     rows = []
     payload = {
         "revision": os.environ["MEASURE_REVISION"],
+        "wall_device": "titan P100",
+        "device_kinds": [device.device_kind for device in jax.devices()],
         "rows": rows,
         "inputs_sha256": hashlib.sha256(args.inputs.read_bytes()).hexdigest(),
     }
@@ -230,7 +306,7 @@ def main():
     if args.census:
         diagnostic, observed, original, counter = counted_program(parts)
         support_read._rebuilt_reading = original
-    for lanes in (16, 128):
+    for lanes in args.widths:
         for key, step, index, state, seeds, previous in input_rows(inputs, lanes):
             amplitude = 1 + index * step
             call = (state, seeds, previous, amplitude, bank, cache)
@@ -250,6 +326,7 @@ def main():
             )
             row = dict(
                 lanes=lanes,
+                wall_device="titan P100",
                 key=key,
                 step=step,
                 slice=index,

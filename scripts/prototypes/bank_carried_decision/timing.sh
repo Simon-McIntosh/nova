@@ -1,18 +1,23 @@
 #!/usr/bin/env bash
-#SBATCH --partition=betelgeuse
-#SBATCH --reservation=gpu_0003_grpA
+#SBATCH --partition=titan
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=96G
 #SBATCH --time=02:00:00
-set -uo pipefail
+set -euo pipefail
 root=$1
 run=$2
 base=$3
 export TMPDIR=/tmp
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH XLA_FLAGS
-scratch=$(mktemp -d "$TMPDIR/carried-timing-XXXXXX") || exit 2
-trap 'rm -rvf "$scratch"' EXIT
+scratch=$(mktemp -d "$TMPDIR/carried-timing-XXXXXX")
+cleanup() {
+    result=$?
+    rm -rvf "$scratch"
+    printf 'EXIT=%s\n' "$result"
+}
+trap cleanup EXIT
+printf '# titan P100 paired timing; H200 headline pending a free card; job=%s\n' "$SLURM_JOB_ID"
 mkdir -p "$scratch/base"
 git -C "$root" archive "$base" | tar -x -C "$scratch/base"
 mkdir -p "$scratch/base/scripts/prototypes/bank_carried_decision"
@@ -28,20 +33,43 @@ execute() {
     (
         cd "$tree" || exit 2
         export PYTHONPATH="$tree" MEASURE_REVISION="$revision"
-        printf '# revision: %s tree: %s command: %s -m scripts.prototypes.bank_carried_decision.measure %s\n' "$revision" "$tree" "$python" "$*"
+        printf '# revision: %s tree: %s wall_device: titan P100 command: %s -m scripts.prototypes.bank_carried_decision.measure %s\n' "$revision" "$tree" "$python" "$*"
+        set +e
         bash "$root/scripts/prototypes/bank_booking_determinism/measurement.sh" "$cache" "$python" -m scripts.prototypes.bank_carried_decision.measure "$@"
         result=$?
         printf 'EXIT=%s\n' "$result"
         exit "$result"
     ) > "$run/$label.log" 2>&1
 }
-execute builder "$scratch/base" "$base" "$run/cache-base" --build --inputs "$run/common-inputs.npz" --output "$run/builder.json" || exit 1
-for process in 0 1 2; do
-    for arm in base head; do
-        if [ "$arm" = base ]; then tree="$scratch/base"; revision=$base; else tree=$root; revision=$head; fi
-        extra=(--census)
-        if [ "$process" = 1 ]; then extra=(--profile --census); fi
-        execute "$arm-$process" "$tree" "$revision" "$run/cache-$arm" --inputs "$run/common-inputs.npz" --output "$run/$arm-$process.json" "${extra[@]}" || exit 1
+execute builder "$scratch/base" "$base" "$run/cache-base" --build --inputs "$run/common-inputs.npz" --output "$run/builder.json"
+measure_width() {
+    width=$1
+    suffix=$2
+    for process in 0 1 2; do
+        for arm in base head; do
+            if [ "$arm" = base ]; then tree="$scratch/base"; revision=$base; else tree=$root; revision=$head; fi
+            extra=(--census)
+            if [ "$process" = 1 ]; then extra=(--profile --census); fi
+            execute "$arm$suffix-$process" "$tree" "$revision" "$run/cache-$arm" --widths "$width" --inputs "$run/common-inputs.npz" --output "$run/$arm$suffix-$process.json" "${extra[@]}"
+        done
     done
+}
+# Complete the mandatory width before spending compile time on a wider batch.
+measure_width 16 ''
+for arm in base head; do
+    if [ "$arm" = base ]; then tree="$scratch/base"; revision=$base; else tree=$root; revision=$head; fi
+    execute "$arm-memory" "$tree" "$revision" "$run/cache-$arm" --widths 128 --probe-memory --census --inputs "$run/common-inputs.npz" --output "$run/$arm-memory.json"
 done
-printf 'EXIT=0\n'
+if "$python" - "$run" <<'PY'
+import json, sys
+from pathlib import Path
+run=Path(sys.argv[1])
+rows=[json.loads((run/f'{arm}-memory.json').read_text())['widths'][0] for arm in ('base','head')]
+print('WIDTH_ADMISSION titan P100 '+json.dumps(rows),flush=True)
+raise SystemExit(0 if all(row['fits'] for row in rows) else 1)
+PY
+then
+    measure_width 128 '-wide'
+else
+    printf 'WIDTH_128_NOT_RUN: titan P100 compiler buffer exceeds usable device memory; see base-memory.json and head-memory.json\n'
+fi

@@ -28,6 +28,13 @@
     "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip"
   ],
   "completed_at": "2026-11-09T10:44:08.348Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "prototype correction record; the call-site guard gap is recorded in finding 0",
+      "recorded_at": "2026-11-09T10:59:41.750566+00:00"
+    }
+  },
   "dispatched_at": "2026-11-09T10:33:05Z",
   "figure_review": {
     "rendered_and_inspected": [

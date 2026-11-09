@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-09T11:34:33.328Z",
   "dispatched_at": "2026-11-09T11:19:15Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "two short batch-size witness tests, one per route, each naming its own pair and component; parametrizing them is a cosmetic change with no behaviour or coverage gain, left until the tile test is next edited",
+      "recorded_at": "2026-11-09T11:47:18.591279+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_sheet_tile.py",

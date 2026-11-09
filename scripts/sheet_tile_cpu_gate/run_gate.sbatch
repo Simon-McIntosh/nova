@@ -47,12 +47,13 @@ header() {
     local log=$1
     local command=$2
     {
+        # the command leads: a reader must find what ran at the head of the log
+        echo "# command: $command"
         echo "# revision: $REV"
         echo "# tree: $WORKTREE"
         echo "# host: $(hostname) job ${SLURM_JOB_ID:-none}"
         echo "# cwd: $(pwd -P)"
         echo "# module: $($SPY -c 'import nova.biot.sheet as m; print(m.__file__)')"
-        echo "# command: $command"
     } > "$log"
 }
 
@@ -69,8 +70,8 @@ NOVA_SHEET_TILE_WORKERS=$WORKERS $SPY -m pytest -p no:cacheprovider -q -s \
     >> "$STEP1" 2>&1
 STEP1_EXIT=$?
 STEP1_WALL=$(( $(date +%s) - START ))
-echo "EXIT=$STEP1_EXIT" >> "$STEP1"
 echo "# wall_seconds: $STEP1_WALL" >> "$STEP1"
+echo "EXIT=$STEP1_EXIT" >> "$STEP1"
 
 # Step 2: restore the subtractive radial bracket in a scratch extraction and
 # re-run the eight-target agreement and the batch-size identity against it.
@@ -108,8 +109,8 @@ else
         >> "$STEP2" 2>&1
     STEP2_EXIT=$?
     STEP2_WALL=$(( $(date +%s) - START ))
-    echo "EXIT=$STEP2_EXIT" >> "$STEP2"
     echo "# wall_seconds: $STEP2_WALL" >> "$STEP2"
+    echo "EXIT=$STEP2_EXIT" >> "$STEP2"
 fi
 
 # The tracked source is never edited: confirm its blob is still the head blob.

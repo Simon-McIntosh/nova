@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="271">
+<meta name="plan-version" content="272">
 <meta name="plan-modified" content="2026-11-09">
 </head>
 <body>
@@ -907,7 +907,10 @@
     <div class="r-comment-body"><p>sub-millisecond-forward-path section 3 — docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html, with figure /nova/figures/sub-millisecond-forward-path/bank-warm-stall/residual-warm-vs-cold.svg and the reduced record scripts/prototypes/bank_warm_stall/results/bank-warm-stall.json. The stall is not warm-start specific: both arms at the 1e-2 drive fail to converge, agreeing to within 2.4 percent for the first ten updates and diverging after update 11. The mechanism is that the unit Newton trial raises the fresh residual at every update of the warm arm — 1.30 to 25.94 times over the eleven tabulated updates — while the linear solve itself converges to 4e-16.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261109T052818401950-review-of-bank-route-rows-bb59f06a74af" data-who="reckon-build" data-when="2026-11-09T05:57:48.470Z">
-    <div class="r-comment-body"><p>the three commits gained since the last review (8a6ba070a, 7c718db4e, bb59f06a7) make the limited rows&#x27; boundary clause reproducible from the repository, scored goal_fidelity 18, evidence 18, scope_discipline 20, durability 16, fit 18, reuse 5 (total 95), with four non-blocking findings — the --state path still prints ALL_PASS without an exit status, --output is ignored under --check so the recorded results/boundary-check.json was never written, digest() duplicates nova/database/content_store.py:45 sha256_bytes, and the manifest&#x27;s tests line carries two commands with unsubstituted placeholders</p></div>
+    <div class="r-comment-body"><p>the three commits gained since the last review (8a6ba070a, 7c718db4e, bb59f06a7) make the limited rows' boundary clause reproducible from the repository, scored goal_fidelity 18, evidence 18, scope_discipline 20, durability 16, fit 18, reuse 5 (total 95), with four non-blocking findings — the --state path still prints ALL_PASS without an exit status, --output is ignored under --check so the recorded results/boundary-check.json was never written, digest() duplicates nova/database/content_store.py:45 sha256_bytes, and the manifest's tests line carries two commands with unsubstituted placeholders</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261109T062615471910-review-of-bank-route-rows-aca068f62a5c" data-who="reckon-build" data-when="2026-11-09T06:52:37.684Z">
+    <div class="r-comment-body"><p>independent review stored for run r-20261107T111216113482-bank-route-rows over commits bb59f06a74af..aca068f62a5c (967bbd618, aca068f62) scoring goal_fidelity 18, evidence 15, scope_discipline 20, durability 14, fit 18, reuse 19, with three non-blocking findings on the unautomated fail-closed and the stale revision stamp in the gate receipt and a caption that names the wrong quantity</p></div>
 </div>
 </section>
 </main>

@@ -180,6 +180,10 @@ the packed pancake radial subtraction. This is a counterexample on eight
 targets against every cell, before the final series-boundary widening.</td></tr>
 </tbody>
 </table>
+<p>The checkpoint logs print 16 matrix rows as “16 targets”; those rows represent
+eight physical targets with two field components each. Their 16 × 3392 matrix
+contains 54,272 entries. The final fixture converts matrix rows back to the
+physical target count when printing its receipt.</p>
 <p>The fixture now uses 256-pair blocks and four worker processes, retaining
 every target, every cell and the 1e−13 floor. A broken process pool raises
 explicitly. The head run records no new OOM kills, but the all-target computation

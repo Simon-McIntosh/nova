@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-09T05:42:00.459Z",
+  "dispatched_at": "2026-11-09T05:27:09Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html",
+      "line": "6",
+      "severity": "non-blocking",
+      "text": "non-blocking: the sentence says 'neither arm converges in sixty updates' and then gives the count that refutes it in the same clause, '0 of 16 warm lanes, 1 of 16 cold'; the committed record's cold arm carries one true entry in its converged array and one lane at 26 updates, so a reader who stops at 'neither' takes a stronger claim than the record supports."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html",
+      "line": "37",
+      "severity": "non-blocking",
+      "text": "non-blocking: the column headed 'terminal residual, lane 0' carries 4.1e-12 for the reference row, but scripts/prototypes/bank_warm_stall/compact.py:83 stores max() over the sixteen lanes for that arm (lane 0 is 3.396e-12), so one column mixes two conventions and only the two 1.01 arms are lane-0 values."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_stall/compact.py",
+      "line": "80",
+      "severity": "non-blocking",
+      "text": "non-blocking: the reference entry records revision None while the warm and cold entries carry 5f34f03c4a850904ec0432db511adf5ba3ac0133, so the record cannot state which base the control arm ran at and a reader must fall back to the fragment's job note."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_stall/plot.py",
+      "line": "64",
+      "severity": "non-blocking",
+      "text": "non-blocking: the figure now sets a linear y-range from the data and drops axes.set_yscale('log'), but the section's brief specifies a log y-axis for this figure and the caption's '9.7 decades below this range' now annotates a note on a linear panel; the traces read correctly and the divergence is clearer than a tolerance-scaled log axis, so this is a stated deviation rather than a misleading figure."
+    },
+    {
+      "file": "scripts/prototypes/bank_warm_stall/plot.py",
+      "line": "41",
+      "severity": "non-blocking",
+      "text": "non-blocking: --lane is parsed and never used, so a caller passing it gets no error and no effect."
+    }
+  ],
+  "justifications": {
+    "durability": "the diff adds no assertion anywhere -- render.py's compare() and summary() are a report, not a check -- so nothing reddens if a later edit reintroduces the 'within 0.3% for all sixty updates' claim the previous review caught; the record survives reclamation only because compact.py can rebuild it, which I verified by running it, not by a test.",
+    "evidence": "scripts/prototypes/bank_warm_stall/compact.py regenerated the committed results/bank-warm-stall.json byte for byte from wp/report.json plus the unity job's SUMMARY line, render.py --summary reproduced every figure the prose quotes, and plot.py re-rendered the committed SVG except for generation ids, so the artefact's provenance holds under re-execution.",
+    "fit": "the added code follows the prototype idiom and the repository style (nova.media.ink style(), a 14x7.2 canvas, no gridlines, despined, legend above the panel) with no plan or version label in any name, but scripts/prototypes/bank_warm_stall/plot.py:41 parses a --lane option the script never reads.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:35-41 now states the measured warm-against-cold divergence and takes the reference arm's terminal residual from the record, but the same file's line 6 still says 'neither arm converges in sixty updates' while its own clause records 1 of 16 cold lanes converged.",
+    "reuse": "searched scripts/prototypes and tests for a reduced-record summariser and for an existing compare() owner (bank_solve_cycle/report.py:66 compares base against head, a different capability); render.py's compare()/summary() and compact.py's reference() extend the modules that already own the record rather than forking another's mechanism.",
+    "scope_discipline": "git diff --stat 22ca7d05a 1661bb3b4 lists exactly the fragment, the SVG, compact.py, plot.py, render.py and results/bank-warm-stall.json, all inside the three declared write paths, with no product code and no test touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to explain why the 1e-2 warm-started slice stalls, with a per-update trace, a cold arm at the same drive and a fragment carrying one figure; these two commits are the fix round on that record and they restate the warm-against-cold comparison from the committed record and carry the amplitude-1.0 control arm into it at docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:6,:35-41.\nVERDICT done_when: the measure is the per-update table, the warm-against-cold comparison and one figure; every quantity now in the fragment's prose and table is reproduced by scripts/prototypes/bank_warm_stall/render.py --summary from results/bank-warm-stall.json (agreement 2.4% over updates 0-10, 83% at update 11, peak 321% at update 19, warm 0.4813 to 1.529 terminal 1.271, cold peak 2.273 terminal 1.350, 0 of 16 and 1 of 16 converged, axis 4.2e-5 and 7.9e-4), though the figure's y-axis at scripts/prototypes/bank_warm_stall/plot.py:64 is linear where the brief specified log.\nVERDICT write_paths: the declared paths are scripts/prototypes/bank_warm_stall, docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html and docs/figures/sub-millisecond-forward-path/bank-warm-stall; all six files in the diff (the fragment, the SVG, compact.py, plot.py, render.py, results/bank-warm-stall.json) are inside them and no product or test file is touched.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T133413665344-bank-warm-stall/manifest.md; it reads status complete with six commits, the literal sbatch command that produced bank-warm-stall-gate.log, and no baseline_suite/after_suite arms because the node's write paths carry no test file.\nVERDICT diff: read commit by commit against 22ca7d05a9ab -- 9d490489f rewrites the fragment's agreement and plateau sentences, adds render.py's compare()/summary(), moves plot.py onto the reduced record and re-renders the SVG, and 1661bb3b4 adds compact.py's reference() and the record's reference entry plus the fragment's control row and two prose sentences; the fragment's numbers reconcile with the record in every case I checked.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:35-41 now states the measured warm-against-cold divergence and takes the reference arm's terminal residual from the record, but the same file's line 6 still says 'neither arm converges in sixty updates' while its own clause records 1 of 16 cold lanes converged.\nSCORE evidence: 17\nJUSTIFICATION evidence: scripts/prototypes/bank_warm_stall/compact.py regenerated the committed results/bank-warm-stall.json byte for byte from wp/report.json plus the unity job's SUMMARY line, render.py --summary reproduced every figure the prose quotes, and plot.py re-rendered the committed SVG except for generation ids, so the artefact's provenance holds under re-execution.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 22ca7d05a 1661bb3b4 lists exactly the fragment, the SVG, compact.py, plot.py, render.py and results/bank-warm-stall.json, all inside the three declared write paths, with no product code and no test touched.\nSCORE durability: 7\nJUSTIFICATION durability: the diff adds no assertion anywhere -- render.py's compare() and summary() are a report, not a check -- so nothing reddens if a later edit reintroduces the 'within 0.3% for all sixty updates' claim the previous review caught; the record survives reclamation only because compact.py can rebuild it, which I verified by running it, not by a test.\nSCORE fit: 16\nJUSTIFICATION fit: the added code follows the prototype idiom and the repository style (nova.media.ink style(), a 14x7.2 canvas, no gridlines, despined, legend above the panel) with no plan or version label in any name, but scripts/prototypes/bank_warm_stall/plot.py:41 parses a --lane option the script never reads.\nSCORE reuse: 19\nJUSTIFICATION reuse: searched scripts/prototypes and tests for a reduced-record summariser and for an existing compare() owner (bank_solve_cycle/report.py:66 compares base against head, a different capability); render.py's compare()/summary() and compact.py's reference() extend the modules that already own the record rather than forking another's mechanism.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:6 non-blocking: the sentence says 'neither arm converges in sixty updates' and then gives the count that refutes it in the same clause, '0 of 16 warm lanes, 1 of 16 cold'; the committed record's cold arm carries one true entry in its converged array and one lane at 26 updates, so a reader who stops at 'neither' takes a stronger claim than the record supports.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:37 non-blocking: the column headed 'terminal residual, lane 0' carries 4.1e-12 for the reference row, but scripts/prototypes/bank_warm_stall/compact.py:83 stores max() over the sixteen lanes for that arm (lane 0 is 3.396e-12), so one column mixes two conventions and only the two 1.01 arms are lane-0 values.\nFINDING scripts/prototypes/bank_warm_stall/compact.py:80 non-blocking: the reference entry records revision None while the warm and cold entries carry 5f34f03c4a850904ec0432db511adf5ba3ac0133, so the record cannot state which base the control arm ran at and a reader must fall back to the fragment's job note.\nFINDING scripts/prototypes/bank_warm_stall/plot.py:64 non-blocking: the figure now sets a linear y-range from the data and drops axes.set_yscale('log'), but the section's brief specifies a log y-axis for this figure and the caption's '9.7 decades below this range' now annotates a note on a linear panel; the traces read correctly and the divergence is clearer than a tolerance-scaled log axis, so this is a stated deviation rather than a misleading figure.\nFINDING scripts/prototypes/bank_warm_stall/plot.py:41 non-blocking: --lane is parsed and never used, so a caller passing it gets no error and no effect.",
+  "review_run_id": "r-20261109T052344715717-review-of-bank-warm-stall-1661bb3b479a",
+  "reviewed_base_sha": "22ca7d05a9abdef7369b69fa856f976bbfe4d1db",
+  "reviewed_head_sha": "1661bb3b479a1e16ef7e8b76592ebe36387b4dd2",
+  "reviewed_revision": "1661bb3b479a1e16ef7e8b76592ebe36387b4dd2",
+  "reviewed_run_id": "r-20261107T133413665344-bank-warm-stall",
+  "rubric": "node",
+  "scores": {
+    "durability": 7,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T05:40:00+00:00",
+  "total": 95,
+  "treatment": {},
+  "verdicts": {
+    "diff": "VERDICT diff: read commit by commit against 22ca7d05a9ab -- 9d490489f rewrites the fragment's agreement and plateau sentences, adds render.py's compare()/summary(), moves plot.py onto the reduced record and re-renders the SVG, and 1661bb3b4 adds compact.py's reference() and the record's reference entry plus the fragment's control row and two prose sentences; the fragment's numbers reconcile with the record in every case I checked.",
+    "done_when": "VERDICT done_when: the measure is the per-update table, the warm-against-cold comparison and one figure; every quantity now in the fragment's prose and table is reproduced by scripts/prototypes/bank_warm_stall/render.py --summary from results/bank-warm-stall.json (agreement 2.4% over updates 0-10, 83% at update 11, peak 321% at update 19, warm 0.4813 to 1.529 terminal 1.271, cold peak 2.273 terminal 1.350, 0 of 16 and 1 of 16 converged, axis 4.2e-5 and 7.9e-4), though the figure's y-axis at scripts/prototypes/bank_warm_stall/plot.py:64 is linear where the brief specified log.",
+    "goal": "VERDICT goal: the node's goal is to explain why the 1e-2 warm-started slice stalls, with a per-update trace, a cold arm at the same drive and a fragment carrying one figure; these two commits are the fix round on that record and they restate the warm-against-cold comparison from the committed record and carry the amplitude-1.0 control arm into it at docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html:6,:35-41.",
+    "manifest": "VERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T133413665344-bank-warm-stall/manifest.md; it reads status complete with six commits, the literal sbatch command that produced bank-warm-stall-gate.log, and no baseline_suite/after_suite arms because the node's write paths carry no test file.",
+    "write_paths": "VERDICT write_paths: the declared paths are scripts/prototypes/bank_warm_stall, docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-stall.html and docs/figures/sub-millisecond-forward-path/bank-warm-stall; all six files in the diff (the fragment, the SVG, compact.py, plot.py, render.py, results/bank-warm-stall.json) are inside them and no product or test file is touched."
+  }
+}

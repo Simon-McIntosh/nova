@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Why the batched B_R differs on XLA CPU</title>
+<meta name="plan-id" content="iron-core-magnetisation">
+<meta name="plan-section" content="s3">
+<meta name="node-id" content="icm-sheet-tile-precision">
+</head>
+<body>
+<article>
+<h1 id="icm-sheet-tile-precision-title">Why the batched B<sub>R</sub> differs on XLA CPU</h1>
+
+<section id="icm-sheet-tile-precision-outcome">
+<h2>Outcome</h2>
+<p>
+The disagreement is not in the sheet's formulation and not in the tile. It is a
+rounding difference that XLA's CPU backend introduces between two <em>program
+shapes</em>: the same pair's value changes with how many pairs share the
+program. No product change is landed; the gate stays at <code>1e-13</code>, no
+test is marked <code>xfail</code> and no tolerance is moved. This node reports
+blocked on clause (2) with the reduced reproducer below.
+</p>
+</section>
+
+<section id="icm-sheet-tile-precision-reproduction">
+<h2>The reproduction, and the reduction that rules out the tile</h2>
+<p>
+Two targets of the 1696-cell WEST prototype mesh, all 3744 edges, on XLA CPU:
+the blocked launch (<code>jax.vmap</code> over pair blocks) and the flat launch
+(one jitted call over a chunk) disagree on the B<sub>R</sub> rows and agree
+bit for bit on most of them.
+</p>
+<pre>
+B_R vmap-vs-flat: identical 5421/7488 bitwise; max |diff| 5.854e-21 at pair (0,1129)
+                  tile=-5.465098408938728e-12 ref=-5.4650984030847755e-12
+B_R scan-vs-flat: identical 5421/7488 bitwise; max |diff| 5.854e-21 at pair (0,1129)
+B_R vmap-vs-scan: identical 7488/7488 bitwise; max |diff| 0.000e+00
+</pre>
+<p>
+<code>vmap</code> and <code>lax.scan</code> are bit-identical to each other, so
+the tile's blocking, padding, pair ordering and gather are not involved: the
+difference is between a program carrying many pairs and one carrying fewer, and
+the tile happens to be the many-pair side.
+</p>
+</section>
+
+<section id="icm-sheet-tile-precision-op">
+<h2>The operation: the value of one pair depends on its batch</h2>
+<p>
+Pair (0, 1129) is a <em>horizontal</em> edge, so it takes the flat (pancake)
+route of <code>_sheet_pancake_terms</code> and never enters
+<code>_sheet_closed_gradient</code>. Comparing the three returned terms of that
+one helper, flat launch against a <code>vmap</code> launch of the same pairs:
+</p>
+<pre>
+n=1:  potential identical | radial identical | height identical
+n=2:  potential differs 1.2e-13 | radial 1.3e-13 | height 4.2e-15
+n=8:  potential differs 1.5e-13 | radial 4.3e-13 | height 3.0e-14
+n=512:potential differs 2.4e-13 | radial 2.7e-11 | height 2.2e-12
+</pre>
+<p>
+A single pair agrees exactly; from two pairs upward it does not. The decisive
+measurement is that the <em>flat</em> program's value for the fixed pair moves
+with the batch it is placed in, while the value itself is deterministic:
+</p>
+<pre>
+pair (0,1129), flat launch of packed_sheet_field:
+  n=1  B_R = -5.4650984030847755e-12
+  n=2  B_R = -5.465098408938728e-12
+  n=8  B_R = -5.4650984030847755e-12
+</pre>
+<p>
+So this is not a formulation difference between two routes and not a defect in
+any one expression: the same arithmetic on the same inputs rounds differently
+depending on the program shape it is compiled into.
+</p>
+</section>
+
+<section id="icm-sheet-tile-precision-ingredients">
+<h2>Every ingredient is bit-identical; only the composition moves</h2>
+<p>
+Each block the pancake route is built from was compared between the two launch
+shapes over the same 3744 edges and found identical in every entry, for two
+targets: <code>complete_kind</code> (first and second kind),
+<code>traced_zeta</code> at <code>pi/2</code>, and both
+<code>complete_pole</code> terms. On the sloped route the same holds for
+<code>_sheet_root_gradient</code> and <code>_sheet_arsinh_gradient</code> (all
+three returned components, 3360/3360 identical), while
+<code>_sheet_closed_gradient</code>'s composed <code>dS/dgamma</code> differs in
+283 of 3360 entries by up to 1.8e-11. The only step that differs is therefore
+<em>composition</em> — the multiply-adds that combine blocks, not the blocks.
+</p>
+</section>
+
+<section id="icm-sheet-tile-precision-flags">
+<h2>The flags, and what identifies contraction</h2>
+<ul>
+<li><code>XLA_FLAGS=--xla_cpu_enable_fast_math=false</code>: no change, the same
+five failing bits in the same pairs.</li>
+<li><code>XLA_FLAGS=--xla_cpu_use_thunk_runtime=false</code>: no change (the flag
+is deprecated and ignored on this build).</li>
+<li><code>XLA_FLAGS=--xla_cpu_max_isa=SSE4_2</code>, which removes the fused
+multiply-add from the instruction set: the flat program's value for the fixed
+pair becomes <em>batch-independent</em> (identical at n=1, 2 and 8), which is the
+signature the default build lacks. Contraction is therefore the mechanism of the
+lane dependence; a residual flat-versus-blocked difference remains, so
+contraction is one of the shape-dependent roundings rather than the only one.</li>
+<li><code>jax.lax.optimization_barrier</code> around each composed addend, to pin
+the composition to separately rounded adds: the results were bit-identical to the
+unbarriered run, so the barrier is elided by the CPU backend and cannot be used
+to pin rounding from nova.</li>
+</ul>
+</section>
+
+<section id="icm-sheet-tile-precision-conclusion">
+<h2>Why it is not fixable in the expressions as they stand</h2>
+<p>
+The amplified quantity is a bracket that cancels: the pancake route's
+<code>2 source K - &Sigma;(pole)</code> and the sloped route's
+<code>a_1 b_1 dR/dgamma + dA/dgamma</code> each combine blocks of like
+magnitude into a result many orders smaller, so a last-bit difference in a
+block arrives in the answer multiplied by the ratio of the two scales — that is
+how 5.854e-21 of absolute difference becomes 6e-8 of the gate's per-end scale.
+Neither block is wrong and neither expression can be re-ordered from Python:
+the contraction is applied by the backend, per SIMD lane, and is not observable
+or pinnable at the JAX level.
+</p>
+<p>
+The identified next step is a <em>cancellation-free reformulation</em> of the
+pancake route's radial block (and the sloped gradient's composition, which the
+same measurement shows differs by the same mechanism), so that the answer is a
+sum of terms of its own size rather than the small remainder of two large ones.
+That makes the gate hold whatever rounding the backend chooses, which is what
+the plan's clause (1) asks for; it is a formulation change in a part of the
+closed form this node did not reach inside its budget.
+</p>
+</section>
+
+<section id="icm-sheet-tile-precision-evidence">
+<h2>Evidence</h2>
+<ul>
+<li>Reproducer over the WEST mesh: <code>repro.py</code> (log
+<code>repro.log</code>), pair (0,1129), 2 targets, 3744 edges.</li>
+<li>Shape bisect of the arsinh gradient and the closed gradient:
+<code>bisect.py</code> (log <code>bisect.log</code>).</li>
+<li>Pancake route bisect, ingredient by ingredient: <code>bisect2.py</code>,
+whose output is quoted above entry by entry.</li>
+<li>Minimal batch-size sweep: <code>minimal.py</code>, and the same sweep under
+<code>XLA_FLAGS=--xla_cpu_max_isa=SSE4_2</code>; both are quoted above.</li>
+<li>CPU gate log: <code>gate-cpu.log</code>; negative control:
+<code>negative-control.log</code>.</li>
+</ul>
+<p>All logs are in the node's run directory, beside this fragment's commit.</p>
+</section>
+</article>
+</body>
+</html>

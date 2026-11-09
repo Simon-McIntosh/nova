@@ -133,8 +133,8 @@ def test_the_read_lands_on_the_analytic_extremum_and_saddle(diverted_case):
     averaged across a cell.
 
     The reference is the analytic field's own stationary points, which the
-    fixture constructs independently of any read code, so the reference is independent of the read being checked. The position budget is expressed
-    as ratios of machine size: 5e-4 of the minor radius, taken here as the
+    fixture constructs independently of the read being checked. The position
+    budget is 5e-4 of the minor radius, taken here as the
     distance from the analytic axis to the furthest sample point.
     """
     (

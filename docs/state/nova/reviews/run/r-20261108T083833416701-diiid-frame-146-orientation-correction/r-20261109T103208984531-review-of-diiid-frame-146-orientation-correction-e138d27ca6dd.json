@@ -1,0 +1,108 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The source dispatch declares FENCE - SUITE (unarmed for this node): no test file lies in the node's write scope and manifest.md carries neither baseline_suite nor after_suite. Zero is the unarmed-suite convention, not a measured absence of regressions. The focused gate (check_orientation.py) and its transposed control were re-run independently by this review at the reviewed head: native shift 3.3980969751578525e-09 m at EXIT=0, transposed shift 0.3284652269144239 m at EXIT=1.",
+  "assertion_review": [
+    {
+      "failure_condition": "Revert flux_orientation.analysis_field to the shape-first branch (return the array unchanged when shape == (height, radius)): the 33x33 archive is then read untransposed, the archive-derived polish moves the independently recorded solver axis 0.328465227 m against an archive-derived 0.053125 m spacing, and the native CLI exits 1. Verified by running it: this review reproduced 3.3980969751578525e-09 m at EXIT=0 and 0.3284652269144239 m at EXIT=1.",
+      "path": "scripts/prototypes/diiid_vertical_loss/check_orientation.py:85"
+    },
+    {
+      "failure_condition": "Point a receipt at a run-scratch or absolute figure path: repository_relative(candidate) != pointer holds, the fault is printed and the CLI exits 1; refusal-controls.log records all three variants red. This is not a pass-through equality because candidate is resolved against the filesystem and the project's own path mapping.",
+      "path": "scripts/prototypes/diiid_vertical_loss/check_panel_receipts.py:41"
+    },
+    {
+      "failure_condition": "Draw a text artist off the canvas, over another text artist, or across a contour: check_panel raises SystemExit naming the artist; panel-guard-controls.log records five controls, of which four are refusals (colliding, off-canvas x=[865,1453], 24 crossed segments, and a segment crossing between two outside endpoints).",
+      "path": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:265"
+    },
+    {
+      "failure_condition": "Rasterise a panel whose solved lines fuse: fused pixel count above the threshold exits nonzero; legibility-negative-control.log records 7254 fused pixels and CHECK=1 on the reverted drawing against 5 on the reviewed head.",
+      "path": "scripts/prototypes/diiid_vertical_loss/check_contour_legibility.py:94"
+    }
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/diiid_vertical_loss/polish_axis_check.py:check",
+    "scripts/prototypes/diiid_vertical_loss/maxima_census.py:census",
+    "scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py:report",
+    "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip"
+  ],
+  "completed_at": "2026-11-09T10:44:08.348Z",
+  "dispatched_at": "2026-11-09T10:33:05Z",
+  "figure_review": {
+    "rendered_and_inspected": [
+      "frame-146-trip-1-flux-contours.svg",
+      "frame-146-trip-2-flux-contours.svg",
+      "frame-137-trip-2-flux-contours.svg"
+    ],
+    "result": "Inspected the three rendered previews at the reviewed head. Frame 146 trip 1: nested solved contours around the reported axis inside the limiter, violet bounding surface closing in the midplane, both null sets drawn, the displaced X-point callout legible with its hollow true-position dot, residual column beside the panel with a fixed 0.05 step and two decimals. Frame 146 trip 2: the axis triangle sits above the limiter as the corrected record states, the crowded solved set is drawn thin, and no bounding-surface legend entry appears because none is drawn. Frame 137 trip 2: the axis is inside the core with contours nesting around it. No clipped or overlapping label observed; a legend entry is present for every mark drawn.",
+    "revision": "e138d27ca6ddee6edcdb58dd0a5201898ad2ba66"
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/check_orientation.py",
+      "line": 36,
+      "severity": "non-blocking",
+      "text": "The gate exercises analysis_field directly and never runs a reader, so a later edit that reinstates the shape-first branch inside polish_axis_check.py, maxima_census.py, core_stationary_probe.py or render_trip_panels.py passes every recorded check while silently re-transposing the field; the binding is guarded at the helper and not at its four call sites, and no suite test imports these modules."
+    },
+    {
+      "file": "scripts/prototypes/diiid_vertical_loss/flux_orientation.py",
+      "line": 45,
+      "severity": "non-blocking",
+      "text": "analysis_field still consults the array shape and returns a height-major non-square map unchanged, so a future writer that emitted the reader order would be read without error rather than refused; the helper therefore prefers the declared order on ambiguity instead of binding to it as the brief asks."
+    }
+  ],
+  "gate_sources": {
+    "after_suite": null,
+    "baseline_suite": null,
+    "legibility_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/legibility-negative-control.log",
+    "negative_control": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/orientation-negative-control.log",
+    "node_gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/orientation-gate.log",
+    "panel_guards": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/panel-guard-controls.log",
+    "regeneration": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/regenerated/regenerate.log",
+    "rendering": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/regenerated/render.log",
+    "review_rerun_native": "/tmp/reckon-crew-scratch/r-20261109T103208984531-review-of-diiid-frame-146-orientation-correction-e138d27ca6dd/native.log",
+    "review_rerun_transposed": "/tmp/reckon-crew-scratch/r-20261109T103208984531-review-of-diiid-frame-146-orientation-correction-e138d27ca6dd/transposed.log",
+    "round_six_gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/gate-round-six.log"
+  },
+  "item_verdicts": {
+    "assertions": "Read each added refusal point against the defect it claims to guard: the polish bound, the receipt pointer rule, the path-mapping lint, the canvas/text-overlap/label-over-data guard and the fused-pixel count are all measured against archive, filesystem or rendered-raster state rather than against a value the check itself supplied; none is a pass-through equality.",
+    "call_sites": "Examined the four production readers that can reach the change: polish_axis_check.py:check, maxima_census.py:census, core_stationary_probe's report, and render_trip_panels.py:render_trip; all four import analysis_field and none retains the shape-first branch (git grep at e138d27ca returns no _oriented).",
+    "diff": "Read all 12 commits from 6f10bb038 to e138d27ca separately against base 737f6953: 6f10bb038 fixes the binding in the helper and four readers, 2e72f2e45 appends the correction, 9ac1b1124/69ced0e8b/9288f116b/296afe3b0 repair panels and add save and legibility guards, eebac055c/36e266762/e138d27ca fix receipt pointers and layout, 5c04a6919 and 48fcbac8f are a re-render and a lint format.",
+    "done_when": "All three clauses are asserted: check_orientation.py:85 asserts the native polish displacement stays under one lattice spacing and its --transpose control goes red (both reproduced by this review); regenerated/regenerate.log and rendered receipts cover frame 146 trips 1-2 and frame 137 trips 1-2; the correction table at fragment:299 names each surviving and withdrawn claim with its source.",
+    "goal": "brief.md asks for one shared declared-order binding, regeneration of the four trip readers and three panels, and an appended (not rewritten) correction; scripts/prototypes/diiid_vertical_loss/flux_orientation.py:39 supplies the helper, all four readers call it, and docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:299 appends the dated correction while leaving the original claims in place.",
+    "manifest": "Read manifest.md at status complete; it records native 3.4e-9 m and transposed 0.3284652 m with named logs, the regenerated receipts, three re-rendered panels, and per-rubric self-checks; its dispatch arms no baseline_suite/after_suite pair.",
+    "write_paths": "brief.md and manifest.md declare scripts/prototypes/diiid_vertical_loss, docs/figures/diiid-frame-146-vertical-loss and the frame-146 fragment; every one of the 12 changed files in git diff 737f6953..e138d27ca is under one of those three, and no product source under nova/ is touched."
+  },
+  "justifications": {
+    "durability": "check_orientation.py:85 reddens if flux_orientation.py:43 returns the untransposed square field, which the logged and independently reproduced transposed control shows, but nothing fails if one of the four readers reverts to a local shape guess because the gate never exercises a call site.",
+    "evidence": "scripts/prototypes/diiid_vertical_loss/check_orientation.py:85 records the done_when's measure and orientation-gate.log/regenerated/regenerate.log carry the results, but the render and regeneration commands recorded in gate-round-six.log abbreviate their arguments as <run-dir>/<rows>, so those lines are not literally re-runnable.",
+    "fit": "The four readers keep their existing spline, interpolator and media idioms and the new names carry no plan label, version or ticket reference, though render_trip_panels.py:58 imports the private _check_text_artists across a sibling prototype directory.",
+    "goal_fidelity": "scripts/prototypes/diiid_vertical_loss/flux_orientation.py:39 replaces the shape guess the brief identifies, and the evidence fragment:299 keeps the withdrawn 0.328 m sentence in place and adds the corrected receipts beside it, which is what the goal asks for.",
+    "reuse": "render_trip_panels.py:736 and check_panel_receipts.py:27 both route through nova.database.filepath.repository_relative and render_trip_panels.py:262 reuses the existing _check_text_artists owner; a search for a segment-versus-box or label-over-data owner in nova/ and scripts/prototypes/ found none (bank_drive_barrier/plot.py:44 tests a whole Path against a bbox, a different capability).",
+    "scope_discipline": "Every changed path is under the three declared write paths, yet the diff also lands three ancillary checkers (check_contour_legibility.py, check_panel_receipts.py, check_path_mapping_reuse.py) and a formatter-only edit to trip_trajectory.py:156 that the orientation goal does not imply."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: brief.md asks for one shared declared-order binding, regeneration of the four trip readers and three panels, and an appended (not rewritten) correction; scripts/prototypes/diiid_vertical_loss/flux_orientation.py:39 supplies the helper, all four readers call it, and docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html:299 appends the dated correction while leaving the original claims in place.\nVERDICT done_when: All three clauses are asserted: check_orientation.py:85 asserts the native polish displacement stays under one lattice spacing and its --transpose control goes red (both reproduced by this review); regenerated/regenerate.log and rendered receipts cover frame 146 trips 1-2 and frame 137 trips 1-2; the correction table at fragment:299 names each surviving and withdrawn claim with its source.\nVERDICT write_paths: brief.md and manifest.md declare scripts/prototypes/diiid_vertical_loss, docs/figures/diiid-frame-146-vertical-loss and the frame-146 fragment; every one of the 12 changed files in git diff 737f6953..e138d27ca is under one of those three, and no product source under nova/ is touched.\nVERDICT manifest: Read manifest.md at status complete; it records native 3.4e-9 m and transposed 0.3284652 m with named logs, the regenerated receipts, three re-rendered panels, and per-rubric self-checks; its dispatch arms no baseline_suite/after_suite pair.\nVERDICT diff: Read all 12 commits from 6f10bb038 to e138d27ca separately against base 737f6953: 6f10bb038 fixes the binding in the helper and four readers, 2e72f2e45 appends the correction, 9ac1b1124/69ced0e8b/9288f116b/296afe3b0 repair panels and add save and legibility guards, eebac055c/36e266762/e138d27ca fix receipt pointers and layout, 5c04a6919 and 48fcbac8f are a re-render and a lint format.\nCALL_SITES: scripts/prototypes/diiid_vertical_loss/polish_axis_check.py:check, scripts/prototypes/diiid_vertical_loss/maxima_census.py:census, scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py:report, scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:render_trip\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/prototypes/diiid_vertical_loss/flux_orientation.py:39 replaces the shape guess the brief identifies, and the evidence fragment:299 keeps the withdrawn 0.328 m sentence in place and adds the corrected receipts beside it, which is what the goal asks for.\nSCORE evidence: 18\nJUSTIFICATION evidence: scripts/prototypes/diiid_vertical_loss/check_orientation.py:85 records the done_when's measure and orientation-gate.log/regenerated/regenerate.log carry the results, but the render and regeneration commands recorded in gate-round-six.log abbreviate their arguments as <run-dir>/<rows>, so those lines are not literally re-runnable.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: Every changed path is under the three declared write paths, yet the diff also lands three ancillary checkers (check_contour_legibility.py, check_panel_receipts.py, check_path_mapping_reuse.py) and a formatter-only edit to trip_trajectory.py:156 that the orientation goal does not imply.\nSCORE durability: 15\nJUSTIFICATION durability: check_orientation.py:85 reddens if flux_orientation.py:43 returns the untransposed square field, which the logged and independently reproduced transposed control shows, but nothing fails if one of the four readers reverts to a local shape guess because the gate never exercises a call site.\nSCORE fit: 18\nJUSTIFICATION fit: The four readers keep their existing spline, interpolator and media idioms and the new names carry no plan label, version or ticket reference, though render_trip_panels.py:58 imports the private _check_text_artists across a sibling prototype directory.\nSCORE reuse: 18\nJUSTIFICATION reuse: render_trip_panels.py:736 and check_panel_receipts.py:27 both route through nova.database.filepath.repository_relative and render_trip_panels.py:262 reuses the existing _check_text_artists owner; a search for a segment-versus-box or label-over-data owner in nova/ and scripts/prototypes/ found none (bank_drive_barrier/plot.py:44 tests a whole Path against a bbox, a different capability).\nFINDING scripts/prototypes/diiid_vertical_loss/check_orientation.py:36 non-blocking: The gate exercises analysis_field directly and never runs a reader, so a later edit that reinstates the shape-first branch inside polish_axis_check.py, maxima_census.py, core_stationary_probe.py or render_trip_panels.py passes every recorded check while silently re-transposing the field; the binding is guarded at the helper and not at its four call sites, and no suite test imports these modules.\nFINDING scripts/prototypes/diiid_vertical_loss/flux_orientation.py:45 non-blocking: analysis_field still consults the array shape and returns a height-major non-square map unchanged, so a future writer that emitted the reader order would be read without error rather than refused; the helper therefore prefers the declared order on ambiguity instead of binding to it as the brief asks.\n",
+  "review_notes": {
+    "out_of_scope_observed": "docs/figures/diiid-frame-146-vertical-loss/frame-146-flux-contours.svg and frame-137-flux-contours.svg are drawn by scripts/prototypes/diiid_forward_convergence/render_panels.py, which retains the same shape-first orientation branch; the node recorded this in its manifest and left them untouched, which is correct for its fence.",
+    "reproduction": "The brief's claimed defect was re-confirmed before accepting its repair: the archived 33x33 trip-1 field read with R and Z swapped polishes 0.3284652269144239 m to (1.58497, -0.03400), exactly the displacement the withdrawn record reported.",
+    "reuse_search": "Searched nova/ and scripts/prototypes/ by capability for archive-order binding, repository-relative path mapping, text-vs-canvas validation, label-over-data testing and segment-box intersection. Owners found and used: nova/database/filepath.py:399 repository_relative and diiid_forward_convergence/render_panels.py:435 _check_text_artists. No owner exists for label-over-data or crowded-stroke weighting."
+  },
+  "review_run_id": "r-20261109T103208984531-review-of-diiid-frame-146-orientation-correction-e138d27ca6dd",
+  "reviewed_base_sha": "737f6953759c77bf2e5ceccd0b51c8d2849dd199",
+  "reviewed_head_sha": "e138d27ca6ddee6edcdb58dd0a5201898ad2ba66",
+  "reviewed_run_id": "r-20261108T083833416701-diiid-frame-146-orientation-correction",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T10:54:28.808260+00:00",
+  "total": 104
+}

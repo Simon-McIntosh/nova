@@ -1,0 +1,97 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite; the run's own suite arms are not re-measured here. The node's promotion measures no suite pair.",
+  "attachment_map": {
+    "frame-137-trip-2-flux-contours.png": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+    "frame-146-trip-1-flux-contours.png": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+    "frame-146-trip-2-flux-contours.png": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg"
+  },
+  "attachment_note": "The three named PNGs under figure-previews-e138d27ca/ were opened and read as images, and nothing else was opened: no SVG and no image besides them. Each attachment carries its figure's basename, so the mapping is by filename rather than by order. Every measurement below was taken from the pixels of these PNGs at their rendered size of 1960x1008. The captions were read from docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html at the reviewed head: each states numbers the figure does not carry (trip-1 axis Z=-0.346 m, 0.912xIp confined; trip-2 axis Z=+1.556 m above the limiter top at +1.363 m, 0.046xIp confined, 39 mask entries changed; frame-137 axis Z=-0.361 m, 0.737xIp confined, 20 mask entries), so none is a restatement of the figure title.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-09T10:34:50Z",
+  "figure_verdicts": [
+    {
+      "attachment": "frame-137-trip-2-flux-contours.png",
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass",
+        "data_ink": "pass",
+        "decoration": "pass",
+        "label_collision": "pass",
+        "legibility": "pass",
+        "table_form": "pass"
+      }
+    },
+    {
+      "attachment": "frame-146-trip-1-flux-contours.png",
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass",
+        "data_ink": "pass",
+        "decoration": "pass",
+        "label_collision": "pass",
+        "legibility": "pass",
+        "table_form": "pass"
+      }
+    },
+    {
+      "attachment": "frame-146-trip-2-flux-contours.png",
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass",
+        "data_ink": "pass",
+        "decoration": "pass",
+        "label_collision": "pass",
+        "legibility": "pass",
+        "table_form": "pass"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "folded: a figure-family follow-up drawing the solved-flux legend key at SOLVED_FLUX_WIDTH so the key weight matches the field the figure exists to show, in every panel of the set",
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "id": "f1ca185527f",
+      "line": 584,
+      "severity": "non-blocking",
+      "summary": "The solved-flux legend key is drawn at the median of the per-level stroke widths, so the key that names the panel's subject inherits whatever the crowding rule did to this particular field. In the frame-146-trip-2 PNG the key renders as a single-row stroke (blue pixels at x478-526, y30 only, 49 px), while the same key on the two sibling panels is a 6 px band (x438-490 / x402-454, y28-33, 317 and 316 px). A reader comparing the three panels sees the key change weight from a bold line to a hairline, and on the trip-2 panel cannot match a 1 px key to the contour set at a glance. The key states the series identity, so it should carry the headline weight in every panel of the set."
+    },
+    {
+      "disposition": "exempted: the missing interior solved ink is the field's own state rather than a rendering fault, the caption states the collapse and the lifted axis, and the stroke and key weights are recorded separately under finding 1",
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "id": "ff16f6ec1a5",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The grey EFIT reference carries 6.3x the ink of the blue solved subject in the panel box (49,440 grey px against 7,825 blue px), where the two sibling panels run the other way (27,867 grey against 43,075 blue, and 28,259 against 44,088). Every solved level on this panel is near the 0.7 pt floor the crowding rule sets, and the surviving blue falls in two fans at the top and bottom edges with none in the core, so the panel alone reads as an EFIT plot with a blue fringe. The absence is the reported collapse (0.046xIp confined, axis lifted to Z=+1.556 m) and the caption states it in words, so a reader who reads the caption misreads nothing; the weight inversion is what the reader sees first."
+    },
+    {
+      "disposition": "exempted: the column is about 230 px wide and carries up to six tick labels, so 12 pt keeps them clear of the axis label and of each other on all three panels, and legibility is verified on the rendered PNGs rather than assumed",
+      "file": "scripts/prototypes/diiid_vertical_loss/render_trip_panels.py",
+      "id": "fe5e7623115",
+      "line": 719,
+      "severity": "non-blocking",
+      "summary": "The residual column's tick labels are set to 12 pt while the two axis labels beside them are 14 pt, and the plotting rules give tick labels 14 pt. All three PNGs render the ticks legibly and consistently with each other (0.00 to 0.15 at 0.05 on the frame-137 panel, 0.00 to 0.25 on both frame-146 panels, now one precision and one step across the set), and no label collides, so nothing is lost to a reader; the size is simply one step below the rest of the figure's text."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261109T103316105287-review-of-diiid-frame-146-orientation-correction-e138d27ca6dd-figure",
+  "reviewed_base_sha": "737f6953759c77bf2e5ceccd0b51c8d2849dd199",
+  "reviewed_figures": [
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg"
+  ],
+  "reviewed_head_sha": "e138d27ca6ddee6edcdb58dd0a5201898ad2ba66",
+  "reviewed_run_id": "r-20261108T083833416701-diiid-frame-146-orientation-correction",
+  "rubric": "figure",
+  "rubric_lines": [
+    "frame-137-trip-2-flux-contours.png (docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg) RUBRIC legibility: pass -- the poloidal section reads at a glance: black limiter, violet bounding surface, blue solved contours at 43,075 px over a grey EFIT set at 27,867 px in the panel box, identifiable red nulls, and the residual column beside it with trip 2 starred. | RUBRIC data_ink: pass -- contours, one limiter ring, one bounding surface and one residual trace carry the ink; no fill, gradient or image contributes. | RUBRIC decoration: pass -- white background, no shading, no frame, no styled theme; the only non-data ink is the eleven-entry legend and two axis labels. | RUBRIC contrast: pass -- black legend and axis text on white, blue contours and red nulls far from the white background, all text rendered at 12-14 pt. | RUBRIC table_form: pass -- a poloidal flux section with both null sets beside a five-point residual trace; neither is a table of numbers. | RUBRIC label_collision: pass -- no text is drawn inside the poloidal panel; the legend band occupies y21-107 while panel ink starts below it, the panel's rightmost contour ink stops at x1080 against the residual column's spine at x1217 and its tick labels from x1153, and all ink lies inside the 1960x1008 canvas (bbox x438-1518, y21-978), so nothing is clipped or overlapping.",
+    "frame-146-trip-1-flux-contours.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg) RUBRIC legibility: pass, with finding 3 on the residual tick size -- the solved field is the dominant ink (44,088 blue px against 28,259 grey px in the panel box), the reported axis and the EFIT axis are distinguishable and the callout X sits clear of the axis triangle. | RUBRIC data_ink: pass -- the subject carries about 1.6x the ink of its reference and no fill, gradient or image contributes. | RUBRIC decoration: pass -- as the frame-137 panel: no shading, frame or styled theme. | RUBRIC contrast: pass -- black text and labels on white; the grey dashed EFIT boundary is a reference cue and never the only carrier of a fact; the 0.8 pt red callout leader is a deliberate thin tie between two visible marks, not text. | RUBRIC table_form: pass -- a poloidal flux section with both null sets beside a three-point residual trace. | RUBRIC label_collision: pass -- no text inside the panel; the legend includes the 'X-point true position' hollow-circle key beside the displaced X, the residual column's six tick labels (0.00 to 0.25 at 0.05) sit clear of its axis label, and all ink lies within x402-1554, y21-978 of the canvas.",
+    "frame-146-trip-2-flux-contours.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg) RUBRIC legibility: pass, with findings 1 and 2 -- the panel shows the lifted axis (red triangle inside a small loop above the limiter) and the collapsed interior, but the solved field holds 7,825 blue px in the panel box against 49,440 grey px, its surviving levels sit in fans at the top and bottom edge with none in the core, and their strokes plus the legend key render as a 1 px light-blue hairline at the 0.7 pt floor. | RUBRIC data_ink: pass -- everything drawn is data; the imbalance between subject and reference is recorded under legibility and as finding 2 rather than as any fill, gradient or decorative element. | RUBRIC decoration: pass -- no gradient, background fill or styling, and the legend correctly drops the bounding-surface and 'X-point true position' keys for a trip at which neither exists (0 violet px, no callout drawn). | RUBRIC contrast: pass -- black text on white; the faintness of the thinnest solved stroke is a line weight, recorded as finding 1, not low contrast of text against its background. | RUBRIC table_form: pass -- a poloidal flux section with both null sets beside a three-point residual trace; the missing solved ink in the core is the field's own state, not a table drawn as a picture. | RUBRIC label_collision: pass -- no text inside the panel; the legend band ends at y77 and panel ink starts at y101, the panel's contour ink stops at x1035 against the residual column's tick labels from x1153, and all ink lies within x477-1480, y21-978, so nothing is clipped or overlapping."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T10:45:13.817214+00:00",
+  "total": null
+}

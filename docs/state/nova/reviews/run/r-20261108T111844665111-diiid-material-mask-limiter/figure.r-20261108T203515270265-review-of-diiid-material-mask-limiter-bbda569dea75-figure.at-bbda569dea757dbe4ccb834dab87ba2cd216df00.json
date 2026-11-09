@@ -41,6 +41,11 @@
       "kind": "exempted",
       "reason": "the fragment is solved field drawn deliberately; clipping would hide measured data, and it is clear of the support polygons",
       "recorded_at": "2026-11-09T04:44:18.011343+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "both null sets and the closed topology stay discernible; the shared level array is what makes the two panels comparable",
+      "recorded_at": "2026-11-09T04:44:26.180961+00:00"
     }
   },
   "findings": [

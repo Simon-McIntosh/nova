@@ -1,0 +1,123 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite; the reviewed run's gate log is cited by that run's own manifest and is not re-measured here.",
+  "attachment_map": {
+    "image-0.png (1400x720)": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+    "image-1.png (1400x720)": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+    "image-2.png (1400x720)": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg"
+  },
+  "attachment_note": "The three named PNGs were opened and read as images and nothing else was opened: no SVG, and no image besides them. Each verdict was formed from the pixels of those PNGs, and every measurement quoted in the findings and rubric lines was taken from those same pixels. Attribution to the three committed figures is by content and each match is unique: the residual strip draws every trip its frame reached and marks the current trip with the red dot, so the 5-point strip with the mark at trip 2 (image-0) is frame 137 trip 2 while the two 3-point strips are the frame-146 panels; the mark is at trip 1 in image-1 and trip 2 in image-2; and image-2 alone carries no 'bounding surface' legend entry, which the run's own manifest records as the trip-2 panel where no surface is drawn. The identically-shaped attachments were independently mapped the same way by the earlier figure review at head 5c04a6919.",
+  "completed_at": "2026-11-09T05:40:58.645Z",
+  "dispatched_at": "2026-11-09T05:21:53Z",
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass",
+        "data_ink": "pass",
+        "decoration": "pass",
+        "label_collision": "pass",
+        "legibility": "pass",
+        "table_form": "pass"
+      }
+    },
+    {
+      "attachment": "image-1.png",
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass",
+        "data_ink": "pass",
+        "decoration": "pass",
+        "label_collision": "pass",
+        "legibility": "pass",
+        "table_form": "pass"
+      }
+    },
+    {
+      "attachment": "image-2.png",
+      "figure": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "rubric": {
+        "contrast": "pass",
+        "data_ink": "fail: the blue block carries no readable level information and the reference holds the core's weight (finding 1)",
+        "decoration": "pass",
+        "label_collision": "pass for text; the band is cut flat at the axes top limit (finding 1)",
+        "legibility": "fail: the solved field is a solid band above the limiter and absent in the core (finding 1)",
+        "table_form": "pass"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "id": "f034aa24784",
+      "line": 429,
+      "severity": "blocking",
+      "summary": "The solved-flux contours render as a solid block instead of separable lines. In the rendered PNG the blue is a single contiguous run 31-33 px wide at rows y=120..150 with no white gap anywhere in it, against 3-5 px runs separated by white in both sibling panels. The nine shared levels are drawn at 3.0 pt (scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:429, 4.2 px at 110 dpi), so where the field is nearly flat they crowd closer than one line width and fuse. The reader cannot read a single contour level in the region above the limiter, which is exactly where this panel's claim (the field collapsed, the axis lifted) sits, and the same merge recurs along the bottom edge. A block of colour carries no level information; either draw the crowded sets thinner or draw the envelope and a zoom."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "id": "fd408bcfc93",
+      "line": 120,
+      "severity": "non-blocking",
+      "summary": "The plasma core carries no solved-flux ink at all: in the core box x 680..800, y 210..430 the PNG holds 0 blue px against 6359 grey EFIT px, where the sibling panels hold 4533/2585 and 4373/2312. The two-field comparison the legend promises is therefore unavailable inside this panel, and with the reference now at 2.4 pt against the subject's 3.0 pt the core reads as an EFIT-only plot with a blue block above it. The absence is itself the reported collapse and the caption states it, so nothing is misread, but a reader can take the all-grey body for a rendering omission; one clause in the caption, or a thinner reference, would prevent that."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "id": "f14141af171",
+      "line": 101,
+      "severity": "non-blocking",
+      "summary": "The solved X-point callout fuses with its own leader dot and nearly touches the solved axis. In the rendered PNG the red components measure 15x9 px (the X and the hollow dot at its true position, y 352..366) and 10x10 px (the axis triangle, y 370..379), the two 3 px apart. The callout fixed the saddle-against-axis crowding, but the saddle itself now reads at 1:1 as an undifferentiated red mark rather than the X the legend names, so the one mark that tells a reader the field has an interior saddle is the least legible mark on the panel."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "id": "fce1ddf11b3",
+      "line": 404,
+      "severity": "non-blocking",
+      "summary": "The poloidal panel occupies 239 px of the 1400 px canvas width while the residual strip beneath it spans 1294 px, so about 83% of the width on either side of the contours is blank and the field is drawn at a fifth of the available size. On the served page at roughly 900 px wide the panel is about 154 px, which puts the hollow EFIT null markers at about 5 px. Nothing is clipped or hidden, and the artifact is a vector figure a reader can enlarge, but the layout spends the canvas on emptiness instead of on the geometry the figure exists to show: placing the strip beside the panel would give the contours about 1.5x the drawn height on the same page."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "id": "f4324077b74",
+      "line": 618,
+      "severity": "non-blocking",
+      "summary": "The strip labels the same quantity to two different precisions across the set: this panel ticks '0.0' and '0.1' while both frame-146 panels tick '0.00' and '0.25', because the residual axis takes matplotlib's automatic locator and formatter per panel range and no formatter is set (scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:618). Each panel is correct on its own, but a reader comparing the three must notice that both the step and the precision changed before the marks can be compared."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261109T051910860543-review-of-diiid-frame-146-orientation-correction-69ced0e8bc8a-figure",
+  "reviewed_base_sha": "737f6953759c77bf2e5ceccd0b51c8d2849dd199",
+  "reviewed_figures": [
+    "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+    "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg"
+  ],
+  "reviewed_head_sha": "69ced0e8bc8a747d22ae6d83fc3b8011479a5d88",
+  "reviewed_run_id": "r-20261108T083833416701-diiid-frame-146-orientation-correction",
+  "rubric": "figure",
+  "rubric_lines": [
+    "image-0.png (docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg) RUBRIC legibility: pass, with finding 4 on the canvas proportion. The poloidal panel reads as a cross-section -- black limiter, violet bounding ring, blue solved contours over grey EFIT contours, hollow EFIT axis over the filled red solved axis -- and the residual strip beneath it names both axes and marks trip 2.",
+    "image-0.png (docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg) RUBRIC data_ink: pass. The panel band carries 31960 ink pixels against 10763 in the strip; contours, vessel, bounding ring and null markers are the only ink, with no fill or shading.",
+    "image-0.png (docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg) RUBRIC decoration: pass. No grid, gradient, background band or frame anywhere; the poloidal panel's axis is off and the strip carries only its left and bottom spines.",
+    "image-0.png (docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg) RUBRIC contrast: pass. Legend and axis text is near-black on white and the tick text is dark grey; the lightest drawn series is the grey EFIT contour set, which still separates from the white ground at its 2.4 pt width.",
+    "image-0.png (docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg) RUBRIC table_form: pass. A poloidal contour map with a residual trace is not information a table would carry.",
+    "image-0.png (docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg) RUBRIC label_collision: pass, with finding 5 on tick precision. All ink lies inside the canvas (ink bbox x 64..1358, y 15..691 of 1400x720); the legend band ends at y 81 and the panel starts at y 101; the strip's 'relative residual' label sits at x 64..90, clear of the panel and of every trip marker.",
+    "image-1.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg) RUBRIC legibility: pass, with finding 3 on the marker cluster at the axis. Field, axis, both null sets and the limiter are readable, the solved contour lines stay separable, and the residual strip marks trip 1.",
+    "image-1.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg) RUBRIC data_ink: pass. 32974 ink pixels in the panel band and 10207 in the strip; the blue solved contours run as 3-5 px lines with white between them over the grey reference, so the ink carries level information.",
+    "image-1.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg) RUBRIC decoration: pass. Nothing is drawn beyond the two contour sets, the bounding ring, the limiter, the null markers and the residual trace.",
+    "image-1.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg) RUBRIC contrast: pass. Text near-black on white; the grey EFIT set and the violet bounding ring both remain distinguishable from the white ground and from each other.",
+    "image-1.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg) RUBRIC table_form: pass. The topology and null placement are what the drawing is for.",
+    "image-1.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg) RUBRIC label_collision: pass for text, with finding 3 for markers. Ink bbox x 54..1358, y 15..691; the strip's y label is fully on the canvas at x 54..90; no text sits on the field. The crowded place is three markers, not labels.",
+    "image-2.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg) RUBRIC legibility: fail -- finding 1. The solved field is unreadable: above the limiter its contours are one solid blue band 31-33 px thick with no white between the levels, and in the plasma core the solved series is absent entirely (0 blue px against 6359 grey). What the eye reads is a grey EFIT field with a blue block laid over its top.",
+    "image-2.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg) RUBRIC data_ink: fail -- finding 1. The blue band is ink that carries no readable information, and with the reference at 2.4 pt against the subject at 3.0 pt the EFIT set now holds the whole visual weight of the core (6359 grey px, 0 blue px).",
+    "image-2.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg) RUBRIC decoration: pass. No grid, gradient, band or frame; everything drawn is a series, the limiter, or a marker.",
+    "image-2.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg) RUBRIC contrast: pass. Text near-black on white; the grey reference clears the ground, and the red markers clear both.",
+    "image-2.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg) RUBRIC table_form: pass. The lifted axis and the collapsed field are spatial facts that need the drawing.",
+    "image-2.png (docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg) RUBRIC label_collision: pass for text (ink bbox x 54..835, y 15..691, legend clear of the panel, strip label on canvas), but recorded under finding 1: the blue band terminates in a flat cut at the axes top limit y=101 and the solved-axis triangle's apex ends 1 px below that same limit, so the top of the panel is jammed against the data it has to show."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T06:56:12.132427+00:00",
+  "total": null
+}

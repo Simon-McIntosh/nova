@@ -109,6 +109,29 @@ table and the panel carry the corrected boundary reference; the archived oracle
 ratios in <code>results/limited-oracle.json</code> were recomputed for the
 boundary clause from the saved states.</p>
 
+<p><strong>The clause is reproducible from the repository, not from the run
+directory.</strong> Both archived limited states are committed beside the
+instrument that reads them —
+<code>scripts/prototypes/bank_route_rows/archived/limited-550-oracle.npz</code>
+(sha256 <code>74ee9e08…</code>) and
+<code>…/limited-2000-oracle.npz</code> (sha256 <code>42a849be…</code>) — with the
+recorded clause in <code>archived/boundary-clause.json</code>. One command
+re-derives both rows and asserts them against that record, exiting nonzero if an
+archive is missing, its hash moved, the designed contact moved, or either ratio
+drifts:
+
+<code>JAX_PLATFORMS=cpu python -m scripts.prototypes.bank_route_rows.boundary_gap --check</code>.
+It prints <code>CHECK=PASS</code>. Two properties the clause depends on are worth
+naming, since they bound what it can claim. The archive holds the converged
+route's node coordinates, its solved flux, both stationary points and the wall,
+but not the route's own reported boundary-flux value, and its boundary point is
+a wall point rather than a lattice node — so the clause carries the analytic
+flux at the route's own boundary point, and the route's own terminal residual
+(9.64e-11 Wb at 550 cells, 6.64e-11 Wb at 2000) is the archived bound on how far
+its booked value sits from it. Separately, the flux span is taken between the
+analytic axis and the designed contact, which is 49.941 Wb; the earlier 49.990 Wb
+figure came from the same vertex contact this correction removed.</p>
+
 <p><strong>The limited residuals sit at their own noise floor.</strong> Moving
 each converged moment by one to four representable steps, with the landed
 noise-floor instrument's <code>nudged</code> imported unchanged and sixteen
@@ -220,6 +243,7 @@ dropped.</p>
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-2000.log</code> and
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/limited-2000.log</code> (the 2000-cell fast routes, two updates each),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/boundary-clause.log</code> (the limited rows' boundary clause recomputed against <code>designed_contact</code> from the archived states, clean exit),
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/boundary-check.log</code> (the committed archives re-derived and asserted against the recorded clause: <code>CHECK=PASS</code>, <code>EXIT=0</code>),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/boundary-gap.json</code> (both limited boundary clauses: contact, route point, their separation, and the flux on each),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/limited-550-oracle.npz</code> and its 2000-cell equivalent (the archived limited states both panels and the boundary analysis are read from),
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111216113482-bank-route-rows/results/diverted-2000.npz</code> (the 2000-cell archived state; that run wrote its archive before its present arm died),

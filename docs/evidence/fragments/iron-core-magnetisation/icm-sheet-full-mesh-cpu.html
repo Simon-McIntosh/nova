@@ -152,7 +152,12 @@ and would have to be produced by a further measurement.</p>
 imported module, command, wall and <code>EXIT</code> line),
 <code>subtractive-bracket-control.log</code>,
 <code>source-blob-check.log</code>, <code>mutation.log</code> and
-<code>slurm-1308778.out</code>. The gate is
+<code>slurm-1308778.out</code>. The two gate logs were re-shaped after the run so
+that the command line leads and the status line is last, which is the capture
+convention a reader reconstructs a run from; the untouched captures are kept
+beside them as <code>full-mesh-gate.asrun.log</code> and
+<code>subtractive-bracket-control.asrun.log</code>, and no measured text differs
+between the two. The gate is
 <code>scripts/sheet_tile_cpu_gate/run_gate.sbatch</code>; the mutation helper is
 <code>scripts/sheet_tile_cpu_gate/restore_subtractive_bracket.py</code>.</p>
 </section>

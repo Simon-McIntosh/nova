@@ -1,0 +1,105 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_review": "Read the three captions from the evidence HTML at the reviewed head. Each adds quantities or interpretation; none merely repeats a title. The trip-1 withdrawn polish claim is explicitly marked withdrawn and corrected in its caption.",
+  "completed_at": "2026-11-08T17:46:47Z",
+  "dispatched_at": "2026-11-08T17:41:19Z",
+  "figures": [
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/figure-previews-48fcbac8f/frame-137-trip-2-flux-contours.png",
+      "rubric_items": {
+        "contrast": "PASS: black text is clear against white; blue, violet where present, grey and red marks remain distinguishable. Thin blue strokes reduce prominence rather than text contrast.",
+        "data_ink": "PASS: contour geometry and the residual trace carry the information; there are no gridlines or decorative bands. The narrow cross-section leaves substantial white space but remains interpretable.",
+        "decoration": "PASS: plain white canvas, frameless shared legend and no gradients, decorative fills or effects.",
+        "label_collision": "PASS: the full legend, relative residual label, active-set trip label and tick labels are visible without clipping or text collisions; legend text is clear of the plotted geometry.",
+        "legibility": "PASS with non-blocking concern: The closed blue and grey contours, violet bounding surface, limiter and separated null markers can be followed; the residual strip highlights trip 2. The solved-flux hairlines have less visual weight than their legend sample and the EFIT contours.",
+        "table_form": "PASS: spatial flux contours and the progression of residual across trips benefit from graphical presentation."
+      },
+      "rubric_verdicts": [
+        "RUBRIC legibility: PASS with non-blocking concern: The closed blue and grey contours, violet bounding surface, limiter and separated null markers can be followed; the residual strip highlights trip 2. The solved-flux hairlines have less visual weight than their legend sample and the EFIT contours.",
+        "RUBRIC data_ink: PASS: contour geometry and the residual trace carry the information; there are no gridlines or decorative bands. The narrow cross-section leaves substantial white space but remains interpretable.",
+        "RUBRIC decoration: PASS: plain white canvas, frameless shared legend and no gradients, decorative fills or effects.",
+        "RUBRIC contrast: PASS: black text is clear against white; blue, violet where present, grey and red marks remain distinguishable. Thin blue strokes reduce prominence rather than text contrast.",
+        "RUBRIC table_form: PASS: spatial flux contours and the progression of residual across trips benefit from graphical presentation.",
+        "RUBRIC label_collision: PASS: the full legend, relative residual label, active-set trip label and tick labels are visible without clipping or text collisions; legend text is clear of the plotted geometry."
+      ]
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/figure-previews-48fcbac8f/frame-146-trip-1-flux-contours.png",
+      "rubric_items": {
+        "contrast": "PASS: black text is clear against white; blue, violet where present, grey and red marks remain distinguishable. Thin blue strokes reduce prominence rather than text contrast.",
+        "data_ink": "PASS: contour geometry and the residual trace carry the information; there are no gridlines or decorative bands. The narrow cross-section leaves substantial white space but remains interpretable.",
+        "decoration": "PASS: plain white canvas, frameless shared legend and no gradients, decorative fills or effects.",
+        "label_collision": "PASS: the full legend, relative residual label, active-set trip label and tick labels are visible without clipping or text collisions; legend text is clear of the plotted geometry.",
+        "legibility": "PASS with non-blocking concern: The closed field inside the limiter and residual strip are readable; the small interior saddle callout and its position dot remain separate from the red axis triangle. The solved-flux hairlines have less visual weight than their legend sample and the EFIT contours.",
+        "table_form": "PASS: spatial flux contours and the progression of residual across trips benefit from graphical presentation."
+      },
+      "rubric_verdicts": [
+        "RUBRIC legibility: PASS with non-blocking concern: The closed field inside the limiter and residual strip are readable; the small interior saddle callout and its position dot remain separate from the red axis triangle. The solved-flux hairlines have less visual weight than their legend sample and the EFIT contours.",
+        "RUBRIC data_ink: PASS: contour geometry and the residual trace carry the information; there are no gridlines or decorative bands. The narrow cross-section leaves substantial white space but remains interpretable.",
+        "RUBRIC decoration: PASS: plain white canvas, frameless shared legend and no gradients, decorative fills or effects.",
+        "RUBRIC contrast: PASS: black text is clear against white; blue, violet where present, grey and red marks remain distinguishable. Thin blue strokes reduce prominence rather than text contrast.",
+        "RUBRIC table_form: PASS: spatial flux contours and the progression of residual across trips benefit from graphical presentation.",
+        "RUBRIC label_collision: PASS: the full legend, relative residual label, active-set trip label and tick labels are visible without clipping or text collisions; legend text is clear of the plotted geometry."
+      ]
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T083833416701-diiid-frame-146-orientation-correction/figure-previews-48fcbac8f/frame-146-trip-2-flux-contours.png",
+      "rubric_items": {
+        "contrast": "PASS: black text is clear against white; blue, violet where present, grey and red marks remain distinguishable. Thin blue strokes reduce prominence rather than text contrast.",
+        "data_ink": "PASS: contour geometry and the residual trace carry the information; there are no gridlines or decorative bands. The narrow cross-section leaves substantial white space but remains interpretable.",
+        "decoration": "PASS: plain white canvas, frameless shared legend and no gradients, decorative fills or effects.",
+        "label_collision": "PASS: the full legend, relative residual label, active-set trip label and tick labels are visible without clipping or text collisions; legend text is clear of the plotted geometry.",
+        "legibility": "PASS with non-blocking concern: The solved axis above the limiter, the blue contour bundles outside the core and the grey EFIT core are distinguishable; trip 2 is highlighted in the residual strip. The solved-flux hairlines have less visual weight than their legend sample and the EFIT contours.",
+        "table_form": "PASS: spatial flux contours and the progression of residual across trips benefit from graphical presentation."
+      },
+      "rubric_verdicts": [
+        "RUBRIC legibility: PASS with non-blocking concern: The solved axis above the limiter, the blue contour bundles outside the core and the grey EFIT core are distinguishable; trip 2 is highlighted in the residual strip. The solved-flux hairlines have less visual weight than their legend sample and the EFIT contours.",
+        "RUBRIC data_ink: PASS: contour geometry and the residual trace carry the information; there are no gridlines or decorative bands. The narrow cross-section leaves substantial white space but remains interpretable.",
+        "RUBRIC decoration: PASS: plain white canvas, frameless shared legend and no gradients, decorative fills or effects.",
+        "RUBRIC contrast: PASS: black text is clear against white; blue, violet where present, grey and red marks remain distinguishable. Thin blue strokes reduce prominence rather than text contrast.",
+        "RUBRIC table_form: PASS: spatial flux contours and the progression of residual across trips benefit from graphical presentation.",
+        "RUBRIC label_collision: PASS: the full legend, relative residual label, active-set trip label and tick labels are visible without clipping or text collisions; legend text is clear of the plotted geometry."
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg",
+      "id": "f9a4ac1b1a5",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The blue solved-flux contours are hairlines beside the heavier grey EFIT contours, while their blue legend sample is substantially thicker. The solved field remains traceable at the supplied PNG size, so this does not block reading, but reducing the figure to the page column makes the subject harder to follow and the legend overstates its visual prominence."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg",
+      "id": "ffa46edf5fc",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The blue solved-flux contours are hairlines beside the heavier grey EFIT contours, while their blue legend sample is substantially thicker. The solved field remains traceable at the supplied PNG size, so this does not block reading, but reducing the figure to the page column makes the subject harder to follow and the legend overstates its visual prominence."
+    },
+    {
+      "file": "docs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg",
+      "id": "ff16f6ec1a5",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The blue solved-flux contours are hairlines beside the heavier grey EFIT contours, while their blue legend sample is substantially thicker. The solved field remains traceable at the supplied PNG size, so this does not block reading, but reducing the figure to the page column makes the subject harder to follow and the legend overstates its visual prominence."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "docs/figures/diiid-frame-146-vertical-loss/frame-137-trip-2-flux-contours.svg\nRUBRIC legibility: PASS with non-blocking concern: The closed blue and grey contours, violet bounding surface, limiter and separated null markers can be followed; the residual strip highlights trip 2. The solved-flux hairlines have less visual weight than their legend sample and the EFIT contours.\nRUBRIC data_ink: PASS: contour geometry and the residual trace carry the information; there are no gridlines or decorative bands. The narrow cross-section leaves substantial white space but remains interpretable.\nRUBRIC decoration: PASS: plain white canvas, frameless shared legend and no gradients, decorative fills or effects.\nRUBRIC contrast: PASS: black text is clear against white; blue, violet where present, grey and red marks remain distinguishable. Thin blue strokes reduce prominence rather than text contrast.\nRUBRIC table_form: PASS: spatial flux contours and the progression of residual across trips benefit from graphical presentation.\nRUBRIC label_collision: PASS: the full legend, relative residual label, active-set trip label and tick labels are visible without clipping or text collisions; legend text is clear of the plotted geometry.\n\ndocs/figures/diiid-frame-146-vertical-loss/frame-146-trip-1-flux-contours.svg\nRUBRIC legibility: PASS with non-blocking concern: The closed field inside the limiter and residual strip are readable; the small interior saddle callout and its position dot remain separate from the red axis triangle. The solved-flux hairlines have less visual weight than their legend sample and the EFIT contours.\nRUBRIC data_ink: PASS: contour geometry and the residual trace carry the information; there are no gridlines or decorative bands. The narrow cross-section leaves substantial white space but remains interpretable.\nRUBRIC decoration: PASS: plain white canvas, frameless shared legend and no gradients, decorative fills or effects.\nRUBRIC contrast: PASS: black text is clear against white; blue, violet where present, grey and red marks remain distinguishable. Thin blue strokes reduce prominence rather than text contrast.\nRUBRIC table_form: PASS: spatial flux contours and the progression of residual across trips benefit from graphical presentation.\nRUBRIC label_collision: PASS: the full legend, relative residual label, active-set trip label and tick labels are visible without clipping or text collisions; legend text is clear of the plotted geometry.\n\ndocs/figures/diiid-frame-146-vertical-loss/frame-146-trip-2-flux-contours.svg\nRUBRIC legibility: PASS with non-blocking concern: The solved axis above the limiter, the blue contour bundles outside the core and the grey EFIT core are distinguishable; trip 2 is highlighted in the residual strip. The solved-flux hairlines have less visual weight than their legend sample and the EFIT contours.\nRUBRIC data_ink: PASS: contour geometry and the residual trace carry the information; there are no gridlines or decorative bands. The narrow cross-section leaves substantial white space but remains interpretable.\nRUBRIC decoration: PASS: plain white canvas, frameless shared legend and no gradients, decorative fills or effects.\nRUBRIC contrast: PASS: black text is clear against white; blue, violet where present, grey and red marks remain distinguishable. Thin blue strokes reduce prominence rather than text contrast.\nRUBRIC table_form: PASS: spatial flux contours and the progression of residual across trips benefit from graphical presentation.\nRUBRIC label_collision: PASS: the full legend, relative residual label, active-set trip label and tick labels are visible without clipping or text collisions; legend text is clear of the plotted geometry.",
+  "review_limits": "Read-only visual review of the supplied PNGs. No independent physical calculation or source-guard test; no figure or caption edits. Non-blocking finding dispositions remain with the coordinator.",
+  "review_run_id": "r-20261108T174031683479-review-of-diiid-frame-146-orientation-correction-48fcbac8fa7e-figure",
+  "reviewed_base_sha": "737f6953759c77bf2e5ceccd0b51c8d2849dd199",
+  "reviewed_head_sha": "48fcbac8fa7e255b584daf2135b1156114df70f9",
+  "reviewed_run_id": "r-20261108T083833416701-diiid-frame-146-orientation-correction",
+  "rubric": "figure",
+  "status": "parsed",
+  "summary": "Inspected all three named PNGs at original resolution. All 18 rubric verdicts are present; no blocking findings and three non-blocking contour-weight findings. No SVG or other image was opened, listed, searched or rendered. No suite was run; the required failure fields are schema placeholders, not suite-delta evidence.",
+  "times_source": "run-record",
+  "timestamp": "2026-11-09T04:46:39.891821+00:00",
+  "total": null
+}

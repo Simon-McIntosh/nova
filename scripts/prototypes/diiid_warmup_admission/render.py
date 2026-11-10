@@ -82,6 +82,7 @@ def paint(ax, data, levels, reference, xlim=None, ylim=None):
         levels=levels,
         colors=POSITIVE,
         linewidths=1.8,
+        linestyles="-",
         zorder=4,
     )
     reference_style = replace(
@@ -111,7 +112,14 @@ def paint(ax, data, levels, reference, xlim=None, ylim=None):
 
 
 def render(source, name, output, previews):
-    pair = [load(source / arm / name) for arm in ("base", "head")]
+    index = source / "comparison.json"
+    records = json.loads(index.read_text()) if index.exists() else []
+    paths = {
+        record["arm"]: Path(record.get("source_path", source / record["arm"] / name))
+        for record in records
+        if record["case"] == name
+    }
+    pair = [load(paths.get(arm, source / arm / name)) for arm in ("base", "head")]
     levels = np.linspace(
         min(float(d[key].min()) for d, _ in pair for key in ("flux", "label")),
         max(float(d[key].max()) for d, _ in pair for key in ("flux", "label")),
@@ -119,6 +127,19 @@ def render(source, name, output, previews):
     )[1:-1]
     reference = reference_nulls(pair[0][0])
     feature = reference[1]
+    reference_field = fit_tensor_spline(
+        jnp.asarray(pair[0][0]["radius"]),
+        jnp.asarray(pair[0][0]["height"]),
+        jnp.asarray(pair[0][0]["label"].T),
+    )
+    # Include each separatrix value in the one level array used by every field.
+    levels = np.unique(
+        np.r_[
+            levels,
+            float(reference_field(*feature)),
+            [float(data["saddle"][2]) for data, _ in pair],
+        ]
+    )
     figure = plt.figure(figsize=(14, 7.2), dpi=100)
     # Separate inset axes leave an actual margin for labels and the common key.
     axes = [
@@ -166,7 +187,7 @@ def render(source, name, output, previews):
             figure.text(
                 0.25 + 0.5 * offset,
                 0.025,
-                f"X-point distance {record['x_point_distance_m']:.3f} m",
+                f"X-point distance {100 * record['x_point_distance_m']:.2f} cm",
                 ha="center",
                 fontsize=14,
             )
@@ -219,11 +240,14 @@ def main():
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--previews", type=Path, required=True)
+    parser.add_argument("--case", choices=("frame-137-diverted", "frame-146-diverted"))
     args = parser.parse_args()
     configure_dtypes()
     validate_palette()
     plt.rcParams["svg.fonttype"] = "none"
-    for name in ("frame-146-diverted", "frame-137-diverted"):
+    for name in (
+        [args.case] if args.case else ("frame-146-diverted", "frame-137-diverted")
+    ):
         render(args.input, name, args.output, args.previews)
 
 

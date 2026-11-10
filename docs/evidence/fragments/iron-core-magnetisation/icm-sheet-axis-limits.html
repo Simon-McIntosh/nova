@@ -1,0 +1,94 @@
+<section data-reckon="evidence" id="icm-sheet-axis-limits">
+  <h2>Axis sheet limits: singular endpoint requires a domain ruling</h2>
+  <p>
+    <strong>Blocked before implementation.</strong> At base
+    <code>4221309d2e66fd30eadafa7eacc3d967dd233481</code>, the two supplied
+    off-axis witnesses reproduce. The requested general on-axis limit also
+    includes a genuinely singular endpoint case. The dispatch explicitly
+    requires stopping with a derivation when a limit is singular. No kernel
+    or test source was changed, and no finite-value regularisation was made.
+  </p>
+  <h3 id="icm-sheet-axis-limits-reproduction">Reproduction at the base</h3>
+  <table>
+    <thead><tr><th>Source edge [m]</th><th>Target [m]</th><th>Scalar field [T per A/m]</th></tr></thead>
+    <tbody>
+      <tr><td>(0, −0.5) to (0, −0.4)</td><td>(0.04913072, −0.44836919)</td><td>(NaN, 0)</td></tr>
+      <tr><td>(0, −0.5) to (0.003067942, −0.499990588)</td><td>(0.04913072, −0.44836919)</td><td>(1.2510684838409353e−11, NaN)</td></tr>
+      <tr><td>(0.2, −0.5) to (0.3, −0.4)</td><td>(0, 0.2)</td><td>ZeroDivisionError: division by zero</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The packed route also returns (NaN, −0) for the axis-lying edge. In both
+    <code>_closed_root</code> and <code>_sheet_root</code>, the root expression
+    divides by <code>k2 = 4 R R′ / span</code>. At R′ = 0 its numerator and
+    denominator vanish together. The azimuthal grading width in
+    <code>_arsinh_gradient</code> and <code>_sheet_arsinh_gradient</code> divides
+    by sqrt(R R′), producing an infinite width and indeterminate mapped nodes.
+    On-axis targets additionally reach the field scale 1/R. The full 528-pair
+    census was not run before the singularity stop; these observations do not
+    claim that classification is complete.
+  </p>
+  <h3 id="icm-sheet-axis-limits-derivation">Exact on-axis integral and its singular case</h3>
+  <p>
+    A circular loop of radius a at height h above an axis target carries
+    B<sub>Z</sub> = μ<sub>0</sub>I a²/[2(a²+h²)<sup>3/2</sup>]. A sheet strip of
+    arclength ds carries I = K ds. If a straight sheet starts at the target
+    (0, z<sub>0</sub>) with unit tangent (u, v), then a = us, h = vs and
+    u²+v² = 1. Consequently, for u ≠ 0,
+  </p>
+  <pre>B_Z(δ) = μ₀ K u²/2 ∫[δ,L] ds/s = μ₀ K u²/2 log(L/δ) → +∞  (K &gt; 0).</pre>
+  <p>
+    This is a physical logarithmic divergence, even though the source area
+    element 2πa ds vanishes at the endpoint. For a sheet lying entirely on the
+    axis, u = 0 and the current surface has zero area, so its field is exactly
+    zero. That fact does not extend to a sheet which leaves the axis with u ≠ 0.
+    At disjoint on-axis targets symmetry gives B<sub>R</sub> = 0 and ψ = 0;
+    their finite B<sub>Z</sub> still needs implementation.
+  </p>
+  <p>
+    For completeness, the disjoint-target integral is elementary. Write
+    a(s) = a₀ + us, h(s) = h₀ + vs, d = ua₀ + vh₀, c = va₀ − uh₀,
+    t = s+d and D = sqrt(t²+c²). For c ≠ 0 its primitive is
+  </p>
+  <pre>F(t) = u² asinh(t/|c|) + (v²−u²)t/D − 2uvc/D,
+B_Z = μ₀ K [F(L+d)−F(d)]/2.</pre>
+  <p>
+    For c = 0 and an interval separated from t = 0, the primitive is
+    u² sign(t) log|t|. If the interval reaches t = 0 with u ≠ 0, its improper
+    integral diverges. A horizontal sheet at its axis endpoint is included
+    in the same result with u = 1, v = 0.
+  </p>
+  <h3 id="icm-sheet-axis-limits-measurement">Independent cutoff check</h3>
+  <p>
+    For the supplied sloped edge, L = 0.003067956437289813 m,
+    u = 0.9999952941672713 and v = 0.003067840170605829. At its axis endpoint
+    the positive logarithmic coefficient is 6.283126172080608e−7 T per A/m.
+    Numerical integration of the axis loop field gives the values below;
+    each agrees with the derived expression to 2.220446049250313e−16 relative.
+    These cutoffs diagnose a divergence; they are not a proposed regularisation.
+  </p>
+  <table>
+    <thead><tr><th>δ/L</th><th>B<sub>Z</sub> [µT per A/m]</th></tr></thead>
+    <tbody>
+      <tr><td>1e−3</td><td>4.340229798370066</td></tr>
+      <tr><td>1e−5</td><td>7.233716330616777</td></tr>
+      <tr><td>1e−7</td><td>10.127202862863487</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Evidence is in this run's <code>singularity.log</code> (EXIT=0),
+    <code>singularity_probe.py</code> and <code>reproduction.log</code>.
+    The latter also records an exception in the flux primitive at zero modulus.
+    Neither the sphere finiteness census, the graded approach comparisons,
+    the restored-unguarded negative control nor the WEST head gate is complete.
+    The baseline suite was cancelled on the mandated stop and is not a passing arm.
+  </p>
+  <h3 id="icm-sheet-axis-limits-next">Required ruling</h3>
+  <p>
+    Define whether axis-endpoint coincidence is outside the finite-field domain
+    and specify its refusal or divergence representation. Then resume the
+    finite limits for disjoint targets and the two supplied off-axis witnesses,
+    followed by the sphere, quadrature, mutation and WEST gates. The sphere's
+    centroid witnesses themselves do not establish a physical singularity.
+  </p>
+</section>

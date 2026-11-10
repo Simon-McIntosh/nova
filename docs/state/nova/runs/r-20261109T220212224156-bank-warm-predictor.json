@@ -1,0 +1,2807 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 4,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "65315dc89facef18876b46b637a5466fc4a401fa",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220212224156-bank-warm-predictor/brief.txt",
+    "sha256": "6616f841d1f1d661766d3198c51f4fa23940e29da1ea17c2ea0268f0ace248bf"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 21943296,
+      "cached_input_tokens_cumulative": 21943296,
+      "input_tokens": 22811251,
+      "input_tokens_cumulative": 22811251,
+      "output_tokens": 109542,
+      "output_tokens_cumulative": 109542,
+      "reasoning_output_tokens": 47094,
+      "reasoning_output_tokens_cumulative": 47094
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 2006,
+    "files": 10,
+    "removed": 32
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 75,
+        "name": "_toy_solve_batch",
+        "path": "tests/test_bank_drive_continuation.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "solve",
+        "path": "scripts/prototypes/bank_warm_predictor/program.py"
+      },
+      "window_line": 35
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "step",
+        "path": "tests/test_support_read.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "solve",
+        "path": "scripts/prototypes/bank_warm_predictor/program.py"
+      },
+      "window_line": 35
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 34
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 34
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_stored_boundary_support_and_accuracy_floor_are_explicit",
+        "path": "tests/test_efit_parity_field_instrument.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 34
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 23,
+        "name": "provenance",
+        "path": "scripts/prototypes/bank_warm_predictor/receipts.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "snapshot",
+        "path": "scripts/prototypes/bank_warm_predictor/suites.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "step",
+        "path": "tests/test_support_read.py"
+      },
+      "run_function": {
+        "line": 75,
+        "name": "_toy_solve_batch",
+        "path": "tests/test_bank_drive_continuation.py"
+      },
+      "window_line": 76
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "ef671803835eb24fb842de505affe4290c9cb74e",
+    "2721a2774ab1edbb62e44f85ed1757852b934e33",
+    "5e4c900d54503ac878a19b97873b62582b79e7f9",
+    "8812ad6593cb291525b3478473bfcea81ffb9765",
+    "2e3dfb10734f48302377f232142afff11b8d08ff",
+    "95f700c25f1dfedc8b986adc1c1093a80ece79f8",
+    "d32f1c7a864aa7596d3475ae6fb3a2b701c00a0a",
+    "cd674ece07bd43385152a908329c92d38c8cc439"
+  ],
+  "completed_at": "2026-11-10T21:51:29Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-09T22:04:55Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_bank_drive_continuation.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220212224156-bank-warm-predictor/head-test_bank_drive_continuation.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.25773195876288657,
+    "plan": "sub-millisecond-forward-path",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.4776447593452235,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-13T02:48:18Z, which is after this node's 3600s horizon ending 2026-11-09T23:02:37.998018+00:00",
+    "horizon_ends_at": "2026-11-09T23:02:37.998018+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-11-09T22:02:36Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-13T02:48:18Z",
+    "resets_at": "2026-11-14T15:28:13Z",
+    "seconds_until_reset": 408336,
+    "state": "quiet",
+    "utilisation_pct": 48.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-09T22:02:36Z",
+    "read_at": "2026-11-09T22:02:37Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 48.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-10T21:51:29Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-10T21:51:29Z",
+        "resets_at": 1794670093,
+        "used_percent": 61.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220212224156-bank-warm-predictor/manifest.md",
+  "member": "disposable-r-20261109T220212224156-bank-warm-predictor",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_bank_drive_continuation.py::test_linear_stream_predicts_next_state_to_rounding"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_bank_drive_continuation.py::test_linear_stream_predicts_next_state_to_rounding"
+    ],
+    "control_run_failed": true,
+    "declaration": "in a scratch copy the predictor returns the previous converged state unchanged; the linear-stream test must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220212224156-bank-warm-predictor/unchanged-seed-mutant.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220212224156-bank-warm-predictor/unchanged-seed-mutant.log",
+    "test_paths": [
+      "tests/test_bank_drive_continuation.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "bank-warm-predictor",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/nov06/bank-warm-predictor.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220212224156-bank-warm-predictor/brief.txt",
+    "brief_sha256": "6616f841d1f1d661766d3198c51f4fa23940e29da1ea17c2ea0268f0ace248bf",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1153,
+          "cached_input_tokens": 352047,
+          "input_tokens": 353202,
+          "output_tokens": 94,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 353296,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the predictor is in drive_continuation.py with tests for a linear stream, unchanged certification and the fallback, and a negative-control log failing on the unchanged-seed mutant; paired base and head suites in one sirius job show no added failures; one GPU job with two agreeing fresh processes per arm tables seed residual, reads, updates and wall per slice at 1e-5 and 1e-3 steps with every lane inside the precision budget, recorded in the bank-warm-predictor fragment with one inspected SVG",
+    "estimated_hours": null,
+    "goal": "Seed each warm-started slice with a first-order drive predictor so a slow-ramp slice converges in one update",
+    "id": "bank-warm-predictor",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-09T22:02:36Z",
+      "read_at": "2026-11-09T22:02:37Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 48.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220212224156-bank-warm-predictor/manifest.md",
+    "negative_control": "in a scratch copy the predictor returns the previous converged state unchanged; the linear-stream test must fail",
+    "over_fence_reason": "",
+    "peer_scopes": {
+      "bank-carried-decision": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-carried-decision.html",
+        "docs/figures/sub-millisecond-forward-path/bank-carried-decision",
+        "nova/equilibrium/support_read.py",
+        "nova/equilibrium/topology.py",
+        "scripts/prototypes/bank_carried_decision",
+        "tests/test_tracked_read.py"
+      ],
+      "diiid-warmup-finite-admission": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-warmup-finite-admission.html",
+        "docs/figures/diiid-warmup-finite-admission",
+        "scripts/prototypes/diiid_warmup_admission",
+        "tests/test_warmup_finite_admission.py"
+      ],
+      "icm-iron-read": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-iron-read.html",
+        "docs/figures/iron-core-magnetisation/icm-iron-read",
+        "nova/imas/machine.py",
+        "scripts/prototypes/iron_magnetisation/west.py",
+        "scripts/west_stray_field/solve.py",
+        "tests/test_imas_iron_read.py"
+      ],
+      "icm-sheet-tile-compile-cost": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile-compile-cost.html",
+        "docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile-compile.html",
+        "docs/figures/iron-core-magnetisation/icm-sheet-tile-compile-cost",
+        "docs/research/compile-cost-evidence.html",
+        "scripts/sheet_tile_census"
+      ],
+      "receipt-mask-history-rename": [
+        "apps/playable/session.py",
+        "benchmarks/scanned_trip_loop_prototype.py",
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html",
+        "nova/equilibrium/fixed_point.py",
+        "nova/equilibrium/forward.py",
+        "nova/equilibrium/reduced_newton.py",
+        "nova/equilibrium/solve_request.py",
+        "scripts/labeller_batch/shard.py",
+        "tests/test_equilibrium_constraint_protocol.py",
+        "tests/test_forward_parity_constrained_arm.py",
+        "tests/test_forward_profile_corsica.py",
+        "tests/test_forward_solve_request.py",
+        "tests/test_labeller_receipt.py",
+        "tests/test_receipt_support_count.py",
+        "tests/test_reduced_newton_constraints.py",
+        "tests/test_steering_frames.py",
+        "tests/test_transport_coupled_window.py"
+      ]
+    },
+    "plan": "sub-millisecond-forward-path",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/drive_continuation.py",
+      "tests/test_bank_drive_continuation.py",
+      "scripts/prototypes/bank_warm_predictor",
+      "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-predictor.html",
+      "docs/figures/sub-millisecond-forward-path/bank-warm-predictor"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 1.477161871389645,
+      "derived": 0.35744220740228166,
+      "drain_hours": 168.0,
+      "effective_limit": 0.35744220740228166,
+      "elapsed_fraction": 0.3249474612748015,
+      "elapsed_hours": 54.591173494166654,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-11-11T09:00:01+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1794082577-c029e5",
+        "pace_multiple": null,
+        "remaining_seconds": 125779.775421,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-11-09T22:03:41+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.52,
+      "remaining_windows": null,
+      "resets_at": "2026-11-14T15:28:13Z",
+      "state": "observed",
+      "utilisation": 0.48,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.470016,
+      "decided_by": "window",
+      "margin": 0.26748400000000006,
+      "name": "bank-warm-predictor",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.48
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.224579,
+        "observed_at": "2026-11-09T22:03:41+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-14T15:28:13Z",
+        "state": "observed",
+        "utilisation": 0.48,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1794082577-c029e5",
+    "member": "codex",
+    "node": "bank-warm-predictor",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-09T22:03:41.224579+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "lead 2026-11-09: dispatch the warm-start predictor now, timing on titan while the H200 is full; filed under §3 like the warm-start nodes since §4 waits on unlanded sections; difficult work to codex sol",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.977,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25773195876288657,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "cd674ece07bd43385152a908329c92d38c8cc439",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_absent": true,
+    "scratch_bytes": null,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261109T220212224156-bank-warm-predictor",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/bank-warm-predictor",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "65315dc89facef18876b46b637a5466fc4a401fa",
+    "reviewed_head_sha": "cd674ece07bd43385152a908329c92d38c8cc439",
+    "scores": {
+      "durability": 16,
+      "evidence": 19,
+      "fit": 19,
+      "goal_fidelity": 20,
+      "reuse": 5,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 99
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261109T220212224156-bank-warm-predictor",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a1c258-5485-7b82-b2c8-b6cbb14fc0fa",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_bank_drive_continuation.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220212224156-bank-warm-predictor/head-test_bank_drive_continuation.log",
+      "revision": "5e4c900d54503ac878a19b97873b62582b79e7f9"
+    },
+    "baseline_measured_nothing": false,
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_bank_drive_continuation.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220212224156-bank-warm-predictor/base-test_bank_drive_continuation.log",
+      "revision": "65315dc89facef18876b46b637a5466fc4a401fa"
+    },
+    "failure_attribution": {},
+    "status": "clean",
+    "suite_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_bank_drive_continuation.py",
+    "waiver_reason": null
+  },
+  "tests_added": 5,
+  "throughput": {
+    "cumulative_cached_input_tokens": 21943296,
+    "cumulative_input_tokens": 22811251,
+    "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+    "generated_tokens": 156636,
+    "generation_seconds": 85207.34,
+    "machine_seconds": 349.606,
+    "tokens_per_second": 1.84
+  },
+  "time_budget": "60m",
+  "tool_steps": 85.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "source": "coordinator",
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": 49.54,
+        "budget_overrun_reference_rate": 64.745,
+        "budget_overrun_reference_runs": 298,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 122455,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 126055,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T11:13:44Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T11:01:56Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T105730642218-review-of-bank-fold-radial-714f29cfa289-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 5331,
+          "worker_pid": 2082892
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T11:13:44Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 125340,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none — read-only review",
+          "both deliverables live outside the repository."
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "0520036c56bc2d1593692e6258150880ec0d32aa28abbb911a125e308aafba7f",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T105730642218-review-of-bank-fold-radial-714f29cfa289-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-fold-radial-714f29cfa289-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T105730642218-review-of-bank-fold-radial-714f29cfa289-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 125469,
+        "terminal_at": "2026-11-08T11:11:31Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-fold-radial-714f29cfa289-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": 69.08,
+        "budget_overrun_reference_rate": 64.745,
+        "budget_overrun_reference_runs": 298,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 117755,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 121355,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T12:28:22Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T12:21:00Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T121243879416-review-of-bank-fold-radial-dab5c5352b23-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 4210,
+          "worker_pid": 2839796
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T12:28:22Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 120863,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "72afa9aa091b30f7348492622b418dd52074bc0ceafc520bade6b923aae6618a",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T121243879416-review-of-bank-fold-radial-dab5c5352b23-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-fold-radial-dab5c5352b23-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T121243879416-review-of-bank-fold-radial-dab5c5352b23-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 120886,
+        "terminal_at": "2026-11-08T12:27:56Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-fold-radial-dab5c5352b23-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": 63.06,
+        "budget_overrun_reference_rate": 64.745,
+        "budget_overrun_reference_runs": 298,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 112909,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 116509,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T13:57:58Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T13:41:34Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T133824301046-review-of-bank-fold-arclength-ab60151ed913-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 7434,
+          "worker_pid": 3416370
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T13:57:58Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 115486,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none — read-only review",
+          "no repository writes"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "4871996213aab8544dd4e4748ae3ae00c58de9f5b3441eb6fe7f261e9f773cd5",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T133824301046-review-of-bank-fold-arclength-ab60151ed913-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-fold-arclength-ab60151ed913-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T133824301046-review-of-bank-fold-arclength-ab60151ed913-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 115507,
+        "terminal_at": "2026-11-08T13:57:35Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-fold-arclength-ab60151ed913-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "lane-saturated",
+        "budget_overrun_rate": 19.99,
+        "budget_overrun_reference_rate": 64.745,
+        "budget_overrun_reference_runs": 298,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 108929,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 112529,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T15:13:03Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T14:48:14Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T144136995558-review-of-bank-fold-arclength-e9afe4af1cfd-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 5597,
+          "worker_pid": 3771142
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T15:13:03Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 110982,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none (read-only review; no file in the repository was edited",
+          "created",
+          "moved or deleted)"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "840140242485de679db3570c2a4558b9233bfeb40502b34fd1b6a5fb7ddfbd8a",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T144136995558-review-of-bank-fold-arclength-e9afe4af1cfd-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-fold-arclength-e9afe4af1cfd-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T144136995558-review-of-bank-fold-arclength-e9afe4af1cfd-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 111106,
+        "terminal_at": "2026-11-08T15:10:56Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-fold-arclength-e9afe4af1cfd-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 57923,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 61523,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [
+            1979299,
+            2031123,
+            2031441,
+            2031440,
+            2031452,
+            2031773,
+            1979998,
+            1980130
+          ],
+          "exit_code": 0,
+          "exited_at": "2026-11-09T05:13:29Z",
+          "last_record_type": "user",
+          "launched_at": "2026-11-09T04:58:32Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261109T045329818721-review-of-bank-route-rows-47be40341c62-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 5483,
+          "worker_pid": 1977851
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-09T05:13:29Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 60556,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "d215f85ea7425ec0e69d220160a194a753f272bc26fef390e13b8575e5be2766",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T045329818721-review-of-bank-route-rows-47be40341c62-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-route-rows-47be40341c62-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261109T045329818721-review-of-bank-route-rows-47be40341c62-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 60858,
+        "terminal_at": "2026-11-09T05:08:25Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-route-rows-47be40341c62-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": 36.83,
+        "budget_overrun_reference_rate": 64.745,
+        "budget_overrun_reference_runs": 298,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 55384,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 58984,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-09T05:52:14Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-09T05:40:41Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261109T053635023789-review-of-bank-warm-stall-1661bb3b479a-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 2376,
+          "worker_pid": 2216369
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-09T05:52:14Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 58230,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none — this is a read-only figure review; no repository commit was made."
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "6e8e92618635d94c1c94fc9070fe775f1e13ac9a7a38068cc028c03e2424446b",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T053635023789-review-of-bank-warm-stall-1661bb3b479a-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-warm-stall-1661bb3b479a-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261109T053635023789-review-of-bank-warm-stall-1661bb3b479a-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 58331,
+        "terminal_at": "2026-11-09T05:50:31Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-warm-stall-1661bb3b479a-figure"
+      }
+    ]
+  },
+  "wall_seconds": 85594,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-10T21:51:38Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-10T21:38:44Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 67847978,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220212224156-bank-warm-predictor/codex-home/cache"
+      },
+      {
+        "bytes": 28814443,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220212224156-bank-warm-predictor/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261109T220212224156-bank-warm-predictor",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 966,
+    "worker_pid": 1654642
+  },
+  "worker_seconds": 85556,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

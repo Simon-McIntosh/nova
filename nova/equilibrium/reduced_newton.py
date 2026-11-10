@@ -333,6 +333,14 @@ class ReducedNewtonResult:
     map_evaluations_per_trip: list[int] = field(default_factory=list)
     reduced_dimension: int = 0
     support_cells: int = 0
+    active_set_support_cells: list[int] = field(default_factory=list)
+    """Axis-connected support population this route drives, one entry per trip.
+
+    The reduced route carries a profile-owned support that one topology read
+    fixes for the whole solve, so every trip reports the same population: the
+    value is per trip because a receipt history is indexed by trip, not
+    because the support moves between them.
+    """
     off_support_leakage: float = 0.0
     steps: list[ReducedNewtonStep] = field(default_factory=list)
     promoted_mask: jax.Array | None = None
@@ -2125,6 +2133,8 @@ def solve_reduced_newton(
         map_evaluations_per_trip=driven["map_evaluations_per_trip"],
         reduced_dimension=coordinates.size,
         support_cells=int(coordinates.cells.size),
+        active_set_support_cells=[int(coordinates.cells.size)]
+        * len(driven["differences"]),
         off_support_leakage=driven["off_support_leakage"],
         steps=driven["steps"],
         promoted_mask=driven["promoted_mask"],
@@ -3089,6 +3099,8 @@ def solve_constrained_reduced_newton(
         map_evaluations_per_trip=driven["map_evaluations_per_trip"],
         reduced_dimension=coordinates.size,
         support_cells=int(coordinates.cells.size),
+        active_set_support_cells=[int(coordinates.cells.size)]
+        * len(driven["differences"]),
         off_support_leakage=driven["off_support_leakage"],
         steps=driven["steps"],
         promoted_mask=driven["promoted_mask"],

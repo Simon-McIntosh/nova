@@ -204,6 +204,30 @@ _REDUCED: tuple[str, ...] = ("reduced_newton",)
 _CONSTRAINABLE: tuple[str, ...] = ("newton_krylov", *_REDUCED)
 
 
+def receipt_history_fields(history, route: str):
+    """Select the per-trip histories one solved route publishes.
+
+    Active-set solvers (the Krylov route and the reduced routes) report
+    per-trip residuals, changed mask entries and the axis-connected support
+    size each trip observed.  The remaining routes report a plain trace and
+    a single shadow-change count, so they publish no per-trip support
+    population.  The reduced result aliases the two change pairs today, so
+    the literal is what keeps the right selection if that alias is dropped.
+    """
+    reduced_or_krylov = route == "newton_krylov" or route in _REDUCED
+    if not reduced_or_krylov:
+        return (
+            history.trace,
+            history.shadow_mask_changes,
+            jnp.empty((0,), dtype=jnp.int32),
+        )
+    return (
+        history.active_set_residuals,
+        history.active_set_mask_differences,
+        history.active_set_support_cells,
+    )
+
+
 def _shared_shadowed_map(shadowed_map: Callable) -> Callable:
     """Retain the map and its optional warmed-partition protocol together."""
 
@@ -2400,6 +2424,9 @@ class ForwardProfile:
             active_set_mask_differences=jnp.asarray(
                 result.active_set_mask_differences, dtype=jnp.int32
             ),
+            active_set_support_cells=jnp.asarray(
+                result.active_set_support_cells, dtype=jnp.int32
+            ),
             shadow_mask_changes=jnp.asarray(
                 result.active_set_mask_differences, dtype=jnp.int32
             ),
@@ -2731,22 +2758,11 @@ class ForwardProfile:
                     tuple(record.qualified for record in terminal_constraints)
                 )
             )
-        # Active-set solvers (the Krylov route and the reduced routes) report
-        # per-trip residuals and mask differences; the remaining routes report
-        # a plain trace.  The reduced receipt aliases the two pairs today, so
-        # the literal is what keeps the right selection if that alias is ever
-        # dropped.
-        reduced_or_krylov = (
-            request.route == "newton_krylov" or request.route in _REDUCED
-        )
-        residual_history = (
-            history.active_set_residuals if reduced_or_krylov else history.trace
-        )
-        mask_history = (
-            history.active_set_mask_differences
-            if reduced_or_krylov
-            else history.shadow_mask_changes
-        )
+        (
+            residual_history,
+            changed_mask_entries,
+            support_cell_count,
+        ) = receipt_history_fields(history, request.route)
         amplitude = getattr(
             getattr(equilibrium, "normalisation", None), "amplitude", None
         )
@@ -2762,7 +2778,8 @@ class ForwardProfile:
             attempted_newton_promotions=history.attempted_newton_promotions,
             accepted_newton_promotions=history.accepted_newton_promotions,
             residual_history=residual_history,
-            mask_history=mask_history,
+            changed_mask_entries=changed_mask_entries,
+            support_cell_count=support_cell_count,
             globalisation_decisions=(
                 history.inner_iteration_decisions,
                 history.inner_iteration_applied_factors,

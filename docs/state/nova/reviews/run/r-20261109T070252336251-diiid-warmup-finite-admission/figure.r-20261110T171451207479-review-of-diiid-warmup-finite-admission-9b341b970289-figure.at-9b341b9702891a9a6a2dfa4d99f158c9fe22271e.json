@@ -1,0 +1,156 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so the count is the neutral value the record shape requires and not a measurement.",
+  "attachment_map": {
+    "image-0.png": "docs/figures/diiid-warmup-finite-admission/frame-137-diverted.svg",
+    "image-1.png": "docs/figures/diiid-warmup-finite-admission/frame-146-diverted.svg"
+  },
+  "attachment_note": "Both attached PNGs were handed to this node and were opened with the Read tool; every verdict below is about those rendered images (1399x720 each). The frame identity of each was bound by the numbers the render itself prints, not by its file position: image-0 shows support 326 -> 258 and residual 0.21516 -> 0.043211, which is the reviewed run's frame 137 diverted arm (base 0.2151594 on 326 cells, head 0.0432107 on 258); image-1 shows 262 -> 132 and residual 6.8734 -> 0.0072147, which is frame 146 diverted (base 6.8734 on 262, head 0.0072147 on 132). No SVG and no other image was opened, read, listed, searched, rendered or git-showed.",
+  "completed_at": "2026-11-10T17:30:35.911Z",
+  "dispatched_at": "2026-11-10T17:16:52Z",
+  "figure_checks": {
+    "caption_numbers": "image-0 ratios match the reviewed run's receipt for frame 137 diverted (base residual 0.2151594 on 326 support cells, head 0.0432107 on 258). image-1 matches frame 146 diverted (base 6.8734 on 262, head 0.0072147 on 132). No caption number is invented or rounded differently from its receipt.",
+    "clipping": "Non-white pixel count in the outer frame is zero on all four edges of both images: columns 0-3 and 1395-1398, rows 0-2 and 717-719. Nothing is clipped by the canvas.",
+    "collision": "Text bands located by the label colour #3F3F3F: legend rows y 24-63 (green pixels present there are the legend's own line swatches, not data), panel titles y 125-136, zoom labels y 216-230, captions y 619-701. Inset content begins at y 291, so both zoom labels sit 60 px clear. The caption bands contain zero green pixels in both images, so no contour runs under the caption text.",
+    "density": "Green mask (G > R+25 and G > B+10) covers 42,269 px (3.99 %) of image-0 and 37,871 px (3.58 %) of image-1; in a 160x160 core box the coverage is 18.6 % / 21.8 % (image-0) and 16.7 % / 17.8 % (image-1), well short of the >60 % a merged solid block would give. A dense-core filled-block defect is falsified by measurement, not assumed absent.",
+    "palette": "Exact colours used: #FFFFFF ground, #2E8B57 solved series, #000000 limiter, #7F7F7F EFIT reference (with 146 and 191 as its antialias blends), #3F3F3F text. No gradient and no fill colour exists in either histogram.",
+    "renders": "Both PNGs opened from the run directory and read at their native 1399x720. Every quantitative statement below was measured on those PNGs: exact palette histogram, ink bounding boxes per edge, text-band row ranges, green-pixel coverage in panel and core boxes. No SVG was consulted for any verdict."
+  },
+  "figure_verdicts": [
+    {
+      "figure": "docs/figures/diiid-warmup-finite-admission/frame-137-diverted.svg",
+      "render": "image-0.png (1399x720)",
+      "rubric": {
+        "contrast": "pass. Text 10.4:1, EFIT reference 3.95:1, solved series 4.24:1, all measured on the render.",
+        "data_ink": "pass. 3.99 % green coverage overall, 18.6 % and 21.8 % in the two core boxes; the contour rings do not merge into a solid block at this resolution.",
+        "decoration": "pass. None visible.",
+        "label_collision": "pass. Canvas edges clean, caption rows free of data ink, zoom labels clear of inset content.",
+        "legibility": "pass. Two arms (before, after), each a main poloidal panel plus a zoomed inset, with a five-column legend above and three caption lines beneath. The solved boundary is the heaviest ink, the solved flux is a half-weight contour and the EFIT reference is a dashed grey, so the before/after comparison holds at a glance.",
+        "table_form": "pass. Spatial field, not tabular."
+      }
+    },
+    {
+      "figure": "docs/figures/diiid-warmup-finite-admission/frame-146-diverted.svg",
+      "render": "image-1.png (1399x720)",
+      "rubric": {
+        "contrast": "pass. Text 10.4:1, EFIT reference 3.95:1, solved series 4.24:1, all measured on the render.",
+        "data_ink": "pass. 3.58 % green coverage overall, 16.7 % and 17.8 % in the core boxes; the core is striped, not filled.",
+        "decoration": "pass. None visible.",
+        "label_collision": "pass. Canvas edges clean, caption rows free of data ink, zoom labels clear of inset content.",
+        "legibility": "pass with finding 2. Panel and caption are readable; the 221.85 cm distance the caption reports cannot fit the +-0.25 m inset window the script draws (4.4x its width), so that number has no supporting close-up.",
+        "table_form": "pass. Spatial field, not tabular."
+      }
+    }
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-diverted-branch-continuation",
+      "recorded_at": "2026-11-10T17:53:37.730636+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "diiid-diverted-branch-continuation",
+      "recorded_at": "2026-11-10T17:54:04.233620+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "diiid-diverted-branch-continuation",
+      "recorded_at": "2026-11-10T17:54:30.448889+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "diiid-diverted-branch-continuation",
+      "recorded_at": "2026-11-10T17:55:07.425246+00:00"
+    }
+  },
+  "findings": [
+    {
+      "disposition": {
+        "kind": "exempted",
+        "reason": "A figure review is read-only and writes no caption; the wording change belongs to a follow-on node against the evidence fragment and render script."
+      },
+      "file": "docs/figures/diiid-warmup-finite-admission/frame-146-diverted.svg",
+      "id": "f34b7a9fcd6",
+      "line": 235,
+      "severity": "non-blocking",
+      "summary": "The caption prints one field under one label, 'Qualified saddle gap', in both figures, but that field names different pairs of nulls in each. For frame 137 the 12.15 cm is the lower solved-saddle to EFIT gap; for frame 146 the 221.85 cm is, by the reviewed run's own receipt, the upper selected qualified saddle to lower EFIT reference, while the continued lower gap is 13.90 cm -- sixteen times smaller and the number a reader of this non-converged arm most needs. Nothing in the rendered picture names either endpoint, so a reader takes 221.85 cm as the solved-versus-EFIT X-point mismatch the zoom is there to show. The caption should name the two nulls it spans, and the lower continued gap belongs beside it. Anchor: scripts/prototypes/diiid_warmup_admission/render.py:235, f\"Qualified saddle gap {100 * record['x_point_distance_m']:.2f} cm\"."
+    },
+    {
+      "disposition": {
+        "kind": "exempted",
+        "reason": "Read-only review; the window is computed in the render script and the correction is a follow-on change to it."
+      },
+      "file": "docs/figures/diiid-warmup-finite-admission/frame-146-diverted.svg",
+      "id": "fba2092acba",
+      "line": 199,
+      "severity": "non-blocking",
+      "summary": "Both figures draw their X-point inset over a fixed 0.5 m window (xlim and ylim at feature +- 0.25 m), and the caption beneath each reports a distance that window is supposed to support. For frame 137 the reported 12.15 cm is 24 % of the window width and the inset shows it. For frame 146 the reported 2.2185 m is 4.4 times the window width, so the two endpoints the caption measures cannot both appear in the inset at all: the zoom shows a local tangle of solved contours whose relation to the printed 221.85 cm cannot be read off the picture. Either the inset should be sized from the distance it illustrates, or the caption should say the zoom is a local view and the gap is read from the main panel. Anchor: scripts/prototypes/diiid_warmup_admission/render.py:199-200."
+    },
+    {
+      "disposition": {
+        "kind": "exempted",
+        "reason": "Read-only review; the marker vocabulary lives in the render script and in nova.media.poloidal, so changing it is a follow-on node."
+      },
+      "file": "docs/figures/diiid-warmup-finite-admission/frame-137-diverted.svg",
+      "id": "f41d0b23beb",
+      "line": 260,
+      "severity": "non-blocking",
+      "summary": "The legend distinguishes 'solved saddles' from 'EFIT X-point' by hue alone: both entries are the same open 'X' marker with mfc='none', drawn #2E8B57 against #7F7F7F (render.py:251-254 and :260). The axis pair does not have this problem, because the solved axis is filled and the EFIT axis is hollow. In the dense lower region of both figures a reader hunting the admitted EFIT X-point has only a green-versus-grey judgement to separate two markers that denote different physical objects, and the same weakness applies in a greyscale reproduction of the evidence page. A distinct marker shape for one of the two would remove the reliance on hue."
+    },
+    {
+      "disposition": {
+        "kind": "exempted",
+        "reason": "A figure review writes nothing; this is a caption-and-title change for a follow-on node against the render script."
+      },
+      "file": "docs/figures/diiid-warmup-finite-admission/frame-137-diverted.svg",
+      "id": "fb667a3650b",
+      "line": 203,
+      "severity": "non-blocking",
+      "summary": "Neither rendered figure carries a title, and the caption lines beneath each panel name only 'support', 'residual' and 'Qualified saddle gap'. The frame number and the machine appear nowhere in the image, so a PNG lifted out of the evidence fragment -- in a slide, a thumbnail, or the powers-of-ten listing -- cannot be told from the other one except by reading its file name. Identity lives in the file name and should also stand in the caption; a single line naming the machine and frame would make the picture self-describing. Anchor: scripts/prototypes/diiid_warmup_admission/render.py:203, which writes only the arm word ('before'/'after')."
+    }
+  ],
+  "item_verdicts": {
+    "blocking_note": "No figure of this pair is held: a reader can read both panels, both insets, the legend and all six caption lines.",
+    "caption_independence": "Neither caption repeats a title, because neither figure carries a title. Both captions state the support count, the terminal residual, the converged flag and a saddle gap, which is data rather than restatement. Finding 4 records the identity that the caption nonetheless omits.",
+    "finding_materiality": "Four non-blocking findings, none blocking. No label is clipped (zero ink in the outer frame on all four edges of both renders), no label overlaps another label or the data (caption bands carry no data ink; zoom labels clear inset content by 60 px), and no text is unreadable (measured 10.4:1). No finding meets a blocking category.",
+    "rendered_artifact": "Both attached PNGs were opened with the Read tool and judged as images. Every supporting number in this record is a measurement taken on those PNGs, not on any source markup."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared write paths and checked with reckon crew check --review --record before the manifest is closed.",
+    "evidence": "Every caption number was reconciled against the reviewed run's own receipt fields (manifest evidence_inputs head137 and head146) rather than against the picture alone.",
+    "legibility": "Read from the two 1399x720 renders at native size, with the ink density and palette measured so that a 'reads as a solid block' or 'reference too faint' claim could be falsified rather than assumed; both were falsified.",
+    "scope_discipline": "Read-only. No figure, caption, script, fragment or plan file was edited, created, moved, deleted, redrawn, relabelled or reformatted. The only writes are this record at its two declared paths and the manifest."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261110T171451207479-review-of-diiid-warmup-finite-admission-9b341b970289-figure",
+  "reviewed_base_sha": "f419ed4f195771688018a7c9ff0a9707bee0cc5d",
+  "reviewed_figures": [
+    "docs/figures/diiid-warmup-finite-admission/frame-137-diverted.svg",
+    "docs/figures/diiid-warmup-finite-admission/frame-146-diverted.svg"
+  ],
+  "reviewed_head_artifact": "9b341b9702891a9a6a2dfa4d99f158c9fe22271e",
+  "reviewed_head_sha": "9b341b9702891a9a6a2dfa4d99f158c9fe22271e",
+  "reviewed_run_id": "r-20261109T070252336251-diiid-warmup-finite-admission",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC frame-137-diverted.png (image-0.png) legibility: pass. before and after are read in one pass: the thick green solved boundary, the thinner green solved-flux contours and the dashed grey EFIT reference are distinguishable by weight and hue in both main panels, and the two insets resolve the lower null region; the reported shrink from 326 to 258 support cells and from 0.21516 to 0.043211 residual is legible in the caption beneath each pair.",
+    "RUBRIC frame-137-diverted.png (image-0.png) data_ink: pass. The panels are pure line work on white with nothing behind it: measured green coverage is 3.99 % of the whole canvas and 18.6 % (before) / 21.8 % (after) inside the core box, so the contour rings are separated strokes rather than a filled block, and the caption band carries only the quantities the figure exists to compare.",
+    "RUBRIC frame-137-diverted.png (image-0.png) decoration: pass. No gradient, no background fill, no gridline, no frame, no shading band and no axis furniture in any of the four panels.",
+    "RUBRIC frame-137-diverted.png (image-0.png) contrast: pass. All text is #3F3F3F on white (measured contrast 10.4:1); the EFIT reference series is #7F7F7F (measured 3.95:1) and the solved series #2E8B57 (measured 4.24:1), so no label and no compared series falls below 3:1.",
+    "RUBRIC frame-137-diverted.png (image-0.png) table_form: pass. The subject is a poloidal flux field with its limiting surface and nulls; no arrangement of these numbers as a table would show where the boundary sits or which null is admitted.",
+    "RUBRIC frame-137-diverted.png (image-0.png) label_collision: pass. No text touches another text, the plotted data or the canvas edge: zero non-white pixels in the outer four columns and outer three rows of the 1399x720 render, the three caption rows (y 619-701) contain zero green pixels, and both X-point zoom labels (y 216-230) sit above inset content that begins at y 291.",
+    "RUBRIC frame-146-diverted.png (image-1.png) legibility: pass. The same reading holds: before and after pairs, solved against EFIT contours, both null sets, the limiter and an X-point inset; the 262 -> 132 support and 6.8734 -> 0.0072147 residual change is legible. Boundary, recorded as finding 2: the caption's 221.85 cm separation is larger than the inset window can show, so that one number is readable only at main-panel scale.",
+    "RUBRIC frame-146-diverted.png (image-1.png) data_ink: pass. Measured green coverage is 3.58 % of the canvas and 16.7 % (before) / 17.8 % (after) in the core box, so the dense core reads as separated contour lines rather than as a filled block; nothing but contours, the wall, the two null sets and the boundary is drawn.",
+    "RUBRIC frame-146-diverted.png (image-1.png) decoration: pass. No gradient, fill, gridline, frame or decorative band in either arm or in either inset.",
+    "RUBRIC frame-146-diverted.png (image-1.png) contrast: pass. Measured text #3F3F3F on white at 10.4:1, EFIT reference #7F7F7F at 3.95:1, solved series #2E8B57 at 4.24:1.",
+    "RUBRIC frame-146-diverted.png (image-1.png) table_form: pass. A non-converged poloidal field compared against a reference is a spatial object; the caption's four numbers would lose the boundary class, the null positions and the shape of the miss.",
+    "RUBRIC frame-146-diverted.png (image-1.png) label_collision: pass. Zero ink in the outer four columns and outer three rows; the three caption rows (y 619-701) carry zero green pixels; both X-point zoom labels sit clear of inset content that starts 60 px below them; the legend's two rows sit above every panel."
+  ],
+  "scores_note": "Omitted by contract for a figure review: no scores object is written and no six-dimension text judgement is claimed. This review ran no suite and claims no suite-delta measurement.",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T17:38:13.690625+00:00",
+  "total": null
+}

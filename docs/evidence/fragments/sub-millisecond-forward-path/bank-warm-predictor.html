@@ -1,0 +1,68 @@
+<section data-reckon="fragment" id="bank-warm-predictor-fragment"
+data-plan="sub-millisecond-forward-path" data-node="bank-warm-predictor">
+<h2>Drive predictor counts: secant</h2>
+<p>The selected predictor is <strong>secant</strong>, selected by total fresh
+reads across the fourteen slices, with total linear solves breaking a tie and
+secant preferred if those counts tie. Counts include the tangent predictor’s own
+fresh read and linear solve. The totals below sum the largest lane count of each
+of the fourteen batched slices. The chosen predictor reduces total fresh reads
+by 31.7% against plain, with 42
+to 29 linear solves.</p>
+<table id="bank-warm-predictor-totals"><thead><tr><th>arm</th>
+<th>total fresh reads</th><th>total linear solves</th></tr></thead>
+<tbody><tr><td>plain</td><td>63</td><td>42</td></tr><tr><td>secant</td><td>43</td><td>29</td></tr><tr><td>tangent</td><td>54</td><td>40</td></tr></tbody></table>
+<table id="bank-warm-predictor-step-summary"><thead><tr><th>drive step</th>
+<th>arm</th><th>total fresh reads</th><th>read reduction against plain</th>
+<th>updates per slice, observed counts</th></tr></thead>
+<tbody><tr><td>1e-05</td><td>plain</td><td>21</td><td>0.0%</td><td>2</td></tr><tr><td>1e-05</td><td>secant</td><td>15</td><td>28.6%</td><td>1, 2</td></tr><tr><td>1e-05</td><td>tangent</td><td>21</td><td>0.0%</td><td>1</td></tr><tr><td>0.001</td><td>plain</td><td>42</td><td>0.0%</td><td>3, 4, 6</td></tr><tr><td>0.001</td><td>secant</td><td>28</td><td>33.3%</td><td>3</td></tr><tr><td>0.001</td><td>tangent</td><td>33</td><td>21.4%</td><td>2, 3</td></tr></tbody></table>
+<p>The slow-ramp objective is reached once two converged history states exist:
+slices 2–7 at step 1e-5 each take one update and two fresh reads. Their seed fresh
+residual lies between 2.099e-05 and 2.102e-05, against
+1.796e-3 for plain. Slice 1 retains the documented plain-start fallback.</p>
+<p>The step 1e-3 result has a clear limit: secant takes three updates and four
+fresh reads on every slice. Neither measured predictor reaches one update at
+that step. Secant seed residuals range from 0.151 to 0.616
+after the fallback,
+so seed residual alone does not rank the nonlinear solve cost. The count
+reduction is established; a one-update fast-ramp claim is not.</p>
+<p>Each arm uses the first eight saved lanes at drive steps 1e-5 and 1e-3 over
+slices 1–7, with one warmup and one measured process. Matching inputs hash:
+<code>a14c588f87ff76791d53cbcf9dc5f702912abc47017cb9ae9a3b1ab92241d12e</code>. Slice 1 has only one history state, so secant
+falls back to the plain warm seed. Every lane is certified by its terminal fresh
+read at residual at most 1e-10; neither predictor changes that certificate.</p>
+<figure id="bank-warm-predictor-reads"><img
+src="/nova/figures/sub-millisecond-forward-path/bank-warm-predictor/reads-per-slice.svg"
+alt="Fresh reads per slice for plain, secant and tangent at two drive steps"
+width="1400"><figcaption>Read counts include the tangent predictor’s one fresh
+read. Plain is grey, secant blue and tangent dotted near-black. Small horizontal
+offsets separate coincident counts. Walls are informational only: titan P100, width 8, not a speed verdict.
+The H200 width-16 wall remains pending a free card.</figcaption></figure>
+<table id="bank-warm-predictor-counts"><thead><tr><th>arm</th><th>drive step</th>
+<th>slice</th><th>seed fresh residual, max</th><th>total fresh reads, max</th>
+<th>solve reads, lane range</th><th>updates, lane range</th>
+<th>terminal fresh residual, max</th><th>total wall / slice [s]; titan P100, width 8, not a speed verdict</th>
+<th>predictor wall / slice; titan P100, width 8, not a speed verdict</th></tr></thead>
+<tbody><tr><td>plain</td><td>1e-05</td><td>1</td><td>1.796e-03</td><td>3</td><td>3–3</td><td>2–2</td><td>3.624e-12</td><td>15.290</td><td>12.923 µs</td></tr><tr><td>plain</td><td>1e-05</td><td>2</td><td>1.796e-03</td><td>3</td><td>3–3</td><td>2–2</td><td>5.684e-12</td><td>9.731</td><td>4.547 µs</td></tr><tr><td>plain</td><td>1e-05</td><td>3</td><td>1.796e-03</td><td>3</td><td>3–3</td><td>2–2</td><td>3.106e-11</td><td>9.731</td><td>3.240 µs</td></tr><tr><td>plain</td><td>1e-05</td><td>4</td><td>1.796e-03</td><td>3</td><td>3–3</td><td>2–2</td><td>3.951e-12</td><td>9.731</td><td>3.514 µs</td></tr><tr><td>plain</td><td>1e-05</td><td>5</td><td>1.796e-03</td><td>3</td><td>3–3</td><td>2–2</td><td>4.832e-12</td><td>9.731</td><td>3.193 µs</td></tr><tr><td>plain</td><td>1e-05</td><td>6</td><td>1.796e-03</td><td>3</td><td>3–3</td><td>2–2</td><td>5.670e-12</td><td>9.731</td><td>3.810 µs</td></tr><tr><td>plain</td><td>1e-05</td><td>7</td><td>1.796e-03</td><td>3</td><td>3–3</td><td>2–2</td><td>4.889e-12</td><td>9.731</td><td>6.458 µs</td></tr><tr><td>secant</td><td>1e-05</td><td>1</td><td>1.796e-03</td><td>3</td><td>3–3</td><td>2–2</td><td>3.624e-12</td><td>15.722</td><td>11.344 µs</td></tr><tr><td>secant</td><td>1e-05</td><td>2</td><td>2.099e-05</td><td>2</td><td>2–2</td><td>1–1</td><td>8.015e-12</td><td>6.322</td><td>8.154 ms</td></tr><tr><td>secant</td><td>1e-05</td><td>3</td><td>2.100e-05</td><td>2</td><td>2–2</td><td>1–1</td><td>2.527e-11</td><td>6.313</td><td>90.431 µs</td></tr><tr><td>secant</td><td>1e-05</td><td>4</td><td>2.101e-05</td><td>2</td><td>2–2</td><td>1–1</td><td>8.626e-12</td><td>6.313</td><td>94.248 µs</td></tr><tr><td>secant</td><td>1e-05</td><td>5</td><td>2.101e-05</td><td>2</td><td>2–2</td><td>1–1</td><td>7.446e-12</td><td>6.315</td><td>99.135 µs</td></tr><tr><td>secant</td><td>1e-05</td><td>6</td><td>2.102e-05</td><td>2</td><td>2–2</td><td>1–1</td><td>5.741e-12</td><td>6.314</td><td>104.053 µs</td></tr><tr><td>secant</td><td>1e-05</td><td>7</td><td>2.102e-05</td><td>2</td><td>2–2</td><td>1–1</td><td>6.509e-12</td><td>6.314</td><td>107.394 µs</td></tr><tr><td>tangent</td><td>1e-05</td><td>1</td><td>1.050e-05</td><td>3</td><td>2–2</td><td>1–1</td><td>2.458e-12</td><td>18.218</td><td>6.547 s</td></tr><tr><td>tangent</td><td>1e-05</td><td>2</td><td>1.050e-05</td><td>3</td><td>2–2</td><td>1–1</td><td>4.263e-12</td><td>9.737</td><td>3.423 s</td></tr><tr><td>tangent</td><td>1e-05</td><td>3</td><td>1.050e-05</td><td>3</td><td>2–2</td><td>1–1</td><td>2.032e-11</td><td>9.732</td><td>3.419 s</td></tr><tr><td>tangent</td><td>1e-05</td><td>4</td><td>1.050e-05</td><td>3</td><td>2–2</td><td>1–1</td><td>3.610e-12</td><td>9.732</td><td>3.419 s</td></tr><tr><td>tangent</td><td>1e-05</td><td>5</td><td>1.051e-05</td><td>3</td><td>2–2</td><td>1–1</td><td>3.141e-12</td><td>9.732</td><td>3.418 s</td></tr><tr><td>tangent</td><td>1e-05</td><td>6</td><td>1.051e-05</td><td>3</td><td>2–2</td><td>1–1</td><td>2.629e-12</td><td>9.733</td><td>3.419 s</td></tr><tr><td>tangent</td><td>1e-05</td><td>7</td><td>1.051e-05</td><td>3</td><td>2–2</td><td>1–1</td><td>1.876e-12</td><td>9.734</td><td>3.419 s</td></tr><tr><td>plain</td><td>0.001</td><td>1</td><td>1.796e-01</td><td>4</td><td>4–4</td><td>3–3</td><td>6.182e-11</td><td>13.148</td><td>5.128 µs</td></tr><tr><td>plain</td><td>0.001</td><td>2</td><td>1.796e-01</td><td>4</td><td>4–4</td><td>3–3</td><td>4.855e-11</td><td>13.141</td><td>3.547 µs</td></tr><tr><td>plain</td><td>0.001</td><td>3</td><td>1.796e-01</td><td>5</td><td>5–5</td><td>4–4</td><td>2.146e-12</td><td>16.554</td><td>3.074 µs</td></tr><tr><td>plain</td><td>0.001</td><td>4</td><td>1.796e-01</td><td>6</td><td>6–6</td><td>4–4</td><td>5.713e-12</td><td>19.448</td><td>3.415 µs</td></tr><tr><td>plain</td><td>0.001</td><td>5</td><td>1.796e-01</td><td>6</td><td>6–6</td><td>4–4</td><td>5.471e-12</td><td>19.449</td><td>3.265 µs</td></tr><tr><td>plain</td><td>0.001</td><td>6</td><td>1.796e-01</td><td>12</td><td>12–12</td><td>6–6</td><td>3.190e-12</td><td>37.855</td><td>3.702 µs</td></tr><tr><td>plain</td><td>0.001</td><td>7</td><td>1.796e-01</td><td>5</td><td>5–5</td><td>4–4</td><td>3.034e-12</td><td>17.319</td><td>3.529 µs</td></tr><tr><td>secant</td><td>0.001</td><td>1</td><td>1.796e-01</td><td>4</td><td>4–4</td><td>3–3</td><td>6.182e-11</td><td>13.147</td><td>5.853 µs</td></tr><tr><td>secant</td><td>0.001</td><td>2</td><td>2.154e-01</td><td>4</td><td>4–4</td><td>3–3</td><td>5.983e-12</td><td>13.140</td><td>90.219 µs</td></tr><tr><td>secant</td><td>0.001</td><td>3</td><td>1.510e-01</td><td>4</td><td>4–4</td><td>3–3</td><td>3.439e-12</td><td>13.140</td><td>106.878 µs</td></tr><tr><td>secant</td><td>0.001</td><td>4</td><td>4.014e-01</td><td>4</td><td>4–4</td><td>3–3</td><td>4.107e-12</td><td>13.142</td><td>110.785 µs</td></tr><tr><td>secant</td><td>0.001</td><td>5</td><td>3.925e-01</td><td>4</td><td>4–4</td><td>3–3</td><td>5.812e-12</td><td>13.143</td><td>150.939 µs</td></tr><tr><td>secant</td><td>0.001</td><td>6</td><td>6.159e-01</td><td>4</td><td>4–4</td><td>3–3</td><td>2.863e-12</td><td>13.141</td><td>113.337 µs</td></tr><tr><td>secant</td><td>0.001</td><td>7</td><td>5.591e-01</td><td>4</td><td>4–4</td><td>3–3</td><td>5.045e-12</td><td>13.901</td><td>98.176 µs</td></tr><tr><td>tangent</td><td>0.001</td><td>1</td><td>1.062e-01</td><td>4</td><td>3–3</td><td>2–2</td><td>5.507e-11</td><td>13.149</td><td>3.419 s</td></tr><tr><td>tangent</td><td>0.001</td><td>2</td><td>1.080e-01</td><td>4</td><td>3–3</td><td>2–2</td><td>4.548e-11</td><td>13.144</td><td>3.418 s</td></tr><tr><td>tangent</td><td>0.001</td><td>3</td><td>1.231e-01</td><td>5</td><td>4–4</td><td>3–3</td><td>4.263e-12</td><td>16.557</td><td>3.416 s</td></tr><tr><td>tangent</td><td>0.001</td><td>4</td><td>2.060e-01</td><td>5</td><td>4–4</td><td>3–3</td><td>4.249e-12</td><td>16.563</td><td>3.419 s</td></tr><tr><td>tangent</td><td>0.001</td><td>5</td><td>1.939e-01</td><td>5</td><td>4–4</td><td>3–3</td><td>4.775e-12</td><td>16.558</td><td>3.417 s</td></tr><tr><td>tangent</td><td>0.001</td><td>6</td><td>5.177e-01</td><td>5</td><td>4–4</td><td>3–3</td><td>4.071e-12</td><td>16.557</td><td>3.417 s</td></tr><tr><td>tangent</td><td>0.001</td><td>7</td><td>1.718e-01</td><td>5</td><td>4–4</td><td>3–3</td><td>3.290e-12</td><td>17.324</td><td>3.417 s</td></tr></tbody></table>
+<p>All eight lanes in every slice meet the precision budget against plain:
+flux ≤1e-8 of span, axis and X-point ≤5e-4 of minor radius, boundary flux ≤1e-4
+of span. All 336 lane/slice results certify; their maximum terminal fresh
+residual is 6.182e-11. The same check refused synthetic violations
+of each of the four precision bounds.</p>
+<table id="bank-warm-predictor-precision"><thead><tr><th>ratio to local scale</th>
+<th>observed maximum</th><th>budget</th></tr></thead>
+<tbody><tr><td>flux</td><td>6.461e-14</td><td>1e-08</td></tr><tr><td>axis</td><td>4.437e-14</td><td>0.0005</td></tr><tr><td>saddle</td><td>3.210e-14</td><td>0.0005</td></tr><tr><td>boundary</td><td>8.268e-15</td><td>0.0001</td></tr></tbody></table>
+<table id="bank-warm-predictor-cpu"><thead><tr><th>arm</th><th>file</th>
+<th>passed</th><th>exit</th></tr></thead><tbody><tr><td>base</td><td>test_bank_drive_continuation</td><td>3</td><td>0</td></tr><tr><td>base</td><td>test_bank_solve_driver</td><td>10</td><td>0</td></tr><tr><td>head</td><td>test_bank_drive_continuation</td><td>8</td><td>0</td></tr><tr><td>head</td><td>test_bank_solve_driver</td><td>10</td><td>0</td></tr></tbody></table>
+<p>The paired sirius files have zero added failures. The unchanged-seed mutant
+fails the linear-stream check with EXIT=1; the head passes it. Imported module,
+revision and working-directory provenance are retained in the logs.</p>
+<p>Titan job 1309827 completed with scheduler record <code>COMPLETED|0:0</code>
+and allocation EXIT=0. Logs, per-slice arrays, input hashes and source digests
+are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220212224156-bank-warm-predictor</code>, using
+<code>counts-{plain,secant,tangent}-first</code> prefixes. Width 16 previously
+failed to allocate 15,120,805,120 bytes on P100; width 8 retains the original
+saved streams’ first eight lanes. Titan wall time does not decide speed.
+The shared saver passed its SVG text-bounds and overlap check. The producer
+rendered the SVG at 1400 pixels wide and inspected it: axis labels and legend
+are legible, with no clipped or colliding text.</p>
+</section>

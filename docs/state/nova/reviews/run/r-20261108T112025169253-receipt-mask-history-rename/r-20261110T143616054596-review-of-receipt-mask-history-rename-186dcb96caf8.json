@@ -1,0 +1,110 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 9,
+  "call_sites": [
+    "nova/equilibrium/forward.py:ForwardProfile._solve_imposed_request",
+    "nova/equilibrium/forward.py:receipt_history_fields",
+    "nova/equilibrium/forward.py:ForwardProfile._solve_reduced_newton",
+    "nova/equilibrium/fixed_point.py:_active_set_newton_krylov",
+    "nova/equilibrium/reduced_newton.py:solve_reduced_newton",
+    "nova/equilibrium/reduced_newton.py:solve_constrained_reduced_newton",
+    "apps/playable/session.py:equilibrium_frame_receipt",
+    "apps/playable/production.py:_reduced_receipt",
+    "scripts/labeller_batch/shard.py:_forward_receipt"
+  ],
+  "completed_at": "2026-11-10T14:48:03.640Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-10T14:37:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "playable-reduced-support-history",
+      "recorded_at": "2026-11-10T14:53:46.100754+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "record hygiene: the gate's literal command is in the first line of each gate log, and the after_suite arm records the exact template command at the head",
+      "recorded_at": "2026-11-10T14:54:03.355730+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the commits field is the worker's list; the landing names every commit from base to 186dcb96c explicitly",
+      "recorded_at": "2026-11-10T14:54:21.328899+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "both focused gate files ran at 186dcb96c inside the after_suite arm (test_forward_solve_request.py and test_receipt_support_count.py), and the labeller test ran at the head in gate-labeller.log",
+      "recorded_at": "2026-11-10T14:54:36.619526+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "apps/playable/production.py",
+      "line": "173",
+      "severity": "non-blocking",
+      "text": "non-blocking: `_reduced_receipt` builds its FixedPointResult without `active_set_support_cells`, so it falls back to the empty default at nova/equilibrium/fixed_point.py:524 and apps/playable/session.py:422-424 then publishes an empty `support_cell_count` on the playable app's reduced route, although the ReducedNewtonResult it holds carries the per-trip population since 60efd32e6; the data is discarded one line before it is needed, and the file is outside the node's write paths so a widen or a follow-up node has to carry the two-line lift."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "non-blocking: the top-level `tests` line still carries `--basetemp=<arm scratch>`, an unsubstituted placeholder, so the gate command cannot be re-run from the record; the literal command survives only in the `# command:` header of gate-final.log, which is the fallback a promotion gate would have to take."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md",
+      "line": "11",
+      "severity": "non-blocking",
+      "text": "non-blocking: the `commits` field lists 3294d1017 0b810e963 4e400eba8 60efd32e6 and omits 186dcb96c, the revision the after_suite arm and the scope_note are recorded at, so the record's own commit list does not reach the revision the review is taken at."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/gate-final.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the focused gate ran at 60efd32e6, not at the reviewed head 186dcb96c, so the brief's \"run the focused gate at your final head\" is met only by gate-labeller.log, which names one test rather than the two gate files; the result carries because neither gate file imports scripts/labeller_batch/shard.py, but the record does not show that."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read 3294d1017, 0b810e963, 4e400eba8, 60efd32e6 and 186dcb96c against 708079d2e5c785d2d2b6fe67be128632c9852043; seventeen files: the receipt field is renamed to changed_mask_entries with support_cell_count added beside it at nova/equilibrium/solve_request.py:733-734, nova/equilibrium/fixed_point.py:4652-4661 counts the axis-connected core population into a new carry leaf threaded to FixedPointResult.active_set_support_cells, nova/equilibrium/reduced_newton.py:2136 and :3102 publish the reduced population per trip, nova/equilibrium/forward.py:207 creates receipt_history_fields and :2427 and :2782 publish both counters, and every remaining constructor and reader plus the RECEIPT_FIELDS pin at tests/test_forward_solve_request.py:52 is migrated; the stopping-rule fragment gains a dated correction with the original text intact.",
+    "done_when": "the done_when asks for the rename with no alias, a per-trip support count threaded from the fixed point, every reader and the RECEIPT_FIELDS pin updated, a positive-support-zero-change test with a logged red control, a dated correction, and 0 added failures; tests/test_receipt_support_count.py:119 provokes support 5 beside changes 0, negative-control.log records `3 failed in 27.84s` with `EXIT=1` under the declared swap, negative-control-support.log records `1 failed in 485.81s` with `EXIT=1` under the threading removal, and both arms carry the same 14 failure ids.",
+    "goal": "the source goal is to publish the receipt's changed_mask_entries beside a separate per-trip support_cell_count; nova/equilibrium/solve_request.py:733-734 resolves it, nova/equilibrium/forward.py:2762-2782 fills both through receipt_history_fields, and the only receipt.mask_history readers left at head are scripts/prototypes/diiid_forward_convergence/measure_branches.py:351 and scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:102, both declared under outside_scope.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md; it records both arms complete with literal commands and 14 failure ids each, the per-id reduction for tests/test_reduced_newton_constraints.py, three negative controls, the outside_scope handoff and a rubric line per dimension, but its `tests` line keeps a `<arm scratch>` placeholder and its `commits` list stops at 60efd32e6.",
+    "write_paths": "the brief declares six paths and permits a widen; the run's declared list at manifest.md:3 authorises fifteen files and the manifest's changed_paths at manifest.md:12 names all seventeen the diff touches, so the two round-3 additions (nova/equilibrium/reduced_newton.py:336, scripts/labeller_batch/shard.py) are inside the declared list and tests/test_labeller_receipt.py is covered by changed_paths and scope_note but is not itself in the declared path list."
+  },
+  "justifications": {
+    "durability": "tests/test_receipt_support_count.py:119-123 reddens if the count is the change count or if the carry never fills (the declared swap logs 3 failed), :140 reddens if every label were counted (it would read [4,4]), and :151-154 reddens if a settled zero-change trip published a non-zero support; tests/test_reduced_newton_constraints.py:1076-1081 recomputes the population from the terminal flux and is the id that negative-control-support.log reddens.",
+    "evidence": "both arms carry literal commands at their own revisions with 14 identical failure ids and 0 added (arm-base-suite.log, arm-head-suite.log, perid-base.log `ids 20 failures 2`, perid-head.log `ids 20 failures 2`), and the negative controls are logged red, but gate-final.log ran at 60efd32e6 rather than the reviewed head and manifest.md:16 keeps a `<arm scratch>` placeholder in the gate command.",
+    "fit": "nova/equilibrium/fixed_point.py:4652-4661 follows the duck-typed partition idiom of partition_difference above it, nova/equilibrium/forward.py:207-229 moves the inline route selection into a documented owner, and every added name describes a mechanism with no plan, version or ticket label.",
+    "goal_fidelity": "nova/equilibrium/solve_request.py:733-734 renames the field with no alias and adds the population, nova/equilibrium/fixed_point.py:4894-4898 counts it per trip, and nova/equilibrium/forward.py:2782 publishes it, but apps/playable/production.py:173 leaves the population unthreaded so that one production path publishes an empty history.",
+    "reuse": "the new counter has no prior owner (a search of nova/equilibrium for an axis-connected count found only the mask predicate at nova/equilibrium/domain.py:91 and no counting helper), but apps/playable/session.py:414-425 duplicates the same per-route selection that nova/equilibrium/forward.py:207 now owns and nova/equilibrium/fixed_point.py:4661 re-derives that predicate.",
+    "scope_discipline": "all seventeen paths in the diff appear in the manifest's changed_paths at manifest.md:12 and fifteen of them in the declared write-path list at manifest.md:3, with the two round-3 additions carried by the scope_note at manifest.md:14 rather than by the declared list."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal is to publish the receipt's changed_mask_entries beside a separate per-trip support_cell_count; nova/equilibrium/solve_request.py:733-734 resolves it, nova/equilibrium/forward.py:2762-2782 fills both through the new receipt_history_fields, and the only receipt.mask_history readers left at head are scripts/prototypes/diiid_forward_convergence/measure_branches.py:351 and scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py:102, both declared under outside_scope.\nVERDICT done_when: the done_when asks for the rename with no alias, a per-trip support count threaded from where the fixed point holds the support, every reader and the RECEIPT_FIELDS pin updated, a positive-support-zero-change test with a logged red control, a dated correction and 0 added failures; tests/test_receipt_support_count.py:119-123 provokes support 5 beside changes 0, negative-control.log ends `3 failed in 27.84s` with `EXIT=1` under the declared swap, negative-control-support.log ends `1 failed in 485.81s` with `EXIT=1` under the threading removal, and both arms carry the same 14 failure ids.\nVERDICT write_paths: the brief declares six paths and permits a widen; manifest.md:3 authorises fifteen files and manifest.md:12 names all seventeen paths the diff touches, so nova/equilibrium/reduced_newton.py:336 and scripts/labeller_batch/shard.py are inside the declared list while tests/test_labeller_receipt.py is covered by changed_paths and the scope_note but is not itself in the declared path list.\nVERDICT manifest: read manifest.md; both arms are recorded complete at their own revisions with literal commands and 14 failure ids each, the per-id reduction for tests/test_reduced_newton_constraints.py is recorded, three negative controls are logged, and a rubric line exists per dimension, but the `tests` line at manifest.md:16 keeps a `<arm scratch>` placeholder and the `commits` list at manifest.md:11 stops at 60efd32e6.\nVERDICT diff: read 3294d1017, 0b810e963, 4e400eba8, 60efd32e6 and 186dcb96c against 708079d2e5c785d2d2b6fe67be128632c9852043; seventeen files rename the receipt field with no alias, add an axis-connected core count as a new fixed-point carry leaf published per trip, thread the reduced route's per-trip population through both construction sites and the labeller shard, migrate every remaining constructor and reader plus the RECEIPT_FIELDS pin, add six tests, and append a dated correction to the stopping-rule fragment with the original text intact.\n\nCALL_SITES: nova/equilibrium/forward.py:ForwardProfile._solve_imposed_request, nova/equilibrium/forward.py:receipt_history_fields, nova/equilibrium/forward.py:ForwardProfile._solve_reduced_newton, nova/equilibrium/fixed_point.py:_active_set_newton_krylov, nova/equilibrium/reduced_newton.py:solve_reduced_newton, nova/equilibrium/reduced_newton.py:solve_constrained_reduced_newton, apps/playable/session.py:equilibrium_frame_receipt, apps/playable/production.py:_reduced_receipt, scripts/labeller_batch/shard.py:_forward_receipt\n\nSCORE goal_fidelity: 18\nSCORE evidence: 16\nSCORE scope_discipline: 16\nSCORE durability: 18\nSCORE fit: 18\nSCORE reuse: 16\nJUSTIFICATION goal_fidelity: nova/equilibrium/solve_request.py:733-734 renames the field with no alias and adds the population, nova/equilibrium/fixed_point.py:4894-4898 counts it per trip, and nova/equilibrium/forward.py:2782 publishes it, but apps/playable/production.py:173 leaves the population unthreaded so that one production path publishes an empty history.\nJUSTIFICATION evidence: both arms carry literal commands at their own revisions with 14 identical failure ids and 0 added (perid-base.log and perid-head.log each record `ids 20 / failures 2`), and the negative controls are logged red, but gate-final.log ran at 60efd32e6 rather than the reviewed head and manifest.md:16 keeps a `<arm scratch>` placeholder in the gate command.\nJUSTIFICATION scope_discipline: all seventeen paths in the diff appear in the manifest's changed_paths at manifest.md:12 and fifteen of them in the declared write-path list at manifest.md:3, with the two round-3 additions carried by the scope_note at manifest.md:14 rather than by the declared list.\nJUSTIFICATION durability: tests/test_receipt_support_count.py:119-123 reddens if the count is the change count or the carry never fills (the declared swap logs 3 failed), :140 reddens if every label were counted (it would read [4,4]), and :151-154 reddens if a settled zero-change trip published a non-zero support; tests/test_reduced_newton_constraints.py:1076-1081 recomputes the population from the terminal flux and is the id negative-control-support.log reddens.\nJUSTIFICATION fit: nova/equilibrium/fixed_point.py:4652-4661 follows the duck-typed partition idiom of partition_difference above it, nova/equilibrium/forward.py:207-229 moves the inline route selection into a documented owner, and every added name describes a mechanism with no plan, version or ticket label.\nJUSTIFICATION reuse: the new counter has no prior owner (a search of nova/equilibrium for an axis-connected count found only the mask predicate at nova/equilibrium/domain.py:91 and no counting helper), but apps/playable/session.py:414-425 duplicates the same per-route selection nova/equilibrium/forward.py:207 now owns and nova/equilibrium/fixed_point.py:4661 re-derives that predicate.\n\nFINDING apps/playable/production.py:173 non-blocking: `_reduced_receipt` builds its FixedPointResult without `active_set_support_cells`, so it falls back to the empty default at nova/equilibrium/fixed_point.py:524 and apps/playable/session.py:422-424 then publishes an empty support_cell_count on the playable app's reduced route, although the ReducedNewtonResult it holds carries the per-trip population since 60efd32e6; the data is discarded one line before it is needed and the file is outside the node's write paths.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md:16 non-blocking: the top-level `tests` line still carries `--basetemp=<arm scratch>`, an unsubstituted placeholder, so the gate command cannot be re-run from the record and the literal command survives only in the `# command:` header of gate-final.log.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/manifest.md:11 non-blocking: the `commits` field lists 3294d1017 0b810e963 4e400eba8 60efd32e6 and omits 186dcb96c, the revision the after_suite arm and the scope_note are recorded at, so the record's own commit list does not reach the revision the review is taken at.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T112025169253-receipt-mask-history-rename/gate-final.log:1 non-blocking: the focused gate ran at 60efd32e6, not at the reviewed head 186dcb96c, so the brief's final-head gate requirement is met only by gate-labeller.log, which names one test rather than both gate files; the result carries because neither gate file imports scripts/labeller_batch/shard.py, but the record does not show that.\n",
+  "review_run_id": "r-20261110T143616054596-review-of-receipt-mask-history-rename-186dcb96caf8",
+  "reviewed_base_sha": "708079d2e5c785d2d2b6fe67be128632c9852043",
+  "reviewed_commits": [
+    "3294d101740f2939900ad7c3b4f168258bdf49ae",
+    "0b810e963b856f9e74b43386cee2990b7247249c",
+    "4e400eba8cc0bc6fdb19e94cd239191c2bf071c6",
+    "60efd32e6bd3970cfa830657894724dfbdc313cd",
+    "186dcb96caf867f0ce33cb520d1be2d8b024c680"
+  ],
+  "reviewed_head_sha": "186dcb96caf867f0ce33cb520d1be2d8b024c680",
+  "reviewed_run_id": "r-20261108T112025169253-receipt-mask-history-rename",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T14:52:37.057929+00:00",
+  "total": 102
+}

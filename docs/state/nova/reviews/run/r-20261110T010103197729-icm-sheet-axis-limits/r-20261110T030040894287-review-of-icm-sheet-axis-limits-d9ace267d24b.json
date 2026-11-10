@@ -1,0 +1,157 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_review": [
+    {
+      "failure_condition": "Changing the joint recurrence gamma derivative or disabling the eligible source series breaks the retained independent 60-digit expected values; a NaN regular sentinel forces coverage of the series.",
+      "path": "tests/test_edge_sheet.py:775-779"
+    },
+    {
+      "failure_condition": "Incorrectly selecting the source expansion for interior, unconverged or cylindrical cases fails the 3.25 fallback sentinel; this compares the supplied regular value intentionally and proves branch routing only, not physical accuracy; returning regular unconditionally is caught by the paired high-precision test.",
+      "path": "tests/test_edge_sheet.py:790-795"
+    },
+    {
+      "failure_condition": "Reference nonconvergence fails explicitly; restoring the old zero-modulus expressions makes value finiteness fail for four cases, as recorded; incorrect analytic values fail against separately integrated rings; nonzero symmetry values fail the explicit zeros.",
+      "path": "tests/test_edge_sheet.py:877-892"
+    },
+    {
+      "failure_condition": "Nonconverged references fail; removing the root/source/target conditioning loses agreement at the prescribed small radii and fails the independent field-norm or flux errors; the high-precision evaluator computes ring elliptics independently of sheet.py.",
+      "path": "tests/test_edge_sheet.py:968-980"
+    },
+    {
+      "failure_condition": "The distance assertions qualify the fixed geometric probes only; replacing endpoint behavior by a finite clamp or altering its logarithmic coefficient fails monotonic growth or the independent asymptotic coefficient; distance assertions alone are not implementation guards.",
+      "path": "tests/test_edge_sheet.py:1000-1009"
+    },
+    {
+      "failure_condition": "Allowing a zero denominator or singular unselected expression to poison jacfwd makes a geometry tangent nonfinite; a finite but incorrect tangent is not detected.",
+      "path": "tests/test_edge_sheet.py:1020"
+    },
+    {
+      "failure_condition": "Centroid-on-edge geometry fails positive distance; restored zero-radius source defects fail the scalar/packed finite checks under --require-finite; before-census.log is the positive detection control for the zero after count.",
+      "path": "scripts/sheet_tile_cpu_gate/axis_census.py:95-98"
+    },
+    {
+      "failure_condition": "The current-worktree target is refused; a source retaining the introduced guard or missing the expected unguarded expression fails mutation identity assertions.",
+      "path": "scripts/sheet_tile_cpu_gate/restore_axis_expressions.py:12-15"
+    }
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/biot/tiledassembly.py:432 (_warm_sheet_evaluator.one_block)",
+    "nova/biot/sheet.py:1277 (sheet_field)",
+    "nova/biot/sheet.py:1270 (sheet_flux)",
+    "nova/biot/sheet.py:1712 (packed_sheet_end_scale)"
+  ],
+  "completed_at": "2026-11-10T03:13:21Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "icm-sheet-axis-limits",
+      "recorded_at": "2026-11-10T14:28:26.734499+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-10T03:02:37Z",
+  "findings": [
+    {
+      "file": "tests/test_edge_sheet.py",
+      "line": "895",
+      "severity": "non-blocking",
+      "text": "non-blocking: _graded_precise_ring_reference duplicates the panel integration, bisection and convergence loop already owned by scripts/edge_sheet/reference.py:_panel_integral and sheet_reference; its 50-digit ring evaluation is justified by the small-loop precision defect, but the shared reference owner should accept or own that evaluator so the refinement algorithms do not drift; this does not block the independently qualified production repair."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read all five commits from 4221309d2e66fd30eadafa7eacc3d967dd233481 to d9ace267d24b7d54871c9a1d32e7d84f6ca245ae; they derive and implement the limits, add independent value/gradient checks, retain prior precision assertions and record the gates, with one test-reference capability duplicated at tests/test_edge_sheet.py:895.",
+    "done_when": "The source live pointer requires zero nonfinite sphere pairs, 1e-10 approach agreement at three radii, a red restored-source control and the 1e-13 WEST bound; head-census.log, focused-values.log, negative-control.log and full-mesh-gate.log record each quantitative result.",
+    "goal": "The source node goal in its live pointer requires finite sheet limits at zero source radius and axis targets; nova/biot/sheet.py:1168 and :1569 implement those limits on scalar and packed routes within the documented disjoint-target domain.",
+    "manifest": "The source manifest names all five commits and complete baseline/after arms; baseline_suite.log records 702 passed and after_suite.log records 721 passed with EXIT=0, while the preserved original and two frozen-blob receipts substantiate its corrected revision header.",
+    "write_paths": "The source live pointer declares sheet.py, tiledassembly.py, the two sheet test files, the gate-script directory and named evidence/figure paths; all six changed paths are inside that scope."
+  },
+  "justifications": {
+    "durability": "tests/test_edge_sheet.py:882-886 fails on reinstated zero-modulus divisions, :978-980 fails on lost small-radius conditioning, :1009 fails on incorrect endpoint asymptotics and :1020 fails on poisoned inactive tangents; negative-control.log confirms four required value cases turn red, while gradient numerical accuracy itself is not asserted.",
+    "evidence": "The source run's head-census.log records 0/26972 nonfinite pairs on both routes, focused-values.log records all nine approaches, negative-control.log records four failing witnesses, and full-mesh-gate.log records 0/11505664 above 1e-13; the final head changes only evidence and launcher metadata after the measured source/test revision.",
+    "fit": "nova/biot/sheet.py:1457 and :1593 follow the existing NumPy/JAX shared-owner pattern with held inactive arguments, and the new definitions describe mechanisms without forbidden source labels.",
+    "goal_fidelity": "nova/biot/sheet.py:1168 and :1569 select the derived zero-area, zero-source and axis-target expressions, and the evidence fragment:80 preserves the excluded physical endpoint singularity.",
+    "reuse": "nova/biot/sheet.py:321 wraps greens.py:198 and extends existing sheet owners, but tests/test_edge_sheet.py:895 duplicates the graded-panel integration/refinement capability owned by scripts/edge_sheet/reference.py:150 and :189 rather than extending that owner.",
+    "scope_discipline": "Every path in the five-commit diff is inside the source node's declared write paths, and nova/biot/magnetisation.py and its tests remain untouched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source node goal in its live pointer requires finite sheet limits at zero source radius and axis targets; nova/biot/sheet.py:1168 and :1569 implement those limits on scalar and packed routes within the documented disjoint-target domain.\nVERDICT done_when: The source live pointer requires zero nonfinite sphere pairs, 1e-10 approach agreement at three radii, a red restored-source control and the 1e-13 WEST bound; head-census.log, focused-values.log, negative-control.log and full-mesh-gate.log record each quantitative result.\nVERDICT write_paths: The source live pointer declares sheet.py, tiledassembly.py, the two sheet test files, the gate-script directory and named evidence/figure paths; all six changed paths are inside that scope.\nVERDICT manifest: The source manifest names all five commits and complete baseline/after arms; baseline_suite.log records 702 passed and after_suite.log records 721 passed with EXIT=0, while the preserved original and two frozen-blob receipts substantiate its corrected revision header.\nVERDICT diff: Read all five commits from 4221309d2e66fd30eadafa7eacc3d967dd233481 to d9ace267d24b7d54871c9a1d32e7d84f6ca245ae; they derive and implement the limits, add independent value/gradient checks, retain prior precision assertions and record the gates, with one test-reference capability duplicated at tests/test_edge_sheet.py:895.\nCALL_SITES: nova/biot/tiledassembly.py:432 (_warm_sheet_evaluator.one_block), nova/biot/sheet.py:1277 (sheet_field), nova/biot/sheet.py:1270 (sheet_flux), nova/biot/sheet.py:1712 (packed_sheet_end_scale)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/biot/sheet.py:1168 and :1569 select the derived zero-area, zero-source and axis-target expressions, and the evidence fragment:80 preserves the excluded physical endpoint singularity.\nSCORE evidence: 19\nJUSTIFICATION evidence: The source run's head-census.log records 0/26972 nonfinite pairs on both routes, focused-values.log records all nine approaches, negative-control.log records four failing witnesses, and full-mesh-gate.log records 0/11505664 above 1e-13; the final head changes only evidence and launcher metadata after the measured source/test revision.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every path in the five-commit diff is inside the source node's declared write paths, and nova/biot/magnetisation.py and its tests remain untouched.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_edge_sheet.py:882-886 fails on reinstated zero-modulus divisions, :978-980 fails on lost small-radius conditioning, :1009 fails on incorrect endpoint asymptotics and :1020 fails on poisoned inactive tangents; negative-control.log confirms four required value cases turn red, while gradient numerical accuracy itself is not asserted.\nSCORE fit: 20\nJUSTIFICATION fit: nova/biot/sheet.py:1457 and :1593 follow the existing NumPy/JAX shared-owner pattern with held inactive arguments, and the new definitions describe mechanisms without forbidden source labels.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/biot/sheet.py:321 wraps greens.py:198 and extends existing sheet owners, but tests/test_edge_sheet.py:895 duplicates the graded-panel integration/refinement capability owned by scripts/edge_sheet/reference.py:150 and :189 rather than extending that owner.\nFINDING tests/test_edge_sheet.py:895 non-blocking: _graded_precise_ring_reference duplicates the panel integration, bisection and convergence loop already owned by scripts/edge_sheet/reference.py:_panel_integral and sheet_reference; its 50-digit ring evaluation is justified by the small-loop precision defect, but the shared reference owner should accept or own that evaluator so the refinement algorithms do not drift; this does not block the independently qualified production repair.\n",
+  "reuse_search": {
+    "capabilities": [
+      "axis sheet antiderivatives",
+      "source multipoles",
+      "small-modulus elliptic combinations",
+      "graded ring integration",
+      "compiled pair evaluator",
+      "sphere mesh census"
+    ],
+    "no_other_owner_found": [
+      "closed-form sheet axis primitive",
+      "sheet radial jet expansion",
+      "50-digit ring evaluator",
+      "sphere finite-pair classifier",
+      "restored-axis mutation helper"
+    ],
+    "owners": {
+      "graded ring reference": "scripts/edge_sheet/reference.py:150 and :189 duplicated refinement in new test helper",
+      "section axis field": "nova/biot/polygonanalytic.py:1847 opened; area-current polygon integral differs from sheet line-current primitive",
+      "sheet limits and multipoles": "nova/biot/sheet.py extended existing owner",
+      "sphere mesh": "committed nova/biot/magnetisation.py owner reused by extraction",
+      "stable loop elliptic combinations": "nova/biot/greens.py:198 wrapped"
+    },
+    "scope": "nova/biot and scripts/edge_sheet, with existing test helpers read in the diff context"
+  },
+  "review_run_id": "r-20261110T030040894287-review-of-icm-sheet-axis-limits-d9ace267d24b",
+  "reviewed_base_sha": "4221309d2e66fd30eadafa7eacc3d967dd233481",
+  "reviewed_commits": [
+    "7d8936b82e91f3b0a9eb50a3cc51aa416228f42e",
+    "765c910b3694378c4b72d44c5c3b557be7d8c096",
+    "9c4cc4d60a4ee0e6f7a04b8eb1b0dc08a3f6e025",
+    "19687600fe984b7e8ef565de50504a1e60ef4b96",
+    "d9ace267d24b7d54871c9a1d32e7d84f6ca245ae"
+  ],
+  "reviewed_head_sha": "d9ace267d24b7d54871c9a1d32e7d84f6ca245ae",
+  "reviewed_run_id": "r-20261110T010103197729-icm-sheet-axis-limits",
+  "revision_evidence": {
+    "final_delta": "Evidence fragment and launcher revision sampling only after measured revision 19687600fe984b7e8ef565de50504a1e60ef4b96; source and test blobs agree with frozen receipts.",
+    "receipts": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T010103197729-icm-sheet-axis-limits/head-before-suite.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T010103197729-icm-sheet-axis-limits/after-start-provenance.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T010103197729-icm-sheet-axis-limits/after_suite.log.asrecorded"
+    ],
+    "source_blob": "8cc0150fa32e080cbfd27a9e9885d67fe2cbc8d8",
+    "test_blob": "77d8577b7ad2f17624311e183e4b9601a677a1ac"
+  },
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T010103197729-icm-sheet-axis-limits/after_suite.log",
+      "summary": "721 passed in 979.24s (0:16:19)"
+    },
+    "baseline_suite": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T010103197729-icm-sheet-axis-limits/baseline_suite.log",
+      "summary": "702 passed in 785.13s (0:13:05)"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T03:25:22.120309+00:00",
+  "total": 103
+}

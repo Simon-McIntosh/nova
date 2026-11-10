@@ -179,6 +179,9 @@ class ProductionSolver:
                 result.active_set_iterations, dtype=jnp.int32
             ),
             active_set_residuals=residuals,
+            active_set_support_cells=jnp.asarray(
+                result.active_set_support_cells, dtype=jnp.int32
+            ),
             active_set_mask_differences=jnp.asarray(
                 result.active_set_mask_differences, dtype=jnp.int32
             ),

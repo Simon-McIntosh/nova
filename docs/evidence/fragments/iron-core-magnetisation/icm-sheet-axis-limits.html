@@ -223,3 +223,654 @@ B_R = −R f′/2 + R³ f‴/16 − R⁵ f⁽⁵⁾/384 + O(R⁷),
     the coordinator.
   </p>
 </section>
+<section id="icm-sheet-axis-limits-shell-accuracy">
+  <h2>Finite shell operands: source multipoles before endpoint subtraction</h2>
+  <p>
+    The material qualification mesh at <code>25eabd5de</code> has 228 shell cells.
+    At (R,Z)=(3,1) m the response B<sub>R</sub>/M<sub>R,5</sub> reproduces
+    as 6.53973138e-9 T/(A/m), against the independent ring integral
+    9.80715345e-15 T/(A/m). The largest erroneous edge joins (0,1) to
+    (0.003067956763,0.999995293810) m after the material owner's
+    common dilation and edge-identity rounding. The target has positive distance
+    from that segment. The target-radius <code>_near_axis</code> selector is false
+    for every edge of this cell; that radial expansion does not produce the error.
+  </p>
+  <p>
+    The ordinary endpoint derivative <code>_arsinh_gradient</code>, and its packed
+    transcription <code>_sheet_arsinh_gradient</code>, contain
+    B<sub>1</sub><sup>2</sup> = (r<sub>1</sub>-r cos φ)<sup>2</sup>
+    +(1+b<sup>2</sup>)r<sup>2</sup> sin<sup>2</sup>φ in the denominator of the
+    γ pole. Near a horizontal edge through the source axis, r<sub>1</sub> is
+    near zero and this bracket has angular layers of width 1/|b| at 0 and π.
+    The azimuthal grading width hypot(γ,r-s)/sqrt(rs) follows the ring standoff
+    and does not resolve this slope-induced layer. The existing finite-end
+    primitive also contains a common large zero-source gauge; subtracting its
+    two values can discard a weak physical field. The repair evaluates physical
+    multipole endpoints before this common gauge is added.
+  </p>
+  <p>
+    The defect predates the axis repair. Read-only extraction of the original
+    base <code>4221309d2</code> gives B<sub>R</sub>=-4.1957332735887546e-11
+    on the adjacent edge with two strictly positive source radii, against
+    1.0409935901858e-20 from precise rings; the packed base gives the same wrong
+    response. The edge with a zero-radius endpoint is nonfinite in that base.
+    The axis repair made that endpoint finite but left the shallow-slope
+    angular layer and primitive cancellation exposed. At the repaired head the
+    two edge radial fields are respectively 1.0409935901858e-20 and
+    3.9531600374750e-22 T/(A/m), on scalar and packed routes.
+  </p>
+  <h3 id="icm-sheet-axis-limits-shell-series">Derived physical endpoint primitive</h3>
+  <p>
+    Write the source line s=bγ+c<sub>1</sub>, a=sqrt(1+b²),
+    c=γ-s/b, D=sqrt(r²+c²), q=sa/(|b|D), t=-c/D and v=sign(b)/a.
+    The Laplace addition theorem and azimuthal cosine projection give
+    ∫cosφ P<sub>n</sub>(cosθ cosθ′+sinθ sinθ′cosφ)dφ
+    =π sinθ sinθ′ P′<sub>n</sub>(t)P′<sub>n</sub>(v)/(n(n+1)),
+    with integration over 0≤φ≤π. Integrating source arclength supplies 1/(n+2).
+    Hence the physical flux endpoint primitive is μ₀πr²H, where
+  </p>
+  <pre>H(s;c,r,b) = sign(b) b²/a² Σ[n=1..∞]
+    q^(n+2) P′n(t) P′n(v) / [n(n+1)(n+2)]
+∂c H: replace P′n(t) by -r² P″n(t)/D³ - (n+2)c P′n(t)/D²
+∂r H: replace P′n(t) by  cr P″n(t)/D³ - (n+2)r P′n(t)/D²
+B_R endpoint = μ₀ r (∂c H)/2
+B_Z endpoint = μ₀ [2H+r(∂r H)]/2
+ψ endpoint   = μ₀ π r² H.</pre>
+  <p>
+    The definite field is the upper-height endpoint minus the lower-height
+    endpoint. Both endpoints have the same c and therefore the same zero-source
+    gauge, which cancels identically. <code>_source_series_ends</code> selects this
+    representation only for nonhorizontal, noncylindrical segments whose two
+    endpoints satisfy q≤1/2. The 80-term Legendre recurrence retains the source
+    powers explicitly. Inactive geometry is held at regular values before
+    evaluation, then the result is selected arithmetically (double-where).
+    The same physical endpoint terms serve scalar fields, scalar flux and packed
+    fields, including the packed per-end rounding scale. No production quadrature,
+    radius shift, clamp or nonfinite substitution was added.
+  </p>
+  <h3 id="icm-sheet-axis-limits-accuracy-budget">Accuracy census and absolute floor</h3>
+  <p>
+    <code>scripts/sheet_tile_cpu_gate/accuracy_census.py</code> rebuilds both meshes
+    from the read-only committed mesher at <code>25eabd5de</code>. It applies the
+    material owner's exact power-of-two dilation 1024 before edge identity
+    rounding and restores metre coordinates afterward. Sphere targets are its
+    44 centroids plus (1,0) and (0,1); shell targets are its 228 centroids plus
+    (2,0), (0,2) and (3,1). Every pair is compared independently on scalar,
+    packed and commonly dilated packed routes, including zero-area sources
+    and targets on the axis.
+  </p>
+  <p>
+    The reference owner is now <code>scripts/edge_sheet/reference.py</code>:
+    <code>graded_precise_ring_reference</code> evaluates independent elliptic ring
+    kernels, source interpolation and weighted summation at 50 decimal digits.
+    Nearby segments grade toward the target's orthogonal foot; distant short
+    segments start with one panel. Increasing Gaussian orders and subsequent
+    panel bisection must converge at 1e-13. Exact axis rings use
+    B<sub>R</sub>=ψ=0 and B<sub>Z</sub>=μ₀s²/[2(s²+(Z-Z′)²)^(3/2)].
+    The first census refused to converge when binary64 weighted accumulation
+    lost a symmetry cancellation; retaining the full-precision sum fixes the
+    reference rather than weakening its convergence criterion.
+  </p>
+  <p>
+    Comparisons use |computed-reference| ≤ 1e-10|reference| + 128εE per
+    component, with ε=2^-52 and E the absolute sum of the two physical endpoint
+    terms returned by the production owner. This absolute floor accounts for
+    subtracting nearly equal endpoint primitives: for n rounded operations,
+    γ<sub>n</sub>=nε/(1-nε) bounds accumulated relative roundoff, and 128ε
+    budgets the endpoint recurrence summation and final elementary arithmetic.
+    The floor scales with the computed primitive, independently of the residual
+    being measured; it cannot absorb the reproduced 6.54e-9 error. Exact zero-area
+    sources have E=0 and must be exactly zero.
+  </p>
+  <p>
+    Current durable result: sphere 611 edges × 46 targets = 28,106 pairs;
+    zero inaccurate or nonfinite pairs on all three routes. The largest absolute
+    floor is 8.570776534479921e-20 T/(A/m), and the worst fraction of the allowed
+    budget is 0.9893601 (scalar), 0.5475899 (packed), 0.9291696 (dilated).
+    The shell's 2635 edges × 231 targets = 608,685 pairs and preservation gates
+    are running; final receipts follow below.
+  </p>
+</section>
+<section id="icm-sheet-axis-limits-double-end-remainder">
+  <h2>Complete shell census exposed a second azimuthal layer</h2>
+  <p>
+    The first complete shell accuracy census refused 452 scalar, 455 packed and
+    591 dilated packed pairs (605 distinct pairs across the three routes).
+    All values were finite. Its worst pair is target
+    (0.10058128716025194,-0.9071429134838774), source
+    (0.0964551824609375,-0.8948164045078125) to
+    (0.09919998656445313,-0.8945162730019531) m. It returned
+    (-4.0626262477703335e-8,-4.772535084003146e-10), against precise rings
+    (-4.0626286138512844e-8,-4.772590736412317e-10) T/(A/m).
+  </p>
+  <p>
+    Here b=9.145338126552916, r₁=-0.016274910045165666 and the ring-distance
+    layer has width 0.13197154251180435 radians at φ=0. The single-ended rule
+    reverses to resolve B₁ near π and leaves this independent layer unresolved.
+    The same analytic endpoint expression is retained; its existing arsinh
+    remainder is split exactly into two half-turn contributions, with the
+    same total 140×24=3360 nodes:
+  </p>
+  <pre>∫[0,π] f(φ)dφ = ∫[0,π/2] [f(φ)+f(π-φ)]dφ
+D²(φ)  = d₀² + rs φ² + O(φ⁴),   d₀²=γ²+(r-s)²
+B₁²(φ) = (r₁-r)² + [r(r₁-r)+a²r²]φ² + O(φ⁴)
+B₁²(π-θ) = (r₁+r)² + [-r(r₁+r)+a²r²]θ² + O(θ⁴)
+w⁻² = rs/d₀² + |r(r₁-r)+a²r²|/(r₁-r)²
+                 + |-r(r₁+r)+a²r²|/(r₁+r)².</pre>
+  <p>
+    Both half-turns use φ=w sinh(u) with 70 geometrically graded panels.
+    A zero pole gap is the removable supporting-line case: its inactive
+    denominator is held before omitting that curvature term. The scalar and
+    packed derivative owners call the same <code>_gradient_azimuth_rule</code>.
+    This corrects the existing analytic remainder evaluation; the source line
+    is still evaluated by its endpoint primitive. The new regression checks
+    both components of this pair directly against precise rings at 1e-10.
+  </p>
+  <p>
+    Rechecking all 605 recorded bad pairs removes the large misses. Fifteen
+    near-zero components exceed the provisional 128εE floor by at most a factor
+    1.654863. That provisional operation count omitted the remainder summation.
+    The final census uses the counted roundoff allowance γ₃₅₀₄E, where
+    n=3360 remainder terms + 80 recurrence terms + 64 endpoint operations and
+    γₙ=nε/(1-nε). Thus γ₃₅₀₄=7.78044295658e-13. The relative component budget
+    remains 1e-10|reference|. The reproduced sheet defects exceed this corrected
+    absolute floor by thousands of times; it only addresses arithmetic at
+    nearly cancelling endpoint differences. The full census is repeated with
+    this fixed, printed budget.
+  </p>
+</section>
+<section id="icm-sheet-axis-limits-unmet-dilated-pairs">
+  <h2>Second complete census: two dilated pairs remain above budget</h2>
+  <p>
+    The repeated full census at source revision <code>533d59093</code>, sirius
+    job 1309713, exits 1. Sphere: 28,106 pairs, zero inaccurate or nonfinite
+    values on scalar, packed and dilated packed routes. Shell: 608,685 pairs,
+    zero inaccurate values on scalar and packed routes, two inaccurate pairs
+    on the dilated packed route; every value is finite. Maximum absolute floors
+    are 2.346250076315704e-18 (sphere) and 2.664487511701676e-18 T/(A/m)
+    (shell), varying per endpoint scale rather than a uniform allowance.
+  </p>
+  <table>
+    <thead><tr><th>Mesh</th><th>Route</th><th>Failed pairs</th><th>Worst fraction of tolerance</th></tr></thead>
+    <tbody>
+      <tr><td>Sphere</td><td>Scalar</td><td>0</td><td>0.023849258</td></tr>
+      <tr><td>Sphere</td><td>Packed</td><td>0</td><td>0.023191877</td></tr>
+      <tr><td>Sphere</td><td>Dilated packed</td><td>0</td><td>0.076183957</td></tr>
+      <tr><td>Shell</td><td>Scalar</td><td>0</td><td>0.996048992</td></tr>
+      <tr><td>Shell</td><td>Packed</td><td>0</td><td>0.869461902</td></tr>
+      <tr><td>Shell</td><td>Dilated packed</td><td>2</td><td>1.039181120</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The worst remaining pair is target (0.8600227012928746,-0.34002196003153545),
+    source (0.9707721407285156,-0.24000302244921876) to
+    (0.9707728830478516,-0.24) m. Computed B is
+    (-2.8796757087955512e-12,4.295403878866854e-12), reference B is
+    (-2.8796757087867334e-12,4.295403878199872e-12) T/(A/m).
+    Its vertical absolute difference is about 6.67e-22. It remains a failed
+    measurement: the budget is not enlarged again to admit it.
+  </p>
+  <p>
+    This is the second counted failure of the complete accuracy command after
+    different repairs. The dispatch stop rule is invoked. Further changes need
+    a coordinator ruling. The reported shell witness is repaired, but the full
+    node is not qualified. The final WEST measurement and suite arms already
+    launched continue to their own receipts; their results do not override this
+    failed independent accuracy census.
+  </p>
+</section>
+<section id="icm-sheet-axis-limits-final-west-receipt">
+  <h2>Final-source WEST preservation passes; suite receipts pending</h2>
+  <p>
+    Sirius job 1309714 completed with exit 0. The whole-mesh measurement at
+    source revision <code>533d59093</code> reports 1696 targets × 1696 cells,
+    zero of 11,505,664 entries above 1e-13, every entry finite, worst 4.239e-14
+    at (1886,1426); the gate passed in 571.45 s. It used
+    <code>scripts/sheet_tile_cpu_gate/run_tail_gate.sbatch</code> with its
+    gate-only switch, while both exact suite-command arms continue in the
+    original sirius allocation 1309695.
+  </p>
+  <p>
+    Restoring the pre-repair sheet owner in a HEAD scratch extraction asserts
+    the mutant import and reproduces the reported 6.53973138e-9 radial cell
+    response on scalar and packed routes. Pytest fails
+    <code>tests/test_edge_sheet.py::test_shell_oblique_radial_magnetisation</code>
+    with exit 1. The introduced source-series and two-ended-rule markers are
+    present once each in the unchanged HEAD source blob.
+  </p>
+  <p>
+    The focused two-layer regression passed. The separately launched shell
+    Jacobian check passed its field comparisons, then its cold compile took
+    486.14 s and exceeded the 300 s test bound loaded at that process's start;
+    its complete log records one failed and one passed test. The matching
+    900 s bound was committed before the head suite starts. That suite is still
+    awaited and no passing gradient result is claimed from the timed-out run.
+  </p>
+  <p>
+    The mandatory stop rule remains in effect for the two inaccurate dilated
+    shell pairs. Waiting for the already-running suite collects evidence and
+    does not authorise another repair pass.
+  </p>
+</section>
+<section id="icm-sheet-axis-limits-terminal-suite-receipt">
+  <h2>Completed suite arms: eight added failures; node blocked</h2>
+  <p>
+    Sirius job 1309695 is terminal FAILED with exit 1:0 and elapsed 00:41:41.
+    Both suite arms ran the exact resolved command below, without a timeout
+    wrapper, in this one allocation. Each log carries its revision, imported
+    module and working directory, and ends with the command's bare EXIT receipt.
+  </p>
+  <pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_edge_sheet.py tests/test_sheet_tile.py</pre>
+  <table>
+    <thead><tr><th>Arm</th><th>Revision</th><th>Summary</th><th>Receipt</th></tr></thead>
+    <tbody>
+      <tr><td>Baseline</td><td><code>d9ace267d24b7d54871c9a1d32e7d84f6ca245ae</code></td><td>721 passed in 936.61s</td><td><code>EXIT=0</code></td></tr>
+      <tr><td>Head</td><td><code>59ef71aeab8835ba878eb548ef14dbe1fa58d83c</code></td><td>8 failed, 715 passed in 825.33s</td><td><code>EXIT=1</code></td></tr>
+    </tbody>
+  </table>
+  <p>
+    The eight failures are the following four parameter cases in each of
+    <code>test_sloped_field_matches_reference</code> and
+    <code>test_sloped_closed_form_field_matches_reference</code>, all in
+    <code>tests/test_edge_sheet.py</code>. Every case exceeds the existing 1e-10
+    reference tolerance. These are added failures against the passing baseline.
+  </p>
+  <table>
+    <thead><tr><th>Slope [radians]</th><th>Station</th><th>Distance [m]</th><th>Measured relative error, both tests</th></tr></thead>
+    <tbody>
+      <tr><td>0.7853981633974483</td><td>start</td><td>0.1</td><td>2.90e-9</td></tr>
+      <tr><td>0.7853981633974483</td><td>end</td><td>0.1</td><td>1.62e-9</td></tr>
+      <tr><td>0.7853981633974483</td><td>end</td><td>1.0</td><td>1.13e-10</td></tr>
+      <tr><td>1.1780972450961724</td><td>end</td><td>1.0</td><td>2.16e-10</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The reported shell-witness test is absent from the completed head arm's
+    failure list, while the restored-defect control fails that same test.
+    The standalone cold-compile timeout remains preserved as an earlier failed
+    run; the complete head suite used the committed 900 s derivative-test bound.
+    Source and test blobs at the measured head revision equal the delivered
+    source and test blobs; subsequent commits only update this evidence fragment.
+  </p>
+  <p>
+    Final-source WEST remains a pass: zero of 11,505,664 entries above 1e-13,
+    every entry finite, worst 4.239e-14. Independent accuracy remains a failure:
+    the shell's dilated packed route has two inaccurate pairs. Together with
+    the eight added suite failures and the mandatory two-census-failure stop
+    rule, this leaves the node blocked. Receipt collection is complete; no
+    kernel repair or tolerance change was made on this resume. A coordinator
+    ruling is required before any further repair.
+  </p>
+  <p>
+    Durable receipts are under the assigned run directory in
+    <code>shell-accuracy/baseline_suite.log</code>,
+    <code>shell-accuracy/after_suite.log</code>,
+    <code>shell-accuracy/final-west/full-mesh-gate.log</code>,
+    <code>shell-accuracy/negative-control.log</code> and
+    <code>shell-accuracy/final-census/</code>. The manifest holds all eight exact
+    failing test ids and the two remaining census counterexamples.
+  </p>
+</section>
+<section id="icm-sheet-axis-limits-authorised-round">
+  <h2>One authorised round: remove the branch regression and enforce binary homogeneity</h2>
+  <p>
+    The coordinator permits one further repair round. The existing sloped-field
+    tests, their parameters and their 1e-10 tolerances remain unchanged.
+    Reproduction at the four failing geometries confirms that
+    <code>_source_series_ends</code> is unselected. Replacing only
+    <code>_gradient_azimuth_rule</code> by the established single-ended rule
+    changes the relative errors from 2.90e-9, 1.62e-9, 1.13e-10 and 2.16e-10
+    to at most 4.49e-13 against independent precise rings, on both scalar routes.
+    The common condition is r₁/r=1 to floating-point precision: the target is
+    on the extension of the source line. The integrand takes its removable-gap
+    limit, while the unconditional two-ended rule grades a rounding-sized gap.
+    Neither the source multipoles nor full-precision reference accumulation
+    causes these regressions.
+  </p>
+  <h3 id="icm-sheet-axis-limits-bounded-selection">Selection and truncation bound</h3>
+  <p>
+    The two-ended rule is now selected only when both pole gaps are resolved
+    relative to the integrand's existing 1e-12r removable-line condition,
+    w≤1, U=asinh(π/(2w))≤10, and the exact imaginary azimuthal distance of
+    each ring or pole singularity is at least w. Otherwise the established
+    140-panel single-ended rule is selected. Inactive rule widths are held
+    before arithmetic and the results are selected with double-where.
+    No source radius is shifted. The exact singular distances are
+  </p>
+  <pre>ηD = 2 asinh(sqrt(γ²+(r-s)²)/(2 sqrt(rs)))
+A = sqrt(1+b²) hypot(r₁,br)
+η+ = 2 asinh(|r₁-r| / sqrt(2r[b²r+r₁+A]))
+η- = 2 asinh(|r₁+r| / sqrt(2r[b²r-r₁+A])).</pre>
+  <p>
+    A nonpositive pole denominator denotes an absent pole and its inactive
+    denominator is held. These formulas follow by factoring B₁² as a quadratic
+    in cosφ and rationalising coshη−1; they avoid subtracting nearly equal roots.
+    Under φ=w sinh(u), η≥w places the zero-end singularities at imaginary
+    u=±π/2 or beyond. The opposite-end singularities have real u at least
+    asinh(π/w), more than 0.629 beyond U for w≤1.
+  </p>
+  <p>
+    Each selected half uses 70 panels with ratio 1.1 and 24 Gaussian nodes,
+    retaining 3360 total nodes. At U≤10 its largest panel width is
+    0.910243485214. A Bernstein ellipse with parameter ρ=4 on that panel
+    extends by at most 0.512013 in real u and 0.853354 in imaginary u.
+    It therefore stays inside the above analytic domain. If Mⱼ bounds the
+    magnitude of a transformed integrand on that ellipse, the Chebyshev
+    coefficient bound |aₖ|≤2Mⱼρ⁻ᵏ and Gaussian exactness through degree 47 give
+  </p>
+  <pre>|δI| ≤ [4 ρ⁻⁴⁸/(1-ρ⁻¹)] Σⱼ Δuⱼ Mⱼ
+     = 6.731613057886e-29 Σⱼ Δuⱼ Mⱼ.</pre>
+  <p>
+    This is the explicit truncation bound for the newly selected rule. Even an
+    amplification of 1/ε=2⁵² gives 3.031649005910e-13, below the 1e-10 relative
+    budget; stronger cancellation is assessed against the printed absolute
+    endpoint allowance in the full census. The removable-line geometries never
+    select this rule. The same focused command now passes all 72 existing
+    sloped reference cases and both binary-dilation regressions: 74 passed,
+    643 deselected in 57.38s, EXIT=0.
+  </p>
+  <p>
+    The source-series truncation is independent. With q≤1/2 at both endpoints,
+    |P′ₙ|≤n(n+1)/2 and |P″ₙ|≤(n−1)n(n+1)(n+2)/8 bound the omitted terms
+    after n=80. Writing T=Σ[n≥81]n(n+1)(n+3)qⁿ⁺², T≤1.197377023896e-19;
+    since r/D≤1, |δB_R|/μ₀≤T/32=3.741803199672e-21 and
+    |δB_Z|/μ₀≤3.746042500312e-21. Those source multipoles remain unchanged.
+  </p>
+  <h3 id="icm-sheet-axis-limits-binary-rounding">Dilation and edge-identity rounding</h3>
+  <p>
+    Multiplication or division by 1024=2¹⁰ changes only a normal binary64
+    exponent and has zero rounding error here. The material owner's decimal
+    edge-identity grid is h=1e-9/1024=9.765625e-13 m; nearest-grid rounding
+    moves a coordinate by at most h/2, plus the floating arithmetic of the
+    decimal round operation. For authored coordinates of magnitude X a
+    conservative arithmetic term is γ₃X, giving endpoint displacement at most
+    √2(h/2+γ₃X). This is a common geometry change: all three census routes and
+    their precise reference use those same once-rounded endpoints. The 1024×
+    evaluation does not round them again. Therefore the additional geometric
+    error from dilation and edge identity in this comparison is exactly zero.
+  </p>
+  <p>
+    The two former misses cannot be admitted by adding a grid allowance.
+    Instead <code>_binary_field_geometry</code> chooses the common exponent e
+    with frexp(max|coordinate|), then evaluates all six coordinates with
+    ldexp(coordinate,−e). For a common 2¹⁰ dilation the exponent becomes e+10,
+    so the canonical operands are bit-identical. Normalisation is exact and
+    the sheet field B/K is homogeneous of degree zero; no output rescaling is
+    required. The packed field and its endpoint scale use the same canonical
+    operands, and the derivative remains traceable through the piecewise
+    constant exponent. The two actual counterexamples now pass their unchanged
+    budgets and return bit-identical fields at scales 1 and 1024.
+  </p>
+  <p>
+    The census explicitly adds a zero dilation-geometry term to its unchanged
+    1e-10|reference|+γ₃₅₀₄E budget, asserts canonical operands and resulting
+    fields are bit-identical, and reports the grid step. Its positive control
+    requires a nonzero measured identity-grid displacement of an authored mesh
+    coordinate before reporting zero additional rounding. Full census and
+    preservation receipts for this authorised round follow separately.
+  </p>
+</section>
+<section id="icm-sheet-axis-limits-authorised-round-admission">
+  <h2>Collection and negative control are explicit</h2>
+  <p>
+    The suite's exact resolved command, with only <code>--collect-only</code>
+    appended for the collection probe, lists 725 tests and exits 0. It explicitly
+    lists <code>tests/test_edge_sheet.py::test_shell_oblique_radial_magnetisation</code>
+    and all eight formerly failing sloped-field test ids. The two existing test
+    functions are AST-identical to the round's base; their parameters and
+    tolerances are unchanged. Thus the shell witness is collected by this suite.
+    Earlier wording concerned its absence from a failure list, not from collection.
+  </p>
+  <p>
+    A HEAD scratch extraction restoring the defective pre-shell owner asserts
+    the mutant module path, reproduces 6.53973138e-9 radial response on both
+    routes, and fails the shell-witness test: one failed in 37.67s, EXIT=1.
+    The production source blob is checked against HEAD afterward, including
+    the introduced binary-canonicalisation and bounded-selection markers.
+    Receipts are <code>one-round/collection.log</code>,
+    <code>one-round/negative-control.log</code> and
+    <code>one-round/source-blob-check.log</code> under the assigned run directory.
+  </p>
+  <p>
+    The full sphere/shell accuracy census is submitted as sirius job 1309790.
+    WEST and both exact-command suite arms share sirius job 1309791. Both jobs
+    are queued on scheduler priority. The baseline is the round's base
+    <code>61dadd7eeee75fc00da0e9ccfa818e287eeaa940</code>, which carries the eight
+    recorded regressions. Qualification depends on the completed head and
+    independent census receipts; no passing full-gate result is claimed yet.
+  </p>
+</section>
+<section id="icm-sheet-axis-limits-authorised-round-outcome">
+  <h2>Authorised round remains blocked: one scalar census miss</h2>
+  <p>
+    The single authorised round is measured at source commit
+    <code>58c81cb9a2e1847c85555e98197d6eee77ad4050</code>, with the gate logs
+    identifying evidence-only head <code>b5af48b5cd67d3e00ed0255deb8e77eca9788856</code>.
+    The source and test blobs are unchanged between those revisions.
+    The independent census completed in sirius job 1309790 and exits 1:
+    <code>AssertionError: 1 inaccurate pairs</code>, followed by <code>EXIT=1</code>.
+  </p>
+  <table>
+    <thead><tr><th>Mesh</th><th>Pairs</th><th>Scalar failures</th><th>Packed failures</th><th>Dilated packed failures</th></tr></thead>
+    <tbody>
+      <tr><td>Sphere</td><td>28,106</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>Shell</td><td>608,685</td><td>1</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Every value is finite. Packed and dilated packed fields are bit-identical
+    over every pair on both meshes. The additional geometry-rounding allowance
+    remains exactly zero. Positive controls observe identity-grid movements
+    4.866662628444374e-13 m (sphere) and 4.881650639276813e-13 m (shell).
+    Thus the two dilated-route misses are corrected, but full scalar accuracy
+    is still unmet; the allowance is not enlarged to accept the remaining miss.
+  </p>
+  <p>
+    The scalar counterexample is target
+    (0.45992116430406516,-0.8599178752181855) m and source segment
+    (0.72,-0.6939740549492187) to
+    (0.7200025079609375,-0.6939714608896485) m. Its returned field is
+    (-1.2672138029109027e-12,3.5895551714549664e-12), against precise rings
+    (-1.26721380297948e-12,3.5895551719919193e-12) T/(A/m).
+    The vertical absolute error is 5.36952904749504e-22, against the unchanged
+    combined budget 5.335076211121033e-22. The excess is
+    3.4452836374006456e-24 T/(A/m), or a budget ratio of 1.0064577964794934.
+    This is a failed measurement despite its small margin.
+  </p>
+  <h3 id="icm-sheet-axis-limits-authorised-round-suite-cutoff">WEST passes; the head suite was cut short</h3>
+  <p>
+    The new WEST gate completed with zero of 11,505,664 entries above 1e-13,
+    all finite, worst 4.239e-14 at (1886,1426): one passed in 1318.41s,
+    <code>EXIT=0</code>. Both exact-command suite arms then ran in the same
+    sirius allocation 1309791. Baseline
+    <code>61dadd7eeee75fc00da0e9ccfa818e287eeaa940</code> completed with the eight
+    known sloped-field failures: eight failed, 715 passed in 1283.71s,
+    <code>EXIT=1</code>.
+  </p>
+  <p>
+    The head arm started at
+    <code>b5af48b5cd67d3e00ed0255deb8e77eca9788856</code> and emitted 719 passing
+    progress markers from the 725 collected tests before scheduler termination.
+    Its ordered collection lists all 717 edge-sheet tests before the tile tests;
+    the log then stops during the third tile test, the whole-mesh comparison.
+    There is no head summary and no bare EXIT receipt. Its completion is false,
+    final pytest exit and total failure count are unknown, and no passing
+    full-suite result is claimed.
+  </p>
+  <p>
+    The scheduler receipt is TIMEOUT after 01:00:20 with actual Timelimit
+    01:00:00. The batch step is CANCELLED with ExitCode 0:15, and the job log
+    explicitly reports cancellation due to the time limit. These receipts,
+    rather than the job's top-level 0:0 exit field, establish termination.
+    No timeout wrapper was placed around either suite. The original head log,
+    including cleanup output, is preserved without appending an invented
+    pytest EXIT line.
+  </p>
+  <p>
+    Focused validation remains 74 passed, the shell witness and all eight prior
+    failure ids are explicitly collected, and the restored shell mutant fails.
+    Nevertheless one scalar census pair remains above budget and the head
+    suite is incomplete. The coordinator's stop instruction applies: this
+    resume records the outcome and makes no source repair, tolerance change,
+    suite rerun or scheduler change. The node is blocked pending a new ruling.
+  </p>
+  <p>
+    Complete census arrays and summaries remain in <code>one-round/census/</code>;
+    the WEST, baseline, incomplete head and scheduler logs remain in
+    <code>one-round/gates/</code> under the assigned run directory. The manifest
+    records the actual head revision, scheduler signal and missing exit receipt.
+  </p>
+</section>
+<p id="icm-sheet-axis-limits-cancelled-arm-record">
+  The manifest encodes the observed batch cancellation signal 15 as the
+  shell-equivalent runner status 128+15=143 so the interrupted arm has a typed
+  flat record. It explicitly records that this is derived from the scheduler
+  batch receipt and is not a captured pytest exit. The arm remains
+  <code>completed=false</code>, <code>pytest_exit_status=null</code>, with no
+  summary and no EXIT receipt. This encoding does not make the head arm complete
+  or passing and does not modify the original log.
+</p>
+
+<section id="icm-sheet-axis-limits-scalar-rounding-admission">
+  <h2>Scalar final-assembly rounding admits the remaining pair</h2>
+  <p>
+    The subsequent lead ruling authorises a derived scalar rounding term and a
+    head-only suite rerun. Product source, test parameters and test tolerances
+    remain unchanged. This paragraph supersedes the blocked admission above;
+    the original failed census receipt is preserved. No full census, WEST gate
+    or baseline suite is rerun for this admission.
+  </p>
+  <p>
+    For the recorded shell target and segment above, neither the near-axis nor
+    the source-series selector fires. The scalar sloped route forms
+    B_Z = C[(S_e + r S_{r,e}) - (S_s + r S_{r,s})], where
+    C = μ₀/[2πr(1+b²)] = 2.2476486620755053e-7 and
+    b = 0.9668093077869323. Treat the computed endpoint outputs and C as
+    inputs to this final assembly; their own evaluation retains the existing
+    endpoint-kernel and common-scale allowance. The additional term below
+    accounts for assembly conditioning before the endpoint cancellations.
+  </p>
+  <table>
+    <thead><tr><th>Signed physical contribution [T/(A/m)]</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>C S_e</td><td>9.770657347343699e-9</td></tr>
+      <tr><td>C r S_{r,e}</td><td>−9.881036198487738e-9</td></tr>
+      <tr><td>−C S_s</td><td>−9.769030678834822e-9</td></tr>
+      <tr><td>−C r S_{r,s}</td><td>9.882999085150316e-9</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The absolute sum before cancellation is
+    T = Σ|C S_i| + Σ|C r S_{r,i}| = 3.9303723309816574e-8 T/(A/m),
+    while the computed final field is only 3.5895551714549664e-12 T/(A/m).
+    The operation count is six: two r S_r products, two within-end additions,
+    one endpoint subtraction, and one final multiplication by C. Multiplication
+    by ±1 and the initial addition to zero are exact. With binary64
+    u = 2⁻⁵³ = 1.1102230246251565e-16, the usual product-of-roundings bound
+    |Π(1+δ_j)−1| ≤ γ₆ = 6u/(1−6u), |δ_j| ≤ u, bounds every contribution's
+    assembly path. The triangle inequality therefore gives the named term
+    <code>scalar_assembly_roundoff = γ₆ T</code> for the vertical component.
+    This bounds the assembly error conditional on the endpoint inputs; it does
+    not replace the existing endpoint-kernel allowance.
+  </p>
+  <p>
+    The census computes T with a correctly rounded positive sum and rounds its
+    bound outward: T_up = nextafter(T/(1−3u), +∞) =
+    3.9303723309816594e-8. Three u cover at most two products forming each
+    scaled contribution and the positive sum's rounding. It then rounds γ₆T_up
+    outward to <strong>2.618153914323293e-23 T/(A/m)</strong>. These outward
+    operations affect the evidence allowance only. The field evaluation is
+    unchanged. The explicit scalar budget becomes
+    1e-10|B_ref| + γ₃₅₀₄E + (0, scalar_assembly_roundoff);
+    packed and dilated budgets retain their original terms and the zero
+    dilation-geometry term.
+  </p>
+  <p>
+    At this pair the vertical budget is consequently
+    5.335076211121033e-22 + 2.618153914323293e-23 =
+    <strong>5.596891602553363e-22</strong>, which exceeds the observed
+    <strong>5.36952904749504e-22</strong> error. The added term covers the
+    3.4452836374006456e-24 excess. The summand probe reproduces the stored
+    scalar vertical field bit for bit before applying the bound, so the
+    conditioning instrument demonstrably observes the actual missed pair.
+  </p>
+  <p>
+    <code>accuracy_census.py --admit-cached</code> reads the completed arrays
+    and checks every recorded row against the unchanged original allowance.
+    It evaluates the named assembly term only for the sole formerly rejected
+    scalar row. Already-passing rows remain certified because the new term is
+    nonnegative. It performs no new mesh census, ring integration or packed
+    evaluation. The stored admission receipt exits 0: sphere 28,106 pairs and
+    shell 608,685 pairs each have zero remaining rejected pairs on scalar,
+    packed and 1024× dilated packed routes. Every field remains finite and the
+    packed/dilated bit identity stands. The full-census path also includes the
+    named scalar term explicitly for future measurements.
+  </p>
+  <p>
+    Receipts under the assigned run directory are
+    <code>final-admission/rounding-probe.json</code>,
+    <code>final-admission/cached-admission.log</code>, and the two
+    <code>final-admission/{sphere,shell}-admission.json</code> files.
+    Head-only job 1309863 is verified on sirius with Timelimit 01:30:00,
+    eight CPUs, 64 GB and one pytest process using the exact resolved suite
+    command. Its completion receipt will be recorded below. The earlier
+    one-hour head interruption was the coordinator's move to all_debug.
+  </p>
+</section>
+
+<section id="icm-sheet-axis-limits-completion">
+  <h2>Complete: head suite passes and all eight regressions are fixed</h2>
+  <p>
+    The head-only suite completed in sirius job 1309863 with scheduler and
+    batch status COMPLETED, ExitCode 0:0, elapsed 01:02:23. The actual measured
+    revision is <code>cb63840160f3f88c211c9401b1ccf5e01a9e1f61</code>.
+    Its log reaches the complete pytest summary
+    <strong>725 passed in 3728.67s (1:02:08)</strong> and ends with the bare
+    receipt <code>EXIT=0</code>. The allocation was verified as sirius,
+    Timelimit 01:30:00, eight CPUs, 64 GB and one pytest process. There is no
+    timeout wrapper.
+  </p>
+  <p>
+    Both arm records use the exact resolved command:
+    <code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_edge_sheet.py tests/test_sheet_tile.py</code>.
+    The completed baseline at
+    <code>61dadd7eeee75fc00da0e9ccfa818e287eeaa940</code> stands: eight failed,
+    715 passed in 1283.71s, EXIT=1. The new head has no failing test ids, so all
+    eight known sloped-field failures are fixed and the added failure count is
+    zero. Their existing parameters and tolerances remain unchanged. The
+    collection receipt explicitly includes all eight ids and the shell oblique
+    radial-magnetisation witness among the 725 tests. The additional two tests
+    beyond the baseline pin exact binary dilation behaviour.
+  </p>
+  <table>
+    <thead><tr><th>Final qualification</th><th>Receipt</th></tr></thead>
+    <tbody>
+      <tr><td>Head suite</td><td>725 passed; EXIT=0; zero added failures, all eight baseline failures fixed</td></tr>
+      <tr><td>Sphere accuracy</td><td>28,106 pairs; zero rejected pairs on scalar, packed and dilated packed routes</td></tr>
+      <tr><td>Shell accuracy</td><td>608,685 pairs; zero rejected pairs on all three routes with the derived scalar assembly term</td></tr>
+      <tr><td>Finiteness and dilation</td><td>All fields finite; packed and 1024× dilated packed fields bit-identical throughout both meshes</td></tr>
+      <tr><td>Standing WEST gate</td><td>0 of 11,505,664 above 1e-13; worst 4.239e-14; every entry finite; EXIT=0</td></tr>
+      <tr><td>Restored defective shell owner</td><td>Shell witness FAILED; one failed in 37.67s; EXIT=1</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The census figures include the derived six-operation scalar allowance
+    printed above. Admission reads the stored arrays and preserves the
+    original failed measurement; no new full census was run. The standing
+    standalone WEST gate and baseline were also retained. The latest action
+    reran only the exact-command head suite. Product source, tests and shared
+    ring-reference blobs match the measured head, the committed census/evidence
+    head <code>c97b05330c613309157d059a8420efb33a928d6c</code>, and the delivery
+    tree. The final source check verifies the introduced source-series,
+    bounded azimuthal-selection and binary-canonicalisation markers.
+  </p>
+  <p>
+    Under the assigned run directory, the completed head receipt is
+    <code>final-admission/after_suite.log</code>, with the comparison and blob
+    receipt in <code>final-admission/completion-receipt.json</code>.
+    The exact-command arm JSON, six rubric self-check lines, commit list and
+    final write-time audit are recorded in the manifest. This worker reports
+    its node complete; coordinator review, promotion and plan writeback remain
+    coordinator actions.
+  </p>
+</section>

@@ -1070,6 +1070,16 @@ def test_the_request_path_reports_the_reduced_active_set_history(steered):
         np.asarray(history.active_set_residuals),
     )
     np.testing.assert_array_equal(
-        np.asarray(receipt.mask_history),
+        np.asarray(receipt.changed_mask_entries),
         np.asarray(history.active_set_mask_differences),
     )
+    support = np.asarray(receipt.support_cell_count)
+    assert support.ndim == 1
+    assert support.size == np.asarray(receipt.changed_mask_entries).size
+    assert support.size == len(history.active_set_residuals)
+    assert support.size > 0
+    assert np.all(support > 0)
+    operator = profile.operator
+    terminal = np.asarray(receipt.equilibrium.flux)
+    recomputed = reduced_newton.reduced_coordinates(operator, terminal)
+    assert int(recomputed.cells.size) == int(support[-1])

@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "apps/playable/production.py:215",
+    "apps/playable/session.py:422"
+  ],
+  "completed_at": "2026-11-10T18:12:48.494Z",
+  "dispatched_at": "2026-11-10T17:51:58Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the field name on ReducedNewtonResult is exercised against the real class by tests/test_labeller_receipt.py and tests/test_receipt_support_count.py; this test isolates the playable lift",
+      "recorded_at": "2026-11-10T18:26:50.653177+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the shape assertions guard truncation and zeroing, which is their stated purpose; the equality at line 42 carries the identity",
+      "recorded_at": "2026-11-10T18:27:20.171301+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "pre-existing on main: base ddde21337 and head fail the 190 s warm CPU fence identically (2816 s vs 2802 s); not introduced by this lift",
+      "recorded_at": "2026-11-10T18:27:51.228132+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_playable_reduced_support.py",
+      "line": "25",
+      "severity": "non-blocking",
+      "text": "non-blocking: the result is a types.SimpleNamespace rather than the real ReducedNewtonResult that tests/test_labeller_receipt.py:663 uses, so a rename or removal of ReducedNewtonResult.active_set_support_cells would leave this test green while apps/playable/production.py:182 raises AttributeError in production."
+    },
+    {
+      "file": "tests/test_playable_reduced_support.py",
+      "line": "43",
+      "severity": "non-blocking",
+      "text": "non-blocking: the size and positivity assertions compare the stub's own arrays and hold for any code that forwards the field unchanged, so they add no protection beyond line 42; they would only redden on truncation or zeroing."
+    },
+    {
+      "file": "tests/test_playable_session.py",
+      "line": "661",
+      "severity": "non-blocking",
+      "text": "non-blocking: the declared focused gate is red as delivered (focused-gate.log:112-113, 1 failed 28 passed EXIT=1) on the 190s warm_cpu_fence_seconds assertion; the pre-existing attribution is supported because base-timeout-corrected.log at ddde21337 and head-timeout-corrected.log at 6d0747f1f fail identically at this line with walls 0.5% apart (2816.3338s vs 2801.9032s) against a 190s fence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "one commit, 2 files, +47/-0 \u2014 a three-line kwarg lift in _reduced_receipt and a 44-line stubbed regression.",
+    "done_when": "clauses 1 and 2 are met and verified (production.py:182-184 is the only change; tests/test_playable_reduced_support.py passes 1 passed in 98.63s when I re-ran it at 6d0747f1f); clause 3 asks for a green declared gate but the delivered focused-gate.log records 1 failed, 28 passed, EXIT=1.",
+    "goal": "read apps/playable/production.py:182-184 at 6d0747f1f; the reduced receipt now passes active_set_support_cells, the one field the brief at production.py:163-187 named as dropped.",
+    "manifest": "read; it records commits [6d0747f1f], the gate and arm logs by absolute path, the negative control's ACTUAL/DESIRED arrays, and the pre-existing wall-attribution with both corrected arm logs.",
+    "write_paths": "the manifest declares apps/playable/production.py and tests/test_playable_reduced_support.py; `git show --stat 6d0747f1f` touches exactly those two and nothing else."
+  },
+  "justifications": {
+    "durability": "the assertion at tests/test_playable_reduced_support.py:42 is falsifiable because FixedPointResult.active_set_support_cells defaults to an empty array at nova/equilibrium/fixed_point.py:524, and negative-control.log records the removal mutation producing ACTUAL array([], dtype=int32).",
+    "evidence": "focused-gate.log:113 records EXIT=1 for the declared gate, so the done_when's green clause is unmet, though the base-timeout-corrected.log and head-timeout-corrected.log pair (ddde21337 window wall=2816.3338s, 6d0747f1f 2801.9032s, both at tests/test_playable_session.py:661) supports the pre-existing attribution.",
+    "fit": "production.py:182-184 mirrors the identical kwarg at nova/equilibrium/forward.py:2427-2429, but tests/test_playable_reduced_support.py:25 stubs the result with types.SimpleNamespace where tests/test_labeller_receipt.py:663 builds the real ReducedNewtonResult.",
+    "goal_fidelity": "apps/playable/production.py:182-184 passes the per-trip population off the ReducedNewtonResult field declared at nova/equilibrium/reduced_newton.py:336, which apps/playable/session.py:422 then publishes as support_cell_count.",
+    "reuse": "the change defines nothing new; it passes the same field the existing owners at nova/equilibrium/forward.py:2427 and scripts/labeller_batch/shard.py:320 already pass, so no capability is forked.",
+    "scope_discipline": "`git show --stat 6d0747f1f` lists only apps/playable/production.py (+3) and tests/test_playable_reduced_support.py (+44), both declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read apps/playable/production.py:182-184 at 6d0747f1f; the reduced receipt now passes active_set_support_cells, the one field the brief at production.py:163-187 named as dropped.\nVERDICT done_when: clauses 1 and 2 are met and verified (production.py:182-184 is the only change; tests/test_playable_reduced_support.py passes 1 passed in 98.63s when I re-ran it at 6d0747f1f); clause 3 asks for a green declared gate but the delivered focused-gate.log records 1 failed, 28 passed, EXIT=1.\nVERDICT write_paths: the manifest declares apps/playable/production.py and tests/test_playable_reduced_support.py; `git show --stat 6d0747f1f` touches exactly those two and nothing else.\nVERDICT manifest: read; it records commits [6d0747f1f], the gate and arm logs by absolute path, the negative control's ACTUAL/DESIRED arrays, and the pre-existing wall-attribution with both corrected arm logs.\nVERDICT diff: one commit, 2 files, +47/-0 \u2014 a three-line kwarg lift in _reduced_receipt and a 44-line stubbed regression.\nCALL_SITES: apps/playable/production.py:215, apps/playable/session.py:422\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: apps/playable/production.py:182-184 passes the per-trip population off the ReducedNewtonResult field declared at nova/equilibrium/reduced_newton.py:336, which apps/playable/session.py:422 then publishes as support_cell_count.\nSCORE evidence: 16\nJUSTIFICATION evidence: focused-gate.log:113 records EXIT=1 for the declared gate, so the done_when's green clause is unmet, though the base-timeout-corrected.log and head-timeout-corrected.log pair (ddde21337 window wall=2816.3338s, 6d0747f1f 2801.9032s, both at tests/test_playable_session.py:661) supports the pre-existing attribution.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git show --stat 6d0747f1f` lists only apps/playable/production.py (+3) and tests/test_playable_reduced_support.py (+44), both declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: the assertion at tests/test_playable_reduced_support.py:42 is falsifiable because FixedPointResult.active_set_support_cells defaults to an empty array at nova/equilibrium/fixed_point.py:524, and negative-control.log records the removal mutation producing ACTUAL array([], dtype=int32).\nSCORE fit: 17\nJUSTIFICATION fit: production.py:182-184 mirrors the identical kwarg at nova/equilibrium/forward.py:2427-2429, but tests/test_playable_reduced_support.py:25 stubs the result with types.SimpleNamespace where tests/test_labeller_receipt.py:663 builds the real ReducedNewtonResult.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change defines nothing new; it passes the same field the existing owners at nova/equilibrium/forward.py:2427 and scripts/labeller_batch/shard.py:320 already pass, so no capability is forked.\nFINDING tests/test_playable_reduced_support.py:25 non-blocking: the result is a types.SimpleNamespace rather than the real ReducedNewtonResult that tests/test_labeller_receipt.py:663 uses, so a rename or removal of ReducedNewtonResult.active_set_support_cells would leave this test green while apps/playable/production.py:182 raises AttributeError in production.\nFINDING tests/test_playable_reduced_support.py:43 non-blocking: the size and positivity assertions compare the stub's own arrays and hold for any code that forwards the field unchanged, so they add no protection beyond line 42; they would only redden on truncation or zeroing.\nFINDING tests/test_playable_session.py:661 non-blocking: the declared focused gate is red as delivered (focused-gate.log:112-113, 1 failed 28 passed EXIT=1) on the 190s warm_cpu_fence_seconds assertion; the pre-existing attribution is supported because base-timeout-corrected.log at ddde21337 and head-timeout-corrected.log at 6d0747f1f fail identically at this line with walls 0.5% apart (2816.3338s vs 2801.9032s) against a 190s fence.",
+  "review_run_id": "r-20261110T174912848890-review-of-playable-reduced-support-history-6d0747f1f6d0",
+  "reviewed_base_sha": "ddde21337200a703347d904bc74b53bb37c169c5",
+  "reviewed_head_sha": "6d0747f1f6d0fd39ac0e84c742b368215e7d1edb",
+  "reviewed_run_id": "r-20261110T150937827200-playable-reduced-support-history",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T18:25:00.165195+00:00",
+  "total": 111
+}

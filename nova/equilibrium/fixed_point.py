@@ -51,6 +51,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from nova.jax.config import Precision, resolve_precision
+from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.manifold_advance import (
     ManifoldAdvanceQualification,
     normal_component,
@@ -464,8 +465,11 @@ class FixedPointResult(NamedTuple):
     ladder and NaN where the fallback was not evaluated.
     ``active_set_iterations`` counts frozen-mask inner solves.  Their live
     residuals and re-evaluated mask differences are recorded in the two
-    corresponding fixed-length arrays.  ``active_set_cycle_damping_activations``
-    marks the midpoint transition attempted when a mask repeats.
+    corresponding fixed-length arrays.  ``active_set_support_cells`` records
+    the axis-connected support size observed at each trip, which is a
+    population and not the change count beside it.
+    ``active_set_cycle_damping_activations`` marks the midpoint transition
+    attempted when a mask repeats.
     ``frozen_partition_reads`` and ``live_partition_reads`` count the initial
     live partition read and one terminal live requalification per frozen pass.
     ``frozen_partition_refreezes`` counts the bounded retries prompted by a
@@ -481,6 +485,10 @@ class FixedPointResult(NamedTuple):
     Newton iterate separately from the best reported fallback.  An active-set
     solve may continue that local trajectory while still returning the best
     live iterate it has observed.
+    ``warmup_refused_proposals`` and ``warmup_first_nonfinite_index`` record
+    each warm-up's refused proposals and first zero-based nonfinite-image
+    index (-1 when none). Active-set solves retain one entry per trip, preceded by the
+    topology-freezing warm-up when that separate pass is required.
     """
 
     state: jax.Array
@@ -517,6 +525,7 @@ class FixedPointResult(NamedTuple):
     active_set_iterations: jax.Array | int = 0
     active_set_residuals: jax.Array | float = float("nan")
     active_set_mask_differences: jax.Array | int = -1
+    active_set_support_cells: jax.Array = jnp.zeros((0,), dtype=jnp.int32)
     active_set_cycle_damping_activations: jax.Array | int = -1
     frozen_partition_reads: jax.Array | int = 0
     frozen_partition_refreezes: jax.Array | int = 0
@@ -539,6 +548,8 @@ class FixedPointResult(NamedTuple):
     trajectory_state: jax.Array | float = float("nan")
     trajectory_residual: jax.Array | float = float("nan")
     row_jvp_projections: jax.Array | tuple[()] = ()
+    warmup_refused_proposals: jax.Array | tuple[()] = ()
+    warmup_first_nonfinite_index: jax.Array | tuple[()] = ()
 
 
 class KinkAwareResult(NamedTuple):
@@ -684,6 +695,7 @@ class _ActiveSetIterationState(NamedTuple):
     live_residual: jax.Array
     residuals: jax.Array
     mask_differences: jax.Array
+    support_cells: jax.Array
     cycle_damping_activations: jax.Array
     iterations: jax.Array
     attempted_promotions: jax.Array
@@ -3820,8 +3832,11 @@ def _newton_krylov_inner(
                 best_residual,
                 recent_merits,
                 merit_observations,
+                mapped,
+                warm_relaxation,
+                refused_proposals,
+                first_nonfinite_index,
             ) = carry
-            mapped = mapped_with_shadow(state, previous_shadow)
             residual = _relative_residual(mapped, state)
             merit = _smooth_relative_sup_merit(mapped, state)
             trace = trace.at[index].set(residual)
@@ -3834,9 +3849,33 @@ def _newton_krylov_inner(
                 merit,
                 jnp.asarray(True),
             )
-            candidate = state + relaxation * (mapped - state)
-            amplification = _observe_increment(amplification, state, candidate, True)
-            current_shadow = promoted_shadow(candidate, previous_shadow)
+            proposal = state + warm_relaxation * (mapped - state)
+            proposed_shadow = promoted_shadow(proposal, previous_shadow)
+            proposed_image = mapped_with_shadow(proposal, proposed_shadow)
+            proposed_residual = _relative_residual(proposed_image, proposal)
+            finite_image = jnp.all(jnp.isfinite(proposed_image))
+            finite_proposal = (
+                jnp.all(jnp.isfinite(proposal))
+                & finite_image
+                & jnp.isfinite(proposed_residual)
+            )
+            candidate = jnp.where(finite_proposal, proposal, state)
+            current_shadow = jnp.where(
+                finite_proposal, proposed_shadow, previous_shadow
+            )
+            next_image = jnp.where(finite_proposal, proposed_image, mapped)
+            amplification = _observe_increment(
+                amplification, state, candidate, finite_proposal
+            )
+            first_nonfinite_index = jnp.where(
+                ~finite_image & (first_nonfinite_index < 0),
+                index,
+                first_nonfinite_index,
+            )
+            refused_proposals = refused_proposals + (~finite_proposal).astype(jnp.int32)
+            warm_relaxation = jnp.where(
+                finite_proposal, warm_relaxation, 0.5 * warm_relaxation
+            )
             changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
             shadow_changes = shadow_changes.at[index].set(
                 jnp.where(observe_shadows, changed, -1)
@@ -3851,6 +3890,10 @@ def _newton_krylov_inner(
                 best_residual,
                 recent_merits,
                 merit_observations,
+                next_image,
+                warm_relaxation,
+                refused_proposals,
+                first_nonfinite_index,
             )
 
         return jax.lax.cond(run_warmup, advance, lambda value: value, carry)
@@ -3865,6 +3908,10 @@ def _newton_krylov_inner(
         best_residual,
         recent_merits,
         merit_observations,
+        _warm_image,
+        _warm_relaxation,
+        warmup_refused_proposals,
+        warmup_first_nonfinite_index,
     ) = jax.lax.fori_loop(
         0,
         warmup,
@@ -3879,6 +3926,14 @@ def _newton_krylov_inner(
             jnp.asarray(jnp.inf, dtype=initial.dtype),
             jnp.full(_NONMONOTONE_MERIT_WINDOW, jnp.nan, dtype=initial.dtype),
             jnp.asarray(0, dtype=jnp.int32),
+            jax.lax.cond(
+                jnp.asarray(run_warmup) & (warmup > 0),
+                lambda: mapped_with_shadow(initial, shadow_mask(initial)),
+                lambda: initial,
+            ),
+            jnp.asarray(relaxation, dtype=initial.dtype),
+            jnp.asarray(0, dtype=jnp.int32),
+            jnp.asarray(-1, dtype=jnp.int32),
         ),
     )
     if globalization_state is None:
@@ -4469,6 +4524,8 @@ def _newton_krylov_inner(
         inner_iteration_step_cap_factors=loop.inner_trace.step_cap_factors,
         trajectory_state=loop.state,
         trajectory_residual=loop.residual,
+        warmup_refused_proposals=warmup_refused_proposals[None],
+        warmup_first_nonfinite_index=warmup_first_nonfinite_index[None],
     )
     continued_globalization = _NewtonGlobalizationState(
         best_state=loop.best_state,
@@ -4539,7 +4596,8 @@ def _active_set_newton_krylov(
             return jnp.asarray(True)
         return jnp.asarray(partition_usable(partition))
 
-    if freeze_topology and warmup:
+    separate_warmup = bool(freeze_topology and warmup)
+    if separate_warmup:
         warmup_result = _newton_krylov_inner(
             shadowed_map_fn,
             initial,
@@ -4642,6 +4700,17 @@ def _active_set_newton_krylov(
         populated = jnp.arange(mask_history.shape[0]) < history_count
         matches = jnp.all(mask_history == mask[None, :], axis=1)
         return jnp.any(populated & matches)
+
+    def axis_connected_cell_count(partition):
+        """Count axis-connected support cells in one trip's partition.
+
+        Only a partition that carries domain labels has a support population;
+        a map that reconciles on a bare shadow mask reports none.
+        """
+        label = getattr(partition, "label", None)
+        if label is None:
+            return jnp.asarray(-1, dtype=jnp.int32)
+        return jnp.sum(jnp.asarray(label) == int(PlasmaDomain.CORE), dtype=jnp.int32)
 
     def partition_difference(partition, observed, mask_difference):
         """Count changed label or support-membership cells after one trip."""
@@ -4872,6 +4941,13 @@ def _active_set_newton_krylov(
         )
         history_count = history_count + record_mask.astype(jnp.int32)
         active = can_continue & ((index + 1) < trip_limit)
+        # The support size is a population, not a change count: the partition
+        # this trip reconciled against holds its own axis-connected cells.
+        support_cells = (
+            axis_connected_cell_count(selected_partition)
+            if freeze_topology
+            else jnp.asarray(-1, dtype=jnp.int32)
+        )
         return (
             selected_state,
             selected_mask,
@@ -4880,6 +4956,7 @@ def _active_set_newton_krylov(
             history_count,
             selected_residual,
             selected_difference,
+            support_cells,
             repeated,
             active,
             converged,
@@ -4913,6 +4990,22 @@ def _active_set_newton_krylov(
         lambda value: jnp.zeros(value.shape, value.dtype),
         (result_shape, globalization_shape),
     )
+    warmup_slots = trip_limit + int(separate_warmup)
+    empty_result = empty_result._replace(
+        warmup_refused_proposals=jnp.zeros(warmup_slots, dtype=jnp.int32),
+        warmup_first_nonfinite_index=jnp.full(warmup_slots, -1, dtype=jnp.int32),
+    )
+    if separate_warmup:
+        empty_result = empty_result._replace(
+            warmup_refused_proposals=empty_result.warmup_refused_proposals.at[0].set(
+                warmup_result.warmup_refused_proposals[0]
+            ),
+            warmup_first_nonfinite_index=(
+                empty_result.warmup_first_nonfinite_index.at[0].set(
+                    warmup_result.warmup_first_nonfinite_index[0]
+                )
+            ),
+        )
     outer = _ActiveSetIterationState(
         state=initial,
         mask=initial_mask,
@@ -4927,6 +5020,7 @@ def _active_set_newton_krylov(
         live_residual=jnp.asarray(jnp.nan, dtype=initial.dtype),
         residuals=jnp.full(trip_limit, jnp.nan, dtype=initial.dtype),
         mask_differences=jnp.full(trip_limit, -1, dtype=jnp.int32),
+        support_cells=jnp.full(trip_limit, -1, dtype=jnp.int32),
         cycle_damping_activations=jnp.full(trip_limit, -1, dtype=jnp.int32),
         iterations=jnp.asarray(0, dtype=jnp.int32),
         attempted_promotions=jnp.asarray(0, dtype=jnp.int32),
@@ -4967,6 +5061,7 @@ def _active_set_newton_krylov(
                 history_count,
                 live_residual,
                 mask_difference,
+                support_cells,
                 damping_activated,
                 active,
                 converged,
@@ -5003,7 +5098,18 @@ def _active_set_newton_krylov(
                 partition=partition,
                 mask_history=mask_history,
                 mask_history_count=history_count,
-                result=inner_result,
+                result=inner_result._replace(
+                    warmup_refused_proposals=(
+                        carry.result.warmup_refused_proposals.at[
+                            index + int(separate_warmup)
+                        ].set(inner_result.warmup_refused_proposals[0])
+                    ),
+                    warmup_first_nonfinite_index=(
+                        carry.result.warmup_first_nonfinite_index.at[
+                            index + int(separate_warmup)
+                        ].set(inner_result.warmup_first_nonfinite_index[0])
+                    ),
+                ),
                 trajectory_state=trajectory_state,
                 continue_trajectory=continue_trajectory,
                 globalization_state=globalization_state,
@@ -5011,6 +5117,7 @@ def _active_set_newton_krylov(
                 live_residual=live_residual,
                 residuals=carry.residuals.at[index].set(live_residual),
                 mask_differences=carry.mask_differences.at[index].set(mask_difference),
+                support_cells=carry.support_cells.at[index].set(support_cells),
                 cycle_damping_activations=(
                     carry.cycle_damping_activations.at[index].set(
                         damping_activated.astype(jnp.int32)
@@ -5096,6 +5203,7 @@ def _active_set_newton_krylov(
         active_set_iterations=outer.iterations,
         active_set_residuals=outer.residuals,
         active_set_mask_differences=outer.mask_differences,
+        active_set_support_cells=outer.support_cells,
         active_set_cycle_damping_activations=outer.cycle_damping_activations,
         frozen_partition_reads=jnp.where(freeze_topology, outer.iterations + 1, 0),
         frozen_partition_refreezes=jnp.where(

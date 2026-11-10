@@ -1,14 +1,9 @@
 """Advance a large drive change in adaptive warm-started sub-steps.
 
-A bank solve is seeded from the previous slice's converged state, so the seed
-is only as good as the distance to the new drive. Measured on the diverted
-550-cell certificate, a slice warm-started across a 1e-3 relative amplitude
-step converges in three to six updates, while a 1e-2 step stalls at the solve's
-sixty-update ceiling from a warm seed and from a cold one alike
-(``bank-warm-start``). The stall is not a warm-start defect: the assembled
-Jacobian agrees with central differences of the fresh residual to about 1e-8
-at the stalled state, so the step direction is right and the linear model is
-simply invalid that far from the seed (``bank-jacobian-mismatch``).
+A bank solve carries a converged state between drive slices. Two accepted
+states define a secant in drive, removing the first-order seed drift without
+another Jacobian or linear solve. The predicted state remains only a seed:
+the solve's terminal fresh residual alone certifies convergence.
 
 The remedy is drive continuation. A large drive change is split into sub-steps,
 each a warm-started :func:`nova.equilibrium.support_read.solve_batch` from the
@@ -97,6 +92,34 @@ def _batch_count(values) -> int:
     return int(jnp.max(values))
 
 
+def predict_seed(
+    moments,
+    drive: float,
+    target_drive: float,
+    *,
+    previous_moments=None,
+    previous_drive: float | None = None,
+):
+    """Extrapolate from two converged states, or retain the plain warm start.
+
+    The caller supplies only accepted states of the same drive stream. A
+    missing or repeated drive cannot define a secant and leaves the seed
+    unchanged. Stationary points remain warm seeds for the next fresh read.
+    """
+    if previous_moments is None or previous_drive is None:
+        return moments
+    distance = jnp.asarray(drive - previous_drive)
+    ratio = jnp.where(
+        distance != 0,
+        (target_drive - drive) / jnp.where(distance != 0, distance, 1.0),
+        0.0,
+    )
+    return tuple(
+        current + ratio * (current - previous)
+        for current, previous in zip(moments, previous_moments, strict=True)
+    )
+
+
 def advance_drive(
     operands,
     cache,
@@ -122,13 +145,17 @@ def advance_drive(
     max_substeps: int = 256,
     solve: Callable | None = None,
     solve_options: dict | None = None,
+    previous_moments=None,
+    previous_drive: float | None = None,
 ) -> DriveContinuationResult:
     """Reach ``target_drive`` from lanes converged at ``start_drive``.
 
     ``moments`` and ``seeds_previous`` are the warm start: the converged state
     and the stationary points its own read returned. ``profile_at`` builds the
     profile a drive asks for, so the driver never inspects the profile's
-    internals.
+    internals. Two converged slices supplied through ``previous_moments`` and
+    ``previous_drive`` seed the next slice by secant extrapolation. Accepted
+    sub-steps extend that history; rejected attempts never enter it.
 
     Each sub-step solves at ``drive + change`` with ``tolerance`` set to the
     intermediate budget, except the sub-step that reaches the target, which is
@@ -168,10 +195,18 @@ def advance_drive(
         change = min(attempted, remaining)
         final = change >= remaining
         tolerance = certification_tolerance if final else intermediate_tolerance
+        next_drive = drive + direction * change
+        predicted = predict_seed(
+            state_moments,
+            drive,
+            next_drive,
+            previous_moments=previous_moments,
+            previous_drive=previous_drive,
+        )
         attempt = solve(
             operands,
             cache,
-            state_moments,
+            predicted,
             seeds,
             state_previous,
             convention,
@@ -206,7 +241,8 @@ def advance_drive(
         )
         if accepted:
             result = attempt
-            drive = float(target_drive) if final else drive + direction * change
+            previous_moments, previous_drive = state_moments, drive
+            drive = float(target_drive) if final else next_drive
             state_moments = attempt.moments
             state_previous = attempt.support.stationary.position
             if final:

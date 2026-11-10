@@ -25,8 +25,8 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="273">
-<meta name="plan-modified" content="2026-11-09">
+<meta name="plan-version" content="274">
+<meta name="plan-modified" content="2026-11-10">
 </head>
 <body>
   <main class="plan-doc">
@@ -913,7 +913,10 @@
     <div class="r-comment-body"><p>independent review stored for run r-20261107T111216113482-bank-route-rows over commits bb59f06a74af..aca068f62a5c (967bbd618, aca068f62) scoring goal_fidelity 18, evidence 15, scope_discipline 20, durability 14, fit 18, reuse 19, with three non-blocking findings on the unautomated fail-closed and the stale revision stamp in the gate receipt and a caption that names the wrong quantity</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261107T111216113482-bank-route-rows" data-who="reckon-build" data-when="2026-11-09T06:21:10Z">
-    <div class="r-comment-body"><p>the fast route converges on all four measured certificate rows and every row is inside the locked precision budget on every clause it carries; the limited rows pass the axis clause (1.158e-5 and 2.297e-6 of minor radius) and, against the limiter&#x27;s designed contact, the boundary clause at 5.373e-6 and 4.567e-11 of a 49.941 Wb span; the earlier limited boundary miss was this node&#x27;s own oracle taking the wall-vertex argmax rather than the designed midplane contact, found by the bank-limited-contact node, and the corrected clause is recomputed from the archived states with no new allocation; both limited residuals sit at their own noise floor, the 550-cell floor straddling 1e-10</p></div>
+    <div class="r-comment-body"><p>the fast route converges on all four measured certificate rows and every row is inside the locked precision budget on every clause it carries; the limited rows pass the axis clause (1.158e-5 and 2.297e-6 of minor radius) and, against the limiter's designed contact, the boundary clause at 5.373e-6 and 4.567e-11 of a 49.941 Wb span; the earlier limited boundary miss was this node's own oracle taking the wall-vertex argmax rather than the designed midplane contact, found by the bank-limited-contact node, and the corrected clause is recomputed from the archived states with no new allocation; both limited residuals sit at their own noise floor, the 550-cell floor straddling 1e-10</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261109T220212224156-bank-warm-predictor" data-who="reckon-build" data-when="2026-11-10T21:51:29Z">
+    <div class="r-comment-body"><p>Secant predictor selected from common-input titan width-eight counts: 63→43 fresh reads (31.7%) and 42→29 linear solves across fourteen slices. Primed slow-ramp slices take one update/two reads; fast-ramp slices take three/four. All 336 lane/slice results certify at &lt;=6.182e-11 and pass precision budgets; inspected reads-per-slice SVG and final fragment are committed. Titan walls are information only; H200 width-sixteen wall remains pending.</p></div>
 </div>
 </section>
 </main>

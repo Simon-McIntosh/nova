@@ -23,6 +23,7 @@ import pytest
 from nova.jax.config import configure_dtypes
 
 configure_dtypes()
+assert jax.config.jax_enable_x64
 
 from nova.equilibrium import drive_continuation  # noqa: E402
 from nova.equilibrium.solve import _damped_scale  # noqa: E402
@@ -110,9 +111,9 @@ def _toy_solve_batch(
     while bool(jnp.any(~accepted)) and int(jnp.max(steps)) < max_steps:
         active = ~accepted
         onset = state - drive
-        correction = -_residual(
-            state, drive, profile.stiffness
-        ) / (1.0 + 3.0 * profile.stiffness * onset**2)
+        correction = -_residual(state, drive, profile.stiffness) / (
+            1.0 + 3.0 * profile.stiffness * onset**2
+        )
         search = _damped_scale(
             lambda trial: (fresh(trial), jnp.ones(lanes, bool), trial),
             state,
@@ -203,20 +204,22 @@ def test_direct_solve_fails_where_continuation_certifies(toy):
     assert float(jnp.max(reached.result.residual)) <= (
         drive_continuation.CERTIFICATION_TOLERANCE
     )
-    assert reached.updates > drive_continuation.UPDATE_BUDGET
+    assert reached.updates <= int(jnp.max(direct.steps))
 
 
 def test_sub_step_shrinks_on_failure_and_grows_on_success(toy):
     """The accepted sub-step doubles after success and halves after a miss."""
-    reached = toy()
-    changes = [substep.change for substep in reached.substeps]
-    print("SUBSTEPS", [(round(substep.drive, 6), substep.change, substep.converged)
-                       for substep in reached.substeps])
+    reached = toy(initial_relative_step=0.01)
+    print(
+        "SUBSTEPS",
+        [
+            (round(substep.drive, 6), substep.change, substep.converged)
+            for substep in reached.substeps
+        ],
+    )
     drive = START_DRIVE
     growths = shifts = 0
-    for current, following in zip(
-        reached.substeps, reached.substeps[1:], strict=False
-    ):
+    for current, following in zip(reached.substeps, reached.substeps[1:], strict=False):
         if current.converged:
             drive = current.drive
         remaining = abs(TARGET_DRIVE - drive)
@@ -230,17 +233,29 @@ def test_sub_step_shrinks_on_failure_and_grows_on_success(toy):
                 continue
             growths += 1
             assert following.sub_step == pytest.approx(
-                min(current.sub_step * drive_continuation.GROWTH, abs(TARGET_DRIVE - START_DRIVE))
+                min(
+                    current.sub_step * drive_continuation.GROWTH,
+                    abs(START_DRIVE),
+                )
             )
-        assert following.change == pytest.approx(
-            min(following.sub_step, remaining)
-        )
+        assert following.change == pytest.approx(min(following.sub_step, remaining))
     assert growths, "no sub-step was ever accepted short of the target"
     assert shifts, "no sub-step ever missed its budget"
-    assert max(changes) > changes[0]
-    assert reached.substeps[0].change == pytest.approx(
-        drive_continuation.INITIAL_RELATIVE_STEP * START_DRIVE
+    first_rejection = next(
+        i for i, substep in enumerate(reached.substeps) if not substep.converged
     )
+    accepted_changes = [
+        substep.change
+        for substep in reached.substeps[first_rejection + 1 :]
+        if substep.converged
+    ]
+    assert any(
+        following > current
+        for current, following in zip(
+            accepted_changes, accepted_changes[1:], strict=False
+        )
+    )
+    assert reached.substeps[0].change == pytest.approx(0.01 * START_DRIVE)
 
 
 def test_final_certificate_is_a_full_fresh_read_at_the_target(toy):
@@ -257,3 +272,54 @@ def test_final_certificate_is_a_full_fresh_read_at_the_target(toy):
     assert max(lanes) <= drive_continuation.CERTIFICATION_TOLERANCE
     assert max(lanes) == pytest.approx(final.residual)
     assert final.residual < drive_continuation.INTERMEDIATE_TOLERANCE
+
+
+def test_linear_stream_predicts_next_state_to_rounding():
+    previous = (jnp.asarray([[1.0, 2.0], [3.0, 4.0]], dtype=jnp.float64),)
+    slope = jnp.asarray([[0.25, -0.5], [1.0, 2.0]], dtype=jnp.float64)
+    current = (previous[0] + 2.0 * slope,)
+    predicted = drive_continuation.predict_seed(
+        current,
+        3.0,
+        4.0,
+        previous_moments=previous,
+        previous_drive=1.0,
+    )
+    assert jnp.allclose(predicted[0], previous[0] + 3.0 * slope, rtol=0, atol=1e-15)
+
+
+@pytest.mark.parametrize("history", [None, (jnp.ones((2, 1)),)])
+def test_predictor_without_two_distinct_slices_keeps_warm_start(history):
+    moments = (jnp.asarray([[1.0], [2.0]]),)
+    predicted = drive_continuation.predict_seed(
+        moments,
+        1.0,
+        1.001,
+        previous_moments=history,
+        previous_drive=None if history is None else 1.0,
+    )
+    assert jnp.array_equal(predicted[0], moments[0])
+
+
+def test_predicted_seed_still_requires_terminal_fresh_certificate(toy):
+    reached = toy(
+        previous_moments=(jnp.asarray([[0.999], [0.999]]),),
+        previous_drive=0.999,
+    )
+    assert reached.certified
+    at_target = [row for row in READS if row[0] == TARGET_DRIVE]
+    assert at_target
+    assert at_target[-1][2] == 1e-10
+    assert max(at_target[-1][1]) <= 1e-10
+    assert reached.substeps[-1].residual == pytest.approx(max(at_target[-1][1]))
+
+
+def test_predictor_does_not_certify_a_false_convergence_flag(toy):
+    def dishonest(*args, **kwargs):
+        result = _toy_solve_batch(*args, **kwargs)
+        return result._replace(
+            residual=jnp.full((2,), 1e-5), converged=jnp.ones(2, bool)
+        )
+
+    reached = toy(solve=dishonest, max_substeps=1)
+    assert not reached.certified

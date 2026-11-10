@@ -1010,3 +1010,17 @@ def test_shell_oblique_radial_magnetisation():
 
     derivative = _compiled_axis_pair()[1](jnp.array((*point, *start, *end)))
     assert np.isfinite(derivative).all()
+
+
+def test_sheet_remainder_resolves_both_azimuthal_layers():
+    """The ring-distance layer and the opposite pole both remain resolved."""
+    import jax.numpy as jnp
+
+    point = (0.10058128716025194, -0.9071429134838774)
+    start = (0.0964551824609375, -0.8948164045078125)
+    end = (0.09919998656445313, -0.8945162730019531)
+    wanted = reference.graded_precise_ring_reference(start, end, point)[1:]
+    scalar = np.array(sheet_field(*point, start, end))
+    packed = np.asarray(_compiled_axis_pair()[0](jnp.array((*point, *start, *end))))
+    for value in (scalar, packed):
+        np.testing.assert_allclose(value, wanted, rtol=1e-10, atol=1e-25)

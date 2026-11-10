@@ -156,14 +156,17 @@ def main():
             scalar=scalar,
             reference=reference,
         )
-        # A difference of end primitives has roundoff bounded by gamma_n times
-        # their absolute sum. n=128 covers the elementary operations and sums.
-        floor = 128 * np.finfo(float).eps * end_scales
+        # Count the actual remainder sum, multipole recurrence and elementary
+        # endpoint work before applying the standard gamma_n rounding allowance.
+        operations = sheet._SHEET_FIELD_PANELS * sheet._SHEET_FIELD_NODES + 80 + 64
+        epsilon = np.finfo(float).eps
+        gamma = operations * epsilon / (1 - operations * epsilon)
+        floor = gamma * end_scales
         tolerance = 1e-10 * np.abs(reference) + floor
         summary = {
             "mesh": name,
             "pairs": len(rows),
-            "absolute_floor": "128 eps times absolute endpoint sum",
+            "absolute_floor": f"gamma_{operations} times absolute endpoint sum",
             "max_floor": float(floor.max()),
         }
         for route, values in [

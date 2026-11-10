@@ -956,17 +956,10 @@ class SheetFlux:
         a1sq = 1.0 + b1 * b1
         r1 = rp - b1 * gamma
         a1 = np.sqrt(a1sq)
-        width = np.hypot(gamma, r - rp) / np.sqrt(r * rp)
-        width = width if width > 0.0 else 1.0
-        # The arsinh argument's denominator vanishes at the azimuth where the
-        # source ring passes through the target, which is phi = 0 when
-        # r_1 = r and phi = pi when r_1 = -r.  The rule grades only one end, so
-        # it is placed at whichever end is nearer that confluence: a target on
-        # the far side of the line puts r_1 below -r, and the end carrying the
-        # logarithmic layer is then the far one.
-        phi, rule = self._azimuth_rule(width)
-        if np.abs(r1 + r) < np.abs(r1 - r):
-            phi = np.pi - phi
+        phi, rule = _gradient_azimuth_rule(
+            np, *[np.asarray([value]) for value in (gamma, r, rp, b1)]
+        )
+        phi, rule = phi.ravel(), rule.ravel()
         cosine = np.cos(phi)
         sine_sq = np.sin(phi) ** 2
         dense = np.sqrt(
@@ -1375,7 +1368,7 @@ def _sheet_root_gradient(gamma, radius, source):
     return value, gradient
 
 
-def _sheet_azimuth_rule(xp, width):
+def _sheet_azimuth_rule(xp, width, *, angle=np.pi, panels=_SHEET_FIELD_PANELS):
     """Return the field kernels' azimuth nodes and weights, shape ``(pairs, nodes)``.
 
     The rule is graded geometrically toward the singular azimuth and its width
@@ -1386,12 +1379,12 @@ def _sheet_azimuth_rule(xp, width):
     _, (node, weight) = _sheet_graded_rule()
     node = xp.asarray(node)
     weight = xp.asarray(weight)
-    span = xp.arcsinh(np.pi / width)
-    index = np.arange(_SHEET_FIELD_PANELS + 1)
+    span = xp.arcsinh(angle / width)
+    index = np.arange(panels + 1)
     edges = (
         span[:, None]
         * (_SHEET_FIELD_RATIO**index - 1.0)
-        / (_SHEET_FIELD_RATIO**_SHEET_FIELD_PANELS - 1.0)
+        / (_SHEET_FIELD_RATIO**panels - 1.0)
     )
     half = 0.5 * (edges[:, 1:] - edges[:, :-1])
     centre = 0.5 * (edges[:, 1:] + edges[:, :-1])
@@ -1401,6 +1394,31 @@ def _sheet_azimuth_rule(xp, width):
     rule = (half[:, :, None] * weight[None, None, :]).reshape(width.shape[0], -1)
     rule = rule * width[:, None] * xp.cosh(stretch)
     return width[:, None] * xp.sinh(stretch), rule
+
+
+def _gradient_azimuth_rule(xp, gamma, radius, source, slope):
+    """Resolve the ring distance and both pole layers of the same remainder.
+
+    Splitting at pi/2 preserves the integral while grading each end. The
+    inverse squared width sums the curvatures of D² and B² at both endpoints.
+    A zero pole gap is removable; hold its inactive denominator before selecting.
+    """
+    intercept = source - slope * gamma
+    square = 1 + slope**2
+    inverse = radius * source / (gamma**2 + (radius - source) ** 2)
+    for gap, curvature in (
+        (intercept - radius, radius * (intercept - radius) + square * radius**2),
+        (intercept + radius, -radius * (intercept + radius) + square * radius**2),
+    ):
+        held = xp.where(gap != 0, gap, radius)
+        inverse = inverse + xp.where(gap != 0, xp.abs(curvature) / held**2, 0.0)
+    width = 1 / xp.sqrt(inverse)
+    phi, rule = _sheet_azimuth_rule(
+        xp, width, angle=np.pi / 2, panels=_SHEET_FIELD_PANELS // 2
+    )
+    return xp.concatenate((phi, np.pi - phi), axis=1), xp.concatenate(
+        (rule, rule), axis=1
+    )
 
 
 def _sheet_arsinh_rule(xp, gamma, radius, r1, b1):
@@ -1451,18 +1469,7 @@ def _sheet_arsinh_gradient(xp, gamma, radius, source, b1):
     a1sq = 1.0 + b1 * b1
     a1 = xp.asarray(1.0 + b1 * b1) ** 0.5
     r1 = source - b1 * gamma
-    width = xp.hypot(gamma, radius - source) / xp.sqrt(radius * source)
-    width = xp.where(width > 0.0, width, 1.0)
-    # The arsinh argument's denominator vanishes at the azimuth where the source
-    # ring passes through the target, which is phi = 0 when r_1 = r and
-    # phi = pi when r_1 = -r. The rule grades only one end, so it is placed at
-    # whichever end is nearer that confluence: a target on the far side of the
-    # line puts r_1 below -r, and the end carrying the logarithmic layer is
-    # then the far one.
-    phi, rule = _sheet_azimuth_rule(xp, width)
-    phi = xp.where(
-        (xp.abs(r1 + radius) < xp.abs(r1 - radius))[:, None], np.pi - phi, phi
-    )
+    phi, rule = _gradient_azimuth_rule(xp, gamma, radius, source, b1)
     cosine = xp.cos(phi)
     sine_sq = xp.sin(phi) ** 2
     dense = xp.sqrt(

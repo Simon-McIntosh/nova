@@ -331,3 +331,51 @@ B_Z endpoint = μ₀ [2H+r(∂r H)]/2
     are running; final receipts follow below.
   </p>
 </section>
+<section id="icm-sheet-axis-limits-double-end-remainder">
+  <h2>Complete shell census exposed a second azimuthal layer</h2>
+  <p>
+    The first complete shell accuracy census refused 452 scalar, 455 packed and
+    591 dilated packed pairs (605 distinct pairs across the three routes).
+    All values were finite. Its worst pair is target
+    (0.10058128716025194,-0.9071429134838774), source
+    (0.0964551824609375,-0.8948164045078125) to
+    (0.09919998656445313,-0.8945162730019531) m. It returned
+    (-4.0626262477703335e-8,-4.772535084003146e-10), against precise rings
+    (-4.0626286138512844e-8,-4.772590736412317e-10) T/(A/m).
+  </p>
+  <p>
+    Here b=9.145338126552916, r₁=-0.016274910045165666 and the ring-distance
+    layer has width 0.13197154251180435 radians at φ=0. The single-ended rule
+    reverses to resolve B₁ near π and leaves this independent layer unresolved.
+    The same analytic endpoint expression is retained; its existing arsinh
+    remainder is split exactly into two half-turn contributions, with the
+    same total 140×24=3360 nodes:
+  </p>
+  <pre>∫[0,π] f(φ)dφ = ∫[0,π/2] [f(φ)+f(π-φ)]dφ
+D²(φ)  = d₀² + rs φ² + O(φ⁴),   d₀²=γ²+(r-s)²
+B₁²(φ) = (r₁-r)² + [r(r₁-r)+a²r²]φ² + O(φ⁴)
+B₁²(π-θ) = (r₁+r)² + [-r(r₁+r)+a²r²]θ² + O(θ⁴)
+w⁻² = rs/d₀² + |r(r₁-r)+a²r²|/(r₁-r)²
+                 + |-r(r₁+r)+a²r²|/(r₁+r)².</pre>
+  <p>
+    Both half-turns use φ=w sinh(u) with 70 geometrically graded panels.
+    A zero pole gap is the removable supporting-line case: its inactive
+    denominator is held before omitting that curvature term. The scalar and
+    packed derivative owners call the same <code>_gradient_azimuth_rule</code>.
+    This corrects the existing analytic remainder evaluation; the source line
+    is still evaluated by its endpoint primitive. The new regression checks
+    both components of this pair directly against precise rings at 1e-10.
+  </p>
+  <p>
+    Rechecking all 605 recorded bad pairs removes the large misses. Fifteen
+    near-zero components exceed the provisional 128εE floor by at most a factor
+    1.654863. That provisional operation count omitted the remainder summation.
+    The final census uses the counted roundoff allowance γ₃₅₀₄E, where
+    n=3360 remainder terms + 80 recurrence terms + 64 endpoint operations and
+    γₙ=nε/(1-nε). Thus γ₃₅₀₄=7.78044295658e-13. The relative component budget
+    remains 1e-10|reference|. The reproduced sheet defects exceed this corrected
+    absolute floor by thousands of times; it only addresses arithmetic at
+    nearly cancelling endpoint differences. The full census is repeated with
+    this fixed, printed budget.
+  </p>
+</section>

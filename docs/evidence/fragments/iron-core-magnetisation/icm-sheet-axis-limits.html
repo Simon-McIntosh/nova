@@ -419,3 +419,36 @@ w⁻² = rs/d₀² + |r(r₁-r)+a²r²|/(r₁-r)²
     failed independent accuracy census.
   </p>
 </section>
+<section id="icm-sheet-axis-limits-final-west-receipt">
+  <h2>Final-source WEST preservation passes; suite receipts pending</h2>
+  <p>
+    Sirius job 1309714 completed with exit 0. The whole-mesh measurement at
+    source revision <code>533d59093</code> reports 1696 targets × 1696 cells,
+    zero of 11,505,664 entries above 1e-13, every entry finite, worst 4.239e-14
+    at (1886,1426); the gate passed in 571.45 s. It used
+    <code>scripts/sheet_tile_cpu_gate/run_tail_gate.sbatch</code> with its
+    gate-only switch, while both exact suite-command arms continue in the
+    original sirius allocation 1309695.
+  </p>
+  <p>
+    Restoring the pre-repair sheet owner in a HEAD scratch extraction asserts
+    the mutant import and reproduces the reported 6.53973138e-9 radial cell
+    response on scalar and packed routes. Pytest fails
+    <code>tests/test_edge_sheet.py::test_shell_oblique_radial_magnetisation</code>
+    with exit 1. The introduced source-series and two-ended-rule markers are
+    present once each in the unchanged HEAD source blob.
+  </p>
+  <p>
+    The focused two-layer regression passed. The separately launched shell
+    Jacobian check passed its field comparisons, then its cold compile took
+    486.14 s and exceeded the 300 s test bound loaded at that process's start;
+    its complete log records one failed and one passed test. The matching
+    900 s bound was committed before the head suite starts. That suite is still
+    awaited and no passing gradient result is claimed from the timed-out run.
+  </p>
+  <p>
+    The mandatory stop rule remains in effect for the two inaccurate dilated
+    shell pairs. Waiting for the already-running suite collects evidence and
+    does not authorise another repair pass.
+  </p>
+</section>

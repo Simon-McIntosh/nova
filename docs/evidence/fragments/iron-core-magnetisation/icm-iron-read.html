@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence-fragment">
+  <title>Iron geometry and material reads through the machine owner</title>
+</head>
+<body>
+<main>
+<h1 id="icm-iron-read-state">Iron reads share the machine-description owner</h1>
+<p><code>StaticMachineDescription.read_iron_core(source, dd_version=...)</code>
+in <code>nova/imas/machine.py</code> opens the selected entry at its explicit
+source-manifest dictionary pin, lists occurrences before reading occurrence zero,
+and disables conversion. It refuses a missing occurrence, an omitted pin and a
+written dictionary version that disagrees with the pin. Each ordered segment is
+read through <code>ImasGeometryReader</code> into <code>iron_segments</code>, retaining
+its name, description, raw outline vertices and individual material table.</p>
+<p>The WEST curation manifest is
+<code>/home/ITER/mcintos/Code/imas-efit/tests/data-manifest.json</code>, row
+<code>west-dd4-1-0</code>. Its target is
+<code>tests/data/imas/WEST/machine/dd4-1-0</code>, its dictionary pin is
+<code>4.1.0</code>, and the opened <code>iron_core</code> reports that same written
+version. This dictionary represents the B-H law by <code>b_field</code> and
+<code>permeability_relative</code> arrays; it has no separate material identifier.
+WEST's segment names and descriptions are empty and remain empty. The read retains
+all six independent tables without inventing material names or fitting the law.</p>
+<h2 id="icm-iron-read-comparison">Exact preservation of the script inputs</h2>
+<p>The unmodified script expressions were executed at base
+<code>4221309d2e66fd30eadafa7eacc3d967dd233481</code> before implementation.
+Their arrays and the census's complete cell polygons were saved, then compared
+entry by entry with the migrated script expressions. The committed implementation
+<code>511412a9a1be801ac74c5562cceaeca26729f7f0</code> is byte-identical to that
+measured candidate, as recorded in <code>candidate-identity.log</code>.</p>
+<table>
+<thead><tr><th>Input</th><th>Before</th><th>After</th><th>Changed values</th></tr></thead>
+<tbody>
+<tr><td>Iron segments</td><td>6</td><td>6</td><td>0</td></tr>
+<tr><td>Stored outline vertices, by segment</td><td>5, 6, 15, 5, 15, 6</td><td>5, 6, 15, 5, 15, 6</td><td>0</td></tr>
+<tr><td>B / relative-permeability pairs</td><td>25 per segment; 150 total</td><td>25 per segment; 150 total</td><td>0</td></tr>
+<tr><td>Census mesh at 0.08 m</td><td>1696 cells</td><td>1696 cells</td><td>0</td></tr>
+</tbody>
+</table>
+<p>Every coordinate of every census cell matches exactly, including ordering.
+Both meshes have SHA-256
+<code>c8f5549ac68a4a90597d82e68f85820d3acb055d18f088e53481b13276df467d</code>.
+No titan census or interaction-matrix build was rerun.</p>
+<ul>
+<li><code>scripts/prototypes/iron_magnetisation/west.py</code> constructs its
+polygons from <code>machine.iron_segments</code> and uses the first segment's
+unchanged material table.</li>
+<li><code>scripts/west_stray_field/solve.py</code> constructs the same ordered
+outline arrays and retains its empty-outline filtering.</li>
+<li><code>scripts/sheet_tile_census/measure.py</code> meshes the same polygons
+through its unchanged mesh call.</li>
+</ul>
+<p>A search of production Python under <code>nova/</code> and
+<code>scripts/</code> finds one direct <code>iron_core</code> IDS read, in
+<code>nova/imas/machine.py</code>. Independent IDS reads in the tests provide the
+comparison oracle. None of the three callers extracts iron IDS fields locally.</p>
+<h2 id="icm-iron-read-validation">Validation and its limits</h2>
+<p>The exact focused head command passes: <strong>12 passed in 14.00s</strong>,
+<code>EXIT=0</code>. It compares WEST arrays and the callers' actual AST expressions,
+compares all 1696 census cells, uses distinct synthetic material tables to catch
+accidental first-table reuse, retains an empty-outline segment, rejects unpaired
+material arrays, and exercises missing-occurrence and dictionary-mismatch refusals.
+The declared drop-one-segment mutation on the committed tree reports
+<strong>7 failed, 5 passed in 12.01s</strong>, <code>EXIT=1</code>, including all
+four WEST and caller comparisons. The mutation was removed and the source was
+verified byte-identical to the committed file afterward.</p>
+<p>The base has no <code>tests/test_imas_iron_read.py</code>, so its required
+suite-template resolution is the path-free default suite. Its first attempt was
+interrupted after five passes to isolate the baseline from subsequent edits. The
+full replacement runs in a frozen extraction of the original revision, with its
+own fixed HEAD, original source, and logged imported-module path. It has not yet
+completed; no baseline success or added-failure count is claimed here.</p>
+<p>Logs and receipts are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/</code>:
+<code>before-read.log</code>, <code>before-read.json</code>,
+<code>before-mesh.npz</code>, <code>scratch-after-read.log</code>,
+<code>after-read.json</code>, <code>candidate-identity.log</code>,
+<code>after-suite.log</code>, <code>negative-control.log</code>,
+<code>baseline-suite-initial.log</code> and <code>baseline-suite.log</code>.
+The manifest records the terminal suite state and any remaining blocker.</p>
+<p>The solver, its mesh selection, Newton iteration history and converged
+permeability range belong to the separate solver and WEST measurement nodes;
+this reader change makes no claim about their results.</p>
+</main>
+</body>
+</html>

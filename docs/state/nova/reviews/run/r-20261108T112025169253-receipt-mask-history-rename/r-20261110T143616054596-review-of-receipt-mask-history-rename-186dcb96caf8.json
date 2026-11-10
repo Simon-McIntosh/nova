@@ -28,6 +28,11 @@
       "kind": "exempted",
       "reason": "record hygiene: the gate's literal command is in the first line of each gate log, and the after_suite arm records the exact template command at the head",
       "recorded_at": "2026-11-10T14:54:03.355730+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the commits field is the worker's list; the landing names every commit from base to 186dcb96c explicitly",
+      "recorded_at": "2026-11-10T14:54:21.328899+00:00"
     }
   },
   "findings": [

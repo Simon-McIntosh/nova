@@ -249,33 +249,42 @@ def enrich(output, profile, scale, record, data, branches, seeds):
         return topology, connected, admitted
 
     @jax.jit
-    def lower_root(state):
+    def lower_root(state, starts):
         field = fit_tensor_spline(
             jnp.asarray(data["radius"]),
             jnp.asarray(data["height"]),
             state[:count].reshape(data["flux"].shape).T,
         )
-        return polish_stationary_points(
-            field, jnp.asarray(reference[None]), jnp.ones(1, bool)
-        )
+        return polish_stationary_points(field, starts, jnp.ones(starts.shape[0], bool))
 
     def topology_record(state):
         topology, connected, admitted = jax.device_get(inspect(jnp.asarray(state)))
-        roots = jax.device_get(lower_root(jnp.asarray(state)))
-        position = np.asarray(roots["position_rz"])[0]
-        qualified = bool(
-            roots["converged"][0]
-            and roots["hessian_type"][0] == -1
-            and position[1] < topology.axis[1]
+        starts = np.vstack((reference, np.asarray(topology.x_point)))
+        roots = jax.device_get(lower_root(jnp.asarray(state), jnp.asarray(starts)))
+        positions = np.asarray(roots["position_rz"])
+        valid = (
+            np.asarray(roots["converged"])
+            & (np.asarray(roots["hessian_type"]) == -1)
+            & (positions[:, 1] < topology.axis[1])
         )
+        distances = np.linalg.norm(positions - reference, axis=1)
+        index = int(np.argmin(np.where(valid, distances, np.inf)))
+        position = positions[index]
+        qualified = bool(valid.any())
         return dict(
             boundary_class="diverted" if topology.boundary_is_xpoint else "limited",
             support=int(connected.sum()),
             axis_admitted=bool(admitted),
             selected_saddle_rz_m=np.asarray(topology.x_point).tolist(),
             lower_saddle_qualified=qualified,
+            lower_saddle_probe_converged=np.asarray(roots["converged"]).tolist(),
+            lower_saddle_probe_qualified=valid.tolist(),
+            lower_saddle_probe_gradient_norm=np.asarray(
+                roots["gradient_norm"]
+            ).tolist(),
+            lower_saddle_probe_positions_rz_m=positions.tolist(),
             lower_saddle_rz_m=position.tolist() if qualified else None,
-            lower_saddle_flux_wb=float(roots["value"][0]) if qualified else None,
+            lower_saddle_flux_wb=float(roots["value"][index]) if qualified else None,
             lower_saddle_inside_wall=bool(
                 inside_wall_units(position[None], data["limiter"])[0]
             )

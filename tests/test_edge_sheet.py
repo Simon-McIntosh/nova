@@ -892,64 +892,6 @@ def test_axis_sheet_limits_match_graded_reference(start, end, point):
         assert scalar[0] == packed[0] == flux == 0
 
 
-def _graded_precise_ring_reference(start, end, point):
-    """Grade the independent ring integral with enough arithmetic for tiny loops."""
-    import mpmath as mp
-
-    panels = reference._geometric_panels(0.5, 12, 1.7)
-    nodes, weights = np.polynomial.legendre.leggauss(16)
-    start, end = np.asarray(start), np.asarray(end)
-    length = np.linalg.norm(end - start)
-    previous = None
-    with mp.workdps(50):
-        for _ in range(4):
-            total = np.zeros(3)
-            for lower, upper in panels:
-                for node, weight in zip(nodes, weights):
-                    t = (lower + upper) / 2 + (upper - lower) / 2 * node
-                    source = start + t * (end - start)
-                    r, z, a, h = map(mp.mpf, (*point, *source))
-                    dz = z - h
-                    span = (r + a) ** 2 + dz**2
-                    gap = (r - a) ** 2 + dz**2
-                    k = 4 * r * a / span
-                    first, second = mp.ellipk(k), mp.ellipe(k)
-                    psi = mp.mpf(MU0) * mp.sqrt(span) * ((1 - k / 2) * first - second)
-                    bz = (
-                        mp.mpf(MU0)
-                        / (2 * mp.pi * mp.sqrt(span))
-                        * (first + (a * a - r * r - dz * dz) / gap * second)
-                    )
-                    br = (
-                        mp.mpf(MU0)
-                        * dz
-                        / (2 * mp.pi * r * mp.sqrt(span))
-                        * (-first + (a * a + r * r + dz * dz) / gap * second)
-                    )
-                    total += (
-                        (upper - lower)
-                        / 2
-                        * weight
-                        * length
-                        * np.array([float(psi), float(br), float(bz)])
-                    )
-            if (
-                previous is not None
-                and np.max(np.abs((total - previous) / total)) < 1e-13
-            ):
-                return total
-            previous = total
-            middle = panels.mean(axis=1)
-            panels = np.stack(
-                (
-                    np.column_stack((panels[:, 0], middle)),
-                    np.column_stack((middle, panels[:, 1])),
-                ),
-                axis=1,
-            ).reshape(-1, 2)
-    raise AssertionError("the precise graded ring reference did not converge")
-
-
 @pytest.mark.parametrize("radius", [1e-3, 1e-5, 1e-7])
 @pytest.mark.parametrize("limit", ["axis_edge", "axis_end", "axis_target"])
 def test_axis_approaches_match_graded_reference(radius, limit, capsys):
@@ -969,7 +911,7 @@ def test_axis_approaches_match_graded_reference(radius, limit, capsys):
     wanted = np.array([expected.br, expected.bz])
     reference_flux = expected.psi
     if limit == "axis_edge":
-        precise = _graded_precise_ring_reference(start, end, point)
+        precise = reference.graded_precise_ring_reference(start, end, point)
         reference_flux, *components = precise
         wanted = np.array(components)
     scalar = np.array(sheet_field(*point, start, end))
@@ -1018,3 +960,102 @@ def test_axis_limits_keep_inactive_gradient_paths_finite(start, end, point):
 
     values = jnp.array((*point, *start, *end))
     assert np.isfinite(_compiled_axis_pair()[1](values)).all()
+
+
+@pytest.mark.timeout(900)
+def test_shell_oblique_radial_magnetisation():
+    """A distant oblique probe resolves the weak radial cell response."""
+    import jax.numpy as jnp
+    from nova.biot.tiledassembly import cell_edges
+
+    polygon = np.array(
+        [
+            [0.04, 0.9600000000000017],
+            [0.0, 0.9600000000000017],
+            [0.0, 1.0],
+            [0.003067956762966115, 0.9999952938095762],
+            [0.0061358846491540485, 0.9999811752826011],
+            [0.009203754782059715, 0.9999576445519639],
+            [0.012271538285720144, 0.9999247018391445],
+            [0.015339206284987753, 0.9998823474542126],
+            [0.018406729905804796, 0.9998305817958234],
+            [0.021474080275468918, 0.9997694053512153],
+            [0.02454122852291202, 0.9996988186962042],
+            [0.027608145778965795, 0.9996188224951786],
+            [0.030674803176636116, 0.9995294175010931],
+            [0.0337411718513774, 0.9994306045554617],
+            [0.036807222941358964, 0.9993223845883495],
+            [0.03987292758773938, 0.9992047586183639],
+            [0.04, 0.9991994925876344],
+        ]
+    )
+    edges = cell_edges((polygon * 1024,))
+    point = (3.0, 1.0)
+    scalar = np.zeros(2)
+    packed = np.zeros(2)
+    wanted = np.zeros(2)
+    for i, coefficient in enumerate(edges.coefficient_r[0]):
+        start = np.array([edges.start_r[i], edges.start_z[i]]) / 1024
+        end = np.array([edges.end_r[i], edges.end_z[i]]) / 1024
+        expected = reference.graded_precise_ring_reference(start, end, point)[1:]
+        got = np.array(sheet_field(*point, start, end))
+        traced = np.asarray(_compiled_axis_pair()[0](jnp.array((*point, *start, *end))))
+        for value in (got, traced):
+            np.testing.assert_allclose(value, expected, rtol=1e-10, atol=1e-28)
+        scalar += coefficient * got
+        packed += coefficient * traced
+        wanted += coefficient * expected
+    assert wanted[0] == pytest.approx(9.80715345e-15, rel=1e-9)
+    np.testing.assert_allclose(scalar, wanted, rtol=1e-10, atol=1e-28)
+    np.testing.assert_allclose(packed, wanted, rtol=1e-10, atol=1e-28)
+
+    derivative = _compiled_axis_pair()[1](jnp.array((*point, *start, *end)))
+    assert np.isfinite(derivative).all()
+
+
+def test_sheet_remainder_resolves_both_azimuthal_layers():
+    """The ring-distance layer and the opposite pole both remain resolved."""
+    import jax.numpy as jnp
+
+    point = (0.10058128716025194, -0.9071429134838774)
+    start = (0.0964551824609375, -0.8948164045078125)
+    end = (0.09919998656445313, -0.8945162730019531)
+    wanted = reference.graded_precise_ring_reference(start, end, point)[1:]
+    scalar = np.array(sheet_field(*point, start, end))
+    packed = np.asarray(_compiled_axis_pair()[0](jnp.array((*point, *start, *end))))
+    for value in (scalar, packed):
+        np.testing.assert_allclose(value, wanted, rtol=1e-10, atol=1e-25)
+
+
+@pytest.mark.parametrize(
+    "point,start,end",
+    [
+        (
+            (0.8600227012928746, -0.34002196003153545),
+            (0.9707721407285156, -0.24000302244921876),
+            (0.9707728830478516, -0.24),
+        ),
+        (
+            (0.45992116430406516, -0.8599178752181855),
+            (0.72, -0.6939740549492187),
+            (0.7200025079609375, -0.6939714608896485),
+        ),
+    ],
+)
+def test_packed_sheet_binary_dilation_preserves_the_field(point, start, end):
+    """Exact binary dilation preserves both values and their reference budget."""
+    import jax.numpy as jnp
+
+    coordinates = np.array((*point, *start, *end))
+    wanted = reference.graded_precise_ring_reference(start, end, point)[1:]
+    values = []
+    for scale in (1.0, 1024.0):
+        pair = coordinates * scale
+        value = np.asarray(_compiled_axis_pair()[0](jnp.asarray(pair)))
+        ends = np.asarray(
+            sheet_module.packed_sheet_end_scale(np, *[np.array([x]) for x in pair])
+        ).ravel()
+        gamma = 3504 * np.finfo(float).eps / (1 - 3504 * np.finfo(float).eps)
+        assert np.all(abs(value - wanted) <= 1e-10 * abs(wanted) + gamma * ends)
+        values.append(value)
+    np.testing.assert_array_equal(values[0], values[1])

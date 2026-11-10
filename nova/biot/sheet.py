@@ -332,7 +332,7 @@ def _cylinder_radial(xp, gamma, radius, source):
     return xp.where(at_zero, 0.0, value)
 
 
-def _source_potential_series(xp, gamma, radius, source, slope):
+def _source_potential_series(xp, gamma, radius, source, slope, *, exterior_only=True):
     """Source multipoles of psi/(mu0 pi r²) and its target derivatives.
 
     The addition theorem integrates cos(phi) P_n onto
@@ -347,7 +347,10 @@ def _source_potential_series(xp, gamma, radius, source, slope):
     ratio = source * a / (xp.abs(held_slope) * distance)
     eligible = (
         (slope != 0.0)
-        & (xp.abs(source - slope * gamma) > radius * (1 + 1e-12))
+        & (
+            (not exterior_only)
+            | (xp.abs(source - slope * gamma) > radius * (1 + 1e-12))
+        )
         & (ratio <= 0.5)
     )
     if xp is np and not np.any(eligible):
@@ -403,6 +406,46 @@ def _source_potential_series(xp, gamma, radius, source, slope):
     )
     factor = xp.sign(held_slope) * slope**2 / a**2
     return eligible, intercept, factor * value, factor * height, factor * radial
+
+
+def _source_series_ends(xp, radius, target_z, start_r, start_z, end_r, end_z):
+    """Difference physical source multipoles before adding a primitive gauge.
+
+    Both ends must lie inside the convergence sphere about the source line's
+    axis intercept. The common zero-source primitive then cancels identically.
+    Holding inactive geometry before the series keeps its derivative defined.
+    """
+    dz = end_z - start_z
+    slope = (end_r - start_r) / xp.where(dz != 0, dz, 1.0)
+    held_slope = xp.where(slope != 0, slope, 1.0)
+    intercept = start_z - target_z - start_r / held_slope
+    distance = xp.hypot(radius, intercept)
+    eligible = (
+        (dz != 0)
+        & (slope != 0)
+        & (
+            xp.maximum(start_r, end_r) * xp.sqrt(1 + slope**2)
+            <= 0.5 * xp.abs(held_slope) * distance
+        )
+    )
+    r = xp.where(eligible, radius, 1.0)
+    b = xp.where(eligible, slope, 1.0)
+    fields, fluxes = [], []
+    for source, height in ((end_r, end_z), (start_r, start_z)):
+        source = xp.where(eligible, source, 0.0)
+        gamma = xp.where(eligible, height - target_z, 1.0)
+        _, _, value, vertical, radial = _source_potential_series(
+            xp, gamma, r, source, b, exterior_only=False
+        )
+        orientation = xp.where(dz > 0, 1.0, -1.0)
+        fields.append(
+            (
+                orientation * MU0 / 2 * r * vertical,
+                orientation * MU0 / 2 * (2 * value + r * radial),
+            )
+        )
+        fluxes.append(orientation * MU0 * np.pi * r**2 * value)
+    return eligible, fields, fluxes
 
 
 def _source_gradient_series(xp, gamma, radius, source, slope, regular):
@@ -913,17 +956,10 @@ class SheetFlux:
         a1sq = 1.0 + b1 * b1
         r1 = rp - b1 * gamma
         a1 = np.sqrt(a1sq)
-        width = np.hypot(gamma, r - rp) / np.sqrt(r * rp)
-        width = width if width > 0.0 else 1.0
-        # The arsinh argument's denominator vanishes at the azimuth where the
-        # source ring passes through the target, which is phi = 0 when
-        # r_1 = r and phi = pi when r_1 = -r.  The rule grades only one end, so
-        # it is placed at whichever end is nearer that confluence: a target on
-        # the far side of the line puts r_1 below -r, and the end carrying the
-        # logarithmic layer is then the far one.
-        phi, rule = self._azimuth_rule(width)
-        if np.abs(r1 + r) < np.abs(r1 - r):
-            phi = np.pi - phi
+        phi, rule = _gradient_azimuth_rule(
+            np, *[np.asarray([value]) for value in (gamma, r, rp, b1)]
+        )
+        phi, rule = phi.ravel(), rule.ravel()
         cosine = np.cos(phi)
         sine_sq = np.sin(phi) ** 2
         dense = np.sqrt(
@@ -1178,6 +1214,11 @@ class SheetFlux:
             return float(self.sheet_current * (radial[0] - radial[1])), float(
                 self.sheet_current * (height[0] - height[1])
             )
+        series, ends, _ = _source_series_ends(np, r, z, *self.start, *self.end)
+        if series and route == "closed":
+            return tuple(
+                float(self.sheet_current * (ends[0][i] - ends[1][i])) for i in (0, 1)
+            )
         if self._flat:
             b_r, b_z = (
                 self._pancake_field(r, z)
@@ -1251,6 +1292,9 @@ class SheetFlux:
         if _near_axis(np, r, z, *self.start, *self.end):
             radial, height, flux = _axis_expansion(r, z, *self.start, *self.end)
             return float(self.sheet_current * (flux[0] - flux[1]))
+        series, _, fluxes = _source_series_ends(np, r, z, *self.start, *self.end)
+        if series and route == "closed":
+            return float(self.sheet_current * (fluxes[0] - fluxes[1]))
         if self._flat:
             value = (
                 self._pancake_flux(r, z) if route == "closed" else self._flat_flux(r, z)
@@ -1324,7 +1368,9 @@ def _sheet_root_gradient(gamma, radius, source):
     return value, gradient
 
 
-def _sheet_azimuth_rule(xp, width):
+def _sheet_azimuth_rule(
+    xp, width, *, angle=np.pi, panels=_SHEET_FIELD_PANELS, ratio=_SHEET_FIELD_RATIO
+):
     """Return the field kernels' azimuth nodes and weights, shape ``(pairs, nodes)``.
 
     The rule is graded geometrically toward the singular azimuth and its width
@@ -1335,13 +1381,9 @@ def _sheet_azimuth_rule(xp, width):
     _, (node, weight) = _sheet_graded_rule()
     node = xp.asarray(node)
     weight = xp.asarray(weight)
-    span = xp.arcsinh(np.pi / width)
-    index = np.arange(_SHEET_FIELD_PANELS + 1)
-    edges = (
-        span[:, None]
-        * (_SHEET_FIELD_RATIO**index - 1.0)
-        / (_SHEET_FIELD_RATIO**_SHEET_FIELD_PANELS - 1.0)
-    )
+    span = xp.arcsinh(angle / width)
+    index = np.arange(panels + 1)
+    edges = span[:, None] * (ratio**index - 1.0) / (ratio**panels - 1.0)
     half = 0.5 * (edges[:, 1:] - edges[:, :-1])
     centre = 0.5 * (edges[:, 1:] + edges[:, :-1])
     stretch = (centre[:, :, None] + half[:, :, None] * node[None, None, :]).reshape(
@@ -1350,6 +1392,54 @@ def _sheet_azimuth_rule(xp, width):
     rule = (half[:, :, None] * weight[None, None, :]).reshape(width.shape[0], -1)
     rule = rule * width[:, None] * xp.cosh(stretch)
     return width[:, None] * xp.sinh(stretch), rule
+
+
+def _gradient_azimuth_rule(xp, gamma, radius, source, slope):
+    """Resolve the ring distance and both pole layers of the same remainder.
+
+    Splitting at pi/2 preserves the integral while grading each end. The
+    inverse squared width sums the curvatures of D² and B² at both endpoints.
+    A zero pole gap is removable; hold its inactive denominator before selecting.
+    """
+    intercept = source - slope * gamma
+    square = 1 + slope**2
+    inverse = radius * source / (gamma**2 + (radius - source) ** 2)
+    for gap, curvature in (
+        (intercept - radius, radius * (intercept - radius) + square * radius**2),
+        (intercept + radius, -radius * (intercept + radius) + square * radius**2),
+    ):
+        held = xp.where(gap != 0, gap, radius)
+        inverse = inverse + xp.where(gap != 0, xp.abs(curvature) / held**2, 0.0)
+    width = 1 / xp.sqrt(inverse)
+    stretch = xp.arcsinh(np.pi / (2 * width))
+    resolved = (xp.abs(intercept - radius) > 1e-12 * radius) & (
+        xp.abs(intercept + radius) > 1e-12 * radius
+    )
+    ring_pole = 2 * xp.arcsinh(
+        xp.hypot(gamma, radius - source) / (2 * xp.sqrt(radius * source))
+    )
+    split = resolved & (stretch <= 10.0) & (width <= 1.0) & (ring_pole >= width)
+    pole_root = xp.sqrt(square) * xp.hypot(intercept, slope * radius)
+    for gap, sign in ((intercept - radius, 1), (intercept + radius, -1)):
+        denominator = radius * (slope**2 * radius + sign * intercept + pole_root)
+        present = denominator > 0
+        held = xp.where(present, denominator, 1.0)
+        pole_distance = 2 * xp.arcsinh(xp.abs(gap) / xp.sqrt(2 * held))
+        split = split & (~present | (pole_distance >= width))
+    held_width = xp.where(split, width, 1.0)
+    phi, rule = _sheet_azimuth_rule(
+        xp, held_width, angle=np.pi / 2, panels=_SHEET_FIELD_PANELS // 2, ratio=1.1
+    )
+    phi = xp.concatenate((phi, np.pi - phi), axis=1)
+    rule = xp.concatenate((rule, rule), axis=1)
+    distance_width = xp.hypot(gamma, radius - source) / xp.sqrt(radius * source)
+    distance_width = xp.where(distance_width > 0, distance_width, 1.0)
+    held_width = xp.where(split, 1.0, distance_width)
+    single_phi, single_rule = _sheet_azimuth_rule(xp, held_width)
+    single_phi = xp.where((intercept < 0)[:, None], np.pi - single_phi, single_phi)
+    return xp.where(split[:, None], phi, single_phi), xp.where(
+        split[:, None], rule, single_rule
+    )
 
 
 def _sheet_arsinh_rule(xp, gamma, radius, r1, b1):
@@ -1400,18 +1490,7 @@ def _sheet_arsinh_gradient(xp, gamma, radius, source, b1):
     a1sq = 1.0 + b1 * b1
     a1 = xp.asarray(1.0 + b1 * b1) ** 0.5
     r1 = source - b1 * gamma
-    width = xp.hypot(gamma, radius - source) / xp.sqrt(radius * source)
-    width = xp.where(width > 0.0, width, 1.0)
-    # The arsinh argument's denominator vanishes at the azimuth where the source
-    # ring passes through the target, which is phi = 0 when r_1 = r and
-    # phi = pi when r_1 = -r. The rule grades only one end, so it is placed at
-    # whichever end is nearer that confluence: a target on the far side of the
-    # line puts r_1 below -r, and the end carrying the logarithmic layer is
-    # then the far one.
-    phi, rule = _sheet_azimuth_rule(xp, width)
-    phi = xp.where(
-        (xp.abs(r1 + radius) < xp.abs(r1 - radius))[:, None], np.pi - phi, phi
-    )
+    phi, rule = _gradient_azimuth_rule(xp, gamma, radius, source, b1)
     cosine = xp.cos(phi)
     sine_sq = xp.sin(phi) ** 2
     dense = xp.sqrt(
@@ -1548,6 +1627,22 @@ def _sheet_pancake_field(xp, target_r, target_z, start_r, start_z, end_r, end_z)
     return MU0 / (2.0 * np.pi) * radial, MU0 / (2.0 * np.pi) * height
 
 
+def _binary_field_geometry(xp, *coordinates):
+    """Canonicalise a homogeneous field with an exact binary dilation.
+
+    frexp chooses a shared exponent; ldexp changes exponent bits exactly for
+    normal finite coordinates. A common input dilation therefore has identical
+    canonical operands and follows identical floating-point arithmetic.
+    """
+    magnitude = xp.abs(xp.asarray(coordinates[0]))
+    for coordinate in coordinates[1:]:
+        magnitude = xp.maximum(magnitude, xp.abs(xp.asarray(coordinate)))
+    _, exponent = xp.frexp(magnitude)
+    return tuple(
+        xp.ldexp(xp.asarray(coordinate), -exponent) for coordinate in coordinates
+    )
+
+
 def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
     """Return the per-end field terms of both the sloped and the flat route.
 
@@ -1560,6 +1655,9 @@ def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
     The flat route's ends sit at the segment's radial extremes, the sloped
     route's at its ordered endpoints. ``flat`` selects between them.
     """
+    target_r, target_z, start_r, start_z, end_r, end_z = _binary_field_geometry(
+        xp, target_r, target_z, start_r, start_z, end_r, end_z
+    )
     target_r = xp.asarray(target_r)
     target_z = xp.asarray(target_z)
     start_r = xp.asarray(start_r)
@@ -1606,6 +1704,9 @@ def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
     start_z = xp.where(inactive, 0.0, start_z)
     end_r = xp.where(inactive, 0.5, end_r)
     end_z = xp.where(inactive, 1.0, end_z)
+    source_series, source_ends, _ = _source_series_ends(
+        xp, target_r, target_z, start_r, start_z, end_r, end_z
+    )
     # The sheet current is an azimuthal density, so the field depends on the
     # segment and the sign of K alone. Ordering the endpoints by height makes
     # that independence arithmetic rather than a convention on the caller.
@@ -1663,6 +1764,9 @@ def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
         (pancake_height, False),
     ):
         for index in range(2):
+            values[index] = xp.where(
+                source_series, source_ends[index][0 if radial else 1], values[index]
+            )
             values[index] = xp.where(
                 near_axis, expansion[0 if radial else 1][index], values[index]
             )

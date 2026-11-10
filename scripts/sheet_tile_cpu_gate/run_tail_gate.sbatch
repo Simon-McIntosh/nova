@@ -37,6 +37,10 @@ header() {
     echo "EXIT=$GATE_EXIT"
 } > "$RUN/full-mesh-gate.log" 2>&1
 
+if [ "${GATE_ONLY:-0}" -eq 1 ]; then
+    exit "$GATE_EXIT"
+fi
+
 mkdir "$SCRATCH/base"
 git archive "$BASE" nova tests scripts conftest.py pyproject.toml | tar -x -C "$SCRATCH/base"
 cd "$SCRATCH/base" || exit 2

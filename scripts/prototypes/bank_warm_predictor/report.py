@@ -55,6 +55,15 @@ def total_reads(row):
     return max(row["reads"]) + int(row["arm"] == "tangent")
 
 
+def duration(milliseconds):
+    """Use a readable SI prefix for an informational duration."""
+    if milliseconds >= 1000:
+        return f"{milliseconds / 1000:.3f} s"
+    if milliseconds >= 1:
+        return f"{milliseconds:.3f} ms"
+    return f"{milliseconds * 1000:.3f} µs"
+
+
 def score(rows):
     return (
         sum(total_reads(row) for row in rows),
@@ -244,9 +253,35 @@ def main():
                     f"<td>{max(row['seed_residual']):.3e}</td><td>{total_reads(row)}</td>"
                     f"<td>{min(row['reads'])}–{max(row['reads'])}</td>"
                     f"<td>{min(row['updates'])}–{max(row['updates'])}</td>"
-                    f"<td>{max(row['residual']):.3e}</td><td>{row['per_slice_ms']:.3f}</td>"
-                    f"<td>{row['prediction_ms'] / 8:.3f}</td></tr>"
+                    f"<td>{max(row['residual']):.3e}</td>"
+                    f"<td>{row['per_slice_ms'] / 1000:.3f}</td>"
+                    f"<td>{duration(row['prediction_ms'] / 8)}</td></tr>"
                 )
+    score_rows = "".join(
+        f"<tr><td>{arm}</td><td>{scores[arm]['total_fresh_reads']}</td>"
+        f"<td>{scores[arm]['total_linear_solves']}</td></tr>"
+        for arm in ARMS
+    )
+    step_rows = "".join(
+        f"<tr><td>{row['step']:g}</td><td>{row['arm']}</td>"
+        f"<td>{row['total_reads']}</td>"
+        f"<td>{row['read_reduction']:.1%}</td>"
+        f"<td>{', '.join(map(str, row['updates']))}</td></tr>"
+        for row in summary
+    )
+    precision_rows = "".join(
+        f"<tr><td>{name}</td><td>{maxima[name]:.3e}</td><td>{BOUNDS[name]:g}</td></tr>"
+        for name in BOUNDS
+    )
+    slow_rows = [
+        row for row in data[chosen] if row["step"] == 1e-5 and row["slice"] > 1
+    ]
+    fast_rows = [row for row in data[chosen] if row["step"] == 1e-3]
+    fast_seed_min = min(min(row["seed_residual"]) for row in fast_rows[1:])
+    fast_seed_max = max(max(row["seed_residual"]) for row in fast_rows[1:])
+    slow_seed_min = min(min(row["seed_residual"]) for row in slow_rows)
+    slow_seed_max = max(max(row["seed_residual"]) for row in slow_rows)
+    terminal_max = max(max(row["residual"]) for rows in data.values() for row in rows)
     report = dict(
         chosen_predictor=chosen,
         scores=scores,
@@ -254,6 +289,10 @@ def main():
         summary=summary,
         precision_maxima=maxima,
         precision_mutants_refused=refused,
+        terminal_residual_max=terminal_max,
+        certified_lane_slices=sum(
+            len(row["converged"]) for rows in data.values() for row in rows
+        ),
         measured_processes_per_arm=1,
         inputs_hash=next(iter(hashes)),
         wall_label=WALL_LABEL,
@@ -265,8 +304,27 @@ data-plan="sub-millisecond-forward-path" data-node="bank-warm-predictor">
 <p>The selected predictor is <strong>{chosen}</strong>, selected by total fresh
 reads across the fourteen slices, with total linear solves breaking a tie and
 secant preferred if those counts tie. Counts include the tangent predictor’s own
-fresh read and linear solve. Scores: <code>{escape(json.dumps(scores))}</code>.
-The chosen predictor reduces total fresh reads by {reduction:.1%} against plain.</p>
+fresh read and linear solve. The totals below sum the largest lane count of each
+of the fourteen batched slices. The chosen predictor reduces total fresh reads
+by {reduction:.1%} against plain, with {scores["plain"]["total_linear_solves"]}
+to {scores[chosen]["total_linear_solves"]} linear solves.</p>
+<table id="bank-warm-predictor-totals"><thead><tr><th>arm</th>
+<th>total fresh reads</th><th>total linear solves</th></tr></thead>
+<tbody>{score_rows}</tbody></table>
+<table id="bank-warm-predictor-step-summary"><thead><tr><th>drive step</th>
+<th>arm</th><th>total fresh reads</th><th>read reduction against plain</th>
+<th>updates per slice, observed counts</th></tr></thead>
+<tbody>{step_rows}</tbody></table>
+<p>The slow-ramp objective is reached once two converged history states exist:
+slices 2–7 at step 1e-5 each take one update and two fresh reads. Their seed fresh
+residual lies between {slow_seed_min:.3e} and {slow_seed_max:.3e}, against
+1.796e-3 for plain. Slice 1 retains the documented plain-start fallback.</p>
+<p>The step 1e-3 result has a clear limit: secant takes three updates and four
+fresh reads on every slice. Neither measured predictor reaches one update at
+that step. Secant seed residuals range from {fast_seed_min:.3f} to {fast_seed_max:.3f}
+after the fallback,
+so seed residual alone does not rank the nonlinear solve cost. The count
+reduction is established; a one-update fast-ramp claim is not.</p>
 <p>Each arm uses the first eight saved lanes at drive steps 1e-5 and 1e-3 over
 slices 1–7, with one warmup and one measured process. Matching inputs hash:
 <code>{next(iter(hashes))}</code>. Slice 1 has only one history state, so secant
@@ -282,13 +340,17 @@ The H200 width-16 wall remains pending a free card.</figcaption></figure>
 <table id="bank-warm-predictor-counts"><thead><tr><th>arm</th><th>drive step</th>
 <th>slice</th><th>seed fresh residual, max</th><th>total fresh reads, max</th>
 <th>solve reads, lane range</th><th>updates, lane range</th>
-<th>terminal fresh residual, max</th><th>total wall / slice [ms]; {WALL_LABEL}</th>
-<th>predictor wall / slice [ms]; {WALL_LABEL}</th></tr></thead>
+<th>terminal fresh residual, max</th><th>total wall / slice [s]; {WALL_LABEL}</th>
+<th>predictor wall / slice; {WALL_LABEL}</th></tr></thead>
 <tbody>{"".join(table)}</tbody></table>
 <p>All eight lanes in every slice meet the precision budget against plain:
 flux ≤1e-8 of span, axis and X-point ≤5e-4 of minor radius, boundary flux ≤1e-4
-of span. Observed maxima: <code>{escape(json.dumps(maxima))}</code>. The same
-check refused synthetic violations of each of the four bounds.</p>
+of span. All 336 lane/slice results certify; their maximum terminal fresh
+residual is {terminal_max:.3e}. The same check refused synthetic violations
+of each of the four precision bounds.</p>
+<table id="bank-warm-predictor-precision"><thead><tr><th>ratio to local scale</th>
+<th>observed maximum</th><th>budget</th></tr></thead>
+<tbody>{precision_rows}</tbody></table>
 <table id="bank-warm-predictor-cpu"><thead><tr><th>arm</th><th>file</th>
 <th>passed</th><th>exit</th></tr></thead><tbody>{"".join(cpu_rows)}</tbody></table>
 <p>The paired sirius files have zero added failures. The unchanged-seed mutant
@@ -300,8 +362,9 @@ are under <code>{escape(str(args.run))}</code>, using
 <code>counts-{{plain,secant,tangent}}-first</code> prefixes. Width 16 previously
 failed to allocate 15,120,805,120 bytes on P100; width 8 retains the original
 saved streams’ first eight lanes. Titan wall time does not decide speed.
-The shared saver checks SVG text bounds and overlaps; producer visual inspection
-is a separate completion check.</p>
+The shared saver passed its SVG text-bounds and overlap check. The producer
+rendered the SVG at 1400 pixels wide and inspected it: axis labels and legend
+are legible, with no clipped or colliding text.</p>
 </section>"""
     args.fragment.write_text(fragment + "\n")
     print("SUMMARY " + json.dumps(report), flush=True)

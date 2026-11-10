@@ -353,10 +353,11 @@ def graded_precise_ring_reference(start, end, point, *, rtol=1e-13):
         mu = mp.mpf(MU0)
         for refinement in range(8):
             nodes, weights = leggauss(min(4 * 2**refinement, 32))
-            total = np.zeros(3)
+            accumulated = [mp.mpf(0), mp.mpf(0), mp.mpf(0)]
             for lower, upper in panels:
+                lo, hi = mp.mpf(lower), mp.mpf(upper)
                 for node, weight in zip(nodes, weights):
-                    t = mp.mpf((lower + upper) / 2 + (upper - lower) / 2 * node)
+                    t = (lo + hi) / 2 + (hi - lo) / 2 * mp.mpf(node)
                     a, h = ar + t * dr, az + t * dz
                     height = z - h
                     span = (r + a) ** 2 + height**2
@@ -382,13 +383,10 @@ def graded_precise_ring_reference(start, end, point, *, rtol=1e-13):
                                 + (a * a + r * r + height * height) / gap * second
                             )
                         )
-                    total += (
-                        (upper - lower)
-                        / 2
-                        * weight
-                        * length
-                        * np.array([float(psi), float(br), float(bz)])
-                    )
+                    coefficient = (hi - lo) / 2 * mp.mpf(weight) * mp.mpf(length)
+                    for i, value in enumerate((psi, br, bz)):
+                        accumulated[i] += coefficient * value
+            total = np.array([float(value) for value in accumulated])
             scale = np.maximum(np.abs(total), np.max(np.abs(total)) * 1e-8)
             if previous is not None and np.all(
                 np.abs(total - previous) <= rtol * scale
@@ -404,4 +402,7 @@ def graded_precise_ring_reference(start, end, point, *, rtol=1e-13):
                     ),
                     axis=1,
                 ).reshape(-1, 2)
-    raise AssertionError("the precise graded ring reference did not converge")
+    raise AssertionError(
+        f"the precise graded ring reference did not converge: {start}, {end}, "
+        f"{point}; value={total}; previous={previous}"
+    )

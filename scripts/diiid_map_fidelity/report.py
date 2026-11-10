@@ -60,10 +60,15 @@ def main():
     assert len(rows) == 4
     ref_rows, shift_rows, solve_rows, components = [], [], [], []
     for identity, data, audit in rows:
+        display = (
+            "MAST 21978/35"
+            if identity.startswith("mast-")
+            else "DIII-D " + identity.rsplit("-", 1)[1]
+        )
         ref = data["reference"][0]
         ref_rows.append(
             [
-                identity,
+                display,
                 number(ref["relative"]),
                 number(ref["centred_relative"]),
                 number(ref["force_n"]),
@@ -79,7 +84,7 @@ def main():
         for control in data["reference"]:
             shift_rows.append(
                 [
-                    identity,
+                    display,
                     number(control["dz_m"] * 100),
                     number(control["relative"]),
                     number(control["force_n"]),
@@ -90,7 +95,7 @@ def main():
         solved = data["terminal"]
         solve_rows.append(
             [
-                identity,
+                display,
                 number(solved["residual"]),
                 number(solved["direct_terminal_map"]["relative"]),
                 solved["converged"],
@@ -114,7 +119,7 @@ def main():
         )
         components.append(
             [
-                identity,
+                display,
                 number(values["plasma_against_label_tare"]["centred_rms_wb"]),
                 number(values["external_against_label_remainder"]["centred_rms_wb"]),
                 number(ref["target_scaling_delta_sup_wb"]),

@@ -112,7 +112,7 @@ def render(row, destination, previews):
                 label.T,
                 levels,
                 color=REFERENCE,
-                linewidth=1.6,
+                linewidth=2.6,
                 wall=wall,
             )
             ref.set_linestyle("--")
@@ -124,7 +124,7 @@ def render(row, destination, previews):
                     solved.T,
                     levels,
                     color=SUBJECT,
-                    linewidth=2.6,
+                    linewidth=3.0,
                     wall=wall,
                 )
             draw_nulls(
@@ -155,7 +155,7 @@ def render(row, destination, previews):
                     data["defect"].T,
                     np.sort(sign * maximum * np.array([0.2, 0.5, 0.8])),
                     color=color,
-                    linewidth=2.0,
+                    linewidth=2.6,
                     wall=None,
                 )
                 contour.set_linestyle(style)
@@ -165,9 +165,9 @@ def render(row, destination, previews):
         figure.text(0.175 + index * 0.325, 0.88, label_text, ha="center", fontsize=14)
     handles = [
         Line2D([], [], color=REFERENCE, lw=2.6, ls="--", label="EFIT"),
-        Line2D([], [], color=SUBJECT, lw=2.6, label="seeded from EFIT"),
-        Line2D([], [], color=SUBJECT, lw=2.0, label="positive defect"),
-        Line2D([], [], color=REFERENCE, lw=2.0, ls=":", label="negative defect"),
+        Line2D([], [], color=SUBJECT, lw=3.0, label="seeded from EFIT"),
+        Line2D([], [], color=SUBJECT, lw=2.6, label="positive defect"),
+        Line2D([], [], color=REFERENCE, lw=2.6, ls=":", label="negative defect"),
     ]
     figure.legend(
         handles=handles,

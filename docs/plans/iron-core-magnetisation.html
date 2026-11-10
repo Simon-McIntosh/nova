@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="37">
 <meta name="plan-modified" content="2026-11-10">
 </head>
 <body>
@@ -619,6 +619,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261109T234825928895-review-of-icm-sheet-tile-compile-cost-6083692b9ad4" data-who="reckon-build" data-when="2026-11-10T00:04:52Z">
     <div class="r-comment-body"><p>Independent review stored at both declared review-record paths for base e914d02e6ff5ae1f3388a7099a1f1cdb0c6987fe and head 6083692b9ad44a2a2785021a7ee9c26dc71539df; six scores 20/19/20/17/20/20, zero blocking and one non-blocking finding on missing control identity binding; both record audits pass.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261109T102156082059-icm-sheet-tile-compile-cost" data-who="reckon-build" data-when="2026-11-09T23:42:29Z">
+    <div class="r-comment-body"><p>Completed titan Tesla P100 compile census: original cold 1696 / 6493-cell builds compile in 7.3675576113164425 / 6.591119719669223 s, serialize 537969 bytes each and peak at 1432596480 / 6978228224 host bytes; full warm G walls remain 173.59582106396556 / 2272.9446377959102 s. Focused recovery job 1309335 completes the 6493-cell tile-only fresh hit (1.286908557638526 s lower plus retrieval) and separate empty-root AssertionError/EXIT=1 refusal. Combined verification is complete=true with no failures. Both program and memory rows are committed in docs/research/compile-cost-evidence.html; landing evidence is docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile-compile.html#icm-sheet-tile-compile-cost-state. All bounds pass and no full G build or 1696-cell row was repeated.</p></div>
 </div>
 </section>
 </main>

@@ -6,47 +6,157 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="icm-magnetisation-solve">
 <meta name="plan-evidence-for" content="iron-core-magnetisation">
-<title>Material solve blocked on axis-touching sheet edges</title>
+<title>Meshed iron material solve: analytic controls and differential Newton</title>
 </head>
 <body>
 <article id="icm-magnetisation-solve-record">
-<h1 id="icm-magnetisation-solve-title">Material solve blocked on axis-touching sheet edges</h1>
-<p>The production material-solve scaffold calls the existing sheet-tile interaction
-owner. It has a merged-cell mesh, a monotone cubic H(B) interpolant with positive
-differential permeability, and dense differentiated Newton updates with runtime
-state, operands, LU factors and backtracking scales. These are partial work:
-the analytic control has not passed and this record claims no delivered solve.</p>
-<p>The 44-cell sphere at 0.1 m cell size reaches the production tile, which produces
-528 nonfinite target–edge pairs out of 26,972 pairs (44 targets, 613 edges). Twelve
-edges lie on or end at R = 0. For example, the target (0.04913072, −0.44836919) m
-against the edge (0, −0.5) to (0, −0.4) m returns B_R = NaN and B_Z = −0.0.
-The neighbouring sloped edge (0, −0.5) to (0.003067942, −0.499990588) m returns
-B_R = 1.2510684759427282e−11 T per A/m and B_Z = NaN. The solve explicitly
-refuses the resulting nonfinite matrix before Newton.</p>
-<p>Nine focused controls passed in 133.91 s: mesh coverage and sliver refusal,
-material monotonicity and endpoint holds, invalid-table refusal, the finite
-zero-field Jacobian, and runtime state, matrix and factor arguments. The log is
-<code>material-tests.log</code>. This excludes the eight analytic and nonlinear
-sphere/shell controls and is not the acceptance gate.</p>
-<p>The defect is in the existing sheet owner, outside this node's write grant.
-Replacing NaNs with zero would erase the finite field of a sheet that ends on
-the axis, so the solver does not mask them. No kernel repair or alternative
-interaction derivation is included. The axis-source and axis-target limits must
-be supplied by the sheet owner before the sphere and closed-shell acceptance
-measure and its differential-versus-secant negative control can be completed.</p>
-<p>Reproduction files in the assigned run directory:
-<code>production-probe.log</code>, <code>diagnose-interaction.py</code> and
-<code>diagnose-interaction.log</code>. The prototype input receipts read were
-<code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/prototype/sphere.json</code>,
-<code>shell.json</code> and <code>shell-mu1000.json</code>. The proposed regression
-checks remain enabled in <code>tests/test_magnetisation.py</code>.</p>
-<p>Both required suite commands were invoked with the template resolved over
-each arm: no test path at the base, where this file is absent, and
-<code>tests/test_magnetisation.py</code> at the committed head. Both were explicitly
-terminated under the scope-stop rule and their logs end with <code>EXIT=143</code>;
-neither arm reached its summary. The Jacobian mutation was not applied because
-the unmutated analytic controls cannot reach Newton. These acceptance measures
-remain to be run after the sheet repair; this node is blocked.</p>
+<h1 id="icm-magnetisation-solve-title">Meshed iron material solve</h1>
+<p>The four uniform-field sphere cases pass through the production path at
+<code>160d019c233599fa992604e64c0c3c864590c376</code>. The node remains blocked:
+the closed-shell factors fail the prototype comparison, and the declared secant
+mutation passes the current ten-correction guard. One <code>sirius</code> job,
+1309371, ran both suite arms to completion without intervention: the head records
+15 passed and 3 failed in 167.64 s; the baseline exits 4 because the exact requested
+command names a test file absent at the recorded base. No final qualification is
+claimed.</p>
+
+<h2 id="icm-magnetisation-solve-mechanism">Mesh, law and Newton update</h2>
+<p><code>nova/biot/magnetisation.py</code> owns the mesh, the material interpolant
+and the solve. Its public entry point is <code>solve_magnetisation</code>; the
+result exposes magnetisation, permeability, residual and accepted-step histories,
+termination and the iron field at new targets. A clipped square grid merges
+pieces below 0.15 of a full cell area into the neighbour sharing the longest
+boundary. Unresolved slivers are refused. Clipping duplicates separated only by
+floating roundoff are removed before forming sheet edges.</p>
+<p>The interaction matrix is built only through
+<code>nova.biot.tiledassembly.cell_interaction</code>, also used for exterior
+fields. A common dilation of source and target coordinates leaves B/M invariant:
+the ring field scales inversely with length and the sheet arclength scales with
+length. An exact power-of-two dilation of 1024 therefore preserves the physical
+operator while reducing the tile's 1 nm edge-identity grid to 0.977 pm in the
+authored geometry. The external-field callback receives metre coordinates.</p>
+<p>The material fit interpolates H(B) with cubic Hermite polynomials whose slopes
+are strictly positive and limited by the adjoining secants. Thus dB/dH is
+positive. The endpoint secant relative permeabilities are held outside the table.
+The residual is F(M) = M − c(|B|)B, with B = B<sub>ext</sub> + GM and
+c = (1 − 1/μ<sub>r</sub>)/μ<sub>0</sub>. Dense <code>jax.jacfwd</code> forms the
+differential Jacobian, LU supplies the Newton direction, and fifteen halving
+grades require the residual to fall. State, operands, LU factor and step scale
+are runtime arguments of compiled functions. The law is single-valued and
+anhysteretic; no remanence or minor-loop response is represented.</p>
+
+<h2 id="icm-magnetisation-solve-sphere">Uniform-field sphere</h2>
+<p>Radius a = 0.5 m, applied axial field B<sub>0</sub> = 10 mT, 44 cells at
+0.1 m grid spacing, and the prototype's polygonal boundary. The printed analytic
+closed forms are B<sub>in</sub> = 3μ<sub>r</sub>B<sub>0</sub>/(μ<sub>r</sub> + 2)
+and k = (μ<sub>r</sub> − 1)/(μ<sub>r</sub> + 2). At distance 2a, the equatorial
+field is B<sub>0</sub>(1 − k/8) and the polar field is B<sub>0</sub>(1 + k/4).
+These are printed alongside the production measurements in
+<code>after-suite-resumed.log</code>.</p>
+<table>
+<thead><tr><th>μ<sub>r</sub></th><th>Exact interior [mT]</th><th>Exact equator [mT]</th><th>Exact pole [mT]</th><th>Maximum interior relative error</th><th>Newton corrections</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>10</td><td>10</td><td>10</td><td>0</td><td>0</td></tr>
+<tr><td>10</td><td>25</td><td>9.0625</td><td>11.875</td><td>2.0365e−11</td><td>1</td></tr>
+<tr><td>100</td><td>29.4117647059</td><td>8.78676470588</td><td>12.4264705882</td><td>4.1493e−11</td><td>1</td></tr>
+<tr><td>1000</td><td>29.9401197605</td><td>8.75374251497</td><td>12.4925149701</td><td>8.0240e−11</td><td>1</td></tr>
+</tbody>
+</table>
+<p>Equatorial/polar dipole relative errors are respectively
+9.7369224e−7 / 1.4861686e−6 at μ<sub>r</sub> = 10,
+1.2996145e−6 / 1.8379255e−6 at 100, and
+1.3400239e−6 / 1.8779697e−6 at 1000. They reproduce the stored prototype errors;
+the material-free case returns zero magnetisation and the applied field exactly.
+The interior bound remains 1e−9 and the exterior-error agreement bound remains
+2e−10; neither was widened to absorb the geometry-rounding loss.</p>
+
+<h2 id="icm-magnetisation-solve-shell">Closed-shell control</h2>
+<p>Inner radius a = 0.9 m, outer radius b = 1 m, 228 cells at 0.04 m spacing,
+and a 0.05 m central current loop, as in the prototype. The analytic dipole
+shielding factor printed by the runner is
+S = ((2μ<sub>r</sub> + 1)(μ<sub>r</sub> + 2) −
+2(μ<sub>r</sub> − 1)²(a/b)³)/(9μ<sub>r</sub>):
+1.4878 at μ<sub>r</sub> = 10, 6.90238 at 100 and 61.101838 at 1000.
+The acceptance compares all three exterior probes with the prototype factors to
+their reported 0.001 precision, using a 0.0005 absolute half-unit bound. All three
+material cases fail; the largest discrepancy is at the oblique probe (3, 1) m.
+The three probe positions are (2, 0), (0, 2) and (3, 1) m.</p>
+<table>
+<thead><tr><th>μ<sub>r</sub></th><th>Analytic S</th><th>Production S at the three probes</th><th>Prototype S at the same probes</th></tr></thead>
+<tbody>
+<tr><td>10</td><td>1.4878</td><td>1.4862867, 1.4855557, 1.4544525</td><td>1.486, 1.486, 1.487</td></tr>
+<tr><td>100</td><td>6.90238</td><td>6.8478165, 6.8185254, 6.0637796</td><td>6.846, 6.821, 6.861</td></tr>
+<tr><td>1000</td><td>61.101838</td><td>59.4571188, 56.6844430, 27.4368882</td><td>59.327, 56.949, 60.219</td></tr>
+</tbody>
+</table>
+<p>The largest production deviation from the analytic shielding is 55.0965% at
+μ<sub>r</sub> = 1000 and the oblique probe. The linear solves themselves converge
+in one Newton correction. Neither the comparison bound nor the target set has
+been changed to accept these results.</p>
+
+<h2 id="icm-magnetisation-solve-domain">Finite-field domain and geometry checks</h2>
+<p>A target on a closed source segment is outside the finite-field domain,
+on or off the symmetry axis. No field regularisation is used. The coordinator's
+sheet-owner repair <code>ed5ed6a6bc6954d82ee085f883f5ea5133ed96ce</code> was merged
+into this worktree at <code>4d5b44aaa7a398d33e81b352fa535e9e35d59aa8</code>.
+The original 44-cell mesh census then returned zero nonfinite entries over
+26,972 target–edge pairs. A subsequent mesh check removes two collapsed clipping edges: 44 cells, 611
+edges and 26,884 pairs remain, with minimum centroid-to-closed-segment distance
+0.0185787475 m and minimum edge length 2.156405e−6 m. Every collocation target is
+strictly clear of every source segment.</p>
+<p>The raw-coordinate ring reference reproduces the prototype interior errors
+2.0197e−11, 4.1105e−11 and 7.9718e−11 for μ<sub>r</sub> = 10, 100 and 1000.
+Rounding those source coordinates onto the tile's unscaled identity grid raises
+them to 3.3354e−10, 2.3986e−9 and 4.4842e−9. This independent instrument check,
+<code>geometry-precision.log</code>, identifies geometry quantisation as the loss;
+the coordinate dilation restores the prototype-level result without changing the
+field law or the acceptance bounds. Three focused mesh checks pass.</p>
+
+<h2 id="icm-magnetisation-solve-mutation">Declared Jacobian mutation</h2>
+<p>The scratch extraction applies <code>jax.lax.stop_gradient</code> only to the
+material coefficient in the residual's derivative. Residual values are identical;
+the Jacobian contains the secant coefficient and omits its differential term.
+The nonlinear shell must converge within ten corrections in the production arm.
+The scratch runner asserts that the imported module is its mutated extraction,
+preserves the patch and mutant source, and compares the production source blob
+with HEAD after the test. The mutation did not fail: the differential arm converges in three corrections,
+with terminal relative residual 5.975509e−14, while the secant arm converges in
+five, with residual 1.670711e−9. Both pass the current bound of ten. The mutation
+log ends with <code>1 passed</code> and <code>EXIT=0</code>, so it is not an admitted
+negative control. A discriminating iteration bound or a stronger nonlinear case
+remains to be supplied; no red result is invented from this measurement. The
+production source blob and HEAD blob both read
+<code>180d1a7ff970fc4b5e77e6e8b2bc531e2a14a72a</code>, and the scratch extraction
+was removed after the run.</p>
+
+<h2 id="icm-magnetisation-solve-operand">The unresolved error is in the interaction operand</h2>
+<p>An independent ring-integral comparison evaluates the production operator at
+the oblique probe before any material solve. Orders 24 and 48 agree to a maximum
+absolute difference of 6.882401e−25 T/(A/m), with a largest reference entry of
+4.086798e−11 T/(A/m). The production operator's largest disagreement is
+6.539722e−9 T/(A/m), 160.02 times that largest reference entry.</p>
+<p>The worst entry is radial field from radial magnetisation of cell 5, near the
+upper axis end of the shell: production 6.539731380889133e−9 T/(A/m), reference
+9.80715345127379e−15 T/(A/m). The probe (3, 1) m lies on no source segment. The
+reference is nonzero, and its refinement is far below the disagreement. Thus
+finite matrix entries and a converged Newton residual are insufficient here:
+the required closed-shell agreement fails in the existing sheet/tile operand,
+before Newton. The exclusive write grant does not permit repairing that owner.
+The reproducer and arrays are <code>shell-operand.py</code>,
+<code>shell-operand.log</code> and <code>shell-operand.npz</code> in the run directory.</p>
+
+<h2 id="icm-magnetisation-solve-receipts">Receipt locations and baseline limitation</h2>
+<p>All logs and receipts are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220119790593-icm-magnetisation-solve</code>:
+<code>after-suite-resumed.log</code>, <code>baseline-suite-resumed.log</code>,
+<code>negative-control-resumed.log</code>, <code>mesh-domain.log</code>,
+<code>resumed-mesh.log</code> and <code>suite-job.json</code>.</p>
+<p>The resumed instruction requests the exact live-pointer suite command in both
+arms. At recorded base <code>4221309d2e66fd30eadafa7eacc3d967dd233481</code>,
+<code>tests/test_magnetisation.py</code> does not exist; that exact command exits 4
+with “file or directory not found” and zero tests run. This is not a passing
+baseline. The earlier arms ending in <code>EXIT=143</code> were explicitly killed
+and are retained only as historical, incomplete logs, not qualification evidence.</p>
 </article>
 </body>
 </html>

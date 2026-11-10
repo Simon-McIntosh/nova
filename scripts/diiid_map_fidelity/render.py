@@ -61,6 +61,7 @@ def save(figure, path, preview):
     tree.getroot().set("width", "31.111cm")
     tree.getroot().set("height", "16cm")
     tree.write(path, encoding="utf-8", xml_declaration=True)
+    path.write_text("\n".join(line.rstrip() for line in path.read_text().splitlines()))
     figure.savefig(preview, dpi=100)
     print("FIGURE", path, "text_check=passed", "preview", preview, flush=True)
 

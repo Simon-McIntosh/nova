@@ -609,6 +609,46 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "c7d2eb71c9d18fc58f28fd58ef9e12d73ed31302",
+  "release": {
+    "arms_kept": [
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T010103197729-icm-sheet-axis-limits/shell-accuracy/final-census",
+        "reason": "outside the node-local temp root /tmp"
+      }
+    ],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "ledger_index_removed": "/home/ITER/mcintos/.cache/reckon/ledger-3e6fdd6bcf2eae182313e8218508329f62b88e4f96b7fa3549104dd04c64eda0-v5.sqlite",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_absent": true,
+    "scratch_bytes": null,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261110T010103197729-icm-sheet-axis-limits",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-sheet-axis-limits",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

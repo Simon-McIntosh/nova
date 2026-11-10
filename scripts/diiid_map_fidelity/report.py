@@ -59,6 +59,7 @@ def main():
         rows.append((path.parent.name, data, audit))
     assert len(rows) == 4
     ref_rows, shift_rows, solve_rows, components, forces = [], [], [], [], []
+    context_rows, displacement_rows, field_rows = [], [], []
     for identity, data, audit in rows:
         display = (
             "MAST 21978/35"
@@ -82,16 +83,21 @@ def main():
                 number(ref["centred_relative"]),
                 number(ref["force_n"]),
                 number(ref["force_over_hoop"]),
-                number(ref["reference_gradient_force_n"]),
-                number(ref["hoop_scale_n"]),
-                number(ref["amplitude"]),
-                ref["core_cells"],
-                ref["diverted"],
                 audit["maximum_full_state_region"]
                 + ": "
                 + ", ".join(
                     number(value) for value in audit["maximum_full_state_rz_m"]
                 ),
+            ]
+        )
+        context_rows.append(
+            [
+                display,
+                number(ref["reference_gradient_force_n"]),
+                number(ref["hoop_scale_n"]),
+                number(ref["amplitude"]),
+                ref["core_cells"],
+                ref["diverted"],
             ]
         )
         for control in data["reference"]:
@@ -115,6 +121,11 @@ def main():
                 solved["qualified"],
                 REASONS.get(solved["reason"], str(solved["reason"])),
                 solved["topology"],
+            ]
+        )
+        displacement_rows.append(
+            [
+                display,
                 number(100 * solved["axis_delta_m"][0]),
                 number(100 * solved["axis_delta_m"][1]),
                 number(100 * solved["axis_distance_m"]),
@@ -137,9 +148,14 @@ def main():
                 number(values["external_against_label_remainder"]["centred_rms_wb"]),
                 number(ref["target_scaling_delta_sup_wb"]),
                 number(ref["current_target_effect"]["relative"]),
+                split["largest_centred_rms"],
+            ]
+        )
+        field_rows.append(
+            [
+                display,
                 number(values["coils_only"]["sup_wb"]),
                 number(prescribed["sup_wb"]),
-                split["largest_centred_rms"],
             ]
         )
     document = args.document.read_text()
@@ -150,14 +166,20 @@ def main():
             "Centred residual",
             "Fz [N]",
             "Fz / hoop scale",
+            "Largest defect R, Z [m]",
+        ],
+        ref_rows,
+    )
+    body += "<h3>Reference normalization and topology</h3>" + table(
+        [
+            "Row",
             "Reference-gradient Fz [N]",
             "Hoop scale [N]",
             "Current amplitude",
             "Core cells",
             "Map reads diverted",
-            "Largest defect R, Z [m]",
         ],
-        ref_rows,
+        context_rows,
     )
     body += "<h3>Rigid displacement controls</h3>" + table(
         ["Row", "ΔZ [cm]", "Raw residual", "Fz [N]", "Fz / hoop scale", "Core cells"],
@@ -190,12 +212,18 @@ def main():
             "Qualified",
             "Reason",
             "Topology",
+        ],
+        solve_rows,
+    )
+    body += table(
+        [
+            "Row",
             "Axis ΔR [cm]",
             "Axis ΔZ [cm]",
             "Axis gap [cm]",
             "Verified admitted X-point gap [cm]",
         ],
-        solve_rows,
+        displacement_rows,
     )
     body += (
         "<p>Axis offsets use the stationary point polished on the reference "
@@ -236,15 +264,16 @@ def main():
             "External vs remainder centred RMS [Wb]",
             "Target scaling sup change [Wb]",
             "Residual without target scaling",
-            "Coils sup [Wb]",
-            "Prescribed circuits sup [Wb]",
             "Largest centred component",
         ],
         components,
     )
+    supplement += table(
+        ["Row", "Coils sup [Wb]", "Prescribed circuits sup [Wb]"], field_rows
+    )
     document = re.sub(
         r'(<section id="decomposition">\s*<h2>Contributor switches</h2>)'
-        r"(?:\s*<table>.*?</table>)?",
+        r"(?:\s*<table>.*?</table>)*",
         lambda match: match[1] + supplement,
         document,
         flags=re.S,

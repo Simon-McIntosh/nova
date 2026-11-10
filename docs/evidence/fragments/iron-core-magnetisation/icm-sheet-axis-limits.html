@@ -452,3 +452,62 @@ w⁻² = rs/d₀² + |r(r₁-r)+a²r²|/(r₁-r)²
     does not authorise another repair pass.
   </p>
 </section>
+<section id="icm-sheet-axis-limits-terminal-suite-receipt">
+  <h2>Completed suite arms: eight added failures; node blocked</h2>
+  <p>
+    Sirius job 1309695 is terminal FAILED with exit 1:0 and elapsed 00:41:41.
+    Both suite arms ran the exact resolved command below, without a timeout
+    wrapper, in this one allocation. Each log carries its revision, imported
+    module and working directory, and ends with the command's bare EXIT receipt.
+  </p>
+  <pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_edge_sheet.py tests/test_sheet_tile.py</pre>
+  <table>
+    <thead><tr><th>Arm</th><th>Revision</th><th>Summary</th><th>Receipt</th></tr></thead>
+    <tbody>
+      <tr><td>Baseline</td><td><code>d9ace267d24b7d54871c9a1d32e7d84f6ca245ae</code></td><td>721 passed in 936.61s</td><td><code>EXIT=0</code></td></tr>
+      <tr><td>Head</td><td><code>59ef71aeab8835ba878eb548ef14dbe1fa58d83c</code></td><td>8 failed, 715 passed in 825.33s</td><td><code>EXIT=1</code></td></tr>
+    </tbody>
+  </table>
+  <p>
+    The eight failures are the following four parameter cases in each of
+    <code>test_sloped_field_matches_reference</code> and
+    <code>test_sloped_closed_form_field_matches_reference</code>, all in
+    <code>tests/test_edge_sheet.py</code>. Every case exceeds the existing 1e-10
+    reference tolerance. These are added failures against the passing baseline.
+  </p>
+  <table>
+    <thead><tr><th>Slope [radians]</th><th>Station</th><th>Distance [m]</th><th>Measured relative error, both tests</th></tr></thead>
+    <tbody>
+      <tr><td>0.7853981633974483</td><td>start</td><td>0.1</td><td>2.90e-9</td></tr>
+      <tr><td>0.7853981633974483</td><td>end</td><td>0.1</td><td>1.62e-9</td></tr>
+      <tr><td>0.7853981633974483</td><td>end</td><td>1.0</td><td>1.13e-10</td></tr>
+      <tr><td>1.1780972450961724</td><td>end</td><td>1.0</td><td>2.16e-10</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The reported shell-witness test is absent from the completed head arm's
+    failure list, while the restored-defect control fails that same test.
+    The standalone cold-compile timeout remains preserved as an earlier failed
+    run; the complete head suite used the committed 900 s derivative-test bound.
+    Source and test blobs at the measured head revision equal the delivered
+    source and test blobs; subsequent commits only update this evidence fragment.
+  </p>
+  <p>
+    Final-source WEST remains a pass: zero of 11,505,664 entries above 1e-13,
+    every entry finite, worst 4.239e-14. Independent accuracy remains a failure:
+    the shell's dilated packed route has two inaccurate pairs. Together with
+    the eight added suite failures and the mandatory two-census-failure stop
+    rule, this leaves the node blocked. Receipt collection is complete; no
+    kernel repair or tolerance change was made on this resume. A coordinator
+    ruling is required before any further repair.
+  </p>
+  <p>
+    Durable receipts are under the assigned run directory in
+    <code>shell-accuracy/baseline_suite.log</code>,
+    <code>shell-accuracy/after_suite.log</code>,
+    <code>shell-accuracy/final-west/full-mesh-gate.log</code>,
+    <code>shell-accuracy/negative-control.log</code> and
+    <code>shell-accuracy/final-census/</code>. The manifest holds all eight exact
+    failing test ids and the two remaining census counterexamples.
+  </p>
+</section>

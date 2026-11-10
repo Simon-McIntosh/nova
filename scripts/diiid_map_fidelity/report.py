@@ -73,6 +73,7 @@ def main():
                 number(ref["amplitude"]),
                 ref["core_cells"],
                 ref["diverted"],
+                ", ".join(number(value) for value in ref["maximum_grid_rz_m"]),
             ]
         )
         for control in data["reference"]:
@@ -136,6 +137,7 @@ def main():
             "Current amplitude",
             "Core cells",
             "Map reads diverted",
+            "Largest grid defect R, Z [m]",
         ],
         ref_rows,
     )

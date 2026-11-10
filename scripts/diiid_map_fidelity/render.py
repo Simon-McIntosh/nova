@@ -156,7 +156,7 @@ def render(row, destination, previews):
                     np.sort(sign * maximum * np.array([0.2, 0.5, 0.8])),
                     color=color,
                     linewidth=2.0,
-                    wall=wall,
+                    wall=None,
                 )
                 contour.set_linestyle(style)
     for index, label_text in enumerate(

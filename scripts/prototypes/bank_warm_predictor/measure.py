@@ -17,7 +17,7 @@ import jax.numpy as jnp
 import numpy as np
 from nova.equilibrium import drive_continuation, support_read as bank
 from scripts.prototypes.bank_warm_start import streams
-from scripts.prototypes.bank_warm_start.measure import solve
+from scripts.prototypes.bank_warm_predictor.program import programs
 from scripts.prototypes.bank_solve_profile.fixture import gradient
 
 assert jax.config.jax_enable_x64
@@ -86,6 +86,7 @@ def main():
     parser.add_argument("--streams", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--width", type=int, default=8)
+    parser.add_argument("--warmup", action="store_true")
     args = parser.parse_args()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(
@@ -112,7 +113,14 @@ def main():
         jnp.asarray(archive[name][: args.width]) for name in ("m0", "m1", "m2")
     )
     roots = jnp.asarray(archive["stationary"][: args.width])
-    tangent_program = jax.jit(lambda m, s, d, t: tangent(machine, m, s, d, t))
+    bank_inputs, solve_program, tangent_compiled = programs(machine, tangent)
+
+    def solve(machine, moments, seeds, previous, amplitude):
+        return solve_program(*bank_inputs, moments, seeds, previous, amplitude)
+
+    def tangent_program(moments, stationary, drive, target):
+        return tangent_compiled(*bank_inputs, moments, stationary, drive, target)
+
     secant_program = jax.jit(
         lambda m, p, d, pd, t: drive_continuation.predict_seed(
             m, d, t, previous_moments=p, previous_drive=pd
@@ -183,6 +191,9 @@ def main():
             )
             print("SLICE", json.dumps(row), flush=True)
             rows.append(row)
+            if args.warmup and index == 2:
+                print("SUMMARY two-slice warmup complete", flush=True)
+                return
             assert np.all(result.converged) and np.max(result.residual) <= 1e-10
             older, old_drive = current, drive
             current, drive = result.moments, target

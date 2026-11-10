@@ -489,6 +489,11 @@ class FixedPointResult(NamedTuple):
     each warm-up's refused proposals and first zero-based nonfinite-image
     index (-1 when none). Active-set solves retain one entry per trip, preceded by the
     topology-freezing warm-up when that separate pass is required.
+    The parallel ``warmup_branch_refused_proposals`` and
+    ``newton_branch_refused_proposals`` arrays count topology refusals;
+    ``warmup_first_branch_refusal_index`` and
+    ``newton_first_branch_refusal_index`` give their first zero-based proposal
+    indices, with -1 for no refusal.
     """
 
     state: jax.Array
@@ -550,6 +555,10 @@ class FixedPointResult(NamedTuple):
     row_jvp_projections: jax.Array | tuple[()] = ()
     warmup_refused_proposals: jax.Array | tuple[()] = ()
     warmup_first_nonfinite_index: jax.Array | tuple[()] = ()
+    warmup_branch_refused_proposals: jax.Array | tuple[()] = ()
+    warmup_first_branch_refusal_index: jax.Array | tuple[()] = ()
+    newton_branch_refused_proposals: jax.Array | tuple[()] = ()
+    newton_first_branch_refusal_index: jax.Array | tuple[()] = ()
 
 
 class KinkAwareResult(NamedTuple):
@@ -662,6 +671,8 @@ class _NewtonIterationState(NamedTuple):
     promotion_descent_scales: jax.Array
     inner_trace: _InnerIterationTrace
     model_rebuild_required: jax.Array
+    branch_refused_proposals: jax.Array
+    first_branch_refusal_index: jax.Array
 
 
 class _NewtonGlobalizationState(NamedTuple):
@@ -1853,6 +1864,7 @@ def _complete_newton_promotion(
     observe_shadows: bool,
     stream_inner_iterations: bool,
     reuse_rejected_score: jax.Array | bool = False,
+    proposal_qualification_fn: Callable[[jax.Array], jax.Array] | None = None,
 ) -> _NewtonIterationState:
     """Record one promotion while preserving every existing receipt decision."""
 
@@ -1870,6 +1882,14 @@ def _complete_newton_promotion(
         rebuilt_or_descent_residual,
     )
     promotion_accepted = promotion.accepted | rebuilt.accepted | descent.accepted
+    branch_refused = jnp.asarray(False)
+    if proposal_qualification_fn is not None:
+        branch_refused = promotion_accepted & ~proposal_qualification_fn(candidate)
+        promotion_accepted = promotion_accepted & ~branch_refused
+        candidate = jnp.where(branch_refused, state, candidate)
+        candidate_residual = jnp.where(
+            branch_refused, nonlinear_residual, candidate_residual
+        )
     attempted = measured.attempted + 1
     accepted = measured.accepted + jnp.asarray(promotion_accepted, dtype=jnp.int32)
     conditioning_count = measured.conditioning_count + jnp.asarray(
@@ -1897,6 +1917,7 @@ def _complete_newton_promotion(
         & ~converged
         & ~exhausted
         & (promotion_accepted | recovery_retry)
+        & ~branch_refused
     )
     reason = jnp.where(
         ~promotion_accepted,
@@ -2011,6 +2032,9 @@ def _complete_newton_promotion(
             ),
         ),
     ).astype(jnp.int32)
+    decision = jnp.where(
+        branch_refused, InnerIterationDecision.SUFFICIENT_DECREASE_REFUSED, decision
+    )
     applied_factor = jnp.where(
         promotion.accepted,
         promotion.applied_factor,
@@ -2025,6 +2049,7 @@ def _complete_newton_promotion(
         ),
     )
     bounded_step_norm = jnp.max(jnp.abs(step))
+    applied_factor = jnp.where(branch_refused, 0.0, applied_factor)
     inner_trace = _record_inner_iteration(
         measured.inner_trace,
         measured.attempted,
@@ -2109,6 +2134,12 @@ def _complete_newton_promotion(
         descent_scales,
         inner_trace,
         next_model_rebuild_required,
+        measured.branch_refused_proposals + branch_refused.astype(jnp.int32),
+        jnp.where(
+            branch_refused & (measured.first_branch_refusal_index < 0),
+            measured.attempted,
+            measured.first_branch_refusal_index,
+        ),
     )
 
 
@@ -3668,6 +3699,43 @@ def _manifold_newton_krylov(
     )
 
 
+def _diverted_branch_qualification(partition_read, initial):
+    """Keep an admitted saddle boundary in its seed's vertical half-plane.
+
+    The fresh partition read admits contained saddles and compares their flux
+    with the wall. A finite published saddle on a wall-limited state does not
+    activate continuation. The saddle's side of the axis distinguishes lower
+    from upper selection without fixing its position or its source-cell index.
+    """
+    if partition_read is None:
+        return None
+    seed = partition_read(initial, None).topology
+    seed_side = seed.x_point[1] - seed.axis[1]
+    protected = (
+        seed.boundary_is_xpoint
+        & jnp.all(jnp.isfinite(seed.x_point))
+        & jnp.all(jnp.isfinite(seed.axis))
+        & jnp.isfinite(seed.flux_span)
+        & (jnp.abs(seed.flux_span) > 0.0)
+        & (seed_side != 0.0)
+    )
+
+    def qualify(proposal):
+        topology = partition_read(proposal, None).topology
+        same_saddle_side = (topology.x_point[1] - topology.axis[1]) * seed_side > 0
+        admitted = (
+            topology.boundary_is_xpoint
+            & jnp.all(jnp.isfinite(topology.x_point))
+            & jnp.all(jnp.isfinite(topology.axis))
+            & jnp.isfinite(topology.flux_span)
+            & (jnp.abs(topology.flux_span) > 0.0)
+            & same_saddle_side
+        )
+        return jnp.where(protected, admitted, True)
+
+    return qualify
+
+
 def _newton_krylov_inner(
     map_fn: Callable[[jax.Array], jax.Array],
     initial: jax.Array,
@@ -3702,6 +3770,7 @@ def _newton_krylov_inner(
     own_mask_acceptance: bool = False,
     presettlement_incumbent_scoring: jax.Array | bool = False,
     carry_unchanged_fallback: bool = True,
+    proposal_qualification_fn: Callable[[jax.Array], jax.Array] | None = None,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult | tuple[FixedPointResult, _NewtonGlobalizationState]:
     """Exact-tangent Jacobian-free Newton–Krylov on the fixed-point residual.
@@ -3785,6 +3854,10 @@ def _newton_krylov_inner(
             precision=precision,
         )
     initial = _solver_state(initial, precision)
+    if proposal_qualification_fn is None:
+        proposal_qualification_fn = _diverted_branch_qualification(
+            getattr(shadowed_map_fn or map_fn, "_read_frozen_partition", None), initial
+        )
     stride = 2 + gmres_iterations
     trace_length = warmup + newton_steps * stride
     change_length = warmup + newton_steps
@@ -3836,6 +3909,8 @@ def _newton_krylov_inner(
                 warm_relaxation,
                 refused_proposals,
                 first_nonfinite_index,
+                branch_refused_proposals,
+                first_branch_refusal_index,
             ) = carry
             residual = _relative_residual(mapped, state)
             merit = _smooth_relative_sup_merit(mapped, state)
@@ -3851,6 +3926,8 @@ def _newton_krylov_inner(
             )
             proposal = state + warm_relaxation * (mapped - state)
             proposed_shadow = promoted_shadow(proposal, previous_shadow)
+            # Even the last proposal needs its image to establish finite admission.
+            # Newton re-evaluates it to obtain the exact tangent, not just the value.
             proposed_image = mapped_with_shadow(proposal, proposed_shadow)
             proposed_residual = _relative_residual(proposed_image, proposal)
             finite_image = jnp.all(jnp.isfinite(proposed_image))
@@ -3859,13 +3936,20 @@ def _newton_krylov_inner(
                 & finite_image
                 & jnp.isfinite(proposed_residual)
             )
-            candidate = jnp.where(finite_proposal, proposal, state)
-            current_shadow = jnp.where(
-                finite_proposal, proposed_shadow, previous_shadow
+            branch_qualified = (
+                jnp.asarray(True)
+                if proposal_qualification_fn is None
+                else proposal_qualification_fn(proposal)
             )
-            next_image = jnp.where(finite_proposal, proposed_image, mapped)
+            accepted_proposal = finite_proposal & branch_qualified
+            branch_refused = finite_proposal & ~branch_qualified
+            candidate = jnp.where(accepted_proposal, proposal, state)
+            current_shadow = jnp.where(
+                accepted_proposal, proposed_shadow, previous_shadow
+            )
+            next_image = jnp.where(accepted_proposal, proposed_image, mapped)
             amplification = _observe_increment(
-                amplification, state, candidate, finite_proposal
+                amplification, state, candidate, accepted_proposal
             )
             first_nonfinite_index = jnp.where(
                 ~finite_image & (first_nonfinite_index < 0),
@@ -3873,8 +3957,16 @@ def _newton_krylov_inner(
                 first_nonfinite_index,
             )
             refused_proposals = refused_proposals + (~finite_proposal).astype(jnp.int32)
+            # Keep the damped value for this scan after an accepted proposal;
+            # restoring it immediately would repeat the same inadmissible jump.
             warm_relaxation = jnp.where(
-                finite_proposal, warm_relaxation, 0.5 * warm_relaxation
+                accepted_proposal, warm_relaxation, 0.5 * warm_relaxation
+            )
+            branch_refused_proposals += branch_refused.astype(jnp.int32)
+            first_branch_refusal_index = jnp.where(
+                branch_refused & (first_branch_refusal_index < 0),
+                index,
+                first_branch_refusal_index,
             )
             changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
             shadow_changes = shadow_changes.at[index].set(
@@ -3894,6 +3986,8 @@ def _newton_krylov_inner(
                 warm_relaxation,
                 refused_proposals,
                 first_nonfinite_index,
+                branch_refused_proposals,
+                first_branch_refusal_index,
             )
 
         return jax.lax.cond(run_warmup, advance, lambda value: value, carry)
@@ -3912,6 +4006,8 @@ def _newton_krylov_inner(
         _warm_relaxation,
         warmup_refused_proposals,
         warmup_first_nonfinite_index,
+        warmup_branch_refused_proposals,
+        warmup_first_branch_refusal_index,
     ) = jax.lax.fori_loop(
         0,
         warmup,
@@ -3932,6 +4028,8 @@ def _newton_krylov_inner(
                 lambda: initial,
             ),
             jnp.asarray(relaxation, dtype=initial.dtype),
+            jnp.asarray(0, dtype=jnp.int32),
+            jnp.asarray(-1, dtype=jnp.int32),
             jnp.asarray(0, dtype=jnp.int32),
             jnp.asarray(-1, dtype=jnp.int32),
         ),
@@ -4293,6 +4391,7 @@ def _newton_krylov_inner(
                         observe_shadows=observe_shadows,
                         stream_inner_iterations=stream_inner_iterations,
                         reuse_rejected_score=~first,
+                        proposal_qualification_fn=proposal_qualification_fn,
                     )
                     full_fallback_refused = descent_activated & ~descent.accepted
                     repeat = (
@@ -4421,6 +4520,8 @@ def _newton_krylov_inner(
                     measured.promotion_descent_scales,
                     inner_trace,
                     measured.model_rebuild_required,
+                    measured.branch_refused_proposals,
+                    measured.first_branch_refusal_index,
                 )
 
             return jax.lax.cond(
@@ -4485,6 +4586,8 @@ def _newton_krylov_inner(
                 globalization_state.model_rebuild_required,
                 jnp.asarray(False),
             ),
+            jnp.asarray(0, dtype=jnp.int32),
+            jnp.asarray(-1, dtype=jnp.int32),
         ),
     )
     result = FixedPointResult(
@@ -4526,6 +4629,10 @@ def _newton_krylov_inner(
         trajectory_residual=loop.residual,
         warmup_refused_proposals=warmup_refused_proposals[None],
         warmup_first_nonfinite_index=warmup_first_nonfinite_index[None],
+        warmup_branch_refused_proposals=warmup_branch_refused_proposals[None],
+        warmup_first_branch_refusal_index=warmup_first_branch_refusal_index[None],
+        newton_branch_refused_proposals=loop.branch_refused_proposals[None],
+        newton_first_branch_refusal_index=loop.first_branch_refusal_index[None],
     )
     continued_globalization = _NewtonGlobalizationState(
         best_state=loop.best_state,
@@ -4582,6 +4689,7 @@ def _active_set_newton_krylov(
         and partitioned_map is not None
         and partition_shadow is not None
     )
+    proposal_qualification = _diverted_branch_qualification(partition_read, initial)
 
     def usable_partition(partition):
         """Whether a frozen read may be carried onto this trip's iterations.
@@ -4608,6 +4716,7 @@ def _active_set_newton_krylov(
             shadow_mask_fn=shadow_mask_fn,
             promoted_shadow_mask_fn=promoted_shadow_mask_fn,
             shadowed_map_fn=shadowed_map_fn,
+            proposal_qualification_fn=proposal_qualification,
             precision=precision,
         )
         initial = warmup_result.state
@@ -4693,6 +4802,7 @@ def _active_set_newton_krylov(
             ),
             own_mask_acceptance=own_mask_acceptance,
             presettlement_incumbent_scoring=presettlement,
+            proposal_qualification_fn=proposal_qualification,
             precision=precision,
         )
 
@@ -4994,6 +5104,10 @@ def _active_set_newton_krylov(
     empty_result = empty_result._replace(
         warmup_refused_proposals=jnp.zeros(warmup_slots, dtype=jnp.int32),
         warmup_first_nonfinite_index=jnp.full(warmup_slots, -1, dtype=jnp.int32),
+        warmup_branch_refused_proposals=jnp.zeros(warmup_slots, dtype=jnp.int32),
+        warmup_first_branch_refusal_index=jnp.full(warmup_slots, -1, dtype=jnp.int32),
+        newton_branch_refused_proposals=jnp.zeros(warmup_slots, dtype=jnp.int32),
+        newton_first_branch_refusal_index=jnp.full(warmup_slots, -1, dtype=jnp.int32),
     )
     if separate_warmup:
         empty_result = empty_result._replace(
@@ -5003,6 +5117,16 @@ def _active_set_newton_krylov(
             warmup_first_nonfinite_index=(
                 empty_result.warmup_first_nonfinite_index.at[0].set(
                     warmup_result.warmup_first_nonfinite_index[0]
+                )
+            ),
+            warmup_branch_refused_proposals=(
+                empty_result.warmup_branch_refused_proposals.at[0].set(
+                    warmup_result.warmup_branch_refused_proposals[0]
+                )
+            ),
+            warmup_first_branch_refusal_index=(
+                empty_result.warmup_first_branch_refusal_index.at[0].set(
+                    warmup_result.warmup_first_branch_refusal_index[0]
                 )
             ),
         )
@@ -5109,6 +5233,17 @@ def _active_set_newton_krylov(
                             index + int(separate_warmup)
                         ].set(inner_result.warmup_first_nonfinite_index[0])
                     ),
+                    **{
+                        name: getattr(carry.result, name)
+                        .at[index + int(separate_warmup)]
+                        .set(getattr(inner_result, name)[0])
+                        for name in (
+                            "warmup_branch_refused_proposals",
+                            "warmup_first_branch_refusal_index",
+                            "newton_branch_refused_proposals",
+                            "newton_first_branch_refusal_index",
+                        )
+                    },
                 ),
                 trajectory_state=trajectory_state,
                 continue_trajectory=continue_trajectory,

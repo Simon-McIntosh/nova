@@ -28,6 +28,7 @@ def snapshot(root, revision, destination):
                 "nova",
                 "tests",
                 "scripts",
+                "benchmarks",
                 "conftest.py",
                 "pyproject.toml",
             ],
@@ -40,7 +41,10 @@ def snapshot(root, revision, destination):
 
 
 def run(tree, revision, target, log, basetemp):
-    command = f"PYTHONPATH=. JAX_PLATFORMS=cpu {PYTHON} -m pytest -p no:cacheprovider -q {target}"
+    command = (
+        f"PYTHONPATH=. JAX_PLATFORMS=cpu {PYTHON} "
+        f"-m pytest -p no:cacheprovider -q {target}"
+    )
     environment = dict(
         os.environ,
         PYTHONPATH=str(tree),
@@ -55,7 +59,8 @@ def run(tree, revision, target, log, basetemp):
             [
                 PYTHON,
                 "-c",
-                "from pathlib import Path; import nova.equilibrium.drive_continuation as m; "
+                "from pathlib import Path; "
+                "import nova.equilibrium.drive_continuation as m; "
                 'print("# module:", m.__file__); print("# cwd:", Path.cwd().resolve())',
             ],
             cwd=tree,
@@ -138,7 +143,10 @@ def main():
             scratch / (key + "-temp"),
         )
         (args.run / "suite-receipts.json").write_text(json.dumps(receipts, indent=2))
-        expected = "tests/test_bank_drive_continuation.py::test_linear_stream_predicts_next_state_to_rounding"
+        expected = (
+            "tests/test_bank_drive_continuation.py::"
+            "test_linear_stream_predicts_next_state_to_rounding"
+        )
         assert (
             receipts[key]["exit_status"] != 0
             and expected in receipts[key]["failure_ids"]

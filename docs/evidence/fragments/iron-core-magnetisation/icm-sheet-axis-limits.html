@@ -640,3 +640,93 @@ A = sqrt(1+b²) hypot(r₁,br)
     independent census receipts; no passing full-gate result is claimed yet.
   </p>
 </section>
+<section id="icm-sheet-axis-limits-authorised-round-outcome">
+  <h2>Authorised round remains blocked: one scalar census miss</h2>
+  <p>
+    The single authorised round is measured at source commit
+    <code>58c81cb9a2e1847c85555e98197d6eee77ad4050</code>, with the gate logs
+    identifying evidence-only head <code>b5af48b5cd67d3e00ed0255deb8e77eca9788856</code>.
+    The source and test blobs are unchanged between those revisions.
+    The independent census completed in sirius job 1309790 and exits 1:
+    <code>AssertionError: 1 inaccurate pairs</code>, followed by <code>EXIT=1</code>.
+  </p>
+  <table>
+    <thead><tr><th>Mesh</th><th>Pairs</th><th>Scalar failures</th><th>Packed failures</th><th>Dilated packed failures</th></tr></thead>
+    <tbody>
+      <tr><td>Sphere</td><td>28,106</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>Shell</td><td>608,685</td><td>1</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Every value is finite. Packed and dilated packed fields are bit-identical
+    over every pair on both meshes. The additional geometry-rounding allowance
+    remains exactly zero. Positive controls observe identity-grid movements
+    4.866662628444374e-13 m (sphere) and 4.881650639276813e-13 m (shell).
+    Thus the two dilated-route misses are corrected, but full scalar accuracy
+    is still unmet; the allowance is not enlarged to accept the remaining miss.
+  </p>
+  <p>
+    The scalar counterexample is target
+    (0.45992116430406516,-0.8599178752181855) m and source segment
+    (0.72,-0.6939740549492187) to
+    (0.7200025079609375,-0.6939714608896485) m. Its returned field is
+    (-1.2672138029109027e-12,3.5895551714549664e-12), against precise rings
+    (-1.26721380297948e-12,3.5895551719919193e-12) T/(A/m).
+    The vertical absolute error is 5.36952904749504e-22, against the unchanged
+    combined budget 5.335076211121033e-22. The excess is
+    3.4452836374006456e-24 T/(A/m), or a budget ratio of 1.0064577964794934.
+    This is a failed measurement despite its small margin.
+  </p>
+  <h3 id="icm-sheet-axis-limits-authorised-round-suite-cutoff">WEST passes; the head suite was cut short</h3>
+  <p>
+    The new WEST gate completed with zero of 11,505,664 entries above 1e-13,
+    all finite, worst 4.239e-14 at (1886,1426): one passed in 1318.41s,
+    <code>EXIT=0</code>. Both exact-command suite arms then ran in the same
+    sirius allocation 1309791. Baseline
+    <code>61dadd7eeee75fc00da0e9ccfa818e287eeaa940</code> completed with the eight
+    known sloped-field failures: eight failed, 715 passed in 1283.71s,
+    <code>EXIT=1</code>.
+  </p>
+  <p>
+    The head arm started at
+    <code>b5af48b5cd67d3e00ed0255deb8e77eca9788856</code> and emitted 719 passing
+    progress markers from the 725 collected tests before scheduler termination.
+    Its ordered collection lists all 717 edge-sheet tests before the tile tests;
+    the log then stops during the third tile test, the whole-mesh comparison.
+    There is no head summary and no bare EXIT receipt. Its completion is false,
+    final pytest exit and total failure count are unknown, and no passing
+    full-suite result is claimed.
+  </p>
+  <p>
+    The scheduler receipt is TIMEOUT after 01:00:20 with actual Timelimit
+    01:00:00. The batch step is CANCELLED with ExitCode 0:15, and the job log
+    explicitly reports cancellation due to the time limit. These receipts,
+    rather than the job's top-level 0:0 exit field, establish termination.
+    No timeout wrapper was placed around either suite. The original head log,
+    including cleanup output, is preserved without appending an invented
+    pytest EXIT line.
+  </p>
+  <p>
+    Focused validation remains 74 passed, the shell witness and all eight prior
+    failure ids are explicitly collected, and the restored shell mutant fails.
+    Nevertheless one scalar census pair remains above budget and the head
+    suite is incomplete. The coordinator's stop instruction applies: this
+    resume records the outcome and makes no source repair, tolerance change,
+    suite rerun or scheduler change. The node is blocked pending a new ruling.
+  </p>
+  <p>
+    Complete census arrays and summaries remain in <code>one-round/census/</code>;
+    the WEST, baseline, incomplete head and scheduler logs remain in
+    <code>one-round/gates/</code> under the assigned run directory. The manifest
+    records the actual head revision, scheduler signal and missing exit receipt.
+  </p>
+</section>
+<p id="icm-sheet-axis-limits-cancelled-arm-record">
+  The manifest encodes the observed batch cancellation signal 15 as the
+  shell-equivalent runner status 128+15=143 so the interrupted arm has a typed
+  flat record. It explicitly records that this is derived from the scheduler
+  batch receipt and is not a captured pytest exit. The arm remains
+  <code>completed=false</code>, <code>pytest_exit_status=null</code>, with no
+  summary and no EXIT receipt. This encoding does not make the head arm complete
+  or passing and does not modify the original log.
+</p>

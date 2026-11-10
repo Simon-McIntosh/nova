@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import hashlib
-import inspect
 import json
 from pathlib import Path
 import sys
@@ -30,17 +29,11 @@ def row(args):
     instances, branches, seeds = [], [], []
 
     def load(name, path):
-        module = original_load(name, path)
-        if name == "operand_capture":
-            source = inspect.getsource(module.run)
-            if "receipt.mask_history" in source:
-                assert source.count("receipt.mask_history") == 1
-                source = source.replace(
-                    "receipt.mask_history", "receipt.changed_mask_entries"
-                )
-                padding = "\n" * (module.run.__code__.co_firstlineno - 1)
-                exec(compile(padding + source, str(path), "exec"), module.__dict__)
-            print("COLLECTOR_RECEIPT_FIELD=changed_mask_entries", flush=True)
+        reader_path = ROOT / Path(path).relative_to(args.tree)
+        assert reader_path.is_file()
+        module = original_load(name, reader_path)
+        assert Path(module.__file__).resolve().is_relative_to(ROOT)
+        print("HEAD_MEASUREMENT_READER=" + str(reader_path), flush=True)
         if name == "material_measure" and args.branch == "diverted":
             prepare = module.probe._prepare_frame
 
@@ -121,11 +114,13 @@ def row(args):
                 def install(self):
                     super().install()
                     from nova.equilibrium.forward import ForwardProfile
+                    from nova.equilibrium.solve_request import ForwardSolveRequest
 
                     solve = ForwardProfile.solve
 
-                    def persisted(profile, *a, **kw):
-                        request = a[0] if a else kw["request"]
+                    def persisted(profile, request=None, *a, **kw):
+                        if not isinstance(request, ForwardSolveRequest):
+                            return solve(profile, request, *a, **kw)
                         state = np.asarray(request.seed_policy.state)
                         seed_hash = hashlib.sha256(state.tobytes()).hexdigest()
                         if seeds:
@@ -133,7 +128,7 @@ def row(args):
                         else:
                             seeds.append(dict(selected="request", sha256=seed_hash))
                         print("REQUEST_SEED_SHA256=" + seed_hash, flush=True)
-                        receipt = solve(profile, *a, **kw)
+                        receipt = solve(profile, request, *a, **kw)
                         fixed = receipt.equilibrium.fixed_point
                         saved = dict(
                             revision=args.revision,
@@ -215,6 +210,18 @@ def row(args):
         "missing inner branch-counter callbacks"
     )
     record["augmented_topology_reader_connected"] = reader_connected
+    record["measurement_reader_root"] = str(ROOT)
+    record["measurement_reader_policy"] = "head scripts against arm product tree"
+    record["measurement_reader_sha256"] = {
+        str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in (
+            ROOT / "scripts/prototypes/diiid_forward_convergence/measure_branches.py",
+            ROOT / "scripts/prototypes/diiid_material_mask/measure.py",
+            ROOT / "scripts/prototypes/diiid_residual_plateau/measure.py",
+            ROOT / "scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py",
+            ROOT / "scripts/prototypes/diiid_support_mask/trace_support.py",
+        )
+    }
     with np.load(args.output / "terminal.npz") as archive:
         data = {name: archive[name] for name in archive.files}
     enrich(

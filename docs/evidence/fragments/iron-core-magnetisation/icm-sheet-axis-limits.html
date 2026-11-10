@@ -610,3 +610,33 @@ A = sqrt(1+b²) hypot(r₁,br)
     preservation receipts for this authorised round follow separately.
   </p>
 </section>
+<section id="icm-sheet-axis-limits-authorised-round-admission">
+  <h2>Collection and negative control are explicit</h2>
+  <p>
+    The suite's exact resolved command, with only <code>--collect-only</code>
+    appended for the collection probe, lists 725 tests and exits 0. It explicitly
+    lists <code>tests/test_edge_sheet.py::test_shell_oblique_radial_magnetisation</code>
+    and all eight formerly failing sloped-field test ids. The two existing test
+    functions are AST-identical to the round's base; their parameters and
+    tolerances are unchanged. Thus the shell witness is collected by this suite.
+    Earlier wording concerned its absence from a failure list, not from collection.
+  </p>
+  <p>
+    A HEAD scratch extraction restoring the defective pre-shell owner asserts
+    the mutant module path, reproduces 6.53973138e-9 radial response on both
+    routes, and fails the shell-witness test: one failed in 37.67s, EXIT=1.
+    The production source blob is checked against HEAD afterward, including
+    the introduced binary-canonicalisation and bounded-selection markers.
+    Receipts are <code>one-round/collection.log</code>,
+    <code>one-round/negative-control.log</code> and
+    <code>one-round/source-blob-check.log</code> under the assigned run directory.
+  </p>
+  <p>
+    The full sphere/shell accuracy census is submitted as sirius job 1309790.
+    WEST and both exact-command suite arms share sirius job 1309791. Both jobs
+    are queued on scheduler priority. The baseline is the round's base
+    <code>61dadd7eeee75fc00da0e9ccfa818e287eeaa940</code>, which carries the eight
+    recorded regressions. Qualification depends on the completed head and
+    independent census receipts; no passing full-gate result is claimed yet.
+  </p>
+</section>

@@ -54,12 +54,12 @@ def solve_program(parts):
     return jax.jit(solve)
 
 
-def build_inputs(parts, path):
+def build_inputs(parts, path, lanes):
     bank, cache, roots, _, _, _, _, moments, _ = parts
     seed = roots + 0.03 * jnp.median(bank.geometry.pitch)
-    scales = jnp.linspace(2e-5, 6e-5, 16)
+    scales = jnp.linspace(2e-5, 6e-5, 16)[:lanes]
     cold = tuple(value[None] * (1 + scales[:, None]) for value in moments)
-    seeds = jnp.broadcast_to(seed, (16, *seed.shape))
+    seeds = jnp.broadcast_to(seed, (lanes, *seed.shape))
     prior = jnp.broadcast_to(roots, seeds.shape)
     payload = {f"cold_m{i}": np.asarray(value) for i, value in enumerate(cold)}
     payload.update(cold_seeds=np.asarray(seeds), cold_previous=np.asarray(prior))
@@ -82,7 +82,13 @@ def build_inputs(parts, path):
             assert bool(jnp.all(result.converged)), (key, np.asarray(result.residual))
             state, points = result.moments, result.support.stationary.position
     np.savez(path, **payload)
-    emit("COMMON_INPUTS", path=str(path), keys=sorted(payload))
+    emit(
+        "COMMON_INPUTS",
+        path=str(path),
+        keys=sorted(payload),
+        lanes=lanes,
+        sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+    )
 
 
 def input_rows(archive, lanes):
@@ -92,12 +98,10 @@ def input_rows(archive, lanes):
         for index in range(1, streams.SLICES)
     ]
     for key, step, index in labels:
-        repeat = lanes // 16
-        state = tuple(
-            jnp.tile(jnp.asarray(archive[f"{key}_m{i}"]), (repeat, 1)) for i in range(3)
-        )
-        seeds = jnp.tile(jnp.asarray(archive[f"{key}_seeds"]), (repeat, 1, 1))
-        previous = jnp.tile(jnp.asarray(archive[f"{key}_previous"]), (repeat, 1, 1))
+        assert lanes == 8
+        state = tuple(jnp.asarray(archive[f"{key}_m{i}"][:lanes]) for i in range(3))
+        seeds = jnp.asarray(archive[f"{key}_seeds"][:lanes])
+        previous = jnp.asarray(archive[f"{key}_previous"][:lanes])
         yield key, step, index, state, seeds, previous
 
 
@@ -238,7 +242,7 @@ def memory_receipt(parts, archive, lanes, census):
                 lanes=lanes,
                 program=name,
                 device_limit_bytes=limit,
-                wall_device="titan P100",
+                wall_device="titan P100, width 8",
                 **entry,
             )
         finally:
@@ -246,7 +250,7 @@ def memory_receipt(parts, archive, lanes, census):
                 support_read._rebuilt_reading = original
     return dict(
         lanes=lanes,
-        wall_device="titan P100",
+        wall_device="titan P100, width 8",
         programs=rows,
         device_limit_bytes=limit,
         fits=all(row["fits"] for row in rows.values()),
@@ -260,7 +264,7 @@ def main():
     parser.add_argument("--build", action="store_true")
     parser.add_argument("--profile", action="store_true")
     parser.add_argument("--census", action="store_true")
-    parser.add_argument("--widths", type=int, nargs="+", default=[16])
+    parser.add_argument("--widths", type=int, nargs="+", choices=[8], default=[8])
     parser.add_argument("--probe-memory", action="store_true")
     args = parser.parse_args()
     emit(
@@ -273,7 +277,7 @@ def main():
         device_kinds=[device.device_kind for device in jax.devices()],
         x64=jax.config.jax_enable_x64,
         cache=os.environ.get("JAX_COMPILATION_CACHE_DIR"),
-        wall_device="titan P100",
+        wall_device="titan P100, width 8",
         memory_fitting_level=jax.config.jax_memory_fitting_level,
         memory_fitting_effort=jax.config.jax_memory_fitting_effort,
         memory_stats=jax.devices()[0].memory_stats(),
@@ -283,7 +287,7 @@ def main():
     parts = machine("diverted")
     bank, cache, roots, convention, policy, profile, quadrature, _, analytic = parts
     if args.build:
-        build_inputs(parts, args.inputs)
+        build_inputs(parts, args.inputs, args.widths[0])
         return
     inputs = np.load(args.inputs, allow_pickle=False)
     if args.probe_memory:
@@ -291,7 +295,7 @@ def main():
             memory_receipt(parts, inputs, width, args.census) for width in args.widths
         ]
         args.output.write_text(
-            json.dumps(dict(wall_device="titan P100", widths=capacity))
+            json.dumps(dict(wall_device="titan P100, width 8", widths=capacity))
         )
         return
     program = solve_program(parts)
@@ -299,7 +303,7 @@ def main():
     rows = []
     payload = {
         "revision": os.environ["MEASURE_REVISION"],
-        "wall_device": "titan P100",
+        "wall_device": "titan P100, width 8",
         "device_kinds": [device.device_kind for device in jax.devices()],
         "rows": rows,
         "inputs_sha256": hashlib.sha256(args.inputs.read_bytes()).hexdigest(),
@@ -329,7 +333,7 @@ def main():
             )
             row = dict(
                 lanes=lanes,
-                wall_device="titan P100",
+                wall_device="titan P100, width 8",
                 key=key,
                 step=step,
                 slice=index,

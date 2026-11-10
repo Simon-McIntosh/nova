@@ -18,7 +18,7 @@ cleanup() {
     printf 'EXIT=%s\n' "$result"
 }
 trap cleanup EXIT
-printf '# titan P100 paired timing; H200 headline pending a free card; job=%s\n' "$SLURM_JOB_ID"
+printf '# titan P100, width 8 paired timing; H200 width-16 headline pending a free card; job=%s\n' "$SLURM_JOB_ID"
 printf '# memory fitting: level=%s effort=%s\n' "$JAX_MEMORY_FITTING_LEVEL" "$JAX_MEMORY_FITTING_EFFORT"
 mkdir -p "$scratch/base"
 git -C "$root" archive "$base" | tar -x -C "$scratch/base"
@@ -35,7 +35,7 @@ execute() {
     (
         cd "$tree" || exit 2
         export PYTHONPATH="$tree" MEASURE_REVISION="$revision"
-        printf '# revision: %s tree: %s wall_device: titan P100 command: %s -m scripts.prototypes.bank_carried_decision.measure %s\n' "$revision" "$tree" "$python" "$*"
+        printf '# revision: %s tree: %s wall_device: titan P100, width 8 command: %s -m scripts.prototypes.bank_carried_decision.measure %s\n' "$revision" "$tree" "$python" "$*"
         set +e
         bash "$root/scripts/prototypes/bank_booking_determinism/measurement.sh" "$cache" "$python" -m scripts.prototypes.bank_carried_decision.measure "$@"
         result=$?
@@ -43,7 +43,7 @@ execute() {
         exit "$result"
     ) > "$run/$label.log" 2>&1
 }
-execute builder "$scratch/base" "$base" "$run/cache-base" --build --inputs "$run/common-inputs.npz" --output "$run/builder.json"
+execute builder "$scratch/base" "$base" "$run/cache-base" --widths 8 --build --inputs "$run/common-inputs.npz" --output "$run/builder.json"
 measure_width() {
     width=$1
     suffix=$2
@@ -56,22 +56,4 @@ measure_width() {
         done
     done
 }
-# Complete the mandatory width before spending compile time on a wider batch.
-measure_width 16 ''
-for arm in base head; do
-    if [ "$arm" = base ]; then tree="$scratch/base"; revision=$base; else tree=$root; revision=$head; fi
-    execute "$arm-memory" "$tree" "$revision" "$run/cache-$arm" --widths 128 --probe-memory --census --inputs "$run/common-inputs.npz" --output "$run/$arm-memory.json"
-done
-if "$python" - "$run" <<'PY'
-import json, sys
-from pathlib import Path
-run=Path(sys.argv[1])
-rows=[json.loads((run/f'{arm}-memory.json').read_text())['widths'][0] for arm in ('base','head')]
-print('WIDTH_ADMISSION titan P100 '+json.dumps(rows),flush=True)
-raise SystemExit(0 if all(row['fits'] for row in rows) else 1)
-PY
-then
-    measure_width 128 '-wide'
-else
-    printf 'WIDTH_128_NOT_RUN: titan P100 compiler buffer exceeds usable device memory; see base-memory.json and head-memory.json\n'
-fi
+measure_width 8 ''

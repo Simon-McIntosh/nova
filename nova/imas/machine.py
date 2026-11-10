@@ -16,7 +16,7 @@ import xarray
 from nova.graphics.plot import Plot
 from nova.frame.coilset import CoilSet
 from nova.imas.database import CoilData, Database, IdsData
-from nova.imas.dataset import IdsBase, Ids, ImasIds, EMPTY_FLOAT
+from nova.imas.dataset import IdsBase, Ids, ImasIds, EMPTY_FLOAT, open_db_entry
 from nova.imas.ids_index import IdsIndex
 from nova.geometry.polygon import Polygon
 from nova.equilibrium.wall_mask import WallUnit, wall_units_from_ids
@@ -303,6 +303,27 @@ class ImasGeometryReader(MachineGeometryReader):
         """Build the section by extracting attributes from the IDS node."""
         return geometry(self.source)
 
+    def iron_segment(self, segment: object) -> MachineIronSegment:
+        """Read an iron segment's raw outline and material table together.
+
+        The geometry source is ``segment.geometry``. Retain closing and repeated
+        vertices exactly as stored rather than normalising through a polygon.
+        """
+        outline = self.section(Outline).data
+        return MachineIronSegment(
+            name=str(segment.name),
+            description=str(segment.description),
+            outline=MachineContour.from_record(
+                {"kind": "iron", "r": outline["r"], "z": outline["z"]}
+            ),
+            material=MachineIronMaterial(
+                b_field=tuple(float(value) for value in segment.b_field),
+                permeability_relative=tuple(
+                    float(value) for value in segment.permeability_relative
+                ),
+            ),
+        )
+
 
 @dataclass
 class TabularGeometryReader(MachineGeometryReader):
@@ -399,6 +420,35 @@ class MachineContour:
         if len(r) != len(z):
             raise ValueError("machine contour r and z arrays have different lengths")
         return cls(kind=str(record["kind"]), r=r, z=z)
+
+
+@dataclass(frozen=True)
+class MachineIronMaterial:
+    """Material law stored as paired B [T] and relative-permeability samples.
+
+    The iron_core IDS encodes the B-H relation by these two arrays. It carries
+    no separate material identifier; none is inferred from the segment name.
+    """
+
+    b_field: tuple[float, ...]
+    permeability_relative: tuple[float, ...]
+
+    def __post_init__(self):
+        """Reject an unpaired material table without changing its samples."""
+        if len(self.b_field) != len(self.permeability_relative):
+            raise ValueError(
+                "iron B and relative-permeability arrays have different lengths"
+            )
+
+
+@dataclass(frozen=True)
+class MachineIronSegment:
+    """One ordered iron region and its own material law."""
+
+    name: str
+    description: str
+    outline: MachineContour
+    material: MachineIronMaterial
 
 
 @dataclass(frozen=True)
@@ -560,6 +610,48 @@ class StaticMachineDescription:
     sightlines: tuple[DiagnosticSightline, ...]
     active_coils: tuple[MachineCoil, ...] = ()
     wall_units: tuple[WallUnit, ...] = ()
+    iron_segments: tuple[MachineIronSegment, ...] = ()
+
+    @classmethod
+    def from_iron_core_ids(cls, iron: object) -> StaticMachineDescription:
+        """Read every segment through the IMAS geometry owner, in IDS order."""
+        return cls(
+            contour=None,
+            active_sections=(),
+            passive_loop_count=0,
+            toroidal_coil_count=0,
+            sightlines=(),
+            iron_segments=tuple(
+                ImasGeometryReader(segment.geometry).iron_segment(segment)
+                for segment in iron.segment
+            ),
+        )
+
+    @classmethod
+    def read_iron_core(
+        cls, source: str | os.PathLike, *, dd_version: str
+    ) -> StaticMachineDescription:
+        """Open static iron at the source manifest's exact dictionary pin.
+
+        ``source`` is an IMAS entry URI or netCDF path. An absent occurrence is
+        a refusal about this entry, never a fabricated empty iron frame.
+        """
+        if not dd_version:
+            raise ValueError("iron read requires the source manifest DD version")
+        with open_db_entry(source, "r", dd_version=dd_version) as entry:
+            occurrences = entry.list_all_occurrences("iron_core")
+            if 0 not in occurrences:
+                raise ValueError(
+                    f"iron_core occurrence 0 is absent from {source}: {occurrences}"
+                )
+            iron = entry.get("iron_core", 0, lazy=False, autoconvert=False)
+            written = str(iron.ids_properties.version_put.data_dictionary)
+            if written != dd_version:
+                raise ValueError(
+                    f"iron_core DD version {written!r} disagrees with "
+                    f"manifest {dd_version!r}"
+                )
+            return cls.from_iron_core_ids(iron)
 
     @classmethod
     def from_record(cls, record: dict) -> StaticMachineDescription:

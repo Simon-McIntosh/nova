@@ -1,0 +1,106 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Not applicable: source prompt FENCE SUITE explicitly unarmed; source manifest has neither baseline_suite nor after_suite. Zero denotes no declared suite delta, not a measured green suite. No unrelated suite logs were substituted.",
+  "assertion_audit": [
+    {
+      "fails_if": "x64 is disabled, the selected device is not a P100 GPU, or the resolved production cache escapes the job root; the expectations are fixed configuration requirements, not values supplied back to themselves.",
+      "path": "scripts/sheet_tile_census/measure.py:40-46"
+    },
+    {
+      "fails_if": "the production mesh emits a count other than the independently fixed 1696 or 6493 for the selected spacing; the count comes from geometry, not an injected expected-count result.",
+      "path": "scripts/sheet_tile_census/measure.py:91"
+    },
+    {
+      "fails_if": "lowering yields no StableHLO operations, the instrument observes zero or multiple tile rows, hit mode observes a miss, a miss is unpersisted, or no cache file exists; control.log actually exercises the hit-mode miss refusal at line 136.",
+      "path": "scripts/sheet_tile_census/measure.py:119-138"
+    },
+    {
+      "fails_if": "G shape differs from twice the independently measured cell count, G contains nonfinite entries or is identically zero, or measured compile, executable size or host RSS exceeds a fixed bound; returning a zero matrix or adding a NaN would redden the full-build checks.",
+      "path": "scripts/sheet_tile_census/measure.py:155-165"
+    },
+    {
+      "fails_if": "a receipt is incomplete, has the wrong platform or cells, lacks an independently observed cache event, warm execution or successful exit, or fails the full-G/resource requirements; restoring the actual truncated 0.04-hit receipt reproduces the recorded incomplete-receipt and missing-exit refusals.",
+      "path": "scripts/sheet_tile_census/verify.py:36-104"
+    },
+    {
+      "fails_if": "cold and hit receipts disagree on identity or share a PID, or the recovered tile differs from the original full-build key/HLO/count/platform identity; these compare independent process observations, not one injected value with itself.",
+      "path": "scripts/sheet_tile_census/verify.py:105-123"
+    },
+    {
+      "fails_if": "the control is absent, succeeds, does not observe a miss with AssertionError, uses the wrong platform/count or shares a positive root; removing the expected-hit assert makes the control complete and EXIT=0, which these checks reject. Program identity binding remains the reported gap.",
+      "path": "scripts/sheet_tile_census/verify.py:124-157 and run.sbatch:57-59"
+    },
+    {
+      "fails_if": "the TERM exit mapping is removed; the recorded isolated signal-after.log probe expects process return 143 and a final EXIT=143 instead of false success. This probe is recorded evidence, not an installed test.",
+      "path": "scripts/sheet_tile_census/run.sbatch:23-26"
+    }
+  ],
+  "authorization_evidence": [
+    "resume-1-advice.txt explicitly moves this measurement to titan",
+    "resume-3-advice.txt authorizes one focused titan recovery job and combined verification"
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/sheet_tile_census/run.sbatch:43 invokes measure.py",
+    "scripts/sheet_tile_census/run.sbatch:54 invokes the refusal control",
+    "scripts/sheet_tile_census/run.sbatch:62 invokes verify.py",
+    "scripts/sheet_tile_census/measure.py:150 invokes nova.biot.tiledassembly.cell_interaction"
+  ],
+  "completed_at": "2026-11-10T00:04:52Z",
+  "dispatched_at": "2026-11-09T23:54:06Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The delivered control matches the positive pair's tile key, revision and job, so these measurements stand; binding the control to the pair's key in verify.py is a hardening for future runs, not a defect in this receipt.",
+      "recorded_at": "2026-11-10T00:09:16.914959+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/sheet_tile_census/verify.py",
+      "line": "129",
+      "severity": "non-blocking",
+      "text": "non-blocking: The control checks phase, reported miss, AssertionError, platform, cell count and a distinct root but never binds tile_cache_key, revision or job to the positive cache pair, so a stale same-platform control for another program could satisfy a future combined verification; the delivered control does match the pair and does not invalidate these measurements."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read all eight commits from ad99933f through 6083692b against base e914d02e6ff5ae1f3388a7099a1f1cdb0c6987fe; the changes add the measurement and receipt verifier, repair termination handling, implement authorized recovery and append the program and memory ledger rows without changing numerical production code.",
+    "done_when": "Read prompt.txt FENCE EVIDENCE and the later resume instructions; titan/recovery/verification-after.log records complete=true and EXIT=0 for 1696 and 6493 cells with compile walls 7.3675576113164425 and 6.591119719669223 s, 537969 executable bytes each and peaks 1432596480 and 6978228224 host bytes, beneath 60 s, 50000000 bytes and 64000000000 bytes.",
+    "goal": "Read brief.md and live iron-core-magnetisation section s3 version 35 alongside resume-1-advice.txt and resume-3-advice.txt; the explicit titan substitution and focused recovery authorization are satisfied by both cold builds and the completed recovery receipts.",
+    "manifest": "Read manifest.md and its named JSON receipts and process logs; completion, cold metrics, cache pairs, negative control and retained TIMEOUT history agree with the artifacts, and the manifest explicitly declares that no suite pair is armed.",
+    "write_paths": "Read prompt.txt FENCE SCOPE and manifest.md orientation_write_paths; all five paths changed from e914d02e6ff5ae1f3388a7099a1f1cdb0c6987fe to 6083692b9ad44a2a2785021a7ee9c26dc71539df are within scripts/sheet_tile_census and the two declared HTML destinations."
+  },
+  "justifications": {
+    "durability": "scripts/sheet_tile_census/measure.py:136 fails on an actual miss in hit mode and verify.py:36 and :64 reject the preserved incomplete receipt and missing successful exit, but no automated regression test protects the verifier itself and its control provenance checks at :129 omit program identity binding.",
+    "evidence": "titan/recovery/verification-after.log records the successful combined gate, titan/recovery/control.log:10 refuses the requested hit with AssertionError and EXIT=1, and the matched positive receipts demonstrate that the cache instrument observes both misses and hits.",
+    "fit": "scripts/sheet_tile_census/measure.py:39 configures x64 before arrays, :75 uses imas.DBEntry with DD 4.1.0 and :94 reuses TilePlan, while run.sbatch:26 propagates TERM as a nonzero exit and the added source definitions have mechanism-based names.",
+    "goal_fidelity": "scripts/sheet_tile_census/measure.py:91 uses the exact 1696 and 6493-cell meshes through the production evaluator and cell_interaction, and docs/research/compile-cost-evidence.html:71 and :154 record both scales under the explicitly authorized titan platform.",
+    "reuse": "Capability searches found the numerical owner in nova/biot/tiledassembly.py:414 and :577 and the cache-event owner in scripts/h200_test_lane/cache_guard.py:157, all reused by measure.py; the existing scripts/prototypes/kernel_compile_census/row.py:248 owns a different uncached graph census and supplies no full-sheet-build or same-job persistent-cache-pair verifier duplicated here.",
+    "scope_discipline": "The five-path base-to-head diff is confined to scripts/sheet_tile_census, docs/research/compile-cost-evidence.html and docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile-compile.html, exactly the source prompt's granted destinations."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read brief.md and live iron-core-magnetisation section s3 version 35 alongside resume-1-advice.txt and resume-3-advice.txt; the explicit titan substitution and focused recovery authorization are satisfied by both cold builds and the completed recovery receipts.\nVERDICT done_when: Read prompt.txt FENCE EVIDENCE and the later resume instructions; titan/recovery/verification-after.log records complete=true and EXIT=0 for 1696 and 6493 cells with compile walls 7.3675576113164425 and 6.591119719669223 s, 537969 executable bytes each and peaks 1432596480 and 6978228224 host bytes, beneath 60 s, 50000000 bytes and 64000000000 bytes.\nVERDICT write_paths: Read prompt.txt FENCE SCOPE and manifest.md orientation_write_paths; all five paths changed from e914d02e6ff5ae1f3388a7099a1f1cdb0c6987fe to 6083692b9ad44a2a2785021a7ee9c26dc71539df are within scripts/sheet_tile_census and the two declared HTML destinations.\nVERDICT manifest: Read manifest.md and its named JSON receipts and process logs; completion, cold metrics, cache pairs, negative control and retained TIMEOUT history agree with the artifacts, and the manifest explicitly declares that no suite pair is armed.\nVERDICT diff: Read all eight commits from ad99933f through 6083692b against base e914d02e6ff5ae1f3388a7099a1f1cdb0c6987fe; the changes add the measurement and receipt verifier, repair termination handling, implement authorized recovery and append the program and memory ledger rows without changing numerical production code.\nCALL_SITES: scripts/sheet_tile_census/run.sbatch:43 invokes measure.py, scripts/sheet_tile_census/run.sbatch:54 invokes the refusal control, scripts/sheet_tile_census/run.sbatch:62 invokes verify.py, scripts/sheet_tile_census/measure.py:150 invokes nova.biot.tiledassembly.cell_interaction\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scripts/sheet_tile_census/measure.py:91 uses the exact 1696 and 6493-cell meshes through the production evaluator and cell_interaction, and docs/research/compile-cost-evidence.html:71 and :154 record both scales under the explicitly authorized titan platform.\nSCORE evidence: 19\nJUSTIFICATION evidence: titan/recovery/verification-after.log records the successful combined gate, titan/recovery/control.log:10 refuses the requested hit with AssertionError and EXIT=1, and the matched positive receipts demonstrate that the cache instrument observes both misses and hits.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The five-path base-to-head diff is confined to scripts/sheet_tile_census, docs/research/compile-cost-evidence.html and docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile-compile.html, exactly the source prompt's granted destinations.\nSCORE durability: 17\nJUSTIFICATION durability: scripts/sheet_tile_census/measure.py:136 fails on an actual miss in hit mode and verify.py:36 and :64 reject the preserved incomplete receipt and missing successful exit, but no automated regression test protects the verifier itself and its control provenance checks at :129 omit program identity binding.\nSCORE fit: 20\nJUSTIFICATION fit: scripts/sheet_tile_census/measure.py:39 configures x64 before arrays, :75 uses imas.DBEntry with DD 4.1.0 and :94 reuses TilePlan, while run.sbatch:26 propagates TERM as a nonzero exit and the added source definitions have mechanism-based names.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability searches found the numerical owner in nova/biot/tiledassembly.py:414 and :577 and the cache-event owner in scripts/h200_test_lane/cache_guard.py:157, all reused by measure.py; the existing scripts/prototypes/kernel_compile_census/row.py:248 owns a different uncached graph census and supplies no full-sheet-build or same-job persistent-cache-pair verifier duplicated here.\nFINDING scripts/sheet_tile_census/verify.py:129 non-blocking: The control checks phase, reported miss, AssertionError, platform, cell count and a distinct root but never binds tile_cache_key, revision or job to the positive cache pair, so a stale same-platform control for another program could satisfy a future combined verification; the delivered control does match the pair and does not invalidate these measurements.\n",
+  "review_run_id": "r-20261109T234825928895-review-of-icm-sheet-tile-compile-cost-6083692b9ad4",
+  "review_text": "VERDICT goal: Read brief.md and live iron-core-magnetisation section s3 version 35 alongside resume-1-advice.txt and resume-3-advice.txt; the explicit titan substitution and focused recovery authorization are satisfied by both cold builds and the completed recovery receipts.\nVERDICT done_when: Read prompt.txt FENCE EVIDENCE and the later resume instructions; titan/recovery/verification-after.log records complete=true and EXIT=0 for 1696 and 6493 cells with compile walls 7.3675576113164425 and 6.591119719669223 s, 537969 executable bytes each and peaks 1432596480 and 6978228224 host bytes, beneath 60 s, 50000000 bytes and 64000000000 bytes.\nVERDICT write_paths: Read prompt.txt FENCE SCOPE and manifest.md orientation_write_paths; all five paths changed from e914d02e6ff5ae1f3388a7099a1f1cdb0c6987fe to 6083692b9ad44a2a2785021a7ee9c26dc71539df are within scripts/sheet_tile_census and the two declared HTML destinations.\nVERDICT manifest: Read manifest.md and its named JSON receipts and process logs; completion, cold metrics, cache pairs, negative control and retained TIMEOUT history agree with the artifacts, and the manifest explicitly declares that no suite pair is armed.\nVERDICT diff: Read all eight commits from ad99933f through 6083692b against base e914d02e6ff5ae1f3388a7099a1f1cdb0c6987fe; the changes add the measurement and receipt verifier, repair termination handling, implement authorized recovery and append the program and memory ledger rows without changing numerical production code.\nCALL_SITES: scripts/sheet_tile_census/run.sbatch:43 invokes measure.py, scripts/sheet_tile_census/run.sbatch:54 invokes the refusal control, scripts/sheet_tile_census/run.sbatch:62 invokes verify.py, scripts/sheet_tile_census/measure.py:150 invokes nova.biot.tiledassembly.cell_interaction\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scripts/sheet_tile_census/measure.py:91 uses the exact 1696 and 6493-cell meshes through the production evaluator and cell_interaction, and docs/research/compile-cost-evidence.html:71 and :154 record both scales under the explicitly authorized titan platform.\nSCORE evidence: 19\nJUSTIFICATION evidence: titan/recovery/verification-after.log records the successful combined gate, titan/recovery/control.log:10 refuses the requested hit with AssertionError and EXIT=1, and the matched positive receipts demonstrate that the cache instrument observes both misses and hits.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The five-path base-to-head diff is confined to scripts/sheet_tile_census, docs/research/compile-cost-evidence.html and docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile-compile.html, exactly the source prompt's granted destinations.\nSCORE durability: 17\nJUSTIFICATION durability: scripts/sheet_tile_census/measure.py:136 fails on an actual miss in hit mode and verify.py:36 and :64 reject the preserved incomplete receipt and missing successful exit, but no automated regression test protects the verifier itself and its control provenance checks at :129 omit program identity binding.\nSCORE fit: 20\nJUSTIFICATION fit: scripts/sheet_tile_census/measure.py:39 configures x64 before arrays, :75 uses imas.DBEntry with DD 4.1.0 and :94 reuses TilePlan, while run.sbatch:26 propagates TERM as a nonzero exit and the added source definitions have mechanism-based names.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability searches found the numerical owner in nova/biot/tiledassembly.py:414 and :577 and the cache-event owner in scripts/h200_test_lane/cache_guard.py:157, all reused by measure.py; the existing scripts/prototypes/kernel_compile_census/row.py:248 owns a different uncached graph census and supplies no full-sheet-build or same-job persistent-cache-pair verifier duplicated here.\nFINDING scripts/sheet_tile_census/verify.py:129 non-blocking: The control checks phase, reported miss, AssertionError, platform, cell count and a distinct root but never binds tile_cache_key, revision or job to the positive cache pair, so a stale same-platform control for another program could satisfy a future combined verification; the delivered control does match the pair and does not invalidate these measurements.\n",
+  "reviewed_base_sha": "e914d02e6ff5ae1f3388a7099a1f1cdb0c6987fe",
+  "reviewed_head_sha": "6083692b9ad44a2a2785021a7ee9c26dc71539df",
+  "reviewed_run_id": "r-20261109T102156082059-icm-sheet-tile-compile-cost",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_referential_assertions": "None: expected outcomes are fixed requirements, geometry-derived dimensions or observations from separate cache processes; no added test asserts a value by returning the same expected input supplied to the implementation.",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T00:12:29.405726+00:00",
+  "total": 116
+}

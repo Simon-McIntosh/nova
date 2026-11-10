@@ -10,6 +10,13 @@
   ],
   "completed_at": "2026-11-10T18:12:48.494Z",
   "dispatched_at": "2026-11-10T17:51:58Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the field name on ReducedNewtonResult is exercised against the real class by tests/test_labeller_receipt.py and tests/test_receipt_support_count.py; this test isolates the playable lift",
+      "recorded_at": "2026-11-10T18:26:50.653177+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_playable_reduced_support.py",

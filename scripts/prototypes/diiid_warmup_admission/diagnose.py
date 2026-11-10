@@ -17,8 +17,14 @@ from nova.linalg.tensor_spline import fit_tensor_spline
 
 def diagnose(source, case):
     output = {}
+    index = json.loads((source / "comparison.json").read_text())
+    paths = {
+        r["arm"]: Path(r.get("source_path", source / r["arm"] / case))
+        for r in index
+        if r["case"] == case
+    }
     for arm in ("base", "head"):
-        path = source / arm / case
+        path = paths.get(arm, source / arm / case)
         receipt = json.loads((path / "receipt.json").read_text())
         assert receipt["storage_order"] == "radius_height"
         with np.load(path / "terminal.npz") as archive:

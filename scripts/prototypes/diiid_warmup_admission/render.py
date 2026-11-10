@@ -88,6 +88,16 @@ def paint(ax, data, levels, reference, xlim=None, ylim=None):
     reference_style = replace(
         DEFAULT_INK, axis_color=FLUX, xpoint_color=FLUX, axis_markersize=10
     )
+    ax.contour(
+        data["radius"],
+        data["height"],
+        data["flux"].T,
+        levels=[float(data["boundary"][2])],
+        colors=POSITIVE,
+        linewidths=2.8,
+        linestyles="-",
+        zorder=5,
+    )
     start = len(ax.lines)
     draw_nulls(
         ax,
@@ -100,6 +110,9 @@ def paint(ax, data, levels, reference, xlim=None, ylim=None):
         line.set_zorder(5)
     admitted = np.allclose(data["saddle"][:3], data["boundary"][:3], atol=1e-10)
     kwargs = {"x_points" if admitted else "other_x_points": data["saddle"][:2][None]}
+    if "continued_saddle" in data:
+        others = kwargs.get("other_x_points", np.empty((0, 2)))
+        kwargs["other_x_points"] = np.vstack((others, data["continued_saddle"][:2]))
     start = len(ax.lines)
     draw_nulls(
         ax,
@@ -111,7 +124,7 @@ def paint(ax, data, levels, reference, xlim=None, ylim=None):
         line.set_zorder(6)
 
 
-def render(source, name, output, previews):
+def render(source, name, output, previews, diagnoses=None):
     index = source / "comparison.json"
     records = json.loads(index.read_text()) if index.exists() else []
     paths = {
@@ -120,6 +133,17 @@ def render(source, name, output, previews):
         if record["case"] == name
     }
     pair = [load(paths.get(arm, source / arm / name)) for arm in ("base", "head")]
+    diagnostic_path = (
+        diagnoses / (name.split("-")[1] + "-null-diagnosis.json") if diagnoses else None
+    )
+    if diagnostic_path is not None and diagnostic_path.exists():
+        diagnostic = json.loads(diagnostic_path.read_text())
+        for arm, (data, _record) in zip(("base", "head"), pair, strict=True):
+            root = diagnostic[arm]["from_reference_and_saved"]
+            if root["converged"][0] and root["hessian_type"][0] == -1:
+                point = np.asarray(root["position_rz"][0])
+                if np.linalg.norm(point - data["saddle"][:2]) > 1e-5:
+                    data["continued_saddle"] = np.r_[point, root["value"][0]]
     levels = np.linspace(
         min(float(d[key].min()) for d, _ in pair for key in ("flux", "label")),
         max(float(d[key].max()) for d, _ in pair for key in ("flux", "label")),
@@ -137,7 +161,17 @@ def render(source, name, output, previews):
         np.r_[
             levels,
             float(reference_field(*feature)),
-            [float(data["saddle"][2]) for data, _ in pair],
+            [float(data[key][2]) for data, _ in pair for key in ("saddle", "boundary")],
+        ]
+    )
+    levels = np.unique(
+        np.r_[
+            levels,
+            [
+                data["continued_saddle"][2]
+                for data, _ in pair
+                if "continued_saddle" in data
+            ],
         ]
     )
     figure = plt.figure(figsize=(14, 7.2), dpi=100)
@@ -145,9 +179,9 @@ def render(source, name, output, previews):
     axes = [
         figure.add_axes(rect)
         for rect in (
-            (0.02, 0.12, 0.28, 0.64),
+            (0.02, 0.17, 0.28, 0.59),
             (0.31, 0.25, 0.16, 0.38),
-            (0.52, 0.12, 0.28, 0.64),
+            (0.52, 0.17, 0.28, 0.59),
             (0.81, 0.25, 0.16, 0.38),
         )
     ]
@@ -173,6 +207,17 @@ def render(source, name, output, previews):
                 0.39 + 0.5 * offset, 0.68, "X-point zoom", ha="center", fontsize=14
             )
         )
+        diverted = np.allclose(data["saddle"][:3], data["boundary"][:3], atol=1e-10)
+        notes.append(
+            figure.text(
+                0.25 + 0.5 * offset,
+                0.12,
+                f"support {record['support']}; "
+                f"{'diverted' if diverted else 'limited'} boundary",
+                ha="center",
+                fontsize=14,
+            )
+        )
         notes.append(
             figure.text(
                 0.25 + 0.5 * offset,
@@ -187,7 +232,7 @@ def render(source, name, output, previews):
             figure.text(
                 0.25 + 0.5 * offset,
                 0.025,
-                f"X-point distance {100 * record['x_point_distance_m']:.2f} cm",
+                f"Qualified saddle gap {100 * record['x_point_distance_m']:.2f} cm",
                 ha="center",
                 fontsize=14,
             )
@@ -196,6 +241,7 @@ def render(source, name, output, previews):
         Line2D([], [], color=POSITIVE, lw=1.8, label="solved flux"),
         Line2D([], [], color=FLUX, ls="--", lw=1.2, label="EFIT flux"),
         Line2D([], [], color=FLUX, ls=":", lw=1.4, label="EFIT boundary"),
+        Line2D([], [], color=POSITIVE, lw=2.8, label="solved boundary"),
         Line2D([], [], color=DEFAULT_INK.wall_color, lw=1.4, label="limiter"),
         Line2D([], [], color=POSITIVE, marker="^", ls="none", label="solved axis"),
         Line2D(
@@ -205,7 +251,7 @@ def render(source, name, output, previews):
             marker="X",
             ls="none",
             mfc="none",
-            label="solved saddle",
+            label="solved saddles",
         ),
         Line2D(
             [], [], color=FLUX, marker="^", ls="none", mfc="none", label="EFIT axis"
@@ -218,9 +264,9 @@ def render(source, name, output, previews):
         handles=handles,
         loc="upper center",
         bbox_to_anchor=(0.5, 0.99),
-        ncol=4,
+        ncol=5,
         frameon=False,
-        fontsize=14,
+        fontsize=13,
     )
     shared.save(
         figure, axes, notes, output / (name + ".svg"), previews / (name + ".png")
@@ -241,6 +287,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--previews", type=Path, required=True)
     parser.add_argument("--case", choices=("frame-137-diverted", "frame-146-diverted"))
+    parser.add_argument("--diagnoses", type=Path)
     args = parser.parse_args()
     configure_dtypes()
     validate_palette()
@@ -248,7 +295,7 @@ def main():
     for name in (
         [args.case] if args.case else ("frame-146-diverted", "frame-137-diverted")
     ):
-        render(args.input, name, args.output, args.previews)
+        render(args.input, name, args.output, args.previews, args.diagnoses)
 
 
 if __name__ == "__main__":

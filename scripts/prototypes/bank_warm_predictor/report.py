@@ -4,6 +4,7 @@ import argparse
 from html import escape
 import json
 from pathlib import Path
+import re
 
 import matplotlib
 
@@ -53,6 +54,25 @@ def main():
     parser.add_argument("--figure", type=Path, required=True)
     parser.add_argument("--fragment", type=Path, required=True)
     args = parser.parse_args()
+    allocation = (args.run / "runtime-gpu-allocation.log").read_text()
+    assert allocation.splitlines()[-1] == "EXIT=0"
+    suites = json.loads((args.run / "suite-receipts.json").read_text())
+    cpu_rows = []
+    for arm in ("base", "head"):
+        for name in ("test_bank_drive_continuation", "test_bank_solve_driver"):
+            receipt = suites[arm + "-" + name]
+            assert receipt["completed"] and receipt["exit_status"] == 0
+            log = Path(receipt["log_path"]).read_text()
+            passed = re.findall(r"(\d+) passed", log)[-1]
+            cpu_rows.append(
+                f"<tr><td>{arm}</td><td>{name}</td><td>{passed}</td><td>0</td></tr>"
+            )
+    negative = (args.run / "unchanged-seed-mutant.log").read_text()
+    assert (
+        "FAILED tests/test_bank_drive_continuation.py::"
+        "test_linear_stream_predicts_next_state_to_rounding" in negative
+    )
+    assert negative.splitlines()[-1] == "EXIT=1"
     data, arrays = {}, {}
     for arm in ARMS:
         for repeat in ("first", "second"):
@@ -226,6 +246,13 @@ def main():
     fragment = f"""<section data-reckon="fragment" id="bank-warm-predictor-fragment"
 data-plan="sub-millisecond-forward-path" data-node="bank-warm-predictor">
 <h2>Warm drive predictor: titan P100, width 8</h2>
+<p>The focused head passes eight tests. The paired base/head sirius job runs each
+file in a fresh process and reports zero added failures:</p>
+<table id="bank-warm-predictor-cpu"><thead><tr><th>arm</th><th>file</th>
+<th>passed</th><th>exit</th></tr></thead><tbody>{"".join(cpu_rows)}</tbody></table>
+<p>The unchanged-seed mutant fails the linear-stream check with EXIT=1. The head
+passes that check. Logs preserve revision, imported module and working directory.
+Both suites and the negative control are in <code>suite-receipts.json</code>.</p>
 <p>Plain, secant and assembled-Jacobian tangent seeds use the first eight lanes of
 the saved warm-start streams, at drive steps 1e-5 and 1e-3 over slices 1–7. Each arm
 has one cache warmup followed by two fresh interpreters. Read and update counts agree
@@ -261,6 +288,12 @@ check.</p>
 <p>Width 16 failed on titan P100: jit_one requested 15,120,805,120 bytes (14.08 GiB).
 Width 8 is the memory fallback. These walls are titan P100, width 8;
 the H200 width-16 headline remains pending a free card.</p>
+<p>The runtime-bank GPU allocation completed EXIT=0. Logs and arrays are preserved
+under <code>{escape(str(args.run))}</code>: <code>runtime-gpu-allocation.log</code>,
+<code>runtime-{{arm}}-{{first,second}}.log</code> and matching JSON/NPZ receipts.
+The report producer checks every lane and refuses synthetic violations of all
+four precision bounds before saving the SVG through the shared text-collision
+checker. Visual inspection remains a separate producer check.</p>
 </section>"""
     args.fragment.write_text(fragment + "\n")
     print("SUMMARY " + json.dumps(report), flush=True)

@@ -2,12 +2,16 @@
 
 A magnetised cell edge carries a uniform toroidal sheet current ``K_phi`` along a
 straight segment. Its field is a line integral of nova's exact ring Green's
-functions over the segment. This module owns three evaluators of that field:
+functions over the segment. This module owns the reference and strip routes:
 
 ``sheet_reference``
     Gauss-Legendre along the segment, refined by panel bisection until two
     successive refinements agree to ``1e-13`` relative at the target, with the
     initial panels graded geometrically toward the target's foot on the segment.
+
+``graded_precise_ring_reference``
+    Independently refined elliptic ring kernels, source interpolation and weighted
+    accumulation at fifty decimal digits, returning ``(psi, B_R, B_Z)``.
 
 ``strip_greens``
     The Urankar Part V route: the segment widened into a rectangle of width
@@ -17,8 +21,9 @@ functions over the segment. This module owns three evaluators of that field:
 ``sheet_error``
     The relative difference between the two, per component.
 
-Both return ``(psi, B_Z, B_R)`` for unit sheet current density and unit total
-current respectively, so the strip value is ``L`` times the per-ampere polygon
+``sheet_reference`` and ``strip_greens`` return ``(psi, B_Z, B_R)`` for unit
+sheet current density and unit total current respectively, so the strip value is
+``L`` times the per-ampere polygon
 Green's function and the reference is the length integral of the per-ampere ring
 Green's function -- the same physical current either way.
 """

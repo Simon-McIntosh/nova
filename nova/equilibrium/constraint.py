@@ -2126,6 +2126,17 @@ def assemble_augmented_system(
             state, pairs if runtime_pairs is None else runtime_pairs, shadow
         )
 
+    topology_read = getattr(profile.operator, "_fixed_design_read", None)
+    if topology_read is not None:
+
+        def read_branch_topology(state, _runtime_pairs=None):
+            flux, _unknowns = split(state)
+            # Admission uses the emergent wall-compatible class, even on a pinned solve.
+            return topology_read(flux, None)[1]
+
+        mapped._read_branch_topology = read_branch_topology
+        shadowed_map._read_branch_topology = read_branch_topology
+
     observers = []
     for pair, row_slice in zip(pairs, row_slices, strict=True):
 

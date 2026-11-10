@@ -8,8 +8,14 @@ import numpy as np
 import pytest
 
 from nova.equilibrium.fixed_point import newton_krylov
+from nova.equilibrium.constraint import ConstraintMultiplier, assemble_augmented_system
 from nova.equilibrium.topology import TopologyState
 from nova.jax.config import Precision, configure_dtypes
+from tests.test_equilibrium_constraint_protocol import (
+    _CoordinateFunctional,
+    _pair,
+    _profile,
+)
 
 configure_dtypes()
 assert jax.config.jax_enable_x64
@@ -108,3 +114,70 @@ def test_warmup_relaxation_stays_damped_after_finite_refusal():
     # Refuse 2, then retain relaxation 1/2 for both accepted proposals.
     np.testing.assert_array_equal(result.trajectory_state, [1.25])
     np.testing.assert_array_equal(result.warmup_refused_proposals, [1])
+
+
+@pytest.mark.parametrize("warmup", [0, 2])
+def test_augmented_route_qualifies_physical_flux_with_runtime_rows(warmup):
+    profile = _profile()
+
+    def read(flux, requested_class=None):
+        assert requested_class is None
+        axis, saddle = jnp.array([1.5, 0.0]), jnp.array([1.0, -1.0])
+        topology = TopologyState(
+            axis, 0.0, saddle, 1.0, saddle, 1.0, axis, 2.0, flux[0] < 0.8
+        )
+        return None, topology, None, None
+
+    profile.operator._fixed_design_read = read
+    pair = _pair(
+        _CoordinateFunctional(1),
+        ConstraintMultiplier(jnp.asarray([1.0])),
+        target=2.0,
+        payload=0.0,
+    )
+
+    def mapped(flux):
+        return flux.at[0].set(2.0 - 0.5 * flux[0])
+
+    def solve(initial):
+        system = assemble_augmented_system(
+            profile,
+            initial,
+            (pair,),
+            base_map=mapped,
+            base_shadow_mask=lambda flux: jnp.zeros_like(flux, dtype=bool),
+            base_promoted_shadow_mask=lambda flux, previous: previous,
+            base_shadowed_map=lambda flux, shadow: mapped(flux),
+            requested_class=None,
+            target_current=None,
+        )
+        result = newton_krylov(
+            system.map_fn,
+            system.initial,
+            map_arguments=((pair,),),
+            shadow_mask_fn=system.shadow_mask_fn,
+            promoted_shadow_mask_fn=system.promoted_shadow_mask_fn,
+            shadowed_map_fn=system.shadowed_map_fn,
+            warmup=warmup,
+            newton_steps=2,
+            gmres_iterations=1,
+            active_set_steps=2,
+            relaxation=1.0,
+            precision=Precision.DOUBLE,
+        )
+        flux, _unknown = system.split(result.state)
+        return flux, result
+
+    compiled = jax.jit(solve)
+    flux, result = compiled(jnp.array([0.0, 2.0]))
+    np.testing.assert_array_equal(flux, [0.0, 2.0])
+    counters = (
+        result.warmup_branch_refused_proposals
+        if warmup
+        else result.newton_branch_refused_proposals
+    )
+    assert int(jnp.sum(counters)) > 0
+    # A second scale and seed use the same compiled program and remain protected.
+    other, _result = compiled(jnp.array([0.0, 3.0]))
+    np.testing.assert_array_equal(other, [0.0, 3.0])
+    assert compiled._cache_size() == 1

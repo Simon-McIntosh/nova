@@ -2966,6 +2966,10 @@ def _bind_traced_map_arguments(
     def bound(*state_arguments):
         return map_fn(*state_arguments, *arguments)
 
+    branch_read = getattr(map_fn, "_read_branch_topology", None)
+    if branch_read is not None:
+        bound._read_branch_topology = lambda state: branch_read(state, *arguments)
+
     partition_read = getattr(map_fn, "_read_frozen_partition", None)
     partitioned_map = getattr(map_fn, "_map_frozen_partition", None)
     partition_shadow = getattr(map_fn, "_frozen_partition_shadow", None)
@@ -3699,7 +3703,7 @@ def _manifold_newton_krylov(
     )
 
 
-def _diverted_branch_qualification(partition_read, initial):
+def _diverted_branch_qualification(partition_read, initial, topology_read=None):
     """Keep an admitted saddle boundary in its seed's vertical half-plane.
 
     The fresh partition read admits contained saddles and compares their flux
@@ -3707,9 +3711,17 @@ def _diverted_branch_qualification(partition_read, initial):
     activate continuation. The saddle's side of the axis distinguishes lower
     from upper selection without fixing its position or its source-cell index.
     """
-    if partition_read is None:
+    if partition_read is None and topology_read is None:
         return None
-    seed = partition_read(initial, None).topology
+
+    def read(state):
+        return (
+            partition_read(state, None).topology
+            if topology_read is None
+            else topology_read(state)
+        )
+
+    seed = read(initial)
     seed_side = seed.x_point[1] - seed.axis[1]
     protected = (
         seed.boundary_is_xpoint
@@ -3721,7 +3733,7 @@ def _diverted_branch_qualification(partition_read, initial):
     )
 
     def qualify(proposal):
-        topology = partition_read(proposal, None).topology
+        topology = read(proposal)
         same_saddle_side = (topology.x_point[1] - topology.axis[1]) * seed_side > 0
         admitted = (
             topology.boundary_is_xpoint
@@ -3856,7 +3868,9 @@ def _newton_krylov_inner(
     initial = _solver_state(initial, precision)
     if proposal_qualification_fn is None:
         proposal_qualification_fn = _diverted_branch_qualification(
-            getattr(shadowed_map_fn or map_fn, "_read_frozen_partition", None), initial
+            getattr(shadowed_map_fn or map_fn, "_read_frozen_partition", None),
+            initial,
+            getattr(shadowed_map_fn or map_fn, "_read_branch_topology", None),
         )
     stride = 2 + gmres_iterations
     trace_length = warmup + newton_steps * stride
@@ -4689,7 +4703,9 @@ def _active_set_newton_krylov(
         and partitioned_map is not None
         and partition_shadow is not None
     )
-    proposal_qualification = _diverted_branch_qualification(partition_read, initial)
+    proposal_qualification = _diverted_branch_qualification(
+        partition_read, initial, getattr(shadowed_map_fn, "_read_branch_topology", None)
+    )
 
     def usable_partition(partition):
         """Whether a frozen read may be carried onto this trip's iterations.

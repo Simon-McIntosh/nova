@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_basis": "the run's own suite arms: baseline scoped probe 0 failures (the node creates its only test file), after_suite 0 failures; the six-file regression comparison adds 0 failure ids over nine pre-existing ids identical on base and head",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/forward.py:2297",
+    "nova/equilibrium/forward.py:2133",
+    "nova/equilibrium/forward.py:2143",
+    "nova/equilibrium/fixed_point.py:5283",
+    "nova/imas/mast_parity_chain.py:28"
+  ],
+  "completed_at": "2026-11-10T17:28:54.753Z",
+  "dispatched_at": "2026-11-10T17:15:33Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/fixed_point.py",
+      "line": "3860",
+      "severity": "non-blocking",
+      "text": "non-blocking: the last warm-up iteration's proposed image is carried out as _warm_image and discarded at :3905, so every warm-up pass performs one full shadowed-map evaluation that nothing reads; with five warm-up slots per trip this is measurable cost the record's timing table does not decompose."
+    },
+    {
+      "file": "nova/equilibrium/fixed_point.py",
+      "line": "3870",
+      "severity": "non-blocking",
+      "text": "non-blocking: a refusal halves the relaxation and nothing restores it, so four refusals take the 146 diverted seed's relaxation from 0.5 to 0.03125 for the rest of its warm-up, and no test pins the damped value or any recovery rule."
+    },
+    {
+      "file": "nova/equilibrium/fixed_point.py",
+      "line": "546",
+      "severity": "non-blocking",
+      "text": "non-blocking: appending warmup_refused_proposals and warmup_first_nonfinite_index to FixedPointResult touches the same field block the landed peer history renamed, so promotion requires a hand merge of this declaration and of the _replace call at :4521."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit by commit from f419ed4f to 9b341b97; one product commit (f854a6ba2) changes the warm-up carry and result fields, e6b1abaa7 tightens the finiteness classification, and the rest add the test, the measurement/analysis scripts and the evidence fragment and figures, all inside the declared scope.",
+    "done_when": "the done_when names tests/test_warmup_finite_admission.py asserting a finite terminal state, at least one Newton attempt and the refusal count; final-focused.log records 5 passed in 33.57s at 9b341b97 with EXIT=0, and the gate is red-able (final-negative-control.log: 4 failed, 1 passed, EXIT=1).",
+    "goal": "the node's goal is that the warm-up scan admit only finite proposals and record the refusals; nova/equilibrium/fixed_point.py:3856 selects candidate and shadow together with jnp.where, :3869 counts refusals, :3864 records the first nonfinite image, and :4521 carries both through the existing outer history.",
+    "manifest": "read; it records status complete, the fourteen commits, both suite-arm blocks, the negative control log path and note, the ten-row cohort and the regression deltas, and every claim I checked against the receipt agrees.",
+    "write_paths": "the manifest declares the five brief paths; the thirteen paths in the diff all fall inside them, with nova/equilibrium/fixed_point.py the one shared file accepted under the coordinator's 2026-10-24 ruling."
+  },
+  "justifications": {
+    "durability": "tests/test_warmup_finite_admission.py:34 and :104 assert literal refusal counts that the restored unconditional candidate reddens (4 of 5 ids fail in final-negative-control.log), and :83 pins the all-finite trajectory against 1.328125.",
+    "evidence": "final-focused.log and final-negative-control.log measure what the done_when asserts, while the base arm's first-nonfinite indices are inferred rather than measured, as the fragment states at docs/evidence/fragments/diiid-vertical-force-balance/diiid-warmup-finite-admission.html (\"Base has no admission fields\").",
+    "fit": "the guard is a jnp.where inside the existing warm_body carry at nova/equilibrium/fixed_point.py:3846-3872, adding named carry fields and no host loop, in the idiom of _observe_increment at :810.",
+    "goal_fidelity": "nova/equilibrium/fixed_point.py:3856-3872 refuses a nonfinite proposal and keeps state, image and shadow on the last finite iterate, and the record's ten-row cohort shows the fields reaching a receipt, though the halved relaxation is never restored.",
+    "reuse": "no owner of a finite warm-up admission existed in fixed_point.py or kink_aware_newton_krylov's admissibility_fn, and scripts/prototypes/diiid_warmup_admission/measure.py:69-74 loads scripts/prototypes/diiid_residual_plateau/measure.py and scripts/prototypes/diiid_material_mask/measure.py rather than copying them.",
+    "scope_discipline": "every diff path is under one of the brief's declared write paths, and the only shared file is nova/equilibrium/fixed_point.py, accepted under the ruling the manifest records as scope_note."
+  },
+  "node": "diiid-warmup-finite-admission",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is that the warm-up scan admit only finite proposals and record the refusals; nova/equilibrium/fixed_point.py:3856 selects candidate and shadow together with jnp.where, :3869 counts refusals, :3864 records the first nonfinite image, and :4521 carries both through the existing outer history.\nVERDICT done_when: the done_when names tests/test_warmup_finite_admission.py asserting a finite terminal state, at least one Newton attempt and the refusal count; final-focused.log records 5 passed in 33.57s at 9b341b97 with EXIT=0, and the gate is red-able (final-negative-control.log: 4 failed, 1 passed, EXIT=1).\nVERDICT write_paths: the manifest declares the five brief paths; the thirteen paths in the diff all fall inside them, with nova/equilibrium/fixed_point.py the one shared file accepted under the coordinator's 2026-10-24 ruling.\nVERDICT manifest: read; it records status complete, the fourteen commits, both suite-arm blocks, the negative control log path and note, the ten-row cohort and the regression deltas, and every claim I checked against the receipt agrees.\nVERDICT diff: read commit by commit from f419ed4f to 9b341b97; one product commit (f854a6ba2) changes the warm-up carry and result fields, e6b1abaa7 tightens the finiteness classification, and the rest add the test, the measurement/analysis scripts and the evidence fragment and figures, all inside the declared scope.\nCALL_SITES: nova/equilibrium/forward.py:2297, nova/equilibrium/forward.py:2133, nova/equilibrium/forward.py:2143, nova/equilibrium/fixed_point.py:5283, nova/imas/mast_parity_chain.py:28\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/fixed_point.py:3856-3872 refuses a nonfinite proposal and keeps state, image and shadow on the last finite iterate, and the record's ten-row cohort shows the fields reaching a receipt, though the halved relaxation is never restored.\nSCORE evidence: 18\nJUSTIFICATION evidence: final-focused.log and final-negative-control.log measure what the done_when asserts, while the base arm's first-nonfinite indices are inferred rather than measured, as the fragment states at docs/evidence/fragments/diiid-vertical-force-balance/diiid-warmup-finite-admission.html (\"Base has no admission fields\").\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every diff path is under one of the brief's declared write paths, and the only shared file is nova/equilibrium/fixed_point.py, accepted under the ruling the manifest records as scope_note.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_warmup_finite_admission.py:34 and :104 assert literal refusal counts that the restored unconditional candidate reddens (4 of 5 ids fail in final-negative-control.log), and :83 pins the all-finite trajectory against 1.328125.\nSCORE fit: 19\nJUSTIFICATION fit: the guard is a jnp.where inside the existing warm_body carry at nova/equilibrium/fixed_point.py:3846-3872, adding named carry fields and no host loop, in the idiom of _observe_increment at :810.\nSCORE reuse: 20\nJUSTIFICATION reuse: no owner of a finite warm-up admission existed in fixed_point.py or kink_aware_newton_krylov's admissibility_fn, and scripts/prototypes/diiid_warmup_admission/measure.py:69-74 loads scripts/prototypes/diiid_residual_plateau/measure.py and scripts/prototypes/diiid_material_mask/measure.py rather than copying them.\nFINDING nova/equilibrium/fixed_point.py:3860 non-blocking: the last warm-up iteration's proposed image is carried out as _warm_image and discarded at :3905, so every warm-up pass performs one full shadowed-map evaluation that nothing reads; with five warm-up slots per trip this is measurable cost the record's timing table does not decompose.\nFINDING nova/equilibrium/fixed_point.py:3870 non-blocking: a refusal halves the relaxation and nothing restores it, so four refusals take the 146 diverted seed's relaxation from 0.5 to 0.03125 for the rest of its warm-up, and no test pins the damped value or any recovery rule.\nFINDING nova/equilibrium/fixed_point.py:546 non-blocking: appending warmup_refused_proposals and warmup_first_nonfinite_index to FixedPointResult touches the same field block the landed peer history renamed, so promotion requires a hand merge of this declaration and of the _replace call at :4521.",
+  "review_run_id": "r-20261110T171427447276-review-of-diiid-warmup-finite-admission-9b341b970289",
+  "reviewed_base_sha": "f419ed4f195771688018a7c9ff0a9707bee0cc5d",
+  "reviewed_head_sha": "9b341b9702891a9a6a2dfa4d99f158c9fe22271e",
+  "reviewed_run_id": "r-20261109T070252336251-diiid-warmup-finite-admission",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T17:36:32.271869+00:00",
+  "total": 114,
+  "verdict_basis": {
+    "cohort_check": "replay-137.json head stages: diverted through linearization 2 (292 cells), first limited at linearization 3 (278 cells); replay-146.json head: warm-up 0 already 262 limited, linearization 1 184, linearization 2 148 with an upper saddle",
+    "distance_check": "146 head 2.218480 m and 179 2.229/2.245 m reproduced as Euclidean upper-saddle-to-lower-EFIT distances; 137 head 12.147 cm and base 1.775 cm reproduced against the same lower EFIT null",
+    "figure_check": "both added SVGs rasterised at density 140 via ImageMagick and inspected: axes off, limiter and both null sets drawn, no clipped or colliding labels"
+  }
+}

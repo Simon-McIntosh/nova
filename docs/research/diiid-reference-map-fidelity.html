@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="research">
+<meta name="plan-slug" content="diiid-reference-map-fidelity">
+<meta name="plan-title" content="Is the EFIT reference a fixed point of the registered forward map?">
+<meta name="plan-summary" content="Reference-state map residual, vertical force, rigid displacement controls and Newton seeded from EFIT on three DIII-D frames and one MAST control.">
+<meta name="plan-informs" content="diiid-vertical-force-balance">
+<meta name="plan-evidence-for" content="diiid-vertical-force-balance">
+<title>Reference map fidelity | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Is EFIT’s reference a fixed point of the registered forward map?</h1>
+<p id="verdict">Measurement in progress. This record distinguishes the map defect at the reference from the solver’s ability to find a different self-consistent state.</p></header>
+<section id="method"><h2>Instrument and provenance</h2>
+<p>The DIII-D rows are frames 137, 146 and 179 selected through the registered benchmark’s <code>select_frames</code>. Each uses <code>_build_profile</code>, its EFIT-flux seed and physical wall, the completed circuit-current adapter and the frame’s recorded plasma-current target. The MAST row is shot 21978, slice 35, at 33 × 33 grid points, using the parity benchmark’s passive-inclusive fitted-circuit builder. Both builders are the same ones used by the finite-admission measurement. This is a measurement of those specific composed maps; no source, coil current, mask, tolerance or product code is repaired.</p>
+<p>The primary residual is exactly <code>max|g(ψref) − ψref| / max|g(ψref)|</code>, over the full grid-plus-wall state, cross-checked against <code>fixed_point._relative_residual</code>. The largest grid defect’s location is reported separately because a wall entry can set the full-state maximum. A companion centred defect subtracts the median additive constant from the difference, using the same denominator. It diagnoses gauge sensitivity and does not replace the primary raw measurement.</p>
+<p>The vertical-force quadrature is <code>Fz = −Σ Icell BR 2πR</code>, in newtons: the operator’s own clipped cell-current integrals supply <code>Icell = Jφ dA</code>, after its declared-current amplitude is applied. <code>BR</code> comes from the map image’s grid flux through Nova’s <code>poloidal_field</code>, which divides the total-flux derivative by <code>2πR</code>. A second force uses the reference flux’s gradient instead. This distinguishes the field the composed model supplies from the one the label carries. The force fraction divides by <code>μ0 Ip²/2</code>, the characteristic thin-ring hoop-force scale before the aspect-ratio/internal-inductance geometry factor. It is a specified comparison scale, not a measured net radial force. Cell-centre force quadrature and finite-difference field gradients carry discretization error, including a possible discrete plasma self-force.</p>
+<p>The negative controls translate the total reference grid and wall flux by rigid ±2 cm in Z while retaining the wall, external currents and prescribed profiles. Cubic interpolation evaluates <code>ψ(R,Z−ΔZ)</code>; the spline extrapolates the outermost grid strip where necessary. The signed force offset and its displacement slope are reported, so a biased force need not cross zero for the displacement response to be visible.</p>
+<p>Newton uses the benchmark’s registered <code>ForwardSolveRequest</code> and <code>ExplicitSolveSeed</code>, with only <code>warmup=0</code> changed. No topology class is imposed. A finite saddle is not called an admitted X-point on a limited state, and no cross-branch saddle distance is reported as X-point displacement. Terminal residual convergence and public receipt qualification are kept separately.</p>
+</section>
+<section id="prior"><h2>Prior label-state measurement reproduced</h2>
+<p><a href="/nova/figures/diiid-forward-onboarding/root-existence/root_existence_receipt.json">The existing root-existence receipt</a> and <a href="/nova/evidence/diiid-forward-onboarding-state#root-convention">its convention audit</a> already evaluate a linear free-boundary residual at an unchanged DIII-D label. They use a sparse Dirichlet operator and whole-grid RMS divided by reference flux range, rather than the current nonlinear map’s relative sup norm. They are prior evidence, not interchangeable scores.</p>
+<p>The first recorded frame was reproduced on the current product head: free-boundary fractional RMS <strong>0.39360398517782363</strong> against recorded <strong>0.3936039751610567</strong>; fixed-boundary profile <strong>0.04114859473505696</strong> against <strong>0.041148593087127656</strong>. The known-present direct-operator control reads <strong>1.0906002317249677 × 10⁻¹⁴</strong> against its recorded 2.311880148197976 × 10⁻⁸. Thus the earlier large free-boundary discrepancy still reproduces, while direct operator closure has improved. No repair is attempted here.</p>
+</section>
+<section id="reference"><h2>Residual and vertical force at the reference</h2><p>Numerical row receipts pending.</p></section>
+<section id="newton"><h2>Newton seeded from EFIT</h2><p>Terminal row receipts pending.</p></section>
+<section id="decomposition"><h2>Contributor switches</h2>
+<p>The diagnostic plasma tare applies Delta-star to the reference on the benchmark grid, retains the density inside EFIT’s LCFS, and images its node-area zeroth current moments through the map’s own Green operator. The difference splits algebraically into the prescribed plasma image minus this label-current tare, and the supplied external field minus the remaining label flux. Their sum is checked against the measured grid defect. This node-area tare has a different discretization from the older native-grid exact clipped-profile tare, so it is identified explicitly and does not silently inherit that instrument’s closure claims.</p>
+<p>The target-current switch removes only the common amplitude applied to the reference-state current moments. The coil switch zeros the ordinary conductor-current vector; any prescribed current-field response remains and is reported separately. DIII-D’s absent driven passive state is not replaced by an invented current. MAST’s prescribed field contains both active and passive fitted circuits, so that switch alone cannot separate its passive circuits from its active ones.</p>
+</section>
+<section id="provenance"><h2>Durable receipts and limits</h2>
+<p>The run record is under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T203927550930-diiid-reference-map-fidelity/</code>. Per-row receipts and fields live below <code>measurement/</code>; figure previews live outside git. H200 submission 1309842 remained pending with scheduler reason Priority while the node reported all eight GPUs allocated. It was cancelled before executing; the single sequential measurement allocation is titan job 1309845. The actual GPU device and imported benchmark path are printed in its log. GPU timings are P100 timings.</p>
+</section>
+</main></body></html>

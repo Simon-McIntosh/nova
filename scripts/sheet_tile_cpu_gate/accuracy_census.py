@@ -3,6 +3,7 @@
 import argparse
 import concurrent.futures
 import json
+import math
 import multiprocessing
 from pathlib import Path
 import subprocess
@@ -50,6 +51,136 @@ def meshes():
     ]
 
 
+def scalar_assembly_roundoff(owner, radius, target_z):
+    """Bound the six scalar final-assembly operations before cancellation.
+
+    The existing endpoint allowance retains the kernel and common-scale work.
+    This term uses the four uncancelled S and r*S_r contributions instead of
+    their nearly cancelling endpoint sums. It affects only the vertical field.
+    """
+    if (
+        radius == 0
+        or owner._flat
+        or owner._slope == 0
+        or owner.start[0] == owner.end[0] == 0
+    ):
+        return None
+    if sheet._near_axis(np, radius, target_z, *owner.start, *owner.end):
+        return None
+    if sheet._source_series_ends(np, radius, target_z, *owner.start, *owner.end)[0]:
+        return None
+    factor = sheet.MU0 / (2 * np.pi * radius * (1 + owner._slope**2))
+    terms, endpoints = [], []
+    for source, height, sign in (
+        (owner.end[0], owner.end[1], 1.0),
+        (owner.start[0], owner.start[1], -1.0),
+    ):
+        value, _, radial = map(
+            float, owner._closed_gradient(height - target_z, radius, source)
+        )
+        contributions = [sign * factor * value, sign * factor * radius * radial]
+        terms.extend(contributions)
+        endpoints.append(
+            {"S": value, "r_Sr": radius * radial, "physical_terms": contributions}
+        )
+    unit_roundoff = 2.0**-53
+    operations = 6  # two products, two endpoint sums, one difference, one scale
+    magnitude_sum = math.fsum(abs(value) for value in terms)
+    # Outward rounding covers two products per physical contribution and the
+    # correctly rounded positive fsum used to measure its conditioning scale.
+    magnitude_upper = np.nextafter(magnitude_sum / (1 - 3 * unit_roundoff), np.inf)
+    gamma = operations * unit_roundoff / (1 - operations * unit_roundoff)
+    bound = float(np.nextafter(gamma * magnitude_upper, np.inf))
+    return {
+        "operations": operations,
+        "unit_roundoff": unit_roundoff,
+        "field_scale": factor,
+        "endpoints": endpoints,
+        "physical_terms": terms,
+        "sum_abs_terms": magnitude_sum,
+        "sum_abs_terms_upper": float(magnitude_upper),
+        "scalar_assembly_roundoff": bound,
+    }
+
+
+def admit_cached_census(source, output):
+    """Admit recorded scalar misses using only their assembly-rounding receipt.
+
+    This reads the completed census; it performs no new mesh census, ring
+    integration or packed evaluation. Already-passing rows stay certified by
+    their original allowance because the additional term is nonnegative.
+    """
+    output.mkdir(parents=True, exist_ok=True)
+    final = []
+    for name in ("sphere", "shell"):
+        operands = np.load(source / f"{name}-operands.npz")
+        values = np.load(source / f"{name}-reference.npz")
+        reference = values["reference"]
+        epsilon = np.finfo(float).eps
+        original = (
+            1e-10 * abs(reference)
+            + 3504 * epsilon / (1 - 3504 * epsilon) * operands["end_scales"]
+        )
+        summary = {
+            "mesh": name,
+            "pairs": len(reference),
+            "source_receipt": str(source),
+            "new_census_executed": False,
+            "additional_term_nonnegative": True,
+        }
+        for route, field in [
+            ("scalar", values["scalar"]),
+            ("packed", operands["packed"]),
+            ("dilated", operands["dilated"]),
+        ]:
+            bad = (abs(field - reference) > original).any(axis=1) | ~np.isfinite(
+                field
+            ).all(axis=1)
+            receipts = []
+            remaining = 0
+            for index in np.flatnonzero(bad):
+                if route != "scalar":
+                    remaining += 1
+                    continue
+                row = operands["rows"][index]
+                owner = sheet.SheetFlux(row[2:4], row[4:6])
+                receipt = scalar_assembly_roundoff(owner, *row[:2])
+                assert receipt is not None
+                # The named pair is a positive control for the instrument.
+                assert owner.field(*row[:2])[1] == field[index, 1]
+                allowance = np.array([0.0, receipt["scalar_assembly_roundoff"]])
+                admitted = np.all(
+                    abs(field[index] - reference[index]) <= original[index] + allowance
+                )
+                remaining += int(not admitted)
+                receipt.update(
+                    {
+                        "pair_index": int(index),
+                        "pair": row.tolist(),
+                        "recorded_field": field[index].tolist(),
+                        "reference": reference[index].tolist(),
+                        "absolute_error": abs(field[index] - reference[index]).tolist(),
+                        "original_budget": original[index].tolist(),
+                        "adjusted_budget": (original[index] + allowance).tolist(),
+                        "admitted": bool(admitted),
+                    }
+                )
+                receipts.append(receipt)
+            summary[route] = {
+                "previous_failed_pairs": int(bad.sum()),
+                "remaining_failed_pairs": remaining,
+                "rounding_receipts": receipts,
+            }
+        print(json.dumps(summary), flush=True)
+        (output / f"{name}-admission.json").write_text(json.dumps(summary, indent=2))
+        final.append(summary)
+    assert all(
+        value[route]["remaining_failed_pairs"] == 0
+        for value in final
+        for route in ("scalar", "packed", "dilated")
+    ), "derived term does not admit the receipt"
+
+
 def reference_chunk(rows):
     result = []
     for row in rows:
@@ -57,8 +188,16 @@ def reference_chunk(rows):
         value = graded_precise_ring_reference((a, h), (b, k), (r, z))
         with warnings.catch_warnings(), np.errstate(all="ignore"):
             warnings.simplefilter("ignore")
-            scalar = sheet.sheet_field(r, z, (a, h), (b, k))
-        result.append((*scalar, *value[1:]))
+            owner = sheet.SheetFlux((a, h), (b, k))
+            scalar = owner.field(r, z)
+            rounding = scalar_assembly_roundoff(owner, r, z)
+        result.append(
+            (
+                *scalar,
+                *value[1:],
+                0.0 if rounding is None else rounding["scalar_assembly_roundoff"],
+            )
+        )
     return np.asarray(result)
 
 
@@ -66,7 +205,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--workers", type=int, default=32)
+    parser.add_argument("--admit-cached", type=Path)
     args = parser.parse_args()
+    if args.admit_cached is not None:
+        admit_cached_census(args.admit_cached, args.output)
+        return
     args.output.mkdir(parents=True, exist_ok=True)
     print(
         "module:",
@@ -172,12 +315,14 @@ def main():
                     )
         result = np.concatenate(result)
         scalar = result[:, :2]
-        reference = result[:, 2:]
+        reference = result[:, 2:4]
+        scalar_assembly = np.column_stack((np.zeros(len(result)), result[:, 4]))
         np.savez(
             args.output / f"{name}-reference.npz",
             rows=rows,
             scalar=scalar,
             reference=reference,
+            scalar_assembly_roundoff=scalar_assembly,
         )
         # Count the actual remainder sum, multipole recurrence and elementary
         # endpoint work before applying the standard gamma_n rounding allowance.
@@ -189,7 +334,7 @@ def main():
         # Binary dilation and canonicalisation are exact: additional geometry
         # rounding is zero, so no allowance can be added for it.
         dilation_geometry_rounding = np.zeros_like(floor)
-        tolerance = 1e-10 * np.abs(reference) + floor + dilation_geometry_rounding
+        base_tolerance = 1e-10 * np.abs(reference) + floor + dilation_geometry_rounding
         assert np.array_equal(packed, dilated), (
             "canonical field must preserve every bit"
         )
@@ -202,12 +347,16 @@ def main():
             "identity_grid_step": 1e-9 / 1024,
             "max_identity_movement": float(identity_movement),
             "packed_dilated_bit_identical": True,
+            "scalar_assembly_operations": 6,
+            "scalar_unit_roundoff": 2.0**-53,
+            "max_scalar_assembly_roundoff": float(scalar_assembly.max()),
         }
         for route, values in [
             ("scalar", scalar),
             ("packed", packed),
             ("dilated", dilated),
         ]:
+            tolerance = base_tolerance + (scalar_assembly if route == "scalar" else 0.0)
             bad = (np.abs(values - reference) > tolerance) | ~np.isfinite(values)
             count = int(bad.any(axis=1).sum())
             failures += count

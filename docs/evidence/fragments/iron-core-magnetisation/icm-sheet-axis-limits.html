@@ -730,3 +730,90 @@ A = sqrt(1+b²) hypot(r₁,br)
   summary and no EXIT receipt. This encoding does not make the head arm complete
   or passing and does not modify the original log.
 </p>
+
+<section id="icm-sheet-axis-limits-scalar-rounding-admission">
+  <h2>Scalar final-assembly rounding admits the remaining pair</h2>
+  <p>
+    The subsequent lead ruling authorises a derived scalar rounding term and a
+    head-only suite rerun. Product source, test parameters and test tolerances
+    remain unchanged. This paragraph supersedes the blocked admission above;
+    the original failed census receipt is preserved. No full census, WEST gate
+    or baseline suite is rerun for this admission.
+  </p>
+  <p>
+    For the recorded shell target and segment above, neither the near-axis nor
+    the source-series selector fires. The scalar sloped route forms
+    B_Z = C[(S_e + r S_{r,e}) - (S_s + r S_{r,s})], where
+    C = μ₀/[2πr(1+b²)] = 2.2476486620755053e-7 and
+    b = 0.9668093077869323. Treat the computed endpoint outputs and C as
+    inputs to this final assembly; their own evaluation retains the existing
+    endpoint-kernel and common-scale allowance. The additional term below
+    accounts for assembly conditioning before the endpoint cancellations.
+  </p>
+  <table>
+    <thead><tr><th>Signed physical contribution [T/(A/m)]</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>C S_e</td><td>9.770657347343699e-9</td></tr>
+      <tr><td>C r S_{r,e}</td><td>−9.881036198487738e-9</td></tr>
+      <tr><td>−C S_s</td><td>−9.769030678834822e-9</td></tr>
+      <tr><td>−C r S_{r,s}</td><td>9.882999085150316e-9</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The absolute sum before cancellation is
+    T = Σ|C S_i| + Σ|C r S_{r,i}| = 3.9303723309816574e-8 T/(A/m),
+    while the computed final field is only 3.5895551714549664e-12 T/(A/m).
+    The operation count is six: two r S_r products, two within-end additions,
+    one endpoint subtraction, and one final multiplication by C. Multiplication
+    by ±1 and the initial addition to zero are exact. With binary64
+    u = 2⁻⁵³ = 1.1102230246251565e-16, the usual product-of-roundings bound
+    |Π(1+δ_j)−1| ≤ γ₆ = 6u/(1−6u), |δ_j| ≤ u, bounds every contribution's
+    assembly path. The triangle inequality therefore gives the named term
+    <code>scalar_assembly_roundoff = γ₆ T</code> for the vertical component.
+    This bounds the assembly error conditional on the endpoint inputs; it does
+    not replace the existing endpoint-kernel allowance.
+  </p>
+  <p>
+    The census computes T with a correctly rounded positive sum and rounds its
+    bound outward: T_up = nextafter(T/(1−3u), +∞) =
+    3.9303723309816594e-8. Three u cover at most two products forming each
+    scaled contribution and the positive sum's rounding. It then rounds γ₆T_up
+    outward to <strong>2.618153914323293e-23 T/(A/m)</strong>. These outward
+    operations affect the evidence allowance only. The field evaluation is
+    unchanged. The explicit scalar budget becomes
+    1e-10|B_ref| + γ₃₅₀₄E + (0, scalar_assembly_roundoff);
+    packed and dilated budgets retain their original terms and the zero
+    dilation-geometry term.
+  </p>
+  <p>
+    At this pair the vertical budget is consequently
+    5.335076211121033e-22 + 2.618153914323293e-23 =
+    <strong>5.596891602553363e-22</strong>, which exceeds the observed
+    <strong>5.36952904749504e-22</strong> error. The added term covers the
+    3.4452836374006456e-24 excess. The summand probe reproduces the stored
+    scalar vertical field bit for bit before applying the bound, so the
+    conditioning instrument demonstrably observes the actual missed pair.
+  </p>
+  <p>
+    <code>accuracy_census.py --admit-cached</code> reads the completed arrays
+    and checks every recorded row against the unchanged original allowance.
+    It evaluates the named assembly term only for the sole formerly rejected
+    scalar row. Already-passing rows remain certified because the new term is
+    nonnegative. It performs no new mesh census, ring integration or packed
+    evaluation. The stored admission receipt exits 0: sphere 28,106 pairs and
+    shell 608,685 pairs each have zero remaining rejected pairs on scalar,
+    packed and 1024× dilated packed routes. Every field remains finite and the
+    packed/dilated bit identity stands. The full-census path also includes the
+    named scalar term explicitly for future measurements.
+  </p>
+  <p>
+    Receipts under the assigned run directory are
+    <code>final-admission/rounding-probe.json</code>,
+    <code>final-admission/cached-admission.log</code>, and the two
+    <code>final-admission/{sphere,shell}-admission.json</code> files.
+    Head-only job 1309863 is verified on sirius with Timelimit 01:30:00,
+    eight CPUs, 64 GB and one pytest process using the exact resolved suite
+    command. Its completion receipt will be recorded below. The earlier
+    one-hour head interruption was the coordinator's move to all_debug.
+  </p>
+</section>

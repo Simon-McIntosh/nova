@@ -6,6 +6,10 @@ plane swept through a full turn, bearing a uniform azimuthal surface current
 ``(r, z)`` from the closed form of L. K. Urankar, "Current-carrying finite arc
 segment, Part II", IEEE Trans. Magn. MAG-18(3), 911-917, 1982.
 
+The finite-field domain is positive distance from the source's closed segment.
+The same domain applies on and off the symmetry axis. Source endpoints and
+interior source points carry no finite-field contract.
+
 Route.  The sheet's flux is ``2 pi r A_phi``, and the azimuthal vector potential
 is the segment integral of the ring kernel.  Part II reduces that integral by
 parts to complete elliptic integrals of all three kinds plus one smooth integral
@@ -86,7 +90,12 @@ from nova.biot.completeelliptic import (
     complete_pole,
 )
 from nova.biot.gradedresidual import QUARTER, graded_residual
-from nova.biot.greens import MU0, greens_bz_br, greens_psi
+from nova.biot.greens import (
+    MU0,
+    _filament_elliptic_combinations,
+    greens_bz_br,
+    greens_psi,
+)
 from nova.biot.zeta import traced_zeta, zeta
 from nova.jax.config import configure_dtypes
 
@@ -186,24 +195,228 @@ _FLAT_NODES = 32
 """The flat annulus's radial rule; its kernel varies on the standoff scale."""
 
 
-@jax.jit
-def _closed_root(height, radius, source):
+def _root_expression(height, radius, source):
     """``R``: the closed form's complete first- and second-kind ``D`` block.
 
     ``2a[2(1 - k^2)K + (k^2 - 2)E] / (3k^2)`` of eq (22a), with the modulus
     ``k^2 = 4 r r' / a^2`` and its complement both formed from the geometry
     rather than by subtraction.
     """
+    distance2 = height**2 + radius**2 + source**2
+    q = 2.0 * radius * source / distance2
+    use_series = q <= 0.25
+    power = jnp.where(use_series, q, 0.0)
+    coefficient = 1.0
+    moment = 1.0
+    series = 0.0
+    for order in range(1, 33):
+        coefficient *= (1.5 - order) / order
+        if order % 2:
+            moment *= order / (order + 1)
+            series += -coefficient * moment * power**order
+    series *= np.pi * jnp.sqrt(distance2)
+    height = jnp.where(use_series, 1.0, height)
+    radius = jnp.where(use_series, 1.0, radius)
+    source = jnp.where(use_series, 0.5, source)
     span = height * height + (radius + source) ** 2
     k2 = 4.0 * radius * source / span
     complement = (height * height + (radius - source) ** 2) / span
     first, second = complete_kind_traced(complement)
-    return (
+    regular = (
         2.0 * span**0.5 * (2.0 * (1.0 - k2) * first + (k2 - 2.0) * second) / (3.0 * k2)
     )
+    return jnp.where(use_series, series, regular)
+
+
+_closed_root = jax.jit(_root_expression)
 
 
 _closed_root_gradient = jax.jit(jax.value_and_grad(_closed_root, argnums=(0, 1)))
+
+
+def _zero_source_terms(xp, gamma, radius, slope):
+    """Primitive and target derivatives at a source end of zero radius.
+
+    At zero modulus the root integral vanishes. Fourier integration of the
+    remaining atanh gives the interior primitive below; outside |b gamma|=r
+    it is linear in r and independent of gamma.
+    """
+    distance = xp.hypot(gamma, radius)
+    square = slope**2
+    inside = xp.abs(slope * gamma) <= radius
+    magnitude = xp.where(slope != 0.0, xp.abs(slope), 1.0)
+    exterior = (
+        np.pi
+        / 2
+        * xp.sign(gamma)
+        * (xp.sqrt(1 + square) + square * xp.arcsinh(1 / magnitude))
+    )
+    inner = np.pi * square / 2
+    angle = xp.arcsinh(gamma / radius)
+    value = xp.where(
+        inside, inner * (gamma * distance / radius + radius * angle), radius * exterior
+    )
+    height = xp.where(inside, 2 * inner * distance / radius, 0.0)
+    radial = xp.where(inside, inner * (angle - gamma * distance / radius**2), exterior)
+    return value, height, radial
+
+
+def _axis_field_ends(xp, target_z, start_r, start_z, end_r, end_z):
+    """Elementary on-axis B_Z antiderivatives in arclength, per sheet end."""
+    length = xp.hypot(end_r - start_r, end_z - start_z)
+    u = (end_r - start_r) / length
+    v = (end_z - start_z) / length
+    cross = v * start_r - u * (start_z - target_z)
+    line = cross == 0.0
+    held_cross = xp.where(line, 1.0, cross)
+    ends = []
+    for source, gamma in ((end_r, end_z - target_z), (start_r, start_z - target_z)):
+        t = u * source + v * gamma
+        held_t = xp.where(line, 1.0, t)
+        distance = xp.hypot(held_t, held_cross)
+        regular = (
+            u**2 * xp.arcsinh(held_t / xp.abs(held_cross))
+            + ((v**2 - u**2) * held_t - 2 * u * v * held_cross) / distance
+        )
+        line_t = xp.where(line, t, 1.0)
+        collinear = u**2 * xp.sign(line_t) * xp.log(xp.abs(line_t))
+        ends.append(MU0 / 2 * xp.where(line, collinear, regular))
+    return ends
+
+
+def _axis_expansion(radius, target_z, start_r, start_z, end_r, end_z):
+    """Fields and flux from the axis primitive's convergent radial expansion."""
+    from jax.experimental.jet import jet
+
+    def ends(z):
+        return jnp.stack(_axis_field_ends(jnp, z, start_r, start_z, end_r, end_z))
+
+    tangent = (jnp.ones_like(target_z),) + (jnp.zeros_like(target_z),) * 4
+    value, derivatives = jet(ends, (target_z,), (tangent,))
+    first, second, third, fourth, fifth = derivatives
+    height = value - radius**2 / 4 * second + radius**4 / 64 * fourth
+    radial = -radius / 2 * first + radius**3 / 16 * third - radius**5 / 384 * fifth
+    flux = (
+        np.pi * radius**2 * (value - radius**2 / 8 * second + radius**4 / 192 * fourth)
+    )
+    return radial, height, flux
+
+
+_axis_expansion = jax.jit(_axis_expansion)
+
+
+def _near_axis(xp, radius, target_z, start_r, start_z, end_r, end_z):
+    """Select a uniformly convergent radial series away from its line limit."""
+    dr, dz = end_r - start_r, end_z - start_z
+    length2 = dr**2 + dz**2
+    foot = -(start_r * dr + (start_z - target_z) * dz) / length2
+    foot = xp.minimum(1.0, xp.maximum(0.0, foot))
+    distance = xp.hypot(start_r + foot * dr, start_z + foot * dz - target_z)
+    cross = (dz * start_r - dr * (start_z - target_z)) / xp.sqrt(length2)
+    return (
+        (radius > 0) & (radius <= 0.01 * distance) & (xp.abs(cross) > 0.01 * distance)
+    )
+
+
+def _cylinder_radial(xp, gamma, radius, source):
+    """The cylinder's radial endpoint is the stable ring flux over 2 pi r."""
+    at_zero = source == 0.0
+    source = xp.where(at_zero, 0.5 * radius, source)
+    span = gamma**2 + (radius + source) ** 2
+    complement = (gamma**2 + (radius - source) ** 2) / span
+    first, second = complete_kind(complement, xp=xp)
+    _, flux, _ = _filament_elliptic_combinations(
+        xp, 4 * radius * source / span, complement, first, second
+    )
+    value = MU0 * xp.sqrt(span) * flux / (2 * np.pi * radius)
+    return xp.where(at_zero, 0.0, value)
+
+
+def _source_potential_series(xp, gamma, radius, source, slope):
+    """Source multipoles of psi/(mu0 pi r²) and its target derivatives.
+
+    The addition theorem integrates cos(phi) P_n onto
+    pi sin(theta) sin(theta_s) P_n'(t) P_n'(v)/(n(n+1)).
+    Integrating arclength adds the factor 1/(n+2). Each term retains its
+    source-radius power before the two endpoint primitives are differenced.
+    """
+    held_slope = xp.where(slope != 0.0, slope, 1.0)
+    a = xp.sqrt(1 + slope**2)
+    intercept = gamma - source / held_slope
+    distance = xp.hypot(radius, intercept)
+    ratio = source * a / (xp.abs(held_slope) * distance)
+    eligible = (
+        (slope != 0.0)
+        & (xp.abs(source - slope * gamma) > radius * (1 + 1e-12))
+        & (ratio <= 0.5)
+    )
+    if xp is np and not np.any(eligible):
+        zero = np.zeros_like(distance)
+        return eligible, intercept, zero, zero, zero
+    ratio = xp.where(eligible, ratio, 0.0)
+    t = -intercept / distance
+    v = xp.sign(held_slope) / a
+    zero, one = xp.zeros_like(distance), xp.ones_like(distance)
+
+    def step(index, state):
+        (
+            prev,
+            current,
+            dprev,
+            derivative,
+            vprev,
+            vcurrent,
+            power,
+            value,
+            height,
+            radial,
+        ) = state
+        n = index + 1
+        common = power * vcurrent / (n * (n + 1) * (n + 2))
+        value = value + common * current
+        height = height + common * (
+            -derivative * radius**2 / distance**3
+            - (n + 2) * current * intercept / distance**2
+        )
+        radial = radial + common * (
+            derivative * intercept * radius / distance**3
+            - (n + 2) * current * radius / distance**2
+        )
+        following = ((2 * n + 1) * t * current - (n + 1) * prev) / n
+        dfollowing = ((2 * n + 1) * (current + t * derivative) - (n + 1) * dprev) / n
+        vfollowing = ((2 * n + 1) * v * vcurrent - (n + 1) * vprev) / n
+        return (
+            current,
+            following,
+            derivative,
+            dfollowing,
+            vcurrent,
+            vfollowing,
+            power * ratio,
+            value,
+            height,
+            radial,
+        )
+
+    *_, value, height, radial = _sheet_series_loop(
+        xp, 80, step, (zero, one, zero, zero, zero, one, ratio**3, zero, zero, zero)
+    )
+    factor = xp.sign(held_slope) * slope**2 / a**2
+    return eligible, intercept, factor * value, factor * height, factor * radial
+
+
+def _source_gradient_series(xp, gamma, radius, source, slope, regular):
+    eligible, intercept, value, height, radial = _source_potential_series(
+        xp, gamma, radius, source, slope
+    )
+    base = _zero_source_terms(xp, intercept, radius, slope)
+    factor = np.pi * (1 + slope**2)
+    terms = (
+        base[0] + factor * radius * value,
+        base[1] + factor * radius * height,
+        base[2] + factor * (value + radius * radial),
+    )
+    return tuple(xp.where(eligible, a, b) for a, b in zip(terms, regular))
 
 
 def _sheet_series_loop(xp, count, body, initial):
@@ -357,51 +570,6 @@ def _sheet_cylinder_height(xp, gamma, radius, source):
     return xp.where(eligible, series, regular)
 
 
-def _sheet_gamma_series(xp, gamma, radius, source, slope, regular):
-    """Combine the root and arsinh gamma derivatives as source multipoles.
-
-    The zero-source primitive has zero gamma derivative on the exterior
-    branch. Integrating the differentiated ring addition theorem along the
-    source line then factors out source cubed before the endpoint is evaluated.
-    """
-    gamma, radius, source, slope = map(xp.asarray, (gamma, radius, source, slope))
-    held_slope = xp.where(slope != 0.0, slope, 1.0)
-    a = xp.sqrt(1.0 + slope**2)
-    intercept = gamma - source / held_slope
-    distance = xp.hypot(radius, intercept)
-    ratio = source * a / (xp.abs(held_slope) * distance)
-    eligible = (
-        (slope != 0.0)
-        & (xp.abs(source - slope * gamma) > radius * (1.0 + 1e-12))
-        & (ratio <= 0.5)
-    )
-    v = xp.where(eligible, ratio, 0.0)
-    t = -intercept / distance
-    u = xp.sign(held_slope) / a
-    zero = xp.zeros_like(distance)
-    one = xp.ones_like(distance)
-
-    def step(index, state):
-        n = index + 1
-        ct0, ct1, cu0, cu1, power, value = state
-        value = value + power * ct1 * cu0 / ((n + 1) * (n + 2))
-        ct0, ct1 = ct1, ((2 * n + 3) * t * ct1 - (n + 2) * ct0) / (n + 1)
-        cu0, cu1 = cu1, ((2 * n + 3) * u * cu1 - (n + 2) * cu0) / (n + 1)
-        return ct0, ct1, cu0, cu1, power * v, value
-
-    *_, value = _sheet_series_loop(
-        xp, 80, step, (one, 3.0 * t, one, 3.0 * u, one, zero)
-    )
-    series = (
-        np.pi
-        * (a**3 / held_slope)
-        * (radius / distance)
-        * (source / distance) ** 3
-        * value
-    )
-    return xp.where(eligible, series, regular)
-
-
 class SheetFlux:
     """Poloidal flux of one sheet in the closed form of Part II."""
 
@@ -437,6 +605,8 @@ class SheetFlux:
         from positive terms rather than by subtracting nearly equal radii, which
         is what keeps the layer's own digits at a near standoff.
         """
+        if rp == 0.0:
+            return 0.0
         width = np.hypot(gamma, r - rp) / np.sqrt(r * rp)
         width = width if width > 0.0 else 1.0
         node, weight = _graded_nodes()
@@ -526,6 +696,13 @@ class SheetFlux:
         coordinate, so the segment enters as the difference between the two ends.
         ``rp`` must lie on the segment's supporting line, ``rp = b_1 z' + c_1``.
         """
+        if rp == 0.0:
+            return float(
+                MU0
+                * r
+                / (1 + self._slope**2)
+                * _zero_source_terms(np, gamma, r, self._slope)[0]
+            )
         b1 = self._slope
         a1sq = 1.0 + b1 * b1
         r1 = rp - b1 * gamma
@@ -636,6 +813,21 @@ class SheetFlux:
         complete third-kind integrals at the two pole seeds.  A straight segment
         (``b_1 = 0``) is eq (24) and must take the earlier route instead.
         """
+        if rp == 0.0:
+            return float(
+                MU0
+                * r
+                / (1 + self._slope**2)
+                * _zero_source_terms(np, gamma, r, self._slope)[0]
+            )
+        eligible, intercept, value, _, _ = _source_potential_series(
+            np, gamma, r, rp, self._slope
+        )
+        if eligible:
+            base = _zero_source_terms(np, intercept, r, self._slope)[0]
+            return float(
+                MU0 * r / (1 + self._slope**2) * base + MU0 * np.pi * r**2 * value
+            )
         b1 = self._slope
         a1sq = 1.0 + b1 * b1
         r1 = rp - b1 * gamma
@@ -646,7 +838,7 @@ class SheetFlux:
         first, second = complete_kind(np.asarray([complement]))
         K = float(first[0])
         E = float(second[0])
-        root = 2.0 * a * (2.0 * (1.0 - k2) * K + (k2 - 2.0) * E) / (3.0 * k2)
+        root = float(_closed_root(gamma, r, rp))
         total = np.sqrt(a1sq) * b1 * root
         total += self._arsinh_term_closed(gamma, r, r1, b1, a, k2, K, E, complement)
         return float(MU0 * r / a1sq * total)
@@ -680,6 +872,10 @@ class SheetFlux:
         the derivative kernels on the shared graded rule, and ``A``'s come from
         :meth:`_arsinh_gradient`.
         """
+        if rp == 0.0:
+            return tuple(
+                float(x) for x in _zero_source_terms(np, gamma, r, self._slope)
+            )
         b1 = self._slope
         a1 = np.sqrt(1.0 + b1 * b1)
         width = np.hypot(gamma, r - rp) / np.sqrt(r * rp)
@@ -709,6 +905,10 @@ class SheetFlux:
         ``d(r_1)/dgamma = -b_1`` enters the height component WITHOUT the field
         weight, so the weighted flux integral cannot stand in for it.
         """
+        if rp == 0.0:
+            return tuple(
+                float(x) for x in _zero_source_terms(np, gamma, r, self._slope)
+            )
         b1 = self._slope
         a1sq = 1.0 + b1 * b1
         r1 = rp - b1 * gamma
@@ -792,26 +992,22 @@ class SheetFlux:
         routes, so the two fields cannot disagree about a piece neither
         computes in closed form.
         """
+        if rp == 0.0:
+            return tuple(
+                float(x) for x in _zero_source_terms(np, gamma, r, self._slope)
+            )
         b1 = self._slope
         a1 = np.sqrt(1.0 + b1 * b1)
         root, gradient = _closed_root_gradient(
             jnp.asarray(gamma), jnp.asarray(r), jnp.asarray(rp)
         )
         arsinh_term, arsinh_gamma, arsinh_radial = self._arsinh_gradient(gamma, r, rp)
-        return (
+        regular = (
             float(a1 * b1) * float(root) + arsinh_term,
-            float(
-                _sheet_gamma_series(
-                    np,
-                    gamma,
-                    r,
-                    rp,
-                    b1,
-                    float(a1 * b1) * float(gradient[0]) + arsinh_gamma,
-                )
-            ),
+            float(a1 * b1) * float(gradient[0]) + arsinh_gamma,
             float(a1 * b1) * float(gradient[1]) + arsinh_radial,
         )
+        return _source_gradient_series(np, gamma, r, rp, b1, regular)
 
     def _sloped_field_closed(self, r: float, r_z: float) -> tuple[float, float]:
         """``(B_R, B_Z)`` from the closed form's own partial derivatives."""
@@ -823,6 +1019,10 @@ class SheetFlux:
         )
         for height, radius, sign in ends:
             value, gamma_value, radial_value = self._closed_gradient(height, r, radius)
+            if self._slope == 0.0:
+                gamma_value = float(
+                    2 * np.pi / MU0 * _cylinder_radial(np, height, r, radius)
+                )
             b_r += sign * gamma_value
             if self._slope == 0.0:
                 b_z += sign * r * float(_sheet_cylinder_height(np, height, r, radius))
@@ -846,6 +1046,8 @@ class SheetFlux:
         falls off like ``r - c``, so the radial kernel's block cancels to zero and
         the potential's third-kind term vanishes with ``gamma^2``.
         """
+        if rp == 0.0:
+            return 0.0, 0.0, 0.0
         span = gamma**2 + (r + rp) ** 2
         a = np.sqrt(span)
         complement = (gamma**2 + (r - rp) ** 2) / span
@@ -966,6 +1168,16 @@ class SheetFlux:
         between them is a defect in one.
         """
         _checked_route(route)
+        if self.start[0] == self.end[0] == 0.0:
+            return 0.0, 0.0
+        if r == 0.0:
+            ends = _axis_field_ends(np, z, *self.start, *self.end)
+            return 0.0, float(self.sheet_current * (ends[0] - ends[1]))
+        if _near_axis(np, r, z, *self.start, *self.end):
+            radial, height, flux = _axis_expansion(r, z, *self.start, *self.end)
+            return float(self.sheet_current * (radial[0] - radial[1])), float(
+                self.sheet_current * (height[0] - height[1])
+            )
         if self._flat:
             b_r, b_z = (
                 self._pancake_field(r, z)
@@ -980,6 +1192,10 @@ class SheetFlux:
 
     def _vertical_flux(self, r: float, z: float) -> float:
         """Eq (24): the exact closed form of a straight cylinder."""
+        source = float(self.start[0])
+        if _near_axis(np, source, z, r, self.start[1], r, self.end[1]):
+            _, _, flux = _axis_expansion(source, z, r, self.start[1], r, self.end[1])
+            return float(flux[0] - flux[1])
         lower = self.antiderivative_uniform(
             float(self.start[1]) - z, r, float(self.start[0])
         )
@@ -990,6 +1206,8 @@ class SheetFlux:
 
     def antiderivative_uniform(self, gamma: float, r: float, rp: float) -> float:
         """Eq (24) as a function of the source height, for the ``b_1 = 0`` case."""
+        if rp == 0.0:
+            return 0.0
         span = gamma**2 + (rp + r) ** 2
         a = np.sqrt(span)
         complement = 1.0 - 4.0 * r * rp / span
@@ -1028,6 +1246,11 @@ class SheetFlux:
         is a defect in one.
         """
         _checked_route(route)
+        if r == 0.0 or self.start[0] == self.end[0] == 0.0:
+            return 0.0
+        if _near_axis(np, r, z, *self.start, *self.end):
+            radial, height, flux = _axis_expansion(r, z, *self.start, *self.end)
+            return float(self.sheet_current * (flux[0] - flux[1]))
         if self._flat:
             value = (
                 self._pancake_flux(r, z) if route == "closed" else self._flat_flux(r, z)
@@ -1083,13 +1306,7 @@ def _sheet_root(gamma, radius, source):
     The same expression :func:`nova.biot.sheet` carries, written against the
     traced elliptic descent so one call evaluates a whole block of pairs.
     """
-    span = gamma * gamma + (radius + source) ** 2
-    k2 = 4.0 * radius * source / span
-    complement = (gamma * gamma + (radius - source) ** 2) / span
-    first, second = complete_kind_traced(complement)
-    return (
-        2.0 * span**0.5 * (2.0 * (1.0 - k2) * first + (k2 - 2.0) * second) / (3.0 * k2)
-    )
+    return _root_expression(gamma, radius, source)
 
 
 def _sheet_root_gradient(gamma, radius, source):
@@ -1239,18 +1456,30 @@ def _sheet_arsinh_gradient(xp, gamma, radius, source, b1):
 
 def _sheet_closed_gradient(xp, gamma, radius, source, b1):
     """Return ``(S, dS/dgamma, dS/dradius)`` of the closed-form antiderivative."""
+    at_zero = source == 0.0
+    limit = _zero_source_terms(xp, gamma, radius, b1)
+    gamma = xp.where(at_zero, 1.0, gamma)
+    radius = xp.where(at_zero, 1.0, radius)
+    source = xp.where(at_zero, 0.5, source)
+    b1 = xp.where(at_zero, 0.0, b1)
     a1 = xp.sqrt(1.0 + b1 * b1)
     root, gradient = _sheet_root_gradient(gamma, radius, source)
     value, gamma_value, radial_value = _sheet_arsinh_gradient(
         xp, gamma, radius, source, b1
     )
-    return (
-        a1 * b1 * root + value,
-        _sheet_gamma_series(
-            xp, gamma, radius, source, b1, a1 * b1 * gradient[0] + gamma_value
+    regular = _source_gradient_series(
+        xp,
+        gamma,
+        radius,
+        source,
+        b1,
+        (
+            a1 * b1 * root + value,
+            a1 * b1 * gradient[0] + gamma_value,
+            a1 * b1 * gradient[1] + radial_value,
         ),
-        a1 * b1 * gradient[1] + radial_value,
     )
+    return tuple(xp.where(at_zero, a, b) for a, b in zip(limit, regular))
 
 
 def _sheet_pancake_terms(xp, gamma, radius, source):
@@ -1262,6 +1491,8 @@ def _sheet_pancake_terms(xp, gamma, radius, source):
     need their limit taken rather than their arithmetic, and it is selected
     arithmetically rather than by a branch.
     """
+    at_zero = source == 0.0
+    source = xp.where(at_zero, 0.5 * radius, source)
     span = gamma**2 + (radius + source) ** 2
     a = xp.sqrt(span)
     complement = (gamma**2 + (radius - source) ** 2) / span
@@ -1300,7 +1531,7 @@ def _sheet_pancake_terms(xp, gamma, radius, source):
     )
     radial, height = _pancake_end_series(xp, gamma, radius, source, radial, height)
     radial = xp.where(level, 0.0, radial)
-    return potential, radial, height
+    return tuple(xp.where(at_zero, 0.0, value) for value in (potential, radial, height))
 
 
 def _sheet_pancake_field(xp, target_r, target_z, start_r, start_z, end_r, end_z):
@@ -1335,6 +1566,46 @@ def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
     start_z = xp.asarray(start_z)
     end_r = xp.asarray(end_r)
     end_z = xp.asarray(end_z)
+    on_axis = target_r == 0.0
+    zero_area = (start_r == 0.0) & (end_r == 0.0)
+    near_axis = _near_axis(xp, target_r, target_z, start_r, start_z, end_r, end_z)
+    expansion_inputs = (
+        xp.where(near_axis, target_r, 0.001),
+        xp.where(near_axis, target_z, -1.0),
+        xp.where(near_axis, start_r, 0.5),
+        xp.where(near_axis, start_z, 0.0),
+        xp.where(near_axis, end_r, 0.5),
+        xp.where(near_axis, end_z, 1.0),
+    )
+    if xp is np:
+        expansion = (
+            _axis_expansion(*expansion_inputs)
+            if np.any(near_axis)
+            else (np.zeros((2,) + target_r.shape),) * 3
+        )
+    else:
+        expansion = jax.lax.cond(
+            xp.any(near_axis),
+            lambda _: _axis_expansion(*expansion_inputs),
+            lambda _: (xp.zeros((2,) + target_r.shape),) * 3,
+            operand=None,
+        )
+    axis_active = on_axis & ~zero_area
+    axis_ends = _axis_field_ends(
+        xp,
+        xp.where(axis_active, target_z, -1.0),
+        xp.where(axis_active, start_r, 0.5),
+        xp.where(axis_active, start_z, 0.0),
+        xp.where(axis_active, end_r, 0.5),
+        xp.where(axis_active, end_z, 1.0),
+    )
+    inactive = on_axis | zero_area | near_axis
+    target_r = xp.where(inactive, 2.0, target_r)
+    target_z = xp.where(inactive, -1.0, target_z)
+    start_r = xp.where(inactive, 0.5, start_r)
+    start_z = xp.where(inactive, 0.0, start_z)
+    end_r = xp.where(inactive, 0.5, end_r)
+    end_z = xp.where(inactive, 1.0, end_z)
     # The sheet current is an azimuthal density, so the field depends on the
     # segment and the sign of K alone. Ordering the endpoints by height makes
     # that independence arithmetic rather than a convention on the caller.
@@ -1359,6 +1630,10 @@ def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
         value, gamma_value, radial_value = _sheet_closed_gradient(
             xp, gamma, target_r, source, b1
         )
+        cylinder_radial = _cylinder_radial(xp, gamma, target_r, source)
+        gamma_value = xp.where(
+            b1 == 0.0, 2 * np.pi / MU0 * cylinder_radial, gamma_value
+        )
         sloped_radial.append(radial_scale * gamma_value)
         cylinder_height = (
             MU0 / (2.0 * np.pi) * _sheet_cylinder_height(xp, gamma, target_r, source)
@@ -1381,6 +1656,20 @@ def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
         _, end_radial, end_height = _sheet_pancake_terms(xp, gamma, target_r, source)
         pancake_radial.append(MU0 / (2.0 * np.pi) * end_radial)
         pancake_height.append(MU0 / (2.0 * np.pi) * end_height)
+    for values, radial in (
+        (sloped_radial, True),
+        (sloped_height, False),
+        (pancake_radial, True),
+        (pancake_height, False),
+    ):
+        for index in range(2):
+            values[index] = xp.where(
+                near_axis, expansion[0 if radial else 1][index], values[index]
+            )
+            value = xp.where(
+                on_axis, 0.0 if radial else axis_ends[index], values[index]
+            )
+            values[index] = xp.where(zero_area, 0.0, value)
     return sloped_radial, sloped_height, pancake_radial, pancake_height, flat
 
 

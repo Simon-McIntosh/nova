@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="40">
 <meta name="plan-modified" content="2026-11-10">
 </head>
 <body>
@@ -625,6 +625,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-11-10T00:30:00Z">
     <div class="r-comment-body"><p>§3 landed. Clause (1) met on CPU at 1e-13 over every entry (worst 9.712e-14, sirius job 1308946). Clauses (2) and (3) met on titan, Tesla P100, by the lead's direction while the H200 was fully allocated: compile 7.37 / 6.59 s, executable 537,969 bytes, peak host 1.43 / 6.98 GB at 1696 / 6493 cells, fresh-process cache hit at both scales, empty-root control refuses; ledger rows recorded as titan. No H200 row exists; the warm execute walls are P100 walls. Merged at 0f3cf5469, review 116/120.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261109T215930627453-icm-iron-read" data-who="reckon-build" data-when="2026-11-10T01:11:04Z">
+    <div class="r-comment-body"><p>Machine-owner iron read serves all three callers; six WEST segments, 150 material pairs and every polygon of the 1696-cell census mesh match exactly; head 12 passed, declared drop-segment control 7 failed. Base scope is empty, confirmed by the installed resolver and a present-head positive control. Evidence: docs/evidence/fragments/iron-core-magnetisation/icm-iron-read.html#icm-iron-read-state.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261110T011846198430-review-of-icm-iron-read-a07cb4a5179d" data-who="reckon-build" data-when="2026-11-10T01:33:58Z">
+    <div class="r-comment-body"><p>Independent review of base 4221309d2e66fd30eadafa7eacc3d967dd233481 to head a07cb4a5179d1b2fd411969642a0b81e30bb43a4 is parsed; all six dimensions scored, no blocking findings, one non-blocking shared-oracle assertion, zero added scoped failures against an empty baseline.</p></div>
 </div>
 </section>
 </main>

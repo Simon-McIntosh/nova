@@ -11,6 +11,7 @@ length and ten segment lengths away from the middle and from each end.
 from __future__ import annotations
 
 import importlib.util
+from functools import lru_cache
 import sys
 from pathlib import Path
 
@@ -771,7 +772,9 @@ def test_sloped_endpoint_series_matches_high_precision(
     gamma, radius, source, slope, expected
 ):
     """The combined derivative against a 60-digit angular-integral reference."""
-    got = sheet_module._sheet_gamma_series(np, gamma, radius, source, slope, np.nan)
+    got = sheet_module._source_gradient_series(
+        np, gamma, radius, source, slope, (np.nan, np.nan, np.nan)
+    )[1]
     assert np.isfinite(got)
     assert abs(got - expected) <= 5e-15 * abs(expected)
 
@@ -786,7 +789,9 @@ def test_sloped_endpoint_series_refuses_an_unqualified_branch(
     """Interior, unconverged-series and cylindrical cases retain their regular form."""
     regular = 3.25
     assert (
-        sheet_module._sheet_gamma_series(np, gamma, radius, source, slope, regular)
+        sheet_module._source_gradient_series(
+            np, gamma, radius, source, slope, (regular, regular, regular)
+        )[1]
         == regular
     )
 
@@ -839,3 +844,177 @@ def test_cylinder_height_endpoint_matches_high_precision(
     """Cylinder endpoints against complete elliptic values at 60 to 70 digits."""
     height = sheet_module._sheet_cylinder_height(np, gamma, radius, source)
     assert abs(height - expected) <= 5e-15 * abs(expected)
+
+
+AXIS_WITNESSES = (
+    ((0.0, -0.5), (0.0, -0.4), (0.04913072, -0.44836919)),
+    ((0.0, -0.5), (0.003067942, -0.499990588), (0.04913072, -0.44836919)),
+    ((0.2, -0.5), (0.3, -0.4), (0.0, 0.2)),
+    ((0.0, -0.5), (0.3, -0.5), (0.1, 0.2)),
+    ((0.2, 0.2), (0.3, 0.3), (0.0, 0.0)),
+)
+
+
+@lru_cache(maxsize=1)
+def _compiled_axis_pair():
+    import jax
+    import jax.numpy as jnp
+    from nova.biot.sheet import packed_sheet_field
+
+    def evaluate(values):
+        return jnp.stack(packed_sheet_field(jnp, *[x[None] for x in values])).ravel()
+
+    return jax.jit(evaluate), jax.jit(jax.jacfwd(evaluate))
+
+
+@pytest.mark.parametrize("start,end,point", AXIS_WITNESSES)
+def test_axis_sheet_limits_match_graded_reference(start, end, point):
+    """Zero source radii and axis targets take their finite, disjoint limits."""
+    import jax.numpy as jnp
+
+    target = reference.Target(0.0, "axis", *point, 0.5)
+    expected = reference.sheet_reference(target, np.array(start), np.array(end))
+    assert expected.converged
+    wanted = np.array([expected.br, expected.bz])
+    scale = np.linalg.norm(wanted)
+    scalar = np.array(sheet_field(*point, start, end))
+    packed = np.asarray(_compiled_axis_pair()[0](jnp.array((*point, *start, *end))))
+    assert np.isfinite(scalar).all() and np.isfinite(packed).all()
+    for got in (scalar, packed):
+        assert np.linalg.norm(got - wanted) <= TOLERANCE * scale
+    flux = sheet_flux(*point, start, end)
+    assert abs(flux - expected.psi) <= TOLERANCE * abs(expected.psi)
+    if start[0] == end[0] == 0:
+        np.testing.assert_array_equal(scalar, 0)
+        np.testing.assert_array_equal(packed, 0)
+        assert flux == 0
+    if point[0] == 0:
+        assert scalar[0] == packed[0] == flux == 0
+
+
+def _graded_precise_ring_reference(start, end, point):
+    """Grade the independent ring integral with enough arithmetic for tiny loops."""
+    import mpmath as mp
+
+    panels = reference._geometric_panels(0.5, 12, 1.7)
+    nodes, weights = np.polynomial.legendre.leggauss(16)
+    start, end = np.asarray(start), np.asarray(end)
+    length = np.linalg.norm(end - start)
+    previous = None
+    with mp.workdps(50):
+        for _ in range(4):
+            total = np.zeros(3)
+            for lower, upper in panels:
+                for node, weight in zip(nodes, weights):
+                    t = (lower + upper) / 2 + (upper - lower) / 2 * node
+                    source = start + t * (end - start)
+                    r, z, a, h = map(mp.mpf, (*point, *source))
+                    dz = z - h
+                    span = (r + a) ** 2 + dz**2
+                    gap = (r - a) ** 2 + dz**2
+                    k = 4 * r * a / span
+                    first, second = mp.ellipk(k), mp.ellipe(k)
+                    psi = mp.mpf(MU0) * mp.sqrt(span) * ((1 - k / 2) * first - second)
+                    bz = (
+                        mp.mpf(MU0)
+                        / (2 * mp.pi * mp.sqrt(span))
+                        * (first + (a * a - r * r - dz * dz) / gap * second)
+                    )
+                    br = (
+                        mp.mpf(MU0)
+                        * dz
+                        / (2 * mp.pi * r * mp.sqrt(span))
+                        * (-first + (a * a + r * r + dz * dz) / gap * second)
+                    )
+                    total += (
+                        (upper - lower)
+                        / 2
+                        * weight
+                        * length
+                        * np.array([float(psi), float(br), float(bz)])
+                    )
+            if (
+                previous is not None
+                and np.max(np.abs((total - previous) / total)) < 1e-13
+            ):
+                return total
+            previous = total
+            middle = panels.mean(axis=1)
+            panels = np.stack(
+                (
+                    np.column_stack((panels[:, 0], middle)),
+                    np.column_stack((middle, panels[:, 1])),
+                ),
+                axis=1,
+            ).reshape(-1, 2)
+    raise AssertionError("the precise graded ring reference did not converge")
+
+
+@pytest.mark.parametrize("radius", [1e-3, 1e-5, 1e-7])
+@pytest.mark.parametrize("limit", ["axis_edge", "axis_end", "axis_target"])
+def test_axis_approaches_match_graded_reference(radius, limit, capsys):
+    """The finite-radius approach preserves small fields and fluxes."""
+    import jax.numpy as jnp
+
+    if limit == "axis_edge":
+        start, end, point = (radius, -0.5), (radius, -0.4), (0.04913072, -0.44836919)
+    elif limit == "axis_end":
+        start, end, point = (radius, -0.5), (0.3, -0.4), (0.04913072, -0.44836919)
+    else:
+        start, end, point = (0.2, -0.5), (0.3, -0.4), (radius, 0.2)
+    expected = reference.sheet_reference(
+        reference.Target(0.0, "approach", *point, 0.5), np.array(start), np.array(end)
+    )
+    assert expected.converged
+    wanted = np.array([expected.br, expected.bz])
+    reference_flux = expected.psi
+    if limit == "axis_edge":
+        precise = _graded_precise_ring_reference(start, end, point)
+        reference_flux, *components = precise
+        wanted = np.array(components)
+    scalar = np.array(sheet_field(*point, start, end))
+    packed = np.asarray(_compiled_axis_pair()[0](jnp.array((*point, *start, *end))))
+    for got in (scalar, packed):
+        assert np.linalg.norm(got - wanted) <= TOLERANCE * np.linalg.norm(wanted)
+    flux = sheet_flux(*point, start, end)
+    assert abs(flux - reference_flux) <= TOLERANCE * abs(reference_flux)
+    scalar_error = np.linalg.norm(scalar - wanted) / np.linalg.norm(wanted)
+    packed_error = np.linalg.norm(packed - wanted) / np.linalg.norm(wanted)
+    with capsys.disabled():
+        print(
+            f"\n{limit} R={radius:g}: "
+            f"scalar_relative={scalar_error:.3e}, "
+            f"packed_relative={packed_error:.3e}, "
+            f"flux_relative={abs(flux / reference_flux - 1):.3e}",
+            flush=True,
+        )
+
+
+def test_axis_and_off_axis_endpoints_share_the_singular_domain():
+    """Both endpoint approaches diverge outside the positive-distance contract."""
+    from shapely import LineString, Point
+
+    for radius, coefficient in ((0.0, MU0 / 2), (0.2, MU0 / (2 * np.pi))):
+        start, end = (radius, 0.0), (radius + 0.3, 0.0)
+        edge = LineString([start, end])
+        assert Point(start).distance(edge) == 0
+        values = []
+        for distance in (1e-3, 1e-4, 1e-5):
+            point = (radius, distance)
+            assert Point(point).distance(edge) > 0
+            values.append(sheet_field(*point, start, end)[1])
+        assert np.isfinite(values).all()
+        assert np.all(np.diff(values) > 0)
+        measured = (values[-1] - values[-2]) / np.log(10)
+        assert abs(measured / coefficient - 1) < 0.01
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(900)
+@pytest.mark.parametrize("start,end,point", AXIS_WITNESSES[:4])
+def test_axis_limits_keep_inactive_gradient_paths_finite(start, end, point):
+    """Both branches of packed axis selections remain traceable."""
+    import jax.numpy as jnp
+
+    values = jnp.array((*point, *start, *end))
+    assert np.isfinite(_compiled_axis_pair()[1](values)).all()

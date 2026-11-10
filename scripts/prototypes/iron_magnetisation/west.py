@@ -16,24 +16,25 @@ import pickle
 import sys
 from time import perf_counter
 
-import imas
 import numpy as np
 import shapely
 
 from magnetisation import Material, interaction, mesh, ring_field, solve, solve_newton
+from nova.imas.machine import StaticMachineDescription
 
 logging.disable(logging.WARNING)
 solve_path, out_path = sys.argv[1], sys.argv[2]
 size = float(sys.argv[3]) if len(sys.argv) > 3 else 0.08
 data = pickle.load(open(solve_path, "rb"))
 MACHINE = "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/WEST/machine/dd4-1-0"
-with imas.DBEntry(f"imas:hdf5?path={MACHINE}", "r", dd_version="4.1.0") as entry:
-    iron = entry.get("iron_core", autoconvert=False)
+machine = StaticMachineDescription.read_iron_core(
+    f"imas:hdf5?path={MACHINE}", dd_version="4.1.0"
+)
 segments = [
-    shapely.Polygon(np.column_stack((s.geometry.outline.r, s.geometry.outline.z)))
-    for s in iron.segment
+    shapely.Polygon(np.column_stack((segment.outline.r, segment.outline.z)))
+    for segment in machine.iron_segments
 ]
-table = iron.segment[0]
+table = machine.iron_segments[0].material
 material = Material(
     np.asarray(table.b_field, float), np.asarray(table.permeability_relative, float)
 )

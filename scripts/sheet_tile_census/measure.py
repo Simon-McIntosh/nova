@@ -12,13 +12,13 @@ import subprocess
 import sys
 from time import perf_counter
 
-import imas
 import jax
 import numpy as np
 import shapely
 
 from nova.biot import tiledassembly as tile
 from nova.jax.config import Precision, configure_dtypes
+from nova.imas.machine import StaticMachineDescription
 from scripts.h200_test_lane import cache_guard
 from scripts.prototypes.iron_magnetisation.magnetisation import Cells, mesh
 
@@ -74,16 +74,13 @@ def main():
         machine = (
             "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/WEST/machine/dd4-1-0"
         )
-        with imas.DBEntry(
-            f"imas:hdf5?path={machine}", "r", dd_version="4.1.0"
-        ) as entry:
-            iron = entry.get("iron_core", autoconvert=False)
+        description = StaticMachineDescription.read_iron_core(
+            f"imas:hdf5?path={machine}", dd_version="4.1.0"
+        )
         polygons = []
-        for segment in iron.segment:
+        for segment in description.iron_segments:
             region = shapely.Polygon(
-                np.column_stack(
-                    (segment.geometry.outline.r, segment.geometry.outline.z)
-                )
+                np.column_stack((segment.outline.r, segment.outline.z))
             )
             polygons.extend(mesh(region.buffer(0), args.size).polygons)
         cells = Cells(tuple(polygons))

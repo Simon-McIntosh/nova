@@ -33,6 +33,7 @@ from scipy.interpolate import RegularGridInterpolator  # noqa: E402
 
 from nova.frame.coilset import CoilSet  # noqa: E402
 from nova.imas.plasma_source import PlasmaSource  # noqa: E402
+from nova.imas.machine import StaticMachineDescription  # noqa: E402
 
 logging.disable(logging.WARNING)
 ROOT = "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/WEST"
@@ -54,7 +55,6 @@ def entry(path, dd):
 with entry(MACHINE, "4.1.0") as md:
     pf_md = md.get("pf_active", autoconvert=False)
     wall = md.get("wall", autoconvert=False)
-    iron = md.get("iron_core", autoconvert=False)
 coils = [
     dict(
         name=str(coil.name).strip(),
@@ -69,12 +69,13 @@ coils = [
 ]
 outline = wall.description_2d[0].limiter.unit[0].outline
 limiter = np.column_stack((np.asarray(outline.r), np.asarray(outline.z)))
+machine = StaticMachineDescription.read_iron_core(
+    f"imas:hdf5?path={MACHINE}", dd_version="4.1.0"
+)
 iron_outlines = [
-    np.column_stack(
-        (np.asarray(s.geometry.outline.r), np.asarray(s.geometry.outline.z))
-    )
-    for s in iron.segment
-    if len(s.geometry.outline.r)
+    np.column_stack((segment.outline.r, segment.outline.z))
+    for segment in machine.iron_segments
+    if len(segment.outline.r)
 ]
 
 with entry(EQUILIBRIUM, "3.42.2") as eq_entry, entry(PULSE, "4.1.0") as pulse:

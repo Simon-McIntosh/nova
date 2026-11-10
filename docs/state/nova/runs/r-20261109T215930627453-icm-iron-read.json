@@ -1,0 +1,585 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "4221309d2e66fd30eadafa7eacc3d967dd233481",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/brief.md",
+    "sha256": "9937d5612d2859ef84278f008c54db6a0589df3a4198902168f3169224527257"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 13294720,
+      "cached_input_tokens_cumulative": 13294720,
+      "input_tokens": 14001712,
+      "input_tokens_cumulative": 14001712,
+      "output_tokens": 64149,
+      "output_tokens_cumulative": 64149,
+      "reasoning_output_tokens": 28432,
+      "reasoning_output_tokens_cumulative": 28432
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 499,
+    "files": 6,
+    "removed": 22
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "511412a9a1be801ac74c5562cceaeca26729f7f0",
+    "02f9234d8f8c4cb4934ffef48863a1adc4227a12",
+    "a07cb4a5179d1b2fd411969642a0b81e30bb43a4"
+  ],
+  "completed_at": "2026-11-10T01:11:04Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-10T00:25:04Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_imas_iron_read.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/after-suite.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.3774703557312253,
+    "plan": "iron-core-magnetisation",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.5053880993284399,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-13T02:10:36Z, which is after this node's 3600s horizon ending 2026-11-10T01:23:10.406254+00:00",
+    "horizon_ends_at": "2026-11-10T01:23:10.406254+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-11-10T00:23:08Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-13T02:10:36Z",
+    "resets_at": "2026-11-14T15:28:13Z",
+    "seconds_until_reset": 399904,
+    "state": "quiet",
+    "utilisation_pct": 51.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-10T00:23:08Z",
+    "read_at": "2026-11-10T00:23:10Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 51.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-10T01:11:04Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-10T01:11:04Z",
+        "resets_at": 1794670093,
+        "used_percent": 51.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/manifest.md",
+  "member": "disposable-r-20261109T215930627453-icm-iron-read",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_imas_iron_read.py::test_census_mesh_matches_previous_read",
+      "tests/test_imas_iron_read.py::test_each_segment_keeps_its_material_and_raw_vertices",
+      "tests/test_imas_iron_read.py::test_empty_outline_segment_is_retained",
+      "tests/test_imas_iron_read.py::test_open_uses_manifest_pin_and_refuses_missing_or_mismatched_ids[occurrences2-4.1.0]",
+      "tests/test_imas_iron_read.py::test_prototype_inputs_match_previous_read",
+      "tests/test_imas_iron_read.py::test_stray_field_outlines_match_previous_read",
+      "tests/test_imas_iron_read.py::test_west_iron_segments_match_previous_reads"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_imas_iron_read.py::test_census_mesh_matches_previous_read",
+      "tests/test_imas_iron_read.py::test_each_segment_keeps_its_material_and_raw_vertices",
+      "tests/test_imas_iron_read.py::test_empty_outline_segment_is_retained",
+      "tests/test_imas_iron_read.py::test_open_uses_manifest_pin_and_refuses_missing_or_mismatched_ids[occurrences2-4.1.0]",
+      "tests/test_imas_iron_read.py::test_prototype_inputs_match_previous_read",
+      "tests/test_imas_iron_read.py::test_stray_field_outlines_match_previous_read",
+      "tests/test_imas_iron_read.py::test_west_iron_segments_match_previous_reads"
+    ],
+    "control_run_failed": true,
+    "declaration": "drop one iron_core segment from the reader: the entry-by-entry comparison against the previous script reads must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/negative-control.log",
+    "test_paths": [
+      "tests/test_imas_iron_read.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "icm-iron-read",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/steering.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/brief.md",
+    "brief_sha256": "9937d5612d2859ef84278f008c54db6a0589df3a4198902168f3169224527257",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "5b10be66-c69b-456f-9a85-3840909f1723"
+    },
+    "done_when": "(1) nova/imas/machine.py reads each iron_core segment's outline, material and B-H table at the manifest DD pin, with a test on WEST; (2) scripts/prototypes/iron_magnetisation/west.py and scripts/west_stray_field/solve.py read the iron through it, each reproducing its previous segment count, outlines and B-H tables entry by entry, and no third iron reader exists in the tree; (3) baseline and after suite arms run with exactly the declared suite command.",
+    "estimated_hours": 2.0,
+    "goal": "Read the iron frame through the machine-description owner and retire both script readers",
+    "id": "icm-iron-read",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-10T00:23:08Z",
+      "read_at": "2026-11-10T00:23:10Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 51.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/manifest.md",
+    "negative_control": "drop one iron_core segment from the reader: the entry-by-entry comparison against the previous script reads must fail",
+    "over_fence_reason": "",
+    "peer_scopes": {
+      "bank-carried-decision": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-carried-decision.html",
+        "docs/figures/sub-millisecond-forward-path/bank-carried-decision",
+        "nova/equilibrium/support_read.py",
+        "nova/equilibrium/topology.py",
+        "scripts/prototypes/bank_carried_decision",
+        "tests/test_tracked_read.py"
+      ],
+      "bank-warm-predictor": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-predictor.html",
+        "docs/figures/sub-millisecond-forward-path/bank-warm-predictor",
+        "nova/equilibrium/drive_continuation.py",
+        "scripts/prototypes/bank_warm_predictor",
+        "tests/test_bank_drive_continuation.py"
+      ],
+      "diiid-warmup-finite-admission": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-warmup-finite-admission.html",
+        "docs/figures/diiid-warmup-finite-admission",
+        "scripts/prototypes/diiid_warmup_admission",
+        "tests/test_warmup_finite_admission.py"
+      ],
+      "icm-magnetisation-solve": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-magnetisation-solve.html",
+        "docs/figures/iron-core-magnetisation/icm-magnetisation-solve",
+        "nova/biot/magnetisation.py",
+        "tests/test_magnetisation.py"
+      ],
+      "icm-west-62751-solve": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-solve.html",
+        "docs/figures/iron-core-magnetisation/icm-west-62751-solve",
+        "scripts/west_iron_solve"
+      ],
+      "receipt-mask-history-rename": [
+        "apps/playable/session.py",
+        "benchmarks/scanned_trip_loop_prototype.py",
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html",
+        "nova/equilibrium/fixed_point.py",
+        "nova/equilibrium/forward.py",
+        "nova/equilibrium/reduced_newton.py",
+        "nova/equilibrium/solve_request.py",
+        "scripts/labeller_batch/shard.py",
+        "tests/test_equilibrium_constraint_protocol.py",
+        "tests/test_forward_parity_constrained_arm.py",
+        "tests/test_forward_profile_corsica.py",
+        "tests/test_forward_solve_request.py",
+        "tests/test_labeller_receipt.py",
+        "tests/test_receipt_support_count.py",
+        "tests/test_reduced_newton_constraints.py",
+        "tests/test_steering_frames.py",
+        "tests/test_transport_coupled_window.py"
+      ]
+    },
+    "plan": "iron-core-magnetisation",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/imas/machine.py",
+      "scripts/prototypes/iron_magnetisation/west.py",
+      "scripts/west_stray_field/solve.py",
+      "tests/test_imas_iron_read.py",
+      "docs/evidence/fragments/iron-core-magnetisation/icm-iron-read.html",
+      "docs/figures/iron-core-magnetisation/icm-iron-read",
+      "scripts/sheet_tile_census/measure.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 1.5048821409072854,
+      "derived": 0.3727866686369048,
+      "drain_hours": 168.0,
+      "effective_limit": 0.3727866686369048,
+      "elapsed_fraction": 0.3388969714880952,
+      "elapsed_hours": 56.93469121,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-11-11T09:00:01+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1794082577-c029e5",
+        "pace_multiple": null,
+        "remaining_seconds": 117343.111644,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-11-10T00:24:17+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.49,
+      "remaining_windows": null,
+      "resets_at": "2026-11-14T15:28:13Z",
+      "state": "observed",
+      "utilisation": 0.51,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.514998,
+      "decided_by": "window",
+      "margin": 0.2225020000000001,
+      "name": "icm-iron-read",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.51
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.888356,
+        "observed_at": "2026-11-10T00:24:17+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-14T15:28:13Z",
+        "state": "observed",
+        "utilisation": 0.51,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1794082577-c029e5",
+    "member": "codex",
+    "node": "icm-iron-read",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-10T00:24:17.888356+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.968,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.3774703557312253,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "a07cb4a5179d1b2fd411969642a0b81e30bb43a4",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 0,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261109T215930627453-icm-iron-read",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261109T215930627453-icm-iron-read"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-iron-read",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "4221309d2e66fd30eadafa7eacc3d967dd233481",
+    "reviewed_head_sha": "a07cb4a5179d1b2fd411969642a0b81e30bb43a4",
+    "scores": {
+      "durability": 19,
+      "evidence": 20,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 119
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261109T215930627453-icm-iron-read",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+  "session_harness": "codex",
+  "session_id": "01a1c2d8-8fc1-7a12-a26f-62ceedd087f4",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_imas_iron_read.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/after-suite.log",
+      "revision": "511412a9a1be801ac74c5562cceaeca26729f7f0"
+    },
+    "baseline_measured_nothing": true,
+    "baseline_suite": {
+      "command": "/home/ITER/mcintos/Code/reckon/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/verify_baseline_scope.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/baseline-scope.log",
+      "revision": "4221309d2e66fd30eadafa7eacc3d967dd233481"
+    },
+    "failure_attribution": {},
+    "status": "clean",
+    "suite_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_imas_iron_read.py",
+    "waiver_reason": null
+  },
+  "tests_added": 12,
+  "throughput": {
+    "cumulative_cached_input_tokens": 13294720,
+    "cumulative_input_tokens": 27296432,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 92581
+  },
+  "time_budget": "60m",
+  "tool_steps": 40.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 2760,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-10T01:11:12Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-10T00:34:37Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 66511551,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/codex-home/cache"
+      },
+      {
+        "bytes": 28836794,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261109T215930627453-icm-iron-read",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 603,
+    "worker_pid": 2899070
+  },
+  "worker_seconds": 2727,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

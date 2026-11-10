@@ -1,0 +1,210 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Zero added failures in the declared scope: base has zero scoped tests; the completed head runs 12. This is not a full-suite comparison.",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Selected source lacks occurrence zero or manifest pin changes from the independently required 4.1.0; these validate the oracle, not the implementation.",
+      "lines": [
+        44,
+        65
+      ]
+    },
+    {
+      "failure_condition": "Drop or reorder a segment, alter a vertex, name, description or table sample, or reuse a different table; independently opened IDS arrays and fixed counts disagree.",
+      "lines": [
+        89,
+        90,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        100
+      ]
+    },
+    {
+      "failure_condition": "Reinstate a prototype input expression that loses a segment or changes polygon coordinates or selected table values; independent IDS expressions disagree.",
+      "lines": [
+        108,
+        110,
+        113,
+        116
+      ]
+    },
+    {
+      "failure_condition": "Stray-field caller loses or changes an outline; its AST-evaluated inputs disagree with independent original IDS expressions.",
+      "lines": [
+        126,
+        128
+      ]
+    },
+    {
+      "failure_condition": "Census migration changes polygon inputs, mesh ordering or cell coordinates; independently meshed original IDS outlines differ from actual caller cells.",
+      "lines": [
+        151,
+        153
+      ]
+    },
+    {
+      "failure_condition": "Drop a synthetic segment, share the first table, normalise closing vertices, lose description or alias the mutable IDS table; independent literal expectations or distinct-table check fail.",
+      "lines": [
+        173,
+        174,
+        177,
+        178,
+        179,
+        181
+      ]
+    },
+    {
+      "failure_condition": "Direct and aggregate APIs disagree; a common extraction defect survives both operands, so this is not independent extraction coverage.",
+      "independent": false,
+      "lines": [
+        183
+      ]
+    },
+    {
+      "failure_condition": "Filter the empty-outline segment, invent vertices or lose its individual material; fixed segment count, empty tuple or fixed table disagree.",
+      "lines": [
+        191,
+        192,
+        193
+      ]
+    },
+    {
+      "failure_condition": "Remove paired-array length refusal or its diagnostic; pytest.raises fails on the deliberately unpaired table.",
+      "lines": [
+        199
+      ]
+    },
+    {
+      "failure_condition": "Read without listing occurrences first, read an absent occurrence, change IDS/occurrence/lazy/conversion flags or omit/change source/mode/DD pin; mock checks fail against literal expectations.",
+      "lines": [
+        225,
+        226,
+        227,
+        237
+      ]
+    },
+    {
+      "failure_condition": "Remove absence or DD mismatch refusal, attempt a get on missing occurrence, drop successful segments or fail to close on either success or exception; explicit raises, event list or count checks fail.",
+      "lines": [
+        246,
+        250,
+        252,
+        257,
+        265
+      ]
+    },
+    {
+      "failure_condition": "Remove omitted-pin refusal; expected ValueError is absent or has the wrong diagnostic.",
+      "lines": [
+        269
+      ]
+    },
+    {
+      "failure_condition": "Remove delegation from a named caller or restore literal get(\"iron_core\") there; positive or negative AST assertion fails; this covers those syntax forms rather than every possible spelling.",
+      "lines": [
+        279,
+        283
+      ]
+    }
+  ],
+  "baseline_measured_nothing": true,
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/iron_magnetisation/west.py:30",
+    "scripts/west_stray_field/solve.py:72",
+    "scripts/sheet_tile_census/measure.py:77"
+  ],
+  "completed_at": "2026-11-10T01:33:58Z",
+  "dispatched_at": "2026-11-10T01:22:27Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The equality is API-consistency evidence only, as the finding says; the independent source-array and literal assertions in the same file carry the regression protection, and the drop-segment control fails 7 of them.",
+      "recorded_at": "2026-11-10T01:35:28.511802+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_imas_iron_read.py",
+      "line": "183",
+      "severity": "non-blocking",
+      "text": "non-blocking: direct == description.iron_segments[0] compares two results of ImasGeometryReader.iron_segment, so the same incorrect extraction on both paths leaves it green; treat this as API consistency evidence only, since the independent source-array and literal assertions provide the regression protection."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "Read 511412a9a1be801ac74c5562cceaeca26729f7f0 as the five-file implementation, 02f9234d8f8c4cb4934ffef48863a1adc4227a12 as the evidence fragment and a07cb4a5179d1b2fd411969642a0b81e30bb43a4 as its baseline correction; final code and tests are byte-identical to the tested implementation.",
+    "done_when": "The source live pointer node.done_when is measured by exact WEST array and caller comparisons in tests/test_imas_iron_read.py:86-154, after-suite.log records 12 passed, and baseline-scope.log establishes the explicitly empty per-tree baseline with a present-head positive control.",
+    "goal": "The live plan section s4 and source brief.md require one machine-owned iron reader; nova/imas/machine.py:305,616,631 implement it and all three migrated script callers use it.",
+    "manifest": "Source manifest.md names three commits, the exact 12-pass head log, the seven-failure segment-drop log and the empty-baseline scope log; all three receipts were opened and their outcomes agree with its account.",
+    "write_paths": "The current source live pointer node.write_paths includes scripts/sheet_tile_census/measure.py, and all six paths changed from the observed base to head lie within those grants."
+  },
+  "justifications": {
+    "durability": "tests/test_imas_iron_read.py:89-100,108-154,173-181,191-269 independently catch lost segments, changed inputs and missing refusals, with seven actual mutation failures, while line 183 is only a shared-implementation consistency check and contributes no independent extraction coverage.",
+    "evidence": "after-suite.log records 12 passed in 14.00s with EXIT=0, negative-control.log records 7 failed and 5 passed with EXIT=1, and baseline-scope.log records zero scoped base tests with an independently present head test.",
+    "fit": "nova/imas/machine.py:425-454 follows the adjacent frozen machine-value dataclasses, reuses MachineContour.from_record and Outline, and adds no forbidden source names or plan-labelled comments.",
+    "goal_fidelity": "nova/imas/machine.py:305-325 preserves raw ordered geometry and individual material tables, and the three production call sites replace their local IDS extraction.",
+    "reuse": "Capability searches for iron_core and permeability_relative across nova/ and scripts/ find the existing machine.py geometry owner and dataset.py:510 entry opener, both extended or reused; the prototype Material class evaluates a law rather than duplicating this new immutable source-table record.",
+    "scope_discipline": "All six changed paths match the source live pointer node.write_paths, including the granted census migration; nova/biot/magnetisation.py is unchanged."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The live plan section s4 and source brief.md require one machine-owned iron reader; nova/imas/machine.py:305,616,631 implement it and all three migrated script callers use it.\nVERDICT done_when: The source live pointer node.done_when is measured by exact WEST array and caller comparisons in tests/test_imas_iron_read.py:86-154, after-suite.log records 12 passed, and baseline-scope.log establishes the explicitly empty per-tree baseline with a present-head positive control.\nVERDICT write_paths: The current source live pointer node.write_paths includes scripts/sheet_tile_census/measure.py, and all six paths changed from the observed base to head lie within those grants.\nVERDICT manifest: Source manifest.md names three commits, the exact 12-pass head log, the seven-failure segment-drop log and the empty-baseline scope log; all three receipts were opened and their outcomes agree with its account.\nVERDICT diff: Read 511412a9a1be801ac74c5562cceaeca26729f7f0 as the five-file implementation, 02f9234d8f8c4cb4934ffef48863a1adc4227a12 as the evidence fragment and a07cb4a5179d1b2fd411969642a0b81e30bb43a4 as its baseline correction; final code and tests are byte-identical to the tested implementation.\nCALL_SITES: scripts/prototypes/iron_magnetisation/west.py:30, scripts/west_stray_field/solve.py:72, scripts/sheet_tile_census/measure.py:77\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/imas/machine.py:305-325 preserves raw ordered geometry and individual material tables, and the three production call sites replace their local IDS extraction.\nSCORE evidence: 20\nJUSTIFICATION evidence: after-suite.log records 12 passed in 14.00s with EXIT=0, negative-control.log records 7 failed and 5 passed with EXIT=1, and baseline-scope.log records zero scoped base tests with an independently present head test.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All six changed paths match the source live pointer node.write_paths, including the granted census migration; nova/biot/magnetisation.py is unchanged.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_imas_iron_read.py:89-100,108-154,173-181,191-269 independently catch lost segments, changed inputs and missing refusals, with seven actual mutation failures, while line 183 is only a shared-implementation consistency check and contributes no independent extraction coverage.\nSCORE fit: 20\nJUSTIFICATION fit: nova/imas/machine.py:425-454 follows the adjacent frozen machine-value dataclasses, reuses MachineContour.from_record and Outline, and adds no forbidden source names or plan-labelled comments.\nSCORE reuse: 20\nJUSTIFICATION reuse: Capability searches for iron_core and permeability_relative across nova/ and scripts/ find the existing machine.py geometry owner and dataset.py:510 entry opener, both extended or reused; the prototype Material class evaluates a law rather than duplicating this new immutable source-table record.\nFINDING tests/test_imas_iron_read.py:183 non-blocking: direct == description.iron_segments[0] compares two results of ImasGeometryReader.iron_segment, so the same incorrect extraction on both paths leaves it green; treat this as API consistency evidence only, since the independent source-array and literal assertions provide the regression protection.\n",
+  "reuse_search": {
+    "assessment": "Iron segment extraction and static value models extend machine.py; geometry decoding and contour copying reuse its owners; pinned IO reuses open_db_entry. The prototype Material owns interpolation, not immutable IDS capture. Test helpers supply independent IDS oracles and evaluate caller ASTs without running solves.",
+    "owners_opened": [
+      "nova/imas/machine.py:32-80,271-325,408-454,600-654",
+      "nova/imas/dataset.py:510-540",
+      "scripts/prototypes/iron_magnetisation/magnetisation.py:Material"
+    ],
+    "query": "git grep -n -E iron_core|permeability_relative|class (Outline|MachineContour|MachineGeometryReader)|def open_db_entry at reviewed head across nova/ and scripts/"
+  },
+  "review_run_id": "r-20261110T011846198430-review-of-icm-iron-read-a07cb4a5179d",
+  "reviewed_base_sha": "4221309d2e66fd30eadafa7eacc3d967dd233481",
+  "reviewed_commits": [
+    "511412a9a1be801ac74c5562cceaeca26729f7f0",
+    "02f9234d8f8c4cb4934ffef48863a1adc4227a12",
+    "a07cb4a5179d1b2fd411969642a0b81e30bb43a4"
+  ],
+  "reviewed_head_sha": "a07cb4a5179d1b2fd411969642a0b81e30bb43a4",
+  "reviewed_run_id": "r-20261109T215930627453-icm-iron-read",
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/after-suite.log",
+      "revision": "511412a9a1be801ac74c5562cceaeca26729f7f0",
+      "sha256": "e9c8d222b3ae8ec87bc8019ab5c0f6b8369a1283d7d48d13521135b6c224c247",
+      "summary": "12 passed in 14.00s"
+    },
+    "baseline_suite": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/baseline-scope.log",
+      "revision": "4221309d2e66fd30eadafa7eacc3d967dd233481",
+      "sha256": "972e09b1f3117dafd95c6dc0f987bdd465f9f252c5580d5b4eebcf7689fd468c",
+      "summary": "EMPTY_BASELINE_CONFIRMED: 0 scoped base tests; positive control resolves the head test; no full-suite pass claimed"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T01:44:40.927869+00:00",
+  "total": 119
+}

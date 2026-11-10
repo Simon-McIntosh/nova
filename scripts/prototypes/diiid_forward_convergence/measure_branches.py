@@ -348,7 +348,7 @@ def _record_receipt(receipt, wall_seconds, prepared, topology_class) -> dict[str
         float(topology.boundary_flux),
         np.asarray(topology.axis, dtype=float),
     )[0]
-    mask_history = _int_list(receipt.mask_history)
+    mask_history = _int_list(receipt.changed_mask_entries)
     terminal_mask = _core_mask(profile, flux)
     presence = _presence(
         profile, flux_grid, wall, terminal_mask, prepared["target_current_a"]

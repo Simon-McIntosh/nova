@@ -178,9 +178,12 @@ def row(args):
 
 def batch(args):
     repository = Path(__file__).resolve().parents[3]
-    head = subprocess.check_output(
-        ["git", "-C", str(repository), "rev-parse", "HEAD"], text=True
-    ).strip()
+    head = (
+        args.head_revision
+        or subprocess.check_output(
+            ["git", "-C", str(repository), "rev-parse", "HEAD"], text=True
+        ).strip()
+    )
     args.output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(
         prefix="warmup-admission-", dir=os.environ["TMPDIR"]
@@ -199,6 +202,22 @@ def batch(args):
                     "mast-21978-35" if branch == "mast" else f"frame-{frame}-{branch}"
                 )
                 output = args.output / arm / name
+                previous = args.resume_from / arm / name if args.resume_from else None
+                if previous is not None and (previous / "receipt.json").is_file():
+                    receipt = json.loads((previous / "receipt.json").read_text())
+                    assert receipt["base_revision"] == revision
+                    assert (
+                        (previous / "row.log").read_text().rstrip().endswith("EXIT=0")
+                    )
+                    assert (previous / "terminal.npz").is_file()
+                    records.append(
+                        dict(arm=arm, case=name, source_path=str(previous), **receipt)
+                    )
+                    (args.output / "comparison.json").write_text(
+                        json.dumps(records, indent=2) + "\n"
+                    )
+                    print(f"RETAINED {arm} {name} SOURCE={previous}", flush=True)
+                    continue
                 output.mkdir(parents=True)
                 command = [
                     PYTHON,
@@ -241,6 +260,7 @@ def batch(args):
                     dict(
                         arm=arm,
                         case=name,
+                        source_path=str(output),
                         **json.loads((output / "receipt.json").read_text()),
                     )
                 )
@@ -271,6 +291,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--base")
+    parser.add_argument("--head-revision")
+    parser.add_argument("--resume-from", type=Path)
     parser.add_argument("--row", action="store_true")
     parser.add_argument("--tree", type=Path)
     parser.add_argument("--revision")

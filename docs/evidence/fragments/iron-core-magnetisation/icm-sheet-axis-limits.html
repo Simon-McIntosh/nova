@@ -379,3 +379,43 @@ w⁻² = rs/d₀² + |r(r₁-r)+a²r²|/(r₁-r)²
     this fixed, printed budget.
   </p>
 </section>
+<section id="icm-sheet-axis-limits-unmet-dilated-pairs">
+  <h2>Second complete census: two dilated pairs remain above budget</h2>
+  <p>
+    The repeated full census at source revision <code>533d59093</code>, sirius
+    job 1309713, exits 1. Sphere: 28,106 pairs, zero inaccurate or nonfinite
+    values on scalar, packed and dilated packed routes. Shell: 608,685 pairs,
+    zero inaccurate values on scalar and packed routes, two inaccurate pairs
+    on the dilated packed route; every value is finite. Maximum absolute floors
+    are 2.346250076315704e-18 (sphere) and 2.664487511701676e-18 T/(A/m)
+    (shell), varying per endpoint scale rather than a uniform allowance.
+  </p>
+  <table>
+    <thead><tr><th>Mesh</th><th>Route</th><th>Failed pairs</th><th>Worst fraction of tolerance</th></tr></thead>
+    <tbody>
+      <tr><td>Sphere</td><td>Scalar</td><td>0</td><td>0.023849258</td></tr>
+      <tr><td>Sphere</td><td>Packed</td><td>0</td><td>0.023191877</td></tr>
+      <tr><td>Sphere</td><td>Dilated packed</td><td>0</td><td>0.076183957</td></tr>
+      <tr><td>Shell</td><td>Scalar</td><td>0</td><td>0.996048992</td></tr>
+      <tr><td>Shell</td><td>Packed</td><td>0</td><td>0.869461902</td></tr>
+      <tr><td>Shell</td><td>Dilated packed</td><td>2</td><td>1.039181120</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The worst remaining pair is target (0.8600227012928746,-0.34002196003153545),
+    source (0.9707721407285156,-0.24000302244921876) to
+    (0.9707728830478516,-0.24) m. Computed B is
+    (-2.8796757087955512e-12,4.295403878866854e-12), reference B is
+    (-2.8796757087867334e-12,4.295403878199872e-12) T/(A/m).
+    Its vertical absolute difference is about 6.67e-22. It remains a failed
+    measurement: the budget is not enlarged again to admit it.
+  </p>
+  <p>
+    This is the second counted failure of the complete accuracy command after
+    different repairs. The dispatch stop rule is invoked. Further changes need
+    a coordinator ruling. The reported shell witness is repaired, but the full
+    node is not qualified. The final WEST measurement and suite arms already
+    launched continue to their own receipts; their results do not override this
+    failed independent accuracy census.
+  </p>
+</section>

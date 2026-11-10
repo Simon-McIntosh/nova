@@ -1025,3 +1025,37 @@ def test_sheet_remainder_resolves_both_azimuthal_layers():
     packed = np.asarray(_compiled_axis_pair()[0](jnp.array((*point, *start, *end))))
     for value in (scalar, packed):
         np.testing.assert_allclose(value, wanted, rtol=1e-10, atol=1e-25)
+
+
+@pytest.mark.parametrize(
+    "point,start,end",
+    [
+        (
+            (0.8600227012928746, -0.34002196003153545),
+            (0.9707721407285156, -0.24000302244921876),
+            (0.9707728830478516, -0.24),
+        ),
+        (
+            (0.45992116430406516, -0.8599178752181855),
+            (0.72, -0.6939740549492187),
+            (0.7200025079609375, -0.6939714608896485),
+        ),
+    ],
+)
+def test_packed_sheet_binary_dilation_preserves_the_field(point, start, end):
+    """Exact binary dilation preserves both values and their reference budget."""
+    import jax.numpy as jnp
+
+    coordinates = np.array((*point, *start, *end))
+    wanted = reference.graded_precise_ring_reference(start, end, point)[1:]
+    values = []
+    for scale in (1.0, 1024.0):
+        pair = coordinates * scale
+        value = np.asarray(_compiled_axis_pair()[0](jnp.asarray(pair)))
+        ends = np.asarray(
+            sheet_module.packed_sheet_end_scale(np, *[np.array([x]) for x in pair])
+        ).ravel()
+        gamma = 3504 * np.finfo(float).eps / (1 - 3504 * np.finfo(float).eps)
+        assert np.all(abs(value - wanted) <= 1e-10 * abs(wanted) + gamma * ends)
+        values.append(value)
+    np.testing.assert_array_equal(values[0], values[1])

@@ -93,6 +93,21 @@ def main():
             np.column_stack((edges.start_r, edges.start_z, edges.end_r, edges.end_z))
             / 1024
         )
+        authored = np.concatenate(mesh.polygons)
+        identity_movement = np.max(
+            np.abs(np.round(authored * 1024, 9) / 1024 - authored)
+        )
+        assert identity_movement > 0, (
+            "the edge-rounding control must see a moved coordinate"
+        )
+        print(
+            name,
+            "identity grid step:",
+            1e-9 / 1024,
+            "known-present grid movement:",
+            identity_movement,
+            flush=True,
+        )
         targets = np.concatenate((mesh.centroids, probes))
         rows = np.column_stack(
             (
@@ -110,6 +125,14 @@ def main():
             len(targets),
             "pairs:",
             len(rows),
+            flush=True,
+        )
+        canonical = sheet._binary_field_geometry(np, *rows.T)
+        dilated_canonical = sheet._binary_field_geometry(np, *(rows * 1024).T)
+        assert all(np.array_equal(a, b) for a, b in zip(canonical, dilated_canonical))
+        print(
+            name,
+            "canonical operands bit-identical under 1024 dilation: True",
             flush=True,
         )
         packed = []
@@ -162,12 +185,23 @@ def main():
         epsilon = np.finfo(float).eps
         gamma = operations * epsilon / (1 - operations * epsilon)
         floor = gamma * end_scales
-        tolerance = 1e-10 * np.abs(reference) + floor
+        # Both routes and the reference use the same once-rounded edges.
+        # Binary dilation and canonicalisation are exact: additional geometry
+        # rounding is zero, so no allowance can be added for it.
+        dilation_geometry_rounding = np.zeros_like(floor)
+        tolerance = 1e-10 * np.abs(reference) + floor + dilation_geometry_rounding
+        assert np.array_equal(packed, dilated), (
+            "canonical field must preserve every bit"
+        )
         summary = {
             "mesh": name,
             "pairs": len(rows),
             "absolute_floor": f"gamma_{operations} times absolute endpoint sum",
             "max_floor": float(floor.max()),
+            "dilation_additional_geometry_floor": 0.0,
+            "identity_grid_step": 1e-9 / 1024,
+            "max_identity_movement": float(identity_movement),
+            "packed_dilated_bit_identical": True,
         }
         for route, values in [
             ("scalar", scalar),

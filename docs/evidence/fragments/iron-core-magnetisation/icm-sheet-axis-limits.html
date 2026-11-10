@@ -511,3 +511,102 @@ w⁻² = rs/d₀² + |r(r₁-r)+a²r²|/(r₁-r)²
     failing test ids and the two remaining census counterexamples.
   </p>
 </section>
+<section id="icm-sheet-axis-limits-authorised-round">
+  <h2>One authorised round: remove the branch regression and enforce binary homogeneity</h2>
+  <p>
+    The coordinator permits one further repair round. The existing sloped-field
+    tests, their parameters and their 1e-10 tolerances remain unchanged.
+    Reproduction at the four failing geometries confirms that
+    <code>_source_series_ends</code> is unselected. Replacing only
+    <code>_gradient_azimuth_rule</code> by the established single-ended rule
+    changes the relative errors from 2.90e-9, 1.62e-9, 1.13e-10 and 2.16e-10
+    to at most 4.49e-13 against independent precise rings, on both scalar routes.
+    The common condition is r₁/r=1 to floating-point precision: the target is
+    on the extension of the source line. The integrand takes its removable-gap
+    limit, while the unconditional two-ended rule grades a rounding-sized gap.
+    Neither the source multipoles nor full-precision reference accumulation
+    causes these regressions.
+  </p>
+  <h3 id="icm-sheet-axis-limits-bounded-selection">Selection and truncation bound</h3>
+  <p>
+    The two-ended rule is now selected only when both pole gaps are resolved
+    relative to the integrand's existing 1e-12r removable-line condition,
+    w≤1, U=asinh(π/(2w))≤10, and the exact imaginary azimuthal distance of
+    each ring or pole singularity is at least w. Otherwise the established
+    140-panel single-ended rule is selected. Inactive rule widths are held
+    before arithmetic and the results are selected with double-where.
+    No source radius is shifted. The exact singular distances are
+  </p>
+  <pre>ηD = 2 asinh(sqrt(γ²+(r-s)²)/(2 sqrt(rs)))
+A = sqrt(1+b²) hypot(r₁,br)
+η+ = 2 asinh(|r₁-r| / sqrt(2r[b²r+r₁+A]))
+η- = 2 asinh(|r₁+r| / sqrt(2r[b²r-r₁+A])).</pre>
+  <p>
+    A nonpositive pole denominator denotes an absent pole and its inactive
+    denominator is held. These formulas follow by factoring B₁² as a quadratic
+    in cosφ and rationalising coshη−1; they avoid subtracting nearly equal roots.
+    Under φ=w sinh(u), η≥w places the zero-end singularities at imaginary
+    u=±π/2 or beyond. The opposite-end singularities have real u at least
+    asinh(π/w), more than 0.629 beyond U for w≤1.
+  </p>
+  <p>
+    Each selected half uses 70 panels with ratio 1.1 and 24 Gaussian nodes,
+    retaining 3360 total nodes. At U≤10 its largest panel width is
+    0.910243485214. A Bernstein ellipse with parameter ρ=4 on that panel
+    extends by at most 0.512013 in real u and 0.853354 in imaginary u.
+    It therefore stays inside the above analytic domain. If Mⱼ bounds the
+    magnitude of a transformed integrand on that ellipse, the Chebyshev
+    coefficient bound |aₖ|≤2Mⱼρ⁻ᵏ and Gaussian exactness through degree 47 give
+  </p>
+  <pre>|δI| ≤ [4 ρ⁻⁴⁸/(1-ρ⁻¹)] Σⱼ Δuⱼ Mⱼ
+     = 6.731613057886e-29 Σⱼ Δuⱼ Mⱼ.</pre>
+  <p>
+    This is the explicit truncation bound for the newly selected rule. Even an
+    amplification of 1/ε=2⁵² gives 3.031649005910e-13, below the 1e-10 relative
+    budget; stronger cancellation is assessed against the printed absolute
+    endpoint allowance in the full census. The removable-line geometries never
+    select this rule. The same focused command now passes all 72 existing
+    sloped reference cases and both binary-dilation regressions: 74 passed,
+    643 deselected in 57.38s, EXIT=0.
+  </p>
+  <p>
+    The source-series truncation is independent. With q≤1/2 at both endpoints,
+    |P′ₙ|≤n(n+1)/2 and |P″ₙ|≤(n−1)n(n+1)(n+2)/8 bound the omitted terms
+    after n=80. Writing T=Σ[n≥81]n(n+1)(n+3)qⁿ⁺², T≤1.197377023896e-19;
+    since r/D≤1, |δB_R|/μ₀≤T/32=3.741803199672e-21 and
+    |δB_Z|/μ₀≤3.746042500312e-21. Those source multipoles remain unchanged.
+  </p>
+  <h3 id="icm-sheet-axis-limits-binary-rounding">Dilation and edge-identity rounding</h3>
+  <p>
+    Multiplication or division by 1024=2¹⁰ changes only a normal binary64
+    exponent and has zero rounding error here. The material owner's decimal
+    edge-identity grid is h=1e-9/1024=9.765625e-13 m; nearest-grid rounding
+    moves a coordinate by at most h/2, plus the floating arithmetic of the
+    decimal round operation. For authored coordinates of magnitude X a
+    conservative arithmetic term is γ₃X, giving endpoint displacement at most
+    √2(h/2+γ₃X). This is a common geometry change: all three census routes and
+    their precise reference use those same once-rounded endpoints. The 1024×
+    evaluation does not round them again. Therefore the additional geometric
+    error from dilation and edge identity in this comparison is exactly zero.
+  </p>
+  <p>
+    The two former misses cannot be admitted by adding a grid allowance.
+    Instead <code>_binary_field_geometry</code> chooses the common exponent e
+    with frexp(max|coordinate|), then evaluates all six coordinates with
+    ldexp(coordinate,−e). For a common 2¹⁰ dilation the exponent becomes e+10,
+    so the canonical operands are bit-identical. Normalisation is exact and
+    the sheet field B/K is homogeneous of degree zero; no output rescaling is
+    required. The packed field and its endpoint scale use the same canonical
+    operands, and the derivative remains traceable through the piecewise
+    constant exponent. The two actual counterexamples now pass their unchanged
+    budgets and return bit-identical fields at scales 1 and 1024.
+  </p>
+  <p>
+    The census explicitly adds a zero dilation-geometry term to its unchanged
+    1e-10|reference|+γ₃₅₀₄E budget, asserts canonical operands and resulting
+    fields are bit-identical, and reports the grid step. Its positive control
+    requires a nonzero measured identity-grid displacement of an authored mesh
+    coordinate before reporting zero additional rounding. Full census and
+    preservation receipts for this authorised round follow separately.
+  </p>
+</section>

@@ -1368,7 +1368,9 @@ def _sheet_root_gradient(gamma, radius, source):
     return value, gradient
 
 
-def _sheet_azimuth_rule(xp, width, *, angle=np.pi, panels=_SHEET_FIELD_PANELS):
+def _sheet_azimuth_rule(
+    xp, width, *, angle=np.pi, panels=_SHEET_FIELD_PANELS, ratio=_SHEET_FIELD_RATIO
+):
     """Return the field kernels' azimuth nodes and weights, shape ``(pairs, nodes)``.
 
     The rule is graded geometrically toward the singular azimuth and its width
@@ -1381,11 +1383,7 @@ def _sheet_azimuth_rule(xp, width, *, angle=np.pi, panels=_SHEET_FIELD_PANELS):
     weight = xp.asarray(weight)
     span = xp.arcsinh(angle / width)
     index = np.arange(panels + 1)
-    edges = (
-        span[:, None]
-        * (_SHEET_FIELD_RATIO**index - 1.0)
-        / (_SHEET_FIELD_RATIO**panels - 1.0)
-    )
+    edges = span[:, None] * (ratio**index - 1.0) / (ratio**panels - 1.0)
     half = 0.5 * (edges[:, 1:] - edges[:, :-1])
     centre = 0.5 * (edges[:, 1:] + edges[:, :-1])
     stretch = (centre[:, :, None] + half[:, :, None] * node[None, None, :]).reshape(
@@ -1413,11 +1411,34 @@ def _gradient_azimuth_rule(xp, gamma, radius, source, slope):
         held = xp.where(gap != 0, gap, radius)
         inverse = inverse + xp.where(gap != 0, xp.abs(curvature) / held**2, 0.0)
     width = 1 / xp.sqrt(inverse)
-    phi, rule = _sheet_azimuth_rule(
-        xp, width, angle=np.pi / 2, panels=_SHEET_FIELD_PANELS // 2
+    stretch = xp.arcsinh(np.pi / (2 * width))
+    resolved = (xp.abs(intercept - radius) > 1e-12 * radius) & (
+        xp.abs(intercept + radius) > 1e-12 * radius
     )
-    return xp.concatenate((phi, np.pi - phi), axis=1), xp.concatenate(
-        (rule, rule), axis=1
+    ring_pole = 2 * xp.arcsinh(
+        xp.hypot(gamma, radius - source) / (2 * xp.sqrt(radius * source))
+    )
+    split = resolved & (stretch <= 10.0) & (width <= 1.0) & (ring_pole >= width)
+    pole_root = xp.sqrt(square) * xp.hypot(intercept, slope * radius)
+    for gap, sign in ((intercept - radius, 1), (intercept + radius, -1)):
+        denominator = radius * (slope**2 * radius + sign * intercept + pole_root)
+        present = denominator > 0
+        held = xp.where(present, denominator, 1.0)
+        pole_distance = 2 * xp.arcsinh(xp.abs(gap) / xp.sqrt(2 * held))
+        split = split & (~present | (pole_distance >= width))
+    held_width = xp.where(split, width, 1.0)
+    phi, rule = _sheet_azimuth_rule(
+        xp, held_width, angle=np.pi / 2, panels=_SHEET_FIELD_PANELS // 2, ratio=1.1
+    )
+    phi = xp.concatenate((phi, np.pi - phi), axis=1)
+    rule = xp.concatenate((rule, rule), axis=1)
+    distance_width = xp.hypot(gamma, radius - source) / xp.sqrt(radius * source)
+    distance_width = xp.where(distance_width > 0, distance_width, 1.0)
+    held_width = xp.where(split, 1.0, distance_width)
+    single_phi, single_rule = _sheet_azimuth_rule(xp, held_width)
+    single_phi = xp.where((intercept < 0)[:, None], np.pi - single_phi, single_phi)
+    return xp.where(split[:, None], phi, single_phi), xp.where(
+        split[:, None], rule, single_rule
     )
 
 
@@ -1606,6 +1627,22 @@ def _sheet_pancake_field(xp, target_r, target_z, start_r, start_z, end_r, end_z)
     return MU0 / (2.0 * np.pi) * radial, MU0 / (2.0 * np.pi) * height
 
 
+def _binary_field_geometry(xp, *coordinates):
+    """Canonicalise a homogeneous field with an exact binary dilation.
+
+    frexp chooses a shared exponent; ldexp changes exponent bits exactly for
+    normal finite coordinates. A common input dilation therefore has identical
+    canonical operands and follows identical floating-point arithmetic.
+    """
+    magnitude = xp.abs(xp.asarray(coordinates[0]))
+    for coordinate in coordinates[1:]:
+        magnitude = xp.maximum(magnitude, xp.abs(xp.asarray(coordinate)))
+    _, exponent = xp.frexp(magnitude)
+    return tuple(
+        xp.ldexp(xp.asarray(coordinate), -exponent) for coordinate in coordinates
+    )
+
+
 def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
     """Return the per-end field terms of both the sloped and the flat route.
 
@@ -1618,6 +1655,9 @@ def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
     The flat route's ends sit at the segment's radial extremes, the sloped
     route's at its ordered endpoints. ``flat`` selects between them.
     """
+    target_r, target_z, start_r, start_z, end_r, end_z = _binary_field_geometry(
+        xp, target_r, target_z, start_r, start_z, end_r, end_z
+    )
     target_r = xp.asarray(target_r)
     target_z = xp.asarray(target_z)
     start_r = xp.asarray(start_r)

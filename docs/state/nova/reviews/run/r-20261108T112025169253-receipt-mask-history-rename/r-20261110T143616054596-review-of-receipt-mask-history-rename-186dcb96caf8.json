@@ -18,7 +18,13 @@
   "completed_at": "2026-11-10T14:48:03.640Z",
   "dimension_dispositions": {},
   "dispatched_at": "2026-11-10T14:37:17Z",
-  "finding_dispositions": {},
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "playable-reduced-support-history",
+      "recorded_at": "2026-11-10T14:53:46.100754+00:00"
+    }
+  },
   "findings": [
     {
       "file": "apps/playable/production.py",

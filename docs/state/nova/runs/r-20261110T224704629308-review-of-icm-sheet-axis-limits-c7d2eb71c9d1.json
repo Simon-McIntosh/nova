@@ -1,0 +1,556 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "0d324f9ad25e9c674c8e25cbc7b5cb5384752943",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T224704629308-review-of-icm-sheet-axis-limits-c7d2eb71c9d1/brief.md",
+    "sha256": "bf53d8b158c044a239d4298e3abea9e0cc02e3398c2b8f569ec97231e73b4f5d"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 7628928,
+      "cached_input_tokens_cumulative": 7628928,
+      "input_tokens": 7796626,
+      "input_tokens_cumulative": 7796626,
+      "output_tokens": 20954,
+      "output_tokens_cumulative": 20954,
+      "reasoning_output_tokens": 6918,
+      "reasoning_output_tokens_cumulative": 6918
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-11-10T23:09:30Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-10T22:50:59Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.3774703557312253,
+    "plan": "iron-core-magnetisation",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.3343605978679591,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-13T17:14:54Z, which is after this node's 3600s horizon ending 2026-11-10T23:47:22.813788+00:00",
+    "horizon_ends_at": "2026-11-10T23:47:22.813788+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-11-10T22:47:20Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-13T17:14:54Z",
+    "resets_at": "2026-11-14T15:28:13Z",
+    "seconds_until_reset": 319252,
+    "state": "quiet",
+    "utilisation_pct": 63.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-10T22:47:20Z",
+    "read_at": "2026-11-10T22:47:22Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 63.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-10T23:09:30Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-10T23:09:30Z",
+        "resets_at": 1794670093,
+        "used_percent": 64.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T224704629308-review-of-icm-sheet-axis-limits-c7d2eb71c9d1/manifest.md",
+  "member": "disposable-r-20261110T224704629308-review-of-icm-sheet-axis-limits-c7d2eb71c9d1",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-icm-sheet-axis-limits-c7d2eb71c9d1",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T010103197729-icm-sheet-axis-limits/review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T224704629308-review-of-icm-sheet-axis-limits-c7d2eb71c9d1/brief.md",
+    "brief_sha256": "bf53d8b158c044a239d4298e3abea9e0cc02e3398c2b8f569ec97231e73b4f5d",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "5b10be66-c69b-456f-9a85-3840909f1723"
+    },
+    "done_when": "the review for r-20261110T010103197729-icm-sheet-axis-limits stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261110T010103197729-icm-sheet-axis-limits, and never in the worktree; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261110T010103197729-icm-sheet-axis-limits covering only the commits it gained since it was reviewed: docs/evidence/fragments/iron-core-magnetisation/icm-sheet-axis-limits.html, scripts/sheet_tile_cpu_gate/accuracy_census.py, scripts/sheet_tile_cpu_gate/run_after_suite.sbatch, nova/biot/sheet.py, tests/test_edge_sheet.py, scripts/edge_sheet/reference.py, scripts/sheet_tile_cpu_gate/run_tail_gate.sbatch, scripts/sheet_tile_cpu_gate/run_accuracy_census.sbatch",
+    "id": "review-of-icm-sheet-axis-limits-c7d2eb71c9d1",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-10T22:47:20Z",
+      "read_at": "2026-11-10T22:47:22Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 63.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T224704629308-review-of-icm-sheet-axis-limits-c7d2eb71c9d1/manifest.md",
+    "negative_control": "",
+    "over_fence_reason": "",
+    "peer_scopes": {},
+    "plan": "iron-core-magnetisation",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T010103197729-icm-sheet-axis-limits/review-records/r-20261110T010103197729-icm-sheet-axis-limits.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T010103197729-icm-sheet-axis-limits/review-records/r-20261110T010103197729-icm-sheet-axis-limits.at-c7d2eb71c9d18fc58f28fd58ef9e12d73ed31302.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 1.3339593231446576,
+      "derived": 0.5195060958578042,
+      "drain_hours": 168.0,
+      "effective_limit": 0.5195060958578042,
+      "elapsed_fraction": 0.47227826896164016,
+      "elapsed_hours": 79.34274918555555,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-11-11T09:00:01+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1794082577-c029e5",
+        "pace_multiple": null,
+        "remaining_seconds": 36674.102932,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-11-10T22:48:46+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.37,
+      "remaining_windows": null,
+      "resets_at": "2026-11-14T15:28:13Z",
+      "state": "observed",
+      "utilisation": 0.63,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.690606,
+      "decided_by": "window",
+      "margin": -0.06560600000000005,
+      "name": "review-of-icm-sheet-axis-limits-c7d2eb71c9d1",
+      "score": 0.625,
+      "state": "observed",
+      "verdict": "split",
+      "window_fill": 0.63
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.897068,
+        "observed_at": "2026-11-10T22:48:46+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-14T15:28:13Z",
+        "state": "observed",
+        "utilisation": 0.63,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1794082577-c029e5",
+    "member": "codex",
+    "node": "review-of-icm-sheet-axis-limits-c7d2eb71c9d1",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-10T22:48:46.897068+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5001.026,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 2190.674,
+      "context-estimate": 263.433,
+      "records": 3888.091,
+      "verdict-inputs": 926.841
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.3774703557312253,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "0d324f9ad25e9c674c8e25cbc7b5cb5384752943",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261110T224704629308-review-of-icm-sheet-axis-limits-c7d2eb71c9d1",
+    "reviewed_base_sha": "d9ace267d24b7d54871c9a1d32e7d84f6ca245ae",
+    "reviewed_head_sha": "c7d2eb71c9d18fc58f28fd58ef9e12d73ed31302",
+    "scores": {
+      "durability": 18,
+      "evidence": 19,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 117
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261110T224704629308-review-of-icm-sheet-axis-limits-c7d2eb71c9d1",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+  "session_harness": "codex",
+  "session_id": "01a1c7a9-fbe9-76e3-9934-4d28dc1cc9b0",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 7628928,
+    "cumulative_input_tokens": 15425554,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 27872
+  },
+  "time_budget": "60m",
+  "tool_steps": 53.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "source": "coordinator",
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 61926,
+        "budget_seconds": 9000,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: Closed-shell acceptance fails in the upstream interaction operand before Newton; no write grant permits that repair. The declared Jacobian mutation is non-discriminating under the current ten-correction bound and remains unmet. Baseline exact command exits 4 because its test path is absent. Stop rule prohibits further repair after the repeated full-command failures.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 70926,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-10T03:48:32Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-10T03:06:02Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 1497702,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220119790593-icm-magnetisation-solve/codex-home/cache"
+            },
+            {
+              "bytes": 28836794,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220119790593-icm-magnetisation-solve/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261109T220119790593-icm-magnetisation-solve",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 662,
+          "worker_pid": 3924608
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "Closed-shell acceptance fails in the upstream interaction operand before Newton; no write grant permits that repair. The declared Jacobian mutation is non-discriminating under the current ten-correction bound and remains unmet. Baseline exact command exits 4 because its test path is absent. Stop rule prohibits further repair after the repeated full-command failures.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-10T03:48:32Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 68371,
+        "log_fresh": false,
+        "manifest_commits": [
+          "87f46ff3e174db28c55221f44c3ba5ef6fa00f36",
+          "ef784a2d7d91a34ef70b3758ed982fa73f406f30",
+          "160d019c233599fa992604e64c0c3c864590c376",
+          "25eabd5de1c1291db4d62bc10bc73b307abe7ccf"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "ad1b68e886ff018c026a9b931c3e7bbb8f0fa2886e45ebc5ec200508397adfa5",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220119790593-icm-magnetisation-solve/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "sol",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220119790593-icm-magnetisation-solve/manifest.md; resolve the blocker before resuming the run",
+        "node": "icm-magnetisation-solve",
+        "phase": "blocked",
+        "plan": "iron-core-magnetisation",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261109T220119790593-icm-magnetisation-solve",
+        "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261109T220119790593-icm-magnetisation-solve",
+          "session_id": "01a1c2db-4cb7-7d53-9b51-3c049263cb45",
+          "source": "pointer"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 68458,
+        "terminal_at": "2026-11-10T03:47:00Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-magnetisation-solve"
+      }
+    ]
+  },
+  "wall_seconds": 1111,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-10T23:09:37Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-10T22:52:23Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 68002872,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T224704629308-review-of-icm-sheet-axis-limits-c7d2eb71c9d1/codex-home/cache"
+      },
+      {
+        "bytes": 28814443,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T224704629308-review-of-icm-sheet-axis-limits-c7d2eb71c9d1/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261110T224704629308-review-of-icm-sheet-axis-limits-c7d2eb71c9d1",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 152,
+    "worker_pid": 2067266
+  },
+  "worker_seconds": 1111,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

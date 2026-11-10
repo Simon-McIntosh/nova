@@ -1,0 +1,170 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_review": [
+    {
+      "failure_condition": "Restoring the primitive-gauge cancellation returns 6.53973138e-9 rather than the independently integrated 9.80715345e-15 cell response and fails both edge and cell comparisons; the restored-source log records the red test.",
+      "path": "tests/test_edge_sheet.py:1004,1009-1010"
+    },
+    {
+      "failure_condition": "This fixed reference anchor rejects errors above about 1e-12 but accepts zero despite the stated nonzero 9.8e-15 reference; a direct pytest.approx control confirms this defect.",
+      "path": "tests/test_edge_sheet.py:1008"
+    },
+    {
+      "failure_condition": "An undefined inactive branch tangent makes jacfwd nonfinite; a finite incorrect derivative is not caught.",
+      "path": "tests/test_edge_sheet.py:1013"
+    },
+    {
+      "failure_condition": "Restoring the single-ended rule leaves the near-ring/opposite-pole witness about 2.37e-14 T wrong and exceeds the independent component tolerance.",
+      "path": "tests/test_edge_sheet.py:1027"
+    },
+    {
+      "failure_condition": "Removing binary canonicalisation restores either an independent reference-budget miss or distinct bit patterns under 1024 dilation; the reference is independently integrated rather than supplied to the kernel.",
+      "path": "tests/test_edge_sheet.py:1059,1061"
+    },
+    {
+      "failure_condition": "An unavailable scalar assembly receipt or a changed current vertical field refuses cached admission, and any residual pair beyond its derived allowance makes the final assertion fail; the stored failing census is the positive control.",
+      "path": "scripts/sheet_tile_cpu_gate/accuracy_census.py:148-150,177-182"
+    },
+    {
+      "failure_condition": "An absent known grid displacement, differing canonical operands, differing packed dilation outputs, a nonfinite field or an independent reference miss refuses the census.",
+      "path": "scripts/sheet_tile_cpu_gate/accuracy_census.py:243,275,338,377"
+    }
+  ],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/biot/tiledassembly.py:432 (_warm_sheet_evaluator.one_block)",
+    "nova/biot/tiledassembly.py:598 (cell_interaction)",
+    "nova/biot/sheet.py:1325 (sheet_field)",
+    "nova/biot/sheet.py:1318 (sheet_flux)",
+    "nova/biot/sheet.py:1806 (packed_sheet_end_scale)"
+  ],
+  "completed_at": "2026-11-10T23:09:30Z",
+  "dispatched_at": "2026-11-10T22:50:59Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the shell-witness anchor's default abs tolerance admits zero, but the separate edge and cell comparisons against the precise ring reference already detect the recorded defect and the negative control fails; tightening abs=0.0 is a one-line hardening to fold into the next sheet-owner node",
+      "recorded_at": "2026-11-10T23:22:34.417604+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_edge_sheet.py",
+      "line": "1008",
+      "severity": "non-blocking",
+      "text": "non-blocking: pytest.approx(9.80715345e-15, rel=1e-9) retains its default 1e-12 absolute tolerance, so wanted[0]=0 passes the fixed nonzero reference anchor; specify abs=0.0 to make this independent reference control reject zero. The separate edge and cell comparisons against precise rings still detect the recorded production defect, so this does not block the repair."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified nova/biot/tiledassembly.py:432 (_warm_sheet_evaluator.one_block), nova/biot/tiledassembly.py:598 (cell_interaction), nova/biot/sheet.py:1325 (sheet_field), nova/biot/sheet.py:1318 (sheet_flux), nova/biot/sheet.py:1806 (packed_sheet_end_scale)",
+    "diff": "Read the fifteen added commits from d9ace267d24b7d54871c9a1d32e7d84f6ca245ae through c7d2eb71c9d18fc58f28fd58ef9e12d73ed31302; production changes are source-multipole endpoint differences, bounded two-ended remainder grading and binary canonicalisation, with precise-reference ownership consolidated and one weak fixed-value assertion at tests/test_edge_sheet.py:1008.",
+    "done_when": "Read node.done_when and the incremental qualification in docs/evidence/fragments/iron-core-magnetisation/icm-sheet-axis-limits.html:736 and :824; completed accuracy admission covers 28106 sphere and 608685 shell pairs, and one-round/gates/full-mesh-gate.log retains 0/11505664 entries above 1e-13 with all finite.",
+    "goal": "Read the source live pointer node.goal and brief.md: the finite axis-limit repair is preserved, while nova/biot/sheet.py:411 now avoids the shallow-source endpoint cancellation exposed by material qualification.",
+    "manifest": "Read the source manifest.md and its actual baseline_suite/after_suite logs: the baseline records eight failures and 715 passes, the completed head records 725 passes and EXIT=0, giving zero added failure ids.",
+    "write_paths": "Read node.write_paths in the source live pointer; the eight paths changed since d9ace267d24b all fall inside the declared sheet owner, reference owner, sheet tests, gate-script directory and evidence fragment."
+  },
+  "justifications": {
+    "durability": "tests/test_edge_sheet.py:1004, :1009, :1027 and :1059 compare against independent rings and :1061 detects lost dilation identity, but :1008 admits a zero reference through the default absolute tolerance and :1013 only checks derivative finiteness.",
+    "evidence": "final-admission/after_suite.log records 725 passed and EXIT=0 with sheet/reference/test blobs identical to reviewed head, while cached-admission.log explicitly records the derived scalar allowance that admits the original single miss without rerunning the census.",
+    "fit": "nova/biot/sheet.py:411 and :1397 extend the established shared NumPy/JAX owner with held inactive operands, and the added symbols and comments describe mechanisms without forbidden planning labels.",
+    "goal_fidelity": "nova/biot/sheet.py:411, :1217 and :1707 share convergent physical endpoint multipoles across scalar and packed fields while preserving the finite axis branches required by the source goal.",
+    "reuse": "Searches for source multipoles, graded azimuth rules, binary normalisation, precise ring integration, mesh generation and rounding budgets found the existing owners in sheet.py, reference.py and magnetisation.py; the additions extend those owners or wrap them rather than duplicate their capabilities.",
+    "scope_discipline": "The eight-path incremental diff is contained by the source live pointer node.write_paths and leaves nova/biot/magnetisation.py and tests/test_magnetisation.py untouched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read the source live pointer node.goal and brief.md: the finite axis-limit repair is preserved, while nova/biot/sheet.py:411 now avoids the shallow-source endpoint cancellation exposed by material qualification.\nVERDICT done_when: Read node.done_when and the incremental qualification in docs/evidence/fragments/iron-core-magnetisation/icm-sheet-axis-limits.html:736 and :824; completed accuracy admission covers 28106 sphere and 608685 shell pairs, and one-round/gates/full-mesh-gate.log retains 0/11505664 entries above 1e-13 with all finite.\nVERDICT write_paths: Read node.write_paths in the source live pointer; the eight paths changed since d9ace267d24b all fall inside the declared sheet owner, reference owner, sheet tests, gate-script directory and evidence fragment.\nVERDICT manifest: Read the source manifest.md and its actual baseline_suite/after_suite logs: the baseline records eight failures and 715 passes, the completed head records 725 passes and EXIT=0, giving zero added failure ids.\nVERDICT diff: Read the fifteen added commits from d9ace267d24b7d54871c9a1d32e7d84f6ca245ae through c7d2eb71c9d18fc58f28fd58ef9e12d73ed31302; production changes are source-multipole endpoint differences, bounded two-ended remainder grading and binary canonicalisation, with precise-reference ownership consolidated and one weak fixed-value assertion at tests/test_edge_sheet.py:1008.\nCALL_SITES: nova/biot/tiledassembly.py:432 (_warm_sheet_evaluator.one_block), nova/biot/tiledassembly.py:598 (cell_interaction), nova/biot/sheet.py:1325 (sheet_field), nova/biot/sheet.py:1318 (sheet_flux), nova/biot/sheet.py:1806 (packed_sheet_end_scale)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/biot/sheet.py:411, :1217 and :1707 share convergent physical endpoint multipoles across scalar and packed fields while preserving the finite axis branches required by the source goal.\nSCORE evidence: 19\nJUSTIFICATION evidence: final-admission/after_suite.log records 725 passed and EXIT=0 with sheet/reference/test blobs identical to reviewed head, while cached-admission.log explicitly records the derived scalar allowance that admits the original single miss without rerunning the census.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The eight-path incremental diff is contained by the source live pointer node.write_paths and leaves nova/biot/magnetisation.py and tests/test_magnetisation.py untouched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_edge_sheet.py:1004, :1009, :1027 and :1059 compare against independent rings and :1061 detects lost dilation identity, but :1008 admits a zero reference through the default absolute tolerance and :1013 only checks derivative finiteness.\nSCORE fit: 20\nJUSTIFICATION fit: nova/biot/sheet.py:411 and :1397 extend the established shared NumPy/JAX owner with held inactive operands, and the added symbols and comments describe mechanisms without forbidden planning labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: Searches for source multipoles, graded azimuth rules, binary normalisation, precise ring integration, mesh generation and rounding budgets found the existing owners in sheet.py, reference.py and magnetisation.py; the additions extend those owners or wrap them rather than duplicate their capabilities.\nFINDING tests/test_edge_sheet.py:1008 non-blocking: pytest.approx(9.80715345e-15, rel=1e-9) retains its default 1e-12 absolute tolerance, so wanted[0]=0 passes the fixed nonzero reference anchor; specify abs=0.0 to make this independent reference control reject zero. The separate edge and cell comparisons against precise rings still detect the recorded production defect, so this does not block the repair.\n",
+  "reuse_search": {
+    "no_other_owner_found": [
+      "exact binary canonicalisation of homogeneous sheet operands",
+      "scalar uncancelled final-assembly allowance",
+      "cached independent material-pair census admission"
+    ],
+    "owners": {
+      "committed meshes": "nova/biot/magnetisation.py at 25eabd5de, wrapped by accuracy_census.py:24",
+      "graded ring references": "scripts/edge_sheet/reference.py:138,195,326",
+      "multipoles and remainder grading": "nova/biot/sheet.py:335,1371",
+      "packed field and endpoint scale": "nova/biot/sheet.py:1780,1806"
+    },
+    "scope": "nova/biot, scripts/edge_sheet and scripts/sheet_tile_cpu_gate"
+  },
+  "review_run_id": "r-20261110T224704629308-review-of-icm-sheet-axis-limits-c7d2eb71c9d1",
+  "reviewed_base_sha": "d9ace267d24b7d54871c9a1d32e7d84f6ca245ae",
+  "reviewed_commits": [
+    "d3c71ba77ff0ace5dddd433f43527428f07d0cd4",
+    "47e7253741275c1784cf205c4818ea73d84041e6",
+    "9af4ddb3f60305d6664a0b63beb35353e4f403e6",
+    "533d590939b8564fb20723f579f792b37f790c6d",
+    "4e637828802f7098074bd03814191d8ce98a7d28",
+    "dc79154c41c466e0f07a6fd5d1901e78860f3c6b",
+    "59ef71aeab8835ba878eb548ef14dbe1fa58d83c",
+    "7f18a434e0933a4609a18873fd624e0154e448d7",
+    "61dadd7eeee75fc00da0e9ccfa818e287eeaa940",
+    "58c81cb9a2e1847c85555e98197d6eee77ad4050",
+    "b5af48b5cd67d3e00ed0255deb8e77eca9788856",
+    "1fde2e3f9738595d4b4bff905e294bab7c1b146d",
+    "cb63840160f3f88c211c9401b1ccf5e01a9e1f61",
+    "c97b05330c613309157d059a8420efb33a928d6c",
+    "c7d2eb71c9d18fc58f28fd58ef9e12d73ed31302"
+  ],
+  "reviewed_head_sha": "c7d2eb71c9d18fc58f28fd58ef9e12d73ed31302",
+  "reviewed_paths": [
+    "docs/evidence/fragments/iron-core-magnetisation/icm-sheet-axis-limits.html",
+    "nova/biot/sheet.py",
+    "scripts/edge_sheet/reference.py",
+    "scripts/sheet_tile_cpu_gate/accuracy_census.py",
+    "scripts/sheet_tile_cpu_gate/run_accuracy_census.sbatch",
+    "scripts/sheet_tile_cpu_gate/run_after_suite.sbatch",
+    "scripts/sheet_tile_cpu_gate/run_tail_gate.sbatch",
+    "tests/test_edge_sheet.py"
+  ],
+  "reviewed_run_id": "r-20261110T010103197729-icm-sheet-axis-limits",
+  "revision_evidence": {
+    "method": "Read git object identities at measured suite, standing WEST and reviewed head; sheet.py, test_edge_sheet.py and reference.py blobs match across all three.",
+    "reference_blob": "c0fb33bc560b106082da7cf2f66779d97adc5e74",
+    "sheet_blob": "b1a1479cb8d7eea13004fc2c464ac8da1fd3ab75",
+    "test_blob": "4c35ac2122343803384ebe14920b2b617f65137e"
+  },
+  "scope_note": "Incremental review only; earlier d9ace axis-limit review remains available in its immutable record. No implementation files changed.",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T010103197729-icm-sheet-axis-limits/final-admission/after_suite.log",
+      "revision": "cb63840160f3f88c211c9401b1ccf5e01a9e1f61",
+      "summary": "725 passed in 3728.67s (1:02:08)"
+    },
+    "baseline_suite": {
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 8,
+      "failure_ids": [
+        "tests/test_edge_sheet.py::test_sloped_field_matches_reference[0.7853981633974483-start-0.1]",
+        "tests/test_edge_sheet.py::test_sloped_field_matches_reference[0.7853981633974483-end-0.1]",
+        "tests/test_edge_sheet.py::test_sloped_field_matches_reference[0.7853981633974483-end-1.0]",
+        "tests/test_edge_sheet.py::test_sloped_field_matches_reference[1.1780972450961724-end-1.0]",
+        "tests/test_edge_sheet.py::test_sloped_closed_form_field_matches_reference[0.7853981633974483-start-0.1]",
+        "tests/test_edge_sheet.py::test_sloped_closed_form_field_matches_reference[0.7853981633974483-end-0.1]",
+        "tests/test_edge_sheet.py::test_sloped_closed_form_field_matches_reference[0.7853981633974483-end-1.0]",
+        "tests/test_edge_sheet.py::test_sloped_closed_form_field_matches_reference[1.1780972450961724-end-1.0]"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T010103197729-icm-sheet-axis-limits/one-round/gates/baseline_suite.log",
+      "revision": "61dadd7eeee75fc00da0e9ccfa818e287eeaa940",
+      "summary": "8 failed, 715 passed in 1283.71s (0:21:23)"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T23:41:57.896588+00:00",
+  "total": 117
+}

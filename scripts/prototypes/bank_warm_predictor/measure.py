@@ -85,6 +85,7 @@ def main():
     parser.add_argument("--arm", choices=["plain", "secant", "tangent"], required=True)
     parser.add_argument("--streams", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--width", type=int, default=8)
     args = parser.parse_args()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(
@@ -98,6 +99,8 @@ def main():
                 devices=str(jax.devices()),
                 x64=jax.config.jax_enable_x64,
                 arm=args.arm,
+                width=args.width,
+                wall_label=f"titan P100, width {args.width}",
             )
         ),
         flush=True,
@@ -105,8 +108,10 @@ def main():
     assert jax.default_backend() == "gpu"
     machine = streams.build()
     archive = np.load(args.streams, allow_pickle=False)
-    initial = tuple(jnp.asarray(archive[name]) for name in ("m0", "m1", "m2"))
-    roots = jnp.asarray(archive["stationary"])
+    initial = tuple(
+        jnp.asarray(archive[name][: args.width]) for name in ("m0", "m1", "m2")
+    )
+    roots = jnp.asarray(archive["stationary"][: args.width])
     tangent_program = jax.jit(lambda m, s, d, t: tangent(machine, m, s, d, t))
     secant_program = jax.jit(
         lambda m, p, d, pd, t: drive_continuation.predict_seed(
@@ -161,6 +166,8 @@ def main():
             )
             row = dict(
                 arm=args.arm,
+                width=args.width,
+                wall_label=f"titan P100, width {args.width}",
                 step=step,
                 slice=index,
                 seed_residual=np.asarray(result.residual_path)[:, 0].tolist(),
@@ -171,7 +178,7 @@ def main():
                 prediction_ms=prediction_ms,
                 solve_ms=solve_ms,
                 batch_ms=prediction_ms + solve_ms,
-                per_slice_ms=(prediction_ms + solve_ms) / 16,
+                per_slice_ms=(prediction_ms + solve_ms) / args.width,
                 minor_radius=machine.minor_radius,
             )
             print("SLICE", json.dumps(row), flush=True)

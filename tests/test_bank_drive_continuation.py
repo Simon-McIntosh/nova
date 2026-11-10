@@ -210,7 +210,6 @@ def test_direct_solve_fails_where_continuation_certifies(toy):
 def test_sub_step_shrinks_on_failure_and_grows_on_success(toy):
     """The accepted sub-step doubles after success and halves after a miss."""
     reached = toy(initial_relative_step=0.01)
-    changes = [substep.change for substep in reached.substeps]
     print(
         "SUBSTEPS",
         [
@@ -242,7 +241,20 @@ def test_sub_step_shrinks_on_failure_and_grows_on_success(toy):
         assert following.change == pytest.approx(min(following.sub_step, remaining))
     assert growths, "no sub-step was ever accepted short of the target"
     assert shifts, "no sub-step ever missed its budget"
-    assert max(changes) > changes[0]
+    first_rejection = next(
+        i for i, substep in enumerate(reached.substeps) if not substep.converged
+    )
+    accepted_changes = [
+        substep.change
+        for substep in reached.substeps[first_rejection + 1 :]
+        if substep.converged
+    ]
+    assert any(
+        following > current
+        for current, following in zip(
+            accepted_changes, accepted_changes[1:], strict=False
+        )
+    )
     assert reached.substeps[0].change == pytest.approx(0.01 * START_DRIVE)
 
 

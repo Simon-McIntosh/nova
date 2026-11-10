@@ -68,20 +68,26 @@ The declared drop-one-segment mutation on the committed tree reports
 <strong>7 failed, 5 passed in 12.01s</strong>, <code>EXIT=1</code>, including all
 four WEST and caller comparisons. The mutation was removed and the source was
 verified byte-identical to the committed file afterward.</p>
-<p>The base has no <code>tests/test_imas_iron_read.py</code>, so its required
-suite-template resolution is the path-free default suite. Its first attempt was
-interrupted after five passes to isolate the baseline from subsequent edits. The
-full replacement runs in a frozen extraction of the original revision, with its
-own fixed HEAD, original source, and logged imported-module path. It has not yet
-completed; no baseline success or added-failure count is claimed here.</p>
+<p>The base has no <code>tests/test_imas_iron_read.py</code>. The installed
+Reckon resolver returns an empty command for this base and recognises it as an
+empty baseline, rather than expanding it to path-free pytest. The scope probe
+confirms that the test is absent at the base and present at the head, and that the
+head resolves to the exact focused command above. It completes with
+<code>EMPTY_BASELINE_CONFIRMED</code> and <code>EXIT=0</code>. This records an empty
+baseline; it does not claim a full-suite pass or a pre-existing test suite for the
+added file. The two broad default-suite attempts came from an incorrect initial
+interpretation, were interrupted after five passes each, and are excluded from
+the completed scoped pair. Their logs remain available.</p>
 <p>Logs and receipts are under
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T215930627453-icm-iron-read/</code>:
 <code>before-read.log</code>, <code>before-read.json</code>,
 <code>before-mesh.npz</code>, <code>scratch-after-read.log</code>,
 <code>after-read.json</code>, <code>candidate-identity.log</code>,
 <code>after-suite.log</code>, <code>negative-control.log</code>,
-<code>baseline-suite-initial.log</code> and <code>baseline-suite.log</code>.
-The manifest records the terminal suite state and any remaining blocker.</p>
+<code>baseline-suite-initial.log</code>, <code>baseline-suite.log</code>,
+<code>baseline-scope.log</code> and <code>baseline-scope.json</code>.
+The manifest distinguishes the empty baseline observation from the twelve passing
+head tests and records the exact probe command separately.</p>
 <p>The solver, its mesh selection, Newton iteration history and converged
 permeability range belong to the separate solver and WEST measurement nodes;
 this reader change makes no claim about their results.</p>

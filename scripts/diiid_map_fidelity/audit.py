@@ -11,6 +11,17 @@ from scipy.interpolate import RectBivariateSpline
 from scipy.optimize import root
 
 
+def finite_record(value):
+    """Persist unavailable landmarks as null rather than a numeric sentinel."""
+    if isinstance(value, dict):
+        return {key: finite_record(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [finite_record(item) for item in value]
+    if isinstance(value, float) and not np.isfinite(value):
+        return None
+    return value
+
+
 def stationary(field, radius, height, guess):
     spline = RectBivariateSpline(radius, height, field)
     answer = root(lambda x: [spline.ev(*x, dx=1), spline.ev(*x, dy=1)], guess)
@@ -93,7 +104,7 @@ def audit(row):
         data["height"],
         data["reference_saddle"],
     )
-    selected = np.asarray(terminal["selected_saddle_rz_m"])
+    selected = np.asarray(terminal["selected_saddle_rz_m"], dtype=np.float64)
     selected_matches = bool(connected and np.linalg.norm(guess - selected) < 1e-5)
     admitted_same_branch = terminal["topology"] == "diverted" and selected_matches
     delta = data["mapped"] - data["seed"]
@@ -142,6 +153,7 @@ def audit(row):
             "the executed Newton trajectory and is not an exhaustive null census."
         ),
     )
+    result = finite_record(result)
     (row / "audit.json").write_text(
         json.dumps(result, indent=2, allow_nan=False) + "\n"
     )

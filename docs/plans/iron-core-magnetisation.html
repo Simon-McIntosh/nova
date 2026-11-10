@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="biot,iron-core,machine-description,jax,efit">
   <meta name="plan-after" content="kernel-compile-barrier">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;,&quot;iron-core-magnetisation#s3&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;,&quot;iron-core-magnetisation#s5&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s1&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;iron-core-magnetisation#s8&quot;,&quot;iron-core-magnetisation#s10&quot;],&quot;s10&quot;:[&quot;iron-core-magnetisation#s5&quot;,&quot;iron-core-magnetisation#s6&quot;]}">
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="38">
 <meta name="plan-modified" content="2026-11-10">
 </head>
 <body>
@@ -227,7 +227,7 @@
     </p>
 
     <h2 id="s3">§3 — The cell interaction matrix on the device</h2>
-<section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s3" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       Build the cell interaction matrix G (B<sub>R</sub> and B<sub>Z</sub> at the cell centroids per
       unit M<sub>R</sub> and M<sub>Z</sub>, square, 2N by 2N for N cells, the operand of the §4 solve)
@@ -622,6 +622,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261109T102156082059-icm-sheet-tile-compile-cost" data-who="reckon-build" data-when="2026-11-09T23:42:29Z">
     <div class="r-comment-body"><p>Completed titan Tesla P100 compile census: original cold 1696 / 6493-cell builds compile in 7.3675576113164425 / 6.591119719669223 s, serialize 537969 bytes each and peak at 1432596480 / 6978228224 host bytes; full warm G walls remain 173.59582106396556 / 2272.9446377959102 s. Focused recovery job 1309335 completes the 6493-cell tile-only fresh hit (1.286908557638526 s lower plus retrieval) and separate empty-root AssertionError/EXIT=1 refusal. Combined verification is complete=true with no failures. Both program and memory rows are committed in docs/research/compile-cost-evidence.html; landing evidence is docs/evidence/fragments/iron-core-magnetisation/icm-sheet-tile-compile.html#icm-sheet-tile-compile-cost-state. All bounds pass and no full G build or 1696-cell row was repeated.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-11-10T00:30:00Z">
+    <div class="r-comment-body"><p>§3 landed. Clause (1) met on CPU at 1e-13 over every entry (worst 9.712e-14, sirius job 1308946). Clauses (2) and (3) met on titan, Tesla P100, by the lead's direction while the H200 was fully allocated: compile 7.37 / 6.59 s, executable 537,969 bytes, peak host 1.43 / 6.98 GB at 1696 / 6493 cells, fresh-process cache hit at both scales, empty-root control refuses; ledger rows recorded as titan. No H200 row exists; the warm execute walls are P100 walls. Merged at 0f3cf5469, review 116/120.</p></div>
 </div>
 </section>
 </main>

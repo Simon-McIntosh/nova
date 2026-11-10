@@ -30,8 +30,13 @@ def main():
         assert log.rstrip().endswith("EXIT=0"), f"incomplete process {label}"
         assert "XLA_FLAGS=unset" in log and "P100" in log, label
         result = json.loads((args.run / f"{label}.json").read_text())
-        assert result["wall_device"] == "titan P100", label
+        assert result["wall_device"] == "titan P100, width 8", label
         assert all("P100" in kind for kind in result["device_kinds"]), label
+        expected = {"cold"} | {
+            f"warm_{step}_{index}" for step in (1e-5, 1e-3) for index in range(1, 8)
+        }
+        assert len(result["rows"]) == 15, label
+        assert {row["key"] for row in result["rows"]} == expected, label
         return result
 
     builder = (args.run / "builder.log").read_text()
@@ -40,23 +45,6 @@ def main():
         process: {arm: receipt(f"{arm}-{process}") for arm in ("base", "head")}
         for process in (0, 1, 2)
     }
-    memory = {}
-    for arm in ("base", "head"):
-        log = (args.run / f"{arm}-memory.log").read_text()
-        assert log.rstrip().endswith("EXIT=0"), f"incomplete memory probe {arm}"
-        memory[arm] = json.loads((args.run / f"{arm}-memory.json").read_text())[
-            "widths"
-        ][0]
-    wide = all(row["fits"] for row in memory.values())
-    if wide:
-        for process, pair in pairs.items():
-            for arm in ("base", "head"):
-                extra = receipt(f"{arm}-wide-{process}")
-                assert extra["inputs_sha256"] == pair[arm]["inputs_sha256"]
-                pair[arm]["rows"].extend(extra["rows"])
-                pair[arm].setdefault("read_device_cost", {}).update(
-                    extra.get("read_device_cost", {})
-                )
     hashes = {
         receipt["inputs_sha256"] for pair in pairs.values() for receipt in pair.values()
     }
@@ -71,6 +59,7 @@ def main():
             pair["base"]["rows"], pair["head"]["rows"], strict=True
         ):
             assert (before["lanes"], before["key"]) == (after["lanes"], after["key"])
+            assert before["lanes"] == 8
             gaps, limits = pair_gaps(before, after)
             maximum = {key: float(np.max(value)) for key, value in gaps.items()}
             precision.append(
@@ -79,6 +68,8 @@ def main():
                     lanes=before["lanes"],
                     key=before["key"],
                     gaps=maximum,
+                    lane_gaps=gaps,
+                    limits=limits,
                 )
             )
             for name, value in maximum.items():
@@ -101,8 +92,8 @@ def main():
                         f"p{process} {arm} {row['key']}: diagnostic census differs"
                     )
                 per_read = float(np.median(row["walls_ms"])) / max(row["reads"])
-                memory = row["peak_memory"] or {}
-                peak = memory.get("peak_bytes_in_use", memory.get("bytes_in_use"))
+                allocator = row["peak_memory"] or {}
+                peak = allocator.get("peak_bytes_in_use", allocator.get("bytes_in_use"))
                 peak_gb = None if peak is None else peak / 1e9
                 table.append(
                     f"<tr><td>{process}</td><td>{arm}</td><td>{row['lanes']}</td>"
@@ -119,7 +110,7 @@ def main():
         json.dumps(dict(rows=precision, problems=problems), indent=2)
     )
     plt.style.use("data-ink")
-    widths = (16, 128) if wide else (16,)
+    widths = (8,)
     fig, axes = plt.subplots(1, len(widths), figsize=(14, 7.2), dpi=100, squeeze=False)
     fig.subplots_adjust(left=0.08, right=0.98, bottom=0.16, top=0.82, wspace=0.25)
     color = InkStyle().flux_color
@@ -155,7 +146,7 @@ def main():
                         zorder=3 if arm == "head" else 2,
                     )
         ax.set_xticks([0, 1, 2], ["cold", "warm\n1e-5 step", "warm\n1e-3 step"])
-        ax.set_ylabel("titan P100 wall per slice [ms]")
+        ax.set_ylabel("titan P100, width 8 wall per slice [ms]")
         ax.set_xlim(-0.5, 2.5)
         ax.set_ylim(bottom=0)
         ax.text(0, 1.05, f"{lanes} slices", transform=ax.transAxes, fontsize=16)
@@ -193,21 +184,30 @@ def main():
         if not problems
         else "Measured checks remain unmet: " + "; ".join(problems)
     )
-    memory_table = "".join(
-        f"<tr><td>{arm}</td><td>{name}</td>"
-        f"<td>{item['temp_size_in_bytes']}</td>"
-        f"<td>{item['estimated_working_bytes']}</td>"
-        f"<td>{row['device_limit_bytes']}</td><td>{item['fits']}</td></tr>"
-        for arm, row in memory.items()
-        for name, item in row["programs"].items()
+    comparisons = []
+    for step in (0.0, 1e-5, 1e-3):
+        costs = {}
+        for arm in ("base", "head"):
+            values = [
+                float(np.median(row["walls_ms"])) / max(row["reads"])
+                for process in (1, 2)
+                for row in pairs[process][arm]["rows"]
+                if row["step"] == step
+            ]
+            costs[arm] = float(np.mean(values))
+        comparisons.append(
+            dict(step=step, **costs, ratio=costs["head"] / costs["base"])
+        )
+    comparison_table = "".join(
+        f"<tr><td>{row['step']}</td><td>{row['base']:.5f}</td>"
+        f"<td>{row['head']:.5f}</td><td>{row['ratio']:.5f}</td></tr>"
+        for row in comparisons
     )
     width_note = (
-        "The compiled 128-lane programs fit, so both widths were measured."
-        if wide
-        else "Width 128 was not run: a compiled program exceeds the admission "
-        "budget of 90% of the allocator's usable device memory. The compiler's "
-        "temporary buffer and total working estimates are tabled below; the P100 "
-        "has 16 GB physical memory."
+        "Only the first eight lanes were run. The cold perturbations are the first "
+        "eight entries of the unchanged sixteen-lane schedule. Base builds all "
+        "cold and warm predecessor arrays once at width eight; both arms load "
+        "that same archive. Widths sixteen and 128 were not attempted on titan."
     )
     residual_max = max(
         max(row["residual"])
@@ -217,23 +217,32 @@ def main():
     )
     section = (
         '<section id="bank-carried-decision-device">'
-        "<h2>Titan P100 paired measurement</h2>"
-        "<p>" + escape(verdict) + " Every wall below is a titan P100 wall. "
-        "The H200 headline remains pending a free card. The pending H200 "
+        "<h2>Titan P100, width 8 paired measurement</h2>"
+        "<p>" + escape(verdict) + " Every wall below is a titan P100, width 8 wall. "
+        "The H200 width-16 headline remains pending a free card. The pending H200 "
         "allocation was cancelled by id under the revised device decision; "
         "the titan allocation uses one P100, four CPUs and 96 GB host memory.</p>"
         "<p>" + escape(width_note) + "</p>"
         '<figure id="bank-carried-decision-wall"><img '
         'src="/nova/figures/sub-millisecond-forward-path/'
         'bank-carried-decision/wall-per-slice.svg" '
-        'alt="Titan P100 wall per slice, base and carried decision, cold and warm">'
-        "<figcaption>Titan P100 wall per slice. Each marker represents one fresh "
+        'alt="Titan P100, width 8 wall per slice, base and carried decision, '
+        'cold and warm">'
+        "<figcaption>Titan P100, width 8 wall per slice. Each mark is a fresh "
         "measured process after process zero warmed its revision cache. Cold is "
         "the median of three calls; warm is the mean of seven input medians, "
         "with whiskers spanning the seven inputs. Both measured processes are "
         "shown. Raw walls describe the workload; revision comparisons require "
         "equal per-lane read counts or the wall per trial read table. "
-        "H200 headline pending a free card.</figcaption></figure>"
+        "H200 width-16 headline pending a free card.</figcaption></figure>"
+        "<h3>Read-normalised comparison</h3><p>Titan P100, width 8 wall per "
+        "batch trial read, averaged over the two measured processes and inputs "
+        "in each stream. A batch trial read uses the maximum per-lane read count; "
+        "the detailed table retains every lane’s counts.</p>"
+        "<table><thead><tr><th>Drive step</th>"
+        "<th>Base titan P100, width 8 wall [ms/read]</th>"
+        "<th>Head titan P100, width 8 wall [ms/read]</th>"
+        "<th>Head/base</th></tr></thead><tbody>" + comparison_table + "</tbody></table>"
         "<h3>Provenance and precision</h3><p>All processes, including warmup "
         "process zero, load the same seed and predecessor arrays built once at base. "
         "Input SHA-256: <code>" + next(iter(hashes)) + "</code>. "
@@ -251,27 +260,25 @@ def main():
         + precision_table
         + "</tbody></table>"
         "<h3>Fresh processes and lane census</h3>"
-        "<p>All timing columns are titan P100 walls. Full and carried counts "
+        "<p>All timing columns are titan P100, width 8 walls. Full and carried counts "
         "include the extra fresh certificate after tentative carried convergence. "
         "Peak device GB is the process allocator high-water mark through the row, "
         "including setup and diagnostics; it is not incremental solve memory.</p>"
         "<table><thead><tr><th>Process</th><th>Arm</th><th>Lanes</th><th>Input</th>"
-        "<th>Full reads</th><th>Carried reads</th><th>Titan P100 wall [ms/slice]</th>"
-        "<th>Titan P100 wall [ms/batch trial read]</th><th>Peak device [GB]</th>"
+        "<th>Full reads</th><th>Carried reads</th>"
+        "<th>Titan P100, width 8 wall [ms/slice]</th>"
+        "<th>Titan P100, width 8 wall [ms/batch trial read]</th>"
+        "<th>Peak device [GB]</th>"
         "<th>Per-lane counters</th></tr></thead><tbody>"
         + "".join(table)
         + "</tbody></table>"
         "<h3>Standalone read device cost</h3><p>Process one profiles one warmed "
-        "full and carried read at the cold input. Titan P100 device milliseconds "
+        "full and carried read at the cold input. Titan P100, width 8 device ms "
         "sum observed GPU stream activity including copies; this is not an inferred "
         "decomposition of solve wall.</p><table><thead><tr><th>Arm</th><th>Lanes</th>"
-        "<th>Read</th><th>Titan P100 device [ms]</th><th>Rebuilt by lane</th></tr>"
+        "<th>Read</th><th>Titan P100, width 8 device [ms]</th>"
+        "<th>Rebuilt by lane</th></tr>"
         "</thead><tbody>" + "".join(cost_rows) + "</tbody></table>"
-        "<h3>Compiler memory admission at 128 lanes</h3>"
-        "<table><thead><tr><th>Arm</th><th>Program</th>"
-        "<th>Temporary buffer [bytes]</th>"
-        "<th>Working estimate [bytes]</th><th>Allocator limit [bytes]</th>"
-        "<th>Admitted</th></tr></thead><tbody>" + memory_table + "</tbody></table>"
         "<p>Complete logs, receipts, common inputs, profiler traces, precision.json: "
         "<code>" + escape(str(args.run)) + "</code>. The checked SVG uses the "
         "repository data-ink style; raster inspection is recorded in the run log.</p>"
@@ -290,13 +297,14 @@ def main():
         "CHECKS",
         json.dumps(
             dict(
-                wall_device="titan P100",
+                wall_device="titan P100, width 8",
                 problems=problems,
                 precision_maxima=pmax,
                 fresh_residual_max=residual_max,
                 widths=widths,
                 inputs_sha256=next(iter(hashes)),
                 paired_rows=len(precision),
+                read_normalised_wall=comparisons,
             )
         ),
         flush=True,

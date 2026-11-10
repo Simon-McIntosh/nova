@@ -69,8 +69,23 @@ def audit(row):
     selected = np.asarray(terminal["selected_saddle_rz_m"])
     selected_matches = bool(connected and np.linalg.norm(guess - selected) < 1e-5)
     admitted_same_branch = terminal["topology"] == "diverted" and selected_matches
+    delta = data["mapped"] - data["seed"]
+    maximum = int(np.argmax(np.abs(delta)))
+    nodes = data["label"].size
+    if maximum < nodes:
+        radial, vertical = np.unravel_index(maximum, data["label"].shape)
+        location = [float(data["radius"][radial]), float(data["height"][vertical])]
+        region = "grid"
+    else:
+        assert len(data["seed"]) == nodes + len(data["wall"])
+        location = data["wall"][maximum - nodes].tolist()
+        region = "wall"
     result = dict(
         identity=row.name,
+        maximum_full_state_index=maximum,
+        maximum_full_state_region=region,
+        maximum_full_state_rz_m=location,
+        maximum_full_state_abs_wb=float(abs(delta[maximum])),
         branch_method=(
             "41 samples of linear interpolation between reference and "
             "terminal fields; saddle polishing from preceding root"

@@ -82,7 +82,7 @@ def render(row, destination, previews):
                 )
             )
         )
-    levels = np.linspace(min(ranges), max(ranges), 15)[1:-1]
+    levels = np.linspace(min(ranges), max(ranges), 11)[1:-1]
     figure = plt.figure(figsize=(14, 7.2), dpi=100)
     axes = [
         figure.add_axes([0.03 + index * 0.325, 0.15, 0.29, 0.67]) for index in range(3)
@@ -99,6 +99,7 @@ def render(row, destination, previews):
         axis_markersize=6.5,
         xpoint_markersize=7.5,
     )
+    defect_handles = []
     for index, ax in enumerate(axes):
         poloidal_axes(ax)
         draw_wall(ax, wall[:, 0], wall[:, 1], color="0.2", linewidth=1.5)
@@ -147,18 +148,35 @@ def render(row, destination, previews):
                 )
         else:
             maximum = float(np.max(np.abs(data["defect"])))
-            for sign, color, style in ((-1, REFERENCE, ":"), (1, SUBJECT, "-")):
+            for sign, style in ((-1, ":"), (1, "-")):
+                candidates = np.sort(sign * maximum * np.array([0.2, 0.5, 0.8]))
+                selected = candidates[
+                    (candidates > data["defect"].min())
+                    & (candidates < data["defect"].max())
+                ]
+                if not len(selected):
+                    continue
                 contour = draw_flux_contours(
                     ax,
                     radius,
                     height,
                     data["defect"].T,
-                    np.sort(sign * maximum * np.array([0.2, 0.5, 0.8])),
-                    color=color,
+                    selected,
+                    color=SUBJECT,
                     linewidth=2.6,
                     wall=None,
                 )
                 contour.set_linestyle(style)
+                defect_handles.append(
+                    Line2D(
+                        [],
+                        [],
+                        color=SUBJECT,
+                        lw=2.6,
+                        ls=style,
+                        label="negative defect" if sign < 0 else "positive defect",
+                    )
+                )
     for index, label_text in enumerate(
         ("EFIT reference", "seeded from EFIT", "g(ψ reference) − ψ reference")
     ):
@@ -166,14 +184,12 @@ def render(row, destination, previews):
     handles = [
         Line2D([], [], color=REFERENCE, lw=2.6, ls="--", label="EFIT"),
         Line2D([], [], color=SUBJECT, lw=3.0, label="seeded from EFIT"),
-        Line2D([], [], color=SUBJECT, lw=2.6, label="positive defect"),
-        Line2D([], [], color=REFERENCE, lw=2.6, ls=":", label="negative defect"),
-    ]
+    ] + defect_handles
     figure.legend(
         handles=handles,
         loc="lower center",
         bbox_to_anchor=(0.5, 0.025),
-        ncol=4,
+        ncol=len(handles),
         frameon=False,
         fontsize=14,
     )

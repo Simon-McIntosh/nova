@@ -78,7 +78,11 @@ def main():
                 number(ref["amplitude"]),
                 ref["core_cells"],
                 ref["diverted"],
-                ", ".join(number(value) for value in ref["maximum_grid_rz_m"]),
+                audit["maximum_full_state_region"]
+                + ": "
+                + ", ".join(
+                    number(value) for value in audit["maximum_full_state_rz_m"]
+                ),
             ]
         )
         for control in data["reference"]:
@@ -142,7 +146,7 @@ def main():
             "Current amplitude",
             "Core cells",
             "Map reads diverted",
-            "Largest grid defect R, Z [m]",
+            "Largest defect R, Z [m]",
         ],
         ref_rows,
     )
@@ -199,7 +203,6 @@ def main():
             "The defect is evaluated at EFIT.</figcaption></figure>"
         )
     document = section(document, "newton", body)
-    marker = "<h2>Contributor switches</h2>"
     supplement = table(
         [
             "Row",
@@ -213,7 +216,13 @@ def main():
         ],
         components,
     )
-    document = document.replace(marker, marker + supplement)
+    document = re.sub(
+        r'(<section id="decomposition">\s*<h2>Contributor switches</h2>)'
+        r"(?:\s*<table>.*?</table>)?",
+        lambda match: match[1] + supplement,
+        document,
+        flags=re.S,
+    )
     args.document.write_text(document)
     print(f"REPORT: {len(rows)} complete numerical rows inserted into {args.document}")
 

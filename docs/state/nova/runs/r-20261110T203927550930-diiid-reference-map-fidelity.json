@@ -1,0 +1,1454 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "0d324f9ad25e9c674c8e25cbc7b5cb5384752943",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T203927550930-diiid-reference-map-fidelity/brief.md",
+    "sha256": "152f845c8e0b0fca8985eb0cc4045fca93f7df24942afb8f4218a1b8355b0b17"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 41297536,
+      "cached_input_tokens_cumulative": 41297536,
+      "input_tokens": 41968617,
+      "input_tokens_cumulative": 41968617,
+      "output_tokens": 177023,
+      "output_tokens_cumulative": 177023,
+      "reasoning_output_tokens": 103484,
+      "reasoning_output_tokens_cumulative": 103484
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 2571,
+    "files": 12,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 163
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 228,
+        "name": "_solve_receipt",
+        "path": "tests/test_carrier_vertex_identity.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 163
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 163
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_treats_a_positionally_passed_wall_as_guarded",
+        "path": "tests/test_renderer_wall_scan.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 559,
+        "name": "test_mast_efm_geometry_matches_host_contour_route",
+        "path": "tests/test_transport_geometry_reference.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "main",
+        "path": "scripts/diiid_map_fidelity/report.py"
+      },
+      "window_line": 164
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "ff9a718271e049fb0965a66cc19516f7612aaffe",
+    "1802e2c12235729977e0063b2ab62a8b60b2a29a",
+    "49ecfdb27802a15e8c926c7ead5903322714cf6f",
+    "c6ab41328b1861335dbd88b984a4f198aca3fbb5",
+    "023922872904cec482c92a091f8f8a5ac648c6fe",
+    "b700cd49fa29f8cb9b15b736922c353c2ba96128",
+    "79d14ee0551c4265865e106539ba95516e5a713e",
+    "9a78483f4114bb12abc62c0f4065e28cc39c5ea3",
+    "f207dd0e65e541b23c9f389b8545a11ec295ad10",
+    "d6263c1ef784080b05d7594f8d445bc9967a009c",
+    "0e1ef38f0f6c375c00e697f9f899139965cc467a",
+    "afc2791e7141c95dfb98abd136b861396f0f86a7",
+    "53f24aec08743d5bedee93d9cb0e01d7bb972e8d",
+    "baf211c4d794b49ddc67166577d8fcc8e3399419"
+  ],
+  "completed_at": "2026-11-10T22:56:40Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-10T20:42:04Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python scripts/diiid_map_fidelity/measure.py --output /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T203927550930-diiid-reference-map-fidelity/measurement",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T203927550930-diiid-reference-map-fidelity/measurement-1309845.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "",
+    "reason": "brief-names-no-plan",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.2623669380087663,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-13T20:35:45Z, which is after this node's 10800s horizon ending 2026-11-10T23:39:32.131560+00:00",
+    "horizon_ends_at": "2026-11-10T23:39:32.131560+00:00",
+    "horizon_seconds": 10800,
+    "metered": true,
+    "observed_at": "2026-11-10T20:39:30Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-13T20:35:45Z",
+    "resets_at": "2026-11-14T15:28:13Z",
+    "seconds_until_reset": 326922,
+    "state": "quiet",
+    "utilisation_pct": 58.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-10T20:39:30Z",
+    "read_at": "2026-11-10T20:39:32Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 58.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-10T22:56:40Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-10T22:56:40Z",
+        "resets_at": 1794670093,
+        "used_percent": 63.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T203927550930-diiid-reference-map-fidelity/manifest.md",
+  "member": "disposable-r-20261110T203927550930-diiid-reference-map-fidelity",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "diiid-reference-map-fidelity",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/dev/shm/39486-fleet-1291586/claude-39486/-home-ITER-mcintos-Code-nova/5b10be66-c69b-456f-9a85-3840909f1723/scratchpad/diiid-reference-map-fidelity.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T203927550930-diiid-reference-map-fidelity/brief.md",
+    "brief_sha256": "152f845c8e0b0fca8985eb0cc4045fca93f7df24942afb8f4218a1b8355b0b17",
+    "capability": null,
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1154,
+          "cached_input_tokens": 285703,
+          "input_tokens": 286859,
+          "output_tokens": 242,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 287101,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "5b10be66-c69b-456f-9a85-3840909f1723",
+      "session_id": "5b10be66-c69b-456f-9a85-3840909f1723"
+    },
+    "done_when": "Residual and vertical force at EFIT's flux for 137/146/179 plus MAST control, with a rigid +/-2 cm shift as negative control; Newton seeded from EFIT's flux reports residual, convergence, landmark displacement and paired contour panels; a per-frame verdict between map inconsistency and solver path, with the residual decomposed by contributor if the map is inconsistent",
+    "estimated_hours": null,
+    "goal": "Measure whether EFIT's own DIII-D equilibrium is a fixed point of nova's forward map",
+    "id": "diiid-reference-map-fidelity",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-10T20:39:30Z",
+      "read_at": "2026-11-10T20:39:32Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 58.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T203927550930-diiid-reference-map-fidelity/manifest.md",
+    "negative_control": "",
+    "over_fence_reason": "each DIII-D solve row cold-compiles for about 990 s on the GPU (measured in the warm-up landing), and four rows plus decomposition need about two hours of wall clock",
+    "peer_scopes": {
+      "bank-carried-decision": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-carried-decision.html",
+        "docs/figures/sub-millisecond-forward-path/bank-carried-decision",
+        "nova/equilibrium/support_read.py",
+        "nova/equilibrium/topology.py",
+        "scripts/prototypes/bank_carried_decision",
+        "tests/test_tracked_read.py"
+      ],
+      "bank-warm-predictor": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-warm-predictor.html",
+        "docs/figures/sub-millisecond-forward-path/bank-warm-predictor",
+        "nova/equilibrium/drive_continuation.py",
+        "scripts/prototypes/bank_warm_predictor",
+        "tests/test_bank_drive_continuation.py"
+      ],
+      "diiid-diverted-branch-continuation": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-diverted-branch-continuation.html",
+        "docs/figures/diiid-diverted-branch-continuation",
+        "nova/equilibrium/constraint.py",
+        "nova/equilibrium/fixed_point.py",
+        "scripts/prototypes/diiid_diverted_branch",
+        "scripts/prototypes/diiid_forward_convergence/measure_branches.py",
+        "scripts/prototypes/diiid_material_mask/measure.py",
+        "scripts/prototypes/diiid_residual_plateau/measure.py",
+        "scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py",
+        "scripts/prototypes/diiid_support_mask/trace_support.py",
+        "tests/test_diverted_branch_continuation.py"
+      ],
+      "icm-magnetisation-solve": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-magnetisation-solve.html",
+        "docs/figures/iron-core-magnetisation/icm-magnetisation-solve",
+        "nova/biot/magnetisation.py",
+        "tests/test_magnetisation.py"
+      ],
+      "icm-sheet-axis-limits": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-sheet-axis-limits.html",
+        "docs/figures/iron-core-magnetisation/icm-sheet-axis-limits",
+        "nova/biot/sheet.py",
+        "nova/biot/tiledassembly.py",
+        "scripts/edge_sheet/reference.py",
+        "scripts/sheet_tile_cpu_gate",
+        "tests/test_edge_sheet.py",
+        "tests/test_sheet_tile.py"
+      ],
+      "icm-west-62751-solve": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-solve.html",
+        "docs/figures/iron-core-magnetisation/icm-west-62751-solve",
+        "scripts/west_iron_solve"
+      ]
+    },
+    "plan": "",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "",
+    "spec_level": "guided",
+    "time_budget": "180m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/diiid_map_fidelity",
+      "docs/research/diiid-reference-map-fidelity.html",
+      "docs/figures/diiid-reference-map-fidelity"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "EFIT is not a fixed point of nova's DIII-D map: relative defects 0.0481/0.0482/0.0300 on 137/146/179 against 0.0067 on MAST; upward reference forces 17.4/11.6 kN on 137/146, 179 balanced; Newton seeded from EFIT step-refused on all three; plasma-image and exterior-remainder terms comparable; the repair belongs to the DIII-D profile composition, not the solver; review 90/120",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 1.2622639397278748,
+      "derived": 0.5054410412275132,
+      "drain_hours": 168.0,
+      "effective_limit": 0.5054410412275132,
+      "elapsed_fraction": 0.4594918556613756,
+      "elapsed_hours": 77.1946317511111,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-11-11T09:00:01+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1794082577-c029e5",
+        "pace_multiple": null,
+        "remaining_seconds": 44407.325696,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-11-10T20:39:53+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.42000000000000004,
+      "remaining_windows": null,
+      "resets_at": "2026-11-14T15:28:13Z",
+      "state": "observed",
+      "utilisation": 0.58,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.618976,
+      "decided_by": "window",
+      "margin": 0.19352400000000003,
+      "name": "diiid-reference-map-fidelity",
+      "score": 0.8125,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.58
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.674304,
+        "observed_at": "2026-11-10T20:39:53+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-14T15:28:13Z",
+        "state": "observed",
+        "utilisation": 0.58,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1794082577-c029e5",
+    "member": "codex",
+    "node": "diiid-reference-map-fidelity",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-10T20:39:53.674304+00:00",
+    "score": 0.8125,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "lead: difficult node to codex sol; DIII-D forward never converges and the latest landing drifts away from EFIT. Waiver: icm-magnetisation-solve is deliberately blocked on the in-flight sheet axis repair",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.99,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "baf211c4d794b49ddc67166577d8fcc8e3399419",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "0d324f9ad25e9c674c8e25cbc7b5cb5384752943",
+    "reviewed_head_sha": "baf211c4d794b49ddc67166577d8fcc8e3399419",
+    "scores": {
+      "durability": 12,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "reuse": 5,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 90
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261110T203927550930-diiid-reference-map-fidelity",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+  "session_harness": "codex",
+  "session_id": "01a1c733-864b-74f2-ba2d-7c780c884e27",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 0,
+  "throughput": {
+    "cumulative_cached_input_tokens": 41297536,
+    "cumulative_input_tokens": 83266153,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 280507
+  },
+  "time_budget": "180m",
+  "tool_steps": 540.0,
+  "unplanned_reason": "measurement only: changes no product source; it writes a research document that informs the shipped diiid-vertical-force-balance plan and whichever DIII-D plan owns the repair",
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "source": "coordinator",
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 54234,
+        "budget_seconds": 9000,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: Closed-shell acceptance fails in the upstream interaction operand before Newton; no write grant permits that repair. The declared Jacobian mutation is non-discriminating under the current ten-correction bound and remains unmet. Baseline exact command exits 4 because its test path is absent. Stop rule prohibits further repair after the repeated full-command failures.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 63234,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-10T03:48:32Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-10T03:06:02Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 1497702,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220119790593-icm-magnetisation-solve/codex-home/cache"
+            },
+            {
+              "bytes": 28836794,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220119790593-icm-magnetisation-solve/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261109T220119790593-icm-magnetisation-solve",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 662,
+          "worker_pid": 3924608
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "Closed-shell acceptance fails in the upstream interaction operand before Newton; no write grant permits that repair. The declared Jacobian mutation is non-discriminating under the current ten-correction bound and remains unmet. Baseline exact command exits 4 because its test path is absent. Stop rule prohibits further repair after the repeated full-command failures.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-10T03:48:32Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 60678,
+        "log_fresh": false,
+        "manifest_commits": [
+          "87f46ff3e174db28c55221f44c3ba5ef6fa00f36",
+          "ef784a2d7d91a34ef70b3758ed982fa73f406f30",
+          "160d019c233599fa992604e64c0c3c864590c376",
+          "25eabd5de1c1291db4d62bc10bc73b307abe7ccf"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "ad1b68e886ff018c026a9b931c3e7bbb8f0fa2886e45ebc5ec200508397adfa5",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220119790593-icm-magnetisation-solve/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "sol",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220119790593-icm-magnetisation-solve/manifest.md; resolve the blocker before resuming the run",
+        "node": "icm-magnetisation-solve",
+        "phase": "blocked",
+        "plan": "iron-core-magnetisation",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261109T220119790593-icm-magnetisation-solve",
+        "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261109T220119790593-icm-magnetisation-solve",
+          "session_id": "01a1c2db-4cb7-7d53-9b51-3c049263cb45",
+          "source": "pointer"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 60766,
+        "terminal_at": "2026-11-10T03:47:00Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-magnetisation-solve"
+      }
+    ]
+  },
+  "wall_seconds": 8076,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-10T22:56:51Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-10T20:42:56Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 67762597,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T203927550930-diiid-reference-map-fidelity/codex-home/cache"
+      },
+      {
+        "bytes": 28814443,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T203927550930-diiid-reference-map-fidelity/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261110T203927550930-diiid-reference-map-fidelity",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1401,
+    "worker_pid": 1372050
+  },
+  "worker_seconds": 8076,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

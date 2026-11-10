@@ -33,6 +33,11 @@
       "kind": "exempted",
       "reason": "the commits field is the worker's list; the landing names every commit from base to 186dcb96c explicitly",
       "recorded_at": "2026-11-10T14:54:21.328899+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "both focused gate files ran at 186dcb96c inside the after_suite arm (test_forward_solve_request.py and test_receipt_support_count.py), and the labeller test ran at the head in gate-labeller.log",
+      "recorded_at": "2026-11-10T14:54:36.619526+00:00"
     }
   },
   "findings": [

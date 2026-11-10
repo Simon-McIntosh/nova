@@ -23,6 +23,11 @@
       "kind": "folded",
       "node": "playable-reduced-support-history",
       "recorded_at": "2026-11-10T14:53:46.100754+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "record hygiene: the gate's literal command is in the first line of each gate log, and the after_suite arm records the exact template command at the head",
+      "recorded_at": "2026-11-10T14:54:03.355730+00:00"
     }
   },
   "findings": [

@@ -18,6 +18,26 @@ from measure import extract  # noqa: E402
 from regression import FILES, gate  # noqa: E402
 
 NODE_TEST = "tests/test_diverted_branch_continuation.py"
+CONSTRAINT_FILES = (
+    "tests/test_shafranov_combination_discriminator.py",
+    "tests/test_centroid_constrained_fixture.py",
+    "tests/test_equilibrium_constraint_protocol.py",
+    "tests/test_forward_constraints.py",
+    "tests/test_constraint_active_set.py",
+    "tests/test_batched_labeller.py",
+    "tests/equilibrium/test_solve_vertical_pin.py",
+    "tests/test_first_moment_centroid_row.py",
+    "tests/test_constraint_residual_algebra.py",
+    "tests/test_forward_profile_arguments.py",
+    "tests/test_reduced_newton_constraint_bounds.py",
+    "tests/test_shape_constraints.py",
+    "tests/test_vertical_position_constraint.py",
+    "tests/test_edge_constraint_demonstration.py",
+    "tests/test_centroid_constraint_lattice_guard.py",
+    "tests/test_constraint_response_matrix.py",
+    "tests/test_reduced_newton_constraints.py",
+    "tests/test_constraint_interface.py",
+)
 
 
 def main():
@@ -63,7 +83,7 @@ def main():
                 assert after["exit_status"] == 0 and after["completed"]
             module = tree / "nova/equilibrium/fixed_point.py"
             text = module.read_text()
-            marker = "    seed = partition_read(initial, None).topology"
+            marker = "    if partition_read is None and topology_read is None:"
             assert text.count(marker) == 1
             module.write_text(text.replace(marker, "    return None\n" + marker))
             result = gate(
@@ -130,7 +150,7 @@ def main():
                 )
         else:
             result = {}
-            for path in FILES:
+            for path in FILES + CONSTRAINT_FILES:
                 result[path] = gate(
                     tree, args.revision, path, args.output / (Path(path).stem + ".log")
                 )

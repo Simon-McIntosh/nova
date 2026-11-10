@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 from pathlib import Path
 import sys
@@ -22,10 +23,7 @@ def row(args):
     import numpy as np
 
     from nova.equilibrium import fixed_point
-    from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
     from nova.jax.config import configure_dtypes
-    from nova.linalg.tensor_spline import fit_tensor_spline
-    from nova.media.poloidal import inside_wall_units
 
     configure_dtypes()
     assert jax.config.jax_enable_x64
@@ -33,6 +31,16 @@ def row(args):
 
     def load(name, path):
         module = original_load(name, path)
+        if name == "operand_capture":
+            source = inspect.getsource(module.run)
+            if "receipt.mask_history" in source:
+                assert source.count("receipt.mask_history") == 1
+                source = source.replace(
+                    "receipt.mask_history", "receipt.changed_mask_entries"
+                )
+                padding = "\n" * (module.run.__code__.co_firstlineno - 1)
+                exec(compile(padding + source, str(path), "exec"), module.__dict__)
+            print("COLLECTOR_RECEIPT_FIELD=changed_mask_entries", flush=True)
         if name == "material_measure" and args.branch == "diverted":
             prepare = module.probe._prepare_frame
 
@@ -112,6 +120,52 @@ def row(args):
 
                 def install(self):
                     super().install()
+                    from nova.equilibrium.forward import ForwardProfile
+
+                    solve = ForwardProfile.solve
+
+                    def persisted(profile, *a, **kw):
+                        request = a[0] if a else kw["request"]
+                        state = np.asarray(request.seed_policy.state)
+                        seed_hash = hashlib.sha256(state.tobytes()).hexdigest()
+                        if seeds:
+                            assert len(seeds) == 1 and seeds[0]["sha256"] == seed_hash
+                        else:
+                            seeds.append(dict(selected="request", sha256=seed_hash))
+                        print("REQUEST_SEED_SHA256=" + seed_hash, flush=True)
+                        receipt = solve(profile, *a, **kw)
+                        fixed = receipt.equilibrium.fixed_point
+                        saved = dict(
+                            revision=args.revision,
+                            module=fixed_point.__file__,
+                            cwd=str(Path.cwd().resolve()),
+                            residual=float(fixed.residual),
+                            converged=bool(fixed.converged),
+                            terminal_reason=int(receipt.termination_reason),
+                            attempted=int(receipt.attempted_newton_promotions),
+                            accepted=int(receipt.accepted_newton_promotions),
+                            residual_history=np.asarray(
+                                receipt.residual_history
+                            ).tolist(),
+                            changed_mask_entries=np.asarray(
+                                receipt.changed_mask_entries
+                            ).tolist(),
+                            seed_admission=seeds,
+                            branch_refusals=branches,
+                            warmup_refused_proposals=np.asarray(
+                                fixed.warmup_refused_proposals
+                            ).tolist(),
+                            warmup_first_nonfinite_index=np.asarray(
+                                fixed.warmup_first_nonfinite_index
+                            ).tolist(),
+                        )
+                        pending = self.output / "solve-receipt.pending.json"
+                        pending.write_text(json.dumps(saved, indent=2) + "\n")
+                        pending.replace(self.output / "solve-receipt.json")
+                        print("DURABLE_SOLVE_RECEIPT " + json.dumps(saved), flush=True)
+                        return receipt
+
+                    ForwardProfile.solve = persisted
                     inner = fixed_point._newton_krylov_inner
 
                     def measured(*a, **kw):
@@ -152,7 +206,6 @@ def row(args):
     original_row(args)
     capture = instances[0]
     profile = capture.profile
-    operator = profile.operator
     reader_connected = hasattr(capture.system.shadowed_map_fn, "_read_branch_topology")
     if hasattr(fixed_point.FixedPointResult, "newton_branch_refused_proposals"):
         assert reader_connected, "augmented route lost its topology reader"
@@ -164,10 +217,31 @@ def row(args):
     record["augmented_topology_reader_connected"] = reader_connected
     with np.load(args.output / "terminal.npz") as archive:
         data = {name: archive[name] for name in archive.files}
+    enrich(
+        args.output,
+        profile,
+        float(capture.system.flux_scale),
+        record,
+        data,
+        branches,
+        seeds,
+    )
+
+
+def enrich(output, profile, scale, record, data, branches, seeds):
+    """Read saved terminal and trip states without advancing a forward solve."""
+    import jax
+    import jax.numpy as jnp
+    import numpy as np
+
+    from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
+    from nova.linalg.tensor_spline import fit_tensor_spline
+    from nova.media.poloidal import inside_wall_units
+
+    operator = profile.operator
     reference = np.asarray(record["efit_x_point_rz_m"])
     count = profile.lattice.node_count
     flux_size = data["state"].size
-    scale = float(capture.system.flux_scale)
 
     @jax.jit
     def inspect(state):
@@ -214,7 +288,7 @@ def row(args):
 
     trips = []
     for number, inner in enumerate(record["inner"]):
-        with np.load(args.output / f"inner-{number}.npz") as values:
+        with np.load(output / f"inner-{number}.npz") as values:
             initial = np.asarray(values["initial"][:flux_size] * scale)
             returned = np.asarray(values["state"][:flux_size] * scale)
         trips.append(
@@ -225,7 +299,7 @@ def row(args):
                 **inner,
             )
         )
-        (args.output / "trips.json").write_text(json.dumps(trips, indent=2) + "\n")
+        (output / "trips.json").write_text(json.dumps(trips, indent=2) + "\n")
     terminal = topology_record(data["state"])
     assert terminal["support"] == record["support"], (
         "terminal support control disagrees"
@@ -234,7 +308,7 @@ def row(args):
         data["continued_saddle"] = np.r_[
             terminal["lower_saddle_rz_m"], terminal["lower_saddle_flux_wb"]
         ]
-        np.savez_compressed(args.output / "terminal.npz", **data)
+        np.savez_compressed(output / "terminal.npz", **data)
     record.update(
         terminal_topology=terminal,
         trip_topology=trips,
@@ -247,7 +321,7 @@ def row(args):
             sum(item["newton_branch_refused_proposals"]) for item in branches
         ),
     )
-    record_path.write_text(json.dumps(record, indent=2) + "\n")
+    (output / "receipt.json").write_text(json.dumps(record, indent=2) + "\n")
     print("BRANCH_SUMMARY " + json.dumps(record), flush=True)
 
 
@@ -258,6 +332,17 @@ def batch(args):
     records = json.loads((args.output / "comparison.json").read_text())
     paired = {(r["arm"], r["case"]): r for r in records}
     verdict = {}
+    seed_pairs = {}
+    for case in {case for _arm, case in paired}:
+        base, head = (paired[arm, case] for arm in ("base", "head"))
+        assert len(base["seed_admission"]) == len(head["seed_admission"]) == 1
+        seed_hash = base["seed_admission"][0]["sha256"]
+        assert seed_hash == head["seed_admission"][0]["sha256"]
+        assert head["augmented_topology_reader_connected"] is True
+        seed_pairs[case] = seed_hash
+    assert len(seed_pairs) == 5
+    verdict["paired_seed_sha256"] = seed_pairs
+    verdict["augmented_topology_reader_connected"] = True
     for frame, limit in ((137, 0.018), (146, 0.005)):
         name = f"frame-{frame}-diverted"
         base, head = (paired[arm, name] for arm in ("base", "head"))

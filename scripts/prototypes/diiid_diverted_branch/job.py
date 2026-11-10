@@ -16,6 +16,9 @@ def main():
     parser.add_argument("--base", required=True)
     parser.add_argument("--head", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument("--recover-from", type=Path)
+    source.add_argument("--resume-from", type=Path)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     scripts = Path(__file__).resolve().parent
@@ -54,6 +57,25 @@ def main():
             )
             return result.returncode
 
+        retained = ["--resume-from", str(args.resume_from)] if args.resume_from else []
+        if args.recover_from is not None:
+            previous = args.output / "recovered"
+            status = run(
+                "recover-base137",
+                "recover.py",
+                [
+                    "--source",
+                    str(args.recover_from),
+                    "--revision",
+                    args.base,
+                    "--output",
+                    str(previous / "base/frame-137-diverted"),
+                ],
+                "cuda,cpu",
+            )
+            if status:
+                raise SystemExit(status)
+            retained = ["--resume-from", str(previous)]
         status = run(
             "measurement",
             "measure.py",
@@ -65,6 +87,7 @@ def main():
                 "--output",
                 str(args.output / "measurement"),
                 "--forward-regressions",
+                *retained,
             ],
             "cuda,cpu",
         )

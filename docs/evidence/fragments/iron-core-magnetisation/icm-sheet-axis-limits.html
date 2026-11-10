@@ -123,9 +123,9 @@ B_R = −R f′/2 + R³ f‴/16 − R⁵ f⁽⁵⁾/384 + O(R⁷),
   </p>
   <h3 id="icm-sheet-axis-limits-checks">Qualification</h3>
   <p>
-    The first repaired sphere census has zero nonfinite pairs on scalar and
-    packed routes. The final committed-head census and the WEST and suite
-    receipts are recorded below when their runs finish. Fourteen focused
+    The repaired sphere census has zero nonfinite pairs on scalar and packed
+    routes. The committed-head census, WEST gate and both suite receipts are
+    recorded below. Fourteen focused
     value tests already pass, including the original witnesses, a flat edge
     starting on the axis, and a collinear disjoint axis target. The on-axis
     ZeroDivisionError witness now gives (0, 1.691446191554589e−8) T per A/m.
@@ -170,6 +170,56 @@ B_R = −R f′/2 + R³ f‴/16 − R⁵ f⁽⁵⁾/384 + O(R⁷),
     <code>source-blob-check.log</code> in this run directory. Sirius job
     1309356 runs the full WEST gate followed by both suite arms, without a
     shell timeout, through <code>scripts/sheet_tile_cpu_gate/run_tail_gate.sbatch</code>.
-    Those receipts remain pending.
+    Both suite arms completed successfully; their final receipts follow.
+  </p>
+  <h3 id="icm-sheet-axis-limits-final-receipts">WEST and suite receipts</h3>
+  <p>
+    Sirius job 1309356 completed with scheduler exit 0:0 in 42 min 19 s.
+    The standalone WEST gate passed in 720.07 s: every entry finite,
+    <strong>0 of 11,505,664 entries above 1e−13</strong>, worst
+    <strong>9.667e−14</strong> at matrix entry (1833, 1624), measured relative
+    to the absolute per-end antiderivative scale. The after suite repeats the
+    same full-mesh result. The baseline repeats 0 entries above 1e−13 with
+    worst 9.712e−14, preserving the earlier recorded result.
+  </p>
+  <table>
+    <thead><tr><th>Suite arm</th><th>Revision</th><th>Result</th><th>Wall [s]</th></tr></thead>
+    <tbody>
+      <tr><td>Baseline</td><td><code>4221309d2e66fd30eadafa7eacc3d967dd233481</code></td><td>702 passed; EXIT=0</td><td>785.13</td></tr>
+      <tr><td>After</td><td><code>19687600fe984b7e8ef565de50504a1e60ef4b96</code></td><td>721 passed; EXIT=0</td><td>979.24</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Nineteen tests were added and no failures were added. Both arms ran in
+    fresh processes, in the same sirius allocation, with the exact command
+    below and without a shell timeout. Existing endpoint precision checks
+    retain their expected values and tolerances and call the extended joint
+    recurrence; their eleven focused cases also pass.
+  </p>
+  <pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_edge_sheet.py tests/test_sheet_tile.py</pre>
+  <p>
+    The product source blob remains
+    <code>8cc0150fa32e080cbfd27a9e9885d67fe2cbc8d8</code>. The full-mesh gate
+    ran at source revision <code>765c910b3694378c4b72d44c5c3b557be7d8c096</code>.
+    Before either suite arm, the test-only owner-call follow-up was committed
+    as <code>19687600fe984b7e8ef565de50504a1e60ef4b96</code>; HEAD and all source,
+    test and launcher blobs were frozen, then verified again during the after
+    arm. Those receipts are <code>head-before-suite.json</code> and
+    <code>after-start-provenance.json</code> in the run directory.
+  </p>
+  <p>
+    The launcher initially captured its revision at job startup, before that
+    test-only follow-up. The after log's header is corrected to the actual
+    frozen test-tree revision, with the original header retained inline and
+    the original complete log beside it as <code>after_suite.log.asrecorded</code>.
+    The launcher now samples the current revision immediately before the after
+    arm, preventing that stale header. This final evidence and logging update
+    changes no tested Python source or test bytes.
+  </p>
+  <p>
+    Final logs: <code>full-mesh-gate.log</code>, <code>baseline_suite.log</code>
+    and <code>after_suite.log</code>. All three acceptance measures and both
+    suite arms are satisfied. Integration and plan-section closure belong to
+    the coordinator.
   </p>
 </section>

@@ -48,6 +48,7 @@ cd "$SCRATCH/base" || exit 2
 } > "$RUN/baseline_suite.log" 2>&1
 
 cd "$WORKTREE" || exit 2
+REV=$(git rev-parse HEAD)
 {
     header "$REV" "$COMMAND"
     eval "$COMMAND"

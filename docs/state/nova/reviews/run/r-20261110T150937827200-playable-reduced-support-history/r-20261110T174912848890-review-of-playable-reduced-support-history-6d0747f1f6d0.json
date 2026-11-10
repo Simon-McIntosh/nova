@@ -20,6 +20,11 @@
       "kind": "exempted",
       "reason": "the shape assertions guard truncation and zeroing, which is their stated purpose; the equality at line 42 carries the identity",
       "recorded_at": "2026-11-10T18:27:20.171301+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "pre-existing on main: base ddde21337 and head fail the 190 s warm CPU fence identically (2816 s vs 2802 s); not introduced by this lift",
+      "recorded_at": "2026-11-10T18:27:51.228132+00:00"
     }
   },
   "findings": [

@@ -55,6 +55,33 @@ def continue_saddle(label, solved, radius, height, seed):
     return guess, bool(connected), trace
 
 
+def force_components(data, expected):
+    """Expose the discrete plasma self-force beside the fixed exterior force."""
+    import jax
+    from nova.jax.config import configure_dtypes
+    from nova.equilibrium.conservation import FluxLattice, poloidal_field
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
+    lattice = FluxLattice(data["radius"], data["height"])
+    count = lattice.node_count
+    current = data["cell_current"]
+    factor = 2 * np.pi * np.asarray(lattice.node_radius)
+    result = {}
+    for name in ("external", "plasma"):
+        radial, _ = poloidal_field(lattice, data[name][:count])
+        result[name + "_force_n"] = float(
+            -np.sum(current * np.asarray(radial) * factor)
+        )
+    np.testing.assert_allclose(
+        sum(result.values()),
+        expected,
+        rtol=1e-9,
+        atol=1e-5,
+    )
+    return result
+
+
 def audit(row):
     data = dict(np.load(row / "fields.npz"))
     terminal = json.loads((row / "solve.json").read_text())
@@ -82,6 +109,7 @@ def audit(row):
         region = "wall"
     result = dict(
         identity=row.name,
+        force_components=force_components(data, reference[0]["force_n"]),
         maximum_full_state_index=maximum,
         maximum_full_state_region=region,
         maximum_full_state_rz_m=location,

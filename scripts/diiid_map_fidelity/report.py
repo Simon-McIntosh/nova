@@ -58,7 +58,7 @@ def main():
         audit = json.loads((path.parent / "audit.json").read_text())
         rows.append((path.parent.name, data, audit))
     assert len(rows) == 4
-    ref_rows, shift_rows, solve_rows, components = [], [], [], []
+    ref_rows, shift_rows, solve_rows, components, forces = [], [], [], [], []
     for identity, data, audit in rows:
         display = (
             "MAST 21978/35"
@@ -66,6 +66,15 @@ def main():
             else "DIII-D " + identity.rsplit("-", 1)[1]
         )
         ref = data["reference"][0]
+        force = audit["force_components"]
+        forces.append(
+            [
+                display,
+                number(force["external_force_n"]),
+                number(force["plasma_force_n"]),
+                number(force["plasma_force_n"] / ref["hoop_scale_n"]),
+            ]
+        )
         ref_rows.append(
             [
                 display,
@@ -153,6 +162,23 @@ def main():
     body += "<h3>Rigid displacement controls</h3>" + table(
         ["Row", "ΔZ [cm]", "Raw residual", "Fz [N]", "Fz / hoop scale", "Core cells"],
         shift_rows,
+    )
+    body += "<h3>Force-instrument self-force check</h3>" + table(
+        [
+            "Row",
+            "Fixed-exterior force [N]",
+            "Discrete plasma self-force [N]",
+            "Self-force / hoop scale",
+        ],
+        forces,
+    )
+    body += (
+        "<p>The external and plasma-image forces sum back to the primary force "
+        "using the same field-gradient operator and captured cell currents. "
+        "An isolated axisymmetric plasma has zero net vertical self-force; "
+        "the discrete self term therefore exposes the quadrature/image bias "
+        "rather than an external vertical drive. The primary total is retained "
+        "as measured, with this diagnostic beside it.</p>"
     )
     document = section(document, "reference", body)
     body = "<h2>Newton seeded from EFIT</h2>" + table(

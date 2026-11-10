@@ -1,0 +1,235 @@
+"""Material-law, geometry and analytic controls for production iron solves."""
+
+from __future__ import annotations
+
+from functools import lru_cache
+
+import jax
+import jax.numpy as jnp
+import numpy as np
+import pytest
+import shapely
+
+from nova.biot import magnetisation as iron
+from nova.biot.greens import greens_bz_br
+from nova.jax.config import configure_dtypes
+
+configure_dtypes()
+assert jax.config.jax_enable_x64
+
+
+@lru_cache(maxsize=None)
+def sphere():
+    return (
+        shapely.Point(0, 0)
+        .buffer(0.5, 256)
+        .intersection(shapely.box(0, -0.5, 0.5, 0.5))
+    )
+
+
+@lru_cache(maxsize=None)
+def shell():
+    return (
+        shapely.Point(0, 0)
+        .buffer(1, 512)
+        .difference(shapely.Point(0, 0).buffer(0.9, 512))
+        .intersection(shapely.box(0, -1, 1, 1))
+    )
+
+
+def uniform(points, strength=0.01):
+    return np.tile([0.0, strength], (len(points), 1))
+
+
+def loop(points, current=1.0):
+    bz, br = greens_bz_br(points[:, 0], points[:, 1], 0.05, 0.0)
+    return current * np.column_stack([br, bz])
+
+
+@pytest.mark.parametrize("mu", [1.0, 10.0, 100.0, 1000.0])
+@pytest.mark.slow
+@pytest.mark.timeout(900)
+def test_uniform_sphere_matches_prototype(mu, capsys):
+    result = iron.solve_magnetisation(
+        sphere(), uniform, [0, 10], [mu, mu], cell_size=0.1
+    )
+    assert result.converged
+    assert result.cell_count == 44
+    assert result.iterations <= 1
+    assert result.magnetisation.dtype == np.float64
+    points = result._mesh.centroids
+    total = uniform(points) + result.field(points)
+    inside = np.linalg.norm(points, axis=1) < 0.3
+    exact = 3 * mu / (mu + 2) * 0.01
+    error = np.max(np.abs(total[inside, 1] / exact - 1))
+    # The polygonised sphere's interior is effectively uniform; the dipole
+    # retains the finite boundary-resolution error measured by the ring control.
+    assert error < 1e-9
+    probes = np.array([[1.0, 0.0], [0.0, 1.0]])
+    measured = (uniform(probes) + result.field(probes))[:, 1]
+    fraction = (mu - 1) / (mu + 2)
+    expected = 0.01 * np.array([1 - fraction / 8, 1 + fraction / 4])
+    recorded = {
+        1.0: [0, 0],
+        10.0: [9.736922259584446e-7, 1.4861685984079998e-6],
+        100.0: [1.299614500682722e-6, 1.8379254441702741e-6],
+        1000.0: [1.3400238558780586e-6, 1.8779696518977929e-6],
+    }
+    exterior_error = np.abs(measured / expected - 1)
+    np.testing.assert_allclose(exterior_error, recorded[mu], rtol=0, atol=2e-10)
+    if mu == 1:
+        np.testing.assert_array_equal(result.magnetisation, 0)
+        np.testing.assert_array_equal(total, uniform(points))
+    with capsys.disabled():
+        print(
+            f"\nsphere mu={mu:g}: cells={result.cell_count}, "
+            f"iterations={result.iterations}, interior_max={error:.12g}, "
+            f"exterior_error={exterior_error.tolist()}",
+            flush=True,
+        )
+
+
+@pytest.mark.parametrize(
+    "mu, recorded",
+    [
+        (10.0, [1.486, 1.486, 1.487]),
+        (100.0, [6.846, 6.821, 6.861]),
+        (1000.0, [59.327, 56.949, 60.219]),
+    ],
+)
+@pytest.mark.slow
+@pytest.mark.timeout(1200)
+def test_closed_shell_matches_prototype(mu, recorded, capsys):
+    result = iron.solve_magnetisation(shell(), loop, [0, 10], [mu, mu], cell_size=0.04)
+    assert result.converged
+    assert result.cell_count == 228
+    assert result.iterations <= 1
+    probes = np.array([[2.0, 0], [0, 2.0], [3.0, 1.0]])
+    air = loop(probes)
+    total = air + result.field(probes)
+    shielding = np.linalg.norm(air, axis=1) / np.linalg.norm(total, axis=1)
+    np.testing.assert_allclose(shielding, recorded, rtol=0, atol=0.0005)
+    exact = ((2 * mu + 1) * (mu + 2) - 2 * (mu - 1) ** 2 * 0.9**3) / (9 * mu)
+    with capsys.disabled():
+        print(
+            f"\nshell mu={mu:g}: cells={result.cell_count}, "
+            f"iterations={result.iterations}, shielding={shielding.tolist()}, "
+            f"analytic_relative_error={np.abs(shielding / exact - 1).tolist()}",
+            flush=True,
+        )
+
+
+def test_mesh_merges_slivers_without_losing_material():
+    region = shapely.Polygon([(1, 0), (1.93, 0), (1.43, 0.73), (1, 0.73)])
+    cells = iron._mesh(region, 0.1)
+    merged = shapely.union_all([shapely.Polygon(p) for p in cells.polygons])
+    assert region.symmetric_difference(merged).area < 1e-14
+    assert cells.areas.min() >= 0.15 * 0.1**2 * (1 - 1e-12)
+    assert all(
+        shapely.Polygon(p).contains(shapely.Point(c))
+        for p, c in zip(cells.polygons, cells.centroids)
+    )
+
+
+def test_mesh_preserves_holes_and_refuses_isolated_slivers():
+    region = shapely.box(1, 0, 1.2, 0.2).difference(shapely.box(1.04, 0.04, 1.06, 0.06))
+    cells = iron._mesh(region, 0.1)
+    merged = shapely.union_all([shapely.Polygon(p) for p in cells.polygons])
+    assert region.symmetric_difference(merged).area < 1e-14
+    with pytest.raises(ValueError, match="sliver"):
+        iron._mesh(shapely.box(1, 0, 1.001, 0.001), 0.1)
+
+
+def nonlinear_law():
+    b = np.array([0.0, 0.05, 0.1, 0.2, 0.4, 0.8, 1.2, 2.0, 6.0])
+    return b, 215 + 1400 * b
+
+
+def test_material_is_monotone_and_holds_end_values():
+    b, mu = nonlinear_law()
+    law = tuple(jnp.asarray(x) for x in iron._fit_law(b, mu))
+    sample = jnp.linspace(1e-8, 8, 2001)
+
+    def h(value):
+        return value * (1 / iron._MU0 - iron._coefficient(value, *law))
+
+    derivative = jax.vmap(jax.grad(h))(sample)
+    assert np.all(np.isfinite(derivative))
+    assert float(derivative.min()) > 0
+    np.testing.assert_allclose(
+        iron._coefficient(jnp.asarray(b), *law),
+        (mu - 1) / (iron._MU0 * mu),
+        rtol=2e-15,
+    )
+    top = iron._coefficient(jnp.asarray([6.0, 8.0, 80.0]), *law)
+    np.testing.assert_array_equal(top, np.full(3, float(top[0])))
+    at_zero = iron._coefficient(jnp.asarray(0.0), *law)
+    np.testing.assert_allclose(at_zero, (215 - 1) / (iron._MU0 * 215))
+    # Positive samples alone do not imply a positive differential material law.
+    with pytest.raises(ValueError, match="differential permeability"):
+        iron._fit_law([0, 1, 2], [2, 2, 10])
+
+
+@pytest.mark.parametrize(
+    "b, mu",
+    [([1, 2], [2, 2]), ([0, 0], [2, 2]), ([0, 1], [1, np.nan]), ([0, 1], [0.5, 2])],
+)
+def test_material_refuses_invalid_tables(b, mu):
+    with pytest.raises(ValueError, match="B-H table"):
+        iron._fit_law(b, mu)
+
+
+def test_differential_jacobian_is_finite_at_zero():
+    law = iron._fit_law([0, 1], [10, 10])
+    operands = tuple(
+        jnp.asarray(x) for x in (np.eye(4) * iron._MU0 * 0.5, np.zeros(4), *law)
+    )
+    jacobian = jax.jacfwd(iron._residual)(jnp.zeros(4), operands)
+    np.testing.assert_allclose(jacobian, np.eye(4) * 0.55)
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(1200)
+def test_nonlinear_shell_uses_differential_newton(capsys):
+    b, mu = nonlinear_law()
+    result = iron.solve_magnetisation(
+        shell(),
+        lambda p: loop(p, current=2e6),
+        b,
+        mu,
+        cell_size=0.04,
+        max_iterations=10,
+    )
+    with capsys.disabled():
+        print(
+            f"\nnonlinear shell: converged={result.converged}, "
+            f"iterations={result.iterations}, residual={result.residual_history}, "
+            f"mu_range={result.permeability_relative.min():.6g}-"
+            f"{result.permeability_relative.max():.6g}",
+            flush=True,
+        )
+    assert result.converged
+    assert result.iterations <= 10
+    assert result.residual_history[-1] < 1e-8
+    assert np.all(np.diff(result.residual_history) < 0)
+
+
+def test_update_operands_and_factor_are_runtime_arguments():
+    law = iron._fit_law([0, 1], [10, 10])
+    operands = tuple(
+        jnp.asarray(x) for x in (np.eye(6) * iron._MU0 * 0.5, np.ones(6) * 0.01, *law)
+    )
+    state = jnp.zeros(6)
+    factor = iron._factor(state, operands)
+    lowered = iron._update.lower(state, operands, factor, jnp.asarray(1.0))
+    hlo = lowered.compiler_ir(dialect="hlo").as_hlo_text()
+    assert "f64[6,6]{1,0} parameter(" in hlo
+    assert "f64[6]{0} parameter(" in hlo
+    assert "f64[6,6]{1,0} constant(" not in hlo
+    result, residual = iron._update(state, operands, factor, jnp.asarray(1.0))
+    assert float(jnp.linalg.norm(residual)) < 1e-10
+    moved = (operands[0], operands[1] * 2, *operands[2:])
+    shifted, _ = iron._update(state, moved, factor, jnp.asarray(1.0))
+    np.testing.assert_allclose(shifted, 2 * result)
+    damped, _ = iron._update(state, moved, factor, jnp.asarray(0.5))
+    np.testing.assert_allclose(damped, result)

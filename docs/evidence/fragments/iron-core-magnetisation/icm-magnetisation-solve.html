@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="iron-core-magnetisation">
+<title>Material solve blocked on axis-touching sheet edges</title>
+</head>
+<body>
+<article id="icm-magnetisation-solve-record">
+<h1 id="icm-magnetisation-solve-title">Material solve blocked on axis-touching sheet edges</h1>
+<p>The production material-solve scaffold calls the existing sheet-tile interaction
+owner. It has a merged-cell mesh, a monotone cubic H(B) interpolant with positive
+differential permeability, and dense differentiated Newton updates with runtime
+state, operands, LU factors and backtracking scales. These are partial work:
+the analytic control has not passed and this record claims no delivered solve.</p>
+<p>The 44-cell sphere at 0.1 m cell size reaches the production tile, which produces
+528 nonfinite target–edge pairs out of 26,972 pairs (44 targets, 613 edges). Twelve
+edges lie on or end at R = 0. For example, the target (0.04913072, −0.44836919) m
+against the edge (0, −0.5) to (0, −0.4) m returns B_R = NaN and B_Z = −0.0.
+The neighbouring sloped edge (0, −0.5) to (0.003067942, −0.499990588) m returns
+B_R = 1.2510684759427282e−11 T per A/m and B_Z = NaN. The solve explicitly
+refuses the resulting nonfinite matrix before Newton.</p>
+<p>The defect is in the existing sheet owner, outside this node's write grant.
+Replacing NaNs with zero would erase the finite field of a sheet that ends on
+the axis, so the solver does not mask them. No kernel repair or alternative
+interaction derivation is included. The axis-source and axis-target limits must
+be supplied by the sheet owner before the sphere and closed-shell acceptance
+measure and its differential-versus-secant negative control can be completed.</p>
+<p>Reproduction files in the assigned run directory:
+<code>production-probe.log</code>, <code>diagnose-interaction.py</code> and
+<code>diagnose-interaction.log</code>. The prototype input receipts read were
+<code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/prototype/sphere.json</code>,
+<code>shell.json</code> and <code>shell-mu1000.json</code>. The proposed regression
+checks remain enabled in <code>tests/test_magnetisation.py</code>.</p>
+</article>
+</body>
+</html>

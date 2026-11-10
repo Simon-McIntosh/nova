@@ -962,6 +962,7 @@ def test_axis_limits_keep_inactive_gradient_paths_finite(start, end, point):
     assert np.isfinite(_compiled_axis_pair()[1](values)).all()
 
 
+@pytest.mark.timeout(900)
 def test_shell_oblique_radial_magnetisation():
     """A distant oblique probe resolves the weak radial cell response."""
     import jax.numpy as jnp

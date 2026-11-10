@@ -39,6 +39,7 @@ __all__ = [
     "segment_frame",
     "sheet_error",
     "sheet_reference",
+    "graded_precise_ring_reference",
     "strip_greens",
 ]
 
@@ -317,3 +318,90 @@ def sheet_error(
         detail[name] = relative
         worst = max(worst, relative)
     return worst, detail
+
+
+def graded_precise_ring_reference(start, end, point, *, rtol=1e-13):
+    """Integrate independent 50-digit ring kernels, returning (psi, B_R, B_Z).
+
+    Short distant edges need one panel; nearby edges grade toward the target's
+    orthogonal foot. Successive Gaussian orders and panel bisection must agree.
+    The axis kernel is evaluated by its elementary ring limit.
+    """
+    import mpmath as mp
+
+    from nova.biot.greens import MU0
+
+    start, end, point = map(lambda x: np.asarray(x, dtype=float), (start, end, point))
+    delta = end - start
+    length = np.linalg.norm(delta)
+    if start[0] == end[0] == 0:
+        return np.zeros(3)
+    foot = float(np.clip(np.dot(point - start, delta) / length**2, 0, 1))
+    distance = np.linalg.norm(point - start - foot * delta)
+    if distance == 0:
+        raise ValueError("the target lies on the closed source segment")
+    panels = (
+        np.array([[0.0, 1.0]])
+        if distance >= length
+        else _geometric_panels(foot, 8, 1.7)
+    )
+    previous = None
+    with mp.workdps(50):
+        r, z = map(mp.mpf, point)
+        ar, az = map(mp.mpf, start)
+        dr, dz = map(mp.mpf, delta)
+        mu = mp.mpf(MU0)
+        for refinement in range(8):
+            nodes, weights = leggauss(min(4 * 2**refinement, 32))
+            total = np.zeros(3)
+            for lower, upper in panels:
+                for node, weight in zip(nodes, weights):
+                    t = mp.mpf((lower + upper) / 2 + (upper - lower) / 2 * node)
+                    a, h = ar + t * dr, az + t * dz
+                    height = z - h
+                    span = (r + a) ** 2 + height**2
+                    if r == 0:
+                        psi = br = mp.mpf(0)
+                        bz = mu * a * a / (2 * span ** mp.mpf("1.5"))
+                    else:
+                        gap = (r - a) ** 2 + height**2
+                        k = 4 * r * a / span
+                        first, second = mp.ellipk(k), mp.ellipe(k)
+                        psi = mu * mp.sqrt(span) * ((1 - k / 2) * first - second)
+                        bz = (
+                            mu
+                            / (2 * mp.pi * mp.sqrt(span))
+                            * (first + (a * a - r * r - height * height) / gap * second)
+                        )
+                        br = (
+                            mu
+                            * height
+                            / (2 * mp.pi * r * mp.sqrt(span))
+                            * (
+                                -first
+                                + (a * a + r * r + height * height) / gap * second
+                            )
+                        )
+                    total += (
+                        (upper - lower)
+                        / 2
+                        * weight
+                        * length
+                        * np.array([float(psi), float(br), float(bz)])
+                    )
+            scale = np.maximum(np.abs(total), np.max(np.abs(total)) * 1e-8)
+            if previous is not None and np.all(
+                np.abs(total - previous) <= rtol * scale
+            ):
+                return total
+            previous = total
+            if refinement >= 3:
+                middle = panels.mean(axis=1)
+                panels = np.stack(
+                    (
+                        np.column_stack((panels[:, 0], middle)),
+                        np.column_stack((middle, panels[:, 1])),
+                    ),
+                    axis=1,
+                ).reshape(-1, 2)
+    raise AssertionError("the precise graded ring reference did not converge")

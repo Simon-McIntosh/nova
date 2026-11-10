@@ -332,7 +332,7 @@ def _cylinder_radial(xp, gamma, radius, source):
     return xp.where(at_zero, 0.0, value)
 
 
-def _source_potential_series(xp, gamma, radius, source, slope):
+def _source_potential_series(xp, gamma, radius, source, slope, *, exterior_only=True):
     """Source multipoles of psi/(mu0 pi r²) and its target derivatives.
 
     The addition theorem integrates cos(phi) P_n onto
@@ -347,7 +347,10 @@ def _source_potential_series(xp, gamma, radius, source, slope):
     ratio = source * a / (xp.abs(held_slope) * distance)
     eligible = (
         (slope != 0.0)
-        & (xp.abs(source - slope * gamma) > radius * (1 + 1e-12))
+        & (
+            (not exterior_only)
+            | (xp.abs(source - slope * gamma) > radius * (1 + 1e-12))
+        )
         & (ratio <= 0.5)
     )
     if xp is np and not np.any(eligible):
@@ -403,6 +406,46 @@ def _source_potential_series(xp, gamma, radius, source, slope):
     )
     factor = xp.sign(held_slope) * slope**2 / a**2
     return eligible, intercept, factor * value, factor * height, factor * radial
+
+
+def _source_series_ends(xp, radius, target_z, start_r, start_z, end_r, end_z):
+    """Difference physical source multipoles before adding a primitive gauge.
+
+    Both ends must lie inside the convergence sphere about the source line's
+    axis intercept. The common zero-source primitive then cancels identically.
+    Holding inactive geometry before the series keeps its derivative defined.
+    """
+    dz = end_z - start_z
+    slope = (end_r - start_r) / xp.where(dz != 0, dz, 1.0)
+    held_slope = xp.where(slope != 0, slope, 1.0)
+    intercept = start_z - target_z - start_r / held_slope
+    distance = xp.hypot(radius, intercept)
+    eligible = (
+        (dz != 0)
+        & (slope != 0)
+        & (
+            xp.maximum(start_r, end_r) * xp.sqrt(1 + slope**2)
+            <= 0.5 * xp.abs(held_slope) * distance
+        )
+    )
+    r = xp.where(eligible, radius, 1.0)
+    b = xp.where(eligible, slope, 1.0)
+    fields, fluxes = [], []
+    for source, height in ((end_r, end_z), (start_r, start_z)):
+        source = xp.where(eligible, source, 0.0)
+        gamma = xp.where(eligible, height - target_z, 1.0)
+        _, _, value, vertical, radial = _source_potential_series(
+            xp, gamma, r, source, b, exterior_only=False
+        )
+        orientation = xp.where(dz > 0, 1.0, -1.0)
+        fields.append(
+            (
+                orientation * MU0 / 2 * r * vertical,
+                orientation * MU0 / 2 * (2 * value + r * radial),
+            )
+        )
+        fluxes.append(orientation * MU0 * np.pi * r**2 * value)
+    return eligible, fields, fluxes
 
 
 def _source_gradient_series(xp, gamma, radius, source, slope, regular):
@@ -1178,6 +1221,11 @@ class SheetFlux:
             return float(self.sheet_current * (radial[0] - radial[1])), float(
                 self.sheet_current * (height[0] - height[1])
             )
+        series, ends, _ = _source_series_ends(np, r, z, *self.start, *self.end)
+        if series and route == "closed":
+            return tuple(
+                float(self.sheet_current * (ends[0][i] - ends[1][i])) for i in (0, 1)
+            )
         if self._flat:
             b_r, b_z = (
                 self._pancake_field(r, z)
@@ -1251,6 +1299,9 @@ class SheetFlux:
         if _near_axis(np, r, z, *self.start, *self.end):
             radial, height, flux = _axis_expansion(r, z, *self.start, *self.end)
             return float(self.sheet_current * (flux[0] - flux[1]))
+        series, _, fluxes = _source_series_ends(np, r, z, *self.start, *self.end)
+        if series and route == "closed":
+            return float(self.sheet_current * (fluxes[0] - fluxes[1]))
         if self._flat:
             value = (
                 self._pancake_flux(r, z) if route == "closed" else self._flat_flux(r, z)
@@ -1606,6 +1657,9 @@ def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
     start_z = xp.where(inactive, 0.0, start_z)
     end_r = xp.where(inactive, 0.5, end_r)
     end_z = xp.where(inactive, 1.0, end_z)
+    source_series, source_ends, _ = _source_series_ends(
+        xp, target_r, target_z, start_r, start_z, end_r, end_z
+    )
     # The sheet current is an azimuthal density, so the field depends on the
     # segment and the sign of K alone. Ordering the endpoints by height makes
     # that independence arithmetic rather than a convention on the caller.
@@ -1663,6 +1717,9 @@ def _sheet_end_terms(xp, target_r, target_z, start_r, start_z, end_r, end_z):
         (pancake_height, False),
     ):
         for index in range(2):
+            values[index] = xp.where(
+                source_series, source_ends[index][0 if radial else 1], values[index]
+            )
             values[index] = xp.where(
                 near_axis, expansion[0 if radial else 1][index], values[index]
             )

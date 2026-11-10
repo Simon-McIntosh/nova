@@ -19,10 +19,12 @@
 <p>The implementation, focused controls and five-file paired suites are complete.
 The paired suites have zero added failures. Titan P100 job <code>1309317</code>
 and retry <code>1309319</code> both failed during the sixteen-lane base builder.
-Those failures are accepted as measured memory limits. The authorised rerun,
-job <code>1309751</code>, is queued at <strong>titan P100, width 8</strong>.
-Its paired precision checks and wall figure are pending. The H200 width-16
-headline remains pending a free card.</p>
+Those failures are accepted as measured memory limits. The width-8 titan rerun,
+job <code>1309751</code>, timed out after two hours and is retained as an
+incomplete measurement, <strong>not a speed verdict</strong>. The required
+wall verdict awaits reserved H200 width-16 job <code>1309825</code> and an
+inspected figure. The job is submitted for real under <code>gpu_0003_grpA</code>
+with one GPU, four CPUs, 96 GB host memory and a two-hour allocation.</p>
 <h2 id="bank-carried-decision-mechanism">Continuous refresh under a fixed decision</h2>
 <p><code>support_read.read_batch</code> still forms the stationary stencil and
 one batch-level <code>rebuild_needed</code> decision, including represented
@@ -96,7 +98,7 @@ including source hashes and each per-file receipt, is retained as
 <code>paired-suite-audit.json</code> beside <code>paired-suite-audit.log</code>,
 which ends <code>EXIT=0</code>. The committed reproducer is
 <code>scripts/prototypes/bank_carried_decision/audit_suites.py</code>.</p>
-<h2 id="bank-carried-decision-pending">Prior width-16 memory limits and width-8 rerun</h2>
+<h2 id="bank-carried-decision-pending">Titan capacity and timeout receipts; H200 verdict pending</h2>
 <p>The final paired suite above closes the CPU gate. The earlier job
 <code>1308719</code> and repaired tracked-read job <code>1308723</code> retain
 the preceding revisions' evidence; the repaired file reports nine passing tests.
@@ -131,28 +133,46 @@ precision results to admit. Width 128 was not attempted because width 16 could
 not run. The two failures closed that width-16 attempt as a measured memory limit.
 The coordinator lifted the retry rule for one change of shape to width 8;
 no product code was changed. The H200 width-16 headline remains pending a free card.</p>
-<p>The timing runner builds cold and preceding warm-stream inputs once at base,
-uses separate revision caches, warms each once, and measures two fresh processes
-per arm at width 8. The cold inputs use the first eight entries of the unchanged
-sixteen-lane perturbation schedule. Base builds the cold and warm predecessor
-arrays once at width 8; both arms load the identical archive. Width 16 and 128
-are forbidden on this titan run. An independent full read recomputes every terminal residual.
-The untimed read-census executable is accepted beside a timing only if its
-per-lane trial and update counts match the timed executable. The report uses
-<code>pair_gaps</code> for the precision budget and draws the required wall figure
-only after receipts exist.</p>
+<p>The titan width-8 run built its common inputs at base and then reached only
+10 of the 15 inputs in base process zero. Accounting reports
+<code>TIMEOUT</code> at <code>02:00:05</code>; there is no completed head arm.
+The retained partial cold row is <strong>titan P100, width 8</strong>,
+13.14854 s per slice, four reads and three updates in every lane. This is an
+incomplete observation on the wrong device for the wall verdict, not a speed
+verdict for this change. The ten recorded rows have a largest independent fresh
+residual of 6.230038707144558e-11 and matching diagnostic census, but do not
+certify the missing rows or any paired precision comparison. The common-input
+SHA-256 is <code>8e347c8f2657c1fcb2841fc7fc09da2a7be0e2fe51c81e5e19a8135a535f83ce</code>.
+The builder ends <code>EXIT=0</code>; the truncated base-zero log has no terminal
+exit receipt. The parent log misleadingly ends <code>EXIT=0</code> despite the
+scheduler timeout. All original titan receipts remain unchanged.</p>
+<p>The reserved H200 runner returns to all sixteen original perturbation lanes.
+It builds cold and preceding warm-stream inputs once at base, loads the same
+archive in both arms, uses a separate cache per revision, runs a separate warmup,
+and then fresh measured processes zero, one and two per arm. Both source trees
+are pinned archives, so a queued run cannot silently change with the worktree.
+An independent full read recomputes every terminal residual. The untimed census
+must match the timed executable's per-lane trials and updates. The reporter
+requires every arm's complete receipt and a positive all-arms completion marker,
+then uses <code>pair_gaps</code> for the unchanged precision budget. A parent
+exit line alone cannot admit a truncated measurement. The reporter was applied
+to the actual timed-out titan parent log and refused it with
+<code>AssertionError: paired job did not finish all arms</code>; the retained
+refusal log ends <code>EXIT=1</code>.</p>
 <p>Complete logs and receipts are under
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T044945756828-bank-carried-decision</code>.
 The reproducible launchers and reporter are under
 <code>scripts/prototypes/bank_carried_decision</code>.
 The failed P100 logs are in <code>titan/builder.log</code> and
 <code>titan-memory-fit/builder.log</code>, with their parent logs in the same
-directories. The authorised width-8 rerun is job <code>1309751</code>, using one P100, four
-CPUs, 96 GB host memory and a two-hour allocation. Its logs and receipts are in
-<code>titan-eight</code> under the run directory above. Every wall from that job
-is labelled <strong>titan P100, width 8</strong>; width 16 and 128 will not run
-on titan. If width 8 cannot allocate, the attempt stops with its byte count.
-The paired measurement and inspected figure remain required for a complete verdict.
-The H200 width-16 headline remains pending a free card.</p>
+directories. The incomplete width-8 receipts remain under <code>titan-eight</code>,
+labelled <strong>not a speed verdict</strong>. Reserved H200 width-16
+job <code>1309825</code> will supply the paired wall verdict; no further titan
+run is allowed. Its base archive is <code>8ce11904123bfebd516bc418416a6ec5eeb10117</code>
+and head archive <code>d4bab5fe15e463dcec7831253b5c85f64495b657</code>.
+New receipts will be retained under <code>h200-sixteen</code>. The job is left
+queued until a card is free, with no timer cancellation or fallback.
+The paired precision audit and rendered, inspected SVG remain required before
+completion. The H200 headline remains pending a free card.</p>
 </section>
 </main></body></html>

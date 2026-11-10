@@ -30,6 +30,7 @@ from nova.equilibrium.fixed_point import _relative_residual
 from nova.equilibrium.map_extraction import apply_delta_star
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.jax.config import configure_dtypes
+from scripts.diiid_map_fidelity.audit import continue_saddle
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -315,7 +316,7 @@ def decomposition(prepared, arrays, output):
     scores["coils_only"] = dict(
         sup_wb=float(np.max(np.abs(coil[:n]))), current_channels=len(zero_current)
     )
-    scores["prescribed_passive_only"] = dict(
+    scores["prescribed_circuits_only"] = dict(
         sup_wb=float(np.max(np.abs(prescribed_only[:n]))),
         present=op.prescribed_field is not None,
     )
@@ -371,7 +372,12 @@ def solve(prepared, arrays, output):
     reference_axis = np.asarray(arrays["reference_axis"])
     reference_saddle = np.asarray(arrays["reference_saddle"])
     branch = bool(equilibrium.topology.diverted)
-    same_branch = bool(branch and np.sign(saddle[1]) == np.sign(reference_saddle[1]))
+    continued, connected, _ = continue_saddle(
+        arrays["label"], field, arrays["radius"], arrays["height"], reference_saddle
+    )
+    same_branch = bool(
+        branch and connected and np.linalg.norm(continued - saddle) < 1e-5
+    )
     mapped = jax.jit(
         profile.flux_map(
             jnp.asarray(prepared["current"]), target_current=prepared["target"]
@@ -389,7 +395,7 @@ def solve(prepared, arrays, output):
         axis_delta_m=(axis - reference_axis).tolist(),
         axis_distance_m=float(np.linalg.norm(axis - reference_axis)),
         selected_saddle_rz_m=saddle.tolist(),
-        same_lower_branch=same_branch,
+        admitted_same_branch=same_branch,
         xpoint_distance_m=float(np.linalg.norm(saddle - reference_saddle))
         if same_branch
         else None,

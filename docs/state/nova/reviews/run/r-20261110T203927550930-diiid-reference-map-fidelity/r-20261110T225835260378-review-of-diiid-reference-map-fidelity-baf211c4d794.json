@@ -1,0 +1,137 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: source manifest has neither baseline_suite nor after_suite; source document explicitly declares its measurement-only suite unarmed. No measured zero is inferred from absent logs.",
+  "assertion_analysis": [
+    {
+      "failure_condition": "Changing the local residual denominator or norm without changing fixed_point._relative_residual causes the cross-check to fail; independent implementation, shared inputs.",
+      "location": "measure.py:134"
+    },
+    {
+      "failure_condition": "Changing assembly of only one component or defect can fail, but changing tare itself cannot because it cancels from both sides; no independent tare validation.",
+      "location": "measure.py:326"
+    },
+    {
+      "failure_condition": "Disabling JAX float64 fails the configuration assertions.",
+      "location": "measure.py:462 and audit.py:76"
+    },
+    {
+      "failure_condition": "A retained field containing nonfinite values fails the finite-state assertion; it does not prove revision provenance.",
+      "location": "measure.py:514"
+    },
+    {
+      "failure_condition": "A captured total force inconsistent with the separately differentiated plasma and external fields fails force closure; this cannot detect a common sign or normalization mistake in both computations.",
+      "location": "audit.py:87"
+    },
+    {
+      "failure_condition": "A wall maximum with a seed whose length does not equal grid nodes plus wall points fails the layout assertion.",
+      "location": "audit.py:118"
+    },
+    {
+      "failure_condition": "Fewer or more than four captured row receipts fail row-count assertions; these do not independently require each specific row identity.",
+      "location": "audit.py:175 and report.py:60"
+    },
+    {
+      "failure_condition": "A nonconverged MAST solve or direct terminal map residual at least 1e-8 fails the known-root control.",
+      "location": "audit.py:178-180"
+    },
+    {
+      "failure_condition": "Returning the seed instead of the translated saddle fails the independent analytic endpoint; admitting a convex field fails not-connected; replacing missing landmarks by zero fails the literal null expectation; the script is in the run directory rather than the committed regression suite.",
+      "location": "source run check-branch.py:12-25"
+    }
+  ],
+  "call_site_count": 5,
+  "call_sites": [
+    "scripts/diiid_map_fidelity/submit.sh:15",
+    "scripts/diiid_map_fidelity/job.sh:11",
+    "scripts/diiid_map_fidelity/artifacts.sh:12",
+    "scripts/diiid_map_fidelity/artifacts.sh:18",
+    "scripts/diiid_map_fidelity/measure.py:375"
+  ],
+  "completed_at": "2026-11-10T23:13:50Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "the reuse shortfall is the duplicated figure-save checks in a one-off measurement renderer (finding 1); no product code is duplicated",
+      "recorded_at": "2026-11-10T23:23:13.695325+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-10T23:02:23Z",
+  "figure_review": {
+    "inspected": [
+      "diiid-d3d-shot-00000c4a7b-179.svg",
+      "diiid-d3d-shot-002495e835-146.svg",
+      "diiid-d3d-shot-0040ca9bdc-137.svg",
+      "mast-21978-35.svg"
+    ],
+    "render_tool": "ImageMagick convert -background white -density 120 ... -resize 1400x",
+    "rendered_from_reviewed_revision": true,
+    "result": "All four readable with no clipped or overlapping labels; population contours and nulls visible. ImageMagick emitted scratch-path warnings but produced viewable 1400px images."
+  },
+  "filing_blocker": "Review contract requires an integer failure delta derived from source suite-arm logs that do not exist; coordinator must resolve the unarmed-suite exception or supply completed source arms.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "measurement-only script: the closure assertion is kept as bookkeeping, and the research document does not claim it protects against tare regression",
+      "recorded_at": "2026-11-10T23:22:47.737173+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "one-off diagnostic renderer in a measurement script, with no product surface; the duplicated save checks are not imported anywhere and are retired with the script",
+      "recorded_at": "2026-11-10T23:23:00.471997+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/diiid_map_fidelity/measure.py",
+      "line": "326",
+      "severity": "non-blocking",
+      "text": "non-blocking: The closure assertion is algebraic rather than an independent tare check: the same tare is subtracted from plasma and added to the reference remainder, so replacing it with an incorrect or zero tare leaves the assertion true while changing the contributor ranking; retain this as a bookkeeping check and do not count it as protection against tare regression."
+    },
+    {
+      "file": "scripts/diiid_map_fidelity/render.py",
+      "line": "26",
+      "severity": "non-blocking",
+      "text": "non-blocking: The new save function duplicates canvas-bound and text-overlap validation owned by benchmarks/diiid_forward_gs_match.py:3782, rather than extending or wrapping it; its extra panel exclusion and SVG sizing leave two implementations of the same checks to maintain, although this does not invalidate the inspected figures or numerical receipts."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read the fourteen commits through baf211c4d794b49ddc67166577d8fcc8e3399419; the diff adds measurement and reporting scripts, one research document and four inspected contour figures, with no nova product modification.",
+    "done_when": "The three clauses in the source brief are substantially measured by measurement-1309845.log and artifacts-1309866.log, while docs/research/diiid-reference-map-fidelity.html:43 retains the failed 146 downward-shift prediction and the limits of separating prescribed active and passive circuits.",
+    "goal": "The source brief asks whether EFIT is a fixed point of the registered map; docs/research/diiid-reference-map-fidelity.html:19 reports reference residuals, force, seeded Newton outcomes and qualified frame-by-frame interpretations.",
+    "manifest": "The source manifest names fourteen actual commits and completed measurement/artifact logs with EXIT=0, but supplies neither baseline_suite nor after_suite because its suite is explicitly unarmed.",
+    "write_paths": "The source manifest declares scripts/diiid_map_fidelity, docs/research/diiid-reference-map-fidelity.html and docs/figures/diiid-reference-map-fidelity; all twelve paths changed against 0d324f9ad25e9c674c8e25cbc7b5cb5384752943 are inside them."
+  },
+  "justifications": {
+    "durability": "The preserved check-branch.py and source-verification.log demonstrate a convex-field refusal and null serialization, and audit.py:178-180 would fail on lost MAST convergence or a large direct map residual, but measure.py:326 cannot detect an incorrect tare and no regression tests are committed.",
+    "evidence": "measurement-1309845.log records all four completed numerical rows and EXIT=0, and scripts/diiid_map_fidelity/audit.py:178 independently requires a converged MAST root with direct residual below 1e-8, although no suite delta is measurable from the absent source suite arms.",
+    "fit": "scripts/diiid_map_fidelity/render.py:19 reuses nova.media poloidal drawing and ink roles, every inspected SVG has readable unclipped labels, and source symbols contain no plan-stage labels, while the save checker remains local.",
+    "goal_fidelity": "scripts/diiid_map_fidelity/measure.py:170 evaluates the benchmark map at the reference and shifted states and :348 uses its registered explicit-seed request with warmup zero, while the report accurately limits the contributor diagnosis.",
+    "reuse": "scripts/diiid_map_fidelity/measure.py reuses profile construction, current adapters, the registered request and map operators, but render.py:26 duplicates the existing checked-save capability in benchmarks/diiid_forward_gs_match.py:3782 instead of extending or wrapping that owner.",
+    "scope_discipline": "All twelve paths in the base-to-head diff lie in the three grants in the source manifest, and scripts/diiid_map_fidelity/measure.py imports rather than modifies nova product code."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief asks whether EFIT is a fixed point of the registered map; docs/research/diiid-reference-map-fidelity.html:19 reports reference residuals, force, seeded Newton outcomes and qualified frame-by-frame interpretations.\nVERDICT done_when: The three clauses in the source brief are substantially measured by measurement-1309845.log and artifacts-1309866.log, while docs/research/diiid-reference-map-fidelity.html:43 retains the failed 146 downward-shift prediction and the limits of separating prescribed active and passive circuits.\nVERDICT write_paths: The source manifest declares scripts/diiid_map_fidelity, docs/research/diiid-reference-map-fidelity.html and docs/figures/diiid-reference-map-fidelity; all twelve paths changed against 0d324f9ad25e9c674c8e25cbc7b5cb5384752943 are inside them.\nVERDICT manifest: The source manifest names fourteen actual commits and completed measurement/artifact logs with EXIT=0, but supplies neither baseline_suite nor after_suite because its suite is explicitly unarmed.\nVERDICT diff: Read the fourteen commits through baf211c4d794b49ddc67166577d8fcc8e3399419; the diff adds measurement and reporting scripts, one research document and four inspected contour figures, with no nova product modification.\nCALL_SITES: scripts/diiid_map_fidelity/submit.sh:15, scripts/diiid_map_fidelity/job.sh:11, scripts/diiid_map_fidelity/artifacts.sh:12, scripts/diiid_map_fidelity/artifacts.sh:18, scripts/diiid_map_fidelity/measure.py:375\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/diiid_map_fidelity/measure.py:170 evaluates the benchmark map at the reference and shifted states and :348 uses its registered explicit-seed request with warmup zero, while the report accurately limits the contributor diagnosis.\nSCORE evidence: 17\nJUSTIFICATION evidence: measurement-1309845.log records all four completed numerical rows and EXIT=0, and scripts/diiid_map_fidelity/audit.py:178 independently requires a converged MAST root with direct residual below 1e-8, although no suite delta is measurable from the absent source suite arms.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All twelve paths in the base-to-head diff lie in the three grants in the source manifest, and scripts/diiid_map_fidelity/measure.py imports rather than modifies nova product code.\nSCORE durability: 12\nJUSTIFICATION durability: The preserved check-branch.py and source-verification.log demonstrate a convex-field refusal and null serialization, and audit.py:178-180 would fail on lost MAST convergence or a large direct map residual, but measure.py:326 cannot detect an incorrect tare and no regression tests are committed.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/diiid_map_fidelity/render.py:19 reuses nova.media poloidal drawing and ink roles, every inspected SVG has readable unclipped labels, and source symbols contain no plan-stage labels, while the save checker remains local.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/diiid_map_fidelity/measure.py reuses profile construction, current adapters, the registered request and map operators, but render.py:26 duplicates the existing checked-save capability in benchmarks/diiid_forward_gs_match.py:3782 instead of extending or wrapping that owner.\nFINDING scripts/diiid_map_fidelity/measure.py:326 non-blocking: The closure assertion is algebraic rather than an independent tare check: the same tare is subtracted from plasma and added to the reference remainder, so replacing it with an incorrect or zero tare leaves the assertion true while changing the contributor ranking; retain this as a bookkeeping check and do not count it as protection against tare regression.\nFINDING scripts/diiid_map_fidelity/render.py:26 non-blocking: The new save function duplicates canvas-bound and text-overlap validation owned by benchmarks/diiid_forward_gs_match.py:3782, rather than extending or wrapping it; its extra panel exclusion and SVG sizing leave two implementations of the same checks to maintain, although this does not invalidate the inspected figures or numerical receipts.\n",
+  "reuse_search": "Searched reviewed revision nova/media, nova/equilibrium, benchmarks/diiid_* and scripts for checked figure saving, stationary-point polishing, saddle continuation, finite serialization, reference-map residuals and report generation; opened benchmarks/diiid_forward_gs_match.py:3782 owner of checked saving. Measurement composes existing benchmark/map/field operators; no pre-existing owner of this complete four-row experiment or its captured-field interpolation audit was identified.",
+  "review_run_id": "r-20261110T225835260378-review-of-diiid-reference-map-fidelity-baf211c4d794",
+  "reviewed_base_sha": "0d324f9ad25e9c674c8e25cbc7b5cb5384752943",
+  "reviewed_head_sha": "baf211c4d794b49ddc67166577d8fcc8e3399419",
+  "reviewed_run_id": "r-20261110T203927550930-diiid-reference-map-fidelity",
+  "scores": {
+    "durability": 12,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_armed": false,
+  "times_source": "run-record",
+  "timestamp": "2026-11-10T23:45:09.212520+00:00",
+  "total": 90
+}

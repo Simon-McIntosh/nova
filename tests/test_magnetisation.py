@@ -233,16 +233,27 @@ def test_nonlinear_shell_uses_differential_newton(capsys):
         cell_size=0.04,
         max_iterations=10,
     )
+    history = np.asarray(result.residual_history)
+    assert history.size >= 3
+    # For quadratic convergence this ratio equals the preceding contraction
+    # and tends to zero; a fixed linear contraction instead gives one.
+    quadratic_ratio = history[-1] * history[-3] / history[-2] ** 2
+    observed_order = np.log(history[-1] / history[-2]) / np.log(
+        history[-2] / history[-3]
+    )
     with capsys.disabled():
         print(
             f"\nnonlinear shell: converged={result.converged}, "
             f"iterations={result.iterations}, residual={result.residual_history}, "
+            f"quadratic_ratio={quadratic_ratio:.12g}, "
+            f"observed_order={observed_order:.12g}, "
             f"mu_range={result.permeability_relative.min():.6g}-"
             f"{result.permeability_relative.max():.6g}",
             flush=True,
         )
     assert result.converged
     assert result.iterations <= 10
+    assert quadratic_ratio < 0.1, "late residual contractions must accelerate"
     assert result.residual_history[-1] < 1e-8
     assert np.all(np.diff(result.residual_history) < 0)
 

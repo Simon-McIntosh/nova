@@ -145,4 +145,31 @@ B_R = −R f′/2 + R³ f‴/16 − R⁵ f⁽⁵⁾/384 + O(R⁷),
     The source-series and radial-expansion thresholds are one-sided convergence
     conditions, not radius shifts, clamps, or replacements of the source shape.
   </p>
+  <h3 id="icm-sheet-axis-limits-head-controls">Committed-head controls</h3>
+  <p>
+    At <code>765c910b3694378c4b72d44c5c3b557be7d8c096</code>, the final sphere
+    census reports 0 nonfinite pairs on both routes out of 26,972. The minimum
+    distance between any centroid and any source segment is
+    0.01857874750124538 m. The four full-geometry forward-derivative tests also
+    pass (581.35 s including compilation), covering the zero-area edge,
+    zero-radius source end, zero-radius target and flat edge starting at zero.
+  </p>
+  <p>
+    Restoring the entire unguarded source owner in a scratch extraction fails
+    the axis-lying edge, the supplied one-end-on-axis edge, the supplied
+    on-axis target and the collinear axis target: 4 failed, 1 passed, EXIT=1.
+    The test process asserts that its imported module is the mutant and that
+    the introduced zero-source primitive is absent there. The tracked source
+    is unchanged: both HEAD and worktree blobs are
+    <code>8cc0150fa32e080cbfd27a9e9885d67fe2cbc8d8</code>, and HEAD contains the
+    introduced <code>_zero_source_terms</code> marker once.
+  </p>
+  <p>
+    Logs: <code>head-census.log</code>, <code>focused-values.log</code>,
+    <code>focused-gradient.log</code>, <code>negative-control.log</code> and
+    <code>source-blob-check.log</code> in this run directory. Sirius job
+    1309356 runs the full WEST gate followed by both suite arms, without a
+    shell timeout, through <code>scripts/sheet_tile_cpu_gate/run_tail_gate.sbatch</code>.
+    Those receipts remain pending.
+  </p>
 </section>

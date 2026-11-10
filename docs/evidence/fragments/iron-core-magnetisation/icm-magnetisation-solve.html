@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="docs-project" content="nova">
 <meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="icm-magnetisation-solve">
 <meta name="plan-evidence-for" content="iron-core-magnetisation">
 <title>Material solve blocked on axis-touching sheet edges</title>
 </head>
@@ -22,6 +23,11 @@ against the edge (0, −0.5) to (0, −0.4) m returns B_R = NaN and B_Z = −0.0
 The neighbouring sloped edge (0, −0.5) to (0.003067942, −0.499990588) m returns
 B_R = 1.2510684759427282e−11 T per A/m and B_Z = NaN. The solve explicitly
 refuses the resulting nonfinite matrix before Newton.</p>
+<p>Nine focused controls passed in 133.91 s: mesh coverage and sliver refusal,
+material monotonicity and endpoint holds, invalid-table refusal, the finite
+zero-field Jacobian, and runtime state, matrix and factor arguments. The log is
+<code>material-tests.log</code>. This excludes the eight analytic and nonlinear
+sphere/shell controls and is not the acceptance gate.</p>
 <p>The defect is in the existing sheet owner, outside this node's write grant.
 Replacing NaNs with zero would erase the finite field of a sheet that ends on
 the axis, so the solver does not mask them. No kernel repair or alternative
@@ -34,6 +40,13 @@ measure and its differential-versus-secant negative control can be completed.</p
 <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/prototype/sphere.json</code>,
 <code>shell.json</code> and <code>shell-mu1000.json</code>. The proposed regression
 checks remain enabled in <code>tests/test_magnetisation.py</code>.</p>
+<p>Both required suite commands were invoked with the template resolved over
+each arm: no test path at the base, where this file is absent, and
+<code>tests/test_magnetisation.py</code> at the committed head. Both were explicitly
+terminated under the scope-stop rule and their logs end with <code>EXIT=143</code>;
+neither arm reached its summary. The Jacobian mutation was not applied because
+the unmutated analytic controls cannot reach Newton. These acceptance measures
+remain to be run after the sheet repair; this node is blocked.</p>
 </article>
 </body>
 </html>

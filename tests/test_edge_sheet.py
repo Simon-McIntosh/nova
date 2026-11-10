@@ -1007,3 +1007,6 @@ def test_shell_oblique_radial_magnetisation():
     assert wanted[0] == pytest.approx(9.80715345e-15, rel=1e-9)
     np.testing.assert_allclose(scalar, wanted, rtol=1e-10, atol=1e-28)
     np.testing.assert_allclose(packed, wanted, rtol=1e-10, atol=1e-28)
+
+    derivative = _compiled_axis_pair()[1](jnp.array((*point, *start, *end)))
+    assert np.isfinite(derivative).all()

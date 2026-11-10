@@ -223,3 +223,111 @@ B_R = −R f′/2 + R³ f‴/16 − R⁵ f⁽⁵⁾/384 + O(R⁷),
     the coordinator.
   </p>
 </section>
+<section id="icm-sheet-axis-limits-shell-accuracy">
+  <h2>Finite shell operands: source multipoles before endpoint subtraction</h2>
+  <p>
+    The material qualification mesh at <code>25eabd5de</code> has 228 shell cells.
+    At (R,Z)=(3,1) m the response B<sub>R</sub>/M<sub>R,5</sub> reproduces
+    as 6.53973138e-9 T/(A/m), against the independent ring integral
+    9.80715345e-15 T/(A/m). The largest erroneous edge joins (0,1) to
+    (0.003067956763,0.999995293810) m after the material owner's
+    common dilation and edge-identity rounding. The target has positive distance
+    from that segment. The target-radius <code>_near_axis</code> selector is false
+    for every edge of this cell; that radial expansion does not produce the error.
+  </p>
+  <p>
+    The ordinary endpoint derivative <code>_arsinh_gradient</code>, and its packed
+    transcription <code>_sheet_arsinh_gradient</code>, contain
+    B<sub>1</sub><sup>2</sup> = (r<sub>1</sub>-r cos φ)<sup>2</sup>
+    +(1+b<sup>2</sup>)r<sup>2</sup> sin<sup>2</sup>φ in the denominator of the
+    γ pole. Near a horizontal edge through the source axis, r<sub>1</sub> is
+    near zero and this bracket has angular layers of width 1/|b| at 0 and π.
+    The azimuthal grading width hypot(γ,r-s)/sqrt(rs) follows the ring standoff
+    and does not resolve this slope-induced layer. The existing finite-end
+    primitive also contains a common large zero-source gauge; subtracting its
+    two values can discard a weak physical field. The repair evaluates physical
+    multipole endpoints before this common gauge is added.
+  </p>
+  <p>
+    The defect predates the axis repair. Read-only extraction of the original
+    base <code>4221309d2</code> gives B<sub>R</sub>=-4.1957332735887546e-11
+    on the adjacent edge with two strictly positive source radii, against
+    1.0409935901858e-20 from precise rings; the packed base gives the same wrong
+    response. The edge with a zero-radius endpoint is nonfinite in that base.
+    The axis repair made that endpoint finite but left the shallow-slope
+    angular layer and primitive cancellation exposed. At the repaired head the
+    two edge radial fields are respectively 1.0409935901858e-20 and
+    3.9531600374750e-22 T/(A/m), on scalar and packed routes.
+  </p>
+  <h3 id="icm-sheet-axis-limits-shell-series">Derived physical endpoint primitive</h3>
+  <p>
+    Write the source line s=bγ+c<sub>1</sub>, a=sqrt(1+b²),
+    c=γ-s/b, D=sqrt(r²+c²), q=sa/(|b|D), t=-c/D and v=sign(b)/a.
+    The Laplace addition theorem and azimuthal cosine projection give
+    ∫cosφ P<sub>n</sub>(cosθ cosθ′+sinθ sinθ′cosφ)dφ
+    =π sinθ sinθ′ P′<sub>n</sub>(t)P′<sub>n</sub>(v)/(n(n+1)),
+    with integration over 0≤φ≤π. Integrating source arclength supplies 1/(n+2).
+    Hence the physical flux endpoint primitive is μ₀πr²H, where
+  </p>
+  <pre>H(s;c,r,b) = sign(b) b²/a² Σ[n=1..∞]
+    q^(n+2) P′n(t) P′n(v) / [n(n+1)(n+2)]
+∂c H: replace P′n(t) by -r² P″n(t)/D³ - (n+2)c P′n(t)/D²
+∂r H: replace P′n(t) by  cr P″n(t)/D³ - (n+2)r P′n(t)/D²
+B_R endpoint = μ₀ r (∂c H)/2
+B_Z endpoint = μ₀ [2H+r(∂r H)]/2
+ψ endpoint   = μ₀ π r² H.</pre>
+  <p>
+    The definite field is the upper-height endpoint minus the lower-height
+    endpoint. Both endpoints have the same c and therefore the same zero-source
+    gauge, which cancels identically. <code>_source_series_ends</code> selects this
+    representation only for nonhorizontal, noncylindrical segments whose two
+    endpoints satisfy q≤1/2. The 80-term Legendre recurrence retains the source
+    powers explicitly. Inactive geometry is held at regular values before
+    evaluation, then the result is selected arithmetically (double-where).
+    The same physical endpoint terms serve scalar fields, scalar flux and packed
+    fields, including the packed per-end rounding scale. No production quadrature,
+    radius shift, clamp or nonfinite substitution was added.
+  </p>
+  <h3 id="icm-sheet-axis-limits-accuracy-budget">Accuracy census and absolute floor</h3>
+  <p>
+    <code>scripts/sheet_tile_cpu_gate/accuracy_census.py</code> rebuilds both meshes
+    from the read-only committed mesher at <code>25eabd5de</code>. It applies the
+    material owner's exact power-of-two dilation 1024 before edge identity
+    rounding and restores metre coordinates afterward. Sphere targets are its
+    44 centroids plus (1,0) and (0,1); shell targets are its 228 centroids plus
+    (2,0), (0,2) and (3,1). Every pair is compared independently on scalar,
+    packed and commonly dilated packed routes, including zero-area sources
+    and targets on the axis.
+  </p>
+  <p>
+    The reference owner is now <code>scripts/edge_sheet/reference.py</code>:
+    <code>graded_precise_ring_reference</code> evaluates independent elliptic ring
+    kernels, source interpolation and weighted summation at 50 decimal digits.
+    Nearby segments grade toward the target's orthogonal foot; distant short
+    segments start with one panel. Increasing Gaussian orders and subsequent
+    panel bisection must converge at 1e-13. Exact axis rings use
+    B<sub>R</sub>=ψ=0 and B<sub>Z</sub>=μ₀s²/[2(s²+(Z-Z′)²)^(3/2)].
+    The first census refused to converge when binary64 weighted accumulation
+    lost a symmetry cancellation; retaining the full-precision sum fixes the
+    reference rather than weakening its convergence criterion.
+  </p>
+  <p>
+    Comparisons use |computed-reference| ≤ 1e-10|reference| + 128εE per
+    component, with ε=2^-52 and E the absolute sum of the two physical endpoint
+    terms returned by the production owner. This absolute floor accounts for
+    subtracting nearly equal endpoint primitives: for n rounded operations,
+    γ<sub>n</sub>=nε/(1-nε) bounds accumulated relative roundoff, and 128ε
+    budgets the endpoint recurrence summation and final elementary arithmetic.
+    The floor scales with the computed primitive, independently of the residual
+    being measured; it cannot absorb the reproduced 6.54e-9 error. Exact zero-area
+    sources have E=0 and must be exactly zero.
+  </p>
+  <p>
+    Current durable result: sphere 611 edges × 46 targets = 28,106 pairs;
+    zero inaccurate or nonfinite pairs on all three routes. The largest absolute
+    floor is 8.570776534479921e-20 T/(A/m), and the worst fraction of the allowed
+    budget is 0.9893601 (scalar), 0.5475899 (packed), 0.9291696 (dilated).
+    The shell's 2635 edges × 231 targets = 608,685 pairs and preservation gates
+    are running; final receipts follow below.
+  </p>
+</section>

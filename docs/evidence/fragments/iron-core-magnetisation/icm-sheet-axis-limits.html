@@ -1,94 +1,148 @@
 <section data-reckon="evidence" id="icm-sheet-axis-limits">
-  <h2>Axis sheet limits: singular endpoint requires a domain ruling</h2>
+  <h2>Finite sheet limits at the symmetry axis</h2>
   <p>
-    <strong>Blocked before implementation.</strong> At base
-    <code>4221309d2e66fd30eadafa7eacc3d967dd233481</code>, the two supplied
-    off-axis witnesses reproduce. The requested general on-axis limit also
-    includes a genuinely singular endpoint case. The dispatch explicitly
-    requires stopping with a derivation when a limit is singular. No kernel
-    or test source was changed, and no finite-value regularisation was made.
+    The finite-field domain is every target at positive distance from the
+    source edge's closed segment, on or off the axis. Endpoint coincidence is
+    the ordinary sheet-edge singularity and is outside that domain. The
+    interaction matrix G evaluates cell centroids, never source-edge points:
+    the sphere mesh has 44 centroids at strictly positive distance from every
+    source segment. No endpoint regularisation or new endpoint output policy
+    is introduced.
   </p>
-  <h3 id="icm-sheet-axis-limits-reproduction">Reproduction at the base</h3>
+  <h3 id="icm-sheet-axis-limits-census">Reproduced and classified before repair</h3>
+  <p>
+    At source base <code>4221309d2e66fd30eadafa7eacc3d967dd233481</code>, the
+    committed sphere mesher produces 44 cells and 613 unique edges, hence
+    26,972 target-edge pairs. Both scalar and packed routes have exactly 528
+    nonfinite pairs: 440 from ten axis-lying edges and 88 from two edges with
+    one endpoint on the axis. There are no on-axis centroids and no other
+    nonfinite cases. Minimum centroid radius is 0.049130719424955595 m.
+  </p>
   <table>
-    <thead><tr><th>Source edge [m]</th><th>Target [m]</th><th>Scalar field [T per A/m]</th></tr></thead>
+    <thead><tr><th>Source [m]</th><th>Target [m]</th><th>Scalar reproduction</th></tr></thead>
     <tbody>
-      <tr><td>(0, −0.5) to (0, −0.4)</td><td>(0.04913072, −0.44836919)</td><td>(NaN, 0)</td></tr>
-      <tr><td>(0, −0.5) to (0.003067942, −0.499990588)</td><td>(0.04913072, −0.44836919)</td><td>(1.2510684838409353e−11, NaN)</td></tr>
-      <tr><td>(0.2, −0.5) to (0.3, −0.4)</td><td>(0, 0.2)</td><td>ZeroDivisionError: division by zero</td></tr>
+      <tr><td>(0, −0.5)–(0, −0.4)</td><td>(0.04913072, −0.44836919)</td><td>(NaN, 0)</td></tr>
+      <tr><td>(0, −0.5)–(0.003067942, −0.499990588)</td><td>(0.04913072, −0.44836919)</td><td>(1.2510684838409353e−11, NaN)</td></tr>
+      <tr><td>(0.2, −0.5)–(0.3, −0.4)</td><td>(0, 0.2)</td><td>ZeroDivisionError</td></tr>
     </tbody>
   </table>
   <p>
-    The packed route also returns (NaN, −0) for the axis-lying edge. In both
-    <code>_closed_root</code> and <code>_sheet_root</code>, the root expression
-    divides by <code>k2 = 4 R R′ / span</code>. At R′ = 0 its numerator and
-    denominator vanish together. The azimuthal grading width in
-    <code>_arsinh_gradient</code> and <code>_sheet_arsinh_gradient</code> divides
-    by sqrt(R R′), producing an infinite width and indeterminate mapped nodes.
-    On-axis targets additionally reach the field scale 1/R. The full 528-pair
-    census was not run before the singularity stop; these observations do not
-    claim that classification is complete.
+    The zero-modulus root in <code>_closed_root</code> and
+    <code>_sheet_root</code> divides its vanishing numerator by k². The flux
+    primitive's pole moments also divide by k². Both scalar and packed
+    arsinh gradients form a grading width divided by sqrt(R R′), which is
+    infinite at a zero-radius source end and produces indeterminate mapped
+    nodes. Finally the field's vertical scale divides by the target radius.
+    These are arithmetic defects at disjoint targets, distinct from the
+    excluded coincident-target singularity.
   </p>
-  <h3 id="icm-sheet-axis-limits-derivation">Exact on-axis integral and its singular case</h3>
+  <h3 id="icm-sheet-axis-limits-source">Zero-radius sources: derived limits</h3>
   <p>
-    A circular loop of radius a at height h above an axis target carries
-    B<sub>Z</sub> = μ<sub>0</sub>I a²/[2(a²+h²)<sup>3/2</sup>]. A sheet strip of
-    arclength ds carries I = K ds. If a straight sheet starts at the target
-    (0, z<sub>0</sub>) with unit tangent (u, v), then a = us, h = vs and
-    u²+v² = 1. Consequently, for u ≠ 0,
-  </p>
-  <pre>B_Z(δ) = μ₀ K u²/2 ∫[δ,L] ds/s = μ₀ K u²/2 log(L/δ) → +∞  (K &gt; 0).</pre>
-  <p>
-    This is a physical logarithmic divergence, even though the source area
-    element 2πa ds vanishes at the endpoint. For a sheet lying entirely on the
-    axis, u = 0 and the current surface has zero area, so its field is exactly
-    zero. That fact does not extend to a sheet which leaves the axis with u ≠ 0.
-    At disjoint on-axis targets symmetry gives B<sub>R</sub> = 0 and ψ = 0;
-    their finite B<sub>Z</sub> still needs implementation.
+    For an edge lying entirely on the axis the area element 2πR′ dl vanishes
+    everywhere. Its sheet field and flux are exactly zero, selected before
+    either evaluation family enters an elliptic or grading expression.
   </p>
   <p>
-    For completeness, the disjoint-target integral is elementary. Write
-    a(s) = a₀ + us, h(s) = h₀ + vs, d = ua₀ + vh₀, c = va₀ − uh₀,
-    t = s+d and D = sqrt(t²+c²). For c ≠ 0 its primitive is
+    For one source end at R′ = 0 and R &gt; 0, let b = dR′/dZ′,
+    a = sqrt(1+b²), γ = Z′−Z, and d = sqrt(R²+γ²). The root integral is
+    ∫ cos(φ) D dφ = d ∫ cos(φ) dφ = 0, as are its γ and R derivatives.
+    The remaining primitive is elementary: at this end,
   </p>
-  <pre>F(t) = u² asinh(t/|c|) + (v²−u²)t/D − 2uvc/D,
-B_Z = μ₀ K [F(L+d)−F(d)]/2.</pre>
+  <pre>asinh(β) = atanh[(γ − b R cos φ)/(a d)],
+S₀ = ∫[0,π] cos φ (−bγ + b²R cos φ) atanh[(γ − bR cos φ)/(ad)] dφ.</pre>
   <p>
-    For c = 0 and an interval separated from t = 0, the primitive is
-    u² sign(t) log|t|. If the interval reaches t = 0 with u ≠ 0, its improper
-    integral diverges. A horizontal sheet at its axis endpoint is included
-    in the same result with u = 1, v = 0.
+    Integrating the first two cosine moments of the logarithm gives the closed
+    forms below. The flux primitive is μ₀ R S₀/a². The b = 0 case is S₀ = 0.
   </p>
-  <h3 id="icm-sheet-axis-limits-measurement">Independent cutoff check</h3>
+  <pre>For |bγ| ≤ R:
+  S₀ = πb²/2 [γd/R + R asinh(γ/R)],
+  ∂γ S₀ = πb² d/R,
+  ∂R S₀ = πb²/2 [asinh(γ/R) − γd/R²].
+For |bγ| &gt; R:
+  C = π sign(γ)/2 [a + b² asinh(1/|b|)],
+  S₀ = RC,    ∂γ S₀ = 0,    ∂R S₀ = C.</pre>
   <p>
-    For the supplied sloped edge, L = 0.003067956437289813 m,
-    u = 0.9999952941672713 and v = 0.003067840170605829. At its axis endpoint
-    the positive logarithmic coefficient is 6.283126172080608e−7 T per A/m.
-    Numerical integration of the axis loop field gives the values below;
-    each agrees with the derived expression to 2.220446049250313e−16 relative.
-    These cutoffs diagnose a divergence; they are not a proposed regularisation.
+    These expressions serve the scalar primitive, both scalar field families,
+    and the packed field. The grading map also has a regular one-sided limit:
+    writing its fractional panel coordinate as x, w sinh[x asinh(π/w)] tends
+    to πx as w tends to infinity, and its Jacobian tends to π. At the zero
+    source end the elementary primitive above evaluates that limit directly;
+    no infinite width reaches the map. In traced selections the inactive
+    geometry is held at a regular value before division or differentiation.
+  </p>
+  <h3 id="icm-sheet-axis-limits-target">On-axis target: derived limits</h3>
+  <p>
+    Symmetry gives B<sub>R</sub> = 0 and ψ = 0. Parameterise the source by
+    arclength s with R′ = R₀+us, h = Z′−Z = h₀+vs, u²+v² = 1, 0 ≤ s ≤ L.
+    Define d = uR₀+vh₀, c = vR₀−uh₀, t = s+d and D = sqrt(t²+c²).
+    Then R′ = ut+vc, and the circular loop's axis field integrates as
+  </p>
+  <pre>B_Z = μ₀ K/2 ∫[0,L] (R′)²/[(R′)²+h²]^(3/2) ds
+    = μ₀ K/2 [F(L+d) − F(d)],
+F(t) = u² asinh(t/|c|) + (v²−u²)t/D − 2uvc/D       (c ≠ 0),
+F(t) = u² sign(t) log|t|                            (c = 0).</pre>
+  <p>
+    The collinear form applies on intervals separated from t = 0. An interval
+    reaching zero is outside the finite-field domain. In particular, a sheet
+    leaving an axis endpoint with u ≠ 0 has μ₀Ku² log(L/δ)/2 as δ tends to
+    zero. Both axis and off-axis endpoint approaches are tested for logarithmic
+    growth; the exact endpoint is excluded in both cases. The initial stop
+    identified this physical divergence; the domain ruling permits the finite
+    disjoint-target limits implemented here.
+  </p>
+  <h3 id="icm-sheet-axis-limits-conditioning">Preserving the finite-radius approach</h3>
+  <p>
+    Taking a limit only at zero leaves subtractive cancellation nearby.
+    The root uses its binomial cosine-moment series for q = 2RR′/(γ²+R²+R′²)
+    ≤ 1/4, through degree 31. For sloped small-source ends, the Legendre
+    addition theorem integrates the flux along arclength without quadrature:
+  </p>
+  <pre>γ₀ = γ − R′/b,    D₀ = sqrt(R²+γ₀²),
+u = |b|/a,    v = sign(b)/a,    t = −γ₀/D₀,    q = R′/(u D₀),
+H = sign(b) u² Σ[n≥1] q^(n+2) P′_n(t) P′_n(v)/[n(n+1)(n+2)],
+S = S₀(γ₀,R,b) + πa²R H,    ψ_primitive = μ₀ R S/a².</pre>
+  <p>
+    The source series uses 80 terms at q ≤ 1/2 on the exterior branch, with
+    analytic γ and R derivatives carried through the same polynomial recurrence.
+    Cylinders retain their existing height series; their radial endpoint is
+    the canonical stable ring flux divided by 2πR. Flux reciprocity exchanges
+    the loop radii to condition a cylinder's small-source flux.
+  </p>
+  <p>
+    Close to an axis target, let f(Z) be the elementary axis B<sub>Z</sub>
+    above. The vacuum radial expansion is evaluated from derivatives of the
+    same F, with no elliptic integral and no added quadrature:
+  </p>
+  <pre>B_Z = f − R² f″/4 + R⁴ f⁽⁴⁾/64 + O(R⁶),
+B_R = −R f′/2 + R³ f‴/16 − R⁵ f⁽⁵⁾/384 + O(R⁷),
+ψ = πR² [f − R² f″/8 + R⁴ f⁽⁴⁾/192] + O(R⁸).</pre>
+  <p>
+    This branch is selected only at R ≤ 0.01 times the axis-to-segment
+    distance and away from the collinear primitive's cancellation. Zero-radius
+    targets use F itself, including the separately derived collinear form.
+  </p>
+  <h3 id="icm-sheet-axis-limits-checks">Qualification</h3>
+  <p>
+    The first repaired sphere census has zero nonfinite pairs on scalar and
+    packed routes. The final committed-head census and the WEST and suite
+    receipts are recorded below when their runs finish. Fourteen focused
+    value tests already pass, including the original witnesses, a flat edge
+    starting on the axis, and a collinear disjoint axis target. The on-axis
+    ZeroDivisionError witness now gives (0, 1.691446191554589e−8) T per A/m.
   </p>
   <table>
-    <thead><tr><th>δ/L</th><th>B<sub>Z</sub> [µT per A/m]</th></tr></thead>
+    <thead><tr><th>Approach at R = 1e−3, 1e−5, 1e−7 m</th><th>Worst scalar field relative</th><th>Worst packed field relative</th><th>Worst flux relative</th></tr></thead>
     <tbody>
-      <tr><td>1e−3</td><td>4.340229798370066</td></tr>
-      <tr><td>1e−5</td><td>7.233716330616777</td></tr>
-      <tr><td>1e−7</td><td>10.127202862863487</td></tr>
+      <tr><td>Axis-lying source</td><td>1.661e−15</td><td>1.544e−15</td><td>1.572e−13</td></tr>
+      <tr><td>One source endpoint</td><td>9.033e−16</td><td>9.067e−16</td><td>4.885e−15</td></tr>
+      <tr><td>On-axis target</td><td>3.521e−15</td><td>8.998e−15</td><td>5.773e−15</td></tr>
     </tbody>
   </table>
   <p>
-    Evidence is in this run's <code>singularity.log</code> (EXIT=0),
-    <code>singularity_probe.py</code> and <code>reproduction.log</code>.
-    The latter also records an exception in the flux primitive at zero modulus.
-    Neither the sphere finiteness census, the graded approach comparisons,
-    the restored-unguarded negative control nor the WEST head gate is complete.
-    The baseline suite was cancelled on the mandated stop and is not a passing arm.
-  </p>
-  <h3 id="icm-sheet-axis-limits-next">Required ruling</h3>
-  <p>
-    Define whether axis-endpoint coincidence is outside the finite-field domain
-    and specify its refusal or divergence representation. Then resume the
-    finite limits for disjoint targets and the two supplied off-axis witnesses,
-    followed by the sphere, quadrature, mutation and WEST gates. The sphere's
-    centroid witnesses themselves do not establish a physical singularity.
+    The graded ring quadrature converges to 1e−13 before comparison. Small-loop
+    values use 50-digit elliptic arithmetic, retaining the same graded panel
+    construction, so fields near 1e−18 T per A/m have an adequate reference.
+    The source-series and radial-expansion thresholds are one-sided convergence
+    conditions, not radius shifts, clamps, or replacements of the source shape.
   </p>
 </section>

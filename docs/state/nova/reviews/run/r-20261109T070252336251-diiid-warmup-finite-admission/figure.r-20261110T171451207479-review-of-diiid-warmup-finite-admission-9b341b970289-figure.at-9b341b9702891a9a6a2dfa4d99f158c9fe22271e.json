@@ -7,7 +7,7 @@
     "image-1.png": "docs/figures/diiid-warmup-finite-admission/frame-146-diverted.svg"
   },
   "attachment_note": "Both attached PNGs were handed to this node and were opened with the Read tool; every verdict below is about those rendered images (1399x720 each). The frame identity of each was bound by the numbers the render itself prints, not by its file position: image-0 shows support 326 -> 258 and residual 0.21516 -> 0.043211, which is the reviewed run's frame 137 diverted arm (base 0.2151594 on 326 cells, head 0.0432107 on 258); image-1 shows 262 -> 132 and residual 6.8734 -> 0.0072147, which is frame 146 diverted (base 6.8734 on 262, head 0.0072147 on 132). No SVG and no other image was opened, read, listed, searched, rendered or git-showed.",
-  "completed_at": "",
+  "completed_at": "2026-11-10T17:30:35.911Z",
   "dispatched_at": "2026-11-10T17:16:52Z",
   "figure_checks": {
     "caption_numbers": "image-0 ratios match the reviewed run's receipt for frame 137 diverted (base residual 0.2151594 on 326 support cells, head 0.0432107 on 258). image-1 matches frame 146 diverted (base 6.8734 on 262, head 0.0072147 on 132). No caption number is invented or rounded differently from its receipt.",
@@ -129,6 +129,6 @@
   "scores_note": "Omitted by contract for a figure review: no scores object is written and no six-dimension text judgement is claimed. This review ran no suite and claims no suite-delta measurement.",
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-10T17:30:39.933817+00:00",
+  "timestamp": "2026-11-10T17:38:13.690625+00:00",
   "total": null
 }

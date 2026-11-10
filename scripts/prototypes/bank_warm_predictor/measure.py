@@ -18,6 +18,7 @@ import numpy as np
 from nova.equilibrium import drive_continuation, support_read as bank
 from scripts.prototypes.bank_warm_start import streams
 from scripts.prototypes.bank_warm_predictor.program import programs
+from scripts.prototypes.bank_warm_predictor import receipts
 from scripts.prototypes.bank_solve_profile.fixture import gradient
 
 assert jax.config.jax_enable_x64
@@ -87,6 +88,7 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--width", type=int, default=8)
     parser.add_argument("--warmup", action="store_true")
+    parser.add_argument("--reuse-from", type=Path)
     args = parser.parse_args()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(
@@ -101,19 +103,36 @@ def main():
                 x64=jax.config.jax_enable_x64,
                 arm=args.arm,
                 width=args.width,
-                wall_label=f"titan P100, width {args.width}",
+                wall_label=f"titan P100, width {args.width}, not a speed verdict",
             )
         ),
         flush=True,
     )
     assert jax.default_backend() == "gpu"
+    root = Path(__file__).resolve().parents[3]
+    assert (
+        Path(drive_continuation.__file__).resolve()
+        == root / "nova/equilibrium/drive_continuation.py"
+    )
+    assert Path(bank.__file__).resolve() == root / "nova/equilibrium/support_read.py"
     machine = streams.build()
     archive = np.load(args.streams, allow_pickle=False)
     initial = tuple(
         jnp.asarray(archive[name][: args.width]) for name in ("m0", "m1", "m2")
     )
     roots = jnp.asarray(archive["stationary"][: args.width])
+    assert args.width == initial[0].shape[0] == roots.shape[0] == 8
     bank_inputs, solve_program, tangent_compiled = programs(machine, tangent)
+    metadata = receipts.provenance(
+        Path(__file__).resolve().parents[3], initial, roots, bank_inputs, args.width
+    )
+    receipts.write_metadata(args.out, metadata)
+    print("INPUTS_HASH", metadata["inputs_hash"], flush=True)
+    if args.reuse_from is not None and receipts.reuse(
+        args.reuse_from, args.out, metadata
+    ):
+        print("SUMMARY reused complete plain receipt", flush=True)
+        return
 
     def solve(machine, moments, seeds, previous, amplitude):
         return solve_program(*bank_inputs, moments, seeds, previous, amplitude)
@@ -150,10 +169,6 @@ def main():
                     )
                 return current
 
-            predicted = seed()
-            jax.block_until_ready(predicted)
-            result = solve(machine, predicted, stationary, stationary, target)
-            jax.block_until_ready(result.residual)
             start = perf_counter()
             predicted = seed()
             jax.block_until_ready(predicted)
@@ -175,7 +190,7 @@ def main():
             row = dict(
                 arm=args.arm,
                 width=args.width,
-                wall_label=f"titan P100, width {args.width}",
+                wall_label=f"titan P100, width {args.width}, not a speed verdict",
                 step=step,
                 slice=index,
                 seed_residual=np.asarray(result.residual_path)[:, 0].tolist(),
@@ -190,16 +205,21 @@ def main():
                 minor_radius=machine.minor_radius,
             )
             print("SLICE", json.dumps(row), flush=True)
+            assert np.all(result.converged) and np.max(result.residual) <= 1e-10
             rows.append(row)
+            receipts.persist(
+                args.out,
+                rows,
+                arrays,
+                metadata,
+                complete=(not args.warmup and len(rows) == 14),
+            )
             if args.warmup and index == 2:
                 print("SUMMARY two-slice warmup complete", flush=True)
                 return
-            assert np.all(result.converged) and np.max(result.residual) <= 1e-10
             older, old_drive = current, drive
             current, drive = result.moments, target
             stationary = result.support.stationary.position
-    args.out.with_suffix(".json").write_text(json.dumps(rows, indent=2))
-    np.savez(args.out.with_suffix(".npz"), **arrays)
     print(
         "SUMMARY",
         args.arm,

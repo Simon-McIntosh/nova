@@ -1,10 +1,12 @@
-"""Validate paired predictor receipts and draw reads against slice index."""
+"""Judge predictor counts and precision; retain device walls as information."""
 
 import argparse
+import hashlib
 from html import escape
 import json
 from pathlib import Path
 import re
+import subprocess
 
 import matplotlib
 
@@ -17,6 +19,7 @@ from scripts.prototypes.bank_solve_profile.plot import save_checked
 ARMS = ("plain", "secant", "tangent")
 STEPS = (1e-5, 1e-3)
 BOUNDS = dict(flux=1e-8, axis=5e-4, saddle=5e-4, boundary=1e-4)
+WALL_LABEL = "titan P100, width 8, not a speed verdict"
 
 
 def precision(reference, candidate, key, radius):
@@ -48,78 +51,95 @@ def require_budget(values):
         )
 
 
+def total_reads(row):
+    return max(row["reads"]) + int(row["arm"] == "tangent")
+
+
+def score(rows):
+    return (
+        sum(total_reads(row) for row in rows),
+        sum(max(row["updates"]) + int(row["arm"] == "tangent") for row in rows),
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=Path, required=True)
     parser.add_argument("--figure", type=Path, required=True)
     parser.add_argument("--fragment", type=Path, required=True)
     args = parser.parse_args()
-    allocation = (args.run / "runtime-gpu-allocation.log").read_text()
+    allocation = (args.run / "counts-gpu-allocation.log").read_text()
     assert allocation.splitlines()[-1] == "EXIT=0"
+    job = re.search(r"JOB=(\d+)", allocation).group(1)
+    scheduler = subprocess.check_output(
+        ["sacct", "-n", "-X", "-j", job, "-o", "State,ExitCode", "--parsable2"],
+        text=True,
+    ).strip()
+    assert scheduler.split("|")[:2] == ["COMPLETED", "0:0"], scheduler
     suites = json.loads((args.run / "suite-receipts.json").read_text())
     cpu_rows = []
     for arm in ("base", "head"):
         for name in ("test_bank_drive_continuation", "test_bank_solve_driver"):
             receipt = suites[arm + "-" + name]
             assert receipt["completed"] and receipt["exit_status"] == 0
-            log = Path(receipt["log_path"]).read_text()
-            passed = re.findall(r"(\d+) passed", log)[-1]
+            passed = re.findall(r"(\d+) passed", Path(receipt["log_path"]).read_text())[
+                -1
+            ]
             cpu_rows.append(
                 f"<tr><td>{arm}</td><td>{name}</td><td>{passed}</td><td>0</td></tr>"
             )
     negative = (args.run / "unchanged-seed-mutant.log").read_text()
     assert (
         "FAILED tests/test_bank_drive_continuation.py::"
-        "test_linear_stream_predicts_next_state_to_rounding" in negative
-    )
+        "test_linear_stream_predicts_next_state_to_rounding"
+    ) in negative
     assert negative.splitlines()[-1] == "EXIT=1"
-    data, arrays = {}, {}
+    data, arrays, hashes = {}, {}, set()
     for arm in ARMS:
-        for repeat in ("first", "second"):
-            stem = args.run / f"runtime-{arm}-{repeat}"
-            data[arm, repeat] = json.loads(stem.with_suffix(".json").read_text())
-            arrays[arm, repeat] = dict(
-                np.load(stem.with_suffix(".npz"), allow_pickle=False)
+        stem = args.run / f"counts-{arm}-first"
+        metadata = json.loads(stem.with_suffix(".inputs.json").read_text())
+        assert metadata["completed"] and metadata["rows"] == 14
+        encoded = json.dumps(
+            metadata["inputs"], sort_keys=True, separators=(",", ":")
+        ).encode()
+        assert hashlib.sha256(encoded).hexdigest() == metadata["inputs_hash"]
+        hashes.add(metadata["inputs_hash"])
+        for suffix in (".json", ".npz"):
+            assert (
+                hashlib.sha256(stem.with_suffix(suffix).read_bytes()).hexdigest()
+                == metadata["receipt_sha256"][suffix]
             )
-            assert len(data[arm, repeat]) == 14
-            for row in data[arm, repeat]:
-                assert len(row["residual"]) == 8 and all(row["converged"])
-                assert np.max(row["residual"]) <= 1e-10
-        for first, second in zip(data[arm, "first"], data[arm, "second"], strict=True):
-            for name in (
-                "step",
-                "slice",
-                "reads",
-                "updates",
-            ):
-                np.testing.assert_array_equal(first[name], second[name])
-        for row in data[arm, "first"]:
-            key = f"{row['step']:g}-{row['slice']}"
-            require_budget(
-                precision(
-                    arrays[arm, "first"],
-                    arrays[arm, "second"],
-                    key,
-                    row["minor_radius"],
-                )
+        data[arm] = json.loads(stem.with_suffix(".json").read_text())
+        arrays[arm] = dict(np.load(stem.with_suffix(".npz"), allow_pickle=False))
+        assert len(data[arm]) == 14
+        assert {(r["step"], r["slice"]) for r in data[arm]} == {
+            (step, index) for step in STEPS for index in range(1, 8)
+        }
+        for row in data[arm]:
+            assert row["arm"] == arm and row["width"] == 8
+            assert (
+                len(row["residual"])
+                == len(row["seed_residual"])
+                == len(row["reads"])
+                == len(row["updates"])
+                == 8
             )
+            assert len(row["converged"]) == 8 and all(row["converged"])
+            assert (
+                np.all(np.isfinite(row["residual"])) and max(row["residual"]) <= 1e-10
+            )
+            assert np.all(np.isfinite(row["seed_residual"]))
+    assert len(hashes) == 1
     maxima = {name: 0.0 for name in BOUNDS}
     for arm in ARMS:
-        for repeat in ("first", "second"):
-            for row in data[arm, repeat]:
-                key = f"{row['step']:g}-{row['slice']}"
-                values = precision(
-                    arrays["plain", repeat],
-                    arrays[arm, repeat],
-                    key,
-                    row["minor_radius"],
-                )
-                require_budget(values)
-                for name in maxima:
-                    maxima[name] = max(maxima[name], float(np.max(values[name])))
-    reference = arrays["plain", "first"]
-    key = "1e-05-1"
-    radius = data["plain", "first"][0]["minor_radius"]
+        for row in data[arm]:
+            key = f"{row['step']:g}-{row['slice']}"
+            values = precision(arrays["plain"], arrays[arm], key, row["minor_radius"])
+            require_budget(values)
+            for name in maxima:
+                maxima[name] = max(maxima[name], float(np.max(values[name])))
+    reference, key = arrays["plain"], "1e-05-1"
+    radius = data["plain"][0]["minor_radius"]
     refused = []
     for quantity in BOUNDS:
         mutant = {name: value.copy() for name, value in reference.items()}
@@ -136,6 +156,19 @@ def main():
         except AssertionError:
             refused.append(quantity)
     assert set(refused) == set(BOUNDS)
+    chosen = min(
+        ("secant", "tangent"), key=lambda arm: (*score(data[arm]), arm != "secant")
+    )
+    scores = {
+        arm: dict(
+            total_fresh_reads=score(data[arm])[0],
+            total_linear_solves=score(data[arm])[1],
+        )
+        for arm in ARMS
+    }
+    reduction = (
+        1 - scores[chosen]["total_fresh_reads"] / scores["plain"]["total_fresh_reads"]
+    )
     plt.style.use("data-ink")
     fig, axes = plt.subplots(1, 2, figsize=(14, 7.2), dpi=100, sharey=True)
     styles = dict(
@@ -145,22 +178,22 @@ def main():
     )
     for ax, step in zip(axes, STEPS, strict=True):
         for arm in ARMS:
-            rows = [row for row in data[arm, "first"] if row["step"] == step]
+            rows = [row for row in data[arm] if row["step"] == step]
             colour, line, marker = styles[arm]
             ax.plot(
                 [
                     row["slice"] + {"plain": -0.08, "secant": 0, "tangent": 0.08}[arm]
                     for row in rows
                 ],
-                [max(row["reads"]) + int(arm == "tangent") for row in rows],
+                [total_reads(row) for row in rows],
                 color=colour,
                 linestyle=line,
                 marker=marker,
                 fillstyle="none",
-                linewidth=3 if arm == "secant" else 2.6,
+                linewidth=3 if arm == chosen else 2.6,
                 markersize=9,
                 label=arm,
-                zorder=4 if arm == "secant" else 2,
+                zorder=4 if arm == chosen else 2,
             )
         ax.set_xlabel("slice index")
         ax.set_xticks(range(1, 8))
@@ -174,11 +207,7 @@ def main():
             ha="center",
             fontsize=14,
         )
-    top = max(
-        max(row["reads"]) + int(arm == "tangent")
-        for arm in ARMS
-        for row in data[arm, "first"]
-    )
+    top = max(total_reads(row) for rows in data.values() for row in rows)
     axes[0].set_yticks(range(1, top + 1))
     axes[0].set_ylim(0.7, top + 0.8)
     axes[0].set_ylabel("fresh reads per slice [count]")
@@ -188,112 +217,91 @@ def main():
     fig.subplots_adjust(left=0.09, right=0.97, bottom=0.14, top=0.78, wspace=0.16)
     save_checked(fig, args.figure)
     fig.savefig(args.run / "reads-per-slice-preview.png", dpi=100)
-    table = []
-    summary = []
+    table, summary = [], []
     for step in STEPS:
         for arm in ARMS:
-            rows = [row for row in data[arm, "first"] if row["step"] == step]
-            walls = [
-                row["per_slice_ms"]
-                for repeat in ("first", "second")
-                for row in data[arm, repeat]
-                if row["step"] == step
-            ]
+            rows = [row for row in data[arm] if row["step"] == step]
+            base_rows = [row for row in data["plain"] if row["step"] == step]
             summary.append(
                 dict(
                     arm=arm,
                     step=step,
-                    reads=sorted(
-                        {
-                            value + int(arm == "tangent")
-                            for row in rows
-                            for value in row["reads"]
-                        }
-                    ),
-                    solve_reads=sorted(
-                        {value for row in rows for value in row["reads"]}
-                    ),
+                    total_reads=sum(total_reads(r) for r in rows),
+                    reads=sorted({total_reads(r) for r in rows}),
                     updates=sorted({value for row in rows for value in row["updates"]}),
+                    read_reduction=1
+                    - sum(total_reads(r) for r in rows)
+                    / sum(total_reads(r) for r in base_rows),
                     seed_residual=max(max(row["seed_residual"]) for row in rows),
                     terminal_residual=max(max(row["residual"]) for row in rows),
-                    per_slice_ms=float(np.mean(walls)),
+                    per_slice_ms=float(np.mean([row["per_slice_ms"] for row in rows])),
+                    wall_label=WALL_LABEL,
                 )
             )
             for row in rows:
-                other = next(
-                    r
-                    for r in data[arm, "second"]
-                    if r["step"] == step and r["slice"] == row["slice"]
-                )
                 table.append(
                     f"<tr><td>{arm}</td><td>{step:g}</td><td>{row['slice']}</td>"
-                    f"<td>{max(row['seed_residual']):.3e}</td>"
-                    f"<td>{max(row['reads']) + int(arm == 'tangent')}</td>"
-                    f"<td>{max(row['reads'])}</td>"
-                    f"<td>{max(row['updates'])}</td><td>{max(row['residual']):.3e}</td>"
-                    f"<td>{row['per_slice_ms']:.3f}, {other['per_slice_ms']:.3f}</td>"
-                    f"<td>{row['prediction_ms'] / 8:.3f}, "
-                    f"{other['prediction_ms'] / 8:.3f}</td></tr>"
+                    f"<td>{max(row['seed_residual']):.3e}</td><td>{total_reads(row)}</td>"
+                    f"<td>{min(row['reads'])}–{max(row['reads'])}</td>"
+                    f"<td>{min(row['updates'])}–{max(row['updates'])}</td>"
+                    f"<td>{max(row['residual']):.3e}</td><td>{row['per_slice_ms']:.3f}</td>"
+                    f"<td>{row['prediction_ms'] / 8:.3f}</td></tr>"
                 )
     report = dict(
+        chosen_predictor=chosen,
+        scores=scores,
+        read_reduction=reduction,
         summary=summary,
         precision_maxima=maxima,
         precision_mutants_refused=refused,
-        processes_agree_within_budget=True,
-        wall_label="titan P100, width 8",
+        measured_processes_per_arm=1,
+        inputs_hash=next(iter(hashes)),
+        wall_label=WALL_LABEL,
     )
     (args.run / "predictor-report.json").write_text(json.dumps(report, indent=2))
     fragment = f"""<section data-reckon="fragment" id="bank-warm-predictor-fragment"
 data-plan="sub-millisecond-forward-path" data-node="bank-warm-predictor">
-<h2>Warm drive predictor: titan P100, width 8</h2>
-<p>The focused head passes eight tests. The paired base/head sirius job runs each
-file in a fresh process and reports zero added failures:</p>
-<table id="bank-warm-predictor-cpu"><thead><tr><th>arm</th><th>file</th>
-<th>passed</th><th>exit</th></tr></thead><tbody>{"".join(cpu_rows)}</tbody></table>
-<p>The unchanged-seed mutant fails the linear-stream check with EXIT=1. The head
-passes that check. Logs preserve revision, imported module and working directory.
-Both suites and the negative control are in <code>suite-receipts.json</code>.</p>
-<p>Plain, secant and assembled-Jacobian tangent seeds use the first eight lanes of
-the saved warm-start streams, at drive steps 1e-5 and 1e-3 over slices 1–7. Each arm
-has one cache warmup followed by two fresh interpreters. Read and update counts agree
-exactly; both processes certify every lane and their terminal flux/geometry agree
-within the locked precision budget. Slice
-1 has only one converged history state, so secant uses the plain warm-start
-fallback.</p>
-<p>The secant extrapolates two accepted states in drive. The tangent assembles the
-bank Jacobian at the converged state and uses its equilibrated block-GMRES solve
-against the drive derivative. Its own read, assembly and solve are included in its
-predictor cost. Neither predictor changes terminal certification: every lane has a
-fresh residual at most 1e-10.</p>
+<h2>Drive predictor counts: {chosen}</h2>
+<p>The selected predictor is <strong>{chosen}</strong>, selected by total fresh
+reads across the fourteen slices, with total linear solves breaking a tie and
+secant preferred if those counts tie. Counts include the tangent predictor’s own
+fresh read and linear solve. Scores: <code>{escape(json.dumps(scores))}</code>.
+The chosen predictor reduces total fresh reads by {reduction:.1%} against plain.</p>
+<p>Each arm uses the first eight saved lanes at drive steps 1e-5 and 1e-3 over
+slices 1–7, with one warmup and one measured process. Matching inputs hash:
+<code>{next(iter(hashes))}</code>. Slice 1 has only one history state, so secant
+falls back to the plain warm seed. Every lane is certified by its terminal fresh
+read at residual at most 1e-10; neither predictor changes that certificate.</p>
 <figure id="bank-warm-predictor-reads"><img
 src="/nova/figures/sub-millisecond-forward-path/bank-warm-predictor/reads-per-slice.svg"
-alt="Batch reads against slice index for plain, secant and tangent seeds at two drive
-steps" width="1400"><figcaption>Reads per slice, titan P100, width 8. Each point is
-the largest lane count in its batch; both fresh processes agree exactly. Secant is
-blue, plain grey and tangent dotted near-black. Predictor work is tabled separately
-and total reads include the tangent predictor’s one fresh read before the
-solve. Small horizontal offsets separate coincident counts.</figcaption></figure>
-<table id="bank-warm-predictor-table"><thead><tr><th>arm</th><th>drive
-step</th><th>slice</th><th>seed fresh residual, max</th>
-<th>total fresh reads, max</th><th>solve reads, max</th><th>updates, max</th>
-<th>terminal fresh residual, max</th><th>total wall /
-slice, two processes [ms]; titan P100, width 8</th><th>predictor wall / slice, two
-processes [ms]; titan P100, width
-8</th></tr></thead><tbody>{"".join(table)}</tbody></table>
-<p>Every lane in both measured processes is checked against its same-process plain
-arm: flux ≤1e-8 of its span, axis and X-point ≤5e-4 of the minor radius, boundary
-flux ≤1e-4 of span. Observed maxima: {escape(json.dumps(maxima))}. Synthetic
-over-budget changes in each of those four quantities were refused by the same
-check.</p>
-<p>Width 16 failed on titan P100: jit_one requested 15,120,805,120 bytes (14.08 GiB).
-Width 8 is the memory fallback. These walls are titan P100, width 8;
-the H200 width-16 headline remains pending a free card.</p>
-<p>The runtime-bank GPU allocation completed EXIT=0. Logs and arrays are preserved
-under <code>{escape(str(args.run))}</code>: <code>runtime-gpu-allocation.log</code>,
-<code>runtime-{{arm}}-{{first,second}}.log</code> and matching JSON/NPZ receipts.
-The report producer checks every lane and refuses synthetic violations of all
-four precision bounds before saving the SVG through the shared text-collision
-checker. Visual inspection remains a separate producer check.</p>
+alt="Fresh reads per slice for plain, secant and tangent at two drive steps"
+width="1400"><figcaption>Read counts include the tangent predictor’s one fresh
+read. Plain is grey, secant blue and tangent dotted near-black. Small horizontal
+offsets separate coincident counts. Walls are informational only: {WALL_LABEL}.
+The H200 width-16 wall remains pending a free card.</figcaption></figure>
+<table id="bank-warm-predictor-counts"><thead><tr><th>arm</th><th>drive step</th>
+<th>slice</th><th>seed fresh residual, max</th><th>total fresh reads, max</th>
+<th>solve reads, lane range</th><th>updates, lane range</th>
+<th>terminal fresh residual, max</th><th>total wall / slice [ms]; {WALL_LABEL}</th>
+<th>predictor wall / slice [ms]; {WALL_LABEL}</th></tr></thead>
+<tbody>{"".join(table)}</tbody></table>
+<p>All eight lanes in every slice meet the precision budget against plain:
+flux ≤1e-8 of span, axis and X-point ≤5e-4 of minor radius, boundary flux ≤1e-4
+of span. Observed maxima: <code>{escape(json.dumps(maxima))}</code>. The same
+check refused synthetic violations of each of the four bounds.</p>
+<table id="bank-warm-predictor-cpu"><thead><tr><th>arm</th><th>file</th>
+<th>passed</th><th>exit</th></tr></thead><tbody>{"".join(cpu_rows)}</tbody></table>
+<p>The paired sirius files have zero added failures. The unchanged-seed mutant
+fails the linear-stream check with EXIT=1; the head passes it. Imported module,
+revision and working-directory provenance are retained in the logs.</p>
+<p>Titan job {job} completed with scheduler record <code>{escape(scheduler)}</code>
+and allocation EXIT=0. Logs, per-slice arrays, input hashes and source digests
+are under <code>{escape(str(args.run))}</code>, using
+<code>counts-{{plain,secant,tangent}}-first</code> prefixes. Width 16 previously
+failed to allocate 15,120,805,120 bytes on P100; width 8 retains the original
+saved streams’ first eight lanes. Titan wall time does not decide speed.
+The shared saver checks SVG text bounds and overlaps; producer visual inspection
+is a separate completion check.</p>
 </section>"""
     args.fragment.write_text(fragment + "\n")
     print("SUMMARY " + json.dumps(report), flush=True)

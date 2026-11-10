@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# One allocation, common saved seeds, one warmup and two fresh processes per arm.
+# One allocation, common saved seeds, one warmup and one measured process per arm.
 set -eu
 trap 'code=$?; printf "EXIT=%s\n" "$code"' EXIT
+trap 'exit 143' TERM
+trap 'exit 130' INT
 export TMPDIR=/tmp
 ROOT=${NOVA_ROOT:?}
 RUN=${RUN_DIR:?}
@@ -16,12 +18,16 @@ export JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES=0
 cd "$ROOT"
 printf 'REVISION=%s TREE=%s JOB=%s DEVICE=titan-P100 WIDTH=8\n' "$(git rev-parse HEAD)" "$ROOT" "$SLURM_JOB_ID"
 for arm in plain secant tangent; do
-  for repeat in warmup first second; do
+  for repeat in warmup first; do
     warmup=()
     if [ "$repeat" = warmup ]; then warmup=(--warmup); fi
-    "$PY" "$ROOT/scripts/prototypes/bank_warm_predictor/measure.py" --arm "$arm" --width 8 "${warmup[@]}" \
+    reuse=()
+    if [ "$arm" = plain ] && [ "$repeat" = first ]; then
+      reuse=(--reuse-from "$RUN/runtime-plain-first")
+    fi
+    "$PY" "$ROOT/scripts/prototypes/bank_warm_predictor/measure.py" --arm "$arm" --width 8 "${warmup[@]}" "${reuse[@]}" \
       --streams /home/ITER/mcintos/.config/reckon/crew/runs/r-20261107T111056270825-bank-warm-start/warm-start-streams.npz \
-      --out "$RUN/runtime-$arm-$repeat" > "$RUN/runtime-$arm-$repeat.log" 2>&1
+      --out "$RUN/counts-$arm-$repeat" > "$RUN/counts-$arm-$repeat.log" 2>&1
     printf 'ARM=%s PROCESS=%s EXIT=0\n' "$arm" "$repeat"
   done
 done

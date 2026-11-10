@@ -772,7 +772,9 @@ def test_sloped_endpoint_series_matches_high_precision(
     gamma, radius, source, slope, expected
 ):
     """The combined derivative against a 60-digit angular-integral reference."""
-    got = sheet_module._sheet_gamma_series(np, gamma, radius, source, slope, np.nan)
+    got = sheet_module._source_gradient_series(
+        np, gamma, radius, source, slope, (np.nan, np.nan, np.nan)
+    )[1]
     assert np.isfinite(got)
     assert abs(got - expected) <= 5e-15 * abs(expected)
 
@@ -787,7 +789,9 @@ def test_sloped_endpoint_series_refuses_an_unqualified_branch(
     """Interior, unconverged-series and cylindrical cases retain their regular form."""
     regular = 3.25
     assert (
-        sheet_module._sheet_gamma_series(np, gamma, radius, source, slope, regular)
+        sheet_module._source_gradient_series(
+            np, gamma, radius, source, slope, (regular, regular, regular)
+        )[1]
         == regular
     )
 

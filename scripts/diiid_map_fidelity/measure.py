@@ -452,6 +452,8 @@ def reproduce_prior(output):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--retain-complete", action="store_true")
+    parser.add_argument("--prior-revision")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     configure_dtypes()
@@ -470,8 +472,51 @@ def main():
         ),
         flush=True,
     )
-    reproduce_prior(args.output)
+    if args.retain_complete:
+        if not args.prior_revision:
+            parser.error("--retain-complete requires --prior-revision")
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                str(ROOT),
+                "diff",
+                "--exit-code",
+                args.prior_revision,
+                "HEAD",
+                "--",
+                "nova",
+                "benchmarks",
+            ],
+            check=True,
+        )
+    if not (
+        args.retain_complete and (args.output / "prior-reproduction.json").exists()
+    ):
+        reproduce_prior(args.output)
     for frame in (None, 137, 146, 179):
+        if args.retain_complete:
+            pattern = (
+                "mast-21978-35/row.json"
+                if frame is None
+                else f"diiid-*-{frame}/row.json"
+            )
+            completed = list(args.output.glob(pattern))
+            if len(completed) > 1:
+                raise ValueError(f"ambiguous completed rows: {completed}")
+            if completed:
+                path = completed[0]
+                saved = json.loads(path.read_text())
+                terminal = json.loads((path.parent / "solve.json").read_text())
+                if saved["terminal"] != terminal:
+                    raise ValueError(f"row and terminal receipts disagree: {path}")
+                with np.load(path.parent / "fields.npz") as fields:
+                    for name in ("label", "solved", "mapped", "seed"):
+                        assert np.isfinite(fields[name]).all(), (path, name)
+                print(
+                    "RETAINED", path, "prior_revision", args.prior_revision, flush=True
+                )
+                continue
         prepared = prepare_mast() if frame is None else prepare_diiid(frame)
         output = args.output / prepared["identity"]
         output.mkdir(exist_ok=True)

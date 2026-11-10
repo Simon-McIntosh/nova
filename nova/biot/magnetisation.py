@@ -24,6 +24,7 @@ __all__ = ["MagnetisationSolution", "solve_magnetisation"]
 
 _MU0 = 4e-7 * np.pi
 _PLAN = TilePlan(64, 256, 256, 16, 48)
+_SHEET_LENGTH_SCALE = 1024.0
 
 
 @dataclass(frozen=True)
@@ -36,7 +37,7 @@ class _Mesh:
 def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
     """Clip a square grid and merge small pieces along their longest boundary.
 
-    No boundary is simplified: the union of the cells is the authored material.
+    The cell union preserves the authored material to floating-point roundoff.
     A hole inside one grid square is triangulated before merging. A disconnected
     sliver that cannot acquire a full edge neighbour is refused rather than
     passed to a near-singular collocation calculation.
@@ -83,9 +84,13 @@ def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
                 pieces[j], pieces[k] = merged, None
                 break
     polygons, centres, areas = [], [], []
+    duplicate_tolerance = 1024 * np.finfo(float).eps * max(1.0, *np.abs(region.bounds))
     for piece in pieces:
         if piece is None:
             continue
+        # Clipping can leave consecutive vertices separated only by roundoff.
+        # Such duplicates are not physical edges and collapse in the sheet tile.
+        piece = shapely.remove_repeated_points(piece, tolerance=duplicate_tolerance)
         centre = piece.centroid
         if (
             piece.area < floor * (1 - 1e-12)
@@ -99,6 +104,19 @@ def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
     if not polygons:
         raise ValueError("iron mesh has no cells")
     return _Mesh(tuple(polygons), np.asarray(centres), np.asarray(areas))
+
+
+def _interaction(cells, points, plan):
+    # B/M is invariant under a common dilation of source and target coordinates.
+    # A power of two preserves input bits while moving the tile's nanometre edge
+    # identity grid below a picometre in the authored geometry.
+    scale = _SHEET_LENGTH_SCALE
+    return cell_interaction(
+        tuple(p * scale for p in cells.polygons),
+        points[:, 0] * scale,
+        points[:, 1] * scale,
+        plan=plan,
+    )
 
 
 def _fit_law(b_field, permeability_relative):
@@ -218,9 +236,7 @@ class MagnetisationSolution:
         points = _points(points)
         if not len(points):
             return np.empty((0, 2))
-        response = cell_interaction(
-            self._mesh.polygons, points[:, 0], points[:, 1], plan=self._plan
-        )
+        response = _interaction(self._mesh, points, self._plan)
         return (response @ self.magnetisation.T.reshape(-1)).reshape(2, -1).T
 
 
@@ -269,9 +285,7 @@ def solve_magnetisation(
         raise ValueError(
             "external_field must return finite (cells, 2) field components"
         )
-    gram = cell_interaction(
-        cells.polygons, cells.centroids[:, 0], cells.centroids[:, 1], plan=tile_plan
-    )
+    gram = _interaction(cells, cells.centroids, tile_plan)
     if not np.all(np.isfinite(gram)):
         raise ValueError("the sheet interaction contains nonfinite entries")
     operands = tuple(

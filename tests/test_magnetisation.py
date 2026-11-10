@@ -12,10 +12,33 @@ import shapely
 
 from nova.biot import magnetisation as iron
 from nova.biot.greens import greens_bz_br
+from nova.biot.tiledassembly import cell_edges
 from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 assert jax.config.jax_enable_x64
+
+
+@pytest.fixture(scope="module", autouse=True)
+def reuse_identical_interactions():
+    """Build each geometry/target operator once while varying the material law."""
+    original = iron.cell_interaction
+    cache = {}
+
+    def response(polygons, radial, height, *, plan):
+        key = (
+            tuple(p.tobytes() for p in polygons),
+            np.asarray(radial).tobytes(),
+            np.asarray(height).tobytes(),
+            plan,
+        )
+        if key not in cache:
+            cache[key] = original(polygons, radial, height, plan=plan)
+        return cache[key]
+
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(iron, "cell_interaction", response)
+        yield
 
 
 @lru_cache(maxsize=None)
@@ -64,7 +87,6 @@ def test_uniform_sphere_matches_prototype(mu, capsys):
     error = np.max(np.abs(total[inside, 1] / exact - 1))
     # The polygonised sphere's interior is effectively uniform; the dipole
     # retains the finite boundary-resolution error measured by the ring control.
-    assert error < 1e-9
     probes = np.array([[1.0, 0.0], [0.0, 1.0]])
     measured = (uniform(probes) + result.field(probes))[:, 1]
     fraction = (mu - 1) / (mu + 2)
@@ -76,17 +98,19 @@ def test_uniform_sphere_matches_prototype(mu, capsys):
         1000.0: [1.3400238558780586e-6, 1.8779696518977929e-6],
     }
     exterior_error = np.abs(measured / expected - 1)
-    np.testing.assert_allclose(exterior_error, recorded[mu], rtol=0, atol=2e-10)
     if mu == 1:
         np.testing.assert_array_equal(result.magnetisation, 0)
         np.testing.assert_array_equal(total, uniform(points))
     with capsys.disabled():
         print(
             f"\nsphere mu={mu:g}: cells={result.cell_count}, "
-            f"iterations={result.iterations}, interior_max={error:.12g}, "
+            f"iterations={result.iterations}, interior_exact={exact:.12g} T, "
+            f"interior_max={error:.12g}, exterior_exact={expected.tolist()} T, "
             f"exterior_error={exterior_error.tolist()}",
             flush=True,
         )
+    assert error < 1e-9
+    np.testing.assert_allclose(exterior_error, recorded[mu], rtol=0, atol=2e-10)
 
 
 @pytest.mark.parametrize(
@@ -108,15 +132,17 @@ def test_closed_shell_matches_prototype(mu, recorded, capsys):
     air = loop(probes)
     total = air + result.field(probes)
     shielding = np.linalg.norm(air, axis=1) / np.linalg.norm(total, axis=1)
-    np.testing.assert_allclose(shielding, recorded, rtol=0, atol=0.0005)
     exact = ((2 * mu + 1) * (mu + 2) - 2 * (mu - 1) ** 2 * 0.9**3) / (9 * mu)
     with capsys.disabled():
         print(
             f"\nshell mu={mu:g}: cells={result.cell_count}, "
-            f"iterations={result.iterations}, shielding={shielding.tolist()}, "
+            f"iterations={result.iterations}, shielding_exact={exact:.12g}, "
+            f"shielding={shielding.tolist()}, "
             f"analytic_relative_error={np.abs(shielding / exact - 1).tolist()}",
             flush=True,
         )
+
+    np.testing.assert_allclose(shielding, recorded, rtol=0, atol=0.0005)
 
 
 def test_mesh_merges_slivers_without_losing_material():
@@ -129,6 +155,13 @@ def test_mesh_merges_slivers_without_losing_material():
         shapely.Polygon(p).contains(shapely.Point(c))
         for p, c in zip(cells.polygons, cells.centroids)
     )
+
+
+def test_clipped_sphere_has_no_collapsed_sheet_edges():
+    cells = iron._mesh(sphere(), 0.1)
+    edges = cell_edges(cells.polygons)
+    lengths = np.hypot(edges.end_r - edges.start_r, edges.end_z - edges.start_z)
+    assert np.all(lengths > 0)
 
 
 def test_mesh_preserves_holes_and_refuses_isolated_slivers():

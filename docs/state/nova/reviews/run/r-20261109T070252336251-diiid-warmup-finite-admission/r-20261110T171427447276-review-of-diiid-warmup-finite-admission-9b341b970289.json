@@ -24,6 +24,11 @@
       "kind": "folded",
       "node": "diiid-diverted-branch-continuation",
       "recorded_at": "2026-11-10T17:52:04.667953+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "git merge-tree against main (with the landed rename) is clean, and the merged fixed_point.py keeps both active_set_support_cells and the warm-up counters",
+      "recorded_at": "2026-11-10T17:53:11.738954+00:00"
     }
   },
   "findings": [

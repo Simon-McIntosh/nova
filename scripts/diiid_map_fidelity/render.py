@@ -193,7 +193,7 @@ def render(row, destination, previews):
         frameon=False,
         fontsize=14,
     )
-    name = row.name + ".svg"
+    name = row.name.replace("_", "-") + ".svg"
     save(figure, destination / name, previews / (row.name + ".png"))
     plt.close(figure)
     return dict(

@@ -817,3 +817,60 @@ A = sqrt(1+b²) hypot(r₁,br)
     one-hour head interruption was the coordinator's move to all_debug.
   </p>
 </section>
+
+<section id="icm-sheet-axis-limits-completion">
+  <h2>Complete: head suite passes and all eight regressions are fixed</h2>
+  <p>
+    The head-only suite completed in sirius job 1309863 with scheduler and
+    batch status COMPLETED, ExitCode 0:0, elapsed 01:02:23. The actual measured
+    revision is <code>cb63840160f3f88c211c9401b1ccf5e01a9e1f61</code>.
+    Its log reaches the complete pytest summary
+    <strong>725 passed in 3728.67s (1:02:08)</strong> and ends with the bare
+    receipt <code>EXIT=0</code>. The allocation was verified as sirius,
+    Timelimit 01:30:00, eight CPUs, 64 GB and one pytest process. There is no
+    timeout wrapper.
+  </p>
+  <p>
+    Both arm records use the exact resolved command:
+    <code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_edge_sheet.py tests/test_sheet_tile.py</code>.
+    The completed baseline at
+    <code>61dadd7eeee75fc00da0e9ccfa818e287eeaa940</code> stands: eight failed,
+    715 passed in 1283.71s, EXIT=1. The new head has no failing test ids, so all
+    eight known sloped-field failures are fixed and the added failure count is
+    zero. Their existing parameters and tolerances remain unchanged. The
+    collection receipt explicitly includes all eight ids and the shell oblique
+    radial-magnetisation witness among the 725 tests. The additional two tests
+    beyond the baseline pin exact binary dilation behaviour.
+  </p>
+  <table>
+    <thead><tr><th>Final qualification</th><th>Receipt</th></tr></thead>
+    <tbody>
+      <tr><td>Head suite</td><td>725 passed; EXIT=0; zero added failures, all eight baseline failures fixed</td></tr>
+      <tr><td>Sphere accuracy</td><td>28,106 pairs; zero rejected pairs on scalar, packed and dilated packed routes</td></tr>
+      <tr><td>Shell accuracy</td><td>608,685 pairs; zero rejected pairs on all three routes with the derived scalar assembly term</td></tr>
+      <tr><td>Finiteness and dilation</td><td>All fields finite; packed and 1024× dilated packed fields bit-identical throughout both meshes</td></tr>
+      <tr><td>Standing WEST gate</td><td>0 of 11,505,664 above 1e-13; worst 4.239e-14; every entry finite; EXIT=0</td></tr>
+      <tr><td>Restored defective shell owner</td><td>Shell witness FAILED; one failed in 37.67s; EXIT=1</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The census figures include the derived six-operation scalar allowance
+    printed above. Admission reads the stored arrays and preserves the
+    original failed measurement; no new full census was run. The standing
+    standalone WEST gate and baseline were also retained. The latest action
+    reran only the exact-command head suite. Product source, tests and shared
+    ring-reference blobs match the measured head, the committed census/evidence
+    head <code>c97b05330c613309157d059a8420efb33a928d6c</code>, and the delivery
+    tree. The final source check verifies the introduced source-series,
+    bounded azimuthal-selection and binary-canonicalisation markers.
+  </p>
+  <p>
+    Under the assigned run directory, the completed head receipt is
+    <code>final-admission/after_suite.log</code>, with the comparison and blob
+    receipt in <code>final-admission/completion-receipt.json</code>.
+    The exact-command arm JSON, six rubric self-check lines, commit list and
+    final write-time audit are recorded in the manifest. This worker reports
+    its node complete; coordinator review, promotion and plan writeback remain
+    coordinator actions.
+  </p>
+</section>

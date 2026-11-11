@@ -1654,6 +1654,8 @@ class SolveResult(NamedTuple):
     unfreezes: jax.Array
     residual_path: jax.Array
     update_path: jax.Array
+    factor: NewtonFactor
+    factor_valid: jax.Array
 
 
 def solve_batch(
@@ -1673,6 +1675,8 @@ def solve_batch(
     tolerance: float = 1e-10,
     freeze_threshold: float = 1e-6,
     reuse_factor: bool = False,
+    factor_cache: NewtonFactor | None = None,
+    factor_valid: jax.Array | bool = True,
     contraction_limit: float = 0.5,
     freeze_active_set: bool = True,
     iterations: int = 12,
@@ -1689,7 +1693,10 @@ def solve_batch(
     until their fresh residual contracts. If no halving improves the incumbent,
     retain the smallest-residual valid trial: retaining the incumbent can stall
     at a non-smooth residual plateau above tolerance. Factor reuse is opt-in
-    because extra iterations can cost more than skipped refactors.
+    because extra iterations can cost more than skipped refactors. An incoming
+    factor proposes the first update; a fresh-residual contraction check rejects
+    that trial and rebuilds at the incumbent if it fails the contraction limit.
+    The returned factor is usable only where ``factor_valid`` is true.
     """
     lanes, cells = moments[0].shape
     support = read_batch(
@@ -1744,8 +1751,10 @@ def solve_batch(
         empty_set,
         empty_set,
         locked_fragments,
-        empty_factor,
-        jnp.asarray(False),
+        empty_factor if factor_cache is None else factor_cache,
+        jnp.asarray(False)
+        if factor_cache is None
+        else jnp.all(jnp.asarray(factor_valid)),
         jnp.full((lanes,), jnp.inf, dtype),
         jnp.zeros(lanes, jnp.int32),
         jnp.zeros(lanes, jnp.int32),
@@ -1901,6 +1910,45 @@ def solve_batch(
             search.auxiliary,
             search.residual,
         )
+        if factor_cache is not None and reuse_factor:
+            trial_ratio = next_norm / jnp.where(current_norm > 0, current_norm, 1.0)
+            retry = (
+                (~rebuild)
+                & (jnp.max(steps) == 0)
+                & jnp.any(
+                    active
+                    & (~jnp.isfinite(trial_ratio) | (trial_ratio > contraction_limit))
+                )
+            )
+
+            def rebuild_trial(_):
+                rebuilt = jax.vmap(one_fresh)((state, step_support))
+                retried = _damped_scale(
+                    evaluate,
+                    state,
+                    rebuilt.update,
+                    current_norm,
+                    fresh,
+                    active=active,
+                    max_steps=8,
+                    tolerance=tolerance,
+                    keep_incumbent=False,
+                )
+                return rebuilt, retried
+
+            correction, checked = jax.lax.cond(
+                retry, rebuild_trial, lambda _: (correction, search), None
+            )
+            candidate, next_read, next_norm = (
+                checked.state,
+                checked.auxiliary,
+                checked.residual,
+            )
+            search = checked._replace(
+                evaluations=search.evaluations
+                + jnp.where(retry, checked.evaluations, 0)
+            )
+            rebuild = rebuild | retry
         drift = lock & selection_changed(
             next_read.reading, cut_set, normal_set, locked_fragments
         )
@@ -1981,6 +2029,8 @@ def solve_batch(
         final[15],
         final[16],
         final[17],
+        final[8],
+        jnp.full((lanes,), final[9], bool),
     )
 
 

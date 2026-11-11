@@ -629,3 +629,97 @@ def test_active_set_freeze_trajectory_converges(fresh_solution, frozen_solution)
     assert bool(fresh_solution.converged) and bool(frozen_solution.converged)
     assert int(frozen_solution.freezes) >= 1
     assert float(frozen_solution.residual) <= 1e-10
+
+
+@pytest.mark.parametrize(
+    "slope, expected_refactors", [(1.0, 0), (4.0, 1), (float("nan"), 1)]
+)
+def test_carried_factor_first_update_is_guarded(monkeypatch, slope, expected_refactors):
+    """A carried trial must contract its fresh residual before it is retained."""
+    builds = []
+
+    def jacobian(_operands, moments, *_args, **_kwargs):
+        jax.debug.callback(lambda _: builds.append(1), moments[0][0])
+        return jnp.eye(3, dtype=moments[0].dtype)
+
+    monkeypatch.setattr(support_read, "read_batch", _toy_read)
+    monkeypatch.setattr(support_read, "step_residual", _toy_residual)
+    monkeypatch.setattr(support_read, "step_jacobian", jacobian)
+    states = tuple(jnp.ones((1, 1), dtype=jnp.float64) for _ in range(3))
+    points = jnp.zeros((1, 1, 2), dtype=jnp.float64)
+    matrix = slope * jnp.eye(3, dtype=jnp.float64)
+    inverse, indices = support_read._block_preconditioner(matrix)
+    carried = support_read.NewtonFactor(
+        matrix[None], jnp.ones((1, 3)), jnp.ones((1, 3)), inverse[None], indices[None]
+    )
+    result = jax.jit(
+        lambda state, factor: support_read.solve_batch(
+            None,
+            None,
+            state,
+            points,
+            points,
+            None,
+            None,
+            None,
+            None,
+            None,
+            max_steps=1,
+            reuse_factor=True,
+            factor_cache=factor,
+            freeze_active_set=False,
+        )
+    )(states, carried)
+    jax.block_until_ready(result)
+    jax.effects_barrier()
+    print(
+        "CARRIED_FACTOR",
+        slope,
+        np.asarray(result.refactors),
+        len(builds),
+        np.asarray(result.residual),
+        np.asarray(result.reads),
+    )
+    assert bool(result.converged[0])
+    assert float(result.residual[0]) <= 1e-10
+    assert float(result.residual_path[0, 1]) == float(result.residual[0])
+    assert int(result.refactors[0]) == expected_refactors
+    assert len(builds) == expected_refactors
+    assert bool(result.factor_valid[0])
+    np.testing.assert_allclose(result.factor.matrix[0], jnp.eye(3), rtol=0, atol=0)
+
+
+def test_factor_is_returned_for_the_next_slice(monkeypatch):
+    monkeypatch.setattr(support_read, "read_batch", _toy_read)
+    monkeypatch.setattr(support_read, "step_residual", _toy_residual)
+    monkeypatch.setattr(
+        support_read,
+        "step_jacobian",
+        lambda *_args, **_kwargs: jnp.eye(3, dtype=jnp.float64),
+    )
+    points = jnp.zeros((1, 1, 2), dtype=jnp.float64)
+
+    def run(state, factor=None):
+        return support_read.solve_batch(
+            None,
+            None,
+            state,
+            points,
+            points,
+            None,
+            None,
+            None,
+            None,
+            None,
+            max_steps=1,
+            reuse_factor=True,
+            factor_cache=factor,
+        )
+
+    state = tuple(jnp.ones((1, 1), dtype=jnp.float64) for _ in range(3))
+    first = jax.jit(run)(state)
+    second = jax.jit(run)(state, first.factor)
+    jax.block_until_ready(second)
+    assert int(first.refactors[0]) == 1
+    assert int(second.refactors[0]) == 0
+    assert bool(second.converged[0]) and float(second.residual[0]) <= 1e-10

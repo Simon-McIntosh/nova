@@ -3,18 +3,22 @@
 # ruff: noqa: E501
 
 import argparse
+import hashlib
 from html import escape
 import json
 from pathlib import Path
 import re
 import statistics
+import subprocess
 
 
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("run", type=Path)
     parser.add_argument("--root", type=Path, required=True)
+    parser.add_argument("--measurements", type=Path)
     args = parser.parse_args()
+    measurement_run = args.measurements or args.run
     import matplotlib
 
     matplotlib.use("Agg")
@@ -23,7 +27,10 @@ def main():
     from scripts.prototypes.bank_solve_profile.plot import save_checked
 
     pairs = {
-        arm: [json.loads((args.run / f"{arm}-{i}.json").read_text()) for i in (1, 2)]
+        arm: [
+            json.loads((measurement_run / f"{arm}-{i}.json").read_text())
+            for i in (1, 2)
+        ]
         for arm in ("base", "head")
     }
     for receipts in pairs.values():
@@ -31,6 +38,39 @@ def main():
         assert receipts[0]["revision"] == receipts[1]["revision"]
         assert receipts[0]["instrument_sha256"] == receipts[1]["instrument_sha256"]
         assert receipts[0]["helper_sha256"] == receipts[1]["helper_sha256"]
+        for receipt in receipts:
+            for path, key in (
+                (
+                    "scripts/prototypes/read_diverted_wall_skip/measure.py",
+                    "instrument_sha256",
+                ),
+                ("tests/test_read_wall_skip.py", "helper_sha256"),
+            ):
+                committed = subprocess.check_output(
+                    [
+                        "git",
+                        "-C",
+                        str(args.root),
+                        "show",
+                        f"{receipt['instrument_revision']}:{path}",
+                    ]
+                )
+                assert hashlib.sha256(committed).hexdigest() == receipt[key]
+            if receipt["revision"] == pairs["head"][0]["revision"]:
+                for path in (
+                    "nova/equilibrium/topology.py",
+                    "nova/equilibrium/support_read.py",
+                ):
+                    committed = subprocess.check_output(
+                        [
+                            "git",
+                            "-C",
+                            str(args.root),
+                            "show",
+                            f"{receipt['revision']}:{path}",
+                        ]
+                    )
+                    assert committed == (args.root / path).read_bytes()
     summary = []
     max_error = 0.0
     for index, row in enumerate(pairs["base"][0]["rows"]):
@@ -64,8 +104,8 @@ def main():
             )
         for process in (1, 2):
             with (
-                np.load(args.run / f"base-{process}-{key}.npz") as baseline,
-                np.load(args.run / f"head-{process}-{key}.npz") as head,
+                np.load(measurement_run / f"base-{process}-{key}.npz") as baseline,
+                np.load(measurement_run / f"head-{process}-{key}.npz") as head,
             ):
                 assert baseline.files == head.files
                 for field in baseline.files:
@@ -83,7 +123,7 @@ def main():
         summary.append(dict(**row, **values))
 
     plt.style.use("data-ink")
-    fig, axes = plt.subplots(1, 2, figsize=(14, 7.2), dpi=100)
+    fig, axes = plt.subplots(1, 2, figsize=(14, 7.2), dpi=100, sharey=True)
     fig.subplots_adjust(left=0.09, right=0.98, bottom=0.17, top=0.82, wspace=0.25)
     handles = []
     for ax, population in zip(axes, ("diverted", "mixed"), strict=True):
@@ -224,7 +264,7 @@ def main():
 <h2>One wall decision per carried batch</h2>
 <p>The carried refresh selects a scalar all-diverted branch before mapping over lanes. That branch omits wall evaluation. Limited and mixed batches retain the lane wall competition; full reads and terminal certificates retain the full topology owner.</p>
 <p>The pre-fix execution counter observed <code>{escape(counter[0])}</code>. Head execution controls require zero calls for an all-diverted carry and positive counts for limited, mixed and certified reads. A scratch mutation using any diverted lane instead of every diverted lane is refused by the mixed parity check.</p>
-<figure id="read-diverted-wall-skip-figure"><img src="/nova/figures/sub-millisecond-forward-path/read-diverted-wall-skip/read-wall.svg" alt="Paired CPU read time by batch width for diverted and mixed batches"><figcaption>Native CPU read over {cells} cells on the shared single-null fixture vessel. Two independent physical fields share one operator bank: the closed-form single-null diverted field and a wall-limited polynomial with an internal saddle. Full reads are dashed; carried reads are solid. Blue is head; grey is base. Each plotted value averages two fresh-process medians of seven warm calls. Width one of the mixed family is its limited member, because one lane cannot be mixed. These CPU measurements are not H200 measurements and do not establish the plan's per-slice device bound.</figcaption></figure>
+<figure id="read-diverted-wall-skip-figure"><img src="/nova/figures/sub-millisecond-forward-path/read-diverted-wall-skip/read-wall.svg" alt="Paired CPU read time by batch width for diverted and mixed batches"><figcaption>Native CPU read over {cells} cells on the shared single-null fixture vessel. Two independent physical fields share one operator bank: the closed-form single-null diverted field and a wall-limited polynomial with an internal saddle. Full reads are dashed; carried reads are solid. Blue is head; grey is base. Each plotted value averages two fresh-process medians of twelve warm calls after five untimed warm-ups. Width one of the mixed family is its limited member, because one lane cannot be mixed. These CPU measurements are not H200 measurements and do not establish the plan's per-slice device bound.</figcaption></figure>
 <h3 id="read-diverted-wall-skip-times">Paired CPU reads</h3>
 <table><thead><tr>{headers}</tr></thead><tbody>{"".join(table_rows)}</tbody></table>
 <p>Every returned numeric field agrees across base/head at rtol 1e-10 and atol 1e-12; boolean and integer fields agree exactly, including validity and rebuild flags. Maximum finite absolute difference: {max_error:.6g}. All process-pair spreads are at most 10% and both processes reproduce the lowered counts.</p>
@@ -233,7 +273,7 @@ def main():
 <table><thead><tr><th>Population</th><th>Width</th><th>Read</th><th>Arm</th><th>HLO ops</th><th>StableHLO ops</th><th>While sites</th><th>Fusion sites</th></tr></thead><tbody>{"".join(count_rows)}</tbody></table>
 <h3 id="read-diverted-wall-skip-provenance">Provenance and verification</h3>
 {verification}
-<p>Base <code>{pairs["base"][0]["revision"]}</code>; measured head <code>{pairs["head"][0]["revision"]}</code>. Instrument SHA-256 <code>{pairs["head"][0]["instrument_sha256"]}</code>; fixture SHA-256 <code>{pairs["head"][0]["helper_sha256"]}</code>. Instrument and fixture were committed before measurement. Raw receipts and complete logs are under <code>{args.run}</code>. Each receipt records the imported module, scratch working directory, backend, device, compile time and individual warm samples. Each process log ends in its captured exit status.</p>
+<p>Base <code>{pairs["base"][0]["revision"]}</code>; measured head <code>{pairs["head"][0]["revision"]}</code>. Instrument SHA-256 <code>{pairs["head"][0]["instrument_sha256"]}</code>; fixture SHA-256 <code>{pairs["head"][0]["helper_sha256"]}</code>. Instrument and fixture were committed before measurement. Raw receipts and complete logs are under <code>{measurement_run}</code>; regression logs are under <code>{args.run}</code>. Each receipt records the imported module, scratch working directory, backend, device, compile time and individual warm samples. Each process log ends in its captured exit status.</p>
 </section>
 """
     destination = (

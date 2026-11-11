@@ -16,7 +16,7 @@ def main():
     parser.add_argument("--helper", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--revision", required=True)
-    parser.add_argument("--repeats", type=int, default=7)
+    parser.add_argument("--repeats", type=int, default=12)
     args = parser.parse_args()
     from nova.jax.config import configure_dtypes
 
@@ -70,7 +70,8 @@ def main():
                 compiled = lowered.compile()
                 hlo = compiled.as_text()
                 compile_seconds = time.perf_counter() - start
-                jax.block_until_ready(compiled(inputs, tracked))
+                for _ in range(5):
+                    jax.block_until_ready(compiled(inputs, tracked))
                 samples = []
                 for _ in range(args.repeats):
                     start = time.perf_counter()

@@ -77,6 +77,7 @@ def main():
     )
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--run", type=Path, required=True)
+    parser.add_argument("--serial", action="store_true")
     args = parser.parse_args()
     root, run = args.root.resolve(), args.run.resolve()
     revision = subprocess.check_output(
@@ -188,8 +189,14 @@ def main():
         def lane(index):
             return [execute(*task, groups[index]) for task in tasks[index::2]]
 
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            outcomes = list(pool.map(lane, range(2)))
+        if args.serial:
+            all_cpus = ",".join(map(str, cpus))
+            if args.mode == "measure":
+                tasks = [tasks[index] for index in (0, 2, 1, 3)]
+            outcomes = [execute(*task, all_cpus) for task in tasks]
+        else:
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                outcomes = list(pool.map(lane, range(2)))
         print("OUTCOMES", outcomes, flush=True)
     finally:
         print("REMOVE_SCRATCH", scratch, flush=True)

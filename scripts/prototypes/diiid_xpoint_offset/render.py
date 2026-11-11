@@ -259,7 +259,7 @@ def render(entry, row, output, preview):
             0.065,
             f"gauge-free flux RMS {1000 * row['fit']['rms_before_wb']:.1f} → "
             f"{1000 * row['fit']['rms_after_wb']:.1f} mWb; "
-            "one physical contour-level array",
+            "shared levels per panel; core adds near-peak levels",
             ha="center",
             fontsize=14,
         )

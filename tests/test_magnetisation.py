@@ -3,9 +3,6 @@
 from __future__ import annotations
 
 from functools import lru_cache
-import json
-import os
-from pathlib import Path
 from time import perf_counter
 
 import jax
@@ -19,6 +16,7 @@ from nova.biot import magnetisation as iron
 from nova.biot.greens import greens_bz_br
 from nova.biot.tiledassembly import cell_edges
 from nova.jax.config import configure_dtypes
+from tests.test_imas_iron_read import west as west
 
 configure_dtypes()
 assert jax.config.jax_enable_x64
@@ -256,6 +254,7 @@ def assert_material_interpolation(b, mu):
     polynomial = PPoly(coefficients, knots)
     expected = b / (iron._MU0 * mu)
     np.testing.assert_allclose(polynomial(b), expected, rtol=8e-15, atol=0)
+    # Independent origin tangent from the tabulated permeability.
     assert coefficients[2, 0] == 1 / (iron._MU0 * mu[0])
     # Evaluate both sides at each exact join, including inserted breakpoints.
     widths = np.diff(knots)
@@ -282,6 +281,7 @@ def assert_material_interpolation(b, mu):
     differential = np.asarray(jax.vmap(jax.grad(h))(jnp.asarray(sample)))
     assert np.isfinite(differential).all()
     assert differential.min() > 0
+    # Zero-magnitude branch check: the production branch uses its held origin.
     assert float(jax.grad(h)(0.0)) == pytest.approx(ends[0], rel=2e-14)
     print(
         f"material knots={len(b)}, fitted_knots={len(knots)}, "
@@ -292,26 +292,12 @@ def assert_material_interpolation(b, mu):
 
 
 @pytest.fixture(scope="module")
-def west_material():
-    """Read the CEA table at the curation manifest's source and DD pin."""
+def west_material(west):
+    """Read the unchanged CEA table from its DD-pinned machine description."""
     from nova.imas.machine import StaticMachineDescription
 
-    manifest_path = Path(
-        os.environ.get(
-            "NOVA_WEST_SOURCE_MANIFEST",
-            "/home/ITER/mcintos/Code/imas-efit/tests/data-manifest.json",
-        )
-    )
-    if not manifest_path.is_file():
-        pytest.skip("WEST source manifest is not mounted")
-    manifest = json.loads(manifest_path.read_text())
-    row = next(
-        row for row in manifest["machine_descriptions"] if row["key"] == "west-dd4-1-0"
-    )
-    source = manifest_path.parent.parent / row["target"]
-    machine = StaticMachineDescription.read_iron_core(
-        f"imas:hdf5?path={source}", dd_version=row["dd_version"]
-    )
+    source, dd_version, _ = west
+    machine = StaticMachineDescription.read_iron_core(source, dd_version=dd_version)
     assert len(machine.iron_segments) == 6
     return machine.iron_segments[0].material
 

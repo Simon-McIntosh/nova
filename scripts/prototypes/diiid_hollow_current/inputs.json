@@ -1,0 +1,3530 @@
+{
+  "rows": [
+    {
+      "arm": "base",
+      "case": "frame-137-diverted",
+      "folder": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/retained/base/frame-137-diverted",
+      "counts": {
+        "inner": 3,
+        "receipt": 1,
+        "terminal": 1,
+        "trips": 1
+      }
+    },
+    {
+      "arm": "base",
+      "case": "frame-146-diverted",
+      "folder": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted",
+      "counts": {
+        "inner": 5,
+        "linearization": 84,
+        "receipt": 1,
+        "terminal": 1,
+        "trips": 1,
+        "warmup": 32
+      }
+    },
+    {
+      "arm": "base",
+      "case": "mast-21978-35",
+      "folder": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35",
+      "counts": {
+        "inner": 4,
+        "linearization": 8,
+        "receipt": 1,
+        "terminal": 1,
+        "trips": 1,
+        "warmup": 64
+      }
+    },
+    {
+      "arm": "head",
+      "case": "frame-137-diverted",
+      "folder": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted",
+      "counts": {
+        "inner": 3,
+        "linearization": 48,
+        "receipt": 1,
+        "terminal": 1,
+        "trips": 1,
+        "warmup": 16
+      }
+    },
+    {
+      "arm": "head",
+      "case": "frame-146-diverted",
+      "folder": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted",
+      "counts": {
+        "inner": 11,
+        "linearization": 161,
+        "receipt": 1,
+        "terminal": 1,
+        "trips": 1,
+        "warmup": 32
+      }
+    },
+    {
+      "arm": "head",
+      "case": "mast-21978-35",
+      "folder": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35",
+      "counts": {
+        "inner": 2,
+        "linearization": 2,
+        "receipt": 1,
+        "terminal": 1,
+        "trips": 1,
+        "warmup": 32
+      }
+    }
+  ],
+  "npz_schemas": {
+    "9f8ecf44e818": [
+      "first",
+      "initial",
+      "mapped",
+      "state"
+    ],
+    "5e213c66b5bb": [
+      "axis",
+      "boundary",
+      "boundary_band",
+      "connected",
+      "continued_saddle",
+      "flux",
+      "height",
+      "label",
+      "label_boundary",
+      "limiter",
+      "mapped",
+      "radius",
+      "reference_axis",
+      "reference_saddle",
+      "residual",
+      "saddle",
+      "shadow",
+      "state"
+    ],
+    "9f2d111111f8": [
+      "mapped",
+      "state"
+    ]
+  },
+  "files": [
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/retained/base/frame-137-diverted/inner-0.npz",
+      "sha256": "afcb851fa6bfd1fb4491a035ad093be2e38df5ab129d6d77db081b4cae555135",
+      "bytes": 36811,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/retained/base/frame-137-diverted/inner-1.npz",
+      "sha256": "7b1b72884ac1bbf926270bd3749ca1298559664fc9ffa5456777546180b786ab",
+      "bytes": 36794,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/retained/base/frame-137-diverted/inner-2.npz",
+      "sha256": "712f8fc83d7284fdf37fbd66524e712f1e59d29c81850afacbaec6effe1c91cd",
+      "bytes": 36804,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/retained/base/frame-137-diverted/receipt.json",
+      "sha256": "ab122f9dfff634774621fa9d79ced6b38e059deaab92981bd58a76d8399c018d",
+      "bytes": 13773,
+      "keys": [
+        "accepted",
+        "attempted",
+        "augmented_topology_reader_connected",
+        "base_revision",
+        "branch",
+        "branch_refusals",
+        "changed_mask_entries",
+        "changed_mask_entries_reconstructed",
+        "converged",
+        "cwd",
+        "efit_x_point_rz_m",
+        "frame",
+        "inner",
+        "machine",
+        "material_cells",
+        "module",
+        "newton_branch_refused_proposals",
+        "recovery",
+        "residual",
+        "residual_history",
+        "residual_history_kind",
+        "route",
+        "seed_admission",
+        "storage_order",
+        "support",
+        "terminal_reason",
+        "terminal_reason_basis",
+        "terminal_topology",
+        "termination_reason_reconstructed",
+        "timing",
+        "trip_topology",
+        "warmup",
+        "warmup_branch_refused_proposals",
+        "warmup_refused_proposals",
+        "x_point_distance_m"
+      ]
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/retained/base/frame-137-diverted/terminal.npz",
+      "sha256": "4552ebc44c2979565e066cfce71445db0d37f6383a3a0fc45de013601ef0eb0c",
+      "bytes": 49129,
+      "schema": "5e213c66b5bb"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/retained/base/frame-137-diverted/trips.json",
+      "sha256": "6306056e1c87e296dd67bf5d54e326e6a23657f11b38295b7bd781f6a72abba8",
+      "bytes": 6396,
+      "keys": "list of 3"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/inner-0.npz",
+      "sha256": "197c3958bb1141c5a1c8b4ebbfe5be88fd4001890a4df6fcd9a8b20f3ce54a2e",
+      "bytes": 36780,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/inner-1.npz",
+      "sha256": "267e8d8a4b1fc44340691c0b5d47097d18b04db1508c932ee626df908d8f4ab7",
+      "bytes": 36756,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/inner-2.npz",
+      "sha256": "0a8d5772b58454352d6d1932d2c08036c76a69e433a56b6534c86175449437b5",
+      "bytes": 36754,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/inner-3.npz",
+      "sha256": "99a4d250654d033a89db89f791e5030219fc9db565e853589ef3da0979ad7ed9",
+      "bytes": 36751,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/inner-4.npz",
+      "sha256": "e1d32b555b5dce03dbaae949b6141c893282ec3dd3b2e447d2b838e7407b4380",
+      "bytes": 36754,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-0.npz",
+      "sha256": "ed6ca32ab26e83845fb8840445ef1f0637dd67f90c74ccbe3105394143e35c14",
+      "bytes": 18409,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-1.npz",
+      "sha256": "cc3cb38a006488bb37ea293c0d4e5608700345454cd9ece0dd19008958a3ceb9",
+      "bytes": 18399,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-10.npz",
+      "sha256": "0fe8c90bcda36ff97457b891b6cce205416e346e064062b9c9fa5c04c3655bff",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-11.npz",
+      "sha256": "062da67c75f5cab16b7702a7b5b094fa8dba710852bfdbaf1acbcc5df8de2f67",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-12.npz",
+      "sha256": "11983ae42cfe7331a8a98129cc8394e705a1266f10f80a6595fd7f509d36f08b",
+      "bytes": 18403,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-13.npz",
+      "sha256": "2ba330b4c8af776b20de6ea18a9a131be811fd42ff4d41020c2dd686a2f4c6d7",
+      "bytes": 18400,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-14.npz",
+      "sha256": "5c135d08cf37b6146bd65874e43e4106a0a1fb171495870d2b3a23298bbe3529",
+      "bytes": 18399,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-15.npz",
+      "sha256": "eacf6c5fbe1b1df6b20915eaa5a0e4c4e3b5bb16c57108dd18f529ddcddefa45",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-16.npz",
+      "sha256": "f332f9d9115c31b7c5ee3611c4a817915c65110876fb9d230a03b704a83dc15f",
+      "bytes": 18402,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-17.npz",
+      "sha256": "69ff0141d14582ab4c9cc257a5074a325bffe9c3e4c86cb0ac2a3669f7b6da7a",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-18.npz",
+      "sha256": "ce54ebec6f395000a589dd7b9f968fce1e425c8973d87fc7a3a732872606feee",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-19.npz",
+      "sha256": "e6a4deb7f6374be98db327512cb902f46e5541fd7183459e0cc558108e867c98",
+      "bytes": 18393,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-2.npz",
+      "sha256": "e256c58d7b152070c3d44af9a70cc0870aa3ad0ed5e1c15ee72910ce4715324e",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-20.npz",
+      "sha256": "cfe5e3f2d8944b09db7d11f94c1946142faa2404e72a5dbc405b87a7f86d7aa0",
+      "bytes": 18393,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-21.npz",
+      "sha256": "6a6baf1275bb3ff232f65d438551d0d942f22be0fb6343fd2fe97b04fb8a4bd4",
+      "bytes": 18399,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-22.npz",
+      "sha256": "d39972b9e674e26525601540d9e60fe41db86b60b30c440a89e04ead97a8d3e3",
+      "bytes": 18401,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-23.npz",
+      "sha256": "4922a802f2c91d9efc6c2b9174d13af92ac02d033834f19f707296d91ce8b81d",
+      "bytes": 18396,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-24.npz",
+      "sha256": "7110ced57309e6f5cbb47fb61b25ad3d34cb17517876192cc602b9f3b61d0484",
+      "bytes": 18401,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-25.npz",
+      "sha256": "37d8a998722f8b92df195b1b139178213cac3987248fa8b0eefc72370d46acf2",
+      "bytes": 18393,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-26.npz",
+      "sha256": "a4c9e7cb4b18261bafced533009aba6a47e26247498c6b251c96423719ba53ed",
+      "bytes": 18385,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-27.npz",
+      "sha256": "cc9699c13ca4211ea87ed988a4b8cf452455f5f09443ce2ad6fa97ac6cf379c0",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-28.npz",
+      "sha256": "e4a1b8aa6dcd9155c0fa464cb5866388a8fe1d07d78ec1888e027f668fab4216",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-29.npz",
+      "sha256": "08aa71423572dd02d1c9e049ee696f4f249f9f149fecfbe1c83fd3e6a30f297d",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-3.npz",
+      "sha256": "97573ba89f8bcb3cb7bef8110f3e2d222498fd46be5a563f0d27a3ba78c07df2",
+      "bytes": 18402,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-30.npz",
+      "sha256": "0a2fdf4085def9e7e946a4abe576772267da3428fc946c0a684e6fa0d47b1f44",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-31.npz",
+      "sha256": "afc86cbc6e35519b54996b5df6dc632ca585851144f7682898b58cbb71c26169",
+      "bytes": 18382,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-32.npz",
+      "sha256": "06b02ac26f330fd2db013fb0506b055a273156a0735ea4dd8eef6085a5409dd4",
+      "bytes": 18385,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-33.npz",
+      "sha256": "b8513d9793ef0252d308f92498fbb5d89bc356c863435b241a0bb652db3778eb",
+      "bytes": 18396,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-34.npz",
+      "sha256": "7238b277c55b8ab66bc868e4e5f81a1e5c83c27f171d996c66806653e40cb9e6",
+      "bytes": 18395,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-35.npz",
+      "sha256": "3428ca55540e0fd2d813b3ff60a43dec036f210fea257b82e21a05165a9003d8",
+      "bytes": 18399,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-36.npz",
+      "sha256": "91055ea27a5ca0b580e681d24466bf2568e3f5c431f94beb062e71b10bfb87a3",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-37.npz",
+      "sha256": "970d36e4366e28f4ebf6c83f76889f7f8806a772da7007c3b19c2b2eb62fd286",
+      "bytes": 18396,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-38.npz",
+      "sha256": "2c4a43e6abe4c094fdba8778a1fb89d6b750a0367b14d18718f6d5311bb16805",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-39.npz",
+      "sha256": "f22314ffcee66299fd48c9a2818afd391b8396f0932d8729d30c4731c23b0792",
+      "bytes": 18396,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-4.npz",
+      "sha256": "f96bb978cbe0dcbe8e066d8d42bc9a5837dd4d27d8cc67737b37eb125eeac9f5",
+      "bytes": 18384,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-40.npz",
+      "sha256": "63c54cae3e9c714e0b72b88e6a74cfff77e0a89ba3b0f031ef59bb03d7a101c1",
+      "bytes": 18402,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-41.npz",
+      "sha256": "e6b7a299174aa53795dc5aad7b27d2f1dcd96407dcd710fc2f6ad34a874a5d0c",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-42.npz",
+      "sha256": "fd56a2e56461c4b667e873b4300c2c6c1cc69a4be14c867cbcf5c64c6dfc519e",
+      "bytes": 18397,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-43.npz",
+      "sha256": "8805130540da5a5bdf2b73e4a9e692484108d52da3c9e48be18816f8921a7ab7",
+      "bytes": 18375,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-44.npz",
+      "sha256": "755f7dd617e9c85c7c5dca5a2a6c325dda26bee44bd8840eb78054146297a4b9",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-45.npz",
+      "sha256": "dd30db526558b391d31b54db4033ce3e872aaa786292bbb472a9f3dc81a954aa",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-46.npz",
+      "sha256": "4a4b2892bae86bc8da0f9ac28f7a260bb002dc9803b27842f358950e57ff406c",
+      "bytes": 18383,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-47.npz",
+      "sha256": "a08a3acf61328c8fca15095f0353f26f7acfb0548e538aaef7f6c2bba894ab3e",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-48.npz",
+      "sha256": "3102698089b4e75e12ac227a83cb2e46a9677b26f6cd724d9074a06dc2ec50e2",
+      "bytes": 18390,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-49.npz",
+      "sha256": "09a5cd8f4e8482b55825695438a5d6657a6448af0c9a05a83d90fcdf0c8a8948",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-5.npz",
+      "sha256": "d109b67b8c9b116553bd4149dce8034f7e43c6355e2a1fa5a6a6d4ddc7c177a5",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-50.npz",
+      "sha256": "17caaa077cb2602296038057b612523f892d95b1a4a884c7448949a60cdff213",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-51.npz",
+      "sha256": "11964165280ddb9165436cd72cfdd4e06e24170211836a081e9c6ac3035b77a0",
+      "bytes": 18401,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-52.npz",
+      "sha256": "6f88adf709610159daeaa83509203c150b68048aa64541513e4c4021ae5f4856",
+      "bytes": 18396,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-53.npz",
+      "sha256": "41be783977f75cab98374fb746c81f70d68c31ee4d9c8bb3aa3f8963bde0aa95",
+      "bytes": 18395,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-54.npz",
+      "sha256": "46f0b5ceae8a435a7b5ebb65175cd179bfdc295ee19bb78294bcaaac8a47c7fa",
+      "bytes": 18396,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-55.npz",
+      "sha256": "0c1fb782cbcaeec7cff48727db6f388ef48b6ad7cffd3188685748d723dc93f5",
+      "bytes": 18396,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-56.npz",
+      "sha256": "a1efc1edfc5dd7779be76401f0c9bc52955c3789ac8985add7ec684c9133fb47",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-57.npz",
+      "sha256": "17c1e42286e2b104bde0f289d8d3c9a4222edb9da3982a50e0af9c0c15366b23",
+      "bytes": 18389,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-58.npz",
+      "sha256": "f3b5440ca1bdf3779f0297618162b1bd2725a1c38672c99a23bb0d1c7f8d4ec9",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-59.npz",
+      "sha256": "f713af49fe607d14f236e128a54024a9282444c0c2bb1c6a6ffd976a61019e7b",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-6.npz",
+      "sha256": "a65a3ec3347cb5cfb9c1e5363b23ac3dd93be6e11687793ff616de1f1729e915",
+      "bytes": 18403,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-60.npz",
+      "sha256": "ae41a58847d464b850e19055887f2c448b343a673a02df24469fc8b3539c976b",
+      "bytes": 18383,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-61.npz",
+      "sha256": "0d8d01174612b5e5b8127f93a977334f9caa58730b412ea8a3d78fc2ad40c4d3",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-62.npz",
+      "sha256": "b7016ad850a29cacf7c42e79fd71688dd4637dfe751e02c41749773a6523c913",
+      "bytes": 18393,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-63.npz",
+      "sha256": "44bd09fcec5010d6895f3479358170f6dadf9571cc7e7cb416273789f8a9e2c9",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-64.npz",
+      "sha256": "6a8a11151de55c51bce18aa6e429aff8a2c4579666175fdefadfa612f962631d",
+      "bytes": 18384,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-65.npz",
+      "sha256": "f243a062e682762fe25fb50c9a89795e0e1c7c37e5be331fe16658263de050e6",
+      "bytes": 18373,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-66.npz",
+      "sha256": "70093d15fcf5f7d4a73517818087c64d7399480e426d90b4121ed9778530af34",
+      "bytes": 18373,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-67.npz",
+      "sha256": "703a20ea915351adb1b47340ce3ad1dc47928d6af9a86f478ca5140a6685f3de",
+      "bytes": 18367,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-68.npz",
+      "sha256": "2ed70aedd3877ed2588b277b7932e77f9b862219d3540c0099fb40b2e7676c3d",
+      "bytes": 18373,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-69.npz",
+      "sha256": "60e727b420c65a24a483c92c482eff377338fab0cdb1195644f527e212703345",
+      "bytes": 18381,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-7.npz",
+      "sha256": "2eee37b2ee0fe0defdf4a7d0d9af057737f4a3410e5b6bb0573acb02723aa969",
+      "bytes": 18395,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-70.npz",
+      "sha256": "ea036b3c74c65f7c05ad844102b9d3de44f8183bc5521860571078f780c8958e",
+      "bytes": 18378,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-71.npz",
+      "sha256": "bb327e5e58e833eb7a07e4663662c3036e98b9434d72daf907734396d480eb51",
+      "bytes": 18379,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-72.npz",
+      "sha256": "a2825355039cda6188462dc73830884a981178dd396514a9eac87f3d7a8db6e7",
+      "bytes": 18384,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-73.npz",
+      "sha256": "3f3fd4d82c0ae28922159e7dd98ec9101c91abf40371da6fe0db92986cd9166d",
+      "bytes": 18378,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-74.npz",
+      "sha256": "a81a88f65918ccd67148a5f032555eaddd3eae4a62359237f43aa5f403c6f4e0",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-75.npz",
+      "sha256": "db349be44029dd612250967a0ff5c3aca97e657bf342e5efc3579292137b9051",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-76.npz",
+      "sha256": "1982ebaa4796596465197227ffa4b2f467bd830ca70e832f8a3459f0cf41ece9",
+      "bytes": 18375,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-77.npz",
+      "sha256": "f64cfcf218c894ad9a74e2ec6cb33f4749518dc596de79671ed34f496f7bfcae",
+      "bytes": 18365,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-78.npz",
+      "sha256": "e337041be58bb1c3ae04f6781a4c27596212d74eb6e687281e5265303e678ffb",
+      "bytes": 18379,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-79.npz",
+      "sha256": "7a61ee2c2724b3b420b9a72cd43e2c07968890f9192f78984ea08c917e289f73",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-8.npz",
+      "sha256": "7b2d32c534f87499bb788e13f82176f12eed0915e520b0cdeca3ec8d9845e2fb",
+      "bytes": 18390,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-80.npz",
+      "sha256": "6d52e3aee0f271bcec85ff985d83addd74f8efe2c5ab5b62ffcacda03854cabd",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-81.npz",
+      "sha256": "b7fea552724b4898c54346b34f8f6c0c4820eeb3a99e667abda5958a3d01ce70",
+      "bytes": 18390,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-82.npz",
+      "sha256": "f474ec8b21237526ec1b45376d96c72acc78ae7cf91944e89060ab914177264b",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-83.npz",
+      "sha256": "f474ec8b21237526ec1b45376d96c72acc78ae7cf91944e89060ab914177264b",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/linearization-9.npz",
+      "sha256": "6502d019463d35d413b393bab7cdcdbd480f49d8367d67453db72fb3c250b8b7",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/receipt.json",
+      "sha256": "3a9aef56154fb7939d2f69de2ea265a00ad33d13f0a977311af20556d8ca2174",
+      "bytes": 145960,
+      "keys": [
+        "accepted",
+        "attempted",
+        "augmented_residual",
+        "augmented_topology_reader_connected",
+        "axis_rz_m",
+        "backend_compile_programs",
+        "base_revision",
+        "block_region",
+        "branch",
+        "branch_refusals",
+        "changed_mask_entries",
+        "coil_rows",
+        "constraint_residual",
+        "constraint_rows",
+        "converged",
+        "counts",
+        "cwd",
+        "efit_x_point_rz_m",
+        "frame",
+        "inner",
+        "last_ladder",
+        "machine",
+        "material_cells",
+        "measurement_reader_policy",
+        "measurement_reader_root",
+        "measurement_reader_sha256",
+        "module",
+        "newton_branch_refused_proposals",
+        "recomputed_residual",
+        "residual",
+        "residual_history",
+        "route",
+        "seed_admission",
+        "shadow_count",
+        "storage_order",
+        "support",
+        "terminal_reason",
+        "terminal_topology",
+        "timing",
+        "trip_topology",
+        "warmup",
+        "warmup_branch_refused_proposals",
+        "warmup_refused_proposals",
+        "x_point_distance_m",
+        "x_point_rz_m"
+      ]
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/terminal.npz",
+      "sha256": "3afa7340a7416ce7efb61cfd68792d9e157f9d9c595087c1d4ec1416f42d3e4a",
+      "bytes": 49061,
+      "schema": "5e213c66b5bb"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/trips.json",
+      "sha256": "c3b494903a51ebcf16d915811521ab41948db8bc66a5320f326183a0c92f070f",
+      "bytes": 10711,
+      "keys": "list of 5"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-0.npz",
+      "sha256": "0a270b6f4a037b8fb6999e5904b77ca166fc032cc448808f60771c4d32b617d7",
+      "bytes": 18414,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-1.npz",
+      "sha256": "01b72c64f2d99709ee1f68289f4ed69de137e31702a05e4228a69aa7778502f8",
+      "bytes": 18413,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-10.npz",
+      "sha256": "2f0e5f433a1d34f0b2152e2495b2d76a6e8222e5ee37e6332b45432162f7ddf5",
+      "bytes": 18414,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-11.npz",
+      "sha256": "c7bb5b66d55743c9f4b1a655f1da818df77388ade0ce57d614b1d6dc5e469142",
+      "bytes": 9532,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-12.npz",
+      "sha256": "2f0e5f433a1d34f0b2152e2495b2d76a6e8222e5ee37e6332b45432162f7ddf5",
+      "bytes": 18414,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-13.npz",
+      "sha256": "05c41ee0347c782eb57f4376ba8e5063b49551a144196a2a002b14439ea15005",
+      "bytes": 9518,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-14.npz",
+      "sha256": "2f0e5f433a1d34f0b2152e2495b2d76a6e8222e5ee37e6332b45432162f7ddf5",
+      "bytes": 18414,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-15.npz",
+      "sha256": "ed6ca32ab26e83845fb8840445ef1f0637dd67f90c74ccbe3105394143e35c14",
+      "bytes": 18409,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-16.npz",
+      "sha256": "682dcb688f8ddd5e815bf33622edf1a38e4fb9c9cc06f4641bd2068665373d28",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-17.npz",
+      "sha256": "5d989c13c0adc9cb8a159cb2ad84c16da0b8e519fe16d8689d2d58806158bac6",
+      "bytes": 9473,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-18.npz",
+      "sha256": "682dcb688f8ddd5e815bf33622edf1a38e4fb9c9cc06f4641bd2068665373d28",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-19.npz",
+      "sha256": "8eff00f1b15e820abceb3f55062a7cb235150e3a5073c68fc0f38352e459e7b8",
+      "bytes": 9459,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-2.npz",
+      "sha256": "01b72c64f2d99709ee1f68289f4ed69de137e31702a05e4228a69aa7778502f8",
+      "bytes": 18413,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-20.npz",
+      "sha256": "682dcb688f8ddd5e815bf33622edf1a38e4fb9c9cc06f4641bd2068665373d28",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-21.npz",
+      "sha256": "1faf007f1e5ff3b92be11d815be38f0128ce6ba3bb4ed1a89ebc2851a5866f75",
+      "bytes": 9479,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-22.npz",
+      "sha256": "682dcb688f8ddd5e815bf33622edf1a38e4fb9c9cc06f4641bd2068665373d28",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-23.npz",
+      "sha256": "1d995575a4783c069deebc05cba079a0b650516a3ec70a12bbffd3f54c233dee",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-24.npz",
+      "sha256": "1d995575a4783c069deebc05cba079a0b650516a3ec70a12bbffd3f54c233dee",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-25.npz",
+      "sha256": "ae0dba1f41654499d74157d30ba95f70b7a518f7d2db4d60176a41e3b863cdf4",
+      "bytes": 9463,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-26.npz",
+      "sha256": "1d995575a4783c069deebc05cba079a0b650516a3ec70a12bbffd3f54c233dee",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-27.npz",
+      "sha256": "c6a8fb08cca2338b077426dd4b104c4b59858ba1f6dd8b4fcbe4c0089b9a8edf",
+      "bytes": 9466,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-28.npz",
+      "sha256": "1d995575a4783c069deebc05cba079a0b650516a3ec70a12bbffd3f54c233dee",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-29.npz",
+      "sha256": "a3260ffccbc4a0c0912005a890988e2d4c91c37a67fb6e1f7887650596cec563",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-3.npz",
+      "sha256": "677f0c1c4477b2dea2a58be5ef5972a38db331a8eac966ae293663e7a19cfaea",
+      "bytes": 18417,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-30.npz",
+      "sha256": "a3260ffccbc4a0c0912005a890988e2d4c91c37a67fb6e1f7887650596cec563",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-31.npz",
+      "sha256": "7110ced57309e6f5cbb47fb61b25ad3d34cb17517876192cc602b9f3b61d0484",
+      "bytes": 18401,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-4.npz",
+      "sha256": "677f0c1c4477b2dea2a58be5ef5972a38db331a8eac966ae293663e7a19cfaea",
+      "bytes": 18417,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-5.npz",
+      "sha256": "f8fa40add40330fb7aa942f4f641c293925a41a158a543ec470a7127c88a85ff",
+      "bytes": 18408,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-6.npz",
+      "sha256": "f8fa40add40330fb7aa942f4f641c293925a41a158a543ec470a7127c88a85ff",
+      "bytes": 18408,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-7.npz",
+      "sha256": "2f0e5f433a1d34f0b2152e2495b2d76a6e8222e5ee37e6332b45432162f7ddf5",
+      "bytes": 18414,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-8.npz",
+      "sha256": "2f0e5f433a1d34f0b2152e2495b2d76a6e8222e5ee37e6332b45432162f7ddf5",
+      "bytes": 18414,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/warmup-9.npz",
+      "sha256": "287c272646ff87ee3731f66b466078b728e0cb29467af2fc452d5f2f90e1fb01",
+      "bytes": 9526,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/inner-0.npz",
+      "sha256": "a41c24db48ddc9c74264bff3583f7c147f8abff841010ef26cc3ee2f7c0dc26b",
+      "bytes": 35290,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/inner-1.npz",
+      "sha256": "bf9fc75452faffa6665587bd00d500c745b99da8d4fa51348860ca21db04921e",
+      "bytes": 35253,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/inner-2.npz",
+      "sha256": "35f478c48ec1562adeca9b3a3827860a1862bac64c21486b321346a00982e312",
+      "bytes": 35257,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/inner-3.npz",
+      "sha256": "45c4a007fa81e9862b6f05a23fbad3678e96bbec1e04c8708356dbf6130229d9",
+      "bytes": 35264,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/linearization-0.npz",
+      "sha256": "c67507efe0e132f8fabdcbc15cec4c83351d09f04a935dbb2d79122269692f63",
+      "bytes": 17655,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/linearization-1.npz",
+      "sha256": "1219ae675172ee8f899ecf8c22c470911ab95849cb3c8e5817aee7d996ea53dd",
+      "bytes": 17656,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/linearization-2.npz",
+      "sha256": "a6368c1862b2ea32dc0b48aa6569b3791a09c1678cb12a572d5235a9f1232cb9",
+      "bytes": 17654,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/linearization-3.npz",
+      "sha256": "123b671af80f118cfe7cad2624662bb2d334c756e8f0d7c0cd10c6528bb3001b",
+      "bytes": 17651,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/linearization-4.npz",
+      "sha256": "7e882316df98a76b6d972318805b17facd3c4a899fd565c7e2a601d2af230bd0",
+      "bytes": 17665,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/linearization-5.npz",
+      "sha256": "70cde80c04a31a11190c01d29d7e4e57190297d4ceb8593f63eb890e6c485bef",
+      "bytes": 17639,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/linearization-6.npz",
+      "sha256": "8ac2c3a955d52937b2afdda1cc67f9248c56dfe8560c7ac73ff1f4945fee71f1",
+      "bytes": 17632,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/linearization-7.npz",
+      "sha256": "6ffd6f2a1228c8a33edbc5f348e722ee11d362916e267b7469321c13156dd04b",
+      "bytes": 17640,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/receipt.json",
+      "sha256": "44495fe8ccc894bc750b7bbd3df4dfe3625d74a41d127bfee44c4981983f6359",
+      "bytes": 132733,
+      "keys": [
+        "accepted",
+        "attempted",
+        "augmented_residual",
+        "augmented_topology_reader_connected",
+        "axis_rz_m",
+        "backend_compile_programs",
+        "base_revision",
+        "block_region",
+        "branch",
+        "branch_refusals",
+        "changed_mask_entries",
+        "coil_rows",
+        "constraint_residual",
+        "constraint_rows",
+        "converged",
+        "counts",
+        "cwd",
+        "efit_x_point_rz_m",
+        "frame",
+        "inner",
+        "last_ladder",
+        "machine",
+        "material_cells",
+        "measurement_reader_policy",
+        "measurement_reader_root",
+        "measurement_reader_sha256",
+        "module",
+        "newton_branch_refused_proposals",
+        "recomputed_residual",
+        "residual",
+        "residual_history",
+        "route",
+        "seed_admission",
+        "shadow_count",
+        "storage_order",
+        "support",
+        "terminal_reason",
+        "terminal_topology",
+        "timing",
+        "trip_topology",
+        "warmup",
+        "warmup_branch_refused_proposals",
+        "warmup_refused_proposals",
+        "x_point_distance_m",
+        "x_point_rz_m"
+      ]
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/terminal.npz",
+      "sha256": "941cb43e1ed5c0060c19c0a6392a3490d4c90c8825ed8049e2e0f867b8a80db4",
+      "bytes": 40380,
+      "schema": "5e213c66b5bb"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/trips.json",
+      "sha256": "16c878615491d6f1b6334c216810acf3fccc1c6b145ed570f07267de8b1a3d2d",
+      "bytes": 8587,
+      "keys": "list of 4"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-0.npz",
+      "sha256": "774da34b69b7212cd0a51fdceb7a2eb28212fd9d38572456d74564d1dae4a0df",
+      "bytes": 17671,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-1.npz",
+      "sha256": "a59cb88144db39315a9d4aeb59afd439df2123bd69de7b2ce4476a0e22c6ba26",
+      "bytes": 17652,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-10.npz",
+      "sha256": "9439acb6fc5cc2c82507c4fdec0005b14399aacbfc318fc8ee1b28f2a34d4c18",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-11.npz",
+      "sha256": "1fef664438eaf864f856ad31263b7e111dadf9f22f9096895f32a480f9c3efdd",
+      "bytes": 17645,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-12.npz",
+      "sha256": "1fef664438eaf864f856ad31263b7e111dadf9f22f9096895f32a480f9c3efdd",
+      "bytes": 17645,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-13.npz",
+      "sha256": "f61525c4a52b4b1335b8fd2fde3f648f8aa01706cbd15576db9372fa071b5feb",
+      "bytes": 17656,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-14.npz",
+      "sha256": "f61525c4a52b4b1335b8fd2fde3f648f8aa01706cbd15576db9372fa071b5feb",
+      "bytes": 17656,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-15.npz",
+      "sha256": "c67507efe0e132f8fabdcbc15cec4c83351d09f04a935dbb2d79122269692f63",
+      "bytes": 17655,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-16.npz",
+      "sha256": "e201ab974e84d08c89e6e4ed645488117c97f31394adccf745e70441dacb3b84",
+      "bytes": 17638,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-17.npz",
+      "sha256": "7ce2d8e2422c060cfde7681bcf663e2e9b4443bdfa9dc72cbc7c5891169dccdf",
+      "bytes": 17642,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-18.npz",
+      "sha256": "7ce2d8e2422c060cfde7681bcf663e2e9b4443bdfa9dc72cbc7c5891169dccdf",
+      "bytes": 17642,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-19.npz",
+      "sha256": "4c1277a2f3990c1415ac73e0ff7d120161af1570f74fc45a17f5052b474b8c79",
+      "bytes": 17646,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-2.npz",
+      "sha256": "a59cb88144db39315a9d4aeb59afd439df2123bd69de7b2ce4476a0e22c6ba26",
+      "bytes": 17652,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-20.npz",
+      "sha256": "4c1277a2f3990c1415ac73e0ff7d120161af1570f74fc45a17f5052b474b8c79",
+      "bytes": 17646,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-21.npz",
+      "sha256": "9b4e0cf0cd82bd272dacb3c0e01d5df3fc9d9225eb221306ac18c30c1113a416",
+      "bytes": 17638,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-22.npz",
+      "sha256": "9b4e0cf0cd82bd272dacb3c0e01d5df3fc9d9225eb221306ac18c30c1113a416",
+      "bytes": 17638,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-23.npz",
+      "sha256": "2a8a3d08e4fb11d8b73a8c342f23cec85d25f3f94e86ed62efe374924a8ab94d",
+      "bytes": 17643,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-24.npz",
+      "sha256": "2a8a3d08e4fb11d8b73a8c342f23cec85d25f3f94e86ed62efe374924a8ab94d",
+      "bytes": 17643,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-25.npz",
+      "sha256": "9b96e080fd125d492c4ce2c3510bf820eb608db14afebdc5e176ca10a42cc011",
+      "bytes": 17654,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-26.npz",
+      "sha256": "9b96e080fd125d492c4ce2c3510bf820eb608db14afebdc5e176ca10a42cc011",
+      "bytes": 17654,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-27.npz",
+      "sha256": "13259d574b588f16edac5bbec3eefb7409b249676f2dcf738f13d63b852016d7",
+      "bytes": 17638,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-28.npz",
+      "sha256": "13259d574b588f16edac5bbec3eefb7409b249676f2dcf738f13d63b852016d7",
+      "bytes": 17638,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-29.npz",
+      "sha256": "4c05a880355fb1309d095932e713710f012e88e33d5fc1fce45fcddee443ef85",
+      "bytes": 17651,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-3.npz",
+      "sha256": "c00898d4f1f9b6eb50df2dfc566e6048c53ac2f0308e04594843d3191608f802",
+      "bytes": 17644,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-30.npz",
+      "sha256": "4c05a880355fb1309d095932e713710f012e88e33d5fc1fce45fcddee443ef85",
+      "bytes": 17651,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-31.npz",
+      "sha256": "70cde80c04a31a11190c01d29d7e4e57190297d4ceb8593f63eb890e6c485bef",
+      "bytes": 17639,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-32.npz",
+      "sha256": "de01890f49b2c5cb00fcbb1818cefeee0310795047b0636ac6784a9cbbd07577",
+      "bytes": 17636,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-33.npz",
+      "sha256": "7d0b1de9192e0932984374597d7ba0106d624c96ba1df6c7fabaea0ce9129c22",
+      "bytes": 17632,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-34.npz",
+      "sha256": "7d0b1de9192e0932984374597d7ba0106d624c96ba1df6c7fabaea0ce9129c22",
+      "bytes": 17632,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-35.npz",
+      "sha256": "8a3eb7cf457b7e81c173e4b7bbc4671af1e5f3e2321f872d64b76d4d69fb45e0",
+      "bytes": 17631,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-36.npz",
+      "sha256": "8a3eb7cf457b7e81c173e4b7bbc4671af1e5f3e2321f872d64b76d4d69fb45e0",
+      "bytes": 17631,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-37.npz",
+      "sha256": "1204b3625a526a330163f84055f287703f7698c7ccbc750f5a1fa80e0c3f7063",
+      "bytes": 17629,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-38.npz",
+      "sha256": "1204b3625a526a330163f84055f287703f7698c7ccbc750f5a1fa80e0c3f7063",
+      "bytes": 17629,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-39.npz",
+      "sha256": "f14f8897631e8e88f9e2e65a6812f1ffd0603a58de407117f11bb017d184e627",
+      "bytes": 17632,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-4.npz",
+      "sha256": "c00898d4f1f9b6eb50df2dfc566e6048c53ac2f0308e04594843d3191608f802",
+      "bytes": 17644,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-40.npz",
+      "sha256": "f14f8897631e8e88f9e2e65a6812f1ffd0603a58de407117f11bb017d184e627",
+      "bytes": 17632,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-41.npz",
+      "sha256": "9c1cf91c5eaac58090ff676ff4634fa83fd139178b00f3e2525f8ce9c2ba3d6f",
+      "bytes": 17636,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-42.npz",
+      "sha256": "9c1cf91c5eaac58090ff676ff4634fa83fd139178b00f3e2525f8ce9c2ba3d6f",
+      "bytes": 17636,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-43.npz",
+      "sha256": "ad7cebb4999655ae4a92ca5ea41843addbb28eaabcbe135b43e807ef001067b8",
+      "bytes": 17631,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-44.npz",
+      "sha256": "ad7cebb4999655ae4a92ca5ea41843addbb28eaabcbe135b43e807ef001067b8",
+      "bytes": 17631,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-45.npz",
+      "sha256": "134d254891080bdb1567fa2fbd4bfc3586bfbc6a26f3993710c36f84ee4d4ffb",
+      "bytes": 17634,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-46.npz",
+      "sha256": "134d254891080bdb1567fa2fbd4bfc3586bfbc6a26f3993710c36f84ee4d4ffb",
+      "bytes": 17634,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-47.npz",
+      "sha256": "8ac2c3a955d52937b2afdda1cc67f9248c56dfe8560c7ac73ff1f4945fee71f1",
+      "bytes": 17632,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-48.npz",
+      "sha256": "ef2776523dc380aab61af05f8bfd57d807ccf702cfa208c0908d94d56b386cb7",
+      "bytes": 17641,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-49.npz",
+      "sha256": "f64f6e8d7180a0f7c20cdfeaeffc8ba7f6598bd8920ec6e19a04d12413465754",
+      "bytes": 17648,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-5.npz",
+      "sha256": "de265b3706d6e83c5b9e0e1e9ad132e106d693e86e4fe106c88083490eaacd40",
+      "bytes": 17645,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-50.npz",
+      "sha256": "f64f6e8d7180a0f7c20cdfeaeffc8ba7f6598bd8920ec6e19a04d12413465754",
+      "bytes": 17648,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-51.npz",
+      "sha256": "cc2bf4e836b3ca575d6a19d9fa269f7b4987be70eeb280554927bc1061813a92",
+      "bytes": 17642,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-52.npz",
+      "sha256": "cc2bf4e836b3ca575d6a19d9fa269f7b4987be70eeb280554927bc1061813a92",
+      "bytes": 17642,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-53.npz",
+      "sha256": "34413607f7dedc60fbe6a1a1b801a07448c0ddb24fa06cf4807c63b55fc80bf1",
+      "bytes": 17641,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-54.npz",
+      "sha256": "34413607f7dedc60fbe6a1a1b801a07448c0ddb24fa06cf4807c63b55fc80bf1",
+      "bytes": 17641,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-55.npz",
+      "sha256": "70050e684fae8e4f057b894bc943702ef1ec90aad859e4ae75dbc7db18b6955d",
+      "bytes": 17641,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-56.npz",
+      "sha256": "70050e684fae8e4f057b894bc943702ef1ec90aad859e4ae75dbc7db18b6955d",
+      "bytes": 17641,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-57.npz",
+      "sha256": "633a6b76e97f81ce90e156688877bc2541edccd7bc5fd344778f59deb9f3ea0f",
+      "bytes": 17639,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-58.npz",
+      "sha256": "633a6b76e97f81ce90e156688877bc2541edccd7bc5fd344778f59deb9f3ea0f",
+      "bytes": 17639,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-59.npz",
+      "sha256": "8181f4eb1df0e5532bb81d0055b6dffa8e6c5989dc038ec299a35311399bc2c1",
+      "bytes": 17643,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-6.npz",
+      "sha256": "de265b3706d6e83c5b9e0e1e9ad132e106d693e86e4fe106c88083490eaacd40",
+      "bytes": 17645,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-60.npz",
+      "sha256": "8181f4eb1df0e5532bb81d0055b6dffa8e6c5989dc038ec299a35311399bc2c1",
+      "bytes": 17643,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-61.npz",
+      "sha256": "852f2b97d2310ec0160805a618e7e993246611e77cadaae6b5fb126acf855c5f",
+      "bytes": 17640,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-62.npz",
+      "sha256": "852f2b97d2310ec0160805a618e7e993246611e77cadaae6b5fb126acf855c5f",
+      "bytes": 17640,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-63.npz",
+      "sha256": "6ffd6f2a1228c8a33edbc5f348e722ee11d362916e267b7469321c13156dd04b",
+      "bytes": 17640,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-7.npz",
+      "sha256": "adb986dba946b331aa0748f254d65ef0281304bbb809f58e6edab20e709c8b53",
+      "bytes": 17640,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-8.npz",
+      "sha256": "adb986dba946b331aa0748f254d65ef0281304bbb809f58e6edab20e709c8b53",
+      "bytes": 17640,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/warmup-9.npz",
+      "sha256": "9439acb6fc5cc2c82507c4fdec0005b14399aacbfc318fc8ee1b28f2a34d4c18",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/inner-0.npz",
+      "sha256": "afcb851fa6bfd1fb4491a035ad093be2e38df5ab129d6d77db081b4cae555135",
+      "bytes": 36811,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/inner-1.npz",
+      "sha256": "53deeab4c3213751272f781849db769c214f76b3932cbf0a7a105de71ba3bc9f",
+      "bytes": 36795,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/inner-2.npz",
+      "sha256": "fde66084a488dc58fdca649f03e5894ce5f0759b5244ea4d29697d584612e01a",
+      "bytes": 36806,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-0.npz",
+      "sha256": "c2508f76bc77d86c708b6a8ea9424d74bb6d1e1898e2371c118cef43b1ad46b7",
+      "bytes": 18411,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-1.npz",
+      "sha256": "30a9301cb870ba4e5eed1e70b189a2411c5f2fd3f34557704e4fedb87decb636",
+      "bytes": 18413,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-10.npz",
+      "sha256": "64c206e4cb78879ebd9d42a3618424f5a1b4094cf7ab2c9b6321212e66455d57",
+      "bytes": 18418,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-11.npz",
+      "sha256": "dcc646b82d7711e24eb507591b50a5b9315ffc054d58b85252fb2e5527d014d6",
+      "bytes": 18405,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-12.npz",
+      "sha256": "fd1a2e79718d67cada9767d84abec5f92b292b8161eefeec1804562dc9f56e30",
+      "bytes": 18404,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-13.npz",
+      "sha256": "65a608f65b8393b163ee5dcc432edd045ffdd74be5711d55236b801cd711478c",
+      "bytes": 18415,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-14.npz",
+      "sha256": "c6672eda02a37ac0764ea85d73fced9fb2e0bf22c0c36fc7e7c9bd194fed9939",
+      "bytes": 18410,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-15.npz",
+      "sha256": "69da1f5cf335d3dc11230673e86aa61305b26c87eb5c3bb3edee427a1003ea79",
+      "bytes": 18414,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-16.npz",
+      "sha256": "ef9b756ddb359436ac3fb4d3134585f2306c33831964b762383c75b30c3ede88",
+      "bytes": 18423,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-17.npz",
+      "sha256": "a63d594b4ce4310a98a0961656d8cae9ce399bf3aaf46874adcf060c1020dae5",
+      "bytes": 18412,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-18.npz",
+      "sha256": "705aa7cbc76c69615fe9c95cc6a4d5f5d67bdb33feb267e918d4b3d9d522cb40",
+      "bytes": 18406,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-19.npz",
+      "sha256": "bd4c532af15c28704c3ad83d0cd8de27ceead4ddf47a06a8803f47232052b3dd",
+      "bytes": 18404,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-2.npz",
+      "sha256": "37b927f5c8d87c85275eab3299bef03aa911afd6c903e2aa69f7f0da915835e3",
+      "bytes": 18424,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-20.npz",
+      "sha256": "bf5f43e7c49f73e5b5ec61ace65a9e0b388cbddcd76ef2003f5cf3ae311e744b",
+      "bytes": 18404,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-21.npz",
+      "sha256": "6fa3b560843dc10ac1e2b8b8dfea4ee257e9400a81f77b1fd49e2f36c9346cce",
+      "bytes": 18411,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-22.npz",
+      "sha256": "c4aee87c60990808e010385bf334dde85a32bd0d5ff3e83e6482a3138f6761e3",
+      "bytes": 18411,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-23.npz",
+      "sha256": "5f6336c4b7ffb0a41e5b5af3e9fdecaeabf649854f7c9e21abf7f9b7f9f5fcf7",
+      "bytes": 18413,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-24.npz",
+      "sha256": "82ace12e168c2fce8d9686e078f549b9a70c7167d5f9eb6faafd013e287b6609",
+      "bytes": 18402,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-25.npz",
+      "sha256": "b3acc451b1fe2445970b1987bbc86828d0ff7c2dac8e0b88acaab9f0f379388e",
+      "bytes": 18405,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-26.npz",
+      "sha256": "6a65e65e49952256b202e54ec7c41a0dffc2a9331c31879b98ce1a0b818e7496",
+      "bytes": 18421,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-27.npz",
+      "sha256": "bd595601e69f243aa2bf78126c6c0ca5f5b7db5030b54ba9dfa4c92b91e168e2",
+      "bytes": 18413,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-28.npz",
+      "sha256": "844e3ebe844fc9a7874bea65055fb9d2e31e50523d3518b98efb1aaa4dfcf8d3",
+      "bytes": 18435,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-29.npz",
+      "sha256": "a46a0e76c69005b3e6b34f03de56f0541893f3548dcbefa121ea2c5b89bb7f59",
+      "bytes": 18407,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-3.npz",
+      "sha256": "73a8bae393c7a184e466658b1471e088c1125f21ef7fdc31f2b021fef0b0b02b",
+      "bytes": 18431,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-30.npz",
+      "sha256": "fe08949541f3e63e96adf0e2d2eeb2bb0b2551168d658b9ccd93fb98ba284eda",
+      "bytes": 18411,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-31.npz",
+      "sha256": "07d2f63a29a53317a51abb219cef8468b7ed2a8c8cc0bd071156f26af9d55020",
+      "bytes": 18416,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-32.npz",
+      "sha256": "21bc6128a5d3a5bd65f66c5716efd01e3de67aa460ad969984090299dff14965",
+      "bytes": 18408,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-33.npz",
+      "sha256": "8770ccd4dcba4c62536c99d18b902579cfe3200ba43128ea47dbd7dfec943cba",
+      "bytes": 18405,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-34.npz",
+      "sha256": "5e5007ded80091cc4a66ee2254186b88360bff95527edddb6d233e94ccfd8a6f",
+      "bytes": 18421,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-35.npz",
+      "sha256": "f18f5e723725fe2e82cd2e9356d54737885575cb88f43af1fe53ac68e72dc012",
+      "bytes": 18405,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-36.npz",
+      "sha256": "782b2e9a162fbb38a60a23050fcddddb598c56d945e62580d0d0ed9b6d345196",
+      "bytes": 18420,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-37.npz",
+      "sha256": "bbb5adb2a986de4dbaa64ff534ee03ef67d7a7a0fa470ea64fc2364ef337233e",
+      "bytes": 18415,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-38.npz",
+      "sha256": "85a1674dfe184db2742d9116201948cbc3516facae139145dea39628ff0db448",
+      "bytes": 18417,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-39.npz",
+      "sha256": "f96b1413805a2c1e4e6458a8e9cba18b90143fade650fbbda7ca91176b12b888",
+      "bytes": 18406,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-4.npz",
+      "sha256": "98266c619e99111f8a4db64aaf24f825aace7b5350b0aac9a0e3cb522c9a7489",
+      "bytes": 18408,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-40.npz",
+      "sha256": "bef7731d34db805a82c45883e773bf4d445d1f61f4e90508ee2931df5f802b03",
+      "bytes": 18409,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-41.npz",
+      "sha256": "0430691f49b9ba5aa7399234df3404863ddebf082fb6313d0131a72807a8cd25",
+      "bytes": 18409,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-42.npz",
+      "sha256": "c8288b2f0b0482d22adaab4e42b13e5d425fae0eb2e345b5245d733e9e79a4bc",
+      "bytes": 18423,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-43.npz",
+      "sha256": "3d9d3f12166c98b2216529c23055ed4fdc3e2b2f646c8e5af051117706c6f598",
+      "bytes": 18418,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-44.npz",
+      "sha256": "2afe3df7da077d8f2e5e522435a804e37e669e70df5fb8aaba9e957ca58bd9a9",
+      "bytes": 18421,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-45.npz",
+      "sha256": "134b5c683acbc062b703552842a0e75a29ee77e861018378f1d66973861c5844",
+      "bytes": 18413,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-46.npz",
+      "sha256": "d209a0df9ecc66a0b565e211d399feeafafebc63f6c3dce7148a960a84bd4460",
+      "bytes": 18413,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-47.npz",
+      "sha256": "d209a0df9ecc66a0b565e211d399feeafafebc63f6c3dce7148a960a84bd4460",
+      "bytes": 18413,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-5.npz",
+      "sha256": "6f26068c9492654aac37210e6e7effce2e7a73fc8d34930eb71c014c71c00792",
+      "bytes": 18403,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-6.npz",
+      "sha256": "3cc54670b2f0dbcf4cb35a86a9dd8c03a8bc77fa6789459b195ebe89fed4d4bd",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-7.npz",
+      "sha256": "de4cd66ec941101de734b0f1f1e7cc75c3668f1f7195c83bc530bb88acd5718b",
+      "bytes": 18423,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-8.npz",
+      "sha256": "c1d37f10ba69b81be4ef215b0495e9658b1522f8758727226fb31dad244b86bf",
+      "bytes": 18416,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/linearization-9.npz",
+      "sha256": "81eed7fe016e272ea3ee2699a9ae36d6b461ab3127a9468c1798aa09a8d0db58",
+      "bytes": 18401,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/receipt.json",
+      "sha256": "a474d3f0e8021a0b74575e20e86b8d6a024c9f6dea32578ba99f7305f54720d6",
+      "bytes": 140092,
+      "keys": [
+        "accepted",
+        "attempted",
+        "augmented_residual",
+        "augmented_topology_reader_connected",
+        "axis_rz_m",
+        "backend_compile_programs",
+        "base_revision",
+        "block_region",
+        "branch",
+        "branch_refusals",
+        "changed_mask_entries",
+        "coil_rows",
+        "constraint_residual",
+        "constraint_rows",
+        "converged",
+        "counts",
+        "cwd",
+        "efit_x_point_rz_m",
+        "frame",
+        "inner",
+        "last_ladder",
+        "machine",
+        "material_cells",
+        "measurement_reader_policy",
+        "measurement_reader_root",
+        "measurement_reader_sha256",
+        "module",
+        "newton_branch_refused_proposals",
+        "recomputed_residual",
+        "residual",
+        "residual_history",
+        "route",
+        "seed_admission",
+        "shadow_count",
+        "storage_order",
+        "support",
+        "terminal_reason",
+        "terminal_topology",
+        "timing",
+        "trip_topology",
+        "warmup",
+        "warmup_branch_refused_proposals",
+        "warmup_refused_proposals",
+        "x_point_distance_m",
+        "x_point_rz_m"
+      ]
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/terminal.npz",
+      "sha256": "4b65823a5eac080ac794547508fd6aeb64223e1ee00c2dd10cecc9028ea9d88d",
+      "bytes": 49129,
+      "schema": "5e213c66b5bb"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/trips.json",
+      "sha256": "d04941bbfa44c51301582d6976acdff28507c3133bcc2c7f866fc83d842897d8",
+      "bytes": 6404,
+      "keys": "list of 3"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-0.npz",
+      "sha256": "580f6039cddd0bbd55f65f9471c2f11da880e559cb25f64f363900c32aa1317e",
+      "bytes": 18429,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-1.npz",
+      "sha256": "964a75b174da0828161033a8629c7659023a09567ab489b90b91e6079ec47dc5",
+      "bytes": 18412,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-10.npz",
+      "sha256": "cae7cef0280b0753f7bbf1d9a25538f7fbd3297df5ff875daa895273c59b1266",
+      "bytes": 18426,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-11.npz",
+      "sha256": "58e2f7a3b2e32128227f7f2353d67c19e84bb0e615014a3aac69c6e2db356811",
+      "bytes": 18421,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-12.npz",
+      "sha256": "58e2f7a3b2e32128227f7f2353d67c19e84bb0e615014a3aac69c6e2db356811",
+      "bytes": 18421,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-13.npz",
+      "sha256": "750ca6b9b66171233178f1900242f82f342a4d196720f739411a2f044fea6f93",
+      "bytes": 9535,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-14.npz",
+      "sha256": "58e2f7a3b2e32128227f7f2353d67c19e84bb0e615014a3aac69c6e2db356811",
+      "bytes": 18421,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-15.npz",
+      "sha256": "984eede18fc28b855c801923680801114b844ef4374b068102952f2e8973b9ec",
+      "bytes": 18415,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-2.npz",
+      "sha256": "964a75b174da0828161033a8629c7659023a09567ab489b90b91e6079ec47dc5",
+      "bytes": 18412,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-3.npz",
+      "sha256": "c310b575aeba629208d637677032cb168404c2ab1292537e220df1b66401af56",
+      "bytes": 18427,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-4.npz",
+      "sha256": "c310b575aeba629208d637677032cb168404c2ab1292537e220df1b66401af56",
+      "bytes": 18427,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-5.npz",
+      "sha256": "0b6fb6cf0da5bc0b8a33def76b119c692e6e01afe5a1e4849c2af628676123be",
+      "bytes": 18426,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-6.npz",
+      "sha256": "0b6fb6cf0da5bc0b8a33def76b119c692e6e01afe5a1e4849c2af628676123be",
+      "bytes": 18426,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-7.npz",
+      "sha256": "ac5afaed80bb9e7ace83126dd710c8e1f608623e327e5c1484332934e1ced4f0",
+      "bytes": 9546,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-8.npz",
+      "sha256": "0b6fb6cf0da5bc0b8a33def76b119c692e6e01afe5a1e4849c2af628676123be",
+      "bytes": 18426,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/warmup-9.npz",
+      "sha256": "cae7cef0280b0753f7bbf1d9a25538f7fbd3297df5ff875daa895273c59b1266",
+      "bytes": 18426,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/inner-0.npz",
+      "sha256": "4756db972db2309cc0936c0fccfe61e3bfa0685ec164b9afec12e95b4cbe422d",
+      "bytes": 36786,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/inner-1.npz",
+      "sha256": "6e11e2f0eaaaff06deacaa9a3a63521b81e4991fc155ee431545ed5fa664b0ec",
+      "bytes": 36762,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/inner-10.npz",
+      "sha256": "1faf6b051f91be94b915f8351125827c995d46977b5161add4ab5ef7620ac00a",
+      "bytes": 36730,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/inner-2.npz",
+      "sha256": "5e54f116422764a426987fca7da9d42a70ca74f2417252840c3718d8a1a287fa",
+      "bytes": 36765,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/inner-3.npz",
+      "sha256": "8e0d5b28246a9c2b6b9227f235dd101466efe8d0355c192d7cc5b35b06f58fd5",
+      "bytes": 36767,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/inner-4.npz",
+      "sha256": "eaf57924c472df7143a1daa26c6896fdd4f0eea74e64326914f663a464cf165b",
+      "bytes": 36761,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/inner-5.npz",
+      "sha256": "f175bc13de24fcd0960c3efa4dc7058f4484d75eaf98f050af94755f107be018",
+      "bytes": 36746,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/inner-6.npz",
+      "sha256": "95d889a9a4a701b87878717db804a4799fe175233844561c67ef0764d9a0e174",
+      "bytes": 36736,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/inner-7.npz",
+      "sha256": "f751980d01284afe68670e10d58b33ab12aa2d2f3c9cced4fbc67f7ff57445cb",
+      "bytes": 36740,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/inner-8.npz",
+      "sha256": "df538978312ccdc029d3176dd5d199197ef3de26de21ec5e6bebef939c9818a6",
+      "bytes": 36750,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/inner-9.npz",
+      "sha256": "90fe352703c4c11bdda431436fcd710f0f69456a0f86244d664d982ae8ff91f4",
+      "bytes": 36743,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-0.npz",
+      "sha256": "ed6ca32ab26e83845fb8840445ef1f0637dd67f90c74ccbe3105394143e35c14",
+      "bytes": 18409,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-1.npz",
+      "sha256": "cc3cb38a006488bb37ea293c0d4e5608700345454cd9ece0dd19008958a3ceb9",
+      "bytes": 18399,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-10.npz",
+      "sha256": "0fe8c90bcda36ff97457b891b6cce205416e346e064062b9c9fa5c04c3655bff",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-100.npz",
+      "sha256": "edb83ce70c86a5ded88f3efc7d1c0fcd28895868d0db1b136651aa50032d8ec5",
+      "bytes": 18389,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-101.npz",
+      "sha256": "cd4dd821cf974e567f194d45e752ca3a899b64656654e9f4c5ac9b779b859c38",
+      "bytes": 18379,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-102.npz",
+      "sha256": "150ecdd46a2f5b7ebe8cbadcf778130b23fedc9ac862580dfb9863fe88595982",
+      "bytes": 18389,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-103.npz",
+      "sha256": "851c70154bd61c27e0fa0241e1dbd1a73fc24b7ca4137ef6e19f07a433a4d3e2",
+      "bytes": 18383,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-104.npz",
+      "sha256": "331feaf47752f5f99ced2429ebb68f2b70620c090fdf92437223938e44935c62",
+      "bytes": 18384,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-105.npz",
+      "sha256": "4b64b8b06561f507733466fcd2065206818a338dd5667c2aec679be0b6a02608",
+      "bytes": 18381,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-106.npz",
+      "sha256": "0426ef59b5fbc72c59b1d71bb2623274d6ad49932dab615534169ea315c1d9e1",
+      "bytes": 18380,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-107.npz",
+      "sha256": "e5c08c16702252f171edf9176d6a88a6467de73b51cded91d99a89978f1ea88f",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-108.npz",
+      "sha256": "df3aee4d544b8916d6f1daea157dac44d1ef7dd1fb4240984362f6fb20cfd880",
+      "bytes": 18377,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-109.npz",
+      "sha256": "6bf6d9c3d08db2f32de61883a359c90f92ca9e0efd625e2e83f134532a5a9646",
+      "bytes": 18385,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-11.npz",
+      "sha256": "062da67c75f5cab16b7702a7b5b094fa8dba710852bfdbaf1acbcc5df8de2f67",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-110.npz",
+      "sha256": "5a9f4ce489ac691365cd13b15d6dd78013f2bae16a838316990159b7b8156b60",
+      "bytes": 18376,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-111.npz",
+      "sha256": "9bf60566d163148b997f48733517a58cf5f7345162e7c26c48dc48123a8cecfd",
+      "bytes": 18385,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-112.npz",
+      "sha256": "bddbd20a252a7c2fd9e54108505bd9c107d8e7671fdfcc65f50e1d6d721feb7b",
+      "bytes": 18379,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-113.npz",
+      "sha256": "2a380bf289bda40e508ca7b063d4e6cba54de19763971edff68eb5ebd79294c8",
+      "bytes": 18376,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-114.npz",
+      "sha256": "04d7815b5c72f2137cb452b7849abd6ee7487160de6ee784f07ca0b91d60336f",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-115.npz",
+      "sha256": "e5f6d3258150131941f55b0450ad0c3911cf4ef9e88132dd0e8b0c010204172e",
+      "bytes": 18381,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-116.npz",
+      "sha256": "6cb242ccef264bc84709cbe5408268f636cf645fbb2a8a13b4366dca1fb0c3d5",
+      "bytes": 18389,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-117.npz",
+      "sha256": "4adf0b77c52825d979986476cf24009df7f51c56fcd9bfc8317837787f1e9dd4",
+      "bytes": 18381,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-118.npz",
+      "sha256": "c4dceea57ef9ade10dbc4e5ae791187ebdc9c6c6e1b9e7cf9a809588fa6c5789",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-119.npz",
+      "sha256": "e88b1055066a86a888c1dfcfed67742b0ff124c44c705ad81b0d40b53994537e",
+      "bytes": 18383,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-12.npz",
+      "sha256": "11983ae42cfe7331a8a98129cc8394e705a1266f10f80a6595fd7f509d36f08b",
+      "bytes": 18403,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-120.npz",
+      "sha256": "c2ea13fef6c1e7c8c1dc0a3b3a536b6c352867152e677011a9a6436dbde32182",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-121.npz",
+      "sha256": "1906cea19a76b817b0321af8d6603860a4eccea6a845eabb9d1f2020b4240030",
+      "bytes": 18393,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-122.npz",
+      "sha256": "76b7a9ec632070afa0e4d1ecdc3ed5a612a306fe84d0ed0acd4b676de1b89435",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-123.npz",
+      "sha256": "a7ca637ed355a84a7d8a40a5b9debb2817593a1be81bd507f6d9871202f628a9",
+      "bytes": 18389,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-124.npz",
+      "sha256": "cbc882239e092dc6f5c327103b3d000167afec57a4e46f6d6c606fd4c568cecd",
+      "bytes": 18377,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-125.npz",
+      "sha256": "cc516ec4e065a41007bcd90ec34eb865eb011278eaa68797854e6c0092400b54",
+      "bytes": 18380,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-126.npz",
+      "sha256": "f72824469d81eb2501ac58f99e3a75250f105119377354937975d79418df3a34",
+      "bytes": 18383,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-127.npz",
+      "sha256": "468906f3bce19fb34e7d224764fc238ba1c7ac430096a8e9eed2c2d241a6c6d4",
+      "bytes": 18382,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-128.npz",
+      "sha256": "18fe645aa8e8f1a81fa58365ecde330f9a49b20dcb741f43a3c780aedd071f3b",
+      "bytes": 18381,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-129.npz",
+      "sha256": "78595beed116bb4ac1a3633b783d99355a17c178c67afb397ceb5d6207ebd6eb",
+      "bytes": 18369,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-13.npz",
+      "sha256": "f135fd786e07d4d081a928ff8ef845d34bc7296cf6ec7de9c4f9774e5c561ebb",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-130.npz",
+      "sha256": "072df66243e73929b38c69aee840fd6f0dda12cfabd4aebcc6210a04cb95609d",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-131.npz",
+      "sha256": "49d1ba6a4669527cf925328b86e0a18cab3100707eefc716b94a0381bc010e7a",
+      "bytes": 18381,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-132.npz",
+      "sha256": "c3511e309d559c8359dff1c9efdf81c3a589f1037a01782d0694618043d5c114",
+      "bytes": 18382,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-133.npz",
+      "sha256": "7d1130bf41e531f0c39e05956b165823505682f354de3f286bb523acf0fc1eeb",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-134.npz",
+      "sha256": "b3be29442a8cd1e716ade79f699b3dc120ac7a01c70b06bc5125d35e618a4da1",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-135.npz",
+      "sha256": "4d6abd36d84e4a264708321146135737a9d9d5692425d8016a4a635046c68718",
+      "bytes": 18390,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-136.npz",
+      "sha256": "dbe18e473e66bce7b8648031a5a9f00ebccf6f1652afddb23c6375ed0bf0eaa2",
+      "bytes": 18380,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-137.npz",
+      "sha256": "8764c41ccdbff6070a91123b0ca8344f941b452cf4818dd2723eba7f37c532f9",
+      "bytes": 18385,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-138.npz",
+      "sha256": "075fd44f2579ec3c0ec96454c665951cf098d06a140d320693de569118b5d15f",
+      "bytes": 18390,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-139.npz",
+      "sha256": "7e34c43978ebd4fb491bfef2adb14e0ef9cb9693c87c67f3dd2714d0350463a0",
+      "bytes": 18394,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-14.npz",
+      "sha256": "6b9aad251b99a5030fcf8f36d7df9a120d205ba7e1e4d54619afc80f85a6643b",
+      "bytes": 18394,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-140.npz",
+      "sha256": "e11ae730ac25d58f30bf25589493236439912ebc79077c6caba5959436a6b4c3",
+      "bytes": 18396,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-141.npz",
+      "sha256": "cf92a9f7166603de7217efbce4280d1ff2f7ee061d760406b5b769d1696dd5c3",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-142.npz",
+      "sha256": "637a7c1fc743235fd6110a190d75b90203ae97460a00a9344835ce0e7dc10c8e",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-143.npz",
+      "sha256": "97d38c198ce4d2dbd5cf34418d68d2475b87b6393e7656691389df95ec28316f",
+      "bytes": 18397,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-144.npz",
+      "sha256": "3f08842d1168f81f04152e501681e718b48bcb337882bf87d8fd24e1e81730ea",
+      "bytes": 18378,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-145.npz",
+      "sha256": "7807bef44c3b0da4accca01dd93c91601a12a85226c14a195ef58b4fd9cc8f7f",
+      "bytes": 18378,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-146.npz",
+      "sha256": "7807bef44c3b0da4accca01dd93c91601a12a85226c14a195ef58b4fd9cc8f7f",
+      "bytes": 18378,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-147.npz",
+      "sha256": "4abb869796df473e5d8483e2c91846a9fd52a872cb4bf9a090455a065d0558ee",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-148.npz",
+      "sha256": "6bf270a2ac429b10614aedefc3f1d1e60e8c486898a044dfccece0555d2b96e5",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-149.npz",
+      "sha256": "c4eec8ba13ea5e9dfd1f5a4cff0383a10a4bc2f9eee0be84528b851615736f2f",
+      "bytes": 18382,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-15.npz",
+      "sha256": "f8be3189c4860e5e99c5645bc70a273b6dfa67559efb272c5f292ca7bbf6f4d9",
+      "bytes": 18404,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-150.npz",
+      "sha256": "c4eec8ba13ea5e9dfd1f5a4cff0383a10a4bc2f9eee0be84528b851615736f2f",
+      "bytes": 18382,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-151.npz",
+      "sha256": "6739cb00cff089cb20315e9ba452c20fd39d0294246479775d65f1e7fb8e852e",
+      "bytes": 18393,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-152.npz",
+      "sha256": "ab724153005d0513b7f322f945111d5c05f0008def8111d6af8e867e36d8943f",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-153.npz",
+      "sha256": "9170de18afc96233b9caaafc444383e757e264fa96ac594d364ef17b7a89a9e1",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-154.npz",
+      "sha256": "9170de18afc96233b9caaafc444383e757e264fa96ac594d364ef17b7a89a9e1",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-155.npz",
+      "sha256": "4346f534bec969054e95e758961c73cccbc0ff5809ce14c03642f669815421da",
+      "bytes": 18394,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-156.npz",
+      "sha256": "c84c25e6474d0626b1aa9ab5a162dc1d013a3bc1f56e9d0065e956f16e4ea2f0",
+      "bytes": 18382,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-157.npz",
+      "sha256": "247b5048876be011607fab6cefe0fda099ccaf76144e6866d9e743e7dcc58f10",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-158.npz",
+      "sha256": "6541e4f0ade2ae9145daec1692e359a2b35a16f79d7b22058c8a7e39c475ee2b",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-159.npz",
+      "sha256": "ef3704c2f4ce4cdf9dd64799e0cc9ec3a44501523ca7f0e7fbc9a080812851e5",
+      "bytes": 18381,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-16.npz",
+      "sha256": "a8e72bca89fb199a09ba8d12ea9c316415240e70737e203c098cbcb87003a971",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-160.npz",
+      "sha256": "ef3704c2f4ce4cdf9dd64799e0cc9ec3a44501523ca7f0e7fbc9a080812851e5",
+      "bytes": 18381,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-17.npz",
+      "sha256": "5813dcb25b5763817d2fbb0f219b1a9421b0ff234ce2bdda5cc908ad52748aa1",
+      "bytes": 18394,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-18.npz",
+      "sha256": "5f528448f0e7977ec55a0d44e2b14c20f0417622a648f9dc9df8e22db7746c8f",
+      "bytes": 18376,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-19.npz",
+      "sha256": "ef088d0d6bf5035c354774cca700e9ae30771f41394ace20258771dadc5e6d48",
+      "bytes": 18380,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-2.npz",
+      "sha256": "e256c58d7b152070c3d44af9a70cc0870aa3ad0ed5e1c15ee72910ce4715324e",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-20.npz",
+      "sha256": "886e795cbc06c33a0fa3642afa69f1bb2e153c450b9372afc2ce32003a0e9128",
+      "bytes": 18399,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-21.npz",
+      "sha256": "40223e22f2ed03ab6502bc0934cec2f0bd2ddd693d5c8408f91e2ebcecad43c1",
+      "bytes": 18402,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-22.npz",
+      "sha256": "fb40972782359a0048ec3690e7064cc5fc7f42bcfb7267e5e8e7ad2a3db4231a",
+      "bytes": 18380,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-23.npz",
+      "sha256": "e4dc62b6de6e38ada10a2f250eb78390396c3a450861c6c69ef1277e585f189b",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-24.npz",
+      "sha256": "2d65556d1b25d6b1c5cf5328edeeda40d48c608359efd052281951cda28344c8",
+      "bytes": 18399,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-25.npz",
+      "sha256": "b4da08dfbc97176552adcc64b5fd57433ec6a4bf6785d00d022d33abfaf7b972",
+      "bytes": 18396,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-26.npz",
+      "sha256": "45351728a3939cab0c9b238da3c5694a52ce23d69155683e17ccc67c0590e2c8",
+      "bytes": 18389,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-27.npz",
+      "sha256": "bc47f04c46f45757786f8f9760471cfa2839f2fa930178fbab12d9ed54de1b7c",
+      "bytes": 18397,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-28.npz",
+      "sha256": "b81ae62f101e950d36cbedfcf164bad444f35ad101f6f5407917e50d5862be80",
+      "bytes": 18399,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-29.npz",
+      "sha256": "06768ac237144103f0b2b960cd029987401c493ca883d8872c83495aacb95a15",
+      "bytes": 18390,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-3.npz",
+      "sha256": "97573ba89f8bcb3cb7bef8110f3e2d222498fd46be5a563f0d27a3ba78c07df2",
+      "bytes": 18402,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-30.npz",
+      "sha256": "118d14ca8aebf634891afd182529c79338a3a36ee1cedef904906b14a2856e81",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-31.npz",
+      "sha256": "367805fed391a79a4a03165e566ce293a9d2e8e4706b42380913f3ab5bb40f0e",
+      "bytes": 18399,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-32.npz",
+      "sha256": "82ba92f99a33a7dda6c053a65469f4a3e745f4b9c2a5ea6527cf420d6c0d542b",
+      "bytes": 18389,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-33.npz",
+      "sha256": "6884504d4748ffa15ffa1a2326866f0a668d4dd0707248aa34bce26808aafac9",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-34.npz",
+      "sha256": "20a0059e8bfaf3c15d02227002c0d700daf9ccf92a6dfb99005a14b60f87b3d1",
+      "bytes": 18389,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-35.npz",
+      "sha256": "2278b12518396280903ff9c571d258fa95a9c390b76399dba51e7a0b963fecf6",
+      "bytes": 18400,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-36.npz",
+      "sha256": "664d9aa733bd28d9caa82bf6d68d997e3c400020fd969442507f17bc9662a24d",
+      "bytes": 18400,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-37.npz",
+      "sha256": "f6fd42b760fb84ed3b650b98e92e06f1277cf576847b37c188d046582ec449bd",
+      "bytes": 18395,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-38.npz",
+      "sha256": "574fd50513c14d7dfdb2f55980fecbf8325ae2430a362a5b0bf4d13ea132b254",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-39.npz",
+      "sha256": "a33a927c3005ea11557e878098d093b4837e7de537ae74fe0908125b06acd6ab",
+      "bytes": 18393,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-4.npz",
+      "sha256": "f96bb978cbe0dcbe8e066d8d42bc9a5837dd4d27d8cc67737b37eb125eeac9f5",
+      "bytes": 18384,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-40.npz",
+      "sha256": "2b4820ca385e4a9f5c4350514b306ffdfc4077521d72aa571408d7970b16fc9e",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-41.npz",
+      "sha256": "9293e270314206dd637b2fd53e124f14b4e0c1c56e4a11d3cfdc0bcd7ea4e804",
+      "bytes": 18410,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-42.npz",
+      "sha256": "8acec4226bedd8bec73e7d43417a7626e4ed6d73377c53a95cc2360d33b92302",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-43.npz",
+      "sha256": "86612ebc6501e76230f5ee33760fc04972917e7ed03229b9421131ae07516c1d",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-44.npz",
+      "sha256": "f67144507e031ce36d3eab387ceee006faadc388c4eb6af6ab2e1d90391cf24b",
+      "bytes": 18395,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-45.npz",
+      "sha256": "dc28625da643cad888e91100de5cce7e6007e74e07e554e8228f79cd2d570fc7",
+      "bytes": 18401,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-46.npz",
+      "sha256": "ae3e8d7c8aec30a503471f7bd92e85a48ea59a79b90d72195f6efe2143b8adb2",
+      "bytes": 18380,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-47.npz",
+      "sha256": "5505277d4eac6b326bfe2b7f2b2ddd1182011a4f0161a1eae8f1a7ce8c9dcf30",
+      "bytes": 18396,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-48.npz",
+      "sha256": "6bb0299b66f2466745c2ba937177a97dafbfab756d62b74a68370b2e91c5220f",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-49.npz",
+      "sha256": "68504481a45281e8e1ff7d87078024838fc0684011ccdc2699b0a70d042b94a4",
+      "bytes": 18396,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-5.npz",
+      "sha256": "d109b67b8c9b116553bd4149dce8034f7e43c6355e2a1fa5a6a6d4ddc7c177a5",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-50.npz",
+      "sha256": "933b29444f261695988ea442e661fb4f594bb23f0330bf22ab2dfb57eaf0e0dd",
+      "bytes": 18401,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-51.npz",
+      "sha256": "fec2012a4be805d595310f8a5af45aa07a0fe21b6759fbdc44768c93324fdf25",
+      "bytes": 18402,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-52.npz",
+      "sha256": "0d477f2703b4672a8546fb100321cf7405d35cfb93e3434f481209fe197105ca",
+      "bytes": 18395,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-53.npz",
+      "sha256": "be548f1c5b3b709b6dfea6d8002c5c576dc5fb3c5a99db8cd00e7679a44b19cb",
+      "bytes": 18385,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-54.npz",
+      "sha256": "583b627eab5f4233d8bc4f3cdae7f635fe5338332c8ee795993e0feb1275a786",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-55.npz",
+      "sha256": "dc8ae53205444cabd2f566efecdd72e3467a3f3a106475a797d9f53a3ff70162",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-56.npz",
+      "sha256": "bbb4f2d05bf94dc72a9b851db41b215187fa7ed442151b98d4975bc2852a1e9b",
+      "bytes": 18395,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-57.npz",
+      "sha256": "990e4e2b827bb4cbbc6abdac384393849147d7d1ae7289c3cb5e154eaddfb7d1",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-58.npz",
+      "sha256": "ef0797c3dae01d90d767f9a3e23c7eccd57dd1654da78710c717d643c80a3885",
+      "bytes": 18390,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-59.npz",
+      "sha256": "8b814569411f7e8d7959fdf2948fb326529bb4756f947b8498e3f9d0e6bf435e",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-6.npz",
+      "sha256": "a65a3ec3347cb5cfb9c1e5363b23ac3dd93be6e11687793ff616de1f1729e915",
+      "bytes": 18403,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-60.npz",
+      "sha256": "4be31a75448e2b046987839959660e02f9c404cb85224772cea74a4d6cbeb8aa",
+      "bytes": 18389,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-61.npz",
+      "sha256": "c799ab51ac6a483a6041a02390dccb45e0b809a0a00c2f5272cc1bff03b97e4b",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-62.npz",
+      "sha256": "9884e5047b3ec65a2227ad1b4e61b9875d27ece026150b7a5645898c2099ac96",
+      "bytes": 18389,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-63.npz",
+      "sha256": "1370e3831f4d422ff7f9fef4fbeb75ce5c8290706d52ca6a560bec5317d382c1",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-64.npz",
+      "sha256": "972833212cae637f35e738c1ea21620bb5d84d40c3d9ac0ef6b9b5918fd396d5",
+      "bytes": 18378,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-65.npz",
+      "sha256": "abb52a4035cedaefaf79eb9d292e8df1ca595cd0de7413566a5cd3bec9a809d7",
+      "bytes": 18397,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-66.npz",
+      "sha256": "e1b522d4a8f5ddf710f20b41706c96eb64cfe7f58a37c7ded2a9312a1cb29db0",
+      "bytes": 18384,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-67.npz",
+      "sha256": "6bf6eed38c6e0fe8fc2722e81422431b79dfd2dee7e7ba2a3cbe396195117ef5",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-68.npz",
+      "sha256": "33683fbc2940b5d18b48027f1e1858025d4a6ee161027413a72b0b58c06f5e24",
+      "bytes": 18390,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-69.npz",
+      "sha256": "035ecf2c93b4b6d2c86b205c999e4598c97b4a8baf8031e626db99b587660cf6",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-7.npz",
+      "sha256": "2eee37b2ee0fe0defdf4a7d0d9af057737f4a3410e5b6bb0573acb02723aa969",
+      "bytes": 18395,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-70.npz",
+      "sha256": "3aa13a98be1f3d196a3cc503f2b99a59531f47bb7b0708d5f279c2b7e0c3b802",
+      "bytes": 18411,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-71.npz",
+      "sha256": "0daf381ccb2e481608b13cbc950d01bfe2378d2b53c56e990a97677a345f84a6",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-72.npz",
+      "sha256": "ea3abe976806f0623adeee999d71335b56d6c15f7b569d44c7a854f0c84b8a51",
+      "bytes": 18394,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-73.npz",
+      "sha256": "b77b7769233da18eae34efb572943f8e50dbff31ebc0b4ac32c098105ce58511",
+      "bytes": 18401,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-74.npz",
+      "sha256": "def948fc58da2ce4a96f217e3bc8bbb2696cf49fb18797ad0b595497d17c5c9f",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-75.npz",
+      "sha256": "8bba1a21353da75d2126ab00b5ea09bb5afd9d93d7a7c2909f330ccd1e870aa9",
+      "bytes": 18389,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-76.npz",
+      "sha256": "386ea88b35c49c876be390267a1ce617cf63df91655d41da5cc0db88a21b32ed",
+      "bytes": 18389,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-77.npz",
+      "sha256": "9c3fbe4a0ad58142ff73c84282f07418b1b6821fba46ebb4b75c8812cddfc843",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-78.npz",
+      "sha256": "d38389fdb81fef14a54a0e196ff6436d7ec2c4997e8120792b42ada55801965d",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-79.npz",
+      "sha256": "bf1fc0571392711bc9693e4b3c0ea86f85c46572d6f3b6a90c24a3c7d0e55be6",
+      "bytes": 18386,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-8.npz",
+      "sha256": "7b2d32c534f87499bb788e13f82176f12eed0915e520b0cdeca3ec8d9845e2fb",
+      "bytes": 18390,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-80.npz",
+      "sha256": "0054ea4b1bb30aeffbb67163027722206680a107419a8be90db514c4fb7fd5d3",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-81.npz",
+      "sha256": "c784f0b9e9ae352d363cf88b752626222d0158f2917a17ca8a330e92ce4ee63e",
+      "bytes": 18380,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-82.npz",
+      "sha256": "2e5bc0aebef35a6419e5352895a26fdb75e96f9f211a19a1ea34214d02243027",
+      "bytes": 18395,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-83.npz",
+      "sha256": "1b58486095506a1dbb640e3377b083c8b20737eeeb71c39bb493de9bfc619d36",
+      "bytes": 18395,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-84.npz",
+      "sha256": "ad8aef7264317f092a6c33757b1e930bcd7fabc3d491b6d9b56ba035311ca5e6",
+      "bytes": 18390,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-85.npz",
+      "sha256": "94f80d04d15c6038e2e98919eb49d2e0f0a6faa263dde28da9df7a9035a16e57",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-86.npz",
+      "sha256": "6aae851a9ad0604aaa8f2c24e6c4db955d83a636b65a02386385a40bcc4be029",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-87.npz",
+      "sha256": "0ec470904ab8aa724ebe65c2c804e5e98c6b99b518552afa54cbc1ba9c387dce",
+      "bytes": 18394,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-88.npz",
+      "sha256": "5c892a8364d473d910d7b8239d376cca77bc58a1912850d2904c92b76acdaa06",
+      "bytes": 18384,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-89.npz",
+      "sha256": "6f6da5d7cf52b4cd8621f5da30ed05a7bf39a1259522dde08bffe7bdade1b741",
+      "bytes": 18387,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-9.npz",
+      "sha256": "6502d019463d35d413b393bab7cdcdbd480f49d8367d67453db72fb3c250b8b7",
+      "bytes": 18392,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-90.npz",
+      "sha256": "66193e1195d9bc173eb3e71d748d9351d9533fbebeec5ce5f4a8e738b8f3b45a",
+      "bytes": 18382,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-91.npz",
+      "sha256": "b5219f13771f6018929091984833508db5b8719e655ae38c59bb91ecf4fe59f0",
+      "bytes": 18397,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-92.npz",
+      "sha256": "e422a5588caa8ab640ecfcd12de9586a7ada2972618d5ae8c131010a62fa3a0d",
+      "bytes": 18384,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-93.npz",
+      "sha256": "cfcff3b18a40965965797a0d2b27071699ad3c9da975b537ecf065e89693952b",
+      "bytes": 18390,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-94.npz",
+      "sha256": "b75e9b253c9829033cdf9302cfc1a047f1151311eba44506c938d995e53bf1f3",
+      "bytes": 18390,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-95.npz",
+      "sha256": "34b7495a78537ffe6382f848e38ebbf876ee36fdcbf6b7032629bde9d9b3428b",
+      "bytes": 18398,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-96.npz",
+      "sha256": "284924d8b43aaa77742114e7d78ff9d0b0225cc098d55ced54aec5315fc95f4d",
+      "bytes": 18393,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-97.npz",
+      "sha256": "490492bd83115e0a40c10970b453fe44dc67f194da8af46f957b57cf2cb4c08a",
+      "bytes": 18390,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-98.npz",
+      "sha256": "53768ce921db853cb024b51081fbc1c0ca9abb694f0ba00e47b728e6ab323582",
+      "bytes": 18384,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/linearization-99.npz",
+      "sha256": "ae904144c13b6028cb81106d4cbdedb2e01f4813f92465a3d3aece09959e2c90",
+      "bytes": 18383,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/receipt.json",
+      "sha256": "3513a4b6439433e1d29973b612c1e2cc1408350d98ce74bef22996def2346b23",
+      "bytes": 163449,
+      "keys": [
+        "accepted",
+        "attempted",
+        "augmented_residual",
+        "augmented_topology_reader_connected",
+        "axis_rz_m",
+        "backend_compile_programs",
+        "base_revision",
+        "block_region",
+        "branch",
+        "branch_refusals",
+        "changed_mask_entries",
+        "coil_rows",
+        "constraint_residual",
+        "constraint_rows",
+        "converged",
+        "counts",
+        "cwd",
+        "efit_x_point_rz_m",
+        "frame",
+        "inner",
+        "last_ladder",
+        "machine",
+        "material_cells",
+        "measurement_reader_policy",
+        "measurement_reader_root",
+        "measurement_reader_sha256",
+        "module",
+        "newton_branch_refused_proposals",
+        "recomputed_residual",
+        "residual",
+        "residual_history",
+        "route",
+        "seed_admission",
+        "shadow_count",
+        "storage_order",
+        "support",
+        "terminal_reason",
+        "terminal_topology",
+        "timing",
+        "trip_topology",
+        "warmup",
+        "warmup_branch_refused_proposals",
+        "warmup_refused_proposals",
+        "x_point_distance_m",
+        "x_point_rz_m"
+      ]
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/terminal.npz",
+      "sha256": "dedb89b4713bd569fa7758b78ef22cc978b16d7fbc82816edb96ecc18583acd9",
+      "bytes": 49024,
+      "schema": "5e213c66b5bb"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/trips.json",
+      "sha256": "5d80736cef4f85c3c93d96b895ade242d45049ce93659c4446e88c89ab8dac81",
+      "bytes": 23629,
+      "keys": "list of 11"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-0.npz",
+      "sha256": "0a270b6f4a037b8fb6999e5904b77ca166fc032cc448808f60771c4d32b617d7",
+      "bytes": 18414,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-1.npz",
+      "sha256": "01b72c64f2d99709ee1f68289f4ed69de137e31702a05e4228a69aa7778502f8",
+      "bytes": 18413,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-10.npz",
+      "sha256": "2f0e5f433a1d34f0b2152e2495b2d76a6e8222e5ee37e6332b45432162f7ddf5",
+      "bytes": 18414,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-11.npz",
+      "sha256": "c7bb5b66d55743c9f4b1a655f1da818df77388ade0ce57d614b1d6dc5e469142",
+      "bytes": 9532,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-12.npz",
+      "sha256": "2f0e5f433a1d34f0b2152e2495b2d76a6e8222e5ee37e6332b45432162f7ddf5",
+      "bytes": 18414,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-13.npz",
+      "sha256": "05c41ee0347c782eb57f4376ba8e5063b49551a144196a2a002b14439ea15005",
+      "bytes": 9518,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-14.npz",
+      "sha256": "2f0e5f433a1d34f0b2152e2495b2d76a6e8222e5ee37e6332b45432162f7ddf5",
+      "bytes": 18414,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-15.npz",
+      "sha256": "ed6ca32ab26e83845fb8840445ef1f0637dd67f90c74ccbe3105394143e35c14",
+      "bytes": 18409,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-16.npz",
+      "sha256": "3b743465687de37dff42b6bede4d5ad1eeaa715b09c973c1b576e3511ea9eef4",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-17.npz",
+      "sha256": "7833a72ab1554e3284ae0ae5336de0ca15890c9dde9f24154f0cf25262921f57",
+      "bytes": 9460,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-18.npz",
+      "sha256": "3b743465687de37dff42b6bede4d5ad1eeaa715b09c973c1b576e3511ea9eef4",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-19.npz",
+      "sha256": "0937010cc69c523620b09a09d8582e7c234d015f4f58cb06b62c3e6d72c55ef4",
+      "bytes": 9469,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-2.npz",
+      "sha256": "01b72c64f2d99709ee1f68289f4ed69de137e31702a05e4228a69aa7778502f8",
+      "bytes": 18413,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-20.npz",
+      "sha256": "3b743465687de37dff42b6bede4d5ad1eeaa715b09c973c1b576e3511ea9eef4",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-21.npz",
+      "sha256": "6bab6b04bb46cf5a9f87038fbbd3cb9d7a00659e01daed9a1a66158d73c12442",
+      "bytes": 9462,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-22.npz",
+      "sha256": "3b743465687de37dff42b6bede4d5ad1eeaa715b09c973c1b576e3511ea9eef4",
+      "bytes": 18391,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-23.npz",
+      "sha256": "8dca6d1b4c672212beff8fc3d3db6b4b76d1bbb2e5f3d62095f11b3af22933fc",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-24.npz",
+      "sha256": "8dca6d1b4c672212beff8fc3d3db6b4b76d1bbb2e5f3d62095f11b3af22933fc",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-25.npz",
+      "sha256": "ded198a2174b8a380898119419682a0d9f9135fd0eadf153908f380c6f7c3c22",
+      "bytes": 9479,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-26.npz",
+      "sha256": "8dca6d1b4c672212beff8fc3d3db6b4b76d1bbb2e5f3d62095f11b3af22933fc",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-27.npz",
+      "sha256": "397aff6e251eb79d7df24348a3a7e7d356e4bd350ef081d671a35a2c74722ace",
+      "bytes": 9458,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-28.npz",
+      "sha256": "8dca6d1b4c672212beff8fc3d3db6b4b76d1bbb2e5f3d62095f11b3af22933fc",
+      "bytes": 18388,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-29.npz",
+      "sha256": "e1afff43036e51d8c781178d9564c41a062c3ed9793e71dc9aa5f90ccd0e6b0f",
+      "bytes": 18399,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-3.npz",
+      "sha256": "677f0c1c4477b2dea2a58be5ef5972a38db331a8eac966ae293663e7a19cfaea",
+      "bytes": 18417,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-30.npz",
+      "sha256": "e1afff43036e51d8c781178d9564c41a062c3ed9793e71dc9aa5f90ccd0e6b0f",
+      "bytes": 18399,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-31.npz",
+      "sha256": "2d65556d1b25d6b1c5cf5328edeeda40d48c608359efd052281951cda28344c8",
+      "bytes": 18399,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-4.npz",
+      "sha256": "677f0c1c4477b2dea2a58be5ef5972a38db331a8eac966ae293663e7a19cfaea",
+      "bytes": 18417,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-5.npz",
+      "sha256": "f8fa40add40330fb7aa942f4f641c293925a41a158a543ec470a7127c88a85ff",
+      "bytes": 18408,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-6.npz",
+      "sha256": "f8fa40add40330fb7aa942f4f641c293925a41a158a543ec470a7127c88a85ff",
+      "bytes": 18408,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-7.npz",
+      "sha256": "2f0e5f433a1d34f0b2152e2495b2d76a6e8222e5ee37e6332b45432162f7ddf5",
+      "bytes": 18414,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-8.npz",
+      "sha256": "2f0e5f433a1d34f0b2152e2495b2d76a6e8222e5ee37e6332b45432162f7ddf5",
+      "bytes": 18414,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/warmup-9.npz",
+      "sha256": "287c272646ff87ee3731f66b466078b728e0cb29467af2fc452d5f2f90e1fb01",
+      "bytes": 9526,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/inner-0.npz",
+      "sha256": "be101a8089bf52194ac555585e0a9e36bb941a5b880c22212bae1c7dfe490de4",
+      "bytes": 35296,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/inner-1.npz",
+      "sha256": "f2f92e5bbea4ef315552c84dc14813ad957e2a3a1c7ee0d338021e2033231a4c",
+      "bytes": 35270,
+      "schema": "9f8ecf44e818"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/linearization-0.npz",
+      "sha256": "9439acb6fc5cc2c82507c4fdec0005b14399aacbfc318fc8ee1b28f2a34d4c18",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/linearization-1.npz",
+      "sha256": "860305ba7b07dc772a20343d1229c92d19dae27a90ab6de002fa4970e5bb59a9",
+      "bytes": 17657,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/receipt.json",
+      "sha256": "9166c358175993cdfa4cf820c0b2b7057d2a09fe9b9e34101b0b83bb199f05f2",
+      "bytes": 127028,
+      "keys": [
+        "accepted",
+        "attempted",
+        "augmented_residual",
+        "augmented_topology_reader_connected",
+        "axis_rz_m",
+        "backend_compile_programs",
+        "base_revision",
+        "block_region",
+        "branch",
+        "branch_refusals",
+        "changed_mask_entries",
+        "coil_rows",
+        "constraint_residual",
+        "constraint_rows",
+        "converged",
+        "counts",
+        "cwd",
+        "efit_x_point_rz_m",
+        "frame",
+        "inner",
+        "last_ladder",
+        "machine",
+        "material_cells",
+        "measurement_reader_policy",
+        "measurement_reader_root",
+        "measurement_reader_sha256",
+        "module",
+        "newton_branch_refused_proposals",
+        "recomputed_residual",
+        "residual",
+        "residual_history",
+        "route",
+        "seed_admission",
+        "shadow_count",
+        "storage_order",
+        "support",
+        "terminal_reason",
+        "terminal_topology",
+        "timing",
+        "trip_topology",
+        "warmup",
+        "warmup_branch_refused_proposals",
+        "warmup_refused_proposals",
+        "x_point_distance_m",
+        "x_point_rz_m"
+      ]
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/terminal.npz",
+      "sha256": "58a0ffc52e69ef540064066f65826431bf09011839ebb79719cdf6dfc6952a18",
+      "bytes": 47186,
+      "schema": "5e213c66b5bb"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/trips.json",
+      "sha256": "eff5579cec6f905da18a578384cef6fe0798aee3158f4e197d8696d0da71feb1",
+      "bytes": 4276,
+      "keys": "list of 2"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-0.npz",
+      "sha256": "774da34b69b7212cd0a51fdceb7a2eb28212fd9d38572456d74564d1dae4a0df",
+      "bytes": 17671,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-1.npz",
+      "sha256": "a59cb88144db39315a9d4aeb59afd439df2123bd69de7b2ce4476a0e22c6ba26",
+      "bytes": 17652,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-10.npz",
+      "sha256": "9439acb6fc5cc2c82507c4fdec0005b14399aacbfc318fc8ee1b28f2a34d4c18",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-11.npz",
+      "sha256": "1fef664438eaf864f856ad31263b7e111dadf9f22f9096895f32a480f9c3efdd",
+      "bytes": 17645,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-12.npz",
+      "sha256": "9439acb6fc5cc2c82507c4fdec0005b14399aacbfc318fc8ee1b28f2a34d4c18",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-13.npz",
+      "sha256": "46b5d735122a9a00e980c1441f56d9996fcb5ab814a93c611287995f84ecd3e2",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-14.npz",
+      "sha256": "9439acb6fc5cc2c82507c4fdec0005b14399aacbfc318fc8ee1b28f2a34d4c18",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-15.npz",
+      "sha256": "9f497f45372079e37ba2676ea774262ec01fd51c6bdb6bfc6aabb34b67cbff04",
+      "bytes": 17649,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-16.npz",
+      "sha256": "de265b3706d6e83c5b9e0e1e9ad132e106d693e86e4fe106c88083490eaacd40",
+      "bytes": 17645,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-17.npz",
+      "sha256": "adb986dba946b331aa0748f254d65ef0281304bbb809f58e6edab20e709c8b53",
+      "bytes": 17640,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-18.npz",
+      "sha256": "adb986dba946b331aa0748f254d65ef0281304bbb809f58e6edab20e709c8b53",
+      "bytes": 17640,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-19.npz",
+      "sha256": "9439acb6fc5cc2c82507c4fdec0005b14399aacbfc318fc8ee1b28f2a34d4c18",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-2.npz",
+      "sha256": "a59cb88144db39315a9d4aeb59afd439df2123bd69de7b2ce4476a0e22c6ba26",
+      "bytes": 17652,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-20.npz",
+      "sha256": "9439acb6fc5cc2c82507c4fdec0005b14399aacbfc318fc8ee1b28f2a34d4c18",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-21.npz",
+      "sha256": "1fef664438eaf864f856ad31263b7e111dadf9f22f9096895f32a480f9c3efdd",
+      "bytes": 17645,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-22.npz",
+      "sha256": "9439acb6fc5cc2c82507c4fdec0005b14399aacbfc318fc8ee1b28f2a34d4c18",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-23.npz",
+      "sha256": "46b5d735122a9a00e980c1441f56d9996fcb5ab814a93c611287995f84ecd3e2",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-24.npz",
+      "sha256": "9439acb6fc5cc2c82507c4fdec0005b14399aacbfc318fc8ee1b28f2a34d4c18",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-25.npz",
+      "sha256": "9f497f45372079e37ba2676ea774262ec01fd51c6bdb6bfc6aabb34b67cbff04",
+      "bytes": 17649,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-26.npz",
+      "sha256": "9439acb6fc5cc2c82507c4fdec0005b14399aacbfc318fc8ee1b28f2a34d4c18",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-27.npz",
+      "sha256": "860305ba7b07dc772a20343d1229c92d19dae27a90ab6de002fa4970e5bb59a9",
+      "bytes": 17657,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-28.npz",
+      "sha256": "860305ba7b07dc772a20343d1229c92d19dae27a90ab6de002fa4970e5bb59a9",
+      "bytes": 17657,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-29.npz",
+      "sha256": "9a6c9c2f363713621f6585a4ecf2ee4ce7a71bede546f9126a30bceba790bcf7",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-3.npz",
+      "sha256": "c00898d4f1f9b6eb50df2dfc566e6048c53ac2f0308e04594843d3191608f802",
+      "bytes": 17644,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-30.npz",
+      "sha256": "860305ba7b07dc772a20343d1229c92d19dae27a90ab6de002fa4970e5bb59a9",
+      "bytes": 17657,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-31.npz",
+      "sha256": "f0006596dbbb6f903fef07916b933e4d5595be3987a695b7548125cc91b7b9ab",
+      "bytes": 17665,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-4.npz",
+      "sha256": "c00898d4f1f9b6eb50df2dfc566e6048c53ac2f0308e04594843d3191608f802",
+      "bytes": 17644,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-5.npz",
+      "sha256": "de265b3706d6e83c5b9e0e1e9ad132e106d693e86e4fe106c88083490eaacd40",
+      "bytes": 17645,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-6.npz",
+      "sha256": "de265b3706d6e83c5b9e0e1e9ad132e106d693e86e4fe106c88083490eaacd40",
+      "bytes": 17645,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-7.npz",
+      "sha256": "adb986dba946b331aa0748f254d65ef0281304bbb809f58e6edab20e709c8b53",
+      "bytes": 17640,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-8.npz",
+      "sha256": "adb986dba946b331aa0748f254d65ef0281304bbb809f58e6edab20e709c8b53",
+      "bytes": 17640,
+      "schema": "9f2d111111f8"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/warmup-9.npz",
+      "sha256": "9439acb6fc5cc2c82507c4fdec0005b14399aacbfc318fc8ee1b28f2a34d4c18",
+      "bytes": 17650,
+      "schema": "9f2d111111f8"
+    }
+  ]
+}

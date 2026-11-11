@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: tests/test_bank_step_booking.py is 1 failed at base 8e9fd161 and 1 failed at head 865abeabf with the identical id tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments (default-restoration/base- and head-test_bank_step_booking.py.log), tests/test_support_read.py is 0 failed at base and 0 failed at head, and the head-only tests/test_booking_scalar_tile.py is 0 failed (50 passed, EXIT=0). Zero failures are added; the single legacy failure is inherited and outside this node's scope.",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:495",
+    "nova/equilibrium/support_read.py:617",
+    "nova/equilibrium/support_read.py:641",
+    "nova/equilibrium/support_read.py:1204",
+    "nova/equilibrium/support_read.py:645"
+  ],
+  "completed_at": "2026-11-11T18:28:02.156Z",
+  "dispatched_at": "2026-11-11T18:17:29Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "booking-scalar-tile",
+      "recorded_at": "2026-11-11T18:31:56.400713+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the width-1 12% spread is disclosed in the fragment; the CPU result is information only and the H200 section decides the tile",
+      "recorded_at": "2026-11-11T18:32:06.813585+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_booking_scalar_tile.py",
+      "line": "96",
+      "severity": "non-blocking",
+      "text": "non-blocking: no assertion reddens if nova/equilibrium/current.py:492 or :636 stop forwarding Quadrature.scalar_cut_batch_width to _integrate_bucket; the parity tests compare widths that are equal by construction, and _scalar_cut_width is asserted only directly, so a revert of the central wiring leaves all 50 tests green and would silently make a future H200 tile sweep compare identical programs."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/booking-scalar-tile.html",
+      "line": "47",
+      "severity": "non-blocking",
+      "text": "non-blocking: the width-1 booking row reports a 12.07% head process spread, so the done_when clause 'two agreeing processes' is met only at width 16 (spreads at most 1.15%); the fragment discloses the figure but the width-1 rows should not be read as within-noise agreement."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "nova/equilibrium/support_read.py:495, :617, :641 and :1204 call current.book, and support_read.py:645 calls current.book_tangent, the two functions whose batch_width resolution the change edits.",
+    "diff": "read the 14 commits 8e9fd161..865abeabf commit by commit: current.py gains the scalar_cut_batch_width field and _scalar_cut_width resolver, tests/test_booking_scalar_tile.py adds five test functions, five prototype scripts and one inspected SVG are added, and the fragment is rewritten as a negative CPU result.",
+    "done_when": "the brief's three clauses are each backed by a recorded artefact: the width parameter and parity tests are in current.py and tests/test_booking_scalar_tile.py (50 passed, EXIT=0), the negative control fails (18 failed, EXIT=1), the paired suites are recorded in default-restoration/suite-receipts.json with no added failures, and the paired CPU measurement with two fresh processes per arm, the fragment and the inspected SVG are committed.",
+    "goal": "the node goal is 'Widen the scalar booking conic tile so a read books its cut cells in fewer buckets' (prompt.txt:38); the landed change at nova/equilibrium/current.py:56 and :492 instead exposes the tile as an opt-in static parameter and ships 32 unchanged, a negative result the coordinator's resume-1-advice.txt explicitly ordered after the CPU measurement showed a regression.",
+    "manifest": "read r-20261111T161136164612-booking-scalar-tile/manifest.md; status complete, 14 commits ending 865abeabf, tests line records the literal pytest command, the paired suite arms in suite_pairs show zero added failures, and the negative_control_log is default-restoration/negative-control.log.",
+    "write_paths": "read the declared write paths from the source prompt (current.py, tests/test_booking_scalar_tile.py, scripts/prototypes/booking_scalar_tile, the evidence fragment and the figure directory); git diff --stat 8e9fd161..865abeabf changes only files inside them."
+  },
+  "justifications": {
+    "durability": "the drop-last-partial-tile mutant at default-restoration/negative-current.py:394 reddens 18 test_all_booked_moments_match_independent_population cases, so the population bound is guarded, but no assertion at tests/test_booking_scalar_tile.py:96 reddens if current.py:492 or current.py:636 stop forwarding Quadrature.scalar_cut_batch_width to the bucket integrator.",
+    "evidence": "the reviewed head log default-restoration/head-test_booking_scalar_tile.py.log names revision 865abeabf in its header and ends '50 passed' then a bare EXIT=0, the negative-control log ends EXIT=1 with 18 partial-tile parity failures, and suite_pairs record both legacy files at dispatch base and final head with the one inherited failure identical on each side; only the width-1 process agreement is weak.",
+    "fit": "current.py:56 follows the file's existing dataclass_field(default=..., metadata={'static': True}) idiom, the scripts live under the established scripts/prototypes/<node> convention, and no added source line carries a plan, phase, version or ticket label.",
+    "goal_fidelity": "nova/equilibrium/current.py:56 adds the scalar_cut_batch_width override but the shipped default stays 32 at current.py:70 and current.py:492, so the literal goal of widening the shipped tile is not delivered; the coordinator's resume advice (r-20261111T161136164612-booking-scalar-tile/resume-1-advice.txt) redirected the node to a measured negative CPU result, which the change does deliver.",
+    "reuse": "scripts/prototypes/booking_scalar_tile/report.py:12 reuses scripts.prototypes.bank_solve_read.plot.save_checked and tests/test_booking_scalar_tile.py:16 reuses tests.test_support_read._case and UnitDensity; a capability search over scripts/prototypes found scripts/prototypes/support/measure.py and scripts/prototypes/bank_read_attribution/measure.py are peer node-local drivers rather than importable owners, so the new driver forks no owned mechanism.",
+    "scope_discipline": "git diff --stat 8e9fd161..865abeabf lists nine files, every one inside the five declared write paths (current.py, the test file, scripts/prototypes/booking_scalar_tile, the evidence fragment and the figure directory)."
+  },
+  "node": "review-of-booking-scalar-tile-865abeabf814",
+  "node:reviewed": "booking-scalar-tile",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is 'Widen the scalar booking conic tile so a read books its cut cells in fewer buckets' (prompt.txt:38); the landed change at nova/equilibrium/current.py:56 and :492 exposes the tile as an opt-in static parameter and ships 32 unchanged, a negative result the coordinator's resume-1-advice.txt explicitly ordered.\nVERDICT done_when: the brief's three clauses are each backed by a recorded artefact: parity tests in tests/test_booking_scalar_tile.py (50 passed, EXIT=0), a failing negative control (18 failed, EXIT=1), the paired suites in default-restoration/suite-receipts.json with no added failures, and a two-process paired CPU measurement with the committed fragment and inspected SVG.\nVERDICT write_paths: read the declared write paths from the source prompt (nova/equilibrium/current.py, tests/test_booking_scalar_tile.py, scripts/prototypes/booking_scalar_tile, the evidence fragment and the figure directory); git diff --stat 8e9fd161..865abeabf changes only files inside them.\nVERDICT manifest: read r-20261111T161136164612-booking-scalar-tile/manifest.md; status complete, 14 commits ending 865abeabf, the tests line records the literal pytest command, suite_pairs show zero added failures, and the negative_control_log is default-restoration/negative-control.log.\nVERDICT diff: read the 14 commits 8e9fd161..865abeabf commit by commit: current.py gains the scalar_cut_batch_width field and _scalar_cut_width resolver, tests/test_booking_scalar_tile.py adds five test functions, five prototype scripts and one inspected SVG are added, and the fragment is rewritten as a negative CPU result.\nCALL_SITES: nova/equilibrium/support_read.py:495, nova/equilibrium/support_read.py:617, nova/equilibrium/support_read.py:641, nova/equilibrium/support_read.py:1204, nova/equilibrium/support_read.py:645\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: current.py:56 adds the scalar_cut_batch_width override but the shipped default stays 32 at current.py:70 and current.py:492, so the literal widening goal is not delivered; the coordinator's resume-1-advice.txt redirected the node to a measured negative CPU result, which the change does deliver.\nSCORE evidence: 17\nJUSTIFICATION evidence: default-restoration/head-test_booking_scalar_tile.py.log names revision 865abeabf and ends '50 passed' with EXIT=0, negative-control.log ends EXIT=1 with 18 partial-tile failures, and suite_pairs record both legacy files at base and head with the one inherited failure identical on each side.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 8e9fd161..865abeabf lists nine files, every one inside the five declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: the drop-last-partial-tile mutant at default-restoration/negative-current.py:394 reddens 18 parity cases, but no assertion at tests/test_booking_scalar_tile.py:96 reddens if current.py:492 or :636 stop forwarding scalar_cut_batch_width.\nSCORE fit: 19\nJUSTIFICATION fit: current.py:56 follows the file's existing dataclass_field static-metadata idiom and no added source line carries a plan, phase, version or ticket label.\nSCORE reuse: 17\nJUSTIFICATION reuse: scripts/prototypes/booking_scalar_tile/report.py:12 reuses save_checked and tests/test_booking_scalar_tile.py:16 reuses tests.test_support_read._case and UnitDensity; the new timing driver forks no importable owner, since scripts/prototypes/support/measure.py and scripts/prototypes/bank_read_attribution/measure.py are peer node-local scripts.\nFINDING tests/test_booking_scalar_tile.py:96 non-blocking: no assertion reddens if current.py:492 or :636 stop forwarding Quadrature.scalar_cut_batch_width; the parity tests compare widths that are equal by construction, so a revert of the central wiring leaves all 50 tests green and would silently make a future H200 tile sweep compare identical programs.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/booking-scalar-tile.html:47 non-blocking: the width-1 booking row reports a 12.07% head process spread, so the done_when clause 'two agreeing processes' is met only at width 16 (spreads at most 1.15%).",
+  "review_run_id": "r-20261111T181236544585-review-of-booking-scalar-tile-865abeabf814",
+  "reviewed_base_sha": "8e9fd161c048191ecf135660c173b433e3b29dc8",
+  "reviewed_head_sha": "865abeabf81412306c20ff29db6a991a2318cbe5",
+  "reviewed_run_id": "r-20261111T161136164612-booking-scalar-tile",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 14,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T19:20:00+00:00",
+  "total": 102
+}

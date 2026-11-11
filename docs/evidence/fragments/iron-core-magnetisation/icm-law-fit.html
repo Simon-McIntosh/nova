@@ -25,6 +25,16 @@
     the origin tangent is 3699.381770149879 A/(m·T), 4.82526513504544 times the
     first interval secant; the reproduced exception is:</p>
   <pre>ValueError('origin permeability is incompatible with the first B-H interval')</pre>
+  <p>The regression test resolves its source through the existing
+    <code>west</code> fixture in <code>tests/test_imas_iron_read.py</code>.
+    That fixture honours <code>NOVA_WEST_SOURCE_MANIFEST</code>, selects the
+    curation manifest's <code>west-dd4-1-0</code> row and takes
+    <code>dd_version</code> from that row. The source above is the resolved
+    measurement input, rather than a second location or DD pin in the test.
+    If the manifest is not mounted, the shared fixture skips the test. The
+    mounted-source probe reports <code>1 passed in 6.90s</code>; an explicit
+    missing-manifest probe reports <code>1 skipped in 2.33s</code> with the
+    reason <code>WEST source manifest is not mounted</code>.</p>
 
   <h3 id="icm-law-fit-construction">Positive derivative construction</h3>
   <p>Let an interval have width w &gt; 0, H increment wδ &gt; 0, and positive
@@ -70,6 +80,29 @@ v = [δ − f(p + q)/2] / (1 − f)</pre>
       <tr><td>Minimum sampled WEST H′ through 12 T</td><td>56.166964456 A/(m·T)</td></tr>
     </tbody>
   </table>
+  <figure id="icm-law-fit-derivative">
+    <img src="/nova/figures/iron-core-magnetisation/icm-law-fit/differential-law.svg"
+         alt="Positive differential reluctivity from 0 to 12 tesla with a low-field zoom showing both inserted breakpoints"
+         width="1400" height="720">
+    <figcaption>Production dH/dB for the manifest-pinned WEST CEA table. Left:
+      0–12 T on a logarithmic derivative scale; the held end-secant tail
+      starts at 6 T and is 523.0559555273131 kA/(m·T). Right: the origin
+      interval on a linear derivative scale, exposing the inserted
+      breakpoints at 0.050176353516388106 and 0.4498236464836119 T. Grey
+      circles mark the authored B-knot locations on the fitted derivative;
+      they are not measured differential-permeability samples. Purple
+      diamonds mark inserted breakpoints. The origin is
+      3.699381770149879 kA/(m·T). All plotted derivatives are positive.</figcaption>
+  </figure>
+  <p>The independent origin-slope check in
+    <code>assert_material_interpolation</code> compares
+    <code>coefficients[2, 0]</code> directly with
+    <code>1 / (iron._MU0 * mu[0])</code>, using the tabulated permeability.
+    This is the assertion supporting the origin-slope value above. The
+    separate <code>jax.grad(h)(0.0)</code> versus <code>ends[0]</code>
+    assertion is labelled as a zero-magnitude-branch check; both operands
+    there come from the implementation, so it is not independent evidence
+    for the tabulated tangent.</p>
   <p>The test samples 201 points per polynomial piece, including every short
     ramp, plus 201 in the held tail. It checks both exact polynomial limits at
     every join and differentiates the production JAX coefficient to measure

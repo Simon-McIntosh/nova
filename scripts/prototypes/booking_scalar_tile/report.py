@@ -1,0 +1,268 @@
+"""Publish paired scalar-booking receipts with a checked timing comparison."""
+
+import argparse
+from html import escape
+import json
+from math import ceil
+from pathlib import Path
+import re
+import statistics
+
+import matplotlib.pyplot as plt
+
+from nova.media.ink import InkStyle
+from scripts.prototypes.bank_solve_read.plot import save_checked
+
+
+def main():
+    parser = argparse.ArgumentParser(__doc__)
+    parser.add_argument("run", type=Path)
+    args = parser.parse_args()
+    root = Path(__file__).resolve().parents[3]
+    run = args.run.resolve()
+    measurement = run / "pinned-measurement"
+    validation = run / "final-validation"
+    sweep = json.loads((run / "sweep-fixed.json").read_text())
+    receipts = {
+        (arm, process): json.loads((measurement / f"{arm}-{process}.json").read_text())
+        for arm in ("base", "head")
+        for process in (1, 2)
+    }
+    assert all(receipt["complete"] for receipt in receipts.values())
+    assert len({r["job"] for r in receipts.values()}) == 1
+    assert len({r["instrument_sha256"] for r in receipts.values()}) == 1
+    rows = {
+        key: {(r["width"], r["kind"]): r for r in value["rows"]}
+        for key, value in receipts.items()
+    }
+
+    def mean(arm, width, kind):
+        return statistics.mean(rows[arm, p][width, kind]["median_ms"] for p in (1, 2))
+
+    summary = {}
+    table = []
+    for width in (1, 16):
+        for kind in ("booking", "carried", "full"):
+            base, head = (mean(arm, width, kind) for arm in ("base", "head"))
+            pairs = [
+                100
+                * (
+                    1
+                    - rows["head", p][width, kind]["median_ms"]
+                    / rows["base", p][width, kind]["median_ms"]
+                )
+                for p in (1, 2)
+            ]
+            spreads = {
+                arm: 100
+                * abs(
+                    rows[arm, 1][width, kind]["median_ms"]
+                    - rows[arm, 2][width, kind]["median_ms"]
+                )
+                / mean(arm, width, kind)
+                for arm in ("base", "head")
+            }
+            summary[f"{width}:{kind}"] = dict(
+                base_ms=base,
+                head_ms=head,
+                reduction_percent=100 * (1 - head / base),
+                reduction_by_pair=pairs,
+                process_spread_percent=spreads,
+            )
+            table.append(
+                f"<tr><td>{width}</td><td>{kind}</td><td>{base:.3f}</td>"
+                f"<td>{head:.3f}</td><td>{100 * (1 - head / base):.2f}%</td>"
+                f"<td>{pairs[0]:.2f}%, {pairs[1]:.2f}%</td>"
+                f"<td>{spreads['base']:.2f}%, {spreads['head']:.2f}%</td></tr>"
+            )
+    plt.style.use("data-ink")
+    fig, axes = plt.subplots(1, 2, figsize=(14, 7.2), dpi=100)
+    colour = InkStyle().flux_color
+    names = ["Scalar booking", "Carried read + booking", "Full read + booking"]
+    for ax, width in zip(axes, (1, 16), strict=True):
+        for arm, hue, offset in (("base", "#929292", 0.1), ("head", colour, -0.1)):
+            for index, kind in enumerate(("booking", "carried", "full")):
+                points = [rows[arm, p][width, kind]["median_ms"] / 1000 for p in (1, 2)]
+                y = 2 - index + offset
+                ax.plot(points, [y, y], color=hue, linewidth=3, zorder=2)
+                ax.scatter(
+                    [statistics.mean(points)],
+                    [y],
+                    color=hue,
+                    s=70,
+                    label=arm if index == 0 and width == 1 else None,
+                    zorder=4 if arm == "head" else 3,
+                )
+        ax.set_yticks([2, 1, 0], names if width == 1 else [])
+        ax.set_xlabel(f"CPU batch wall [s], width {width}")
+        step = 0.2 if width == 1 else 2.0
+        limit = step * ceil(
+            max(
+                mean(a, width, k) / 1000
+                for a in ("base", "head")
+                for k in ("booking", "carried", "full")
+            )
+            * 1.05
+            / step
+        )
+        ax.set_xlim(0, limit)
+        ax.set_xticks([step * i for i in range(round(limit / step) + 1)])
+        ax.set_ylim(-0.45, 2.45)
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.grid(False)
+    fig.legend(loc="upper center", ncols=2, frameon=False, bbox_to_anchor=(0.64, 0.98))
+    fig.subplots_adjust(left=0.24, right=0.97, bottom=0.16, top=0.88, wspace=0.14)
+    destination = (
+        root
+        / "docs/figures/sub-millisecond-forward-path/booking-scalar-tile/cpu-walls.svg"
+    )
+    save_checked(fig, destination)
+    fig.savefig(run / "cpu-walls.png", dpi=100)
+    plt.close(fig)
+    lowered_rows = []
+    for (arm, process), programs in rows.items():
+        for (width, kind), program in programs.items():
+            lowered_rows.append(
+                f"<tr><td>{arm}</td><td>{process}</td><td>{width}</td>"
+                f"<td>{kind}</td><td>{program['optimized_hlo_operations']}</td>"
+                f"<td>{program['stablehlo_operations']}</td>"
+                f"<td>{program['fusion_sites']}</td><td>{program['while_sites']}</td></tr>"
+            )
+    suite = []
+    suite_receipts = json.loads((validation / "suite-receipts.json").read_text())
+    for key, receipt in suite_receipts.items():
+        text = Path(receipt["log_path"]).read_text()
+        summaries = [
+            line
+            for line in text.splitlines()
+            if re.search(r"\d+ (passed|failed)", line)
+        ]
+        assert summaries and text.rstrip().endswith(f"EXIT={receipt['exit_status']}")
+        suite.append(
+            f"<tr><td>{escape(key)}</td><td>{escape(summaries[-1])}</td>"
+            f"<td>{receipt['exit_status']}</td></tr>"
+        )
+    negative = (validation / "negative-control.log").read_text()
+    assert negative.rstrip().endswith("EXIT=1")
+    assert (
+        "FAILED tests/test_booking_scalar_tile.py::"
+        "test_all_booked_moments_match_independent_population" in negative
+    )
+    negative_summary = [
+        line for line in negative.splitlines() if re.search(r"\d+ failed", line)
+    ][-1]
+    positive = suite_receipts["head:test_booking_scalar_tile.py"]
+    assert positive["exit_status"] == 0
+    base = receipts["base", 1]["revision"]
+    head = receipts["head", 1]["revision"]
+    instrument = receipts["head", 1]["instrument_sha256"]
+    job = receipts["head", 1]["job"]
+    result = summary["16:booking"]
+    fragment = f"""<section id="booking-scalar-tile-result">
+<h2>Negative CPU result; shipped scalar tile stays at 32</h2>
+<p>The measured 64-cell CPU experiment increases width-16 scalar booking by
+<strong>12.1%</strong>, carried read and booking by <strong>7.0%</strong>, and
+full read and booking by <strong>2.5%</strong>. The shipped scalar conic default
+is restored to <strong>32 cells</strong>, preserving the dispatch-base behaviour.
+The normal-form population keeps its independent eight-cell tile.</p>
+<p><strong>H200 performance decides the tile.</strong> Its measurement belongs
+to the separate plan section assigned by the coordinator. This record makes
+no GPU performance claim. The existing partial-population ceiling division
+remains unchanged.</p>
+<p>Scalar width is an explicit static quadrature parameter, independent of the
+multi-channel tangent tile. Tests retain moment/normalization and trial/converged
+residual parity at 32, 64 and 128; the default guard now pins 32.
+The same-input CPU sweep measured 2815.838 ms at 32, 3158.677 ms at 64,
+3208.195 ms at 128 and 6184.424 ms at 256. None of the wider candidates beats
+the narrow CPU baseline. The tables and figure below preserve that experiment.</p>
+<p>The timing driver takes a repository root and accepts
+<code>--tiles 32 64 128</code>, without changing the module or forcing a CPU
+backend. On an H200 allocation it can be run from main as
+<code>PYTHONPATH=. /home/ITER/mcintos/Code/nova/.venv/bin/python
+scripts/prototypes/booking_scalar_tile/measure.py . --tiles 32 64 128
+--output /absolute/receipt.json</code>. It records the actual backend, devices,
+selected tile and committed instrument hash. The root-argument
+<code>sweep.py</code> uses the same driver for scalar booking alone.</p>
+<p>At width sixteen, scalar booking changes from {result["base_ms"]:.3f} to
+{result["head_ms"]:.3f} ms ({abs(result["reduction_percent"]):.2f}%
+{"lower" if result["reduction_percent"] >= 0 else "higher"}).
+The two fresh process pairs and their spreads are preserved below. The booking
+program times current.book directly on precomputed physical flux samples;
+carried and full programs include the complete native read and booking.
+All operands enter the timed programs at runtime. Each row uses one synchronized
+warm-up and three synchronized measured calls, excluding compilation.</p>
+<figure><img
+src="/nova/figures/sub-millisecond-forward-path/booking-scalar-tile/cpu-walls.svg"
+alt="Paired scalar booking and complete read walls at widths one and sixteen">
+<figcaption>CPU batch walls, widths one and sixteen in separate panels.
+Points show means of two fresh-process medians; segments join those medians.
+Base is the 32-cell CPU experiment; head is its 64-cell candidate.
+The shipped default is restored to 32. Colours retain their experiment meaning.
+The panels have separate time scales. These CPU measurements make no H200
+latency claim. The checked 1400 by 720 render was inspected before delivery.
+</figcaption></figure>
+<table><thead><tr><th>Width</th><th>Program</th><th>Base ms</th><th>Head ms</th>
+<th>Reduction</th><th>Reductions by pair</th><th>Base/head process spread</th>
+</tr></thead>
+<tbody>{"".join(table)}</tbody></table>
+<h3>Lowered programs</h3>
+<p>Counts are static program sites, not measured device launches. Both optimized
+HLO and StableHLO operation counts are required to be positive in the instrument.</p>
+<table><thead><tr><th>Arm</th><th>Process</th><th>Width</th><th>Program</th>
+<th>Optimized HLO</th><th>StableHLO</th><th>Fusion sites</th><th>While sites</th>
+</tr></thead><tbody>{"".join(lowered_rows)}</tbody></table>
+<h3>CPU experiment parity and deliberate refusal</h3>
+<p>The unchanged 32-cell booking and an independent unbucketed placement oracle
+supply comparisons for repeated physical cut-cell inventories from both limited
+and diverted reads, with 17, 47, 67 and 137 conic cells. The tests compare cell current,
+radial and vertical moments, raw current and normalization at 1e-12 relative
+(with a 1e-14 absolute floor), including prescribed total-current normalization.
+The repeated inventory isolates scheduling from mesh resolution; it is not a
+new physical mesh or a convergence study. Separate checks exercise 0, 17, 67,
+128, 137 and 257 active cells in a 270-cell array. These archived checks
+validated the CPU candidate. The retained, parameterized checks also cover
+32, 64 and 128 explicitly, and the shipped-default guard now asserts 32.
+The original 128-cell sentinel failed with
+<code>assert 32 == 128</code>, reproducing the recorded narrow-tile condition.</p>
+<p>Trial and converged fresh residuals on both analytic fixtures agree with the
+32-cell path at the existing 1e-12 absolute comparison floor; the converged
+fixed-exterior, unit-density fixture has residual at most 1e-10. This is a
+booking-regression check, not a new nonlinear bank-solve certificate.</p>
+<p>The scratch mutation replaces only the scalar population ceiling division by
+floor division, dropping its last partial tile. Its parity run reports
+<code>{escape(negative_summary)}</code> and <code>EXIT=1</code>.
+The unchanged head parity tests pass. The mutated source and complete refusal log
+remain in the run directory.</p>
+<h3>Archived CPU experiment validation and provenance</h3>
+<p>The paired validation uses one Sirius job with seven CPUs, one fresh process per
+file and arm. The new scalar-tile file runs only at head. The archived-moment
+pin fails identically at base and head (absolute 2.83388764e-15, relative
+4.59452653e-12); support-read tests pass at both arms. Added failures are zero.
+The archived comparison and its tolerance remain unchanged.</p>
+<table><thead><tr><th>Arm and file</th><th>Pytest summary</th><th>Exit</th></tr></thead>
+<tbody>{"".join(suite)}</tbody></table>
+<p>CPU experiment base <code>{base}</code>; candidate <code>{head}</code>.
+CPU measurement job <code>{job}</code>, all_debug, fourteen CPUs, two fresh processes
+per arm on the same node. Base and head run on disjoint seven-CPU groups,
+swapped for the second pair; every receipt records its CPU affinity.
+Committed measurement instrument SHA-256
+<code>{instrument}</code>. Every receipt records the imported current module,
+working directory, source revision, instrument hash, backend and job identity.
+The width-sweep receipt carries instrument SHA-256
+<code>{sweep["instrument_sha256"]}</code>.
+The default-restoration suite receipts are recorded in the landing manifest
+at the same run directory. Logs and JSON receipts:
+<code>{escape(str(run))}</code>.</p>
+</section>"""
+    path = (
+        root
+        / "docs/evidence/fragments/sub-millisecond-forward-path"
+        / "booking-scalar-tile.html"
+    )
+    path.write_text(fragment)
+    (run / "summary.json").write_text(json.dumps(summary, indent=2))
+    print("SUMMARY", json.dumps(summary), flush=True)
+
+
+if __name__ == "__main__":
+    main()

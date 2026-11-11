@@ -120,13 +120,15 @@ def _interaction(cells, points, plan):
 
 
 def _fit_law(b_field, permeability_relative):
-    """Return cubic H(B)/B coefficients with strictly positive dH/dB.
+    """Return piecewise polynomial H(B) with strictly positive, continuous dH/dB.
 
     Interpolate H, not permeability: a rising permeability is compatible with
     positive differential permeability only while H still rises. Restrict each
-    Hermite slope to (0, 2*adjacent secant]; the derivative of each cubic is
-    then strictly positive throughout its interval. Outside the table the end
-    secant permeabilities are held. The origin's secant is its tangent.
+    interior Hermite slope to (0, 2*adjacent secant]. Endpoint slopes match
+    the held secant permeabilities outside the table. An interval whose end
+    slope exceeds twice its secant uses positive linear derivative ramps
+    joined by a positive constant derivative, integrated as two quadratics
+    and a line. Their areas reproduce the interval's H increment exactly.
     """
     b = np.asarray(b_field, dtype=np.float64)
     mu = np.asarray(permeability_relative, dtype=np.float64)
@@ -151,15 +153,34 @@ def _fit_law(b_field, permeability_relative):
     bound = np.r_[secant[0], np.minimum(secant[:-1], secant[1:]), secant[-1]]
     slopes = np.clip(slopes, bound * 1e-6, 2 * bound)
     slopes[0] = 1 / (_MU0 * mu[0])
-    if slopes[0] > 2 * secant[0]:
-        raise ValueError(
-            "origin permeability is incompatible with the first B-H interval"
-        )
+    slopes[-1] = 1 / (_MU0 * mu[-1])
     width = np.diff(b)
     cubic = (slopes[:-1] + slopes[1:] - 2 * secant) / width**2
     quadratic = (3 * secant - 2 * slopes[:-1] - slopes[1:]) / width
     coefficients = np.stack([cubic, quadratic, slopes[:-1], h[:-1]])
-    return b, coefficients, 1 / (_MU0 * mu[[0, -1]])
+    knots, pieces = [b[0]], []
+    for i, average in enumerate(secant):
+        left, right = slopes[i : i + 2]
+        if max(left, right) <= 2 * average:
+            pieces.append(coefficients[:, i])
+        else:
+            # Each ramp occupies fraction f of the interval. Its endpoint
+            # contribution is at most average/4, leaving a positive plateau.
+            fraction = min(0.25, average / (2 * (left + right)))
+            edge = fraction * width[i]
+            middle = (average - fraction * (left + right) / 2) / (1 - fraction)
+            first = h[i] + edge * (left + middle) / 2
+            last = h[i + 1] - edge * (middle + right) / 2
+            pieces.extend(
+                [
+                    [0, (middle - left) / (2 * edge), left, h[i]],
+                    [0, 0, middle, first],
+                    [0, (right - middle) / (2 * edge), middle, last],
+                ]
+            )
+            knots.extend([b[i] + edge, b[i + 1] - edge])
+        knots.append(b[i + 1])
+    return np.asarray(knots), np.asarray(pieces).T, 1 / (_MU0 * mu[[0, -1]])
 
 
 def _coefficient(magnitude, knots, coefficients, end_reluctivity):

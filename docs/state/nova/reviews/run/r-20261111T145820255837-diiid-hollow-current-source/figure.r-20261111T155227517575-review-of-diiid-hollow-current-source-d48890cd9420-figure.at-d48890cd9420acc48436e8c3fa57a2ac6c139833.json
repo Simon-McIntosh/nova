@@ -10,7 +10,7 @@
     "mast-21978-35-midplane.png": "docs/figures/diiid-hollow-current-source/mast-21978-35-midplane.svg",
     "source-axis-cap.png": "docs/figures/diiid-hollow-current-source/source-axis-cap.svg"
   },
-  "completed_at": "",
+  "completed_at": "2026-11-11T16:01:37.754Z",
   "dispatched_at": "2026-11-11T15:53:33Z",
   "figure_verdicts": [
     {
@@ -86,6 +86,33 @@
       }
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-hollow-current-source",
+      "recorded_at": "2026-11-11T17:39:56.480215+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-11T17:40:42.774081+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-11T17:41:27.428061+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "per-machine y-scales are deliberate: MAST and DIII-D current densities differ by a factor of four; the axis labels carry the units",
+      "recorded_at": "2026-11-11T17:43:07.638631+00:00"
+    },
+    "4": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-11T17:42:12.785327+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/diiid-hollow-current-source/mast-21978-35-midplane.svg",
@@ -178,6 +205,6 @@
   "rubric_lines_note": "Thirty-six lines, six per figure, in reviewed_figures order: frame-137-diverted-midplane, frame-137-diverted-poloidal, frame-146-diverted-midplane, frame-146-diverted-poloidal, mast-21978-35-midplane, source-axis-cap. Each block is legibility, data_ink, decoration, contrast, table_form, label_collision.",
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-11T16:01:44.817037+00:00",
+  "timestamp": "2026-11-11T17:34:10.874418+00:00",
   "total": null
 }

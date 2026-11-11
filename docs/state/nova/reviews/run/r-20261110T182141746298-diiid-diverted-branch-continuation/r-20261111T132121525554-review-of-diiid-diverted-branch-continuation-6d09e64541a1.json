@@ -35,6 +35,11 @@
   "call_sites": [],
   "completed_at": "2026-11-11T13:39:53.804Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "no product code remains to be durable; nova/ is identical to main and the record is documentation of a withdrawn change",
+      "recorded_at": "2026-11-11T13:43:02.921613+00:00"
+    },
     "goal_fidelity": {
       "kind": "exempted",
       "reason": "the lead withdrew the guard after measurement (inert on DIII-D, regressed MAST); the delivered goal is the measured negative result and the repaired readers",

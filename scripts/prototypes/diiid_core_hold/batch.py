@@ -25,6 +25,73 @@ CASES = (
 )
 
 
+def case_name(frame, branch):
+    return "mast-21978-35" if branch == "mast" else f"frame-{frame}-{branch}"
+
+
+def completed_row(record, revision):
+    if not record or record.get("exit_status") != 0:
+        return None
+    log = Path(record["log_path"])
+    if not log.is_file() or not log.read_text().endswith("EXIT=0\n"):
+        return None
+    folder = log.parent
+    for name in (
+        "receipt.json",
+        "core-analysis.json",
+        "terminal.npz",
+        "source-inputs.json",
+    ):
+        if not (folder / name).is_file():
+            raise ValueError(f"completed row has no {name}: {folder}")
+    receipt = json.loads((folder / "receipt.json").read_text())
+    analysis = json.loads((folder / "core-analysis.json").read_text())
+    if "maxima_count" not in analysis or "source_centre_to_shoulder" not in analysis:
+        raise ValueError(
+            f"completed row has no critical-point/source analysis: {folder}"
+        )
+    subprocess.run(
+        [
+            "git",
+            "diff",
+            "--exit-code",
+            "--quiet",
+            receipt["base_revision"],
+            revision,
+            "--",
+            "nova",
+            "tests",
+        ],
+        cwd=ROOT,
+        check=True,
+    )
+    return folder.resolve()
+
+
+def resume_plan(previous, revisions):
+    summary = json.loads((previous / "results.json").read_text())
+    retained = {}
+    for arm, revision in revisions:
+        for frame, branch in CASES:
+            key = arm + ":" + case_name(frame, branch)
+            folder = completed_row(summary.get(key), revision)
+            if folder is not None:
+                retained[key] = folder
+            else:
+                summary.pop(key, None)
+        key = arm + ":forward"
+        record = summary.get(key)
+        if record:
+            log = Path(record["log_path"])
+            if not (
+                record.get("completed")
+                and log.is_file()
+                and log.read_text().endswith(f"EXIT={record['exit_status']}\n")
+            ):
+                summary.pop(key)
+    return summary, retained
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", required=True)
@@ -32,13 +99,52 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--trace-helper", type=Path, required=True)
     parser.add_argument("--cpu-files", type=Path)
+    parser.add_argument("--resume-from", type=Path)
+    parser.add_argument("--plan-only", action="store_true")
     args = parser.parse_args()
-    args.output.mkdir(parents=True, exist_ok=True)
+    revisions = (("base", args.base), ("head", args.head))
+    summary, retained = {}, {}
+    if args.resume_from:
+        if args.cpu_files:
+            raise ValueError("solver continuation cannot include CPU regression files")
+        summary, retained = resume_plan(args.resume_from, revisions)
+    plan = dict(
+        retained={key: str(path) for key, path in retained.items()},
+        pending=[
+            arm + ":" + case_name(frame, branch)
+            for arm, _ in revisions
+            for frame, branch in CASES
+            if arm + ":" + case_name(frame, branch) not in retained
+        ],
+        pending_forward=[
+            arm for arm, _ in revisions if arm + ":forward" not in summary
+        ],
+    )
+    print("CONTINUATION_PLAN " + json.dumps(plan), flush=True)
+    if args.plan_only:
+        return
+    args.output.mkdir(parents=True, exist_ok=not bool(args.resume_from))
+    for key, folder in retained.items():
+        arm, case = key.split(":", 1)
+        target = args.output / arm / case
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.symlink_to(folder, target_is_directory=True)
+    (args.output / "continuation-plan.json").write_text(
+        json.dumps(plan, indent=2) + "\n"
+    )
+    (args.output / "results.json").write_text(json.dumps(summary, indent=2) + "\n")
     with tempfile.TemporaryDirectory(
         prefix="nova-core-hold-", dir=os.environ["TMPDIR"]
     ) as scratch:
-        summary = {}
-        for arm, revision in (("base", args.base), ("head", args.head)):
+        for arm, revision in revisions:
+            if (
+                all(
+                    arm + ":" + case_name(frame, branch) in retained
+                    for frame, branch in CASES
+                )
+                and arm + ":forward" in summary
+            ):
+                continue
             tree = Path(scratch) / arm
             extract(tree, revision, ROOT)
             if args.cpu_files:
@@ -59,9 +165,9 @@ def main():
                     )
                 continue
             for frame, branch in CASES:
-                case = (
-                    "mast-21978-35" if branch == "mast" else f"frame-{frame}-{branch}"
-                )
+                case = case_name(frame, branch)
+                if arm + ":" + case in retained:
+                    continue
                 output = args.output / arm / case
                 output.mkdir(parents=True, exist_ok=True)
                 command = [
@@ -105,6 +211,8 @@ def main():
                 print("ROW", arm, case, result.returncode, flush=True)
                 if result.returncode:
                     raise SystemExit(result.returncode)
+            if arm + ":forward" in summary:
+                continue
             result = gate(
                 tree,
                 revision,

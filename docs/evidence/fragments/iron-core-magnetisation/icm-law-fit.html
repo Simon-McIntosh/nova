@@ -85,15 +85,23 @@ v = [δ − f(p + q)/2] / (1 − f)</pre>
          alt="Positive differential reluctivity from 0 to 12 tesla with a low-field zoom showing both inserted breakpoints"
          width="1400" height="720">
     <figcaption>Production dH/dB for the manifest-pinned WEST CEA table. Left:
-      0–12 T on a logarithmic derivative scale; the held end-secant tail
-      starts at 6 T and is 523.0559555273131 kA/(m·T). Right: the origin
-      interval on a linear derivative scale, exposing the inserted
+      0–12 T on a logarithmic dH/dB axis. Right: a 0–0.5 T linear zoom of
+      the same law, exposing the inserted
       breakpoints at 0.050176353516388106 and 0.4498236464836119 T. Grey
-      circles mark the authored B-knot locations on the fitted derivative;
+      circles mark authored knots at their B locations on the fitted derivative;
       they are not measured differential-permeability samples. Purple
-      diamonds mark inserted breakpoints. The origin is
+      diamonds mark inserted breakpoints; the grey line marks the held tail,
+      starting at 6 T at 523.0559555273131 kA/(m·T). The origin is
       3.699381770149879 kA/(m·T). All plotted derivatives are positive.</figcaption>
   </figure>
+  <p>The renderer is committed at <code>scripts/magnetisation_law/figure.py</code>.
+    From the repository root, run
+    <code>python -m scripts.magnetisation_law.figure --png /path/to/preview.png</code>;
+    <code>--output</code> optionally selects another SVG path. It resolves the
+    same manifest-pinned table through the shared WEST fixture, uses the
+    existing checked save in <code>scripts/edge_sheet/figure.py</code>, and
+    loads the study's committed <code>data-ink.mplstyle</code>. The SVG is the
+    published artifact; the optional PNG is an inspection rendering.</p>
   <p>The independent origin-slope check in
     <code>assert_material_interpolation</code> compares
     <code>coefficients[2, 0]</code> directly with

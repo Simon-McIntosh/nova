@@ -6,19 +6,17 @@
   "added_failure_note": "Read from the run's own suite arms: baseline at 38df9b27f is the absent-test arm (core-baseline-suite.log, EXIT=4, completed, zero failure ids) and the head arm at 799c0e5e8 is core-after-suite.log 8 passed, EXIT=0, zero failure ids, so the added-failure count is 0 by that pair.",
   "call_site_count": 0,
   "call_sites": [],
-  "completed_at": "",
+  "completed_at": "2026-11-11T14:45:33.309Z",
   "dispatched_at": "2026-11-11T14:30:15Z",
   "findings": [
     {
       "file": "tests/test_xpoint_offset_decomposition.py",
-      "id": "f84819d646c",
       "line": "126",
       "severity": "non-blocking",
       "text": "no test asserts core_flatness_ratio or central_to_shoulder_density (decompose.py:237 core_shape), which are the numbers the fragment's headline rests on, so a regression in the cut radius or shoulder window leaves all eight tests green."
     },
     {
       "file": "scripts/prototypes/diiid_xpoint_offset/decompose.py",
-      "id": "ff20ab6f127",
       "line": "127",
       "severity": "non-blocking",
       "text": "classify_offsets returns \"local\" for any non-rigid fit while the brief defines local as error confined to the separatrix region, and the receipt's own near-saddle versus inner RMS (0.254 versus 0.350 Wb on 137D) and its 14 cm linear saddle prediction miss do not support confinement, so the machine-readable verdict carries a term its evidence contradicts even though the fragment discloses the redefinition in prose."
@@ -73,6 +71,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-11T14:45:59.311639+00:00",
+  "timestamp": "2026-11-11T14:49:29.944968+00:00",
   "total": 103
 }

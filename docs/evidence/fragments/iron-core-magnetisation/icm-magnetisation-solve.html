@@ -6,18 +6,20 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="icm-magnetisation-solve">
 <meta name="plan-evidence-for" content="iron-core-magnetisation">
-<title>Meshed iron: sphere qualification, differential Newton and remaining shell discrepancy</title>
+<title>Meshed iron: analytic shell refinement exposes a high-permeability defect</title>
 </head>
 <body>
 <article id="icm-magnetisation-solve-record">
 <h1 id="icm-magnetisation-solve-title">Meshed iron material solve</h1>
-<p>The production sphere arms, the μ<sub>r</sub> = 10 closed shell and the
-nonlinear differential-Newton guard pass. The node remains blocked on agreement
-with the reported μ<sub>r</sub> = 100 and 1000 prototype shell factors. The current
-head arm records <strong>2 failed, 16 passed in 273.06 s</strong> at
-<code>9d4100519096955818cd612f918b7225717773bd</code>. The declared secant-Jacobian
-mutation now fails the strengthened guard. Further implementation stopped under
-the instruction for this round; no acceptance bound or target was relaxed.</p>
+<p>The analytic-refinement gate exposes a real high-permeability shell defect.
+At μ<sub>r</sub> = 1000, refinement from 228 to 828 cells raises the exact-relative
+error at the equatorial and oblique probes, with observed orders −0.2673 and
+−0.9366. The polar error falls, and all three μ<sub>r</sub> = 100 errors fall.
+The node is blocked under the explicit instruction to stop if any probe's error
+does not fall. The complete head arm records <strong>1 failed, 16 passed in
+1164.12 s</strong> at <code>ef05d09e8d0b5ec62d6866812e78a258ff3aec58</code>.
+All sphere arms and the differential-Newton guard pass. No further solver repair
+or measurement follows this failure.</p>
 
 <h2 id="icm-magnetisation-solve-mechanism">Mesh, law and Newton update</h2>
 <p><code>nova/biot/magnetisation.py</code> owns the mesh, material interpolant and
@@ -68,27 +70,75 @@ field values in tesla are scaled to mT in this table.</p>
 the material-free case returns zero magnetisation and the applied field exactly.
 The interior bound remains 1e−9 and the exterior-error agreement bound 2e−10.</p>
 
-<h2 id="icm-magnetisation-solve-shell">Closed-shell comparison remains open</h2>
-<p>Inner radius a = 0.9 m, outer radius b = 1 m, 228 cells at 0.04 m spacing,
-and a 0.05 m central current loop, as in the prototype. The printed analytic
-dipole shielding factor is
+<h2 id="icm-magnetisation-solve-shell">Closed-shell analytic refinement</h2>
+<p>Inner radius a = 0.9 m, outer radius b = 1 m, and a 0.05 m central current loop,
+as in the prototype. The printed exact dipole shielding factor is
 S = ((2μ<sub>r</sub> + 1)(μ<sub>r</sub> + 2) −
 2(μ<sub>r</sub> − 1)²(a/b)³)/(9μ<sub>r</sub>).
-The three exterior probes are (2, 0), (0, 2) and (3, 1) m, in that order.</p>
+It evaluates to <strong>1.4878, 6.90238 and 61.101838</strong> at
+μ<sub>r</sub> = 10, 100 and 1000. The exterior probes are equator (2, 0), pole
+(0, 2) and oblique (3, 1) m. Each production value is
+|B<sub>air</sub>|/|B<sub>air</sub> + B<sub>iron</sub>|.</p>
+<p>The lead's revised acceptance requires the relative error to this exact S to
+fall at every probe from 0.04 to 0.02 m for μ<sub>r</sub> = 100 and 1000.
+The recorded prototype used the sheet operand that was subsequently repaired.
+Its values are retained below as a cross-check; the former 0.0005 absolute
+prototype assertion is removed, with no replacement prototype tolerance.</p>
 <table>
-<thead><tr><th>μ<sub>r</sub></th><th>Analytic S</th><th>Production S at the three probes</th><th>Reported prototype S</th><th>Comparison</th></tr></thead>
+<thead><tr><th>μ<sub>r</sub></th><th>Spacing [m]</th><th>Cells</th><th>Corrections</th><th>Observation wall [s]</th></tr></thead>
 <tbody>
-<tr><td>10</td><td>1.4878</td><td>1.4862874904, 1.4855774658, 1.4866227406</td><td>1.486, 1.486, 1.487</td><td>Pass</td></tr>
-<tr><td>100</td><td>6.90238</td><td>6.8481839535, 6.8212894737, 6.8630859149</td><td>6.846, 6.821, 6.861</td><td>Fail</td></tr>
-<tr><td>1000</td><td>61.101838</td><td>59.4981162374, 56.9546458120, 60.3440376834</td><td>59.327, 56.949, 60.219</td><td>Fail</td></tr>
+<tr><td>10</td><td>0.04</td><td>228</td><td>1</td><td>222.094058</td></tr>
+<tr><td>100</td><td>0.04</td><td>228</td><td>1</td><td>0.199043</td></tr>
+<tr><td>100</td><td>0.02</td><td>828</td><td>1</td><td>888.869049</td></tr>
+<tr><td>1000</td><td>0.04</td><td>228</td><td>1</td><td>0.199562</td></tr>
+<tr><td>1000</td><td>0.02</td><td>828</td><td>1</td><td>1.058979</td></tr>
 </tbody>
 </table>
-<p>All linear material solves converge in one Newton correction. The gate compares
-against the reported 0.001 precision using a 0.0005 absolute half-unit bound. The
-largest discrepancy is 0.17111624 in the μ<sub>r</sub> = 1000 equatorial factor.
-The maximum production error against the analytic closed form is 6.78734% at that
-permeability, at the polar probe. Errors against the analytic closed form and the
-stricter prototype-reproduction requirement are reported separately.</p>
+<p>Observation wall includes the public solve and field read at the three probes.
+The fixture reuses identical sheet matrices between material laws, so the first
+0.02 m observation includes the 888.869049 s matrix build and the μ<sub>r</sub> =
+1000 observation reuses it. The refinement test is marked <code>slow</code> and
+has a 3600 s per-test timeout, allowing approximately sixteen times the measured
+coarse build of 222.094058 s. The suite itself has no timeout wrapper.</p>
+<table>
+<thead><tr><th>μ<sub>r</sub></th><th>Spacing [m]</th><th>Probe</th><th>Production S</th><th>Prototype S</th><th>Exact S</th><th>Relative error [%]</th></tr></thead>
+<tbody>
+<tr><td>10</td><td>0.04</td><td>Equator</td><td>1.4862874904</td><td>1.4860000000</td><td>1.48780000</td><td>0.10166081</td></tr>
+<tr><td>10</td><td>0.04</td><td>Pole</td><td>1.4855774658</td><td>1.4860000000</td><td>1.48780000</td><td>0.14938394</td></tr>
+<tr><td>10</td><td>0.04</td><td>Oblique</td><td>1.4866227406</td><td>1.4870000000</td><td>1.48780000</td><td>0.07912753</td></tr>
+<tr><td>100</td><td>0.04</td><td>Equator</td><td>6.8481839535</td><td>6.8460000000</td><td>6.90238000</td><td>0.78517912</td></tr>
+<tr><td>100</td><td>0.04</td><td>Pole</td><td>6.8212894737</td><td>6.8210000000</td><td>6.90238000</td><td>1.17481979</td></tr>
+<tr><td>100</td><td>0.04</td><td>Oblique</td><td>6.8630859149</td><td>6.8610000000</td><td>6.90238000</td><td>0.56928313</td></tr>
+<tr><td>100</td><td>0.02</td><td>Equator</td><td>6.8700159018</td><td>6.8720000000</td><td>6.90238000</td><td>0.46888317</td></tr>
+<tr><td>100</td><td>0.02</td><td>Pole</td><td>6.8663030366</td><td>6.8680000000</td><td>6.90238000</td><td>0.52267426</td></tr>
+<tr><td>100</td><td>0.02</td><td>Oblique</td><td>6.8772472291</td><td>6.8790000000</td><td>6.90238000</td><td>0.36411746</td></tr>
+<tr><td>1000</td><td>0.04</td><td>Equator</td><td>59.4981162374</td><td>59.3270000000</td><td>61.10183800</td><td>2.62467025</td></tr>
+<tr><td>1000</td><td>0.04</td><td>Pole</td><td>56.9546458120</td><td>56.9490000000</td><td>61.10183800</td><td>6.78734441</td></tr>
+<tr><td>1000</td><td>0.04</td><td>Oblique</td><td>60.3440376834</td><td>60.2190000000</td><td>61.10183800</td><td>1.24022508</td></tr>
+<tr><td>1000</td><td>0.02</td><td>Equator</td><td>59.1716087300</td><td>59.4632705785</td><td>61.10183800</td><td>3.15903635</td></tr>
+<tr><td>1000</td><td>0.02</td><td>Pole</td><td>59.1154943429</td><td>59.3814855400</td><td>61.10183800</td><td>3.25087382</td></tr>
+<tr><td>1000</td><td>0.02</td><td>Oblique</td><td>59.6514372536</td><td>59.9115209166</td><td>61.10183800</td><td>2.37374324</td></tr>
+</tbody>
+</table>
+<p>Observed order is p = log(e<sub>0.04</sub>/e<sub>0.02</sub>)/log(2), where e
+is the absolute relative error to exact S. Positive order means the error falls;
+negative order is the discriminating failure.</p>
+<table>
+<thead><tr><th>μ<sub>r</sub></th><th>Equator p</th><th>Pole p</th><th>Oblique p</th><th>Every error falls?</th></tr></thead>
+<tbody>
+<tr><td>100</td><td>0.7437933065</td><td>1.1684554644</td><td>0.6447424214</td><td>Yes</td></tr>
+<tr><td>1000</td><td>-0.2673483556</td><td>1.0620196608</td><td>-0.9365619250</td><td>No</td></tr>
+</tbody>
+</table>
+<p>The failing assertion is <code>np.all(error &lt; previous_error)</code> in
+<code>tests/test_magnetisation.py::test_closed_shell_refines_toward_exact_shielding</code>.
+The runner prints <code>[0.03159036, 0.03250874, 0.02373743] &lt;
+[0.02624670, 0.06787344, 0.01240225]</code>, which is false at the equatorial and
+oblique probes. The 0.01 m rung is not admitted: the measured first 0.02 m wall
+is 888.869049 s, above the declared 120 s admission threshold; sixteenfold
+cell-edge work projects 14221.904788 s, beyond the per-test budget and the
+three-hour allocation. The required 0.04/0.02 m observations completed before
+the failure. No finer solve or fresh repair is started after the stop condition.</p>
 
 <h2 id="icm-magnetisation-solve-operand">Requested per-cell operand comparison</h2>
 <p>The coordinator merged the small-source repair into this worktree at
@@ -104,10 +154,10 @@ radial response to radial magnetisation of cell 5:</p>
 entry. The worst entry is radial field from cell 184: production
 2.409231259678133e−12 versus reference 2.4092312664121892e−12 T/(A/m). Refining
 the ring integral from order 24 to 48 changes its entries by at most
-6.882401190382613e−25 T/(A/m). The old large cell-5 discrepancy is resolved. This
-exterior-row comparison does not by itself identify the remaining closed-shell
-prototype discrepancy; no further repair is attempted under the round's stop
-instruction.</p>
+6.882401190382613e−25 T/(A/m). The cell-5 operand agrees after the upstream repair. This
+coarse-mesh exterior-row comparison does not establish the 828-cell operator
+or identify the cause of the non-monotone analytic refinement. No further
+repair is attempted under the stop instruction.</p>
 <p>A target on a closed source segment is outside the finite-field domain, on or
 off the symmetry axis. No regularisation is used. The cleaned sphere mesh has
 44 cells and 611 edges, with minimum centroid-to-closed-segment distance
@@ -136,16 +186,23 @@ module is that extraction. The test
 fails on <code>quadratic_ratio &lt; 0.1</code>, prints <code>1 failed</code> and exits
 1. The unmutated head passes that test. The production source blob and HEAD blob
 both read <code>180d1a7ff970fc4b5e77e6e8b2bc531e2a14a72a</code>; the extraction
-is removed after the comparison.</p>
+is removed after the comparison. In the refinement round, an exact source-segment
+comparison verifies that this Newton test is unchanged from the revision of the
+recorded mutant failure; its SHA-256 identity and unchanged product source blob
+are saved in <code>newton-test-identity-refinement.json</code>. The mutation is
+therefore retained without an unnecessary rerun.</p>
 
 <h2 id="icm-magnetisation-solve-receipts">Execution receipts</h2>
-<p>Head job 1309902 ran on <code>sirius</code>, with a two-hour allocation, eight
-CPUs and 64 GB. <code>TMPDIR=/tmp</code> was exported in the submit environment
-and payload. The shared interpreter ran the exact live-pointer suite command;
-there was no timeout wrapper or termination. The runner recorded the imported
-module and working directory in its extraction before pytest. It finished with
-exit 1 because the two shell comparisons failed, and removed its job-owned
-scratch tree.</p>
+<p>Head job 1310006 ran on <code>sirius</code>, with a three-hour allocation,
+eight CPUs and 64 GB. <code>TMPDIR=/tmp</code> was exported in the submit
+environment and payload. The shared interpreter ran the exact live-pointer
+suite command once, without a subset, timeout wrapper or termination. The runner
+asserted the imported module and working directory in the immutable head
+extraction before pytest. It reached its complete summary and bare
+<code>EXIT=1</code> naturally because the analytic-refinement assertion failed.
+The scheduler receipt is <code>FAILED, elapsed 00:19:58, exit 1:0</code>; pytest
+reports <code>1 failed, 16 passed in 1164.12s (0:19:24)</code>. The runner's
+cleanup receipt confirms its job-owned scratch tree was removed.</p>
 <p>The recorded base is <code>4221309d2e66fd30eadafa7eacc3d967dd233481</code>,
 where <code>tests/test_magnetisation.py</code> does not exist. Its existing exact
 command receipt, exit 4 and zero tests collected, is accepted by the coordinator
@@ -154,11 +211,19 @@ inventing another command or rerunning a different suite. Earlier logs ending
 in <code>EXIT=143</code> remain historical and are not evidence.</p>
 <p>Current logs and arrays are under
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T220119790593-icm-magnetisation-solve</code>:
-<code>after-suite-rate.log</code>, <code>after_suite-rate.json</code>,
+<code>after-suite-refinement.log</code>, <code>after_suite-refinement.json</code>,
+<code>refinement-observations.json</code>, <code>newton-test-identity-refinement.json</code>,
 <code>negative-control-rate.log</code>, <code>secant-rate-mutation.patch</code>,
 <code>mutant-rate-magnetisation.py</code>, <code>shell-operand-rate.log</code>,
-<code>shell-operand-rate.npz</code>, <code>baseline-suite-resumed.log</code> and
-<code>rate-suite-job.json</code>.</p>
+<code>shell-operand-rate.npz</code>, <code>baseline-suite-resumed.log</code>,
+<code>refinement-suite-job.json</code> and
+<code>refinement-suite-1310006.log</code>. The earlier rate-suite receipts retain
+the superseded prototype-pin result as history.</p>
+<p>The next concrete investigation is to compare the 828-cell collocation
+operator against the independent ring reference, beginning with responses that
+control the equatorial and oblique shielding at μ<sub>r</sub> = 1000. That work
+requires a new instruction after this stop report; this evidence does not assign
+a cause to the mesh, material solve or upstream sheet kernel.</p>
 </article>
 </body>
 </html>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s2">
+<meta name="plan-recorded-at" content="2026-11-11"><meta name="plan-verdict" content="partial">
+<title>Tracked-read test gaps | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<section id="tracked-read-tests-result">
+<h1>Two test gaps in the tracked read</h1>
+<p>The carried-decision review left two findings that were test gaps, not
+product defects. Both are closed in <code>tests/test_tracked_read.py</code>
+with no product change: a certificate request is now observed to execute the
+whole-mesh topology read, and a limited-contact case now requires a rebuild
+when the wall-contact winner changes.</p>
+</section>
+
+<section id="tracked-read-tests-certificate">
+<h2>The certificate path reads the whole mesh</h2>
+<p>The previous certificate test compared continuous geometry at an unchanged
+state. At an unchanged state a carried result relabelled as rebuilt agrees
+with a fresh read on every continuous quantity, so that comparison could not
+show the certificate had executed the full read. The new test wraps
+<code>topology.read_at_stationary_points</code>, the whole-mesh read, and
+records each execution through <code>jax.debug.callback</code>. A carry must
+record none; a certificate request must record at least one, beside the
+raised <code>rebuilt</code> flag and the incremented counter.</p>
+<p>Under control (a), which answers a certificate request from the carried
+result marked rebuilt with an incremented counter, the test fails on the
+absent whole-mesh read while both of those reported values still hold.</p>
+</section>
+
+<section id="tracked-read-tests-limited">
+<h2>A limited boundary must rebuild when another wall event wins</h2>
+<p>Every real-geometry tracking case in the file used <code>diverted_case</code>,
+where the boundary is the saddle and no wall-event list is formed. Dropping
+<code>wall_stable</code> from the carried read's validity therefore changed
+nothing the suite could see. The new case builds the limited reference,
+performs one full read, and shifts the exterior jets by
+<code>0.005 * (-1, 0)</code>, which leaves the tracked cell, the fragment
+links and the cut-cell classes unchanged, so the wall-contact winner is the
+only support decision that differs from the carried one. The read must
+rebuild, and a second read at the same state must not.</p>
+<table><thead><tr><th>Shift at the limited state</th><th>Head</th><th>Control (b): <code>wall_stable</code> dropped</th></tr></thead><tbody>
+<tr><td><code>0.005 * (-1, 0)</code></td><td>rebuilt, rebuilds 1 to 2</td><td>not rebuilt, rebuilds stays 1</td></tr>
+<tr><td><code>0.005 * (0, 1)</code></td><td>rebuilt, rebuilds 1 to 2</td><td>rebuilt, rebuilds 1 to 2</td></tr>
+<tr><td><code>0.02 * (1, 0)</code></td><td>rebuilt, rebuilds 1 to 2</td><td>rebuilt, rebuilds 1 to 2</td></tr>
+<tr><td><code>0.05 * (1, 0)</code></td><td>rebuilt, rebuilds 1 to 2</td><td>not rebuilt, rebuilds stays 1</td></tr>
+</tbody></table>
+<p>The two rows that differ under the mutation are the ones that depend on
+<code>wall_stable</code>; the others rebuild for another reason and are not
+used. The test takes the mildest of the differing rows.</p>
+</section>
+
+<section id="tracked-read-tests-gate">
+<h2>Paired arms and controls</h2>
+<p>One <code>all_debug</code> job (4 cpus, one hour) ran the base revision and
+the head in fresh processes, then the two mutated copies. Each log names the
+revision, the tree and the command on its header lines and ends with a bare
+<code>EXIT=</code> line.</p>
+<table><thead><tr><th>Arm</th><th>Command</th><th>Result</th></tr></thead><tbody>
+<tr><td>Base, <code>b905696e2</code></td><td><code>pytest -q tests/test_tracked_read.py</code></td><td>13 passed in 553.07s, <code>EXIT=0</code></td></tr>
+<tr><td>Head, <code>8b6071b8f</code></td><td><code>pytest -q tests/test_tracked_read.py</code></td><td>14 passed, 1 failed in 603.48s, <code>EXIT=1</code></td></tr>
+<tr><td>Control (a)</td><td><code>pytest -q tests/test_tracked_read.py -k whole_mesh_read</code></td><td>1 failed, 14 deselected, <code>EXIT=1</code></td></tr>
+<tr><td>Control (b)</td><td><code>pytest -q tests/test_tracked_read.py -k wall_contact_winner</code></td><td>1 failed, 14 deselected, <code>EXIT=1</code></td></tr>
+</tbody></table>
+<p><strong>The head arm is not entirely green.</strong> The whole-file head arm fails
+<code>test_a_wall_contact_winner_change_rebuilds_at_a_limited_boundary</code>:
+the read reports <code>rebuilt=False</code>, and the 0.005 shift puts the
+wall-contact comparison on a numerical knife edge, so the outcome depends on the
+process history left by the file's earlier diverted cases. Run alone in a fresh
+process the same test passes (<code>1 passed in 232.52s</code>,
+<code>EXIT=0</code>), and under control (b) it fails
+(<code>1 failed in 199.09s</code>, <code>EXIT=1</code>). The remaining work is to
+choose a larger shift that still flips only the wall-contact winner and rerun the
+whole-file arm.</p>
+</section>
+</main></body></html>

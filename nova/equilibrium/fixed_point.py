@@ -3866,12 +3866,6 @@ def _newton_krylov_inner(
             precision=precision,
         )
     initial = _solver_state(initial, precision)
-    if proposal_qualification_fn is None:
-        proposal_qualification_fn = _diverted_branch_qualification(
-            getattr(shadowed_map_fn or map_fn, "_read_frozen_partition", None),
-            initial,
-            getattr(shadowed_map_fn or map_fn, "_read_branch_topology", None),
-        )
     stride = 2 + gmres_iterations
     trace_length = warmup + newton_steps * stride
     change_length = warmup + newton_steps
@@ -4690,6 +4684,7 @@ def _active_set_newton_krylov(
     model_trust_selection: bool,
     own_mask_acceptance: bool,
     presettlement_incumbent_scoring: bool,
+    preserve_diverted_branch: bool,
     precision: Precision | str,
 ) -> FixedPointResult:
     """Reconcile bounded frozen-mask solves with their live active sets."""
@@ -4703,8 +4698,14 @@ def _active_set_newton_krylov(
         and partitioned_map is not None
         and partition_shadow is not None
     )
-    proposal_qualification = _diverted_branch_qualification(
-        partition_read, initial, getattr(shadowed_map_fn, "_read_branch_topology", None)
+    proposal_qualification = (
+        _diverted_branch_qualification(
+            partition_read,
+            initial,
+            getattr(shadowed_map_fn, "_read_branch_topology", None),
+        )
+        if preserve_diverted_branch
+        else None
     )
 
     def usable_partition(partition):
@@ -5393,12 +5394,19 @@ def newton_krylov(
     model_trust_selection: bool | None = None,
     own_mask_acceptance: bool | None = None,
     presettlement_incumbent_scoring: bool = True,
+    preserve_diverted_branch: bool = False,
     row_jvp_observers: tuple[Callable[[jax.Array, jax.Array], jax.Array], ...] = (),
     map_arguments: tuple[Any, ...] = (),
     callback_arguments: tuple[Any, ...] = (),
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Run globalized Newton and reconcile state-dependent active sets.
+
+    ``preserve_diverted_branch`` explicitly holds an admitted seed's diverted
+    class and saddle hemisphere through warm-up and Newton promotion. It is a
+    static policy: when false, no branch qualification is traced. A topology
+    reader alone does not request continuation, since another saddle can belong
+    to the unconstrained equilibrium the caller is asking the solver to find.
 
     Supplying the promoted-mask and shadowed-map callbacks wraps the existing
     smooth Newton solve in a fixed-trip active-set iteration.  Each inner solve
@@ -5507,6 +5515,15 @@ def newton_krylov(
             shadow_mask_fn=shadow_mask_fn,
             promoted_shadow_mask_fn=promoted_shadow_mask_fn,
             shadowed_map_fn=shadowed_map_fn,
+            proposal_qualification_fn=(
+                _diverted_branch_qualification(
+                    getattr(shadowed_map_fn or map_fn, "_read_frozen_partition", None),
+                    initial,
+                    getattr(shadowed_map_fn or map_fn, "_read_branch_topology", None),
+                )
+                if preserve_diverted_branch
+                else None
+            ),
             **options,
         )
     else:
@@ -5534,6 +5551,7 @@ def newton_krylov(
             model_trust_selection=use_model_trust,
             own_mask_acceptance=use_own_mask_acceptance,
             presettlement_incumbent_scoring=presettlement_incumbent_scoring,
+            preserve_diverted_branch=preserve_diverted_branch,
             precision=precision,
         )
     if row_jvp_observers:

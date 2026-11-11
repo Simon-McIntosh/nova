@@ -64,6 +64,7 @@ def _solve(initial, *, switch="limited", warmup=0, newton_steps=2):
         promoted_shadow_mask_fn=lambda state, previous: mask(state),
         shadowed_map_fn=shadowed,
         active_set_steps=2,
+        preserve_diverted_branch=True,
         precision=Precision.DOUBLE,
     )
 
@@ -162,6 +163,7 @@ def test_augmented_route_qualifies_physical_flux_with_runtime_rows(warmup):
             newton_steps=2,
             gmres_iterations=1,
             active_set_steps=2,
+            preserve_diverted_branch=True,
             relaxation=1.0,
             precision=Precision.DOUBLE,
         )
@@ -181,3 +183,52 @@ def test_augmented_route_qualifies_physical_flux_with_runtime_rows(warmup):
     other, _result = compiled(jnp.array([0.0, 3.0]))
     np.testing.assert_array_equal(other, [0.0, 3.0])
     assert compiled._cache_size() == 1
+
+
+@pytest.mark.parametrize(
+    "diverted", [False, True], ids=["limited", "saddle-transition"]
+)
+def test_unrequested_branch_reader_preserves_program_and_vector_state(diverted):
+    coefficient = jnp.array([[0.2, -0.3, 0.1], [0.4, 0.1, -0.2], [0.1, 0.3, 0.2]])
+    forcing = jnp.array([1.1, 0.8, 1.3])
+    reads = []
+
+    def mapped(state):
+        return forcing + coefficient @ jnp.sin(state)
+
+    def decorated(state):
+        return mapped(state)
+
+    def read(state):
+        reads.append(True)
+        axis = jnp.array([1.5, 0.0])
+        saddle = jnp.array([1.0, jnp.where(state[0] < 0.5, -1.0, 1.0)])
+        return TopologyState(
+            axis, 0.0, saddle, 1.0, saddle, 1.0, axis, 2.0, jnp.asarray(diverted)
+        )
+
+    decorated._read_branch_topology = read
+
+    def solve(fn, initial):
+        return newton_krylov(
+            fn,
+            initial,
+            newton_steps=5,
+            warmup=3,
+            gmres_iterations=3,
+            precision=Precision.DOUBLE,
+        )
+
+    initial = jnp.zeros(3)
+    plain = jax.jit(lambda value: solve(mapped, value))(initial)
+    observed = jax.jit(lambda value: solve(decorated, value))(initial)
+    np.testing.assert_array_equal(observed.state, plain.state)
+    assert bool(observed.converged) == bool(plain.converged)
+    assert int(jnp.sum(observed.warmup_branch_refused_proposals)) == 0
+    assert int(jnp.sum(observed.newton_branch_refused_proposals)) == 0
+    assert not reads, "unrequested topology qualification was traced"
+    plain_program = str(jax.make_jaxpr(lambda value: solve(mapped, value))(initial))
+    decorated_program = str(
+        jax.make_jaxpr(lambda value: solve(decorated, value))(initial)
+    )
+    assert decorated_program == plain_program

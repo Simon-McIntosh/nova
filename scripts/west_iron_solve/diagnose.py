@@ -199,7 +199,10 @@ def main():
     for index in ranked:
         polygon = shapely.Polygon(cells.polygons[index])
         overlaps = [polygon.intersection(region).area for region in regions]
-        segment = machine.iron_segments[int(np.argmax(overlaps))].name
+        segment_index = int(np.argmax(overlaps))
+        segment = (
+            machine.iron_segments[segment_index].name or f"segment[{segment_index}]"
+        )
         row = dict(
             cell=int(index),
             centroid_m=cells.centroids[index].tolist(),
@@ -212,6 +215,7 @@ def main():
             area_fraction=float(cells.areas[index] / receipt["cell_size_m"] ** 2),
             clearance_m=polygon.centroid.distance(polygon.boundary),
             segment=segment,
+            segment_index=segment_index,
         )
         result["top_cells"].append(row)
         print("CELL " + json.dumps(row), flush=True)

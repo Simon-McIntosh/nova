@@ -14,13 +14,65 @@ import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.collections import PolyCollection  # noqa: E402
 import numpy as np  # noqa: E402
 
-from nova.equilibrium.wall_mask import wall_units_from_ids  # noqa: E402
+from nova.equilibrium.wall_mask import wall_unit_from_ids  # noqa: E402
 from nova.media.ink import DEFAULT_INK, poloidal_axes  # noqa: E402
 from nova.media.poloidal import draw_coils, draw_wall  # noqa: E402
 from scripts.edge_sheet.figure import save_checked  # noqa: E402
 from scripts.west_iron_solve.measure import MACHINE  # noqa: E402
 
 IRON = "#7b4fb3"
+
+
+def draw_machine(axis, source):
+    """Draw unit-faithful wall and coil outlines on a poloidal axis."""
+    poloidal_axes(axis)
+    axis.set_xticks([])
+    axis.set_yticks([])
+    with imas.DBEntry(f"imas:hdf5?path={MACHINE}", "r", dd_version="4.1.0") as entry:
+        stored = entry.get("wall", autoconvert=False).description_2d[0].limiter.unit
+        outline = stored[0].outline
+        np.testing.assert_allclose(
+            np.column_stack((np.asarray(outline.r), np.asarray(outline.z))),
+            source["limiter"],
+            rtol=0,
+            atol=1e-12,
+        )
+        wall = tuple(wall_unit_from_ids(unit, index=i) for i, unit in enumerate(stored))
+    assert wall
+    draw_wall(axis, units=wall, style=DEFAULT_INK)
+    outlines = []
+    for coil in source["coils"]:
+        r, z, dr, dz = (coil[k] for k in ("r", "z", "dr", "dz"))
+        outlines.append(
+            np.array(
+                [
+                    [r - dr / 2, z - dz / 2],
+                    [r + dr / 2, z - dz / 2],
+                    [r + dr / 2, z + dz / 2],
+                    [r - dr / 2, z + dz / 2],
+                ]
+            )
+        )
+    draw_coils(axis, outlines, DEFAULT_INK, edgecolor="#929292", linewidth=1.0)
+    axis.set_xlim(-0.1, 5.3)
+    axis.set_ylim(-3.8, 3.8)
+    return len(wall)
+
+
+def save_figure(fig, output, preview):
+    """Check text geometry and declare the common slide canvas."""
+    output.parent.mkdir(parents=True, exist_ok=True)
+    preview.parent.mkdir(parents=True, exist_ok=True)
+    labels = save_checked(fig, str(output), str(preview))
+    svg = output.read_text()
+    svg = re.sub(
+        r'width="[^\"]+" height="[^\"]+"',
+        'width="31.1111cm" height="16cm"',
+        svg,
+        count=1,
+    )
+    output.write_text(svg)
+    return labels
 
 
 def main():
@@ -37,9 +89,6 @@ def main():
         solution = pickle.load(stream)
     with Path(fine["source"]).open("rb") as stream:
         source = pickle.load(stream)
-    with imas.DBEntry(f"imas:hdf5?path={MACHINE}", "r", dd_version="4.1.0") as entry:
-        wall = wall_units_from_ids(entry.get("wall", autoconvert=False))
-    assert wall
     plt.style.use("data-ink")
     plt.rcParams.update({"svg.fonttype": "none"})
     fig = plt.figure(figsize=(14, 7.2), dpi=100)
@@ -60,23 +109,7 @@ def main():
         zorder=2,
     )
     mesh_axis.add_collection(edges)
-    draw_wall(mesh_axis, units=wall, style=DEFAULT_INK)
-    outlines = []
-    for coil in source["coils"]:
-        r, z, dr, dz = (coil[k] for k in ("r", "z", "dr", "dz"))
-        outlines.append(
-            np.array(
-                [
-                    [r - dr / 2, z - dz / 2],
-                    [r + dr / 2, z - dz / 2],
-                    [r + dr / 2, z + dz / 2],
-                    [r - dr / 2, z + dz / 2],
-                ]
-            )
-        )
-    draw_coils(mesh_axis, outlines, DEFAULT_INK, edgecolor="#929292", linewidth=1.0)
-    mesh_axis.set_xlim(-0.1, 5.3)
-    mesh_axis.set_ylim(-3.8, 3.8)
+    wall_count = draw_machine(mesh_axis, source)
     colour_axis = fig.add_axes([0.445, 0.2, 0.014, 0.6])
     bar = fig.colorbar(
         matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), cax=colour_axis
@@ -101,14 +134,7 @@ def main():
     axis.set_xlim(0.7, 4.3)
     axis.set_ylim(bottom=0)
     axis.ticklabel_format(axis="y", style="plain", useOffset=False)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.preview.parent.mkdir(parents=True, exist_ok=True)
-    labels = save_checked(fig, str(args.output), str(args.preview))
-    svg = args.output.read_text()
-    svg = re.sub(
-        r'width="[^"]+" height="[^"]+"', 'width="31.1111cm" height="16cm"', svg, count=1
-    )
-    args.output.write_text(svg)
+    labels = save_figure(fig, args.output, args.preview)
     print(
         "FIGURE "
         + json.dumps(
@@ -120,7 +146,7 @@ def main():
                 cell_size_m=fine["cell_size_m"],
                 field_difference_unit=unit,
                 no_direct_labels=True,
-                wall_units=len(wall),
+                wall_units=wall_count,
             )
         )
     )

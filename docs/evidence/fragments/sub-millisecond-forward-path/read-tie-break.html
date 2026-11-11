@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="read-tie-break">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s2">
+<meta name="plan-recorded-at" content="2026-11-11">
+<meta name="plan-verdict" content="pass">
+<title>Deterministic read candidate ties | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<section id="read-tie-break-rule">
+<h1>One rule for near-tied read candidates</h1>
+<p><code>topology.extremum_index</code> selects the lowest canonical candidate
+index among scores within <code>1e-12 * abs(best)</code> of the best. Minima use
+negated scores and the same rule. The margin exceeds the reproduced equivalent-seed
+roundoff, while preserving every leader separated by more than that margin.
+There is no absolute floor: a zero best ties only exactly. Candidate order is the
+canonical order of the fixed mesh, wall or null slots; a reordered array must
+carry those canonical indices. The returned value is the winning array position.
+JAX reductions implement the rule under both <code>jit</code> and <code>vmap</code>.
+NaNs are ignored; all-NaN inputs return -1. Equal masked infinities choose the
+first index, with admission still decided by each caller's existing validity mask.</p>
+<p>The assigned base was reproduced before the product edit: <code>winner 1327
+runner_up 1325 gap 1.7763568394002505e-15 best -0.039006978946510174</code>.
+The margin there is approximately 3.90e-14. These are aliases of one physical
+wall contact, not two separated limiter contacts. The reproduction receipt is
+<code>reproduction.log</code>, with <code>EXIT=0</code>, under the run directory
+named below. The raw points and scores are preserved in <code>original-events.npz</code>.
+Its tied indices are 1325, 1326 and 1327, so the rule selects canonical index 1325.</p>
+</section>
+<section id="read-tie-break-decisions">
+<h2>Discrete decisions examined</h2>
+<p>Every argmax/argmin in <code>topology.py</code> and <code>support_read.py</code>
+was examined. Fifteen floating-point rankings share the helper:</p>
+<table><thead><tr><th>Owner</th><th>Ranking</th></tr></thead><tbody>
+<tr><td><code>Topology.x_point_index</code></td><td>Contained saddle signed flux</td></tr>
+<tr><td><code>Topology.o_point_index</code></td><td>Qualified axis signed flux</td></tr>
+<tr><td><code>Topology._wall_anchor_selection</code></td><td>Eligible structured-wall signed flux</td></tr>
+<tr><td><code>Topology.boundary</code></td><td>Saddle versus wall signed flux; saddle has the lower slot</td></tr>
+<tr><td><code>Topology.axis_component</code></td><td>Confined flood seed distance squared</td></tr>
+<tr><td><code>Topology.qualified_o_candidates</code></td><td>Nearest grid owner for each axis seed</td></tr>
+<tr><td><code>Topology.read_qualification</code></td><td>Nearest wall node for unit attribution</td></tr>
+<tr><td><code>saddle_cell_fragments</code></td><td>First positive ray intersection, per ray</td></tr>
+<tr><td><code>_null_census</code></td><td>Nearest critical-tree slot, per seed</td></tr>
+<tr><td><code>_read_at_nulls</code>, saddle</td><td>Admitted saddle signed flux</td></tr>
+<tr><td><code>_read_at_nulls</code>, initial wall</td><td>All wall-event signed flux; includes the reproduced tie</td></tr>
+<tr><td><code>_read_at_nulls</code>, confined wall</td><td>Core-connected wall-event signed flux</td></tr>
+<tr><td><code>refresh_at_stationary_points</code>, contact</td><td>Nearest event to the carried contact</td></tr>
+<tr><td><code>refresh_at_stationary_points</code>, winner</td><td>Core-connected wall-event signed flux</td></tr>
+<tr><td><code>support_read._normal_ring_rates</code></td><td>Farthest vertex defining the ray bound and its rate</td></tr>
+</tbody></table>
+<p>Ten Boolean argmax lookups retain their existing exact first-true-index rule:
+fragment-label owner and vertical branch in <code>quadratic_cell_fragments</code>;
+axis cell and interval in <code>_support_at_level</code>; axis and saddle-owner cell
+in <code>_read_at_nulls</code>; wall-containing cells in that function and in
+<code>refresh_at_stationary_points</code>; admitted saddle in the refresh; and
+admitted saddle in <code>support_read.rebuild_needed</code>. These rank masks,
+not floating-point scores. The helper's own argmin ranks integer identities.</p>
+</section>
+<section id="read-tie-break-measure">
+<h2>Verification</h2>
+<p>Implementation and seven collected test cases are committed at
+<code>ba23b17dfc9a343ae08d538159ce819577b28429</code>. The tests cover exact ties
+under candidate permutations and changed summation orders, clear leaders and both
+sides of the margin across three score scales, masks and row reductions, and the
+original limited fixture both isolated and after a real diverted read.</p>
+<p>Seven-CPU <code>sirius</code> job <code>1310570</code> completed the paired
+base/head tracked-read and support-read files, one fresh process per file, plus
+the head tie file and the plain-argmax scratch control. It reports zero added
+failures. Base is <code>b48deaa93f55ad2c759c5977ed611b9047e393fb</code>;
+product/test head is <code>ba23b17dfc9a343ae08d538159ce819577b28429</code>.
+The final commit adds only this evidence fragment; its exact-revision armed tie
+check is recorded separately in the manifest.</p>
+<table><thead><tr><th>Arm / log</th><th>Runner summary</th><th>Exit</th></tr></thead><tbody>
+<tr><td><code>base-tracked.log</code></td><td>15 passed in 853.91s</td><td>0</td></tr>
+<tr><td><code>head-tracked.log</code></td><td>15 passed in 842.93s</td><td>0</td></tr>
+<tr><td><code>base-support.log</code></td><td>13 passed, 2 skipped in 139.95s</td><td>0</td></tr>
+<tr><td><code>head-support.log</code></td><td>13 passed, 2 skipped in 141.53s</td><td>0</td></tr>
+<tr><td><code>head-ties.log</code></td><td>7 passed in 67.88s</td><td>0</td></tr>
+<tr><td><code>negative-control.log</code></td><td>2 failed, 5 deselected in 3.96s</td><td>1</td></tr>
+</tbody></table>
+<p>The same failure-ID parser finds both known mutant failures and no failure IDs
+in any base/head log; <code>measurements.json</code> preserves all six parsed
+receipts. The two support-read skips are the limited fixture's absent saddle and
+X-point, unchanged at both revisions.</p>
+<p>The control fails both exact-tie cases: expected canonical identity 2,
+plain argmax/argmin returns identities <code>[8, 5, 2]</code> under the three
+candidate permutations. The runner reports <code>2 failed, 5 deselected in 3.96s</code>
+and <code>EXIT=1</code> in <code>negative-control.log</code>.</p>
+<p>Scripts, logs, imported-module paths and resolved working directories are
+retained under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T131359627137-read-tie-break</code>.
+Suite commands are recorded in repository-relative form:
+<code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_tracked_read.py</code>,
+with <code>tests/test_support_read.py</code> or <code>tests/test_read_tie_break.py</code>
+substituted for the other file processes. Each log begins with its revision,
+tree and literal command and ends with a bare <code>EXIT=</code> line. Scratch
+trees are node-local and removed by the job; receipts remain on shared storage.
+No dependency or environment changes are made.</p>
+</section>
+</main></body></html>

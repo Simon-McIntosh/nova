@@ -47,18 +47,23 @@ def main():
         "diverted"
     )
 
-    def booking(bank, state, support, rule):
-        def one(values, reading):
-            psi = sr.nodal_jets(bank, values)[bank.sample_index, 0]
-            return sr.book(bank, reading, psi, profile, rule)
-
-        return jax.vmap(one)(state, support)
+    def booking(geometry, psi, readings, rule):
+        return jax.vmap(
+            lambda values, reading: current.book(
+                values, reading, geometry, profile, rule
+            )
+        )(psi, readings)
 
     def whole(bank, cache, state, seeds, previous, tracking, rule):
         support = sr.read_batch(
             bank, cache, state, seeds, previous, convention, policy, tracking=tracking
         )
-        return support, booking(bank, state, support, rule)
+
+        def one(values, reading):
+            psi = sr.nodal_jets(bank, values)[bank.sample_index, 0]
+            return sr.book(bank, reading, psi, profile, rule)
+
+        return support, jax.vmap(one)(state, support)
 
     for width in (1, 16):
         scales = jnp.linspace(2e-5, 6e-5, 16)[:width]
@@ -77,9 +82,12 @@ def main():
         conic = cut & ~initial.reading.normal_form_cells
         counts = np.asarray(jnp.sum(conic, axis=-1)).tolist()
         assert min(counts) > 32
+        psi = jax.jit(
+            jax.vmap(lambda state: sr.nodal_jets(bank, state)[bank.sample_index, 0])
+        )(state)
         for kind in ("booking", "carried", "full"):
             if kind == "booking":
-                fn, values = booking, (bank, state, initial, quadrature)
+                fn, values = booking, (bank.geometry, psi, initial.reading, quadrature)
             else:
                 tracking = sr.tracking_of(initial) if kind == "carried" else None
                 fn, values = (

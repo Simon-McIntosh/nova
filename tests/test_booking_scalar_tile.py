@@ -91,7 +91,7 @@ def _assert_booking(actual, expected):
         )
 
 
-@pytest.mark.parametrize("count", [17, 67, 137])
+@pytest.mark.parametrize("count", [17, 47, 67, 137])
 def test_all_booked_moments_match_independent_population(physical, count):
     psi, reading, geometry = _population(physical, count)
     rule = current.Quadrature(segments=8, target_current=3.7)
@@ -110,7 +110,7 @@ def test_all_booked_moments_match_independent_population(physical, count):
 
 
 def test_scalar_tile_is_wide_and_normal_tile_is_independent():
-    assert current._SCALAR_CUT_BATCH_WIDTH == 128
+    assert current._SCALAR_CUT_BATCH_WIDTH == 64
     assert current._NORMAL_CUT_BATCH_WIDTH == 8
 
 

@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:read_batch",
+    "nova/equilibrium/support_read.py:step_batch",
+    "nova/equilibrium/support_read.py:solve_batch",
+    "nova/equilibrium/topology.py:refresh_at_stationary_points"
+  ],
+  "completed_at": "2026-11-11T19:25:42.773Z",
+  "dispatched_at": "2026-11-11T19:02:34Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "read-diverted-wall-skip",
+      "recorded_at": "2026-11-11T19:46:38.105845+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "topology.py was edited under the coordinator's explicit written grant (lead ruling of 2026-10-24) while read-live-candidates held the claim; accepted with --accept-path at landing",
+      "recorded_at": "2026-11-11T19:46:49.288960+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": "3588",
+      "severity": "non-blocking",
+      "text": "non-blocking: skip_wall is accepted for any decision and silently returns a wall-less boundary with the stable flag true, so the docstring's permission only for all-diverted batches is unenforced and a future caller would get a wrong read with no refusal."
+    },
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": "3551",
+      "severity": "non-blocking",
+      "text": "non-blocking: the node edited two product files outside its registered write paths; the run's own terminal check refuses topology.py, so the registration gap has to be closed by the coordinator rather than silently accepted."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read commit by commit against base 519d378f9e6f8d2786f69af64569625971651a73; fbd580449 carries the whole product change, c5db194c4 and 049003db2 and e920cb0f4 and 06e3ee356 and 5a0c44e59 and cc251d95e harden the test and measurement drivers, and 98be05446 and e9530c70c and 6621bff17 add the fragment, the figure and the combined-state verification.",
+    "done_when": "All three clauses are recorded rather than claimed; tests/test_read_wall_skip.py passes 8 tests with EXIT=0 and verified/negative-control.log is red at [classes2] with EXIT=1, combined-bd8a59666/receipt.json records sirius job 1310858 with one fresh process per file and zero added failures over four files, and the paired CPU measurement in verified/serial plus the fragment and the inspected read-wall.svg are committed.",
+    "goal": "The goal is one wall decision per batch that skips wall evaluation when every lane is diverted; nova/equilibrium/support_read.py:506 computes jnp.all over tracking.reading.boundary_class, support_read.py:510 routes the carried refresh through a static skip_wall, and nova/equilibrium/topology.py:3588 bypasses wall events for it while whole_mesh() and certified reads still run the full wall competition.",
+    "manifest": "Read; it reports status complete with 8 passed on the node file, zero added failures on the combined pair and wall counters 0/1/1/1, and its published 1774.757 to 1116.403 ms pair reconciles with the means of verified/serial base-1 and base-2 against head-1 and head-2.",
+    "write_paths": "The registered scope names four paths (tests/test_read_wall_skip.py, scripts/prototypes/read_diverted_wall_skip, the evidence fragment and the figure directory); the diff also edits nova/equilibrium/support_read.py and nova/equilibrium/topology.py, which the brief requires and which the run's own manifest check flags for topology.py alone."
+  },
+  "justifications": {
+    "durability": "tests/test_read_wall_skip.py:180 asserts zero wall calls for the all-diverted carry against the three positive controls at line 214, which is the assertion a revert of support_read.py:510 reddens, and the parity check at tests/test_read_wall_skip.py:107 is discriminating only through that counter.",
+    "evidence": "The four counts 0/1/1/1 in combined-bd8a59666/wall-controls.log are the measured absence of the wall path with limited, mixed and certificate positive controls beside it, and every gate log ends in a captured EXIT line.",
+    "fit": "The batch-level jnp.all plus lax.cond at nova/equilibrium/support_read.py:506 follows the batch-uniform conditional the same function already uses, and the docstring at nova/equilibrium/topology.py:3559 states the static contract the new keyword requires.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:506-511 chooses the branch once outside vmap and nova/equilibrium/topology.py:3588 is the negation of the diverted arm it replaces, so the skipped path returns the same boundary, level and stable flag the lane conditional would have returned.",
+    "reuse": "The change extends topology.refresh_at_stationary_points rather than forking it, and no owner of a batch-level diverted decision exists in nova/equilibrium beyond the per-lane comparison at support_read.py:222.",
+    "scope_discipline": "nova/equilibrium/topology.py:3551 lies outside the registered write paths and is the one path the run's own terminal manifest check refuses, while the rest of the diff stays inside the scope and inside what the brief asked for."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal is one wall decision per batch that skips wall evaluation when every lane is diverted; nova/equilibrium/support_read.py:506 computes jnp.all over tracking.reading.boundary_class, support_read.py:510 routes the carried refresh through a static skip_wall, and nova/equilibrium/topology.py:3588 bypasses wall events for it while whole_mesh() and certified reads still run the full wall competition.\nVERDICT done_when: All three clauses are recorded rather than claimed; tests/test_read_wall_skip.py passes 8 tests with EXIT=0 and verified/negative-control.log is red at [classes2] with EXIT=1, combined-bd8a59666/receipt.json records sirius job 1310858 with one fresh process per file and zero added failures over four files, and the paired CPU measurement in verified/serial plus the fragment and the inspected read-wall.svg are committed.\nVERDICT write_paths: The registered scope names four paths (tests/test_read_wall_skip.py, scripts/prototypes/read_diverted_wall_skip, the evidence fragment and the figure directory); the diff also edits nova/equilibrium/support_read.py and nova/equilibrium/topology.py, which the brief requires and which the run's own manifest check flags for topology.py alone.\nVERDICT manifest: Read; it reports status complete with 8 passed on the node file, zero added failures on the combined pair and wall counters 0/1/1/1, lists skip_wall in topology.py and support_read.py as its two product edits, and its published 1774.757 to 1116.403 ms pair reconciles with the means of verified/serial base-1 and base-2 against head-1 and head-2.\nVERDICT diff: Read commit by commit against base 519d378f9e6f8d2786f69af64569625971651a73; fbd580449 carries the whole product change, c5db194c4 and 049003db2 and e920cb0f4 and 06e3ee356 and 5a0c44e59 and cc251d95e harden the test and measurement drivers, and 98be05446 and e9530c70c and 6621bff17 add the fragment, the figure and the combined-state verification.\nVERDICT manifest: Read; it reports status complete with 8 passed on the node file, zero added failures on the combined pair and wall counters 0/1/1/1, and its published 1774.757 to 1116.403 ms pair reconciles with the means of verified/serial base-1 and base-2 against head-1 and head-2.\nCALL_SITES: nova/equilibrium/support_read.py:read_batch, nova/equilibrium/support_read.py:step_batch, nova/equilibrium/support_read.py:solve_batch, nova/equilibrium/topology.py:refresh_at_stationary_points\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:506-511 chooses the branch once outside vmap and nova/equilibrium/topology.py:3588 is the negation of the diverted arm it replaces, so the skipped path returns the same boundary, level and stable flag the lane conditional would have returned.\nSCORE evidence: 19\nJUSTIFICATION evidence: The four counts 0/1/1/1 in combined-bd8a59666/wall-controls.log are the measured absence of the wall path with limited, mixed and certificate positive controls beside it, and every gate log ends in a captured EXIT line.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: nova/equilibrium/topology.py:3551 lies outside the registered write paths and is the one path the run's own terminal manifest check refuses, while the rest of the diff stays inside the scope and inside what the brief asked for.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_read_wall_skip.py:180 asserts zero wall calls for the all-diverted carry against the three positive controls at line 214, which is the assertion a revert of support_read.py:510 reddens, and the parity check at tests/test_read_wall_skip.py:107 is discriminating only through that counter.\nSCORE fit: 19\nJUSTIFICATION fit: The batch-level jnp.all plus lax.cond at nova/equilibrium/support_read.py:506 follows the batch-uniform conditional the same function already uses, and the docstring at nova/equilibrium/topology.py:3559 states the static contract the new keyword requires.\nSCORE reuse: 19\nJUSTIFICATION reuse: The change extends topology.refresh_at_stationary_points rather than forking it, and no owner of a batch-level diverted decision exists in nova/equilibrium beyond the per-lane comparison at support_read.py:222.\nFINDING nova/equilibrium/topology.py:3588 non-blocking: skip_wall is accepted for any decision and silently returns a wall-less boundary with the stable flag true, so the docstring's permission only for all-diverted batches is unenforced and a future caller would get a wrong read with no refusal.\nFINDING nova/equilibrium/topology.py:3551 non-blocking: the node edited two product files outside its registered write paths; the run's own terminal check refuses topology.py, so the registration gap has to be closed by the coordinator rather than silently accepted.",
+  "review_run_id": "r-20261111T190040387292-review-of-read-diverted-wall-skip-6621bff171af",
+  "reviewed_base_sha": "519d378f9e6f8d2786f69af64569625971651a73",
+  "reviewed_head_sha": "6621bff171af99fbdb483d7953733838af283c5c",
+  "reviewed_run_id": "r-20261111T161525525046-read-diverted-wall-skip",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T19:22:17.152771+00:00",
+  "total": 105
+}

@@ -1,0 +1,224 @@
+<section class="r-evidence" id="icm-high-permeability-shell-completion">
+  <h3>High-permeability shell: amplified discretisation error, with continued convergence</h3>
+  <p><strong>Verdict.</strong> The dominant mechanism is high-permeability amplification
+    of the piecewise-constant, centroid-collocated magnetisation error. The recorded
+    non-monotone refinement reproduces at 40 → 20 mm, but every probe improves at
+    20 → 10 mm: at μ<sub>r</sub> = 1000 the errors become 1.10182%, 1.29591% and
+    0.90253%, with orders 1.520, 1.327 and 1.395. There is no measured fixed error
+    floor on these meshes. At μ = 1000 the geometric-volume prediction is thousands
+    of times smaller with the outer radius held nominal, and vanishes to roundoff
+    when both effective radii are used. Radial layers alone do not control the error.</p>
+
+  <p><strong>Measurement.</strong> Production <code>solve_magnetisation</code>, unchanged
+    from base <code>c381a899741ac3c8695919c0915a021bd6a8fc14</code>; production module
+    blob <code>180d1a7ff970fc4b5e77e6e8b2bc531e2a14a72a</code>.
+    The core sweep ran at <code>77160e16fe42a0d4c34c21bd9895dcfd458aadf7</code>,
+    the directional comparison at <code>f9a546e39ae2266156e5c49e0b6ffda18ee9ca79</code>,
+    and the independent mesh-boundary check on all_debug at
+    <code>8e661116a2c0a2154459f68e558bf01316028040</code>.
+    One allocation per experiment, on Titan's Tesla P100-PCIE-16GB, with CUDA
+    placement and float64 asserted before array construction. Real H200 submissions
+    remained pending on Resources and were cancelled unstarted before the specified
+    fallback. Both GPU jobs completed with <code>EXIT=0</code>; all 24 shell solves
+    took one Newton correction, with material residual below 6 × 10<sup>−16</sup>.
+    These are accuracy measurements, not H200 timing claims.</p>
+
+  <figure>
+    <img src="/nova/figures/iron-core-magnetisation/icm-high-permeability-shell/error-vs-cell-size.svg"
+         alt="Largest shielding error over three exterior probes against cell size, for four permeabilities; both source models converge while geometric volume error is much smaller">
+    <figcaption>Maximum absolute relative shielding error over probes (2, 0), (0, 2)
+      and (3, 1) m. Purple: the 50 mm loop used in the production control; dashed:
+      an ideal central dipole with the same moment. The dotted geometric prediction
+      deliberately holds b = 1 m while replacing the shell volume by its meshed
+      value; its magnitude is at most 0.0002341%. With both effective radii, their
+      ratio stays 0.9 and the prediction is zero to roundoff, which cannot be drawn
+      on a logarithmic axis. The maximum falls at both refinements for every μ;
+      individual probe orders, including the reproduced negative orders, are below.
+      The save guard passed; the 1400 × 720 PNG preview was inspected.</figcaption>
+  </figure>
+
+  <h4>Geometry is fixed while cells refine</h4>
+  <p>Volumes are 2π times the first radial area moment, summed over the actual cells.
+    Effective radii are derived independently from the inner and outer enclosed
+    volumes, r<sub>eff</sub> = (3V/4π)<sup>1/3</sup>. The exact shell volume is
+    1.1351621454971115 m³. The outer and inner effective-radius errors are
+    −0.784366 μm and −0.705929 μm; both are the same fractional shrinkage.</p>
+  <table>
+    <thead><tr><th>Cell size [mm]</th><th>Cells</th><th>Shell volume [m³]</th><th>Volume error [ppm]</th><th>b<sub>eff</sub> [m]</th><th>a<sub>eff</sub> [m]</th></tr></thead>
+    <tbody>
+      <tr><td>40</td><td>228</td><td>1.1351594743525024</td><td>−2.353095</td><td>0.9999992156343144</td><td>0.8999992940708826</td></tr>
+      <tr><td>20</td><td>828</td><td>1.1351594743525030</td><td>−2.353095</td><td>0.9999992156343143</td><td>0.8999992940708829</td></tr>
+      <tr><td>10</td><td>3168</td><td>1.1351594743525030</td><td>−2.353095</td><td>0.9999992156343143</td><td>0.8999992940708827</td></tr>
+    </tbody>
+  </table>
+  <p>Use S = ((2μ+1)(μ+2) − 2(μ−1)²f)/(9μ), with f = (a/b)³.
+    The measured inner/outer enclosed-volume ratio is 0.729 within 6 × 10<sup>−16</sup>, giving
+    S<sub>volume</sub>/S<sub>exact</sub> − 1 below 6 × 10<sup>−15</sup> in magnitude.
+    The boundary is the same polygon in every row, rather than a new approximation
+    of the spheres at each cell size. This rejects the stated volume-fraction
+    explanation; it does not claim that arbitrary faceted shapes equal spheres.</p>
+  <p>The direct raw-cell union is a valid MultiPolygon with 30 parts because of
+    floating-coordinate seams. The boundary check stitches at 10 fm, finer than
+    the production sheet operand's approximately 1 pm edge-identity grid. Maximum
+    coordinate rounding is 5.107 fm; independent unary area differences are
+    1.443 / 2.776 / 3.442 × 10<sup>−15</sup> m². Boundary-moment volumes agree with
+    the cell sums within 3.2 × 10<sup>−15</sup> m³. The overlay's zero difference
+    is not used as proof of exact preservation: it inherits the snapping precision.
+    The same independent area instrument reads 0.09999999999999998 m² for a known
+    0.1 m² change, and a genuine 20 mm gap remains disconnected and is explicitly
+    refused. The initial exact-contiguity assumption failed visibly in
+    <code>gpu-1310133.log</code>; the corrected check passes in
+    <code>gpu-1310142.log</code>.</p>
+
+  <h4>Solved shielding beside the volume-implied shielding</h4>
+  <p>Probe triples are equator, pole, oblique in the order stated in the caption.
+    Every signed S error is negative. The table prints absolute relative errors.</p>
+  <table>
+    <thead><tr><th>μ<sub>r</sub></th><th>Size [mm]</th><th>S<sub>exact</sub></th><th>S<sub>volume</sub></th><th>Solved S, three probes</th><th>Error [%], three probes</th></tr></thead>
+    <tbody>
+      <tr><td>100</td><td>40</td><td>6.902380000</td><td>6.902380000</td><td>6.848184 / 6.821289 / 6.863086</td><td>0.78518 / 1.17482 / 0.56928</td></tr>
+      <tr><td>100</td><td>20</td><td>6.902380000</td><td>6.902380000</td><td>6.870016 / 6.866303 / 6.877247</td><td>0.46888 / 0.52267 / 0.36412</td></tr>
+      <tr><td>100</td><td>10</td><td>6.902380000</td><td>6.902380000</td><td>6.892871 / 6.887905 / 6.893897</td><td>0.13776 / 0.20971 / 0.12291</td></tr>
+      <tr><td>300</td><td>40</td><td>18.946422963</td><td>18.946422963</td><td>18.675090 / 18.443531 / 18.771088</td><td>1.43211 / 2.65428 / 0.92542</td></tr>
+      <tr><td>300</td><td>20</td><td>18.946422963</td><td>18.946422963</td><td>18.722584 / 18.709488 / 18.775915</td><td>1.18143 / 1.25055 / 0.89995</td></tr>
+      <tr><td>300</td><td>10</td><td>18.946422963</td><td>18.946422963</td><td>18.867838 / 18.850933 / 18.880884</td><td>0.41478 / 0.50400 / 0.34592</td></tr>
+      <tr><td>1000</td><td>40</td><td>61.101838000</td><td>61.101838000</td><td>59.498116 / 56.954646 / 60.344038</td><td>2.62467 / 6.78734 / 1.24023</td></tr>
+      <tr><td>1000</td><td>20</td><td>61.101838000</td><td>61.101838000</td><td>59.171609 / 59.115494 / 59.651437</td><td>3.15904 / 3.25087 / 2.37374</td></tr>
+      <tr><td>1000</td><td>10</td><td>61.101838000</td><td>61.101838000</td><td>60.428607 / 60.310014 / 60.550374</td><td>1.10182 / 1.29591 / 0.90253</td></tr>
+      <tr><td>3000</td><td>40</td><td>181.546242296</td><td>181.546242296</td><td>172.571573 / 151.864283 / 179.345231</td><td>4.94346 / 16.34953 / 1.21237</td></tr>
+      <tr><td>3000</td><td>20</td><td>181.546242296</td><td>181.546242296</td><td>166.946650 / 166.964240 / 170.628284</td><td>8.04180 / 8.03211 / 6.01387</td></tr>
+      <tr><td>3000</td><td>10</td><td>181.546242296</td><td>181.546242296</td><td>176.764787 / 175.918706 / 177.639291</td><td>2.63374 / 3.09978 / 2.15204</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Observed spatial orders and susceptibility dependence</h4>
+  <p>p = log₂(e<sub>coarse</sub>/e<sub>fine</sub>) per probe. The first μ = 1000
+    row reproduces the defect quoted in the dispatch; the second refinement resolves
+    it at all probes. No all-probe coarse-mesh convergence claim is made.</p>
+  <table>
+    <thead><tr><th>μ<sub>r</sub></th><th>p, 40 → 20 mm</th><th>p, 20 → 10 mm</th></tr></thead>
+    <tbody>
+      <tr><td>100</td><td>0.744 / 1.168 / 0.645</td><td>1.767 / 1.318 / 1.567</td></tr>
+      <tr><td>300</td><td>0.278 / 1.086 / 0.040</td><td>1.510 / 1.311 / 1.379</td></tr>
+      <tr><td>1000</td><td>−0.267 / 1.062 / −0.937</td><td>1.520 / 1.327 / 1.395</td></tr>
+      <tr><td>3000</td><td>−0.702 / 1.025 / −2.310</td><td>1.610 / 1.374 / 1.483</td></tr>
+    </tbody>
+  </table>
+  <p>At fixed h, least-squares fits over χ = μ<sub>r</sub> − 1 give the log-log
+    exponent α in e ∝ χ<sup>α</sup>. A linear fit of error in percentage points
+    against χ is also printed, to distinguish the two meanings of “slope”.</p>
+  <table>
+    <thead><tr><th>Size [mm]</th><th>α, three probes</th><th>Linear slope [percentage points per χ], three probes</th></tr></thead>
+    <tbody>
+      <tr><td>40</td><td>0.535 / 0.773 / 0.224</td><td>0.00136868 / 0.00514964 / 0.00016537</td></tr>
+      <tr><td>20</td><td>0.831 / 0.800 / 0.820</td><td>0.00257595 / 0.00254996 / 0.00192108</td></tr>
+      <tr><td>10</td><td>0.859 / 0.789 / 0.834</td><td>0.00084113 / 0.00097853 / 0.00068422</td></tr>
+    </tbody>
+  </table>
+  <p>The finer two meshes support susceptibility amplification, approximately
+    sublinear over this range. They do not establish the literal e ∝ χh law:
+    measured α is below one and fine-mesh p exceeds one. The poor coarse oblique
+    exponent accompanies its non-asymptotic spatial behaviour.</p>
+
+  <h4>The defect is in the represented field, not the Newton stopping criterion</h4>
+  <p>For the ideal dipole, sample the analytic shell magnetisation at the same cell
+    centroids. In the iron, H<sub>R</sub> = 3DRZ/ρ⁵ and
+    H<sub>Z</sub> = −C + D(2Z²−R²)/ρ⁵, with q = 0.05²/(4S),
+    C = 2(μ−1)q/(3μ), D = (μ+2)q/(3μ), and M = χH.
+    Inserting those samples into the discrete material equation gives a nonzero
+    truncation defect despite the converged algebraic solve:</p>
+  <table>
+    <thead><tr><th>Size [mm]</th><th>Analytic-sample equation defect [%]</th><th>Solved M versus analytic samples [%]</th><th>Observed defect amplification</th></tr></thead>
+    <tbody>
+      <tr><td>40</td><td>0.724783</td><td>13.709814</td><td>18.916</td></tr>
+      <tr><td>20</td><td>0.273686</td><td>11.163191</td><td>40.788</td></tr>
+      <tr><td>10</td><td>0.103268</td><td>7.435839</td><td>72.005</td></tr>
+    </tbody>
+  </table>
+  <p>These are Euclidean relative norms at μ = 1000. Writing
+    A<sub>h</sub> = I − χG<sub>h</sub>/(μ₀(1+χ)) and
+    τ = A<sub>h</sub>M* − χB<sub>source</sub>/(μ₀(1+χ)), the exact algebraic
+    identity is M<sub>h</sub> − M* = −A<sub>h</sub><sup>−1</sup>τ.
+    The last column measures the gain on this defect vector, not a condition
+    number or an identified eigenmode. It localises the problem to representation
+    and collocation error amplified by the material equation. Newton residuals
+    near machine precision do not remove τ.</p>
+  <p>The finite loop and ideal dipole differ by at most 0.04736 percentage points
+    in shielding error anywhere in the sweep. At μ = 1000, 10 mm, the ideal-dipole
+    errors are 1.13638 / 1.24908 / 0.91417%; their fine orders are
+    1.488 / 1.360 / 1.381. Source multipoles therefore do not account for the
+    percent-scale gap or its non-monotone coarse refinement.</p>
+
+  <h4>Independent radial and angular refinement</h4>
+  <p>A second experiment uses annular-sector cells with the same 256-segment
+    half-circle boundary in every row, at μ = 1000 with an ideal dipole.
+    All rows have volume 1.1351194076861975 m³. These cells are a diagnostic
+    mesh family, not a replacement production mesher.</p>
+  <table>
+    <thead><tr><th>Radial layers</th><th>Angular cells per half-circle</th><th>Cells</th><th>Solved S, three probes</th><th>Worst error [%]</th></tr></thead>
+    <tbody>
+      <tr><td>2</td><td>64</td><td>128</td><td>33.432705 / 33.395176 / 33.425501</td><td>45.3451</td></tr>
+      <tr><td>5</td><td>64</td><td>320</td><td>33.703744 / 33.587208 / 33.680838</td><td>45.0308</td></tr>
+      <tr><td>10</td><td>64</td><td>640</td><td>26.238207 / 26.244043 / 26.239700</td><td>57.0582</td></tr>
+      <tr><td>5</td><td>32</td><td>160</td><td>22.233265 / 21.679741 / 22.129890</td><td>64.5187</td></tr>
+      <tr><td>5</td><td>128</td><td>640</td><td>51.762430 / 51.747860 / 51.759628</td><td>15.3088</td></tr>
+    </tbody>
+  </table>
+  <p>Angular refinement at fixed thickness resolution substantially improves the
+    result. Adding radial layers at fixed angular resolution does not. This rejects
+    a thickness-count-only repair; aspect ratio and tangential variation matter.
+    The large sector-cell errors also prohibit transferring a Cartesian h-based
+    accuracy estimate to arbitrary meshes.</p>
+
+  <h4>Controls that could have falsified the instrument</h4>
+  <p>The μ = 100 shell improves at every probe on both refinements, as its table
+    and orders show. For the uniform-field sphere at μ = 1000, boundary resolution
+    is refined with the cells to avoid a fixed polygon floor. The exterior control
+    uses the analytic magnetised-sphere field at (1, 0) and (0, 1) m.</p>
+  <table>
+    <thead><tr><th>Cell size [mm]</th><th>Buffer segments per quadrant</th><th>Cells</th><th>Exterior relative errors</th></tr></thead>
+    <tbody>
+      <tr><td>100</td><td>64</td><td>44</td><td>2.1435591 × 10⁻⁵ / 3.0051067 × 10⁻⁵</td></tr>
+      <tr><td>50</td><td>128</td><td>166</td><td>5.3603560 × 10⁻⁶ / 7.5122729 × 10⁻⁶</td></tr>
+      <tr><td>25</td><td>256</td><td>644</td><td>1.3393260 × 10⁻⁶ / 1.8782755 × 10⁻⁶</td></tr>
+    </tbody>
+  </table>
+  <p>Sphere orders are 1.99961 / 2.00009 and 2.00082 / 1.99984.
+    Both physical controls pass. Separately, deliberately overlapping plot labels
+    produce <code>REFUSED: overlap 'collision one'/'collision two'</code> and
+    <code>EXIT=1</code>, with no SVG saved; the unmutated figure passes the guard.</p>
+
+  <h4>Repair implied, owner and limits</h4>
+  <p><strong>Owner: <code>nova/biot/magnetisation.py</code>.</strong> The measured
+    formulation continues converging, so these data do not prove that it must be
+    replaced to obtain an eventual limit. They also do not provide a certified
+    global error bound or qualify a WEST mesh. Even 10 mm leaves 1.296% error at
+    μ = 1000 and 3.100% at μ = 3000, above the 0.5% high-permeability target.</p>
+  <p><strong>Recommended repair route:</strong> compare a reduced scalar-potential
+    material formulation, H = H<sub>source</sub> − ∇φ, against these same controls.
+    It represents the curl-free material field directly rather than relying on
+    cancellation of fields from constant-M cells. Retain the qualified sheet
+    operand (see the <a href="/nova/evidence/fragments/iron-core-magnetisation/icm-sheet-axis-limits.html">sheet-pair reference</a>);
+    the change belongs to the material representation and solve.
+    This is a recommendation for the next measured comparison, not a claim that
+    a potential implementation has already met the target. A higher-order M basis
+    remains a legitimate comparison candidate. No few-line production repair is
+    indicated, and no production source or test was changed here.</p>
+  <p>A refinement-only policy would need a bound that includes permeability,
+    tangential resolution and cell shape. Three Cartesian sizes and one fixed-μ
+    directional sweep cannot establish that bound. Extrapolating the observed
+    orders is an estimate, not an accuracy certificate; adding radial layers or
+    tightening the Newton tolerance does not supply the missing guarantee.</p>
+
+  <h4>Durable receipts</h4>
+  <p>Driver and launcher: <code>scripts/magnetisation_high_permeability/</code>.
+    All raw data and logs remain outside git under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T051520948243-icm-high-permeability-shell/</code>:
+    <code>measurement.json</code>, <code>directional.json</code>, <code>geometry.json</code>,
+    <code>gpu-1310090.log</code>, <code>gpu-1310095.log</code>,
+    <code>gpu-1310142.log</code>, <code>figure-validation.log</code> and
+    <code>figure-negative-control.log</code>.
+    The GPU logs identify revision, resolved tree, imported production module and actual
+    command; their last lines record the exit status. The run-local landing record
+    and manifest carry the coordinator's writeback inputs. No plan state was changed.</p>
+</section>

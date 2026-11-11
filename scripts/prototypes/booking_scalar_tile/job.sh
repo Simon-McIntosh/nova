@@ -8,3 +8,6 @@ BASE=$3
 MODE=$4
 export PYTHONPATH=$ROOT
 /home/ITER/mcintos/Code/nova/.venv/bin/python "$ROOT/scripts/prototypes/booking_scalar_tile/run.py" "$MODE" "$ROOT" "$RUN" "$BASE"
+if [ "$MODE" = suites ]; then
+  /home/ITER/mcintos/Code/nova/.venv/bin/python "$ROOT/scripts/prototypes/booking_scalar_tile/run.py" negative "$ROOT" "$RUN" "$BASE"
+fi

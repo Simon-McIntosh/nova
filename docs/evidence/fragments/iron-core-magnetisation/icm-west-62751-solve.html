@@ -1,3 +1,28 @@
+<section id="icm-west-62751-solve-mesh-census">
+  <h3>Production mesh census and selected pair</h3>
+  <p>The lead authorized a mesh acceptance census while a separate node repairs
+    the production mesher. One CPU job on sirius, <code>1310797</code>,
+    tested the five requested sizes through the production reader and mesher,
+    stopping before interaction assembly. A known four-cell square was accepted,
+    verifying the probe can observe a successful mesh.</p>
+  <table>
+    <thead><tr><th>Cell size [m]</th><th>Result</th><th>Cells</th><th>Mesh wall [s]</th></tr></thead>
+    <tbody><tr><td>0.08</td><td>refused: unresolved iron sliver</td><td>not returned</td><td>0.901</td></tr><tr><td>0.0566</td><td>accepted</td><td>3447</td><td>3.250</td></tr><tr><td>0.04</td><td>accepted</td><td>6632</td><td>6.777</td></tr><tr><td>0.0283</td><td>refused: unresolved iron sliver</td><td>not returned</td><td>10.569</td></tr><tr><td>0.02</td><td>refused: unresolved iron sliver</td><td>not returned</td><td>32.551</td></tr></tbody>
+  </table>
+  <p>The coarsest accepted pair is <strong>0.0566 m and 0.04 m</strong>, with
+    3447 and 6632 cells. Their size ratio is 1.415, the rounded square-root-of-two
+    spacing requested. The finer dense system has 13264 unknowns and occupies
+    1.407469568 GB per float64 matrix, within the prescribed 26000-unknown ceiling.
+    Both accepted meshes cover 10.096691 m² of iron.</p>
+  <p>This pair departs from the original 0.08/0.04 m brief because the unchanged
+    production mesher refuses 0.08 m; its repair is in flight separately.
+    One Titan job, <code>1310799</code>, is measuring both selected meshes,
+    their flat-permeability arms and the Picard control at 0.0566 m.
+    Mesh acceptance alone makes no convergence or field-accuracy claim.</p>
+  <p>Probe receipts are <code>mesh-probe.log</code> (ending EXIT=0) and
+    <code>mesh-probe.json</code> in the run directory below. Refused rows have
+    no returned cell count; a missing count is not reported as zero.</p>
+</section>
 <section id="icm-west-62751-solve-resumed">
   <h3>Resumed WEST measurement: production mesh refusal</h3>
   <p>The coordinator merged the split-interval B-H fit into this worktree at

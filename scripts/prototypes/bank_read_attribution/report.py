@@ -36,7 +36,8 @@ def instrument_provenance(root, run):
     """Bind each recorded source digest to identical committed file bytes."""
     path = "scripts/prototypes/bank_read_attribution/measure.py"
     history = subprocess.check_output(
-        ["git", "-C", str(root), "log", "--format=%H", "--", path], text=True
+        ["git", "-C", str(root), "log", "--full-history", "--format=%H", "--", path],
+        text=True,
     ).splitlines()
     revisions = {}
     for revision in history:

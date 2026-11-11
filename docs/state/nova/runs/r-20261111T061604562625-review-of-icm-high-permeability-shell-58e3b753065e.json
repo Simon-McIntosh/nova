@@ -614,6 +614,68 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "375d1218ffac5b31b4a0d38885971b8f1724d92d",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_absent": true,
+    "scratch_bytes": null,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261111T061604562625-review-of-icm-high-permeability-shell-58e3b753065e",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "375d1218ffac5b31b4a0d38885971b8f1724d92d",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/review-of-icm-high-permeability-shell-58e3b753065e",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-11-11T06:25:21Z",
+            "session_id": "01a1c941-9905-7700-aaf0-8ce23b33ee92",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/review-of-icm-high-permeability-shell-58e3b753065e"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a1c941-9905-7700-aaf0-8ce23b33ee92"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-11-11T06:25:21Z",
+      "session_id": "01a1c941-9905-7700-aaf0-8ce23b33ee92",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/review-of-icm-high-permeability-shell-58e3b753065e"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 01a1c941-9905-7700-aaf0-8ce23b33ee92"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

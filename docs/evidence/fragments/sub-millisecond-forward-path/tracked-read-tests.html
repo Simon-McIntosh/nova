@@ -7,7 +7,8 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-evidence-for" content="sub-millisecond-forward-path">
 <meta name="plan-verifies" content="sub-millisecond-forward-path#s2">
-<meta name="plan-recorded-at" content="2026-11-11"><meta name="plan-verdict" content="partial">
+<meta name="plan-recorded-at" content="2026-11-11">
+<meta name="plan-verdict" content="pass">
 <title>Tracked-read test gaps | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -15,71 +16,86 @@
 <body><main class="plan-doc">
 <section id="tracked-read-tests-result">
 <h1>Two test gaps in the tracked read</h1>
-<p>The carried-decision review left two findings that were test gaps, not
-product defects. Both are closed in <code>tests/test_tracked_read.py</code>
-with no product change: a certificate request is now observed to execute the
-whole-mesh topology read, and a limited-contact case now requires a rebuild
-when the wall-contact winner changes.</p>
+<p>Two tests in <code>tests/test_tracked_read.py</code> close the carried-decision
+review findings without changing product source. A runtime spy proves that a
+certificate executes the full topology read. A limited fixture requires a rebuild
+when the winner moves between physically separated wall contacts. The paired file
+gate passes 13 tests at base and 15 at head, with zero added failures; both declared
+scratch mutations fail the matching new test.</p>
 </section>
-
 <section id="tracked-read-tests-certificate">
-<h2>The certificate path reads the whole mesh</h2>
-<p>The previous certificate test compared continuous geometry at an unchanged
-state. At an unchanged state a carried result relabelled as rebuilt agrees
-with a fresh read on every continuous quantity, so that comparison could not
-show the certificate had executed the full read. The new test wraps
-<code>topology.read_at_stationary_points</code>, the whole-mesh read, and
-records each execution through <code>jax.debug.callback</code>. A carry must
-record none; a certificate request must record at least one, beside the
-raised <code>rebuilt</code> flag and the incremented counter.</p>
-<p>Under control (a), which answers a certificate request from the carried
-result marked rebuilt with an incremented counter, the test fails on the
-absent whole-mesh read while both of those reported values still hold.</p>
+<h2>The certificate executes the full read</h2>
+<p><code>test_a_certificate_request_executes_the_whole_mesh_read</code> wraps
+<code>topology.read_at_stationary_points</code> and observes its execution through
+<code>jax.debug.callback</code>, waiting for device work and callback effects.
+An ordinary carry records no execution. A certificate must record an execution,
+report <code>rebuilt=True</code>, and increment the rebuild count.</p>
+<p>The certificate control preserves the ordinary carry, then replaces the
+requested full verdict with the carried result marked rebuilt and counted once.
+It reaches <code>WHOLE_MESH_READS 0</code> and fails with
+<code>AssertionError: a certificate request answered without a full read</code>.
+Thus the test rejects the falsely marked result even though its rebuilt flag and
+counter satisfy the certificate assertions.</p>
 </section>
-
 <section id="tracked-read-tests-limited">
-<h2>A limited boundary must rebuild when another wall event wins</h2>
-<p>Every real-geometry tracking case in the file used <code>diverted_case</code>,
-where the boundary is the saddle and no wall-event list is formed. Dropping
-<code>wall_stable</code> from the carried read's validity therefore changed
-nothing the suite could see. The new case builds the limited reference,
-performs one full read, and shifts the exterior jets by
-<code>0.005 * (-1, 0)</code>, which leaves the tracked cell, the fragment
-links and the cut-cell classes unchanged, so the wall-contact winner is the
-only support decision that differs from the carried one. The read must
-rebuild, and a second read at the same state must not.</p>
-<table><thead><tr><th>Shift at the limited state</th><th>Head</th><th>Control (b): <code>wall_stable</code> dropped</th></tr></thead><tbody>
-<tr><td><code>0.005 * (-1, 0)</code></td><td>rebuilt, rebuilds 1 to 2</td><td>not rebuilt, rebuilds stays 1</td></tr>
-<tr><td><code>0.005 * (0, 1)</code></td><td>rebuilt, rebuilds 1 to 2</td><td>rebuilt, rebuilds 1 to 2</td></tr>
-<tr><td><code>0.02 * (1, 0)</code></td><td>rebuilt, rebuilds 1 to 2</td><td>rebuilt, rebuilds 1 to 2</td></tr>
-<tr><td><code>0.05 * (1, 0)</code></td><td>rebuilt, rebuilds 1 to 2</td><td>not rebuilt, rebuilds stays 1</td></tr>
-</tbody></table>
-<p>The two rows that differ under the mutation are the ones that depend on
-<code>wall_stable</code>; the others rebuild for another reason and are not
-used. The test takes the mildest of the differing rows.</p>
+<h2>The limited fixture changes physical contacts</h2>
+<p>The rectangular wall touches the analytic limited boundary at the inboard and
+outboard midplane radii, 4.002277319 m and 7.801395789 m. Opposite exterior tilts,
+<code>psi - 0.001 R</code> and <code>psi + 0.001 R</code>, move the winning contact
+from inboard to outboard. The test asserts both positions, limited classification,
+a valid read, unchanged tracked cells, and one additional rebuild.</p>
+<p>The diagnostic probe selects wall-event index 38 initially and 18 after the
+tilt reversal. The signed-flux margin between the two distinct contacts is
+0.003799118470245076 initially and 0.003799118470282657 after reversal; the test
+also pins the analytic margin above 0.003. Coincident Newton seeds still have
+roundoff-scale score differences, so these margins compare distinct contact
+locations rather than aliases of one contact. Dropping <code>wall_stable</code>
+keeps the carried result valid but reports <code>rebuilt=False</code>, failing
+the new test. The scratch probe also shows that this mutant retains the inboard
+contact when the outboard one wins.</p>
 </section>
-
-<section id="tracked-read-tests-gate">
-<h2>Paired arms and controls</h2>
-<p>One <code>all_debug</code> job (4 cpus, one hour) ran the base revision and
-the head in fresh processes, then the two mutated copies. Each log names the
-revision, the tree and the command on its header lines and ends with a bare
-<code>EXIT=</code> line.</p>
-<table><thead><tr><th>Arm</th><th>Command</th><th>Result</th></tr></thead><tbody>
-<tr><td>Base, <code>b905696e2</code></td><td><code>pytest -q tests/test_tracked_read.py</code></td><td>13 passed in 553.07s, <code>EXIT=0</code></td></tr>
-<tr><td>Head, <code>8b6071b8f</code></td><td><code>pytest -q tests/test_tracked_read.py</code></td><td>14 passed, 1 failed in 603.48s, <code>EXIT=1</code></td></tr>
-<tr><td>Control (a)</td><td><code>pytest -q tests/test_tracked_read.py -k whole_mesh_read</code></td><td>1 failed, 14 deselected, <code>EXIT=1</code></td></tr>
-<tr><td>Control (b)</td><td><code>pytest -q tests/test_tracked_read.py -k wall_contact_winner</code></td><td>1 failed, 14 deselected, <code>EXIT=1</code></td></tr>
+<section id="tracked-read-tests-diagnosis">
+<h2>The original fixture did not require a physical winner change</h2>
+<p>The original <code>0.005 * (-1, 0)</code> shift was reproduced before repair.
+Both an isolated process and a process running the earlier diverted cases fail
+<code>assert bool(result.rebuilt)</code> with <code>rebuilt=False</code>.
+Their two parsed wall-event diagnostic records are identical, including candidate
+scores, coordinates, geometry and exterior hashes, and JAX precision/cache settings.</p>
+<table><thead><tr><th>Original shifted fixture</th><th>Winner / nearest carried contact</th><th>Top two seed score gap</th><th>Next distinct contact gap</th></tr></thead><tbody>
+<tr><td>Isolated</td><td>1327 / 1327</td><td>1.7763568394002505e-15</td><td>0.008985510648837902</td></tr>
+<tr><td>After diverted cases</td><td>1327 / 1327</td><td>1.7763568394002505e-15</td><td>0.008985510648837902</td></tr>
 </tbody></table>
-<p><strong>The head arm is not entirely green.</strong> The whole-file head arm fails
-<code>test_a_wall_contact_winner_change_rebuilds_at_a_limited_boundary</code>:
-the read reports <code>rebuilt=False</code>, and the 0.005 shift puts the
-wall-contact comparison on a numerical knife edge, so the outcome depends on the
-process history left by the file's earlier diverted cases. Run alone in a fresh
-process the same test passes (<code>1 passed in 232.52s</code>,
-<code>EXIT=0</code>), and under control (b) it fails
-(<code>1 failed in 199.09s</code>, <code>EXIT=1</code>). The remaining work is to
-choose a larger shift that still flips only the wall-contact winner and rerun the
-whole-file arm.</p>
+<p>The earlier isolated success remains preserved in <code>rerun/head-limited.log</code>,
+but its inferred dependence on preceding tests is not reproduced here. The shift
+leaves the physical wall contact unchanged; a changed index among coincident seeds
+would not prove the intended event. No product cache-key defect was identified.
+The replacement fixture asserts a separated physical winner change instead of
+requiring a rebuild for this ambiguous seed choice.</p>
+</section>
+<section id="tracked-read-tests-gate">
+<h2>Completed paired gate and controls</h2>
+<p>One <code>all_debug</code> job, <code>1310349</code>, requested four CPUs,
+64 GB and <code>00:59:00</code>, and completed in 22 min 16 s. It ran fresh base
+and head processes, then one fresh process per scratch mutation. Base is
+<code>b905696e2b6dcecbea8262b99357380dcef48afc</code>; head is
+<code>74fd4b503da3e22230c3c4f6c2a3a0ff83fb849a</code>.</p>
+<table><thead><tr><th>Log</th><th>Selection</th><th>Runner summary</th><th>Exit</th></tr></thead><tbody>
+<tr><td><code>final-base.log</code></td><td>Whole file</td><td>13 passed in 497.88s</td><td>0</td></tr>
+<tr><td><code>final-head.log</code></td><td>Whole file</td><td>15 passed in 599.37s</td><td>0</td></tr>
+<tr><td><code>final-certificate-control.log</code></td><td>Certificate full-read spy</td><td>1 failed in 80.58s</td><td>1</td></tr>
+<tr><td><code>final-wall-control.log</code></td><td>Limited-contact rebuild</td><td>1 failed in 89.93s</td><td>1</td></tr>
+</tbody></table>
+<p>Each gate log starts with its revision, tree and actual command, records the
+imported module path and resolved working directory, and ends with a bare
+<code>EXIT=</code> line. The parent log carries <code>ALL_FOUR_ARMS_COMPLETE</code>.
+The failure-ID parser finds both known control failures and no base/head failures.
+The shared interpreter runs directly with CPU JAX, x64 configured before arrays,
+and node-local temporary trees; no environment sync is performed.</p>
+<p>Logs, scripts and the manifest are retained under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054735827333-tracked-read-tests</code>.
+The order diagnostics are <code>diagnostic-isolated.log</code> and
+<code>diagnostic-preceded.log</code>; the two-contact probes are
+<code>rectangle-head.log</code> and <code>rectangle-mutant.log</code>.
+Earlier attempt logs remain unchanged. Path-scoped Ruff lint and format checks pass.</p>
 </section>
 </main></body></html>

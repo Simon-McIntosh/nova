@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-11T20:24:08Z",
+  "figure": {
+    "canvas_px": [
+      1400,
+      721
+    ],
+    "drawing_script": "scripts/west_iron_solve/diagnostic_figure.py",
+    "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T202001520298-review-of-icm-west-62751-solve-a6d9a38e3d63-figure/image-0.png",
+    "repository_path": "docs/figures/iron-core-magnetisation/icm-west-62751-solve/newton-stall.svg"
+  },
+  "findings": [
+    {
+      "file": "scripts/west_iron_solve/diagnostic_figure.py",
+      "id": "ffb52fa9e40",
+      "line": 95,
+      "severity": "non-blocking",
+      "summary": "The figure-level legend keys the mesh with a 2.6 pt grey swatch and the residuals with a 3.0 pt violet swatch (lines 95-96), while the marks they name are drawn at 0.3 pt (line 79) and 1.8 pt (line 89). The 'iron cells' key therefore shows a bar roughly six times thicker than any cell edge in the picture, so a reader calibrating the legend to the data sees a weight the mesh does not have; when the legend is the only key to the two series it should be as thick as the lines it names."
+    },
+    {
+      "file": "docs/figures/iron-core-magnetisation/icm-west-62751-solve/newton-stall.svg",
+      "id": "f84b90f4773",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The caption states that purple edges select the twenty largest cell residual norms, but in the render those twenty cells merge into seven distinct violet strokes: neighbouring cells share edges and their coincident outlines fuse into one continuous line. The spatial message survives - the residual-dominant cells sit in short narrow runs along the wall side and the outer mesh boundary - but a reader cannot count the twenty cells the caption names, so the highlight communicates location rather than membership."
+    },
+    {
+      "file": "scripts/west_iron_solve/diagnostic_figure.py",
+      "id": "f98b9b39a22",
+      "line": 79,
+      "severity": "non-blocking",
+      "summary": "The 3447-cell population is drawn at 0.3 pt, which at the 100 dpi render is under one pixel wide, so every cell edge is antialiased lighter than its nominal #929292: sampled mesh pixels sit at luminance 165-199, an effective contrast of about 1.7-2.5:1 against white rather than the 3.1:1 the style prescribes. The population still reads as a lattice and correctly recedes behind the subject, but it sits below the floor the plot rules set, and at the figure's declared 31.1 cm slide width the individual cell edges are close to invisible."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261111T202001520298-review-of-icm-west-62751-solve-a6d9a38e3d63-figure",
+  "reviewed_base_sha": "0b642bcfe528444b74d912d462579693610f44a0",
+  "reviewed_head_sha": "a6d9a38e3d63153c725c221ec3963fccd71d02d7",
+  "reviewed_run_id": "r-20261111T130417404611-icm-west-62751-solve",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass - all text renders near-black (minimum luminance 11 of 255) and the purple series measures about 5.8:1 against white; the grey series is the prescribed #929292, whose darkest rendered pixels reach exactly 146 (about 3.1:1).",
+    "data_ink": "pass - the purple residual marks (1.8 pt) and the two right-hand traces (3.0 pt and 2.6 pt) carry the visual weight; the grey cell population is thin and recedes behind them.",
+    "decoration": "pass - no gradient, no background fill, no shading band and no axis gridline; the geometry is unfilled cell edges and the panels are bare traces on white.",
+    "label_collision": "pass - zero non-white pixels in the outer 3 px frame of the canvas, so no artist is clipped; the two legend entries, the four logarithmic tick labels on each right-hand panel and the rotated axis labels occupy disjoint space with no overlap onto data.",
+    "legibility": "pass - the machine cross-section, the residual trace and the step-scale panel are each readable at a glance on the delivered 1400x721 canvas, and the purple residual marks are unambiguous against both the bare and the meshed background; the 3447-cell grey lattice reads as a population rather than as individual cells, which is the intended weight and is recorded as a non-blocking finding.",
+    "table_form": "pass - the image is a spatial map plus two trajectories; the iteration record it supports is already a table in the evidence fragment, not a picture of a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T20:36:53.805733+00:00",
+  "total": null
+}

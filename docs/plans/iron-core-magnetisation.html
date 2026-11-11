@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="48">
+<meta name="plan-version" content="49">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -654,7 +654,10 @@
     <div class="r-comment-body"><p>Independent review of r-20261111T144605264038-icm-law-fit at head fdb99418c929084264fd773c472a24841b337c36 from base 9d86f3f25411d725657183dd5d483898415d9f73; parsed record scores all six dimensions and carries added_failure_count 0 derived from baseline-suite.log (17 passed, 1 xfailed, EXIT=0) and review-after-suite.log (20 passed, 1 xfailed, EXIT=0); two non-blocking findings recorded, no blocking defect found.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261111T191714430350-review-of-icm-law-fit-fdb99418c929-figure" data-who="reckon-build" data-when="2026-11-11T19:45:37.143Z">
-    <div class="r-comment-body"><p>figure review of r-20261111T144605264038-icm-law-fit at fdb99418c929 records status parsed, all six rubric items answered, two non-blocking findings (figure unreachable from the run&#x27;s evidence; no caption identifying the two panels), no edited file.</p></div>
+    <div class="r-comment-body"><p>figure review of r-20261111T144605264038-icm-law-fit at fdb99418c929 records status parsed, all six rubric items answered, two non-blocking findings (figure unreachable from the run's evidence; no caption identifying the two panels), no edited file.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261111T202350098829-review-of-icm-west-62751-solve-a6d9a38e3d63" data-who="reckon-build" data-when="2026-11-11T20:48:32.148Z">
+    <div class="r-comment-body"><p>Reviewed 0b642bcfe528444b74d912d462579693610f44a0..a6d9a38e3d63153c725c221ec3963fccd71d02d7 (twelve commits, all inside scripts/west_iron_solve, the icm-west-62751-solve evidence fragment and its figure directory); the plan-section acceptance is UNMET — no test or gate ran that asserts a converged two-mesh solve, a Picard negative control or the converged mu_r figure — and the landed work is the lead-authorized Newton-stall diagnosis: scores goal_fidelity 8, evidence 9, scope_discipline 19, durability 9, fit 17, reuse 13; added failures 0; three non-blocking findings (duplicated source construction at measure.py:37, convergence assertion ahead of the independent arms at measure.py:296, post-guard SVG rewrite at figure.py:66); no production call site.</p></div>
 </div>
 </section>
 </main>

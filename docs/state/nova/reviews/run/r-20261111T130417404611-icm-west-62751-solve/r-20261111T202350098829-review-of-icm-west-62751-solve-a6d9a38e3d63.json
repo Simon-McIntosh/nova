@@ -1,0 +1,80 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-11T20:48:32.148Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "icm-west-62751-solve",
+      "recorded_at": "2026-11-11T20:56:16.669324+00:00"
+    },
+    "evidence": {
+      "kind": "folded",
+      "node": "icm-west-62751-solve",
+      "recorded_at": "2026-11-11T20:56:06.603136+00:00"
+    },
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "icm-west-62751-solve",
+      "recorded_at": "2026-11-11T20:55:54.112165+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-11T20:28:41Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-west-62751-solve",
+      "recorded_at": "2026-11-11T20:55:19.660819+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "icm-west-62751-solve",
+      "recorded_at": "2026-11-11T20:55:31.016763+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "icm-west-62751-solve",
+      "recorded_at": "2026-11-11T20:55:41.163163+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/west_iron_solve/measure.py",
+      "line": "37",
+      "severity": "non-blocking",
+      "text": "non-blocking: source_field re-implements the 6x6 coil-filament and plasma-cell source construction owned by scripts/prototypes/iron_magnetisation/west.py:57-76, and sits beside the same capability already factored as scripts/west_stray_field/field.py:27 sources(data); the docstring at measure.py:38 says 'Reuse the prototype's coil quadrature' while copying it, so a change to the quadrature convention in either owner now diverges silently from the solve the plan compares against."
+    },
+    {
+      "file": "scripts/west_iron_solve/measure.py",
+      "line": "296",
+      "severity": "non-blocking",
+      "text": "non-blocking: the convergence assertion at measure.py:296 sits ahead of the flat-law arm at :303 and the Picard control at :329, so one non-converged coarse row suppresses every downstream measurement in the same allocation; that is exactly what happened at job 1310799, where the refused coarse solve also cost the fine-mesh row, the CEA-versus-215 comparison and the negative control, none of which depends on the coarse solve converging."
+    },
+    {
+      "file": "scripts/west_iron_solve/figure.py",
+      "line": "66",
+      "severity": "non-blocking",
+      "text": "non-blocking: save_figure edits the SVG after save_checked has validated it, rewriting width/height at figure.py:68-73 and stripping trailing whitespace at :74, so the geometry guard measures a different byte stream from the committed artefact; the current values are aspect-preserving (31.1111/16 = 1.9444 = 1008/518.4) and my render of the head shows no clipping, but a future viewBox change would go unchecked."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is \"Solve WEST 62751's iron through the production reader and material solve at two mesh sizes\"; scripts/west_iron_solve/measure.py:223-343 attempts that pair and refuses its own result at :296, so what landed is the Newton-stall diagnosis that the resumed brief (resume-3-advice.txt) substituted for acceptance, and no two-mesh solve, converged mu_r figure, Picard control or discretisation error bar exists in the tree.\nVERDICT done_when: done_when clause (1) -- convergence at 0.08 m and 0.04 m in at most ten Newton iterations with every mu_r inside the table, plus a frozen-permeability Picard run recorded failing -- is asserted by no gate that ran: measure.py:296 asserts exactly that and is never reached with a converged row, probe.py records the 0.08 m mesh refused outright, and the gate that did run (diagnose.sbatch, EXIT=0 in diagnostic.log at revision 2bc1f557f) measures the diagnosis instead; the manifest states the ten-iteration gate \"remains unmet\" rather than claiming it.\nVERDICT write_paths: the dispatch names scripts/west_iron_solve, docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-solve.html and docs/figures/iron-core-magnetisation/icm-west-62751-solve; all twelve commits 97be7b243 through a6d9a38e3 touch only those three roots, and no nova/ or tests/ path appears in any of them.\nVERDICT manifest: read at the reviewed run's manifest.md; status complete with twelve shas, the diagnose.sbatch command and diagnostic.log named, and module_sha256 4507b806f8eeca9d1c459c3af21e0095d5a17d52c59e53822ba6bcb1abe6b6ab which I recomputed and found identical at both 2bc1f557f and a6d9a38e3, and it states the original ten-iteration mesh-pair gate remains unmet rather than reporting success.\nVERDICT diff: read commit by commit from 0b642bcfe5 to a6d9a38e3d; the node adds measure.py, probe.py, figure.py, diagnose.py, diagnostic_figure.py and three sbatch launchers under scripts/west_iron_solve, 263 lines of evidence fragment and one 36k-line SVG, and the head commit a6d9a38e3 is a whitespace-only SVG rewrite plus the single rstrip line at scripts/west_iron_solve/figure.py:74.\nCALL_SITES: none\nSCORE goal_fidelity: 8\nJUSTIFICATION goal_fidelity: measure.py:296 refuses the coarse solve at residual 5.8446e-4 after ten corrections, so the two-mesh solve the goal names is not delivered and the substituted diagnosis is what lands.\nSCORE evidence: 9\nJUSTIFICATION evidence: the diagnosis is recorded in diagnostic.log ends EXIT=0 with replay_relative_error 0.0 and 33 directional checks, but none of the done when's converged quantities (two meshes, Picard control, far-field error bar, converged mu_r figure) is measured.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all twelve commits stay inside the three declared write roots, and no production module under nova/ or any test file is modified.\nSCORE durability: 9\nJUSTIFICATION durability: the guards are in-script asserts (measure.py:296 and :333) and no test exists that reddens if they are weakened; the convergence refusal did fire and is recorded, but the Picard assertion at measure.py:333 was never reached.\nSCORE fit: 17\nJUSTIFICATION fit: the scripts follow the repository's measurement idiom -- atomic save at measure.py:31, revision header at :160, device assert at :158 -- and reuse scripts/edge_sheet/figure.py:48 save_checked and the nova.media painters at figure.py:17-19.\nSCORE reuse: 13\nJUSTIFICATION reuse: measure.py:37 duplicates the source construction owned at scripts/prototypes/iron_magnetisation/west.py:57-76 rather than extending it, while solve_magnetisation at measure.py:231, the iron reader at :172 and the figure painters are all the existing owners.\nFINDING scripts/west_iron_solve/measure.py:37 non-blocking: source_field re-implements the 6x6 coil-filament and plasma-cell source construction owned by scripts/prototypes/iron_magnetisation/west.py:57-76 and sits beside the same capability already factored as scripts/west_stray_field/field.py:27 sources(data); the docstring at measure.py:38 says it reuses the prototype's quadrature while copying it, so a change to the convention in either owner now diverges silently from the solve the plan compares against.\nFINDING scripts/west_iron_solve/measure.py:296 non-blocking: the convergence assertion sits ahead of the flat-law arm at :303 and the Picard control at :329, so one non-converged coarse row suppresses every downstream measurement in the same allocation; job 1310799 lost the fine-mesh row, the CEA-versus-215 comparison and the negative control, none of which depends on the coarse solve converging.\nFINDING scripts/west_iron_solve/figure.py:66 non-blocking: save_figure edits the SVG after save_checked has validated it, rewriting width/height at figure.py:68-73 and stripping trailing whitespace at :74, so the geometry guard measures a different byte stream from the committed artefact; the current values are aspect-preserving (31.1111/16 = 1.9444 = 1008/518.4) and my render of the head shows no clipping, but a future viewBox change would go unchecked.",
+  "review_run_id": "r-20261111T202350098829-review-of-icm-west-62751-solve-a6d9a38e3d63",
+  "reviewed_base_sha": "0b642bcfe528444b74d912d462579693610f44a0",
+  "reviewed_head_sha": "a6d9a38e3d63153c725c221ec3963fccd71d02d7",
+  "reviewed_run_id": "r-20261111T130417404611-icm-west-62751-solve",
+  "scores": {
+    "durability": 9,
+    "evidence": 9,
+    "fit": 17,
+    "goal_fidelity": 8,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T20:57:25.999800+00:00",
+  "total": 75
+}

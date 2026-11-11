@@ -100,8 +100,9 @@ def main():
     fig.savefig(args.run / "booking-cost.png", dpi=100)
     plt.close(fig)
     table = []
-    for name in measurements["base", 1]["rows"]:
-        name = name["name"]
+    for name, row in rows["base", 1].items():
+        if "optimized_hlo_operations" not in row:
+            continue
         for arm in ("base", "head"):
             for process in (1, 2):
                 row = rows[arm, process][name]

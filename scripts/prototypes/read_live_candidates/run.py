@@ -20,7 +20,9 @@ def git(root, *args):
 
 def snapshot(root, revision, target):
     target.mkdir()
-    content = git(root, "archive", revision, "nova", "tests", "pyproject.toml")
+    content = git(
+        root, "archive", revision, "nova", "tests", "pyproject.toml", "conftest.py"
+    )
     with tarfile.open(fileobj=io.BytesIO(content)) as archive:
         archive.extractall(target, filter="data")
     (target / "scripts").symlink_to(root / "scripts", target_is_directory=True)

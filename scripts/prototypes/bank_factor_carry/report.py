@@ -142,7 +142,9 @@ def main():
             -0.15,
             max(max(r["refactors"]) for rows in data.values() for r in rows) + 0.5,
         )
-        ax.set_yticks(range(0, int(ax.get_ylim()[1]) + 1))
+        highest = int(ax.get_ylim()[1])
+        stride = max(1, (highest + 5) // 6)
+        ax.set_yticks(range(0, highest + 1, stride))
         ax.text(0.05, 0.93, f"drive step {step:g}", transform=ax.transAxes, fontsize=14)
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(False)

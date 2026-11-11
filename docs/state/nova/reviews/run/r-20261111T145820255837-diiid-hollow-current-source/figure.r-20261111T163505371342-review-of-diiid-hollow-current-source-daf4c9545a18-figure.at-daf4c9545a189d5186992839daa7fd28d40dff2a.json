@@ -101,6 +101,11 @@
       "kind": "folded",
       "node": "sampled-profile-core-hold",
       "recorded_at": "2026-11-11T18:03:54.804253+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "per-machine density scale is deliberate and now declared in the caption",
+      "recorded_at": "2026-11-11T18:04:25.596925+00:00"
     }
   },
   "findings": [

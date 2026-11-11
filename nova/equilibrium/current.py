@@ -44,8 +44,8 @@ class Quadrature:
     ``segments`` sets cosine-spaced conic chords and cubic-ray chords, without
     changing fragment ownership. No polygon-count limit is imposed here.
     ``cut_batch_width`` controls the conic tile of ``book_tangent_channels``
-    only and defaults to 32. Scalar ``book`` and ``book_tangent`` use fixed
-    32-cell cut tiles; a narrower tile repeats conic strip propagation.
+    only and defaults to 32. ``scalar_cut_batch_width`` overrides the conic
+    tile for ``book`` and ``book_tangent``; None keeps their 32-cell default.
     Normal-form buckets use eight cells independently of the conic tile.
     """
 
@@ -53,6 +53,9 @@ class Quadrature:
     target_current: object = None
     segments: int = dataclass_field(default=512, metadata={"static": True})
     cut_batch_width: int = dataclass_field(default=32, metadata={"static": True})
+    scalar_cut_batch_width: int | None = dataclass_field(
+        default=None, metadata={"static": True}
+    )
 
 
 class Booking(NamedTuple):
@@ -68,6 +71,15 @@ class Booking(NamedTuple):
 
 _SCALAR_CUT_BATCH_WIDTH = 32
 _NORMAL_CUT_BATCH_WIDTH = 8
+
+
+def _scalar_cut_width(quadrature):
+    """Resolve the static scalar conic tile independently of normal geometry."""
+    width = quadrature.scalar_cut_batch_width
+    width = _SCALAR_CUT_BATCH_WIDTH if width is None else width
+    if width < 1:
+        raise ValueError("scalar cut batch width must be positive")
+    return width
 
 
 def _inward_interval_points(x, left, right):
@@ -476,9 +488,8 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
     whole = jax.vmap(whole_cell)(jnp.arange(cells))
     whole = jax.tree.map(lambda value: jnp.where(full, value, 0.0), whole)
 
-    # Scalar moments use a wider cell tile than the multi-channel tangent.
-    # Sharing its smaller tile repeats the conic strip propagation.
-    batch_width = min(_SCALAR_CUT_BATCH_WIDTH, cells)
+    # Scalar conic and normal-form populations keep independent tile widths.
+    batch_width = min(_scalar_cut_width(quadrature), cells)
     normal = cut & read.normal_form_cells
     zero = jax.tree.map(jnp.zeros_like, whole)
     conic = _integrate_bucket(cut & ~normal, batch_width, conic_cell, zero)
@@ -622,7 +633,7 @@ def book_tangent(
     cut = (read.membership > 0) & ~full
     whole = jax.vmap(whole_cell)(jnp.arange(cells))
     whole = jax.tree.map(lambda value: jnp.where(full, value, 0.0), whole)
-    batch_width = _SCALAR_CUT_BATCH_WIDTH
+    batch_width = _scalar_cut_width(quadrature)
     cut_count = jnp.sum(cut, dtype=jnp.int32)
     cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
     cut_index = jnp.pad(cut_index, (0, (-cells) % batch_width))

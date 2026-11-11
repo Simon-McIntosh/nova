@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="298">
+<meta name="plan-version" content="299">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -296,7 +296,10 @@
     <div class="r-comment-body"><p>[Read attribution evidence](/nova/evidence/fragments/sub-millisecond-forward-path/bank-read-attribution.html#bank-read-attribution-result): stages close within 7.248%, native CPU pair spread at most 1.081%; exact recorded instrument SHA256 6936d5e39b5bf02cd19e1275afbb1483114225989a3f9f650dc51e8448a63fa6 committed at 210cd1e7342a8e4807be8979aa9d83cc151b643d; all four receipt hashes bind to committed files, and regenerated inspected artifacts bind to report revision aedfc540d078092295fb98ab4a1bc726beebc5af. Stage split and three ranked proposals unchanged.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261111T190040387292-review-of-read-diverted-wall-skip-6621bff171af" data-who="reckon-build" data-when="2026-11-11T19:25:42.773Z">
-    <div class="r-comment-body"><p>[Review of the diverted wall skip](/nova/evidence/fragments/sub-millisecond-forward-path/read-diverted-wall-skip): reviewed 519d378f9e6f8d2786f69af64569625971651a73..6621bff171af99fbdb483d7953733838af283c5c; scores goal_fidelity 19, evidence 19, scope_discipline 14, durability 15, fit 19, reuse 19; added failures 0; two non-blocking findings, one that the skip_wall precondition at topology.py:3588 is unenforced and one that topology.py:3551 lies outside the registered write scope and is refused by the run&#x27;s own manifest check.</p></div>
+    <div class="r-comment-body"><p>[Review of the diverted wall skip](/nova/evidence/fragments/sub-millisecond-forward-path/read-diverted-wall-skip): reviewed 519d378f9e6f8d2786f69af64569625971651a73..6621bff171af99fbdb483d7953733838af283c5c; scores goal_fidelity 19, evidence 19, scope_discipline 14, durability 15, fit 19, reuse 19; added failures 0; two non-blocking findings, one that the skip_wall precondition at topology.py:3588 is unenforced and one that topology.py:3551 lies outside the registered write scope and is refused by the run's own manifest check.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261111T161525525046-read-diverted-wall-skip" data-who="reckon-build" data-when="2026-11-11T20:15:18Z">
+    <div class="r-comment-body"><p>[Safe wall-skip hint](/nova/evidence/fragments/sub-millisecond-forward-path/read-diverted-wall-skip.html#read-diverted-wall-skip-guarded-hint): refresh now honours the static hint only for diverted ownership, retaining a scalar batch fast path and traced per-lane wall selection for limited/mixed hints. Both direct hint tests fail on unguarded scratch source and pass on product head 190546a5a414a44049795500d0982f8e7e0d53cc. Sirius job 1310950 (7 CPUs) passes wall-skip 10, tracked-read 15, support-read 13 with 2 existing skips, and exact wall counters 0/1/1/1. Final head 5346637e8d6650b4f55f00d0fb380c5fdbe025a7 adds the evidence paragraph; tested source is unchanged. This retains the combined state from bd8a5966655ae2b33b9d92785ff7c51c5b6afc2a and the historical paired CPU figure.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261029T064352171540-review-of-bank-newton-step-425d44581fee" data-who="reckon-build" data-when="2026-10-29T06:56:01Z">
     <div class="r-comment-body"><p>Parsed independent review of c8e424a78957b379be997296e09e374ee6ba6a10..425d44581fee3c17f335358fed320009e7f845e8 stored under the reviewed run's review-records, with 3 blocking and 2 non-blocking findings.</p></div>

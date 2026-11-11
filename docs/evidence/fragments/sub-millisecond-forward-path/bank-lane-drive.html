@@ -99,4 +99,17 @@ the run directory above. The wrong-profile log is
 <code>review-cached-profile-mutant.log</code>; the original control is
 <code>review-shared-step-mutant.log</code>. Existing GPU counts and the inspected
 figure remain the earlier measurement; this review repair reran the CPU gates.</p>
+<p id="bank-lane-drive-combined-state">The combined product at
+<code>06af4890e</code> is unchanged in test head <code>9700ae22f</code>. One
+seven-CPU Sirius job, <code>1310312</code>, ran fresh processes per file:
+pinned base <code>2a3bbf39b</code> passed 28 tests, merged head passed 47
+(including ten head-only lane tests), and the new head passed all eleven lane
+tests; added failures by shared-file delta: zero. The incoming-factor regression
+forces failed contraction with distinct lane profiles, rebuilds at each incumbent
+and certifies both lanes in three reads. Reverting only that rebuild call to two
+items in a scratch copy fails the new test with <code>ValueError: not enough
+values to unpack (expected 3, got 2)</code> and <code>EXIT=1</code>. The allocation
+ended <code>EXIT=0</code>; receipts and the red control are
+<code>integration-suite-receipts.json</code> and
+<code>integration-two-item-mutant.log</code> in the run directory above.</p>
 </section>

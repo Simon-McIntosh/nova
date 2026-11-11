@@ -906,7 +906,7 @@ def _normal_ring_rates(
         vertices, count, form, changes, 1e-12
     )
     bound_norm = jnp.linalg.norm(relative, axis=-1)
-    index = jnp.argmax(bound_norm)
+    index = topology.extremum_index(bound_norm)
     bound = 2 * bound_norm[index]
     bound_rate = -2 * jnp.dot(relative[index], position_rate) / bound_norm[index]
     values = jnp.where(hit, roots, jnp.inf).reshape(4, -1)

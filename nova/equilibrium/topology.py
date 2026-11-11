@@ -53,6 +53,42 @@ qualifying as if it were the confined region.
 """
 
 
+def extremum_index(score, *, minimize=False, axis=None, candidate_index=None):
+    """Select the lowest canonical index within relative 1e-12 of the best.
+
+    The margin absorbs floating-point reduction noise between equivalent seeds
+    without changing a leader separated by more than 1e-12 * abs(best). There
+    is no absolute floor: zero scores tie only exactly. NaNs are ignored; masked
+    infinities retain first-index selection when no candidate is admitted.
+    Candidate indices default to array order. A permutation must carry those
+    indices to preserve candidate identity; the result is a position in score.
+    """
+    score = jnp.asarray(score)
+    ranked = -score if minimize else score
+    best = jnp.max(
+        jnp.where(jnp.isnan(ranked), -jnp.inf, ranked), axis=axis, keepdims=True
+    )
+    tied = ~jnp.isnan(ranked) & (
+        (ranked == best)
+        | (
+            jnp.isfinite(best)
+            & jnp.isfinite(ranked)
+            & (best - ranked <= 1e-12 * jnp.abs(best))
+        )
+    )
+    if candidate_index is None:
+        if axis is None:
+            candidate_index = jnp.arange(score.size).reshape(score.shape)
+        else:
+            shape = [1] * score.ndim
+            shape[axis] = score.shape[axis]
+            candidate_index = jnp.arange(score.shape[axis]).reshape(shape)
+    index = jnp.argmin(
+        jnp.where(tied, candidate_index, jnp.iinfo(jnp.int32).max), axis=axis
+    )
+    return jnp.where(jnp.any(~jnp.isnan(score), axis=axis), index, -1)
+
+
 def x_point_height_limits(axis_height, qualified_x_points):
     """Bound the axis-facing height interval with admitted saddle positions.
 
@@ -453,7 +489,7 @@ class Topology(Pytree):
         x_psi = vmap_x[:, 2]
         inside_wall = self.contained_x_candidates(vmap_x)
         score = jnp.asarray(polarity * (x_psi - o_psi), dtype=self.grid.fit_dtype)
-        return jnp.nanargmax(jnp.where(inside_wall, score, -jnp.inf))
+        return extremum_index(jnp.where(inside_wall, score, -jnp.inf))
 
     @jax.jit
     def x_point_data(self, vmap_x, polarity, o_psi):
@@ -488,7 +524,7 @@ class Topology(Pytree):
         if qualified is None:
             qualified = jnp.isfinite(vmap_o[:, 0])
         admitted = jnp.any(qualified)
-        selected = jnp.argmax(jnp.where(qualified, score, -jnp.inf))
+        selected = extremum_index(jnp.where(qualified, score, -jnp.inf))
         return jnp.where(admitted, selected, -1)
 
     def o_point_data(self, vmap_o, polarity, qualified=None):
@@ -614,7 +650,7 @@ class Topology(Pytree):
             eligible = jnp.isfinite(wall_flux)
         eligible = jnp.asarray(eligible, dtype=bool) & jnp.isfinite(wall_flux)
         signed = jnp.asarray(polarity, dtype=wall_flux.dtype) * wall_flux
-        node = jnp.argmax(jnp.where(eligible, signed, -jnp.inf))
+        node = extremum_index(jnp.where(eligible, signed, -jnp.inf))
         data = jnp.where(
             jnp.any(eligible),
             candidates[node],
@@ -808,12 +844,7 @@ class Topology(Pytree):
         selection_flux = jnp.asarray(
             jnp.r_[data_x[2], data_w[2]], dtype=self.grid.fit_dtype
         )
-        mode_index = jax.lax.cond(
-            polarity < 0,
-            jnp.nanargmin,
-            jnp.nanargmax,
-            selection_flux,
-        )
+        mode_index = extremum_index(polarity * selection_flux)
         return jnp.where(
             (w_height < x_height_min) | (w_height > x_height_max),
             data_x,
@@ -1031,7 +1062,9 @@ class Topology(Pytree):
         link_admissible = exact_link & (inward_link | ~saddle_neighbourhood)
         link_admissible = _canonicalize_reciprocal_hex_edges(rings, link_admissible)
         distance2 = jnp.sum((coordinate - axis) ** 2, axis=-1)
-        seed_index = jnp.argmin(jnp.where(confined, distance2, jnp.inf))
+        seed_index = extremum_index(
+            jnp.where(confined, distance2, jnp.inf), minimize=True
+        )
         seed = (
             jnp.zeros(confined.shape, dtype=bool).reshape(-1).at[seed_index].set(True)
         )
@@ -1066,7 +1099,9 @@ class Topology(Pytree):
         coordinate = self.grid.coordinate
         finite_o = jnp.isfinite(vmap_o[:, 0])
         owner_index = jax.vmap(
-            lambda position: jnp.argmin(jnp.sum((coordinate - position) ** 2, axis=1))
+            lambda position: extremum_index(
+                jnp.sum((coordinate - position) ** 2, axis=1), minimize=True
+            )
         )(vmap_o[:, :2])
         seedable = (
             jnp.zeros(coordinate.shape[0], dtype=bool).at[owner_index].max(finite_o)
@@ -1248,8 +1283,8 @@ class Topology(Pytree):
                 containment_required,
                 self.x_point_data(vmap_x, polarity, data_o[2])[2],
             )
-        wall_node = jnp.argmin(
-            jnp.sum((self.wall.coordinate - data_w[:2]) ** 2, axis=1)
+        wall_node = extremum_index(
+            jnp.sum((self.wall.coordinate - data_w[:2]) ** 2, axis=1), minimize=True
         )
         wall_unit_index = jnp.searchsorted(
             self.wall_unit_offsets[1:], wall_node, side="right"
@@ -1794,7 +1829,7 @@ def saddle_cell_fragments(vertices, vertex_count, normal_form, tolerance):
         & (fraction <= 1.0 + tolerance)
     )
     candidates = jnp.where(hit, parameters, jnp.inf).reshape(4, -1)
-    selected = jnp.argmin(candidates, axis=1)
+    selected = extremum_index(candidates, minimize=True, axis=1)
     ray_parameter = jnp.take_along_axis(candidates, selected[:, None], axis=1)[:, 0]
     ray_valid = jnp.isfinite(ray_parameter)
     parameter = jnp.where(ray_valid, ray_parameter, 0.0)
@@ -2841,7 +2876,7 @@ def _null_census(field, geometry, coefficient, policy, tree):
     distance = jnp.linalg.norm(seeds[:, None, :] - tree_points[None, :, :], axis=-1)
     tree_critical = tree.node_valid & (tree.critical_type != 3)
     distance = jnp.where(tree_critical[None, :], distance, jnp.inf)
-    tree_slot = jnp.argmin(distance, axis=1)
+    tree_slot = extremum_index(distance, minimize=True, axis=1)
     resolved = jnp.min(distance, axis=1) <= 2.5 * geometry.pitch
     census_resolved = jnp.all(~candidate | resolved)
     required = jnp.sum(candidate, dtype=jnp.int32)
@@ -3400,14 +3435,14 @@ def _read_at_nulls(
         ),
         forms,
     )
-    saddle_index = jnp.argmax(
+    saddle_index = extremum_index(
         jnp.where(candidates_admitted, sigma * nulls.jet.value, -jnp.inf)
     )
     saddle_point = nulls.position[saddle_index]
     form = jax.tree.map(lambda stack: stack[saddle_index], forms)
     saddle_live = jnp.any(candidates_admitted)
     wall_points, wall_flux = _wall_events(field, geometry, policy, sigma)
-    wall_index = jnp.argmax(sigma * wall_flux)
+    wall_index = extremum_index(sigma * wall_flux)
     initial_level = jnp.where(
         saddle_live, nulls.jet.value[saddle_index], wall_flux[wall_index]
     )
@@ -3425,7 +3460,7 @@ def _read_at_nulls(
     )
     on_core = jnp.any(selected[wall_cell], axis=1)
     wall_score = jnp.where(~saddle_live | on_core, sigma * wall_flux, -jnp.inf)
-    wall_index = jnp.argmax(wall_score)
+    wall_index = extremum_index(wall_score)
     diverted = saddle_admitted & (sigma * initial_level >= wall_score[wall_index])
     boundary = jnp.where(diverted, saddle_point, wall_points[wall_index])
     level = jnp.where(diverted, initial_level, wall_flux[wall_index])
@@ -3550,12 +3585,14 @@ def refresh_at_stationary_points(field, geometry, convention, policy, solved, de
 
     def wall_contact(_):
         points, flux = _wall_events(field, geometry, policy, sigma)
-        index = jnp.argmin(jnp.linalg.norm(points - decision.boundary, axis=-1))
+        index = extremum_index(
+            jnp.linalg.norm(points - decision.boundary, axis=-1), minimize=True
+        )
         cells = jax.vmap(lambda point: jnp.argmax(_inside_cells(geometry, point)))(
             points
         )
         on_core = jnp.any(decision.fragment_selected[cells], axis=1)
-        winner = jnp.argmax(jnp.where(on_core, sigma * flux, -jnp.inf))
+        winner = extremum_index(jnp.where(on_core, sigma * flux, -jnp.inf))
         return points[index], flux[index], winner == index
 
     boundary, level, wall_stable = jax.lax.cond(

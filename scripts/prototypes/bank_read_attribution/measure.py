@@ -163,6 +163,8 @@ def common_subexpressions(closed):
             return tuple((k, freeze(v)) for k, v in sorted(value.items()))
         if isinstance(value, tuple | list):
             return (type(value).__name__, tuple(map(freeze, value)))
+        if isinstance(value, set | frozenset):
+            return ("set", frozenset(map(freeze, value)))
         if isinstance(value, np.ndarray | np.generic | float | complex):
             array = np.asarray(value)
             return (array.dtype.str, array.shape, array.tobytes())
@@ -191,7 +193,7 @@ def common_subexpressions(closed):
                 tuple(map(atom, eqn.invars)),
                 tuple(map(atom, eqn.outvars)),
                 freeze(eqn.params),
-                eqn.effects,
+                freeze(eqn.effects),
             )
             for eqn in graph.eqns
         )

@@ -53,4 +53,13 @@
 <tr><td>Wall events, isolated on each arm</td><td>1310971</td><td>1310974</td><td>384</td></tr>
 </tbody></table>
 <p>All six jobs were admitted on Sirius with eight CPUs, one pytest process at a time, four-hour limits, <code>PYTEST_TIMEOUT=3600</code>, and <code>TMPDIR=/tmp</code> at submission and inside the payload. Any repeated OOM at 384 GB remains an explicit arm outcome. The requested combined scoped head gate runs at <code>0a9d10c6bacb402b66cbff059f5ff54557e278a8</code>. Completed historical receipts retain their actual revisions. Titan job 1310833 continues unchanged; final cohort metrics and inspected figures remain pending.</p>
+<h3>Solver continuation and the completed 137D pair</h3>
+<p>Titan job 1310833 reached its 3-hour-15-minute limit after completing all five base rows, the base forward-suite arm and head 137D. Head 146D was interrupted before a terminal receipt. Every original row and per-file log is preserved. The continuation validates the successful log and required receipts of each retained row and checks product/test-tree equivalence against the requested revision. Its plan retains six completed rows and advances only head 146D, 146L, 179L and MAST, followed by the missing head forward-suite arm. A known completed row is retained in the control, while a successful-looking row without its receipt is refused.</p>
+<table><thead><tr><th>137D measurement</th><th>base</th><th>held core</th></tr></thead><tbody>
+<tr><td>Residual; converged</td><td>0.0177822; false</td><td>8.98111 × 10<sup>−12</sup>; true</td></tr>
+<tr><td>In-plasma maxima</td><td>4</td><td>1</td></tr>
+<tr><td>Source centre-to-shoulder ratio</td><td>0.338623</td><td>1.17200</td></tr>
+<tr><td>Lower X-point distance from EFIT [cm]</td><td>7.29582</td><td>6.03317</td></tr>
+</tbody></table>
+<p>This is a completed pair, not the final cohort verdict. The retained head row was measured at <code>fad3d4b741328835d07dd0da8e2108821226f610</code>; its product and test trees match the requested <code>1cd270e343cba33a4ed3a9d6a06e101bfb1ae9f0</code> head. H200 continuation job 1311074 was submitted for real, remained pending on <code>Resources</code> after the admission interval, and was cancelled before allocation. One titan continuation, job 1311076 with four CPUs, one GPU, 64 GB and a three-hour limit, was admitted. Its fresh <code>cohort-continuation/</code> directory links retained row folders and writes missing rows separately. All seven active CPU allocations remain unchanged. Final paired metrics and inspected figures remain pending.</p>
 </section>

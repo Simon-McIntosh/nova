@@ -1,0 +1,90 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "Figure record: a figure review runs no suite, so the count and empty id list are the record shape's neutral values and no suite delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1399x720)": "docs/figures/diiid-diverted-branch-continuation/frame-137-diverted.svg",
+    "image-1.png (1399x720)": "docs/figures/diiid-diverted-branch-continuation/frame-146-diverted.svg"
+  },
+  "attachment_note": "Both attached PNGs were opened with Read at native 1399x720 and judged as pictures. The mapping is read off the pictures themselves: each panel's in-image caption now prints 'DIII-D frame 137' or 'DIII-D frame 146' (added by the head commit under review), so attachment identity is not assumed from file order. No SVG was opened, read or rendered, and no image other than the two named PNGs was opened or created.",
+  "completed_at": "2026-11-11T13:55:00Z",
+  "dispatched_at": "2026-11-11T13:23:33Z",
+  "figure_checks": {
+    "alignment": "In both PNGs the arm label and the caption block are centred to the right of the poloidal panel they describe (see finding 1); everything else sits in clear space.",
+    "arms_identical": "In image-0 the two arms are indistinguishable in every printed number (residual 0.017782, support 314, diverted boundary, gap 7.30 cm) and visually identical, so that comparison is carried by the printed values rather than by a visible difference. That is the run's own claim for this seed and matches the withdrawn-guard state recorded in the run's manifest; it is not recorded as a figure defect.",
+    "caption_independence": "Neither caption restates a title. Each carries support, boundary class, residual, converged flag and the lower-saddle gap, and now the machine and frame as well. The duplicate content is the numeric readout, which is figure text rather than a table.",
+    "endpoints_visible": "In both insets both endpoints of the reported distance are inside the frame: the green solved-saddle star and the dark EFIT X-point plus, horizontally adjacent in the main panels and well separated in the insets (about 22 px and 85 px apart respectively at native size).",
+    "folded_finding_frame_named": "The previous figure review's finding 1 (the in-image caption named neither machine nor frame) is fixed in both attached PNGs: image-0 prints 'DIII-D frame 137' and image-1 prints 'DIII-D frame 146' as the first caption line under each column, in the same dark ink and size as the rest of the block, centred under the panel and clear of the panel ink.",
+    "folded_finding_xpoint_visible": "The previous figure review's finding 2 (the EFIT X-point plus was the faintest mark on the canvas, thin grey on a dotted grey boundary with its right arm covered by a green contour) is fixed: in both PNGs the plus is now a heavy, near-black cross drawn above the contours, legible at native size in the lower X-point inset and in the main panel, and still shape-distinguished from the green solved-saddle star.",
+    "marker_vocabulary": "The legend's eight entries match what is drawn: solid green solved flux, dashed grey EFIT flux, dotted grey EFIT boundary, black limiter, filled green triangle solved axis, green solved-saddle star, hollow grey circle EFIT axis, near-black plus EFIT X-point. EFIT and solved nulls differ by shape and weight as well as hue.",
+    "rendered_artifact": "Both attached PNGs opened with Read at native 1399x720 and inspected directly. No SVG and no other image was opened, rendered or created; every verdict below is about the pixels a reader sees."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/diiid-diverted-branch-continuation/frame-137-diverted.svg",
+      "rubric": {
+        "contrast": "pass. All text is near-black on white. The EFIT X-point plus is drawn in near-black (#333333) at larger size and above the boundary, so it clears both the white field and the green separatrix leg it crosses; the grey dashed and dotted reference marks read as a lighter second vocabulary without disappearing, and the frame name is as dark as the rest of the caption.",
+        "data_ink": "pass. Ink is contour strokes, one wall outline, four null marks per panel and one plus per inset. No fill, no gradient, no painted scatter; the green subject carries the weight and the grey references stay subordinate.",
+        "decoration": "pass. Axes are off in every panel (no spines, ticks, tick labels or gridlines); one frameless two-row legend sits in clear white above the panels; white background throughout.",
+        "label_collision": "pass. Nothing is clipped: the lowest caption line 'lower saddle gap 7.30 cm' clears the canvas bottom edge, and every caption line is separated from the panel ink and from its neighbours. No label overlaps another label or the data. The offset of the caption block from the panel it annotates is recorded as finding 1; it is a placement weakness, not a collision.",
+        "legibility": "pass. Two poloidal panels titled 'base' and 'head', each beside its 'lower X-point zoom' inset. Nested green solved-flux contours, dashed grey EFIT flux, dotted grey EFIT boundary and the black limiter separate cleanly; the filled green axis triangle, the green solved-saddle star and the now near-black EFIT X-point plus are each identifiable at native size. Four caption lines name the frame, support/boundary class, residual/converged and the 7.30 cm lower-saddle gap, all readable at a glance.",
+        "table_form": "pass. The panels show a spatial field comparison (contours, wall, null positions) that no table carries; the caption block is text on the figure, not an image of a table."
+      }
+    },
+    {
+      "attachment": "image-1.png",
+      "figure": "docs/figures/diiiid-diverted-branch-continuation/frame-146-diverted.svg",
+      "rubric": {
+        "contrast": "pass. Text near-black on white; the plus is dark against both white and the dotted EFIT boundary it sits on, so the endpoint a reader needs is no longer the faintest mark on the canvas.",
+        "data_ink": "pass. Contour strokes, the limiter and the null marks only; the inset plus is the single heaviest mark and it earns that weight as the reported distance endpoint.",
+        "decoration": "pass. Axes off, no grid, no spines, no background; one frameless legend above the panels.",
+        "label_collision": "pass. No text is clipped at any canvas edge and no label overlaps another or the data; the caption block's right offset from its panel is recorded as finding 1.",
+        "legibility": "pass. Same layout and vocabulary as frame 137, and the caption now names 'DIII-D frame 146'. The lower X-point inset shows both endpoints of the reported 6.59 cm distance: the green solved-saddle star above the near-black EFIT X-point plus, at a clearly larger separation than in frame 137. Base and head differ only in the printed residual (0.010214 against 0.010199).",
+        "table_form": "pass. Spatial field comparison, not an image of a table."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_diverted_branch/render.py",
+      "id": "f9247fa919d",
+      "line": 106,
+      "severity": "non-blocking",
+      "summary": "The arm label and the four caption lines are centred at figure x=0.25 (0.75 for head), but the poloidal panel is letterboxed inside its 0.28-wide axes rect by equal aspect, so the drawn field is about 245 px wide inside a 392 px box and its centre sits near x=0.16 (0.66 for head) \u2014 roughly 130 px left of the annotation. In both attached PNGs 'base'/'head' float above the panel's upper-right corner and the caption block starts under the panel's right third and runs past its right edge into the gutter toward the inset ('support 314; diverted boundary' extends beyond the panel outline), leaving the left half of each panel's width without its label and forcing a reader to infer which column the numbers belong to. Centring the block on the panel's ink (near 0.16 and 0.66) would put it under the panel it describes."
+    }
+  ],
+  "item_verdicts": {
+    "finding_materiality": "One non-blocking finding. Nothing is clipped, no text is unreadable, no label overlaps another label or the data, and both insets show the endpoints of the distance they report, so no blocking category is met.",
+    "rendered_artifact": "Verdicts come from the two attached PNGs opened directly; no SVG.",
+    "scope": "Read-only review: no figure, caption, script or other file in the reviewed tree was edited, created, moved, deleted, redrawn, relabelled or reformatted. The only writes are this record at its two declared paths and the run manifest."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261111T132228694555-review-of-diiid-diverted-branch-continuation-6d09e64541a1-figure",
+  "reviewed_base_sha": "04337b991e8aed9d0904494437e02a1b66fa24dc",
+  "reviewed_figures": [
+    "docs/figures/diiid-diverted-branch-continuation/frame-137-diverted.svg",
+    "docs/figures/diiid-diverted-branch-continuation/frame-146-diverted.svg"
+  ],
+  "reviewed_head_sha": "6d09e64541a1f1f93fa6799c073786cb37c514a8",
+  "reviewed_run_id": "r-20261110T182141746298-diiid-diverted-branch-continuation",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass (image-0, frame 137). Two poloidal panels titled base and head each beside a 'lower X-point zoom' inset; nested green solved-flux contours, dashed EFIT flux, dotted EFIT boundary and the black limiter separate cleanly, the axis triangle, solved-saddle star and near-black EFIT plus are identifiable at native size, and the four caption lines read at a glance.",
+    "RUBRIC data_ink: pass (image-0, frame 137). Contour strokes, one wall outline, four null marks per panel and one plus per inset carry the ink; no fill, gradient or decorative band, and the green subject outweighs the grey references.",
+    "RUBRIC decoration: pass (image-0, frame 137). Axes off in every panel, no spines, ticks, gridlines or background fill; one frameless two-row legend in clear white above the panels.",
+    "RUBRIC contrast: pass (image-0, frame 137). All text near-black on white; the grey dashed and dotted EFIT references are lighter but still identifiable, and the near-black EFIT X-point plus clears both white and the green separatrix leg it crosses.",
+    "RUBRIC table_form: pass (image-0, frame 137). The panels carry a spatial field comparison no table carries; the numeric caption is figure text, not an image of a table.",
+    "RUBRIC label_collision: pass (image-0, frame 137). Nothing clipped: the lowest line 'lower saddle gap 7.30 cm' clears the canvas bottom, every caption line is separated from the panel ink and from its neighbours, and no label overlaps another label or the data. The block's offset from its panel is recorded as finding 1, a placement weakness rather than a collision.",
+    "RUBRIC legibility: pass (image-1, frame 146). Same layout and vocabulary as frame 137, now named 'DIII-D frame 146'; the inset shows both endpoints of the 6.59 cm distance and the base/head pair differs only in the printed residual.",
+    "RUBRIC data_ink: pass (image-1, frame 146). Contour strokes, the limiter and the null marks only, with the inset plus the single heavy mark that earns its weight as the reported endpoint.",
+    "RUBRIC decoration: pass (image-1, frame 146). Axes off, no grid, no spines, no background fill, frameless legend above the panels.",
+    "RUBRIC contrast: pass (image-1, frame 146). Text near-black on white; the dark plus now stands off the dotted EFIT boundary and the green contour it sits among, so the endpoint is no longer the faintest mark on the canvas.",
+    "RUBRIC table_form: pass (image-1, frame 146). Spatial field comparison, not a table rendered as an image.",
+    "RUBRIC label_collision: pass (image-1, frame 146). No text clipped at any canvas edge and no label overlaps another or the data; the caption block's right offset from its panel is recorded as finding 1."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T13:39:04.128146+00:00",
+  "total": null
+}

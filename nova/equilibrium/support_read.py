@@ -346,7 +346,15 @@ def read(
 
 
 def _rebuilt_reading(
-    operands, stencil, moments, convention, policy, jets, decision=None
+    operands,
+    stencil,
+    moments,
+    convention,
+    policy,
+    jets,
+    decision=None,
+    *,
+    skip_wall=False,
 ):
     """The connected-domain decision of one stencil, fitted over the whole mesh."""
     field_jets = nodal_jets(operands, moments) if jets is None else jets
@@ -363,7 +371,13 @@ def _rebuilt_reading(
             field, operands.geometry, convention, policy, stencil.solved
         )
     return topology.refresh_at_stationary_points(
-        field, operands.geometry, convention, policy, stencil.solved, decision
+        field,
+        operands.geometry,
+        convention,
+        policy,
+        stencil.solved,
+        decision,
+        skip_wall=skip_wall,
     )
 
 
@@ -460,18 +474,41 @@ def read_batch(
         )(stack, whole_mesh(), tracking)
 
     def carry(_):
-        if jets is None:
-            reading = jax.vmap(
-                lambda stencil, state, decision: _rebuilt_reading(
-                    operands, stencil, state, convention, policy, None, decision
-                )
-            )(stack, moments, tracking.reading)
-        else:
-            reading = jax.vmap(
+        def refresh(skip_wall):
+            if jets is None:
+                return jax.vmap(
+                    lambda stencil, state, decision: _rebuilt_reading(
+                        operands,
+                        stencil,
+                        state,
+                        convention,
+                        policy,
+                        None,
+                        decision,
+                        skip_wall=skip_wall,
+                    )
+                )(stack, moments, tracking.reading)
+            return jax.vmap(
                 lambda stencil, state, jet, decision: _rebuilt_reading(
-                    operands, stencil, state, convention, policy, jet, decision
+                    operands,
+                    stencil,
+                    state,
+                    convention,
+                    policy,
+                    jet,
+                    decision,
+                    skip_wall=skip_wall,
                 )
             )(stack, moments, jets, tracking.reading)
+
+        # A scalar branch outside vmap keeps diverted lanes from executing
+        # wall events; a lane-wise conditional becomes an eager select.
+        all_diverted = jnp.all(
+            tracking.reading.boundary_class == int(topology.TopologyClass.DIVERTED)
+        )
+        reading = jax.lax.cond(
+            all_diverted, lambda _: refresh(True), lambda _: refresh(False), None
+        )
         carried = jax.vmap(verdict)(stack, reading, tracking)
         changed = jax.vmap(
             lambda reading, decision: topology.carried_decision_changed(

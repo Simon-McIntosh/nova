@@ -3547,14 +3547,17 @@ def _read_at_nulls(
     )
 
 
-def refresh_at_stationary_points(field, geometry, convention, policy, solved, decision):
+def refresh_at_stationary_points(
+    field, geometry, convention, policy, solved, decision, *, skip_wall=False
+):
     """Refresh continuous geometry while carrying the connected decision.
 
     Fragment ownership, component labels, admitted saddle slots and represented
     normal-form cells stay fixed. Coefficients, stationary positions and fluxes,
     saddle curvature, fragment areas, edge intervals and fractional membership
     are evaluated at the supplied state. Limited boundaries re-evaluate wall
-    events and retain the contact nearest the carried boundary.
+    events and retain the contact nearest the carried boundary. ``skip_wall``
+    is a static hint; wall events are omitted only for diverted ownership.
     """
     policy = _read_policy(geometry, policy)
     sigma = convention.sigma
@@ -3582,12 +3585,32 @@ def refresh_at_stationary_points(field, geometry, convention, policy, solved, de
         winner = extremum_index(jnp.where(on_core, sigma * flux, -jnp.inf))
         return points[index], flux[index], winner == index
 
-    boundary, level, wall_stable = jax.lax.cond(
-        diverted,
-        lambda _: (point, solved.jet.value[saddle_index], jnp.asarray(True)),
-        wall_contact,
-        None,
-    )
+    def diverted_contact(_):
+        return (
+            point,
+            solved.jet.value[saddle_index],
+            jnp.asarray(True),
+        )
+
+    def lane_contact(_):
+        return jax.lax.cond(diverted, diverted_contact, wall_contact, None)
+
+    if skip_wall:
+
+        @jax.custom_batching.custom_vmap
+        def needs_wall(diverted):
+            return ~diverted
+
+        @needs_wall.def_vmap
+        def wall_batch(axis_size, in_batched, diverted):
+            # Keep the wall guard scalar when mapped over read lanes.
+            return jnp.any(~diverted), False
+
+        boundary, level, wall_stable = jax.lax.cond(
+            needs_wall(diverted), lane_contact, diverted_contact, None
+        )
+    else:
+        boundary, level, wall_stable = lane_contact(None)
     coefficient = field.sampled_coefficient(geometry)
     area, intervals, fragment_valid, required, *_ = _fragments_at_level(
         geometry, coefficient, sigma, level, form, decision.normal_form_cells, policy

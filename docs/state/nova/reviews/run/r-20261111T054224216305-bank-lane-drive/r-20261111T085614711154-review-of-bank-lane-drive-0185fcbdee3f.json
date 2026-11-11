@@ -1,0 +1,188 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed manifest baseline_suite and after_suite log summaries and EXIT lines; both have no failures. Cross-checked all shared-file pairs in integration-suite-receipts.json, since the two manifest fields name different files. Known-failure parser control: integration-two-item-mutant.log contains the expected FAILED id and EXIT=1.",
+  "after_suite": {
+    "command": "PYTHONPATH=/tmp/combined-drive-gates-v0rqzoo6/candidate JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q /tmp/combined-drive-gates-v0rqzoo6/candidate/tests/test_bank_lane_drive.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054224216305-bank-lane-drive/integration-candidate-test_bank_lane_drive.log",
+    "measurement_cwd": "/tmp/combined-drive-gates-v0rqzoo6/candidate",
+    "measurement_module": "/tmp/combined-drive-gates-v0rqzoo6/candidate/nova/equilibrium/drive_continuation.py",
+    "revision": "9700ae22f1a9758d25b0be5a56428a6acbb99e47"
+  },
+  "assertion_analysis": [
+    {
+      "fails_if": "x64 configuration is absent; runtime configuration check.",
+      "file": "tests/test_bank_lane_drive.py",
+      "lines": "13"
+    },
+    {
+      "fails_if": "Uniform array drives differ from the existing scalar driver in certification, moments, reached drive, counts, requested drives or steps; changing only lane growth/history breaks agreement.",
+      "file": "tests/test_bank_lane_drive.py",
+      "lines": "105-119"
+    },
+    {
+      "fails_if": "Sharing acceptance or the minimum step removes [True,False], the easy-lane growth, earlier arrival, held target or zero subsequent updates; recorded mutant returns 0.005 instead of 0.02.",
+      "file": "tests/test_bank_lane_drive.py",
+      "lines": "122-136"
+    },
+    {
+      "fails_if": "Broadcasting a single target or direction produces incorrect solved cubic roots, reached drives or fresh residuals; updating a stationary lane violates zero update observation.",
+      "file": "tests/test_bank_lane_drive.py",
+      "lines": "148-159"
+    },
+    {
+      "fails_if": "Only one update occurs, cached branch is never executed, or cached Newton uses lane zero profile; runtime callbacks must observe both 0.25 and -0.75 and one refactor per lane. Wrong cached-profile mutant fails.",
+      "file": "tests/test_bank_lane_drive.py",
+      "lines": "210-222"
+    },
+    {
+      "fails_if": "Restoring first-trial result leakage exposes moments/positions shifted by 100, certifies a rejected lane, loses warm support, or marks absent support available; floor and ceiling variants cover both exits.",
+      "file": "tests/test_bank_lane_drive.py",
+      "lines": "269-279"
+    },
+    {
+      "fails_if": "Whole-batch acceptance, unconditional result replacement or rejected support retention loses the independently expected accepted lane value 2, incumbent value 1, positions, availability or missing-read NaN.",
+      "file": "tests/test_bank_lane_drive.py",
+      "lines": "315-326"
+    },
+    {
+      "fails_if": "Dropping lane_indices from rebuild_trial raises expected-3/got-2; rebuilding at the trial instead of incumbent changes observed builds; wrong lane profile prevents expected roots; failure to redo the first correction changes literal [1,1] refactors and [3,3] reads.",
+      "file": "tests/test_bank_lane_drive.py",
+      "lines": "387-395"
+    },
+    {
+      "fails_if": "Dtype or backend is wrong, continuation does not certify, or any reported fresh residual exceeds 1e-10.",
+      "file": "scripts/prototypes/bank_lane_drive/measure.py",
+      "lines": "22,63,187-189"
+    },
+    {
+      "fails_if": "Arms use different inputs, ratios exceed the independent bounds, the four over-bound synthetic controls fail to refuse, eight finite certified residuals are absent, or aggregate reads/updates disagree with the sum of per-call maxima.",
+      "file": "scripts/prototypes/bank_lane_drive/verify.py",
+      "lines": "26-52"
+    },
+    {
+      "fails_if": "Reconstructed accepted drives fail to reach target, allocation/reproduction is incomplete, suite receipt is incomplete/nonzero, negative control does not fail, or a first measured trial is rejected.",
+      "file": "scripts/prototypes/bank_lane_drive/report.py",
+      "lines": "29,44-69"
+    },
+    {
+      "fails_if": "The archived shared-driver premise no longer exhibits easy success with stiff failure and whole-batch shrink.",
+      "file": "scripts/prototypes/bank_lane_drive/reproduce.py",
+      "lines": "28-31"
+    },
+    {
+      "fails_if": "Shared-step mutation marker is absent/ambiguous, mutant is green, paired run is incomplete or adds a failure, or head lane tests fail.",
+      "file": "scripts/prototypes/bank_lane_drive/suites.py",
+      "lines": "108,125-139"
+    },
+    {
+      "fails_if": "A shared-step or cached-profile mutation cannot be uniquely placed, fails to produce a failure, or paired completed files gain failures.",
+      "file": "scripts/prototypes/bank_lane_drive/review_suites.py",
+      "lines": "50,59,77-82"
+    },
+    {
+      "fails_if": "Updated driver gates fail or are incomplete, mutation placement is ambiguous, or the shared-step control passes.",
+      "file": "scripts/prototypes/bank_lane_drive/verify_retention.py",
+      "lines": "38,42,59"
+    },
+    {
+      "fails_if": "The rebuild mutation is not unique, paired common files are incomplete/add failures, either head lane file fails, or the two-item mutant passes.",
+      "file": "scripts/prototypes/bank_lane_drive/integration_suites.py",
+      "lines": "101,116-127"
+    }
+  ],
+  "assertion_independence_note": "No unconditional input-echo assertion found: expected target roots are checked against Newton-computed moments, incumbent values differ deliberately from rejected trials, and cached profiles are observed inside the runtime branch. Growth/shrink checks share the configured constants and do not lock their numerical defaults, but the independently failing shared-step mutant establishes the scheduling guard.",
+  "baseline_suite": {
+    "command": "PYTHONPATH=/tmp/combined-drive-gates-v0rqzoo6/base JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q /tmp/combined-drive-gates-v0rqzoo6/base/tests/test_bank_drive_continuation.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054224216305-bank-lane-drive/integration-base-test_bank_drive_continuation.log",
+    "measurement_cwd": "/tmp/combined-drive-gates-v0rqzoo6/base",
+    "measurement_module": "/tmp/combined-drive-gates-v0rqzoo6/base/nova/equilibrium/drive_continuation.py",
+    "revision": "2a3bbf39b65d34bde31f820abe45175343fe3b9b"
+  },
+  "call_site_count": 8,
+  "call_sites": [
+    "nova/equilibrium/drive_continuation.py:206 advance_drive defaults to support_read.solve_batch",
+    "nova/equilibrium/drive_continuation.py:209 advance_drive dispatches array drives to _advance_lanes",
+    "nova/equilibrium/drive_continuation.py:425 _advance_lanes invokes the selected solve with lane drives and tolerances",
+    "nova/equilibrium/support_read.py:1722 solve_batch magnitude maps lane profiles into residuals",
+    "nova/equilibrium/support_read.py:1850 one_with_factor maps lane profiles into cached Newton booking",
+    "nova/equilibrium/support_read.py:1864 one_fresh maps lane profiles into fresh Newton booking",
+    "nova/equilibrium/support_read.py:1933 rebuild_trial reuses one_fresh with lane_indices",
+    "nova/equilibrium/support_read.py:2060 solve invokes solve_batch"
+  ],
+  "completed_at": "2026-11-11T09:06:52Z",
+  "dispatched_at": "2026-11-11T08:58:32Z",
+  "evidence_limits": [
+    "GPU head fef53b8f2fc9a630847836e72d346cd20ea44495 precedes support-retention repair and integration; later product branches have CPU evidence, not fresh GPU evidence.",
+    "Main GPU arm is an archived driver using the common head numerical solver with exact integer progress coordinates; it measures scheduling, not whole-source main/head differences.",
+    "Review base is the original source orientation base; source-head history contains peer integration commits, which were not attributed as this node writes.",
+    "Final reviewed head differs from tested 9700ae22f1a9758d25b0be5a56428a6acbb99e47 only in the evidence fragment."
+  ],
+  "figure_inspection": {
+    "render": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T085614711154-review-of-bank-lane-drive-0185fcbdee3f/reviewed-drive-trajectories.png",
+    "reviewed_revision": "0185fcbdee3fd967269587058806174edcce6fbc",
+    "source": "docs/figures/sub-millisecond-forward-path/bank-lane-drive/drive-trajectories.svg",
+    "verdict": "Inspected exact-head SVG rendered with ImageMagick at 1400x720: eight panels, shared legend, no clipped or colliding text; hollow grey shared points remain visible beneath blue lane points."
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "prototype suite runner under scripts/prototypes; no product path",
+      "recorded_at": "2026-11-11T09:11:56.631339+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_lane_drive/suites.py",
+      "line": "21",
+      "severity": "non-blocking",
+      "text": "non-blocking: run duplicates the fresh-interpreter execution, provenance headers, logging and receipt parsing already owned by scripts/prototypes/bank_warm_predictor/suites.py:43; it neither wraps nor extends that owner, so future parser fixes must be maintained twice; coordinator disposition is required before closure."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 8 production call site(s)",
+    "diff": "Read the eleven manifest commits individually and their cumulative owned-path delta from eb78afe5355009db83dfbc5750cc5081f37859d7 to 0185fcbdee3fd967269587058806174edcce6fbc; production lane bookkeeping and profile selection match the focused tests, and the final commit changes only the evidence fragment.",
+    "done_when": "The three clauses in the source brief.txt are supported by completed Sirius paired-file logs, shared-step and profile/rebuild refusal logs, and counts-allocation.log ending EXIT=0 with eight certified titan lanes; the GPU measurement uses an earlier driver and a common numerical adapter as explicitly qualified in docs/evidence/fragments/sub-millisecond-forward-path/bank-lane-drive.html:11-18.",
+    "goal": "The source brief.txt requests independent adaptive drive lanes with scalar compatibility, and nova/equilibrium/drive_continuation.py:341-526 implements lane-local acceptance, history, support retention and target certification.",
+    "manifest": "The source manifest.md names its commits, changed paths, module provenance and completed baseline_suite/after_suite logs, whose actual summaries and EXIT lines agree with zero failures; its latest baseline and after fields name different files, so the complete integration-suite-receipts.json paired-file set was also checked.",
+    "write_paths": "The eleven source commits stay in the four paths declared by manifest.md plus nova/equilibrium/drive_continuation.py and nova/equilibrium/support_read.py explicitly authorized by the shared-file ruling in brief.txt; peer changes inherited through integration are distinguished from this node's writes."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_lane_drive.py:123-136 fails when lane steps are shared, :210-222 observes both profiles on cached calls, :269-326 distinguishes incumbent from rejected support, and :387-395 exercises contraction rebuilding with independent literal observations and three recorded failing mutants.",
+    "evidence": "scripts/prototypes/bank_lane_drive/verify.py:26-52 checks common inputs and every lane's precision, with completed CPU and titan receipts, while docs/evidence/fragments/sub-millisecond-forward-path/bank-lane-drive.html:11-18 explicitly limits the earlier GPU comparison to scheduling through a common numerical adapter.",
+    "fit": "nova/equilibrium/drive_continuation.py:341-526 follows its existing host continuation and JAX tree idiom, support_read.py:1705-1726 extends lane mapping in place, and the committed trajectory SVG renders without clipped or overlapping labels.",
+    "goal_fidelity": "nova/equilibrium/drive_continuation.py:383-526 independently retains drive, support and secant history and certifies each lane, while tests/test_bank_lane_drive.py:105-159 establishes scalar equivalence and independent arrivals.",
+    "reuse": "Production changes extend drive_continuation.py and support_read.py and verification imports the existing precision and figure owners, but scripts/prototypes/bank_lane_drive/suites.py:21 duplicates the runner already owned by scripts/prototypes/bank_warm_predictor/suites.py:43 rather than extending it.",
+    "scope_discipline": "The source manifest.md changed_paths and its eleven commit diffs contain the scoped lane tests, runners, fragment and SVG plus only the two production owners explicitly authorized by brief.txt."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief.txt requests independent adaptive drive lanes with scalar compatibility, and nova/equilibrium/drive_continuation.py:341-526 implements lane-local acceptance, history, support retention and target certification.\nVERDICT done_when: The three clauses in the source brief.txt are supported by completed Sirius paired-file logs, shared-step and profile/rebuild refusal logs, and counts-allocation.log ending EXIT=0 with eight certified titan lanes; the GPU measurement uses an earlier driver and a common numerical adapter as explicitly qualified in docs/evidence/fragments/sub-millisecond-forward-path/bank-lane-drive.html:11-18.\nVERDICT write_paths: The eleven source commits stay in the four paths declared by manifest.md plus nova/equilibrium/drive_continuation.py and nova/equilibrium/support_read.py explicitly authorized by the shared-file ruling in brief.txt; peer changes inherited through integration are distinguished from this node's writes.\nVERDICT manifest: The source manifest.md names its commits, changed paths, module provenance and completed baseline_suite/after_suite logs, whose actual summaries and EXIT lines agree with zero failures; its latest baseline and after fields name different files, so the complete integration-suite-receipts.json paired-file set was also checked.\nVERDICT diff: Read the eleven manifest commits individually and their cumulative owned-path delta from eb78afe5355009db83dfbc5750cc5081f37859d7 to 0185fcbdee3fd967269587058806174edcce6fbc; production lane bookkeeping and profile selection match the focused tests, and the final commit changes only the evidence fragment.\nCALL_SITES: nova/equilibrium/drive_continuation.py:206 advance_drive defaults to support_read.solve_batch, nova/equilibrium/drive_continuation.py:209 advance_drive dispatches array drives to _advance_lanes, nova/equilibrium/drive_continuation.py:425 _advance_lanes invokes the selected solve with lane drives and tolerances, nova/equilibrium/support_read.py:1722 solve_batch magnitude maps lane profiles into residuals, nova/equilibrium/support_read.py:1850 one_with_factor maps lane profiles into cached Newton booking, nova/equilibrium/support_read.py:1864 one_fresh maps lane profiles into fresh Newton booking, nova/equilibrium/support_read.py:1933 rebuild_trial reuses one_fresh with lane_indices, nova/equilibrium/support_read.py:2060 solve invokes solve_batch\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/drive_continuation.py:383-526 independently retains drive, support and secant history and certifies each lane, while tests/test_bank_lane_drive.py:105-159 establishes scalar equivalence and independent arrivals.\nSCORE evidence: 18\nJUSTIFICATION evidence: scripts/prototypes/bank_lane_drive/verify.py:26-52 checks common inputs and every lane's precision, with completed CPU and titan receipts, while docs/evidence/fragments/sub-millisecond-forward-path/bank-lane-drive.html:11-18 explicitly limits the earlier GPU comparison to scheduling through a common numerical adapter.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The source manifest.md changed_paths and its eleven commit diffs contain the scoped lane tests, runners, fragment and SVG plus only the two production owners explicitly authorized by brief.txt.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_bank_lane_drive.py:123-136 fails when lane steps are shared, :210-222 observes both profiles on cached calls, :269-326 distinguishes incumbent from rejected support, and :387-395 exercises contraction rebuilding with independent literal observations and three recorded failing mutants.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/drive_continuation.py:341-526 follows its existing host continuation and JAX tree idiom, support_read.py:1705-1726 extends lane mapping in place, and the committed trajectory SVG renders without clipped or overlapping labels.\nSCORE reuse: 5\nJUSTIFICATION reuse: Production changes extend drive_continuation.py and support_read.py and verification imports the existing precision and figure owners, but scripts/prototypes/bank_lane_drive/suites.py:21 duplicates the runner already owned by scripts/prototypes/bank_warm_predictor/suites.py:43 rather than extending it.\nFINDING scripts/prototypes/bank_lane_drive/suites.py:21 non-blocking: run duplicates the fresh-interpreter execution, provenance headers, logging and receipt parsing already owned by scripts/prototypes/bank_warm_predictor/suites.py:43; it neither wraps nor extends that owner, so future parser fixes must be maintained twice; coordinator disposition is required before closure.\n",
+  "reuse_search": "Searched drive/acceptance/independent-lane capabilities in the existing continuation owner; _advance_lanes extends that owner and its nested choose selects accepted tree leaves. Searched suite execution and receipt capabilities and opened bank_warm_predictor/suites.py:43 (duplicate). Snapshot is reused. Opened bank_warm_predictor/report.py:25,46 (precision and refusal reused) and bank_solve_profile/plot.py:45 (saver reused). Measurement, accepted_drives reconstruction, refusal orchestration and test fixtures are specific adaptations; test solver helpers reuse test_bank_solve_driver.",
+  "review_run_id": "r-20261111T085614711154-review-of-bank-lane-drive-0185fcbdee3f",
+  "reviewed_base_sha": "eb78afe5355009db83dfbc5750cc5081f37859d7",
+  "reviewed_head_sha": "0185fcbdee3fd967269587058806174edcce6fbc",
+  "reviewed_run_id": "r-20261111T054224216305-bank-lane-drive",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T09:56:29.078665+00:00",
+  "total": 99
+}

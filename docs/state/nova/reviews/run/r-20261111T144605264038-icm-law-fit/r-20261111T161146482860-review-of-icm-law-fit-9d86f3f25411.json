@@ -33,6 +33,13 @@
     "FINDING tests/test_magnetisation.py:282 non-blocking: 'float(jax.grad(h)(0.0)) == pytest.approx(ends[0])' compares two outputs of _fit_law because nova/biot/magnetisation.py:193 returns end_reluctivity[0] at zero magnitude, so it cannot redden on a wrong polynomial origin slope; the independent guard is the check at :256.",
     "FINDING docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html:1 non-blocking: the fragment proves strictly positive, continuous dH/dB only through a scalar table and draws no figure, although the granted docs/figures/iron-core-magnetisation/icm-law-fit was left empty and a dH/dB trace with the inserted knots marked would show the construction directly."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-law-fit",
+      "recorded_at": "2026-11-11T17:30:54.985026+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_magnetisation.py",

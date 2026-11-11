@@ -7,7 +7,7 @@
     "image-1.png (1399x720)": "docs/figures/diiid-diverted-branch-continuation/frame-146-diverted.svg"
   },
   "attachment_note": "Both attached PNGs were opened with Read at native 1399x720 and judged as pictures. The mapping is read off the pictures themselves: each panel's in-image caption now prints 'DIII-D frame 137' or 'DIII-D frame 146' (added by the head commit under review), so attachment identity is not assumed from file order. No SVG was opened, read or rendered, and no image other than the two named PNGs was opened or created.",
-  "completed_at": "2026-11-11T13:55:00Z",
+  "completed_at": "2026-11-11T13:39:00.085Z",
   "dispatched_at": "2026-11-11T13:23:33Z",
   "figure_checks": {
     "alignment": "In both PNGs the arm label and the caption block are centred to the right of the poloidal panel they describe (see finding 1); everything else sits in clear space.",
@@ -85,6 +85,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-11T13:39:04.128146+00:00",
+  "timestamp": "2026-11-11T13:40:39.663153+00:00",
   "total": null
 }

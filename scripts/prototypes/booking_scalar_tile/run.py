@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import tarfile
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 
 PYTHON = "/home/ITER/mcintos/Code/nova/.venv/bin/python"
 FILES = (
@@ -18,9 +19,11 @@ FILES = (
 )
 
 
-def capture(command, tree, revision, log, **extra):
+def capture(command, tree, revision, log, cpu_group=None, **extra):
     env = dict(os.environ, PYTHONPATH=str(tree), JAX_PLATFORMS="cpu", **extra)
     rendered = "PYTHONPATH=. JAX_PLATFORMS=cpu " + " ".join(command)
+    if cpu_group is not None:
+        command = ["taskset", "-c", ",".join(map(str, cpu_group)), *command]
     with log.open("w") as stream:
         stream.write(f"# revision: {revision} tree: {tree} command: {rendered}\n")
         stream.flush()
@@ -155,24 +158,47 @@ def main():
                         json.dumps(receipts, indent=2)
                     )
             return
-        for process in (1, 2):
-            for arm, tree, revision in (
-                ("base", base, args.base),
-                ("head", root, head),
-            ):
-                command = [
-                    PYTHON,
-                    str(root / "scripts/prototypes/booking_scalar_tile/measure.py"),
-                    str(tree),
-                    "--revision",
-                    revision,
-                    "--output",
-                    str(run / f"{arm}-{process}.json"),
+        available = sorted(os.sched_getaffinity(0))
+        assert len(available) >= 14, available
+        groups = (available[:7], available[7:14])
+        print("CPU_GROUPS", groups, flush=True)
+
+        def measure(arm, tree, revision, process, cpu_group):
+            command = [
+                PYTHON,
+                str(root / "scripts/prototypes/booking_scalar_tile/measure.py"),
+                str(tree),
+                "--revision",
+                revision,
+                "--output",
+                str(run / f"{arm}-{process}.json"),
+            ]
+            code = capture(
+                command,
+                tree,
+                revision,
+                run / f"{arm}-measure-{process}.log",
+                cpu_group=cpu_group,
+            )
+            assert code == 0
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            for process in (1, 2):
+                futures = [
+                    pool.submit(
+                        measure,
+                        arm,
+                        tree,
+                        revision,
+                        process,
+                        groups[(slot + process - 1) % 2],
+                    )
+                    for slot, (arm, tree, revision) in enumerate(
+                        (("base", base, args.base), ("head", root, head))
+                    )
                 ]
-                code = capture(
-                    command, tree, revision, run / f"{arm}-measure-{process}.log"
-                )
-                assert code == 0
+                for future in futures:
+                    future.result()
     print("SCRATCH_REMOVED", temporary, flush=True)
 
 

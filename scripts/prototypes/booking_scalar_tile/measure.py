@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import statistics
 import sys
@@ -38,6 +39,7 @@ def main():
         backend=jax.default_backend(),
         job=os.environ.get("SLURM_JOB_ID"),
         tile=current._SCALAR_CUT_BATCH_WIDTH,
+        cpu_affinity=sorted(os.sched_getaffinity(0)),
         rows=[],
         complete=False,
     )
@@ -95,7 +97,8 @@ def main():
                     (bank, cache, state, seeds, prior, tracking, quadrature),
                 )
             started = time.perf_counter()
-            program = jax.jit(fn).lower(*values).compile()
+            lowered = jax.jit(fn).lower(*values)
+            program = lowered.compile()
             compile_seconds = time.perf_counter() - started
             result = jax.block_until_ready(program(*values))
             samples = []
@@ -109,7 +112,15 @@ def main():
             )
             if kind != "booking":
                 assert bool(jnp.all(result[0].rebuilt == (kind == "full")))
+            hlo = program.as_text()
+            operations = len(re.findall(r"^\s*%[^\n]* = ", hlo, re.M))
+            stable_operations = str(lowered.compiler_ir()).count("stablehlo.")
+            assert operations > 0 and stable_operations > 0
             row = dict(
+                optimized_hlo_operations=operations,
+                stablehlo_operations=stable_operations,
+                fusion_sites=len(re.findall(r"\bfusion\(", hlo)),
+                while_sites=len(re.findall(r"\bwhile\(", hlo)),
                 width=width,
                 kind=kind,
                 median_ms=statistics.median(samples),

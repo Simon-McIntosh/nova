@@ -1,5 +1,15 @@
 <section id="sampled-profile-core-hold">
-<h2>Sampled profiles hold their first value through the core</h2>
+<h2>137D converges with one core maximum; 6.03 cm of X-point offset remains</h2>
+<p>Every table entry below is base → held core. Pending cells have no completed head receipt. The centre-to-shoulder ratios are reported separately for the prescribed source and the current reconstructed from the flux map.</p>
+<table><thead><tr><th>frame</th><th>residual</th><th>converged</th><th>in-plasma maxima</th><th>source centre/shoulder</th><th>map centre/shoulder</th><th>lower X-point distance [cm]</th></tr></thead><tbody>
+<tr><td>137D</td><td>0.0177822 → 8.98111e-12</td><td>false → true</td><td>4 → 1</td><td>0.338623 → 1.172</td><td>0.253188 → 1.17942</td><td>7.2958 → 6.0332</td></tr>
+<tr><td>146D</td><td>0.0102465 → pending</td><td>false → pending</td><td>3 → pending</td><td>0.378988 → pending</td><td>0.33428 → pending</td><td>6.5883 → pending</td></tr>
+<tr><td>146L</td><td>0.0169838 → pending</td><td>false → pending</td><td>1 → pending</td><td>0.436014 → pending</td><td>0.399804 → pending</td><td>18.708 → pending</td></tr>
+<tr><td>179L</td><td>0.00221518 → pending</td><td>false → pending</td><td>3 → pending</td><td>0.0702713 → pending</td><td>0.0975239 → pending</td><td>2.9767 → pending</td></tr>
+<tr><td>MAST 21978/35</td><td>2.2097e-16 → pending</td><td>true → pending</td><td>1 → pending</td><td>0.90068 → pending</td><td>0.905043 → pending</td><td>3.4962 → pending</td></tr>
+</tbody></table>
+<p>The completed 137D held-core state converges at residual 8.98111 × 10<sup>−12</sup> with one in-plasma maximum. Its lower X-point remains 6.03317 cm from EFIT, compared with 7.29582 cm on the unconverged base state: a reduction of 1.26265 cm, or 17.3%. Convergence therefore has not eliminated the geometric disagreement. The core hold removes the hollow-core defect in this frame, but it does not fully recover the EFIT X-point; the remaining offset is present on a converged state.</p>
+<h3>Sampled profiles hold their first value through the core</h3>
 <p><strong>The product rule is a constant hold below every first knot, including negative normalized flux on a zero-start grid.</strong> Flux beyond the normalizing axis value still belongs to the core; its prescribed current must not taper to zero. Bit identity means identity for <code>psi_norm &gt;= grid[0]</code>, including the exterior above <code>grid[-1]</code>. No linear continuation or sign extrapolation is used.</p>
 <p>The original defect reproduced before repair: a sampled table beginning at 0.05 with first value 7 returned 0 at the axis and 2.43712 at normalized flux 0.02. The constant hold returns 7 at both points, for either profile sign. The upper quintic cap retains its arithmetic, and all seven pytree leaves remain arrays. Changed member values use one JIT trace; stacked evaluations and state derivatives remain bit-identical to their unbatched references.</p>
 <p>The placement of the final selection matters numerically. Selecting the lower hold inside the exterior expression changed nine upper-cap values under <code>vmap</code>; selecting it after the complete interpolant changes only the intended lower domain and retains exact upper-cap and batching identity. The controlled arithmetic probe reports zero upper and interior differences for this form.</p>
@@ -55,11 +65,16 @@
 <p>All six jobs were admitted on Sirius with eight CPUs, one pytest process at a time, four-hour limits, <code>PYTEST_TIMEOUT=3600</code>, and <code>TMPDIR=/tmp</code> at submission and inside the payload. Any repeated OOM at 384 GB remains an explicit arm outcome. The requested combined scoped head gate runs at <code>0a9d10c6bacb402b66cbff059f5ff54557e278a8</code>. Completed historical receipts retain their actual revisions. Titan job 1310833 continues unchanged; final cohort metrics and inspected figures remain pending.</p>
 <h3>Solver continuation and the completed 137D pair</h3>
 <p>Titan job 1310833 reached its 3-hour-15-minute limit after completing all five base rows, the base forward-suite arm and head 137D. Head 146D was interrupted before a terminal receipt. Every original row and per-file log is preserved. The continuation validates the successful log and required receipts of each retained row and checks product/test-tree equivalence against the requested revision. Its plan retains six completed rows and advances only head 146D, 146L, 179L and MAST, followed by the missing head forward-suite arm. A known completed row is retained in the control, while a successful-looking row without its receipt is refused.</p>
-<table><thead><tr><th>137D measurement</th><th>base</th><th>held core</th></tr></thead><tbody>
-<tr><td>Residual; converged</td><td>0.0177822; false</td><td>8.98111 × 10<sup>−12</sup>; true</td></tr>
-<tr><td>In-plasma maxima</td><td>4</td><td>1</td></tr>
-<tr><td>Source centre-to-shoulder ratio</td><td>0.338623</td><td>1.17200</td></tr>
-<tr><td>Lower X-point distance from EFIT [cm]</td><td>7.29582</td><td>6.03317</td></tr>
-</tbody></table>
+
 <p>This is a completed pair, not the final cohort verdict. The retained head row was measured at <code>fad3d4b741328835d07dd0da8e2108821226f610</code>; its product and test trees match the requested <code>1cd270e343cba33a4ed3a9d6a06e101bfb1ae9f0</code> head. H200 continuation job 1311074 was submitted for real, remained pending on <code>Resources</code> after the admission interval, and was cancelled before allocation. One titan continuation, job 1311076 with four CPUs, one GPU, 64 GB and a three-hour limit, was admitted. Its fresh <code>cohort-continuation/</code> directory links retained row folders and writes missing rows separately. All seven active CPU allocations remain unchanged. Final paired metrics and inspected figures remain pending.</p>
+<h3>Six-hour continuation and final paired memory outcomes</h3>
+<p>The six-hour request supersedes the preceding three-hour continuation. New H200 job 1311109 was submitted for real, remained pending on <code>Resources</code>, and was cancelled before allocation. Three-hour titan job 1311076 was cancelled after 20 min 27 s with no additional completed row, preserving its partial head 146D output. Replacement titan job 1311113 has a confirmed six-hour limit, one GPU, four CPUs and 64 GB. It retains the six completed rows, runs only the four missing head rows, and explicitly runs both forward GPU regression arms. Historical forward-suite receipts are preserved separately.</p>
+<p>The isolated 384 GB candidate-inspection and wall-event jobs exhausted memory on both arms. Their per-file pytest peaks and scheduler batch peaks are recorded below. These are final paired OOM outcomes; neither file is silently dropped or rerun at a larger memory limit. Head ordinary job 1310972 and topology jobs 1311000/1311001 remain running unchanged.</p>
+<table><thead><tr><th>file</th><th>arm</th><th>job</th><th>pytest peak RSS [KiB]</th><th>batch peak RSS [KiB]</th><th>outcome</th></tr></thead><tbody>
+<tr><td>candidate inspection</td><td>base</td><td>1310970</td><td>401,827,884</td><td>396,710,472</td><td>OOM</td></tr>
+<tr><td>candidate inspection</td><td>head</td><td>1310973</td><td>401,818,840</td><td>400,084,972</td><td>OOM</td></tr>
+<tr><td>wall events</td><td>base</td><td>1310971</td><td>401,819,620</td><td>396,924,468</td><td>OOM</td></tr>
+<tr><td>wall events</td><td>head</td><td>1310974</td><td>401,825,844</td><td>400,499,784</td><td>OOM</td></tr>
+</tbody></table>
+<p>The latest requested scoped head at <code>b0233d4be0c0b1af90201f8caac9fd25512f98c5</code> completed nine passed and one environment-gated skip in 13.12 s, with <code>EXIT=0</code>, in separate all_debug job 1311112. The exact baseline arm remains two passed and one skip. The run manifest now waits only on the six-hour GPU continuation and the three active CPU jobs; terminal OOM and superseded GPU IDs have been removed.</p>
 </section>

@@ -124,7 +124,9 @@ def classify_offsets(saddle_offset, fit):
     corrected = np.linalg.norm(remaining) <= 0.5 * max(
         np.linalg.norm(saddle_offset), 1e-12
     )
-    return "rigid" if fit["squared_mismatch_removed"] >= 0.5 and corrected else "local"
+    return (
+        "rigid" if fit["squared_mismatch_removed"] >= 0.5 and corrected else "non-rigid"
+    )
 
 
 def critical_census(radius, height, flux, mask, boundary=None):

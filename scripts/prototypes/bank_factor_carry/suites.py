@@ -43,11 +43,7 @@ def main():
         source = path.read_text()
         marker = "& (jnp.max(steps) == 0)"
         assert source.count(marker) == 1
-        path.write_text(
-            source.replace(
-                marker, "& jnp.asarray(False) " + marker
-            )
-        )
+        path.write_text(source.replace(marker, "& jnp.asarray(False) " + marker))
         target = FILES[1] + "::test_carried_factor_first_update_is_guarded"
         receipts["mutant"] = run(
             tree,

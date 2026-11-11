@@ -40,9 +40,7 @@ def main():
             log = Path(receipt["log_path"]).read_text()
             assert log.splitlines()[-1] == "EXIT=0"
             passed = re.findall(r"(\d+) passed", log)[-1]
-            cpu_rows.append(
-                f"<tr><td>{arm}</td><td>{name}</td><td>{passed}</td></tr>"
-            )
+            cpu_rows.append(f"<tr><td>{arm}</td><td>{name}</td><td>{passed}</td></tr>")
     negative = (args.run / "unguarded-reuse-mutant.log").read_text()
     assert negative.splitlines()[-1] == "EXIT=1"
     assert (
@@ -75,8 +73,9 @@ def main():
         "nova/equilibrium/support_read.py",
         "nova/equilibrium/drive_continuation.py",
     ):
-        assert hashlib.sha256((args.root / path).read_bytes()).hexdigest() == (
-            inputs["head"]["sources"][path]
+        assert (
+            hashlib.sha256((args.root / path).read_bytes()).hexdigest()
+            == (inputs["head"]["sources"][path])
         ), path
     for key in (
         "width",
@@ -177,10 +176,7 @@ def main():
             )
             estimate = (reads * 35.7 + updates * (44.9 - 25.5) + factors * 25.5) / 16
             possible_retry = (
-                arm == "head"
-                and r["slice"] > 1
-                and factors > 0
-                and reads > updates + 1
+                arm == "head" and r["slice"] > 1 and factors > 0 and reads > updates + 1
             )
             estimate_text = f"{estimate:.3f}"
             if possible_retry:

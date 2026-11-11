@@ -27,8 +27,7 @@ def main():
             snapshot(args.root, revision, tree)
             command = (
                 f"PYTHONPATH=. JAX_PLATFORMS=cpu {PYTHON} "
-                "-m pytest -p no:cacheprovider -q "
-                + " ".join(FILES)
+                "-m pytest -p no:cacheprovider -q " + " ".join(FILES)
             )
             log = args.run / f"armed-{arm}.log"
             basetemp = scratch / (arm + "-temp")

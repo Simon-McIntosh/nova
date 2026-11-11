@@ -9,7 +9,6 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
 import numpy as np
 
 from scripts.prototypes.bank_solve_profile.plot import save_checked
@@ -58,6 +57,10 @@ def main():
         arm: json.loads((counts / f"counts-{arm}-measured.json").read_text())
         for arm in ("main", "head")
     }
+    for record in records.values():
+        first = record["rows"][0]
+        assert all(first["converged"])
+        assert np.all(np.asarray(first["residual"]) <= first["tolerance"])
     plt.style.use("data-ink")
     fig, axes = plt.subplots(2, 4, figsize=(14, 7.2), dpi=100)
     colours = {"main": "#929292", "head": "#1f5d92"}
@@ -73,12 +76,20 @@ def main():
                 color=colours[arm],
                 lw=3.0 if arm == "head" else 2.6,
                 linestyle="-" if arm == "head" else "--",
+                marker="o",
+                markersize=4 if arm == "head" else 8,
+                markerfacecolor=colours[arm] if arm == "head" else "white",
+                markeredgewidth=1.2,
                 label=labels[arm],
                 zorder=3 if arm == "head" else 2,
             )
         ax.set_ylabel(f"lane {lane + 1} drive change [‰]", fontsize=13)
         ax.tick_params(labelsize=11)
-        ax.xaxis.set_major_locator(MaxNLocator(nbins=4, integer=True))
+        maximum = max(record["subsolves"] for record in records.values())
+        ax.set_xticks(np.arange(maximum + 1))
+        ax.set_xlim(-0.15, maximum + 0.2)
+        endpoint = max(path[-1, lane] - 1.0 for path in paths.values()) * 1000
+        ax.set_yticks([0.0, endpoint / 2, endpoint])
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(False)
     handles, legend_labels = axes[0, 0].get_legend_handles_labels()
@@ -102,6 +113,12 @@ def main():
         f"<td>{record['updates']}</td><td>{record['subsolves']}</td>"
         f"<td>{record['seconds']:.3f}</td></tr>"
         for arm, record in records.items()
+    )
+    count_comparison = (
+        "Batch counts are higher with independent lanes in this mixed-ramp case. "
+        "The additional call certifies lanes at an already reached physical target."
+        if records["head"]["reads"] > records["main"]["reads"]
+        else "The table records batch work for the measured mixed-ramp case."
     )
     precision_rows = "".join(
         f"<tr><td>{lane + 1}</td><td>{records['main']['residual'][lane]:.3e}</td>"
@@ -143,6 +160,8 @@ the predictor's saved first eight lanes. Common input hash:
 <table id="bank-lane-drive-counts"><thead><tr><th>driver</th><th>batch reads</th>
 <th>batch updates</th><th>sub-solves</th><th>batch wall [s]</th></tr></thead>
 <tbody>{count_rows}</tbody></table>
+<p>{count_comparison} The stiff-lane toy demonstrates independent progress;
+the physical mixed-ramp count is not a count-improvement claim.</p>
 <p>Each batch read or update counts the largest lane count, summed over sub-solves.
 One Titan P100 job ran one warmup and one measured process per arm, at width 8.
 Walls are Titan P100 walls and carry no speed verdict. Allocation log ends
@@ -151,9 +170,11 @@ Walls are Titan P100 walls and carry no speed verdict. Allocation log ends
  src="/nova/figures/sub-millisecond-forward-path/bank-lane-drive/drive-trajectories.svg"
  alt="Accepted per-lane drive against batch sub-solve for both drivers">
 <figcaption>Accepted drive relative to the initial amplitude, in parts per thousand.
-Shared-step progress is dashed grey; independent lane progress is blue. The
-horizontal portion shows a rejected attempt or a lane held at its certified
-target. Each panel follows one saved lane.</figcaption></figure>
+Shared-step progress is dashed grey with hollow circles; independent lane
+progress is blue with filled points. Rings remain visible where the paths
+coincide. A horizontal portion means no further drive movement, including a
+certification solve at an already reached target or a held certified lane.
+Each panel follows one saved lane.</figcaption></figure>
 <table id="bank-lane-drive-precision"><thead><tr><th>lane</th>
 <th>main fresh residual</th><th>head fresh residual</th><th>flux/span</th>
 <th>axis/minor radius</th><th>X-point/minor radius</th>
@@ -169,6 +190,12 @@ refuse a synthetic violation of each of these four physical bounds.</p>
 scratch copy fails <code>test_stiff_lane_does_not_shrink_easy_lane</code> while
 the head passes it. Scalar/uniform-lane equivalence, distinct targets, stationary
 lanes and both Newton profile paths are covered in the new test file.</p>
+<p>The final rejected-result retention fix is tested at
+<code>{suites['head-test_bank_lane_drive']['revision']}</code>: rejected first
+trials retain incumbent moments and uncertified flags. The GPU head revision is
+the earlier revision stated above. Every first measured attempt was accepted;
+the later accumulator initialization changes only unaccepted result fields and
+leaves the measured accepted-state trajectory and its counts intact.</p>
 <p>Receipts, full logs, module provenance and per-lane arrays are retained under
 <code>{escape(str(args.run))}</code>. The shared saver checks canvas bounds and
 text overlap. The SVG is rendered and inspected before delivery.</p>

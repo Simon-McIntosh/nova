@@ -1,5 +1,33 @@
+<section id="icm-west-62751-solve-resumed">
+  <h3>Resumed WEST measurement: production mesh refusal</h3>
+  <p>The coordinator merged the split-interval B-H fit into this worktree at
+    <code>1e0764d0dcc24ff8a0d17e75b1f825f8e89b725d</code>. The resumed
+    production solve accepts the unchanged DD 4.1.0 CEA table and reaches the
+    mesher. At the required 0.08 m cell size it stops with:</p>
+  <blockquote><code>ValueError: unresolved iron sliver; reduce cell_size</code></blockquote>
+  <p>This refusal originates in <code>nova/biot/magnetisation.py:_mesh</code>,
+    called by <code>solve_magnetisation</code> on the valid union of all six
+    production-reader iron outlines. No material geometry, cell size or
+    meshing guard was changed to bypass it. Neither interaction assembly nor
+    a Newton correction was reached, so the cell count, residual history,
+    converged permeability and mesh-difference quantities remain unmeasured.</p>
+  <p>One Titan job, <code>1310686</code>, ran the committed driver at the
+    coordinator-merged head on <code>98dci4-gpu-0002</code> with a Tesla P100.
+    Its log ends with <code>EXIT=1</code>. The earlier source-field control
+    reproduces unchanged: maximum relative difference
+    <strong>0.109034645394 %</strong> against the stored CoilSet field,
+    below the declared 0.2 % bound. The input SHA-256, time, six segment
+    count, CEA table and three air-core probes match the initial attempt.</p>
+  <p>The current log is <code>titan-resumed.log</code> and its row receipt is
+    <code>measurement-resumed/0.08/receipt.json</code>, under the same run
+    directory listed below. These fresh paths retain the initial failed
+    attempt separately. The requested 0.04 m solve, coarse Picard control,
+    flat-permeability comparison, iron fraction above relative permeability
+    100 and converged-state figure remain outstanding. No test file belongs
+    to this node's write scope, so no baseline/head suite pair is claimed.</p>
+</section>
 <section id="icm-west-62751-solve-state">
-  <h3>WEST production mesh-pair measurement: material-table refusal</h3>
+  <h3>Initial attempt: material-table refusal (resolved upstream)</h3>
   <p>The production reader returned all six WEST iron segments at DD 4.1.0.
     The first 0.08 m production solve then refused the unchanged CEA material
     table before meshing or interaction assembly. This is an incomplete

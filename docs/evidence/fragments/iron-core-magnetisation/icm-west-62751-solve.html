@@ -1,0 +1,64 @@
+<section id="icm-west-62751-solve-state">
+  <h3>WEST production mesh-pair measurement: material-table refusal</h3>
+  <p>The production reader returned all six WEST iron segments at DD 4.1.0.
+    The first 0.08 m production solve then refused the unchanged CEA material
+    table before meshing or interaction assembly. This is an incomplete
+    measurement: neither mesh has a Newton convergence result, and the Picard
+    control and the requested converged-state figure have not run.</p>
+  <p>The committed driver uses <code>StaticMachineDescription.read_iron_core</code>
+    and <code>solve_magnetisation</code>, with no product-source changes.
+    One Titan job runs the two requested mesh sizes, flat-permeability arms
+    and the coarse Picard control, saving each completed row before proceeding.
+    Identical production interaction operands are memoised between the material
+    arms; their values are not changed.</p>
+  <h4 id="icm-west-62751-solve-refusal">Observed refusal</h4>
+  <blockquote><code>ValueError: origin permeability is incompatible with the first B-H interval</code></blockquote>
+  <p>Job <code>1310552</code> ran on <code>98dci4-gpu-0002</code>, using a
+    Tesla P100 with float64 enabled. The job ended with <code>EXIT=1</code>
+    after 26 seconds. The log names the imported production module and working
+    directory. It ran measurement revision
+    <code>97be7b243d1bdaec0f32b1197b274d322e634388</code>.</p>
+  <table>
+    <thead><tr><th>Material quantity</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>First two B knots</td><td>0 and 0.5 T</td></tr>
+      <tr><td>Corresponding relative permeabilities</td><td>215.11019 and 1037.9637</td></tr>
+      <tr><td>Origin tangent dH/dB</td><td>3699.38177015 A/(m T)</td></tr>
+      <tr><td>First interval secant dH/dB</td><td>766.669119026 A/(m T)</td></tr>
+      <tr><td>Validator upper bound: twice that secant</td><td>1533.33823805 A/(m T)</td></tr>
+      <tr><td>Origin tangent / interval secant</td><td>4.82526513505</td></tr>
+    </tbody>
+  </table>
+  <p>The table's H knots increase strictly, but the production interpolant also
+    requires the origin tangent to be no larger than twice the first secant.
+    The unchanged WEST table violates that additional condition. No table knots,
+    permeability values, validator or solver were altered to bypass the refusal.</p>
+  <h4 id="icm-west-62751-solve-inputs">Source and probe controls</h4>
+  <p>The prescribed source is WEST 62751 at 38.4395796373 s, from the existing
+    hexagonal-plasma stray-field state. Its SHA-256 is
+    <code>228e9c7a277e6d16f180cae4566eaadbb4e8df13ae2b49e78a33c53bd5918533</code>.
+    The driver reuses the prototype's 6 by 6 coil-filament quadrature and
+    prescribed plasma-cell currents. Beyond 0.3 m from the coil edge, their
+    field differs from the stored production CoilSet magnitude by at most
+    <strong>0.109034645394 %</strong>, passing the predeclared 0.2 % check.</p>
+  <table>
+    <thead><tr><th>Distance beyond Fh/Fb edge [m]</th><th>R [m]</th><th>Z [m]</th><th>Air-core |B| [mT]</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>5.52</td><td>0</td><td>7.02407743131</td></tr>
+      <tr><td>2</td><td>6.52</td><td>0</td><td>4.39682051236</td></tr>
+      <tr><td>4</td><td>8.52</td><td>0</td><td>1.79996152911</td></tr>
+    </tbody>
+  </table>
+  <p>Iron fields, mesh counts and quality, per-iteration residuals, converged
+    permeability ranges, the volume fraction above relative permeability 100,
+    mesh-difference error bars and the CEA-versus-215 comparison are unmeasured.
+    The model remains anhysteretic and single-valued: it includes neither
+    remanence nor minor-loop permeability.</p>
+  <h4 id="icm-west-62751-solve-receipts">Durable receipts</h4>
+  <p>Run directory:
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130417404611-icm-west-62751-solve</code>.
+    The complete refusal is in <code>titan.log</code>; input provenance and
+    the actual material table are in <code>measurement/inputs.json</code> and
+    <code>measurement/0.08/receipt.json</code>. The independent scalar
+    calculation of the validator's bound is in <code>law-diagnostic.log</code>.</p>
+</section>

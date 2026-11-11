@@ -16,6 +16,7 @@ from nova.biot import magnetisation as iron
 from nova.biot.greens import greens_bz_br
 from nova.biot.tiledassembly import cell_edges
 from nova.jax.config import configure_dtypes
+from tests.test_imas_iron_read import west as west
 
 configure_dtypes()
 assert jax.config.jax_enable_x64
@@ -253,6 +254,7 @@ def assert_material_interpolation(b, mu):
     polynomial = PPoly(coefficients, knots)
     expected = b / (iron._MU0 * mu)
     np.testing.assert_allclose(polynomial(b), expected, rtol=8e-15, atol=0)
+    # Independent origin tangent from the tabulated permeability.
     assert coefficients[2, 0] == 1 / (iron._MU0 * mu[0])
     # Evaluate both sides at each exact join, including inserted breakpoints.
     widths = np.diff(knots)
@@ -279,6 +281,7 @@ def assert_material_interpolation(b, mu):
     differential = np.asarray(jax.vmap(jax.grad(h))(jnp.asarray(sample)))
     assert np.isfinite(differential).all()
     assert differential.min() > 0
+    # Zero-magnitude branch check: the production branch uses its held origin.
     assert float(jax.grad(h)(0.0)) == pytest.approx(ends[0], rel=2e-14)
     held = iron._coefficient(jnp.asarray([b[-1], 2 * b[-1]]), *law)
     np.testing.assert_array_equal(held, np.full(2, 1 / iron._MU0 - ends[-1]))
@@ -290,15 +293,12 @@ def assert_material_interpolation(b, mu):
     return knots
 
 
-def test_west_cea_material_interpolation():
+def test_west_cea_material_interpolation(west):
     """Read the unchanged CEA table from its DD-pinned machine description."""
     from nova.imas.machine import StaticMachineDescription
 
-    source = (
-        "imas:hdf5?path=/home/ITER/mcintos/Code/imas-efit/"
-        "tests/data/imas/WEST/machine/dd4-1-0"
-    )
-    machine = StaticMachineDescription.read_iron_core(source, dd_version="4.1.0")
+    source, dd_version, _ = west
+    machine = StaticMachineDescription.read_iron_core(source, dd_version=dd_version)
     assert len(machine.iron_segments) == 6
     material = machine.iron_segments[0].material
     b, mu = map(np.asarray, (material.b_field, material.permeability_relative))

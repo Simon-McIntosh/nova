@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="49">
+<meta name="plan-version" content="50">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -658,6 +658,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261111T202350098829-review-of-icm-west-62751-solve-a6d9a38e3d63" data-who="reckon-build" data-when="2026-11-11T20:48:32.148Z">
     <div class="r-comment-body"><p>Reviewed 0b642bcfe528444b74d912d462579693610f44a0..a6d9a38e3d63153c725c221ec3963fccd71d02d7 (twelve commits, all inside scripts/west_iron_solve, the icm-west-62751-solve evidence fragment and its figure directory); the plan-section acceptance is UNMET — no test or gate ran that asserts a converged two-mesh solve, a Picard negative control or the converged mu_r figure — and the landed work is the lead-authorized Newton-stall diagnosis: scores goal_fidelity 8, evidence 9, scope_discipline 19, durability 9, fit 17, reuse 13; added failures 0; three non-blocking findings (duplicated source construction at measure.py:37, convergence assertion ahead of the independent arms at measure.py:296, post-guard SVG rewrite at figure.py:66); no production call site.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261111T202001520298-review-of-icm-west-62751-solve-a6d9a38e3d63-figure" data-who="reckon-build" data-when="2026-11-11T20:36:40.585Z">
+    <div class="r-comment-body"><p>Figure review of r-20261111T130417404611-icm-west-62751-solve at head a6d9a38e at base 0b642bcfe is parsed with three non-blocking findings and no blocking finding: the legend swatches are 6x thicker than the marks they key, the twenty highlighted residual cells fuse into seven violet strokes so membership cannot be read, and the 0.3 pt cell lattice renders at about 1.7-2.5:1 rather than the prescribed 3:1. All six rubric items pass; the figure is legible, undeceptive and undecorated, with nothing clipped and no label collision.</p></div>
 </div>
 </section>
 </main>

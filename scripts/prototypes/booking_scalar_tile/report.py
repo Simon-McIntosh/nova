@@ -159,16 +159,30 @@ def main():
     job = receipts["head", 1]["job"]
     result = summary["16:booking"]
     fragment = f"""<section id="booking-scalar-tile-result">
-<h2>Wider scalar conic tiles</h2>
-<p>The scalar tile grows from 32 to 64 cells, reducing the diverted bank's
-113 conic cut cells from four buckets to two. The normal-form population
-retains its independent eight-cell tile. The existing ceiling division already
-handled both small and partial populations correctly and is retained.
-The same-input CPU sweep measured 2815.838 ms at 32 cells, 3158.677 ms at 64,
-3208.195 ms at 128 and 6184.424 ms at 256. Width 64 is the fastest wider
-candidate; none of the wider candidates beats the narrow CPU baseline.
-The initial 128-cell paired run independently confirmed the CPU regression.
-This is a measured shortfall against the expected scalar speedup.</p>
+<h2>Negative CPU result; shipped scalar tile stays at 32</h2>
+<p>The measured 64-cell CPU experiment increases width-16 scalar booking by
+<strong>12.1%</strong>, carried read and booking by <strong>7.0%</strong>, and
+full read and booking by <strong>2.5%</strong>. The shipped scalar conic default
+is restored to <strong>32 cells</strong>, preserving the dispatch-base behaviour.
+The normal-form population keeps its independent eight-cell tile.</p>
+<p><strong>H200 performance decides the tile.</strong> Its measurement belongs
+to the separate plan section assigned by the coordinator. This record makes
+no GPU performance claim. The existing partial-population ceiling division
+remains unchanged.</p>
+<p>Scalar width is an explicit static quadrature parameter, independent of the
+multi-channel tangent tile. Tests retain moment/normalization and trial/converged
+residual parity at 32, 64 and 128; the default guard now pins 32.
+The same-input CPU sweep measured 2815.838 ms at 32, 3158.677 ms at 64,
+3208.195 ms at 128 and 6184.424 ms at 256. None of the wider candidates beats
+the narrow CPU baseline. The tables and figure below preserve that experiment.</p>
+<p>The timing driver takes a repository root and accepts
+<code>--tiles 32 64 128</code>, without changing the module or forcing a CPU
+backend. On an H200 allocation it can be run from main as
+<code>PYTHONPATH=. /home/ITER/mcintos/Code/nova/.venv/bin/python
+scripts/prototypes/booking_scalar_tile/measure.py . --tiles 32 64 128
+--output /absolute/receipt.json</code>. It records the actual backend, devices,
+selected tile and committed instrument hash. The root-argument
+<code>sweep.py</code> uses the same driver for scalar booking alone.</p>
 <p>At width sixteen, scalar booking changes from {result["base_ms"]:.3f} to
 {result["head_ms"]:.3f} ms ({abs(result["reduction_percent"]):.2f}%
 {"lower" if result["reduction_percent"] >= 0 else "higher"}).
@@ -182,7 +196,8 @@ src="/nova/figures/sub-millisecond-forward-path/booking-scalar-tile/cpu-walls.sv
 alt="Paired scalar booking and complete read walls at widths one and sixteen">
 <figcaption>CPU batch walls, widths one and sixteen in separate panels.
 Points show means of two fresh-process medians; segments join those medians.
-Base is grey and the wider scalar tile uses the established booking colour.
+Base is the 32-cell CPU experiment; head is its 64-cell candidate.
+The shipped default is restored to 32. Colours retain their experiment meaning.
 The panels have separate time scales. These CPU measurements make no H200
 latency claim. The checked 1400 by 720 render was inspected before delivery.
 </figcaption></figure>
@@ -196,7 +211,7 @@ HLO and StableHLO operation counts are required to be positive in the instrument
 <table><thead><tr><th>Arm</th><th>Process</th><th>Width</th><th>Program</th>
 <th>Optimized HLO</th><th>StableHLO</th><th>Fusion sites</th><th>While sites</th>
 </tr></thead><tbody>{"".join(lowered_rows)}</tbody></table>
-<h3>Parity and deliberate refusal</h3>
+<h3>CPU experiment parity and deliberate refusal</h3>
 <p>The unchanged 32-cell booking and an independent unbucketed placement oracle
 supply comparisons for repeated physical cut-cell inventories from both limited
 and diverted reads, with 17, 47, 67 and 137 conic cells. The tests compare cell current,
@@ -204,9 +219,10 @@ radial and vertical moments, raw current and normalization at 1e-12 relative
 (with a 1e-14 absolute floor), including prescribed total-current normalization.
 The repeated inventory isolates scheduling from mesh resolution; it is not a
 new physical mesh or a convergence study. Separate checks exercise 0, 17, 67,
-128, 137 and 257 active cells in a 270-cell array. A test pins the selected
-64-cell width and the independent normal width. Before changing the source
-the original 128-cell sentinel failed with
+128, 137 and 257 active cells in a 270-cell array. These archived checks
+validated the CPU candidate. The retained, parameterized checks also cover
+32, 64 and 128 explicitly, and the shipped-default guard now asserts 32.
+The original 128-cell sentinel failed with
 <code>assert 32 == 128</code>, reproducing the recorded narrow-tile condition.</p>
 <p>Trial and converged fresh residuals on both analytic fixtures agree with the
 32-cell path at the existing 1e-12 absolute comparison floor; the converged
@@ -217,7 +233,7 @@ floor division, dropping its last partial tile. Its parity run reports
 <code>{escape(negative_summary)}</code> and <code>EXIT=1</code>.
 The unchanged head parity tests pass. The mutated source and complete refusal log
 remain in the run directory.</p>
-<h3>Paired validation and provenance</h3>
+<h3>Archived CPU experiment validation and provenance</h3>
 <p>The paired validation uses one Sirius job with seven CPUs, one fresh process per
 file and arm. The new scalar-tile file runs only at head. The archived-moment
 pin fails identically at base and head (absolute 2.83388764e-15, relative
@@ -225,7 +241,7 @@ pin fails identically at base and head (absolute 2.83388764e-15, relative
 The archived comparison and its tolerance remain unchanged.</p>
 <table><thead><tr><th>Arm and file</th><th>Pytest summary</th><th>Exit</th></tr></thead>
 <tbody>{"".join(suite)}</tbody></table>
-<p>Base revision <code>{base}</code>; executable head <code>{head}</code>.
+<p>CPU experiment base <code>{base}</code>; candidate <code>{head}</code>.
 CPU measurement job <code>{job}</code>, all_debug, fourteen CPUs, two fresh processes
 per arm on the same node. Base and head run on disjoint seven-CPU groups,
 swapped for the second pair; every receipt records its CPU affinity.
@@ -234,7 +250,9 @@ Committed measurement instrument SHA-256
 working directory, source revision, instrument hash, backend and job identity.
 The width-sweep receipt carries instrument SHA-256
 <code>{sweep["instrument_sha256"]}</code>.
-Logs and JSON receipts: <code>{escape(str(run))}</code>.</p>
+The default-restoration suite receipts are recorded in the landing manifest
+at the same run directory. Logs and JSON receipts:
+<code>{escape(str(run))}</code>.</p>
 </section>"""
     path = (
         root

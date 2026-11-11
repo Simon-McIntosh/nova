@@ -91,63 +91,79 @@ def _assert_booking(actual, expected):
         )
 
 
+@pytest.mark.parametrize("width", [32, 64, 128])
 @pytest.mark.parametrize("count", [17, 47, 67, 137])
-def test_all_booked_moments_match_independent_population(physical, count):
+def test_all_booked_moments_match_independent_population(physical, count, width):
     psi, reading, geometry = _population(physical, count)
     rule = current.Quadrature(segments=8, target_current=3.7)
     with patch.object(current, "_integrate_bucket", _unbucketed):
         expected = jax.jit(current.book)(psi, reading, geometry, UnitDensity(), rule)
     actual = jax.jit(lambda *a: current.book(*a))(
-        psi, reading, geometry, UnitDensity(), rule
+        psi,
+        reading,
+        geometry,
+        UnitDensity(),
+        replace(rule, scalar_cut_batch_width=width),
     )
     _assert_booking(actual, expected)
-    with patch.object(current, "_SCALAR_CUT_BATCH_WIDTH", 32):
-        base = jax.jit(lambda *a: current.book(*a))(
-            psi, reading, geometry, UnitDensity(), rule
-        )
+    base = jax.jit(lambda *a: current.book(*a))(
+        psi,
+        reading,
+        geometry,
+        UnitDensity(),
+        replace(rule, scalar_cut_batch_width=32),
+    )
     _assert_booking(actual, base)
     print("POPULATION", count, "RAW", float(actual.raw_current), flush=True)
 
 
-def test_scalar_tile_is_wide_and_normal_tile_is_independent():
-    assert current._SCALAR_CUT_BATCH_WIDTH == 64
+def test_scalar_tile_ships_narrow_and_normal_tile_is_independent():
+    assert current._SCALAR_CUT_BATCH_WIDTH == 32
+    assert current._scalar_cut_width(current.Quadrature()) == 32
     assert current._NORMAL_CUT_BATCH_WIDTH == 8
 
 
+def test_scalar_tile_refuses_nonpositive_width():
+    with pytest.raises(ValueError, match="must be positive"):
+        current._scalar_cut_width(current.Quadrature(scalar_cut_batch_width=0))
+
+
+@pytest.mark.parametrize("width", [32, 64, 128])
 @pytest.mark.parametrize("count", [0, 17, 67, 128, 137, 257])
-def test_bucket_bound_includes_partial_population(count):
+def test_bucket_bound_includes_partial_population(count, width):
     cells = 270
     mask = jnp.arange(cells) < count
     result = jax.jit(
         lambda mask: current._integrate_bucket(
-            mask, 128, lambda index: (index + 1.0) ** 2, jnp.zeros(cells)
+            mask, width, lambda index: (index + 1.0) ** 2, jnp.zeros(cells)
         )
     )(mask)
     expected = np.where(np.arange(cells) < count, (np.arange(cells) + 1.0) ** 2, 0)
     np.testing.assert_array_equal(result, expected)
 
 
-def test_trial_and_converged_fresh_residuals_match_base(physical):
+@pytest.mark.parametrize("width", [32, 64, 128])
+def test_trial_and_converged_fresh_residuals_match_base(physical, width):
     operands, support, _ = physical
     cells = len(operands.geometry.centre)
     operands = replace(operands, rows=jnp.zeros((len(operands.nodes), cells, 3, 6)))
     zero = (jnp.zeros(cells),) * 3
     rule = current.Quadrature(segments=8)
 
-    def residual(bank, state, reading):
+    def residual(bank, state, reading, quadrature):
         return support_read.step_residual(
-            bank, state, state, reading, UnitDensity(), rule
+            bank, state, state, reading, UnitDensity(), quadrature
         )
 
-    with patch.object(current, "_SCALAR_CUT_BATCH_WIDTH", 32):
-        base_program = jax.jit(residual).lower(operands, zero, support).compile()
-    head_program = (
-        jax.jit(lambda *args: residual(*args)).lower(operands, zero, support).compile()
-    )
-    converged = base_program(operands, zero, support).booked[:3]
+    base_rule = replace(rule, scalar_cut_batch_width=32)
+    head_rule = replace(rule, scalar_cut_batch_width=width)
+    program = jax.jit(residual)
+    base_program = program.lower(operands, zero, support, base_rule).compile()
+    head_program = program.lower(operands, zero, support, head_rule).compile()
+    converged = base_program(operands, zero, support, base_rule).booked[:3]
     for label, state in (("trial", zero), ("converged", converged)):
-        base = base_program(operands, state, support)
-        head = head_program(operands, state, support)
+        base = base_program(operands, state, support, base_rule)
+        head = head_program(operands, state, support, head_rule)
         _assert_booking(head.booked, base.booked)
         for actual, expected in zip(head.residual, base.residual, strict=True):
             np.testing.assert_allclose(actual, expected, rtol=1e-12, atol=1e-12)

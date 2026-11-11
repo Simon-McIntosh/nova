@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="295">
+<meta name="plan-version" content="296">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -978,6 +978,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261111T131035737346-booking-pin-tolerance" data-who="reckon-build" data-when="2026-11-11T14:35:56Z">
     <div class="r-comment-body"><p>test(bank-step) replaces the booked-array digest pin with a 1e-12-relative comparison against tests/data/booking_primal_diverted.npz; base arm 1 failed/4 passed in 167.34 s, head arm 5 passed in 153.08 s; the 1e-9 scale control fails and the 1e-15 scale control passes with its digest changed</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261111T181236544585-review-of-booking-scalar-tile-865abeabf814" data-who="reckon-build" data-when="2026-11-11T18:28:02.156Z">
+    <div class="r-comment-body"><p>[Independent review of the scalar booking tile](/nova/evidence/fragments/sub-millisecond-forward-path/booking-scalar-tile.html#booking-scalar-tile-result): reviewed base 8e9fd161 to head 865abeabf; scores goal_fidelity 14, evidence 17, scope_discipline 20, durability 15, fit 19, reuse 17; 0 added failures (the single bank-step failure is inherited and identical at base and head); two non-blocking findings (unguarded wiring of scalar_cut_batch_width, and a 12.07% width-1 process spread against the two-agreeing-processes clause).</p></div>
 </div>
 </section>
 </main>

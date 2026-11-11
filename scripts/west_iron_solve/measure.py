@@ -150,6 +150,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--sizes", type=float, nargs=2, default=(0.08, 0.04))
     args = parser.parse_args()
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
@@ -219,8 +220,8 @@ def main():
     )
     save(args.output / "inputs.json", common)
     rows = []
-    for size in (0.08, 0.04):
-        out = args.output / f"{size:.2f}"
+    for size in args.sizes:
+        out = args.output / f"{size:.4g}"
         out.mkdir(exist_ok=True)
         row = dict(common, cell_size_m=size, phase="starting")
         save(out / "receipt.json", row)
@@ -324,7 +325,7 @@ def main():
                 )
                 save(out / "receipt.json", row)
                 assert flat.converged
-                if size == 0.08:
+                if size == args.sizes[0]:
                     row["picard"] = picard(
                         np.load(out / "gram.npy"), external(cells.centroids), b, mu
                     )

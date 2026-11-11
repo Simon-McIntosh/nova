@@ -9,6 +9,7 @@ set -euo pipefail
 repo="$1"
 out="$2"
 source="$3"
+shift 3
 export TMPDIR=/tmp JAX_PLATFORMS=cuda,cpu
 export PYTHONPATH="$repo" OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
@@ -25,6 +26,8 @@ trap 'exit 130' INT
 export TMPDIR="$scratch"
 export NOVA_COMPILATION_CACHE_ROOT="$out/compilation-cache"
 mkdir -p "$out"
-printf '# revision: %s tree: %s command: bash scripts/west_iron_solve/run.sbatch %q %q %q\n' "$(git -C "$repo" rev-parse HEAD)" "$repo" "$repo" "$out" "$source"
+printf '# revision: %s tree: %s command: bash scripts/west_iron_solve/run.sbatch %q %q %q' "$(git -C "$repo" rev-parse HEAD)" "$repo" "$repo" "$out" "$source"
+printf ' %q' "$@"
+printf '\n'
 nvidia-smi --query-gpu=name,uuid,memory.total --format=csv
-/home/ITER/mcintos/Code/nova/.venv/bin/python -u "$repo/scripts/west_iron_solve/measure.py" --source "$source" --output "$out"
+/home/ITER/mcintos/Code/nova/.venv/bin/python -u "$repo/scripts/west_iron_solve/measure.py" --source "$source" --output "$out" "$@"

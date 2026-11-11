@@ -45,6 +45,13 @@
       }
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "caption centring offset is cosmetic; labels are legible and do not overlap data, and the panels document a withdrawn change",
+      "recorded_at": "2026-11-11T13:43:33.392133+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_diverted_branch/render.py",

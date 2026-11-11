@@ -79,8 +79,9 @@ def loop(points, current=1.0):
 @pytest.mark.slow
 @pytest.mark.timeout(900)
 def test_uniform_sphere_matches_prototype(mu, capsys):
+    # Keep the analytic probes on a linear interval before the saturation join.
     result = iron.solve_magnetisation(
-        sphere(), uniform, [0, 10], [mu, mu], cell_size=0.1
+        sphere(), uniform, [0, 1, 10], [mu, mu, mu], cell_size=0.1
     )
     assert result.converged
     assert result.cell_count == 44
@@ -120,9 +121,10 @@ def test_uniform_sphere_matches_prototype(mu, capsys):
 
 
 def shell_observation(mu, cell_size, capsys):
+    # Keep the analytic probes on a linear interval before the saturation join.
     started = perf_counter()
     result = iron.solve_magnetisation(
-        shell(), loop, [0, 10], [mu, mu], cell_size=cell_size
+        shell(), loop, [0, 1, 10], [mu, mu, mu], cell_size=cell_size
     )
     assert result.converged
     assert result.iterations <= 1
@@ -292,7 +294,7 @@ def nonlinear_law():
     return b, 215 + 1400 * b
 
 
-def test_material_is_monotone_and_holds_end_values():
+def test_material_is_monotone_and_preserves_origin():
     b, mu = nonlinear_law()
     law = tuple(jnp.asarray(x) for x in iron._fit_law(b, mu))
     sample = jnp.linspace(1e-8, 8, 2001)
@@ -308,8 +310,6 @@ def test_material_is_monotone_and_holds_end_values():
         (mu - 1) / (iron._MU0 * mu),
         rtol=2e-15,
     )
-    top = iron._coefficient(jnp.asarray([6.0, 8.0, 80.0]), *law)
-    np.testing.assert_array_equal(top, np.full(3, float(top[0])))
     at_zero = iron._coefficient(jnp.asarray(0.0), *law)
     np.testing.assert_allclose(at_zero, (215 - 1) / (iron._MU0 * 215))
     # Positive samples alone do not imply a positive differential material law.
@@ -332,14 +332,14 @@ def assert_material_interpolation(b, mu):
     right_slope = (3 * a * widths + 2 * q) * widths + slope
     np.testing.assert_allclose(right_value[:-1], value[1:], rtol=8e-15, atol=0)
     np.testing.assert_allclose(right_slope[:-1], slope[1:], rtol=8e-14, atol=0)
-    np.testing.assert_allclose(right_slope[-1], ends[-1], rtol=8e-14)
+    np.testing.assert_allclose(right_slope[-1], 1 / iron._MU0, rtol=8e-14)
     np.testing.assert_allclose(right_value[-1], expected[-1], rtol=8e-15)
     law = tuple(jnp.asarray(x) for x in (knots, coefficients, ends))
 
     def h(field):
         return field * (1 / iron._MU0 - iron._coefficient(field, *law))
 
-    # Sample every polynomial, even a very short ramp, and the held tail.
+    # Sample every polynomial, even a very short ramp, and the saturated tail.
     sample = np.concatenate(
         [
             np.linspace(start, stop, 201)
@@ -352,8 +352,6 @@ def assert_material_interpolation(b, mu):
     assert differential.min() > 0
     # Zero-magnitude branch check: the production branch uses its held origin.
     assert float(jax.grad(h)(0.0)) == pytest.approx(ends[0], rel=2e-14)
-    held = iron._coefficient(jnp.asarray([b[-1], 2 * b[-1]]), *law)
-    np.testing.assert_array_equal(held, np.full(2, 1 / iron._MU0 - ends[-1]))
     print(
         f"material knots={len(b)}, fitted_knots={len(knots)}, "
         f"origin_slope={coefficients[2, 0]:.12g}, "
@@ -362,19 +360,63 @@ def assert_material_interpolation(b, mu):
     return knots
 
 
-def test_west_cea_material_interpolation(west):
+@pytest.fixture(scope="module")
+def west_material(west):
     """Read the unchanged CEA table from its DD-pinned machine description."""
     from nova.imas.machine import StaticMachineDescription
 
     source, dd_version, _ = west
     machine = StaticMachineDescription.read_iron_core(source, dd_version=dd_version)
     assert len(machine.iron_segments) == 6
-    material = machine.iron_segments[0].material
+    return machine.iron_segments[0].material
+
+
+def test_west_cea_material_interpolation(west_material):
+    material = west_material
     b, mu = map(np.asarray, (material.b_field, material.permeability_relative))
     assert mu[0] == pytest.approx(215.11019, rel=1e-14)
     assert mu[1] > mu[0]
     knots = assert_material_interpolation(b, mu)
     assert len(knots) > len(b)
+
+
+def assert_saturated_material(b, mu):
+    """Pin the tail value, its tangent and its join to the exact table."""
+    b, mu = np.asarray(b, dtype=float), np.asarray(mu, dtype=float)
+    knots, coefficients, ends = iron._fit_law(b, mu)
+    law = tuple(jnp.asarray(x) for x in (knots, coefficients, ends))
+    sample = jnp.asarray(np.linspace(b[-1], 100, 257))
+    magnetisation = sample * iron._coefficient(sample, *law)
+    expected = b[-1] / iron._MU0 * (1 - 1 / mu[-1])
+    np.testing.assert_allclose(magnetisation, expected, rtol=3e-15, atol=1e-9)
+
+    def h(field):
+        return field * (1 / iron._MU0 - iron._coefficient(field, *law))
+
+    derivative = jax.vmap(jax.grad(h))
+    np.testing.assert_allclose(derivative(sample), 1 / iron._MU0, rtol=3e-15)
+    below = np.nextafter(b[-1], 0)
+    np.testing.assert_allclose(jax.grad(h)(below), 1 / iron._MU0, rtol=2e-10)
+    np.testing.assert_allclose(
+        jax.vmap(h)(jnp.asarray(b)), b / (iron._MU0 * mu), rtol=2e-12, atol=1e-9
+    )
+    polynomial = PPoly(coefficients, knots)
+    assert polynomial.derivative()(b[-1]) == pytest.approx(1 / iron._MU0, rel=1e-13)
+    print(
+        f"saturation B_end={b[-1]:g} T, M={expected:.12g} A/m, "
+        f"dH_dB={1 / iron._MU0:.12g}"
+    )
+
+
+def test_west_cea_material_saturates(west_material):
+    assert_saturated_material(
+        west_material.b_field, west_material.permeability_relative
+    )
+
+
+@pytest.mark.parametrize("b, mu", [([0, 1, 2], [10, 20, 2]), ([0, 1], [2, 1000])])
+def test_synthetic_material_saturates(b, mu):
+    assert_saturated_material(b, mu)
 
 
 @pytest.mark.parametrize(
@@ -427,17 +469,22 @@ def test_nonlinear_shell_uses_differential_newton(capsys):
     observed_order = np.log(history[-1] / history[-2]) / np.log(
         history[-2] / history[-3]
     )
+    centres = result._mesh.centroids
+    total = loop(centres, current=2e6) + result.field(centres)
+    maximum_field = np.linalg.norm(total, axis=1).max()
     with capsys.disabled():
         print(
             f"\nnonlinear shell: converged={result.converged}, "
             f"iterations={result.iterations}, residual={result.residual_history}, "
             f"quadratic_ratio={quadratic_ratio:.12g}, "
             f"observed_order={observed_order:.12g}, "
+            f"maximum_field={maximum_field:.12g} T, "
             f"mu_range={result.permeability_relative.min():.6g}-"
             f"{result.permeability_relative.max():.6g}",
             flush=True,
         )
     assert result.converged
+    assert maximum_field < b[-2], "shell must stay below the altered final interval"
     assert result.iterations <= 10
     assert quadratic_ratio < 0.1, "late residual contractions must accelerate"
     assert result.residual_history[-1] < 1e-8
@@ -445,7 +492,7 @@ def test_nonlinear_shell_uses_differential_newton(capsys):
 
 
 def test_update_operands_and_factor_are_runtime_arguments():
-    law = iron._fit_law([0, 1], [10, 10])
+    law = iron._fit_law([0, 0.5, 1], [10, 10, 10])
     operands = tuple(
         jnp.asarray(x) for x in (np.eye(6) * iron._MU0 * 0.5, np.ones(6) * 0.01, *law)
     )

@@ -1,0 +1,118 @@
+<section id="icm-law-saturation-tail">
+  <h2 id="icm-law-saturation-tail-heading">Vacuum-slope continuation saturates the material law</h2>
+  <p id="icm-law-saturation-tail-law">Above the last table knot, the material law now
+    uses H(B) = H<sub>n</sub> + (B − B<sub>n</sub>)/μ<sub>0</sub>. The coefficient is
+    evaluated as c(B) = M<sub>n</sub>/B, avoiding subtraction of two almost equal
+    reluctivities. The fitted final tangent is 1/μ<sub>0</sub>, so the join is C1 and
+    Newton's automatic differential Jacobian sees the same continuation. The
+    existing positive derivative ramps accommodate a steep final tangent; their
+    widths now use the represented breakpoint coordinates to retain exact knot
+    values and tangents after coordinate rounding. The origin permeability and
+    every table knot are preserved.</p>
+  <p id="icm-law-saturation-tail-reproduction">The defect reproduced at base
+    <code>f63aa85d83e053eecbbd8b00ecd256c3e240ffad</code> with the manifest-pinned WEST
+    CEA table (last knot 6 T, μ<sub>r</sub> = 1.521395):
+    <code>M [A/m]: [1636312.5595929811, 26181000.953487698, 27271875.99321635]</code>
+    at B = [6, 96, 100] T. The continuation holds M at 1.63631255959 MA/m instead.
+    The source and its DD version come from the curation manifest, with a skip
+    only when that manifest is not mounted.</p>
+  <p id="icm-law-saturation-tail-tests">The WEST test and two synthetic cases
+    require constant magnetisation from the final knot through 100 T, vacuum
+    differential reluctivity throughout that tail, matching one-sided tangents,
+    and reproduction of every original knot. The existing interpolation tests
+    continue to check positive differential reluctivity across every polynomial
+    and split breakpoint. Focused material and runtime-operand checks passed:
+    <code>13 passed, 11 deselected in 54.49s</code>.</p>
+  <p id="icm-law-saturation-tail-rounding">The first focused invocation failed
+    two assertions on the narrow synthetic endpoint ramp: its knot value had
+    relative error 3.67e-14 against the retained 8e-15 limit, and its terminal
+    tangent had relative error 1.10e-13 against the 1e-13 limit. Using the
+    represented ramp widths fixed both without widening those tolerances.
+    The failed invocation is retained in <code>material.log</code> and the
+    successful follow-up in <code>material-after.log</code>.</p>
+  <p id="icm-law-saturation-tail-fixtures">The analytic sphere, linear shell and
+    runtime-operand controls now include an interior knot of the same permeability.
+    It keeps the analytic probes on a linear interval while the final interval
+    meets the saturation tangent. A two-knot finite table with that tangent is
+    necessarily nonlinear between its endpoints. Their assertions and numerical
+    reference values are retained. The nonlinear shell's table is unchanged.</p>
+  <h3 id="icm-law-saturation-tail-verification">Revision-bound verification</h3>
+  <p id="icm-law-saturation-tail-job">Sirius job 1310864 ran both exact scoped
+    commands and the declared mutation as one allocation with a three-hour
+    limit, using the shared interpreter directly. Each arm ran in a fresh
+    process and extraction, with its imported module and working directory
+    asserted and recorded before pytest. The job removed its scratch tree.</p>
+  <table id="icm-law-saturation-tail-suite">
+    <thead><tr><th>Arm</th><th>Result</th><th>Exit</th></tr></thead>
+    <tbody>
+      <tr><td>Base f63aa85d83e0</td><td>20 passed, 1 xfailed in 1790.29s (0:29:50)</td><td>0</td></tr>
+      <tr><td>Head 00606c8c29c6</td><td>23 passed, 1 xfailed in 1757.28s (0:29:17)</td><td>0</td></tr>
+      <tr><td>Endpoint-hold mutant</td><td>3 failed, 21 deselected in 18.03s</td><td>1</td></tr>
+    </tbody>
+  </table>
+  <p id="icm-law-saturation-tail-expected">There are zero added failures. The
+    existing strict expected failure for μ<sub>r</sub> = 1000 shell refinement
+    is retained; all other existing controls and all three added saturation
+    cases pass.</p>
+  <table id="icm-law-saturation-tail-newton">
+    <thead><tr><th>Nonlinear shell</th><th>Base</th><th>Head</th></tr></thead>
+    <tbody>
+      <tr><td>Newton iterations</td><td>3</td><td>3</td></tr>
+      <tr><td>Quadratic ratio</td><td>0.00709910478702</td><td>0.00709686967603</td></tr>
+      <tr><td>Terminal relative residual</td><td>5.975119916571062e-14</td><td>5.973238686419016e-14</td></tr>
+    </tbody>
+  </table>
+  <p id="icm-law-saturation-tail-comparison">The iteration count is unchanged.
+    The ratio decreases by 0.0315%; the residual histories differ at floating-point
+    precision, with terminal residuals near 6e-14. This small ratio difference is
+    recorded rather than described as identical. The head's maximum solved field
+    is 29.7837749981 mT, below the final fitted interval's start at 2 T. The four
+    sphere controls and all linear-shell shielding values print exactly the same
+    values in both arms.</p>
+  <p id="icm-law-saturation-tail-control">The mutant restores both the held
+    endpoint permeability and its end tangent. Its log asserts the imported
+    module is the mutant extraction. Pytest then fails
+    <code>test_west_cea_material_saturates</code> and both parametrisations of
+    <code>test_synthetic_material_saturates</code>, at the constant-magnetisation
+    assertion. Afterward the driver compares the delivered source and the head
+    extraction byte-for-byte with the HEAD source blob and confirms that the
+    mutant differs. <code>source-identity.json</code> records
+    <code>source_matches_HEAD: true</code> and source SHA-256
+    <code>9b26c46830318910f3efb6fd48b6d3d00709372a5e7c5e086f034fb9c581f24b</code>.</p>
+  <p id="icm-law-saturation-tail-records">Implementation commits:
+    <code>34f109aa7662df5b239fc24bc98c12e394ade075</code> and
+    <code>00606c8c29c64bafd8ac9c9044b81452266369bb</code>. The final commit adds this
+    evidence only. Full commands, revisions, imported paths, suite receipts,
+    nonlinear histories and the mutation are retained in
+    <code>baseline-suite.log</code>, <code>after-suite.log</code>,
+    <code>negative-control.log</code>, <code>measurements.json</code>, and
+    <code>source-identity.json</code> under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T182356721911-icm-law-saturation-tail/</code>.
+    The run manifest carries the flat baseline and head receipts and the landing
+    line for coordinator integration.</p>
+  <h3 id="icm-law-saturation-tail-combined">Combined state after shared-fixture integration</h3>
+  <p id="icm-law-saturation-tail-combined-result">The exact scoped after-suite at
+    <code>b56789ef441d7a00ed7a17ea09f1e833fe832e7f</code> reports
+    <code>23 passed, 1 xfailed in 1296.29s (0:21:36)</code>, <code>EXIT=0</code>:
+    zero added failures against the retained baseline
+    <code>f63aa85d83e053eecbbd8b00ecd256c3e240ffad</code>. The original baseline
+    and accepted endpoint-hold mutation above stand. The resolved material
+    fixture uses the shared manifest-guarded <code>west</code> fixture from
+    <code>tests/test_imas_iron_read.py</code>.</p>
+  <pre id="icm-law-saturation-tail-combined-command">PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_magnetisation.py</pre>
+  <p id="icm-law-saturation-tail-combined-newton">The combined state retains
+    three nonlinear Newton iterations, quadratic ratio 0.00709686967603,
+    terminal relative residual 5.973238686419016e-14, and maximum field
+    29.7837749981 mT: the same printed values as the original delivered head.</p>
+  <p id="icm-law-saturation-tail-combined-provenance">Sirius job 1310956 ran
+    that command once, with no timeout wrapper, and completed in 00:22:17
+    against its 03:00:00 limit, with scheduler exit 0:0. The log asserts both
+    the production module and shared fixture module import from the pinned
+    extraction. Production source and both test blobs match the measured
+    revision; the production-module SHA-256 is unchanged from the original
+    delivered source. The job removed its scratch tree. The run directory
+    retains <code>after-combined-suite.log</code>,
+    <code>combined-measurement.json</code>,
+    <code>combined-source-identity.json</code>, and
+    <code>slurm-combined.log</code>. This verification adds evidence only.</p>
+</section>

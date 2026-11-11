@@ -17,6 +17,7 @@ def main():
     parser.add_argument("run", type=Path)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--measurements", type=Path)
+    parser.add_argument("--job-id", type=int, required=True)
     args = parser.parse_args()
     measurement_run = args.measurements or args.run
     import matplotlib
@@ -123,6 +124,8 @@ def main():
         summary.append(dict(**row, **values))
 
     plt.style.use("data-ink")
+    from matplotlib.lines import Line2D
+
     fig, axes = plt.subplots(1, 2, figsize=(14, 7.2), dpi=100, sharey=True)
     fig.subplots_adjust(left=0.09, right=0.98, bottom=0.17, top=0.82, wspace=0.25)
     handles = []
@@ -150,7 +153,6 @@ def main():
         ax.set_ylabel("read per batch [s]")
         ax.set_xticks([1, 16])
         ax.set_xlim(0, 17)
-        ax.set_ylim(bottom=0)
         ax.text(
             0.5,
             1.06,
@@ -161,12 +163,26 @@ def main():
         )
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(False)
+    maximum = max(row[arm]["mean_ms"] for row in summary for arm in ("base", "head"))
+    axes[0].set_ylim(0, 1.08 * maximum / 1000)
+    legend_handles = [
+        Line2D(
+            [],
+            [],
+            color=line.get_color(),
+            linestyle=line.get_linestyle(),
+            linewidth=line.get_linewidth(),
+            label=line.get_label(),
+        )
+        for line in handles
+    ]
     fig.legend(
-        handles=handles,
+        handles=legend_handles,
         loc="upper center",
         bbox_to_anchor=(0.5, 0.99),
         ncol=4,
         frameon=False,
+        handlelength=3,
     )
     figure = (
         args.root
@@ -266,6 +282,7 @@ def main():
 <p>The pre-fix execution counter observed <code>{escape(counter[0])}</code>. Head execution controls require zero calls for an all-diverted carry and positive counts for limited, mixed and certified reads. A scratch mutation using any diverted lane instead of every diverted lane is refused by the mixed parity check.</p>
 <figure id="read-diverted-wall-skip-figure"><img src="/nova/figures/sub-millisecond-forward-path/read-diverted-wall-skip/read-wall.svg" alt="Paired CPU read time by batch width for diverted and mixed batches"><figcaption>Native CPU read over {cells} cells on the shared single-null fixture vessel. Two independent physical fields share one operator bank: the closed-form single-null diverted field and a wall-limited polynomial with an internal saddle. Full reads are dashed; carried reads are solid. Blue is head; grey is base. Each plotted value averages two fresh-process medians of twelve warm calls after five untimed warm-ups. Width one of the mixed family is its limited member, because one lane cannot be mixed. These CPU measurements are not H200 measurements and do not establish the plan's per-slice device bound.</figcaption></figure>
 <h3 id="read-diverted-wall-skip-times">Paired CPU reads</h3>
+<p>One <code>all_debug</code> allocation, job <code>{args.job_id}</code>, supplies eight CPUs. Four fresh interpreters run serially on the same CPU set, alternating base and head. The retained overlapping pilot is refused because its unchanged full limited control has a 19.376% process spread. It supplies no published timing here.</p>
 <table><thead><tr>{headers}</tr></thead><tbody>{"".join(table_rows)}</tbody></table>
 <p>Every returned numeric field agrees across base/head at rtol 1e-10 and atol 1e-12; boolean and integer fields agree exactly, including validity and rebuild flags. Maximum finite absolute difference: {max_error:.6g}. All process-pair spreads are at most 10% and both processes reproduce the lowered counts.</p>
 <h3 id="read-diverted-wall-skip-counts">Lowered native programs</h3>

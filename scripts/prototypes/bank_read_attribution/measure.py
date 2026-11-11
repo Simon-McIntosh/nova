@@ -55,7 +55,7 @@ def specialize(sr, topology):
     return full, namespace["read_batch"]
 
 
-def owner(eqn, *, full=False):
+def owner(eqn):
     frames = eqn.source_info.traceback.frames
     names = {frame.function_name.split(".")[-1] for frame in frames}
     if eqn.primitive.name == "jit" and eqn.params.get("name") == "solve":
@@ -71,7 +71,9 @@ def owner(eqn, *, full=False):
         for frame in frames
     ):
         return "fixed_points.solve"
-    full_geometry = full and "_rebuilt_reading" in names
+    full_geometry = "_rebuilt_reading" in names and not (
+        "refresh_at_stationary_points" in names
+    )
     if full_geometry and not names & {
         "_wall_events",
         "_curvature_derivatives",
@@ -104,7 +106,7 @@ def owner(eqn, *, full=False):
     return "support_read.read_batch/verdict"
 
 
-def partition(closed, *, full=False):
+def partition(closed):
     """Cut a traced straight-line graph, retaining every crossing variable."""
     from jax.extend import core
 
@@ -122,7 +124,7 @@ def partition(closed, *, full=False):
     )
     groups = []
     for eqn in graph.eqns:
-        name = owner(eqn, full=full)
+        name = owner(eqn)
         if not groups or groups[-1][0] != name:
             groups.append((name, []))
         groups[-1][1].append(eqn)
@@ -382,7 +384,7 @@ def main():
         flat_inputs, _ = jax.tree.flatten(inputs)
         env = dict(zip(closed.jaxpr.invars, flat_inputs, strict=True))
         env.update(zip(closed.jaxpr.constvars, closed.consts, strict=True))
-        regions = partition(closed, full=args.kind == "full")
+        regions = partition(closed)
         row = dict(
             width=width,
             kind=args.kind,

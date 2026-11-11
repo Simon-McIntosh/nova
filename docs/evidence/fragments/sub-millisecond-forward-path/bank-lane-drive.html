@@ -1,0 +1,115 @@
+<section data-reckon="fragment" id="bank-lane-drive-landing"
+ data-plan="sub-millisecond-forward-path" data-node="bank-lane-drive">
+<h2>Independent adaptive drive lanes</h2>
+<p>Each array-drive lane retains its own accepted state, drive, adaptive step and
+secant history. Rejected lanes retry from their incumbent; certified lanes keep
+their target state and take zero further Newton updates. Scalar calls retain the
+shared-step loop. A callable lane-profile selector is mapped inside both the
+residual and Newton booking in <code>support_read.solve_batch</code>.</p>
+<p>The archived shared driver reproduces the rejected easy-lane progress:
+<code>REPRODUCTION easy residual 0.0 stiff residual 0.06784452666296711 whole batch rejected True shared sub-step 0.01 -&gt; 0.005 sub-solves 12</code>.</p>
+<p>The main arm loads the shared-step driver at
+<code>eb78afe5355009db83dfbc5750cc5081f37859d7</code>; the head driver is
+<code>fef53b8f2fc9a630847836e72d346cd20ea44495</code>. Both use the head numerical solve and
+its per-lane profile adapter, because the main solver cannot express mixed
+profiles. Thus these counts isolate driver scheduling; they do not claim a
+whole-source main-versus-head numerical comparison. The scalar main coordinate
+parameterises both physical ramps with integer coordinates 1000 to 1007 and
+physical amplitude <code>1 + (coordinate - 1000) × lane step</code>.
+First four lanes advance by 1e-5 and last four
+by 1e-3 per nominal slice, through seven slices from drive 1.0. Initial seeds are
+the predictor's saved first eight lanes. Common input hash:
+<code>b23ce26e66b48589b697a64a1cc27f6aa9f4c9e5af3916929a4f04c5beb21c28</code>.</p>
+<table id="bank-lane-drive-counts"><thead><tr><th>driver</th><th>batch reads</th>
+<th>batch updates</th><th>sub-solves</th><th>batch wall [s]</th></tr></thead>
+<tbody><tr><td>main</td><td>11</td><td>8</td><td>3</td><td>378.947</td></tr><tr><td>head</td><td>13</td><td>9</td><td>4</td><td>463.547</td></tr></tbody></table>
+<p>Batch counts are higher with independent lanes in this mixed-ramp case. The additional call certifies lanes at an already reached physical target. The stiff-lane toy demonstrates independent progress;
+the physical mixed-ramp count is not a count-improvement claim.</p>
+<p>Each batch read or update counts the largest lane count, summed over sub-solves.
+One Titan P100 job ran one warmup and one measured process per arm, at width 8.
+Walls are Titan P100 walls and carry no speed verdict. Allocation log ends
+<code>EXIT=0</code>; all eight lanes certify in both measured arms.</p>
+<figure id="bank-lane-drive-trajectories"><img width="1400"
+ src="/nova/figures/sub-millisecond-forward-path/bank-lane-drive/drive-trajectories.svg"
+ alt="Accepted per-lane drive against batch sub-solve for both drivers">
+<figcaption>Accepted drive relative to the initial amplitude, in parts per thousand.
+Shared-step progress is dashed grey with hollow circles; independent lane
+progress is blue with filled points. Rings remain visible where the paths
+coincide. A horizontal portion means no further drive movement, including a
+certification solve at an already reached target or a held certified lane.
+Each panel follows one saved lane.</figcaption></figure>
+<table id="bank-lane-drive-precision"><thead><tr><th>lane</th>
+<th>main fresh residual</th><th>head fresh residual</th><th>flux/span</th>
+<th>axis/minor radius</th><th>X-point/minor radius</th>
+<th>boundary/span</th></tr></thead>
+<tbody><tr><td>1</td><td>8.242e-13</td><td>2.032e-12</td><td>3.869e-15</td><td>5.369e-15</td><td>1.683e-15</td><td>1.765e-16</td></tr><tr><td>2</td><td>1.592e-12</td><td>2.430e-12</td><td>3.482e-15</td><td>6.400e-15</td><td>2.041e-15</td><td>4.637e-16</td></tr><tr><td>3</td><td>3.865e-12</td><td>2.586e-12</td><td>3.482e-15</td><td>1.124e-14</td><td>5.772e-16</td><td>1.891e-16</td></tr><tr><td>4</td><td>7.390e-13</td><td>2.544e-12</td><td>3.095e-15</td><td>1.450e-14</td><td>1.633e-15</td><td>5.550e-16</td></tr><tr><td>5</td><td>8.595e-11</td><td>8.773e-11</td><td>1.556e-15</td><td>7.822e-15</td><td>2.041e-15</td><td>1.489e-16</td></tr><tr><td>6</td><td>8.787e-11</td><td>8.911e-11</td><td>1.945e-15</td><td>1.170e-14</td><td>0.000e+00</td><td>2.279e-18</td></tr><tr><td>7</td><td>8.887e-11</td><td>8.450e-11</td><td>2.334e-15</td><td>9.642e-15</td><td>2.081e-15</td><td>4.027e-17</td></tr><tr><td>8</td><td>8.598e-11</td><td>8.762e-11</td><td>2.334e-15</td><td>1.665e-14</td><td>1.633e-15</td><td>3.632e-16</td></tr></tbody></table>
+<p>Every residual is at most 1e-10; every flux difference is at most 1e-8 of
+span; axis and X-point displacement are at most 5e-4 of minor radius; boundary
+flux difference is at most 1e-4 of span. The precision checker was also made to
+refuse a synthetic violation of each of these four physical bounds.</p>
+<table id="bank-lane-drive-cpu"><thead><tr><th>fresh-process file arm</th>
+<th>exit</th><th>failed tests</th></tr></thead><tbody><tr><td>base-test_bank_drive_continuation</td><td>0</td><td>0</td></tr><tr><td>base-test_bank_solve_driver</td><td>0</td><td>0</td></tr><tr><td>head-test_bank_drive_continuation</td><td>0</td><td>0</td></tr><tr><td>head-test_bank_solve_driver</td><td>0</td><td>0</td></tr><tr><td>head-test_bank_lane_drive</td><td>0</td><td>0</td></tr><tr><td>shared-step-mutant</td><td>1</td><td>1</td></tr></tbody></table>
+<p>The paired Sirius files add zero failures. Sharing one sub-step again in a
+scratch copy fails <code>test_stiff_lane_does_not_shrink_easy_lane</code> while
+the head passes it. Scalar/uniform-lane equivalence, distinct targets, stationary
+lanes and both Newton profile paths are covered in the new test file.</p>
+<p>The final rejected-result retention fix is tested at
+<code>29f16bced85946f01f6c193ab2b13d9bd70449cb</code>: rejected first
+trials retain incumbent moments and uncertified flags. The GPU head revision is
+the earlier revision stated above. Every first measured attempt was accepted;
+the later accumulator initialization changes only unaccepted result fields and
+leaves the measured accepted-state trajectory and its counts intact.</p>
+<p>Receipts, full logs, module provenance and per-lane arrays are retained under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054224216305-bank-lane-drive</code>. The shared saver checks canvas bounds and
+text overlap. The SVG is rendered and inspected before delivery.</p>
+<h3 id="bank-lane-drive-review-fixes">Incumbent support and cached-profile coverage</h3>
+<p>The rejected-support defect was reproduced before repair: the returned
+stationary positions were <code>[[101, 102], [103, 104]]</code> while incumbent
+moments and drive still belonged to warm positions
+<code>[[1, 2], [3, 4]]</code>. Array-drive continuation now accepts the full warm
+read through <code>initial_support</code> and retains each lane's last accepted
+support together with its moments. When no warm read was supplied, the returned
+<code>support_available</code> mask marks its absence: warm stationary positions
+are retained, unavailable floating read fields are NaN, and flags are false.
+Rejected trial supports never fill that absence.</p>
+<p>Tests cover floor and ceiling termination, supplied and missing warm support,
+and a mixed batch retaining one lane's last accepted read while its companion
+has no accepted read. These checks are part of the ten passing lane-drive tests.</p>
+<p>The profile-mapping toy now removes seven eighths of its error per update.
+The focused probe records <code>PROFILE_BRANCH reuse True steps [11 11]
+cached_calls 20</code>, with both profiles <code>0.25</code> and <code>-0.75</code>
+observed in cached calls and one refactor per lane. The production cached branch
+already selected the correct profile; the repair adds coverage of that branch.</p>
+<p>In a scratch archive, replacing <code>lane_profile(lane)</code> with
+<code>lane_profile(0)</code> only inside <code>one_with_factor</code> makes
+<code>test_solve_batch_maps_lane_profile_into_residual_and_booking[True]</code>
+fail: the observed cached profile set contains only <code>0.25</code>, missing
+<code>-0.75</code>. The log ends <code>1 failed</code> and <code>EXIT=1</code>.
+The shared-sub-step mutation also still fails its independence check.</p>
+<table id="bank-lane-drive-review-paired-tests"><thead><tr><th>arm</th>
+<th>fresh-process file</th><th>passed</th><th>exit</th></tr></thead>
+<tbody><tr><td>base</td><td>test_bank_drive_continuation</td><td>8</td><td>0</td></tr><tr><td>base</td><td>test_bank_solve_driver</td><td>10</td><td>0</td></tr><tr><td>base</td><td>test_bank_lane_drive</td><td>6</td><td>0</td></tr><tr><td>head</td><td>test_bank_drive_continuation</td><td>8</td><td>0</td></tr><tr><td>head</td><td>test_bank_solve_driver</td><td>10</td><td>0</td></tr><tr><td>head</td><td>test_bank_lane_drive</td><td>10</td><td>0</td></tr></tbody></table>
+<p>One Sirius allocation, job <code>1310265</code>, with seven CPUs ran the three
+files in fresh processes at base
+<code>14f20c0c08a310cd913bb2c4fb45f8fe488ae030</code> and head
+<code>ec0ac814c8c86cc793ccbaa6f70e8bcdad0a9bce</code>, followed by both scratch
+controls. Base: 24 passed; head: 28 passed; zero added failures; allocation
+<code>EXIT=0</code>. Receipts are in <code>review-suite-receipts.json</code> under
+the run directory above. The wrong-profile log is
+<code>review-cached-profile-mutant.log</code>; the original control is
+<code>review-shared-step-mutant.log</code>. Existing GPU counts and the inspected
+figure remain the earlier measurement; this review repair reran the CPU gates.</p>
+<p id="bank-lane-drive-combined-state">The combined product at
+<code>06af4890e</code> is unchanged in test head <code>9700ae22f</code>. One
+seven-CPU Sirius job, <code>1310312</code>, ran fresh processes per file:
+pinned base <code>2a3bbf39b</code> passed 28 tests, merged head passed 47
+(including ten head-only lane tests), and the new head passed all eleven lane
+tests; added failures by shared-file delta: zero. The incoming-factor regression
+forces failed contraction with distinct lane profiles, rebuilds at each incumbent
+and certifies both lanes in three reads. Reverting only that rebuild call to two
+items in a scratch copy fails the new test with <code>ValueError: not enough
+values to unpack (expected 3, got 2)</code> and <code>EXIT=1</code>. The allocation
+ended <code>EXIT=0</code>; receipts and the red control are
+<code>integration-suite-receipts.json</code> and
+<code>integration-two-item-mutant.log</code> in the run directory above.</p>
+</section>

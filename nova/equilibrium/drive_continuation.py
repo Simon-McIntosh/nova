@@ -27,6 +27,7 @@ stalling.
 
 from typing import Callable, NamedTuple
 
+import jax
 import jax.numpy as jnp
 
 from nova.equilibrium import support_read
@@ -61,28 +62,35 @@ CERTIFICATION_TOLERANCE = 1e-10
 class SubStep(NamedTuple):
     """One warm-started sub-solve and the drive it was asked for."""
 
-    drive: float
-    change: float
-    sub_step: float
-    tolerance: float
-    updates: int
-    reads: int
-    residual: float
-    converged: bool
-    final: bool
+    drive: float | jax.Array
+    change: float | jax.Array
+    sub_step: float | jax.Array
+    tolerance: float | jax.Array
+    updates: int | jax.Array
+    reads: int | jax.Array
+    residual: float | jax.Array
+    converged: bool | jax.Array
+    final: bool | jax.Array
 
 
 class DriveContinuationResult(NamedTuple):
-    """The state reached at the target drive and how it was reached."""
+    """The state reached and the availability of its incumbent lane supports.
+
+    Array-drive calls expose ``support_available`` per lane. Without a supplied
+    warm support, an unaccepted lane retains its warm stationary points, but
+    its other floating support fields are NaN and its flags are false. Scalar
+    calls retain their result contract and leave the availability mask unset.
+    """
 
     result: support_read.SolveResult
-    drive: float
+    drive: float | jax.Array
     certified: bool
     substeps: tuple[SubStep, ...]
     updates: int
     reads: int
-    sub_step: float
+    sub_step: float | jax.Array
     reason: str | None
+    support_available: jax.Array | None = None
 
 
 def _batch_count(values) -> int:
@@ -96,11 +104,11 @@ def _batch_count(values) -> int:
 
 def predict_seed(
     moments,
-    drive: float,
-    target_drive: float,
+    drive: float | jax.Array,
+    target_drive: float | jax.Array,
     *,
     previous_moments=None,
-    previous_drive: float | None = None,
+    previous_drive: float | jax.Array | None = None,
 ):
     """Extrapolate from two converged states, or retain the plain warm start.
 
@@ -117,7 +125,9 @@ def predict_seed(
         0.0,
     )
     return tuple(
-        current + ratio * (current - previous)
+        current
+        + ratio.reshape(ratio.shape + (1,) * (current.ndim - ratio.ndim))
+        * (current - previous)
         for current, previous in zip(moments, previous_moments, strict=True)
     )
 
@@ -130,14 +140,14 @@ def advance_drive(
     seeds_previous,
     convention,
     policy,
-    profile_at: Callable[[float], object],
+    profile_at: Callable[[float | jax.Array], object],
     density_gradient,
     quadrature,
     *,
-    start_drive: float,
-    target_drive: float,
+    start_drive: float | jax.Array,
+    target_drive: float | jax.Array,
     axis_sign: float = -1.0,
-    initial_relative_step: float = INITIAL_RELATIVE_STEP,
+    initial_relative_step: float | jax.Array = INITIAL_RELATIVE_STEP,
     growth: float = GROWTH,
     shrink: float = SHRINK,
     minimum_relative_step: float = MINIMUM_RELATIVE_STEP,
@@ -148,9 +158,10 @@ def advance_drive(
     solve: Callable | None = None,
     solve_options: dict | None = None,
     previous_moments=None,
-    previous_drive: float | None = None,
+    previous_drive: float | jax.Array | None = None,
     factor_cache: support_read.NewtonFactor | None = None,
     factor_valid=True,
+    initial_support=None,
 ) -> DriveContinuationResult:
     """Reach ``target_drive`` from lanes converged at ``start_drive``.
 
@@ -178,9 +189,51 @@ def advance_drive(
     factors versus 5.73 s with carry over fourteen slices). With reuse enabled,
     ``factor_cache`` and ``factor_valid`` can prime the first sub-step from a
     preceding slice. Only accepted sub-steps replace that factor.
+
+    Array start or target drives select independent lanes. ``profile_at`` then
+    receives a drive vector and may return a callable from lane index to that
+    lane's profile, as accepted by ``solve_batch``. Tolerances and sub-step
+    telemetry are per-lane arrays; ``certified`` means every lane certified.
+    A zero-span lane is read at its target once, then held. Scalar start and
+    target drives keep the shared-step behaviour described above.
+
+    For array drives, ``initial_support`` may supply the full support of the
+    warm state. Otherwise, ``support_available`` marks lanes whose support is
+    absent until their first accepted sub-solve. Rejected trial reads never
+    become incumbent support. Cross-slice priming through ``factor_cache``
+    applies to scalar drives only.
     """
     solve = solve or support_read.solve_batch
     options = dict(solve_options or {})
+    if jnp.ndim(start_drive) or jnp.ndim(target_drive):
+        return _advance_lanes(
+            operands,
+            cache,
+            moments,
+            seeds,
+            seeds_previous,
+            convention,
+            policy,
+            profile_at,
+            density_gradient,
+            quadrature,
+            start_drive=start_drive,
+            target_drive=target_drive,
+            axis_sign=axis_sign,
+            initial_relative_step=initial_relative_step,
+            growth=growth,
+            shrink=shrink,
+            minimum_relative_step=minimum_relative_step,
+            update_budget=update_budget,
+            intermediate_tolerance=intermediate_tolerance,
+            certification_tolerance=certification_tolerance,
+            max_substeps=max_substeps,
+            solve=solve,
+            solve_options=options,
+            previous_moments=previous_moments,
+            previous_drive=previous_drive,
+            initial_support=initial_support,
+        )
     span = abs(target_drive - start_drive)
     if span == 0:
         raise ValueError("the target drive equals the start drive")
@@ -284,4 +337,189 @@ def advance_drive(
         reads,
         sub_step,
         reason,
+    )
+
+
+def _advance_lanes(
+    operands,
+    cache,
+    moments,
+    seeds,
+    seeds_previous,
+    convention,
+    policy,
+    profile_at,
+    density_gradient,
+    quadrature,
+    *,
+    start_drive,
+    target_drive,
+    axis_sign,
+    initial_relative_step,
+    growth,
+    shrink,
+    minimum_relative_step,
+    update_budget,
+    intermediate_tolerance,
+    certification_tolerance,
+    max_substeps,
+    solve,
+    solve_options,
+    previous_moments,
+    previous_drive,
+    initial_support,
+):
+    """Keep accepted state, certification and secant history independently.
+
+    Array drive calls pass an array to ``profile_at`` and an array tolerance
+    to the solve. Certified lanes retain their state and ask for no updates.
+    Scalar calls retain the shared-step contract of :func:`advance_drive`.
+    """
+    lanes = moments[0].shape[0]
+    drive = jnp.broadcast_to(jnp.asarray(start_drive, moments[0].dtype), (lanes,))
+    target = jnp.broadcast_to(jnp.asarray(target_drive, moments[0].dtype), (lanes,))
+    span = jnp.abs(target - drive)
+    scale = jnp.where(drive != 0, jnp.abs(drive), jnp.where(span > 0, span, 1.0))
+    direction = jnp.sign(target - drive)
+    sub_step = jnp.broadcast_to(jnp.asarray(initial_relative_step) * scale, (lanes,))
+    done = jnp.zeros(lanes, bool)
+    stopped = jnp.zeros(lanes, bool)
+    state = moments
+    stationary = seeds_previous
+    older = moments if previous_moments is None else previous_moments
+    old_drive = (
+        drive
+        if previous_drive is None
+        else jnp.broadcast_to(jnp.asarray(previous_drive), (lanes,))
+    )
+    result = None
+    support_available = jnp.full(lanes, initial_support is not None)
+    substeps = []
+    updates = reads = 0
+
+    def choose(mask, candidate, incumbent):
+        return jax.tree.map(
+            lambda value, prior: jnp.where(
+                mask.reshape((lanes,) + (1,) * (value.ndim - 1)), value, prior
+            ),
+            candidate,
+            incumbent,
+        )
+
+    while bool(jnp.any(~done & ~stopped)) and len(substeps) < max_substeps:
+        active = ~done & ~stopped
+        remaining = jnp.abs(target - drive)
+        change = jnp.where(active, jnp.minimum(sub_step, remaining), 0.0)
+        final = change >= remaining
+        next_drive = jnp.where(final & active, target, drive + direction * change)
+        tolerance = jnp.where(final, certification_tolerance, intermediate_tolerance)
+        predicted = choose(
+            active,
+            predict_seed(
+                state,
+                drive,
+                next_drive,
+                previous_moments=older,
+                previous_drive=old_drive,
+            ),
+            state,
+        )
+        attempt = solve(
+            operands,
+            cache,
+            predicted,
+            seeds,
+            stationary,
+            convention,
+            policy,
+            profile_at(next_drive),
+            density_gradient,
+            quadrature,
+            axis_sign,
+            max_steps=update_budget,
+            tolerance=jnp.where(active, tolerance, jnp.inf),
+            **solve_options,
+        )
+        accepted = (
+            active
+            & attempt.converged
+            & jnp.isfinite(attempt.residual)
+            & (attempt.residual <= tolerance)
+            & (attempt.steps <= update_budget)
+        )
+        updates += _batch_count(attempt.steps)
+        reads += _batch_count(attempt.reads)
+        substeps.append(
+            SubStep(
+                next_drive,
+                change,
+                sub_step,
+                tolerance,
+                attempt.steps,
+                attempt.reads,
+                attempt.residual,
+                accepted,
+                final & active,
+            )
+        )
+        if result is None:
+            incumbent_support = initial_support
+            if incumbent_support is None:
+                incumbent_support = jax.tree.map(
+                    lambda value: (
+                        jnp.full_like(value, jnp.nan)
+                        if jnp.issubdtype(value.dtype, jnp.inexact)
+                        else jnp.zeros_like(value)
+                    ),
+                    attempt.support,
+                )
+                incumbent_support = incumbent_support._replace(
+                    stationary=incumbent_support.stationary._replace(
+                        position=stationary
+                    )
+                )
+            result = attempt._replace(
+                moments=state,
+                support=incumbent_support,
+                residual=jnp.full_like(attempt.residual, jnp.inf),
+                converged=jnp.zeros_like(attempt.converged),
+            )
+        result = choose(accepted, attempt, result)
+        support_available = support_available | accepted
+        older = choose(accepted, state, older)
+        old_drive = jnp.where(accepted, drive, old_drive)
+        state = choose(accepted, attempt.moments, state)
+        stationary = choose(accepted, attempt.support.stationary.position, stationary)
+        drive = jnp.where(accepted, next_drive, drive)
+        done = done | (accepted & final)
+        sub_step = jnp.where(
+            active,
+            jnp.where(
+                accepted, jnp.minimum(sub_step * growth, scale), sub_step * shrink
+            ),
+            sub_step,
+        )
+        stopped = stopped | (
+            active & ~accepted & (sub_step < minimum_relative_step * scale)
+        )
+    certified = bool(jnp.all(done))
+    reason = (
+        None
+        if certified
+        else (
+            "sub-step floor reached"
+            if bool(jnp.any(stopped))
+            else "sub-step ceiling reached"
+        )
+    )
+    return DriveContinuationResult(
+        result,
+        drive,
+        certified,
+        tuple(substeps),
+        updates,
+        reads,
+        sub_step,
+        reason,
+        support_available,
     )

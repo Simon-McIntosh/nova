@@ -174,12 +174,21 @@ def main():
                 max(r[k]) for k in ("reads", "updates", "refactors")
             )
             estimate = (reads * 35.7 + updates * (44.9 - 25.5) + factors * 25.5) / 16
+            possible_retry = (
+                arm == "head"
+                and r["slice"] > 1
+                and factors > 0
+                and reads > updates + 1
+            )
+            estimate_text = f"{estimate:.3f}"
+            if possible_retry:
+                estimate_text += f"–{estimate + (44.9 - 25.5) / 16:.3f}"
             table.append(
                 f"<tr><td>{arm}</td><td>{r['step']:g}</td><td>{r['slice']}</td>"
                 f"<td>{reads}</td><td>{updates}</td><td>{factors}</td>"
                 f"<td>{max(r['residual']):.3e}</td>"
                 f"<td>{r['batch_ms'] / 8 / 1000:.3f}</td>"
-                f"<td>{estimate:.3f}</td></tr>"
+                f"<td>{estimate_text}</td></tr>"
             )
     summary = dict(
         totals=totals,
@@ -207,7 +216,9 @@ Only the terminal fresh read at residual at most 1e-10 certifies a slice.
 Rejected continuation attempts do not replace the accepted factor.</p>
 <p>Both arms use the first eight saved lanes, drive steps 1e-5 and 1e-3 and seven
 slices at each step, with one warmup and one measured process per arm. The bank
-and seed hashes match across arms. Main totals: {totals["main"]};
+and seed hashes match across arms. Main uses secant seeds with fresh factors;
+head enables guarded factor reuse within solves and carries factors across
+slices. Main totals: {totals["main"]};
 head totals: {totals["head"]}. All {summary["lane_slices"]} lane/slice results
 certify, at maximum residual {summary["terminal_residual_max"]:.3e}.</p>
 <figure id="bank-factor-carry-counts"><img
@@ -218,7 +229,7 @@ and carried factors blue. Small horizontal offsets separate coincident points.
 These are titan P100 width-eight counts. The producer rendered the committed SVG
 at 1400 pixels and inspected its labels and marks.</figcaption></figure>
 <table id="bank-factor-carry-table"><thead><tr><th>arm</th><th>drive step</th>
-<th>slice</th><th>fresh reads</th><th>updates</th><th>factor assemblies</th>
+<th>slice</th><th>fresh reads</th><th>accepted updates</th><th>factor assemblies</th>
 <th>fresh residual, maximum</th><th>titan P100 wall per slice [s]</th>
 <th>H200 width-16 estimate per slice [ms]</th></tr></thead>
 <tbody>{"".join(table)}</tbody></table>
@@ -227,7 +238,11 @@ at 1400 pixels and inspected its labels and marks.</figcaption></figure>
 update cost 44.9 ms and its 25.5 ms assembly/factor portion. It is not an H200
 timing measurement. Titan walls carry no speed verdict. The retained run.sh
 accepts the repository root and GPFS run directory as arguments, defaulting to
-width sixteen for a later H200 submission.</p>
+width sixteen for a later H200 submission. Update counts are accepted Newton
+iterations. A rejected carried proposal can add one linear solve before the
+fresh correction, while every associated read and assembly is counted. Where
+the saved counters cannot distinguish that retry from ordinary damping, the
+estimate is a range charging zero to one additional 19.4 ms batch correction.</p>
 <table id="bank-factor-carry-precision"><thead><tr>
 <th>quantity, ratio to local scale</th><th>maximum against main</th><th>bound</th>
 </tr></thead><tbody>{precision_rows}</tbody></table>

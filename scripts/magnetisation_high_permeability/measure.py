@@ -101,10 +101,63 @@ def dump(path, record):
     temporary.replace(path)
 
 
+def summarise(record):
+    """Validate every convergence claim before marking the summary as passed."""
+    summary = {"orders": [], "chi_slopes": []}
+    for source in ["loop", "dipole"]:
+        for mu in PERMEABILITIES:
+            rows = [
+                r for r in record["shell"] if r["mu"] == mu and r["source"] == source
+            ]
+            errors = np.abs([r["signed_error"] for r in rows])
+            orders = (np.log(errors[:-1] / errors[1:]) / np.log(2)).tolist()
+            summary["orders"].append(dict(source=source, mu=mu, orders=orders))
+        for size in SIZES:
+            rows = [
+                r for r in record["shell"] if r["h"] == size and r["source"] == source
+            ]
+            slopes = np.polyfit(
+                np.log(np.array(PERMEABILITIES) - 1),
+                np.log(np.abs([r["signed_error"] for r in rows])),
+                1,
+            )[0]
+            summary["chi_slopes"].append(
+                dict(source=source, h=size, slopes=slopes.tolist())
+            )
+    shell_control = [
+        r for r in record["shell"] if r["mu"] == 100 and r["source"] == "loop"
+    ]
+    assert np.all(
+        np.diff(np.abs([r["signed_error"] for r in shell_control]), axis=0) < 0
+    )
+    assert np.all(np.diff([r["error"] for r in record["sphere"]], axis=0) < 0)
+    for source in ["loop", "dipole"]:
+        errors = {
+            r["h"]: np.abs(r["signed_error"])
+            for r in record["shell"]
+            if r["mu"] == 1000 and r["source"] == source
+        }
+        coarse, fine = errors[0.02], errors[0.01]
+        assert coarse.shape == fine.shape == (len(PROBES),)
+        assert np.all(fine < coarse), (
+            f"high-permeability shell ({source}): 10 mm errors {fine.tolist()} "
+            f"must fall below 20 mm errors {coarse.tolist()} at every probe"
+        )
+    summary["high_permeability_refinement_pass"] = True
+    summary["controls_pass"] = True
+    return summary
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, required=True)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--output", type=Path)
+    mode.add_argument("--check-receipt", type=Path)
     args = parser.parse_args()
+    if args.check_receipt is not None:
+        record = json.loads(args.check_receipt.read_text())
+        print("SUMMARY", json.dumps(summarise(record)), flush=True)
+        return
     assert jax.default_backend() == "gpu", jax.devices()
     record = dict(
         revision=subprocess.check_output(
@@ -246,35 +299,7 @@ def main():
         record["sphere"].append(row)
         print("SPHERE", json.dumps(row), flush=True)
         dump(args.output, record)
-    summary = {"orders": [], "chi_slopes": []}
-    for source in ["loop", "dipole"]:
-        for mu in PERMEABILITIES:
-            rows = [
-                r for r in record["shell"] if r["mu"] == mu and r["source"] == source
-            ]
-            errors = np.abs([r["signed_error"] for r in rows])
-            orders = (np.log(errors[:-1] / errors[1:]) / np.log(2)).tolist()
-            summary["orders"].append(dict(source=source, mu=mu, orders=orders))
-        for size in SIZES:
-            rows = [
-                r for r in record["shell"] if r["h"] == size and r["source"] == source
-            ]
-            slopes = np.polyfit(
-                np.log(np.array(PERMEABILITIES) - 1),
-                np.log(np.abs([r["signed_error"] for r in rows])),
-                1,
-            )[0]
-            summary["chi_slopes"].append(
-                dict(source=source, h=size, slopes=slopes.tolist())
-            )
-    shell_control = [
-        r for r in record["shell"] if r["mu"] == 100 and r["source"] == "loop"
-    ]
-    assert np.all(
-        np.diff(np.abs([r["signed_error"] for r in shell_control]), axis=0) < 0
-    )
-    assert np.all(np.diff([r["error"] for r in record["sphere"]], axis=0) < 0)
-    summary["controls_pass"] = True
+    summary = summarise(record)
     record["summary"] = summary
     dump(args.output, record)
     print("SUMMARY", json.dumps(summary), flush=True)

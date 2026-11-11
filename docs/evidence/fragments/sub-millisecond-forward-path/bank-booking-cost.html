@@ -1,0 +1,88 @@
+<section id="bank-booking-cost-result">
+<h2>Wider booking tiles cut CPU cost; repeatability remains open</h2>
+<p>The final sixteen-lane candidate reduces mean cell-local booking from
+<strong>9710.646 to 5396.689 ms</strong>,
+44.43% lower. Mean complete Jacobian assembly
+falls from 12860.753 to 7864.906 ms,
+38.85% lower. Both process pairs improve.
+The largest matrix difference is 1.36427e-17 relative, against 1e-12.</p>
+<p><strong>This node is blocked on verification, not delivered as a passing timing
+result.</strong> Baseline booking process spread is 5.095495%, exceeding
+the five-percent bound recorded before the final runs; candidate spread is
+3.271560%. The report gate refuses the comparison and ends EXIT=1 in
+<code>report-gate.log</code>. The next measurement must repeat both arms under
+stable execution conditions; the threshold has not been widened. At width one,
+complete assembly changes by +3.04%; the table preserves that tradeoff.</p>
+<p>The default local Jacobian tile grows from 32 to 128 cells. The 113 conic cells
+per lane therefore need one population bucket rather than four. Normal cells
+keep their separate tile. Nondefault quadrature widths remain unchanged.
+The boundary level's geometric derivative is recovered from the constant-field
+channel, reducing independent conic velocity channels from seven to six while
+preserving the fourteen-input response, density derivative and normalization.</p>
+<figure><img src="/nova/figures/sub-millisecond-forward-path/bank-booking-cost/booking-cost.svg"
+alt="Paired CPU booking costs and isolated geometric and scatter stages">
+<figcaption>Width sixteen, CPU; points are the two-process means and short
+horizontal marks join process medians. Conic stages process the actual 113 cut
+cells per lane with runtime arrays between compiled stages; their walls are not
+an additive partition of assembly. Normal geometry is shown for one jet
+direction per lane, while production assembles eighteen local directions.
+Bucket scatter uses the actual 113 conic and four normal cells with independent
+nonzero placement checks, at widths 32 and 128. The log scale keeps millisecond
+scatters visible beside second-scale geometric work. The checked 1400 by 720
+render has been visually inspected: no clipped or overlapping labels.</figcaption></figure>
+<h3>Final paired measurement</h3>
+<p>One all_debug allocation, job 1310114, seven CPUs and 96 GB, two fresh processes
+per arm, six synchronized warm samples per program. Both widths run in each
+process. Every program uses runtime operands; configure_dtypes precedes arrays
+and x64 is asserted. CPU walls are a paired comparison, not an H200 verdict.</p>
+<table><thead><tr><th>Program</th><th>Base process 1 ms</th><th>Base process 2 ms</th>
+<th>Head process 1 ms</th><th>Head process 2 ms</th></tr></thead><tbody><tr><td>1:assembly</td><td>1528.327422</td><td>1518.133404</td><td>1517.346080</td><td>1621.831231</td></tr><tr><td>1:local</td><td>704.047469</td><td>725.143753</td><td>704.747060</td><td>820.629783</td></tr><tr><td>16:assembly</td><td>13302.135320</td><td>12419.369986</td><td>8222.329840</td><td>7507.482948</td></tr><tr><td>16:local</td><td>9958.048362</td><td>9463.242933</td><td>5484.967386</td><td>5308.411473</td></tr></tbody></table>
+<h3>Attribution below booking</h3>
+<p>Conic construction, velocity and clipped-boundary integration are isolated on
+the real conic cells in job 1310085, with seven directions at base and six at
+head. Normal geometry, its normal-ring-rate ablation and dense contraction come
+from job 1310071: those functions and their inputs are unchanged by local tile
+selection. The normal-rate removal is an inclusive ablation, not an exclusive
+operator wall. Sparse scatters run in job 1310117. These different compilation
+boundaries prevent adding the rows to reconstruct production wall.</p>
+<table><thead><tr><th>Program</th><th>Base process 1 ms</th><th>Base process 2 ms</th>
+<th>Head process 1 ms</th><th>Head process 2 ms</th></tr></thead><tbody><tr><td>conic_rings</td><td>581.469718</td><td>564.166792</td><td>566.409215</td><td>554.108974</td></tr><tr><td>conic_velocities</td><td>1765.859872</td><td>1636.286505</td><td>1452.723023</td><td>1757.392850</td></tr><tr><td>clipped_boundary_quadrature</td><td>338.893145</td><td>322.304871</td><td>305.453181</td><td>313.510068</td></tr><tr><td>16:normal_geometry</td><td>648.547482</td><td>647.763262</td><td>678.177245</td><td>611.741599</td></tr><tr><td>16:geometry_without_normal_ring_rates</td><td>605.307782</td><td>606.986539</td><td>629.566912</td><td>572.604936</td></tr><tr><td>16:matrix_contraction</td><td>425.765038</td><td>424.858637</td><td>441.731701</td><td>403.798355</td></tr><tr><td>cell_scatter</td><td>2.906399</td><td>2.970852</td><td>2.165876</td><td>2.046192</td></tr></tbody></table>
+<p>The channel-only candidate did not lower separately compiled booking:
+9705.089 ms versus base 9644.386 and 9652.474 ms, despite a faster full assembly.
+That result motivated the tile probe. In one common-input process, 32, 64 and
+128-cell tiles take 10499.150, 6953.291 and 6021.887 ms with identical sensitivity
+arrays. The probe used the pre-tiling source at 31949bb38; its root argument lets
+that source be selected independently of the current probe script.</p>
+<h3>Lowered programs</h3>
+<p>Fusion and while sites are static lowered-program call sites, not dynamic GPU
+launches. The wider tile reduces runtime bucket iterations rather than these
+static instruction counts. The root-argument timing driver and device.sh are
+committed for a later H200 measurement; no H200 wall or memory verdict is claimed.</p>
+<table><thead><tr><th>Program</th><th>Arm</th><th>Process</th><th>Optimized HLO ops</th>
+<th>StableHLO ops</th><th>Fusion sites</th><th>While sites</th></tr></thead><tbody><tr><td>1:assembly</td><td>base</td><td>1</td><td>29827</td><td>20450</td><td>978</td><td>8</td></tr><tr><td>1:local</td><td>base</td><td>1</td><td>14265</td><td>9713</td><td>519</td><td>6</td></tr><tr><td>16:assembly</td><td>base</td><td>1</td><td>27566</td><td>20479</td><td>998</td><td>8</td></tr><tr><td>16:local</td><td>base</td><td>1</td><td>13604</td><td>9721</td><td>524</td><td>6</td></tr><tr><td>1:assembly</td><td>base</td><td>2</td><td>29827</td><td>20450</td><td>978</td><td>8</td></tr><tr><td>1:local</td><td>base</td><td>2</td><td>14265</td><td>9713</td><td>519</td><td>6</td></tr><tr><td>16:assembly</td><td>base</td><td>2</td><td>27566</td><td>20479</td><td>998</td><td>8</td></tr><tr><td>16:local</td><td>base</td><td>2</td><td>13604</td><td>9721</td><td>524</td><td>6</td></tr><tr><td>1:assembly</td><td>head</td><td>1</td><td>29837</td><td>20467</td><td>981</td><td>8</td></tr><tr><td>1:local</td><td>head</td><td>1</td><td>14274</td><td>9730</td><td>522</td><td>6</td></tr><tr><td>16:assembly</td><td>head</td><td>1</td><td>27575</td><td>20496</td><td>1002</td><td>8</td></tr><tr><td>16:local</td><td>head</td><td>1</td><td>13609</td><td>9738</td><td>527</td><td>6</td></tr><tr><td>1:assembly</td><td>head</td><td>2</td><td>29837</td><td>20467</td><td>981</td><td>8</td></tr><tr><td>1:local</td><td>head</td><td>2</td><td>14274</td><td>9730</td><td>522</td><td>6</td></tr><tr><td>16:assembly</td><td>head</td><td>2</td><td>27575</td><td>20496</td><td>1002</td><td>8</td></tr><tr><td>16:local</td><td>head</td><td>2</td><td>13609</td><td>9738</td><td>527</td><td>6</td></tr></tbody></table>
+<h3>Numerical checks and negative control</h3>
+<p>All final matrices at widths one and sixteen agree with the archived base to
+at most 1.36427e-17 relative. The width-one reference matrix is finite, has norm
+9.74176e+07, and its booking contribution relative to
+the matrix is 1; this is not an
+identity or empty-matrix comparison. The fresh-read central-difference check
+passes at a trial and an actually converged state against the unchanged 1e-6
+relative bound. The paired four-file suites run one fresh process per file and
+arm in Sirius job 1310125, with seven CPUs; added failures are zero.</p>
+<table><thead><tr><th>Arm</th><th>File</th><th>Pytest summary</th><th>Exit</th></tr>
+</thead><tbody><tr><td>base</td><td>test_bank_newton_step</td><td>18 passed in 156.24s (0:02:36)</td><td>0</td></tr><tr><td>base</td><td>test_bank_step_booking_batch</td><td>2 passed, 7 skipped in 65.34s (0:01:05)</td><td>0</td></tr><tr><td>base</td><td>test_bank_step_launch_fusion</td><td>3 passed in 33.83s</td><td>0</td></tr><tr><td>base</td><td>test_bank_solve_driver</td><td>10 passed in 308.78s (0:05:08)</td><td>0</td></tr><tr><td>head</td><td>test_bank_newton_step</td><td>21 passed in 220.66s (0:03:40)</td><td>0</td></tr><tr><td>head</td><td>test_bank_step_booking_batch</td><td>2 passed, 7 skipped in 63.82s (0:01:03)</td><td>0</td></tr><tr><td>head</td><td>test_bank_step_launch_fusion</td><td>3 passed in 35.35s</td><td>0</td></tr><tr><td>head</td><td>test_bank_solve_driver</td><td>10 passed in 308.43s (0:05:08)</td><td>0</td></tr></tbody></table>
+<p>The scratch negative control drops the booking derivative after fixture
+convergence by replacing the assembled matrix with identity. Both new
+central-difference IDs fail; <code>final-negative/negative-control.log</code>
+records <code>2 failed in 145.38s (0:02:25)</code> and EXIT=1. The actual mutated
+scratch module is printed inside pytest, and the mutation is retained beside the
+log. A synthetic fixture first failed because it supplied an opaque namespace
+instead of Quadrature; the final suite uses the real typed rule. No acceptance
+bound was relaxed.</p>
+<p>Base: <code>101d1d839d90b4859f42df114707bff1ee2dbeae</code>. Product commits:
+<code>31949bb38cc291c7aeb6bd87d792e705fadc2230</code> and
+<code>156311548c1d78cd3e8515d77b971e66270f5b52</code>. Receipts and raw failure logs:
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T045017226131-bank-booking-cost</code>. The registered write scope also needs the
+coordinator to add support_read.py under the brief's existing exception; the
+worker's registry lock is read-only. No plan state was edited.</p>
+</section>

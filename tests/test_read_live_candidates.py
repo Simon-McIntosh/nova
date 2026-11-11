@@ -13,7 +13,7 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
-from nova.equilibrium import current, topology
+from nova.equilibrium import current, support_read, topology
 from tests.test_candidate_inspection_batched import SampledField, small_case
 from tests.test_support_read import UnitDensity
 
@@ -143,3 +143,61 @@ def test_support_inspects_only_live_saddles(monkeypatch, count):
     jax.effects_barrier()
     print("SUPPORT_INSPECTIONS", count, len(seen), flush=True)
     assert len(seen) == count + 2, "only live saddles plus initial and terminal support"
+
+
+def test_batched_read_preserves_mixed_live_counts():
+    field, geometry, convention, policy, solved = case("multiple", 4)
+    sparse = solved._replace(valid=jnp.array([True, False, True, False, False]))
+    batch = jax.tree.map(lambda a, b: jnp.stack((a, b)), sparse, solved)
+
+    def mapped(owner):
+        return jax.jit(
+            jax.vmap(lambda points: owner(field, geometry, convention, policy, points))
+        )(batch)
+
+    assert_equal(mapped(topology.read_at_stationary_points), mapped(full_owner()))
+
+
+def test_support_flags_and_booked_moments_match_full_candidates(monkeypatch):
+    from tests.test_support_read import _case
+
+    operands, cache, roots, pitch, _, _, _ = _case("diverted")
+    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    from nova.equilibrium.solve_request import TopologyPolicy
+    from nova.equilibrium.stencil_mesh import CellCurrentMoments
+
+    moments = CellCurrentMoments(jnp.zeros(1), jnp.zeros(1), jnp.zeros(1))
+    policy = TopologyPolicy()
+    quadrature = current.Quadrature(sigma=convention.sigma, segments=16)
+
+    def execute(bank, window, seeds, prior, tracking):
+        return support_read.read_and_book(
+            bank,
+            window,
+            moments,
+            seeds,
+            prior,
+            convention,
+            policy,
+            UnitDensity(),
+            quadrature,
+            tracking=tracking,
+        )
+
+    arguments = (operands, cache, roots + 0.03 * pitch, roots, None)
+    capacity = topology._COMPACT_CANDIDATE_CAPACITY
+    actual = jax.jit(execute)(*arguments)
+    assert bool(actual[0].valid) and bool(actual[0].rebuilt)
+    monkeypatch.setattr(topology, "_COMPACT_CANDIDATE_CAPACITY", 0)
+    expected = jax.jit(lambda *args: execute(*args))(*arguments)
+    assert_equal(actual, expected)
+    monkeypatch.setattr(topology, "_COMPACT_CANDIDATE_CAPACITY", capacity)
+    carried = jax.jit(lambda *args: execute(*args))(
+        *arguments[:-1], support_read.tracking_of(actual[0])
+    )
+    monkeypatch.setattr(topology, "_COMPACT_CANDIDATE_CAPACITY", 0)
+    reference = jax.jit(lambda *args: execute(*args))(
+        *arguments[:-1], support_read.tracking_of(expected[0])
+    )
+    assert not bool(carried[0].rebuilt)
+    assert_equal(carried, reference)

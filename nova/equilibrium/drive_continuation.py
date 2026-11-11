@@ -430,9 +430,12 @@ def _advance_lanes(
             )
         )
         if result is None:
-            result = attempt
-        else:
-            result = choose(accepted, attempt, result)
+            result = attempt._replace(
+                moments=state,
+                residual=jnp.full_like(attempt.residual, jnp.inf),
+                converged=jnp.zeros_like(attempt.converged),
+            )
+        result = choose(accepted, attempt, result)
         older = choose(accepted, state, older)
         old_drive = jnp.where(accepted, drive, old_drive)
         state = choose(accepted, attempt.moments, state)

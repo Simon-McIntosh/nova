@@ -198,3 +198,40 @@ def test_solve_batch_maps_lane_profile_into_residual_and_booking(monkeypatch, re
     for values in result.moments:
         np.testing.assert_array_equal(values[:, 0], targets)
     assert np.all(result.residual <= 1e-10)
+
+
+def test_rejected_first_attempt_returns_incumbent_state():
+    """A failed continuation must not expose a rejected trial as its state."""
+    state = (jnp.ones((2, 1)),)
+    seeds = jnp.zeros((2, 1, 2))
+
+    def rejected(_operands, _cache, moments, _seeds, previous, *_args, **_kwargs):
+        return Result(
+            (moments[0] + 100.0,),
+            Support(Stationary(previous)),
+            jnp.ones(2),
+            jnp.zeros(2, bool),
+            jnp.ones(2, jnp.int32),
+            jnp.ones(2, jnp.int32),
+        )
+
+    result = driver.advance_drive(
+        None,
+        None,
+        state,
+        seeds,
+        seeds,
+        None,
+        None,
+        lambda d: d,
+        None,
+        None,
+        start_drive=jnp.ones(2),
+        target_drive=jnp.full(2, 1.03),
+        max_substeps=1,
+        solve=rejected,
+    )
+    assert not result.certified
+    np.testing.assert_array_equal(result.drive, jnp.ones(2))
+    np.testing.assert_array_equal(result.result.moments[0], state[0])
+    assert not np.any(result.result.converged)

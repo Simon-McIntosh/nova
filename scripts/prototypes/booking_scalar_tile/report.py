@@ -196,8 +196,7 @@ remain in the run directory.</p>
 file and arm. The new scalar-tile file runs only at head. The archived-moment
 pin fails identically at base and head (absolute 2.83388764e-15, relative
 4.59452653e-12); support-read tests pass at both arms. Added failures are zero.
-The pin is outside this node's write scope and is recorded for coordinator
-follow-up rather than changing its tolerance.</p>
+The archived comparison and its tolerance remain unchanged.</p>
 <table><thead><tr><th>Arm and file</th><th>Pytest summary</th><th>Exit</th></tr></thead>
 <tbody>{"".join(suite)}</tbody></table>
 <p>Base revision <code>{base}</code>; executable head <code>{head}</code>.

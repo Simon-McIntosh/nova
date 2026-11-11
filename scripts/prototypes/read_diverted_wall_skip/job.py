@@ -13,8 +13,10 @@ BASE = "519d378f9e6f8d2786f69af64569625971651a73"
 
 
 def execute(tree, command, log, revision, cpus):
+    process_scratch = Path(os.environ["TMPDIR"]) / log.stem
+    process_scratch.mkdir()
     env = dict(
-        os.environ, TMPDIR=os.environ["TMPDIR"], PYTHONPATH=".", JAX_PLATFORMS="cpu"
+        os.environ, TMPDIR=str(process_scratch), PYTHONPATH=".", JAX_PLATFORMS="cpu"
     )
     with log.open("w") as stream:
         stream.write(f"REVISION={revision} TREE={tree} CWD={tree}\n")
@@ -58,7 +60,7 @@ def extract(root, revision, destination):
         for path in paths
         if path.endswith((".py", ".toml", ".json", ".mplstyle"))
         and path.split("/")[0]
-        in ("nova", "tests", "scripts", "benchmarks", "pyproject.toml")
+        in ("nova", "tests", "scripts", "benchmarks", "pyproject.toml", "conftest.py")
     ]
     archive = subprocess.Popen(
         ["git", "-C", str(root), "archive", revision, *paths], stdout=subprocess.PIPE

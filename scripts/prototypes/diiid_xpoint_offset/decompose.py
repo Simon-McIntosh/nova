@@ -17,7 +17,14 @@ import contourpy
 import numpy as np
 from matplotlib.path import Path as PolygonPath
 from scipy.interpolate import RectBivariateSpline
-from scipy.optimize import least_squares, root
+from scipy.optimize import least_squares
+from scipy.interpolate import RegularGridInterpolator
+
+from scripts.diiid_map_fidelity.measure import polish
+from scripts.prototypes.diiid_axis_identification.census import (
+    _critical_points,
+    _boundary_winding,
+)
 
 HERE = Path(__file__).resolve().parent
 
@@ -106,54 +113,186 @@ def fit_translation(radius, height, solved, reference, mask):
     )
 
 
-def classify_offsets(axis_offset, saddle_offset, fit):
-    """Call an offset rigid only when field and BOTH landmarks support it.
+def classify_offsets(saddle_offset, fit):
+    """Require both whole-field and lower-saddle agreement for rigid motion.
 
-    The numerical rule is >=50% squared flux mismatch removed, <=50% of the
-    larger landmark offset left in their difference, and <=50% of the original
-    saddle offset left after translation. 'local' means non-rigid by this rule;
-    it does not assert that an arbitrary shape error is confined to the saddle.
+    A translation must remove at least half the squared flux mismatch AND
+    at least half the lower-X distance. Neither condition uses an axis seed.
     """
-    axis_offset, saddle_offset = map(np.asarray, (axis_offset, saddle_offset))
-    coherent = np.linalg.norm(saddle_offset - axis_offset) <= 0.5 * max(
-        np.linalg.norm(axis_offset), np.linalg.norm(saddle_offset), 1e-12
-    )
+    saddle_offset = np.asarray(saddle_offset)
     remaining = saddle_offset + fit["translation_m"]
     corrected = np.linalg.norm(remaining) <= 0.5 * max(
         np.linalg.norm(saddle_offset), 1e-12
     )
-    rigid = fit["squared_mismatch_removed"] >= 0.5 and coherent and corrected
-    return "rigid" if rigid else "local"
+    return "rigid" if fit["squared_mismatch_removed"] >= 0.5 and corrected else "local"
 
 
-def stationary(field, seed, saddle=False):
-    """Polish a null of this interpolant and require its Hessian signature."""
+def critical_census(radius, height, flux, mask, boundary=None):
+    """Census candidates through their owner, polish through the null owner.
 
-    def gradient(point):
-        return np.array([field.ev(*point, dx=1), field.ev(*point, dy=1)], float)
-
-    result = root(gradient, seed, tol=1e-10)
-    point = result.x
-    hessian = np.array(
-        [
-            [field.ev(*point, dx=2), field.ev(*point, dx=1, dy=1)],
-            [field.ev(*point, dx=1, dy=1), field.ev(*point, dy=2)],
-        ],
-        float,
+    Two refinements must agree on every polished critical point, and the
+    gradient boundary winding must agree with their signed index sum. Hessian
+    eigenvalues distinguish maxima from minima: positive determinant alone
+    only qualifies an extremum, not a magnetic axis.
+    """
+    field = spline(radius, height, flux)
+    membership = RegularGridInterpolator(
+        (radius, height),
+        np.asarray(mask, float),
+        method="nearest",
+        bounds_error=False,
+        fill_value=0,
     )
-    if np.linalg.norm(gradient(point)) > 1e-7 or (np.linalg.det(hessian) < 0) != saddle:
-        raise ValueError(f"unqualified {'saddle' if saddle else 'axis'} at {point}")
-    return point, hessian
+    previous = None
+    histories = []
+    for refine in (16, 32):
+        fine_r = np.linspace(radius[0], radius[-1], (len(radius) - 1) * refine + 1)
+        fine_z = np.linspace(height[0], height[-1], (len(height) - 1) * refine + 1)
+        fine = field(fine_r, fine_z)
+        candidates = _critical_points(fine, fine_r, fine_z)
+        points = []
+        for candidate in candidates:
+            guess = [candidate["r"], candidate["z"]]
+            null = polish(flux, radius, height, guess, False)
+            if not null["valid"]:
+                null = polish(flux, radius, height, guess, True)
+            if not null["valid"]:
+                continue
+            point = np.asarray(null["rz_m"])
+            if any(
+                np.linalg.norm(point - np.asarray(p["rz_m"])) < 1e-6 for p in points
+            ):
+                continue
+            hessian = np.array(
+                [
+                    [field.ev(*point, dx=2), field.ev(*point, dx=1, dy=1)],
+                    [field.ev(*point, dx=1, dy=1), field.ev(*point, dy=2)],
+                ],
+                float,
+            )
+            eigenvalues = np.linalg.eigvalsh(hessian)
+            kind = (
+                "maximum"
+                if eigenvalues[-1] < 0
+                else "minimum"
+                if eigenvalues[0] > 0
+                else "saddle"
+            )
+            inside = (
+                bool(PolygonPath(boundary).contains_point(point))
+                if boundary is not None
+                else bool(membership(point[None])[0] > 0.5)
+            )
+            points.append(
+                dict(
+                    **null,
+                    kind=kind,
+                    in_plasma=inside,
+                    flux_wb=float(field.ev(*point)),
+                    hessian_eigenvalues_wb_per_m2=eigenvalues.tolist(),
+                )
+            )
+        points.sort(key=lambda point: tuple(point["rz_m"]))
+        winding = float(_boundary_winding(fine, fine_r, fine_z))
+        index_sum = sum(-1 if p["kind"] == "saddle" else 1 for p in points)
+        coverage = round(winding) == index_sum
+        histories.append(
+            dict(
+                refine=refine,
+                points=len(points),
+                winding=winding,
+                index_sum=index_sum,
+                coverage_ok=coverage,
+            )
+        )
+        if previous is not None:
+            stable = len(points) == len(previous) and all(
+                first["kind"] == second["kind"]
+                and np.linalg.norm(np.asarray(first["rz_m"]) - second["rz_m"]) < 1e-5
+                for first, second in zip(previous, points)
+            )
+            if not stable or not coverage:
+                raise ValueError(f"critical census not closed: {histories}")
+        previous = points
+    maxima = [p for p in points if p["kind"] == "maximum" and p["in_plasma"]]
+    minima = [p for p in points if p["kind"] == "minimum" and p["in_plasma"]]
+    if not maxima:
+        raise ValueError("census found no in-plasma maximum; no axis can be reported")
+    return dict(
+        points=points,
+        refinements=histories,
+        in_plasma_maxima=maxima,
+        maxima_count=len(maxima),
+        in_plasma_minima=minima,
+        minima_count=len(minima),
+        maxima_flux_spread_mwb=float(1000 * np.ptp([p["flux_wb"] for p in maxima])),
+        max_flux_wb=max(p["flux_wb"] for p in maxima),
+        axis_determined=len(maxima) == 1 and len(minima) == 0,
+    )
 
 
-def boundary_curve(radius, height, flux, axis, level):
-    """Read the 99.9% closed surface enclosing this field's axis.
+def core_shape(radius, height, flux, census, current):
+    """Axis-free core flatness and native Ampere-density contrast.
+
+    The vertical cut has a fixed 60 cm length, centred on the current centroid
+    and at the mean radial coordinate of ALL maxima. The central and shoulder
+    current samples use the same radius and native stencil, never a selected
+    maximum's basin.
+    """
+    from nova.equilibrium.map_extraction import apply_delta_star
+    from scipy.constants import mu_0
+
+    field = spline(radius, height, flux)
+    core_r = float(np.mean([p["rz_m"][0] for p in census["in_plasma_maxima"]]))
+    centre_z = current["centroid_rz_m"][1]
+    cut_z = np.linspace(centre_z - 0.3, centre_z + 0.3, 201)
+    values = field.ev(np.full_like(cut_z, core_r), cut_z)
+    density = apply_delta_star(radius, height, flux)
+    rr, zz = np.meshgrid(radius, height, indexing="ij")
+    radial = np.abs(rr - core_r) <= 1.6 * density.radial_step
+    central = radial & (np.abs(zz - centre_z) <= 0.1) & density.valid
+    shoulder = (
+        radial
+        & (np.abs(zz - centre_z) >= 0.15)
+        & (np.abs(zz - centre_z) <= 0.35)
+        & density.valid
+    )
+    central_j = float(np.median(density.toroidal_current_density[central]))
+    shoulder_j = float(np.median(density.toroidal_current_density[shoulder]))
+    # Compare the continuous and native-stencil density reads at the core.
+    middle_derivatives = (
+        float(field.ev(core_r, centre_z, dx=2)),
+        float(field.ev(core_r, centre_z, dx=1)),
+        float(field.ev(core_r, centre_z, dy=2)),
+    )
+    continuous_j = -(
+        middle_derivatives[0] - middle_derivatives[1] / core_r + middle_derivatives[2]
+    ) / (2 * np.pi * mu_0 * core_r)
+    return dict(
+        cut_radius_m=core_r,
+        cut_centre_z_m=centre_z,
+        cut_half_height_m=0.3,
+        vertical_flux_range_mwb=float(1000 * np.ptp(values)),
+        vertical_flux_interdecile_mwb=float(
+            1000 * np.diff(np.quantile(values, [0.05, 0.95]))[0]
+        ),
+        central_current_density_a_per_m2=central_j,
+        shoulder_current_density_a_per_m2=shoulder_j,
+        central_to_shoulder_density=central_j / shoulder_j if shoulder_j else None,
+        continuous_middle_current_density_a_per_m2=float(continuous_j),
+        central_nodes=int(central.sum()),
+        shoulder_nodes=int(shoulder.sum()),
+    )
+
+
+def boundary_curve(radius, height, flux, anchor, level, peak_flux=None):
+    """Read the 99.9% closed surface enclosing a known plasma interior point.
 
     The finite marching grid cannot resolve the exact tangent saddle crossing.
     The boundary-gap receipt therefore declares this small inward flux offset;
     the null offset itself is always read from the continuous interpolant."""
     field = spline(radius, height, flux)
-    axis_value = float(field.ev(*axis))
+    axis_value = float(field.ev(*anchor)) if peak_flux is None else peak_flux
     interior_level = level + 1e-3 * (axis_value - level)
     dense_r = np.linspace(radius[0], radius[-1], 401)
     dense_z = np.linspace(height[0], height[-1], 601)
@@ -165,7 +304,7 @@ def boundary_curve(radius, height, flux, axis, level):
         for line in contours
         if len(line) >= 4
         and np.linalg.norm(line[0] - line[-1]) < 1e-8
-        and PolygonPath(line).contains_point(axis)
+        and PolygonPath(line).contains_point(anchor)
     ]
     if not loops:
         raise ValueError("no closed axis-enclosing boundary at the saved boundary flux")
@@ -233,13 +372,9 @@ def read_case(entry):
         raise ValueError(f"input hash differs: {path}")
     with np.load(path) as archive:
         data = {key: archive[key] for key in archive.files}
-    receipt_path = Path(entry["files"]["receipt.json"]["copy"])
-    if (
-        hashlib.sha256(receipt_path.read_bytes()).hexdigest()
-        != entry["files"]["receipt.json"]["sha256"]
-    ):
-        raise ValueError(f"receipt hash differs: {receipt_path}")
-    receipt = json.loads(receipt_path.read_text())
+    receipt = entry["observation"]
+    if receipt["source_receipt_sha256"] != entry["files"]["receipt.json"]["sha256"]:
+        raise ValueError("portable observation does not bind to its source receipt")
     if receipt["storage_order"] != "radius_height":
         raise ValueError("only declared radius-height storage is admitted")
     return data, receipt
@@ -251,19 +386,54 @@ def analyze(entry):
     radius, height = data["radius"], data["height"]
     reference, solved = data["label"], data["flux"]
     ref_field, sol_field = [spline(radius, height, v) for v in (reference, solved)]
-    ref_axis, _ = stationary(ref_field, data["reference_axis"])
-    ref_saddle, ref_hessian = stationary(
-        ref_field, receipt["efit_x_point_rz_m"], saddle=True
-    )
-    axis, _ = stationary(sol_field, data["axis"][:2])
-    saddle, _ = stationary(sol_field, data["continued_saddle"][:2], saddle=True)
     ref_mask = polygon_mask(radius, height, data["label_boundary"])
+    solved_mask = np.asarray(data["connected"], bool)
+    solved_core = critical_census(radius, height, solved, solved_mask)
+    reference_core = critical_census(
+        radius, height, reference, ref_mask, data["label_boundary"]
+    )
+    ref_saddle_read = polish(
+        reference, radius, height, receipt["efit_x_point_rz_m"], True
+    )
+    saddle_read = polish(solved, radius, height, data["continued_saddle"][:2], True)
+    if not ref_saddle_read["valid"] or not saddle_read["valid"]:
+        raise ValueError("lower saddle failed its owner's qualification")
+    ref_saddle = np.asarray(ref_saddle_read["rz_m"])
+    saddle = np.asarray(saddle_read["rz_m"])
+    ref_hessian = np.array(
+        [
+            [ref_field.ev(*ref_saddle, dx=2), ref_field.ev(*ref_saddle, dx=1, dy=1)],
+            [ref_field.ev(*ref_saddle, dx=1, dy=1), ref_field.ev(*ref_saddle, dy=2)],
+        ],
+        float,
+    )
+    axis = (
+        np.asarray(solved_core["in_plasma_maxima"][0]["rz_m"])
+        if solved_core["axis_determined"]
+        else None
+    )
+    ref_axis = (
+        np.asarray(reference_core["in_plasma_maxima"][0]["rz_m"])
+        if reference_core["axis_determined"]
+        else None
+    )
+    axis_offset = axis - ref_axis if axis is not None and ref_axis is not None else None
+    saddle_offset = saddle - ref_saddle
     fit = fit_translation(radius, height, solved, reference, ref_mask)
-    axis_offset, saddle_offset = axis - ref_axis, saddle - ref_saddle
-    raw_axis_offset = data["axis"][:2] - data["reference_axis"]
+    current = current_and_force(radius, height, solved, solved_mask)
+    reference_current = current_and_force(radius, height, reference, ref_mask)
+    solved_shape = core_shape(radius, height, solved, solved_core, current)
+    reference_shape = core_shape(
+        radius, height, reference, reference_core, reference_current
+    )
     ref_boundary = data["label_boundary"]
     sol_boundary = boundary_curve(
-        radius, height, solved, axis, float(data["boundary"][2])
+        radius,
+        height,
+        solved,
+        np.asarray(current["centroid_rz_m"]),
+        float(data["boundary"][2]),
+        solved_core["max_flux_wb"],
     )
     ref_in, ref_out = horizontal_intersections(
         ref_boundary, float(data["reference_axis"][1])
@@ -278,10 +448,6 @@ def analyze(entry):
         ]
     )
     predicted = -np.linalg.solve(ref_hessian, gradient_error)
-    current = current_and_force(
-        radius, height, solved, np.asarray(data["connected"], bool)
-    )
-    reference_current = current_and_force(radius, height, reference, ref_mask)
     rr, zz = np.meshgrid(radius, height, indexing="ij")
     difference = solved - reference
     difference -= difference[ref_mask].mean()
@@ -294,16 +460,25 @@ def analyze(entry):
         residual=receipt["residual"],
         terminal_reason=receipt["terminal_reason"],
         grid_spacing_cm=[100 * float(np.median(np.diff(a))) for a in (radius, height)],
-        axis_offset_cm=(100 * axis_offset).tolist(),
-        raw_stored_axis_offset_cm=(100 * raw_axis_offset).tolist(),
+        axis_offset_cm=(100 * axis_offset).tolist()
+        if axis_offset is not None
+        else None,
+        solved_core=solved_core,
+        reference_core=reference_core,
+        solved_core_shape=solved_shape,
+        reference_core_shape=reference_shape,
+        core_flatness_ratio=solved_shape["vertical_flux_interdecile_mwb"]
+        / reference_shape["vertical_flux_interdecile_mwb"],
         xpoint_offset_cm=(100 * saddle_offset).tolist(),
-        rigid_shift_residual_cm=(100 * (saddle_offset - axis_offset)).tolist(),
+        rigid_shift_residual_cm=(100 * (saddle_offset - axis_offset)).tolist()
+        if axis_offset is not None
+        else None,
         xpoint_after_translation_cm=(
             100 * (saddle_offset + fit["translation_m"])
         ).tolist(),
-        axis_rz_m=axis.tolist(),
+        axis_rz_m=axis.tolist() if axis is not None else None,
         saddle_rz_m=saddle.tolist(),
-        reference_axis_rz_m=ref_axis.tolist(),
+        reference_axis_rz_m=ref_axis.tolist() if ref_axis is not None else None,
         reference_saddle_rz_m=ref_saddle.tolist(),
         fit=fit,
         current=current,
@@ -322,7 +497,7 @@ def analyze(entry):
         near_saddle_rms_error_wb=float(np.sqrt(np.mean(difference[near] ** 2)))
         if near.any()
         else None,
-        verdict=classify_offsets(axis_offset, saddle_offset, fit),
+        verdict=classify_offsets(saddle_offset, fit),
     )
 
 
@@ -341,7 +516,17 @@ def main():
         row = analyze(entry)
         rows.append(row)
         arguments.output.write_text(
-            json.dumps(dict(rows=rows, forward_solves=0), indent=2) + "\n"
+            json.dumps(
+                dict(
+                    rows=rows,
+                    forward_solves=0,
+                    source_sha256=hashlib.sha256(
+                        Path(__file__).read_bytes()
+                    ).hexdigest(),
+                ),
+                indent=2,
+            )
+            + "\n"
         )
         print(json.dumps(row), flush=True)
     print(f"MEASUREMENT: {len(rows)} saved states; zero forward solves", flush=True)

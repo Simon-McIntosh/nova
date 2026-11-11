@@ -173,6 +173,43 @@ def test_mixed_batch_rebuilds_when_limited_contact_changes(case):
     assert_same(result.reading, fresh.reading)
 
 
+@pytest.mark.parametrize("classes", [(1, 1), (0, 1)])
+def test_skip_hint_preserves_nondiverted_wall_contact(case, classes):
+    inputs = batch_inputs(case, classes)
+    first = jax.jit(run_batch)(inputs)
+    assert np.all(first.valid)
+    operands, _, moments, *_ = inputs
+
+    def refresh(state, solved, decision, skip_wall):
+        field = fixed_points.field_from_jets(
+            support_read.nodal_jets(operands, state),
+            operands.sample_index,
+            operands.mesh,
+            bank_rows=operands.rows,
+            bank_moments=jnp.stack(tuple(state), axis=-1),
+            bank_exterior=operands.exterior,
+        )
+        return topology.refresh_at_stationary_points(
+            field,
+            operands.geometry,
+            case[3],
+            case[4],
+            solved,
+            decision,
+            skip_wall=skip_wall,
+        )
+
+    def batch(skip_wall):
+        return jax.vmap(
+            lambda state, solved, decision: refresh(state, solved, decision, skip_wall)
+        )(moments, first.stationary, first.reading)
+
+    expected = jax.jit(lambda: batch(False))()
+    actual = jax.jit(lambda: batch(True))()
+    assert np.all(expected.valid)
+    assert_same(actual, expected)
+
+
 @pytest.mark.parametrize(
     "classes,certificate",
     [((0, 0), False), ((1, 1), False), ((0, 1), False), ((0, 0), True)],

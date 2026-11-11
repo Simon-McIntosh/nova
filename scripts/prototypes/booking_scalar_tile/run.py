@@ -30,7 +30,8 @@ def capture(command, tree, revision, log, **extra):
                 "-P",
                 "-c",
                 "from pathlib import Path; from nova.equilibrium import current; "
-                "print('MODULE', current.__file__, 'CWD', Path.cwd().resolve(), flush=True)",
+                "print('MODULE', current.__file__, 'CWD', "
+                "Path.cwd().resolve(), flush=True)",
             ],
             cwd=tree,
             env=env,

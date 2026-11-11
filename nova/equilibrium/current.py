@@ -45,7 +45,7 @@ class Quadrature:
     changing fragment ownership. No polygon-count limit is imposed here.
     ``cut_batch_width`` controls the conic tile of ``book_tangent_channels``
     only and defaults to 32. Scalar ``book`` and ``book_tangent`` use fixed
-    32-cell cut tiles; a narrower tile repeats conic strip propagation.
+    128-cell cut tiles; a narrower tile repeats conic strip propagation.
     Normal-form buckets use eight cells independently of the conic tile.
     """
 
@@ -66,7 +66,7 @@ class Booking(NamedTuple):
     valid: jax.Array
 
 
-_SCALAR_CUT_BATCH_WIDTH = 32
+_SCALAR_CUT_BATCH_WIDTH = 128
 _NORMAL_CUT_BATCH_WIDTH = 8
 
 
@@ -476,8 +476,8 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
     whole = jax.vmap(whole_cell)(jnp.arange(cells))
     whole = jax.tree.map(lambda value: jnp.where(full, value, 0.0), whole)
 
-    # Scalar moments use a wider cell tile than the multi-channel tangent.
-    # Sharing its smaller tile repeats the conic strip propagation.
+    # Wide conic tiles avoid repeating strip propagation for small populations.
+    # Normal-form cells retain their independent bounded tile.
     batch_width = min(_SCALAR_CUT_BATCH_WIDTH, cells)
     normal = cut & read.normal_form_cells
     zero = jax.tree.map(jnp.zeros_like, whole)

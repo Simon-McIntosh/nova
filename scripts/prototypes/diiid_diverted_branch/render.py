@@ -16,6 +16,7 @@ import numpy as np  # noqa: E402
 
 
 original_nulls = painter.draw_nulls
+EFIT_XPOINT = "#333333"
 
 
 def draw_nulls(ax, **kwargs):
@@ -28,6 +29,12 @@ def draw_nulls(ax, **kwargs):
 
 def paint(ax, *args, **kwargs):
     painter.paint(ax, *args, **kwargs)
+    for line in ax.lines:
+        if line.get_marker() == "+":
+            line.set_color(EFIT_XPOINT)
+            line.set_markersize(13)
+            line.set_markeredgewidth(2)
+            line.set_zorder(20)
     for contour in ax.collections:
         width = float(contour.get_linewidths()[0])
         contour.set_linewidth(3.0 if width > 1.5 else 2.6)
@@ -98,14 +105,15 @@ def render(source, output, previews, frame):
         for x, y, text in (
             (0.25, 0.81, arm),
             (0.39, 0.68, "lower X-point zoom"),
+            (0.25, 0.145, f"DIII-D frame {frame}"),
             (
                 0.25,
-                0.12,
+                0.105,
                 f"support {topology['support']}; {topology['boundary_class']} boundary",
             ),
             (
                 0.25,
-                0.075,
+                0.065,
                 f"residual {record['residual']:.5g}; "
                 f"converged {str(record['converged']).lower()}",
             ),
@@ -137,7 +145,16 @@ def render(source, output, previews, frame):
             ls="none",
             label="EFIT axis",
         ),
-        Line2D([], [], color=painter.FLUX, marker="+", ls="none", label="EFIT X-point"),
+        Line2D(
+            [],
+            [],
+            color=EFIT_XPOINT,
+            marker="+",
+            markersize=13,
+            markeredgewidth=2,
+            ls="none",
+            label="EFIT X-point",
+        ),
     ]
     fig.legend(
         handles=handles,

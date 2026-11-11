@@ -50,6 +50,13 @@
       }
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-diverted-branch-continuation",
+      "recorded_at": "2026-11-11T13:05:51.017832+00:00"
+    }
+  },
   "findings": [
     {
       "evidence": "attached image-0.png and image-1.png caption blocks; scripts/prototypes/diiid_diverted_branch/render.py:98-114 (the fig.text tuple emits arm, 'lower X-point zoom', support/boundary, residual/converged and the gap, and no frame string); reviewed fragment figcaptions naming the machine and frame.",

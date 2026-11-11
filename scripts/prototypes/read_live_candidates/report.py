@@ -34,7 +34,7 @@ def main():
     args = parser.parse_args()
     suites = args.suites or args.run
     rows, payloads = {}, {}
-    timings, stages, lowered = [], [], []
+    timings, stages, lowered, native_counts = [], [], [], []
     for arm in ("base", "head"):
         for kind in ("full", "carried"):
             for process in (1, 2):
@@ -88,6 +88,9 @@ def main():
                 assert spread <= 10, (arm, kind, width, spread)
                 assert pair[0]["native_counts"] == pair[1]["native_counts"]
                 assert pair[0]["regions"] == pair[1]["regions"]
+                native_counts.append(
+                    [arm, kind, width, *pair[0]["native_counts"].values()]
+                )
                 entry[arm] = dict(ms=values, spread_percent=spread)
                 timings.append(
                     [
@@ -225,6 +228,20 @@ def main():
             ],
             timings,
         )
+        + '<h3 id="read-live-candidates-native-counts">Native lowered counts</h3>'
+        + table(
+            [
+                "Arm",
+                "Read",
+                "Width",
+                "Optimized HLO",
+                "StableHLO",
+                "Fusion",
+                "While",
+                "Custom call",
+            ],
+            native_counts,
+        )
         + '<h3 id="read-live-candidates-stages">Exclusive stage walls</h3>'
         + table(["Arm", "Read", "Width", "Process", "Owner", "Median [ms]"], stages)
         + '<h3 id="read-live-candidates-counts">Lowered stage counts</h3>'
@@ -260,6 +277,8 @@ def main():
         "connectivity for full reads: they remain under the joint rebuilt "
         "reading owner. Lowered counts are static program sites, including "
         "untaken fallbacks, and are not dynamic GPU launch counts. "
+        "Native counts include the preserved overflow branch and the live "
+        "candidate loop; stage counts cover the specialized diagnostic partition. "
         f"Raw timing receipts are under <code>{escape(str(args.run))}</code>; "
         f"suite and negative-control logs are under "
         f"<code>{escape(str(suites))}</code>. The reproduction and refused "

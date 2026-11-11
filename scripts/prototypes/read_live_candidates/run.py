@@ -1,6 +1,7 @@
 """Run isolated candidate checks and the committed attribution instrument."""
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import io
 import json
 import os
@@ -38,7 +39,9 @@ def snapshot(root, revision, target):
     )
 
 
-def run(tree, revision, command, log, env):
+def run(tree, revision, command, log, env, affinity=None):
+    if affinity is not None:
+        command = ["taskset", "--cpu-list", ",".join(map(str, affinity)), *command]
     display = "PYTHONPATH=. JAX_PLATFORMS=cpu " + " ".join(command)
     with log.open("w") as stream:
         stream.write(f"# revision: {revision} tree: {tree} command: {display}\n")
@@ -61,7 +64,9 @@ def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("root", type=Path)
     parser.add_argument("run", type=Path)
-    parser.add_argument("mode", choices=["reproduce", "suites", "measure", "armed"])
+    parser.add_argument(
+        "mode", choices=["reproduce", "suites", "measure", "measure-paired", "armed"]
+    )
     args = parser.parse_args()
     root, output = args.root.resolve(), args.run.resolve()
     revision = git(root, "rev-parse", "HEAD").decode().strip()
@@ -156,6 +161,48 @@ def main():
                     INSTRUMENT + ":scripts/prototypes/bank_read_attribution/measure.py",
                 )
             )
+            if args.mode == "measure-paired":
+                cpus = sorted(os.sched_getaffinity(0))
+                assert len(cpus) >= 16, cpus
+                groups = (cpus[:8], cpus[8:16])
+
+                def measure(arm, kind, process, affinity):
+                    tree = trees[arm]
+                    name = f"{arm}-{kind}-{process}"
+                    command = [
+                        PYTHON,
+                        str(instrument),
+                        str(tree),
+                        "--kind",
+                        kind,
+                        "--output",
+                        str(output / f"{name}.json"),
+                    ]
+                    return run(
+                        tree,
+                        BASE if arm == "base" else revision,
+                        command,
+                        output / f"{name}.log",
+                        env,
+                        affinity,
+                    )
+
+                with ThreadPoolExecutor(max_workers=2) as pool:
+                    for kind in ("full", "carried"):
+                        for process in (1, 2):
+                            pending = [
+                                pool.submit(
+                                    measure,
+                                    arm,
+                                    kind,
+                                    process,
+                                    groups[(i + process - 1) % 2],
+                                )
+                                for i, arm in enumerate(("base", "head"))
+                            ]
+                            codes = [future.result() for future in pending]
+                            assert codes == [0, 0], (kind, process, codes)
+                return
             for arm, tree in trees.items():
                 for kind in ("full", "carried"):
                     for process in (1, 2):

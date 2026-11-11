@@ -12,7 +12,7 @@ SCRATCH=$(mktemp -d "$TMPDIR/read-attribution-${SLURM_JOB_ID}-XXXX")
 trap 'rm -rvf "$SCRATCH"' EXIT
 export TMPDIR=$SCRATCH
 REVISION=$(git -C "$ROOT" rev-parse HEAD)
-for KIND in carried full; do
+for KIND in full carried; do
   for PROCESS in 1 2; do
     LOG=$RUN/$KIND-$PROCESS.log
     COMMAND="/home/ITER/mcintos/Code/nova/.venv/bin/python scripts/prototypes/bank_read_attribution/measure.py . --kind $KIND --output $RUN/$KIND-$PROCESS.json"

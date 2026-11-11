@@ -71,6 +71,16 @@ def owner(eqn):
         for frame in frames
     ):
         return "fixed_points.solve"
+    if "_read_at_nulls" in names and not names & {
+        "_wall_events",
+        "nodal_jets",
+        "field_from_jets",
+        "sampled_coefficient",
+        "_curvature_derivatives",
+        "saddle_normal_form",
+    }:
+        # Initial and terminal support share geometry inside this owner.
+        return "topology._read_at_nulls"
     if "_wall_events" in names:
         return "topology._wall_events"
     if "_fragments_at_level" in names:

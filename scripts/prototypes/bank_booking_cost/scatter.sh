@@ -11,7 +11,9 @@ export PYTHONPATH=$ROOT
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 $PY "$ROOT/scripts/prototypes/bank_booking_cost/scatter.py" "$ROOT" "$RUN/scatter-mask.npz"
 for ARM in base head; do
+  WIDTH=32
+  if [ "$ARM" = head ]; then WIDTH=128; fi
   for PROCESS in 1 2; do
-    $PY "$ROOT/scripts/prototypes/bank_booking_cost/scatter.py" "$ROOT" "$RUN/scatter-$ARM-$PROCESS.json" --mask "$RUN/scatter-mask.npz"
+    $PY "$ROOT/scripts/prototypes/bank_booking_cost/scatter.py" "$ROOT" "$RUN/scatter-$ARM-$PROCESS.json" --mask "$RUN/scatter-mask.npz" --width "$WIDTH"
   done
 done

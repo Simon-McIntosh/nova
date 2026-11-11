@@ -13,6 +13,7 @@ def main():
     parser.add_argument("root", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--mask", type=Path)
+    parser.add_argument("--width", type=int, default=32)
     args = parser.parse_args()
     sys.path.insert(0, str(args.root))
     from nova.jax.config import configure_dtypes
@@ -46,7 +47,7 @@ def main():
     def one(value, conic_mask, normal_mask):
         zero = jnp.zeros_like(value)
         return current._integrate_bucket(
-            conic_mask, 32, lambda i: value[i], zero
+            conic_mask, args.width, lambda i: value[i], zero
         ) + current._integrate_bucket(
             normal_mask,
             min(current._NORMAL_CUT_BATCH_WIDTH, cells),
@@ -66,6 +67,7 @@ def main():
         times.append(1000 * (time.perf_counter() - start))
     row = {
         "module": current.__file__,
+        "tile_width": args.width,
         "median_ms": statistics.median(times),
         "samples_ms": times,
         "conic_counts": np.asarray(conic.sum(axis=1)).tolist(),

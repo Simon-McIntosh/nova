@@ -6,6 +6,7 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 from dataclasses import replace
+import inspect
 from types import FunctionType
 
 import jax
@@ -21,15 +22,27 @@ assert jax.config.jax_enable_x64 is True
 pytestmark = [pytest.mark.slow, pytest.mark.timeout(1800)]
 
 
-def full_owner():
+def full_nulls():
     """Force the unchanged full-census branch as an independent reference."""
-    owner = FunctionType(
-        topology._read_at_nulls.__code__,
-        dict(vars(topology), _COMPACT_CANDIDATE_CAPACITY=0),
+    source = inspect.getsource(topology._read_at_nulls)
+    anchor = "        compact_candidates,\n    )"
+    assert source.count(anchor) == 1
+    namespace = dict(vars(topology))
+    exec(
+        compile(
+            source.replace(anchor, "        full_candidates,\n    )"),
+            topology.__file__,
+            "exec",
+        ),
+        namespace,
     )
+    return namespace["_read_at_nulls"]
+
+
+def full_owner():
     return FunctionType(
         topology.read_at_stationary_points.__code__,
-        dict(vars(topology), _read_at_nulls=owner),
+        dict(vars(topology), _read_at_nulls=full_nulls()),
     )
 
 
@@ -46,7 +59,7 @@ def case(kind, count):
         )
 
         wall = np.asarray(((1.2, -1.5), (2.8, -1.5), (2.8, 1.5), (1.2, 1.5)))
-        geometry = _realised_hex_geometry(wall, 50)
+        geometry = _realised_hex_geometry(wall, 131)
         analytic = UnequalSaddleField(jnp.asarray(0.08))
         roots = (-0.24 + np.asarray((-1.0, 1.0)) * np.sqrt(0.24**2 + 16)) / 4
         points = jnp.asarray([(2.0, 0.0)] + [(2.0, roots[i % 2]) for i in range(count)])
@@ -185,17 +198,18 @@ def test_support_flags_and_booked_moments_match_full_candidates(monkeypatch):
         )
 
     arguments = (operands, cache, roots + 0.03 * pitch, roots, None)
-    capacity = topology._COMPACT_CANDIDATE_CAPACITY
+    owner = topology._read_at_nulls
+    reference_owner = full_nulls()
     actual = jax.jit(execute)(*arguments)
     assert bool(actual[0].valid) and bool(actual[0].rebuilt)
-    monkeypatch.setattr(topology, "_COMPACT_CANDIDATE_CAPACITY", 0)
+    monkeypatch.setattr(topology, "_read_at_nulls", reference_owner)
     expected = jax.jit(lambda *args: execute(*args))(*arguments)
     assert_equal(actual, expected)
-    monkeypatch.setattr(topology, "_COMPACT_CANDIDATE_CAPACITY", capacity)
+    monkeypatch.setattr(topology, "_read_at_nulls", owner)
     carried = jax.jit(lambda *args: execute(*args))(
         *arguments[:-1], support_read.tracking_of(actual[0])
     )
-    monkeypatch.setattr(topology, "_COMPACT_CANDIDATE_CAPACITY", 0)
+    monkeypatch.setattr(topology, "_read_at_nulls", reference_owner)
     reference = jax.jit(lambda *args: execute(*args))(
         *arguments[:-1], support_read.tracking_of(expected[0])
     )

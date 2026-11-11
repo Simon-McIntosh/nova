@@ -5,6 +5,7 @@ from html import escape
 import json
 from pathlib import Path
 import hashlib
+import re
 import matplotlib
 
 matplotlib.use("Agg")
@@ -28,6 +29,26 @@ def main():
     args = parser.parse_args()
     allocation = (args.run / "counts-gpu-allocation.log").read_text()
     assert allocation.splitlines()[-1] == "EXIT=0"
+    suites = json.loads((args.run / "suite-receipts.json").read_text())
+    armed = json.loads((args.run / "armed-suite-receipts.json").read_text())
+    cpu_rows = []
+    for arm in ("base", "head"):
+        assert armed[arm]["completed"] and armed[arm]["exit_status"] == 0
+        for name in ("test_bank_drive_continuation", "test_bank_solve_driver"):
+            receipt = suites[arm + "-" + name]
+            assert receipt["completed"] and receipt["exit_status"] == 0
+            log = Path(receipt["log_path"]).read_text()
+            assert log.splitlines()[-1] == "EXIT=0"
+            passed = re.findall(r"(\d+) passed", log)[-1]
+            cpu_rows.append(
+                f"<tr><td>{arm}</td><td>{name}</td><td>{passed}</td></tr>"
+            )
+    negative = (args.run / "unguarded-reuse-mutant.log").read_text()
+    assert negative.splitlines()[-1] == "EXIT=1"
+    assert (
+        "FAILED tests/test_bank_solve_driver.py::"
+        "test_carried_factor_first_update_is_guarded[4.0-1]"
+    ) in negative
     data, arrays, inputs = {}, {}, {}
     for arm in ("main", "head"):
         stem = args.run / f"counts-{arm}-measured"
@@ -50,6 +71,13 @@ def main():
             and max(row["residual"]) <= 1e-10
             for row in data[arm]
         )
+    for path in (
+        "nova/equilibrium/support_read.py",
+        "nova/equilibrium/drive_continuation.py",
+    ):
+        assert hashlib.sha256((args.root / path).read_bytes()).hexdigest() == (
+            inputs["head"]["sources"][path]
+        ), path
     for key in (
         "width",
         "steps",
@@ -161,6 +189,8 @@ def main():
             max(r["residual"]) for rows in data.values() for r in rows
         ),
         lane_slices=224,
+        cpu_per_file={key: item["exit_status"] for key, item in suites.items()},
+        cpu_armed={key: item["exit_status"] for key, item in armed.items()},
     )
     (args.run / "count-report.json").write_text(json.dumps(summary, indent=2))
     precision_rows = "".join(
@@ -206,8 +236,11 @@ against main. Synthetic violations of all four precision bounds were refused.
 Receipts and full logs are retained under <code>{escape(str(args.run))}</code>.
 The original API reproduction reports <code>TypeError: solve_batch() got an
 unexpected keyword argument 'factor_cache'</code>. Five focused cases pass;
-the paired sirius suite and unguarded-reuse negative control are recorded in
-the same run directory.</p>
+the paired sirius files have zero added failures. The exact armed two-file
+command also passes both arms. The unguarded-reuse scratch mutation fails the
+non-contracting first-update test with EXIT=1; the same test passes at head.</p>
+<table id="bank-factor-carry-cpu"><thead><tr><th>arm</th><th>fresh process file</th>
+<th>passed</th></tr></thead><tbody>{"".join(cpu_rows)}</tbody></table>
 </section>"""
     (
         args.root

@@ -1,0 +1,135 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: reviewed manifest baseline_suite and after_suite are both empty; suite explicitly unarmed. No suite logs exist to derive a measured delta; null is not a measured zero.",
+  "assertion_analysis": [
+    {
+      "fails_if": "Float64 is disabled or the actual selected JAX backend is not GPU; changing platform or dtype configuration reddens these guards.",
+      "location": "measure.py:20; measure.py:114; directional.py:40"
+    },
+    {
+      "fails_if": "Stitching changes unary area above 1e-13 or produces an invalid/disconnected union; reinstating exact-union contiguity fails on the recorded 30-part mesh. Coordinate-rounding bound alone is weak because rounding to a 1e-14 grid normally moves coordinates by at most half that grid.",
+      "location": "measure.py:76-79"
+    },
+    {
+      "fails_if": "Boundary moment signs, radial partition or factors disagree with independently summed cell centroid moments by 2e-14; e.g. dropping the inner subtraction reddens it.",
+      "location": "measure.py:94"
+    },
+    {
+      "fails_if": "Meshed union differs from authored region above tolerance; overlay precision limits sensitivity below its grid and it is not used alone as evidence of exact preservation.",
+      "location": "measure.py:147; geometry.py:32"
+    },
+    {
+      "fails_if": "Production Newton solve reports non-convergence; exhausting iteration budget reddens these guards, but they do not certify physical accuracy.",
+      "location": "measure.py:173,232; directional.py:60"
+    },
+    {
+      "fails_if": "Any low-mu shell or high-mu sphere probe stops improving at either refinement; a source/field regression causing constant or rising control error reddens it; high-mu shell orders are printed only.",
+      "location": "measure.py:271-274"
+    },
+    {
+      "fails_if": "Shapely unary area subtraction cannot resolve the known independent 0.1 square-metre change.",
+      "location": "geometry.py:25"
+    },
+    {
+      "fails_if": "A genuine 20 mm disconnection is accepted or another assertion masquerades as the expected disconnection refusal; deleting the connected-polygon check causes the explicit else raise.",
+      "location": "geometry.py:58-62"
+    },
+    {
+      "fails_if": "Receipt lacks passing physical controls, or text overlaps/clips/intersects data; figure-negative-control.log records the deliberate collision refusal and EXIT=1.",
+      "location": "figures.py:81 and checked_save:67"
+    }
+  ],
+  "assertion_independence": "No added test assertion equates a returned value with the same configurable value supplied as its oracle. The collocation residual and result.converged guards measure algebraic convergence only; they are not independent physical-accuracy checks.",
+  "blocking_findings": 0,
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/magnetisation_high_permeability/run.sh:29",
+    "scripts/magnetisation_high_permeability/payload.sh:15",
+    "scripts/magnetisation_high_permeability/directional.py:13",
+    "scripts/magnetisation_high_permeability/geometry.py:10"
+  ],
+  "completed_at": "2026-11-11T06:25:21Z",
+  "delivery_blocker": "Review contract requires an integer added_failure_count derived from absent suite arms; missing evidence must not be replaced with a fabricated zero. Coordinator must reconcile the unarmed-suite review contract.",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "the reuse shortfall is the duplicated figure-save checks in a measurement script (finding 1); no product code is duplicated",
+      "recorded_at": "2026-11-11T13:03:34.350174+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-11T06:17:28Z",
+  "figure_review": "Rendered exact submitted SVG extracted with git show using ImageMagick and visually inspected reviewed-figure.png; all four panels, labels and legend readable, no overlap or clipping.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-high-permeability-shell",
+      "recorded_at": "2026-11-11T13:03:23.948438+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "measurement-script save helper with no product surface; consolidating the three script save policies is a separate cleanup, not this measurement's deliverable",
+      "recorded_at": "2026-11-11T13:03:30.497660+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/magnetisation_high_permeability/measure.py",
+      "line": "271",
+      "severity": "non-blocking",
+      "text": "non-blocking: only the low-permeability shell and sphere refinement are asserted; making the 10 mm high-permeability result non-convergent still emits SUMMARY with controls_pass=true, so the central newly recorded conclusion lacks a regression guard."
+    },
+    {
+      "file": "scripts/magnetisation_high_permeability/figures.py",
+      "line": "27",
+      "severity": "non-blocking",
+      "text": "non-blocking: checked_save duplicates text clipping/overlap validation already owned by scripts/edge_sheet/figure.py:48 and scripts/prototypes/iron_magnetisation/figures.py:40 rather than extending or wrapping either owner, leaving multiple save policies to maintain."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read all seven commits from c381a899741ac3c8695919c0915a021bd6a8fc14 through 58e3b753065e1b7252fd1d3ad103620180f2c911; they add measurement tools, geometry cross-checks and one inspected SVG without changing nova/biot/magnetisation.py.",
+    "done_when": "brief.md's three clauses are covered by gpu-1310090.log's 24 shell solves and three sphere controls, gpu-1310142.log's actual boundary radii, and the evidence fragment's orders, susceptibility slopes and repair recommendation.",
+    "goal": "brief.md asks which mechanism causes the high-permeability shell error; docs/evidence/fragments/iron-core-magnetisation/icm-high-permeability-shell.html:2 reports amplified discretisation error and continuing fine-mesh convergence with a named repair owner.",
+    "manifest": "manifest.md names seven existing commits and readable EXIT=0 receipts, but baseline_suite and after_suite are blank because its suite was unarmed, so no suite failure delta can be measured.",
+    "write_paths": "manifest.md declares scripts/magnetisation_high_permeability and the named evidence and figure paths; all nine paths in the submitted diff fall inside them."
+  },
+  "justifications": {
+    "durability": "scripts/magnetisation_high_permeability/measure.py:271 rejects non-converging low-permeability shell and sphere controls and geometry.py:58 rejects acceptance of a real gap, but no assertion protects the reported high-permeability fine-mesh convergence.",
+    "evidence": "gpu-1310090.log records the reproduced negative coarse orders and positive fine orders with both physical controls, while gpu-1310142.log independently validates meshed radii; the core sweep predates the final geometry helper and the separate later receipt closes that difference.",
+    "fit": "scripts/magnetisation_high_permeability/figures.py:84 uses the established 14 by 7.2 inch canvas and named existing iron colours, and the submitted SVG renders with readable unclipped labels; script entry points and production solver calls follow the surrounding research idiom.",
+    "goal_fidelity": "docs/evidence/fragments/iron-core-magnetisation/icm-high-permeability-shell.html:2 discriminates geometry, susceptibility amplification and thickness-only resolution and names nova/biot/magnetisation.py as repair owner without modifying it.",
+    "reuse": "scripts/magnetisation_high_permeability/figures.py:27 duplicates the existing clipping/overlap save capability in scripts/edge_sheet/figure.py:48 instead of extending or wrapping it, although measure.py delegates the actual field and material solve to existing production owners.",
+    "scope_discipline": "all nine changed paths are within manifest.md's declared scope and the additional ideal-dipole and directional experiments directly discriminate the proposed mechanisms."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: brief.md asks which mechanism causes the high-permeability shell error; docs/evidence/fragments/iron-core-magnetisation/icm-high-permeability-shell.html:2 reports amplified discretisation error and continuing fine-mesh convergence with a named repair owner.\nVERDICT done_when: brief.md's three clauses are covered by gpu-1310090.log's 24 shell solves and three sphere controls, gpu-1310142.log's actual boundary radii, and the evidence fragment's orders, susceptibility slopes and repair recommendation.\nVERDICT write_paths: manifest.md declares scripts/magnetisation_high_permeability and the named evidence and figure paths; all nine paths in the submitted diff fall inside them.\nVERDICT manifest: manifest.md names seven existing commits and readable EXIT=0 receipts, but baseline_suite and after_suite are blank because its suite was unarmed, so no suite failure delta can be measured.\nVERDICT diff: read all seven commits from c381a899741ac3c8695919c0915a021bd6a8fc14 through 58e3b753065e1b7252fd1d3ad103620180f2c911; they add measurement tools, geometry cross-checks and one inspected SVG without changing nova/biot/magnetisation.py.\nCALL_SITES: scripts/magnetisation_high_permeability/run.sh:29, scripts/magnetisation_high_permeability/payload.sh:15, scripts/magnetisation_high_permeability/directional.py:13, scripts/magnetisation_high_permeability/geometry.py:10\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/iron-core-magnetisation/icm-high-permeability-shell.html:2 discriminates geometry, susceptibility amplification and thickness-only resolution and names nova/biot/magnetisation.py as repair owner without modifying it.\nSCORE evidence: 19\nJUSTIFICATION evidence: gpu-1310090.log records the reproduced negative coarse orders and positive fine orders with both physical controls, while gpu-1310142.log independently validates meshed radii; the core sweep predates the final geometry helper and the separate later receipt closes that difference.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all nine changed paths are within manifest.md's declared scope and the additional ideal-dipole and directional experiments directly discriminate the proposed mechanisms.\nSCORE durability: 14\nJUSTIFICATION durability: scripts/magnetisation_high_permeability/measure.py:271 rejects non-converging low-permeability shell and sphere controls and geometry.py:58 rejects acceptance of a real gap, but no assertion protects the reported high-permeability fine-mesh convergence.\nSCORE fit: 19\nJUSTIFICATION fit: scripts/magnetisation_high_permeability/figures.py:84 uses the established 14 by 7.2 inch canvas and named existing iron colours, and the submitted SVG renders with readable unclipped labels; script entry points and production solver calls follow the surrounding research idiom.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/magnetisation_high_permeability/figures.py:27 duplicates the existing clipping/overlap save capability in scripts/edge_sheet/figure.py:48 instead of extending or wrapping it, although measure.py delegates the actual field and material solve to existing production owners.\nFINDING scripts/magnetisation_high_permeability/measure.py:271 non-blocking: only the low-permeability shell and sphere refinement are asserted; making the 10 mm high-permeability result non-convergent still emits SUMMARY with controls_pass=true, so the central newly recorded conclusion lacks a regression guard.\nFINDING scripts/magnetisation_high_permeability/figures.py:27 non-blocking: checked_save duplicates text clipping/overlap validation already owned by scripts/edge_sheet/figure.py:48 and scripts/prototypes/iron_magnetisation/figures.py:40 rather than extending or wrapping either owner, leaving multiple save policies to maintain.\n",
+  "reuse_search": "Searched nova/biot, nova/media, scripts and the magnetisation tests by shielding, dipole, volume, save and annular capabilities. Opened nova/biot/magnetisation.py owner and prototype shell.py; actual solves and ring fields delegate to existing owners. No existing fixed-boundary radial/angular mesher or actual-cell inner/outer boundary-moment diagnostic found. Experiment main, cached_interaction, dump and uniform are local orchestration/adapters; cached_interaction wraps the production owner. Opened edge_sheet/figure.py and iron_magnetisation/figures.py: checked_save duplicates their capability with extra label/data checks instead of extending it.",
+  "review_run_id": "r-20261111T061604562625-review-of-icm-high-permeability-shell-58e3b753065e",
+  "reviewed_base_sha": "c381a899741ac3c8695919c0915a021bd6a8fc14",
+  "reviewed_head_sha": "58e3b753065e1b7252fd1d3ad103620180f2c911",
+  "reviewed_run_id": "r-20261111T051520948243-icm-high-permeability-shell",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "source_receipts": [
+    "gpu-1310090.log",
+    "gpu-1310095.log",
+    "gpu-1310142.log",
+    "figure-validation.log",
+    "figure-negative-control.log"
+  ],
+  "status": "parsed",
+  "suite_armed": false,
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T13:07:49.102009+00:00",
+  "total": 97
+}

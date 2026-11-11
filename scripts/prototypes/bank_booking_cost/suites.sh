@@ -34,6 +34,8 @@ arm() {
   REVISION=$3
   export PYTHONPATH=$TREE:$SCRATCH BOOKING_EXPECTED_TREE=$TREE PYTEST_PLUGINS=booking_provenance
   for NAME in test_bank_newton_step test_bank_step_booking_batch test_bank_step_launch_fusion test_bank_solve_driver; do
+    mkdir -p "$SCRATCH/$ARM-$NAME"
+    export TMPDIR=$SCRATCH/$ARM-$NAME
     LOG=$RUN/$ARM-$NAME.log
     COMMAND="/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q $TREE/tests/$NAME.py"
     printf '# revision: %s tree: %s command: %s\n' "$REVISION" "$TREE" "$COMMAND" > "$LOG"

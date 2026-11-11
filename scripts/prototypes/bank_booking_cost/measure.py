@@ -16,6 +16,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--reference", type=Path)
     parser.add_argument("--repeats", type=int, default=12)
+    parser.add_argument("--focus", action="store_true")
     args = parser.parse_args()
     root = args.root.resolve()
     sys.path.insert(0, str(root))
@@ -99,7 +100,7 @@ def main():
             assert relative <= 1e-12
             output[f"parity_{lanes}"] = relative
         measure(f"{lanes}:local", mapped(local), bank, states, support, booked)
-        if lanes == 16:
+        if lanes == 16 and not args.focus:
             # Ablations retain the channel dimensions and all other production work.
             original = current._conic_ring_tangents
 

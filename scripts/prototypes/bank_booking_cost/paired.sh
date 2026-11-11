@@ -23,7 +23,7 @@ for arm in base head; do
   if [ "$arm" = base ]; then TREE=$SCRATCH/base; REVISION=$BASE; fi
   for process in 1 2; do
     LOG=$RUN/$arm-measure-$process.log
-    COMMAND="/home/ITER/mcintos/Code/nova/.venv/bin/python $ROOT/scripts/prototypes/bank_booking_cost/measure.py $TREE --output $RUN/$arm-$process.json"
+    COMMAND="/home/ITER/mcintos/Code/nova/.venv/bin/python $ROOT/scripts/prototypes/bank_booking_cost/measure.py $TREE --output $RUN/$arm-$process.json ${4:-}"
     if [ "$arm" = head ]; then COMMAND="$COMMAND --reference $RUN/base-$process.npz"; fi
     printf '# revision: %s tree: %s command: %s\n' "$REVISION" "$TREE" "$COMMAND" > "$LOG"
     export PYTHONPATH=$TREE

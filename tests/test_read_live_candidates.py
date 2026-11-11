@@ -151,7 +151,9 @@ def test_support_inspects_only_live_saddles(monkeypatch, count):
         return original(*args)
 
     monkeypatch.setattr(topology, "_support_at_level", measured)
-    result = jax.jit(topology.read_at_stationary_points)(*case("diverted", count))
+    result = jax.jit(lambda *values: topology.read_at_stationary_points(*values))(
+        *case("diverted", count)
+    )
     jax.block_until_ready(result)
     jax.effects_barrier()
     print("SUPPORT_INSPECTIONS", count, len(seen), flush=True)

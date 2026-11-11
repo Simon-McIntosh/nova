@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-11-11T14:45:33.309Z",
   "dispatched_at": "2026-11-11T14:30:15Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-hollow-current-source",
+      "recorded_at": "2026-11-11T14:51:58.098156+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_xpoint_offset_decomposition.py",

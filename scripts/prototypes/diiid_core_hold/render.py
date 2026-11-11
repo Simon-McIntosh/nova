@@ -44,7 +44,14 @@ def poloidal(root, case, output, previews):
     high = max(
         float(data[name].max()) for data, _, _ in pair for name in ("flux", "label")
     )
-    levels = np.linspace(low, high, 18)[1:-1]
+    levels = list(np.linspace(low, high, 12)[1:-1])
+    for data, _, analysis in pair:
+        levels.append(float(data["boundary"][2]))
+        for key in ("census", "reference_census"):
+            core = analysis[key]
+            width = max(core["maxima_flux_spread_mwb"] / 1000, 0.002)
+            levels.extend(core["max_flux_wb"] - width * np.array([0.25, 0.75, 1.5]))
+    levels = np.unique(levels)
     points = np.array(
         [
             point["rz_m"]
@@ -167,7 +174,7 @@ def poloidal(root, case, output, previews):
         loc="upper center",
         bbox_to_anchor=(0.5, 1.0),
         frameon=False,
-        fontsize=12,
+        fontsize=13,
     )
     save(
         figure,

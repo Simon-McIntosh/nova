@@ -485,7 +485,8 @@ def test_nonlinear_shell_uses_differential_newton(capsys):
         )
     assert result.converged
     assert maximum_field < b[-2], "shell must stay below the altered final interval"
-    assert result.iterations <= 10
+    assert result.iterations == 3
+    assert result.regularisation_history == (0.0, 0.0, 0.0)
     assert quadratic_ratio < 0.1, "late residual contractions must accelerate"
     assert result.residual_history[-1] < 1e-8
     assert np.all(np.diff(result.residual_history) < 0)
@@ -510,3 +511,130 @@ def test_update_operands_and_factor_are_runtime_arguments():
     np.testing.assert_allclose(shifted, 2 * result)
     damped, _ = iron._update(state, moved, factor, jnp.asarray(0.5))
     np.testing.assert_allclose(damped, result)
+
+
+def test_regularised_newton_crosses_ill_conditioned_material_stall(monkeypatch, capsys):
+    # A cell-volume similarity scaling of a symmetric response makes the
+    # differential system ill-conditioned without changing its eigenvalues.
+    response = (
+        np.array(
+            [
+                [
+                    0.27109626211628385,
+                    6.215590257990723,
+                    0.605505275409036,
+                    -28.29345763919621,
+                ],
+                [
+                    0.16973579554603527,
+                    -0.5154273387446999,
+                    3.2520303434762816,
+                    10.607063515488663,
+                ],
+                [
+                    6.038927604842041e-7,
+                    0.00011876963403776738,
+                    0.9925358710780197,
+                    -0.007598651820290013,
+                ],
+                [
+                    -0.0034226449016746085,
+                    0.046987238944372414,
+                    -0.9216594329649704,
+                    -0.19293680537499014,
+                ],
+            ]
+        )
+        * iron._MU0
+    )
+    external = (
+        np.array(
+            [
+                0.016291980616101504,
+                -0.01907815806338487,
+                -0.025975777223539,
+                0.047051923861125396,
+            ]
+        )
+        .reshape(2, 2)
+        .T
+    )
+    monkeypatch.setattr(iron, "_interaction", lambda *args: response)
+    b, mu = nonlinear_law()
+    operands = tuple(
+        jnp.asarray(x)
+        for x in (response, external.T.reshape(-1), *iron._fit_law(b, mu))
+    )
+    condition = np.linalg.cond(jax.jacfwd(iron._residual)(jnp.zeros(4), operands))
+    assert condition > 1e4
+    result = iron.solve_magnetisation(
+        shapely.box(1, 0, 2, 2),
+        lambda points: external,
+        b,
+        mu,
+        cell_size=1,
+        max_iterations=40,
+    )
+    with capsys.disabled():
+        print(
+            f"\nill-conditioned material: condition={condition:.12g}, "
+            f"converged={result.converged}, iterations={result.iterations}, "
+            f"residual={result.residual_history}, "
+            f"lambda={result.regularisation_history}, ratios={result.reduction_ratios}",
+            flush=True,
+        )
+    assert result.converged
+    assert result.residual_history[-1] < 1e-8
+    assert any(value > 0 for value in result.regularisation_history)
+    assert result.regularisation_history[-1] == 0
+    assert all(value > 0.25 for value in result.reduction_ratios)
+    assert (
+        len(result.regularisation_history)
+        == len(result.reduction_ratios)
+        == len(result.step_types)
+        == result.iterations
+    )
+    assert all(
+        kind == ("newton" if damping == 0 else "regularised")
+        for damping, kind in zip(
+            result.regularisation_history, result.step_types, strict=True
+        )
+    )
+
+
+def test_material_restart_preserves_component_order_and_checks_shape(monkeypatch):
+    response = np.eye(4) * iron._MU0 * 0.5
+    monkeypatch.setattr(iron, "_interaction", lambda *args: response)
+    region = shapely.box(1, 0, 2, 2)
+    initial = np.array([[100.0, -200.0], [300.0, -400.0]])
+    external = np.array([[0.01, 0.02], [-0.03, 0.04]])
+    b, mu = [0, 1, 10], [10, 10, 10]
+    result = iron.solve_magnetisation(
+        region,
+        lambda points: external,
+        b,
+        mu,
+        cell_size=1,
+        initial_magnetisation=initial,
+        max_iterations=0,
+    )
+    np.testing.assert_array_equal(result.magnetisation, initial)
+    operands = tuple(
+        jnp.asarray(x)
+        for x in (response, external.T.reshape(-1), *iron._fit_law(b, mu))
+    )
+    expected = np.linalg.norm(
+        iron._residual(jnp.asarray(initial.T.reshape(-1)), operands)
+    ) / (np.linalg.norm(external) / iron._MU0)
+    assert result.residual_history == pytest.approx((expected,))
+    assert not result.converged
+    for invalid in (np.zeros((4, 1)), np.full((2, 2), np.nan)):
+        with pytest.raises(ValueError, match="initial_magnetisation"):
+            iron.solve_magnetisation(
+                region,
+                lambda points: external,
+                b,
+                mu,
+                cell_size=1,
+                initial_magnetisation=invalid,
+            )

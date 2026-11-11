@@ -1,0 +1,84 @@
+<section id="icm-newton-trust-region-state">
+  <h2>Regularised material Newton</h2>
+  <p>The saved 3447-cell WEST state now converges from a relative residual of
+    5.844633900691807e-4 to 2.100506605937123e-12 in 248 accepted corrections on
+    titan (Tesla P100). The saved interaction matrix is reused: zero G rebuilds.
+    Product commit: <code>80c194ee3fb321b3548da7581ae04fb2fb4191e1</code>.</p>
+
+  <h3 id="icm-newton-trust-region-method">Adaptive diagonal regularisation</h3>
+  <p>The exact differential Jacobian remains in use. Each iteration first tries
+    ordinary Newton, then solves <code>(F'(M) + lambda I) p = -F(M)</code> when
+    necessary. A positive lambda is an implicit pseudo-time step, with local
+    equation <code>F(M + p) + lambda p = 0</code>. Its linear model predicts zero
+    residual. The measured reduction ratio is therefore
+    <code>rho = 1 - ||F(M + p) + lambda p||^2 / ||F(M)||^2</code>.</p>
+  <p>A step is accepted only for rho &gt; 0.25 and a representable displacement.
+    The first positive lambda is 1e-6; refused positive trials multiply it by ten.
+    An accepted regularised trial multiplies lambda by 0.3 for rho &gt; 0.9, or by
+    two for rho &lt; 0.5. Trying lambda zero first restores unregularised Newton
+    near a nonsingular root. State, operands, factor and shift are runtime data.
+    The mesh, material fit and material coefficient are unchanged.</p>
+  <p>The receipt exposes <code>regularisation_history</code>,
+    <code>reduction_ratios</code> and <code>step_types</code>, one entry per accepted
+    correction alongside <code>step_scales</code>. Each accepted correction takes
+    its whole regularised direction, so its step scale is one. A validated
+    <code>initial_magnetisation</code> in (cells, 2) component order enables saved
+    states to restart through the production solve.</p>
+  <p>Reduction is measured on the regularised local equation. The unregularised
+    material residual can increase: the WEST recovery contains 142 such
+    increases and peaks at 0.003562881574555639. This is the mechanism that allows
+    recovery past a residual-only descent stall; the convergence test continues
+    to use the original, unregularised material residual.</p>
+
+  <h3 id="icm-newton-trust-region-measure">Saved-state replay and controls</h3>
+  <p>Before the repair, the saved defect reproduced: one correction at 1/512
+    reached 5.838969871878791e-4, then every one of the original fifteen
+    backtracking grades was refused. The committed replay asserts that the
+    imported source equals its HEAD blob and that the saved seed residual
+    matches its original receipt to 1e-10 relative.</p>
+  <table>
+    <thead><tr><th>Measure</th><th>Observed result</th></tr></thead>
+    <tbody>
+      <tr><td>WEST recovery</td><td>248 corrections: 40 Newton, 208 regularised; residual 2.100506605937123e-12</td></tr>
+      <tr><td>Smallest accepted local-equation ratio</td><td>0.25124237279090167</td></tr>
+      <tr><td>Final four corrections</td><td>lambda = 0; residuals 3.699959127604011e-5, 1.6243632543765434e-6, 1.464596480723835e-8, 2.100506605937123e-12</td></tr>
+      <tr><td>Terminal permeability range</td><td>22.57871072083226 to 1690.6134483969697</td></tr>
+      <tr><td>Synthetic nonuniform response</td><td>Jacobian condition 146276.331565; 16 corrections; residual 3.728044482115181e-12</td></tr>
+      <tr><td>Restored pure backtracking</td><td>New ill-conditioned test fails: two corrections, residual 0.009264822015720146, backtracking-refused; EXIT=1</td></tr>
+      <tr><td>Frozen-permeability Jacobian</td><td>Nonlinear-shell test fails: five corrections and late ratio 1.04458978683; EXIT=1</td></tr>
+    </tbody>
+  </table>
+  <p>The synthetic operator is a cell-volume similarity scaling of a symmetric
+    response. Both mutation controls assert the scratch module's import path,
+    record its distinct source digest, and verify the unmodified product source
+    blob against HEAD after the failing test. The focused regression gate passes
+    all three tests, including restart component order and runtime operands.</p>
+  <p>The WEST measurement used <code>max_iterations=400</code>. The public default
+    remains sixty; this result does not claim recovery within that default or
+    within ten corrections. No refinement or mesh-pair acceptance is inferred.</p>
+
+  <h3 id="icm-newton-trust-region-validation">CPU suite pair</h3>
+  <p>The exact scoped command passed in both fresh-process arms of sirius job
+    1311012, which had a three-hour allocation. Baseline
+    <code>6abcdfe84ec3df3b707ae6a2e21aed1b7da02296</code>: 28 passed in 1379.37 s,
+    EXIT=0. Product head <code>80c194ee3fb321b3548da7581ae04fb2fb4191e1</code>:
+    30 passed in 1368.02 s, EXIT=0. There are zero added failures. Later commits
+    change this evidence fragment only.</p>
+  <p>Both arms ran <code>PYTHONPATH=. JAX_PLATFORMS=cpu
+    /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q
+    tests/test_magnetisation.py</code>. Each extracted tree printed the actual
+    imported module and working directory before its suite; x64 was configured
+    and asserted before constructing arrays. Both temporary trees were removed
+    when the job completed.</p>
+  <p>The nonlinear shell has exactly three unregularised corrections and the
+    identical residual history in both arms: 0.995437821501903,
+    0.0004873816814920752, 6.435774840540602e-8, 5.994298257758251e-14.
+    Its quadratic ratio remains 0.00705351942949, against 1.04458978683 for the
+    frozen-permeability control. The suite enforces both the three-correction
+    count and a quadratic ratio below 0.1.</p>
+  <p>Raw receipts and logs are retained under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T205006716359-icm-newton-trust-region/</code>:
+    <code>measurement.json</code>, <code>measurement.log</code>,
+    <code>negative-backtracking.log</code>, <code>negative-secant.log</code>,
+    <code>baseline-suite.log</code> and <code>after-suite.log</code>.</p>
+</section>

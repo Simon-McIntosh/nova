@@ -82,10 +82,19 @@ v = [δ − f(p + q)/2] / (1 − f)</pre>
     <code>material-focused.log</code> in the run directory.</p>
 
   <h3 id="icm-law-fit-suite">Full file and mutation receipts</h3>
-  <p>Pending: one sirius job, 1310636, is running the exact scoped baseline
-    and head suite commands sequentially in independent revision extractions,
-    then restoring the refusal branch in the head extraction for the WEST
-    negative control. This paragraph will be replaced by the completed receipts.</p>
+  <p>The revision-bound full-file receipts are recorded in the run manifest's
+    <code>baseline_suite</code> and <code>after_suite</code> fields, with the
+    exact scoped command, imported module path, working directory and terminal
+    exit status retained in <code>baseline-suite.log</code> and
+    <code>after-suite.log</code>. The unchanged nonlinear-shell test prints its
+    iteration count, residual history and quadratic ratio in each arm.</p>
+  <pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_magnetisation.py</pre>
+  <p>The declared mutation restores the origin-permeability refusal branch in
+    a separate head extraction. <code>negative-control.log</code> records the
+    asserted mutant import, the WEST-table pytest failure and the source-blob
+    comparison proving the delivered source still equals HEAD. The manifest
+    records the observed result; this fragment is committed before those
+    measurements so the measured head remains the delivered head.</p>
   <p>Durable implementation commit:
     <code>284dce417f6d225c7859febdd04d1e7f29cf42cc</code>.
     Logs are under

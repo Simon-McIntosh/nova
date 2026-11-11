@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from functools import lru_cache
+import json
+import os
+from pathlib import Path
 from time import perf_counter
 
 import jax
@@ -206,6 +209,89 @@ def test_clipped_sphere_has_no_collapsed_sheet_edges():
     edges = cell_edges(cells.polygons)
     lengths = np.hypot(edges.end_r - edges.start_r, edges.end_z - edges.start_z)
     assert np.all(lengths > 0)
+
+
+@pytest.fixture(scope="module")
+def west_iron_region():
+    """Read every iron segment at the source manifest's dictionary pin."""
+    from nova.imas.machine import StaticMachineDescription
+
+    manifest_path = Path(
+        os.environ.get(
+            "NOVA_WEST_SOURCE_MANIFEST",
+            "/home/ITER/mcintos/Code/imas-efit/tests/data-manifest.json",
+        )
+    )
+    if not manifest_path.is_file():
+        pytest.skip("WEST source manifest is not mounted")
+    manifest = json.loads(manifest_path.read_text())
+    row = next(
+        row for row in manifest["machine_descriptions"] if row["key"] == "west-dd4-1-0"
+    )
+    source = manifest_path.parent.parent / row["target"]
+    machine = StaticMachineDescription.read_iron_core(
+        f"imas:hdf5?path={source}", dd_version=row["dd_version"]
+    )
+    assert len(machine.iron_segments) == 6
+    return shapely.union_all(
+        [
+            shapely.Polygon(np.column_stack((segment.outline.r, segment.outline.z)))
+            for segment in machine.iron_segments
+        ]
+    )
+
+
+@pytest.mark.parametrize("size", [0.08, 0.057, 0.04])
+def test_west_mesh_preserves_iron_and_collocation_clearance(
+    west_iron_region, size, capsys
+):
+    cells = iron._mesh(west_iron_region, size)
+    polygons = [shapely.Polygon(p) for p in cells.polygons]
+    union_error = west_iron_region.symmetric_difference(
+        shapely.union_all(polygons)
+    ).area
+    clearances = np.array(
+        [
+            shapely.Point(centre).distance(polygon.boundary)
+            for polygon, centre in zip(polygons, cells.centroids, strict=True)
+        ]
+    )
+    assert all(
+        polygon.contains(shapely.Point(centre))
+        for polygon, centre in zip(polygons, cells.centroids, strict=True)
+    )
+    assert union_error == 0
+    assert clearances.min() >= 0.01 * size
+    with capsys.disabled():
+        print(
+            f"\nWEST mesh: cell_size={size:g}, cells={len(polygons)}, "
+            f"union_error={union_error:g}, min_clearance={clearances.min():.12g} m",
+            flush=True,
+        )
+
+
+def test_mesh_merges_thin_plate_without_losing_material(capsys):
+    size = 0.1
+    thickness = 0.03 * size
+    region = shapely.box(1, 0, 2, thickness)
+    cells = iron._mesh(region, size)
+    polygons = [shapely.Polygon(p) for p in cells.polygons]
+    assert region.symmetric_difference(shapely.union_all(polygons)).area == 0
+    clearance = min(
+        shapely.Point(centre).distance(polygon.boundary)
+        for polygon, centre in zip(polygons, cells.centroids, strict=True)
+    )
+    assert all(
+        polygon.contains(shapely.Point(centre))
+        for polygon, centre in zip(polygons, cells.centroids, strict=True)
+    )
+    assert clearance >= 0.01 * size
+    with capsys.disabled():
+        print(
+            f"\nthin plate: thickness={thickness:g} m, cells={len(polygons)}, "
+            f"min_clearance={clearance:.12g} m",
+            flush=True,
+        )
 
 
 def test_mesh_preserves_holes_and_refuses_isolated_slivers():

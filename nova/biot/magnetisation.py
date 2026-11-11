@@ -52,10 +52,13 @@ def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
     ):
         raise ValueError("iron must be a valid nonempty polygon at nonnegative radius")
     r0, z0, r1, z1 = region.bounds
+    # Adjacent squares must use identical endpoints to share exact edges.
+    radial = np.r_[np.arange(r0, r1, size), r1]
+    vertical = np.r_[np.arange(z0, z1, size), z1]
     pieces = []
-    for r in np.arange(r0, r1, size):
-        for z in np.arange(z0, z1, size):
-            clipped = shapely.box(r, z, r + size, z + size).intersection(region)
+    for r, right in zip(radial[:-1], radial[1:], strict=True):
+        for z, top in zip(vertical[:-1], vertical[1:], strict=True):
+            clipped = shapely.box(r, z, right, top).intersection(region)
             for piece in shapely.get_parts(clipped):
                 if isinstance(piece, shapely.Polygon) and piece.area > 0:
                     if piece.interiors:

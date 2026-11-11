@@ -13,13 +13,10 @@ def main():
     parser.add_argument("--row", type=Path, required=True)
     args = parser.parse_args()
     import jax
-    import jax.numpy as jnp
     import numpy as np
 
-    from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
+    from scripts.prototypes.diiid_diverted_branch.measure import lower_saddle_reader
     from nova.jax.config import configure_dtypes
-    from nova.linalg.tensor_spline import fit_tensor_spline
-    from nova.media.poloidal import inside_wall_units
 
     configure_dtypes()
     assert jax.config.jax_enable_x64
@@ -27,67 +24,30 @@ def main():
     with np.load(args.row / "terminal.npz") as archive:
         data = {key: archive[key] for key in archive.files}
     state_hash = hashlib.sha256(data["state"].tobytes()).hexdigest()
-    count = data["flux"].size
     reference = np.asarray(record["efit_x_point_rz_m"])
     terminal_trip = record["inner"][-1]["index"]
     with np.load(args.row / f"inner-{terminal_trip}.npz") as archive:
         normalized = archive["state"][: data["state"].size]
         scale = np.dot(data["state"], normalized) / np.dot(normalized, normalized)
 
-    @jax.jit
-    def roots(state, starts):
-        field = fit_tensor_spline(
-            jnp.asarray(data["radius"]),
-            jnp.asarray(data["height"]),
-            state[:count].reshape(data["flux"].shape).T,
-        )
-        return polish_stationary_points(field, starts, jnp.ones(2, bool))
-
+    read_lower = lower_saddle_reader(data, reference)
     observations = []
 
     def refresh(topology, state):
-        starts = np.vstack((reference, topology["selected_saddle_rz_m"]))
-        found = jax.device_get(roots(jnp.asarray(state), jnp.asarray(starts)))
-        positions = np.asarray(found["position_rz"])
-        valid = (
-            np.asarray(found["converged"])
-            & (np.asarray(found["hessian_type"]) == -1)
-            & (positions[:, 1] < min(data["reference_axis"][1], data["axis"][1]))
+        # Older receipts retain only the terminal axis; record that fallback.
+        axis = topology.get("axis_rz_m", data["axis"])
+        lower = read_lower(state, topology["selected_saddle_rz_m"], axis)
+        print("LOWER_ROOT_PROBE " + json.dumps(lower), flush=True)
+        assert lower["lower_saddle_qualified"], (
+            "known lower saddle was not recovered by either probe"
         )
-        distance = np.linalg.norm(positions - reference, axis=1)
-        index = int(np.argmin(np.where(valid, distance, np.inf)))
-        print(
-            "LOWER_ROOT_PROBE "
-            + json.dumps(
-                dict(
-                    starts=starts.tolist(),
-                    positions=positions.tolist(),
-                    converged=np.asarray(found["converged"]).tolist(),
-                    gradient_norm=np.asarray(found["gradient_norm"]).tolist(),
-                    hessian_type=np.asarray(found["hessian_type"]).tolist(),
-                )
-            ),
-            flush=True,
-        )
-        assert valid.any(), "known lower saddle was not recovered by either probe"
-        position = positions[index]
-        topology.update(
-            lower_saddle_qualified=True,
-            lower_saddle_probe_converged=np.asarray(found["converged"]).tolist(),
-            lower_saddle_probe_qualified=valid.tolist(),
-            lower_saddle_probe_gradient_norm=np.asarray(
-                found["gradient_norm"]
-            ).tolist(),
-            lower_saddle_probe_positions_rz_m=positions.tolist(),
-            lower_saddle_rz_m=position.tolist(),
-            lower_saddle_flux_wb=float(found["value"][index]),
-            lower_saddle_inside_wall=bool(
-                inside_wall_units(position[None], data["limiter"])[0]
-            ),
-            lower_saddle_distance_m=float(distance[index]),
-        )
+        topology.update(lower)
         observations.append(
-            dict(distance_m=float(distance[index]), probes=valid.tolist())
+            dict(
+                distance_m=lower["lower_saddle_distance_m"],
+                probes=lower["lower_saddle_probe_qualified"],
+                axis_source="trip" if "axis_rz_m" in topology else "terminal fallback",
+            )
         )
 
     for trip in record["trip_topology"]:

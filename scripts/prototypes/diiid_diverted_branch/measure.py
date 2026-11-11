@@ -235,8 +235,8 @@ def row(args):
     )
 
 
-def enrich(output, profile, scale, record, data, branches, seeds):
-    """Read saved terminal and trip states without advancing a forward solve."""
+def lower_saddle_reader(data, reference):
+    """Build the shared two-probe lower-root diagnostic for saved physical flux."""
     import jax
     import jax.numpy as jnp
     import numpy as np
@@ -245,18 +245,11 @@ def enrich(output, profile, scale, record, data, branches, seeds):
     from nova.linalg.tensor_spline import fit_tensor_spline
     from nova.media.poloidal import inside_wall_units
 
-    operator = profile.operator
-    reference = np.asarray(record["efit_x_point_rz_m"])
-    count = profile.lattice.node_count
-    flux_size = data["state"].size
+    reference = np.asarray(reference)
+    count = data["flux"].size
 
     @jax.jit
-    def inspect(state):
-        _mask, topology, connected, admitted = operator._fixed_design_read(state)
-        return topology, connected, admitted
-
-    @jax.jit
-    def lower_root(state, starts):
+    def roots(state, starts):
         field = fit_tensor_spline(
             jnp.asarray(data["radius"]),
             jnp.asarray(data["height"]),
@@ -264,42 +257,65 @@ def enrich(output, profile, scale, record, data, branches, seeds):
         )
         return polish_stationary_points(field, starts, jnp.ones(starts.shape[0], bool))
 
-    def topology_record(state):
-        topology, connected, admitted = jax.device_get(inspect(jnp.asarray(state)))
-        starts = np.vstack((reference, np.asarray(topology.x_point)))
-        roots = jax.device_get(lower_root(jnp.asarray(state), jnp.asarray(starts)))
-        positions = np.asarray(roots["position_rz"])
+    def read(state, selected_saddle, axis):
+        starts = np.vstack((reference, selected_saddle))
+        found = jax.device_get(roots(jnp.asarray(state), jnp.asarray(starts)))
+        positions = np.asarray(found["position_rz"])
         valid = (
-            np.asarray(roots["converged"])
-            & (np.asarray(roots["hessian_type"]) == -1)
-            & (positions[:, 1] < topology.axis[1])
+            np.asarray(found["converged"])
+            & (np.asarray(found["hessian_type"]) == -1)
+            & (positions[:, 1] < np.asarray(axis)[1])
         )
         distances = np.linalg.norm(positions - reference, axis=1)
         index = int(np.argmin(np.where(valid, distances, np.inf)))
         position = positions[index]
         qualified = bool(valid.any())
         return dict(
-            boundary_class="diverted" if topology.boundary_is_xpoint else "limited",
-            support=int(connected.sum()),
-            axis_admitted=bool(admitted),
-            selected_saddle_rz_m=np.asarray(topology.x_point).tolist(),
             lower_saddle_qualified=qualified,
-            lower_saddle_probe_converged=np.asarray(roots["converged"]).tolist(),
+            lower_saddle_probe_converged=np.asarray(found["converged"]).tolist(),
             lower_saddle_probe_qualified=valid.tolist(),
             lower_saddle_probe_gradient_norm=np.asarray(
-                roots["gradient_norm"]
+                found["gradient_norm"]
             ).tolist(),
             lower_saddle_probe_positions_rz_m=positions.tolist(),
             lower_saddle_rz_m=position.tolist() if qualified else None,
-            lower_saddle_flux_wb=float(roots["value"][index]) if qualified else None,
+            lower_saddle_flux_wb=float(found["value"][index]) if qualified else None,
             lower_saddle_inside_wall=bool(
                 inside_wall_units(position[None], data["limiter"])[0]
             )
             if qualified
             else None,
-            lower_saddle_distance_m=float(np.linalg.norm(position - reference))
-            if qualified
-            else None,
+            lower_saddle_distance_m=float(distances[index]) if qualified else None,
+        )
+
+    return read
+
+
+def enrich(output, profile, scale, record, data, branches, seeds):
+    """Read saved terminal and trip states without advancing a forward solve."""
+    import jax
+    import jax.numpy as jnp
+    import numpy as np
+
+    operator = profile.operator
+    reference = np.asarray(record["efit_x_point_rz_m"])
+    read_lower = lower_saddle_reader(data, reference)
+    flux_size = data["state"].size
+
+    @jax.jit
+    def inspect(state):
+        _mask, topology, connected, admitted = operator._fixed_design_read(state)
+        return topology, connected, admitted
+
+    def topology_record(state):
+        topology, connected, admitted = jax.device_get(inspect(jnp.asarray(state)))
+        return dict(
+            boundary_class="diverted" if topology.boundary_is_xpoint else "limited",
+            support=int(connected.sum()),
+            axis_admitted=bool(admitted),
+            axis_rz_m=np.asarray(topology.axis).tolist(),
+            selected_saddle_rz_m=np.asarray(topology.x_point).tolist(),
+            **read_lower(state, topology.x_point, topology.axis),
         )
 
     trips = []

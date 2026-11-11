@@ -1,0 +1,352 @@
+[
+  {
+    "arm": "base",
+    "case": "frame-137-diverted",
+    "files": {
+      "terminal.npz": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/retained/base/frame-137-diverted/terminal.npz",
+        "copy": "scripts/prototypes/diiid_xpoint_offset/inputs/base/frame-137-diverted/terminal.npz",
+        "sha256": "4552ebc44c2979565e066cfce71445db0d37f6383a3a0fc45de013601ef0eb0c",
+        "bytes": 49129
+      },
+      "receipt.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/retained/base/frame-137-diverted/receipt.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/base/frame-137-diverted/receipt.json",
+        "sha256": "ab122f9dfff634774621fa9d79ced6b38e059deaab92981bd58a76d8399c018d",
+        "bytes": 13773
+      },
+      "trips.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/retained/base/frame-137-diverted/trips.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/base/frame-137-diverted/trips.json",
+        "sha256": "6306056e1c87e296dd67bf5d54e326e6a23657f11b38295b7bd781f6a72abba8",
+        "bytes": 6396
+      }
+    },
+    "observation": {
+      "storage_order": "radius_height",
+      "converged": false,
+      "residual": 0.01778218920812512,
+      "terminal_reason": 12,
+      "efit_x_point_rz_m": [
+        1.2928092462110807,
+        -1.1850521964855898
+      ],
+      "source_receipt_sha256": "ab122f9dfff634774621fa9d79ced6b38e059deaab92981bd58a76d8399c018d"
+    }
+  },
+  {
+    "arm": "base",
+    "case": "frame-146-diverted",
+    "files": {
+      "terminal.npz": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/terminal.npz",
+        "copy": "scripts/prototypes/diiid_xpoint_offset/inputs/base/frame-146-diverted/terminal.npz",
+        "sha256": "3afa7340a7416ce7efb61cfd68792d9e157f9d9c595087c1d4ec1416f42d3e4a",
+        "bytes": 49061
+      },
+      "receipt.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/receipt.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/base/frame-146-diverted/receipt.json",
+        "sha256": "3a9aef56154fb7939d2f69de2ea265a00ad33d13f0a977311af20556d8ca2174",
+        "bytes": 145960
+      },
+      "trips.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-diverted/trips.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/base/frame-146-diverted/trips.json",
+        "sha256": "c3b494903a51ebcf16d915811521ab41948db8bc66a5320f326183a0c92f070f",
+        "bytes": 10711
+      }
+    },
+    "observation": {
+      "storage_order": "radius_height",
+      "converged": false,
+      "residual": 0.010213883763988066,
+      "terminal_reason": 12,
+      "efit_x_point_rz_m": [
+        1.2964334165884246,
+        -1.1876873281466465
+      ],
+      "source_receipt_sha256": "3a9aef56154fb7939d2f69de2ea265a00ad33d13f0a977311af20556d8ca2174"
+    }
+  },
+  {
+    "arm": "base",
+    "case": "frame-146-limited",
+    "files": {
+      "terminal.npz": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-limited/terminal.npz",
+        "copy": "scripts/prototypes/diiid_xpoint_offset/inputs/base/frame-146-limited/terminal.npz",
+        "sha256": "1569b62fa409901f818722b4ea6456b8e793139ce5fd702fe49de76db1412efe",
+        "bytes": 49270
+      },
+      "receipt.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-limited/receipt.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/base/frame-146-limited/receipt.json",
+        "sha256": "1398b52802301cfbe61e3e0cafde4c1a6ab12db5ed39a1899b99f402ea1e60fa",
+        "bytes": 142135
+      },
+      "trips.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-146-limited/trips.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/base/frame-146-limited/trips.json",
+        "sha256": "72aa009554662904692e3086efef0d8a0ad6dda35f2b42cc49924a41b045e79a",
+        "bytes": 8563
+      }
+    },
+    "observation": {
+      "storage_order": "radius_height",
+      "converged": false,
+      "residual": 0.016983841887921798,
+      "terminal_reason": 12,
+      "efit_x_point_rz_m": [
+        1.2964334165884246,
+        -1.1876873281466465
+      ],
+      "source_receipt_sha256": "1398b52802301cfbe61e3e0cafde4c1a6ab12db5ed39a1899b99f402ea1e60fa"
+    }
+  },
+  {
+    "arm": "base",
+    "case": "frame-179-limited",
+    "files": {
+      "terminal.npz": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-179-limited/terminal.npz",
+        "copy": "scripts/prototypes/diiid_xpoint_offset/inputs/base/frame-179-limited/terminal.npz",
+        "sha256": "4dce6265ccd2eb227dce63d81c5f4625fa07d043f91cd7aad1fd2d768848076d",
+        "bytes": 48112
+      },
+      "receipt.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-179-limited/receipt.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/base/frame-179-limited/receipt.json",
+        "sha256": "489c71a54145b540ceefd4282c870df49fdd013448479eb3567aeb4028a163c6",
+        "bytes": 142229
+      },
+      "trips.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/frame-179-limited/trips.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/base/frame-179-limited/trips.json",
+        "sha256": "45cc13eb88fee6d01482e2a88c26b984deac72e06428c5eae63b2b0d07ee73d2",
+        "bytes": 8593
+      }
+    },
+    "observation": {
+      "storage_order": "radius_height",
+      "converged": false,
+      "residual": 0.0022141907742804054,
+      "terminal_reason": 12,
+      "efit_x_point_rz_m": [
+        1.2104174789799869,
+        -1.2142137852082322
+      ],
+      "source_receipt_sha256": "489c71a54145b540ceefd4282c870df49fdd013448479eb3567aeb4028a163c6"
+    }
+  },
+  {
+    "arm": "base",
+    "case": "mast-21978-35",
+    "files": {
+      "terminal.npz": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/terminal.npz",
+        "copy": "scripts/prototypes/diiid_xpoint_offset/inputs/base/mast-21978-35/terminal.npz",
+        "sha256": "941cb43e1ed5c0060c19c0a6392a3490d4c90c8825ed8049e2e0f867b8a80db4",
+        "bytes": 40380
+      },
+      "receipt.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/receipt.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/base/mast-21978-35/receipt.json",
+        "sha256": "44495fe8ccc894bc750b7bbd3df4dfe3625d74a41d127bfee44c4981983f6359",
+        "bytes": 132733
+      },
+      "trips.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/base/mast-21978-35/trips.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/base/mast-21978-35/trips.json",
+        "sha256": "16c878615491d6f1b6334c216810acf3fccc1c6b145ed570f07267de8b1a3d2d",
+        "bytes": 8587
+      }
+    },
+    "observation": {
+      "storage_order": "radius_height",
+      "converged": true,
+      "residual": 2.2096965623508588e-16,
+      "terminal_reason": 1,
+      "efit_x_point_rz_m": [
+        0.5693290433074586,
+        -1.2376221618468375
+      ],
+      "source_receipt_sha256": "44495fe8ccc894bc750b7bbd3df4dfe3625d74a41d127bfee44c4981983f6359"
+    }
+  },
+  {
+    "arm": "head",
+    "case": "frame-137-diverted",
+    "files": {
+      "terminal.npz": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/terminal.npz",
+        "copy": "scripts/prototypes/diiid_xpoint_offset/inputs/head/frame-137-diverted/terminal.npz",
+        "sha256": "4b65823a5eac080ac794547508fd6aeb64223e1ee00c2dd10cecc9028ea9d88d",
+        "bytes": 49129
+      },
+      "receipt.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/receipt.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/head/frame-137-diverted/receipt.json",
+        "sha256": "a474d3f0e8021a0b74575e20e86b8d6a024c9f6dea32578ba99f7305f54720d6",
+        "bytes": 140092
+      },
+      "trips.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-137-diverted/trips.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/head/frame-137-diverted/trips.json",
+        "sha256": "d04941bbfa44c51301582d6976acdff28507c3133bcc2c7f866fc83d842897d8",
+        "bytes": 6404
+      }
+    },
+    "observation": {
+      "storage_order": "radius_height",
+      "converged": false,
+      "residual": 0.01778218920812533,
+      "terminal_reason": 12,
+      "efit_x_point_rz_m": [
+        1.2928092462110807,
+        -1.1850521964855898
+      ],
+      "source_receipt_sha256": "a474d3f0e8021a0b74575e20e86b8d6a024c9f6dea32578ba99f7305f54720d6"
+    }
+  },
+  {
+    "arm": "head",
+    "case": "frame-146-diverted",
+    "files": {
+      "terminal.npz": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/terminal.npz",
+        "copy": "scripts/prototypes/diiid_xpoint_offset/inputs/head/frame-146-diverted/terminal.npz",
+        "sha256": "dedb89b4713bd569fa7758b78ef22cc978b16d7fbc82816edb96ecc18583acd9",
+        "bytes": 49024
+      },
+      "receipt.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/receipt.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/head/frame-146-diverted/receipt.json",
+        "sha256": "3513a4b6439433e1d29973b612c1e2cc1408350d98ce74bef22996def2346b23",
+        "bytes": 163449
+      },
+      "trips.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-diverted/trips.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/head/frame-146-diverted/trips.json",
+        "sha256": "5d80736cef4f85c3c93d96b895ade242d45049ce93659c4446e88c89ab8dac81",
+        "bytes": 23629
+      }
+    },
+    "observation": {
+      "storage_order": "radius_height",
+      "converged": false,
+      "residual": 0.01019921008266583,
+      "terminal_reason": 12,
+      "efit_x_point_rz_m": [
+        1.2964334165884246,
+        -1.1876873281466465
+      ],
+      "source_receipt_sha256": "3513a4b6439433e1d29973b612c1e2cc1408350d98ce74bef22996def2346b23"
+    }
+  },
+  {
+    "arm": "head",
+    "case": "frame-146-limited",
+    "files": {
+      "terminal.npz": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-limited/terminal.npz",
+        "copy": "scripts/prototypes/diiid_xpoint_offset/inputs/head/frame-146-limited/terminal.npz",
+        "sha256": "cccb65b071bd29c53cd7bf9781624e9656117ba35d1c03f0e498b23771006295",
+        "bytes": 49274
+      },
+      "receipt.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-limited/receipt.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/head/frame-146-limited/receipt.json",
+        "sha256": "26f25ce8ba6034242d46bbc78ca385160ec744d4115d57f02206852f2b5f15a7",
+        "bytes": 142248
+      },
+      "trips.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-146-limited/trips.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/head/frame-146-limited/trips.json",
+        "sha256": "f168312e9d4968d49f5e8b488118ff5f16ca85f228c0c93954e1fa6b8826f890",
+        "bytes": 8576
+      }
+    },
+    "observation": {
+      "storage_order": "radius_height",
+      "converged": false,
+      "residual": 0.016983841887921885,
+      "terminal_reason": 12,
+      "efit_x_point_rz_m": [
+        1.2964334165884246,
+        -1.1876873281466465
+      ],
+      "source_receipt_sha256": "26f25ce8ba6034242d46bbc78ca385160ec744d4115d57f02206852f2b5f15a7"
+    }
+  },
+  {
+    "arm": "head",
+    "case": "frame-179-limited",
+    "files": {
+      "terminal.npz": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-179-limited/terminal.npz",
+        "copy": "scripts/prototypes/diiid_xpoint_offset/inputs/head/frame-179-limited/terminal.npz",
+        "sha256": "3324284e40e06e877bab1d8de0fce10a41987c1eee04ab6fcd34792aab00ea98",
+        "bytes": 48107
+      },
+      "receipt.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-179-limited/receipt.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/head/frame-179-limited/receipt.json",
+        "sha256": "fc1305fcb915716b6ba1c1d00085599abfe224f996c652329c9f07b460dcfb68",
+        "bytes": 142346
+      },
+      "trips.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/frame-179-limited/trips.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/head/frame-179-limited/trips.json",
+        "sha256": "458c7d6fa3fb74fe35808df72cf5dc0236f9ab761a0f6102958fca5d21d4a905",
+        "bytes": 8585
+      }
+    },
+    "observation": {
+      "storage_order": "radius_height",
+      "converged": false,
+      "residual": 0.002214837916227638,
+      "terminal_reason": 12,
+      "efit_x_point_rz_m": [
+        1.2104174789799869,
+        -1.2142137852082322
+      ],
+      "source_receipt_sha256": "fc1305fcb915716b6ba1c1d00085599abfe224f996c652329c9f07b460dcfb68"
+    }
+  },
+  {
+    "arm": "head",
+    "case": "mast-21978-35",
+    "files": {
+      "terminal.npz": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/terminal.npz",
+        "copy": "scripts/prototypes/diiid_xpoint_offset/inputs/head/mast-21978-35/terminal.npz",
+        "sha256": "58a0ffc52e69ef540064066f65826431bf09011839ebb79719cdf6dfc6952a18",
+        "bytes": 47186
+      },
+      "receipt.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/receipt.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/head/mast-21978-35/receipt.json",
+        "sha256": "9166c358175993cdfa4cf820c0b2b7057d2a09fe9b9e34101b0b83bb199f05f2",
+        "bytes": 127028
+      },
+      "trips.json": {
+        "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/titan-reader-repaired/measurement/head/mast-21978-35/trips.json",
+        "copy": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/inputs/head/mast-21978-35/trips.json",
+        "sha256": "eff5579cec6f905da18a578384cef6fe0798aee3158f4e197d8696d0da71feb1",
+        "bytes": 4276
+      }
+    },
+    "observation": {
+      "storage_order": "radius_height",
+      "converged": false,
+      "residual": 0.002161879174815926,
+      "terminal_reason": 12,
+      "efit_x_point_rz_m": [
+        0.5693290433074586,
+        -1.2376221618468375
+      ],
+      "source_receipt_sha256": "9166c358175993cdfa4cf820c0b2b7057d2a09fe9b9e34101b0b83bb199f05f2"
+    }
+  }
+]

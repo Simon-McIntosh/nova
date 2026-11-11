@@ -59,7 +59,7 @@ def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("root", type=Path)
     parser.add_argument("run", type=Path)
-    parser.add_argument("mode", choices=["reproduce", "suites", "measure"])
+    parser.add_argument("mode", choices=["reproduce", "suites", "measure", "armed"])
     args = parser.parse_args()
     root, output = args.root.resolve(), args.run.resolve()
     revision = git(root, "rev-parse", "HEAD").decode().strip()
@@ -69,6 +69,19 @@ def main():
     ) as temporary:
         scratch = Path(temporary)
         env["TMPDIR"] = str(scratch)
+        if args.mode == "armed":
+            command = [
+                PYTHON,
+                "-m",
+                "pytest",
+                "-p",
+                "no:cacheprovider",
+                "-q",
+                "tests/test_read_live_candidates.py",
+            ]
+            code = run(root, revision, command, output / "final-head.log", env)
+            assert code == 0, "final committed head must pass its armed file"
+            return
         if args.mode == "reproduce":
             test = (
                 "tests/test_read_live_candidates.py::"

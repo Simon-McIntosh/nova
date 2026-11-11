@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "Read from the run's own suite arms: baseline at 38df9b27f is the absent-test arm the brief ordered (exit 4, completed, zero failure ids) and the head arm at 4082789df is 6 passed, EXIT=0, zero failure ids, so the added-failure count is 0 by that pair.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-11T13:53:19.616Z",
+  "dispatched_at": "2026-11-11T13:32:44Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_xpoint_offset/decompose.py",
+      "line": "258",
+      "severity": "blocking",
+      "text": "blocking: the solved magnetic axis is read by polishing one seed through a flat, multi-modal flux core, so axis_offset_cm is not a determined quantity; on head frame 137 the spline has four in-plasma qualified maxima within 1.7 mWb of each other at (1.5440,-0.2703), (1.5768,-0.1957), (1.5462,+0.2803) and (1.5839,+0.1972), giving axis Z offsets of -27.20, -19.74, +27.86 and +19.55 cm, and on 146 four maxima give -22.62, -5.71, -8.34 and +2.39 cm; the fragment's sentence \"The axes move down 27.20 cm and 22.62 cm\" therefore reports which basin the stored seed falls in, not a measured displacement, and the same record's robust current centroids sit 26.6 cm and 21.3 cm above the reported axis while essentially matching EFIT's Z."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_offset/decompose.py",
+      "line": "129",
+      "severity": "non-blocking",
+      "text": "non-blocking: stationary duplicates the capability already owned by scripts/diiid_map_fidelity/measure.py:143 polish, including the same RectBivariateSpline root and the same gradient and Hessian-determinant qualification, without calling, wrapping or extending the owner; scripts/prototypes/diiid_axis_identification/census.py:64 also already enumerates every critical point, which is the check that would have exposed the degenerate core."
+    },
+    {
+      "file": "tests/test_xpoint_offset_decomposition.py",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "non-blocking: the only axis test polishes a well-conditioned synthetic field seeded exactly on its axis, so nothing fails if a real map's axis is ambiguous or if analyze() picks a different basin; an end-to-end assertion on one committed bank with a checked axis count would guard the number the record turns on."
+    },
+    {
+      "file": "measurement-closed-level.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the measurement log's revision line names feead21e8, a commit that does not contain scripts/prototypes/diiid_xpoint_offset/decompose.py, and negative-control.log:1 carries the same revision although its run post-dates that commit, so neither header identifies the code that produced its numbers; after-suite.log correctly names 4082789df."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read commit by commit: feead21e8 commits ten hash-verified terminal banks and inputs.json, cb6d8a7c7 commits decompose.py and the six-test file, 4082789df commits results.json, render.py, style.py, the fragment and the two SVGs; the arithmetic reconciles with results.json throughout.",
+    "done_when": "The done_when names a per-frame decomposition, a verdict with a stated threshold, synthetic tests including a disabled-translation red control, a fragment and inspected panels; the gate tests/test_xpoint_offset_decomposition.py runs six tests (after-suite.log, 6 passed, EXIT=0) and the red control is named in negative-control.log (2 failed, 4 passed, EXIT=1), though no test exercises the axis read on a saved bank.",
+    "goal": "The node goal is to decompose the DIII-D lower X-point offset into rigid shift and local separatrix error from saved terminal states; scripts/prototypes/diiid_xpoint_offset/decompose.py:290-326 emits every quantity the brief enumerates (axis and lower-X offsets, rigid-shift residual, best rigid translation with mismatch before/after and residual X, current centroid and total current, own-field forces, four boundary gaps, and a per-frame verdict), plus results.json, the fragment and two panels.",
+    "manifest": "Read; it records three commits, all changed paths, the two suite arms, the negative control, the ten-row receipt and inputs.json; its evidence_inputs numbers match results.json, but its provenance note does not disclose that the headline axis offset is seed-dependent.",
+    "write_paths": "The declared scope is scripts/prototypes/diiid_xpoint_offset, tests/test_xpoint_offset_decomposition.py, the fragment and docs/figures/diiid-xpoint-offset-decomposition; git diff --name-status 38df9b27f..4082789df lists exactly nineteen added files and every one lies inside those four paths, with no product source touched."
+  },
+  "justifications": {
+    "durability": "tests/test_xpoint_offset_decomposition.py:35 and :54 redden under the recorded mutation and :74-102 pins the force sign analytically, but no test at :49 covers a degenerate multi-maximum axis, so the central number is unguarded.",
+    "evidence": "every table value in the fragment reconciles with results.json and the panel markers sit at the recorded offsets, yet measurement-closed-level.log:1 names revision feead21e8, which does not contain decompose.py, so the receipt's provenance is not checkable.",
+    "fit": "decompose.py follows the prototype idiom (docstring, type-free numpy flow, explicit refusals) and introduces no forbidden name, with one nit that style.py:5 imports a private helper across prototypes.",
+    "goal_fidelity": "decompose.py:290-326 emits the full quantity set the brief demands, but its headline axis_offset_cm rests on one of several equally qualified maxima of a flat flux core (decompose.py:258).",
+    "reuse": "decompose.py:129 stationary re-implements scripts/diiid_map_fidelity/measure.py:143 polish (same spline root plus Hessian-signature qualification) without extending it, while the current and force read does extend nova/equilibrium/map_extraction.py:119.",
+    "scope_discipline": "git diff 38df9b27f..4082789df shows nineteen added files, all inside the four declared write paths, with no edit outside them."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to decompose the DIII-D lower X-point offset into rigid shift and local separatrix error from saved terminal states; scripts/prototypes/diiid_xpoint_offset/decompose.py:290-326 emits every quantity the brief enumerates (axis and lower-X offsets, rigid-shift residual, best rigid translation with mismatch before/after and residual X, current centroid and total current, own-field forces, four boundary gaps, and a per-frame verdict), plus results.json, the fragment and two panels.\nVERDICT done_when: The done_when names a per-frame decomposition, a verdict with a stated threshold, synthetic tests including a disabled-translation red control, a fragment and inspected panels; the gate tests/test_xpoint_offset_decomposition.py runs six tests (after-suite.log, 6 passed, EXIT=0) and the red control is named in negative-control.log (2 failed, 4 passed, EXIT=1), though no test exercises the axis read on a saved bank.\nVERDICT write_paths: The declared scope is scripts/prototypes/diiid_xpoint_offset, tests/test_xpoint_offset_decomposition.py, the fragment and docs/figures/diiid-xpoint-offset-decomposition; git diff --name-status 38df9b27f..4082789df lists exactly nineteen added files and every one lies inside those four paths, with no product source touched.\nVERDICT manifest: Read; it records three commits, all changed paths, the two suite arms, the negative control, the ten-row receipt and inputs.json; its evidence_inputs numbers match results.json, but its provenance note does not disclose that the headline axis offset is seed-dependent.\nVERDICT diff: Read commit by commit: feead21e8 commits ten hash-verified terminal banks and inputs.json, cb6d8a7c7 commits decompose.py and the six-test file, 4082789df commits results.json, render.py, style.py, the fragment and the two SVGs; the arithmetic reconciles with results.json throughout.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: decompose.py:290-326 emits the full quantity set the brief demands, but its headline axis_offset_cm rests on one of several equally qualified maxima of a flat flux core (decompose.py:258).\nSCORE evidence: 13\nJUSTIFICATION evidence: every table value in the fragment reconciles with results.json and the panel markers sit at the recorded offsets, yet measurement-closed-level.log:1 names revision feead21e8, which does not contain decompose.py, so the receipt's provenance is not checkable.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 38df9b27f..4082789df shows nineteen added files, all inside the four declared write paths, with no edit outside them.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_xpoint_offset_decomposition.py:35 and :54 redden under the recorded mutation and :74-102 pins the force sign analytically, but no test at :49 covers a degenerate multi-maximum axis, so the central number is unguarded.\nSCORE fit: 17\nJUSTIFICATION fit: decompose.py follows the prototype idiom (docstring, type-free numpy flow, explicit refusals) and introduces no forbidden name, with one nit that style.py:5 imports a private helper across prototypes.\nSCORE reuse: 5\nJUSTIFICATION reuse: decompose.py:129 stationary re-implements scripts/diiid_map_fidelity/measure.py:143 polish (same spline root plus Hessian-signature qualification) without extending it, while the current and force read does extend nova/equilibrium/map_extraction.py:119.\nFINDING scripts/prototypes/diiid_xpoint_offset/decompose.py:258 blocking: the solved magnetic axis is read by polishing one seed through a flat, multi-modal flux core, so axis_offset_cm is not a determined quantity; on head frame 137 the spline has four in-plasma qualified maxima within 1.7 mWb of each other at (1.5440,-0.2703), (1.5768,-0.1957), (1.5462,+0.2803) and (1.5839,+0.1972), giving axis Z offsets of -27.20, -19.74, +27.86 and +19.55 cm, and on 146 four maxima give -22.62, -5.71, -8.34 and +2.39 cm; the fragment's sentence \"The axes move down 27.20 cm and 22.62 cm\" therefore reports which basin the stored seed falls in, not a measured displacement, and the same record's robust current centroids sit 26.6 cm and 21.3 cm above the reported axis while essentially matching EFIT's Z.\nFINDING scripts/prototypes/diiid_xpoint_offset/decompose.py:129 non-blocking: stationary duplicates the capability already owned by scripts/diiid_map_fidelity/measure.py:143 polish, including the same RectBivariateSpline root and the same gradient and Hessian-determinant qualification, without calling, wrapping or extending the owner; scripts/prototypes/diiid_axis_identification/census.py:64 also already enumerates every critical point, which is the check that would have exposed the degenerate core.\nFINDING tests/test_xpoint_offset_decomposition.py:49 non-blocking: the only axis test polishes a well-conditioned synthetic field seeded exactly on its axis, so nothing fails if a real map's axis is ambiguous or if analyze() picks a different basin; an end-to-end assertion on one committed bank with a checked axis count would guard the number the record turns on.\nFINDING measurement-closed-level.log:1 non-blocking: the measurement log's revision line names feead21e8, a commit that does not contain scripts/prototypes/diiid_xpoint_offset/decompose.py, and negative-control.log:1 carries the same revision although its run post-dates that commit, so neither header identifies the code that produced its numbers; after-suite.log correctly names 4082789df.\n",
+  "review_run_id": "r-20261111T133140159279-review-of-diiid-xpoint-offset-decomposition-4082789dfa9d",
+  "reviewed_base_sha": "38df9b27f357791af18e2296cf2e4c66e0e06dc5",
+  "reviewed_commits": [
+    "feead21e8a682b5767766a09d46d08dc793d0fbc",
+    "cb6d8a7c7e639588b2ee1c7abb5c2be4f09f140b",
+    "4082789dfa9dd67c82110dee642e8a3349dfd47e"
+  ],
+  "reviewed_head_sha": "4082789dfa9dd67c82110dee642e8a3349dfd47e",
+  "reviewed_run_id": "r-20261111T130410518337-diiid-xpoint-offset-decomposition",
+  "round_answers": {
+    "current_and_force_reads": "current_and_force at decompose.py:186-225 does what it claims: j_phi from nova.equilibrium.map_extraction.apply_delta_star (the Ampere/Grad-Shafranov stencil, -Delta-star Phi/(2 pi mu0 R)) integrated as j*dR*dZ, and F_R=+sum 2 pi R j B_Z, F_Z=-sum 2 pi R j B_R, which is the correct e_phi x B_p cross product; the analytic test at tests/test_xpoint_offset_decomposition.py:74-102 pins both sign and magnitude. Own-field only, no pressure term, and the differing solved/reference supports are stated in the fragment.",
+    "numbers_vs_receipt_and_panels": "All values in the fragment reconcile with results.json head rows. The panels draw the axis markers at the record's own offsets: pixel geometry of figure-previews-4082789df/frame-137-diverted.png, calibrated on the two EFIT markers, gives 160.6 px/m and a solved-minus-EFIT axis separation of (-17.6, -26.6) cm against the recorded (-17.91, -27.20) cm. The 'few cm' the contours show is the contour-loop centre, not the flux maximum: the solved core is flat to about 0.1 percent, so the innermost loop is centred ~10 cm inboard of EFIT while the polished maximum sits 27 cm below it. Both readings are faithful to the panel; the axis they describe is not a determined quantity.",
+    "recommendation": "It follows from the evidence as a next step: nova/equilibrium/forward_operator.py:3545 is the source current_moments evaluation the fragment cites, :3962 composes external plus plasma flux, and :3661 normalises total current but not centroid, so a branch-dependent current shape is a live hypothesis the record labels as such. The caveat is that the axis should not be used to judge the next state until it is well-conditioned.",
+    "verdict_and_threshold": "The rigid/local rule at decompose.py:109-126 is applied as stated and its limitation is disclosed in the fragment (the converged MAST base control is classed local). The local verdict for 137D and 146D survives the axis ambiguity: using the alternative qualified maxima, the axis-to-X vector difference still exceeds the 50 percent coherence bound on both frames."
+  },
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T13:54:09.664955+00:00",
+  "total": 84
+}

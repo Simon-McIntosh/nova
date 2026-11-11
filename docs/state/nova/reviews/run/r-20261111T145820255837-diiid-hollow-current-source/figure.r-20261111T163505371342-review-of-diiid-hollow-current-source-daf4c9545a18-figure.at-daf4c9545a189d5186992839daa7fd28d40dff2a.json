@@ -91,7 +91,13 @@
       }
     }
   ],
-  "finding_dispositions": {},
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-11T18:03:22.625357+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/diiid-hollow-current-source/frame-137-diverted-poloidal.svg",

@@ -72,7 +72,7 @@ def extract(root, revision, destination):
 
 def main():
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument("mode", choices=("suite", "measure"))
+    parser.add_argument("mode", choices=("suite", "measure", "reproduce"))
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--run", type=Path, required=True)
     args = parser.parse_args()
@@ -90,7 +90,25 @@ def main():
         cpus = sorted(os.sched_getaffinity(0))
         groups = [",".join(map(str, cpus[i::2])) for i in range(2)]
         tasks = []
-        if args.mode == "suite":
+        if args.mode == "reproduce":
+            shutil.copyfile(
+                root / "tests/test_read_wall_skip.py",
+                baseline / "tests/test_read_wall_skip.py",
+            )
+            command = [
+                PYTHON,
+                "-m",
+                "pytest",
+                "-p",
+                "no:cacheprovider",
+                "-q",
+                "-s",
+                "tests/test_read_wall_skip.py",
+                "-k",
+                "wall_execution and classes0 and False",
+            ]
+            tasks.append((baseline, command, run / "reproduce.log", BASE))
+        elif args.mode == "suite":
             files = [
                 "test_tracked_read.py",
                 "test_support_read.py",

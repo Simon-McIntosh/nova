@@ -5,7 +5,6 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
-import re
 from unittest.mock import patch
 
 import jax
@@ -23,42 +22,41 @@ assert jax.config.jax_enable_x64 is True
 def wall_case(target=50):
     """Two physical fields on one wall, with a moment selecting the field.
 
-    The limited quadratic has equal radial contacts until a linear radial
-    term selects one. The diverted field is the closed-form single-null owner.
+    The limited polynomial has a broad transverse extent and touches the wall.
+    A linear radial term permits continuous perturbations. The diverted field
+    is the closed-form single-null owner.
     Both fields share nodes, row windows and two stationary-point slots.
     """
     from tests.equilibrium import test_topology_read as fixture
 
     _, analytic, wall, axis, saddle = fixture._analytic_inputs("diverted")
-    low, high = np.min(wall, axis=0), np.max(wall, axis=0)
-    centre = np.array([(low[0] + high[0]) / 2, 0.0])
-    half_width = (high[0] - low[0]) / 2
-    height = max(abs(low[1]), abs(high[1]), 1.5 * half_width)
-    wall = np.array(
-        [[low[0], -height], [high[0], -height], [high[0], height], [low[0], height]]
-    )
-    for _ in range(4):
-        try:
-            geometry = fixture._realised_hex_geometry(wall, target)
-            break
-        except AssertionError as error:
-            match = re.search(r"reached (\d+)", str(error))
-            if match is None:
-                raise
-            target = int(match[1])
-    else:
-        raise AssertionError(
-            "rectangular carrier did not attain its observed cell count"
-        )
+    geometry = fixture._realised_hex_geometry(wall, target)
     nodes = np.unique(
         np.round(np.asarray(geometry.sample_points).reshape(-1, 2), 12), axis=0
     )
     exterior = fixed_points.stack_jet(jax.vmap(analytic.evaluate)(jnp.asarray(nodes)))
+    centre = np.asarray(axis)
+    direction = np.asarray(saddle) - centre
+    depth = np.linalg.norm(direction)
+    direction = direction / depth
+    transverse = np.array([direction[1], -direction[0]])
     offset = nodes - centre
+    radial, vertical = offset @ transverse, offset @ direction
+    curvature = 0.01
     limited = np.zeros((len(nodes), 6))
-    limited[:, 0] = -np.sum(offset**2, axis=1)
-    limited[:, 1:3] = -2 * offset
-    limited[:, 3] = limited[:, 5] = -2
+    limited[:, 0] = -curvature * radial**2 - vertical**2 + 2 * vertical**3 / (3 * depth)
+    limited[:, 1:3] = (
+        -2 * curvature * radial[:, None] * transverse
+        + (-2 * vertical + 2 * vertical**2 / depth)[:, None] * direction
+    )
+    hessian = (
+        -2 * curvature * np.outer(transverse, transverse)[None]
+        + (-2 + 4 * vertical / depth)[:, None, None]
+        * np.outer(direction, direction)[None]
+    )
+    limited[:, 3] = hessian[:, 0, 0]
+    limited[:, 4] = hessian[:, 0, 1]
+    limited[:, 5] = hessian[:, 1, 1]
     rows = jnp.zeros((len(nodes), 1, 3, 6), dtype=jnp.float64)
     rows = rows.at[:, 0, 0].set(jnp.asarray(limited) - exterior)
     rows = rows.at[:, 0, 1, 0].set(jnp.asarray(nodes[:, 0]))
@@ -67,7 +65,7 @@ def wall_case(target=50):
     cache = fixed_points.RowCache(
         operands.mesh, operands.nodes, jnp.arange(len(nodes)), rows, exterior
     )
-    roots = jnp.asarray([[axis, saddle], [centre, centre]], dtype=jnp.float64)
+    roots = jnp.asarray([[axis, saddle], [axis, saddle]], dtype=jnp.float64)
     convention = topology.TopologyConvention.from_cocos(17, 1.0)
     return operands, cache, roots, convention, TopologyPolicy()
 
@@ -138,16 +136,40 @@ def test_batch_matches_lane_wall_decision(case, classes):
 
 
 def test_mixed_batch_rebuilds_when_limited_contact_changes(case):
-    initial = batch_inputs(case, (0, 1), tilt=-0.001)
-    first = jax.jit(run_batch)(initial)
-    moved = batch_inputs(case, (0, 1), tilt=0.001)
-    result = jax.jit(run_batch)(moved, support_read.tracking_of(first))
-    fresh = jax.jit(run_batch)(moved)
+    inputs = batch_inputs(case, (0, 1))
+    first = jax.jit(run_batch)(inputs)
+    operands, _, moments, *_ = inputs
+    state = jax.tree.map(lambda value: value[1], moments)
+
+    @jax.jit
+    def contacts(bank, state):
+        field = fixed_points.field_from_jets(
+            support_read.nodal_jets(bank, state),
+            bank.sample_index,
+            bank.mesh,
+            bank_rows=bank.rows,
+            bank_moments=jnp.stack(tuple(state), axis=-1),
+            bank_exterior=bank.exterior,
+        )
+        return topology._wall_events(field, bank.geometry, case[4], case[3].sigma)
+
+    points, flux = contacts(operands, state)
+    stale_contact = points[jnp.argmin(case[3].sigma * flux)]
+    assert float(jnp.linalg.norm(stale_contact - first.reading.boundary[1])) > 0.1
+    tracking = support_read.tracking_of(first)
+    # Force an outdated limited contact while preserving cells and ownership.
+    tracking = tracking._replace(
+        reading=tracking.reading._replace(
+            boundary=tracking.reading.boundary.at[1].set(stale_contact)
+        )
+    )
+    result = jax.jit(run_batch)(inputs, tracking)
+    fresh = jax.jit(run_batch)(inputs)
     assert np.all(first.valid) and np.all(result.valid)
     assert np.all(result.rebuilt), (
         "mixed batch did not rebuild a changed limited contact"
     )
-    assert abs(float(result.reading.boundary[1, 0] - first.reading.boundary[1, 0])) > 1
+    np.testing.assert_array_equal(result.cells, first.cells)
     assert_same(result.reading, fresh.reading)
 
 
@@ -160,6 +182,17 @@ def test_wall_execution_has_limited_and_certificate_positive_controls(
 ):
     inputs = batch_inputs(case, classes)
     first = jax.jit(run_batch)(inputs)
+    np.testing.assert_array_equal(
+        first.reading.boundary_class,
+        [
+            int(
+                topology.TopologyClass.DIVERTED
+                if c == 0
+                else topology.TopologyClass.LIMITED
+            )
+            for c in classes
+        ],
+    )
     tracked = support_read.tracking_of(first)
     calls = []
     origin = topology._wall_events

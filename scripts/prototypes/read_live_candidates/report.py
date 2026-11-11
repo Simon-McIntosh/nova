@@ -69,7 +69,7 @@ def main():
                                 row["width"],
                                 process,
                                 owner,
-                                f"{stage['median_ms']:.4f}",
+                                f"{stage['median_ms'] / 1000:.7f}",
                             ]
                         )
                         lowered.append(
@@ -97,7 +97,7 @@ def main():
                         arm,
                         kind,
                         width,
-                        *(f"{value:.3f}" for value in values),
+                        *(f"{value / 1000:.6f}" for value in values),
                         f"{spread:.2f}%",
                         *(f"{100 * row['coverage_gap']:+.2f}%" for row in pair),
                     ]
@@ -220,8 +220,8 @@ def main():
                 "Arm",
                 "Read",
                 "Width",
-                "Process 1 [ms]",
-                "Process 2 [ms]",
+                "Process 1 [s]",
+                "Process 2 [s]",
                 "Spread",
                 "Stage gap 1",
                 "Stage gap 2",
@@ -243,7 +243,7 @@ def main():
             native_counts,
         )
         + '<h3 id="read-live-candidates-stages">Exclusive stage walls</h3>'
-        + table(["Arm", "Read", "Width", "Process", "Owner", "Median [ms]"], stages)
+        + table(["Arm", "Read", "Width", "Process", "Owner", "Median [s]"], stages)
         + '<h3 id="read-live-candidates-counts">Lowered stage counts</h3>'
         + table(
             [

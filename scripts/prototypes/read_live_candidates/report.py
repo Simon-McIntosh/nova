@@ -30,7 +30,9 @@ def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("root", type=Path)
     parser.add_argument("run", type=Path)
+    parser.add_argument("--suites", type=Path)
     args = parser.parse_args()
+    suites = args.suites or args.run
     rows, payloads = {}, {}
     timings, stages, lowered = [], [], []
     for arm in ("base", "head"):
@@ -159,12 +161,12 @@ def main():
         ("head", ("tracked_read", "support_read", "read_live_candidates")),
     ):
         for name in files:
-            text = (args.run / f"{arm}-test_{name}.log").read_text()
+            text = (suites / f"{arm}-test_{name}.log").read_text()
             assert text.rstrip().endswith("EXIT=0")
             summaries = re.findall(r"^.*\d+ passed.*$", text, re.M)
             assert summaries, (arm, name)
             suite_rows.append([arm, "tests/test_" + name + ".py", summaries[-1]])
-    negative = (args.run / "negative-control.log").read_text()
+    negative = (suites / "negative-control.log").read_text()
     assert negative.rstrip().endswith("EXIT=1") and "FAILED " in negative
     fragment.write_text(
         '<section id="read-live-candidates-result">\n'

@@ -344,6 +344,7 @@ def test_solve_receives_predicted_seed_and_accepted_factor(toy):
         target_drive=1.002,
         initial_relative_step=0.001,
         solve=solve,
+        solve_options={"reuse_factor": True},
         previous_moments=(jnp.full((2, 1), 0.999),),
         previous_drive=0.999,
     )
@@ -352,3 +353,30 @@ def test_solve_receives_predicted_seed_and_accepted_factor(toy):
     assert jnp.allclose(observed[1][0][0], 1.002, rtol=0, atol=1e-15)
     assert observed[0][1] is None
     assert observed[1][1] is factors[0]
+
+
+def test_factor_reuse_is_disabled_by_default(toy):
+    from types import SimpleNamespace
+
+    observed = []
+    factor = object()
+
+    def solve(*args, **kwargs):
+        observed.append(kwargs)
+        result = _toy_solve_batch(*args, **kwargs)
+        return SimpleNamespace(
+            **result._asdict(), factor=factor, factor_valid=jnp.ones(2, bool)
+        )
+
+    reached = toy(
+        target_drive=1.002,
+        initial_relative_step=0.001,
+        solve=solve,
+        factor_cache=factor,
+        previous_moments=(jnp.full((2, 1), 0.999),),
+        previous_drive=0.999,
+    )
+    assert reached.certified and len(observed) == 2
+    assert all(not options.get("reuse_factor", False) for options in observed)
+    assert all("factor_cache" not in options for options in observed)
+    assert all("factor_valid" not in options for options in observed)

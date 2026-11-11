@@ -1,7 +1,9 @@
 <section data-reckon="fragment" id="bank-factor-carry-result"
 data-plan="sub-millisecond-forward-path" data-node="bank-factor-carry">
-<h2>Newton factors carried across certified drive slices</h2>
-<p>The secant driver carries the last accepted Newton factor. The first carried
+<h2>Factor carry is opt-in after a measured negative result</h2>
+<p>The secant driver carries the last accepted Newton factor only when the
+caller explicitly supplies <code>solve_options={"reuse_factor": True}</code>.
+The default uses fresh Newton factors. The first carried
 correction is provisional: its fresh residual must contract by a finite ratio at
 most the contraction limit, otherwise the factor is rebuilt at the incumbent.
 Only the terminal fresh read at residual at most 1e-10 certifies a slice.
@@ -13,6 +15,20 @@ head enables guarded factor reuse within solves and carries factors across
 slices. Assemblies fall by 86.2%, accompanied by more fresh
 reads and accepted updates. All 224 lane/slice results
 certify, at maximum residual 8.024e-11.</p>
+<p>Factor carry is a measured negative result for the total work. Using the
+H200 kernel costs as an estimate, main costs
+<code>43 × 35.7 + 29 × 44.9 = 2837.2 ms</code> (about 2.84 s) of batch time.
+The carried arm costs <code>107 × 35.7 + 4 × 25.5 + 93 × 19.4 = 5726.1 ms</code>
+(about 5.73 s), where <code>19.4 = 44.9 − 25.5 ms</code> is the update cost
+without assembly. Estimated H200 batch time therefore rises by a factor of
+2.02, roughly doubling despite the assembly reduction. These are estimates
+from counts and measured kernel costs, not H200 timing measurements.</p>
+<p>A carried factor can retain linear convergence at the allowed 0.5
+contraction while fresh Newton steps converge quadratically. The extra reads
+and corrections outweigh the skipped assemblies in this measurement, with
+reads dominating the estimated carried cost. Carry remains available as an
+explicit opt-in; it is disabled by default. The terminal fresh read and the
+precision budgets are unchanged.</p>
 <table id="bank-factor-carry-totals"><thead><tr><th>arm</th>
 <th>total fresh reads</th><th>total accepted updates</th>
 <th>total factor assemblies</th></tr></thead><tbody><tr><td>main</td><td>43</td><td>29</td><td>29</td></tr><tr><td>head</td><td>107</td><td>93</td><td>4</td></tr></tbody></table>

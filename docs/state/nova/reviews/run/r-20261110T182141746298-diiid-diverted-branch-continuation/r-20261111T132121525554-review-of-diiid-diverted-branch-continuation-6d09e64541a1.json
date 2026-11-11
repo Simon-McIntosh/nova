@@ -44,6 +44,13 @@
     "renderer": "ImageMagick convert -density 96 from git show 6d09e6454:docs/figures/..., written under the run scratch TMPDIR",
     "result": "Both figures legible at 1400 px: axis off, one figure-level legend, solved flux solid green and EFIT flux dashed grey on shared levels, EFIT X-point a large dark plus and solved saddles crosses (distinct marker shapes, not hue alone), both lower-distance endpoints visible in each inset, machine and frame named beneath each panel, no clipped or colliding text. Inspection hashes in withdrawal/figure-inspection.json match the committed blobs (0481b525 134732 B; 9d461044 118968 B), while the older top-level figure-inspection.json records the pre-correction sizes and does not describe the committed artifacts."
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the shared lower-saddle reader is a prototype diagnostic; its owner test went with the withdrawn guard, and the decomposition node's own test exercises saved-state readers",
+      "recorded_at": "2026-11-11T13:42:22.689920+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_diverted_branch/refresh.py",

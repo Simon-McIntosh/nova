@@ -1131,6 +1131,9 @@ class NewtonStep(NamedTuple):
     krylov_iterations: jax.Array = 0
 
 
+_LOCAL_BOOKING_CUT_BATCH_WIDTH = 128
+
+
 def _local_booking_sensitivities(
     operands, moments, support, profile, density_gradient, quadrature, booked
 ):
@@ -1151,7 +1154,15 @@ def _local_booking_sensitivities(
         * ((indices >= samples) & (indices < samples + 6))[:, None, None],
         (channels, cells, 6),
     )
-    return current.book_tangent_channels(
+    # Moving the boundary level is the negative constant-field direction.
+    # Add that constant to cancel its ring velocity, retaining the interior
+    # normalization derivative; recover the level channel by linearity below.
+    field_direction = field_direction.at[samples + 7, :, 0].set(1.0)
+    if quadrature.cut_batch_width == current.Quadrature().cut_batch_width:
+        quadrature = replace(
+            quadrature, cut_batch_width=_LOCAL_BOOKING_CUT_BATCH_WIDTH
+        )
+    response = current.book_tangent_channels(
         psi,
         psi_direction,
         support.reading,
@@ -1163,8 +1174,9 @@ def _local_booking_sensitivities(
         density_gradient,
         quadrature,
         booked,
-        jnp.concatenate((jnp.arange(samples, samples + 6), jnp.asarray([samples + 7]))),
+        jnp.arange(samples, samples + 6),
     )
+    return response.at[:, :, samples + 7].add(-response[:, :, samples])
 
 
 _FRESH_GEOMETRY_NODE_CAPACITY = 3

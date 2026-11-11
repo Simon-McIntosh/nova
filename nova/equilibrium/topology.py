@@ -14,6 +14,7 @@ from nova.graphics.plot import Plot2D
 from nova.biot.null import Null1D, Null2D
 from nova.equilibrium.connectivity_boundary import (
     _PRE_SADDLE_OFFSET_FRACTION,
+    _arg_extreme,
     _canonicalize_reciprocal_hex_edges,
     _points_inside_polygon,
     _points_inside_wall_units,
@@ -63,30 +64,13 @@ def extremum_index(score, *, minimize=False, axis=None, candidate_index=None):
     Candidate indices default to array order. A permutation must carry those
     indices to preserve candidate identity; the result is a position in score.
     """
-    score = jnp.asarray(score)
-    ranked = -score if minimize else score
-    best = jnp.max(
-        jnp.where(jnp.isnan(ranked), -jnp.inf, ranked), axis=axis, keepdims=True
+    return _arg_extreme(
+        score,
+        maximize=not minimize,
+        relative_tolerance=1e-12,
+        axis=axis,
+        candidate_index=candidate_index,
     )
-    tied = ~jnp.isnan(ranked) & (
-        (ranked == best)
-        | (
-            jnp.isfinite(best)
-            & jnp.isfinite(ranked)
-            & (best - ranked <= 1e-12 * jnp.abs(best))
-        )
-    )
-    if candidate_index is None:
-        if axis is None:
-            candidate_index = jnp.arange(score.size).reshape(score.shape)
-        else:
-            shape = [1] * score.ndim
-            shape[axis] = score.shape[axis]
-            candidate_index = jnp.arange(score.shape[axis]).reshape(shape)
-    index = jnp.argmin(
-        jnp.where(tied, candidate_index, jnp.iinfo(jnp.int32).max), axis=axis
-    )
-    return jnp.where(jnp.any(~jnp.isnan(score), axis=axis), index, -1)
 
 
 def x_point_height_limits(axis_height, qualified_x_points):
@@ -489,16 +473,19 @@ class Topology(Pytree):
         x_psi = vmap_x[:, 2]
         inside_wall = self.contained_x_candidates(vmap_x)
         score = jnp.asarray(polarity * (x_psi - o_psi), dtype=self.grid.fit_dtype)
-        return extremum_index(jnp.where(inside_wall, score, -jnp.inf))
+        usable = inside_wall & jnp.isfinite(score)
+        selected = extremum_index(jnp.where(usable, score, -jnp.inf))
+        return jnp.where(jnp.any(usable), selected, -1)
 
     @jax.jit
     def x_point_data(self, vmap_x, polarity, o_psi):
         """Return primary x-point data."""
         index = self.x_point_index(vmap_x, polarity, o_psi)
-        admitted = jnp.any(self.contained_x_candidates(vmap_x))
+        # A nonfinite axis flux leaves no usable saddle ranking.
+        admitted = index >= 0
         return jnp.where(
             admitted,
-            vmap_x[index],
+            vmap_x[jnp.maximum(index, 0)],
             jnp.full_like(vmap_x[0], jnp.nan),
         )
 

@@ -133,14 +133,29 @@ def _boundary_defaults(
     )
 
 
-def _arg_extreme(values, *, maximize):
-    """Return the first extreme index with a dtype-exact reduction seed."""
-    values = jax.lax.stop_gradient(values)
-    indices = jax.lax.broadcasted_iota(jnp.int32, values.shape, 0)
+def _arg_extreme(
+    values, *, maximize, relative_tolerance=0.0, axis=None, candidate_index=None
+):
+    """Select an extreme with a dtype-exact seed and optional relative ties.
+
+    Exact reductions retain first-position selection. With a positive tolerance,
+    choose the lowest canonical index within tolerance * abs(best); a permutation
+    carries its canonical indices. All-NaN tolerant inputs return -1.
+    """
+    values = jax.lax.stop_gradient(jnp.asarray(values))
+    if candidate_index is not None:
+        candidate_index = jnp.broadcast_to(candidate_index, values.shape)
+    if axis is None:
+        values = values.reshape(-1)
+        if candidate_index is not None:
+            candidate_index = candidate_index.reshape(-1)
+        axis = 0
+    axis = axis % values.ndim
+    indices = jax.lax.broadcasted_iota(jnp.int32, values.shape, axis)
     initial_value = -jnp.inf if maximize else jnp.inf
     initial = (
         jnp.asarray(initial_value, dtype=values.dtype),
-        jnp.asarray(values.size, dtype=jnp.int32),
+        jnp.asarray(values.shape[axis], dtype=jnp.int32),
     )
 
     def choose(left, right):
@@ -153,7 +168,27 @@ def _arg_extreme(values, *, maximize):
             jnp.where(take_right, right_index, left_index),
         )
 
-    return jax.lax.reduce((values, indices), initial, choose, dimensions=(0,))[1]
+    best, selected = jax.lax.reduce(
+        (values, indices), initial, choose, dimensions=(axis,)
+    )
+    if relative_tolerance == 0.0 and candidate_index is None:
+        return selected
+    best = jnp.expand_dims(best, axis)
+    difference = best - values if maximize else values - best
+    tied = ~jnp.isnan(values) & (
+        (values == best)
+        | (
+            jnp.isfinite(best)
+            & jnp.isfinite(values)
+            & (difference <= relative_tolerance * jnp.abs(best))
+        )
+    )
+    if candidate_index is None:
+        candidate_index = indices
+    selected = jnp.argmin(
+        jnp.where(tied, candidate_index, jnp.iinfo(jnp.int32).max), axis=axis
+    )
+    return jnp.where(jnp.any(~jnp.isnan(values), axis=axis), selected, -1)
 
 
 def _argmax_exact(values):

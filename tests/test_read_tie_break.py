@@ -101,3 +101,107 @@ def test_original_limited_seed_tie_has_stable_winner(preceded):
             int(choose(jnp.asarray(scores[permutation]), jnp.asarray(permutation)))
             == expected
         )
+
+
+@pytest.mark.parametrize("outside", [False, True])
+def test_x_point_data_refuses_all_nan_admitted_scores(outside):
+    from tests.test_topology_o_qualification import _topology_fixture
+
+    reader, _ = _topology_fixture()
+    candidates = jnp.asarray([[1.0, 0.0, 2.0], [1.0, 1.0, 3.0], [3.0, 0.0, 4.0]])
+    np.testing.assert_array_equal(reader.contained_x_candidates(candidates), [1, 1, 0])
+    np.testing.assert_array_equal(
+        reader.x_point_data(candidates, 1.0, 0.0), candidates[1]
+    )
+    refused = reader.x_point_data(candidates, 1.0, jnp.nan)
+    print("X_POINT_REFUSAL", np.asarray(refused))
+    assert np.all(np.isnan(np.asarray(refused)))
+    assert int(reader.x_point_index(candidates, 1.0, jnp.nan)) == -1
+
+
+def test_read_at_nulls_uses_tie_rule_for_both_wall_rankings(monkeypatch):
+    """Construct wall scores while holding component geometry unambiguous."""
+    from types import SimpleNamespace
+
+    wall_levels = []
+    flux = jnp.asarray([1.0, 1.0 + 5e-13])
+    points = jnp.asarray([[1.0, -1.0], [1.0, 1.0]])
+    geometry = SimpleNamespace(
+        contour_mesh=SimpleNamespace(overflow=False),
+        pitch=jnp.ones(1),
+        full_area=jnp.ones(1),
+        fit_inverse=jnp.eye(2)[None],
+    )
+    monkeypatch.setattr(topology, "_wall_events", lambda *args: (points, flux))
+    monkeypatch.setattr(topology, "_inside_cells", lambda *args: jnp.ones(1, bool))
+    monkeypatch.setattr(
+        topology,
+        "_curvature_derivatives",
+        lambda *args: (jnp.zeros((2, 2, 2)), jnp.zeros((2, 2, 2, 2))),
+    )
+    monkeypatch.setattr(
+        topology, "represented_saddle_cells", lambda *args: jnp.zeros(1, bool)
+    )
+    monkeypatch.setattr(
+        topology, "_membership_roundoff_bound", lambda *args: jnp.asarray(1e-12)
+    )
+
+    def support(
+        _geometry, _coefficient, _sigma, level, _axis, _form, saddle_live, _policy
+    ):
+        def observe(value, saddle):
+            if not saddle:
+                wall_levels.append(float(value))
+
+        jax.debug.callback(observe, level, saddle_live, ordered=True)
+        return (
+            jnp.asarray([[1.0, 0.0]]),
+            jnp.zeros((1, 2, 1, 2)),
+            jnp.asarray([[0, 1]]),
+            jnp.ones((1, 2), bool),
+            jnp.asarray([[True, False]]),
+            jnp.ones(1, bool),
+            jnp.asarray(True),
+            jnp.asarray(1),
+        )
+
+    monkeypatch.setattr(topology, "_support_at_level", support)
+    nulls = topology.StationaryRead(
+        jnp.asarray([[1.0, 0.0]]),
+        topology.FieldJet(jnp.asarray([2.0]), jnp.zeros((1, 2)), -jnp.eye(2)[None]),
+        jnp.ones(1, bool),
+        jnp.ones(1, bool),
+        jnp.zeros(1, jnp.int32),
+    )
+    policy = topology.TopologyPolicy(null_capacity=1)
+    run = jax.jit(
+        lambda values: topology._read_at_nulls(
+            None,
+            geometry,
+            topology.TopologyConvention.from_cocos(17, 1.0),
+            policy,
+            jnp.zeros((1, 6)),
+            values,
+            jnp.ones(1, bool),
+            jnp.asarray(1),
+            jnp.asarray(True),
+            None,
+        )
+    )
+    result = run(nulls)
+    jax.block_until_ready(result)
+    jax.effects_barrier()
+    assert bool(result.valid)
+    print("READ_WALL_LEVELS", wall_levels, "BOUNDARY", np.asarray(result.boundary))
+    np.testing.assert_array_equal(result.boundary, points[0])
+    np.testing.assert_array_equal(wall_levels, [float(flux[0]), float(flux[0])])
+
+
+@pytest.mark.parametrize("dtype", [jnp.float32, jnp.float64])
+def test_shared_exact_owner_preserves_input_precision(dtype):
+    from nova.equilibrium import connectivity_boundary
+
+    values = jnp.asarray([1.0, -2.0, 3.0, 3.0], dtype=dtype)
+    assert int(jax.jit(connectivity_boundary._argmax_exact)(values)) == 2
+    assert int(jax.jit(connectivity_boundary._argmin_exact)(values)) == 1
+    assert int(jax.jit(topology.extremum_index)(values)) == 2

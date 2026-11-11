@@ -19,7 +19,7 @@ def main():
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[3]
     run = args.run.resolve()
-    measurement = run / "final-measurement"
+    measurement = run / "pinned-measurement"
     validation = run / "final-validation"
     sweep = json.loads((run / "sweep-fixed.json").read_text())
     receipts = {
@@ -107,6 +107,15 @@ def main():
     save_checked(fig, destination)
     fig.savefig(run / "cpu-walls.png", dpi=100)
     plt.close(fig)
+    lowered_rows = []
+    for (arm, process), programs in rows.items():
+        for (width, kind), program in programs.items():
+            lowered_rows.append(
+                f"<tr><td>{arm}</td><td>{process}</td><td>{width}</td>"
+                f"<td>{kind}</td><td>{program['optimized_hlo_operations']}</td>"
+                f"<td>{program['stablehlo_operations']}</td>"
+                f"<td>{program['fusion_sites']}</td><td>{program['while_sites']}</td></tr>"
+            )
     suite = []
     suite_receipts = json.loads((validation / "suite-receipts.json").read_text())
     for key, receipt in suite_receipts.items():
@@ -170,6 +179,12 @@ latency claim. The checked 1400 by 720 render was inspected before delivery.
 <th>Reduction</th><th>Reductions by pair</th><th>Base/head process spread</th>
 </tr></thead>
 <tbody>{"".join(table)}</tbody></table>
+<h3>Lowered programs</h3>
+<p>Counts are static program sites, not measured device launches. Both optimized
+HLO and StableHLO operation counts are required to be positive in the instrument.</p>
+<table><thead><tr><th>Arm</th><th>Process</th><th>Width</th><th>Program</th>
+<th>Optimized HLO</th><th>StableHLO</th><th>Fusion sites</th><th>While sites</th>
+</tr></thead><tbody>{"".join(lowered_rows)}</tbody></table>
 <h3>Parity and deliberate refusal</h3>
 <p>The unchanged 32-cell booking and an independent unbucketed placement oracle
 supply comparisons for repeated physical cut-cell inventories from both limited
@@ -200,8 +215,10 @@ The archived comparison and its tolerance remain unchanged.</p>
 <table><thead><tr><th>Arm and file</th><th>Pytest summary</th><th>Exit</th></tr></thead>
 <tbody>{"".join(suite)}</tbody></table>
 <p>Base revision <code>{base}</code>; executable head <code>{head}</code>.
-CPU measurement job <code>{job}</code>, all_debug, seven CPUs, two fresh processes
-per arm on the same node. Committed measurement instrument SHA-256
+CPU measurement job <code>{job}</code>, all_debug, fourteen CPUs, two fresh processes
+per arm on the same node. Base and head run on disjoint seven-CPU groups,
+swapped for the second pair; every receipt records its CPU affinity.
+Committed measurement instrument SHA-256
 <code>{instrument}</code>. Every receipt records the imported current module,
 working directory, source revision, instrument hash, backend and job identity.
 The width-sweep receipt carries instrument SHA-256

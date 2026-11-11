@@ -26,6 +26,37 @@ from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import draw_flux_contours, draw_nulls, draw_wall
 
 
+def draw_critical_points(axes, census, shift, style, minimum_marker, size):
+    """Mark all enumerated extrema and saddles, including unconfined roots."""
+    for point in census["points"]:
+        coordinate = np.asarray(point["rz_m"]) + shift
+        before = len(axes.lines)
+        if point["kind"] == "maximum":
+            draw_nulls(
+                axes,
+                magnetic_axis=coordinate,
+                style=replace(style, axis_markersize=size),
+            )
+        elif point["kind"] == "saddle":
+            draw_nulls(
+                axes,
+                x_points=coordinate[None],
+                style=replace(style, xpoint_markersize=size),
+            )
+        else:
+            axes.plot(
+                *coordinate,
+                marker=minimum_marker,
+                markersize=size,
+                linestyle="none",
+                color=style.axis_color,
+                zorder=style.zorder_markers,
+            )
+        if not point["in_plasma"]:
+            for artist in axes.lines[before:]:
+                artist.set_markerfacecolor("none")
+
+
 def render(entry, row, output, preview):
     """Show the original geometry and the actual residual after alignment."""
     data, _ = read_case(entry)
@@ -34,15 +65,18 @@ def render(entry, row, output, preview):
     translation = np.asarray(row["fit"]["translation_m"])
     ref_axis = np.asarray(row["reference_axis_rz_m"])
     ref_saddle = np.asarray(row["reference_saddle_rz_m"])
-    axis, saddle = [np.asarray(row[k]) for k in ("axis_rz_m", "saddle_rz_m")]
-    axis_flux, boundary_flux = float(ref.ev(*ref_axis)), float(ref.ev(*ref_saddle))
+    saddle = np.asarray(row["saddle_rz_m"])
+    axis_flux, boundary_flux = (
+        row["reference_core"]["max_flux_wb"],
+        float(ref.ev(*ref_saddle)),
+    )
     levels = np.sort(
         boundary_flux
         + (axis_flux - boundary_flux) * np.array([0.05, 0.2, 0.4, 0.6, 0.8, 0.95])
     )
     plt.rcParams.update({"svg.fonttype": "none", "font.size": 14})
-    figure, axes = plt.subplots(1, 3, figsize=CANVAS, dpi=100)
-    figure.subplots_adjust(left=0.025, right=0.975, bottom=0.2, top=0.78, wspace=0.12)
+    figure, axes = plt.subplots(1, 4, figsize=CANVAS, dpi=100)
+    figure.subplots_adjust(left=0.025, right=0.975, bottom=0.2, top=0.74, wspace=0.12)
     notes = []
     solved_style = replace(
         DEFAULT_INK,
@@ -64,15 +98,25 @@ def render(entry, row, output, preview):
     )
     for index, ax in enumerate(axes):
         poloidal_axes(ax)
-        shift = translation if index else np.zeros(2)
-        gauge = row["fit"]["gauge_wb" if index else "gauge_before_wb"]
-        if index == 2:
+        shift = translation if index in (1, 3) else np.zeros(2)
+        gauge = row["fit"]["gauge_wb" if index in (1, 3) else "gauge_before_wb"]
+        if index == 3:
             both = np.stack((ref_saddle, saddle + shift))
             lo, hi = both.min(axis=0) - 0.16, both.max(axis=0) + 0.16
             # A square viewport preserves the local geometry and its comparison.
             centre = (lo + hi) / 2
             half = max(hi - lo) / 2
             limits = (centre - half, centre + half)
+        elif index == 2:
+            peak = row["solved_core"]["max_flux_wb"]
+            core = [
+                p["rz_m"]
+                for p in row["solved_core"]["points"]
+                if p["in_plasma"]
+                and p["flux_wb"] > peak - 0.2 * (peak - data["boundary"][2])
+            ]
+            bounds = np.vstack((core, [ref_axis]))
+            limits = (bounds.min(axis=0) - 0.06, bounds.max(axis=0) + 0.06)
         else:
             limits = (
                 np.array([radius[0], height[0]]),
@@ -94,12 +138,21 @@ def render(entry, row, output, preview):
             & (zz - shift[1] <= height[-1])
         )
         translated = np.where(valid, translated, np.nan)
+        panel_levels = levels
+        if index == 2:
+            peak_level = row["solved_core"]["max_flux_wb"] - gauge
+            panel_levels = np.unique(
+                np.r_[
+                    levels,
+                    peak_level - np.array([0.0005, 0.001, 0.002, 0.005, 0.01, 0.02]),
+                ]
+            )
         draw_flux_contours(
             ax,
             dense_r,
             dense_z,
             reference.T,
-            levels,
+            panel_levels,
             color=REFERENCE,
             linewidth=1.5,
             wall=data["limiter"],
@@ -112,7 +165,7 @@ def render(entry, row, output, preview):
             dense_r,
             dense_z,
             translated.T,
-            levels,
+            panel_levels,
             color=SOLVED,
             linewidth=1.8,
             wall=data["limiter"],
@@ -143,38 +196,47 @@ def render(entry, row, output, preview):
             zorder=5,
         )
         draw_wall(ax, units=data["limiter"], color=WALL, linewidth=1.5, zorder=6)
-        draw_nulls(
-            ax,
-            magnetic_axis=axis + shift,
-            x_points=(saddle + shift)[None],
-            style=solved_style,
+        size = 7 if index == 2 else 5
+        draw_critical_points(ax, row["solved_core"], shift, solved_style, "o", size)
+        draw_critical_points(
+            ax, row["reference_core"], np.zeros(2), ref_style, "s", size
         )
         draw_nulls(
-            ax, magnetic_axis=ref_axis, x_points=ref_saddle[None], style=ref_style
+            ax,
+            x_points=(saddle + shift)[None],
+            style=replace(solved_style, zorder_markers=30),
+        )
+        draw_nulls(
+            ax, x_points=ref_saddle[None], style=replace(ref_style, zorder_markers=40)
         )
         ax.set_xlim(lo[0], hi[0])
         ax.set_ylim(lo[1], hi[1])
         box = ax.get_position()
-        name = ("original", "after translation", "lower X-point after translation")[
-            index
-        ]
+        name = (
+            "original",
+            "after translation",
+            "core critical points",
+            "lower X after translation",
+        )[index]
         notes.append(
-            figure.text((box.x0 + box.x1) / 2, 0.82, name, ha="center", fontsize=16)
+            figure.text((box.x0 + box.x1) / 2, 0.79, name, ha="center", fontsize=16)
         )
     handles = [
         Line2D([], [], color=SOLVED, lw=2.4, label="solved"),
         Line2D([], [], color=REFERENCE, lw=2.2, ls="--", label="EFIT"),
         Line2D([], [], color=WALL, lw=1.5, label="wall"),
-        Line2D([], [], color=SOLVED, marker="^", ls="none", label="solved axis"),
-        Line2D([], [], color=REFERENCE, marker="v", ls="none", label="EFIT axis"),
-        Line2D([], [], color=SOLVED, marker="X", ls="none", label="solved lower X"),
-        Line2D([], [], color=REFERENCE, marker="P", ls="none", label="EFIT lower X"),
+        Line2D([], [], color=SOLVED, marker="^", ls="none", label="solved maximum"),
+        Line2D([], [], color=REFERENCE, marker="v", ls="none", label="EFIT maximum"),
+        Line2D([], [], color=SOLVED, marker="X", ls="none", label="solved saddle"),
+        Line2D([], [], color=REFERENCE, marker="P", ls="none", label="EFIT saddle"),
+        Line2D([], [], color=SOLVED, marker="o", ls="none", label="solved minimum"),
+        Line2D([], [], color=REFERENCE, marker="s", ls="none", label="EFIT minimum"),
     ]
     figure.legend(
         handles=handles,
         loc="upper center",
         bbox_to_anchor=(0.5, 0.995),
-        ncol=4,
+        ncol=3,
         frameon=False,
         fontsize=14,
     )
@@ -202,14 +264,27 @@ def render(entry, row, output, preview):
             fontsize=14,
         )
     )
+    notes.append(
+        figure.text(
+            0.5,
+            0.025,
+            f"main-plasma maxima: solved {row['solved_core']['maxima_count']}, "
+            f"EFIT {row['reference_core']['maxima_count']}; "
+            "hollow markers: outside the main plasma",
+            ha="center",
+            fontsize=14,
+        )
+    )
     save(figure, axes, notes, output, preview)
     plt.close(figure)
     return dict(
         file=str(output),
         preview=str(preview),
         shared_levels_wb=levels.tolist(),
-        reference_xpoint_zorder=20,
-        solved_xpoint_zorder=10,
+        reference_xpoint_zorder=40,
+        solved_xpoint_zorder=30,
+        solved_critical_points=len(row["solved_core"]["points"]),
+        reference_critical_points=len(row["reference_core"]["points"]),
     )
 
 

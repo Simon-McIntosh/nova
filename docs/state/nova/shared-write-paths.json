@@ -1,0 +1,19 @@
+{
+ "project": "nova",
+ "shared_roots": [
+  "nova/",
+  "tests/",
+  "scripts/",
+  "benchmarks/",
+  "apps/"
+ ],
+ "exclusive_patterns": [
+  "docs/plans/*.html",
+  "docs/evidence/archive/",
+  "docs/state/",
+  "docs/figures/",
+  "pyproject.toml",
+  "uv.lock"
+ ],
+ "paths": []
+}

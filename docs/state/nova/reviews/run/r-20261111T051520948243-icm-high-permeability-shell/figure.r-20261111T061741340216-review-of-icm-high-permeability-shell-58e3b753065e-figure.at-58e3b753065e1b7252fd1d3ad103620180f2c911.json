@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-11T06:27:01.292Z",
+  "dispatched_at": "2026-11-11T06:18:46Z",
+  "figures_reviewed": [
+    {
+      "caption_location": "docs/evidence/fragments/iron-core-magnetisation/icm-high-permeability-shell.html:26-40",
+      "rendered_artifact_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T061741340216-review-of-icm-high-permeability-shell-58e3b753065e-figure/image-0.png",
+      "rendered_size_px": [
+        1400,
+        721
+      ],
+      "repository_path": "docs/figures/iron-core-magnetisation/icm-high-permeability-shell/error-vs-cell-size.svg",
+      "script": "scripts/magnetisation_high_permeability/figures.py"
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The occlusion is the agreement the figure exists to show, and the caption and alt text both say the two source models converge together; no redraw is required. If a future revision wants the series independently visible, offsetting the dipole markers or drawing it as a marker-only series would do it.",
+      "file": "docs/figures/iron-core-magnetisation/icm-high-permeability-shell/error-vs-cell-size.svg",
+      "id": "fcf89dec63a",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The 'ideal dipole' series is fully occluded by the 'finite loop' series in the mu_r = 1000 and mu_r = 3000 panels. The near-black dashed dipole line and its x markers are drawn beneath the purple solid line (script zorder 2 against 3), and the two agree within the marker size there, so the legend advertises a series that has no visible mark in two of the four panels. In the mu_r = 100 and mu_r = 300 panels the black x markers still peek out at the ends, so the reader can confirm the series exists only in the upper row. The agreement itself is the result and is stated in the caption and alt text, so the figure does not mislead, but a reader scanning the lower row cannot see the second series at all."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "Legend and caption together identify both series unambiguously once read; the mismatch is wording only and the figure is not ambiguous on its own.",
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-high-permeability-shell.html",
+      "id": "fd7d96864aa",
+      "line": 30,
+      "severity": "non-blocking",
+      "summary": "The caption names the two source series as 'the 50 mm loop used in the production control' and 'an ideal central dipole', while the figure legend reads 'finite loop' and 'ideal dipole'. The caption's 'dashed:' clause names neither a colour nor a marker, so a reader has to map two vocabularies and infer that 'dashed' is the dipole. The mapping is recoverable but costs a second pass."
+    }
+  ],
+  "notes": [
+    "Verdicts are formed only from the rendered PNG named above; no SVG was opened.",
+    "The flat dotted line at about 2.3e-4 percent, three decades below every measured point, was checked against the caption before being judged. The caption states the geometric prediction deliberately holds b = 1 m while replacing the shell volume by its meshed value and is bounded by 0.0002341 percent, and that the two-radii prediction is zero to roundoff. The overlay is therefore the intended discriminating result (geometry does not explain the error), not a rendering defect, and is not recorded as a finding.",
+    "The caption does not merely repeat a title; it defines the ordinate, both source models, and the prediction variant, so it is not a finding under the caption rule."
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261111T061741340216-review-of-icm-high-permeability-shell-58e3b753065e-figure",
+  "reviewed_base_sha": "c381a899741ac3c8695919c0915a021bd6a8fc14",
+  "reviewed_brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T051520948243-icm-high-permeability-shell/brief.md",
+  "reviewed_head_sha": "58e3b753065e1b7252fd1d3ad103620180f2c911",
+  "reviewed_run_id": "r-20261111T051520948243-icm-high-permeability-shell",
+  "rubric": "figure",
+  "rubric_verdicts": [
+    "RUBRIC legibility: pass \u2014 at the rendered 1400x721 size every axis label, tick label, panel title and legend entry is readable at a glance; the only visual loss is the ideal-dipole series occluded in two panels, recorded as a finding.",
+    "RUBRIC data_ink: pass \u2014 the measured and predicted series are the only marks; lines at 2.6-3.0 pt on white, no shading, no filled regions.",
+    "RUBRIC decoration: pass \u2014 no gradient, background fill, gridline or frame; top and right spines are removed and the dotted line is a data series, not decoration.",
+    "RUBRIC contrast: pass \u2014 near-black text on white throughout; the grey dotted prediction is a reference series rather than text.",
+    "RUBRIC table_form: pass \u2014 a log-log convergence plot with an overlaid geometric prediction is not information that is naturally a table.",
+    "RUBRIC label_collision: pass \u2014 nothing is clipped at the canvas edge, the figure legend sits above the panels, and the mu_r titles sit clear of the curves."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T13:08:45.162050+00:00",
+  "total": null
+}

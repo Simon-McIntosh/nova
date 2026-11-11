@@ -1,0 +1,127 @@
+<section id="diiid-xpoint-offset-decomposition">
+<h2>DIII-D offset diagnosis: a degenerate flux core and a hollow current distribution</h2>
+<p><strong>The held diverted states have no determined single magnetic axis.</strong> 137D has four in-plasma maxima spanning 1.685 mWb; 146D has three maxima spanning 11.208 mWb plus a local minimum. EFIT has one maximum and no minimum on each frame's own map. The solved core is almost flat vertically: its central 90% flux range is 2.69 mWb against EFIT's 409.35 mWb on 137D, and 11.67 against 470.46 mWb on 146D. The native Ampere-current read also has a hollow vertical core. This is a result about the saved solved current distribution, not merely an ambiguity in the reader.</p>
+<p><strong>Correction to the first delivery at 4082789df:</strong> the reported axis offsets −27.20 cm and −22.62 cm selected the basins of two stored seeds. Those single-axis offsets, and the axis-to-X rigid-shift residuals, are withdrawn wherever the census finds a degenerate core. The reviewed 146D point with an EFIT-relative Z offset of −8.34 cm is a local minimum at (R,Z) = (1.572731,−0.084755) m: its Hessian eigenvalues are +2.310 and +2.898 Wb/m². Positive determinant alone admits either a maximum or a minimum. The corrected census uses both eigenvalues.</p>
+<p>The lower-X offsets and rigid-translation fits are determined independently of an axis seed. All ten lower-X vectors agree with the first receipt within 10⁻⁶ cm, and all fitted translations within 10⁻¹² m. For the two target diverted states, the best translation still increases lower-X error from 7.30 to 9.90 cm and from 6.59 to 7.44 cm. The binary verdict remains <code>local</code>, meaning non-rigid; it does not assert that the error is confined to the separatrix. The broad, flat or multi-peaked core is the next physical target.</p>
+<h3>Inputs, census owners and qualification</h3>
+<p>The ten committed <code>terminal.npz</code> banks under <code>scripts/prototypes/diiid_xpoint_offset/inputs/</code> and the SHA-256 inventory <code>inputs.json</code> remain the inputs. The inventory now also carries the portable observation headers projected from each hash-bound original receipt, so the saved-bank tests require no surviving run-directory receipt. Full receipts and trips remain copied in the durable run record. The numeric record is <code>scripts/prototypes/diiid_xpoint_offset/results.json</code>. No forward map, forward solve or GPU job was run.</p>
+<p>Candidate enumeration calls the existing <code>scripts/prototypes/diiid_axis_identification/census.py:64</code> owner. Every candidate is polished through <code>scripts/diiid_map_fidelity/measure.py:143</code>; there is no duplicate root solver here. The sampled map is refined by 16×, 32× and, when necessary, 64× until the full polished point set is stable at two successive refinements and its signed index sum closes against the gradient's boundary winding. Each point retains its position, flux, gradient norm, Hessian eigenvalues and qualification. The 4× scan was shown to miss maxima and is not used as an absence check.</p>
+<p>“In plasma” means inside the main closed 99.9% flux contour enclosing the solved current centroid, or inside EFIT's labelled LCFS for its own map. Saved-support membership is recorded separately. This matters on 146D: the saved mask also admits a maximum near (1.3091,−1.3322) m in a separate private-flux island below the lower saddle. It is not a main-plasma axis candidate. Every enumerated point is retained and drawn, with hollow symbols outside the main plasma. The map is assigned one axis only when it has exactly one in-plasma maximum and no in-plasma minimum.</p>
+
+<table>
+<caption>Main-plasma extrema. Coordinates are physical (R,Z) [cm]; all ten base/head census rows are in the JSON.</caption>
+<thead><tr><th>case</th><th>solved maxima / minima</th><th>solved maximum positions [cm]</th><th>maximum-flux spread [mWb]</th><th>EFIT maxima / minima</th><th>EFIT maximum [cm]</th></tr></thead>
+<tbody>
+<tr><td>137D (head)</td><td>4 / 0</td><td>(+154.40, -27.03)<br>(+154.62, +28.03)<br>(+157.68, -19.57)<br>(+158.39, +19.72)</td><td>1.6849</td><td>1 / 0</td><td>(+172.31, +0.17)</td></tr>
+<tr><td>146D (head)</td><td>3 / 1</td><td>(+158.50, -22.76)<br>(+159.72, +2.25)<br>(+164.40, -5.84)</td><td>11.2077</td><td>1 / 0</td><td>(+171.80, -0.13)</td></tr>
+<tr><td>146L (head)</td><td>1 / 0</td><td>(+179.53, +24.15)</td><td>0.0000</td><td>1 / 0</td><td>(+171.80, -0.13)</td></tr>
+<tr><td>179L (head)</td><td>3 / 1</td><td>(+184.82, -19.47)<br>(+185.64, +0.09)<br>(+188.98, -4.11)</td><td>14.1064</td><td>1 / 0</td><td>(+177.37, -3.08)</td></tr>
+<tr><td>mast-21978-35 (base)</td><td>1 / 0</td><td>(+90.52, +2.71)</td><td>0.0000</td><td>1 / 0</td><td>(+90.45, +0.04)</td></tr>
+<tr><td>mast-21978-35 (head)</td><td>1 / 0</td><td>(+90.43, -0.32)</td><td>0.0000</td><td>1 / 0</td><td>(+90.45, +0.04)</td></tr>
+</tbody>
+</table>
+
+<h3>Axis-free translation verdict</h3>
+<p>The fit removes a constant gauge and minimises total-flux RMS over a fixed EFIT-plasma node set. Flux amplitude, coil currents and profile coefficients are not fitted. Three starts are tried; bounds retain every comparison point inside the saved solved grid, and none of these fits touches a bound. Translation is applied as aligned(R,Z) = solved(R−dR,Z−dZ). A row is rigid only if translation removes at least 50% of squared flux mismatch <em>and</em> leaves at most 50% of the original lower-X distance. Both tests use determined quantities. Single-axis coherence is no longer part of the verdict.</p>
+
+<table>
+<caption>Offsets and best rigid translation. Vectors are (R,Z) [cm], solved minus EFIT; “undetermined” replaces every degenerate single-axis offset.</caption>
+<thead><tr><th>case</th><th>axis offset</th><th>lower-X offset</th><th>applied translation</th><th>lower-X error before → after [cm]</th><th>verdict</th></tr></thead>
+<tbody>
+<tr><td>137D (head)</td><td>undetermined</td><td>(-0.82, +7.25)</td><td>(+8.41, -0.89)</td><td>7.30 → 9.90</td><td>local</td></tr>
+<tr><td>146D (head)</td><td>undetermined</td><td>(-2.78, +5.97)</td><td>(+9.22, -2.24)</td><td>6.59 → 7.44</td><td>local</td></tr>
+<tr><td>146L (head)</td><td>(+7.73, +24.28)</td><td>(+3.88, +18.30)</td><td>(-9.24, -22.43)</td><td>18.71 → 6.77</td><td>rigid</td></tr>
+<tr><td>179L (head)</td><td>undetermined</td><td>(+2.11, -2.10)</td><td>(-8.11, +4.30)</td><td>2.97 → 6.39</td><td>local</td></tr>
+<tr><td>mast-21978-35 (base)</td><td>(+0.07, +2.67)</td><td>(-1.75, +3.03)</td><td>(-0.05, -3.07)</td><td>3.50 → 1.80</td><td>local</td></tr>
+<tr><td>mast-21978-35 (head)</td><td>(-0.02, -0.36)</td><td>(+0.04, -0.39)</td><td>(+0.03, +0.39)</td><td>0.39 → 0.07</td><td>rigid</td></tr>
+</tbody>
+</table>
+
+<table>
+<caption>Translation fit and core flatness. The flatness measure is the 5th-to-95th percentile flux range on a fixed 60 cm vertical cut, centred at the map-current centroid Z and at the mean R of all its main-plasma maxima; EFIT uses the same rule on its own map.</caption>
+<thead><tr><th>case</th><th>flux RMS before → after [mWb]</th><th>squared mismatch removed [%]</th><th>core range solved / EFIT [mWb]</th><th>flatness ratio solved / EFIT</th></tr></thead>
+<tbody>
+<tr><td>137D (head)</td><td>347.68 → 239.76</td><td>52.45</td><td>2.69 / 409.35</td><td>0.00657</td></tr>
+<tr><td>146D (head)</td><td>366.80 → 221.56</td><td>63.52</td><td>11.67 / 470.46</td><td>0.02480</td></tr>
+<tr><td>146L (head)</td><td>736.12 → 313.80</td><td>81.83</td><td>450.41 / 470.46</td><td>0.95738</td></tr>
+<tr><td>179L (head)</td><td>277.58 → 153.30</td><td>69.50</td><td>104.40 / 316.92</td><td>0.32942</td></tr>
+<tr><td>mast-21978-35 (base)</td><td>11.89 → 3.46</td><td>91.52</td><td>36.90 / 36.52</td><td>1.01030</td></tr>
+<tr><td>mast-21978-35 (head)</td><td>1.49 → 0.39</td><td>93.31</td><td>36.72 / 36.52</td><td>1.00541</td></tr>
+</tbody>
+</table>
+
+<p>The converged base MAST control has one maximum and a flatness ratio of 1.010, compared with 0.00657 and 0.02480 on the target diverted maps. That positive control shows the instrument can distinguish an ordinary core from these flat cores. Base MAST's residual is 2.2096965623508588×10⁻¹⁶ and reason 1. Its 3.50 cm lower-X difference from EFIT remains real; convergence does not imply absolute geometry identity. Supplied head MAST is unconverged and is tabulated separately.</p>
+<h3>Map current and the degenerate core</h3>
+<p>Current is read by the public native Ampere stencil at <code>nova/equilibrium/map_extraction.py:145</code>: jφ = −Δ*Φ/(2πμ₀R). At the same cut radius used above, central samples satisfy |Z−Zcentroid| ≤ 10 cm and shoulders 15–35 cm, within 1.6 radial grid steps. The tables use their median native density, with sample counts retained in the JSON. A continuous spline-curvature density at the cut midpoint is a companion check, not a substitute for the stencil.</p>
+
+<table>
+<caption>Native current-density contrast [MA/m²]. Centre/shoulder ratios below one indicate a hollow vertical core on this cut. EFIT is evaluated with the same rule on its own map.</caption>
+<thead><tr><th>case</th><th>solved centre / shoulder</th><th>solved ratio</th><th>EFIT centre / shoulder</th><th>EFIT ratio</th><th>solved continuous midpoint</th></tr></thead>
+<tbody>
+<tr><td>137D (head)</td><td>0.064 / 0.253</td><td>0.253</td><td>2.139 / 1.744</td><td>1.227</td><td>0.194</td></tr>
+<tr><td>146D (head)</td><td>0.201 / 0.603</td><td>0.334</td><td>2.439 / 1.872</td><td>1.303</td><td>0.141</td></tr>
+<tr><td>146L (head)</td><td>1.031 / 2.579</td><td>0.400</td><td>2.439 / 1.872</td><td>1.303</td><td>1.955</td></tr>
+<tr><td>179L (head)</td><td>0.171 / 1.759</td><td>0.097</td><td>1.703 / 1.414</td><td>1.204</td><td>-0.152</td></tr>
+<tr><td>mast-21978-35 (base)</td><td>0.474 / 0.523</td><td>0.905</td><td>0.468 / 0.512</td><td>0.913</td><td>0.468</td></tr>
+<tr><td>mast-21978-35 (head)</td><td>0.471 / 0.514</td><td>0.916</td><td>0.468 / 0.512</td><td>0.913</td><td>0.471</td></tr>
+</tbody>
+</table>
+
+<p>On 137D, the native central density is 0.064 MA/m² against EFIT's 2.139 MA/m², with centre/shoulder ratios 0.253 against 1.227. On 146D it is 0.201 against 2.439 MA/m², with ratios 0.334 against 1.303. The continuous midpoint reads also show the central-current deficit, so the diagnosis does not rest only on spline peak splitting. At the 146D minimum, a positive-definite Hessian implies negative local toroidal current in the continuous Ampere read; the subcell extremum belongs to the cubic interpolant, while the severe central-current deficit is already present in the native stencil. The saved fields carry an unphysical flat or hollow core relative to the single-peaked EFIT maps. The banks do not contain the native source-moment tables or the evaluated p′/FF′ arrays, so this establishes the solved map-current defect without claiming which input coefficient caused it.</p>
+<p>The robust current integral and centroid do not select a maximum. The original integrals use the saved support; the companion re-integrates the map over the main closed plasma. Neither integral renormalises the current or clips negative density. DIII-D's native spacing is 5.3125 cm by 10 cm; interpolating that 33×33 map does not add physical resolution. The absolute current values are map-implied values, not the magnetics target current or the native clipped source quadrature.</p>
+
+<table>
+<caption>Total current and centroid. Vector coordinates are (R,Z) [cm]. Comparing support and closed-plasma integrals checks sensitivity to the private-flux island.</caption>
+<thead><tr><th>case</th><th>I support / closed / EFIT [MA]</th><th>support centroid</th><th>closed-plasma centroid</th><th>EFIT centroid</th></tr></thead>
+<tbody>
+<tr><td>137D (head)</td><td>1.600541 / 1.601640 / 1.612173</td><td>(+156.17, -0.45)</td><td>(+156.20, -0.43)</td><td>(+165.21, -1.42)</td></tr>
+<tr><td>146D (head)</td><td>1.632670 / 1.604296 / 1.613566</td><td>(+155.52, -1.49)</td><td>(+156.02, +0.76)</td><td>(+165.74, -1.50)</td></tr>
+<tr><td>146L (head)</td><td>1.606642 / 1.605687 / 1.613566</td><td>(+176.93, +19.19)</td><td>(+176.93, +19.14)</td><td>(+165.74, -1.50)</td></tr>
+<tr><td>179L (head)</td><td>1.256305 / 1.256305 / 1.256316</td><td>(+181.32, -6.65)</td><td>(+181.32, -6.65)</td><td>(+171.72, -1.72)</td></tr>
+<tr><td>mast-21978-35 (base)</td><td>0.792669 / 0.792884 / 0.796716</td><td>(+77.07, +3.38)</td><td>(+77.06, +3.40)</td><td>(+77.04, -0.21)</td></tr>
+<tr><td>mast-21978-35 (head)</td><td>0.793340 / 0.793248 / 0.796716</td><td>(+76.97, -0.62)</td><td>(+76.97, -0.60)</td><td>(+77.04, -0.21)</td></tr>
+</tbody>
+</table>
+
+<h3>Own-field forces and boundary gaps</h3>
+<p>The Lorentz read is (Fᵣ,Fᶻ) = ∫2πR jφ(Bᶻ,−Bᵣ)dA, with Bᵣ = −Φᶻ/(2πR) and Bᶻ = Φᵣ/(2πR), from each map's own public central derivatives. It excludes poloidal-current stress and pressure gradients. Fᵣ is the toroidally integrated radial scalar or hoop loading; the Cartesian radial vector cancels by symmetry. The analytic uniform-current case independently pins the force sign and magnitude.</p>
+
+<table>
+<caption>Own-field Lorentz loading [kN], ordered (radial,vertical). Support dependence is reported rather than hidden.</caption>
+<thead><tr><th>case</th><th>saved support</th><th>main closed plasma</th><th>EFIT</th></tr></thead>
+<tbody>
+<tr><td>137D (head)</td><td>(+124.61, +7.26)</td><td>(+118.69, +5.09)</td><td>(+52.58, +1.83)</td></tr>
+<tr><td>146D (head)</td><td>(+142.01, -10.64)</td><td>(+163.77, +6.59)</td><td>(+64.52, -7.57)</td></tr>
+<tr><td>146L (head)</td><td>(+218.01, +281.90)</td><td>(+218.07, +285.47)</td><td>(+64.52, -7.57)</td></tr>
+<tr><td>179L (head)</td><td>(-117.59, -35.92)</td><td>(-117.59, -35.92)</td><td>(-131.37, +8.30)</td></tr>
+<tr><td>mast-21978-35 (base)</td><td>(+50.94, +0.57)</td><td>(+51.04, +0.55)</td><td>(+49.53, -1.24)</td></tr>
+<tr><td>mast-21978-35 (head)</td><td>(+50.15, -1.20)</td><td>(+50.16, -1.22)</td><td>(+49.53, -1.24)</td></tr>
+</tbody>
+</table>
+
+<p>137D's centroid is stable to 0.03 cm vertically between the two support choices, but its axis is undefined. For 146D, excluding the private-flux contribution changes the centroid Z from −1.49 to +0.76 cm and Fᶻ from −10.64 to +6.59 kN. Its vertical force direction is therefore not robust to the integration domain and cannot identify the source of the X-point error. The 146L upward centroid displacement and large upward Lorentz loading remain, but the target diverted-core diagnosis is the flat or multi-peaked current distribution.</p>
+<p>Midplane gaps use one common height, EFIT's stored axis Z. Inboard/outboard entries are signed R gaps and top is the signed Z gap. The solved surface is 99.9% of its own boundary-flux span, compared with the sampled EFIT LCFS; this declared inward offset avoids a marching-grid ambiguity exactly through a tangent saddle. A current-centroid interior anchor is used, not an axis seed. The X gap uses the continuously polished lower null with no inward offset.</p>
+
+<table>
+<caption>Boundary-to-boundary gaps [cm], not wall clearances. The lower-X column is Euclidean; other columns are signed coordinate differences.</caption>
+<thead><tr><th>case</th><th>outboard midplane</th><th>inboard midplane</th><th>top</th><th>lower X</th></tr></thead>
+<tbody>
+<tr><td>137D (head)</td><td>-12.91</td><td>-1.66</td><td>+2.03</td><td>+7.30</td></tr>
+<tr><td>146D (head)</td><td>-13.48</td><td>-3.17</td><td>+3.78</td><td>+6.59</td></tr>
+<tr><td>146L (head)</td><td>+2.12</td><td>+20.02</td><td>-6.25</td><td>+18.71</td></tr>
+<tr><td>179L (head)</td><td>+6.30</td><td>+11.59</td><td>-44.17</td><td>+2.97</td></tr>
+<tr><td>mast-21978-35 (base)</td><td>-0.11</td><td>+0.56</td><td>+9.11</td><td>+3.50</td></tr>
+<tr><td>mast-21978-35 (head)</td><td>-0.11</td><td>+0.06</td><td>-1.29</td><td>+0.39</td></tr>
+</tbody>
+</table>
+
+<h3>Every critical point, on shared flux levels</h3>
+<figure><img src="/nova/figures/diiid-xpoint-offset-decomposition/frame-137-diverted.svg" alt="DIII-D frame 137: all critical points, rigid translation, enlarged core and lower-X detail">
+<figcaption>DIII-D frame 137, saved diverted head state. Left to right: original, after best translation, enlarged original core, and translated lower-X detail. Blue is solved and dark dashed is EFIT; each panel compares both fields on a shared physical level array after constant gauge alignment. The core adds common levels 0.5, 1, 2, 5, 10 and 20 mWb below the solved peak to reveal its multiple domes. Triangles mark maxima, circles/squares minima, and crosses/filled pluses saddles; shapes and colours distinguish the maps. Every enumerated critical point is marked. Hollow marks are outside the main plasma, including private-flux and outside-vessel extrema, and are not admitted axes. The main lower saddles are enlarged, with EFIT drawn last at the highest layer. Grey is the wall; all contours are clipped to its interior and all axes are off. No unique solved axis is drawn. Relative terminal residual 0.0177821892, converged false, reason 12. Both PNGs were inspected; save-time checks found zero clipped text, overlapping labels or labels over data.</figcaption></figure>
+<figure><img src="/nova/figures/diiid-xpoint-offset-decomposition/frame-146-diverted.svg" alt="DIII-D frame 146: all critical points, rigid translation, enlarged core and lower-X detail">
+<figcaption>DIII-D frame 146, saved diverted head state. Left to right: original, after best translation, enlarged original core, and translated lower-X detail. Blue is solved and dark dashed is EFIT; each panel compares both fields on a shared physical level array after constant gauge alignment. The core adds common levels 0.5, 1, 2, 5, 10 and 20 mWb below the solved peak to reveal its multiple domes. Triangles mark maxima, circles/squares minima, and crosses/filled pluses saddles; shapes and colours distinguish the maps. Every enumerated critical point is marked. Hollow marks are outside the main plasma, including private-flux and outside-vessel extrema, and are not admitted axes. The main lower saddles are enlarged, with EFIT drawn last at the highest layer. Grey is the wall; all contours are clipped to its interior and all axes are off. No unique solved axis is drawn. Relative terminal residual 0.0101992101, converged false, reason 12. Both PNGs were inspected; save-time checks found zero clipped text, overlapping labels or labels over data.</figcaption></figure>
+<h3>Guards, provenance and next physical target</h3>
+<p>The original six synthetic and analytic checks remain. Two end-to-end cases now read the committed 137D and 146D banks through the complete diagnostic, assert their measured maxima/minima counts, require EFIT's single maximum, and require missing single-axis and rigid-shift residual values on degenerate maps. The 146D case also requires the minimum's positive Hessian eigenvalues. All eight focused tests pass. Disabling the translation output fails the original two synthetic cases; retaining only one maximum after the census fails both saved-bank cases. Each red run reports 2 failed and 6 passed with EXIT=1. The first scratch-control attempt had a fixture-path error and is retained separately; only the corrected controls are used as evidence.</p>
+<p>The measurement log now names its producing source commit <code>afed62d3c37b5156af6ed42378d28287dd40b4c8</code>, and the renderer log names <code>1de51e2577bbc7294a473422e9503b87cbebfc25</code>, both of which contain the code they exercised. The initial closed-level measurement and red-control headers named a checkout HEAD preceding their uncommitted source. Their headers were corrected only after matching the saved producing-source SHA-256 to <code>cb6d8a7c7e639588b2ee1c7abb5c2be4f09f140b</code>; untouched as-delivered logs and a correction receipt are preserved. Fresh final-head suite arms and their literal commands are recorded in the manifest. The base file remains absent and its required exit 4 is recorded as absence, not a passing baseline.</p>
+<p><strong>Recommendation:</strong> the next node should explain and repair why the held diverted branch forms a flat, hollow or multi-peaked solved current core. Trace the evaluated p′ and FF′ and their normalised-flux coordinates into <code>nova/equilibrium/source.py:371</code>, where the closure forms the density through <code>nova/equilibrium/convention.py:90</code>, jφ = −2π(Rp′ + FF′/(μ₀R)). Follow those values through <code>nova/equilibrium/forward_operator.py:3503</code> and <code>:3545</code>, where current moments are built on the admitted supports, and through the total-current amplitude at <code>:3661</code>. Bank central-versus-shoulder current, the full critical-point census and source-moment tables on each retained state. The target is a physically single-peaked core consistent with the prescribed profiles and EFIT, not selection of a different maximum. Keep the physical inputs fixed until the density defect is attributed; adding a position pin or translating a selected “axis” cannot repair it.</p>
+</section>

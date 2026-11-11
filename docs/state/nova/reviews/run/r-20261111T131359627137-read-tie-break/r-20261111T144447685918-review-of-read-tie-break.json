@@ -1,0 +1,92 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 9,
+  "call_sites": [
+    "nova/equilibrium/topology.py:1135 Topology.update",
+    "nova/equilibrium/topology.py:1151 Topology.read_qualification",
+    "nova/equilibrium/topology.py:1422 Topology.read",
+    "nova/equilibrium/topology.py:3235 topology.read",
+    "nova/equilibrium/topology.py:3278 read_at_stationary_points",
+    "nova/equilibrium/topology.py:3563 refresh_at_stationary_points",
+    "nova/equilibrium/support_read.py:304 read",
+    "nova/equilibrium/support_read.py:909 _normal_ring_rates",
+    "nova/equilibrium/forward_operator.py:2997 read_qualification"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-11T13:16:04Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "read-tie-break",
+      "recorded_at": "2026-11-11T15:05:33.707070+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "read-tie-break",
+      "recorded_at": "2026-11-11T15:05:39.512206+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "connectivity_boundary.py was edited at the coordinator's direction to give the shared argmax one owner; the coordinator accepts it with --accept-path at landing",
+      "recorded_at": "2026-11-11T15:05:45.194107+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/topology.py",
+      "id": "fda891b8c17",
+      "line": 834,
+      "severity": "non-blocking",
+      "text": "extremum_index returns -1 when every candidate is NaN, and three call sites consume that value as a position without masking it (mode_index at :834 used at :838, wall_index at :3432 and :3450, contact index at :3575 used at :3583), so JAX negative indexing wraps -1 onto the last candidate where the replaced jnp.argmax chose the first; the repair masked only x_point_index, leaving the same class of defect at these sites."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/read-tie-break.html",
+      "id": "f0bdb149fbf",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the verification table cites the seven-case arms in sirius job 1310570 while the delivered head runs twelve tie cases in job 1310600, so a reader of the fragment alone sees an earlier gate than the one that landed."
+    },
+    {
+      "file": "nova/equilibrium/connectivity_boundary.py",
+      "id": "ffa7ff17876",
+      "line": 136,
+      "severity": "non-blocking",
+      "text": "this file is edited by 3d58ba468 but is absent from the run's recorded write_paths, so promotion's scope check sees an out-of-scope edit until the coordinator extends the record; the work itself was expressly directed by the resumed finding 3, so this is a record defect rather than an unauthorised change."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "The runtime paths reaching the change are topology.py's update, read_qualification, read, update_batch, read_at_stationary_points and refresh_at_stationary_points, plus support_read.read and support_read._normal_ring_rates and forward_operator's read_qualification call.",
+    "diff": "Read commit by commit against b48deaa93, 5 files and 444 insertions; ba23b17df adds extremum_index and rewires fifteen rankings, b9ca3cd7b adds the evidence fragment, and 3d58ba468 adds the all-NaN saddle refusal and folds the helper into connectivity_boundary._arg_extreme so one owner remains.",
+    "done_when": "The done_when requires the rule with three tests, a negative control failing on plain argmax, paired base and head arms in one seven-CPU job and a fragment; all four are recorded, in tests/test_read_tie_break.py, resume-initial-wall-control.log with resume-confined-wall-control.log, resume-head-ties.log and docs/evidence/fragments/sub-millisecond-forward-path/read-tie-break.html.",
+    "goal": "The node goal is a stated deterministic rule for near-tied discrete read decisions; nova/equilibrium/topology.py:57 implements it as extremum_index and every floating-point ranking the node lists calls it.",
+    "manifest": "Read at 3d58ba468, it states status complete with three commits, nine sampled arm receipts from one seven-CPU sirius job 1310600, and its own blocker that the recorded scope still omits connectivity_boundary.py; its stated counts reconcile with every log summary I opened.",
+    "write_paths": "The run records topology.py, support_read.py, tests/test_read_tie_break.py, the fragment and docs/figures/sub-millisecond-forward-path/read-tie-break; the diff also edits nova/equilibrium/connectivity_boundary.py, which the coordinator's resumed finding 3 expressly directed but the recorded scope was never extended to carry."
+  },
+  "justifications": {
+    "durability": "tests/test_read_tie_break.py:186 drives the real _read_at_nulls and resume-initial-wall-control.log and resume-confined-wall-control.log show each wall ranking reverted to jnp.argmax failing it separately, so a regression reddens; the fixture oracle at tests/test_read_tie_break.py:96 restates the 1e-12 rule instead of naming indices, which is weaker but still fails on plain argmax.",
+    "evidence": "the six arm logs each open with their revision, tree and literal command and close with a bare EXIT= line (resume-head-ties.log 12 passed EXIT=0, resume-head-tracked.log 15 passed EXIT=0) and the three mutant logs each end EXIT=1, but the fragment's verification table still cites the pre-repair seven-case job 1310570 rather than the delivered head's twelve-case job 1310600.",
+    "fit": "nova/equilibrium/topology.py:57 follows the module's pure-jnp helper idiom beside x_point_height_limits, its docstring states the mechanism, and no plan, sprint or ticket identifier appears in the diff.",
+    "goal_fidelity": "nova/equilibrium/topology.py:57 states the relative 1e-12 lowest-canonical-index rule and topology.py:67 delegates it to connectivity_boundary.py:136, so the fifteen rankings from topology.py:477 to :3582 and support_read.py:909 share one implementation.",
+    "reuse": "the change extends the existing connectivity_boundary._arg_extreme owner with the tolerance, axis and canonical-index options and leaves no second algorithm in topology.extremum_index, but nova/equilibrium/stencil_nulls.py:67 still carries a parallel _arg_extreme with its own exact wrappers that this consolidation did not absorb.",
+    "scope_discipline": "four of the five changed files are inside the recorded write paths, and the fifth, nova/equilibrium/connectivity_boundary.py, is the edit the coordinator's resumed finding 3 directed while the run record's write_paths was never extended to name it."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is a stated deterministic rule for near-tied discrete read decisions; nova/equilibrium/topology.py:57 implements it as extremum_index and every floating-point ranking the node lists calls it.\nVERDICT done_when: the done_when requires the rule with three tests, a negative control failing on plain argmax, paired base and head arms in one seven-CPU job and a fragment; all four are recorded, in tests/test_read_tie_break.py, resume-initial-wall-control.log with resume-confined-wall-control.log, resume-head-ties.log and docs/evidence/fragments/sub-millisecond-forward-path/read-tie-break.html.\nVERDICT write_paths: the run records topology.py, support_read.py, tests/test_read_tie_break.py, the fragment and docs/figures/sub-millisecond-forward-path/read-tie-break; the diff also edits nova/equilibrium/connectivity_boundary.py, which the coordinator's resumed finding 3 expressly directed but the recorded scope was never extended to carry.\nVERDICT manifest: read at 3d58ba468, it states status complete with three commits, nine sampled arm receipts from one seven-CPU sirius job 1310600, and its own blocker that the recorded scope still omits connectivity_boundary.py; its stated counts reconcile with every log summary I opened.\nVERDICT diff: read commit by commit against b48deaa93, 5 files and 444 insertions; ba23b17df adds extremum_index and rewires fifteen rankings, b9ca3cd7b adds the evidence fragment, and 3d58ba468 adds the all-NaN saddle refusal and folds the helper into connectivity_boundary._arg_extreme so one owner remains.\nCALL_SITES: nova/equilibrium/topology.py:1135 Topology.update, nova/equilibrium/topology.py:1151 Topology.read_qualification, nova/equilibrium/topology.py:1422 Topology.read, nova/equilibrium/topology.py:3235 topology.read, nova/equilibrium/topology.py:3278 read_at_stationary_points, nova/equilibrium/topology.py:3563 refresh_at_stationary_points, nova/equilibrium/support_read.py:304 read, nova/equilibrium/support_read.py:909 _normal_ring_rates, nova/equilibrium/forward_operator.py:2997 read_qualification\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/topology.py:57 states the relative 1e-12 lowest-canonical-index rule and topology.py:67 delegates it to connectivity_boundary.py:136, so the fifteen rankings at topology.py:477 to :3582 and support_read.py:909 share one implementation.\nSCORE evidence: 18\nJUSTIFICATION evidence: the six arm logs each open with their revision, tree and literal command and close with a bare EXIT= line (resume-head-ties.log 12 passed EXIT=0, resume-head-tracked.log 15 passed EXIT=0), and the three mutant logs each end EXIT=1, but the fragment's verification table still cites the pre-repair seven-case run in job 1310570 rather than the delivered head's twelve-case run in job 1310600.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: four of the five changed files are inside the recorded write paths, and the fifth, nova/equilibrium/connectivity_boundary.py, is the edit the coordinator's resumed finding 3 directed while the run record's write_paths was never extended to name it.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_read_tie_break.py:186 drives the real _read_at_nulls and resume-initial-wall-control.log and resume-confined-wall-control.log show each wall ranking reverted to jnp.argmax failing it separately, so a regression reddens rather than passing; the fixture oracle at tests/test_read_tie_break.py:96 restates the 1e-12 rule instead of naming indices, which is weaker but still fails on plain argmax.\nSCORE fit: 19\nJUSTIFICATION fit: nova/equilibrium/topology.py:57 follows the module's pure-jnp helper idiom beside x_point_height_limits, its docstring states the mechanism, and no plan, sprint or ticket identifier appears in the diff.\nSCORE reuse: 18\nJUSTIFICATION reuse: the change extends the existing connectivity_boundary._arg_extreme owner with the tolerance, axis and canonical-index options and leaves no second algorithm in topology.extremum_index, but nova/equilibrium/stencil_nulls.py:67 still carries a parallel _arg_extreme with its own exact wrappers that this consolidation did not absorb.\nFINDING nova/equilibrium/topology.py:834 non-blocking: extremum_index returns -1 when every candidate is NaN, and three call sites consume that value as a position without masking it (mode_index at :834 used at :838, wall_index at :3432 and :3450, contact index at :3575 used at :3583), so JAX negative indexing wraps -1 onto the last candidate where the replaced jnp.argmax chose the first; the repair masked only x_point_index, so the same class of defect the fold fixed remains at these sites.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/read-tie-break.html:1 non-blocking: the verification table cites the seven-case arms in sirius job 1310570 while the delivered head runs twelve tie cases in job 1310600, so a reader of the fragment alone sees an earlier gate than the one that landed.\nFINDING nova/equilibrium/connectivity_boundary.py:136 non-blocking: this file is edited by 3d58ba468 but is absent from the run's recorded write_paths, so promotion's scope check sees an out-of-scope edit until the coordinator extends the record; the work itself was expressly directed by the resumed finding 3, so this is a record defect rather than an unauthorised change.",
+  "review_run_id": "r-20261111T144447685918-review-of-read-tie-break",
+  "reviewed_base_sha": "b48deaa93f55ad2c759c5977ed611b9047e393fb",
+  "reviewed_head_sha": "3d58ba4688d8774aa7f4f810f1216bb670dddb2e",
+  "reviewed_run_id": "r-20261111T131359627137-read-tie-break",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T16:03:01.806110+00:00",
+  "total": 109
+}

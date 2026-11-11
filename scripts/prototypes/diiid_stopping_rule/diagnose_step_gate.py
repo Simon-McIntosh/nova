@@ -106,7 +106,7 @@ def main() -> None:
         round(seconds, 1),
     )
     print("residual_history", measure_branches._finite_list(receipt.residual_history))
-    print("mask_history", measure_branches._int_list(receipt.mask_history))
+    print("mask_history", measure_branches._int_list(receipt.changed_mask_entries))
     print("attempted", int(receipt.attempted_newton_promotions))
     print("accepted", int(receipt.accepted_newton_promotions))
     print("terminal_residual", float(receipt.equilibrium.fixed_point.residual))

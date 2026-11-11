@@ -107,7 +107,7 @@ def run_frame(frame, root, expansion):
                 qualified=bool(receipt.qualified),
                 termination_reason=int(receipt.termination_reason),
                 residual_history=probe._finite_list(receipt.residual_history),
-                changed_mask_entries=probe._int_list(receipt.mask_history),
+                changed_mask_entries=probe._int_list(receipt.changed_mask_entries),
                 host_boundary_read_class=(
                     "refused"
                     if boundary is None

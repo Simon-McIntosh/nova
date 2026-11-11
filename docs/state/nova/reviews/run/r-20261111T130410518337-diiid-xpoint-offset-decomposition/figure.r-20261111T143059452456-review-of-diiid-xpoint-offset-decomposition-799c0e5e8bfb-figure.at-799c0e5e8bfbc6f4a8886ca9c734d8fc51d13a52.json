@@ -1,0 +1,88 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This is a figure review and ran no suite, so the zero and the empty list are the neutral values the record shape requires rather than a measurement, and no suite-delta is claimed. The reviewed run's own manifest records its arms: baseline absent at 38df9b27f (exit 4, completed, zero failure ids) and eight passed at 799c0e5e8.",
+  "attachment_map": {
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/figure-previews-799c0e5e8/frame-137-diverted.png": "docs/figures/diiid-xpoint-offset-decomposition/frame-137-diverted.svg",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/figure-previews-799c0e5e8/frame-146-diverted.png": "docs/figures/diiid-xpoint-offset-decomposition/frame-146-diverted.svg"
+  },
+  "attachment_note": "Both named PNGs were opened with Read and judged as pictures: each is 1714x882 RGBA, aspect 1.943, the 14 x 7.2 in canvas the render script declares, opaque white background (alpha histogram: 0 transparent pixels of 1,511,748 in each). No SVG and no image other than these two named PNGs was opened, read, listed, searched, rendered or git-shown for any verdict below. Geometry claims were cross-checked against the critical-point coordinates in scripts/prototypes/diiid_xpoint_offset/results.json at the reviewed head, and panel widths were measured from the PNGs' own ink columns; neither is a substitute for looking at the two renders.",
+  "completed_at": "2026-11-11T14:43:10.917Z",
+  "dispatched_at": "2026-11-11T14:32:13Z",
+  "figure_verdicts": [
+    {
+      "attachment": "frame-137-diverted.png (1714x882 RGBA)",
+      "figure": "docs/figures/diiid-xpoint-offset-decomposition/frame-137-diverted.svg",
+      "rubric": {
+        "contrast": "pass. Near-black text on an opaque white background, well above 4.5:1; the solved blue and EFIT near-black data strokes clear 4.5:1; the grey wall sits near 3:1, adequate for a reference polyline.",
+        "data_ink": "pass. Ink is contour strokes, one grey limiter polyline per geometry panel, the critical-point glyphs, the legend, four panel labels and three measurement lines, and nothing else. The extra contour levels in the core panel are data levels, not decoration (finding 2 concerns the caption, not the ink).",
+        "decoration": "pass. Axes, ticks and tick labels are off in all four panels; the legend is frameless; there is no grid, gradient, background fill, band or frame. Colour names a component only: blue solved, near-black EFIT, grey wall.",
+        "label_collision": "pass. Panel labels sit above the axes, the three measurement lines below them; no text is clipped at any canvas edge and no text touches a panel, a marker or another label. The overprinted marks reported in finding 1 are data glyphs, not labels, and are recorded there.",
+        "legibility": "pass, with three non-blocking findings. Four panels labelled 'original', 'after translation', 'core critical points', 'lower X after translation' under a frameless nine-entry legend: solved is a solid blue contour, EFIT a dashed near-black one on one shared level array, the wall a grey polyline, and the six critical-point kinds are distinct glyphs. The new core panel shows what the caption counts: four solved maxima, three saddles and the single EFIT axis, all inside its zoom window, each glyph clear of its neighbours (closest pair about 10 px apart, glyphs about 10 px). The reader can see the flat multi-peaked core and the separation from the EFIT axis. The two full-geometry panels render 217 px wide against 374 px for the lower-X panel (finding 3), which costs scale but leaves every family, axis and null readable.",
+        "table_form": "pass. Poloidal flux contours with critical-point markers are a spatial relationship, not tabular information; the three text lines are a summary of the panel pair, not rows of a table."
+      }
+    },
+    {
+      "attachment": "frame-146-diverted.png (1714x882 RGBA)",
+      "figure": "docs/figures/diiid-xpoint-offset-decomposition/frame-146-diverted.svg",
+      "rubric": {
+        "contrast": "pass. Near-black text and near-black dashes on opaque white clear 4.5:1; blue strokes clear 4.5:1; grey wall near 3:1.",
+        "data_ink": "pass. Contour strokes, limiter polyline, critical-point glyphs, legend, panel labels and three measurement lines; nothing else is drawn. The one hollow triangle near the wall in the lower-X panel is the out-of-plasma solved maximum at R=1.309 m, Z=-1.332 m, correctly hollow per the caption's closing clause.",
+        "decoration": "pass. Axes off in all four panels, frameless legend, no fill, shading or gradient.",
+        "label_collision": "pass. Nothing overlaps another label, a marker or the data, and no text is clipped at the canvas edge. The overprinted out-of-plasma glyph pairs of finding 1 are data marks, not labels.",
+        "legibility": "pass, with the same three non-blocking findings. Same four-panel structure, same legend and encoding. The core panel here shows three solved maxima, one solved minimum and three saddles plus the EFIT axis; the solved minimum drawn inside the innermost blue ring is the hollow core the caption counts, and it is legible as such. The core panel is 314 px wide in this render against 213 px on the 137 render, so its width moves with the zoom window rather than with its content. The full-geometry panels are again 217 px against 374 px for the lower-X panel.",
+        "table_form": "pass. Two poloidal flux comparisons plus a core census and an X-point detail; not tabular information."
+      }
+    }
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "overprinting occurs only where the solved and EFIT critical points coincide outside the plasma; the census table in the fragment lists both sets",
+      "recorded_at": "2026-11-11T14:53:03.673146+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "diiid-hollow-current-source",
+      "recorded_at": "2026-11-11T14:53:25.293603+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "column gaps are layout only; every panel is legible and nothing overlaps",
+      "recorded_at": "2026-11-11T14:53:42.854675+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_xpoint_offset/render.py",
+      "id": "f2fdf3f6244",
+      "line": 200,
+      "severity": "non-blocking",
+      "summary": "Solved and EFIT critical-point markers are each plotted at their own coordinate with no offset (draw_critical_points at line 200 for the solved census and line 201 for the EFIT one), so where the two fields agree the two glyphs overprint into a single mark the reader cannot decompose. On the 137 render this happens at four out-of-plasma points: solved maximum (R=1.0215, Z=+1.5291) over EFIT maximum (R=1.0228, Z=+1.5302), solved maximum (1.0303,-1.5351) over EFIT (1.0321,-1.5358), solved saddle (1.1090,-1.5617) over EFIT (1.1100,-1.5618) and solved saddle (1.1376,+1.5738) over EFIT (1.1357,+1.5723) -- pairwise separations of 1-3 mm, under half a pixel at the panel scale of about 238 px/m, which is why the marks at the top-left and bottom-left of both full-geometry panels read as one glyph rather than two. The 146 render shows the same at its own four coincident pairs. A reader cannot tell which of the six legend glyphs is on top, or that two points are drawn there. This does not hold the node: the affected points are exactly the ones the caption's closing clause labels as outside the main plasma, and the core and lower-X comparisons the figure exists for stay fully readable; a small leader or an inset count would recover the distinction if it is wanted."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_offset/render.py",
+      "id": "f37f5523df5",
+      "line": 144,
+      "severity": "non-blocking",
+      "summary": "Caption line 2 (render.py:257-263) states 'one physical contour-level array', but the core panel is drawn on an augmented array: line 144 takes the shared levels and adds six more at 0.5, 1, 2, 5, 10 and 20 mWb below the solved peak (line 147), so panel 3 does not share the level set the other three panels use. Within panel 3 the reference and solved fields do share that one augmented array, so the comparison inside the panel is fair; the defect is the caption's claim, which invites a reader to compare contour density between the 'after translation' panel and the core panel as if the two used one level set. Either the caption should say the core panel adds levels near the peak, or the panel should carry the shared array."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_offset/render.py",
+      "id": "f9250ae728d",
+      "line": 222,
+      "severity": "non-blocking",
+      "summary": "The four panels sit in equal-width grid columns while each poloidal panel keeps an equal aspect ratio, so the drawings fill only part of their column and the leftover becomes blank bands. Measured from the PNGs' own ink columns, the panels span 124-341 (217 px), 543-759 (216 px), 959-1172 (213 px) and 1297-1671 (374 px) on the 137 render, with blank gaps of 202, 200 and 125 px between them; the 146 render is the same apart from a 314 px core panel. The two full-geometry panels -- the side-by-side original against best translation that carries the comparison -- are thus the smallest on the canvas, and the fixed figure caption runs wider than any drawing above it. Nothing becomes unreadable, which is why this does not hold the node, and it is the same layout item the previous figure round raised; it is recorded again because it is still visible in this round's renders."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261111T143059452456-review-of-diiid-xpoint-offset-decomposition-799c0e5e8bfb-figure",
+  "reviewed_base_sha": "38df9b27f357791af18e2296cf2e4c66e0e06dc5",
+  "reviewed_head_sha": "799c0e5e8bfbc6f4a8886ca9c734d8fc51d13a52",
+  "reviewed_run_id": "r-20261111T130410518337-diiid-xpoint-offset-decomposition",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T14:45:31.376580+00:00",
+  "total": null
+}

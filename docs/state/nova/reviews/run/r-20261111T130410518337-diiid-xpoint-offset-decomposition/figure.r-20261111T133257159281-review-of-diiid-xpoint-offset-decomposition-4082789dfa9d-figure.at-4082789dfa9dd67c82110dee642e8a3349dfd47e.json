@@ -1,0 +1,95 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This is a figure review and ran no suite. The zero and the empty list are the neutral values the record shape requires, not a measurement; no base/head gate pair was read from this node and no suite-delta is claimed. The reviewed run's own manifest records its arms: baseline absent at the base (exit 4, completed, 0 failures) and six passed at the reviewed head.",
+  "attachment_map": {
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/figure-previews-4082789df/frame-137-diverted.png": "docs/figures/diiid-xpoint-offset-decomposition/frame-137-diverted.svg",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130410518337-diiid-xpoint-offset-decomposition/figure-previews-4082789df/frame-146-diverted.png": "docs/figures/diiid-xpoint-offset-decomposition/frame-146-diverted.svg"
+  },
+  "attachment_note": "Both named PNGs were opened with Read and judged as images: frame-137-diverted.png and frame-146-diverted.png are each 1714x882 RGBA (aspect 1.943, matching the 14 x 7.2 in canvas the render script declares). No SVG was opened, read, listed, searched, rendered or git-shown for the verdict, and no image other than these two named PNGs was opened. Everything below describes what is visible in those two renders. The reviewed base 38df9b27f357791af18e2296cf2e4c66e0e06dc5 and the reviewed head 4082789dfa9dd67c82110dee642e8a3349dfd47e are the revisions the run itself recorded in its manifest's suite arms.",
+  "completed_at": "2026-11-11T13:45:06.709Z",
+  "dispatched_at": "2026-11-11T13:34:00Z",
+  "figure_verdicts": [
+    {
+      "attachment": "frame-137-diverted.png (1714x882 RGBA)",
+      "figure": "docs/figures/diiid-xpoint-offset-decomposition/frame-137-diverted.svg",
+      "rubric": {
+        "contrast": "pass. Near-black text on white well above 4.5:1; solved_blue and #333333 data strokes above 4.5:1; the grey wall at about 3:1, adequate for a reference polyline.",
+        "data_ink": "pass. Ink is contour strokes, three grey limiter polylines, six null markers and the legend, plus three panel labels and two lines of measurement text. No grid, no shading, no background fill, no decorative band.",
+        "decoration": "pass. Axes off in all three panels, frameless legend, no stylisation. Colour names a component only: blue solved, near-black EFIT, grey wall.",
+        "label_collision": "pass. Panel labels sit above the axes, the measurement lines below them, and no text touches a panel, another label or the data; nothing is clipped at the canvas edge.",
+        "legibility": "pass, with one non-blocking layout finding (finding 1). Three panels under a frameless seven-entry legend: 'original', 'after translation', 'lower X-point after translation'. Solved flux is a solid blue line, EFIT a dashed near-black line, both on the same physical level array; the dashed reference remains followable around the inner surfaces and the thicker boundary level of each field is visible as the outermost closed curve. The solved axis (blue up triangle) sits below and outboard of the EFIT axis (black inverted triangle), and at the lower null the blue cross and the black plus are separated by about one marker width, so both null sets are told apart without the legend. All text reads at 1714 px without zoom.",
+        "table_form": "pass. Poloidal flux contours, a wall and null positions are a spatial relationship, not a table. The two in-image lines are a summary of the panel pair rather than rows of tabular data."
+      }
+    },
+    {
+      "attachment": "frame-146-diverted.png (1714x882 RGBA)",
+      "figure": "docs/figures/diiid-xpoint-offset-decomposition/frame-146-diverted.svg",
+      "rubric": {
+        "contrast": "pass. Near-black text on white; blue and near-black strokes above 4.5:1; grey wall about 3:1.",
+        "data_ink": "pass. Contour strokes, limiter polyline, null markers, legend, panel labels and the two-line summary; nothing else is drawn.",
+        "decoration": "pass. Axes off, frameless legend, no fill, shading or gradient.",
+        "label_collision": "pass. Nothing overlaps another label, a marker or the data, and no text is clipped at the canvas edge.",
+        "legibility": "pass, with the same non-blocking layout finding (finding 1). Same three-panel structure, legend and encoding as the 137 render; the solved and EFIT contour families separate across the panel, the two axes are individually distinguishable, and the two lower nulls (black plus at the EFIT saddle, blue cross at the solved saddle) stand clear of one another. The in-image summary reads 'applied (dR, dZ) = (+9.22, -2.24) cm; lower-X error 6.59 -> 7.44 cm' and 'gauge-free flux RMS 366.8 -> 221.6 mWb', which is the same read the fragment caption gives for this frame.",
+        "table_form": "pass. The image is a pair of poloidal flux comparisons with a detail panel, not tabular information."
+      }
+    }
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "layout: the comparison panels render narrower than their columns, but labels are legible, nothing overlaps, and the detail panel carries the X-point comparison the record cites",
+      "recorded_at": "2026-11-11T13:50:35.877911+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_xpoint_offset/render.py",
+      "id": "f90781335fe",
+      "line": 44,
+      "severity": "non-blocking",
+      "summary": "The three panels are given equal-width columns while each poloidal panel keeps an equal aspect ratio, so the two panels that carry the comparison the figure exists for render at roughly 40 percent of their allotted width and the detail panel dominates the canvas. In both attached renders the machine cross-section spans about 250 px of a 1714 px canvas, while the right-hand zoom fills nearly its whole third; between the first and second panel there is a blank band wider than either poloidal drawing. The consequence for a reader is that the two full-geometry panels -- the side-by-side comparison of the original against the best rigid translation, with both contour families and both null pairs on each -- are drawn at the smallest scale on the page, and the 32.6 cm and 26.2 cm axis offsets they exist to show are read across a smaller distance than the detail panel's own zoom, which shows only the lower null. Nothing becomes unreadable, which is why this does not hold the node: both families, both axes and both lower nulls are distinguishable in every panel. A width ratio favouring the two geometry panels, or drawing the two geometry panels as equal-height columns with the zoom sized to the same scale, would remove the wasted band and enlarge the comparison without changing any data."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "Neither image carries a title that its caption merely repeats. Identity (frame, machine, convergence state, the diagnostic nature of the translation) lives in the fragment's two figcaptions, which name 'DIII-D frame 137' and 'DIII-D frame 146' with each head state. The text inside each image names panels and states the fitted translation, the lower-X error and the flux RMS -- measurements, not a restatement of a title.",
+    "finding_materiality": "One non-blocking finding, no blocking finding. No label is clipped, overlaps another label or overlaps the data, no text is unreadable, and no data the figure exists to show is hidden, so none of the blocking categories is met.",
+    "nova_rules": "Axis off on every poloidal panel: met. Wall drawn in every panel: met (a full limiter polyline in the two geometry panels, the local wall segments in the zoom). Solved and reference nulls both drawn, with distinct shapes and the reference drawn later at a higher layer: met, and visible as such. Scalar maps as line contours on shared levels: met -- both families sit on the one physical level array the in-image text names. Labels in the margin: met.",
+    "numbers_against_the_receipt": "The values printed inside each image reconcile with the reviewed run's own stored receipt: 137 lower-X offset (0.82125, 7.24945) cm gives 7.30 cm before and 9.90 cm after; 146 (2.78155, 5.97315) cm gives 6.59 cm before and 7.44 cm after; the fitted translations are (+0.08410, -0.00887) m and (+0.09217, -0.02241) m, matching the printed (+8.41, -0.89) cm and (+9.22, -2.24) cm. Frame 137's printed numbers match the frame-137 render exactly; frame 146's match its own. So the text a reader sees on the picture is the receipt's, not a stale transcription.",
+    "rendered_artifact": "Both named PNGs were opened with Read and inspected as images at their delivered 1714x882 size. No SVG was opened, read, listed, searched, rendered or git-shown, and no other image was opened."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with `reckon crew check --review --record` before the manifest is closed.",
+    "evidence": "Provenance is by construction: the PNGs are the previews the reviewed run itself wrote beside the two figures at the reviewed head, and the numbers printed inside them reconcile with that head's stored receipt. The reviewed base and head are the revisions the run's manifest names.",
+    "legibility": "Read from the two named renders at their delivered size, panel by panel: series separation, boundary emphasis, axis and null marker separation, and the reading size of every text element.",
+    "scope_discipline": "This review is read-only: no figure, caption, script or other file was edited, created, moved, deleted, redrawn, relabelled or reformatted. The only writes are this record at its two declared paths and this run's manifest."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261111T133257159281-review-of-diiid-xpoint-offset-decomposition-4082789dfa9d-figure",
+  "reviewed_base_sha": "38df9b27f357791af18e2296cf2e4c66e0e06dc5",
+  "reviewed_figures": [
+    "docs/figures/diiid-xpoint-offset-decomposition/frame-137-diverted.svg",
+    "docs/figures/diiid-xpoint-offset-decomposition/frame-146-diverted.svg"
+  ],
+  "reviewed_head_sha": "4082789dfa9dd67c82110dee642e8a3349dfd47e",
+  "reviewed_run_id": "r-20261111T130410518337-diiid-xpoint-offset-decomposition",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC frame-137-diverted legibility: pass, with one non-blocking layout finding recorded against the render script. Three titled panels -- 'original', 'after translation', 'lower X-point after translation' -- under one frameless seven-entry legend. The solved family reads as a continuous solid blue line and the EFIT family as a dashed near-black line across all three panels; the dashed reference is followable all the way round the inner surfaces, so both families are separable at a glance. Each field's boundary level is drawn thicker and is visible as the outermost closed curve. Null markers are distinct and separated: in the left panel the EFIT axis (black inverted triangle) sits above and outboard of the solved axis (blue up triangle), and at the lower null the black plus stands clear of the blue cross by about one marker width. Text is 14-16 pt on a 1714 px render and readable without zoom.",
+    "RUBRIC frame-137-diverted data_ink: pass. The canvas carries contour strokes, one grey limiter polyline per panel, six null markers, seven legend swatches, three panel labels and two lines of measurement text. No grid, no shading, no background fill, no band, no gradient.",
+    "RUBRIC frame-137-diverted decoration: pass. Axes are off in all three panels -- no spines, ticks, tick labels or gridlines. The legend is frameless with no box. Nothing on the canvas is stylisation, and no colour is spent on anything but a component of the study (blue solved, near-black EFIT, grey wall).",
+    "RUBRIC frame-137-diverted contrast: pass. All text is near-black on white, well above 4.5:1. The solved blue strokes and the #333333 EFIT dashes clear 4.5:1; the grey wall (#929292) sits at about 3:1, which is the repository rule's floor for a reference polyline and reads as one.",
+    "RUBRIC frame-137-diverted table_form: pass. The figure depicts poloidal flux contours, a first wall and null positions -- a spatial relationship no table carries. The two in-image lines ('applied (dR, dZ) = (+8.41, -0.89) cm; lower-X error 7.30 -> 9.90 cm' and 'gauge-free flux RMS 347.7 -> 239.8 mWb; one physical contour-level array') are a two-value summary of the panel pair, not an image of a table; the ten-row numeric receipt lives in the run's results.json and the fragment's text, not in this picture.",
+    "RUBRIC frame-137-diverted label_collision: pass. The three panel labels sit in the top margin above the axes, and the two measurement lines sit in the bottom margin below them; neither crosses a panel. No label overlaps another label, a marker or a contour, and no text is clipped at the canvas edge -- the leftmost and rightmost text extremes both fall well inside the 1714 px frame.",
+    "RUBRIC frame-146-diverted legibility: pass, with the same non-blocking layout finding against the render script. The panel structure, legend, series encoding and boundary emphasis are identical to the 137 render and read the same way; the solved and EFIT contour families separate across the panel, and the two axes (black inverted triangle over blue up triangle) and the two lower nulls (black plus beside blue cross) are individually distinguishable.",
+    "RUBRIC frame-146-diverted data_ink: pass. Same content as the 137 render: contour strokes, limiter, null markers, legend, panel labels and a two-line measurement summary. No grid, fill, shading or gradient.",
+    "RUBRIC frame-146-diverted decoration: pass. Axes off in every panel, frameless legend, no stylisation and no decorative colour.",
+    "RUBRIC frame-146-diverted contrast: pass. Near-black text on white; solved blue and EFIT near-black strokes above 4.5:1; grey wall at about 3:1 as a reference polyline.",
+    "RUBRIC frame-146-diverted table_form: pass. Poloidal geometry, wall and null positions, not tabular information; the in-image lines are the fitted translation, the lower-X error and the flux RMS for this frame, which are the figure's own read and are also stated in the fragment caption.",
+    "RUBRIC frame-146-diverted label_collision: pass. Panel labels in the top margin, measurement lines in the bottom margin, nothing overlapping another label, a marker or the plotted data, and nothing clipped at the canvas edge."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T13:48:20.365894+00:00",
+  "total": null
+}

@@ -9,6 +9,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
+from scipy.interpolate import PPoly
 import shapely
 
 from nova.biot import magnetisation as iron
@@ -159,10 +160,10 @@ def shell_observation(mu, cell_size, capsys):
             1000,
             marks=pytest.mark.xfail(
                 strict=True,
+                raises=AssertionError,
                 reason=(
-                    "Non-monotone shell refinement: errors 2.62/6.79/1.24% at "
-                    "228 cells and 3.16/3.25/2.37% at 828 cells; orders "
-                    "-0.27/+1.06/-0.94. A separate investigation owns it."
+                    "At mu_r=1000, 20 -> 10 mm errors fall at orders 1.3 to 1.5; "
+                    "40 -> 20 mm refinement is pre-asymptotic."
                 ),
             ),
         ),
@@ -244,6 +245,79 @@ def test_material_is_monotone_and_holds_end_values():
     # Positive samples alone do not imply a positive differential material law.
     with pytest.raises(ValueError, match="differential permeability"):
         iron._fit_law([0, 1, 2], [2, 2, 10])
+
+
+def assert_material_interpolation(b, mu):
+    """Check polynomial joins and the differential law used by Newton."""
+    knots, coefficients, ends = iron._fit_law(b, mu)
+    polynomial = PPoly(coefficients, knots)
+    expected = b / (iron._MU0 * mu)
+    np.testing.assert_allclose(polynomial(b), expected, rtol=8e-15, atol=0)
+    assert coefficients[2, 0] == 1 / (iron._MU0 * mu[0])
+    # Evaluate both sides at each exact join, including inserted breakpoints.
+    widths = np.diff(knots)
+    a, q, slope, value = coefficients
+    right_value = ((a * widths + q) * widths + slope) * widths + value
+    right_slope = (3 * a * widths + 2 * q) * widths + slope
+    np.testing.assert_allclose(right_value[:-1], value[1:], rtol=8e-15, atol=0)
+    np.testing.assert_allclose(right_slope[:-1], slope[1:], rtol=8e-14, atol=0)
+    np.testing.assert_allclose(right_slope[-1], ends[-1], rtol=8e-14)
+    np.testing.assert_allclose(right_value[-1], expected[-1], rtol=8e-15)
+    law = tuple(jnp.asarray(x) for x in (knots, coefficients, ends))
+
+    def h(field):
+        return field * (1 / iron._MU0 - iron._coefficient(field, *law))
+
+    # Sample every polynomial, even a very short ramp, and the held tail.
+    sample = np.concatenate(
+        [
+            np.linspace(start, stop, 201)
+            for start, stop in zip(knots[:-1], knots[1:], strict=True)
+        ]
+        + [np.linspace(b[-1], 2 * b[-1], 201)]
+    )
+    differential = np.asarray(jax.vmap(jax.grad(h))(jnp.asarray(sample)))
+    assert np.isfinite(differential).all()
+    assert differential.min() > 0
+    assert float(jax.grad(h)(0.0)) == pytest.approx(ends[0], rel=2e-14)
+    held = iron._coefficient(jnp.asarray([b[-1], 2 * b[-1]]), *law)
+    np.testing.assert_array_equal(held, np.full(2, 1 / iron._MU0 - ends[-1]))
+    print(
+        f"material knots={len(b)}, fitted_knots={len(knots)}, "
+        f"origin_slope={coefficients[2, 0]:.12g}, "
+        f"min_dH_dB={differential.min():.12g}"
+    )
+    return knots
+
+
+def test_west_cea_material_interpolation():
+    """Read the unchanged CEA table from its DD-pinned machine description."""
+    from nova.imas.machine import StaticMachineDescription
+
+    source = (
+        "imas:hdf5?path=/home/ITER/mcintos/Code/imas-efit/"
+        "tests/data/imas/WEST/machine/dd4-1-0"
+    )
+    machine = StaticMachineDescription.read_iron_core(source, dd_version="4.1.0")
+    assert len(machine.iron_segments) == 6
+    material = machine.iron_segments[0].material
+    b, mu = map(np.asarray, (material.b_field, material.permeability_relative))
+    assert mu[0] == pytest.approx(215.11019, rel=1e-14)
+    assert mu[1] > mu[0]
+    knots = assert_material_interpolation(b, mu)
+    assert len(knots) > len(b)
+
+
+@pytest.mark.parametrize(
+    "b, mu",
+    [([0, 1], [2, 1000]), ([0, 1, 2], [10, 2, 3.9])],
+)
+def test_material_accepts_steep_endpoint_tangents(b, mu):
+    b, mu = np.asarray(b, dtype=float), np.asarray(mu, dtype=float)
+    h = b / (iron._MU0 * mu)
+    ratios = (1 / (iron._MU0 * mu[[0, -1]])) / (np.diff(h) / np.diff(b))[[0, -1]]
+    assert ratios.max() > 10
+    assert_material_interpolation(b, mu)
 
 
 @pytest.mark.parametrize(

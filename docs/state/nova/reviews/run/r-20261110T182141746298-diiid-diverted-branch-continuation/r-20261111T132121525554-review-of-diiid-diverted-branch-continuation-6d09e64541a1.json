@@ -1,0 +1,160 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Scoped pair only: the scope-suite template resolves empty at this head because tests/test_diverted_branch_continuation.py is deleted, so the node's own gate is the finite-admission file (5 passed, EXIT=0). The run's own arms give added=[] with a positive control that the parser does see ids: completed-audit.json gpu_delta.common carries two ids and cpu_delta.common twelve, so a parser that found nothing is ruled out and the empty added set is a measured zero rather than a blind one.",
+  "assertion_audit": [
+    {
+      "condition_to_fail": "The reader stops recovering the injected reference saddle, or the EFIT-start probe is dropped so only the selected-saddle probe remains usable; distance_m then exceeds 1e-12.",
+      "path": "scripts/prototypes/diiid_diverted_branch/refresh.py:58"
+    },
+    {
+      "condition_to_fail": "The refresh path advances or rescales the saved state; the post-refresh state hash stops matching the pre-refresh hash.",
+      "path": "scripts/prototypes/diiid_diverted_branch/refresh.py:64"
+    },
+    {
+      "condition_to_fail": "The terminal topology read drifts from the solved receipt, e.g. a different mask or a changed admission rule; recomputed support then disagrees with record['support'].",
+      "path": "scripts/prototypes/diiid_diverted_branch/measure.py:335"
+    },
+    {
+      "condition_to_fail": "The two arms stop sharing an admitted seed, or the head loses the augmented topology reader marker; the paired seed hashes differ or the count is not five.",
+      "path": "scripts/prototypes/diiid_diverted_branch/measure.py:369-374"
+    },
+    {
+      "condition_to_fail": "A head frame loses its diverted class or the lower root moves past 1.8/0.5 cm, or MAST stops agreeing to round-off; the corresponding verdict flips to false, which is what happened and is recorded as passed=false.",
+      "path": "scripts/prototypes/diiid_diverted_branch/measure.py:380-396"
+    },
+    {
+      "condition_to_fail": "A reader reverts to receipt.mask_history (AttributeError) or the persistence helper loses an entry; the fixture's [4, 0] is independently supplied and the assertion reads it back through the reader.",
+      "path": "scripts/prototypes/diiid_diverted_branch/smoke.py:102-207"
+    },
+    {
+      "self_comparisons": "No retained assertion compares a value against the same variable it passed in: seeds are hashed from the request, distances are measured from saved terminal arrays loaded from npz, and the MAST round-off check compares two independent arm files. smoke.py:168 asserts row['mask_history'] == [4, 0] against a fixture value the reader must extract, not against its own input."
+    }
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-11T13:39:53.804Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "no product code remains to be durable; nova/ is identical to main and the record is documentation of a withdrawn change",
+      "recorded_at": "2026-11-11T13:43:02.921613+00:00"
+    },
+    "goal_fidelity": {
+      "kind": "exempted",
+      "reason": "the lead withdrew the guard after measurement (inert on DIII-D, regressed MAST); the delivered goal is the measured negative result and the repaired readers",
+      "recorded_at": "2026-11-11T13:42:42.178232+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-11T13:22:14Z",
+  "figure_review": {
+    "inspected": [
+      "/tmp/reckon-crew-scratch/r-20261111T132121525554-review-of-diiid-diverted-branch-continuation-6d09e64541a1/figcheck/frame-137-diverted.png",
+      "/tmp/reckon-crew-scratch/r-20261111T132121525554-review-of-diiid-diverted-branch-continuation-6d09e64541a1/figcheck/frame-146-diverted.png"
+    ],
+    "rendered_from_reviewed_git_blobs": true,
+    "renderer": "ImageMagick convert -density 96 from git show 6d09e6454:docs/figures/..., written under the run scratch TMPDIR",
+    "result": "Both figures legible at 1400 px: axis off, one figure-level legend, solved flux solid green and EFIT flux dashed grey on shared levels, EFIT X-point a large dark plus and solved saddles crosses (distinct marker shapes, not hue alone), both lower-distance endpoints visible in each inset, machine and frame named beneath each panel, no clipped or colliding text. Inspection hashes in withdrawal/figure-inspection.json match the committed blobs (0481b525 134732 B; 9d461044 118968 B), while the older top-level figure-inspection.json records the pre-correction sizes and does not describe the committed artifacts."
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the shared lower-saddle reader is a prototype diagnostic; its owner test went with the withdrawn guard, and the decomposition node's own test exercises saved-state readers",
+      "recorded_at": "2026-11-11T13:42:22.689920+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_diverted_branch/refresh.py",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "non-blocking: the single-owner link to measure.lower_saddle_reader is unguarded because commit 67b8c3ad5 deleted its regression test (test_saved_state_refresh_reuses_measurement_lower_root_reader, formerly tests/test_diverted_branch_continuation.py:236-289) along with the withdrawn guard's tests, so a future re-fork of the lower-root reader reddens nothing; the fix is to re-home that one test outside the withdrawn branch file."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read all 19 commits from 04337b991 to 6d09e6454: b92ad6b61 is exactly five attribute renames to receipt.changed_mask_entries, 3c722b225 replaces the forked lower-root reader with a call to measure.lower_saddle_reader, 67b8c3ad5 removes the guard and tests, 14d0bc0e8 redraws the two SVGs, and 6d09e6454 records the withdrawal; the final diff is 18 files (5 readers, 11 node scripts, 2 SVGs, 1 evidence fragment), 11676 insertions, 5 deletions.",
+    "done_when": "Read brief.md:53-85 against titan-reader-repaired/measurement/comparison.json and completed-audit.json: all five rows on both arms carry residual, converged, reason, boundary class, support, lower-X gap and both refusal counters, and the head's own FINAL gate (withdrawal/focused.log:1 revision 6d09e6454, 5 passed, EXIT=0) is recorded, though the CPU regression arms never completed.",
+    "goal": "The source brief.md:3 asks for a branch-preserving continuation through warm-up and Newton; the landed change contains none of that mechanism \u2014 git diff 04337b991..6d09e6454 -- nova/ is 0 lines and both product blobs (fixed_point.py 4983c021, constraint.py 1bbe8529) are byte-identical to base, because the lead withdrew the guard, so what the head delivers is the measured negative result instead.",
+    "manifest": "Read source manifest.md in full: it states the guard is withdrawn rather than landed, records the 0.0178/0.0102 residuals with 7.2958/6.5890 cm lower-X offsets, names the MAST and 179L regressions as withdrawal grounds, and its recorded tests line (5 passed on tests/test_warmup_finite_admission.py) matches withdrawal/focused.log including the bare EXIT=0 footer.",
+    "write_paths": "Read the dispatch fence at prompt.txt:133-137 (four paths) plus the resume advice granting the five prototype readers ('the new five-reader scope is granted', resume-4.jsonl); all 18 paths in the final diff lie inside that grant, and the out-of-grant product edits were withdrawn entirely at 67b8c3ad5."
+  },
+  "justifications": {
+    "durability": "No assertion remains that fails if the retained work regresses: 67b8c3ad5 deleted tests/test_diverted_branch_continuation.py:236-289, which held test_saved_state_refresh_reuses_measurement_lower_root_reader, so scripts/prototypes/diiid_diverted_branch/refresh.py:18 could re-fork the reader with nothing reddening.",
+    "evidence": "The five-row measurement is complete in titan-reader-repaired/measurement/comparison.json: its values (residual 0.01778218921/0.01019921008, gaps 7.29582/6.58904 cm, MAST 2.209696562e-16 to 0.002161879175) reconcile exactly with the fragment's table at :29-40, and completed-audit.json independently records max_abs_state_difference_wb 0.0/0.000185333/3.11e-15/0.0006558935/0.0252656231 for the five state comparisons.",
+    "fit": "Scripts follow the prototype idiom (argparse main, module docstring, lazy jax imports) and the renderer at scripts/prototypes/diiid_diverted_branch/render.py:11-38 wraps the existing painter instead of restyling; both committed SVGs render with axis off, one figure-level legend, distinct EFIT plus and solved cross markers, and machine/frame named under each panel.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-diverted-branch-continuation.html:18 records the withdrawal and git diff 04337b991..6d09e6454 -- nova/ returns 0 lines, so no branch-preserving continuation lands and the node's stated goal is answered only by the negative measurement the lead accepted in its place.",
+    "reuse": "scripts/prototypes/diiid_diverted_branch/refresh.py:18 now calls measure.lower_saddle_reader (measure.py:237) rather than forking it, and that owner composes nova's owners polish_stationary_points (nova/equilibrium/flux_surface_connectivity.py:916), fit_tensor_spline (nova/linalg/tensor_spline.py:325) and inside_wall_units; a capability search found nova/equilibrium/boundary_comparison.py:26 owning only polyline-to-polyline x_point_distance_m, not stationary-point root finding, so nothing is duplicated.",
+    "scope_discipline": "Every path in git diff --name-only 04337b991..6d09e6454 is under scripts/prototypes/, docs/evidence/ or docs/figures/, the five reader files were explicitly granted (resume-4.jsonl), and the shared product files fixed_point.py and constraint.py carry base blob shas 4983c021 and 1bbe8529."
+  },
+  "live_plan": {
+    "project": "nova",
+    "slug": "diiid-vertical-force-balance",
+    "version": 65
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief.md:3 asks for a branch-preserving continuation through warm-up and Newton; the landed change contains none of that mechanism, because git diff 04337b991..6d09e6454 -- nova/ is 0 lines and both product blobs are byte-identical to base after 67b8c3ad5, so the head delivers the measured negative result the lead asked for in its place.\nVERDICT done_when: Read brief.md:53-85 against titan-reader-repaired/measurement/comparison.json and completed-audit.json; all five rows on both arms carry residual, converged, reason, boundary class, support, lower-X gap and both refusal counters, and the head's own gate is recorded in withdrawal/focused.log:1-6 as 5 passed EXIT=0 at revision 6d09e6454, though the CPU regression arms never completed.\nVERDICT write_paths: Read the dispatch fence at prompt.txt:133-137 and the resume-4.jsonl grant of the five prototype readers; all 18 paths in the final diff lie inside that grant, and the out-of-grant product edits were withdrawn entirely at 67b8c3ad5.\nVERDICT manifest: Read source manifest.md in full; it states the guard is withdrawn rather than landed, records the 0.0178/0.0102 residuals with 7.2958/6.5890 cm lower-X offsets, names the MAST and 179L regressions as withdrawal grounds, and its tests line matches withdrawal/focused.log including the EXIT=0 footer.\nVERDICT diff: Read all 19 commits from 04337b991 to 6d09e6454: b92ad6b61 is exactly five renames to receipt.changed_mask_entries, 3c722b225 replaces the forked lower-root reader with a call to measure.lower_saddle_reader, 67b8c3ad5 removes the guard and its test, 14d0bc0e8 redraws both SVGs, and the final diff is 18 files with 11676 insertions and 5 deletions.\nCALL_SITES: none\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-diverted-branch-continuation.html:18 records the withdrawal and the nova diff is empty, so no branch-preserving continuation lands and the stated goal is answered only by the negative measurement.\nSCORE evidence: 18\nJUSTIFICATION evidence: titan-reader-repaired/measurement/comparison.json reconciles exactly with the fragment table at :29-40, and completed-audit.json independently records max_abs_state_difference_wb of 0.0, 0.000185333, 3.11e-15, 0.0006558935 and 0.0252656231 for the five state comparisons.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every path in the final diff is under scripts/prototypes/, docs/evidence/ or docs/figures/, the five readers were explicitly granted, and fixed_point.py and constraint.py carry base blob shas 4983c021 and 1bbe8529.\nSCORE durability: 8\nJUSTIFICATION durability: 67b8c3ad5 deleted tests/test_diverted_branch_continuation.py:236-289 including test_saved_state_refresh_reuses_measurement_lower_root_reader, so scripts/prototypes/diiid_diverted_branch/refresh.py:18 could re-fork the reader with nothing reddening.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/diiid_diverted_branch/render.py:11-38 wraps the existing painter, and both committed SVGs render with axis off, one figure-level legend, distinct EFIT plus and solved cross markers, and machine and frame named under each panel.\nSCORE reuse: 20\nJUSTIFICATION reuse: scripts/prototypes/diiid_diverted_branch/refresh.py:18 calls measure.lower_saddle_reader (measure.py:237), which composes polish_stationary_points, fit_tensor_spline and inside_wall_units, and the only near owner nova/equilibrium/boundary_comparison.py:26 wraps polyline comparison rather than stationary-point root finding.\nFINDING scripts/prototypes/diiid_diverted_branch/refresh.py:18 non-blocking: the single-owner link to measure.lower_saddle_reader is unguarded because its regression test was deleted with the withdrawn guard's test file, so a future re-fork reddens nothing.",
+  "reuse_audit": {
+    "measurement": "Opened diiid_diverted_branch/measure.py, refresh.py, recover.py, analyze.py, gates.py, smoke.py and render.py at 6d09e6454: lower_saddle_reader is one owner called by refresh.py:33 and enrich; gates reuses the existing regression gate; analyze reads persisted receipts rather than re-solving; render wraps the warm-up painter and nova.media.poloidal.draw_nulls. The previous round's duplication finding is answered.",
+    "production": "Searched nova by capability for an existing saved-state lower-saddle distance owner: nova/equilibrium/boundary_comparison.py:26 owns x_point_distance_m for two closed boundaries (polyline comparison), which is a different capability from stationary-point root finding in a solved flux field. The prototype composes flux_surface_connectivity.polish_stationary_points, linalg.tensor_spline.fit_tensor_spline and media.poloidal.inside_wall_units; no definition added by this run re-implements an owner."
+  },
+  "review_run_id": "r-20261111T132121525554-review-of-diiid-diverted-branch-continuation-6d09e64541a1",
+  "reviewed_base_sha": "04337b991e8aed9d0904494437e02a1b66fa24dc",
+  "reviewed_commits": [
+    "6d09e64541a1f1f93fa6799c073786cb37c514a8",
+    "14d0bc0e8d5c157d9b7a7ad33e0fc4674708c1dc",
+    "67b8c3ad58ca44c483176317e259b028f4abf69d",
+    "86daa8bfefa0a753cf34886ed22c17fa303012ef",
+    "51d0a391c64f7e0bda343a2d4e16d2e192bba7f2",
+    "3c722b2253fe7dfd626d3ddc18a490e665ccb1f8",
+    "b514b72e9b52d7b38a174ea518f57bc1e5d678a8",
+    "3940da83e695b31f6edd3213cd1ef6f581e66add",
+    "4ef124881cd67d9e3b4260189bdcbc26c914f0c7",
+    "07378642ef46693e73145671e29aaf8a2d08862a",
+    "15631d22e6eef1b8a6d0c526ae06cf88982267d5",
+    "b92ad6b61c2615fe8510d0eaa50872ee31822379",
+    "dc4512faba5aa6bee83d28f20807da5f1533173a",
+    "4464c08533c45fead6fed0fc0590d5860e974ab3",
+    "8fb2118e30f902fce846de297220c3703ac27417",
+    "ff03761a1d9d3f6d42b4f54d4886052a041a9123",
+    "d0b5435a181ee9d94013dbc26e6d10fded9fa37b",
+    "e9cf3a8949e694c22960b072959f11ba3a32289c",
+    "c325c25e14343e46c60433fd17cf519794e7e4a5"
+  ],
+  "reviewed_head_sha": "6d09e64541a1f1f93fa6799c073786cb37c514a8",
+  "reviewed_run_id": "r-20261110T182141746298-diiid-diverted-branch-continuation",
+  "scores": {
+    "durability": 8,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 10,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_warmup_finite_admission.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/withdrawal/focused.log",
+      "revision": "6d09e64541a1f1f93fa6799c073786cb37c514a8",
+      "summary": "5 passed in 28.37s"
+    },
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -c 'import os; from pathlib import Path; from nova.equilibrium import fixed_point; print(\"IMPORTED_MODULE=\" + fixed_point.__file__); print(\"RESOLVED_CWD=\" + os.getcwd()); assert Path(\"nova/equilibrium/fixed_point.py\").is_file(); assert not Path(\"tests/test_diverted_branch_continuation.py\").exists(); print(\"BASE_SCOPE_EMPTY_KNOWN_PRESENT=nova/equilibrium/fixed_point.py\")'",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/final-base-suite/suite.log",
+      "revision": "04337b991e8aed9d0904494437e02a1b66fa24dc",
+      "revision_note": "base has no scoped test; the source manifest's baseline entry is a labelled empty-scope presence probe at 04337b991"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T13:40:22.928669+00:00",
+  "total": 94
+}

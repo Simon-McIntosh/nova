@@ -1,0 +1,88 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 8,
+  "call_sites": [
+    "nova/equilibrium/topology.py:1425 Topology.read_with_connectivity",
+    "nova/equilibrium/topology.py:1293 Topology.read_qualification",
+    "nova/equilibrium/topology.py:1156 Topology.update",
+    "nova/equilibrium/topology.py:1117 Topology.qualified_o_candidates",
+    "nova/equilibrium/topology.py:3277 topology.read",
+    "nova/equilibrium/topology.py:3325 read_at_stationary_points",
+    "nova/equilibrium/topology.py:3563 refresh_at_stationary_points",
+    "nova/equilibrium/support_read.py:1065 _normal_ring_rates"
+  ],
+  "completed_at": "2026-11-11T13:57:28.402Z",
+  "dispatched_at": "2026-11-11T13:47:08Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "read-tie-break",
+      "recorded_at": "2026-11-11T14:00:10.328776+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "read-tie-break",
+      "recorded_at": "2026-11-11T14:00:20.379534+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "read-tie-break",
+      "recorded_at": "2026-11-11T14:00:32.201282+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_read_tie_break.py",
+      "line": 82,
+      "severity": "non-blocking",
+      "text": "The fixture test computes wall scores through topology._wall_events and then applies topology.extremum_index itself, so it never exercises the _read_at_nulls wall-index selection (topology.py:3445 and :3463) the change edited; reverting either call site to jnp.argmax would leave every assertion green, which leaves the product wiring unguarded."
+    },
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": 56,
+      "severity": "non-blocking",
+      "text": "extremum_index restates deterministic first-extremum selection that nova/equilibrium/connectivity_boundary.py:130 already owns as _arg_extreme with _argmax_exact and _argmin_exact wrappers; the tolerance branch is genuinely new but the exact branch duplicates an owner the module already imports from."
+    },
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": 492,
+      "severity": "non-blocking",
+      "text": "extremum_index returns -1 when every admitted score is NaN, and x_point_data uses that index directly as vmap_x[index], so an all-NaN admitted set now selects the last candidate where jnp.nanargmax selected the first; the degenerate state is untested and the -1 is unmasked at the call site."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "The runtime paths reaching the change are topology.py's read, read_with_connectivity, read_qualification, update, qualified_o_candidates and read_at_stationary_points/refresh_at_stationary_points, plus support_read._normal_ring_rates through the solve tangent.",
+    "diff": "Read commit by commit against b48deaa93: ba23b17df adds the helper and rewires 15 rankings plus the new test file, and b9ca3cd7b adds only the evidence fragment.",
+    "done_when": "The done_when asks for the rule plus three tests, a negative control, paired base/head files in one 7-CPU sirius job and a fragment; tests/test_read_tie_break.py carries the three cases, negative-control.log is the plain-argmax run, paired.sh is the single job and docs/evidence/fragments/sub-millisecond-forward-path/read-tie-break.html lists the decisions and the rule.",
+    "goal": "The node goal is a stated deterministic rule for near-tied read candidates shared by every tied decision; nova/equilibrium/topology.py:56 implements it and the 15 converted rankings in topology.py and support_read.py use it.",
+    "manifest": "The manifest reads complete at b9ca3cd7b2ee with the paired arms, the negative control and the final-head tie run recorded, and its stated counts reconcile with the log summaries I read.",
+    "write_paths": "The manifest declares topology.py, support_read.py, tests/test_read_tie_break.py and the fragment; every path changed across the two commits is one of those four."
+  },
+  "justifications": {
+    "durability": "tests/test_read_tie_break.py:82 drives topology.extremum_index directly over independently computed scores, so the exact-tie and fixture assertions redden on a plain-argmax regression (negative-control.log shows 2 failed) but no assertion exercises the product call sites the change edited, so reverting any one of them to jnp.argmax stays green.",
+    "evidence": "The done_when's one-sirius-job, one-process-per-file pair is real: paired.sh requests --cpus-per-task=7 and paired-slurm.log ends ALL_SIX_ARMS_COMPLETE, with base-tracked.log 15 passed EXIT=0, head-tracked.log 15 passed EXIT=0, base-support.log and head-support.log both 13 passed 2 skipped EXIT=0, head-ties.log 7 passed EXIT=0 and negative-control.log 2 failed EXIT=1.",
+    "fit": "nova/equilibrium/topology.py:56 reads in the module's own idiom \u2014 a module-level pure jnp helper beside x_point_height_limits with a mechanism docstring, no plan or ticket identifiers, and a descriptive name.",
+    "goal_fidelity": "nova/equilibrium/topology.py:56 adds the relative-1e-12 lowest-canonical-index rule and all 15 floating-point rankings in topology.py and support_read.py call it while the 10 Boolean first-true lookups stay exact.",
+    "reuse": "The tolerance rule has no owner, but nova/equilibrium/connectivity_boundary.py:130 already owns deterministic first-extremum selection as _arg_extreme with _argmax_exact/_argmin_exact wrappers, and topology.py already imports private names from that module, so the exact branch of any new helper could have extended it rather than restating it.",
+    "scope_discipline": "The diff touches only nova/equilibrium/topology.py, nova/equilibrium/support_read.py, tests/test_read_tie_break.py and the evidence fragment, all inside the manifest's declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is a stated deterministic rule for near-tied read candidates shared by every tied decision; nova/equilibrium/topology.py:56 implements it and the 15 converted rankings in topology.py and support_read.py use it.\nVERDICT done_when: the done_when asks for the rule plus three tests, a negative control, paired base/head files in one 7-CPU sirius job and a fragment; tests/test_read_tie_break.py carries the three cases, negative-control.log is the plain-argmax run, paired.sh is the single job and docs/evidence/fragments/sub-millisecond-forward-path/read-tie-break.html lists the decisions and the rule.\nVERDICT write_paths: the manifest declares topology.py, support_read.py, tests/test_read_tie_break.py and the fragment; every path changed across the two commits is one of those four.\nVERDICT manifest: the manifest reads complete at b9ca3cd7b2ee with the paired arms, the negative control and the final-head tie run recorded, and its stated counts reconcile with the log summaries I read.\nVERDICT diff: read commit by commit against b48deaa93: ba23b17df adds the helper and rewires 15 rankings plus the new test file, and b9ca3cd7b adds only the evidence fragment.\nVERDICT call_sites: the runtime paths reaching the change are topology.py's read, read_with_connectivity, read_qualification, update, qualified_o_candidates and read_at_stationary_points/refresh_at_stationary_points, plus support_read._normal_ring_rates through the solve tangent.\nCALL_SITES: nova/equilibrium/topology.py:1425 Topology.read_with_connectivity, nova/equilibrium/topology.py:1293 Topology.read_qualification, nova/equilibrium/topology.py:1156 Topology.update, nova/equilibrium/topology.py:1117 Topology.qualified_o_candidates, nova/equilibrium/topology.py:3277 topology.read, nova/equilibrium/topology.py:3325 read_at_stationary_points, nova/equilibrium/topology.py:3563 refresh_at_stationary_points, nova/equilibrium/support_read.py:1065 _normal_ring_rates\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/topology.py:56 adds the relative-1e-12 lowest-canonical-index rule and all 15 floating-point rankings in topology.py and support_read.py call it while the 10 Boolean first-true lookups stay exact.\nSCORE evidence: 19\nJUSTIFICATION evidence: paired.sh requests --cpus-per-task=7, paired-slurm.log ends ALL_SIX_ARMS_COMPLETE and the arm logs report base-tracked 15 passed, head-tracked 15 passed, base-support and head-support 13 passed 2 skipped, head-ties 7 passed and negative-control 2 failed, each with a bare EXIT line.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (nova/equilibrium/topology.py, nova/equilibrium/support_read.py, tests/test_read_tie_break.py, docs/evidence/fragments/sub-millisecond-forward-path/read-tie-break.html) is inside the manifest's declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_read_tie_break.py:82 asserts the helper against independently computed scores and reddens on the plain-argmax mutant, but no assertion reaches the edited product call sites, so reverting topology.py:3445 or :3463 to jnp.argmax leaves the suite green.\nSCORE fit: 19\nJUSTIFICATION fit: nova/equilibrium/topology.py:56 follows the module's pure-jnp helper idiom beside x_point_height_limits and carries no plan, sprint or ticket identifier.\nSCORE reuse: 15\nJUSTIFICATION reuse: nova/equilibrium/connectivity_boundary.py:130 already owns first-extremum selection as _arg_extreme and topology.py already imports private names from it, so the exact branch duplicates that owner while the tolerance branch is new.\nFINDING tests/test_read_tie_break.py:82 non-blocking: the fixture test applies extremum_index to independently computed scores rather than driving _read_at_nulls, so reverting the edited call sites to jnp.argmax leaves every assertion green.\nFINDING nova/equilibrium/topology.py:56 non-blocking: extremum_index restates deterministic first-extremum selection already owned by _arg_extreme at nova/equilibrium/connectivity_boundary.py:130 without extending or wrapping it.\nFINDING nova/equilibrium/topology.py:492 non-blocking: an all-NaN admitted set now yields -1 and x_point_data indexes vmap_x[-1] with it, where jnp.nanargmax selected index 0; the degenerate case is unmasked and untested at the call site.",
+  "review_run_id": "r-20261111T134343207392-review-of-read-tie-break-b9ca3cd7b2ee",
+  "reviewed_base_sha": "b48deaa93f55ad2c759c5977ed611b9047e393fb",
+  "reviewed_head_sha": "b9ca3cd7b2ee8a9250936915d6643087eabb2fe7",
+  "reviewed_run_id": "r-20261111T131359627137-read-tie-break",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T14:40:55.917118+00:00",
+  "total": 107
+}

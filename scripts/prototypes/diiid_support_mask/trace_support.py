@@ -154,7 +154,7 @@ def run(frame, branch, trips, root):
             "material": int(np.asarray(captures[0]["inside_material"]).sum()),
             "connected": int(np.asarray(captures[0]["connected"]).sum()),
         },
-        "mask_change_history": measure._int_list(receipt.mask_history),
+        "mask_change_history": measure._int_list(receipt.changed_mask_entries),
         "attempted_newton_promotions": int(receipt.attempted_newton_promotions),
         "accepted_newton_promotions": int(receipt.accepted_newton_promotions),
         "residual": float(receipt.equilibrium.fixed_point.residual),

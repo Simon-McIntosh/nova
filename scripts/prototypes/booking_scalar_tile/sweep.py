@@ -51,16 +51,14 @@ def main():
         with patch.object(current, "_SCALAR_CUT_BATCH_WIDTH", width):
             program = (
                 jax.jit(
-                    lambda psi, read, geometry, profile, rule: jax.vmap(
+                    lambda psi, read, geometry, rule: jax.vmap(
                         lambda p, r: current.book(p, r, geometry, profile, rule)
                     )(psi, read)
                 )
-                .lower(psi, support.reading, geometry, profile, rule)
+                .lower(psi, support.reading, geometry, rule)
                 .compile()
             )
-        result = jax.block_until_ready(
-            program(psi, support.reading, geometry, profile, rule)
-        )
+        result = jax.block_until_ready(program(psi, support.reading, geometry, rule))
         assert bool(jnp.all(result.valid))
         if reference is None:
             reference = jax.tree.map(np.asarray, result)
@@ -69,9 +67,7 @@ def main():
         samples = []
         for _ in range(5):
             start = time.perf_counter()
-            jax.block_until_ready(
-                program(psi, support.reading, geometry, profile, rule)
-            )
+            jax.block_until_ready(program(psi, support.reading, geometry, rule))
             samples.append(1000 * (time.perf_counter() - start))
         row = dict(
             width=width, median_ms=statistics.median(samples), samples_ms=samples

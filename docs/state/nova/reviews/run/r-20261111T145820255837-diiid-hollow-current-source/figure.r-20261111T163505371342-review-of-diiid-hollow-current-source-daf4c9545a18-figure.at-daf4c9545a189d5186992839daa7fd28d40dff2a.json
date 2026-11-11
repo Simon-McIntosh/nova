@@ -1,0 +1,176 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite; both values are the declared empty pair.",
+  "attachment_map": {
+    "image-0.png": "docs/figures/diiid-hollow-current-source/frame-137-diverted-midplane.svg",
+    "image-1.png": "docs/figures/diiid-hollow-current-source/frame-146-diverted-midplane.svg",
+    "image-2.png": "docs/figures/diiid-hollow-current-source/mast-21978-35-midplane.svg",
+    "image-3.png": "docs/figures/diiid-hollow-current-source/frame-137-diverted-poloidal.svg",
+    "image-4.png": "docs/figures/diiid-hollow-current-source/frame-146-diverted-poloidal.svg",
+    "image-5.png": "docs/figures/diiid-hollow-current-source/source-axis-cap.svg"
+  },
+  "checks": {
+    "clipped_text": "An ink scan of the outer two-pixel border of each of the six rasters found zero non-white pixels in all four edges of all six images, so no text or mark is clipped at the canvas edge.",
+    "instrument_note": "The core-density instrument was itself checked before a verdict was taken from it. A loose blue threshold (any bluish non-white pixel) reported continuous 20-38 px blue runs across the core and would have supported a blocking 'solid block' finding; a strict threshold restricted to the saturated stroke colour shows median runs of 2-3 px, so the loose reading was an antialiasing artifact and the blocking finding was withdrawn.",
+    "prior_blocking_finding_repaired": "The previous review at d48890cd9 blocked the MAST midplane figure because only the blue solved traces were visible. At this head both series are present in all three panels, measured as dark non-blue ink of 1027 / 906 / 765 pixels against 3148 / 3600 / 2614 of solved blue. The repair claimed by the reviewed commit is confirmed in the rendered artifact."
+  },
+  "completed_at": "2026-11-11T17:58:26.675Z",
+  "dispatched_at": "2026-11-11T17:40:34Z",
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/diiid-hollow-current-source/frame-137-diverted-midplane.svg",
+      "rubric": {
+        "contrast": "pass. Near-black text on white, a saturated blue solved trace and near-black reference; every text element clears its background. The light grey reference strokes are lines, not text.",
+        "data_ink": "pass. Thin strokes only: dashed source traces and small open-circle/cross map samples; no filled area, no shading, top and right spines removed, no grid.",
+        "decoration": "pass. No gradient, background fill, band or styled theme anywhere on the canvas; the only non-data marks are the axis furniture and the legend.",
+        "label_collision": "pass. Titles sit above each panel, axis labels outside the frames, legend above the titles; no text overlaps text or data. An ink scan of the outer two-pixel border of the raster found zero non-white pixels, so nothing is clipped at the canvas edge.",
+        "legibility": "pass. Three panels, 16 pt titles, axis labels carrying quantity and unit ('current density [MA/m2]', 'radius [m]') and a two-column figure legend above them. The solved source and the EFIT-coordinate source are both visible along their whole length: the complementary dash periods keep the reference inked through both the peak near 1.45 m and the second lobe near 2.05 m, and the reference carries a distinctive broken stroke rather than disappearing under the solved trace. The subject of the panel, the near-zero core between the two lobes, is visible at a glance.",
+        "table_form": "pass. Radial profiles decomposed into two terms; the peak/shoulder geometry and the core collapse would be lost in a table."
+      }
+    },
+    {
+      "attachment": "image-3.png",
+      "figure": "docs/figures/diiid-hollow-current-source/frame-137-diverted-poloidal.svg",
+      "rubric": {
+        "contrast": "pass. Blue solved, near-black dashed EFIT and mid-grey wall all read against white; the level note is near-black on white.",
+        "data_ink": "pass. Unfilled line contours only; no colour map, no filled contour, no painted scatter. The wall is a single thin grey line and the null glyphs are small marks.",
+        "decoration": "pass. No shading, gradient or background fill; the frame is removed and nothing on the canvas is ornamental.",
+        "label_collision": "pass. Panel titles in the margin above each panel, legend above them, level note in its own row below; no text overlaps text or data, and the outer-border ink scan found nothing clipped.",
+        "legibility": "pass with a recorded caveat. Two axis-free panels with grey wall, solid blue solved contours and dark dashed EFIT contours on shared levels, level list beneath the panels, and the null vocabulary now stated in the caption the page renders (triangles maxima, crosses/pluses saddles, circles/squares minima, hollow markers outside the plasma). The solved-against-EFIT disagreement is visible at a glance. What a reader cannot do at the rendered size is count the four maxima the caption claims: the core is where six levels of two series converge and the strict-blue run-length scan over the core gives a median 3 px run with a 27 px maximum, so individual contours stand apart but their spacing falls to about one pixel in places. Recorded non-blocking because the lines are separable and the maxima are marked, not merged.",
+        "table_form": "pass. A poloidal scalar field with stationary points is genuinely spatial; no table conveys the core topology."
+      }
+    },
+    {
+      "attachment": "image-1.png",
+      "figure": "docs/figures/diiid-hollow-current-source/frame-146-diverted-midplane.svg",
+      "rubric": {
+        "contrast": "pass. Text near-black on white at 14-16 pt; both series clear the background.",
+        "data_ink": "pass. Thin dashed traces and small open markers; nothing filled.",
+        "decoration": "pass. No gradient, fill or theme styling; spines at top and right removed, no grid.",
+        "label_collision": "pass. No text overlaps text or data; the outer-border ink scan found nothing clipped.",
+        "legibility": "pass. Same three-panel layout and legend as the 137D midplane figure. Both source traces and both map sample sets are visible through the coincidence; the pressure panel's stepped shoulder near 1.2 m is legible and is the data, not an artifact of the dashes.",
+        "table_form": "pass. The two-term decomposition of a radial profile is a curve relationship."
+      }
+    },
+    {
+      "attachment": "image-4.png",
+      "figure": "docs/figures/diiid-hollow-current-source/frame-146-diverted-poloidal.svg",
+      "rubric": {
+        "contrast": "pass. All three series read against white.",
+        "data_ink": "pass. Line contours only, unfilled, on stated levels.",
+        "decoration": "pass. No gradient, shading or fill; axis off and no frame furniture.",
+        "label_collision": "pass. All text sits in the margins; nothing overlaps and nothing is clipped at the canvas edge.",
+        "legibility": "pass with the same recorded caveat as the 137D poloidal panel. The shared level list, both null sets and the wall are all present and the solved/EFIT disagreement is visible; the core is the densest region and its contour spacing falls to about one pixel at the rendered size (strict-blue run lengths median 2 px, maximum 26 px over the core window), so the claimed three maxima and local minimum are marked but not countable at a glance.",
+        "table_form": "pass. Spatial field with stationary points."
+      }
+    },
+    {
+      "attachment": "image-2.png",
+      "figure": "docs/figures/diiid-hollow-current-source/mast-21978-35-midplane.svg",
+      "rubric": {
+        "contrast": "pass. Text and both series clear the white background; the darkest dashes and the blue are equally weighted so neither is lost.",
+        "data_ink": "pass. Thin complementary dashes plus small markers; no fill.",
+        "decoration": "pass. No gradient, shading or background; despined, no grid.",
+        "label_collision": "pass. Nothing clipped or overlapping; legend above the panels.",
+        "legibility": "pass, and this is the point the previous review blocked on. In all three panels both source series and both map sample sets are now visible through the near-exact coincidence: a raster count of dark non-blue ink inside each panel's plot box finds 1027, 906 and 765 pixels against 3148, 3600 and 2614 of solved blue, so the reference is present in every panel rather than only the first. The alternating circle and cross samples let the two native map reads be told apart where they coincide.",
+        "table_form": "pass. Radial profiles."
+      }
+    },
+    {
+      "attachment": "image-5.png",
+      "figure": "docs/figures/diiid-hollow-current-source/source-axis-cap.svg",
+      "rubric": {
+        "contrast": "pass. Trace and text clear the background. The dotted first-knot rule is a light neutral grey at 1.2 pt, which is the intended weight for a reference and is legible against white.",
+        "data_ink": "pass. One 3 pt trace and one 1.2 pt dotted reference per panel; nothing else is inked.",
+        "decoration": "pass. No gradient, shading or fill; despined, no grid.",
+        "label_collision": "pass. Titles above each panel, axis labels outside the frames, single figure legend above; nothing overlaps and the outer-border ink scan found nothing clipped.",
+        "legibility": "pass. Three single-trace panels titled by case, each with its own y-axis and a dotted grey first-knot marker. The distinguishing feature, that the DIII-D curve starts at zero and rises to its first knot while MAST starts finite, is visible at a glance. The MAST panel's y range (about 0.47-0.58) differs from the DIII-D ranges (0 to about 2.3 and 2.5); the caption states that this panel has its own density scale, so the panel reads correctly, though a reader comparing the three columns by height alone would over-read the MAST variation. Recorded as a non-blocking finding.",
+        "table_form": "pass. Three curves of one quantity against normalised flux; a table would not show the axis behaviour."
+      }
+    }
+  ],
+  "finding_dispositions": {},
+  "findings": [
+    {
+      "file": "docs/figures/diiid-hollow-current-source/frame-137-diverted-poloidal.svg",
+      "id": "fe75dfce757",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The core is the densest region of both contour panels and the place the caption makes its claim (four maxima), but at the rendered 1399x720 size the six shared levels of two series converge there and the solved contour spacing falls to roughly one pixel: a strict-blue run-length scan over a 100x110 px core window gives a median run of 3 px and a maximum of 27 px, with 3 per cent of runs at or above 10 px. The lines do stand apart, so this does not hold the figure, but a reader cannot count the four maxima at a glance and must zoom to check the caption's claim."
+    },
+    {
+      "file": "docs/figures/diiid-hollow-current-source/frame-146-diverted-poloidal.svg",
+      "id": "f52976408a8",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Same defect as the 137D poloidal panel, and slightly denser: over the same core window the strict-blue run lengths have a median of 2 px and a maximum of 26 px, with 4 per cent of runs at or above 10 px, so the caption's 'three main-plasma maxima and a local minimum' is marked in the panel but not countable at the rendered size."
+    },
+    {
+      "file": "docs/figures/diiid-hollow-current-source/source-axis-cap.svg",
+      "id": "f5d4ecc34fc",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The MAST panel autoscales to roughly 0.47-0.58 MA/m2 while the two DIII-D panels run 0 to about 2.3 and 2.5, so a variation of about twenty per cent is drawn as a full-height arch beside peaks eight times larger. The caption now declares that this panel has its own density scale, which is what keeps the figure honest, but the three columns are still read by height at a glance and the mismatch invites over-reading MAST's shoulder enhancement."
+    }
+  ],
+  "method": "Every verdict below is read from the six rendered PNGs attached to this review (1399x720 each), opened directly. Only two script files were read, to anchor findings and to explain a marker vocabulary: scripts/prototypes/diiid_hollow_current/render.py at the reviewed head, and the fragment's rendered captions. No SVG source was opened, read or rendered, and no image other than the six named PNGs was opened. Two numeric checks were run on the rasters themselves: an outer-border ink scan (a clipped-text check) and a strict-blue run-length scan across the contour cores. Both are reported where they bear on a verdict.",
+  "project": "nova",
+  "review_run_id": "r-20261111T163505371342-review-of-diiid-hollow-current-source-daf4c9545a18-figure",
+  "reviewed_base_sha": "33487d156847eb9fd34d2d92158f682d5d1f03f0",
+  "reviewed_figures": [
+    "docs/figures/diiid-hollow-current-source/frame-137-diverted-midplane.svg",
+    "docs/figures/diiid-hollow-current-source/frame-137-diverted-poloidal.svg",
+    "docs/figures/diiid-hollow-current-source/frame-146-diverted-midplane.svg",
+    "docs/figures/diiid-hollow-current-source/frame-146-diverted-poloidal.svg",
+    "docs/figures/diiid-hollow-current-source/mast-21978-35-midplane.svg",
+    "docs/figures/diiid-hollow-current-source/source-axis-cap.svg"
+  ],
+  "reviewed_head_sha": "daf4c9545a189d5186992839daa7fd28d40dff2a",
+  "reviewed_run_id": "r-20261111T145820255837-diiid-hollow-current-source",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass",
+    "RUBRIC legibility: pass -- readable at the figure level; the core is the densest region and its contour spacing falls to about one pixel, which is recorded as a non-blocking finding rather than a block, because the lines stand apart at the rendered size",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass",
+    "RUBRIC legibility: pass",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass",
+    "RUBRIC legibility: pass -- readable at the figure level; same dense-core caveat as the 137D poloidal panel, recorded as a non-blocking finding",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass",
+    "RUBRIC legibility: pass -- both solved and reference series are visible in all three panels, so the earlier occlusion defect is repaired",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass",
+    "RUBRIC legibility: pass -- the MAST panel's separate density range is declared in the caption, which is what made this panel readable rather than misleading",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass"
+  ],
+  "rubric_lines_note": "Thirty-six lines, six per figure, in reviewed_figures order: frame-137-diverted-midplane, frame-137-diverted-poloidal, frame-146-diverted-midplane, frame-146-diverted-poloidal, mast-21978-35-midplane, source-axis-cap. Each block is legibility, data_ink, decoration, contrast, table_form, label_collision.",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T17:59:13.101139+00:00",
+  "total": null
+}

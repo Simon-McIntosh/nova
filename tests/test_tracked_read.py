@@ -468,13 +468,16 @@ def test_a_wall_contact_winner_change_rebuilds_at_a_limited_boundary():
     assert bool(first.rebuilt) and bool(first.valid)
     moved, moved_cache = _shifted(operands, cache, 0.005 * jnp.asarray((-1.0, 0.0)))
     tracking = support_read.tracking_of(first)
-    result, _ = _read(*moved, roots, convention, policy, moments, tracking=tracking)
+    result, _ = _read(
+        moved, moved_cache, roots, convention, policy, moments, tracking=tracking
+    )
     assert bool(result.valid)
     assert bool(result.rebuilt)
     assert int(result.rebuilds) == int(first.rebuilds) + 1
     # The rebuild answers the contact change; it is not a read that churns.
     steady, _ = _read(
-        *moved,
+        moved,
+        moved_cache,
         roots,
         convention,
         policy,

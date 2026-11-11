@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-11-11T13:53:19.616Z",
   "dispatched_at": "2026-11-11T13:32:44Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-xpoint-offset-decomposition",
+      "recorded_at": "2026-11-11T13:54:30.949144+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_xpoint_offset/decompose.py",

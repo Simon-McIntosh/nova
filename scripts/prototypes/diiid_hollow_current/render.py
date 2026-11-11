@@ -30,6 +30,32 @@ from nova.media.poloidal import draw_wall, draw_nulls, draw_flux_contours
 HERE = Path(__file__).resolve().parent
 
 
+def source_style(stage):
+    """Interleave source dashes in display points without offsetting the data."""
+    if stage == "terminal":
+        return dict(color=SOLVED, lw=3.0, ls=(0, (8, 4)), zorder=4)
+    # Match the dash periods despite the different reference line width.
+    width = 2.6
+    return dict(
+        color=REFERENCE, lw=width, ls=(12 / width, (12 / width, 24 / width)), zorder=2
+    )
+
+
+def map_style(stage):
+    """Expose coincident map reads with alternating, unshifted sample markers."""
+    solved = stage == "terminal"
+    return dict(
+        color=SOLVED if solved else REFERENCE,
+        ls="none",
+        marker="o" if solved else "x",
+        markersize=5.5,
+        markerfacecolor="white",
+        markeredgewidth=1.4,
+        markevery=(20 if solved else 0, 40),
+        zorder=6 if solved else 5,
+    )
+
+
 def line_panels(record, output, previews):
     """Compare both source contributions on one fixed EFIT midplane."""
     states = {row["stage"]: row for row in record["states"]}
@@ -41,27 +67,17 @@ def line_panels(record, output, previews):
         ("total current", "pressure contribution", "field contribution"),
         strict=True,
     ):
-        for stage, color, linestyle in [
-            ("reference", REFERENCE, "--"),
-            ("terminal", SOLVED, "-"),
-        ]:
+        for stage in ("reference", "terminal"):
             cut = states[stage]["cuts"]["midplane"]
             values = np.asarray(cut[key]) / 1e6
             if key != "density":
                 values = values * states[stage]["amplitude"]
                 values = np.where(cut["support"], values, 0)
-            ax.plot(
-                cut["x"],
-                values,
-                color=color,
-                ls=linestyle,
-                lw=3 if stage == "terminal" else 2.6,
-                zorder=4 if stage == "terminal" else 2,
-            )
+            ax.plot(cut["x"], values, **source_style(stage))
             if key == "density":
                 native = np.asarray(cut["map_density"]) / 1e6
                 native = np.where(cut["support"], native, np.nan)
-                ax.plot(cut["x"], native, color=color, ls=":", lw=1.5, zorder=1)
+                ax.plot(cut["x"], native, **map_style(stage))
         ax.set_xlabel("radius [m]")
         ax.set_ylabel("current density [MA/m²]")
         ax.spines[["top", "right"]].set_visible(False)
@@ -71,12 +87,10 @@ def line_panels(record, output, previews):
         ax.tick_params(width=1.2, labelsize=14)
         ax.text(0.5, 1.05, name, transform=ax.transAxes, ha="center", fontsize=16)
     handles = [
-        Line2D([], [], color=SOLVED, lw=3, label="solved source"),
-        Line2D(
-            [], [], color=REFERENCE, ls="--", lw=2.6, label="EFIT-coordinate source"
-        ),
-        Line2D([], [], color=SOLVED, ls=":", lw=1.5, label="solved map"),
-        Line2D([], [], color=REFERENCE, ls=":", lw=1.5, label="EFIT map"),
+        Line2D([], [], **source_style("terminal"), label="solved source"),
+        Line2D([], [], **source_style("reference"), label="EFIT-coordinate source"),
+        Line2D([], [], **map_style("terminal"), label="solved map"),
+        Line2D([], [], **map_style("reference"), label="EFIT map"),
     ]
     figure.legend(
         handles=handles,
@@ -84,6 +98,7 @@ def line_panels(record, output, previews):
         ncol=2,
         frameon=False,
         bbox_to_anchor=(0.5, 0.995),
+        handlelength=4,
     )
     path = output / (record["case"] + "-midplane.svg")
     save(figure, axes, [], path, previews / (path.stem + ".png"))
@@ -245,6 +260,11 @@ def main():
     parser.add_argument("--measurement", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--previews", type=Path, required=True)
+    parser.add_argument(
+        "--only",
+        choices=("frame-137-diverted", "frame-146-diverted", "mast-21978-35"),
+        help="Render only this case midplane comparison.",
+    )
     args = parser.parse_args()
     from nova.jax.config import configure_dtypes
 
@@ -257,10 +277,12 @@ def main():
     )["rows"]
     records = []
     for case in ("frame-137-diverted", "frame-146-diverted", "mast-21978-35"):
+        if args.only is not None and case != args.only:
+            continue
         record = json.loads((args.measurement / (case + ".json")).read_text())
         records.append(record)
         line_panels(record, args.output, args.previews)
-        if case.startswith("frame"):
+        if args.only is None and case.startswith("frame"):
             entry = next(
                 row for row in entries if row["case"] == case and row["arm"] == "head"
             )
@@ -270,7 +292,8 @@ def main():
             contour_panels(
                 record, entry, row, args.measurement, args.output, args.previews
             )
-    profile_panels(records, args.output, args.previews)
+    if args.only is None:
+        profile_panels(records, args.output, args.previews)
 
 
 if __name__ == "__main__":

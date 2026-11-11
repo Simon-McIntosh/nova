@@ -129,3 +129,63 @@ def test_committed_closure_and_saved_terminal_pin_both_density_ratios():
     assert (
         split_current(1.7231301069259644, np.array([0.05]), closure)["density"][0] > 1e6
     )
+
+
+def test_coincident_midplane_traces_each_contribute_visible_pixels(
+    monkeypatch, tmp_path
+):
+    from scripts.prototypes.diiid_hollow_current import render
+
+    x = np.linspace(0.2, 1.4, 241)
+    density = 1e6 * (0.2 + np.sin(np.pi * (x - x[0]) / np.ptp(x)) ** 2)
+    cut = dict(
+        x=x,
+        density=density,
+        pressure_term=0.3 * density,
+        field_term=0.7 * density,
+        map_density=density,
+        support=np.ones_like(x, dtype=bool),
+    )
+    states = [
+        dict(stage=stage, amplitude=1.0, cuts=dict(midplane=cut))
+        for stage in ("reference", "terminal")
+    ]
+    counts = {}
+
+    def inspect(figure, axes, notes, output, preview):
+        figure.canvas.draw()
+        full = np.asarray(figure.canvas.buffer_rgba()).copy()
+        for panel, ax in enumerate(axes):
+            box = ax.get_window_extent()
+            left, right = int(box.x0) + 5, int(box.x1) - 5
+            top, bottom = (
+                full.shape[0] - int(box.y1) + 5,
+                full.shape[0] - int(box.y0) - 5,
+            )
+            for series, line in enumerate(ax.lines):
+                expected = (
+                    density / 1e6
+                    if panel == 0
+                    else (0.3 if panel == 1 else 0.7) * density / 1e6
+                )
+                np.testing.assert_allclose(line.get_ydata(), expected, rtol=1e-14)
+                line.set_visible(False)
+                figure.canvas.draw()
+                hidden = np.asarray(figure.canvas.buffer_rgba())
+                difference = (
+                    np.max(
+                        np.abs(
+                            full[top:bottom, left:right].astype(int)
+                            - hidden[top:bottom, left:right].astype(int)
+                        ),
+                        axis=-1,
+                    )
+                    >= 32
+                )
+                counts[f"panel-{panel}-series-{series}"] = int(difference.sum())
+                line.set_visible(True)
+        print("VISIBLE_TRACE_PIXELS", counts)
+        assert all(count > 20 for count in counts.values()), counts
+
+    monkeypatch.setattr(render, "save", inspect)
+    render.line_panels(dict(case="coincident", states=states), tmp_path, tmp_path)

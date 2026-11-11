@@ -1,0 +1,101 @@
+<section id="diiid-xpoint-offset-decomposition">
+<h2>DIII-D lower X-point error is not a rigid vertical displacement</h2>
+<p><strong>137D and 146D falsify the whole-plasma translation explanation, and the remaining error is broader than the separatrix.</strong> The saved states reproduce lower-X separations of 7.29582 cm and 6.58904 cm. The axes move down 27.20 cm and 22.62 cm while the lower X-points move up 7.25 cm and 5.97 cm. Applying the best whole-field translation increases the lower-X errors to 9.90 cm and 7.44 cm. Their current centroids move vertically by only +0.96 cm and +0.008 cm. A shifted magnetic axis is therefore not evidence that the plasma current has undergone the same rigid vertical motion.</p>
+<p>The binary receipt calls these rows <code>local</code>, meaning non-rigid under the quantitative rule below. That name must not be read as proof that the error is confined to the separatrix: the inner flux RMS errors, outside a 30 cm disk about the reference saddle, are 350 and 371 mWb, against 254 and 219 mWb inside it. The observed mechanism is a broad deformation of the flux and current distribution with an additional lower-saddle error. 146L, in contrast, is predominantly rigid and has a large upward current-centroid displacement and vertical Lorentz loading.</p>
+<h3>Inputs and measurement</h3>
+<p>All 30 input files were copied and SHA-256 verified: ten terminal NPZ banks are committed under <code>scripts/prototypes/diiid_xpoint_offset/inputs/</code>; the original receipts and trips are copied into this run's durable <code>inputs/</code> directory. The portable inventory is <code>scripts/prototypes/diiid_xpoint_offset/inputs.json</code>, and all ten numeric rows and their conventions are in <code>scripts/prototypes/diiid_xpoint_offset/results.json</code>. No forward map, forward solve or GPU measurement was run. The CPU diagnostic completed on <code>all_debug</code>, job 1310559: <code>MEASUREMENT: 10 saved states; zero forward solves</code>, <code>EXIT=0</code>.</p>
+<p>The 33×33 maps are stored in (radius, height) order and carry Nova total poloidal flux in Wb. Cubic not-a-knot interpolation polishes each map's own axis and lower saddle; these agree with the saved terminal nulls. The lower saddle is read from <code>continued_saddle</code>, not blindly from <code>saddle</code>: 179L and converged base MAST store an upper saddle in the latter. The reference saddle is the polished null of the EFIT map rather than the lowest sampled LCFS vertex; both locations remain in the saved inputs. The raw stored EFIT-axis comparison is also retained in the JSON.</p>
+<p>The fit minimises gauge-free flux RMS over a fixed EFIT-plasma node set. A single constant gauge is removed; flux amplitude is not rescaled. Three starts are tried and bounds keep every sampled point inside the solved grid; none of these fits touches a bound. The translation (dR,dZ) is the displacement applied to the solved field: aligned(R,Z) = solved(R−dR,Z−dZ). Every reported offset is solved minus EFIT. A row is <code>rigid</code> only if translation removes at least 50% of squared flux mismatch, the axis/X-vector difference is at most 50% of the larger original offset, and the translated X error is at most 50% of its original value. Otherwise the binary verdict is <code>local</code>. The rule is relative and can classify a converged but slightly shape-biased control as non-rigid; convergence and agreement with EFIT are independent observations.</p>
+
+<table>
+<caption>Landmark offsets [cm], each vector ordered (R, Z). The rigid-shift residual is ΔX−Δaxis.</caption>
+<thead><tr><th>case</th><th>axis offset</th><th>lower-X offset</th><th>rigid-shift residual</th><th>verdict</th></tr></thead>
+<tbody>
+<tr><td>137D (head)</td><td>(-17.91, -27.20)</td><td>(-0.82, +7.25)</td><td>(+17.09, +34.45)</td><td>local</td></tr>
+<tr><td>146D (head)</td><td>(-13.30, -22.62)</td><td>(-2.78, +5.97)</td><td>(+10.52, +28.60)</td><td>local</td></tr>
+<tr><td>146L (head)</td><td>(+7.73, +24.28)</td><td>(+3.88, +18.30)</td><td>(-3.84, -5.98)</td><td>rigid</td></tr>
+<tr><td>179L (head)</td><td>(+7.45, -16.38)</td><td>(+2.11, -2.10)</td><td>(-5.34, +14.28)</td><td>local</td></tr>
+<tr><td>mast-21978-35 (base)</td><td>(+0.07, +2.67)</td><td>(-1.75, +3.03)</td><td>(-1.82, +0.35)</td><td>local</td></tr>
+<tr><td>mast-21978-35 (head)</td><td>(-0.02, -0.36)</td><td>(+0.04, -0.39)</td><td>(+0.06, -0.03)</td><td>rigid</td></tr>
+</tbody>
+</table>
+
+<table>
+<caption>Best rigid translation. RMS is gauge-free total flux; X error is the Euclidean distance after applying the fitted shift.</caption>
+<thead><tr><th>case</th><th>applied shift [cm]</th><th>RMS before → after [mWb]</th><th>squared mismatch removed [%]</th><th>X residual (R,Z) [cm]</th><th>X error [cm]</th></tr></thead>
+<tbody>
+<tr><td>137D (head)</td><td>(+8.41, -0.89)</td><td>347.68 → 239.76</td><td>52.45</td><td>(+7.59, +6.36)</td><td>9.90</td></tr>
+<tr><td>146D (head)</td><td>(+9.22, -2.24)</td><td>366.80 → 221.56</td><td>63.52</td><td>(+6.44, +3.73)</td><td>7.44</td></tr>
+<tr><td>146L (head)</td><td>(-9.24, -22.43)</td><td>736.12 → 313.80</td><td>81.83</td><td>(-5.36, -4.13)</td><td>6.77</td></tr>
+<tr><td>179L (head)</td><td>(-8.11, +4.30)</td><td>277.58 → 153.30</td><td>69.50</td><td>(-6.00, +2.20)</td><td>6.39</td></tr>
+<tr><td>mast-21978-35 (base)</td><td>(-0.05, -3.07)</td><td>11.89 → 3.46</td><td>91.52</td><td>(-1.80, -0.04)</td><td>1.80</td></tr>
+<tr><td>mast-21978-35 (head)</td><td>(+0.03, +0.39)</td><td>1.49 → 0.39</td><td>93.31</td><td>(+0.07, -0.00)</td><td>0.07</td></tr>
+</tbody>
+</table>
+
+<h3>Current distribution and force read</h3>
+<p>Current is inferred by the public Ampere/Grad–Shafranov stencil, <code>nova/equilibrium/map_extraction.py:145</code>, jφ = −Δ*Φ/(2πμ₀R). The solved integral uses its saved connected CORE support; EFIT uses its labelled LCFS polygon. These are map-implied current integrals on a coarse lattice, not the native clipped source moments or the magnetics target current. No negative-current clipping, amplitude renormalisation or inferred pressure profile is applied. DIII-D grid spacing is 5.3125 cm radially and 10 cm vertically; MAST is 6.0625 cm and 12.5 cm. Digits below a cell describe the interpolant, not a resolution study.</p>
+<p>Forces use each equilibrium's own poloidal field from the same public central derivatives: Bᵣ = −Φᶻ/(2πR), Bᶻ = Φᵣ/(2πR), and (Fᵣ,Fᶻ) = ∫2πR jφ(Bᶻ,−Bᵣ)dA. This is the toroidal-current Lorentz contribution. It excludes poloidal-current/toroidal-field stress and pressure gradients, so it is not the full force-balance residual. The radial number is the toroidally integrated radial scalar, or hoop loading; the full torus's Cartesian radial resultant cancels by symmetry. The analytic uniform-current test independently checks both the sign and magnitude of these quantities.</p>
+
+<table>
+<caption>Own-map plasma current and current centroid. Each entry is solved / EFIT; centroid coordinates are physical (R,Z).</caption>
+<thead><tr><th>case</th><th>plasma current [MA]</th><th>centroid (R,Z) [cm]</th></tr></thead>
+<tbody>
+<tr><td>137D (head)</td><td>1.600541 / 1.612173</td><td>(+156.17, -0.45) / (+165.21, -1.42)</td></tr>
+<tr><td>146D (head)</td><td>1.632670 / 1.613566</td><td>(+155.52, -1.49) / (+165.74, -1.50)</td></tr>
+<tr><td>146L (head)</td><td>1.606642 / 1.613566</td><td>(+176.93, +19.19) / (+165.74, -1.50)</td></tr>
+<tr><td>179L (head)</td><td>1.256305 / 1.256316</td><td>(+181.32, -6.65) / (+171.72, -1.72)</td></tr>
+<tr><td>mast-21978-35 (base)</td><td>0.792669 / 0.796716</td><td>(+77.07, +3.38) / (+77.04, -0.21)</td></tr>
+<tr><td>mast-21978-35 (head)</td><td>0.793340 / 0.796716</td><td>(+76.97, -0.62) / (+77.04, -0.21)</td></tr>
+</tbody>
+</table>
+
+<table>
+<caption>Own-field Lorentz loading [kN]. Each vector is ordered (radial, vertical); the EFIT column uses EFIT current and EFIT field.</caption>
+<thead><tr><th>case</th><th>solved (Fᵣ,Fᶻ)</th><th>EFIT (Fᵣ,Fᶻ)</th><th>difference (Fᵣ,Fᶻ)</th></tr></thead>
+<tbody>
+<tr><td>137D (head)</td><td>(+124.61, +7.26)</td><td>(+52.58, +1.83)</td><td>(+72.03, +5.43)</td></tr>
+<tr><td>146D (head)</td><td>(+142.01, -10.64)</td><td>(+64.52, -7.57)</td><td>(+77.49, -3.07)</td></tr>
+<tr><td>146L (head)</td><td>(+218.01, +281.90)</td><td>(+64.52, -7.57)</td><td>(+153.49, +289.47)</td></tr>
+<tr><td>179L (head)</td><td>(-117.59, -35.92)</td><td>(-131.37, +8.30)</td><td>(+13.78, -44.22)</td></tr>
+<tr><td>mast-21978-35 (base)</td><td>(+50.94, +0.57)</td><td>(+49.53, -1.24)</td><td>(+1.41, +1.81)</td></tr>
+<tr><td>mast-21978-35 (head)</td><td>(+50.15, -1.20)</td><td>(+49.53, -1.24)</td><td>(+0.61, +0.04)</td></tr>
+</tbody>
+</table>
+
+<h3>Where the geometry differs</h3>
+<p>The midplane cuts use the same horizontal plane, the stored EFIT axis height, for both boundaries. Inboard and outboard entries are signed solved-minus-EFIT R gaps; top is the signed Z gap. The solved boundary is its 99.9% closed flux surface, with anchors from that solved map, compared against EFIT's sampled LCFS. The 0.1% inward flux offset is declared because marching a finite grid exactly through a tangent saddle can return an open path. The first reader deliberately refused that path rather than silently treating it as a closed boundary. The X-point column always uses the continuous lower null and has no inward shift. These are boundary-to-boundary gaps, not wall clearances.</p>
+
+<table>
+<caption>Boundary gaps [cm]. X-point is a nonnegative Euclidean gap; the other entries carry coordinate signs.</caption>
+<thead><tr><th>case</th><th>outboard midplane</th><th>inboard midplane</th><th>top</th><th>lower X-point</th></tr></thead>
+<tbody>
+<tr><td>137D (head)</td><td>-12.91</td><td>-1.66</td><td>+2.03</td><td>+7.30</td></tr>
+<tr><td>146D (head)</td><td>-13.48</td><td>-3.17</td><td>+3.78</td><td>+6.59</td></tr>
+<tr><td>146L (head)</td><td>+2.12</td><td>+20.02</td><td>-6.25</td><td>+18.71</td></tr>
+<tr><td>179L (head)</td><td>+6.30</td><td>+11.59</td><td>-44.17</td><td>+2.97</td></tr>
+<tr><td>mast-21978-35 (base)</td><td>-0.11</td><td>+0.56</td><td>+9.11</td><td>+3.50</td></tr>
+<tr><td>mast-21978-35 (head)</td><td>-0.11</td><td>+0.06</td><td>-1.29</td><td>+0.39</td></tr>
+</tbody>
+</table>
+
+<p>137D and 146D live in the lower inboard saddle neighbourhood, but the outboard midplane is also 12.91 cm and 13.48 cm inboard of EFIT. The current centroid is 9.05 cm and 10.22 cm inboard. The saddle is the zero of the total-field gradient, not a prescribed point: <code>nova/equilibrium/forward_operator.py:3962</code> composes external plus plasma flux. The measured gradient differences at EFIT's saddle, read at <code>scripts/prototypes/diiid_xpoint_offset/decompose.py:274</code>, are (−1.426,−0.448) Wb/m on 137D and (−0.404,−0.312) Wb/m on 146D. The local saddle Hessians, measured lower nulls and the linear estimate −H⁻¹∇δΦ are banked in the JSON. The linear estimate overpredicts 137D's displacement substantially, so it is a sensitivity diagnostic, not an accepted correction.</p>
+<p><strong>The rigid row, 146L, identifies changed plasma-current distribution and vertical Lorentz loading as the moving quantities.</strong> Its centroid is (1.7693,0.1919) m, against EFIT (1.6574,−0.0150) m, and Fᶻ is +281.90 kN against −7.57 kN. The 146D centroid instead has essentially EFIT's Z while its axis is far below. The public source evaluation at <code>nova/equilibrium/forward_operator.py:3545</code> computes current moments from flux-normalised profile samples and admitted support; <code>forward_operator.py:3661</code> normalises their total current, not their centroid. The profiles are extracted shell coefficients at <code>benchmarks/diiid_forward_gs_match.py:1122</code>, with the shell projection at <code>nova/equilibrium/map_extraction.py:273</code>. Those mechanisms permit branch-dependent current shape even with the same prescribed current target. The recorded map-current totals differ from EFIT by −0.43% on 146L and +1.18% on 146D; a scalar current correction cannot account for the opposite geometric outcomes.</p>
+<p>This is evidence for a branch-dependent current-shape/balance difference, not a causal isolation of a wrong coil current or a wrong p′/FF′ sample. The terminal banks do not store the circuit vector or native source-moment tables. These unconverged maps and jφ×Bₚ alone cannot separate a prescribed-profile inconsistency from a solver-stalled response. No coil or profile is retuned on the strength of this diagnostic. The live plan's ban on fitted physical constraints remains in force.</p>
+<h3>Paired geometry panels</h3>
+
+<figure>
+<img src="/nova/figures/diiid-xpoint-offset-decomposition/frame-137-diverted.svg" alt="DIII-D frame 137, original and translated solved flux against EFIT with lower-X detail">
+<figcaption>DIII-D frame 137, diverted seed, saved head state. Left: original field; centre: best rigid translation; right: translated lower-X detail. Blue solid lines are solved flux and dark dashed lines are EFIT on one physical level array after constant gauge alignment. Each field's own boundary level is drawn thicker. Blue triangles/crosses mark the solved axis/lower X; dark inverted triangles/filled pluses mark EFIT, with EFIT's lower X drawn last at the highest layer. Grey is the saved limiter; every contour is clipped to its interior and all axes are off. Terminal relative residual 0.0177821892; converged false; reason 12. The translation is a diagnostic image operation. Both PNG previews were visually inspected after wall clipping; mechanical saving checks refuse clipping, text collisions and labels over a panel.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/diiid-xpoint-offset-decomposition/frame-146-diverted.svg" alt="DIII-D frame 146, original and translated solved flux against EFIT with lower-X detail">
+<figcaption>DIII-D frame 146, diverted seed, saved head state. Left: original field; centre: best rigid translation; right: translated lower-X detail. Blue solid lines are solved flux and dark dashed lines are EFIT on one physical level array after constant gauge alignment. Each field's own boundary level is drawn thicker. Blue triangles/crosses mark the solved axis/lower X; dark inverted triangles/filled pluses mark EFIT, with EFIT's lower X drawn last at the highest layer. Grey is the saved limiter; every contour is clipped to its interior and all axes are off. Terminal relative residual 0.0101992101; converged false; reason 12. The translation is a diagnostic image operation. Both PNG previews were visually inspected after wall clipping; mechanical saving checks refuse clipping, text collisions and labels over a panel.</figcaption>
+</figure>
+
+<h3>Controls, persistence and recommendation</h3>
+<p>The converged control is the supplied <strong>base</strong> MAST 21978/35 bank, residual 2.2096965623508588e−16, reason 1, rather than the supplied head bank, residual 0.002161879174815926, reason 12. The converged map still differs from the EFIT lower saddle by 3.50 cm; translation removes 91.5% of its squared mismatch and leaves 1.80 cm, just outside the declared 50% saddle-reduction threshold, so its binary verdict is local. That result prevents using convergence as a proxy for absolute geometry accuracy. Head MAST is reported separately and is not promoted as a converged control. 137D base/head flux is identical; the remaining DIII-D arm differences are small and all ten rows remain available.</p>
+<p>The six answering tests pass. In the declared red control the scratch module replaces <code>translation = optimization.x</code> by <code>translation = np.zeros(2)</code>; the runner reports <code>2 failed, 4 passed</code>, <code>EXIT=1</code>, naming both <code>test_known_translation_is_recovered_as_rigid</code> and <code>test_saddle_only_perturbation_is_local</code>. The latter requires an actual reduction of the projected local perturbation, not only a classifier label. The other tests pin gauge invariance, explicit refusal of an empty plasma mask, Ampere-current/force signs and the closed near-saddle boundary read. The absent baseline test is recorded with the requested exit status 4. Logs, original receipt copies, PNG previews and landing record live in this node's run directory, whose absolute path is in the manifest.</p>
+<p><strong>Recommendation:</strong> the offset-closing node should restore a converged full-field/current-shape solution on the retained diverted branches with the existing physical inputs, banking the native source moments and the lower-saddle gradient alongside each accepted state. Use both axis and lower-X geometry to judge its terminal state. Do not apply an axis-based rigid translation or add a position constraint: the measured best translations already worsen the target X-point offsets. The first quantity to trace is the branch-dependent current-moment evaluation at <code>forward_operator.py:3545</code>, followed through the stalled full-field residual, before attributing the error to a conductor or changing Newton algebra.</p>
+</section>

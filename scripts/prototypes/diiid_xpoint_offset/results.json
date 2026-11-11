@@ -1,0 +1,1266 @@
+{
+  "rows": [
+    {
+      "arm": "base",
+      "case": "frame-137-diverted",
+      "converged": false,
+      "residual": 0.01778218920812512,
+      "terminal_reason": 12,
+      "grid_spacing_cm": [
+        5.312499962747097,
+        10.000000149011612
+      ],
+      "axis_offset_cm": [
+        -17.914628386955656,
+        -27.198151402035304
+      ],
+      "raw_stored_axis_offset_cm": [
+        -17.913198500028706,
+        -27.19938618217269
+      ],
+      "xpoint_offset_cm": [
+        -0.821247452923779,
+        7.249451800727558
+      ],
+      "rigid_shift_residual_cm": [
+        17.093380934031877,
+        34.44760320276286
+      ],
+      "xpoint_after_translation_cm": [
+        7.5891121377524895,
+        6.362365412739768
+      ],
+      "axis_rz_m": [
+        1.5439981219256764,
+        -0.2703032742107928
+      ],
+      "saddle_rz_m": [
+        1.2845967716818432,
+        -1.1125576784783142
+      ],
+      "reference_axis_rz_m": [
+        1.723144405795233,
+        0.0016782398095602034
+      ],
+      "reference_saddle_rz_m": [
+        1.292809246211081,
+        -1.1850521964855898
+      ],
+      "fit": {
+        "translation_m": [
+          0.08410359590676268,
+          -0.0088708638798779
+        ],
+        "gauge_wb": -0.2793660327045104,
+        "gauge_before_wb": -0.298580255811377,
+        "rms_before_wb": 0.34767572027698457,
+        "rms_after_wb": 0.2397551656552996,
+        "squared_mismatch_removed": 0.5244598176216917,
+        "node_count": 343,
+        "bounds_m": [
+          [
+            -0.3187499977648258,
+            -0.7000000104308128
+          ],
+          [
+            0.26562499813735485,
+            0.5000000074505806
+          ]
+        ],
+        "bound_active": false,
+        "optimality": 2.097704488977263e-07
+      },
+      "current": {
+        "total_current_a": 1600540.79904135,
+        "centroid_rz_m": [
+          1.5616689698062987,
+          -0.004542808862084511
+        ],
+        "force_rz_n": [
+          124612.70532180369,
+          7261.953358517756
+        ],
+        "nodes": 314,
+        "negative_current_fraction": -0.0
+      },
+      "reference_current": {
+        "total_current_a": 1612173.168971286,
+        "centroid_rz_m": [
+          1.652149270649962,
+          -0.014161720902609955
+        ],
+        "force_rz_n": [
+          52579.482746629976,
+          1831.6161282086105
+        ],
+        "nodes": 343,
+        "negative_current_fraction": -0.0
+      },
+      "boundary_level_fraction": 0.999,
+      "boundary_gap_cm": {
+        "inboard": -1.6550703782876264,
+        "outboard": -12.907268840486141,
+        "top": 2.034286209178715,
+        "xpoint": 7.2958206385577915
+      },
+      "saddle_gradient_error_wb_per_m": [
+        -1.4258693238591897,
+        -0.4475828212637164
+      ],
+      "reference_saddle_hessian_wb_per_m2": [
+        [
+          -4.446756891199877,
+          4.858526662751374
+        ],
+        [
+          4.858526662751374,
+          3.9205543330607138
+        ]
+      ],
+      "linear_saddle_prediction_cm": [
+        -8.32282051486461,
+        21.73032695624579
+      ],
+      "inner_rms_error_wb": 0.35035039699099707,
+      "near_saddle_rms_error_wb": 0.2540258390991724,
+      "verdict": "local"
+    },
+    {
+      "arm": "base",
+      "case": "frame-146-diverted",
+      "converged": false,
+      "residual": 0.010213883763988066,
+      "terminal_reason": 12,
+      "grid_spacing_cm": [
+        5.312499962747097,
+        10.000000149011612
+      ],
+      "axis_offset_cm": [
+        -13.303957028999891,
+        -22.624980894102244
+      ],
+      "raw_stored_axis_offset_cm": [
+        -13.303418726135941,
+        -22.62347720285533
+      ],
+      "xpoint_offset_cm": [
+        -2.780457111821155,
+        5.975337322922103
+      ],
+      "rigid_shift_residual_cm": [
+        10.523499917178736,
+        28.600318217024345
+      ],
+      "xpoint_after_translation_cm": [
+        6.436054748918013,
+        3.736235753361013
+      ],
+      "axis_rz_m": [
+        1.5849894705374077,
+        -0.22756195768729173
+      ],
+      "saddle_rz_m": [
+        1.268628845470213,
+        -1.1279339549174252
+      ],
+      "reference_axis_rz_m": [
+        1.7180290408274066,
+        -0.0013121487462692905
+      ],
+      "reference_saddle_rz_m": [
+        1.2964334165884246,
+        -1.1876873281466462
+      ],
+      "fit": {
+        "translation_m": [
+          0.09216511860739168,
+          -0.0223910156956109
+        ],
+        "gauge_wb": -0.27467737902582184,
+        "gauge_before_wb": -0.29903665361443343,
+        "rms_before_wb": 0.36675188268685976,
+        "rms_after_wb": 0.2214994784571479,
+        "squared_mismatch_removed": 0.6352454550166972,
+        "node_count": 342,
+        "bounds_m": [
+          [
+            -0.3187499977648258,
+            -0.7000000104308128
+          ],
+          [
+            0.26562499813735485,
+            0.5000000074505806
+          ]
+        ],
+        "bound_active": false,
+        "optimality": 1.5096375453167804e-06
+      },
+      "current": {
+        "total_current_a": 1632686.7000378966,
+        "centroid_rz_m": [
+          1.5551945495062882,
+          -0.014894312343514994
+        ],
+        "force_rz_n": [
+          142084.73633257812,
+          -10676.386685458754
+        ],
+        "nodes": 330,
+        "negative_current_fraction": 0.015160103746169658
+      },
+      "reference_current": {
+        "total_current_a": 1613566.0044960533,
+        "centroid_rz_m": [
+          1.6573529229006332,
+          -0.014963131179572979
+        ],
+        "force_rz_n": [
+          64519.167222788325,
+          -7568.095483292709
+        ],
+        "nodes": 342,
+        "negative_current_fraction": -0.0
+      },
+      "boundary_level_fraction": 0.999,
+      "boundary_gap_cm": {
+        "inboard": -3.172997810806444,
+        "outboard": -13.47560873106608,
+        "top": 3.7778527042427346,
+        "xpoint": 6.5905688581019115
+      },
+      "saddle_gradient_error_wb_per_m": [
+        -0.40419606930710794,
+        -0.3114292590473863
+      ],
+      "reference_saddle_hessian_wb_per_m2": [
+        [
+          -4.3325867401641895,
+          4.768785181452762
+        ],
+        [
+          4.768785181452762,
+          3.8213232135599804
+        ]
+      ],
+      "linear_saddle_prediction_cm": [
+        -0.1512171180050879,
+        8.338485408194101
+      ],
+      "inner_rms_error_wb": 0.37064771323710954,
+      "near_saddle_rms_error_wb": 0.21923107689778257,
+      "verdict": "local"
+    },
+    {
+      "arm": "base",
+      "case": "frame-146-limited",
+      "converged": false,
+      "residual": 0.016983841887921798,
+      "terminal_reason": 12,
+      "grid_spacing_cm": [
+        5.312499962747097,
+        10.000000149011612
+      ],
+      "axis_offset_cm": [
+        7.726358642402054,
+        24.283269201284767
+      ],
+      "raw_stored_axis_offset_cm": [
+        7.726896945266004,
+        24.284772892531592
+      ],
+      "xpoint_offset_cm": [
+        3.884695647496006,
+        18.29994908917527
+      ],
+      "rigid_shift_residual_cm": [
+        -3.8416629949060477,
+        -5.983320112109494
+      ],
+      "xpoint_after_translation_cm": [
+        -5.358821667540154,
+        -4.129725102590173
+      ],
+      "axis_rz_m": [
+        1.7952926272514271,
+        0.24152054326657837
+      ],
+      "saddle_rz_m": [
+        1.3352803730633847,
+        -1.0046878372548935
+      ],
+      "reference_axis_rz_m": [
+        1.7180290408274066,
+        -0.0013121487462692905
+      ],
+      "reference_saddle_rz_m": [
+        1.2964334165884246,
+        -1.1876873281466462
+      ],
+      "fit": {
+        "translation_m": [
+          -0.0924351731503616,
+          -0.22429674191765445
+        ],
+        "gauge_wb": 0.38763563285630215,
+        "gauge_before_wb": 0.25354545639830617,
+        "rms_before_wb": 0.7361235726577958,
+        "rms_after_wb": 0.3137960623211168,
+        "squared_mismatch_removed": 0.8182838492882172,
+        "node_count": 342,
+        "bounds_m": [
+          [
+            -0.3187499977648258,
+            -0.7000000104308128
+          ],
+          [
+            0.26562499813735485,
+            0.5000000074505806
+          ]
+        ],
+        "bound_active": false,
+        "optimality": 1.0138926587400659e-05
+      },
+      "current": {
+        "total_current_a": 1606641.81384679,
+        "centroid_rz_m": [
+          1.7692667188510744,
+          0.1918576549987887
+        ],
+        "force_rz_n": [
+          218009.92783680093,
+          281899.74096948456
+        ],
+        "nodes": 212,
+        "negative_current_fraction": 0.0032767546448267348
+      },
+      "reference_current": {
+        "total_current_a": 1613566.0044960533,
+        "centroid_rz_m": [
+          1.6573529229006332,
+          -0.014963131179572979
+        ],
+        "force_rz_n": [
+          64519.167222788325,
+          -7568.095483292709
+        ],
+        "nodes": 342,
+        "negative_current_fraction": -0.0
+      },
+      "boundary_level_fraction": 0.999,
+      "boundary_gap_cm": {
+        "inboard": 20.019427863188998,
+        "outboard": 2.1154202994409843,
+        "top": -6.254782816430637,
+        "xpoint": 18.707725595060488
+      },
+      "saddle_gradient_error_wb_per_m": [
+        -0.4494285309912077,
+        -0.6410334069585684
+      ],
+      "reference_saddle_hessian_wb_per_m2": [
+        [
+          -4.3325867401641895,
+          4.768785181452762
+        ],
+        [
+          4.768785181452762,
+          3.8213232135599804
+        ]
+      ],
+      "linear_saddle_prediction_cm": [
+        3.408710564253274,
+        12.521299454439175
+      ],
+      "inner_rms_error_wb": 0.7357417343380285,
+      "near_saddle_rms_error_wb": 0.7475222028334979,
+      "verdict": "rigid"
+    },
+    {
+      "arm": "base",
+      "case": "frame-179-limited",
+      "converged": false,
+      "residual": 0.0022141907742804054,
+      "terminal_reason": 12,
+      "grid_spacing_cm": [
+        5.312499962747097,
+        10.000000149011612
+      ],
+      "axis_offset_cm": [
+        7.449724583771711,
+        -16.38333701356244
+      ],
+      "raw_stored_axis_offset_cm": [
+        7.450515327195362,
+        -16.37421162558538
+      ],
+      "xpoint_offset_cm": [
+        2.106665508851746,
+        -2.0927028580476126
+      ],
+      "rigid_shift_residual_cm": [
+        -5.343059074919965,
+        14.290634155514828
+      ],
+      "xpoint_after_translation_cm": [
+        -5.999250074282091,
+        2.194375688621137
+      ],
+      "axis_rz_m": [
+        1.848149004552166,
+        -0.19466782042214714
+      ],
+      "saddle_rz_m": [
+        1.231484134068499,
+        -1.2351408137887043
+      ],
+      "reference_axis_rz_m": [
+        1.773651758714449,
+        -0.030834450286522725
+      ],
+      "reference_saddle_rz_m": [
+        1.2104174789799815,
+        -1.2142137852082282
+      ],
+      "fit": {
+        "translation_m": [
+          -0.08105915583133837,
+          0.042870785466687496
+        ],
+        "gauge_wb": 0.19270864082441275,
+        "gauge_before_wb": 0.16521325491136601,
+        "rms_before_wb": 0.27742481751627374,
+        "rms_after_wb": 0.1531988787095978,
+        "squared_mismatch_removed": 0.6950556752728538,
+        "node_count": 316,
+        "bounds_m": [
+          [
+            -0.26562499813735485,
+            -0.6000000089406967
+          ],
+          [
+            0.3718749973922968,
+            0.7000000104308128
+          ]
+        ],
+        "bound_active": false,
+        "optimality": 3.3688718435873556e-06
+      },
+      "current": {
+        "total_current_a": 1256292.7053380804,
+        "centroid_rz_m": [
+          1.8132047062278993,
+          -0.06644450473927557
+        ],
+        "force_rz_n": [
+          -117690.46026991215,
+          -35811.59523386766
+        ],
+        "nodes": 225,
+        "negative_current_fraction": 0.000473334332770984
+      },
+      "reference_current": {
+        "total_current_a": 1256316.4023451973,
+        "centroid_rz_m": [
+          1.717210711123209,
+          -0.017170691886848624
+        ],
+        "force_rz_n": [
+          -131368.76772601856,
+          8296.031136293022
+        ],
+        "nodes": 316,
+        "negative_current_fraction": -0.0
+      },
+      "boundary_level_fraction": 0.999,
+      "boundary_gap_cm": {
+        "inboard": 11.587085988418732,
+        "outboard": 6.299299890274801,
+        "top": -44.155434554022264,
+        "xpoint": 2.969418262600645
+      },
+      "saddle_gradient_error_wb_per_m": [
+        0.08228062972575803,
+        -0.008778412033963524
+      ],
+      "reference_saddle_hessian_wb_per_m2": [
+        [
+          -1.8611431319946263,
+          2.1178767744929976
+        ],
+        [
+          2.1178767744929976,
+          1.8650819063822721
+        ]
+      ],
+      "linear_saddle_prediction_cm": [
+        2.1623809481700076,
+        -1.984800330576109
+      ],
+      "inner_rms_error_wb": 0.2774248175162737,
+      "near_saddle_rms_error_wb": null,
+      "verdict": "local"
+    },
+    {
+      "arm": "base",
+      "case": "mast-21978-35",
+      "converged": true,
+      "residual": 2.2096965623508588e-16,
+      "terminal_reason": 1,
+      "grid_spacing_cm": [
+        6.062500004190952,
+        12.5
+      ],
+      "axis_offset_cm": [
+        0.06968057967333685,
+        2.672765811836872
+      ],
+      "raw_stored_axis_offset_cm": [
+        0.06971810460653094,
+        2.6730396107287175
+      ],
+      "xpoint_offset_cm": [
+        -1.750359877140284,
+        3.0264914621160655
+      ],
+      "rigid_shift_residual_cm": [
+        -1.8200404568136208,
+        0.35372565027919356
+      ],
+      "xpoint_after_translation_cm": [
+        -1.7997910272527486,
+        -0.04471573574735474
+      ],
+      "axis_rz_m": [
+        0.9052090499997708,
+        0.02714878957251208
+      ],
+      "saddle_rz_m": [
+        0.5518254445360558,
+        -1.2073572472256768
+      ],
+      "reference_axis_rz_m": [
+        0.9045122442030374,
+        0.00042113145414336006
+      ],
+      "reference_saddle_rz_m": [
+        0.5693290433074586,
+        -1.2376221618468375
+      ],
+      "fit": {
+        "translation_m": [
+          -0.0004943115011246467,
+          -0.030712071978634202
+        ],
+        "gauge_wb": -0.00013596457153933547,
+        "gauge_before_wb": -0.0004935851791517404,
+        "rms_before_wb": 0.01188770441237665,
+        "rms_after_wb": 0.0034625082789868995,
+        "squared_mismatch_removed": 0.9151629330547997,
+        "node_count": 248,
+        "bounds_m": [
+          [
+            -0.6062500004190952,
+            -0.875
+          ],
+          [
+            0.24250000016763806,
+            0.875
+          ]
+        ],
+        "bound_active": false,
+        "optimality": 5.927799972274001e-09
+      },
+      "current": {
+        "total_current_a": 792668.712007685,
+        "centroid_rz_m": [
+          0.7706918152198695,
+          0.0338468341836922
+        ],
+        "force_rz_n": [
+          50941.06507099408,
+          571.1507670428255
+        ],
+        "nodes": 243,
+        "negative_current_fraction": -0.0
+      },
+      "reference_current": {
+        "total_current_a": 796715.8953699282,
+        "centroid_rz_m": [
+          0.7703572025084272,
+          -0.002115553171372831
+        ],
+        "force_rz_n": [
+          49533.98108438426,
+          -1243.3977366410109
+        ],
+        "nodes": 248,
+        "negative_current_fraction": -0.0
+      },
+      "boundary_level_fraction": 0.999,
+      "boundary_gap_cm": {
+        "inboard": 0.5590974468757504,
+        "outboard": -0.106635945522493,
+        "top": 9.108600971704384,
+        "xpoint": 3.4961994036044324
+      },
+      "saddle_gradient_error_wb_per_m": [
+        -0.023637308435334865,
+        -0.04444976186016222
+      ],
+      "reference_saddle_hessian_wb_per_m2": [
+        [
+          -0.9715919929334305,
+          0.4300074100795509
+        ],
+        [
+          0.4300074100795509,
+          1.0089325780862466
+        ]
+      ],
+      "linear_saddle_prediction_cm": [
+        -0.40635223684091215,
+        4.57881008037517
+      ],
+      "inner_rms_error_wb": 0.011822143355718495,
+      "near_saddle_rms_error_wb": 0.013709514812073066,
+      "verdict": "local"
+    },
+    {
+      "arm": "head",
+      "case": "frame-137-diverted",
+      "converged": false,
+      "residual": 0.01778218920812533,
+      "terminal_reason": 12,
+      "grid_spacing_cm": [
+        5.312499962747097,
+        10.000000149011612
+      ],
+      "axis_offset_cm": [
+        -17.914628386955656,
+        -27.198151402035304
+      ],
+      "raw_stored_axis_offset_cm": [
+        -17.913198500028706,
+        -27.19938618217269
+      ],
+      "xpoint_offset_cm": [
+        -0.821247452923779,
+        7.249451800727558
+      ],
+      "rigid_shift_residual_cm": [
+        17.093380934031877,
+        34.44760320276286
+      ],
+      "xpoint_after_translation_cm": [
+        7.5891121377524895,
+        6.362365412739768
+      ],
+      "axis_rz_m": [
+        1.5439981219256764,
+        -0.2703032742107928
+      ],
+      "saddle_rz_m": [
+        1.2845967716818432,
+        -1.1125576784783142
+      ],
+      "reference_axis_rz_m": [
+        1.723144405795233,
+        0.0016782398095602034
+      ],
+      "reference_saddle_rz_m": [
+        1.292809246211081,
+        -1.1850521964855898
+      ],
+      "fit": {
+        "translation_m": [
+          0.08410359590676268,
+          -0.0088708638798779
+        ],
+        "gauge_wb": -0.2793660327045104,
+        "gauge_before_wb": -0.298580255811377,
+        "rms_before_wb": 0.34767572027698457,
+        "rms_after_wb": 0.2397551656552996,
+        "squared_mismatch_removed": 0.5244598176216917,
+        "node_count": 343,
+        "bounds_m": [
+          [
+            -0.3187499977648258,
+            -0.7000000104308128
+          ],
+          [
+            0.26562499813735485,
+            0.5000000074505806
+          ]
+        ],
+        "bound_active": false,
+        "optimality": 2.097704488977263e-07
+      },
+      "current": {
+        "total_current_a": 1600540.79904135,
+        "centroid_rz_m": [
+          1.5616689698062987,
+          -0.004542808862084511
+        ],
+        "force_rz_n": [
+          124612.70532180369,
+          7261.953358517756
+        ],
+        "nodes": 314,
+        "negative_current_fraction": -0.0
+      },
+      "reference_current": {
+        "total_current_a": 1612173.168971286,
+        "centroid_rz_m": [
+          1.652149270649962,
+          -0.014161720902609955
+        ],
+        "force_rz_n": [
+          52579.482746629976,
+          1831.6161282086105
+        ],
+        "nodes": 343,
+        "negative_current_fraction": -0.0
+      },
+      "boundary_level_fraction": 0.999,
+      "boundary_gap_cm": {
+        "inboard": -1.6550703782876264,
+        "outboard": -12.907268840486141,
+        "top": 2.034286209178715,
+        "xpoint": 7.2958206385577915
+      },
+      "saddle_gradient_error_wb_per_m": [
+        -1.4258693238591897,
+        -0.4475828212637164
+      ],
+      "reference_saddle_hessian_wb_per_m2": [
+        [
+          -4.446756891199877,
+          4.858526662751374
+        ],
+        [
+          4.858526662751374,
+          3.9205543330607138
+        ]
+      ],
+      "linear_saddle_prediction_cm": [
+        -8.32282051486461,
+        21.73032695624579
+      ],
+      "inner_rms_error_wb": 0.35035039699099707,
+      "near_saddle_rms_error_wb": 0.2540258390991724,
+      "verdict": "local"
+    },
+    {
+      "arm": "head",
+      "case": "frame-146-diverted",
+      "converged": false,
+      "residual": 0.01019921008266583,
+      "terminal_reason": 12,
+      "grid_spacing_cm": [
+        5.312499962747097,
+        10.000000149011612
+      ],
+      "axis_offset_cm": [
+        -13.303996107456184,
+        -22.62392432508183
+      ],
+      "raw_stored_axis_offset_cm": [
+        -13.303457804592234,
+        -22.622420633834782
+      ],
+      "xpoint_offset_cm": [
+        -2.781547908727666,
+        5.973147359894249
+      ],
+      "rigid_shift_residual_cm": [
+        10.522448198728519,
+        28.59707168497608
+      ],
+      "xpoint_after_translation_cm": [
+        6.435797368976854,
+        3.732579932564295
+      ],
+      "axis_rz_m": [
+        1.5849890797528448,
+        -0.22755139199708757
+      ],
+      "saddle_rz_m": [
+        1.268617937501148,
+        -1.1279558545477038
+      ],
+      "reference_axis_rz_m": [
+        1.7180290408274066,
+        -0.0013121487462692905
+      ],
+      "reference_saddle_rz_m": [
+        1.2964334165884246,
+        -1.1876873281466462
+      ],
+      "fit": {
+        "translation_m": [
+          0.09217345277704521,
+          -0.022405674273299536
+        ],
+        "gauge_wb": -0.2747340454926294,
+        "gauge_before_wb": -0.2990979242237915,
+        "rms_before_wb": 0.366802645864402,
+        "rms_after_wb": 0.221557148430826,
+        "squared_mismatch_removed": 0.63515649914276,
+        "node_count": 342,
+        "bounds_m": [
+          [
+            -0.3187499977648258,
+            -0.7000000104308128
+          ],
+          [
+            0.26562499813735485,
+            0.5000000074505806
+          ]
+        ],
+        "bound_active": false,
+        "optimality": 1.039529736335086e-06
+      },
+      "current": {
+        "total_current_a": 1632670.2108975835,
+        "centroid_rz_m": [
+          1.5551893699690105,
+          -0.014882846764366402
+        ],
+        "force_rz_n": [
+          142012.57495880872,
+          -10637.083348919245
+        ],
+        "nodes": 330,
+        "negative_current_fraction": 0.015125595542748567
+      },
+      "reference_current": {
+        "total_current_a": 1613566.0044960533,
+        "centroid_rz_m": [
+          1.6573529229006332,
+          -0.014963131179572979
+        ],
+        "force_rz_n": [
+          64519.167222788325,
+          -7568.095483292709
+        ],
+        "nodes": 342,
+        "negative_current_fraction": -0.0
+      },
+      "boundary_level_fraction": 0.999,
+      "boundary_gap_cm": {
+        "inboard": -3.172663106577933,
+        "outboard": -13.47719021360314,
+        "top": 3.781466302771941,
+        "xpoint": 6.589043796451718
+      },
+      "saddle_gradient_error_wb_per_m": [
+        -0.40395146161983525,
+        -0.3116244215535806
+      ],
+      "reference_saddle_hessian_wb_per_m2": [
+        [
+          -4.3325867401641895,
+          4.768785181452762
+        ],
+        [
+          4.768785181452762,
+          3.8213232135599804
+        ]
+      ],
+      "linear_saddle_prediction_cm": [
+        -0.14647022100575177,
+        8.33766875875764
+      ],
+      "inner_rms_error_wb": 0.37069856055114075,
+      "near_saddle_rms_error_wb": 0.21928457257168057,
+      "verdict": "local"
+    },
+    {
+      "arm": "head",
+      "case": "frame-146-limited",
+      "converged": false,
+      "residual": 0.016983841887921885,
+      "terminal_reason": 12,
+      "grid_spacing_cm": [
+        5.312499962747097,
+        10.000000149011612
+      ],
+      "axis_offset_cm": [
+        7.72635864240252,
+        24.283269201284227
+      ],
+      "raw_stored_axis_offset_cm": [
+        7.726896945266448,
+        24.284772892531155
+      ],
+      "xpoint_offset_cm": [
+        3.884695647496006,
+        18.29994908917525
+      ],
+      "rigid_shift_residual_cm": [
+        -3.841662994906514,
+        -5.983320112108978
+      ],
+      "xpoint_after_translation_cm": [
+        -5.358821848351478,
+        -4.129726654465641
+      ],
+      "axis_rz_m": [
+        1.7952926272514318,
+        0.241520543266573
+      ],
+      "saddle_rz_m": [
+        1.3352803730633847,
+        -1.0046878372548937
+      ],
+      "reference_axis_rz_m": [
+        1.7180290408274066,
+        -0.0013121487462692905
+      ],
+      "reference_saddle_rz_m": [
+        1.2964334165884246,
+        -1.1876873281466462
+      ],
+      "fit": {
+        "translation_m": [
+          -0.09243517495847484,
+          -0.2242967574364089
+        ],
+        "gauge_wb": 0.38763563402366247,
+        "gauge_before_wb": 0.25354545639830617,
+        "rms_before_wb": 0.7361235726577959,
+        "rms_after_wb": 0.31379606232111673,
+        "squared_mismatch_removed": 0.8182838492882173,
+        "node_count": 342,
+        "bounds_m": [
+          [
+            -0.3187499977648258,
+            -0.7000000104308128
+          ],
+          [
+            0.26562499813735485,
+            0.5000000074505806
+          ]
+        ],
+        "bound_active": false,
+        "optimality": 1.4793561190241732e-05
+      },
+      "current": {
+        "total_current_a": 1606641.8138467895,
+        "centroid_rz_m": [
+          1.769266718851075,
+          0.1918576549987891
+        ],
+        "force_rz_n": [
+          218009.92783679767,
+          281899.7409694807
+        ],
+        "nodes": 212,
+        "negative_current_fraction": 0.003276754644826023
+      },
+      "reference_current": {
+        "total_current_a": 1613566.0044960533,
+        "centroid_rz_m": [
+          1.6573529229006332,
+          -0.014963131179572979
+        ],
+        "force_rz_n": [
+          64519.167222788325,
+          -7568.095483292709
+        ],
+        "nodes": 342,
+        "negative_current_fraction": -0.0
+      },
+      "boundary_level_fraction": 0.999,
+      "boundary_gap_cm": {
+        "inboard": 20.019427863189023,
+        "outboard": 2.11542029944094,
+        "top": -6.25478281643066,
+        "xpoint": 18.707725595060467
+      },
+      "saddle_gradient_error_wb_per_m": [
+        -0.4494285309912047,
+        -0.6410334069585677
+      ],
+      "reference_saddle_hessian_wb_per_m2": [
+        [
+          -4.3325867401641895,
+          4.768785181452762
+        ],
+        [
+          4.768785181452762,
+          3.8213232135599804
+        ]
+      ],
+      "linear_saddle_prediction_cm": [
+        3.4087105642532944,
+        12.521299454439133
+      ],
+      "inner_rms_error_wb": 0.7357417343380285,
+      "near_saddle_rms_error_wb": 0.7475222028334979,
+      "verdict": "rigid"
+    },
+    {
+      "arm": "head",
+      "case": "frame-179-limited",
+      "converged": false,
+      "residual": 0.002214837916227638,
+      "terminal_reason": 12,
+      "grid_spacing_cm": [
+        5.312499962747097,
+        10.000000149011612
+      ],
+      "axis_offset_cm": [
+        7.449834021207646,
+        -16.38245244546777
+      ],
+      "raw_stored_axis_offset_cm": [
+        7.450624764631297,
+        -16.37332705749074
+      ],
+      "xpoint_offset_cm": [
+        2.106694499118933,
+        -2.0984557612795163
+      ],
+      "rigid_shift_residual_cm": [
+        -5.3431395220887135,
+        14.283996684188255
+      ],
+      "xpoint_after_translation_cm": [
+        -5.999834047632513,
+        2.200167808352751
+      ],
+      "axis_rz_m": [
+        1.8481500989265254,
+        -0.19465897474120045
+      ],
+      "saddle_rz_m": [
+        1.2314844239711709,
+        -1.2351983428210234
+      ],
+      "reference_axis_rz_m": [
+        1.773651758714449,
+        -0.030834450286522725
+      ],
+      "reference_saddle_rz_m": [
+        1.2104174789799815,
+        -1.2142137852082282
+      ],
+      "fit": {
+        "translation_m": [
+          -0.08106528546751446,
+          0.04298623569632267
+        ],
+        "gauge_wb": 0.19281051218208103,
+        "gauge_before_wb": 0.16530097079543038,
+        "rms_before_wb": 0.2775847873406783,
+        "rms_after_wb": 0.15330344501104753,
+        "squared_mismatch_removed": 0.694991104437791,
+        "node_count": 316,
+        "bounds_m": [
+          [
+            -0.26562499813735485,
+            -0.6000000089406967
+          ],
+          [
+            0.3718749973922968,
+            0.7000000104308128
+          ]
+        ],
+        "bound_active": false,
+        "optimality": 3.388442533283714e-06
+      },
+      "current": {
+        "total_current_a": 1256304.8855006597,
+        "centroid_rz_m": [
+          1.8132146586187505,
+          -0.06653382638491181
+        ],
+        "force_rz_n": [
+          -117589.84346691752,
+          -35919.49850348734
+        ],
+        "nodes": 225,
+        "negative_current_fraction": 0.00047188600888008273
+      },
+      "reference_current": {
+        "total_current_a": 1256316.4023451973,
+        "centroid_rz_m": [
+          1.717210711123209,
+          -0.017170691886848624
+        ],
+        "force_rz_n": [
+          -131368.76772601856,
+          8296.031136293022
+        ],
+        "nodes": 316,
+        "negative_current_fraction": -0.0
+      },
+      "boundary_level_fraction": 0.999,
+      "boundary_gap_cm": {
+        "inboard": 11.590576725872936,
+        "outboard": 6.298511570641541,
+        "top": -44.173990777996984,
+        "xpoint": 2.9734959718595833
+      },
+      "saddle_gradient_error_wb_per_m": [
+        0.0824125457120226,
+        -0.008677249273628906
+      ],
+      "reference_saddle_hessian_wb_per_m2": [
+        [
+          -1.8611431319946263,
+          2.1178767744929976
+        ],
+        [
+          2.1178767744929976,
+          1.8650819063822721
+        ]
+      ],
+      "linear_saddle_prediction_cm": [
+        2.16278041418395,
+        -1.9906779790531421
+      ],
+      "inner_rms_error_wb": 0.27758478734067826,
+      "near_saddle_rms_error_wb": null,
+      "verdict": "local"
+    },
+    {
+      "arm": "head",
+      "case": "mast-21978-35",
+      "converged": false,
+      "residual": 0.002161879174815926,
+      "terminal_reason": 12,
+      "grid_spacing_cm": [
+        6.062500004190952,
+        12.5
+      ],
+      "axis_offset_cm": [
+        -0.02405957890981858,
+        -0.3610677536202185
+      ],
+      "raw_stored_axis_offset_cm": [
+        -0.02402205397652457,
+        -0.3607939547283898
+      ],
+      "xpoint_offset_cm": [
+        0.039324090878123386,
+        -0.38774068490832203
+      ],
+      "rigid_shift_residual_cm": [
+        0.06338366978794197,
+        -0.02667293128810356
+      ],
+      "xpoint_after_translation_cm": [
+        0.07213122740766141,
+        -0.0021288650603433056
+      ],
+      "axis_rz_m": [
+        0.9042716484139393,
+        -0.0031895460820588247
+      ],
+      "saddle_rz_m": [
+        0.5697222842162398,
+        -1.2414995686959207
+      ],
+      "reference_axis_rz_m": [
+        0.9045122442030374,
+        0.00042113145414336006
+      ],
+      "reference_saddle_rz_m": [
+        0.5693290433074586,
+        -1.2376221618468375
+      ],
+      "fit": {
+        "translation_m": [
+          0.0003280713652953802,
+          0.0038561181984797873
+        ],
+        "gauge_wb": -0.0007362023987654607,
+        "gauge_before_wb": -0.0007367599628476826,
+        "rms_before_wb": 0.0014880686918407045,
+        "rms_after_wb": 0.00038500543961238496,
+        "squared_mismatch_removed": 0.9330596818398731,
+        "node_count": 248,
+        "bounds_m": [
+          [
+            -0.6062500004190952,
+            -0.875
+          ],
+          [
+            0.24250000016763806,
+            0.875
+          ]
+        ],
+        "bound_active": false,
+        "optimality": 2.6119708939865106e-11
+      },
+      "current": {
+        "total_current_a": 793340.2027807347,
+        "centroid_rz_m": [
+          0.7697202840324958,
+          -0.006169586020786844
+        ],
+        "force_rz_n": [
+          50147.14255780418,
+          -1203.7521500130833
+        ],
+        "nodes": 247,
+        "negative_current_fraction": -0.0
+      },
+      "reference_current": {
+        "total_current_a": 796715.8953699282,
+        "centroid_rz_m": [
+          0.7703572025084272,
+          -0.002115553171372831
+        ],
+        "force_rz_n": [
+          49533.98108438426,
+          -1243.3977366410109
+        ],
+        "nodes": 248,
+        "negative_current_fraction": -0.0
+      },
+      "boundary_level_fraction": 0.999,
+      "boundary_gap_cm": {
+        "inboard": 0.06349670840151422,
+        "outboard": -0.11269709498369362,
+        "top": -1.2932007795244616,
+        "xpoint": 0.38972967920927654
+      },
+      "saddle_gradient_error_wb_per_m": [
+        0.0020855681854587086,
+        0.0037114344968307037
+      ],
+      "reference_saddle_hessian_wb_per_m2": [
+        [
+          -0.9715919929334305,
+          0.4300074100795509
+        ],
+        [
+          0.4300074100795509,
+          1.0089325780862466
+        ]
+      ],
+      "linear_saddle_prediction_cm": [
+        0.043620262749509094,
+        -0.38644850445263984
+      ],
+      "inner_rms_error_wb": 0.0014786269775449432,
+      "near_saddle_rms_error_wb": 0.0017477612019440839,
+      "verdict": "rigid"
+    }
+  ],
+  "forward_solves": 0,
+  "method": {
+    "flux": "Nova total poloidal flux [Wb]; constant gauge removed, amplitude fixed",
+    "translation": "applied solved field displacement; solved(R-dR,Z-dZ)",
+    "current": "Ampere density from the public centred conservation stencil, on saved solved CORE or labelled EFIT polygon; not the native clipped source moments",
+    "force": "integral j_phi cross B_p from each map, toroidal volume 2*pi*R*dA; radial scalar hoop loading; not pressure-subtracted total force balance",
+    "boundary": "inboard/outboard cuts at EFIT stored axis height, top of 99.9% solved boundary-flux contour against labelled LCFS; X-point Euclidean gap from lower nulls",
+    "rule": "rigid iff >=50% squared mismatch removed, landmark-difference <=50% larger offset, and corrected X error <=50% initial; local otherwise (non-rigid, not necessarily separatrix-confined)",
+    "resolution": "33x33 saved fields; subgrid cubic null read; no refinement or forward solve",
+    "source_sha256": "1bd05e49a6b43010b7230c4c07a2666bdeccc6098ba29cc69204066f2c9cb159",
+    "inputs_manifest": "scripts/prototypes/diiid_xpoint_offset/inputs.json"
+  }
+}

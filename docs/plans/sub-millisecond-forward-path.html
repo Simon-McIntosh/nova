@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="290">
+<meta name="plan-version" content="291">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -281,6 +281,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261111T144447685918-review-of-read-tie-break-3d58ba4688d8" data-who="reckon-build" data-when="2026-11-11T14:59:14.485Z">
     <div class="r-comment-body"><p>Reviewed r-20261111T131359627137-read-tie-break at base b48deaa93f55ad2c759c5977ed611b9047e393fb and head 3d58ba4688d8774aa7f4f810f1216bb670dddb2e: scores goal_fidelity 19, evidence 18, scope_discipline 17, durability 18, fit 19, reuse 18, with three non-blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261111T131359627137-read-tie-break" data-who="reckon-build" data-when="2026-11-11T15:48:01Z">
+    <div class="r-comment-body"><p>read-tie-break restores first-position fallback for all-NaN scores in the one shared exact/tolerant owner and retains the explicit X-point mask; one parameterized test drives mode, both wall rankings and contact selection, and a helper-only -1 mutant fails all four cases. Seven-CPU sirius job 1310648 reports paired tracked-read 15/15 passed and support-read 13/13 passed with two unchanged skips, current and delivered tie files 16 passed versus reviewed head 12, zero added failures. The corrected fragment table cites delivered job 1310600 with 12 tie cases and job 1310648 with 16; evidence is docs/evidence/fragments/sub-millisecond-forward-path/read-tie-break.html#read-tie-break-nan-policy</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261029T064352171540-review-of-bank-newton-step-425d44581fee" data-who="reckon-build" data-when="2026-10-29T06:56:01Z">
     <div class="r-comment-body"><p>Parsed independent review of c8e424a78957b379be997296e09e374ee6ba6a10..425d44581fee3c17f335358fed320009e7f845e8 stored under the reviewed run's review-records, with 3 blocking and 2 non-blocking findings.</p></div>

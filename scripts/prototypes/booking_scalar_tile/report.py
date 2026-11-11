@@ -3,6 +3,7 @@
 import argparse
 from html import escape
 import json
+from math import ceil
 from pathlib import Path
 import re
 import statistics
@@ -94,7 +95,18 @@ def main():
                 )
         ax.set_yticks([2, 1, 0], names if width == 1 else [])
         ax.set_xlabel(f"CPU batch wall [s], width {width}")
-        ax.set_xlim(left=0)
+        step = 0.2 if width == 1 else 2.0
+        limit = step * ceil(
+            max(
+                mean(a, width, k) / 1000
+                for a in ("base", "head")
+                for k in ("booking", "carried", "full")
+            )
+            * 1.05
+            / step
+        )
+        ax.set_xlim(0, limit)
+        ax.set_xticks([step * i for i in range(round(limit / step) + 1)])
         ax.set_ylim(-0.45, 2.45)
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(False)
@@ -134,8 +146,7 @@ def main():
     assert negative.rstrip().endswith("EXIT=1")
     assert (
         "FAILED tests/test_booking_scalar_tile.py::"
-        "test_all_booked_moments_match_independent_population"
-        in negative
+        "test_all_booked_moments_match_independent_population" in negative
     )
     negative_summary = [
         line for line in negative.splitlines() if re.search(r"\d+ failed", line)

@@ -159,10 +159,10 @@ def shell_observation(mu, cell_size, capsys):
             1000,
             marks=pytest.mark.xfail(
                 strict=True,
+                raises=AssertionError,
                 reason=(
-                    "Non-monotone shell refinement: errors 2.62/6.79/1.24% at "
-                    "228 cells and 3.16/3.25/2.37% at 828 cells; orders "
-                    "-0.27/+1.06/-0.94. A separate investigation owns it."
+                    "At mu_r=1000, 20 -> 10 mm errors fall at orders 1.3 to 1.5; "
+                    "40 -> 20 mm refinement is pre-asymptotic."
                 ),
             ),
         ),

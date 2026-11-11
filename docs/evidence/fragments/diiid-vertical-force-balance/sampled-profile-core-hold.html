@@ -1,0 +1,39 @@
+<section id="sampled-profile-core-hold">
+<h2>Sampled profiles hold their first value through the core</h2>
+<p><strong>The product rule is a constant hold below every first knot, including negative normalized flux on a zero-start grid.</strong> Flux beyond the normalizing axis value still belongs to the core; its prescribed current must not taper to zero. Bit identity means identity for <code>psi_norm &gt;= grid[0]</code>, including the exterior above <code>grid[-1]</code>. No linear continuation or sign extrapolation is used.</p>
+<p>The original defect reproduced before repair: a sampled table beginning at 0.05 with first value 7 returned 0 at the axis and 2.43712 at normalized flux 0.02. The constant hold returns 7 at both points, for either profile sign. The upper quintic cap retains its arithmetic, and all seven pytree leaves remain arrays. Changed member values use one JIT trace; stacked evaluations and state derivatives remain bit-identical to their unbatched references.</p>
+<p>The placement of the final selection matters numerically. Selecting the lower hold inside the exterior expression changed nine upper-cap values under <code>vmap</code>; selecting it after the complete interpolant changes only the intended lower domain and retains exact upper-cap and batching identity. The controlled arithmetic probe reports zero upper and interior differences for this form.</p>
+
+<h3>Tests and expectation changes</h3>
+<table>
+<thead><tr><th>immutable revision</th><th>scoped result</th><th>meaning</th></tr></thead>
+<tbody>
+<tr><td><code>71d06e032b73106c56386ae3a64fa30605571102</code></td><td>2 passed, 1 skipped</td><td>Original batching file; the added core-hold file does not exist at this revision.</td></tr>
+<tr><td><code>021c427de1ec5006afcfc609b50f0c9f3f46e82a</code></td><td>1 failed, 6 passed, 1 skipped</td><td>The explicitly requested original head still carries the decaying reference expectation.</td></tr>
+<tr><td><code>fad3d4b741328835d07dd0da8e2108821226f610</code></td><td>9 passed, 1 skipped</td><td>Corrected product selection and held-core expectations.</td></tr>
+</tbody>
+</table>
+<p>In <code>tests/test_sampled_flux_batching.py</code>, the value and JVP assertions in <code>test_vmap_preserves_unbatched_sampled_values_and_state_derivatives</code> now use a reference with the same constant lower hold. Their exact equality requirements are unchanged. The MAST solve-point comparison applies its zero-start reference at the first sample whenever a recorded coordinate is negative. The independent historical edge-arithmetic control retains its decaying cap and its nine-difference assertion. The skipped case requires an externally selected MAST audit cache and output; the paired cohort below measures the actual MAST solve separately.</p>
+<p>The restored-cap negative control replaces the final held-core selection with the capped interpolant in a scratch copy of the corrected committed product. It reports five failing IDs: the batching value/JVP case, both signed axis-hold cases, the zero-start negative-flux case and the dynamic-member case. The unmodified corrected gate fails none. Logs and literal commands are in <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-regressions/</code>.</p>
+
+<h3>Construction and profile-path census</h3>
+<p>The source census covered <code>nova/</code>, <code>benchmarks/</code>, <code>scripts/</code>, <code>apps/</code> and <code>tests/</code>. The known production constructor at <code>benchmarks/diiid_forward_gs_match.py:1345</code> is its positive control. This is a source-path inventory; it does not claim a corpus-wide scan of every runtime table.</p>
+<table>
+<thead><tr><th>constructor or forwarding path</th><th>coordinate source</th><th>changed evaluations</th></tr></thead>
+<tbody>
+<tr><td><code>benchmarks/diiid_forward_gs_match.py</code>, <code>_build_profile</code></td><td><code>_label_state</code> consumes reliable <code>extract_flux_functions</code> shells; the default grid begins at 0.05 and reliability filtering can raise its first knot.</td><td>Both p′ and FF′ change below the first reliable shell, including the physical core. Every consumer of this builder inherits the rule.</td></tr>
+<tr><td><code>benchmarks/strict_exit_incidence.py</code>, <code>_mast_source_with_sampled_profiles</code></td><td>Stored MAST <code>efm/psi_norm</code>; explicitly requires the uniform 65-point 0–1 grid.</td><td>Only negative coordinates change; the first sample and all larger coordinates retain their values.</td></tr>
+<tr><td><code>scripts/media/mast_pulse_forward.py</code>, <code>_source</code></td><td>Stored <code>efm/psi_norm</code>, <code>pprime</code> and <code>ffprime</code>.</td><td>Zero-start tables change below zero. A positive-start table would change below that first knot; this census does not scan every pulse.</td></tr>
+<tr><td><code>benchmarks/mast_centroid_solve_panels.py</code>, <code>_sampled_factory</code></td><td>Stored MAST tables feed <code>_varied_source</code>; the factory is also supplied to both carrier-building routes.</td><td>Zero-start tables change below zero. The generic factory itself also accepts positive-start grids.</td></tr>
+<tr><td><code>tests/test_forward_profile_corsica.py</code></td><td><code>(psi - psi[0]) / (psi[-1] - psi[0])</code>, starting exactly at zero.</td><td>Only negative evaluations change.</td></tr>
+<tr><td><code>tests/test_batched_operator_boundary.py</code></td><td>Synthetic <code>linspace(0, 1, 65)</code>, plus a rebuild copying the DIII-D source tables.</td><td>Synthetic tables change below zero; rebuilt DIII-D profiles change below their positive first knot.</td></tr>
+<tr><td><code>tests/test_sampled_flux_batching.py</code></td><td>Synthetic zero-start grid; the environment-gated MAST audit forwards through strict-exit incidence.</td><td>The synthetic case explicitly evaluates negative coordinates and therefore requires the changed reference expectation.</td></tr>
+<tr><td><code>tests/test_sampled_profile_core_hold.py</code></td><td>Explicit zero- and positive-start fixtures.</td><td>Pins both lower domains, upper identity, dynamic values and stacking.</td></tr>
+<tr><td><code>scripts/prototypes/diiid_core_hold/measure.py</code></td><td>Forwards the MAST reference builder with <code>SampledFluxFunction</code> as its factory on both arms, rather than leaving that row on an unrelated closure representation.</td><td>Only the product's continuation differs between arms; exact input tables are persisted per row.</td></tr>
+</tbody>
+</table>
+<p>No constructor occurs in <code>nova/</code> outside the class definition or in <code>apps/</code>. The coefficient-recompile audit describes the representation without constructing it; the strict-exit test inspects its type. The detailed source bindings and limits are also retained in the run's <code>census.md</code>.</p>
+
+<h3>Paired solver measurement in progress</h3>
+<p>The H200 was submitted for real as job 1310822 and remained pending on <code>Resources</code> after the admission interval; it was cancelled before allocation. The authorized fallback is one titan job, 1310833, holding all five base/head rows and the forward-solve regressions. The CPU regression arms run independently in all_debug job 1310823 with eight CPUs, 64 GB, a fresh pytest process per file and <code>PYTEST_TIMEOUT=3600</code>. These jobs have not yet supplied a completed cohort verdict. No H200 timing is inferred from titan.</p>
+</section>

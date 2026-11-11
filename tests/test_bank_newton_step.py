@@ -878,3 +878,47 @@ def test_local_booking_reuses_constant_field_boundary_velocity(monkeypatch):
     print("LOCAL_CHANNEL_PARITY", relative, "BOUNDARY_CHANNELS", channels_seen)
     assert relative <= 1e-12
     assert channels_seen and all(number == 6 for number in channels_seen)
+
+
+@pytest.mark.parametrize(
+    "requested_width, expected_width",
+    [(None, 128), (16, 16), (64, 64)],
+    ids=["default", "narrow-explicit", "wide-explicit"],
+)
+def test_local_booking_uses_wide_default_cell_tile(
+    monkeypatch, requested_width, expected_width
+):
+    """The default tangent tile stays wide while explicit memory bounds survive."""
+    assert jax.config.jax_enable_x64
+    operands = SimpleNamespace(
+        sample_index=jnp.arange(6).reshape(1, 6), geometry=object()
+    )
+    monkeypatch.setattr(
+        support_read, "nodal_jets", lambda *_: jnp.zeros((6, 6), dtype=jnp.float64)
+    )
+    observed_widths = []
+
+    def capture(*arguments):
+        observed_widths.append(arguments[9].cut_batch_width)
+        return jnp.zeros((1, 3, 14), dtype=jnp.float64)
+
+    monkeypatch.setattr(current, "book_tangent_channels", capture)
+    rule = (
+        current.Quadrature()
+        if requested_width is None
+        else current.Quadrature(cut_batch_width=requested_width)
+    )
+    support_read._local_booking_sensitivities(
+        operands, None, SimpleNamespace(reading=object()), None, None, rule, None
+    )
+    assert observed_widths == [expected_width]
+
+
+def test_booking_matrix_parity_guard_refuses_perturbed_matrix():
+    """The timing run must reject an altered matrix through its real comparison."""
+    from scripts.prototypes.bank_booking_cost.measure import compare_matrices
+
+    reference = np.arange(1.0, 10.0, dtype=np.float64).reshape(3, 3)
+    assert compare_matrices(reference, reference, 1) == 0.0
+    with pytest.raises(AssertionError):
+        compare_matrices(1.001 * reference, reference, 1)

@@ -10,6 +10,18 @@ import time
 from unittest.mock import patch
 
 
+def compare_matrices(actual, expected, lanes):
+    """Apply the base/head matrix parity guard used by the timing run."""
+    import numpy as np
+
+    relative = float(
+        np.linalg.norm(np.asarray(actual) - expected) / np.linalg.norm(expected)
+    )
+    print("PARITY", lanes, relative, flush=True)
+    assert relative <= 1e-12, (lanes, relative)
+    return relative
+
+
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("root", type=Path)
@@ -93,11 +105,7 @@ def main():
         if args.reference:
             with np.load(args.reference) as archive:
                 expected = archive[f"matrix_{lanes}"]
-            relative = float(
-                np.linalg.norm(np.asarray(matrix) - expected) / np.linalg.norm(expected)
-            )
-            print("PARITY", lanes, relative, flush=True)
-            assert relative <= 1e-12
+            relative = compare_matrices(matrix, expected, lanes)
             output[f"parity_{lanes}"] = relative
         measure(f"{lanes}:local", mapped(local), bank, states, support, booked)
         if lanes == 16 and not args.focus:

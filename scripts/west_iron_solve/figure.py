@@ -71,6 +71,7 @@ def save_figure(fig, output, preview):
         svg,
         count=1,
     )
+    svg = "\n".join(line.rstrip() for line in svg.splitlines()) + "\n"
     output.write_text(svg)
     return labels
 

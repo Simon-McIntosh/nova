@@ -316,6 +316,54 @@ def test_certificate_replaces_carried_read_with_full_fresh_read(diverted_case):
     _assert_continuous_equal(certified.reading, fresh.reading)
 
 
+def test_a_certificate_request_executes_the_whole_mesh_read(diverted_case, monkeypatch):
+    """A certificate request must reach the full topology read, not the carry.
+
+    At an unchanged state the carried decision and a fresh one agree on every
+    continuous quantity, so equal geometry beside a raised rebuilt flag cannot
+    show that the certificate executed the whole-mesh read: a carried result
+    relabelled as rebuilt would pass that comparison. The full read itself is
+    observed here, and it must run for a certificate and never for a carry.
+    """
+    operands, cache, roots, convention, policy, moments, _, first, _ = diverted_case
+    states = jax.tree.map(lambda value: value[None], moments)
+    tracking = jax.tree.map(lambda value: value[None], support_read.tracking_of(first))
+    whole_mesh_reads = []
+    origin = topology.read_at_stationary_points
+
+    def observed(*args, **kwargs):
+        jax.debug.callback(lambda _: whole_mesh_reads.append(1), jnp.asarray(0))
+        return origin(*args, **kwargs)
+
+    monkeypatch.setattr(topology, "read_at_stationary_points", observed)
+    run = jax.jit(
+        lambda tracked, certify: support_read.read_batch(
+            operands,
+            cache,
+            states,
+            roots[None],
+            roots[None],
+            convention,
+            policy,
+            tracking=tracked,
+            certificate=lambda _: certify,
+        )
+    )
+    carried = run(tracking, jnp.asarray(False))
+    jax.block_until_ready(carried)
+    jax.effects_barrier()
+    assert not bool(carried.rebuilt[0])
+    assert not whole_mesh_reads, "the carry executed the whole-mesh read"
+
+    certified = run(tracking, jnp.asarray(True))
+    jax.block_until_ready(certified)
+    jax.effects_barrier()
+    assert bool(certified.rebuilt[0])
+    assert int(certified.rebuilds[0]) == int(first.rebuilds) + 1
+    print("WHOLE_MESH_READS", len(whole_mesh_reads), flush=True)
+    assert whole_mesh_reads, "a certificate request answered without a full read"
+
+
 @pytest.mark.parametrize("certificate_valid", [True, False])
 def test_solve_requires_full_certificate_after_carried_candidate(
     monkeypatch, certificate_valid
@@ -404,6 +452,37 @@ def test_in_cell_motion_that_changes_normal_cells_requires_full_read(diverted_ca
     fresh = run(None)
     assert bool(result.rebuilt[0])
     _assert_continuous_equal(result.reading, fresh.reading)
+
+
+def test_a_wall_contact_winner_change_rebuilds_at_a_limited_boundary():
+    """A limited boundary must rebuild when another wall event wins the contact.
+
+    Every real-geometry case above is diverted, so the list of wall events and
+    the winner among them are never exercised. Here the field moves slightly
+    with the tracked cell, the fragment links and the cut-cell classes all
+    unchanged, so the wall-contact winner is the only support decision that
+    differs from the carried one.
+    """
+    operands, cache, roots, convention, policy, moments, _analytic = _case("limited")
+    first, _pitch = _read(operands, cache, roots, convention, policy, moments)
+    assert bool(first.rebuilt) and bool(first.valid)
+    moved, moved_cache = _shifted(operands, cache, 0.005 * jnp.asarray((-1.0, 0.0)))
+    tracking = support_read.tracking_of(first)
+    result, _ = _read(*moved, roots, convention, policy, moments, tracking=tracking)
+    assert bool(result.valid)
+    assert bool(result.rebuilt)
+    assert int(result.rebuilds) == int(first.rebuilds) + 1
+    # The rebuild answers the contact change; it is not a read that churns.
+    steady, _ = _read(
+        *moved,
+        roots,
+        convention,
+        policy,
+        moments,
+        tracking=support_read.tracking_of(result),
+    )
+    assert not bool(steady.rebuilt)
+    assert int(steady.rebuilds) == int(result.rebuilds)
 
 
 def test_changed_fragment_incidence_refuses_carried_labels(diverted_case):

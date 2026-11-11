@@ -1,0 +1,1560 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "lane-change",
+  "backend": "codex",
+  "base_sha": "b905696e2b6dcecbea8262b99357380dcef48afc",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054735827333-tracked-read-tests/brief.txt",
+    "sha256": "e829761da6234664c7f7d5a9b117cb372501cbe8150db0c31951d10083be62a5"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 12443648,
+      "cached_input_tokens_cumulative": 12443648,
+      "input_tokens": 12592807,
+      "input_tokens_cumulative": 12592807,
+      "output_tokens": 38063,
+      "output_tokens_cumulative": 38063,
+      "reasoning_output_tokens": 16314,
+      "reasoning_output_tokens_cumulative": 16314
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 76,
+    "files": 1,
+    "removed": 60
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_case",
+        "path": "tests/test_support_read.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "_case",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 28
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "test_a_field_change_that_keeps_the_x_point_in_its_cell_triggers_no_rebuild",
+        "path": "tests/test_tracked_read.py"
+      },
+      "run_function": {
+        "line": 85,
+        "name": "test_the_first_read_rebuilds_and_the_steady_state_does_not",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 97
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_a_field_change_that_moves_the_x_point_out_of_its_cell_rebuilds_once",
+        "path": "tests/test_tracked_read.py"
+      },
+      "run_function": {
+        "line": 85,
+        "name": "test_the_first_read_rebuilds_and_the_steady_state_does_not",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 97
+    },
+    {
+      "existing_function": {
+        "line": 85,
+        "name": "test_the_first_read_rebuilds_and_the_steady_state_does_not",
+        "path": "tests/test_tracked_read.py"
+      },
+      "run_function": {
+        "line": 109,
+        "name": "test_a_field_change_that_keeps_the_x_point_in_its_cell_triggers_no_rebuild",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 121
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_a_field_change_that_moves_the_x_point_out_of_its_cell_rebuilds_once",
+        "path": "tests/test_tracked_read.py"
+      },
+      "run_function": {
+        "line": 109,
+        "name": "test_a_field_change_that_keeps_the_x_point_in_its_cell_triggers_no_rebuild",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 110
+    },
+    {
+      "existing_function": {
+        "line": 85,
+        "name": "test_the_first_read_rebuilds_and_the_steady_state_does_not",
+        "path": "tests/test_tracked_read.py"
+      },
+      "run_function": {
+        "line": 163,
+        "name": "test_a_field_change_that_moves_the_x_point_out_of_its_cell_rebuilds_once",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 175
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "test_a_field_change_that_keeps_the_x_point_in_its_cell_triggers_no_rebuild",
+        "path": "tests/test_tracked_read.py"
+      },
+      "run_function": {
+        "line": 163,
+        "name": "test_a_field_change_that_moves_the_x_point_out_of_its_cell_rebuilds_once",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 164
+    },
+    {
+      "existing_function": {
+        "line": 321,
+        "name": "test_a_certificate_request_executes_the_whole_mesh_read",
+        "path": "tests/test_tracked_read.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_certificate_replaces_carried_read_with_full_fresh_read",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 300
+    },
+    {
+      "existing_function": {
+        "line": 423,
+        "name": "test_in_cell_motion_that_changes_normal_cells_requires_full_read",
+        "path": "tests/test_tracked_read.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_certificate_replaces_carried_read_with_full_fresh_read",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 304
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_certificate_replaces_carried_read_with_full_fresh_read",
+        "path": "tests/test_tracked_read.py"
+      },
+      "run_function": {
+        "line": 321,
+        "name": "test_a_certificate_request_executes_the_whole_mesh_read",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 341
+    },
+    {
+      "existing_function": {
+        "line": 423,
+        "name": "test_in_cell_motion_that_changes_normal_cells_requires_full_read",
+        "path": "tests/test_tracked_read.py"
+      },
+      "run_function": {
+        "line": 321,
+        "name": "test_a_certificate_request_executes_the_whole_mesh_read",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 345
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_cycle_lane_is_accepted_within_two_steps",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "run_function": {
+        "line": 370,
+        "name": "test_solve_requires_full_certificate_after_carried_candidate",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 397
+    },
+    {
+      "existing_function": {
+        "line": 177,
+        "name": "test_unchanged_decision_unlocks_when_residual_stalls",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "run_function": {
+        "line": 370,
+        "name": "test_solve_requires_full_certificate_after_carried_candidate",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 397
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_frozen_set_keeps_fresh_continuous_area",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 370,
+        "name": "test_solve_requires_full_certificate_after_carried_candidate",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 404
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_fragment_switch_forces_fresh_extra_step",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 370,
+        "name": "test_solve_requires_full_certificate_after_carried_candidate",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 404
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_batch_reuses_factor_without_rebuilding_jacobians",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 370,
+        "name": "test_solve_requires_full_certificate_after_carried_candidate",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 404
+    },
+    {
+      "existing_function": {
+        "line": 293,
+        "name": "test_step_cap_reports_nonconvergence",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 370,
+        "name": "test_solve_requires_full_certificate_after_carried_candidate",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 404
+    },
+    {
+      "existing_function": {
+        "line": 327,
+        "name": "test_reads_include_companion_lanes_after_two_halvings",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 370,
+        "name": "test_solve_requires_full_certificate_after_carried_candidate",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 397
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_certificate_replaces_carried_read_with_full_fresh_read",
+        "path": "tests/test_tracked_read.py"
+      },
+      "run_function": {
+        "line": 423,
+        "name": "test_in_cell_motion_that_changes_normal_cells_requires_full_read",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 445
+    },
+    {
+      "existing_function": {
+        "line": 321,
+        "name": "test_a_certificate_request_executes_the_whole_mesh_read",
+        "path": "tests/test_tracked_read.py"
+      },
+      "run_function": {
+        "line": 423,
+        "name": "test_in_cell_motion_that_changes_normal_cells_requires_full_read",
+        "path": "tests/test_tracked_read.py"
+      },
+      "window_line": 445
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "058ddf8ddd78ccededbd1e3ca0066a81ca70032d"
+  ],
+  "completed_at": "2026-11-11T09:32:35Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-11T05:52:47Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_tracked_read.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054735827333-tracked-read-tests/final-head.log"
+  },
+  "impl_move": {
+    "at_complete": 0.25773195876288657,
+    "at_dispatch": 0.25773195876288657,
+    "plan": "sub-millisecond-forward-path",
+    "reason": "tests-only node closing two review findings on the landed carried-decision read; it adds coverage to an already-landed section and moves no section of the plan",
+    "verdict": "waived"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-11T06:33:04.662432+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-11T05:48:04Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 16,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 10,
+    "mean_context": 120000,
+    "observed_at": "2026-11-11T05:47:49Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 16,
+      "aggregate_tokens_per_second": 40.263,
+      "detail": "",
+      "mean_tokens_per_second": 50.329,
+      "observed_at": "2026-11-11T05:47:49Z",
+      "runs": 0.8,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-11T09:32:35Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-11T09:32:35Z",
+        "resets_at": 1794670093,
+        "used_percent": 78.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-11-11T08:50:29Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "lead 2026-11-07: difficult work to codex sol; the remaining defect is an order-dependent knife-edge decision that may be hidden process state in the product read",
+        "session": "fresh",
+        "session_id": "cc05626c-738f-4839-b8c2-d2d05fc8f8bb",
+        "session_source": "stream",
+        "to_backend": "codex",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261111T054735827333-tracked-read-tests"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054735827333-tracked-read-tests/manifest.md",
+  "member": "disposable-r-20261111T054735827333-tracked-read-tests",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_tracked_read.py::test_a_certificate_request_executes_the_whole_mesh_read"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_tracked_read.py::test_a_certificate_request_executes_the_whole_mesh_read"
+    ],
+    "control_run_failed": true,
+    "declaration": "answer a certificate request from the carried result marked rebuilt, and separately drop wall_stable from validity; the matching test must fail in each",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054735827333-tracked-read-tests/final-certificate-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054735827333-tracked-read-tests/final-certificate-control.log",
+    "test_paths": [
+      "tests/test_tracked_read.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "tracked-read-tests",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/nov11/tracked-read-tests.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054735827333-tracked-read-tests/brief.txt",
+    "brief_sha256": "e829761da6234664c7f7d5a9b117cb372501cbe8150db0c31951d10083be62a5",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 286,
+          "cached_input_tokens": 216146,
+          "input_tokens": 216434,
+          "output_tokens": 43,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 216477,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "a certificate-executes-full-read test and a limited wall-contact rebuild test are in tests/test_tracked_read.py and pass at the head; both negative-control logs show the matching test failing; paired base and head runs of tests/test_tracked_read.py in one all_debug job show no added failures and a short fragment records the tests and controls",
+    "estimated_hours": null,
+    "goal": "Close the two test gaps the carried-decision review found in the tracked read",
+    "id": "tracked-read-tests",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-11T05:48:04Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 16,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 10,
+      "mean_context": 120000,
+      "observed_at": "2026-11-11T05:47:49Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 16,
+        "aggregate_tokens_per_second": 40.263,
+        "detail": "",
+        "mean_tokens_per_second": 50.329,
+        "observed_at": "2026-11-11T05:47:49Z",
+        "runs": 0.8,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054735827333-tracked-read-tests/manifest.md",
+    "negative_control": "answer a certificate request from the carried result marked rebuilt, and separately drop wall_stable from validity; the matching test must fail in each",
+    "over_fence_reason": "",
+    "peer_scopes": {
+      "bank-booking-cost": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-cost.html",
+        "docs/figures/sub-millisecond-forward-path/bank-booking-cost",
+        "scripts/prototypes/bank_booking_cost",
+        "tests/test_bank_newton_step.py"
+      ],
+      "bank-factor-carry": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-factor-carry.html",
+        "docs/figures/sub-millisecond-forward-path/bank-factor-carry",
+        "nova/equilibrium/drive_continuation.py",
+        "nova/equilibrium/support_read.py",
+        "scripts/prototypes/bank_factor_carry",
+        "tests/test_bank_drive_continuation.py",
+        "tests/test_bank_solve_driver.py"
+      ],
+      "bank-lane-drive": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-lane-drive.html",
+        "docs/figures/sub-millisecond-forward-path/bank-lane-drive",
+        "scripts/prototypes/bank_lane_drive",
+        "tests/test_bank_lane_drive.py"
+      ],
+      "diiid-diverted-branch-continuation": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-diverted-branch-continuation.html",
+        "docs/figures/diiid-diverted-branch-continuation",
+        "nova/equilibrium/constraint.py",
+        "nova/equilibrium/fixed_point.py",
+        "scripts/prototypes/diiid_diverted_branch",
+        "scripts/prototypes/diiid_forward_convergence/measure_branches.py",
+        "scripts/prototypes/diiid_material_mask/measure.py",
+        "scripts/prototypes/diiid_residual_plateau/measure.py",
+        "scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py",
+        "scripts/prototypes/diiid_support_mask/trace_support.py",
+        "tests/test_diverted_branch_continuation.py"
+      ],
+      "icm-high-permeability-shell": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-high-permeability-shell.html",
+        "docs/figures/iron-core-magnetisation/icm-high-permeability-shell",
+        "scripts/magnetisation_high_permeability",
+        "tests/test_magnetisation.py"
+      ]
+    },
+    "plan": "sub-millisecond-forward-path",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "tests/test_tracked_read.py",
+      "docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-tests.html",
+      "docs/figures/sub-millisecond-forward-path/tracked-read-tests"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1490937.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "tracked-read-tests",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-11T05:50:54.155948+00:00",
+    "score": 0.56875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "closes review findings 0 and 1 on bank-carried-decision; tests only",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.643,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1411.489,
+      "context-estimate": 108.417,
+      "records": 1769.755,
+      "verdict-inputs": 944.323
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25773195876288657,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "058ddf8ddd78ccededbd1e3ca0066a81ca70032d",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "b905696e2b6dcecbea8262b99357380dcef48afc",
+    "reviewed_head_sha": "058ddf8ddd78ccededbd1e3ca0066a81ca70032d",
+    "scores": {
+      "durability": 18,
+      "evidence": 19,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 115
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261111T054735827333-tracked-read-tests",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a1c9cd-d378-7740-bf12-7110c2135a03",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_tracked_read.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054735827333-tracked-read-tests/final-head.log",
+      "revision": "74fd4b503da3e22230c3c4f6c2a3a0ff83fb849a"
+    },
+    "baseline_measured_nothing": false,
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_tracked_read.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054735827333-tracked-read-tests/final-base.log",
+      "revision": "b905696e2b6dcecbea8262b99357380dcef48afc"
+    },
+    "failure_attribution": {},
+    "status": "clean",
+    "suite_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_tracked_read.py",
+    "waiver_reason": null
+  },
+  "tests_added": 2,
+  "throughput": {
+    "cumulative_cached_input_tokens": 12443648,
+    "cumulative_input_tokens": 25036455,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 54377
+  },
+  "time_budget": "60m",
+  "tool_steps": 88.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "source": "coordinator",
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": 49.54,
+        "budget_overrun_reference_rate": 65.845,
+        "budget_overrun_reference_runs": 268,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 236795,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 240395,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T11:13:44Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T11:01:56Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T105730642218-review-of-bank-fold-radial-714f29cfa289-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 5331,
+          "worker_pid": 2082892
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T11:13:44Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 239678,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none — read-only review",
+          "both deliverables live outside the repository."
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "0520036c56bc2d1593692e6258150880ec0d32aa28abbb911a125e308aafba7f",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T105730642218-review-of-bank-fold-radial-714f29cfa289-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-fold-radial-714f29cfa289-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T105730642218-review-of-bank-fold-radial-714f29cfa289-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 239803,
+        "terminal_at": "2026-11-08T11:11:31Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-fold-radial-714f29cfa289-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": 69.08,
+        "budget_overrun_reference_rate": 65.845,
+        "budget_overrun_reference_runs": 268,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 232096,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 235696,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T12:28:22Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T12:21:00Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T121243879416-review-of-bank-fold-radial-dab5c5352b23-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 4210,
+          "worker_pid": 2839796
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T12:28:22Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 235205,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "72afa9aa091b30f7348492622b418dd52074bc0ceafc520bade6b923aae6618a",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T121243879416-review-of-bank-fold-radial-dab5c5352b23-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-fold-radial-dab5c5352b23-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T121243879416-review-of-bank-fold-radial-dab5c5352b23-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 235227,
+        "terminal_at": "2026-11-08T12:27:56Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-fold-radial-dab5c5352b23-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": 63.06,
+        "budget_overrun_reference_rate": 65.845,
+        "budget_overrun_reference_runs": 268,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 227251,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 230851,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T13:57:58Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T13:41:34Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T133824301046-review-of-bank-fold-arclength-ab60151ed913-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 7434,
+          "worker_pid": 3416370
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T13:57:58Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 229828,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none — read-only review",
+          "no repository writes"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "4871996213aab8544dd4e4748ae3ae00c58de9f5b3441eb6fe7f261e9f773cd5",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T133824301046-review-of-bank-fold-arclength-ab60151ed913-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-fold-arclength-ab60151ed913-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T133824301046-review-of-bank-fold-arclength-ab60151ed913-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 229849,
+        "terminal_at": "2026-11-08T13:57:35Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-fold-arclength-ab60151ed913-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "lane-saturated",
+        "budget_overrun_rate": 19.99,
+        "budget_overrun_reference_rate": 65.845,
+        "budget_overrun_reference_runs": 268,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 223271,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 226871,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T15:13:03Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T14:48:14Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T144136995558-review-of-bank-fold-arclength-e9afe4af1cfd-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 5597,
+          "worker_pid": 3771142
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T15:13:03Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 225324,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none (read-only review; no file in the repository was edited",
+          "created",
+          "moved or deleted)"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "840140242485de679db3570c2a4558b9233bfeb40502b34fd1b6a5fb7ddfbd8a",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T144136995558-review-of-bank-fold-arclength-e9afe4af1cfd-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-fold-arclength-e9afe4af1cfd-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T144136995558-review-of-bank-fold-arclength-e9afe4af1cfd-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 225448,
+        "terminal_at": "2026-11-08T15:10:56Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-fold-arclength-e9afe4af1cfd-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 172265,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 175865,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [
+            1979299,
+            2031123,
+            2031441,
+            2031440,
+            2031452,
+            2031773,
+            1979998,
+            1980130
+          ],
+          "exit_code": 0,
+          "exited_at": "2026-11-09T05:13:29Z",
+          "last_record_type": "user",
+          "launched_at": "2026-11-09T04:58:32Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261109T045329818721-review-of-bank-route-rows-47be40341c62-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 5483,
+          "worker_pid": 1977851
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-09T05:13:29Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 174898,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "d215f85ea7425ec0e69d220160a194a753f272bc26fef390e13b8575e5be2766",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T045329818721-review-of-bank-route-rows-47be40341c62-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-route-rows-47be40341c62-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261109T045329818721-review-of-bank-route-rows-47be40341c62-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 175200,
+        "terminal_at": "2026-11-09T05:08:25Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-route-rows-47be40341c62-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": 36.83,
+        "budget_overrun_reference_rate": 65.845,
+        "budget_overrun_reference_runs": 268,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 169727,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 173327,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-09T05:52:14Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-09T05:40:41Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261109T053635023789-review-of-bank-warm-stall-1661bb3b479a-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 2376,
+          "worker_pid": 2216369
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-09T05:52:14Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 172573,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none — this is a read-only figure review; no repository commit was made."
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "6e8e92618635d94c1c94fc9070fe775f1e13ac9a7a38068cc028c03e2424446b",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T053635023789-review-of-bank-warm-stall-1661bb3b479a-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-warm-stall-1661bb3b479a-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261109T053635023789-review-of-bank-warm-stall-1661bb3b479a-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 172674,
+        "terminal_at": "2026-11-09T05:50:31Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-warm-stall-1661bb3b479a-figure"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 22896,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the review run's worker has ended and attempt 1 filed a review record holding every measurement its rubric demands (/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261109T220212224156-bank-warm-predictor.at-cd674ece07bd43385152a908329c92d38c8cc439.json) at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T222210460050-review-of-bank-warm-predictor-cd674ece07bd/attempt-1-review-filed.json; the run reads delivered whatever its manifest's status word says",
+        "effective_phase": "complete",
+        "elapsed_seconds": 26496,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-10T22:43:03Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-10T22:28:25Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 67985034,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T222210460050-review-of-bank-warm-predictor-cd674ece07bd/codex-home/cache"
+            },
+            {
+              "bytes": 28814443,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T222210460050-review-of-bank-warm-predictor-cd674ece07bd/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261110T222210460050-review-of-bank-warm-predictor-cd674ece07bd",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 203,
+          "worker_pid": 1941990
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-10T22:43:03Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 25529,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "1b5969e1fe62ad5813899bfe24c3819f7ce14749022341c1534caf08f5b002c7",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T222210460050-review-of-bank-warm-predictor-cd674ece07bd/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run; its filed review is at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261109T220212224156-bank-warm-predictor.at-cd674ece07bd43385152a908329c92d38c8cc439.json",
+        "node": "review-of-bank-warm-predictor-cd674ece07bd",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261110T222210460050-review-of-bank-warm-predictor-cd674ece07bd",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 25594,
+        "terminal_at": "2026-11-10T22:41:51Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-warm-predictor-cd674ece07bd"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the review run's worker has ended and attempt 1 filed a review record holding every measurement its rubric demands (/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261109T044945756828-bank-carried-decision.at-771a87a718ad4aafc91b098264cb876a32587c4d.json) at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T050940655884-review-of-bank-carried-decision-771a87a718ad/attempt-1-review-filed.json; the run reads delivered whatever its manifest's status word says",
+        "effective_phase": "complete",
+        "elapsed_seconds": 2061,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-11T05:22:59Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-11T05:14:59Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 68378844,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T050940655884-review-of-bank-carried-decision-771a87a718ad/codex-home/cache"
+            },
+            {
+              "bytes": 28814443,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T050940655884-review-of-bank-carried-decision-771a87a718ad/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261111T050940655884-review-of-bank-carried-decision-771a87a718ad",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 135,
+          "worker_pid": 4111296
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-11T05:22:59Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1543,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "c9caadf20c43cf23ccec7c149548a07d2f572b0d9bba84577ef005362bb56244",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T050940655884-review-of-bank-carried-decision-771a87a718ad/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run; its filed review is at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261109T044945756828-bank-carried-decision.at-771a87a718ad4aafc91b098264cb876a32587c4d.json",
+        "node": "review-of-bank-carried-decision-771a87a718ad",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261111T050940655884-review-of-bank-carried-decision-771a87a718ad",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1577,
+        "terminal_at": "2026-11-11T05:22:10Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-carried-decision-771a87a718ad"
+      }
+    ]
+  },
+  "wall_seconds": 13188,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-11T09:32:39Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-11T08:51:02Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 68572725,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054735827333-tracked-read-tests/codex-home/cache"
+      },
+      {
+        "bytes": 28814443,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T054735827333-tracked-read-tests/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261111T054735827333-tracked-read-tests",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 7567,
+    "worker_pid": 1148396
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}

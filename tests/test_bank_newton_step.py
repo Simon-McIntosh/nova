@@ -302,7 +302,7 @@ def test_bank_jvp_composes_flux_and_level_derivatives(monkeypatch):
     np.testing.assert_allclose(applied[0], difference, rtol=1e-10)
     np.testing.assert_allclose(applied[0], -27.0, rtol=1e-10)
     matrix = support_read.step_jacobian(
-        operands, moments, support, None, None, SimpleNamespace(target_current=None)
+        operands, moments, support, None, None, current.Quadrature()
     )
     np.testing.assert_allclose(
         matrix @ jnp.concatenate(direction), jnp.concatenate(applied)

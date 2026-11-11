@@ -189,7 +189,7 @@ def main():
             "test_bank_step_launch_fusion",
             "test_bank_solve_driver",
         ):
-            log = args.run / "tiled-suites" / f"{arm}-{name}.log"
+            log = args.run / "final-tiled-suites" / f"{arm}-{name}.log"
             content = log.read_text()
             assert content.rstrip().endswith("EXIT=0"), log
             summaries = [
@@ -306,10 +306,12 @@ the independent CPU measurement supplies full matrix parity at both widths.</p>
 <table><thead><tr><th>Arm</th><th>File</th><th>Pytest summary</th><th>Exit</th></tr>
 </thead><tbody>{"".join(suite_rows)}</tbody></table>
 <p>The final full fresh-read central-difference check passes at a trial and
-actually converged state, against the unchanged 1e-6 relative bound. The scratch negative-control
+actually converged state, against the unchanged 1e-6 relative bound.
+The scratch negative-control
 hook replaces the assembled matrix by identity after fixture convergence,
 dropping its booking derivative. Both new test IDs fail; the log records
-{negative_summary} and EXIT=1. The hook is retained as final-negative/negative-mutation.py.</p>
+{negative_summary} and EXIT=1. The hook is retained as
+final-negative/negative-mutation.py.</p>
 <p>Base revision: <code>101d1d839d90b4859f42df114707bff1ee2dbeae</code>.
 Product changes: <code>31949bb38cc291c7aeb6bd87d792e705fadc2230</code> and
 <code>156311548c1d78cd3e8515d77b971e66270f5b52</code>.

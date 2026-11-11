@@ -172,14 +172,13 @@ def row(args):
                             "newton_branch_refused_proposals",
                             "newton_first_branch_refusal_index",
                         )
-                        values = [
-                            getattr(
-                                terminal,
-                                name,
-                                jnp.array([0 if "proposals" in name else -1]),
-                            )
-                            for name in names
-                        ]
+                        values = []
+                        for name in names:
+                            value = getattr(terminal, name, ())
+                            # Unprotected private loops omit inactive counter leaves.
+                            if isinstance(value, tuple) and not value:
+                                value = jnp.array([0 if "proposals" in name else -1])
+                            values.append(value)
                         jax.debug.callback(
                             lambda *arrays: branches.append(
                                 {

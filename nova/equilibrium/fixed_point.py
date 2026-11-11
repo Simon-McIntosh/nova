@@ -671,8 +671,8 @@ class _NewtonIterationState(NamedTuple):
     promotion_descent_scales: jax.Array
     inner_trace: _InnerIterationTrace
     model_rebuild_required: jax.Array
-    branch_refused_proposals: jax.Array
-    first_branch_refusal_index: jax.Array
+    branch_refused_proposals: jax.Array | tuple[()]
+    first_branch_refusal_index: jax.Array | tuple[()]
 
 
 class _NewtonGlobalizationState(NamedTuple):
@@ -1882,7 +1882,6 @@ def _complete_newton_promotion(
         rebuilt_or_descent_residual,
     )
     promotion_accepted = promotion.accepted | rebuilt.accepted | descent.accepted
-    branch_refused = jnp.asarray(False)
     if proposal_qualification_fn is not None:
         branch_refused = promotion_accepted & ~proposal_qualification_fn(candidate)
         promotion_accepted = promotion_accepted & ~branch_refused
@@ -1917,8 +1916,9 @@ def _complete_newton_promotion(
         & ~converged
         & ~exhausted
         & (promotion_accepted | recovery_retry)
-        & ~branch_refused
     )
+    if proposal_qualification_fn is not None:
+        active = active & ~branch_refused
     reason = jnp.where(
         ~promotion_accepted,
         FixedPointTerminationReason.SUFFICIENT_DECREASE_REFUSED,
@@ -2032,9 +2032,10 @@ def _complete_newton_promotion(
             ),
         ),
     ).astype(jnp.int32)
-    decision = jnp.where(
-        branch_refused, InnerIterationDecision.SUFFICIENT_DECREASE_REFUSED, decision
-    )
+    if proposal_qualification_fn is not None:
+        decision = jnp.where(
+            branch_refused, InnerIterationDecision.SUFFICIENT_DECREASE_REFUSED, decision
+        )
     applied_factor = jnp.where(
         promotion.accepted,
         promotion.applied_factor,
@@ -2049,7 +2050,8 @@ def _complete_newton_promotion(
         ),
     )
     bounded_step_norm = jnp.max(jnp.abs(step))
-    applied_factor = jnp.where(branch_refused, 0.0, applied_factor)
+    if proposal_qualification_fn is not None:
+        applied_factor = jnp.where(branch_refused, 0.0, applied_factor)
     inner_trace = _record_inner_iteration(
         measured.inner_trace,
         measured.attempted,
@@ -2134,11 +2136,19 @@ def _complete_newton_promotion(
         descent_scales,
         inner_trace,
         next_model_rebuild_required,
-        measured.branch_refused_proposals + branch_refused.astype(jnp.int32),
-        jnp.where(
-            branch_refused & (measured.first_branch_refusal_index < 0),
-            measured.attempted,
-            measured.first_branch_refusal_index,
+        (
+            measured.branch_refused_proposals + branch_refused.astype(jnp.int32)
+            if proposal_qualification_fn is not None
+            else ()
+        ),
+        (
+            jnp.where(
+                branch_refused & (measured.first_branch_refusal_index < 0),
+                measured.attempted,
+                measured.first_branch_refusal_index,
+            )
+            if proposal_qualification_fn is not None
+            else ()
         ),
     )
 
@@ -3944,13 +3954,11 @@ def _newton_krylov_inner(
                 & finite_image
                 & jnp.isfinite(proposed_residual)
             )
-            branch_qualified = (
-                jnp.asarray(True)
-                if proposal_qualification_fn is None
-                else proposal_qualification_fn(proposal)
-            )
-            accepted_proposal = finite_proposal & branch_qualified
-            branch_refused = finite_proposal & ~branch_qualified
+            accepted_proposal = finite_proposal
+            if proposal_qualification_fn is not None:
+                branch_qualified = proposal_qualification_fn(proposal)
+                accepted_proposal = finite_proposal & branch_qualified
+                branch_refused = finite_proposal & ~branch_qualified
             candidate = jnp.where(accepted_proposal, proposal, state)
             current_shadow = jnp.where(
                 accepted_proposal, proposed_shadow, previous_shadow
@@ -3970,12 +3978,13 @@ def _newton_krylov_inner(
             warm_relaxation = jnp.where(
                 accepted_proposal, warm_relaxation, 0.5 * warm_relaxation
             )
-            branch_refused_proposals += branch_refused.astype(jnp.int32)
-            first_branch_refusal_index = jnp.where(
-                branch_refused & (first_branch_refusal_index < 0),
-                index,
-                first_branch_refusal_index,
-            )
+            if proposal_qualification_fn is not None:
+                branch_refused_proposals += branch_refused.astype(jnp.int32)
+                first_branch_refusal_index = jnp.where(
+                    branch_refused & (first_branch_refusal_index < 0),
+                    index,
+                    first_branch_refusal_index,
+                )
             changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
             shadow_changes = shadow_changes.at[index].set(
                 jnp.where(observe_shadows, changed, -1)
@@ -4038,8 +4047,12 @@ def _newton_krylov_inner(
             jnp.asarray(relaxation, dtype=initial.dtype),
             jnp.asarray(0, dtype=jnp.int32),
             jnp.asarray(-1, dtype=jnp.int32),
-            jnp.asarray(0, dtype=jnp.int32),
-            jnp.asarray(-1, dtype=jnp.int32),
+            jnp.asarray(0, dtype=jnp.int32)
+            if proposal_qualification_fn is not None
+            else (),
+            jnp.asarray(-1, dtype=jnp.int32)
+            if proposal_qualification_fn is not None
+            else (),
         ),
     )
     if globalization_state is None:
@@ -4594,8 +4607,12 @@ def _newton_krylov_inner(
                 globalization_state.model_rebuild_required,
                 jnp.asarray(False),
             ),
-            jnp.asarray(0, dtype=jnp.int32),
-            jnp.asarray(-1, dtype=jnp.int32),
+            jnp.asarray(0, dtype=jnp.int32)
+            if proposal_qualification_fn is not None
+            else (),
+            jnp.asarray(-1, dtype=jnp.int32)
+            if proposal_qualification_fn is not None
+            else (),
         ),
     )
     result = FixedPointResult(
@@ -4637,10 +4654,26 @@ def _newton_krylov_inner(
         trajectory_residual=loop.residual,
         warmup_refused_proposals=warmup_refused_proposals[None],
         warmup_first_nonfinite_index=warmup_first_nonfinite_index[None],
-        warmup_branch_refused_proposals=warmup_branch_refused_proposals[None],
-        warmup_first_branch_refusal_index=warmup_first_branch_refusal_index[None],
-        newton_branch_refused_proposals=loop.branch_refused_proposals[None],
-        newton_first_branch_refusal_index=loop.first_branch_refusal_index[None],
+        warmup_branch_refused_proposals=(
+            warmup_branch_refused_proposals[None]
+            if proposal_qualification_fn is not None
+            else ()
+        ),
+        warmup_first_branch_refusal_index=(
+            warmup_first_branch_refusal_index[None]
+            if proposal_qualification_fn is not None
+            else ()
+        ),
+        newton_branch_refused_proposals=(
+            loop.branch_refused_proposals[None]
+            if proposal_qualification_fn is not None
+            else ()
+        ),
+        newton_first_branch_refusal_index=(
+            loop.first_branch_refusal_index[None]
+            if proposal_qualification_fn is not None
+            else ()
+        ),
     )
     continued_globalization = _NewtonGlobalizationState(
         best_state=loop.best_state,
@@ -5113,6 +5146,14 @@ def _active_set_newton_krylov(
         initial_mask,
         initial_partition,
     )
+    branch_fields = (
+        "warmup_branch_refused_proposals",
+        "warmup_first_branch_refusal_index",
+        "newton_branch_refused_proposals",
+        "newton_first_branch_refusal_index",
+    )
+    if proposal_qualification is None:
+        result_shape = result_shape._replace(**dict.fromkeys(branch_fields, ()))
     empty_result, empty_globalization = jax.tree.map(
         lambda value: jnp.zeros(value.shape, value.dtype),
         (result_shape, globalization_shape),
@@ -5121,10 +5162,26 @@ def _active_set_newton_krylov(
     empty_result = empty_result._replace(
         warmup_refused_proposals=jnp.zeros(warmup_slots, dtype=jnp.int32),
         warmup_first_nonfinite_index=jnp.full(warmup_slots, -1, dtype=jnp.int32),
-        warmup_branch_refused_proposals=jnp.zeros(warmup_slots, dtype=jnp.int32),
-        warmup_first_branch_refusal_index=jnp.full(warmup_slots, -1, dtype=jnp.int32),
-        newton_branch_refused_proposals=jnp.zeros(warmup_slots, dtype=jnp.int32),
-        newton_first_branch_refusal_index=jnp.full(warmup_slots, -1, dtype=jnp.int32),
+        warmup_branch_refused_proposals=(
+            jnp.zeros(warmup_slots, dtype=jnp.int32)
+            if proposal_qualification is not None
+            else ()
+        ),
+        warmup_first_branch_refusal_index=(
+            jnp.full(warmup_slots, -1, dtype=jnp.int32)
+            if proposal_qualification is not None
+            else ()
+        ),
+        newton_branch_refused_proposals=(
+            jnp.zeros(warmup_slots, dtype=jnp.int32)
+            if proposal_qualification is not None
+            else ()
+        ),
+        newton_first_branch_refusal_index=(
+            jnp.full(warmup_slots, -1, dtype=jnp.int32)
+            if proposal_qualification is not None
+            else ()
+        ),
     )
     if separate_warmup:
         empty_result = empty_result._replace(
@@ -5136,16 +5193,14 @@ def _active_set_newton_krylov(
                     warmup_result.warmup_first_nonfinite_index[0]
                 )
             ),
-            warmup_branch_refused_proposals=(
-                empty_result.warmup_branch_refused_proposals.at[0].set(
-                    warmup_result.warmup_branch_refused_proposals[0]
-                )
-            ),
-            warmup_first_branch_refusal_index=(
-                empty_result.warmup_first_branch_refusal_index.at[0].set(
-                    warmup_result.warmup_first_branch_refusal_index[0]
-                )
-            ),
+            **{
+                name: getattr(empty_result, name)
+                .at[0]
+                .set(getattr(warmup_result, name)[0])
+                for name in branch_fields[:2]
+            }
+            if proposal_qualification is not None
+            else {},
         )
     outer = _ActiveSetIterationState(
         state=initial,
@@ -5254,13 +5309,10 @@ def _active_set_newton_krylov(
                         name: getattr(carry.result, name)
                         .at[index + int(separate_warmup)]
                         .set(getattr(inner_result, name)[0])
-                        for name in (
-                            "warmup_branch_refused_proposals",
-                            "warmup_first_branch_refusal_index",
-                            "newton_branch_refused_proposals",
-                            "newton_first_branch_refusal_index",
-                        )
-                    },
+                        for name in branch_fields
+                    }
+                    if proposal_qualification is not None
+                    else {},
                 ),
                 trajectory_state=trajectory_state,
                 continue_trajectory=continue_trajectory,
@@ -5553,6 +5605,19 @@ def newton_krylov(
             presettlement_incumbent_scoring=presettlement_incumbent_scoring,
             preserve_diverted_branch=preserve_diverted_branch,
             precision=precision,
+        )
+    if not preserve_diverted_branch:
+        shape = jnp.shape(result.warmup_refused_proposals)
+        result = result._replace(
+            **{
+                name: jnp.full(shape, 0 if "proposals" in name else -1, dtype=jnp.int32)
+                for name in (
+                    "warmup_branch_refused_proposals",
+                    "warmup_first_branch_refusal_index",
+                    "newton_branch_refused_proposals",
+                    "newton_first_branch_refusal_index",
+                )
+            }
         )
     if row_jvp_observers:
         telemetry_map = map_fn

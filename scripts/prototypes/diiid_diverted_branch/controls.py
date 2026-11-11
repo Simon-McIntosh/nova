@@ -31,8 +31,8 @@ def main():
         tree = Path(scratch) / "head"
         measure.admission.extract(tree, args.head, repository)
         for frame, branch, case in (
-            (35, "mast", "mast-21978-35"),
             (179, "limited", "frame-179-limited"),
+            (35, "mast", "mast-21978-35"),
         ):
             output = args.output / case
             output.mkdir()
@@ -107,6 +107,8 @@ def main():
                 json.dumps(results, indent=2) + "\n"
             )
             print("CONTROL_RESULT " + json.dumps({case: results[case]}), flush=True)
+            if not passed:
+                raise SystemExit(1)
     raise SystemExit(0 if all(item["passed"] for item in results.values()) else 1)
 
 

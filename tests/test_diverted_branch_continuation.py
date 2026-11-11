@@ -305,3 +305,35 @@ def test_saved_state_refresh_reuses_measurement_lower_root_reader(
     assert terminal["lower_saddle_qualified"]
     assert terminal["lower_saddle_distance_m"] < 1e-12
     np.testing.assert_allclose(terminal["lower_saddle_rz_m"], saddle, atol=1e-12)
+
+
+def test_unrequested_branch_counters_stay_outside_the_numerical_loop(monkeypatch):
+    from nova.equilibrium import fixed_point
+
+    complete = fixed_point._complete_newton_promotion
+    observed = []
+
+    def checked(measured, *args, **kwargs):
+        assert not jax.tree.leaves(measured.branch_refused_proposals), (
+            "inactive branch counter entered the numerical loop"
+        )
+        assert not jax.tree.leaves(measured.first_branch_refusal_index), (
+            "inactive branch index entered the numerical loop"
+        )
+        observed.append(True)
+        return complete(measured, *args, **kwargs)
+
+    monkeypatch.setattr(fixed_point, "_complete_newton_promotion", checked)
+    result = jax.jit(
+        lambda initial: newton_krylov(
+            lambda state: 1.0 + 0.2 * jnp.sin(state),
+            initial,
+            newton_steps=3,
+            warmup=2,
+            gmres_iterations=2,
+            precision=Precision.DOUBLE,
+        )
+    )(jnp.zeros(3))
+    assert observed, "the nonlinear map did not exercise a Newton promotion"
+    np.testing.assert_array_equal(result.newton_branch_refused_proposals, [0])
+    np.testing.assert_array_equal(result.newton_first_branch_refusal_index, [-1])

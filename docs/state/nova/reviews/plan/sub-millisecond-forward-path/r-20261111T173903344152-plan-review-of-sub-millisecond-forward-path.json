@@ -57,7 +57,30 @@
   "plan_slug": "sub-millisecond-forward-path",
   "plan_version": 294,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8b74918674002fea9f7b0a52e90bdd9ef28452a6",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 5 now carries a negative control: each paired arm must show its lever flag reached the compiled program (lowered digest or launch/op count differs), and an identical pair is refused as an inert lever.",
+      "reason": "",
+      "when": "2026-11-11T18:19:51.728944+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8b74918674002fea9f7b0a52e90bdd9ef28452a6",
+      "commit_basis": "edit",
+      "note": "Section 5 now carries a negative control: each paired arm must show its lever flag reached the compiled program (lowered digest or launch/op count differs), and an identical pair is refused as an inert lever.",
+      "reason": "",
+      "when": "2026-11-11T18:19:51.728944+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261111T173903344152-plan-review-of-sub-millisecond-forward-path.json",
   "review_run_id": "r-20261111T173903344152-plan-review-of-sub-millisecond-forward-path",
   "reviewed_blob_sha": "f09aa57f447481042ba2ca17372de5f41447f636",
   "rubric": "content",

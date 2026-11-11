@@ -36,6 +36,13 @@
   ],
   "call_sites_note": "Runtime prototype code that can reach the retained shared reader: refresh.main binds it, measure.enrich builds it, and recover.py:280 drives measure.enrich. The restored test file is excluded as a test.",
   "completed_at": "2026-11-11T14:14:02.377Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "exempted",
+      "reason": "the lead withdrew the guard after measurement; the delivered goal is the measured negative result, panels and repaired readers",
+      "recorded_at": "2026-11-11T14:15:42.436733+00:00"
+    }
+  },
   "dispatched_at": "2026-11-11T14:03:09Z",
   "figure_review": {
     "inspected": [

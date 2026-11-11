@@ -5,6 +5,7 @@ from contextlib import ExitStack
 import inspect
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import statistics
@@ -146,6 +147,95 @@ def partition(closed):
     return list(reversed(regions))
 
 
+def common_subexpressions(closed):
+    """Share pure expressions before compilation boundaries can duplicate them."""
+    import numpy as np
+    from jax.extend import core
+
+    fingerprints = {}
+
+    def freeze(value):
+        if isinstance(value, core.ClosedJaxpr):
+            return ("closed", graph_key(value.jaxpr), freeze(value.consts))
+        if isinstance(value, core.Jaxpr):
+            return ("graph", graph_key(value))
+        if isinstance(value, dict):
+            return tuple((k, freeze(v)) for k, v in sorted(value.items()))
+        if isinstance(value, tuple | list):
+            return (type(value).__name__, tuple(map(freeze, value)))
+        if isinstance(value, np.ndarray | np.generic | float | complex):
+            array = np.asarray(value)
+            return (array.dtype.str, array.shape, array.tobytes())
+        try:
+            hash(value)
+        except TypeError:
+            return (type(value), id(value))
+        return (type(value), value)
+
+    def graph_key(graph):
+        if id(graph) in fingerprints:
+            return fingerprints[id(graph)]
+        variables = {}
+
+        def atom(var):
+            if isinstance(var, core.Literal):
+                return ("literal", freeze(var.val))
+            if var not in variables:
+                variables[var] = len(variables)
+            return ("var", variables[var], str(var.aval))
+
+        signature = tuple(map(atom, (*graph.constvars, *graph.invars)))
+        instructions = tuple(
+            (
+                eqn.primitive,
+                tuple(map(atom, eqn.invars)),
+                tuple(map(atom, eqn.outvars)),
+                freeze(eqn.params),
+                eqn.effects,
+            )
+            for eqn in graph.eqns
+        )
+        result = (signature, instructions, tuple(map(atom, graph.outvars)))
+        fingerprints[id(graph)] = result
+        return result
+
+    aliases, seen, equations = {}, {}, []
+
+    def representative(var):
+        return var if isinstance(var, core.Literal) else aliases.get(var, var)
+
+    for eqn in closed.jaxpr.eqns:
+        inputs = list(map(representative, eqn.invars))
+        key = (
+            eqn.primitive,
+            tuple(
+                ("literal", freeze(v.val)) if isinstance(v, core.Literal) else v
+                for v in inputs
+            ),
+            freeze(eqn.params),
+            tuple(str(v.aval) for v in eqn.outvars),
+        )
+        shareable = not eqn.effects and all(
+            not isinstance(v, core.DropVar) for v in eqn.outvars
+        )
+        if shareable and key in seen:
+            for var, prior in zip(eqn.outvars, seen[key], strict=True):
+                aliases[var] = prior
+        else:
+            equations.append(eqn.replace(invars=inputs))
+            if shareable:
+                seen[key] = eqn.outvars
+    graph = closed.jaxpr
+    shared = core.Jaxpr(
+        graph.constvars,
+        graph.invars,
+        list(map(representative, graph.outvars)),
+        equations,
+    )
+    core.check_jaxpr(shared)
+    return core.ClosedJaxpr(shared, closed.consts), len(graph.eqns) - len(equations)
+
+
 def counts(lowered, compiled):
     text = compiled.as_text()
     return dict(
@@ -188,6 +278,7 @@ def main():
         backend=jax.default_backend(),
         device=str(jax.devices()[0]),
         kind=args.kind,
+        job=os.environ.get("SLURM_JOB_ID"),
         instrument_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         rows=[],
     )
@@ -222,9 +313,9 @@ def main():
         booked = jax.vmap(booking)(state, support)
         return support, booked
 
-    def wall(program, inputs):
+    def wall(program, inputs, repeats):
         samples = []
-        for _ in range(args.repeats):
+        for _ in range(repeats):
             start = time.perf_counter()
             result = jax.block_until_ready(program(*inputs))
             samples.append(1000 * (time.perf_counter() - start))
@@ -271,11 +362,13 @@ def main():
         expected = jax.block_until_ready(program(*inputs))
         assert bool(jnp.all(expected[0].valid)) and bool(jnp.all(expected[1].valid))
         assert bool(jnp.all(expected[0].rebuilt == (args.kind == "full")))
-        _, native_before = wall(program, inputs)
+        _, native_before = wall(program, inputs, args.repeats // 2)
         with ExitStack() as stack:
             stack.enter_context(patch.object(topology, "_read_at_nulls", full_owner))
             stack.enter_context(patch.object(sr, "read_batch", steady_read))
             closed = jax.make_jaxpr(lambda *values: whole(*values))(*inputs)
+        closed, removed = common_subexpressions(closed)
+        print("SHARED_EXPRESSIONS", width, removed, flush=True)
         flat_inputs, _ = jax.tree.flatten(inputs)
         env = dict(zip(closed.jaxpr.invars, flat_inputs, strict=True))
         env.update(zip(closed.jaxpr.constvars, closed.consts, strict=True))
@@ -334,7 +427,7 @@ def main():
             chain_ms.append(1000 * (time.perf_counter() - total_start))
             for name, value in per_owner.items():
                 stage_samples.setdefault(name, []).append(value)
-        _, native_after = wall(program, inputs)
+        _, native_after = wall(program, inputs, args.repeats - args.repeats // 2)
         row.update(
             stages={
                 name: dict(median_ms=statistics.median(samples), samples_ms=samples)

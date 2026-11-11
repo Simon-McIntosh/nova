@@ -21,6 +21,9 @@ def main():
     region = outer.difference(inner)
     record = {"geometry": []}
     print(f"GEOMETRY_MODULE {iron.__file__} cwd={Path.cwd()}", flush=True)
+    area_control = shapely.box(0, 0, 1, 1).area - shapely.box(0, 0, 0.9, 1).area
+    assert abs(area_control - 0.1) < 1e-15
+    print(f"AREA_POSITIVE_CONTROL expected=0.1 observed={area_control}", flush=True)
     for size in SIZES:
         cells = iron._mesh(region, size)
         vo, vi, merged = shell_mesh_volumes(cells)
@@ -35,7 +38,7 @@ def main():
             outer_radius=(3 * vo / (4 * np.pi)) ** (1 / 3),
             inner_radius=(3 * vi / (4 * np.pi)) ** (1 / 3),
             fraction=vi / vo,
-            symmetric_difference_area=difference,
+            quantized_symmetric_difference_area=difference,
             volume_implied={str(mu): shielding(mu, vi / vo) for mu in PERMEABILITIES},
         )
         record["geometry"].append(row)

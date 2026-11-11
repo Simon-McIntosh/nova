@@ -50,10 +50,14 @@ def shell_mesh_volumes(cells):
     """Recover both enclosed volumes from the actual mesh boundary moments."""
     polygons = [shapely.Polygon(p) for p in cells.polygons]
     raw = shapely.union_all(polygons)
-    # Stitch floating-coordinate grid seams far below the sheet operand's
-    # picometre edge-identity rounding, then bound the affected material area.
+    # Stitch floating-coordinate seams below the sheet edge-identity grid.
+    # Compare unary area moments independently: an overlay inherits precision
+    # and can report zero after snapping both of its arguments to that grid.
     merged = shapely.union_all(polygons, grid_size=1e-14)
     difference = raw.symmetric_difference(merged).area
+    area_delta = abs(raw.area - merged.area)
+    coordinates = np.concatenate(cells.polygons)
+    shift = float(np.max(np.abs(np.round(coordinates / 1e-14) * 1e-14 - coordinates)))
     print(
         "BOUNDARY_STITCH",
         json.dumps(
@@ -62,12 +66,14 @@ def shell_mesh_volumes(cells):
                 raw_valid=raw.is_valid,
                 raw_parts=len(shapely.get_parts(raw)),
                 grid_size=1e-14,
-                changed_area=difference,
+                overlay_changed_area=difference,
+                independent_area_delta=area_delta,
+                max_coordinate_shift=shift,
             )
         ),
         flush=True,
     )
-    assert difference < 1e-13
+    assert area_delta < 1e-13 and shift < 1e-14
     assert isinstance(merged, shapely.Polygon) and merged.is_valid, (
         "mesh boundary remains disconnected at measurement precision"
     )

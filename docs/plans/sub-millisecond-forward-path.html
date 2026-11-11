@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="285">
+<meta name="plan-version" content="286">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -272,6 +272,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261111T054735827333-tracked-read-tests" data-who="reckon-build" data-when="2026-11-11T09:32:35Z">
     <div class="r-comment-body"><p>tracked-read-tests adds a runtime spy proving that a certificate executes the full topology read and a limited-contact case that changes the physical winner with a signed-flux margin of 0.003799; one all_debug job reports base 13 passed and head 15 passed (zero added failures), while the falsely marked certificate and missing wall_stable controls each fail the matching test; no product source changed</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261111T093831691867-review-of-tracked-read-tests-058ddf8ddd78" data-who="reckon-build" data-when="2026-11-11T09:50:38.467Z">
+    <div class="r-comment-body"><p>independent review of r-20261111T054735827333-tracked-read-tests at head 058ddf8ddd78 from base b905696e2b6d; scores goal_fidelity 19, evidence 19, scope_discipline 20, durability 18, fit 19, reuse 20 with added_failure_count 0 and one non-blocking finding at tests/test_tracked_read.py:481; the record is stored at both declared paths and parses.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261029T064352171540-review-of-bank-newton-step-425d44581fee" data-who="reckon-build" data-when="2026-10-29T06:56:01Z">
     <div class="r-comment-body"><p>Parsed independent review of c8e424a78957b379be997296e09e374ee6ba6a10..425d44581fee3c17f335358fed320009e7f845e8 stored under the reviewed run's review-records, with 3 blocking and 2 non-blocking findings.</p></div>

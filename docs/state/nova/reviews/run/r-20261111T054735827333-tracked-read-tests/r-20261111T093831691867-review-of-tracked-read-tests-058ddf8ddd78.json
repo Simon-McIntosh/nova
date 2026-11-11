@@ -1,0 +1,99 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own armed arms. baseline_suite records revision b905696e2b6dcecbea8262b99357380dcef48afc, exit_status 0, log final-base.log, completed true, failure_count 0, failure_ids []; after_suite records revision 74fd4b503da3e22230c3c4f6c2a3a0ff83fb849a, exit_status 0, log final-head.log, completed true, failure_count 0, failure_ids []. Both logs were read directly: final-base.log ends '13 passed in 497.88s (0:08:17)' then a bare 'EXIT=0'; final-head.log ends '15 passed in 599.37s (0:09:59)' then a bare 'EXIT=0'. The head arm ran at 74fd4b503 rather than the reviewed head; git show --stat 058ddf8dd reports one file changed (docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-tests.html, 76 insertions 60 deletions), so the head arm's test content is identical to the reviewed head's. added_failure_count is therefore 0 against a base of 0.",
+  "assertion_analysis": [
+    {
+      "condition_to_fail": "Wire the carry path to the fresh read, or force rebuilt true for a carry: the cond then executes the branch holding the spy and 'assert not whole_mesh_reads' reddens on the carried run.",
+      "file": "tests/test_tracked_read.py",
+      "line": 358
+    },
+    {
+      "condition_to_fail": "Answer a certificate request from the carried result marked rebuilt and counted once, which is the mutation final-certificate-control.log preserves: the spy records nothing and the assertion reddens at WHOLE_MESH_READS 0.",
+      "file": "tests/test_tracked_read.py",
+      "line": 366
+    },
+    {
+      "condition_to_fail": "Return the carried counter for a certificate, so the certificate does not increment rebuilds: int(certified.rebuilds[0]) stays at int(first.rebuilds) and the equality reddens.",
+      "file": "tests/test_tracked_read.py",
+      "line": 365
+    },
+    {
+      "condition_to_fail": "Drop wall_stable from the validity check, which is the mutation final-wall-control.log preserves: the carried decision is kept, rebuilt is False, and the assertion reddens at rebuilt=False.",
+      "file": "tests/test_tracked_read.py",
+      "line": 489
+    },
+    {
+      "condition_to_fail": "Report the carried inboard contact after the outboard winner is selected: assert_allclose(result.reading.boundary, (outboard, 0.0)) reddens at 4.002277 m against 7.801396 m.",
+      "file": "tests/test_tracked_read.py",
+      "line": 493
+    },
+    {
+      "condition_to_fail": "Nothing in nova/equilibrium/support_read.py or nova/equilibrium/topology.py can falsify this line: 0.001 * (outboard - inboard) = 0.003799 is computed entirely from the oracle fixture against a literal, so it guards the fixture's separation margin rather than the read. No durability weight rests on it.",
+      "file": "tests/test_tracked_read.py",
+      "line": 481
+    }
+  ],
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:step_batch",
+    "nova/equilibrium/support_read.py:solve_batch"
+  ],
+  "completed_at": "2026-11-11T09:50:38.467Z",
+  "dispatched_at": "2026-11-11T09:40:09Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the assertion documents the fixture margin that makes the limited test order-independent; it is a precondition guard on the fixture, not claimed as coverage of the read",
+      "recorded_at": "2026-11-11T09:51:31.939077+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_tracked_read.py",
+      "line": 481,
+      "severity": "non-blocking",
+      "text": "non-blocking: 'assert 0.001 * (outboard - inboard) > 0.003' compares two quantities both obtained from the oracle fixture (fixture._analytic_inputs('limited').boundary_midplane_radii()) against a literal, so no change in nova/equilibrium/support_read.py or nova/equilibrium/topology.py can falsify it; it documents the 0.003799 m separation of the two contacts rather than guarding the read, and a reader who counts it as coverage would overstate what the test protects."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from b905696e2 to 058ddf8dd: 8b6071b8f adds both tests (79 insertions), 08c35eb15 fixes the limited test's operand unpacking (5 insertions 2 deletions), 412051392 adds an interim fragment recording an open head-arm failure, 74fd4b503 replaces the ambiguous 0.005 shift with the two distinct contacts of a rectangular limited wall (29 insertions 24 deletions), and 058ddf8dd rewrites the fragment with the measured isolated/preceded diagnostics (76 insertions 60 deletions); no production source changed at any commit.",
+    "done_when": "The done_when has three clauses and all three are measured: the two tests pass at the head (final-head.log, 15 passed, EXIT=0); both negative-control logs are red on the matching test id (final-certificate-control.log 1 failed/EXIT=1 on test_a_certificate_request_executes_the_whole_mesh_read, final-wall-control.log 1 failed/EXIT=1 on test_a_wall_contact_winner_change_rebuilds_at_a_limited_boundary); and one all_debug job ran the paired base and head arms plus both controls (sacct -j 1310349: final_gate.sh COMPLETED, 00:22:16, AllocCPUS 4, partition all_debug, ReqMem 64G, Timelimit 00:59:00; final-slurm.log line 1 reads ALL_FOUR_ARMS_COMPLETE) with a fragment recording them.",
+    "goal": "The node goal is to close two carried-decision review findings with tests only: prove a certificate request executes the full topology read, and add a limited-contact case where the wall-contact winner changes and the read must rebuild; both land in tests/test_tracked_read.py as test_a_certificate_request_executes_the_whole_mesh_read:321 and test_a_wall_contact_winner_change_rebuilds_at_a_limited_boundary:459, with no product file touched.",
+    "manifest": "Read the source manifest at the reviewed run's manifest.md: status complete, five commits listed, both armed arms recorded with completed true and zero failure ids, negative_control_log and negative_control_note naming the two controls, a tests line carrying the literal gate command, and retry_failures recording one genuinely failing diagnostic pair attributed to the ambiguous 8b6071b8f fixture.",
+    "write_paths": "The declared write paths are tests/test_tracked_read.py, docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-tests.html and docs/figures/sub-millisecond-forward-path/tracked-read-tests; git diff --stat b905696e..058ddf8dd reports exactly two files changed, tests/test_tracked_read.py (91 lines) and the fragment (101 lines new), both inside the declared set, and the figures path is unused."
+  },
+  "justifications": {
+    "durability": "Each added guard was verified by reinstating the regression it claims to catch: final-certificate-control.log reddens tests/test_tracked_read.py:366 at WHOLE_MESH_READS 0 for a carried result relabelled rebuilt, and final-wall-control.log reddens tests/test_tracked_read.py:489 at rebuilt=False with wall_stable removed from validity; the remaining assertions rest on oracle-derived boundaries and a runtime spy rather than on values the test itself supplied, and the one fixture-side identity at line 481 carries none of that weight.",
+    "evidence": "Each done_when clause has a receipt: final-head.log ends '15 passed in 599.37s' then EXIT=0, the two control logs end '1 failed' then EXIT=1 on the named ids, and sacct -j 1310349 shows the single all_debug job with 4 CPUs and a 00:59:00 limit whose final-slurm.log opens ALL_FOUR_ARMS_COMPLETE; the head arm ran at 74fd4b503, whose test content equals the reviewed head's because 058ddf8dd changes only the fragment.",
+    "fit": "The new tests follow the file's idiom, reusing _shifted, _read, _assert_continuous_equal and the diverted_case fixture and extending _case with a keyword at tests/test_tracked_read.py:22 rather than forking the case builder; the monkeypatch spy matches existing per-test spies at tests/test_saddle_derivatives.py:171 and tests/test_read_ten_thousand_cells.py:97, and no added name carries a plan label, ticket number or version suffix.",
+    "goal_fidelity": "Both findings are closed by tests only: tests/test_tracked_read.py:321 spies on topology.read_at_stationary_points, which nova/equilibrium/support_read.py reaches through the module attribute at lines 304 and 362, so the patched binding is genuinely observed, and tests/test_tracked_read.py:459 changes the physical limiter contact while holding the tracked cells fixed.",
+    "reuse": "The diff adds no module-level definition at all: it adds two tests, one helper keyword, and a docstring. A capability search over tests/ and nova/ for an owner of 'observe that a jitted kernel executed' found only per-test local spies (tests/test_sectioned_set_geometry_cache.py:213 _spy_every_binding, tests/test_saddle_derivatives.py:171, tests/test_read_ten_thousand_cells.py:97, tests/test_edge_sheet.py:511, tests/test_bank_step_booking.py:121), with no shared owner to extend, so the new spy follows the established per-test idiom rather than duplicating a mechanism the repository owns.",
+    "scope_discipline": "git diff --stat b905696e2..058ddf8dd names only tests/test_tracked_read.py and docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-tests.html, both inside the declared write paths, and no production source, plan state or shared index is touched at any of the five commits."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261111T093831691867-review-of-tracked-read-tests-058ddf8ddd78",
+  "reviewed_base_sha": "b905696e2b6dcecbea8262b99357380dcef48afc",
+  "reviewed_head_sha": "058ddf8ddd78ccededbd1e3ca0066a81ca70032d",
+  "reviewed_run_id": "r-20261111T054735827333-tracked-read-tests",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T09:57:25.101255+00:00",
+  "total": 115,
+  "verdict_lines": [
+    "VERDICT goal: read tests/test_tracked_read.py:321 and :459 against the node goal of closing two carried-decision test gaps with tests only, and both gaps are closed with no product change.",
+    "VERDICT done_when: read final-base.log, final-head.log, final-certificate-control.log, final-wall-control.log and sacct job 1310349, and all three clauses of the done_when are measured and green.",
+    "VERDICT write_paths: read the manifest's declared paths and git diff --stat b905696e2..058ddf8dd, and every changed path is inside them.",
+    "VERDICT manifest: read the source manifest, which records status complete, both armed arms with completed true and zero failure ids, the two named control logs, and a retry_failures entry with an attribution.",
+    "VERDICT diff: read the five commits from b905696e2 to 058ddf8dd individually; two files change, both declared, with no production source.",
+    "CALL_SITES: nova/equilibrium/support_read.py:step_batch, nova/equilibrium/support_read.py:solve_batch"
+  ]
+}

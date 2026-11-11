@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import hashlib
 import re
+import subprocess
 import matplotlib
 
 matplotlib.use("Agg")
@@ -29,6 +30,13 @@ def main():
     args = parser.parse_args()
     allocation = (args.run / "counts-gpu-allocation.log").read_text()
     assert allocation.splitlines()[-1] == "EXIT=0"
+    job = re.search(r"JOB=(\d+)", allocation).group(1)
+    scheduler = subprocess.check_output(
+        ["sacct", "-n", "-X", "-j", job, "-o", "State,Elapsed,ExitCode", "--parsable2"],
+        text=True,
+    ).strip()
+    state, elapsed, exit_code = scheduler.split("|")[:3]
+    assert state == "COMPLETED" and exit_code == "0:0", scheduler
     suites = json.loads((args.run / "suite-receipts.json").read_text())
     armed = json.loads((args.run / "armed-suite-receipts.json").read_text())
     cpu_rows = []
@@ -204,6 +212,12 @@ def main():
         f"<tr><td>{k}</td><td>{maxima[k]:.3e}</td><td>{BOUNDS[k]:g}</td></tr>"
         for k in BOUNDS
     )
+    total_rows = "".join(
+        f"<tr><td>{arm}</td><td>{counts['reads']}</td>"
+        f"<td>{counts['updates']}</td><td>{counts['refactors']}</td></tr>"
+        for arm, counts in totals.items()
+    )
+    assembly_reduction = 1 - totals["head"]["refactors"] / totals["main"]["refactors"]
     fragment = f"""<section data-reckon="fragment" id="bank-factor-carry-result"
 data-plan="sub-millisecond-forward-path" data-node="bank-factor-carry">
 <h2>Newton factors carried across certified drive slices</h2>
@@ -216,9 +230,18 @@ Rejected continuation attempts do not replace the accepted factor.</p>
 slices at each step, with one warmup and one measured process per arm. The bank
 and seed hashes match across arms. Main uses secant seeds with fresh factors;
 head enables guarded factor reuse within solves and carries factors across
-slices. Main totals: {totals["main"]};
-head totals: {totals["head"]}. All {summary["lane_slices"]} lane/slice results
+slices. Assemblies fall by {assembly_reduction:.1%}, accompanied by more fresh
+reads and accepted updates. All {summary["lane_slices"]} lane/slice results
 certify, at maximum residual {summary["terminal_residual_max"]:.3e}.</p>
+<table id="bank-factor-carry-totals"><thead><tr><th>arm</th>
+<th>total fresh reads</th><th>total accepted updates</th>
+<th>total factor assemblies</th></tr></thead><tbody>{total_rows}</tbody></table>
+<p>These totals sum the largest lane count of each of the fourteen batched
+slices. Primed slow-ramp slices skip assembly throughout their solves, while
+their accepted update count rises from one in main to two or three in head.
+At the fast step, the head reaches nineteen updates in slice five; its factor
+is rebuilt in slice six. The assembly count alone does not describe this
+additional correction and fresh-read work.</p>
 <figure id="bank-factor-carry-counts"><img
 src="/nova/figures/sub-millisecond-forward-path/bank-factor-carry/factor-assemblies.svg"
 width="1400" alt="Factor assemblies at each slice for secant and carried factors
@@ -236,7 +259,8 @@ at 1400 pixels and inspected its labels and marks.</figcaption></figure>
 update cost 44.9 ms and its 25.5 ms assembly/factor portion. It is not an H200
 timing measurement. Titan walls carry no speed verdict. The retained run.sh
 accepts the repository root and GPFS run directory as arguments, defaulting to
-width sixteen for a later H200 submission. Update counts are accepted Newton
+width sixteen for a later H200 submission. The lead deferred H200 timing to a
+later node. Update counts are accepted Newton
 iterations. A rejected carried proposal can add one linear solve before the
 fresh correction, while every associated read and assembly is counted. Where
 the saved counters cannot distinguish that retry from ordinary damping, the
@@ -254,6 +278,12 @@ command also passes both arms. The unguarded-reuse scratch mutation fails the
 non-contracting first-update test with EXIT=1; the same test passes at head.</p>
 <table id="bank-factor-carry-cpu"><thead><tr><th>arm</th><th>fresh process file</th>
 <th>passed</th></tr></thead><tbody>{"".join(cpu_rows)}</tbody></table>
+<p>Titan job {job} completed in {elapsed} against its authorized eight-hour
+allocation, with scheduler state {state}, exit {exit_code}, and allocation-log
+EXIT=0. One warmup and one measured process ran for each arm. Source digests
+for the measured head match the delivered product files; JSON and array receipt
+digests validate. The figure passed the shared text-bounds and overlap check
+and was rendered from SVG and visually inspected before commit.</p>
 </section>"""
     (
         args.root

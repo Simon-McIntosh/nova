@@ -1,0 +1,108 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured: baseline_suite at b48deaa93 names 1 failure (test_book_primal_keeps_exact_diverted_moments, logs/base-arm.log:41) and after_suite at 936c1b95c names 0 (logs/head-arm.log:6, 5 passed); the after arm's failure set is empty so no failure is added.",
+  "assertion_analysis": [
+    {
+      "condition_to_fail": "The reference npz's key set diverges from the booked namedtuple's fields, e.g. a field renamed or added on either side.",
+      "file": "tests/test_bank_step_booking.py",
+      "line": 59
+    },
+    {
+      "condition_to_fail": "The booking's validity flag flips from True, or its dtype becomes non-boolean so the exact comparison branch is never taken.",
+      "file": "tests/test_bank_step_booking.py",
+      "line": 74
+    },
+    {
+      "condition_to_fail": "Any booked numeric entry moves more than 1e-12 relative to the stored reference, or more than the 1e-15 absolute floor for an entry near zero; the 1e-9 reference perturbation at logs/negative-control-perturb-1e-9.log:1-2 demonstrates the comparison fires.",
+      "file": "tests/test_bank_step_booking.py",
+      "line": 76
+    }
+  ],
+  "base_log_revision": "b48deaa93f55ad2c759c5977ed611b9047e393fb",
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:read_and_book",
+    "nova/equilibrium/current.py:book"
+  ],
+  "completed_at": "2026-11-11T14:11:30.042Z",
+  "dispatched_at": "2026-11-11T13:58:44Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "booking-pin-tolerance",
+      "recorded_at": "2026-11-11T14:14:19.271964+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "booking-pin-tolerance",
+      "recorded_at": "2026-11-11T14:14:26.539183+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "booking-pin-tolerance",
+      "recorded_at": "2026-11-11T14:14:31.432957+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_bank_step_booking.py",
+      "line": 47,
+      "severity": "non-blocking",
+      "text": "non-blocking: the docstring states the reference arrays were written at revision b48deaa93f by a command that imports _booked_diverted, but that helper does not exist at b48deaa93 (git show b48deaa93:tests/test_bank_step_booking.py has no such symbol), so the stated provenance cannot be re-run at the stated revision."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/booking-pin-tolerance.html",
+      "line": 44,
+      "severity": "non-blocking",
+      "text": "non-blocking: the paired-arms paragraph records the head arm as 5 passed in 146.4 s while logs/head-arm.log:6 records 5 passed in 156.06 s, so the fragment disagrees with the log it cites."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/booking-pin-tolerance.html",
+      "line": 31,
+      "severity": "non-blocking",
+      "text": "non-blocking: the bit-only reorder control the done-when requires was not produced (logs/negative-control-sum-reorder.log:12 FIELDS-WITH-CHANGED-BITS 0 over four attempts), so the tolerance is never exercised against a bit-changing reorder; the acceptance criterion is disclosed as unmet rather than substituted."
+    }
+  ],
+  "head_log_revision": "936c1b95c10bc177a519d33fdc74916c07b8c912",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "One commit (936c1b95c) against b48deaa93f55ad2c759c5977ed611b9047e393fb changes three files, +110/-23: the test rewrite, the new reference npz, and a 50-line evidence fragment. No production code is touched.",
+    "done_when": "Clause 1 is met (each field asserted against the stored reference, 5 passed at head). Clause 2 is half met: logs/negative-control-perturb-1e-9.log:1-2 shows the 1e-9 perturbation failing as required (1 failed, EXIT=1), but logs/negative-control-sum-reorder.log:9-13 records FIELDS-WITH-CHANGED-BITS 0, so the required bit-changing reorder was never produced. Clause 3's transition is recorded (base 1 failed/4 passed at logs/base-arm.log:42, head 5 passed at logs/head-arm.log:6) but the arms ran in place on the held allocation, not in the all_debug job the clause names.",
+    "goal": "The node goal (brief.txt:1-3) is to replace the SHA-256 digest pin on the booked arrays with a tolerance comparison against stored reference arrays; tests/test_bank_step_booking.py:40-82 at 936c1b95c does exactly that, loading tests/data/booking_primal_diverted.npz and asserting each field.",
+    "manifest": "Read; reckon crew check --manifest returns ok:true with no findings. It cites four logs, both arms as complete, and outside_scope honestly records the unmet bit-only control. Two in-repo citations drift from the logs: head wall clock 146.4 s in the fragment versus 156.06 s at logs/head-arm.log:6, and the capture command in the docstring imports a helper absent at the revision it cites.",
+    "write_paths": "The manifest's orientation_write_paths names four paths; the diff b48deaa93..936c1b95c touches three of them (tests/test_bank_step_booking.py, tests/data/booking_primal_diverted.npz, docs/evidence/fragments/sub-millisecond-forward-path/booking-pin-tolerance.html) and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_step_booking.py:76-82 compares the code's output against arrays loaded from an independent file, so it fails if booking values move beyond 1e-12 relative; a 1e-9 perturbation of the reference reddens it (logs/negative-control-perturb-1e-9.log:1-2), but the bit-only reorder it is meant to tolerate could not be produced, so that half of the guard is unexercised.",
+    "evidence": "The gate's head arm is recorded (5 passed, logs/head-arm.log:6) but done-when clause 2 is unmet: logs/negative-control-sum-reorder.log:12 prints FIELDS-WITH-CHANGED-BITS 0, and the paired arms were run in place rather than in the all_debug job the clause names.",
+    "fit": "tests/test_bank_step_booking.py:18-28 follows the surrounding idiom (Path(__file__).with_name matching tests/test_layer_fetch.py:14, np.testing.assert_allclose as at tests/test_current_diffusion.py:319) and introduces no name the naming rules forbid.",
+    "goal_fidelity": "tests/test_bank_step_booking.py:76-82 replaces the digest pin with np.testing.assert_allclose(rtol=1e-12, atol=1e-15) against tests/data/booking_primal_diverted.npz, which is the deliverable the goal states.",
+    "reuse": "The diff adds only the local helper _booked_diverted at tests/test_bank_step_booking.py:31 and delegates comparison to np.testing.assert_allclose; a search over tests/ and nova/ for a shared stored-reference or assert_close helper found only a mask-specific local helper at tests/test_clipped_support_quadrature.py:101, so no owned capability is duplicated.",
+    "scope_discipline": "Every path in the b48deaa93..936c1b95c diff lies inside the four declared write paths, and the diff carries no production change the goal does not imply."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal (brief.txt:1-3) is to replace the SHA-256 digest pin on the booked arrays with a tolerance comparison against stored reference arrays; tests/test_bank_step_booking.py:40-82 at 936c1b95c does exactly that, loading tests/data/booking_primal_diverted.npz and asserting each field.\nVERDICT done_when: Clause 1 is met (each field asserted against the stored reference, 5 passed at head). Clause 2 is half met: logs/negative-control-perturb-1e-9.log:1-2 shows the 1e-9 perturbation failing as required (1 failed, EXIT=1), but logs/negative-control-sum-reorder.log:9-13 records FIELDS-WITH-CHANGED-BITS 0, so the required bit-changing reorder was never produced. Clause 3's transition is recorded (base 1 failed/4 passed at logs/base-arm.log:42, head 5 passed at logs/head-arm.log:6) but the arms ran in place on the held allocation, not in the all_debug job the clause names.\nVERDICT write_paths: The manifest's orientation_write_paths names four paths; the diff b48deaa93..936c1b95c touches three of them (tests/test_bank_step_booking.py, tests/data/booking_primal_diverted.npz, docs/evidence/fragments/sub-millisecond-forward-path/booking-pin-tolerance.html) and nothing else.\nVERDICT manifest: Read; reckon crew check --manifest returns ok:true with no findings. It cites four logs, both arms as complete, and outside_scope honestly records the unmet bit-only control. Two in-repo citations drift from the logs: head wall clock 146.4 s in the fragment versus 156.06 s at logs/head-arm.log:6, and the capture command in the docstring imports a helper absent at the revision it cites.\nVERDICT diff: One commit (936c1b95c) against b48deaa93f55ad2c759c5977ed611b9047e393fb changes three files, +110/-23: the test rewrite, the new reference npz, and a 50-line evidence fragment. No production code is touched.\nCALL_SITES: nova/equilibrium/support_read.py:read_and_book, nova/equilibrium/current.py:book\nSCORE goal_fidelity: 18\nSCORE evidence: 12\nSCORE scope_discipline: 20\nSCORE durability: 16\nSCORE fit: 17\nSCORE reuse: 20\nJUSTIFICATION goal_fidelity: tests/test_bank_step_booking.py:76-82 replaces the digest pin with np.testing.assert_allclose(rtol=1e-12, atol=1e-15) against tests/data/booking_primal_diverted.npz, which is the deliverable the goal states.\nJUSTIFICATION evidence: The gate's head arm is recorded (5 passed, logs/head-arm.log:6) but done-when clause 2 is unmet: logs/negative-control-sum-reorder.log:12 prints FIELDS-WITH-CHANGED-BITS 0, and the paired arms were run in place rather than in the all_debug job the clause names.\nJUSTIFICATION scope_discipline: Every path in the b48deaa93..936c1b95c diff lies inside the four declared write paths, and the diff carries no production change the goal does not imply.\nJUSTIFICATION durability: tests/test_bank_step_booking.py:76-82 compares the code's output against arrays loaded from an independent file, so it fails if booking values move beyond 1e-12 relative; a 1e-9 perturbation of the reference reddens it (logs/negative-control-perturb-1e-9.log:1-2), but the bit-only reorder it is meant to tolerate could not be produced, so that half of the guard is unexercised.\nJUSTIFICATION fit: tests/test_bank_step_booking.py:18-28 follows the surrounding idiom (Path(__file__).with_name matching tests/test_layer_fetch.py:14, np.testing.assert_allclose as at tests/test_current_diffusion.py:319) and introduces no name the naming rules forbid.\nJUSTIFICATION reuse: The diff adds only the local helper _booked_diverted at tests/test_bank_step_booking.py:31 and delegates comparison to np.testing.assert_allclose; a search over tests/ and nova/ for a shared stored-reference or assert_close helper found only a mask-specific local helper at tests/test_clipped_support_quadrature.py:101, so no owned capability is duplicated.\nFINDING tests/test_bank_step_booking.py:47 non-blocking: the docstring states the reference arrays were written at revision b48deaa93f by a command that imports _booked_diverted, but that helper does not exist at b48deaa93 (git show b48deaa93:tests/test_bank_step_booking.py has no such symbol), so the stated provenance cannot be re-run at the stated revision.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/booking-pin-tolerance.html:44 non-blocking: the paired-arms paragraph records the head arm as 5 passed in 146.4 s while logs/head-arm.log:6 records 5 passed in 156.06 s, so the fragment disagrees with the log it cites.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/booking-pin-tolerance.html:31 non-blocking: the bit-only reorder control the done-when requires was not produced (logs/negative-control-sum-reorder.log:12 FIELDS-WITH-CHANGED-BITS 0 over four attempts), so the tolerance is never exercised against a bit-changing reorder; the acceptance criterion is disclosed as unmet rather than substituted.\n",
+  "review_run_id": "r-20261111T135708264996-review-of-booking-pin-tolerance-936c1b95c10b",
+  "reviewed_base_sha": "b48deaa93f55ad2c759c5977ed611b9047e393fb",
+  "reviewed_commits": [
+    "936c1b95c10bc177a519d33fdc74916c07b8c912"
+  ],
+  "reviewed_head_sha": "936c1b95c10bc177a519d33fdc74916c07b8c912",
+  "reviewed_run_id": "r-20261111T131035737346-booking-pin-tolerance",
+  "scores": {
+    "durability": 16,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "self_comparison_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T14:22:00Z",
+  "total": 103
+}

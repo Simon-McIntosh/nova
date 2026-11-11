@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="287">
+<meta name="plan-version" content="288">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -956,6 +956,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261111T085614711154-review-of-bank-lane-drive-0185fcbdee3f" data-who="reckon-build" data-when="2026-11-11T09:06:52Z">
     <div class="r-comment-body"><p>Independent review of eb78afe5355009db83dfbc5750cc5081f37859d7..0185fcbdee3fd967269587058806174edcce6fbc: parsed, scores 19/18/20/19/18/5, zero added failures, zero blocking and one non-blocking duplicate-runner finding; both record audits pass.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261111T135708264996-review-of-booking-pin-tolerance-936c1b95c10b" data-who="reckon-build" data-when="2026-11-11T14:11:30.042Z">
+    <div class="r-comment-body"><p>review: booking-pin-tolerance-936c1b95c passes its goal but its done-when is only partly met — the bit-changing reorder control was never produced (logs/negative-control-sum-reorder.log FIELDS-WITH-CHANGED-BITS 0 over four attempts) and the paired arms ran in place rather than in the named all_debug job; scores goal_fidelity 18, evidence 12, scope_discipline 20, durability 16, fit 17, reuse 20; added_failure_count 0.</p></div>
 </div>
 </section>
 </main>

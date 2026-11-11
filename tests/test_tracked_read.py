@@ -19,10 +19,12 @@ from nova.equilibrium.stencil_mesh import CellCurrentMoments
 assert jax.config.jax_enable_x64 is True
 
 
-def _case(kind):
+def _case(kind, *, wall=None):
     from tests.equilibrium import test_topology_read as fixture
 
-    _, analytic, wall, axis, saddle = fixture._analytic_inputs(kind)
+    _, analytic, default_wall, axis, saddle = fixture._analytic_inputs(kind)
+    if wall is None:
+        wall = default_wall
     geometry = fixture._realised_hex_geometry(wall, 50)
     samples = np.asarray(geometry.sample_points)
     nodes = np.unique(np.round(samples.reshape(-1, 2), 12), axis=0)
@@ -455,18 +457,30 @@ def test_in_cell_motion_that_changes_normal_cells_requires_full_read(diverted_ca
 
 
 def test_a_wall_contact_winner_change_rebuilds_at_a_limited_boundary():
-    """A limited boundary must rebuild when another wall event wins the contact.
+    """Opposite small tilts select two physically distinct limiter contacts."""
+    from tests.equilibrium import test_topology_read as fixture
 
-    Every real-geometry case above is diverted, so the list of wall events and
-    the winner among them are never exercised. Here the field moves slightly
-    with the tracked cell, the fragment links and the cut-cell classes all
-    unchanged, so the wall-contact winner is the only support decision that
-    differs from the carried one.
-    """
-    operands, cache, roots, convention, policy, moments, _analytic = _case("limited")
-    first, _pitch = _read(operands, cache, roots, convention, policy, moments)
+    oracle, *_ = fixture._analytic_inputs("limited")
+    inboard, outboard = oracle.boundary_midplane_radii()
+    height = 1.5 * np.sqrt(oracle.axis_flux / oracle.field_coefficient)
+    wall = np.asarray(
+        ((inboard, -height), (outboard, -height), (outboard, height), (inboard, height))
+    )
+    operands, cache, roots, convention, policy, moments, _analytic = _case(
+        "limited", wall=wall
+    )
+    # Both radial wall faces touch the untilted analytic boundary. The tilt
+    # separates their contact fluxes by 0.001 * (outboard - inboard), far
+    # above roundoff between Newton seeds for the same physical contact.
+    gradient = jnp.asarray((0.001, 0.0), dtype=jnp.float64)
+    initial, initial_cache = _shifted(operands, cache, -gradient)
+    first, _pitch = _read(initial, initial_cache, roots, convention, policy, moments)
     assert bool(first.rebuilt) and bool(first.valid)
-    moved, moved_cache = _shifted(operands, cache, 0.005 * jnp.asarray((-1.0, 0.0)))
+    assert int(first.reading.boundary_class) == int(topology.TopologyClass.LIMITED)
+    np.testing.assert_allclose(first.reading.boundary, (inboard, 0.0), atol=1e-10)
+    assert 0.001 * (outboard - inboard) > 0.003
+
+    moved, moved_cache = _shifted(operands, cache, gradient)
     tracking = support_read.tracking_of(first)
     result, _ = _read(
         moved, moved_cache, roots, convention, policy, moments, tracking=tracking
@@ -474,18 +488,9 @@ def test_a_wall_contact_winner_change_rebuilds_at_a_limited_boundary():
     assert bool(result.valid)
     assert bool(result.rebuilt)
     assert int(result.rebuilds) == int(first.rebuilds) + 1
-    # The rebuild answers the contact change; it is not a read that churns.
-    steady, _ = _read(
-        moved,
-        moved_cache,
-        roots,
-        convention,
-        policy,
-        moments,
-        tracking=support_read.tracking_of(result),
-    )
-    assert not bool(steady.rebuilt)
-    assert int(steady.rebuilds) == int(result.rebuilds)
+    assert int(result.reading.boundary_class) == int(topology.TopologyClass.LIMITED)
+    np.testing.assert_array_equal(result.cells, first.cells)
+    np.testing.assert_allclose(result.reading.boundary, (outboard, 0.0), atol=1e-10)
 
 
 def test_changed_fragment_incidence_refuses_carried_labels(diverted_case):

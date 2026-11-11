@@ -1079,7 +1079,11 @@ def _local_booking_sensitivities(
         * ((indices >= samples) & (indices < samples + 6))[:, None, None],
         (channels, cells, 6),
     )
-    return current.book_tangent_channels(
+    # Moving the boundary level is the negative constant-field direction.
+    # Add that constant to cancel its ring velocity, retaining the interior
+    # normalization derivative; recover the level channel by linearity below.
+    field_direction = field_direction.at[samples + 7, :, 0].set(1.0)
+    response = current.book_tangent_channels(
         psi,
         psi_direction,
         support.reading,
@@ -1091,8 +1095,9 @@ def _local_booking_sensitivities(
         density_gradient,
         quadrature,
         booked,
-        jnp.concatenate((jnp.arange(samples, samples + 6), jnp.asarray([samples + 7]))),
+        jnp.arange(samples, samples + 6),
     )
+    return response.at[:, :, samples + 7].add(-response[:, :, samples])
 
 
 _FRESH_GEOMETRY_NODE_CAPACITY = 3

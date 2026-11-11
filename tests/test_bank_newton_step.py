@@ -756,3 +756,125 @@ def test_route_comparison_cli_reaches_comparator(monkeypatch):
     monkeypatch.setattr(measure, "compare_route", reached)
     with pytest.raises(ReachedComparison):
         measure.main()
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("state", ["trial", "converged"])
+def test_booking_jacobian_matches_fresh_residual_difference(
+    diverted_linear_states, state
+):
+    """Include moving saddle geometry when differentiating a fresh support read."""
+    from scripts.prototypes.bank_solve_profile import fixture
+
+    assert jax.config.jax_enable_x64
+    batch, states = diverted_linear_states
+    moments = tuple(value[0] for value in states[state])
+
+    @jax.jit
+    def fresh(bank, cache, values):
+        reading = support_read.read(
+            bank,
+            cache,
+            values,
+            batch.seeds,
+            batch.roots,
+            batch.convention,
+            batch.policy,
+        )
+        return support_read.step_residual(
+            bank, values, values, reading, batch.profile, batch.quadrature
+        ).residual, reading
+
+    _, reading = jax.block_until_ready(fresh(batch.operands, batch.cache, moments))
+    matrix = jax.jit(
+        lambda b, m, s: support_read.step_jacobian(
+            b,
+            m,
+            s,
+            batch.profile,
+            fixture.gradient,
+            batch.quadrature,
+            fresh_geometry=True,
+        )
+    )(batch.operands, moments, reading)
+    cells = moments[0].size
+    shape = jnp.sin(1.7 * jnp.arange(cells)) + jnp.cos(2.3 * jnp.arange(cells))
+    direction = tuple(
+        jnp.max(jnp.abs(value)) * jnp.roll(shape, shift) / 4
+        for value, shift in zip(moments, (0, 17, 31), strict=True)
+    )
+    applied = matrix @ jnp.concatenate(direction)
+    errors = []
+    for epsilon in (1e-4, 1e-5, 1e-6):
+        plus = tuple(v + epsilon * d for v, d in zip(moments, direction, strict=True))
+        minus = tuple(v - epsilon * d for v, d in zip(moments, direction, strict=True))
+        high, high_read = fresh(batch.operands, batch.cache, plus)
+        low, low_read = fresh(batch.operands, batch.cache, minus)
+        difference = jnp.concatenate(
+            tuple(
+                (high_value - low_value) / (2 * epsilon)
+                for high_value, low_value in zip(high, low, strict=True)
+            )
+        )
+        assert bool(high_read.valid & low_read.valid)
+        scale = jnp.linalg.norm(difference)
+        assert float(scale) > 0
+        errors.append(float(jnp.linalg.norm(applied - difference) / scale))
+    print("FRESH_JACOBIAN_DIFFERENCE", state, errors, flush=True)
+    assert np.isfinite(errors).all() and min(errors) <= 1e-6
+
+
+def test_local_booking_reuses_constant_field_boundary_velocity(monkeypatch):
+    """The level channel shares a ring velocity and keeps its density derivative."""
+    from tests.test_current_book_vectorised import _cells
+
+    psi, reading, geometry, profile = _cells(1, slope=0.2)
+    operands = SimpleNamespace(
+        geometry=geometry, sample_index=jnp.arange(psi.size).reshape(psi.shape)
+    )
+    jets = jnp.zeros((psi.size, 6)).at[:, 0].set(psi.reshape(-1))
+    monkeypatch.setattr(support_read, "nodal_jets", lambda *_: jets)
+    channels_seen = []
+    original = current.book_tangent_channels
+
+    def observed(*args):
+        channels_seen.append(args[-1].shape[0])
+        return original(*args)
+
+    monkeypatch.setattr(current, "book_tangent_channels", observed)
+    quadrature = current.Quadrature(segments=8)
+    booked = current.book(psi, reading, geometry, profile, quadrature)
+    actual = jax.jit(
+        lambda: support_read._local_booking_sensitivities(
+            operands,
+            None,
+            SimpleNamespace(reading=reading),
+            profile,
+            lambda r, f: jnp.full_like(r, 0.2),
+            quadrature,
+            booked,
+        )
+    )()
+    indices = jnp.arange(14)
+    flux = jnp.zeros((14, 1, 6)).at[:6, 0, :].set(jnp.eye(6))
+    field = jnp.zeros((14, 1, 6)).at[6:12, 0, :].set(jnp.eye(6))
+    expected = jax.jit(
+        lambda: original(
+            psi,
+            flux,
+            reading,
+            field,
+            (indices == 12).astype(psi.dtype),
+            (indices == 13).astype(psi.dtype),
+            geometry,
+            profile,
+            lambda r, f: jnp.full_like(r, 0.2),
+            quadrature,
+            booked,
+            jnp.asarray([6, 7, 8, 9, 10, 11, 13]),
+        )
+    )()
+    relative = float(jnp.linalg.norm(actual - expected) / jnp.linalg.norm(expected))
+    print("LOCAL_CHANNEL_PARITY", relative, "BOUNDARY_CHANNELS", channels_seen)
+    assert relative <= 1e-12
+    assert channels_seen and all(number == 6 for number in channels_seen)

@@ -8,43 +8,51 @@
     <h3>What changed</h3>
     <p><code>tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments</code>
     pinned the SHA-256 digests of the six booked arrays for two CPU families. The digests
-    are red at the base revision because the same case now produces different bits on the
-    same CPU, so the pin measured bit identity rather than the result.</p>
+    were red at the base revision because the same case produces different bits on the same
+    CPU, so the pin measured bit identity rather than the result.</p>
     <p>The test now asserts each booked field against reference arrays stored in
-    <code>tests/data/booking_primal_diverted.npz</code>, within <code>1e-12</code> relative.
-    Fields with exact zeros and sign changes (<code>cell_current</code>, the two moments) use
-    an absolute floor of <code>1e-15</code>: the fields peak between <code>1e-3</code> and
+    <code>tests/data/booking_primal_diverted.npz</code> (2,769 bytes, six fields), within
+    <code>1e-12</code> relative. Fields with exact zeros and sign changes
+    (<code>cell_current</code>, <code>radial_moment</code>, <code>vertical_moment</code>) use
+    an absolute floor of <code>1e-15</code>: those fields peak between <code>1e-3</code> and
     <code>1e-1</code>, so the floor sits far above the roundoff a reordered sum leaves on a
-    zero entry and far below any entry carrying a physical contribution. <code>valid</code> is
-    boolean and compared exactly.</p>
-    <p>The reference arrays were written from the diverted case at revision
-    <code>b48deaa93f55ad2c759c5977ed611b9047e393fb</code> on the CPU lane; the command is
-    recorded in the test docstring. The digests survive only in the failure message, so a red
-    run names the field that moved without pinning bits.</p>
+    zero entry and far below any entry carrying a physical contribution.
+    <code>normalization</code> and <code>raw_current</code> are scalars
+    (<code>1.0</code> and <code>1.5034747433199205</code>), and <code>valid</code> is boolean
+    and compared exactly. The digests survive only in the failure message, so a red run names
+    the field that moved without pinning bits.</p>
+  </section>
+
+  <section id="booking-pin-tolerance-provenance">
+    <h3>Reference provenance</h3>
+    <p>The arrays were written from the diverted case on the CPU lane. The command recorded in
+    the test docstring imports <code>_booked_diverted</code>, which exists from revision
+    <code>936c1b95c10bc177a519d33fdc74916c07b8c912</code>, and rerunning it at that revision
+    reproduced all six fields: same dtype, same shape, same bytes each
+    (<code>ALL-FIELDS-BIT-IDENTICAL True</code>).</p>
   </section>
 
   <section id="booking-pin-tolerance-controls">
     <h3>Controls</h3>
-    <p><strong>Perturbation (fails as required).</strong> Scaling the reference
-    <code>radial_moment</code> by <code>1 + 1e-9</code> in a scratch copy of the tests tree
-    gives <code>FAILED tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments</code>,
-    <code>1 failed</code>, exit 1.</p>
-    <p><strong>Bit-only reorder (not produced).</strong> Four reorderings of the same terms —
-    a reversed reduction, a reversed quadrature integrand (a tangent-only path, so invalid),
-    a strided-half split, and a sequential <code>fori_loop</code> accumulation — all returned
-    bit-identical booked arrays on this path. XLA canonicalises the floating-point reductions
-    here, so a reorder in the booking cannot be made to move the bits, and the tolerance is
-    therefore not exercised against a genuine reorder. The control is
-    reported unmet rather than substituted: a one-ulp perturbation would show the test admits
-    roundoff noise, but it is not the reorder the clause asks for.</p>
+    <p><strong>Scale by <code>1 + 1e-15</code> (passes, as required).</strong> Scaling the
+    stored <code>radial_moment</code> by <code>1 + 1e-15</code> in a scratch copy of the tests
+    tree changes its digest from <code>b109cedeb1d0…</code> to <code>9e96577609f1…</code>, so
+    the bits moved, and the test passes: <code>1 passed</code>, exit 0. The change is a
+    thousandfold inside the <code>1e-12</code> tolerance, which is the size of the noise a
+    reordered accumulation produces.</p>
+    <p><strong>Scale by <code>1 + 1e-9</code> (fails, as required).</strong> The same
+    perturbation at <code>1e-9</code> relative returns
+    <code>FAILED tests/test_bank_step_booking.py::test_book_primal_keeps_exact_diverted_moments</code>,
+    <code>1 failed</code>, exit 1. The pair brackets the tolerance: <code>1e-15</code> is
+    accepted, <code>1e-9</code> is refused.</p>
   </section>
 
   <section id="booking-pin-tolerance-arms">
     <h3>Paired arms</h3>
-    <p>Base <code>b48deaa93f5</code>: <code>1 failed, 4 passed</code> in 164.4 s, the pinned
-    test the only failure. Head: <code>5 passed</code> in 146.4 s. Both arms ran one fresh
-    process each, the command
-    <code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_bank_step_booking.py</code>
-</p>
+    <p>Both arms ran one fresh process each with
+    <code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_bank_step_booking.py</code>.
+    At the base revision <code>b48deaa93f5</code> the run was
+    <code>1 failed, 4 passed</code> in 164.43 s, the pinned test the only failure. At the head
+    the run was <code>5 passed</code> in 156.06 s, so no other test changed state.</p>
   </section>
 </article>

@@ -41,8 +41,9 @@ def test_book_primal_keeps_exact_diverted_moments():
     """Every booked field reproduces the stored reference within tolerance.
 
     ``tests/data/booking_primal_diverted.npz`` was written from the diverted
-    case at revision ``b48deaa93f55ad2c759c5977ed611b9047e393fb`` on the CPU
-    lane with::
+    case on the CPU lane and is reproduced bit for bit at revision
+    ``936c1b95c10bc177a519d33fdc74916c07b8c912`` — the commit that introduced
+    :func:`_booked_diverted` — by::
 
         PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -c '
         import numpy as np
@@ -51,8 +52,10 @@ def test_book_primal_keeps_exact_diverted_moments():
         np.savez("tests/data/booking_primal_diverted.npz",
                  **{n: np.asarray(v) for n, v in zip(b._fields, b)})'
 
-    The digests below are printed only when a field disagrees, so a failure
-    says which field moved and by how much without pinning the bits.
+    Rerunning that command at that revision leaves every stored field
+    identical in dtype, shape and bytes. The digests below are printed only
+    when a field disagrees, so a failure says which field moved and by how
+    much without pinning the bits.
     """
     booked = _booked_diverted()
     reference = np.load(REFERENCE_PATH)

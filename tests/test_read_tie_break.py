@@ -56,7 +56,7 @@ def test_masks_nan_zero_and_batched_axes():
     np.testing.assert_array_equal(selected, [1, 2])
     assert int(topology.extremum_index(jnp.asarray([-jnp.inf, -jnp.inf]))) == 0
     assert int(topology.extremum_index(jnp.asarray([1.0, jnp.inf]))) == 1
-    assert int(topology.extremum_index(jnp.asarray([jnp.nan, jnp.nan]))) == -1
+    assert int(topology.extremum_index(jnp.asarray([jnp.nan, jnp.nan]))) == 0
 
 
 @jax.jit
@@ -119,12 +119,11 @@ def test_x_point_data_refuses_all_nan_admitted_scores(outside):
     assert int(reader.x_point_index(candidates, 1.0, jnp.nan)) == -1
 
 
-def test_read_at_nulls_uses_tie_rule_for_both_wall_rankings(monkeypatch):
-    """Construct wall scores while holding component geometry unambiguous."""
+def _wall_read_fixture(monkeypatch, flux):
+    """Hold component geometry unambiguous while exercising read selections."""
     from types import SimpleNamespace
 
     wall_levels = []
-    flux = jnp.asarray([1.0, 1.0 + 5e-13])
     points = jnp.asarray([[1.0, -1.0], [1.0, 1.0]])
     geometry = SimpleNamespace(
         contour_mesh=SimpleNamespace(overflow=False),
@@ -132,7 +131,9 @@ def test_read_at_nulls_uses_tie_rule_for_both_wall_rankings(monkeypatch):
         full_area=jnp.ones(1),
         fit_inverse=jnp.eye(2)[None],
     )
-    monkeypatch.setattr(topology, "_wall_events", lambda *args: (points, flux))
+    monkeypatch.setattr(
+        topology, "_wall_events", lambda values, *args: (points, values)
+    )
     monkeypatch.setattr(topology, "_inside_cells", lambda *args: jnp.ones(1, bool))
     monkeypatch.setattr(
         topology,
@@ -175,8 +176,8 @@ def test_read_at_nulls_uses_tie_rule_for_both_wall_rankings(monkeypatch):
     )
     policy = topology.TopologyPolicy(null_capacity=1)
     run = jax.jit(
-        lambda values: topology._read_at_nulls(
-            None,
+        lambda values, wall_flux: topology._read_at_nulls(
+            wall_flux,
             geometry,
             topology.TopologyConvention.from_cocos(17, 1.0),
             policy,
@@ -188,6 +189,19 @@ def test_read_at_nulls_uses_tie_rule_for_both_wall_rankings(monkeypatch):
             None,
         )
     )
+    return (
+        lambda values: run(values, flux),
+        nulls,
+        geometry,
+        policy,
+        points,
+        wall_levels,
+    )
+
+
+def test_read_at_nulls_uses_tie_rule_for_both_wall_rankings(monkeypatch):
+    flux = jnp.asarray([1.0, 1.0 + 5e-13])
+    run, nulls, _, _, points, wall_levels = _wall_read_fixture(monkeypatch, flux)
     result = run(nulls)
     jax.block_until_ready(result)
     jax.effects_barrier()
@@ -205,3 +219,86 @@ def test_shared_exact_owner_preserves_input_precision(dtype):
     assert int(jax.jit(connectivity_boundary._argmax_exact)(values)) == 2
     assert int(jax.jit(connectivity_boundary._argmin_exact)(values)) == 1
     assert int(jax.jit(topology.extremum_index)(values)) == 2
+    missing = jnp.full(2, jnp.nan, dtype=dtype)
+    assert int(jax.jit(connectivity_boundary._argmax_exact)(missing)) == 0
+    assert int(jax.jit(connectivity_boundary._argmin_exact)(missing)) == 0
+
+
+@pytest.mark.parametrize("site", ["mode", "initial_wall", "confined_wall", "contact"])
+def test_all_nan_call_sites_select_first_candidate(monkeypatch, site):
+    """Observe each production selection; all-NaN scores must not wrap to last."""
+    from types import SimpleNamespace
+
+    indices = []
+    select = topology.extremum_index
+
+    def observed(score, **kwargs):
+        index = select(score, **kwargs)
+
+        def record(values, selected):
+            if np.all(np.isnan(values)):
+                indices.append(int(selected))
+
+        jax.debug.callback(record, score, index, ordered=True)
+        return index
+
+    monkeypatch.setattr(topology, "extremum_index", observed)
+    if site == "mode":
+        from tests.test_topology_o_qualification import _topology_fixture
+
+        reader, _ = _topology_fixture()
+        result = reader.boundary(
+            jnp.asarray([1.0, 0.0, 2.0]),
+            jnp.full((3, 3), jnp.nan),
+            jnp.asarray([1.0, 0.0, jnp.nan]),
+            1.0,
+        )
+        jax.block_until_ready(result)
+        jax.effects_barrier()
+        print("ALL_NAN_SELECTION", site, indices, np.asarray(result))
+        assert indices == [0]
+        assert np.all(np.isnan(np.asarray(result)))
+        return
+
+    flux = jnp.asarray([1.0, 2.0]) if site == "contact" else jnp.full(2, jnp.nan)
+    run, nulls, geometry, policy, points, _ = _wall_read_fixture(monkeypatch, flux)
+    decision = run(nulls)
+    jax.block_until_ready(decision)
+    jax.effects_barrier()
+    if site != "contact":
+        print("ALL_NAN_SELECTION", site, indices, np.asarray(decision.boundary))
+        assert len(indices) == 2
+        assert indices[0 if site == "initial_wall" else 1] == 0
+        np.testing.assert_array_equal(decision.boundary, points[0])
+        return
+
+    indices.clear()
+    monkeypatch.setattr(topology, "_wall_events", lambda *args: (points, flux))
+    decision = decision._replace(boundary=jnp.full(2, jnp.nan))
+    coefficient = jnp.zeros((1, 6))
+    field = SimpleNamespace(sampled_coefficient=lambda _: coefficient)
+    monkeypatch.setattr(
+        topology,
+        "_fragments_at_level",
+        lambda *args: (
+            jnp.asarray([[1.0, 0.0]]),
+            jnp.zeros((1, 2, 1, 2)),
+            jnp.asarray(True),
+            jnp.asarray(1),
+        ),
+    )
+    result = jax.jit(
+        lambda solved, carried: topology.refresh_at_stationary_points(
+            field,
+            geometry,
+            topology.TopologyConvention.from_cocos(17, 1.0),
+            policy,
+            solved,
+            carried,
+        )
+    )(nulls, decision)
+    jax.block_until_ready(result)
+    jax.effects_barrier()
+    print("ALL_NAN_SELECTION", site, indices, np.asarray(result.boundary))
+    assert indices == [0]
+    np.testing.assert_array_equal(result.boundary, points[0])

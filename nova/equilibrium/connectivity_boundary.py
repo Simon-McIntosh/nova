@@ -140,7 +140,8 @@ def _arg_extreme(
 
     Exact reductions retain first-position selection. With a positive tolerance,
     choose the lowest canonical index within tolerance * abs(best); a permutation
-    carries its canonical indices. All-NaN tolerant inputs return -1.
+    carries its canonical indices. All-NaN inputs select the first position;
+    callers qualify the selected candidate separately.
     """
     values = jax.lax.stop_gradient(jnp.asarray(values))
     if candidate_index is not None:
@@ -171,8 +172,10 @@ def _arg_extreme(
     best, selected = jax.lax.reduce(
         (values, indices), initial, choose, dimensions=(axis,)
     )
+    has_value = jnp.any(~jnp.isnan(values), axis=axis)
+    empty_index = 0
     if relative_tolerance == 0.0 and candidate_index is None:
-        return selected
+        return jnp.where(has_value, selected, empty_index)
     best = jnp.expand_dims(best, axis)
     difference = best - values if maximize else values - best
     tied = ~jnp.isnan(values) & (
@@ -188,7 +191,7 @@ def _arg_extreme(
     selected = jnp.argmin(
         jnp.where(tied, candidate_index, jnp.iinfo(jnp.int32).max), axis=axis
     )
-    return jnp.where(jnp.any(~jnp.isnan(values), axis=axis), selected, -1)
+    return jnp.where(has_value, selected, empty_index)
 
 
 def _argmax_exact(values):

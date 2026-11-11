@@ -145,7 +145,7 @@ def critical_census(radius, height, flux, mask, boundary=None):
     )
     previous = None
     histories = []
-    for refine in (16, 32):
+    for refine in (16, 32, 64):
         fine_r = np.linspace(radius[0], radius[-1], (len(radius) - 1) * refine + 1)
         fine_z = np.linspace(height[0], height[-1], (len(height) - 1) * refine + 1)
         fine = field(fine_r, fine_z)
@@ -187,6 +187,7 @@ def critical_census(radius, height, flux, mask, boundary=None):
                 dict(
                     **null,
                     kind=kind,
+                    in_saved_support=bool(membership(point[None])[0] > 0.5),
                     in_plasma=inside,
                     flux_wb=float(field.ev(*point)),
                     hessian_eigenvalues_wb_per_m2=eigenvalues.tolist(),
@@ -211,7 +212,9 @@ def critical_census(radius, height, flux, mask, boundary=None):
                 and np.linalg.norm(np.asarray(first["rz_m"]) - second["rz_m"]) < 1e-5
                 for first, second in zip(previous, points)
             )
-            if not stable or not coverage:
+            if stable and coverage:
+                break
+            if refine == 64:
                 raise ValueError(f"critical census not closed: {histories}")
         previous = points
     maxima = [p for p in points if p["kind"] == "maximum" and p["in_plasma"]]
@@ -388,7 +391,21 @@ def analyze(entry):
     ref_field, sol_field = [spline(radius, height, v) for v in (reference, solved)]
     ref_mask = polygon_mask(radius, height, data["label_boundary"])
     solved_mask = np.asarray(data["connected"], bool)
-    solved_core = critical_census(radius, height, solved, solved_mask)
+    current = current_and_force(radius, height, solved, solved_mask)
+    reference_current = current_and_force(radius, height, reference, ref_mask)
+    # A saved node mask can also admit a private-flux island below the saddle.
+    # Qualify plasma extrema on the main closed surface around its centroid.
+    preliminary_boundary = boundary_curve(
+        radius,
+        height,
+        solved,
+        np.asarray(current["centroid_rz_m"]),
+        float(data["boundary"][2]),
+        float(solved[solved_mask].max()),
+    )
+    solved_core = critical_census(
+        radius, height, solved, solved_mask, preliminary_boundary
+    )
     reference_core = critical_census(
         radius, height, reference, ref_mask, data["label_boundary"]
     )
@@ -420,8 +437,6 @@ def analyze(entry):
     axis_offset = axis - ref_axis if axis is not None and ref_axis is not None else None
     saddle_offset = saddle - ref_saddle
     fit = fit_translation(radius, height, solved, reference, ref_mask)
-    current = current_and_force(radius, height, solved, solved_mask)
-    reference_current = current_and_force(radius, height, reference, ref_mask)
     solved_shape = core_shape(radius, height, solved, solved_core, current)
     reference_shape = core_shape(
         radius, height, reference, reference_core, reference_current
@@ -434,6 +449,9 @@ def analyze(entry):
         np.asarray(current["centroid_rz_m"]),
         float(data["boundary"][2]),
         solved_core["max_flux_wb"],
+    )
+    closed_current = current_and_force(
+        radius, height, solved, polygon_mask(radius, height, sol_boundary)
     )
     ref_in, ref_out = horizontal_intersections(
         ref_boundary, float(data["reference_axis"][1])
@@ -482,6 +500,7 @@ def analyze(entry):
         reference_saddle_rz_m=ref_saddle.tolist(),
         fit=fit,
         current=current,
+        closed_plasma_current=closed_current,
         reference_current=reference_current,
         boundary_level_fraction=0.999,
         boundary_gap_cm=dict(

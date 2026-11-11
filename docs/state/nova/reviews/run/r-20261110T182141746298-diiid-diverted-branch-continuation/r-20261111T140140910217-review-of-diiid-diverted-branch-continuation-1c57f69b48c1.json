@@ -46,6 +46,13 @@
     "renderer": "ImageMagick convert -density 140 from git show 1c57f69b48c1:docs/figures/diiid-diverted-branch-continuation/*.svg under the run scratch TMPDIR",
     "result": "Both panels legible at 1400 px: axes off, one figure-level legend, solved flux solid green over dashed grey EFIT flux on shared levels, solved axis triangle and solved saddle cross distinguished from EFIT hollow circle and plus, the limiter drawn, both lower-distance endpoints visible in the inset, and machine/frame plus support, residual and gap stated under each panel. No clipped or colliding text observed."
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "one stale sentence in the run's landing note about suite arms; the manifest's recorded arms at 1c57f69b4 are the authority and are correct",
+      "recorded_at": "2026-11-11T14:14:54.428238+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-diverted-branch-continuation.html",

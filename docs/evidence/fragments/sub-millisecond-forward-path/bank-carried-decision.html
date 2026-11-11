@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s2">
+<meta name="plan-recorded-at" content="2026-11-09">
+<meta name="plan-verdict" content="partial">
+<title>Carried support decision | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<section id="bank-carried-decision-result">
+<h1>Carried support decision with fresh geometry</h1>
+<p>The implementation, focused controls and five-file paired suites are complete.
+The paired suites have zero added failures. Titan P100 job <code>1309317</code>
+and retry <code>1309319</code> both failed during the sixteen-lane base builder.
+Those failures are accepted as measured memory limits. The width-8 titan rerun,
+job <code>1309751</code>, timed out after two hours and is retained as an
+incomplete measurement, <strong>not a speed verdict</strong>. The
+H200 width-16 paired wall and precision verdict, including an inspected figure,
+are deferred to a later timing node. Job <code>1309825</code> was cancelled
+unrun by the coordinator while still pending on Resources. It had been submitted
+under <code>gpu_0003_grpA</code> with one GPU, four CPUs, 96 GB host memory and
+a two-hour allocation. This node lands on its CPU evidence; the titan receipts
+remain information only. The cards are held by long-running services.</p>
+<h2 id="bank-carried-decision-mechanism">Continuous refresh under a fixed decision</h2>
+<p><code>support_read.read_batch</code> still forms the stationary stencil and
+one batch-level <code>rebuild_needed</code> decision, including represented
+saddle cells. When no lane requires a
+rebuild, <code>topology.refresh_at_stationary_points</code> carries fragment
+selection, connected component and wall labels, admitted saddle slots, and the
+normal-form cell set. It recomputes nodal jets, own-cell coefficients, stationary
+positions and fluxes, saddle normal form, fragment areas, edge intervals and
+fractional membership from the new state. The full and carried routes share
+<code>topology._fragments_at_level</code>; connectivity and candidate inspection
+are skipped on a carry. Before labels can be carried, the refreshed fragments
+must preserve live slots, cut-cell classes, neighbour links and wall incidence.
+These local checks share the full read's connection calculation without repeating
+its global label propagation.</p>
+<p>Limited boundaries recompute wall events and follow the contact nearest the
+carried boundary. A tentative converged residual triggers a full fresh read
+before <code>solve_batch</code> can accept it. The last allowed update also
+uses a full read; an invalid search that retains a carried incumbent at the cap
+receives a terminal full read. The residual tolerance remains 1e-10.</p>
+<h2 id="bank-carried-decision-controls">Controls that distinguish the implementation</h2>
+<table><thead><tr><th>Control</th><th>Observed result</th></tr></thead><tbody>
+<tr><td>Base at a moved state with unchanged tracked cells</td>
+<td>The equality test fails on axis, relative error
+<code>2.9542256489575536e-7</code> against the 1e-12 bound.</td></tr>
+<tr><td>Initial focused head gate, before adding the explicit refusal arm</td>
+<td><code>8 passed in 152.60s</code>. The moved-state test reports zero relative
+difference for every checked continuous quantity.</td></tr>
+<tr><td>Scratch mutation carrying the preceding edge intervals</td>
+<td>The equality test fails on <code>edge_interval</code>, relative error
+<code>7.391647964927195e-6</code> against the 1e-12 bound.</td></tr>
+<tr><td>Paired support-read suite</td><td>Base and head each report
+<code>13 passed, 2 skipped</code>.</td></tr>
+</tbody></table>
+<p>The controls include a full rebuild when a tracked cell changes and a full
+certificate even when the discrete decision stays unchanged. The added
+invalid-certificate arm initially over-constrained later backtracking requests;
+its assertion is corrected to permit a non-converged half-trial to skip
+certification while retaining the refusal and fresh-return checks. The paired rerun and the final guard suite both pass. The displacement sweep reproduced an additional defect: at a 0.2-pitch shift,
+tracked null cells stayed unchanged while eight normal-form cells and thirteen
+fragment selections changed; relative membership error was 0.747911826. The
+implementation now refuses to carry across represented-cell or fragment-incidence
+changes. Stable shifts of 1e-6, 1e-3 and 0.01 pitch are covered separately from
+the in-cell rebuild case.</p>
+<p>Control-header caveat: the first controls launcher stamped the pinned base
+revision on its head and mutated-arm headers. Their imported paths identify
+the head worktree and the scratch overlay respectively; the overlay carries
+product source <code>3c3607a6ed73c5ffd210d5c8e4f16c2ee0a2a09e</code>.
+The final paired suite logs carry the correct revision, and subsequent controls
+use the corrected header. The raw records are retained unchanged.</p>
+<h2 id="bank-carried-decision-suites">Completed paired suites</h2>
+<p>Sirius job <code>1308738</code> completed in 20 min 1 s. Each arm ran each
+file in a fresh process with its own basetemp, and every per-file log ends
+<code>EXIT=0</code>. Base is <code>8ce11904123bfebd516bc418416a6ec5eeb10117</code>.
+The head logs identify either <code>3c3607a6ed73c5ffd210d5c8e4f16c2ee0a2a09e</code>
+or <code>76d2cd50e345494417c380a99559783ddd5e6890</code>; SHA-256 comparisons of
+both product modules and the tracked-read test confirm identical contents at
+those head revisions.</p>
+<table><thead><tr><th>File</th><th>Base</th><th>Head</th><th>Added failures</th></tr></thead><tbody>
+<tr><td>test_tracked_read.py</td><td>4 passed</td><td>13 passed</td><td>0</td></tr>
+<tr><td>test_support_read.py</td><td>13 passed, 2 skipped</td><td>13 passed, 2 skipped</td><td>0</td></tr>
+<tr><td>test_bank_solve_driver.py</td><td>10 passed</td><td>10 passed</td><td>0</td></tr>
+<tr><td>test_bank_solve_cycle.py</td><td>3 passed</td><td>3 passed</td><td>0</td></tr>
+<tr><td>test_candidate_inspection_batched.py, light</td><td>5 passed, 4 deselected</td><td>5 passed, 4 deselected</td><td>0</td></tr>
+</tbody></table>
+<p>Totals are 35 base passes and 44 head passes, with two skips and four
+deselections in each arm. The audit reads the pytest summaries, failure IDs and
+terminal exit lines rather than relying on the scheduler result. Its parser
+first finds all three known failures in the stale-edge negative-control log,
+so a zero failure count has a positive instrument control. The complete audit,
+including source hashes and each per-file receipt, is retained as
+<code>paired-suite-audit.json</code> beside <code>paired-suite-audit.log</code>,
+which ends <code>EXIT=0</code>. The committed reproducer is
+<code>scripts/prototypes/bank_carried_decision/audit_suites.py</code>.</p>
+<h2 id="bank-carried-decision-pending">Titan capacity and timeout receipts; H200 verdict deferred</h2>
+<p>The final paired suite above closes the CPU gate. The earlier job
+<code>1308719</code> and repaired tracked-read job <code>1308723</code> retain
+the preceding revisions' evidence; the repaired file reports nine passing tests.
+The final tracked-read head arm reports <code>13 passed in 298.62s</code>;
+controls job <code>1308729</code> independently reports
+<code>13 passed in 317.01s</code> and logs
+<code>REFUSAL invalid fresh certificate: no lane accepted</code>. The declared
+stale-edge mutation at that guard head fails all three equality cases, with
+relative edge-interval errors <code>7.391647964927195e-6</code>,
+<code>0.007403997178451971</code> and
+<code>0.07517782408822127</code>; its log ends <code>EXIT=1</code>. The reserved H200
+job <code>1308720</code> was pending on Resources; under the revised device
+decision it was cancelled by its explicit id. The queue line was printed before
+and after cancellation and accounting confirms <code>CANCELLED</code>.
+Titan job <code>1309317</code> used one P100 with four CPUs, 96 GB host memory
+and a two-hour limit. It failed before producing common inputs or any timing:
+<code>RESOURCE_EXHAUSTED: Out of memory while trying to allocate 14.08GiB</code>
+(15,120,349,440 bytes). The compiler reported 16,672,843,845 temporary bytes
+(15.53 GiB), above its 11,840,517,815-byte fitting target. Builder and parent
+logs both end <code>EXIT=1</code>. The paired retry, titan job
+<code>1309319</code>, used JAX memory-fitting level O3 and effort 1.0 for both
+revisions, retaining <code>XLA_FLAGS=unset</code>. Its base builder failed with
+the same 15,120,349,440-byte allocation request and ended <code>EXIT=1</code>;
+accounting reports <code>FAILED</code> after 3 min 23 s, beside 3 min 34 s for
+the first attempt. Its header confirms <code>Tesla P100-PCIE-16GB</code>,
+64-bit arithmetic and an allocator limit of 12,801,015,808 bytes. The failure
+therefore exceeds the configured allocator budget; it does not establish that
+the whole solve would fit the card if that budget were raised. Both attempts
+stopped before producing the common-input archive, so there are no base/head
+process-zero, one or two receipts, hashes, census matches or independent terminal
+precision results to admit. Width 128 was not attempted because width 16 could
+not run. The two failures closed that width-16 attempt as a measured memory limit.
+The coordinator lifted the retry rule for one change of shape to width 8;
+no product code was changed. The H200 width-16 headline is deferred to a later timing node.</p>
+<p>The titan width-8 run built its common inputs at base and then reached only
+10 of the 15 inputs in base process zero. Accounting reports
+<code>TIMEOUT</code> at <code>02:00:05</code>; there is no completed head arm.
+The retained partial cold row is <strong>titan P100, width 8</strong>,
+13.14854 s per slice, four reads and three updates in every lane. This is an
+incomplete observation on the wrong device for the wall verdict, not a speed
+verdict for this change. The ten recorded rows have a largest independent fresh
+residual of 6.230038707144558e-11 and matching diagnostic census, but do not
+certify the missing rows or any paired precision comparison. The common-input
+SHA-256 is <code>8e347c8f2657c1fcb2841fc7fc09da2a7be0e2fe51c81e5e19a8135a535f83ce</code>.
+The builder ends <code>EXIT=0</code>; the truncated base-zero log has no terminal
+exit receipt. The parent log misleadingly ends <code>EXIT=0</code> despite the
+scheduler timeout. All original titan receipts remain unchanged.</p>
+<p>For the deferred timing node, the reserved H200 runner returns to all sixteen original perturbation lanes.
+It builds cold and preceding warm-stream inputs once at base, loads the same
+archive in both arms, uses a separate cache per revision, runs a separate warmup,
+and then fresh measured processes zero, one and two per arm. Both source trees
+are pinned archives, so a queued run cannot silently change with the worktree.
+An independent full read recomputes every terminal residual. The untimed census
+must match the timed executable's per-lane trials and updates. The reporter
+requires every arm's complete receipt and a positive all-arms completion marker,
+then uses <code>pair_gaps</code> for the unchanged precision budget. A parent
+exit line alone cannot admit a truncated measurement. The reporter was applied
+to the actual timed-out titan parent log and refused it with
+<code>AssertionError: paired job did not finish all arms</code>; the retained
+refusal log ends <code>EXIT=1</code>.</p>
+<p>Complete logs and receipts are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T044945756828-bank-carried-decision</code>.
+The reproducible launchers and reporter are under
+<code>scripts/prototypes/bank_carried_decision</code>.
+The failed P100 logs are in <code>titan/builder.log</code> and
+<code>titan-memory-fit/builder.log</code>, with their parent logs in the same
+directories. The incomplete width-8 receipts remain under <code>titan-eight</code>,
+labelled <strong>not a speed verdict</strong>. Reserved H200 width-16
+job <code>1309825</code> was cancelled unrun by the coordinator while pending
+on Resources; it will not be resubmitted here and no further titan run is allowed.
+Its configured base archive was <code>8ce11904123bfebd516bc418416a6ec5eeb10117</code>
+and head archive <code>d4bab5fe15e463dcec7831253b5c85f64495b657</code>.
+The intended receipt directory was <code>h200-sixteen</code>; its submission
+record is retained, with no timing result from the cancelled job.
+The paired wall and precision audit and rendered, inspected SVG are deferred to
+the later timing node. The H200 headline is deferred; this node is complete on
+its CPU evidence. The launchers and measurement scripts remain in place for that
+node to rerun from main with root set to the main checkout.</p>
+</section>
+</main></body></html>

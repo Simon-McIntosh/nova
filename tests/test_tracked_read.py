@@ -5,7 +5,7 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
-from dataclasses import dataclass, replace
+from dataclasses import replace
 
 import jax
 import jax.numpy as jnp
@@ -111,11 +111,16 @@ def test_a_field_change_that_keeps_the_x_point_in_its_cell_triggers_no_rebuild(
         diverted_case
     )
     hessian = np.asarray(analytic.evaluate(jnp.asarray(roots[1])).hessian)
-    displacement = 0.2 * float(pitch) * np.asarray((1.0, 0.0))
+    displacement = 0.01 * float(pitch) * np.asarray((1.0, 0.0))
     gradient = jnp.asarray(hessian @ displacement)
     moved = _shifted(operands, cache, gradient)
     support, _ = _read(
-        *moved, roots, convention, policy, moments, tracking=support_read.tracking_of(first)
+        *moved,
+        roots,
+        convention,
+        policy,
+        moments,
+        tracking=support_read.tracking_of(first),
     )
     assert bool(support.valid)
     assert np.asarray(support.cells[1]) == np.asarray(first.cells[1])
@@ -128,14 +133,21 @@ def test_the_read_lands_on_the_analytic_extremum_and_saddle(diverted_case):
     averaged across a cell.
 
     The reference is the analytic field's own stationary points, which the
-    fixture constructs independently of any read code, so no instrument this
-    node changes decides the clause. The budget is the locked precision budget
-    as ratios of machine size: 5e-4 of the minor radius, taken here as the
+    fixture constructs independently of the read being checked. The position
+    budget is 5e-4 of the minor radius, taken here as the
     distance from the analytic axis to the furthest sample point.
     """
-    operands, _cache, roots, _convention, _policy, _moments, _analytic, first, _pitch = (
-        diverted_case
-    )
+    (
+        operands,
+        _cache,
+        roots,
+        _convention,
+        _policy,
+        _moments,
+        _analytic,
+        first,
+        _pitch,
+    ) = diverted_case
     samples = np.asarray(operands.geometry.sample_points).reshape(-1, 2)
     minor_radius = float(
         np.max(np.linalg.norm(samples - np.asarray(roots[0]), axis=-1))
@@ -157,9 +169,250 @@ def test_a_field_change_that_moves_the_x_point_out_of_its_cell_rebuilds_once(
     gradient = jnp.asarray(hessian @ displacement)
     moved = _shifted(operands, cache, gradient)
     support, _ = _read(
-        *moved, roots, convention, policy, moments, tracking=support_read.tracking_of(first)
+        *moved,
+        roots,
+        convention,
+        policy,
+        moments,
+        tracking=support_read.tracking_of(first),
     )
     assert bool(support.valid)
     assert np.asarray(support.cells[1]) != np.asarray(first.cells[1])
     assert bool(support.rebuilt)
     assert int(support.rebuilds) == int(first.rebuilds) + 1
+
+
+_CONTINUOUS = (
+    "axis",
+    "axis_flux",
+    "x_points",
+    "x_point_flux",
+    "boundary",
+    "boundary_flux",
+    "membership",
+    "fragment_area",
+    "edge_interval",
+    "field_coefficients",
+    "saddle_form",
+)
+
+
+def _assert_continuous_equal(carried, fresh):
+    for name in _CONTINUOUS:
+        for got, want in zip(
+            jax.tree.leaves(getattr(carried, name)),
+            jax.tree.leaves(getattr(fresh, name)),
+            strict=True,
+        ):
+            got, want = np.asarray(got), np.asarray(want)
+            if want.dtype.kind in "biu":
+                np.testing.assert_array_equal(got, want, err_msg=name)
+                continue
+            np.testing.assert_array_equal(
+                np.isfinite(got), np.isfinite(want), err_msg=name
+            )
+            finite = np.isfinite(want)
+            if finite.any():
+                scale = max(float(np.max(np.abs(want[finite]))), 1e-30)
+                error = float(np.max(np.abs(got[finite] - want[finite]))) / scale
+                print("CONTINUOUS", name, "relative_error", error, flush=True)
+                assert error <= 1e-12, (name, error)
+
+
+@pytest.mark.parametrize("displacement", [1e-6, 1e-3, 0.01])
+def test_carried_decision_equals_fresh_continuous_geometry(diverted_case, displacement):
+    operands, cache, roots, convention, policy, moments, analytic, first, pitch = (
+        diverted_case
+    )
+    hessian = np.asarray(analytic.evaluate(roots[1]).hessian)
+    gradient = jnp.asarray(
+        hessian @ (displacement * float(pitch) * np.array([1.0, 0.0]))
+    )
+    moved, moved_cache = _shifted(operands, cache, gradient)
+    states = jax.tree.map(lambda value: value[None], moments)
+    points = roots[None]
+    tracked = jax.tree.map(lambda value: value[None], support_read.tracking_of(first))
+
+    def run(bank, rows, tracking):
+        return support_read.read_batch(
+            bank, rows, states, points, points, convention, policy, tracking=tracking
+        )
+
+    carried = jax.jit(run)(moved, moved_cache, tracked)
+    fresh = jax.jit(run)(moved, moved_cache, None)
+    assert not bool(carried.rebuilt[0])
+    assert bool(fresh.rebuilt[0])
+    assert bool(carried.valid[0]) and bool(fresh.valid[0])
+    np.testing.assert_array_equal(
+        carried.reading.fragment_selected, fresh.reading.fragment_selected
+    )
+    np.testing.assert_array_equal(
+        carried.reading.normal_form_cells, fresh.reading.normal_form_cells
+    )
+    # The comparison must see motion: equality at an unchanged state cannot
+    # distinguish a refreshed read from one carrying continuous values.
+    assert (
+        float(
+            jnp.max(
+                jnp.abs(fresh.reading.edge_interval[0] - first.reading.edge_interval)
+            )
+        )
+        > 1e-12
+    )
+    _assert_continuous_equal(carried.reading, fresh.reading)
+
+
+def test_batch_rebuilds_full_read_when_tracked_cell_changes(diverted_case):
+    operands, cache, roots, convention, policy, moments, analytic, first, pitch = (
+        diverted_case
+    )
+    hessian = np.asarray(analytic.evaluate(roots[1]).hessian)
+    gradient = jnp.asarray(hessian @ (0.2 * float(pitch) * np.array([-1.0, 0.0])))
+    moved, moved_cache = _shifted(operands, cache, gradient)
+    states = jax.tree.map(lambda value: value[None], moments)
+    points = roots[None]
+    tracking = jax.tree.map(lambda value: value[None], support_read.tracking_of(first))
+    run = jax.jit(
+        lambda tracked: support_read.read_batch(
+            moved,
+            moved_cache,
+            states,
+            points,
+            points,
+            convention,
+            policy,
+            tracking=tracked,
+        )
+    )
+    carried = run(tracking)
+    fresh = run(None)
+    assert bool(carried.rebuilt[0])
+    assert int(carried.rebuilds[0]) == int(first.rebuilds) + 1
+    _assert_continuous_equal(carried.reading, fresh.reading)
+
+
+def test_certificate_replaces_carried_read_with_full_fresh_read(diverted_case):
+    operands, cache, roots, convention, policy, moments, _, first, _ = diverted_case
+    states = jax.tree.map(lambda value: value[None], moments)
+    tracking = jax.tree.map(lambda value: value[None], support_read.tracking_of(first))
+    run = jax.jit(
+        lambda tracked, certify: support_read.read_batch(
+            operands,
+            cache,
+            states,
+            roots[None],
+            roots[None],
+            convention,
+            policy,
+            tracking=tracked,
+            certificate=lambda _: certify,
+        )
+    )
+    carried = run(tracking, jnp.asarray(False))
+    certified = run(tracking, jnp.asarray(True))
+    fresh = run(None, jnp.asarray(False))
+    assert not bool(carried.rebuilt[0])
+    assert bool(certified.rebuilt[0])
+    _assert_continuous_equal(certified.reading, fresh.reading)
+
+
+@pytest.mark.parametrize("certificate_valid", [True, False])
+def test_solve_requires_full_certificate_after_carried_candidate(
+    monkeypatch, certificate_valid
+):
+    from tests.test_bank_solve_driver import _toy_read, _toy_residual, _unit_update
+
+    observed = []
+
+    def read(*args, tracking=None, certificate=None, **kwargs):
+        result = _toy_read(*args, **kwargs)
+        if tracking is None:
+            return result._replace(rebuilt=jnp.ones_like(result.rebuilt))
+        assert certificate is not None
+        requested = certificate(result)
+        jax.debug.callback(lambda flag: observed.append(bool(jnp.any(flag))), requested)
+        return result._replace(
+            rebuilt=requested, valid=result.valid & (~requested | certificate_valid)
+        )
+
+    def step(*args, **kwargs):
+        result = _unit_update(*args, **kwargs)
+        return result._replace(update=tuple(-value for value in args[1]))
+
+    monkeypatch.setattr(support_read, "read_batch", read)
+    monkeypatch.setattr(support_read, "step_residual", _toy_residual)
+    monkeypatch.setattr(support_read, "newton_step", step)
+    points = jnp.zeros((2, 1, 2), dtype=jnp.float64)
+    states = tuple(jnp.ones((2, 1), dtype=jnp.float64) for _ in range(3))
+    result = jax.jit(
+        lambda values: support_read.solve_batch(
+            None,
+            None,
+            values,
+            points,
+            points,
+            None,
+            None,
+            None,
+            None,
+            None,
+            max_steps=2,
+        )
+    )(states)
+    jax.block_until_ready(result)
+    jax.effects_barrier()
+    assert observed and any(observed)
+    if certificate_valid:
+        assert all(observed)
+    assert bool(jnp.all(result.converged)) == certificate_valid
+    assert bool(jnp.all(result.support.rebuilt))
+    if not certificate_valid:
+        print("REFUSAL invalid fresh certificate: no lane accepted", flush=True)
+
+
+def test_in_cell_motion_that_changes_normal_cells_requires_full_read(diverted_case):
+    operands, cache, roots, convention, policy, moments, analytic, first, pitch = (
+        diverted_case
+    )
+    hessian = np.asarray(analytic.evaluate(roots[1]).hessian)
+    moved, rows = _shifted(
+        operands,
+        cache,
+        jnp.asarray(hessian @ (0.2 * float(pitch) * np.array([1.0, 0.0]))),
+    )
+    stencil = support_read.stationary_stencil(
+        moved, rows, moments, roots, roots, convention
+    )
+    tracked = support_read.tracking_of(first)
+    np.testing.assert_array_equal(stencil.cells, tracked.cells)
+    assert bool(support_read.rebuild_needed(stencil, tracked, operands.geometry))
+    states = jax.tree.map(lambda value: value[None], moments)
+    tracking = jax.tree.map(lambda value: value[None], tracked)
+    run = jax.jit(
+        lambda tracked: support_read.read_batch(
+            moved,
+            rows,
+            states,
+            roots[None],
+            roots[None],
+            convention,
+            policy,
+            tracking=tracked,
+        )
+    )
+    result = run(tracking)
+    fresh = run(None)
+    assert bool(result.rebuilt[0])
+    _assert_continuous_equal(result.reading, fresh.reading)
+
+
+def test_changed_fragment_incidence_refuses_carried_labels(diverted_case):
+    operands, _, _, _, policy, _, _, first, _ = diverted_case
+    decision = first.reading
+    assert not bool(
+        topology.carried_decision_changed(decision, decision, operands.geometry, policy)
+    )
+    changed = decision._replace(edge_interval=jnp.zeros_like(decision.edge_interval))
+    assert bool(
+        topology.carried_decision_changed(changed, decision, operands.geometry, policy)
+    )

@@ -1,0 +1,93 @@
+<section id="icm-law-fit-state">
+  <h2>Increasing-permeability steel law</h2>
+  <p>The production fitter accepts the unchanged WEST CEA table through
+    <code>StaticMachineDescription.read_iron_core</code>, retaining every supplied
+    B–H knot and the origin permeability. Two inserted breakpoints make the
+    previously inadmissible origin tangent possible. The existing iron-table
+    domain, finite relative permeability at least one, remains unchanged;
+    within it the construction imposes no upper bound on a positive endpoint
+    tangent relative to an interval secant. No permeability is clamped and no
+    tabulated knot is dropped or smoothed.</p>
+  <p>Scope: <code>nova/biot/magnetisation.py</code> and additive tests in
+    <code>tests/test_magnetisation.py</code>. The production solve and its runtime
+    operand interface are unchanged. This receipt concerns the material fit;
+    it does not establish convergence of the whole WEST solve.</p>
+
+  <h3 id="icm-law-fit-reproduction">Reproduced input and refusal</h3>
+  <p>The source is the machine entry
+    <code>imas:hdf5?path=/home/ITER/mcintos/Code/imas-efit/tests/data/imas/WEST/machine/dd4-1-0</code>,
+    opened at its written DD version <code>4.1.0</code> through
+    <code>read_iron_core</code>. Six iron segments were returned. The first
+    material has 25 pairs, with μ<sub>r</sub>(0) = 215.11019 and
+    μ<sub>r</sub>(0.5 T) = 1037.9637. The directly read table, imported production
+    module path and refusal are preserved in <code>reproduction.log</code> in
+    the run directory. At base <code>d42e6878e7b98ad690d510103f80b487d1973606</code>,
+    the origin tangent is 3699.381770149879 A/(m·T), 4.82526513504544 times the
+    first interval secant; the reproduced exception is:</p>
+  <pre>ValueError('origin permeability is incompatible with the first B-H interval')</pre>
+
+  <h3 id="icm-law-fit-construction">Positive derivative construction</h3>
+  <p>Let an interval have width w &gt; 0, H increment wδ &gt; 0, and positive
+    endpoint slopes p and q. For intervals with p,q ≤ 2δ the bounded Hermite
+    cubic is retained. At normalised coordinate t in (0,1), its derivative
+    divided by δ is affine in p/δ and q/δ. At the four vertices of their
+    closed [0,2] square it equals, respectively,
+    6t(1−t), 2(1−t), 2t, and 2−6t+6t². All are strictly positive in the
+    interior, the last being at least 1/2. The actual endpoint derivatives
+    p,q are strictly positive too.</p>
+  <p>If either endpoint exceeds 2δ, choose:</p>
+  <pre>f = min(1/4, δ / (2(p + q)))
+v = [δ − f(p + q)/2] / (1 − f)</pre>
+  <p>The derivative ramps linearly from p to v over length fw, stays at v
+    for (1−2f)w, then ramps linearly from v to q over fw. Because
+    f(p+q)/2 ≤ δ/4, v ≥ 3δ/[4(1−f)] &gt; 0. Every value of each ramp is a
+    convex combination of positive endpoint derivatives, and the plateau is
+    positive. Integration gives two quadratics and a line, stored in the
+    existing four-coefficient polynomial representation. The integrated
+    increment is exactly the prescribed one:</p>
+  <pre>∫ H′(B) dB = w [f(p+q)/2 + (1−f)v] = wδ.</pre>
+  <p>The joining values follow by integrating the first ramp from the left
+    table knot and the last ramp backwards from the right table knot. Both
+    inner derivatives are v, and adjacent authored intervals share their
+    fitted endpoint slope. Thus H and H′ are continuous at both inserted and
+    authored knots. The origin slope is set to 1/(μ₀μ<sub>r</sub>(0)) exactly
+    in the coefficients. The final slope is set to
+    H(B<sub>max</sub>)/B<sub>max</sub>, matching the unchanged held end-secant
+    permeability outside the table. The derivative is Lipschitz across the
+    finite polynomial joins, as required for local quadratic Newton convergence.</p>
+
+  <h3 id="icm-law-fit-material-measure">Material gate</h3>
+  <table>
+    <thead><tr><th>Quantity</th><th>Measured value</th></tr></thead>
+    <tbody>
+      <tr><td>WEST authored / fitted knots</td><td>25 / 27</td></tr>
+      <tr><td>Inserted B values</td><td>0.050176353516388106 and 0.4498236464836119 T</td></tr>
+      <tr><td>Maximum relative error at authored H knots</td><td>0.0</td></tr>
+      <tr><td>Maximum relative H mismatch at a join</td><td>2.6111941982654304e-16</td></tr>
+      <tr><td>Maximum relative H′ mismatch at a join</td><td>8.354872543083568e-16</td></tr>
+      <tr><td>Relative H′ mismatch into held tail</td><td>6.661338147750939e-16</td></tr>
+      <tr><td>Origin H′</td><td>3699.381770149879 A/(m·T)</td></tr>
+      <tr><td>Minimum sampled WEST H′ through 12 T</td><td>56.166964456 A/(m·T)</td></tr>
+    </tbody>
+  </table>
+  <p>The test samples 201 points per polynomial piece, including every short
+    ramp, plus 201 in the held tail. It checks both exact polynomial limits at
+    every join and differentiates the production JAX coefficient to measure
+    the differential law. The synthetic origin tangent is 500 times its
+    first secant; a second synthetic table exercises a terminal tangent
+    20 times its adjacent secant. Both fit and have positive sampled
+    derivatives. The focused material gate reports
+    <code>9 passed, 12 deselected in 33.82s</code>, <code>EXIT=0</code>.
+    Detailed values are in <code>spline-metrics.log</code> and
+    <code>material-focused.log</code> in the run directory.</p>
+
+  <h3 id="icm-law-fit-suite">Full file and mutation receipts</h3>
+  <p>Pending: one sirius job, 1310636, is running the exact scoped baseline
+    and head suite commands sequentially in independent revision extractions,
+    then restoring the refusal branch in the head extraction for the WEST
+    negative control. This paragraph will be replaced by the completed receipts.</p>
+  <p>Durable implementation commit:
+    <code>284dce417f6d225c7859febdd04d1e7f29cf42cc</code>.
+    Logs are under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T144605264038-icm-law-fit/</code>.</p>
+</section>

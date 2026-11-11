@@ -129,7 +129,7 @@ def main():
         assert results["negative"]["exit_status"] != 0
         source.write_text(text)
         files = json.loads(args.files.read_text())
-        with ThreadPoolExecutor(max_workers=4) as pool:
+        with ThreadPoolExecutor(max_workers=2) as pool:
             futures = {}
             for arm in ("base", "repaired"):
                 tree, revision = trees[arm]

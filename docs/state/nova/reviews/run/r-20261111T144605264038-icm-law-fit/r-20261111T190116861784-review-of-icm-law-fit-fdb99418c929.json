@@ -32,6 +32,13 @@
     "FINDING tests/test_magnetisation.py:285 non-blocking: the zero-magnitude assertion compares two outputs of _fit_law and cannot redden on a wrong origin tangent; the delta labels it as a branch check and the independent guard is the exact comparison at :258, so it is recorded rather than repaired.",
     "FINDING docs/figures/iron-core-magnetisation/icm-law-fit/differential-law.svg:1 non-blocking: the figure has no committed producer, so it cannot be regenerated from the tree; the renderer sits only in the reviewed run's directory and duplicates the layout check at scripts/edge_sheet/figure.py:48; the SVG itself renders cleanly and was re-inspected."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the delta now labels the grad(h)(0) assertion as the zero-magnitude branch check, and the independent origin-slope guard at tests/test_magnetisation.py:258 is the cited evidence",
+      "recorded_at": "2026-11-11T19:54:16.969815+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_magnetisation.py",

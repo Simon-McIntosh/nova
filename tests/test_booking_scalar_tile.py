@@ -128,6 +128,55 @@ def test_scalar_tile_refuses_nonpositive_width():
         current._scalar_cut_width(current.Quadrature(scalar_cut_batch_width=0))
 
 
+@pytest.mark.parametrize("entry", ["book", "book_tangent"])
+def test_scalar_width_changes_conic_bucket_count(physical, entry):
+    psi, reading, geometry = _population(physical, 67)
+    rule = current.Quadrature(segments=8)
+    booked = jax.jit(current.book)(psi, reading, geometry, UnitDensity(), rule)
+    loop = jax.lax.fori_loop
+    loop_owner = "_integrate_bucket" if entry == "book" else entry
+    counts_by_width = []
+    for width in (32, 128):
+        counts = []
+
+        def observe_loop(lower, upper, body, initial, **kwargs):
+            if body.__qualname__ == loop_owner + ".<locals>.add_batch":
+                jax.debug.callback(
+                    lambda bound: counts.append(int(bound)), upper, ordered=True
+                )
+            return loop(lower, upper, body, initial, **kwargs)
+
+        quadrature = replace(rule, scalar_cut_batch_width=width)
+
+        def evaluate(value):
+            if entry == "book":
+                return current.book(value, reading, geometry, UnitDensity(), quadrature)
+            return current.book_tangent(
+                value,
+                jnp.ones_like(value),
+                reading,
+                jnp.ones_like(reading.field_coefficients),
+                jnp.asarray(0.1),
+                jnp.asarray(0.2),
+                geometry,
+                UnitDensity(),
+                lambda radius, flux: jnp.ones_like(radius),
+                quadrature,
+                booked,
+            )
+
+        with patch.object(jax.lax, "fori_loop", observe_loop):
+            result = jax.block_until_ready(jax.jit(evaluate)(psi))
+        jax.effects_barrier()
+        assert all(np.all(np.isfinite(value)) for value in result[:3])
+        expected = [3, 0] if entry == "book" else [3]
+        expected[0] = 3 if width == 32 else 1
+        assert counts == expected, (entry, width, counts)
+        counts_by_width.append(counts[0])
+    assert counts_by_width == [3, 1]
+    print("CONIC_BUCKETS", entry, "widths=32,128", counts_by_width, flush=True)
+
+
 @pytest.mark.parametrize("width", [32, 64, 128])
 @pytest.mark.parametrize("count", [0, 17, 67, 128, 137, 257])
 def test_bucket_bound_includes_partial_population(count, width):

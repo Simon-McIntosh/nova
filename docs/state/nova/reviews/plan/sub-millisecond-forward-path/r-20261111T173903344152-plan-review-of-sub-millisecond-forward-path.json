@@ -97,9 +97,22 @@
       "note": "Section 5 now requires gate logs, per-arm receipts and the job log on GPFS (run directory or ~/.cache/nova-h200-timing/), never only node /tmp.",
       "reason": "",
       "when": "2026-11-11T18:22:51.882083+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "the three identifiers name live runs whose fragments land with them (booking-scalar-tile is delivered and under review; read-live-candidates and read-diverted-wall-skip are in flight); section 5 now says levers are timed only once landed.",
+      "when": "2026-11-11T18:23:53.292781+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the three identifiers name live runs whose fragments land with them (booking-scalar-tile is delivered and under review; read-live-candidates and read-diverted-wall-skip are in flight); section 5 now says levers are timed only once landed.",
+      "when": "2026-11-11T18:23:53.292781+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "",

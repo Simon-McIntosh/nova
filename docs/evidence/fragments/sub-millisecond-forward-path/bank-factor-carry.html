@@ -77,7 +77,26 @@ non-contracting first-update test with EXIT=1; the same test passes at head.</p>
 <p>Titan job 1310055 completed in 01:22:42 against its authorized eight-hour
 allocation, with scheduler state COMPLETED, exit 0:0, and allocation-log
 EXIT=0. One warmup and one measured process ran for each arm. Source digests
-for the measured head match the delivered product files; JSON and array receipt
-digests validate. The figure passed the shared text-bounds and overlap check
+bind the measured head to the carry-enabled experiment; JSON and array receipt
+digests validate. The subsequent default-policy change makes that measured
+policy an explicit opt-in. The figure passed the shared text-bounds and overlap check
 and was rendered from SVG and visually inspected before commit.</p>
+<p>The opt-in policy change was validated in one seven-CPU sirius job, 1310226,
+which completed in 00:20:13 with scheduler exit 0:0 and allocation-log EXIT=0.
+At base 101d1d839d90b4859f42df114707bff1ee2dbeae, fresh processes passed
+8 continuation and 10 solver tests; at head
+f9f4bd34738c4681e87a6a01fb29d4197cb11a3c they passed 10 and 14.
+The exact two-file command also passed 18 tests at base and 24 at head, with
+zero added failures. The new default-call test failed before repair because
+<code>reuse_factor=True</code> was supplied implicitly; it now passes while
+observing that no carried-factor arguments reach either solve. The existing
+factor and predicted-seed observation test opts in explicitly. The latest
+unguarded-reuse mutant still fails both non-contracting rebuild cases:
+2 failed, 1 passed, EXIT=1. Receipts are retained in the run directory's
+<code>opt-in-cpu</code> subdirectory.</p>
+<p>Fresh Newton factors remain the default. Carry is an opt-in experiment:
+assemblies fall from 29 to 4, but reads rise from 43 to 107 and accepted updates
+from 29 to 93, approximately doubling estimated H200 batch time from 2.84 s to
+5.73 s. The precision result is preserved; this measurement rejects factor
+carry as the default latency policy.</p>
 </section>

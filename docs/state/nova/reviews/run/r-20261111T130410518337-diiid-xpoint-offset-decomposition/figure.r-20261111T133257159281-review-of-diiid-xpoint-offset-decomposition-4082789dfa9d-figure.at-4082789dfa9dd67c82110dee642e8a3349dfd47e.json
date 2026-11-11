@@ -35,6 +35,13 @@
       }
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "layout: the comparison panels render narrower than their columns, but labels are legible, nothing overlaps, and the detail panel carries the X-point comparison the record cites",
+      "recorded_at": "2026-11-11T13:50:35.877911+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_xpoint_offset/render.py",

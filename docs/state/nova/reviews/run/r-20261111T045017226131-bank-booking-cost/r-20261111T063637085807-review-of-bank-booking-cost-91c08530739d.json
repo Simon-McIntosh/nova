@@ -1,0 +1,201 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "additional_suite_evidence": {
+    "added_failure_ids": [],
+    "base_passed": 33,
+    "base_skipped": 7,
+    "head_passed": 36,
+    "head_skipped": 7,
+    "logs": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T045017226131-bank-booking-cost/final-tiled-suites/base-test_bank_newton_step.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T045017226131-bank-booking-cost/final-tiled-suites/base-test_bank_solve_driver.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T045017226131-bank-booking-cost/final-tiled-suites/base-test_bank_step_booking_batch.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T045017226131-bank-booking-cost/final-tiled-suites/base-test_bank_step_launch_fusion.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T045017226131-bank-booking-cost/final-tiled-suites/head-test_bank_newton_step.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T045017226131-bank-booking-cost/final-tiled-suites/head-test_bank_solve_driver.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T045017226131-bank-booking-cost/final-tiled-suites/head-test_bank_step_booking_batch.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T045017226131-bank-booking-cost/final-tiled-suites/head-test_bank_step_launch_fusion.log"
+    ]
+  },
+  "assertion_analysis": {
+    "scripts/prototypes/bank_booking_cost/measure.py:100": "Fails if actual candidate matrices differ from archived baseline by more than 1e-12, including the missing boundary subtraction; NaN also fails.",
+    "scripts/prototypes/bank_booking_cost/measure.py:33": "Fails if x64 is disabled.",
+    "scripts/prototypes/bank_booking_cost/measure.py:67": "Fails if the lowered-program operation parser recognizes no HLO or StableHLO operations.",
+    "scripts/prototypes/bank_booking_cost/report.py:154": "Fails if either candidate booking median is not lower than the corresponding baseline process median.",
+    "scripts/prototypes/bank_booking_cost/report.py:155": "Fails if either within-arm process spread exceeds 5%; the retained report-gate.log actually demonstrates this refusal.",
+    "scripts/prototypes/bank_booking_cost/report.py:164": "Fails for an empty-norm or nonfinite reference matrix.",
+    "scripts/prototypes/bank_booking_cost/report.py:168": "Fails if the reference matrix is essentially identity and therefore cannot demonstrate a nontrivial booking derivative.",
+    "scripts/prototypes/bank_booking_cost/report.py:171": "Always refuses the locally manufactured 0.1 percent scaled reference for a nonzero finite matrix and catches that refusal; reinstating a missing production parity guard would not change it, so this is not independent coverage of that guard.",
+    "scripts/prototypes/bank_booking_cost/report.py:195": "Fails when a suite log lacks terminal EXIT=0.",
+    "scripts/prototypes/bank_booking_cost/report.py:201": "Fails when a suite log lacks any passed-test summary.",
+    "scripts/prototypes/bank_booking_cost/report.py:207": "Fails when the dropped-booking log lacks terminal EXIT=1.",
+    "scripts/prototypes/bank_booking_cost/report.py:208": "Fails when the dropped-booking log lacks two failing tests; it does not itself verify their identities, which this review read from the raw log.",
+    "scripts/prototypes/bank_booking_cost/scatter.py:27": "Fails if x64 is disabled.",
+    "scripts/prototypes/bank_booking_cost/scatter.py:37": "Fails if either conic or normal cut population is absent.",
+    "scripts/prototypes/bank_booking_cost/scatter.py:60": "assert_allclose fails if bucket scatter omits, misplaces or duplicates nonzero derivative entries relative to independent mask placement.",
+    "scripts/prototypes/bank_booking_cost/stages.py:28": "Fails if x64 is disabled.",
+    "scripts/prototypes/bank_booking_cost/stages.py:39": "Fails for zero actual conic cells or differing counts across lanes.",
+    "scripts/prototypes/bank_booking_cost/stages.py:75": "Fails when a measured stage returns all zero or nonfinite output.",
+    "scripts/prototypes/bank_booking_cost/suites.sh:27": "The provenance plugin refuses a support_read module imported outside the intended arm root.",
+    "scripts/prototypes/bank_booking_cost/tile_probe.py:28": "Fails if x64 is disabled.",
+    "scripts/prototypes/bank_booking_cost/tile_probe.py:50": "Fails when a subsequent tile width changes sensitivity values beyond 1e-12; the first row compares its own copied array and only establishes a reference.",
+    "tests/test_bank_newton_step.py:769": "Fails when x64 is disabled before the fixture; a precision setup guard.",
+    "tests/test_bank_newton_step.py:819": "Fails when either newly displaced support read is invalid.",
+    "tests/test_bank_newton_step.py:821": "Fails when the independently evaluated fresh residual has zero directional response.",
+    "tests/test_bank_newton_step.py:824": "Fails when every finite-difference displacement differs from the assembled Jacobian by more than 1e-6 or any error is nonfinite; the retained identity-matrix mutation fails both state IDs with errors about 1.0000062.",
+    "tests/test_bank_newton_step.py:879": "Fails if boundary-level channel reconstruction loses the constant-field subtraction or normalization derivative; the independent seven-channel original formulation then differs by more than 1e-12.",
+    "tests/test_bank_newton_step.py:880": "Fails if seven boundary channels are restored or the tangent owner is never called; it does not observe the chosen tile width."
+  },
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:1145 step_jacobian calls _local_booking_sensitivities",
+    "nova/equilibrium/support_read.py:1437 newton_step.rebuild calls step_jacobian",
+    "nova/equilibrium/support_read.py:1552 step_batch.one calls newton_step",
+    "nova/equilibrium/support_read.py:1788 solve_batch.one_fresh calls newton_step"
+  ],
+  "completed_at": "2026-11-11T06:46:11Z",
+  "dispatched_at": "2026-11-11T06:38:17Z",
+  "failure_evidence": {
+    "after_suite": {
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/bank-booking-cost/tests/test_bank_newton_step.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "failure_ids_read_from_log": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T045017226131-bank-booking-cost/final-tiled-suites/head-test_bank_newton_step.log",
+      "revision": "ef85d688617abc2345b90b533b0ec296280d6a25"
+    },
+    "baseline_suite": {
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q /tmp/booking-suite-1310125-8b8I/base/tests/test_bank_newton_step.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "failure_ids_read_from_log": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T045017226131-bank-booking-cost/final-tiled-suites/base-test_bank_newton_step.log",
+      "revision": "101d1d839d90b4859f42df114707bff1ee2dbeae"
+    }
+  },
+  "figure_review": {
+    "render": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T063637085807-review-of-bank-booking-cost-91c08530739d/reviewed-figure.png",
+    "source_revision": "91c08530739dee8d0d534f76b70ec0620ea5896b",
+    "verdict": "Rendered exact committed SVG with ImageMagick and inspected: legible labels, no clipping or overlaps; shared legend identifies grey baseline and blue head."
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-booking-cost",
+      "recorded_at": "2026-11-11T06:55:12.883892+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "reckon refuses a second claim on support_read.py while bank-factor-carry holds it; the edit is authorised by the lead ruling of 2026-10-24 and is accepted with --accept-path at landing",
+      "recorded_at": "2026-11-11T06:55:25.768716+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "bank-booking-cost",
+      "recorded_at": "2026-11-11T06:55:16.939330+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "bank-booking-cost",
+      "recorded_at": "2026-11-11T06:55:21.287497+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "prototype timing helpers under scripts/prototypes; no product path; consolidating them is not this node's goal",
+      "recorded_at": "2026-11-11T06:55:29.478363+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_booking_cost/report.py",
+      "line": "155",
+      "severity": "blocking",
+      "text": "blocking: The final timing gate refuses baseline process spread 5.095494646609778% above its predeclared 5% bound; the source run cannot satisfy its two-agreeing-processes done_when until a new paired measurement passes."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "line": "1088",
+      "severity": "blocking",
+      "text": "blocking: This production edit has explicit brief authority but is absent from the registered write grant, as confirmed by the source manifest's orientation_write_paths and scope_note; the coordinator must repair the registry before promotion."
+    },
+    {
+      "file": "tests/test_bank_newton_step.py",
+      "line": "880",
+      "severity": "non-blocking",
+      "text": "non-blocking: The channel-count guard still passes if the default Jacobian tile is reverted from 128 to 32, and numerical parity also remains true, so no durable test protects the optimization responsible for the measured booking reduction."
+    },
+    {
+      "file": "scripts/prototypes/bank_booking_cost/report.py",
+      "line": "171",
+      "severity": "non-blocking",
+      "text": "non-blocking: The negative parity control constructs 1.001 times the same reference matrix and catches its own local threshold assertion instead of invoking measure.py's actual base/head comparison; deleting or breaking the production parity guard leaves this control green, so it cannot establish the claimed instrument refusal."
+    },
+    {
+      "file": "scripts/prototypes/bank_booking_cost/stages.py",
+      "line": "61",
+      "severity": "non-blocking",
+      "text": "non-blocking: timed reimplements compile/warm/synchronize/repeat/median timing already owned by scripts/prototypes/bank_step_speed/profile.py:29 measure, and measure.py:42 repeats that capability too; these helpers duplicate rather than wrap or extend the owner, multiplying timing implementations."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read all eleven commits from 101d1d839d90b4859f42df114707bff1ee2dbeae to 91c08530739dee8d0d534f76b70ec0620ea5896b; the seventeen changed paths contain the restricted production optimization, three new test cases, measurement tools, fragment and visually inspected SVG.",
+    "done_when": "The four final-tiled-suites base/head logs finish successfully and final-negative/negative-control.log fails both required states, while report-gate.log ends EXIT=1 because baseline spread is 5.095495% against 5%.",
+    "goal": "The brief at r-20261111T045017226131-bank-booking-cost/brief.txt asks for cheaper booking assembly, attribution and numerical parity; support_read.py:1088 implements channel reuse and wider tiles, but the required agreeing timing processes remain unproved.",
+    "manifest": "The source manifest names all eleven commits and receipts and discloses both blockers, but its status complete contradicts its checkpoint that the quantitative timing criterion remains unmet.",
+    "write_paths": "The source manifest declares tests, the prototype directory, fragment and figure directory, while support_read.py is absent from that grant despite the explicit brief exception authorizing its restricted edit."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_newton_step.py:824 fails on the recorded dropped-booking mutation and :879 checks independent channel parity, but reverting support_read.py:1062 to 32 leaves all three new tests passing and loses the main performance improvement.",
+    "evidence": "final-tiled-suites contains completed 33-pass base and 36-pass head receipts with zero added failures and final-negative/negative-control.log shows two failures, but report.py:155 refuses process agreement and report.py:171 does not exercise the production parity comparator.",
+    "fit": "support_read.py:1085 explains the mechanism and extends the existing booking helper with dataclasses.replace, and the committed SVG uses the existing palette and checked-save owner without clipped or overlapping text on inspection.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:1088 retains derivative channels and lowers observed width-sixteen cost, but docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-cost.html:9 explicitly leaves timing verification blocked.",
+    "reuse": "Production extends support_read._local_booking_sensitivities and calls current.book_tangent_channels, and report.py reuses save_checked, but stages.py:61 duplicates synchronized warm timing already owned by bank_step_speed/profile.py:29 rather than extending or wrapping it.",
+    "scope_discipline": "The seventeen-path diff matches the brief including the expressly authorized support_read.py exception, but that file is missing from the source manifest's orientation_write_paths and requires registry repair before promotion."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The brief at r-20261111T045017226131-bank-booking-cost/brief.txt asks for cheaper booking assembly, attribution and numerical parity; support_read.py:1088 implements channel reuse and wider tiles, but the required agreeing timing processes remain unproved.\nVERDICT done_when: The four final-tiled-suites base/head logs finish successfully and final-negative/negative-control.log fails both required states, while report-gate.log ends EXIT=1 because baseline spread is 5.095495% against 5%.\nVERDICT write_paths: The source manifest declares tests, the prototype directory, fragment and figure directory, while support_read.py is absent from that grant despite the explicit brief exception authorizing its restricted edit.\nVERDICT manifest: The source manifest names all eleven commits and receipts and discloses both blockers, but its status complete contradicts its checkpoint that the quantitative timing criterion remains unmet.\nVERDICT diff: Read all eleven commits from 101d1d839d90b4859f42df114707bff1ee2dbeae to 91c08530739dee8d0d534f76b70ec0620ea5896b; the seventeen changed paths contain the restricted production optimization, three new test cases, measurement tools, fragment and visually inspected SVG.\nCALL_SITES: nova/equilibrium/support_read.py:1145 step_jacobian calls _local_booking_sensitivities, nova/equilibrium/support_read.py:1437 newton_step.rebuild calls step_jacobian, nova/equilibrium/support_read.py:1552 step_batch.one calls newton_step, nova/equilibrium/support_read.py:1788 solve_batch.one_fresh calls newton_step\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:1088 retains derivative channels and lowers observed width-sixteen cost, but docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-cost.html:9 explicitly leaves timing verification blocked.\nSCORE evidence: 15\nJUSTIFICATION evidence: final-tiled-suites contains completed 33-pass base and 36-pass head receipts with zero added failures and final-negative/negative-control.log shows two failures, but report.py:155 refuses process agreement and report.py:171 does not exercise the production parity comparator.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: The seventeen-path diff matches the brief including the expressly authorized support_read.py exception, but that file is missing from the source manifest's orientation_write_paths and requires registry repair before promotion.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_bank_newton_step.py:824 fails on the recorded dropped-booking mutation and :879 checks independent channel parity, but reverting support_read.py:1062 to 32 leaves all three new tests passing and loses the main performance improvement.\nSCORE fit: 19\nJUSTIFICATION fit: support_read.py:1085 explains the mechanism and extends the existing booking helper with dataclasses.replace, and the committed SVG uses the existing palette and checked-save owner without clipped or overlapping text on inspection.\nSCORE reuse: 5\nJUSTIFICATION reuse: Production extends support_read._local_booking_sensitivities and calls current.book_tangent_channels, and report.py reuses save_checked, but stages.py:61 duplicates synchronized warm timing already owned by bank_step_speed/profile.py:29 rather than extending or wrapping it.\nFINDING scripts/prototypes/bank_booking_cost/report.py:155 blocking: The final timing gate refuses baseline process spread 5.095494646609778% above its predeclared 5% bound; the source run cannot satisfy its two-agreeing-processes done_when until a new paired measurement passes.\nFINDING nova/equilibrium/support_read.py:1088 blocking: This production edit has explicit brief authority but is absent from the registered write grant, as confirmed by the source manifest's orientation_write_paths and scope_note; the coordinator must repair the registry before promotion.\nFINDING tests/test_bank_newton_step.py:880 non-blocking: The channel-count guard still passes if the default Jacobian tile is reverted from 128 to 32, and numerical parity also remains true, so no durable test protects the optimization responsible for the measured booking reduction.\nFINDING scripts/prototypes/bank_booking_cost/report.py:171 non-blocking: The negative parity control constructs 1.001 times the same reference matrix and catches its own local threshold assertion instead of invoking measure.py's actual base/head comparison; deleting or breaking the production parity guard leaves this control green, so it cannot establish the claimed instrument refusal.\nFINDING scripts/prototypes/bank_booking_cost/stages.py:61 non-blocking: timed reimplements compile/warm/synchronize/repeat/median timing already owned by scripts/prototypes/bank_step_speed/profile.py:29 measure, and measure.py:42 repeats that capability too; these helpers duplicate rather than wrap or extend the owner, multiplying timing implementations.\n",
+  "reuse_search": {
+    "measurements": "Searched capability terms perf_counter, median, compiler_ir, as_text and timing definitions in bank_step_speed/profile.py, bank_step_jacobian_split, bank_jacobian_launches and bank_step_booking_batch; opened profile.measure as the existing synchronized timing owner, booking_batch.inputs/jacobians as reused fixture/matrix owners, and bank_solve_read.plot.save_checked as reused figure owner.",
+    "new_definitions": "New stage extraction, conic velocity wrapper, integral wrapper and scatter experiment call production owners; no separate algorithm owner found for their isolated receipt experiment. Local warmed timing loops duplicate profile.measure instead of extending it.",
+    "production": "Opened existing current.book_tangent_channels, _integrate_bucket and support_read._local_booking_sensitivities: additions extend or call these owners."
+  },
+  "review_method": "Read-only review; no suite rerun or implementation mutation. Runtime records are delivered outside the read-only git tree; no reviewer source commit applies.",
+  "review_run_id": "r-20261111T063637085807-review-of-bank-booking-cost-91c08530739d",
+  "reviewed_base_sha": "101d1d839d90b4859f42df114707bff1ee2dbeae",
+  "reviewed_head_sha": "91c08530739dee8d0d534f76b70ec0620ea5896b",
+  "reviewed_run_id": "r-20261111T045017226131-bank-booking-cost",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "source_commits": [
+    "e89945e124068beb97c37c7bd9b785c215c958b8",
+    "31949bb38cc291c7aeb6bd87d792e705fadc2230",
+    "4aa222fcc810e9b92321a80f53c42ab0595e73ff",
+    "d93d247c5c446b3329f8a9374cc18ae315589580",
+    "bd4f06a073e042b4e1a5fa60d77dfde3af89ea6e",
+    "a766ce176848d12fe88771788216007a28df0ad6",
+    "156311548c1d78cd3e8515d77b971e66270f5b52",
+    "37394fbe59eb3a6b250a299e6b630b40e18b1372",
+    "ef85d688617abc2345b90b533b0ec296280d6a25",
+    "5b696da3b3b0cf79386b609dd1527bc4fde56fa9",
+    "91c08530739dee8d0d534f76b70ec0620ea5896b"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T07:50:10.898211+00:00",
+  "total": 87
+}

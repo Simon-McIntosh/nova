@@ -7,9 +7,11 @@ the solve's terminal fresh residual alone certifies convergence.
 
 The remedy is drive continuation. A large drive change is split into sub-steps,
 each a warm-started :func:`nova.equilibrium.support_read.solve_batch` from the
-previous sub-step's converged state. Nothing inside the solve changes: it is
-called with the same Newton step, the same fresh-residual line search and the
-same terminal certification; only the drive each call is asked for is smaller.
+previous sub-step's converged state and, with opt-in reuse, last Newton factor.
+A carried factor's
+first trial must contract the fresh residual or the solve rebuilds it at the
+incumbent. The fresh-residual line search and terminal certification still
+decide which state is accepted.
 The driver adapts the sub-step size from the outcome of each call, and it
 certifies the state at the target drive against the unchanged fresh-read
 residual of at most :data:`CERTIFICATION_TOLERANCE`.
@@ -157,6 +159,8 @@ def advance_drive(
     solve_options: dict | None = None,
     previous_moments=None,
     previous_drive: float | jax.Array | None = None,
+    factor_cache: support_read.NewtonFactor | None = None,
+    factor_valid=True,
     initial_support=None,
 ) -> DriveContinuationResult:
     """Reach ``target_drive`` from lanes converged at ``start_drive``.
@@ -179,7 +183,12 @@ def advance_drive(
     ``solve`` is the solve the sub-steps call, defaulting to
     :func:`nova.equilibrium.support_read.solve_batch`; it exists so a caller
     can supply a version compiled for its own traced drive. ``solve_options``
-    are passed through to it unchanged.
+    are passed through. Factor reuse is opt-in through
+    ``solve_options={"reuse_factor": True}``: extra reads and updates can
+    outweigh skipped assemblies (estimated H200 batch cost 2.84 s with fresh
+    factors versus 5.73 s with carry over fourteen slices). With reuse enabled,
+    ``factor_cache`` and ``factor_valid`` can prime the first sub-step from a
+    preceding slice. Only accepted sub-steps replace that factor.
 
     Array start or target drives select independent lanes. ``profile_at`` then
     receives a drive vector and may return a callable from lane index to that
@@ -191,7 +200,8 @@ def advance_drive(
     For array drives, ``initial_support`` may supply the full support of the
     warm state. Otherwise, ``support_available`` marks lanes whose support is
     absent until their first accepted sub-solve. Rejected trial reads never
-    become incumbent support.
+    become incumbent support. Cross-slice priming through ``factor_cache``
+    applies to scalar drives only.
     """
     solve = solve or support_read.solve_batch
     options = dict(solve_options or {})
@@ -269,6 +279,11 @@ def advance_drive(
             axis_sign,
             max_steps=update_budget,
             tolerance=tolerance,
+            **(
+                {"factor_cache": factor_cache, "factor_valid": factor_valid}
+                if options.get("reuse_factor", False) and factor_cache is not None
+                else {}
+            ),
             **options,
         )
         steps = _batch_count(attempt.steps)
@@ -297,6 +312,8 @@ def advance_drive(
             drive = float(target_drive) if final else next_drive
             state_moments = attempt.moments
             state_previous = attempt.support.stationary.position
+            if options.get("reuse_factor", False) and hasattr(attempt, "factor"):
+                factor_cache, factor_valid = attempt.factor, attempt.factor_valid
             if final:
                 certified = residual <= certification_tolerance
                 break

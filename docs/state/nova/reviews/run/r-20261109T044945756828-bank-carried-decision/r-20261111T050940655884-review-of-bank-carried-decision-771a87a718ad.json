@@ -1,0 +1,159 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_review": [
+    {
+      "condition": "A leaf has differing integer/boolean values, a different finite mask, or relative continuous error above 1e-12.",
+      "location": "tests/test_tracked_read.py:207-219",
+      "mutation": "Carry prior axis/flux/area/edge/coefficient/form values; stale-edge mutation actually fails all three shifted cases."
+    },
+    {
+      "condition": "The stable shifted read rebuilds, the untracked read does not rebuild, either read is invalid, selected or normal cells differ, or fresh edge intervals show no motion.",
+      "location": "tests/test_tracked_read.py:240-262",
+      "mutation": "Always rebuild, keep stale continuous geometry, or alter carried ownership; the explicit motion assertion prevents unchanged-state equality from being counted."
+    },
+    {
+      "condition": "A moved tracked cell does not report a rebuild or exactly one counter increment, or rebuilt geometry differs from an independent untracked call.",
+      "location": "tests/test_tracked_read.py:289-291",
+      "mutation": "Ignore the tracked-cell change or reuse the preceding read."
+    },
+    {
+      "condition": "An unchanged carried call rebuilds, a requested certificate lacks the rebuilt flag, or certified geometry differs from fresh.",
+      "location": "tests/test_tracked_read.py:314-316",
+      "mutation": "Removing certification entirely fails the flag assertion; a flag-only bypass survives, as recorded in the first finding."
+    },
+    {
+      "condition": "The solver omits its certificate callback, never requests it, requests it inconsistently on the converging valid toy path, accepts an invalid certificate, or returns a non-fresh incumbent at the cap.",
+      "input_dependence": "certificate_valid is a supplied mock validity flag, but convergence is computed by the real solver; ignoring validity makes the False arm fail, so convergence==certificate_valid is not a tautology; rebuilt in the mock is derived from requested and tests propagation rather than execution of the real full-read branch.",
+      "location": "tests/test_tracked_read.py:331,364-368",
+      "mutation": "Remove the solve certificate callback, omit validity from convergence, or remove terminal fresh-read fallback."
+    },
+    {
+      "condition": "The displacement no longer preserves stationary cells, changed represented cells do not request rebuilding, the result fails to rebuild, or rebuilt geometry differs from fresh.",
+      "location": "tests/test_tracked_read.py:387-405",
+      "mutation": "Remove represented_saddle_cells from rebuild_needed; the positive in-cell displacement would stop forcing a full read."
+    },
+    {
+      "condition": "Unmodified fragment incidence is refused or zeroed edge intervals are accepted.",
+      "location": "tests/test_tracked_read.py:411-418",
+      "mutation": "Make carried_decision_changed always false; the zeroed-interval refusal becomes false."
+    },
+    {
+      "condition": "Missing exit/summary, unrecognised known failing control, a failed real arm, wrong base revision, different product bytes at a recorded head, added failure IDs, or unexpected pass totals.",
+      "location": "scripts/prototypes/bank_carried_decision/audit_suites.py:30-120",
+      "mutation": "Supply a truncated log, changed source revision, or known failing stale-edge receipt; source positive parser control actually observes three failure IDs."
+    },
+    {
+      "condition": "Unconverged common inputs or solve, wrong width/device/dtype, empty device trace, census missing initial full reads or lane divisibility, invalid terminal full read, or fresh residual above 1e-10.",
+      "location": "scripts/prototypes/bank_carried_decision/measure.py:68-82,101,144,285-286,374-396",
+      "mutation": "Run on the wrong device, suppress callbacks, lose convergence or return a stale terminal state; device measurements remain deferred so these guards have not all been executed at the final revision."
+    },
+    {
+      "condition": "Incomplete parent or process, wrong device/row keys/count/hash, mismatched paired rows, nonfinite/out-of-budget precision, invalid residual/census, or missing stream inputs.",
+      "location": "scripts/prototypes/bank_carried_decision/report.py:26-90,128",
+      "mutation": "Feed the actually timed-out parent ending EXIT=0 without the all-arms marker; source incomplete-receipt-refusal.log records AssertionError: paired job did not finish all arms."
+    }
+  ],
+  "call_sites": [
+    "nova/equilibrium/drive_continuation.py:146-171",
+    "nova/equilibrium/support_read.py:1870",
+    "nova/equilibrium/support_read.py:365",
+    "nova/equilibrium/topology.py:3087"
+  ],
+  "call_sites_seen": true,
+  "completed_at": "2026-11-11T05:22:44Z",
+  "dispatched_at": "2026-11-11T05:14:15Z",
+  "evidence_note": "Product modules and tracked-read test at final reviewed head are byte-identical to 3c3607a6ed73c5ffd210d5c8e4f16c2ee0a2a09e, the measured product head; all five raw suite pairs were read; no tests rerun.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "tracked-read-tests",
+      "recorded_at": "2026-11-11T05:53:24.544599+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "tracked-read-tests",
+      "recorded_at": "2026-11-11T05:53:36.466609+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "prototype measurement scaffolding under scripts/prototypes; the product path is unaffected and the duplicated runners are retired with the prototype directories rather than refactored in passing",
+      "recorded_at": "2026-11-11T05:53:48.046872+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_tracked_read.py",
+      "line": 315,
+      "severity": "non-blocking",
+      "text": "The certificate test checks a rebuilt flag and equal geometry at the identical unchanged state; replacing read_batch full_verdict with the refreshed carried result plus rebuilt=True and an incremented counter would preserve these assertions, while the solver test mocks read_batch entirely, so no added assertion independently proves that certificate requests execute the full topology read."
+    },
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": 3550,
+      "severity": "non-blocking",
+      "text": "The new limited wall_contact winner check has no focused changed-contact regression: all added real-geometry tracking cases use diverted_case, so dropping wall_stable from validity could survive the added tests even though limited contact ownership must trigger rebuilding."
+    },
+    {
+      "file": "scripts/prototypes/bank_carried_decision/suites.sh",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "run_file duplicates the existing fresh-process pytest runner in scripts/prototypes/bank_booking_primal_buckets/suite.py:26, and audit_suites.py:27 duplicates receipt parsing in scripts/prototypes/bank_jacobian_launches/suite.py:26; these additions neither wrap nor extend those owners, creating parallel log, exit and isolation policies."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the sixteen commits from 8ce11904123bfebd516bc418416a6ec5eeb10117 to 771a87a718ad4aafc91b098264cb876a32587c4d and their eleven-file delta; topology.py:3029 extracts shared continuous geometry, support_read.py:1870 integrates carry and certification, and subsequent commits add guards, receipts and the authorised deferral.",
+    "done_when": "Read the five-file quantitative gate in brief.txt and the authorised H200 deferral in resume-5-advice.txt; guarded logs record 35 base and 44 head passes with zero added failures, and incidence/negative-control.log records three stale-edge failures.",
+    "goal": "Read brief.txt and resume-5-advice.txt in the reviewed run; support_read.py:1870 carries refreshed decisions and certifies terminal candidates, satisfying the CPU-only landing authorised by the final coordinator decision.",
+    "manifest": "Read the source manifest.md, its baseline_suite and after_suite logs, and resume-5-advice.txt; complete correctly means CPU evidence delivered with device precision, timing and figure explicitly deferred, and the controls header caveat is disclosed in the fragment:74.",
+    "write_paths": "Read orientation_write_paths in the source manifest.md and the base-to-head name list; all eleven changed files lie inside the two product modules, tracked-read test, prototype directory and evidence fragment grants."
+  },
+  "justifications": {
+    "durability": "tests/test_tracked_read.py:219 rejects the demonstrated stale-edge regression and :367 rejects invalid certificates, but :315-316 can survive a flag-only certificate bypass and no added test exercises topology.py:3550 limited wall-contact switching.",
+    "evidence": "The source guarded/base-test_tracked_read.log and guarded/HEAD-test_tracked_read.log finish at 4 and 13 passes with EXIT=0, and incidence/negative-control.log fails three equality cases, with its mistaken revision header explicitly disclosed at fragment:74.",
+    "fit": "nova/equilibrium/topology.py:3029 and support_read.py:456 preserve the existing JAX staging, NamedTuple replacement and batch-uniform conditional idioms with mechanism-based names.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:1870 and nova/equilibrium/topology.py:3528 implement fresh continuous geometry under carried decisions, while the final fragment:25 states the authorised timing and precision deferral.",
+    "reuse": "topology.py:3029 extends the geometry owner and report.py:15 reuses pair_gaps, but suites.sh:17 and audit_suites.py:27 duplicate the per-file runner and receipt capabilities already owned by bank_booking_primal_buckets/suite.py:26 and bank_jacobian_launches/suite.py:26.",
+    "scope_discipline": "All eleven files in the reviewed delta match the source manifest orientation_write_paths, including scripts/prototypes/bank_carried_decision and docs/evidence/fragments/sub-millisecond-forward-path/bank-carried-decision.html."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read brief.txt and resume-5-advice.txt in the reviewed run; support_read.py:1870 carries refreshed decisions and certifies terminal candidates, satisfying the CPU-only landing authorised by the final coordinator decision.\nVERDICT done_when: Read the five-file quantitative gate in brief.txt and the authorised H200 deferral in resume-5-advice.txt; guarded logs record 35 base and 44 head passes with zero added failures, and incidence/negative-control.log records three stale-edge failures.\nVERDICT write_paths: Read orientation_write_paths in the source manifest.md and the base-to-head name list; all eleven changed files lie inside the two product modules, tracked-read test, prototype directory and evidence fragment grants.\nVERDICT manifest: Read the source manifest.md, its baseline_suite and after_suite logs, and resume-5-advice.txt; complete correctly means CPU evidence delivered with device precision, timing and figure explicitly deferred, and the controls header caveat is disclosed in the fragment:74.\nVERDICT diff: Read the sixteen commits from 8ce11904123bfebd516bc418416a6ec5eeb10117 to 771a87a718ad4aafc91b098264cb876a32587c4d and their eleven-file delta; topology.py:3029 extracts shared continuous geometry, support_read.py:1870 integrates carry and certification, and subsequent commits add guards, receipts and the authorised deferral.\nCALL_SITES: nova/equilibrium/drive_continuation.py:146-171, nova/equilibrium/support_read.py:1870, nova/equilibrium/support_read.py:365, nova/equilibrium/topology.py:3087\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:1870 and nova/equilibrium/topology.py:3528 implement fresh continuous geometry under carried decisions, while the final fragment:25 states the authorised timing and precision deferral.\nSCORE evidence: 19\nJUSTIFICATION evidence: The source guarded/base-test_tracked_read.log and guarded/HEAD-test_tracked_read.log finish at 4 and 13 passes with EXIT=0, and incidence/negative-control.log fails three equality cases, with its mistaken revision header explicitly disclosed at fragment:74.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All eleven files in the reviewed delta match the source manifest orientation_write_paths, including scripts/prototypes/bank_carried_decision and docs/evidence/fragments/sub-millisecond-forward-path/bank-carried-decision.html.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_tracked_read.py:219 rejects the demonstrated stale-edge regression and :367 rejects invalid certificates, but :315-316 can survive a flag-only certificate bypass and no added test exercises topology.py:3550 limited wall-contact switching.\nSCORE fit: 20\nJUSTIFICATION fit: nova/equilibrium/topology.py:3029 and support_read.py:456 preserve the existing JAX staging, NamedTuple replacement and batch-uniform conditional idioms with mechanism-based names.\nSCORE reuse: 5\nJUSTIFICATION reuse: topology.py:3029 extends the geometry owner and report.py:15 reuses pair_gaps, but suites.sh:17 and audit_suites.py:27 duplicate the per-file runner and receipt capabilities already owned by bank_booking_primal_buckets/suite.py:26 and bank_jacobian_launches/suite.py:26.\nFINDING tests/test_tracked_read.py:315 non-blocking: The certificate test checks a rebuilt flag and equal geometry at the identical unchanged state; replacing read_batch full_verdict with the refreshed carried result plus rebuilt=True and an incremented counter would preserve these assertions, while the solver test mocks read_batch entirely, so no added assertion independently proves that certificate requests execute the full topology read.\nFINDING nova/equilibrium/topology.py:3550 non-blocking: The new limited wall_contact winner check has no focused changed-contact regression: all added real-geometry tracking cases use diverted_case, so dropping wall_stable from validity could survive the added tests even though limited contact ownership must trigger rebuilding.\nFINDING scripts/prototypes/bank_carried_decision/suites.sh:17 non-blocking: run_file duplicates the existing fresh-process pytest runner in scripts/prototypes/bank_booking_primal_buckets/suite.py:26, and audit_suites.py:27 duplicates receipt parsing in scripts/prototypes/bank_jacobian_launches/suite.py:26; these additions neither wrap nor extend those owners, creating parallel log, exit and isolation policies.\n",
+  "reuse_search": "Searched fragment connections, continuous refresh, suite receipt parsing, per-file pytest runners, warm streams, timing wrappers and precision gaps at reviewed head; opened topology owner, warm streams, pair_gaps, primal-buckets runner and jacobian-launches receipt owner.",
+  "review_run_id": "r-20261111T050940655884-review-of-bank-carried-decision-771a87a718ad",
+  "reviewed_base_sha": "8ce11904123bfebd516bc418416a6ec5eeb10117",
+  "reviewed_head_sha": "771a87a718ad4aafc91b098264cb876a32587c4d",
+  "reviewed_run_id": "r-20261109T044945756828-bank-carried-decision",
+  "scope_amendment": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T044945756828-bank-carried-decision/resume-5-advice.txt",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_tracked_read.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T044945756828-bank-carried-decision/guarded/HEAD-test_tracked_read.log",
+      "revision": "3c3607a6ed73c5ffd210d5c8e4f16c2ee0a2a09e"
+    },
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_tracked_read.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T044945756828-bank-carried-decision/guarded/base-test_tracked_read.log",
+      "revision": "8ce11904123bfebd516bc418416a6ec5eeb10117"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T07:48:02.362028+00:00",
+  "total": 100
+}

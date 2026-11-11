@@ -138,6 +138,40 @@ def main():
     reproduction = (args.run / "reproduce.log").read_text()
     counter = re.search(r"WALL_EXECUTIONS[^\n]+", reproduction)
     assert counter is not None and "EXIT=1" in reproduction
+    controls = (args.run / "wall-controls.log").read_text()
+    assert controls.rstrip().endswith("EXIT=0")
+    execution_rows = re.findall(
+        r"WALL_EXECUTIONS \((\d), (\d)\) certificate (True|False) (\d+)", controls
+    )
+    assert len(execution_rows) == 4
+    for left, right, certificate, count in execution_rows:
+        expected = certificate == "True" or left == "1" or right == "1"
+        assert (int(count) > 0) == expected
+    suite_rows = []
+    for arm in ("base", "head"):
+        for filename in (
+            "test_tracked_read.py",
+            "test_support_read.py",
+            "test_read_wall_skip.py",
+        ):
+            if arm == "base" and filename == "test_read_wall_skip.py":
+                continue
+            log = (args.run / f"{arm}-{filename}.log").read_text()
+            assert log.rstrip().endswith("EXIT=0"), (arm, filename)
+            passed = re.search(r"(\d+) passed", log)
+            assert passed is not None
+            suite_rows.append(
+                f"<tr><td>{arm}</td><td><code>{filename}</code></td><td>{passed[1]} passed</td><td>0</td></tr>"
+            )
+    mutant = (args.run / "negative-control.log").read_text()
+    assert mutant.rstrip().endswith("EXIT=1")
+    failures = re.findall(r"^FAILED (\S+)", mutant, re.M)
+    assert any("classes2" in failure for failure in failures), failures
+    verification = f"""<h3 id="read-diverted-wall-skip-tests">Regression and refusal evidence</h3>
+<p>One seven-CPU Sirius job runs each suite file in a fresh interpreter at base and head. The node file is absent at base and is run at head only. No added failures occur.</p>
+<table><thead><tr><th>Arm</th><th>File</th><th>Result</th><th>Failures</th></tr></thead><tbody>{"".join(suite_rows)}</tbody></table>
+<p>The all-to-any scratch mutation fails <code>{escape(", ".join(failures))}</code>, with <code>EXIT=1</code>; the head passes those same test ids. The forced stale limited contact rebuilds the entire mixed batch while leaving stationary cells unchanged.</p>
+<p>Explicit execution counters (diverted selector 0, limited selector 1): <code>{escape(str(execution_rows))}</code>. The all-diverted carry sees zero wall calls; limited and mixed carries and the all-diverted certificate see positive counts. These observations are in <code>wall-controls.log</code>; the mutation is in <code>negative-control.log</code>.</p>"""
     table_rows = []
     count_rows = []
     for row in summary:
@@ -198,6 +232,7 @@ def main():
 <p>Counts include both dynamic branches, including the untaken full-read fallback. They describe static optimized HLO operations, StableHLO operations, while sites and fusion sites, respectively, rather than dynamic executions. The wall execution counter above establishes which branch actually runs.</p>
 <table><thead><tr><th>Population</th><th>Width</th><th>Read</th><th>Arm</th><th>HLO ops</th><th>StableHLO ops</th><th>While sites</th><th>Fusion sites</th></tr></thead><tbody>{"".join(count_rows)}</tbody></table>
 <h3 id="read-diverted-wall-skip-provenance">Provenance and verification</h3>
+{verification}
 <p>Base <code>{pairs["base"][0]["revision"]}</code>; measured head <code>{pairs["head"][0]["revision"]}</code>. Instrument SHA-256 <code>{pairs["head"][0]["instrument_sha256"]}</code>; fixture SHA-256 <code>{pairs["head"][0]["helper_sha256"]}</code>. Instrument and fixture were committed before measurement. Raw receipts and complete logs are under <code>{args.run}</code>. Each receipt records the imported module, scratch working directory, backend, device, compile time and individual warm samples. Each process log ends in its captured exit status.</p>
 </section>
 """

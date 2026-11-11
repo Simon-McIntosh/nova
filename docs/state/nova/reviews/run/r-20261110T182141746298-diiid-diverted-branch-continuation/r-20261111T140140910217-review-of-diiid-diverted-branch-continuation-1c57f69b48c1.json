@@ -51,6 +51,11 @@
       "kind": "exempted",
       "reason": "one stale sentence in the run's landing note about suite arms; the manifest's recorded arms at 1c57f69b4 are the authority and are correct",
       "recorded_at": "2026-11-11T14:14:54.428238+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the restored test guards the single-owner link of a prototype diagnostic; a stronger seed-independence assertion belongs to the decomposition node's axis/saddle census work",
+      "recorded_at": "2026-11-11T14:15:18.612085+00:00"
     }
   },
   "findings": [

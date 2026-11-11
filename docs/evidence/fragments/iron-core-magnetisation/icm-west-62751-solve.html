@@ -1,3 +1,41 @@
+<section id="icm-west-62751-solve-newton-budget">
+  <h3>Accepted coarse mesh exhausts the Newton bound</h3>
+  <p>The accepted 0.0566 m mesh reaches the production material solve, but does
+    not converge within ten accepted Newton corrections. The relative material
+    residual falls from 0.997707865074 to <strong>0.000584463390069</strong>,
+    above the required <code>1e-8</code> tolerance. The returned state has
+    <code>converged=False</code> and <code>termination=iteration-budget</code>;
+    the measurement's convergence assertion refuses it.</p>
+  <table>
+    <thead><tr><th>Accepted corrections</th><th>Relative residual</th><th>Step scale</th></tr></thead>
+    <tbody><tr><td>0</td><td>0.997707865074</td><td>seed</td></tr><tr><td>1</td><td>0.210529617833</td><td>0.25</td></tr><tr><td>2</td><td>0.00601904784909</td><td>1</td></tr><tr><td>3</td><td>0.00167734044861</td><td>1</td></tr><tr><td>4</td><td>0.00113665841367</td><td>0.5</td></tr><tr><td>5</td><td>0.000885494115893</td><td>0.25</td></tr><tr><td>6</td><td>0.000829276335873</td><td>0.125</td></tr><tr><td>7</td><td>0.000688292890475</td><td>0.25</td></tr><tr><td>8</td><td>0.000683879461055</td><td>0.125</td></tr><tr><td>9</td><td>0.000683240396603</td><td>0.001953125</td></tr><tr><td>10</td><td>0.000584463390069</td><td>0.25</td></tr></tbody>
+  </table>
+  <p>The mesh has 3447 cells, area 10.096691 m² and zero symmetric-difference
+    area against the authored iron union. Its minimum cell area is
+    0.154179753617 times the nominal square area, and its minimum centroid-to-edge
+    distance is 1.25 mm. The terminal relative permeability range is
+    <strong>39.1095379421–1691.71520535</strong>, inside the CEA table's
+    1.521395–1692.4255 range. At this nonconverged state, 99.9954884828 % of the
+    axisymmetric iron volume has relative permeability above 100. This is not a
+    converged-volume estimate.</p>
+  <p>Job <code>1310799</code> ran on the Titan P100 and ended FAILED with
+    <code>EXIT=1</code> after 18 min 51 s. The production matrix build took
+    1045.63994365 s, and the three-target iron response took 38.1583721638 s.
+    The source-field control remains 0.109034645394 %. No product source was
+    changed, no tolerance was relaxed, and no extra Newton corrections were run.</p>
+  <p>The driver saved its row and terminal solution before checking convergence.
+    That check stopped the job before the coarse flat-law and Picard arms and
+    before the 0.04 m solve. Consequently no two-mesh discretisation error bar,
+    converged material-law comparison or converged-state figure is available.
+    The committed figure renderer awaits a successful pair receipt.</p>
+  <p>Current receipts under the run directory below:
+    <code>titan-pair.log</code> and
+    <code>measurement-pair/0.0566/receipt.json</code>.
+    The production operand <code>measurement-pair/0.0566/gram.npy</code>
+    and terminal state <code>measurement-pair/0.0566/solution.pkl</code>
+    are retained outside git for a subsequent solver investigation.
+    Measurement revision: <code>d4bfeb872bfe63e9761c1f0c837b34bf85860e5c</code>.</p>
+</section>
 <section id="icm-west-62751-solve-mesh-census">
   <h3>Production mesh census and selected pair</h3>
   <p>The lead authorized a mesh acceptance census while a separate node repairs
@@ -16,8 +54,8 @@
     Both accepted meshes cover 10.096691 m² of iron.</p>
   <p>This pair departs from the original 0.08/0.04 m brief because the unchanged
     production mesher refuses 0.08 m; its repair is in flight separately.
-    One Titan job, <code>1310799</code>, is measuring both selected meshes,
-    their flat-permeability arms and the Picard control at 0.0566 m.
+    One Titan job, <code>1310799</code>, attempted the selected pair and
+    stopped at the coarse convergence check, as recorded above.
     Mesh acceptance alone makes no convergence or field-accuracy claim.</p>
   <p>Probe receipts are <code>mesh-probe.log</code> (ending EXIT=0) and
     <code>mesh-probe.json</code> in the run directory below. Refused rows have

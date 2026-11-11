@@ -151,6 +151,7 @@ def main():
     head = payloads["head", "full", 1]["revision"]
     wide = next(row for row in summary if row["width"] == 16 and row["kind"] == "full")
     instrument_hash = payloads["base", "full", 1]["instrument_sha256"]
+    direction = "falls" if wide["reduction_percent"] >= 0 else "rises"
     fragment = args.root / (
         "docs/evidence/fragments/sub-millisecond-forward-path/read-live-candidates.html"
     )
@@ -178,8 +179,8 @@ def main():
         "inspections plus initial and terminal support. The head guard requires "
         "zero, one and two live saddles to execute two, three and four support "
         "inspections respectively.</p>\n"
-        f"<p>Paired full-read width-sixteen CPU wall falls "
-        f"{wide['reduction_percent']:.2f}%. This is a CPU comparison, "
+        f"<p>Paired full-read width-sixteen CPU wall {direction} "
+        f"{abs(wide['reduction_percent']):.2f}%. This is a CPU comparison, "
         "not an H200 latency verdict. Both fresh processes agree within 10% "
         "on every native arm; complete process spreads and stage-sum gaps are "
         "retained below. Width-one and width-sixteen full and carried reads "
@@ -245,7 +246,12 @@ def main():
         + '<h3 id="read-live-candidates-provenance">Provenance and limits</h3>'
         f"<p>Base <code>{base}</code>; measured source head <code>{head}</code>. "
         "One all_debug job runs two fresh processes per revision and read kind, "
-        "each at widths one and sixteen. The original committed instrument is "
+        "each at widths one and sixteen. Base and head run on disjoint "
+        "eight-CPU affinity sets, swapped for the second process pair. "
+        "The preceding sequential attempt was refused when the carried "
+        "width-sixteen stage sum exceeded native wall by 10.435662%; its "
+        "receipts are retained and are excluded from these tables. "
+        "The original committed instrument is "
         "<code>scripts/prototypes/bank_read_attribution/measure.py</code> from "
         "<code>d3d17c064bd10c209aa4adec67c0ce9e5d1a3785</code>, extracted "
         f"without changes; SHA-256 <code>{instrument_hash}</code>. "
@@ -254,8 +260,10 @@ def main():
         "connectivity for full reads: they remain under the joint rebuilt "
         "reading owner. Lowered counts are static program sites, including "
         "untaken fallbacks, and are not dynamic GPU launch counts. "
-        f"Raw receipts, reproduction, suites and negative control are under "
-        f"<code>{escape(str(args.run))}</code>.</p>\n</section>\n"
+        f"Raw timing receipts are under <code>{escape(str(args.run))}</code>; "
+        f"suite and negative-control logs are under "
+        f"<code>{escape(str(suites))}</code>. The reproduction and refused "
+        "attempts remain in their parent run directory.</p>\n</section>\n"
     )
     print("COMPARISON", json.dumps(summary), flush=True)
     print("REPORT_SHA256", hashlib.sha256(Path(__file__).read_bytes()).hexdigest())

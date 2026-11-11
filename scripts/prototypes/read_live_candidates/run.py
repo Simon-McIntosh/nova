@@ -48,6 +48,23 @@ def run(tree, revision, command, log, env, affinity=None):
         stream.write(f"# measurement_cwd: {tree.resolve()}\n")
         stream.write(f"# measurement_module: {tree / 'nova/equilibrium/topology.py'}\n")
         stream.flush()
+        if "pytest" in command:
+            probe = (
+                "from nova.jax.config import configure_dtypes; configure_dtypes(); "
+                "import jax; assert jax.config.jax_enable_x64; "
+                "import nova.equilibrium.topology as module; "
+                "from pathlib import Path; "
+                "print('# imported_module:', module.__file__, flush=True); "
+                "print('# resolved_cwd:', Path.cwd().resolve(), flush=True)"
+            )
+            subprocess.run(
+                [PYTHON, "-c", probe],
+                cwd=tree,
+                env=dict(env, PYTHONPATH="."),
+                stdout=stream,
+                stderr=subprocess.STDOUT,
+                check=True,
+            )
         result = subprocess.run(
             command,
             cwd=tree,

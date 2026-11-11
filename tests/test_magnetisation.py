@@ -414,17 +414,22 @@ def test_nonlinear_shell_uses_differential_newton(capsys):
     observed_order = np.log(history[-1] / history[-2]) / np.log(
         history[-2] / history[-3]
     )
+    centres = result._mesh.centroids
+    total = loop(centres, current=2e6) + result.field(centres)
+    maximum_field = np.linalg.norm(total, axis=1).max()
     with capsys.disabled():
         print(
             f"\nnonlinear shell: converged={result.converged}, "
             f"iterations={result.iterations}, residual={result.residual_history}, "
             f"quadratic_ratio={quadratic_ratio:.12g}, "
             f"observed_order={observed_order:.12g}, "
+            f"maximum_field={maximum_field:.12g} T, "
             f"mu_range={result.permeability_relative.min():.6g}-"
             f"{result.permeability_relative.max():.6g}",
             flush=True,
         )
     assert result.converged
+    assert maximum_field < b[-2], "shell must stay below the altered final interval"
     assert result.iterations <= 10
     assert quadratic_ratio < 0.1, "late residual contractions must accelerate"
     assert result.residual_history[-1] < 1e-8

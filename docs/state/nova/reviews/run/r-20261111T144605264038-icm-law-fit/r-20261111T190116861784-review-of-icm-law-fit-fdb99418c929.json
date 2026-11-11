@@ -1,0 +1,101 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "Derived from the reviewed run's own arms: baseline-suite.log at d42e6878e7b98ad690d510103f80b487d1973606 reads '17 passed, 1 xfailed in 1552.08s' with a bare 'EXIT=0' last line, and review-after-suite.log at fdb99418c929084264fd773c472a24841b337c36 reads '20 passed, 1 xfailed in 1556.88s' with a bare 'EXIT=0' last line. Both declare failure_count 0 and failure_ids [], both ran the same scoped command to a summary line, so the head adds no failure.",
+  "call_sites": [
+    "nova/biot/magnetisation.py:302 (solve_magnetisation calls _fit_law)",
+    "scripts/magnetisation_high_permeability/directional.py:52 (iron.solve_magnetisation)",
+    "scripts/magnetisation_high_permeability/measure.py:218 (iron.solve_magnetisation)",
+    "scripts/magnetisation_high_permeability/measure.py:284 (iron.solve_magnetisation)"
+  ],
+  "completed_at": "2026-11-11T19:29:41.864Z",
+  "dispatched_at": "2026-11-11T19:06:45Z",
+  "emissions": [
+    "VERDICT goal: the node's goal is to let the production B-H law accept an unchanged steel table whose permeability rises from the origin; the reviewed delta leaves nova/biot/magnetisation.py untouched while tests/test_magnetisation.py:296-308 still drives the production fitter, green at fdb99418c in review-after-suite.log.",
+    "VERDICT done_when: the done_when's WEST-fit assertions are held at tests/test_magnetisation.py:250-308; review-after-suite.log:1 binds fdb99418c and ends '20 passed, 1 xfailed' EXIT=0, baseline-suite.log:1 binds d42e6878 at EXIT=0, and review-negative-control.log ends EXIT=1 with the WEST test failing.",
+    "VERDICT write_paths: git diff --stat 9d86f3f2..fdb99418c touches tests/test_magnetisation.py, docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html and docs/figures/iron-core-magnetisation/icm-law-fit/differential-law.svg, all inside the declared write paths.",
+    "VERDICT manifest: read; it records complete status, the head arm at fdb99418c (20 passed, 1 xfailed, EXIT=0), the baseline arm at d42e6878 (17 passed, 1 xfailed, EXIT=0), the refusal control at EXIT=1, and the two fixture probes at 1 passed and 1 skipped.",
+    "VERDICT diff: read both commits against 9d86f3f2; af2ca315f swaps the hardcoded WEST path at tests/test_magnetisation.py:296-301 for the shared west fixture and adds two comments, and fdb99418c adds the fragment paragraph, caption, figure and the 414-line differential-law.svg, with no product source touched.",
+    "CALL_SITES: nova/biot/magnetisation.py:302, scripts/magnetisation_high_permeability/directional.py:52, scripts/magnetisation_high_permeability/measure.py:218, scripts/magnetisation_high_permeability/measure.py:284",
+    "SCORE goal_fidelity: 19",
+    "JUSTIFICATION goal_fidelity: tests/test_magnetisation.py:296-308 reaches _fit_law through read_iron_core exactly as the goal states and review-after-suite.log records it green at fdb99418c, while the prior three findings the delta exists to answer are all addressed.",
+    "SCORE evidence: 18",
+    "JUSTIFICATION evidence: review-after-suite.log:1 names revision fdb99418c and ends EXIT=0 with '20 passed, 1 xfailed', review-negative-control.log ends EXIT=1, and figure-render.log records the 31-text-artist pass on the SVG I re-rendered; review-west-positive.log:1 is headed '9d86f3f2 plus review test edits' rather than a committed revision.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: git diff --stat 9d86f3f2..fdb99418c lists only tests/test_magnetisation.py, docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html and docs/figures/iron-core-magnetisation/icm-law-fit/differential-law.svg, three files inside the declared scope.",
+    "SCORE durability: 14",
+    "JUSTIFICATION durability: the delta adds no assertion (only the comments at tests/test_magnetisation.py:257 and :284), so restoring the hardcoded source at :296-301 reddens nothing, and the regression cover remains the pre-existing independent check at :258 plus the non-independent branch check at :285.",
+    "SCORE fit: 18",
+    "JUSTIFICATION fit: tests/test_magnetisation.py:19 follows the module-scoped fixture idiom of tests/test_imas_iron_read.py:27-46 and ruff reports all checks passed, while docs/figures/iron-core-magnetisation/icm-law-fit/differential-law.svg carried its generator only in the run directory.",
+    "SCORE reuse: 19",
+    "JUSTIFICATION reuse: tests/test_magnetisation.py:19 extends tests/test_imas_iron_read.py:27-46 rather than duplicating source resolution, and a search for a layout-check owner found only private copies at scripts/edge_sheet/figure.py:48 and scripts/diiid_map_fidelity/render.py:26, no shared owner to extend.",
+    "FINDING tests/test_magnetisation.py:285 non-blocking: the zero-magnitude assertion compares two outputs of _fit_law and cannot redden on a wrong origin tangent; the delta labels it as a branch check and the independent guard is the exact comparison at :258, so it is recorded rather than repaired.",
+    "FINDING docs/figures/iron-core-magnetisation/icm-law-fit/differential-law.svg:1 non-blocking: the figure has no committed producer, so it cannot be regenerated from the tree; the renderer sits only in the reviewed run's directory and duplicates the layout check at scripts/edge_sheet/figure.py:48; the SVG itself renders cleanly and was re-inspected."
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the delta now labels the grad(h)(0) assertion as the zero-magnitude branch check, and the independent origin-slope guard at tests/test_magnetisation.py:258 is the cited evidence",
+      "recorded_at": "2026-11-11T19:54:16.969815+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "icm-law-fit",
+      "recorded_at": "2026-11-11T19:54:47.766279+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_magnetisation.py",
+      "line": 285,
+      "severity": "non-blocking",
+      "summary": "assert float(jax.grad(h)(0.0)) == pytest.approx(ends[0], rel=2e-14) compares two outputs of the production fitter, so it holds whatever origin slope _fit_law returns and cannot redden on a wrong polynomial origin tangent; the delta labels it honestly (tests/test_magnetisation.py:284 and the fragment's origin paragraph) as a zero-magnitude branch check, and the independent guard remains the exact comparison at :258 against 1/(iron._MU0 * mu[0])."
+    },
+    {
+      "file": "docs/figures/iron-core-magnetisation/icm-law-fit/differential-law.svg",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "the committed figure has no committed producer: the renderer that drew it lives only in the reviewed run's directory (render_derivative.py) and its save_checked re-implements the text-layout check already carried at scripts/edge_sheet/figure.py:48, so a later reader cannot regenerate or restyle the artifact from the tree."
+    }
+  ],
+  "justifications": {
+    "durability": "The delta adds no assertion at all (only the comment at tests/test_magnetisation.py:257 and the explanatory comment at :284), so restoring the previous hardcoded source at :296-301 would not redden any test on this workstation; the node's regression cover is the pre-existing assertions at :258 (independent of the fitter) and :283-287 (not independent), which this delta labels but does not strengthen.",
+    "evidence": "Each done_when clause has a recorded result bound to a revision: review-after-suite.log:1 names fdb99418c and ends EXIT=0, baseline-suite.log:1 names d42e6878 and ends EXIT=0, review-negative-control.log ends EXIT=1, and figure-render.log records the 31-text-artist layout pass on the committed SVG, which I re-rendered and inspected; one deduction because the positive fixture probe's header (review-west-positive.log:1) reads '9d86f3f2 plus review test edits' rather than a committed revision, so the fixture wiring is proven by the head arm instead.",
+    "fit": "The test change follows the repository fixture idiom (tests/test_imas_iron_read.py:27-46, module-scoped west) and lint is clean, and the fragment prose and SVG follow the repository evidence and data-ink conventions; the figure's generator was not committed with it (FINDING at differential-law.svg:1), which is the one idiom the change does not carry.",
+    "goal_fidelity": "The delta answers all three prior findings and keeps the production fitter untouched: tests/test_magnetisation.py:296-308 reaches _fit_law through read_iron_core exactly as the goal states, and review-after-suite.log records it green at fdb99418c.",
+    "reuse": "The landed delta's only added definition reuses the existing repository owner: tests/test_magnetisation.py:19 imports the west fixture from tests/test_imas_iron_read.py:27-46 instead of duplicating source resolution, and the SVG was produced through nova.media.ink's trace_axes; searching the repository for a layout-check owner found no shared one, only private copies at scripts/edge_sheet/figure.py:48 and scripts/diiid_map_fidelity/render.py:26.",
+    "scope_discipline": "Every path in git diff --stat 9d86f3f2..fdb99418c is inside the declared write paths, and nothing else moved: three files, +453/-6, with nova/biot/magnetisation.py untouched."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261111T190116861784-review-of-icm-law-fit-fdb99418c929",
+  "reviewed_base_sha": "9d86f3f25411d725657183dd5d483898415d9f73",
+  "reviewed_head_sha": "fdb99418c929084264fd773c472a24841b337c36",
+  "reviewed_run_id": "r-20261111T144605264038-icm-law-fit",
+  "rubric_lines": [
+    "rubric.goal_fidelity: answered",
+    "rubric.evidence: answered",
+    "rubric.scope_discipline: answered",
+    "rubric.durability: answered",
+    "rubric.fit: answered",
+    "rubric.reuse: answered"
+  ],
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T19:42:07.611073+00:00",
+  "total": 108,
+  "verdicts": {
+    "diff": "Read both commits against 9d86f3f2: af2ca315f replaces the hardcoded imas-efit path and dd_version at tests/test_magnetisation.py:296-301 with the shared west fixture and adds the two comments at :257 and :284; fdb99418c adds 33 lines to the fragment and a new docs/figures/iron-core-magnetisation/icm-law-fit/differential-law.svg (31.111 x 16 cm, two panels, 31 text artists).",
+    "done_when": "The done_when asks for a WEST-fit test asserting knot reproduction, the tabulated origin slope, positive dense dH/dB and join continuity, for every existing test unchanged with the nonlinear-shell figures printed, and for a scratch refusal control; tests/test_magnetisation.py:250-308 holds those assertions, review-after-suite.log:1 binds revision fdb99418c and ends '20 passed, 1 xfailed' EXIT=0, and review-negative-control.log ends EXIT=1 with tests/test_magnetisation.py::test_west_cea_material_interpolation failing under the restored refusal.",
+    "goal": "The node's goal is to let the production B-H law accept an unchanged steel table whose permeability rises from the origin, with any positive origin permeability; this review covers only the two commits gained since the prior review, and the delta leaves nova/biot/magnetisation.py untouched while tests/test_magnetisation.py:296-308 still reads the WEST CEA table through StaticMachineDescription.read_iron_core and drives the production fitter, whose green result at fdb99418c is recorded in review-after-suite.log.",
+    "manifest": "Read; it records status complete, the head arm at fdb99418c ('20 passed, 1 xfailed in 1556.88s', EXIT=0, measurement_module under a /tmp scratch head), the baseline arm at d42e6878 ('17 passed, 1 xfailed', EXIT=0), the refreshed refusal control (EXIT=1), and the two fixture probes (review-west-positive.log '1 passed in 6.90s', review-west-unmounted.log '1 skipped in 2.33s').",
+    "write_paths": "The node's declared paths are nova/biot/magnetisation.py, tests/test_magnetisation.py, docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html and the directory docs/figures/iron-core-magnetisation/icm-law-fit; git diff --stat 9d86f3f2..fdb99418c touches only tests/test_magnetisation.py, the fragment and docs/figures/iron-core-magnetisation/icm-law-fit/differential-law.svg, all inside that scope."
+  }
+}

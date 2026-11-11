@@ -41,7 +41,7 @@ def test_known_translation_is_recovered_as_rigid(fields):
     assert classify_offsets(displacement, fit) == "rigid"
 
 
-def test_saddle_only_perturbation_is_local(fields):
+def test_saddle_only_perturbation_is_non_rigid(fields):
     radius, height, rr, zz, reference, mask = fields
     perturbation = 0.035 * (zz + 1) * np.exp(-((rr - 2) ** 2 + (zz + 1) ** 2) / 0.16**2)
     solved = reference + perturbation
@@ -55,7 +55,7 @@ def test_saddle_only_perturbation_is_local(fields):
     assert np.linalg.norm(axis - [2, 0]) < 0.002
     assert np.linalg.norm(saddle - [2, -1]) > 0.015
     assert fit["rms_after_wb"] < fit["rms_before_wb"]
-    assert classify_offsets(saddle - [2, -1], fit) == "local"
+    assert classify_offsets(saddle - [2, -1], fit) == "non-rigid"
 
 
 def test_gauge_does_not_move_the_fit(fields):
@@ -135,10 +135,21 @@ def test_committed_saved_bank_has_no_unique_magnetic_axis(case, maxima, minima):
     assert measured["solved_core"]["minima_count"] == minima
     assert measured["reference_core"]["maxima_count"] == 1
     assert measured["reference_core"]["minima_count"] == 0
+    expected = {
+        "frame-137-diverted": (0.0065714485, 0.2531876274, 1.2269636052),
+        "frame-146-diverted": (0.0248046570, 0.3339350728, 1.3026497079),
+    }[case]
+    assert measured["core_flatness_ratio"] == pytest.approx(expected[0], abs=1e-7)
+    assert measured["solved_core_shape"][
+        "central_to_shoulder_density"
+    ] == pytest.approx(expected[1], abs=1e-7)
+    assert measured["reference_core_shape"][
+        "central_to_shoulder_density"
+    ] == pytest.approx(expected[2], abs=1e-7)
     assert measured["axis_offset_cm"] is None
     assert measured["rigid_shift_residual_cm"] is None
     assert measured["axis_rz_m"] is None
-    assert measured["verdict"] == "local"
+    assert measured["verdict"] == "non-rigid"
     if case == "frame-137-diverted":
         assert measured["solved_core"]["maxima_flux_spread_mwb"] == pytest.approx(
             1.684887, abs=1e-4

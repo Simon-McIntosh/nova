@@ -1,0 +1,101 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-11T15:47:59.541Z",
+  "dispatched_at": "2026-11-11T15:35:25Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-read-attribution",
+      "recorded_at": "2026-11-11T16:07:08.325381+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "prototype measurement helper under scripts/prototypes; no product path",
+      "recorded_at": "2026-11-11T16:07:15.623507+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "prototype measurement helper under scripts/prototypes; no product path",
+      "recorded_at": "2026-11-11T16:07:20.133264+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the finer full-read split failed the 10% coverage bound and is disclosed; the joint stage is reported honestly, and the live-candidate node that follows measures that stage directly",
+      "recorded_at": "2026-11-11T16:07:24.380922+00:00"
+    },
+    "4": {
+      "kind": "folded",
+      "node": "bank-read-attribution",
+      "recorded_at": "2026-11-11T16:07:12.357684+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_read_attribution/measure.py",
+      "line": 292,
+      "severity": "blocking",
+      "text": "The four accepted receipts record instrument_sha256 6936d5e39b5bf02cd19e1275afbb1483114225989a3f9f650dc51e8448a63fa6, which matches no committed revision of measure.py (4c87b30ae hashes d747c0ee, and 391245bdb and d3d17c064 both hash 54189df4), while the rejected pilot at full-control.json records c7353edb, which is exactly commit 93daf68f2's file; so the field is reliable and the accepted table was produced by an uncommitted instrument, which leaves the committed h200.sh/run.sh a different program from the one behind the published stage table a follow-on node will be dispatched against."
+    },
+    {
+      "file": "scripts/prototypes/bank_read_attribution/measure.py",
+      "line": 249,
+      "severity": "non-blocking",
+      "text": "counts() restates the same optimized-HLO, StableHLO, fusion and while counting already written at scripts/prototypes/bank_booking_cost/measure.py:67-79, adding only custom_call_sites, so a later change to how lowered programs are counted must be made twice."
+    },
+    {
+      "file": "scripts/prototypes/bank_read_attribution/measure.py",
+      "line": 58,
+      "severity": "non-blocking",
+      "text": "owner() re-derives source-frame attribution that scripts/prototypes/order2/attribution.py:10-27 _source_owner already owns, reading traceback.frames and frame.function_name where that owner uses raw_frames and code.co_name; the stage precedence lattice is genuinely new but the frame extraction is a second spelling of an existing mechanism."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-read-attribution.html",
+      "line": 9,
+      "severity": "non-blocking",
+      "text": "The brief asks the split to cover cut-cell clipping and quadrature and the topology and connectivity decision each as its own stage; the fragment discloses at line 9 that on the full read both are timed jointly inside support_read._rebuilt_reading, so that enumerated coverage is met only for the carried arm and the full read's 5915 ms leading stage is not decomposed."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130620416417-bank-read-attribution/artifact-gate.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The gate log's header names revision 309e86e6ba35599440e3e082cf158bb53c2ff2cd, whose report.py uses a logarithmic axis and cannot emit the committed linear-panel SVG or the committed fragment, so the log does not identify the revision its artifacts came from; only the appended COMMITTED_REPORT_SHA256=a8f7a305 line at log line 12 ties the executed report.py to d3d17c064."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production module imports or dispatches the harness; grep over nova/, scripts/, apps/ and tests/ finds no reference to bank_read_attribution outside its own directory, so the harness is reached by no runtime path and only reaches product code inward through inspect.getsource and unittest.mock.patch.",
+    "diff": "Read commit by commit against 7ca1b11a: f6d8b06df adds measure.py, run.sh and h200.sh; 3eff6396d, 93daf68f2, 4c87b30ae and 391245bdb refine the owner partition and common-expression sharing in measure.py; 309e86e6b adds report.py; d3d17c064 swaps the log axis for two linear panels and adds the fragment and SVG.",
+    "done_when": "The done_when's three clauses are asserted by scripts/prototypes/bank_read_attribution/report.py:298-301 (coverage through measure.py:18-21), :320-330 and :386 (two-process spread) and :461-516 (fragment plus checked SVG), and the recorded gate at artifact-gate.log:6 reports maximum_coverage_gap_percent 7.248 and maximum_native_spread_percent 1.081 with EXIT=0.",
+    "goal": "The node goal is to attribute the bank read cost to its stages and rank the read-cost changes that follow; scripts/prototypes/bank_read_attribution/measure.py:58-104 names ten owning stages and report.py:47-100 emits three ranked proposals, though the full read times cut-cell clipping and connectivity jointly inside support_read._rebuilt_reading rather than separately as the brief enumerates.",
+    "manifest": "The manifest reports status complete, all seven commits, the report.py gate command and its artifact-gate.log, max_abs_coverage_percent 7.2483234047782785 and max_native_process_spread_percent 1.0806736575320672, and its numbers reconcile against geometry/summary.json and the four receipts.",
+    "write_paths": "The manifest declares three roots (scripts/prototypes/bank_read_attribution, the evidence fragment and the figure directory); git diff --stat 7ca1b11a..d3d17c064 lists exactly six added files and every one is inside them, with no product source in the diff."
+  },
+  "justifications": {
+    "durability": "measure.py:32 and :422 fail loudly if the anchored product branch is refactored or the region chain diverges from native, and measure.py:480-494 plus report.py:394-402 require the omission control to be refused.",
+    "evidence": "artifact-gate.log:6 records the coverage and spread results the done_when asks for and report.py:298-301 re-derives them from the receipts, yet the receipts' own instrument_sha256 at geometry/full-1.json matches no committed revision of measure.py.",
+    "fit": "measure.py, report.py, run.sh and h200.sh mirror the scripts/prototypes/<topic>/{measure,report,run} layout of bank_booking_cost and bank_solve_profile, reuse their machine() and save_checked() helpers, and carry conventional subjects with bodies and no plan or ticket identifiers.",
+    "goal_fidelity": "measure.py:58-104 attributes booking, the stationary solve, wall contact, clipping, connectivity, qualification and field contraction, but report.py:41-45 shows the full arm's clipping and connectivity folded into support_read._rebuilt_reading rather than separately timed.",
+    "reuse": "report.py:270 and measure.py:278 reuse bank_solve_profile/plot.py:save_checked and bank_newton_step/measure.py:machine, but measure.py:249-257 restates the five-metric lowered-count block already written at bank_booking_cost/measure.py:67-79.",
+    "scope_discipline": "git diff --stat 7ca1b11a36f16779d583edb6ddbfb264218d24cb d3d17c064bd10c209aa4adec67c0ce9e5d1a3785 lists six files, all inside the manifest's three declared write roots, and no nova/ product source appears."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to attribute the bank read cost to its stages and rank the read-cost changes that follow; scripts/prototypes/bank_read_attribution/measure.py:58-104 names ten owning stages and report.py:47-100 emits three ranked proposals, though the full read times cut-cell clipping and connectivity jointly inside support_read._rebuilt_reading rather than separately as the brief enumerates.\nVERDICT done_when: The done_when's three clauses are asserted by scripts/prototypes/bank_read_attribution/report.py:298-301 (coverage through measure.py:18-21), :320-330 and :386 (two-process spread) and :461-516 (fragment plus checked SVG), and the recorded gate at artifact-gate.log:6 reports maximum_coverage_gap_percent 7.248 and maximum_native_spread_percent 1.081 with EXIT=0.\nVERDICT write_paths: The manifest declares three roots (scripts/prototypes/bank_read_attribution, the evidence fragment and the figure directory); git diff --stat 7ca1b11a..d3d17c064 lists exactly six added files and every one is inside them, with no product source in the diff.\nVERDICT manifest: The manifest reports status complete, all seven commits, the report.py gate command and its artifact-gate.log, max_abs_coverage_percent 7.2483234047782785 and max_native_process_spread_percent 1.0806736575320672, and its numbers reconcile against geometry/summary.json and the four receipts.\nVERDICT diff: Read commit by commit against 7ca1b11a: f6d8b06df adds measure.py, run.sh and h200.sh; 3eff6396d, 93daf68f2, 4c87b30ae and 391245bdb refine the owner partition and common-expression sharing in measure.py; 309e86e6b adds report.py; d3d17c064 swaps the log axis for two linear panels and adds the fragment and SVG.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: measure.py:58-104 attributes booking, the stationary solve, wall contact, clipping, connectivity, qualification and field contraction, but report.py:41-45 shows the full arm's clipping and connectivity folded into support_read._rebuilt_reading rather than separately timed.\nSCORE evidence: 10\nJUSTIFICATION evidence: artifact-gate.log:6 records the coverage and spread results the done_when asks for and report.py:298-301 re-derives them from the receipts, yet the receipts' own instrument_sha256 at geometry/full-1.json matches no committed revision of measure.py.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 7ca1b11a36f16779d583edb6ddbfb264218d24cb d3d17c064bd10c209aa4adec67c0ce9e5d1a3785 lists six files, all inside the manifest's three declared write roots, and no nova/ product source appears.\nSCORE durability: 16\nJUSTIFICATION durability: measure.py:32 and :422 fail loudly if the anchored product branch is refactored or the region chain diverges from native, and measure.py:480-494 plus report.py:394-402 require the omission control to be refused.\nSCORE fit: 18\nJUSTIFICATION fit: measure.py, report.py, run.sh and h200.sh mirror the scripts/prototypes/<topic>/{measure,report,run} layout of bank_booking_cost and bank_solve_profile, reuse their machine() and save_checked() helpers, and carry conventional subjects with bodies and no plan or ticket identifiers.\nSCORE reuse: 12\nJUSTIFICATION reuse: report.py:270 and measure.py:278 reuse bank_solve_profile/plot.py:save_checked and bank_newton_step/measure.py:machine, but measure.py:249-257 restates the five-metric lowered-count block already written at bank_booking_cost/measure.py:67-79.\nFINDING scripts/prototypes/bank_read_attribution/measure.py:292 blocking: The four accepted receipts record instrument_sha256 6936d5e39b5bf02cd19e1275afbb1483114225989a3f9f650dc51e8448a63fa6, which matches no committed revision of measure.py (4c87b30ae hashes d747c0ee, and 391245bdb and d3d17c064 both hash 54189df4), while the rejected pilot at full-control.json records c7353edb, which is exactly commit 93daf68f2's file; so the field is reliable and the accepted table was produced by an uncommitted instrument, which leaves the committed h200.sh/run.sh a different program from the one behind the published stage table a follow-on node will be dispatched against.\nFINDING scripts/prototypes/bank_read_attribution/measure.py:249 non-blocking: counts() restates the same optimized-HLO, StableHLO, fusion and while counting already written at scripts/prototypes/bank_booking_cost/measure.py:67-79, adding only custom_call_sites, so a later change to how lowered programs are counted must be made twice.\nFINDING scripts/prototypes/bank_read_attribution/measure.py:58 non-blocking: owner() re-derives source-frame attribution that scripts/prototypes/order2/attribution.py:10-27 _source_owner already owns, reading traceback.frames and frame.function_name where that owner uses raw_frames and code.co_name; the stage precedence lattice is genuinely new but the frame extraction is a second spelling of an existing mechanism.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-read-attribution.html:9 non-blocking: The brief asks the split to cover cut-cell clipping and quadrature and the topology and connectivity decision each as its own stage; the fragment discloses at line 9 that on the full read both are timed jointly inside support_read._rebuilt_reading, so that enumerated coverage is met only for the carried arm and the full read's 5915 ms leading stage is not decomposed.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130620416417-bank-read-attribution/artifact-gate.log:1 non-blocking: The gate log's header names revision 309e86e6ba35599440e3e082cf158bb53c2ff2cd, whose report.py uses a logarithmic axis and cannot emit the committed linear-panel SVG or the committed fragment, so the log does not identify the revision its artifacts came from; only the appended COMMITTED_REPORT_SHA256=a8f7a305 line at log line 12 ties the executed report.py to d3d17c064.\n",
+  "review_run_id": "r-20261111T152534788165-review-of-bank-read-attribution-d3d17c064bd1",
+  "reviewed_base_sha": "7ca1b11a36f16779d583edb6ddbfb264218d24cb",
+  "reviewed_head_sha": "d3d17c064bd10c209aa4adec67c0ce9e5d1a3785",
+  "reviewed_run_id": "r-20261111T130620416417-bank-read-attribution",
+  "scores": {
+    "durability": 16,
+    "evidence": 10,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T16:29:55.554263+00:00",
+  "total": 91
+}

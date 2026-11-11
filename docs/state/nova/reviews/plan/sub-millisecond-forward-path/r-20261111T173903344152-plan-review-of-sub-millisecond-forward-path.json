@@ -1,0 +1,192 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-11T17:52:49.322Z",
+  "dispatched_at": "2026-11-11T17:43:39Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:24",
+      "id": "wiring-1",
+      "reason": "without the s5 entry the queue admits the measurement node immediately, and it either blocks on the unlanded lever or times an arm against code that does not exist, which is the failure the section was written to prevent.",
+      "text": "`plan-section-depends-on` lists s2, s3 and s4 and carries no `s5` entry, while the \u00a75 section element (:119) declares `data-links` to `sub-millisecond-forward-path#s2` and `#s3`, and \u00a75's own table row for \"Live saddle candidates, diverted wall skip (read-live-candidates, read-diverted-wall-skip)\" records that lever as \"in flight\"; \u00a75 is declared `implementable`, so a node dispatched against it is admitted with no ordering at all and its first done-when clause (\"one H200 job ends with every lever arm above timed\") cannot be satisfied for a lever that has not landed \u2014 the converse defect is that the declared s2/s3 links bind \u00a75 to \u00a73, which supplies no lever in \u00a75's table",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:120",
+      "id": "done_when-1",
+      "reason": "a node that re-decides six levers' defaults on an unguarded wall measurement has no way to show its instrument discriminates, and the plan's own \u00a71\u2013\u00a74 convention already requires the clause.",
+      "text": "\u00a75 states three done-when clauses and no negative control, where \u00a71 (:77), \u00a72 (:94), \u00a73 (:105) and \u00a74 (:116) each declare one; nothing in \u00a75's gate shows that a lever-off arm differs from its lever-on arm, so a timing driver that ignores its lever flag, or a run in which a lever is silently inert, passes every clause it states",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:120",
+      "id": "done_when-2",
+      "reason": "the plan then acts on the number by changing defaults on main, so an unstated threshold turns noise into a code change and the node cannot be reviewed on its verdict.",
+      "text": "the rule \"A lever whose H200 wall is worse than its off arm is set off by default (or to its best width) in the same node\" fixes no margin and no noise floor, and clause (1) requires \"two agreeing fresh processes per arm\" without defining agreement, so a one-percent run-to-run difference on one card decides whether six landed levers stay on or are switched off, and nothing in the node distinguishes a real regression from measurement variation",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:120",
+      "id": "reasoning-1",
+      "reason": "this clause is the gate that refuses every lever arm, so a node would set a lever off on a criterion the lead never locked, or a reviewer would have to choose between the decision and \u00a75 at implementation time.",
+      "text": "\u00a75 writes \"Every lane must stay inside the locked precision budget: fresh residual at most 1e-10, flux within 1e-8 of span, axis and X-point within 5e-4 of the minor radius, boundary flux within 1e-4 of span\", but decision `precision-budget` (:143\u2013151) locks three quantities \u2014 axis and X-point within 5e-4 of the minor radius, boundary flux within 1e-4 of the flux span, and solved residual at most 1e-10 \u2014 and its unchosen third option is the flux criterion (\"Flux within 1e-8 relative everywhere, the present analytic standard\"); \u00a72's restatement (:90) and \u00a74's (:112\u2013113) use the decision's three quantities, so \u00a75 is the only place a fourth, stricter gate is called locked",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:120",
+      "id": "anchors_resolve-1",
+      "reason": "the node's work is \"each lever's committed timing driver runs from main\", and for three of six levers there is no record to locate that driver or to establish whether the in-flight pair blocks the job.",
+      "text": "the lever table names `booking-scalar-tile` as \"landed at 32, parameterised\", and `read-live-candidates` / `read-diverted-wall-skip` as \"in flight\", yet none of the three appears anywhere in the repository outside this row: `docs/evidence/fragments/sub-millisecond-forward-path/` holds no `booking-scalar-tile.html`, `read-live-candidates.html` or `read-diverted-wall-skip.html`, the plan's decisions hold no key of those names, and a search of `docs/` returns this plan as the only hit \u2014 while the other five levers (`bank-carried-decision`, `bank-booking-cost`, `bank-factor-carry`, `bank-lane-drive`, `bank-read-attribution`) each resolve to a fragment",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:120",
+      "id": "evidence_paths-1",
+      "reason": "the fragment is the delivered record and it is durable by convention, so this is a loss risk on the log rather than a missing deliverable, though the node's brief must name the log path.",
+      "text": "the \"Shape of the measurement\" paragraph names node `/tmp` as the only location it gives for the run (\"trees built by `git archive` into node `/tmp`\") and names no durable path for the gate log or the per-arm receipt, so a worker following it can leave the only record of a multi-hour H200 job on a node-local filesystem that is gone when the allocation ends; \u00a75 does name an evidence fragment for the tables, which is durable",
+      "type": "evidence_paths",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "beec3e07f0254eaaf9703ff3e44206fd351cbd57",
+  "plan_fingerprint": "3a7cc4e9a29b2737b2f091594e10fffc8fbb10a86d65f7683f2fe529cc5b9f6e",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 294,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8b74918674002fea9f7b0a52e90bdd9ef28452a6",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 5 now carries a negative control: each paired arm must show its lever flag reached the compiled program (lowered digest or launch/op count differs), and an identical pair is refused as an inert lever.",
+      "reason": "",
+      "when": "2026-11-11T18:19:51.728944+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8b74918674002fea9f7b0a52e90bdd9ef28452a6",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Defined agreement (two fresh processes within 5% median warm wall, disagreeing arms rerun) and the decision margin (change a default only beyond the larger of 3% and the larger process spread).",
+      "reason": "",
+      "when": "2026-11-11T18:20:53.597159+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8b74918674002fea9f7b0a52e90bdd9ef28452a6",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The budget now reads exactly as decision precision-budget locks it: residual at most 1e-10, axis and X-point within 5e-4 of minor radius, boundary flux within 1e-4 of span; the unlocked flux-to-span clause is removed.",
+      "reason": "",
+      "when": "2026-11-11T18:21:51.562939+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8b74918674002fea9f7b0a52e90bdd9ef28452a6",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "Section 5 now requires gate logs, per-arm receipts and the job log on GPFS (run directory or ~/.cache/nova-h200-timing/), never only node /tmp.",
+      "reason": "",
+      "when": "2026-11-11T18:22:51.882083+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "the three identifiers name live runs whose fragments land with them (booking-scalar-tile is delivered and under review; read-live-candidates and read-diverted-wall-skip are in flight); section 5 now says levers are timed only once landed.",
+      "when": "2026-11-11T18:23:53.292781+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "section 5 measures whatever levers have landed when an H200 card frees; sections 2 and 3 stay open for further levers, so a hard s5 wait on them would hold the measurement indefinitely. The data-links record provenance, not a wait.",
+      "when": "2026-11-11T18:24:50.078301+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the three identifiers name live runs whose fragments land with them (booking-scalar-tile is delivered and under review; read-live-candidates and read-diverted-wall-skip are in flight); section 5 now says levers are timed only once landed.",
+      "when": "2026-11-11T18:23:53.292781+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8b74918674002fea9f7b0a52e90bdd9ef28452a6",
+      "commit_basis": "edit",
+      "note": "Section 5 now carries a negative control: each paired arm must show its lever flag reached the compiled program (lowered digest or launch/op count differs), and an identical pair is refused as an inert lever.",
+      "reason": "",
+      "when": "2026-11-11T18:19:51.728944+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "8b74918674002fea9f7b0a52e90bdd9ef28452a6",
+      "commit_basis": "edit",
+      "note": "Defined agreement (two fresh processes within 5% median warm wall, disagreeing arms rerun) and the decision margin (change a default only beyond the larger of 3% and the larger process spread).",
+      "reason": "",
+      "when": "2026-11-11T18:20:53.597159+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8b74918674002fea9f7b0a52e90bdd9ef28452a6",
+      "commit_basis": "edit",
+      "note": "Section 5 now requires gate logs, per-arm receipts and the job log on GPFS (run directory or ~/.cache/nova-h200-timing/), never only node /tmp.",
+      "reason": "",
+      "when": "2026-11-11T18:22:51.882083+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8b74918674002fea9f7b0a52e90bdd9ef28452a6",
+      "commit_basis": "edit",
+      "note": "The budget now reads exactly as decision precision-budget locks it: residual at most 1e-10, axis and X-point within 5e-4 of minor radius, boundary flux within 1e-4 of span; the unlocked flux-to-span clause is removed.",
+      "reason": "",
+      "when": "2026-11-11T18:21:51.562939+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "section 5 measures whatever levers have landed when an H200 card frees; sections 2 and 3 stay open for further levers, so a hard s5 wait on them would hold the measurement indefinitely. The data-links record provenance, not a wait.",
+      "when": "2026-11-11T18:24:50.078301+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261111T173903344152-plan-review-of-sub-millisecond-forward-path.json",
+  "review_run_id": "r-20261111T173903344152-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "f09aa57f447481042ba2ca17372de5f41447f636",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 three of the six lever identifiers \u00a75 requires a node to time (`booking-scalar-tile`, `read-live-candidates`, `read-diverted-wall-skip`) resolve to no fragment, decision, plan or comment anywhere in the repository.",
+    "done_when": "a finding \u2014 \u00a75 declares no negative control, and its decision rule (\"a lever whose H200 wall is worse than its off arm is set off\") has no margin against an undefined \"two agreeing fresh processes\".",
+    "evidence_paths": "a finding \u2014 \u00a75 names node-local `/tmp` as the only location it gives for the measurement trees and names no durable path for the gate log.",
+    "naming": "pass \u2014 \u00a75 introduces no symbol, filename or comment carrying a plan label, stage name or ticket number; the lever identifiers are plan-document references, which the convention admits.",
+    "reasoning": "a finding \u2014 \u00a75 presents a four-clause \"locked precision budget\" whose flux clause (1e-8 of span) is not among the three quantities decision `precision-budget` locked.",
+    "single_goal": "pass \u2014 \u00a75 names one deliverable, the H200 timing record; the default changes in clause (2) are that measurement's consequence, not a second goal.",
+    "wiring": "a finding \u2014 the plan's `plan-section-depends-on` map carries no `s5` key while the \u00a75 section element declares `data-links` to s2 and s3, and \u00a75's own lever table includes a row that is still \"in flight\"."
+  },
+  "section_digests": {
+    "_document": "8c945b8c070d0a15c7d6a0cd55b55b5cfd0bfa8d7ce464a6865003332f649b3d",
+    "s0": "02c484da982db49df058949810d449b2e95a1a134ec03272e31dda4df5bed6d2",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "5aa72ecf3d63060b466bd064d76dc02fa5439343113fd1657038c73094f830b2",
+    "s4": "91bd28dc1cffb091dd5b8e3154b8052ae494fc161f98b81c4aa3d7fc4b7d4fca",
+    "s5": "54a56331ad4091c7968488ac443ea711ff9a81a6291c90db201c689b0a5b1a4a"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T18:16:17.009322+00:00",
+  "total": null
+}

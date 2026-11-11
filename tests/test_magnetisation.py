@@ -3,18 +3,23 @@
 from __future__ import annotations
 
 from functools import lru_cache
+import json
+import os
+from pathlib import Path
 from time import perf_counter
 
 import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
+from scipy.interpolate import PPoly
 import shapely
 
 from nova.biot import magnetisation as iron
 from nova.biot.greens import greens_bz_br
 from nova.biot.tiledassembly import cell_edges
 from nova.jax.config import configure_dtypes
+from tests.test_imas_iron_read import west as west
 
 configure_dtypes()
 assert jax.config.jax_enable_x64
@@ -150,24 +155,7 @@ def shell_observation(mu, cell_size, capsys):
     return error, result.cell_count, wall
 
 
-@pytest.mark.parametrize(
-    "mu",
-    [
-        10,
-        100,
-        pytest.param(
-            1000,
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=(
-                    "At mu_r=1000, 20 -> 10 mm errors fall at orders 1.3 to 1.5; "
-                    "40 -> 20 mm refinement is pre-asymptotic."
-                ),
-            ),
-        ),
-    ],
-)
+@pytest.mark.parametrize("mu", [10, 100, 1000])
 @pytest.mark.slow
 @pytest.mark.timeout(3600)
 def test_closed_shell_refines_toward_exact_shielding(mu, capsys):
@@ -207,6 +195,89 @@ def test_clipped_sphere_has_no_collapsed_sheet_edges():
     assert np.all(lengths > 0)
 
 
+@pytest.fixture(scope="module")
+def west_iron_region():
+    """Read every iron segment at the source manifest's dictionary pin."""
+    from nova.imas.machine import StaticMachineDescription
+
+    manifest_path = Path(
+        os.environ.get(
+            "NOVA_WEST_SOURCE_MANIFEST",
+            "/home/ITER/mcintos/Code/imas-efit/tests/data-manifest.json",
+        )
+    )
+    if not manifest_path.is_file():
+        pytest.skip("WEST source manifest is not mounted")
+    manifest = json.loads(manifest_path.read_text())
+    row = next(
+        row for row in manifest["machine_descriptions"] if row["key"] == "west-dd4-1-0"
+    )
+    source = manifest_path.parent.parent / row["target"]
+    machine = StaticMachineDescription.read_iron_core(
+        f"imas:hdf5?path={source}", dd_version=row["dd_version"]
+    )
+    assert len(machine.iron_segments) == 6
+    return shapely.union_all(
+        [
+            shapely.Polygon(np.column_stack((segment.outline.r, segment.outline.z)))
+            for segment in machine.iron_segments
+        ]
+    )
+
+
+@pytest.mark.parametrize("size", [0.08, 0.057, 0.04])
+def test_west_mesh_preserves_iron_and_collocation_clearance(
+    west_iron_region, size, capsys
+):
+    cells = iron._mesh(west_iron_region, size)
+    polygons = [shapely.Polygon(p) for p in cells.polygons]
+    union_error = west_iron_region.symmetric_difference(
+        shapely.union_all(polygons)
+    ).area
+    clearances = np.array(
+        [
+            shapely.Point(centre).distance(polygon.boundary)
+            for polygon, centre in zip(polygons, cells.centroids, strict=True)
+        ]
+    )
+    assert all(
+        polygon.contains(shapely.Point(centre))
+        for polygon, centre in zip(polygons, cells.centroids, strict=True)
+    )
+    assert union_error == 0
+    assert clearances.min() >= 0.01 * size
+    with capsys.disabled():
+        print(
+            f"\nWEST mesh: cell_size={size:g}, cells={len(polygons)}, "
+            f"union_error={union_error:g}, min_clearance={clearances.min():.12g} m",
+            flush=True,
+        )
+
+
+def test_mesh_merges_thin_plate_without_losing_material(capsys):
+    size = 0.1
+    thickness = 0.03 * size
+    region = shapely.box(1, 0, 2, thickness)
+    cells = iron._mesh(region, size)
+    polygons = [shapely.Polygon(p) for p in cells.polygons]
+    assert region.symmetric_difference(shapely.union_all(polygons)).area == 0
+    clearance = min(
+        shapely.Point(centre).distance(polygon.boundary)
+        for polygon, centre in zip(polygons, cells.centroids, strict=True)
+    )
+    assert all(
+        polygon.contains(shapely.Point(centre))
+        for polygon, centre in zip(polygons, cells.centroids, strict=True)
+    )
+    assert clearance >= 0.01 * size
+    with capsys.disabled():
+        print(
+            f"\nthin plate: thickness={thickness:g} m, cells={len(polygons)}, "
+            f"min_clearance={clearance:.12g} m",
+            flush=True,
+        )
+
+
 def test_mesh_preserves_holes_and_refuses_isolated_slivers():
     region = shapely.box(1, 0, 1.2, 0.2).difference(shapely.box(1.04, 0.04, 1.06, 0.06))
     cells = iron._mesh(region, 0.1)
@@ -244,6 +315,78 @@ def test_material_is_monotone_and_holds_end_values():
     # Positive samples alone do not imply a positive differential material law.
     with pytest.raises(ValueError, match="differential permeability"):
         iron._fit_law([0, 1, 2], [2, 2, 10])
+
+
+def assert_material_interpolation(b, mu):
+    """Check polynomial joins and the differential law used by Newton."""
+    knots, coefficients, ends = iron._fit_law(b, mu)
+    polynomial = PPoly(coefficients, knots)
+    expected = b / (iron._MU0 * mu)
+    np.testing.assert_allclose(polynomial(b), expected, rtol=8e-15, atol=0)
+    # Independent origin tangent from the tabulated permeability.
+    assert coefficients[2, 0] == 1 / (iron._MU0 * mu[0])
+    # Evaluate both sides at each exact join, including inserted breakpoints.
+    widths = np.diff(knots)
+    a, q, slope, value = coefficients
+    right_value = ((a * widths + q) * widths + slope) * widths + value
+    right_slope = (3 * a * widths + 2 * q) * widths + slope
+    np.testing.assert_allclose(right_value[:-1], value[1:], rtol=8e-15, atol=0)
+    np.testing.assert_allclose(right_slope[:-1], slope[1:], rtol=8e-14, atol=0)
+    np.testing.assert_allclose(right_slope[-1], ends[-1], rtol=8e-14)
+    np.testing.assert_allclose(right_value[-1], expected[-1], rtol=8e-15)
+    law = tuple(jnp.asarray(x) for x in (knots, coefficients, ends))
+
+    def h(field):
+        return field * (1 / iron._MU0 - iron._coefficient(field, *law))
+
+    # Sample every polynomial, even a very short ramp, and the held tail.
+    sample = np.concatenate(
+        [
+            np.linspace(start, stop, 201)
+            for start, stop in zip(knots[:-1], knots[1:], strict=True)
+        ]
+        + [np.linspace(b[-1], 2 * b[-1], 201)]
+    )
+    differential = np.asarray(jax.vmap(jax.grad(h))(jnp.asarray(sample)))
+    assert np.isfinite(differential).all()
+    assert differential.min() > 0
+    # Zero-magnitude branch check: the production branch uses its held origin.
+    assert float(jax.grad(h)(0.0)) == pytest.approx(ends[0], rel=2e-14)
+    held = iron._coefficient(jnp.asarray([b[-1], 2 * b[-1]]), *law)
+    np.testing.assert_array_equal(held, np.full(2, 1 / iron._MU0 - ends[-1]))
+    print(
+        f"material knots={len(b)}, fitted_knots={len(knots)}, "
+        f"origin_slope={coefficients[2, 0]:.12g}, "
+        f"min_dH_dB={differential.min():.12g}"
+    )
+    return knots
+
+
+def test_west_cea_material_interpolation(west):
+    """Read the unchanged CEA table from its DD-pinned machine description."""
+    from nova.imas.machine import StaticMachineDescription
+
+    source, dd_version, _ = west
+    machine = StaticMachineDescription.read_iron_core(source, dd_version=dd_version)
+    assert len(machine.iron_segments) == 6
+    material = machine.iron_segments[0].material
+    b, mu = map(np.asarray, (material.b_field, material.permeability_relative))
+    assert mu[0] == pytest.approx(215.11019, rel=1e-14)
+    assert mu[1] > mu[0]
+    knots = assert_material_interpolation(b, mu)
+    assert len(knots) > len(b)
+
+
+@pytest.mark.parametrize(
+    "b, mu",
+    [([0, 1], [2, 1000]), ([0, 1, 2], [10, 2, 3.9])],
+)
+def test_material_accepts_steep_endpoint_tangents(b, mu):
+    b, mu = np.asarray(b, dtype=float), np.asarray(mu, dtype=float)
+    h = b / (iron._MU0 * mu)
+    ratios = (1 / (iron._MU0 * mu[[0, -1]])) / (np.diff(h) / np.diff(b))[[0, -1]]
+    assert ratios.max() > 10
+    assert_material_interpolation(b, mu)
 
 
 @pytest.mark.parametrize(

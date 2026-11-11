@@ -1,0 +1,113 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "Derived from the reviewed run's own arms: baseline-suite.log at d42e6878e7b98ad690d510103f80b487d1973606 reads '17 passed, 1 xfailed ... EXIT=0'; after-suite.log at 9d86f3f25411d725657183dd5d483898415d9f73 reads '20 passed, 1 xfailed ... EXIT=0'. Both declare failure_count 0 and failure_ids [], both run the same scoped command to a summary line, so the head adds three tests and no failure.",
+  "call_sites": [
+    "nova/biot/magnetisation.py:302 (solve_magnetisation calls _fit_law)",
+    "scripts/magnetisation_high_permeability/directional.py:52 (iron.solve_magnetisation)",
+    "scripts/magnetisation_high_permeability/measure.py:218 (iron.solve_magnetisation)",
+    "scripts/magnetisation_high_permeability/measure.py:284 (iron.solve_magnetisation)"
+  ],
+  "completed_at": "2026-11-11T16:39:41.296Z",
+  "dispatched_at": "2026-11-11T16:15:28Z",
+  "emissions": [
+    "VERDICT goal: the node's goal is to let the production B-H law accept a steel table whose permeability rises from the origin; nova/biot/magnetisation.py:122-184 splits an interval whose endpoint tangent exceeds twice its secant, and the unchanged DD 4.1.0 WEST table read through read_iron_core now fits with 27 fitted knots (25 authored), reproduced at negative-control.log:28-30.",
+    "VERDICT done_when: the done_when asks for the WEST fit with four named assertions, the unchanged existing tests with the nonlinear shell printed, and a scratch refusal control; tests/test_magnetisation.py:250-313 asserts all four, after-suite.log:32,36 records the identical nonlinear-shell line and EXIT=0, and negative-control.log:5-43 records the mutant import, the ValueError and the matching HEAD blob, EXIT=1.",
+    "VERDICT write_paths: the declared paths are nova/biot/magnetisation.py, tests/test_magnetisation.py, docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html and docs/figures/iron-core-magnetisation/icm-law-fit; git diff d42e6878e7b98ad690d510103f80b487d1973606..9d86f3f25411d725657183dd5d483898415d9f73 changes only the first three, and the figure path is unused.",
+    "VERDICT manifest: read; it records status complete, both arms at their declared revisions with exit 0 and the 17/20 passed summaries, the identical nonlinear-shell record in each arm, the mutation log, and four scaffolding retry attributions.",
+    "VERDICT diff: read all three commits against base d42e6878e7b98ad690d510103f80b487d1973606; 284dce417 changes nova/biot/magnetisation.py and tests/test_magnetisation.py, 1f6e061e4 and 9d86f3f25 add and then revision-bind the evidence fragment, and nothing outside the declared scope moves.",
+    "CALL_SITES: nova/biot/magnetisation.py:302, scripts/magnetisation_high_permeability/directional.py:52, scripts/magnetisation_high_permeability/measure.py:218, scripts/magnetisation_high_permeability/measure.py:284",
+    "SCORE goal_fidelity: 19",
+    "JUSTIFICATION goal_fidelity: nova/biot/magnetisation.py:163-183 reproduces every authored knot and forces the origin slope to 1/(mu0*mu[0]) while the split branch's f = min(1/4, average/(2(left+right))) keeps the plateau positive, which is what the goal asks.",
+    "SCORE evidence: 19",
+    "JUSTIFICATION evidence: after-suite.log:1 binds revision 9d86f3f25411d725657183dd5d483898415d9f73 and ends EXIT=0, baseline-suite.log ends EXIT=0, and negative-control.log ends EXIT=1 with the WEST failure, so each done_when clause has a recorded result.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: git diff --stat over d42e6878e7b98ad690d510103f80b487d1973606..9d86f3f25411d725657183dd5d483898415d9f73 lists only nova/biot/magnetisation.py, tests/test_magnetisation.py and docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html, all inside the declared write paths.",
+    "SCORE durability: 17",
+    "JUSTIFICATION durability: tests/test_magnetisation.py:256-266 reddens if the origin slope is clipped or a join breaks and :284-288 reddens if a derivative goes non-positive, while :282 compares two outputs of the same call and is named as a finding.",
+    "SCORE fit: 15",
+    "JUSTIFICATION fit: the source change keeps the numpy-fit/jnp-evaluate split and inline-comment idiom of nova/biot/magnetisation.py:166-174, but tests/test_magnetisation.py:296-301 hardcodes an absolute data path and dd_version where the repository takes dd_version from a manifest.",
+    "SCORE reuse: 5",
+    "JUSTIFICATION reuse: no shape-preserving spline owner exists in nova, so the production addition forks nothing, but tests/test_magnetisation.py:293-301 duplicates rather than extends the WEST source resolution owned by tests/test_imas_iron_read.py:30-46.",
+    "FINDING tests/test_magnetisation.py:298 non-blocking: the WEST source is hardcoded as an absolute imas-efit path with dd_version=\"4.1.0\" instead of extending tests/test_imas_iron_read.py:30-46, which resolves it from the curation manifest behind NOVA_WEST_SOURCE_MANIFEST and skips when unmounted, so the new test errors rather than skips off this workstation.",
+    "FINDING tests/test_magnetisation.py:282 non-blocking: 'float(jax.grad(h)(0.0)) == pytest.approx(ends[0])' compares two outputs of _fit_law because nova/biot/magnetisation.py:193 returns end_reluctivity[0] at zero magnitude, so it cannot redden on a wrong polynomial origin slope; the independent guard is the check at :256.",
+    "FINDING docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html:1 non-blocking: the fragment proves strictly positive, continuous dH/dB only through a scalar table and draws no figure, although the granted docs/figures/iron-core-magnetisation/icm-law-fit was left empty and a dH/dB trace with the inserted knots marked would show the construction directly."
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-law-fit",
+      "recorded_at": "2026-11-11T17:30:54.985026+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "icm-law-fit",
+      "recorded_at": "2026-11-11T17:31:42.216523+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "icm-law-fit",
+      "recorded_at": "2026-11-11T17:32:16.450026+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_magnetisation.py",
+      "line": 298,
+      "severity": "non-blocking",
+      "summary": "test_west_cea_material_interpolation hardcodes the source as 'imas:hdf5?path=/home/ITER/mcintos/Code/imas-efit/tests/data/imas/WEST/machine/dd4-1-0' and dd_version=\"4.1.0\" (:296-301) instead of extending the mechanism that already owns this capability: tests/test_imas_iron_read.py:30-46 resolves the same source through NOVA_WEST_SOURCE_MANIFEST and the curation manifest's west-dd4-1-0 row, reads dd_version from that row, and pytest.skip()s when the manifest is not mounted. The new test duplicates that resolution (it does not wrap or extend it), drops the skip guard, and so turns an absent mount into an error rather than a skip, which makes tests/test_magnetisation.py unrunnable on any host without this workstation's imas-efit checkout and contradicts the repo rule that dd_version is taken per dataset from the manifest rather than guessed. It also re-asserts the six segments and first-material shape that tests/test_imas_iron_read.py:88-100 already owns. Remedy: move the manifest-resolving fixture to tests/conftest.py and read both the path and dd_version from it."
+    },
+    {
+      "file": "tests/test_magnetisation.py",
+      "line": 282,
+      "severity": "non-blocking",
+      "summary": "The assertion 'float(jax.grad(h)(0.0)) == pytest.approx(ends[0], rel=2e-14)' compares two outputs of the code under test: at magnitude 0, nova/biot/magnetisation.py:193 selects end_reluctivity[0], so h(B) = B * ends[0] and the gradient is ends[0] whatever the returned polynomial coefficients are. Both sides therefore move together and the assertion cannot redden on a defect in the polynomial origin slope; the real origin guard is the independent check at :256 against 1/(mu0*mu[0]). It does still catch a regression in _coefficient's zero-magnitude branch, so it is worth keeping, but it must not be counted as the origin-slope evidence it reads as."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "The fragment states its central result only as a table of scalars (knot error, join mismatch, minimum sampled H') and carries no graphic, although the claim it exists to make - that dH/dB is strictly positive and continuous through two inserted breakpoints - is a plotted relationship, and docs/figures/iron-core-magnetisation/icm-law-fit was granted as a write path but left empty. A trace of dH/dB against B over 0-12 T with the inserted knots and the held tail marked would show the ramps and the positive plateau directly, which the number 56.166964456 A/(m T) does not. This is the figure mandate the project applies to evidence records, and the fragment's own construction paragraph describes exactly the curve that should be drawn."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:256-266 reddens if the origin slope is clipped, a join breaks or the terminal slope stops matching the held tail, and :284-288 reddens if a derivative goes non-positive, so restoring the old refusal (shown at negative-control.log:40-42) or reintroducing a clip fails the file; the :282 assertion is self-referential and is named as a finding, and line :256 carries the origin guard it does not.",
+    "evidence": "after-suite.log:1 binds revision 9d86f3f25411d725657183dd5d483898415d9f73 with tree, module and cwd and ends '20 passed, 1 xfailed in 1557.10s' + 'EXIT=0'; baseline-suite.log ends '17 passed, 1 xfailed ... EXIT=0'; negative-control.log ends 'EXIT=1' with the WEST failure and the HEAD source-blob match, so every done_when clause has a recorded result rather than a claim.",
+    "fit": "The source change keeps the module's numpy-fit/jnp-evaluate split and its inline-comment idiom (nova/biot/magnetisation.py:166-174), and names follow the surrounding vocabulary, but tests/test_magnetisation.py:296-301 hardcodes an absolute imas-efit path and dd_version where the repository's test-data rule and the sibling iron-read test resolve both from a curation manifest.",
+    "goal_fidelity": "nova/biot/magnetisation.py:163-183 reproduces every authored knot (spline-metrics.log: knot_max_relative_error 0.0) and sets the origin slope exactly, while the split branch's f = min(1/4, average/(2(left+right))) makes the plateau middle >= 3*delta/(4(1-f)) > 0 so the origin and terminal ramps are admitted and not clipped (nova/biot/magnetisation.py:168-180).",
+    "reuse": "No owner of a shape-preserving monotone spline exists in nova (grep for PchipInterpolator/shape/monotone over nova/ and scripts/ returns only nova/biot/magnetisation.py and the prototype, which interpolates c(B) rather than H(B)), so the production addition forks nothing; the deduction is entirely tests/test_magnetisation.py:293-301, which duplicates rather than extends the WEST source resolution owned by tests/test_imas_iron_read.py:30-46.",
+    "scope_discipline": "git diff d42e6878e7b98ad690d510103f80b487d1973606 9d86f3f25411d725657183dd5d483898415d9f73 --stat lists only nova/biot/magnetisation.py, tests/test_magnetisation.py and docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html, all inside the declared write paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261111T161146482860-review-of-icm-law-fit-9d86f3f25411",
+  "reviewed_base_sha": "d42e6878e7b98ad690d510103f80b487d1973606",
+  "reviewed_head_sha": "9d86f3f25411d725657183dd5d483898415d9f73",
+  "reviewed_run_id": "r-20261111T144605264038-icm-law-fit",
+  "rubric_lines": [
+    "rubric.goal_fidelity: answered",
+    "rubric.evidence: answered",
+    "rubric.scope_discipline: answered",
+    "rubric.durability: answered",
+    "rubric.fit: answered",
+    "rubric.reuse: answered"
+  ],
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T16:55:37.061400+00:00",
+  "total": 95,
+  "verdicts": {
+    "diff": "Read commit by commit. 284dce417 changes nova/biot/magnetisation.py (+30/-9) and tests/test_magnetisation.py (+74/-0); 1f6e061e4 adds the evidence fragment; 9d86f3f25 appends the revision-binding paragraphs to it. The source change replaces the origin refusal with the split-interval branch and adds slopes[-1] = 1/(mu0*mu[-1]); the test change adds assert_material_interpolation, the WEST test and the two steep-tangent parametrizations. No existing assertion, tolerance, source line or plan is modified.",
+    "done_when": "The done_when names the WEST-table fit, the unchanged existing tests with the nonlinear-shell record, and a scratch-tree refusal control; tests/test_magnetisation.py:250-313 asserts knot reproduction, origin slope, dense-sample positivity and join continuity, after-suite.log:1,32,34,36 records revision 9d86f3f2, the identical nonlinear-shell line (iterations=3, quadratic_ratio=0.00709910478702) and EXIT=0, and negative-control.log:5-43 records MUTANT_IMPORT_ASSERTED, the WEST test failing with the restored ValueError and HEAD_SOURCE_BLOB 9a0db65e matching, EXIT=1.",
+    "goal": "The node's goal is 'Let the production B-H law accept a steel table whose permeability rises from the origin'; nova/biot/magnetisation.py:122-184 now splits an interval whose endpoint tangent exceeds twice its secant into two quadratics and a line and returns numpy knot/piece arrays, and the unchanged DD 4.1.0 WEST table read through read_iron_core fits with 27 fitted knots (25 authored) as the negative-control reproduction in negative-control.log:28-30 shows.",
+    "manifest": "Read; it records status complete, three commits, both suite arms with exit 0 and the summary lines above, the identical nonlinear-shell record in both arms, the mutation log, and the four scaffolding retry failures with their attributions.",
+    "write_paths": "Declared paths are nova/biot/magnetisation.py, tests/test_magnetisation.py, docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html and docs/figures/iron-core-magnetisation/icm-law-fit; git diff d42e687..9d86f3f changes exactly the first three and nothing else, and the figure path is declared but unused."
+  }
+}

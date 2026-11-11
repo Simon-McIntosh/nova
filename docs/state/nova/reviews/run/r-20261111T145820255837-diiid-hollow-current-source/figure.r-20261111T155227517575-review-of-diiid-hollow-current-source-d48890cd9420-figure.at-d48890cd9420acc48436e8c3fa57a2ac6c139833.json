@@ -1,0 +1,210 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite; both counts are the declared empty values.",
+  "attachment_map": {
+    "frame-137-diverted-midplane.png": "docs/figures/diiid-hollow-current-source/frame-137-diverted-midplane.svg",
+    "frame-137-diverted-poloidal.png": "docs/figures/diiid-hollow-current-source/frame-137-diverted-poloidal.svg",
+    "frame-146-diverted-midplane.png": "docs/figures/diiid-hollow-current-source/frame-146-diverted-midplane.svg",
+    "frame-146-diverted-poloidal.png": "docs/figures/diiid-hollow-current-source/frame-146-diverted-poloidal.svg",
+    "mast-21978-35-midplane.png": "docs/figures/diiid-hollow-current-source/mast-21978-35-midplane.svg",
+    "source-axis-cap.png": "docs/figures/diiid-hollow-current-source/source-axis-cap.svg"
+  },
+  "completed_at": "2026-11-11T16:01:37.754Z",
+  "dispatched_at": "2026-11-11T15:53:33Z",
+  "figure_verdicts": [
+    {
+      "attachment": "frame-137-diverted-midplane.png",
+      "figure": "docs/figures/diiid-hollow-current-source/frame-137-diverted-midplane.svg",
+      "rubric": {
+        "contrast": "pass. All text near-black on white; the blue solved trace and black dashed reference both read clearly against white at 3 pt and 2.6 pt. The dotted map traces are faint but are secondary data, not text.",
+        "data_ink": "pass. Three thin traces per panel (3 pt solved, 2.6 pt reference, 1.5 pt map), despined top and right, no grid.",
+        "decoration": "pass. No gradient, fill, band or background shading anywhere; panel titles sit in clear margin above each panel.",
+        "label_collision": "pass. Legend above the panels, panel titles above each panel's frame, axis labels outside the plot area; nothing clipped at the canvas edge and no label sits over a trace.",
+        "legibility": "pass. Three panels of 1714x882, 16 pt axis labels and 14 pt ticks, units on every axis ('current density [MA/m2]', 'radius [m]') and a two-column figure legend above the panels. The solid blue solved source and the dashed black EFIT-coordinate source are separable everywhere; the dotted map traces appear only in the total-current panel, which is what the code draws (render.py:62). The hollow core is legible at a glance: the solved total current peaks near 1.45 m and falls to near zero at 1.6 m before a second peak.",
+        "table_form": "pass. Two radial profiles and their decomposition are curves; a table would lose the peak/shoulder structure the panels exist to show."
+      }
+    },
+    {
+      "attachment": "frame-137-diverted-poloidal.png",
+      "figure": "docs/figures/diiid-hollow-current-source/frame-137-diverted-poloidal.svg",
+      "rubric": {
+        "contrast": "pass. Solved blue, EFIT near-black dashed and grey wall all clear of the white background; the level note is near-black on white.",
+        "data_ink": "pass. Line contours only, no fill, no colour map, no scatter.",
+        "decoration": "pass. No gradient, shading or background fill; the wall is a single 1.5 pt grey line and the extent of every coloured mark is data.",
+        "label_collision": "pass. Panel titles sit in the margin, the legend above them, the level note in its own row below the panels; no text overlaps text or data. The markers overlap each other, which is recorded under legibility rather than here.",
+        "legibility": "fail. The two contour panels themselves read well: axis off, grey wall, solid blue solved and dashed black EFIT contours on shared levels, and the shared level list printed under the panels. What is not readable is the null vocabulary: the magnetic axis, the admitted X-point and the other qualified nulls are drawn as 6 pt glyphs (circles, squares, carets and crosses) with no key, and the solved and reference marker sets land on top of one another near the core, so a reader cannot tell which marker is the axis and which is the X-point.",
+        "table_form": "pass. A poloidal scalar field with stationary points is genuinely spatial; no table conveys it."
+      }
+    },
+    {
+      "attachment": "frame-146-diverted-midplane.png",
+      "figure": "docs/figures/diiid-hollow-current-source/frame-146-diverted-midplane.svg",
+      "rubric": {
+        "contrast": "pass. All text near-black on white; both principal traces read clearly.",
+        "data_ink": "pass. Three traces per panel, despined, no grid.",
+        "decoration": "pass. No gradient, fill or background shading.",
+        "label_collision": "pass. Legend, panel titles and axis labels each in clear space; nothing clipped or overlapping.",
+        "legibility": "pass. Same three-panel layout as 137D with its own y-scales; all four declared series are visible, the dashed EFIT-coordinate source clearly separable from the solid solved source in every panel, and the hollow core visible as the dip of the total current to near zero at 1.6 m between two peaks.",
+        "table_form": "pass. Radial profiles; a table would not show the shoulder structure."
+      }
+    },
+    {
+      "attachment": "frame-146-diverted-poloidal.png",
+      "figure": "docs/figures/diiid-hollow-current-source/frame-146-diverted-poloidal.svg",
+      "rubric": {
+        "contrast": "pass. Blue, black dashed and grey against white all legible.",
+        "data_ink": "pass. Line contours only, no fill or colour map.",
+        "decoration": "pass. No gradient, shading or background fill.",
+        "label_collision": "pass. No text overlaps text or data; titles and level note sit in the margins.",
+        "legibility": "fail. Contours and wall read well, but as on the 137D poloidal panel the null and axis markers carry no key and the solved and reference sets overlap at the core, so the axis cannot be distinguished from the X-point by inspection. In the saved-map panel the innermost contours also tangle into a dense knot at the axis, which the marker glyphs add to rather than clarify.",
+        "table_form": "pass. Spatial field, correctly drawn as a panel rather than a table."
+      }
+    },
+    {
+      "attachment": "mast-21978-35-midplane.png",
+      "figure": "docs/figures/diiid-hollow-current-source/mast-21978-35-midplane.svg",
+      "rubric": {
+        "contrast": "pass. Text and the blue trace clear against white.",
+        "data_ink": "pass. Only the traces are drawn; despined, no grid.",
+        "decoration": "pass. No gradient, fill or background shading.",
+        "label_collision": "pass. Legend and labels in clear space; nothing clipped or overlapping.",
+        "legibility": "fail. In all three panels the only visible ink is the blue solved traces. The legend declares four series, and neither the black dashed EFIT-coordinate source nor the dotted EFIT map can be found anywhere in the render; the map trace survives only as a several-pixel dotted sliver near 0.2 m in the total-current panel and near 1.35 m in the pressure panel. The figure's stated purpose is solved against EFIT, and that comparison cannot be read.",
+        "table_form": "pass. Radial profiles, correctly a curve."
+      }
+    },
+    {
+      "attachment": "source-axis-cap.png",
+      "figure": "docs/figures/diiid-hollow-current-source/source-axis-cap.svg",
+      "rubric": {
+        "contrast": "pass. Near-black text on white; the grey dotted rule is visible against white and is not the only carrier of any quantity.",
+        "data_ink": "pass. One 3 pt curve per panel plus one 1.2 pt dotted vertical rule; nothing else drawn.",
+        "decoration": "pass. No gradient, fill, band or shading; the dotted first-knot rule is data and is labelled in the legend.",
+        "label_collision": "pass. Legend above, panel titles in the margins, x-axis labels clear of the canvas edge; nothing overlaps.",
+        "legibility": "fail. Each panel is readable on its own, but the three are read together as a comparison and their y-axes are not comparable: the MAST panel runs 0.465-0.575 MA/m2 (ticks 0.48, 0.51, 0.54, 0.57) while 137D runs 0.0-1.9 and 146D 0.0-2.4. A 20 per cent variation on MAST is therefore drawn as a full-height arch beside panels where the same vertical distance is a tenth of the scale, which overstates the MAST result and understates the DIII-D central drop.",
+        "table_form": "pass. Three curves of current density against normalised flux; a table would not show the hole."
+      }
+    }
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-hollow-current-source",
+      "recorded_at": "2026-11-11T17:39:56.480215+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-11T17:40:42.774081+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-11T17:41:27.428061+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "per-machine y-scales are deliberate: MAST and DIII-D current densities differ by a factor of four; the axis labels carry the units",
+      "recorded_at": "2026-11-11T17:43:07.638631+00:00"
+    },
+    "4": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-11T17:42:12.785327+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/diiid-hollow-current-source/mast-21978-35-midplane.svg",
+      "id": "ff16435ad14",
+      "line": 59,
+      "severity": "blocking",
+      "summary": "Only the blue solved traces are visible in all three panels of the 1714x882 render. The figure's own legend declares four series (render.py:74-81), but the black dashed 'EFIT-coordinate source' has no visible ink in any panel and the dotted 'EFIT map' survives only as a several-pixel sliver near radius 0.2 m (total current) and near 1.35 m (pressure). The solved trace is drawn last at 3 pt over a 2.6 pt reference (render.py:53-59), so the reader cannot tell whether the reference coincides exactly with the solved trace -- what a converged control would do -- or is absent from the saved bank. The figure exists to show the solved-against-EFIT comparison, and that comparison cannot be read. Remedy: draw the reference so it stays distinguishable when it coincides (dash offset or a thin line stepped just off the solved trace)."
+    },
+    {
+      "file": "docs/figures/diiid-hollow-current-source/frame-137-diverted-poloidal.svg",
+      "id": "fbb9c0bb81b",
+      "line": 149,
+      "severity": "non-blocking",
+      "summary": "The axis and null markers carry no key. The panels draw solved critical points as circles, reference critical points as squares and both null sets through draw_nulls (render.py:143-160), but the figure legend names only solved, EFIT and wall (render.py:164-172) and the only caption text is the contour-level list (render.py:176-181). The nova poloidal rule requires the panel to say which null set is which; here a reader cannot tell which marker is the magnetic axis and which the admitted X-point, nor which set belongs to the solved field and which to EFIT. At 6 pt the two sets also overplot near the core, so the distinction is not recoverable by inspection."
+    },
+    {
+      "file": "docs/figures/diiid-hollow-current-source/frame-146-diverted-poloidal.svg",
+      "id": "f81cc93c006",
+      "line": 149,
+      "severity": "non-blocking",
+      "summary": "Same defect as the 137D poloidal panel: the axis and null markers have no legend entry or caption explanation (render.py:143-172, 176-181), and the solved and reference marker sets overplot near the core at 6 pt, so which marker is the axis and which the admitted X-point cannot be determined by a reader."
+    },
+    {
+      "file": "docs/figures/diiid-hollow-current-source/source-axis-cap.svg",
+      "id": "ffe523a1c94",
+      "line": 208,
+      "severity": "non-blocking",
+      "summary": "The MAST panel autoscales its y-axis to 0.465-0.575 MA/m2 while 137D runs 0.0-1.9 and 146D 0.0-2.4, so the ~20 per cent variation of the MAST source is drawn as a full-height arch beside panels where the same vertical distance is a tenth of the scale. The three panels are presented as one comparison of where the source peaks; the independent autoscale reverses their apparent magnitudes. Either share a y-limit where the comparison is the point, or state on the MAST panel that it is on its own scale."
+    },
+    {
+      "file": "docs/figures/diiid-hollow-current-source/mast-21978-35-midplane.svg",
+      "id": "fa2906b543d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The one visible total-current trace on the MAST panel is clearly double-humped: a first maximum near radius 0.67 m, a minimum near 0.90 m and a second local maximum near 1.18 m. The run's record describes MAST 21978/35 as the converged control with a single maximum, and a reader will read this panel against that claim. With the reference and map traces invisible there is nothing on the panel to say whether the second hump belongs to the source or to the saved map, so the control claim cannot be checked from the figure."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261111T155227517575-review-of-diiid-hollow-current-source-d48890cd9420-figure",
+  "reviewed_base_sha": "33487d156847eb9fd34d2d92158f682d5d1f03f0",
+  "reviewed_figures": [
+    "docs/figures/diiid-hollow-current-source/frame-137-diverted-midplane.svg",
+    "docs/figures/diiid-hollow-current-source/frame-137-diverted-poloidal.svg",
+    "docs/figures/diiid-hollow-current-source/frame-146-diverted-midplane.svg",
+    "docs/figures/diiid-hollow-current-source/frame-146-diverted-poloidal.svg",
+    "docs/figures/diiid-hollow-current-source/mast-21978-35-midplane.svg",
+    "docs/figures/diiid-hollow-current-source/source-axis-cap.svg"
+  ],
+  "reviewed_head_sha": "d48890cd9420acc48436e8c3fa57a2ac6c139833",
+  "reviewed_run_id": "r-20261111T145820255837-diiid-hollow-current-source",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass",
+    "RUBRIC legibility: fail -- the axis and null markers are drawn as 6 pt unlabelled glyphs and the two null sets overlap near the axis, so the axis cannot be told from the X-point at a glance",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass",
+    "RUBRIC legibility: pass",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass",
+    "RUBRIC legibility: fail -- the axis and null markers are drawn as 6 pt unlabelled glyphs and the two null sets overlap near the axis, so the axis cannot be told from the X-point at a glance",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass",
+    "RUBRIC legibility: fail -- only the blue solved traces are visible in all three panels; the black dashed EFIT-coordinate source and the dotted EFIT map that the legend declares cannot be seen, so the solved-against-EFIT comparison is unreadable",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass",
+    "RUBRIC legibility: fail -- the MAST panel's y-axis is truncated to 0.465-0.575 MA/m2 against 0.0-2.4 and 0.0-2.6 on the two DIII-D panels, so a 20 per cent variation is drawn as a full-height arch beside them",
+    "RUBRIC data_ink: pass",
+    "RUBRIC decoration: pass",
+    "RUBRIC contrast: pass",
+    "RUBRIC table_form: pass",
+    "RUBRIC label_collision: pass"
+  ],
+  "rubric_lines_note": "Thirty-six lines, six per figure, in reviewed_figures order: frame-137-diverted-midplane, frame-137-diverted-poloidal, frame-146-diverted-midplane, frame-146-diverted-poloidal, mast-21978-35-midplane, source-axis-cap. Each block is legibility, data_ink, decoration, contrast, table_form, label_collision.",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T17:34:10.874418+00:00",
+  "total": null
+}

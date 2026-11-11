@@ -87,6 +87,16 @@
       "note": "The budget now reads exactly as decision precision-budget locks it: residual at most 1e-10, axis and X-point within 5e-4 of minor radius, boundary flux within 1e-4 of span; the unlocked flux-to-span clause is removed.",
       "reason": "",
       "when": "2026-11-11T18:21:51.562939+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8b74918674002fea9f7b0a52e90bdd9ef28452a6",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "Section 5 now requires gate logs, per-arm receipts and the job log on GPFS (run directory or ~/.cache/nova-h200-timing/), never only node /tmp.",
+      "reason": "",
+      "when": "2026-11-11T18:22:51.882083+00:00"
     }
   ],
   "responses": {
@@ -107,6 +117,15 @@
       "note": "Defined agreement (two fresh processes within 5% median warm wall, disagreeing arms rerun) and the decision margin (change a default only beyond the larger of 3% and the larger process spread).",
       "reason": "",
       "when": "2026-11-11T18:20:53.597159+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8b74918674002fea9f7b0a52e90bdd9ef28452a6",
+      "commit_basis": "edit",
+      "note": "Section 5 now requires gate logs, per-arm receipts and the job log on GPFS (run directory or ~/.cache/nova-h200-timing/), never only node /tmp.",
+      "reason": "",
+      "when": "2026-11-11T18:22:51.882083+00:00"
     },
     "reasoning-1": {
       "action": "acted",

@@ -124,11 +124,11 @@ def _fit_law(b_field, permeability_relative):
 
     Interpolate H, not permeability: a rising permeability is compatible with
     positive differential permeability only while H still rises. Restrict each
-    interior Hermite slope to (0, 2*adjacent secant]. Endpoint slopes match
-    the held secant permeabilities outside the table. An interval whose end
-    slope exceeds twice its secant uses positive linear derivative ramps
-    joined by a positive constant derivative, integrated as two quadratics
-    and a line. Their areas reproduce the interval's H increment exactly.
+    interior Hermite slope to (0, 2*adjacent secant]. The origin slope matches
+    its secant permeability; the final slope is 1/mu0 for saturation. An
+    interval whose end slope exceeds twice its secant uses positive linear
+    derivative ramps joined by a positive constant derivative, integrated as
+    two quadratics and a line. Their areas reproduce the interval's H increment exactly.
     """
     b = np.asarray(b_field, dtype=np.float64)
     mu = np.asarray(permeability_relative, dtype=np.float64)
@@ -153,7 +153,7 @@ def _fit_law(b_field, permeability_relative):
     bound = np.r_[secant[0], np.minimum(secant[:-1], secant[1:]), secant[-1]]
     slopes = np.clip(slopes, bound * 1e-6, 2 * bound)
     slopes[0] = 1 / (_MU0 * mu[0])
-    slopes[-1] = 1 / (_MU0 * mu[-1])
+    slopes[-1] = 1 / _MU0
     width = np.diff(b)
     cubic = (slopes[:-1] + slopes[1:] - 2 * secant) / width**2
     quadratic = (3 * secant - 2 * slopes[:-1] - slopes[1:]) / width
@@ -168,23 +168,29 @@ def _fit_law(b_field, permeability_relative):
             # contribution is at most average/4, leaving a positive plateau.
             fraction = min(0.25, average / (2 * (left + right)))
             edge = fraction * width[i]
-            middle = (average - fraction * (left + right) / 2) / (1 - fraction)
-            first = h[i] + edge * (left + middle) / 2
-            last = h[i + 1] - edge * (middle + right) / 2
+            start, stop = b[i] + edge, b[i + 1] - edge
+            left_edge, right_edge = start - b[i], b[i + 1] - stop
+            # Use the represented knot distances so even narrow ramps join
+            # at the tabulated value and tangent after coordinate rounding.
+            middle = (h[i + 1] - h[i] - (left_edge * left + right_edge * right) / 2) / (
+                width[i] - (left_edge + right_edge) / 2
+            )
+            first = h[i] + left_edge * (left + middle) / 2
+            last = h[i + 1] - right_edge * (middle + right) / 2
             pieces.extend(
                 [
-                    [0, (middle - left) / (2 * edge), left, h[i]],
+                    [0, (middle - left) / (2 * left_edge), left, h[i]],
                     [0, 0, middle, first],
-                    [0, (right - middle) / (2 * edge), middle, last],
+                    [0, (right - middle) / (2 * right_edge), middle, last],
                 ]
             )
-            knots.extend([b[i] + edge, b[i + 1] - edge])
+            knots.extend([start, stop])
         knots.append(b[i + 1])
     return np.asarray(knots), np.asarray(pieces).T, 1 / (_MU0 * mu[[0, -1]])
 
 
 def _coefficient(magnitude, knots, coefficients, end_reluctivity):
-    """Return c(B) = 1/mu0 - H(B)/B with held endpoint permeability."""
+    """Return c(B) = M(B)/B with constant magnetisation above the table."""
     index = jnp.clip(
         jnp.searchsorted(knots, magnitude, side="right") - 1, 0, knots.size - 2
     )
@@ -193,8 +199,8 @@ def _coefficient(magnitude, knots, coefficients, end_reluctivity):
     h = ((a * offset + b) * offset + c) * offset + d
     safe = jnp.where(magnitude > 0, magnitude, 1.0)
     reluctivity = jnp.where(magnitude > 0, h / safe, end_reluctivity[0])
-    reluctivity = jnp.where(magnitude >= knots[-1], end_reluctivity[1], reluctivity)
-    return 1 / _MU0 - reluctivity
+    saturated = knots[-1] * (1 / _MU0 - end_reluctivity[1]) / safe
+    return jnp.where(magnitude >= knots[-1], saturated, 1 / _MU0 - reluctivity)
 
 
 def _residual(state, operands):

@@ -188,7 +188,10 @@ def test_augmented_route_qualifies_physical_flux_with_runtime_rows(warmup):
 @pytest.mark.parametrize(
     "diverted", [False, True], ids=["limited", "saddle-transition"]
 )
-def test_unrequested_branch_reader_preserves_program_and_vector_state(diverted):
+@pytest.mark.parametrize("active_set", [False, True], ids=["smooth", "active-set"])
+def test_unrequested_branch_reader_preserves_program_and_vector_state(
+    diverted, active_set
+):
     coefficient = jnp.array([[0.2, -0.3, 0.1], [0.4, 0.1, -0.2], [0.1, 0.3, 0.2]])
     forcing = jnp.array([1.1, 0.8, 1.3])
     reads = []
@@ -210,6 +213,20 @@ def test_unrequested_branch_reader_preserves_program_and_vector_state(diverted):
     decorated._read_branch_topology = read
 
     def solve(fn, initial):
+        options = {}
+        if active_set:
+
+            def shadowed(state, shadow):
+                return fn(state)
+
+            if hasattr(fn, "_read_branch_topology"):
+                shadowed._read_branch_topology = fn._read_branch_topology
+            options = dict(
+                shadow_mask_fn=lambda state: jnp.zeros_like(state, dtype=bool),
+                promoted_shadow_mask_fn=lambda state, previous: previous,
+                shadowed_map_fn=shadowed,
+                active_set_steps=2,
+            )
         return newton_krylov(
             fn,
             initial,
@@ -217,6 +234,7 @@ def test_unrequested_branch_reader_preserves_program_and_vector_state(diverted):
             warmup=3,
             gmres_iterations=3,
             precision=Precision.DOUBLE,
+            **options,
         )
 
     initial = jnp.zeros(3)

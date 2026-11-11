@@ -60,27 +60,27 @@ CERTIFICATION_TOLERANCE = 1e-10
 class SubStep(NamedTuple):
     """One warm-started sub-solve and the drive it was asked for."""
 
-    drive: float
-    change: float
-    sub_step: float
-    tolerance: float
-    updates: int
-    reads: int
-    residual: float
-    converged: bool
-    final: bool
+    drive: float | jax.Array
+    change: float | jax.Array
+    sub_step: float | jax.Array
+    tolerance: float | jax.Array
+    updates: int | jax.Array
+    reads: int | jax.Array
+    residual: float | jax.Array
+    converged: bool | jax.Array
+    final: bool | jax.Array
 
 
 class DriveContinuationResult(NamedTuple):
     """The state reached at the target drive and how it was reached."""
 
     result: support_read.SolveResult
-    drive: float
+    drive: float | jax.Array
     certified: bool
     substeps: tuple[SubStep, ...]
     updates: int
     reads: int
-    sub_step: float
+    sub_step: float | jax.Array
     reason: str | None
 
 
@@ -95,11 +95,11 @@ def _batch_count(values) -> int:
 
 def predict_seed(
     moments,
-    drive: float,
-    target_drive: float,
+    drive: float | jax.Array,
+    target_drive: float | jax.Array,
     *,
     previous_moments=None,
-    previous_drive: float | None = None,
+    previous_drive: float | jax.Array | None = None,
 ):
     """Extrapolate from two converged states, or retain the plain warm start.
 
@@ -131,14 +131,14 @@ def advance_drive(
     seeds_previous,
     convention,
     policy,
-    profile_at: Callable[[float], object],
+    profile_at: Callable[[float | jax.Array], object],
     density_gradient,
     quadrature,
     *,
-    start_drive: float,
-    target_drive: float,
+    start_drive: float | jax.Array,
+    target_drive: float | jax.Array,
     axis_sign: float = -1.0,
-    initial_relative_step: float = INITIAL_RELATIVE_STEP,
+    initial_relative_step: float | jax.Array = INITIAL_RELATIVE_STEP,
     growth: float = GROWTH,
     shrink: float = SHRINK,
     minimum_relative_step: float = MINIMUM_RELATIVE_STEP,
@@ -149,7 +149,7 @@ def advance_drive(
     solve: Callable | None = None,
     solve_options: dict | None = None,
     previous_moments=None,
-    previous_drive: float | None = None,
+    previous_drive: float | jax.Array | None = None,
 ) -> DriveContinuationResult:
     """Reach ``target_drive`` from lanes converged at ``start_drive``.
 
@@ -172,6 +172,13 @@ def advance_drive(
     :func:`nova.equilibrium.support_read.solve_batch`; it exists so a caller
     can supply a version compiled for its own traced drive. ``solve_options``
     are passed through to it unchanged.
+
+    Array start or target drives select independent lanes. ``profile_at`` then
+    receives a drive vector and may return a callable from lane index to that
+    lane's profile, as accepted by ``solve_batch``. Tolerances and sub-step
+    telemetry are per-lane arrays; ``certified`` means every lane certified.
+    A zero-span lane is read at its target once, then held. Scalar start and
+    target drives keep the shared-step behaviour described above.
     """
     solve = solve or support_read.solve_batch
     options = dict(solve_options or {})

@@ -9,6 +9,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import numpy as np
 
 from scripts.prototypes.bank_solve_profile.plot import save_checked
@@ -36,6 +37,11 @@ def main():
     parser.add_argument("--fragment", type=Path, required=True)
     args = parser.parse_args()
     report = json.loads((args.run / "count-report.json").read_text())
+    reproduction = (args.run / "reproduction-partition.log").read_text()
+    assert reproduction.splitlines()[-1] == "EXIT=0"
+    reproduced = next(
+        line for line in reproduction.splitlines() if line.startswith("REPRODUCTION ")
+    )
     allocation = (args.run / "counts-allocation.log").read_text()
     assert allocation.splitlines()[-1] == "EXIT=0"
     suites = json.loads((args.run / "suite-receipts.json").read_text())
@@ -70,9 +76,7 @@ def main():
             )
         ax.set_ylabel(f"lane {lane + 1} drive change [‰]", fontsize=13)
         ax.tick_params(labelsize=11)
-        ax.set_xticks(
-            np.arange(max(record["subsolves"] for record in records.values()) + 1)
-        )
+        ax.xaxis.set_major_locator(MaxNLocator(nbins=4, integer=True))
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(False)
     handles, legend_labels = axes[0, 0].get_legend_handles_labels()
@@ -120,6 +124,8 @@ secant history. Rejected lanes retry from their incumbent; certified lanes keep
 their target state and take zero further Newton updates. Scalar calls retain the
 shared-step loop. A callable lane-profile selector is mapped inside both the
 residual and Newton booking in <code>support_read.solve_batch</code>.</p>
+<p>The archived shared driver reproduces the rejected easy-lane progress:
+<code>{escape(reproduced)}</code>.</p>
 <p>The main arm loads the shared-step driver at
 <code>{records["main"]["revision"]}</code>; the head driver is
 <code>{records["head"]["revision"]}</code>. Both use the head numerical solve and

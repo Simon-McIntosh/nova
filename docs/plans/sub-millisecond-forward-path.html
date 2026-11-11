@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="299">
+<meta name="plan-version" content="300">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -300,6 +300,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261111T161525525046-read-diverted-wall-skip" data-who="reckon-build" data-when="2026-11-11T20:15:18Z">
     <div class="r-comment-body"><p>[Safe wall-skip hint](/nova/evidence/fragments/sub-millisecond-forward-path/read-diverted-wall-skip.html#read-diverted-wall-skip-guarded-hint): refresh now honours the static hint only for diverted ownership, retaining a scalar batch fast path and traced per-lane wall selection for limited/mixed hints. Both direct hint tests fail on unguarded scratch source and pass on product head 190546a5a414a44049795500d0982f8e7e0d53cc. Sirius job 1310950 (7 CPUs) passes wall-skip 10, tracked-read 15, support-read 13 with 2 existing skips, and exact wall counters 0/1/1/1. Final head 5346637e8d6650b4f55f00d0fb380c5fdbe025a7 adds the evidence paragraph; tested source is unchanged. This retains the combined state from bd8a5966655ae2b33b9d92785ff7c51c5b6afc2a and the historical paired CPU figure.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261111T160843090347-read-live-candidates" data-who="reckon-build" data-when="2026-11-11T21:45:40Z">
+    <div class="r-comment-body"><p>[Combined live candidate evidence](/nova/evidence/fragments/sub-millisecond-forward-path/read-live-candidates.html#read-live-candidates-combined-state): coordinator merge 21e32d41d8f90a518ba060f4ad8f9305751b5ec0 verified against refreshed main 6abcdfe84ec3df3b707ae6a2e21aed1b7da02296; final documentation head 3ab3539b8d443cc8ed69cf72ecfee3c6b4a1c085 records 54 to 66 passed, 2 skips per arm, zero added failures and a red saddle-drop control. Historical paired CPU full width-sixteen wall 7.726588 to 6.118481 seconds (-20.81 percent) and inspected SVG remain tied to their recorded source revision.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261029T064352171540-review-of-bank-newton-step-425d44581fee" data-who="reckon-build" data-when="2026-10-29T06:56:01Z">
     <div class="r-comment-body"><p>Parsed independent review of c8e424a78957b379be997296e09e374ee6ba6a10..425d44581fee3c17f335358fed320009e7f845e8 stored under the reviewed run's review-records, with 3 blocking and 2 non-blocking findings.</p></div>

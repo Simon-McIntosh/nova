@@ -104,8 +104,7 @@ def main():
             original = current._conic_ring_tangents
 
             def no_rates(*a):
-                shape = jax.eval_shape(original, *a)
-                return jnp.zeros(shape.shape, shape.dtype)
+                return jnp.zeros_like(original(*a))
 
             with patch.object(current, "_conic_ring_tangents", no_rates):
                 measure(
@@ -119,8 +118,7 @@ def main():
             original_integral = current.moving_polygon_current_moment_tangents
 
             def no_integral(*a):
-                shape = jax.eval_shape(original_integral, *a)
-                return jax.tree.map(lambda x: jnp.zeros(x.shape, x.dtype), shape)
+                return jax.tree.map(jnp.zeros_like, original_integral(*a))
 
             with patch.object(
                 current, "moving_polygon_current_moment_tangents", no_integral
@@ -151,8 +149,7 @@ def main():
             ring_rates = sr._normal_ring_rates
 
             def no_normal_rates(*a):
-                shape = jax.eval_shape(ring_rates, *a)
-                return jnp.zeros(shape.shape, shape.dtype)
+                return jnp.zeros_like(ring_rates(*a))
 
             with patch.object(sr, "_normal_ring_rates", no_normal_rates):
                 measure(

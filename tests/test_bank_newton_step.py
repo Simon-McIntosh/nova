@@ -805,7 +805,7 @@ def test_booking_jacobian_matches_fresh_residual_difference(
     )
     applied = matrix @ jnp.concatenate(direction)
     errors = []
-    for epsilon in (1e-4, 1e-5, 1e-6):
+    for epsilon in (1e-8, 1e-9, 1e-10):
         plus = tuple(v + epsilon * d for v, d in zip(moments, direction, strict=True))
         minus = tuple(v - epsilon * d for v, d in zip(moments, direction, strict=True))
         high, high_read = fresh(batch.operands, batch.cache, plus)

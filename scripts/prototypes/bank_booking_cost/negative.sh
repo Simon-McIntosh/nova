@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=7
 #SBATCH --mem=96G
 set -u
-export TMPDIR=/tmp JAX_PLATFORMS=cpu OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=2
+export TMPDIR=/tmp JAX_PLATFORMS=cpu OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=2 PYTHONSAFEPATH=1
 ROOT=$1
 RUN=$2
 REVISION=$(git -C "$ROOT" rev-parse HEAD)
@@ -18,6 +18,7 @@ from nova.equilibrium import support_read
 
 
 def pytest_runtest_call(item):
+    print("MUTATED_MODULE", support_read.__file__, flush=True)
     original = support_read.step_jacobian
 
     def dropped(*args, **kwargs):

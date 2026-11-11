@@ -31,7 +31,14 @@ def main():
                 + " ".join(FILES)
             )
             log = args.run / f"armed-{arm}.log"
-            env = dict(os.environ, PYTHONPATH=str(tree), JAX_PLATFORMS="cpu")
+            basetemp = scratch / (arm + "-temp")
+            basetemp.mkdir()
+            env = dict(
+                os.environ,
+                PYTHONPATH=str(tree),
+                JAX_PLATFORMS="cpu",
+                PYTEST_DEBUG_TEMPROOT=str(basetemp),
+            )
             with log.open("w") as output:
                 output.write(
                     f"# revision: {revision}; tree: {tree}; command: {command}\n"

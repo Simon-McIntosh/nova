@@ -1,0 +1,162 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Scoped pair only. after_suite at 1c57f69b48c1 is 1 passed / 0 failed / EXIT=0; baseline_suite at 04337b991 is the coordinator-requested absent-file run (no tests collected, EXIT=4, failure_count 0) and is explicitly not a passing collected suite, so it contributes no failure ids. The parser is shown to see ids by the negative control, which records one FAILED id at EXIT=1, so the empty added set is a measured zero rather than a blind one.",
+  "assertion_audit": [
+    {
+      "assertion": "assert len(calls) == 3",
+      "condition_to_fail": "refresh stops importing measure.lower_saddle_reader and defines or imports its own copy, so the monkeypatched observer is never entered and calls stays empty; the recorded negative control sets calls to 0 and reddens this id at EXIT=1.",
+      "independent_of_input": true,
+      "path": "tests/test_diverted_branch_continuation.py:60"
+    },
+    {
+      "assertion": "assert terminal['lower_saddle_qualified']",
+      "condition_to_fail": "the reader stops qualifying a saddle at the analytic lower point, for example by dropping the Hessian-type test or the convergence test.",
+      "independent_of_input": false,
+      "path": "tests/test_diverted_branch_continuation.py:63"
+    },
+    {
+      "assertion": "assert terminal['lower_saddle_distance_m'] < 1e-12",
+      "condition_to_fail": "the recovered lower root moves off the EFIT coordinate, but because the reference and the selected-saddle seed are the same point in this fixture, a reader that returned its seed would also pass.",
+      "independent_of_input": false,
+      "path": "tests/test_diverted_branch_continuation.py:64"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(terminal['lower_saddle_rz_m'], saddle, atol=1e-12)",
+      "condition_to_fail": "the recovered position drifts from the analytic saddle; same caveat as line 64, since saddle is both the expected value and the seed.",
+      "independent_of_input": false,
+      "path": "tests/test_diverted_branch_continuation.py:65"
+    }
+  ],
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/diiid_diverted_branch/refresh.py:33",
+    "scripts/prototypes/diiid_diverted_branch/measure.py:301",
+    "scripts/prototypes/diiid_diverted_branch/recover.py:280"
+  ],
+  "call_sites_note": "Runtime prototype code that can reach the retained shared reader: refresh.main binds it, measure.enrich builds it, and recover.py:280 drives measure.enrich. The restored test file is excluded as a test.",
+  "completed_at": "2026-11-11T14:14:02.377Z",
+  "dispatched_at": "2026-11-11T14:03:09Z",
+  "figure_review": {
+    "inspected": [
+      "/tmp/reckon-crew-scratch/r-20261111T140140910217-review-of-diiid-diverted-branch-continuation-1c57f69b48c1/figcheck/frame-137-diverted.png",
+      "/tmp/reckon-crew-scratch/r-20261111T140140910217-review-of-diiid-diverted-branch-continuation-1c57f69b48c1/figcheck/frame-146-diverted.png"
+    ],
+    "rendered_from_reviewed_git_blobs": true,
+    "renderer": "ImageMagick convert -density 140 from git show 1c57f69b48c1:docs/figures/diiid-diverted-branch-continuation/*.svg under the run scratch TMPDIR",
+    "result": "Both panels legible at 1400 px: axes off, one figure-level legend, solved flux solid green over dashed grey EFIT flux on shared levels, solved axis triangle and solved saddle cross distinguished from EFIT hollow circle and plus, the limiter drawn, both lower-distance endpoints visible in the inset, and machine/frame plus support, residual and gap stated under each panel. No clipped or colliding text observed."
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-diverted-branch-continuation.html",
+      "line": "153",
+      "severity": "non-blocking",
+      "text": "non-blocking: the durable record still states that no test file remains in this node's write paths and that the scoped suite template resolves empty at the final head with no suite arms needed, which is false at 1c57f69b48c1 where tests/test_diverted_branch_continuation.py exists and the suite arms ran; landing.md supersedes the sentence, but the fragment is the repository artifact a later reader opens."
+    },
+    {
+      "file": "tests/test_diverted_branch_continuation.py",
+      "line": "64",
+      "severity": "non-blocking",
+      "text": "non-blocking: the distance assertion compares the recovered saddle against record['efit_x_point_rz_m'], which the test itself sets to the same coordinate it passes as the selected-saddle seed, so both reader starts are identical and a reader that echoed its seed would satisfy lines 63-65; the durability of this test rests on the independent call-count assertion at line 60."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdict_note": "Five of the six checklist items carry a VERDICT line; the sixth, production call sites, is recorded by the CALL_SITES line above, so item_aggregate counts six.",
+  "item_verdicts": {
+    "diff": "Read commit by commit against base 04337b991e8aed9d0904494437e02a1b66fa24dc: 20 commits, 19 files, 11741 insertions and 5 deletions; the delta since the previously reviewed 6d09e6454 is exactly tests/test_diverted_branch_continuation.py (+65 lines, one prototype-reader regression), and git diff 04337b991..1c57f69b48c1bb55552773e0174057c01ea0d58f -- nova/ is 0 lines.",
+    "done_when": "Read brief.md:53-85 against titan-reader-repaired/measurement/comparison.json and completed-audit.json; all five rows on both arms carry residual, converged, reason, boundary class, support, lower-X gap and both refusal counters, and the delta's own gate (reader-test-restoration/after-suite.log:1 revision 1c57f69b48c1, 1 passed, EXIT=0) and focused arm (reader-test-restoration/focused.log, 5 passed, EXIT=0) are recorded, while the base arm is an absent-file exit 4 with no test collected.",
+    "goal": "The source brief.md:3 asks for a branch-preserving continuation through warm-up and Newton; the landed change contains none of it because git diff 04337b991e8aed9d0904494437e02a1b66fa24dc..1c57f69b48c1bb55552773e0174057c01ea0d58f -- nova/ is 0 lines and the lead withdrew the guard at 67b8c3ad58, so the head delivers the measured negative result, the five repaired prototype readers and this restored reader regression in its place.",
+    "manifest": "Read the source manifest.md in full at 1c57f69b48c1bb55552773e0174057c01ea0d58f: status complete, the restored test named, after_suite 1 passed in 19.08s EXIT=0, baseline_suite labelled as an absent-file exit 4 that is explicitly not a passing collected suite, a fresh duplicate-reader negative control at 0 vs 3 calls and EXIT=1, and product identity recorded as git diff 04337b991e8aed9d0904494437e02a1b66fa24dc -- nova/ empty; the commit list ends at 1c57f69b48c1bb55552773e0174057c01ea0d58f.",
+    "write_paths": "Read the fence in prompt.txt:133-137 (tests/test_diverted_branch_continuation.py, scripts/prototypes/diiid_diverted_branch, the evidence fragment, docs/figures/diiid_diverted_branch_continuation) plus the resume advice granting the five prototype readers; all 19 paths in git diff --name-only 04337b991..1c57f69b48c1 lie inside that grant, and the delta adds only the in-scope test file."
+  },
+  "justifications": {
+    "durability": "tests/test_diverted_branch_continuation.py:60 asserts len(calls)==3 from the test's own probe and reader-test-restoration/negative-control.log shows the bypass mutation reddening that exact id at EXIT=1, but the fixture passes the same point as both reader starts so lines 63-65 add little beyond the delegation guard.",
+    "evidence": "titan-reader-repaired/measurement/comparison.json carries the five done-when rows and reader-test-restoration/after-suite.log runs the exact scoped command at 1c57f69b48c1 with 1 passed and a bare EXIT=0 footer, while the base arm is honestly labelled an absent-file exit 4 with no tests collected.",
+    "fit": "tests/test_diverted_branch_continuation.py:8-11 calls configure_dtypes() before any array and asserts x64, matching tests/test_warmup_finite_admission.py, and scoped naming checks over the added file return no plan, ticket or deliverable-id hit.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-diverted-branch-continuation.html:18 records the withdrawal and git diff 04337b991..1c57f69b48c1 -- nova/ returns 0 lines, so the branch-preserving continuation the goal names is not landed and the node answers it only with the negative measurement the lead accepted.",
+    "reuse": "scripts/prototypes/diiid_diverted_branch/refresh.py:18 binds measure.lower_saddle_reader (measure.py:237), the sole def of that name in the tree, which composes nova's polish_stationary_points at nova/equilibrium/flux_surface_connectivity.py:916; the capability search found no second saved-state lower-root owner and the delta adds no new mechanism.",
+    "scope_discipline": "Every path in git diff --name-only 04337b991..1c57f69b48c1 is under scripts/prototypes/, docs/evidence/, docs/figures/ or the granted test file, and nova/equilibrium/fixed_point.py carries the base blob so no shared product file is touched."
+  },
+  "live_plan": {
+    "project": "nova",
+    "slug": "diiid-vertical-force-balance",
+    "version": 65
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source brief.md:3 asks for a branch-preserving continuation through warm-up and Newton; the landed change contains none of it because git diff 04337b991e8aed9d0904494437e02a1b66fa24dc..1c57f69b48c1bb55552773e0174057c01ea0d58f -- nova/ is 0 lines and the lead withdrew the guard at 67b8c3ad58, so the head delivers the measured negative result, the five repaired prototype readers and this restored reader regression in its place.\nVERDICT done_when: Read brief.md:53-85 against titan-reader-repaired/measurement/comparison.json and completed-audit.json; all five rows on both arms carry residual, converged, reason, boundary class, support, lower-X gap and both refusal counters, and the delta's own gate (reader-test-restoration/after-suite.log:1 revision 1c57f69b48c1, 1 passed, EXIT=0) and focused arm (reader-test-restoration/focused.log, 5 passed, EXIT=0) are recorded, while the base arm is an absent-file exit 4 with no test collected.\nVERDICT write_paths: Read the fence in prompt.txt:133-137 (tests/test_diverted_branch_continuation.py, scripts/prototypes/diiid_diverted_branch, the evidence fragment, docs/figures/diiid_diverted_branch_continuation) plus the resume advice granting the five prototype readers; all 19 paths in git diff --name-only 04337b991..1c57f69b48c1 lie inside that grant, and the delta adds only the in-scope test file.\nVERDICT manifest: Read the source manifest.md in full at 1c57f69b48c1bb55552773e0174057c01ea0d58f: status complete, the restored test named, after_suite 1 passed in 19.08s EXIT=0, baseline_suite labelled as an absent-file exit 4 that is explicitly not a passing collected suite, a fresh duplicate-reader negative control at 0 vs 3 calls and EXIT=1, and product identity recorded as git diff 04337b991e8aed9d0904494437e02a1b66fa24dc -- nova/ empty; the commit list ends at 1c57f69b48c1bb55552773e0174057c01ea0d58f.\nVERDICT diff: Read commit by commit against base 04337b991e8aed9d0904494437e02a1b66fa24dc: 20 commits, 19 files, 11741 insertions and 5 deletions; the delta since the previously reviewed 6d09e6454 is exactly tests/test_diverted_branch_continuation.py (+65 lines, one prototype-reader regression), and git diff 04337b991..1c57f69b48c1bb55552773e0174057c01ea0d58f -- nova/ is 0 lines.\nCALL_SITES: scripts/prototypes/diiid_diverted_branch/refresh.py:33, scripts/prototypes/diiid_diverted_branch/measure.py:301, scripts/prototypes/diiid_diverted_branch/recover.py:280\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-diverted-branch-continuation.html:18 records the withdrawal and git diff 04337b991..1c57f69b48c1 -- nova/ returns 0 lines, so the branch-preserving continuation the goal names is not landed and the node answers it only with the negative measurement the lead accepted.\nSCORE evidence: 18\nJUSTIFICATION evidence: titan-reader-repaired/measurement/comparison.json carries the five done-when rows and reader-test-restoration/after-suite.log runs the exact scoped command at 1c57f69b48c1 with 1 passed and a bare EXIT=0 footer, while the base arm is honestly labelled an absent-file exit 4 with no tests collected.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every path in git diff --name-only 04337b991..1c57f69b48c1 is under scripts/prototypes/, docs/evidence/, docs/figures/ or the granted test file, and nova/equilibrium/fixed_point.py carries the base blob so no shared product file is touched.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_diverted_branch_continuation.py:60 asserts len(calls)==3 from the test's own probe and reader-test-restoration/negative-control.log shows the bypass mutation reddening that exact id at EXIT=1, but the fixture passes the same point as both reader starts so lines 63-65 add little beyond the delegation guard.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_diverted_branch_continuation.py:8-11 calls configure_dtypes() before any array and asserts x64, matching tests/test_warmup_finite_admission.py, and scoped naming checks over the added file return no plan, ticket or deliverable-id hit.\nSCORE reuse: 20\nJUSTIFICATION reuse: scripts/prototypes/diiid_diverted_branch/refresh.py:18 binds measure.lower_saddle_reader (measure.py:237), the sole def of that name in the tree, which composes nova's polish_stationary_points at nova/equilibrium/flux_surface_connectivity.py:916; the capability search found no second saved-state lower-root owner and the delta adds no new mechanism.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-diverted-branch-continuation.html:153 non-blocking: the durable record still states that no test file remains in this node's write paths and that the scoped suite template resolves empty at the final head with no suite arms needed, which is false at 1c57f69b48c1 where tests/test_diverted_branch_continuation.py exists and the suite arms ran; landing.md supersedes the sentence, but the fragment is the repository artifact a later reader opens.\nFINDING tests/test_diverted_branch_continuation.py:64 non-blocking: the distance assertion compares the recovered saddle against record['efit_x_point_rz_m'], which the test itself sets to the same coordinate it passes as the selected-saddle seed, so both reader starts are identical and a reader that echoed its seed would satisfy lines 63-65; the durability of this test rests on the independent call-count assertion at line 60.",
+  "reuse_audit": {
+    "measurement": "Searched by capability for a second saved-state lower-root reader: git grep over 1c57f69b48c1 finds exactly one 'def lower_saddle_reader' (scripts/prototypes/diiid_diverted_branch/measure.py:237), reached from refresh.py:18/33 and enrich at measure.py:301. The delta adds a test only, so it forks nothing.",
+    "production": "The underlying capability owner is nova/equilibrium/flux_surface_connectivity.py:916 polish_stationary_points, which measure.lower_saddle_reader composes with fit_tensor_spline and inside_wall_units; no added definition re-implements it."
+  },
+  "review_run_id": "r-20261111T140140910217-review-of-diiid-diverted-branch-continuation-1c57f69b48c1",
+  "reviewed_base_sha": "04337b991e8aed9d0904494437e02a1b66fa24dc",
+  "reviewed_base_sha_note": "the source manifest's orientation_base_sha; git diff 04337b991e8aed9d0904494437e02a1b66fa24dc..1c57f69b48c1bb55552773e0174057c01ea0d58f -- nova/ is 0 lines",
+  "reviewed_commits": [
+    "c325c25e14343e46c60433fd17cf519794e7e4a5",
+    "e9cf3a8949e694c22960b072959f11ba3a32289c",
+    "d0b5435a181ee9d94013dbc26e6d10fded9fa37b",
+    "ff03761a1d9d3f6d42b4f54d4886052a041a9123",
+    "8fb2118e30f902fce846de297220c3703ac27417",
+    "4464c08533c45fead6fed0fc0590d5860e974ab3",
+    "dc4512faba5aa6bee83d28f20807da5f1533173a",
+    "b92ad6b61c2615fe8510d0eaa50872ee31822379",
+    "15631d22e6eef1b8a6d0c526ae06cf88982267d5",
+    "07378642ef46693e73145671e29aaf8a2d08862a",
+    "4ef124881cd67d9e3b4260189bdcbc26c914f0c7",
+    "3940da83e695b31f6edd3213cd1ef6f581e66add",
+    "b514b72e9b52d7b38a174ea518f57bc1e5d678a8",
+    "3c722b2253fe7dfd626d3ddc18a490e665ccb1f8",
+    "51d0a391c64f7e0bda343a2d4e16d2e192bba7f2",
+    "86daa8bfefa0a753cf34886ed22c17fa303012ef",
+    "67b8c3ad58ca44c483176317e259b028f4abf69d",
+    "14d0bc0e8d5c157d9b7a7ad33e0fc4674708c1dc",
+    "6d09e64541a1f1f93fa6799c073786cb37c514a8",
+    "1c57f69b48c1bb55552773e0174057c01ea0d58f"
+  ],
+  "reviewed_head_sha": "1c57f69b48c1bb55552773e0174057c01ea0d58f",
+  "reviewed_run_id": "r-20261110T182141746298-diiid-diverted-branch-continuation",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 10,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_diverted_branch_continuation.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/reader-test-restoration/after-suite.log",
+      "revision": "1c57f69b48c1bb55552773e0174057c01ea0d58f",
+      "summary": "1 passed in 19.08s"
+    },
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_diverted_branch_continuation.py",
+      "completed": true,
+      "exit_status": 4,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/reader-test-restoration/baseline-suite.log",
+      "note": "Expected absent scoped test at base; no tests collected. Not a passing collected suite.",
+      "revision": "04337b991e8aed9d0904494437e02a1b66fa24dc"
+    },
+    "focused": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_warmup_finite_admission.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/reader-test-restoration/focused.log",
+      "revision": "1c57f69b48c1bb55552773e0174057c01ea0d58f",
+      "summary": "5 passed in 29.54s"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T14:14:30.700328+00:00",
+  "total": 102
+}

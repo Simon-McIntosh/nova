@@ -1,0 +1,67 @@
+<section data-reckon="fragment" id="bank-factor-carry-result"
+data-plan="sub-millisecond-forward-path" data-node="bank-factor-carry">
+<h2>Newton factors carried across certified drive slices</h2>
+<p>The secant driver carries the last accepted Newton factor. The first carried
+correction is provisional: its fresh residual must contract by a finite ratio at
+most the contraction limit, otherwise the factor is rebuilt at the incumbent.
+Only the terminal fresh read at residual at most 1e-10 certifies a slice.
+Rejected continuation attempts do not replace the accepted factor.</p>
+<p>Both arms use the first eight saved lanes, drive steps 1e-5 and 1e-3 and seven
+slices at each step, with one warmup and one measured process per arm. The bank
+and seed hashes match across arms. Main uses secant seeds with fresh factors;
+head enables guarded factor reuse within solves and carries factors across
+slices. Assemblies fall by 86.2%, accompanied by more fresh
+reads and accepted updates. All 224 lane/slice results
+certify, at maximum residual 8.024e-11.</p>
+<table id="bank-factor-carry-totals"><thead><tr><th>arm</th>
+<th>total fresh reads</th><th>total accepted updates</th>
+<th>total factor assemblies</th></tr></thead><tbody><tr><td>main</td><td>43</td><td>29</td><td>29</td></tr><tr><td>head</td><td>107</td><td>93</td><td>4</td></tr></tbody></table>
+<p>These totals sum the largest lane count of each of the fourteen batched
+slices. Primed slow-ramp slices skip assembly throughout their solves, while
+their accepted update count rises from one in main to two or three in head.
+At the fast step, the head reaches nineteen updates in slice five; its factor
+is rebuilt in slice six. The assembly count alone does not describe this
+additional correction and fresh-read work.</p>
+<figure id="bank-factor-carry-counts"><img
+src="/nova/figures/sub-millisecond-forward-path/bank-factor-carry/factor-assemblies.svg"
+width="1400" alt="Factor assemblies at each slice for secant and carried factors
+at two drive steps"><figcaption>Batch-maximum factor assemblies; secant is grey
+and carried factors blue. Small horizontal offsets separate coincident points.
+These are titan P100 width-eight counts. The producer rendered the committed SVG
+at 1400 pixels and inspected its labels and marks.</figcaption></figure>
+<table id="bank-factor-carry-table"><thead><tr><th>arm</th><th>drive step</th>
+<th>slice</th><th>fresh reads</th><th>accepted updates</th><th>factor assemblies</th>
+<th>fresh residual, maximum</th><th>titan P100 wall per slice [s]</th>
+<th>H200 width-16 estimate per slice [ms]</th></tr></thead>
+<tbody><tr><td>main</td><td>1e-05</td><td>1</td><td>3</td><td>2</td><td>2</td><td>3.624e-12</td><td>15.534</td><td>12.306</td></tr><tr><td>main</td><td>1e-05</td><td>2</td><td>2</td><td>1</td><td>1</td><td>8.015e-12</td><td>6.322</td><td>7.269</td></tr><tr><td>main</td><td>1e-05</td><td>3</td><td>2</td><td>1</td><td>1</td><td>2.527e-11</td><td>6.314</td><td>7.269</td></tr><tr><td>main</td><td>1e-05</td><td>4</td><td>2</td><td>1</td><td>1</td><td>8.626e-12</td><td>6.313</td><td>7.269</td></tr><tr><td>main</td><td>1e-05</td><td>5</td><td>2</td><td>1</td><td>1</td><td>7.446e-12</td><td>6.314</td><td>7.269</td></tr><tr><td>main</td><td>1e-05</td><td>6</td><td>2</td><td>1</td><td>1</td><td>5.741e-12</td><td>6.314</td><td>7.269</td></tr><tr><td>main</td><td>1e-05</td><td>7</td><td>2</td><td>1</td><td>1</td><td>6.509e-12</td><td>6.314</td><td>7.269</td></tr><tr><td>main</td><td>0.001</td><td>1</td><td>4</td><td>3</td><td>3</td><td>6.182e-11</td><td>13.148</td><td>17.344</td></tr><tr><td>main</td><td>0.001</td><td>2</td><td>4</td><td>3</td><td>3</td><td>5.983e-12</td><td>13.140</td><td>17.344</td></tr><tr><td>main</td><td>0.001</td><td>3</td><td>4</td><td>3</td><td>3</td><td>3.439e-12</td><td>13.140</td><td>17.344</td></tr><tr><td>main</td><td>0.001</td><td>4</td><td>4</td><td>3</td><td>3</td><td>4.107e-12</td><td>13.140</td><td>17.344</td></tr><tr><td>main</td><td>0.001</td><td>5</td><td>4</td><td>3</td><td>3</td><td>5.812e-12</td><td>13.140</td><td>17.344</td></tr><tr><td>main</td><td>0.001</td><td>6</td><td>4</td><td>3</td><td>3</td><td>2.863e-12</td><td>13.140</td><td>17.344</td></tr><tr><td>main</td><td>0.001</td><td>7</td><td>4</td><td>3</td><td>3</td><td>5.045e-12</td><td>13.901</td><td>17.344</td></tr><tr><td>head</td><td>1e-05</td><td>1</td><td>4</td><td>3</td><td>1</td><td>7.844e-12</td><td>18.634</td><td>14.156</td></tr><tr><td>head</td><td>1e-05</td><td>2</td><td>3</td><td>2</td><td>0</td><td>3.162e-11</td><td>18.016</td><td>9.119</td></tr><tr><td>head</td><td>1e-05</td><td>3</td><td>3</td><td>2</td><td>0</td><td>7.286e-11</td><td>9.196</td><td>9.119</td></tr><tr><td>head</td><td>1e-05</td><td>4</td><td>4</td><td>3</td><td>0</td><td>2.927e-12</td><td>12.345</td><td>12.562</td></tr><tr><td>head</td><td>1e-05</td><td>5</td><td>4</td><td>3</td><td>0</td><td>6.196e-12</td><td>12.346</td><td>12.562</td></tr><tr><td>head</td><td>1e-05</td><td>6</td><td>4</td><td>3</td><td>0</td><td>3.951e-12</td><td>12.347</td><td>12.562</td></tr><tr><td>head</td><td>1e-05</td><td>7</td><td>4</td><td>3</td><td>0</td><td>7.091e-12</td><td>12.348</td><td>12.562</td></tr><tr><td>head</td><td>0.001</td><td>1</td><td>5</td><td>4</td><td>2</td><td>5.537e-11</td><td>16.036</td><td>19.194</td></tr><tr><td>head</td><td>0.001</td><td>2</td><td>11</td><td>10</td><td>0</td><td>2.450e-11</td><td>34.369</td><td>36.669</td></tr><tr><td>head</td><td>0.001</td><td>3</td><td>14</td><td>13</td><td>0</td><td>4.481e-11</td><td>43.810</td><td>47.000</td></tr><tr><td>head</td><td>0.001</td><td>4</td><td>17</td><td>16</td><td>0</td><td>6.545e-11</td><td>53.247</td><td>57.331</td></tr><tr><td>head</td><td>0.001</td><td>5</td><td>20</td><td>19</td><td>0</td><td>6.997e-11</td><td>62.687</td><td>67.662</td></tr><tr><td>head</td><td>0.001</td><td>6</td><td>6</td><td>5</td><td>1</td><td>3.986e-12</td><td>18.894</td><td>21.044</td></tr><tr><td>head</td><td>0.001</td><td>7</td><td>8</td><td>7</td><td>0</td><td>8.024e-11</td><td>26.037</td><td>26.337</td></tr></tbody></table>
+<p>The H200 column is an estimate from batch counts: (35.7 ms × reads +
+19.4 ms × updates + 25.5 ms × factor assemblies) / 16, using the measured H200
+update cost 44.9 ms and its 25.5 ms assembly/factor portion. It is not an H200
+timing measurement. Titan walls carry no speed verdict. The retained run.sh
+accepts the repository root and GPFS run directory as arguments, defaulting to
+width sixteen for a later H200 submission. The lead deferred H200 timing to a
+later node. Update counts are accepted Newton
+iterations. A rejected carried proposal can add one linear solve before the
+fresh correction, while every associated read and assembly is counted. Where
+the saved counters cannot distinguish that retry from ordinary damping, the
+estimate is a range charging zero to one additional 19.4 ms batch correction.</p>
+<table id="bank-factor-carry-precision"><thead><tr>
+<th>quantity, ratio to local scale</th><th>maximum against main</th><th>bound</th>
+</tr></thead><tbody><tr><td>flux</td><td>6.731e-14</td><td>1e-08</td></tr><tr><td>axis</td><td>3.761e-14</td><td>0.0005</td></tr><tr><td>saddle</td><td>3.481e-14</td><td>0.0005</td></tr><tr><td>boundary</td><td>1.374e-14</td><td>0.0001</td></tr></tbody></table>
+<p>Every lane meets the locked flux, axis, X-point and boundary-flux budgets
+against main. Synthetic violations of all four precision bounds were refused.
+Receipts and full logs are retained under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry</code>.
+The original API reproduction reports <code>TypeError: solve_batch() got an
+unexpected keyword argument 'factor_cache'</code>. Five focused cases pass;
+the paired sirius files have zero added failures. The exact armed two-file
+command also passes both arms. The unguarded-reuse scratch mutation fails the
+non-contracting first-update test with EXIT=1; the same test passes at head.</p>
+<table id="bank-factor-carry-cpu"><thead><tr><th>arm</th><th>fresh process file</th>
+<th>passed</th></tr></thead><tbody><tr><td>base</td><td>test_bank_drive_continuation</td><td>8</td></tr><tr><td>base</td><td>test_bank_solve_driver</td><td>10</td></tr><tr><td>head</td><td>test_bank_drive_continuation</td><td>9</td></tr><tr><td>head</td><td>test_bank_solve_driver</td><td>14</td></tr></tbody></table>
+<p>Titan job 1310055 completed in 01:22:42 against its authorized eight-hour
+allocation, with scheduler state COMPLETED, exit 0:0, and allocation-log
+EXIT=0. One warmup and one measured process ran for each arm. Source digests
+for the measured head match the delivered product files; JSON and array receipt
+digests validate. The figure passed the shared text-bounds and overlap check
+and was rendered from SVG and visually inspected before commit.</p>
+</section>

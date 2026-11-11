@@ -27,6 +27,10 @@ from scripts.prototypes.bank_warm_predictor.receipts import array_hash  # noqa: 
 from scripts.prototypes.bank_warm_start import streams  # noqa: E402
 
 
+class WarmupComplete(Exception):
+    """Two sub-solves exercise the common compiled program before measurement."""
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--arm", choices=("main", "head"), required=True)
@@ -129,9 +133,7 @@ def main():
         **_options,
     ):
         amplitudes = (
-            jnp.ones(8) + (drive - 1.0) * (steps / 1e-3)
-            if args.arm == "main"
-            else drive
+            jnp.ones(8) + (drive - 1000.0) * steps if args.arm == "main" else drive
         )
         tolerances = jnp.broadcast_to(jnp.asarray(tolerance), (8,))
         started = perf_counter()
@@ -150,26 +152,32 @@ def main():
         )
         args.out.with_suffix(".progress.json").write_text(json.dumps(rows, indent=2))
         print("SUBSOLVE", len(rows), json.dumps(rows[-1]), flush=True)
+        if args.warmup and len(rows) == 2:
+            raise WarmupComplete
         return result
 
     started = perf_counter()
-    result = driver.advance_drive(
-        machine.operands,
-        machine.cache,
-        moments,
-        stationary,
-        stationary,
-        machine.convention,
-        machine.policy,
-        lambda d: d,
-        gradient,
-        machine.quadrature,
-        solve=solve,
-        start_drive=1.0 if args.arm == "main" else jnp.ones(8),
-        target_drive=1.007 if args.arm == "main" else target,
-        initial_relative_step=1e-3 if args.arm == "main" else steps,
-        max_substeps=64,
-    )
+    try:
+        result = driver.advance_drive(
+            machine.operands,
+            machine.cache,
+            moments,
+            stationary,
+            stationary,
+            machine.convention,
+            machine.policy,
+            lambda d: d,
+            gradient,
+            machine.quadrature,
+            solve=solve,
+            start_drive=1000.0 if args.arm == "main" else jnp.ones(8),
+            target_drive=1007.0 if args.arm == "main" else target,
+            initial_relative_step=1e-3 if args.arm == "main" else steps,
+            max_substeps=64,
+        )
+    except WarmupComplete:
+        print("SUMMARY two-subsolve warmup complete", flush=True)
+        return
     elapsed = perf_counter() - started
     assert result.certified, result.reason
     assert np.all(result.result.converged)

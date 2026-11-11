@@ -33,16 +33,18 @@ def accepted_drives(record):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=Path, required=True)
+    parser.add_argument("--counts", type=Path)
     parser.add_argument("--figure", type=Path, required=True)
     parser.add_argument("--fragment", type=Path, required=True)
     args = parser.parse_args()
-    report = json.loads((args.run / "count-report.json").read_text())
+    counts = args.counts or args.run
+    report = json.loads((counts / "count-report.json").read_text())
     reproduction = (args.run / "reproduction-partition.log").read_text()
     assert reproduction.splitlines()[-1] == "EXIT=0"
     reproduced = next(
         line for line in reproduction.splitlines() if line.startswith("REPRODUCTION ")
     )
-    allocation = (args.run / "counts-allocation.log").read_text()
+    allocation = (counts / "counts-allocation.log").read_text()
     assert allocation.splitlines()[-1] == "EXIT=0"
     suites = json.loads((args.run / "suite-receipts.json").read_text())
     assert all(
@@ -53,7 +55,7 @@ def main():
     mutant = suites["shared-step-mutant"]
     assert mutant["exit_status"] != 0 and mutant["failure_ids"]
     records = {
-        arm: json.loads((args.run / f"counts-{arm}-measured.json").read_text())
+        arm: json.loads((counts / f"counts-{arm}-measured.json").read_text())
         for arm in ("main", "head")
     }
     plt.style.use("data-ink")
@@ -132,7 +134,9 @@ residual and Newton booking in <code>support_read.solve_batch</code>.</p>
 its per-lane profile adapter, because the main solver cannot express mixed
 profiles. Thus these counts isolate driver scheduling; they do not claim a
 whole-source main-versus-head numerical comparison. The scalar main coordinate
-parameterises both physical ramps. First four lanes advance by 1e-5 and last four
+parameterises both physical ramps with integer coordinates 1000 to 1007 and
+physical amplitude <code>1 + (coordinate - 1000) × lane step</code>.
+First four lanes advance by 1e-5 and last four
 by 1e-3 per nominal slice, through seven slices from drive 1.0. Initial seeds are
 the predictor's saved first eight lanes. Common input hash:
 <code>{report["inputs"]["hash"]}</code>.</p>

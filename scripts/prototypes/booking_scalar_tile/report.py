@@ -19,8 +19,11 @@ def main():
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[3]
     run = args.run.resolve()
+    measurement = run / "final-measurement"
+    validation = run / "final-validation"
+    sweep = json.loads((run / "sweep-fixed.json").read_text())
     receipts = {
-        (arm, process): json.loads((run / f"{arm}-{process}.json").read_text())
+        (arm, process): json.loads((measurement / f"{arm}-{process}.json").read_text())
         for arm in ("base", "head")
         for process in (1, 2)
     }
@@ -105,7 +108,7 @@ def main():
     fig.savefig(run / "cpu-walls.png", dpi=100)
     plt.close(fig)
     suite = []
-    suite_receipts = json.loads((run / "suite-receipts.json").read_text())
+    suite_receipts = json.loads((validation / "suite-receipts.json").read_text())
     for key, receipt in suite_receipts.items():
         text = Path(receipt["log_path"]).read_text()
         summaries = [
@@ -118,7 +121,7 @@ def main():
             f"<tr><td>{escape(key)}</td><td>{escape(summaries[-1])}</td>"
             f"<td>{receipt['exit_status']}</td></tr>"
         )
-    negative = (run / "negative-control.log").read_text()
+    negative = (validation / "negative-control.log").read_text()
     assert negative.rstrip().endswith("EXIT=1")
     assert (
         "FAILED tests/test_booking_scalar_tile.py::"
@@ -137,16 +140,20 @@ def main():
     result = summary["16:booking"]
     fragment = f"""<section id="booking-scalar-tile-result">
 <h2>Wider scalar conic tiles</h2>
-<p>The scalar tile grows from 32 to 128 cells, reducing the diverted bank's
-113 conic cut cells from four buckets to one. The normal-form population
+<p>The scalar tile grows from 32 to 64 cells, reducing the diverted bank's
+113 conic cut cells from four buckets to two. The normal-form population
 retains its independent eight-cell tile. The existing ceiling division already
 handled both small and partial populations correctly and is retained.
-128 is the prescribed width, matching the independently measured tangent-booking
-choice; this node does not claim a 64/128/256 optimum sweep.</p>
+The same-input CPU sweep measured 2815.838 ms at 32 cells, 3158.677 ms at 64,
+3208.195 ms at 128 and 6184.424 ms at 256. Width 64 is the fastest wider
+candidate; none of the wider candidates beats the narrow CPU baseline.
+The initial 128-cell paired run independently confirmed the CPU regression.
+This is a measured shortfall against the expected scalar speedup.</p>
 <p>At width sixteen, scalar booking changes from {result["base_ms"]:.3f} to
-{result["head_ms"]:.3f} ms ({result["reduction_percent"]:.2f}% lower).
+{result["head_ms"]:.3f} ms ({abs(result["reduction_percent"]):.2f}%
+{"lower" if result["reduction_percent"] >= 0 else "higher"}).
 The two fresh process pairs and their spreads are preserved below. The booking
-program includes the bank's sampled-flux evaluation and the scalar booking;
+program times current.book directly on precomputed physical flux samples;
 carried and full programs include the complete native read and booking.
 All operands enter the timed programs at runtime. Each row uses one synchronized
 warm-up and three synchronized measured calls, excluding compilation.</p>
@@ -166,13 +173,14 @@ latency claim. The checked 1400 by 720 render was inspected before delivery.
 <h3>Parity and deliberate refusal</h3>
 <p>The unchanged 32-cell booking and an independent unbucketed placement oracle
 supply comparisons for repeated physical cut-cell inventories from both limited
-and diverted reads, with 17, 67 and 137 conic cells. The tests compare cell current,
+and diverted reads, with 17, 47, 67 and 137 conic cells. The tests compare cell current,
 radial and vertical moments, raw current and normalization at 1e-12 relative
 (with a 1e-14 absolute floor), including prescribed total-current normalization.
 The repeated inventory isolates scheduling from mesh resolution; it is not a
 new physical mesh or a convergence study. Separate checks exercise 0, 17, 67,
-128, 137 and 257 active cells in a 270-cell array. A test pins the 128-cell width
-and the independent normal width. Before changing the source it failed with
+128, 137 and 257 active cells in a 270-cell array. A test pins the selected
+64-cell width and the independent normal width. Before changing the source
+the original 128-cell sentinel failed with
 <code>assert 32 == 128</code>, reproducing the recorded narrow-tile condition.</p>
 <p>Trial and converged fresh residuals on both analytic fixtures agree with the
 32-cell path at the existing 1e-12 absolute comparison floor; the converged
@@ -185,7 +193,11 @@ The unchanged head parity tests pass. The mutated source and complete refusal lo
 remain in the run directory.</p>
 <h3>Paired validation and provenance</h3>
 <p>The paired validation uses one Sirius job with seven CPUs, one fresh process per
-file and arm. The new scalar-tile file runs only at head.</p>
+file and arm. The new scalar-tile file runs only at head. The archived-moment
+pin fails identically at base and head (absolute 2.83388764e-15, relative
+4.59452653e-12); support-read tests pass at both arms. Added failures are zero.
+The pin is outside this node's write scope and is recorded for coordinator
+follow-up rather than changing its tolerance.</p>
 <table><thead><tr><th>Arm and file</th><th>Pytest summary</th><th>Exit</th></tr></thead>
 <tbody>{"".join(suite)}</tbody></table>
 <p>Base revision <code>{base}</code>; executable head <code>{head}</code>.
@@ -193,6 +205,8 @@ CPU measurement job <code>{job}</code>, all_debug, seven CPUs, two fresh process
 per arm on the same node. Committed measurement instrument SHA-256
 <code>{instrument}</code>. Every receipt records the imported current module,
 working directory, source revision, instrument hash, backend and job identity.
+The width-sweep receipt carries instrument SHA-256
+<code>{sweep["instrument_sha256"]}</code>.
 Logs and JSON receipts: <code>{escape(str(run))}</code>.</p>
 </section>"""
     path = (

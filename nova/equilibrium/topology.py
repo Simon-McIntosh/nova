@@ -3371,19 +3371,28 @@ def _read_at_nulls(
         return jax.vmap(inspect)(indices)
 
     def compact_candidates():
-        slots = jnp.nonzero(
-            retained, size=compact_capacity, fill_value=policy.null_capacity
-        )[0]
-        # Padding evaluates slot 0 and drops its duplicate on the scatter.
-        packed = jax.vmap(inspect)(jnp.where(slots < policy.null_capacity, slots, 0))
-        return jax.tree.map(
+        slots = jnp.nonzero(saddles, size=compact_capacity, fill_value=0)[0]
+        # The limited fallback needs slot 0's form, but no support inspection.
+        fallback = normal_form(0)
+        forms = jax.tree.map(
             lambda leaf: (
-                jnp.zeros((policy.null_capacity,) + leaf.shape[1:], dtype=leaf.dtype)
-                .at[slots]
-                .set(leaf, mode="drop")
+                jnp.zeros((policy.null_capacity,) + leaf.shape, dtype=leaf.dtype)
+                .at[0]
+                .set(leaf)
             ),
-            packed,
+            fallback,
         )
+        accepted = jnp.zeros(policy.null_capacity, dtype=bool)
+
+        def inspect_live(slot, carry):
+            accepted, forms = carry
+            index = slots[slot]
+            admitted, form = inspect(index)
+            return accepted.at[index].set(admitted), jax.tree.map(
+                lambda stack, leaf: stack.at[index].set(leaf), forms, form
+            )
+
+        return jax.lax.fori_loop(0, jnp.sum(saddles), inspect_live, (accepted, forms))
 
     accepted, forms = jax.lax.cond(
         any_lane_overflow(jnp.sum(retained) > compact_capacity),

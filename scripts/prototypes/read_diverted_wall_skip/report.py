@@ -6,6 +6,7 @@ import argparse
 from html import escape
 import json
 from pathlib import Path
+import re
 import statistics
 
 
@@ -134,6 +135,9 @@ def main():
     save_checked(fig, figure)
     fig.savefig(args.run / "read-wall.png", dpi=100)
     cells = pairs["head"][0]["cells"]
+    reproduction = (args.run / "reproduce.log").read_text()
+    counter = re.search(r"WALL_EXECUTIONS[^\n]+", reproduction)
+    assert counter is not None and "EXIT=1" in reproduction
     table_rows = []
     count_rows = []
     for row in summary:
@@ -185,7 +189,7 @@ def main():
     fragment = f"""<section id="read-diverted-wall-skip-record">
 <h2>One wall decision per carried batch</h2>
 <p>The carried refresh selects a scalar all-diverted branch before mapping over lanes. That branch omits wall evaluation. Limited and mixed batches retain the lane wall competition; full reads and terminal certificates retain the full topology owner.</p>
-<p>The pre-fix execution counter observed <code>WALL_EXECUTIONS (0, 0) certificate False 2</code>. Head execution controls require zero calls for an all-diverted carry and positive counts for limited, mixed and certified reads. A scratch mutation using any diverted lane instead of every diverted lane is refused by the mixed parity check.</p>
+<p>The pre-fix execution counter observed <code>{escape(counter[0])}</code>. Head execution controls require zero calls for an all-diverted carry and positive counts for limited, mixed and certified reads. A scratch mutation using any diverted lane instead of every diverted lane is refused by the mixed parity check.</p>
 <figure id="read-diverted-wall-skip-figure"><img src="/nova/figures/sub-millisecond-forward-path/read-diverted-wall-skip/read-wall.svg" alt="Paired CPU read time by batch width for diverted and mixed batches"><figcaption>Native CPU read over {cells} cells on the shared single-null fixture vessel. Two independent physical fields share one operator bank: the closed-form single-null diverted field and a wall-limited polynomial with an internal saddle. Full reads are dashed; carried reads are solid. Blue is head; grey is base. Each plotted value averages two fresh-process medians of seven warm calls. Width one of the mixed family is its limited member, because one lane cannot be mixed. These CPU measurements are not H200 measurements and do not establish the plan's per-slice device bound.</figcaption></figure>
 <h3 id="read-diverted-wall-skip-times">Paired CPU reads</h3>
 <table><thead><tr>{headers}</tr></thead><tbody>{"".join(table_rows)}</tbody></table>

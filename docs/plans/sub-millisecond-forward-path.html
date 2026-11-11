@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="278">
+<meta name="plan-version" content="279">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -929,6 +929,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261111T070011200951-review-of-bank-lane-drive-14f20c0c08a3" data-who="reckon-build" data-when="2026-11-11T07:12:17Z">
     <div class="r-comment-body"><p>Independent review of eb78afe5355009db83dfbc5750cc5081f37859d7..14f20c0c08a310cd913bb2c4fb45f8fe488ae030: parsed, six dimensions scored, zero added test failures; rejected first-trial support consistency blocks implementation landing; duplicate gate runner and unexercised cached-factor profile path are non-blocking findings for coordinator disposition.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261111T044327191654-bank-factor-carry" data-who="reckon-build" data-when="2026-11-11T07:33:36Z">
+    <div class="r-comment-body"><p>Factor carry remains an explicit opt-in: advance_drive uses fresh factors by default and forwards carried factors only with solve_options={&quot;reuse_factor&quot;: True}. The measured negative result preserves assemblies 29 to 4, reads 43 to 107 and accepted updates 29 to 93; estimated H200 batch cost rises from 43*35.7 + 29*44.9 = 2837.2 ms to 107*35.7 + 4*25.5 + 93*19.4 = 5726.1 ms (2.02 times). All 224 historical lane-slice states remain inside the precision budget, maximum fresh residual 8.024159114938811e-11. Latest paired seven-CPU sirius job 1310226 passes 18 base and 24 head tests with zero added failures; the unconditional-reuse mutant fails both rebuild cases. Negative-result fragment and inspected SVG are committed; actual H200 timing is deferred.</p></div>
 </div>
 </section>
 </main>

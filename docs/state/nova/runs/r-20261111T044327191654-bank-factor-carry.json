@@ -1,0 +1,2308 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "101d1d839d90b4859f42df114707bff1ee2dbeae",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry/brief.txt",
+    "sha256": "13cbfd8a5a8d118b2570376245f3bf19177809d122140c0d880b2bb0f7e185e3"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 37860864,
+      "cached_input_tokens_cumulative": 37860864,
+      "input_tokens": 38785761,
+      "input_tokens_cumulative": 38785761,
+      "output_tokens": 175971,
+      "output_tokens_cumulative": 175971,
+      "reasoning_output_tokens": 109769,
+      "reasoning_output_tokens_cumulative": 109769
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 21,
+    "files": 1,
+    "removed": 2
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 75,
+        "name": "_toy_solve_batch",
+        "path": "tests/test_bank_drive_continuation.py"
+      },
+      "run_function": {
+        "line": 1589,
+        "name": "solve_batch",
+        "path": "nova/equilibrium/support_read.py"
+      },
+      "window_line": 1590
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "step",
+        "path": "tests/test_support_read.py"
+      },
+      "run_function": {
+        "line": 1589,
+        "name": "solve_batch",
+        "path": "nova/equilibrium/support_read.py"
+      },
+      "window_line": 1590
+    },
+    {
+      "existing_function": {
+        "line": 75,
+        "name": "_toy_solve_batch",
+        "path": "tests/test_bank_drive_continuation.py"
+      },
+      "run_function": {
+        "line": 1933,
+        "name": "solve",
+        "path": "nova/equilibrium/support_read.py"
+      },
+      "window_line": 1934
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "step",
+        "path": "tests/test_support_read.py"
+      },
+      "run_function": {
+        "line": 1933,
+        "name": "solve",
+        "path": "nova/equilibrium/support_read.py"
+      },
+      "window_line": 1934
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_treats_a_positionally_passed_wall_as_guarded",
+        "path": "tests/test_renderer_wall_scan.py"
+      },
+      "run_function": {
+        "line": 13,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/armed_suites.py"
+      },
+      "window_line": 50
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_book_primal_keeps_exact_diverted_moments",
+        "path": "tests/test_bank_step_booking.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_stored_boundary_support_and_accuracy_floor_are_explicit",
+        "path": "tests/test_efit_parity_field_instrument.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 95
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "test_default_is_unchanged",
+        "path": "tests/test_filepath_data_roots.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 95
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 88
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 95
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 88
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 95
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 26,
+        "name": "main",
+        "path": "scripts/prototypes/bank_factor_carry/report.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_cycle_lane_is_accepted_within_two_steps",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "run_function": {
+        "line": 637,
+        "name": "test_carried_factor_first_update_is_guarded",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 660
+    },
+    {
+      "existing_function": {
+        "line": 177,
+        "name": "test_unchanged_decision_unlocks_when_residual_stalls",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "run_function": {
+        "line": 637,
+        "name": "test_carried_factor_first_update_is_guarded",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 660
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_frozen_set_keeps_fresh_continuous_area",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 637,
+        "name": "test_carried_factor_first_update_is_guarded",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 662
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_fragment_switch_forces_fresh_extra_step",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 637,
+        "name": "test_carried_factor_first_update_is_guarded",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 662
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_batch_reuses_factor_without_rebuilding_jacobians",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 637,
+        "name": "test_carried_factor_first_update_is_guarded",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 662
+    },
+    {
+      "existing_function": {
+        "line": 293,
+        "name": "test_step_cap_reports_nonconvergence",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 637,
+        "name": "test_carried_factor_first_update_is_guarded",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 662
+    },
+    {
+      "existing_function": {
+        "line": 327,
+        "name": "test_reads_include_companion_lanes_after_two_halvings",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 637,
+        "name": "test_carried_factor_first_update_is_guarded",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 660
+    },
+    {
+      "existing_function": {
+        "line": 702,
+        "name": "run",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 637,
+        "name": "test_carried_factor_first_update_is_guarded",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 657
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_cycle_lane_is_accepted_within_two_steps",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "run_function": {
+        "line": 702,
+        "name": "run",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 707
+    },
+    {
+      "existing_function": {
+        "line": 177,
+        "name": "test_unchanged_decision_unlocks_when_residual_stalls",
+        "path": "tests/test_bank_solve_cycle.py"
+      },
+      "run_function": {
+        "line": 702,
+        "name": "run",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 707
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_frozen_set_keeps_fresh_continuous_area",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 702,
+        "name": "run",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 709
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_fragment_switch_forces_fresh_extra_step",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 702,
+        "name": "run",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 709
+    },
+    {
+      "existing_function": {
+        "line": 252,
+        "name": "test_batch_reuses_factor_without_rebuilding_jacobians",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 702,
+        "name": "run",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 709
+    },
+    {
+      "existing_function": {
+        "line": 293,
+        "name": "test_step_cap_reports_nonconvergence",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 702,
+        "name": "run",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 709
+    },
+    {
+      "existing_function": {
+        "line": 327,
+        "name": "test_reads_include_companion_lanes_after_two_halvings",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 702,
+        "name": "run",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 707
+    },
+    {
+      "existing_function": {
+        "line": 637,
+        "name": "test_carried_factor_first_update_is_guarded",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "run_function": {
+        "line": 702,
+        "name": "run",
+        "path": "tests/test_bank_solve_driver.py"
+      },
+      "window_line": 704
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "2a3bbf39b65d34bde31f820abe45175343fe3b9b"
+  ],
+  "completed_at": "2026-11-11T07:33:36Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-11T04:49:59Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_bank_drive_continuation.py tests/test_bank_solve_driver.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry/opt-in-cpu/armed-head.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.25773195876288657,
+    "plan": "sub-millisecond-forward-path",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.3395654255682985,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-13T18:30:06Z, which is after this node's 3600s horizon ending 2026-11-11T05:45:07.384090+00:00",
+    "horizon_ends_at": "2026-11-11T05:45:07.384090+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-11-11T04:45:05Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-13T18:30:06Z",
+    "resets_at": "2026-11-14T15:28:13Z",
+    "seconds_until_reset": 297787,
+    "state": "quiet",
+    "utilisation_pct": 68.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-11T04:45:05Z",
+    "read_at": "2026-11-11T04:45:07Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 68.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-11T07:33:36Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-11T07:33:36Z",
+        "resets_at": 1794670093,
+        "used_percent": 74.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry/manifest.md",
+  "member": "disposable-r-20261111T044327191654-bank-factor-carry",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_bank_solve_driver.py::test_carried_factor_first_update_is_guarded[4.0-1]",
+      "tests/test_bank_solve_driver.py::test_carried_factor_first_update_is_guarded[nan-1]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_bank_solve_driver.py::test_carried_factor_first_update_is_guarded[4.0-1]",
+      "tests/test_bank_solve_driver.py::test_carried_factor_first_update_is_guarded[nan-1]"
+    ],
+    "control_run_failed": true,
+    "declaration": "in a scratch copy the carried factor is reused regardless of contraction; the rebuild test must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry/opt-in-cpu/unguarded-reuse-mutant.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry/opt-in-cpu/unguarded-reuse-mutant.log",
+    "test_paths": [
+      "tests/test_bank_drive_continuation.py",
+      "tests/test_bank_solve_driver.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "bank-factor-carry",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-s21-briefs/nov11/bank-factor-carry.txt",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry/brief.txt",
+    "brief_sha256": "13cbfd8a5a8d118b2570376245f3bf19177809d122140c0d880b2bb0f7e185e3",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 417,
+          "cached_input_tokens": 190315,
+          "input_tokens": 190734,
+          "output_tokens": 772,
+          "reasoning_output_tokens": 52,
+          "total_tokens": 191506,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "session_id": "s21-nova"
+    },
+    "done_when": "factor carry is in drive_continuation.py and solve_batch with tests for guarded reuse, rebuild on failed contraction, unchanged certification and the predicted seed reaching the solve, and a negative-control log failing on the unguarded-reuse mutant; paired base and head suites in one sirius job show no added failures; one titan width-8 count job tables reads, updates and factor assemblies per slice with every lane inside the precision budget, recorded in the bank-factor-carry fragment with one inspected SVG",
+    "estimated_hours": null,
+    "goal": "Carry the converged Newton factor across drive slices so a primed warm slice skips Jacobian assembly",
+    "id": "bank-factor-carry",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-11T04:45:05Z",
+      "read_at": "2026-11-11T04:45:07Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 68.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry/manifest.md",
+    "negative_control": "in a scratch copy the carried factor is reused regardless of contraction; the rebuild test must fail",
+    "over_fence_reason": "",
+    "peer_scopes": {
+      "bank-carried-decision": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-carried-decision.html",
+        "docs/figures/sub-millisecond-forward-path/bank-carried-decision",
+        "nova/equilibrium/support_read.py",
+        "nova/equilibrium/topology.py",
+        "scripts/prototypes/bank_carried_decision",
+        "tests/test_tracked_read.py"
+      ],
+      "diiid-diverted-branch-continuation": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-diverted-branch-continuation.html",
+        "docs/figures/diiid-diverted-branch-continuation",
+        "nova/equilibrium/constraint.py",
+        "nova/equilibrium/fixed_point.py",
+        "scripts/prototypes/diiid_diverted_branch",
+        "scripts/prototypes/diiid_forward_convergence/measure_branches.py",
+        "scripts/prototypes/diiid_material_mask/measure.py",
+        "scripts/prototypes/diiid_residual_plateau/measure.py",
+        "scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py",
+        "scripts/prototypes/diiid_support_mask/trace_support.py",
+        "tests/test_diverted_branch_continuation.py"
+      ],
+      "icm-magnetisation-solve": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-magnetisation-solve.html",
+        "docs/figures/iron-core-magnetisation/icm-magnetisation-solve",
+        "nova/biot/magnetisation.py",
+        "tests/test_magnetisation.py"
+      ]
+    },
+    "plan": "sub-millisecond-forward-path",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "nova/equilibrium/drive_continuation.py",
+      "tests/test_bank_drive_continuation.py",
+      "tests/test_bank_solve_driver.py",
+      "scripts/prototypes/bank_factor_carry",
+      "docs/evidence/fragments/sub-millisecond-forward-path/bank-factor-carry.html",
+      "docs/figures/sub-millisecond-forward-path/bank-factor-carry",
+      "nova/equilibrium/support_read.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 1.3388105392344767,
+      "derived": 0.5587048936944444,
+      "drain_hours": 168.0,
+      "effective_limit": 0.5587048936944444,
+      "elapsed_fraction": 0.5079135397222222,
+      "elapsed_hours": 85.32947467333334,
+      "group": "codex-sub",
+      "lift": {
+        "ends_at": "2026-11-11T09:00:01+00:00",
+        "ends_on": "time",
+        "form": "uncapped",
+        "group": "codex-sub",
+        "id": "codex-sub-1794082577-c029e5",
+        "pace_multiple": null,
+        "remaining_seconds": 15121.891176,
+        "scope": "global"
+      },
+      "lift_hold": {
+        "held": false,
+        "kind": "uncapped"
+      },
+      "limited_by": "allowance",
+      "observed_at": "2026-11-11T04:48:01.428000+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.31999999999999995,
+      "remaining_windows": null,
+      "resets_at": "2026-11-14T15:28:13+00:00",
+      "state": "observed",
+      "utilisation": 0.68,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": null,
+      "decided_by": null,
+      "margin": null,
+      "name": "bank-factor-carry",
+      "score": 0.7375,
+      "state": "unknown",
+      "verdict": null,
+      "window_fill": null
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": -2.319176,
+        "observed_at": "2026-11-11T04:48:01.428000+00:00",
+        "period": "seven_day",
+        "resets_at": "2026-11-14T15:28:13+00:00",
+        "state": "observed",
+        "utilisation": 0.68,
+        "window_minutes": 10080
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": "codex-sub-1794082577-c029e5",
+    "member": "codex",
+    "node": "bank-factor-carry",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-11T04:47:59.108824+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "lead 2026-11-11: dispatch the speed levers while the H200 is full and pick up timing later; counts on titan width 8; difficult work to codex sol",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.909,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.25773195876288657,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "2a3bbf39b65d34bde31f820abe45175343fe3b9b",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "101d1d839d90b4859f42df114707bff1ee2dbeae",
+    "reviewed_head_sha": "2a3bbf39b65d34bde31f820abe45175343fe3b9b",
+    "scores": {
+      "durability": 19,
+      "evidence": 19,
+      "fit": 18,
+      "goal_fidelity": 20,
+      "reuse": 5,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 101
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261111T044327191654-bank-factor-carry",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a1c8f1-d3d6-7032-b4ba-95bf8c099119",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_bank_drive_continuation.py tests/test_bank_solve_driver.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry/opt-in-cpu/armed-head.log",
+      "revision": "f9f4bd34738c4681e87a6a01fb29d4197cb11a3c"
+    },
+    "baseline_measured_nothing": false,
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_bank_drive_continuation.py tests/test_bank_solve_driver.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry/opt-in-cpu/armed-base.log",
+      "revision": "101d1d839d90b4859f42df114707bff1ee2dbeae"
+    },
+    "failure_attribution": {},
+    "status": "clean",
+    "suite_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_bank_drive_continuation.py tests/test_bank_solve_driver.py",
+    "waiver_reason": null
+  },
+  "tests_added": 6,
+  "throughput": {
+    "cumulative_cached_input_tokens": 37860864,
+    "cumulative_input_tokens": 38785761,
+    "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+    "generated_tokens": 285740,
+    "generation_seconds": 7440.607,
+    "machine_seconds": 2321.106,
+    "tokens_per_second": 38.4
+  },
+  "time_budget": "60m",
+  "tool_steps": 331.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "source": "coordinator",
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": 49.54,
+        "budget_overrun_reference_rate": 65.845,
+        "budget_overrun_reference_runs": 268,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 233023,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 236623,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T11:13:44Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T11:01:56Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T105730642218-review-of-bank-fold-radial-714f29cfa289-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 5331,
+          "worker_pid": 2082892
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T11:13:44Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 235903,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none — read-only review",
+          "both deliverables live outside the repository."
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "0520036c56bc2d1593692e6258150880ec0d32aa28abbb911a125e308aafba7f",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T105730642218-review-of-bank-fold-radial-714f29cfa289-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-fold-radial-714f29cfa289-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T105730642218-review-of-bank-fold-radial-714f29cfa289-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 236028,
+        "terminal_at": "2026-11-08T11:11:31Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-fold-radial-714f29cfa289-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": 69.08,
+        "budget_overrun_reference_rate": 65.845,
+        "budget_overrun_reference_runs": 268,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 228324,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 231924,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T12:28:22Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T12:21:00Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T121243879416-review-of-bank-fold-radial-dab5c5352b23-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 4210,
+          "worker_pid": 2839796
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T12:28:22Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 231432,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "72afa9aa091b30f7348492622b418dd52074bc0ceafc520bade6b923aae6618a",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T121243879416-review-of-bank-fold-radial-dab5c5352b23-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-fold-radial-dab5c5352b23-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T121243879416-review-of-bank-fold-radial-dab5c5352b23-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 231455,
+        "terminal_at": "2026-11-08T12:27:56Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-fold-radial-dab5c5352b23-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": 63.06,
+        "budget_overrun_reference_rate": 65.845,
+        "budget_overrun_reference_runs": 268,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 223478,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 227078,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T13:57:58Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T13:41:34Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T133824301046-review-of-bank-fold-arclength-ab60151ed913-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 7434,
+          "worker_pid": 3416370
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T13:57:58Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 226056,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none — read-only review",
+          "no repository writes"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "4871996213aab8544dd4e4748ae3ae00c58de9f5b3441eb6fe7f261e9f773cd5",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T133824301046-review-of-bank-fold-arclength-ab60151ed913-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-fold-arclength-ab60151ed913-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T133824301046-review-of-bank-fold-arclength-ab60151ed913-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 226077,
+        "terminal_at": "2026-11-08T13:57:35Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-fold-arclength-ab60151ed913-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "lane-saturated",
+        "budget_overrun_rate": 19.99,
+        "budget_overrun_reference_rate": 65.845,
+        "budget_overrun_reference_runs": 268,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 219498,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 223098,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-08T15:13:03Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-08T14:48:14Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261108T144136995558-review-of-bank-fold-arclength-e9afe4af1cfd-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 5597,
+          "worker_pid": 3771142
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-08T15:13:03Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 221552,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none (read-only review; no file in the repository was edited",
+          "created",
+          "moved or deleted)"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "840140242485de679db3570c2a4558b9233bfeb40502b34fd1b6a5fb7ddfbd8a",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261108T144136995558-review-of-bank-fold-arclength-e9afe4af1cfd-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-fold-arclength-e9afe4af1cfd-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261108T144136995558-review-of-bank-fold-arclength-e9afe4af1cfd-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 221676,
+        "terminal_at": "2026-11-08T15:10:56Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-fold-arclength-e9afe4af1cfd-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 168493,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 172093,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [
+            1979299,
+            2031123,
+            2031441,
+            2031440,
+            2031452,
+            2031773,
+            1979998,
+            1980130
+          ],
+          "exit_code": 0,
+          "exited_at": "2026-11-09T05:13:29Z",
+          "last_record_type": "user",
+          "launched_at": "2026-11-09T04:58:32Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261109T045329818721-review-of-bank-route-rows-47be40341c62-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 5483,
+          "worker_pid": 1977851
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-09T05:13:29Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 171126,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "d215f85ea7425ec0e69d220160a194a753f272bc26fef390e13b8575e5be2766",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T045329818721-review-of-bank-route-rows-47be40341c62-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-route-rows-47be40341c62-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261109T045329818721-review-of-bank-route-rows-47be40341c62-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 171427,
+        "terminal_at": "2026-11-09T05:08:25Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-route-rows-47be40341c62-figure"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": 36.83,
+        "budget_overrun_reference_rate": 65.845,
+        "budget_overrun_reference_runs": 268,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 165954,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion; the run is the review it dispatched with, so the review it wrote is its deliverable and no review of this run is required",
+        "effective_phase": "complete",
+        "elapsed_seconds": 169554,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-09T05:52:14Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-09T05:40:41Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261109T053635023789-review-of-bank-warm-stall-1661bb3b479a-figure",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 2376,
+          "worker_pid": 2216369
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-09T05:52:14Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": false,
+        "log_age_seconds": 168800,
+        "log_fresh": false,
+        "manifest_commits": [
+          "none — this is a read-only figure review; no repository commit was made."
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "6e8e92618635d94c1c94fc9070fe775f1e13ac9a7a38068cc028c03e2424446b",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261109T053635023789-review-of-bank-warm-stall-1661bb3b479a-figure/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run once its verdict is read; the run is not itself reviewed",
+        "node": "review-of-bank-warm-stall-1661bb3b479a-figure",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261109T053635023789-review-of-bank-warm-stall-1661bb3b479a-figure",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 168901,
+        "terminal_at": "2026-11-09T05:50:31Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-warm-stall-1661bb3b479a-figure"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 19124,
+        "budget_seconds": 3600,
+        "classification": "promotable",
+        "commits_beyond_base": 0,
+        "detail": "the review run's worker has ended and attempt 1 filed a review record holding every measurement its rubric demands (/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261109T220212224156-bank-warm-predictor.at-cd674ece07bd43385152a908329c92d38c8cc439.json) at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T222210460050-review-of-bank-warm-predictor-cd674ece07bd/attempt-1-review-filed.json; the run reads delivered whatever its manifest's status word says",
+        "effective_phase": "complete",
+        "elapsed_seconds": 22724,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-10T22:43:03Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-10T22:28:25Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 67985034,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T222210460050-review-of-bank-warm-predictor-cd674ece07bd/codex-home/cache"
+            },
+            {
+              "bytes": 28814443,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T222210460050-review-of-bank-warm-predictor-cd674ece07bd/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261110T222210460050-review-of-bank-warm-predictor-cd674ece07bd",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 203,
+          "worker_pid": 1941990
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "promote",
+          "recovery_classification": "promotable",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "complete"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-10T22:43:03Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 21757,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "1b5969e1fe62ad5813899bfe24c3819f7ce14749022341c1534caf08f5b002c7",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T222210460050-review-of-bank-warm-predictor-cd674ece07bd/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "promote the completed review run; its filed review is at /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261109T220212224156-bank-warm-predictor.at-cd674ece07bd43385152a908329c92d38c8cc439.json",
+        "node": "review-of-bank-warm-predictor-cd674ece07bd",
+        "phase": "complete",
+        "plan": "sub-millisecond-forward-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261110T222210460050-review-of-bank-warm-predictor-cd674ece07bd",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 21822,
+        "terminal_at": "2026-11-10T22:41:51Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-bank-warm-predictor-cd674ece07bd"
+      }
+    ]
+  },
+  "wall_seconds": 9817,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-11T07:33:39Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-11T07:04:28Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 68479560,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry/codex-home/cache"
+      },
+      {
+        "bytes": 28814443,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261111T044327191654-bank-factor-carry",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1314,
+    "worker_pid": 570141
+  },
+  "worker_seconds": 9761,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

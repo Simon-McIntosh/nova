@@ -327,3 +327,80 @@ def test_rejected_attempt_keeps_last_accepted_lane_support():
     )
     np.testing.assert_array_equal(result.result.support.reading[0], [2.0])
     assert np.all(np.isnan(result.result.support.reading[1]))
+
+
+def test_incoming_factor_rebuild_uses_lane_profiles(monkeypatch):
+    """A poorly contracting carried factor rebuilds with each lane's profile."""
+    builds = []
+
+    def residual(_operands, _base, state, support, profile, _quadrature):
+        return bank.StepResidual(
+            tuple(value - profile for value in state),
+            (*state, jnp.asarray(1.0)),
+            support.reading,
+            support.valid,
+        )
+
+    def jacobian(_operands, moments, _support, profile, *_args, **_kwargs):
+        jax.debug.callback(
+            lambda target, incumbent: builds.append((float(target), float(incumbent))),
+            profile,
+            moments[0][0],
+        )
+        return jnp.eye(3, dtype=moments[0].dtype)
+
+    monkeypatch.setattr(bank, "read_batch", solver_toy._toy_read)
+    monkeypatch.setattr(bank, "step_residual", residual)
+    monkeypatch.setattr(bank, "step_jacobian", jacobian)
+    targets = jnp.asarray([0.25, -0.75], dtype=jnp.float64)
+    moments = tuple(jnp.ones((2, 1), dtype=jnp.float64) for _ in range(3))
+    points = jnp.zeros((2, 1, 2), dtype=jnp.float64)
+    matrix = 4.0 * jnp.eye(3, dtype=jnp.float64)
+    inverse, indices = bank._block_preconditioner(matrix)
+    incoming = bank.NewtonFactor(
+        jnp.broadcast_to(matrix, (2, 3, 3)),
+        jnp.ones((2, 3)),
+        jnp.ones((2, 3)),
+        jnp.broadcast_to(inverse, (2, *inverse.shape)),
+        jnp.broadcast_to(indices, (2, *indices.shape)),
+    )
+    result = jax.jit(
+        lambda state, factor: bank.solve_batch(
+            None,
+            None,
+            state,
+            points,
+            points,
+            None,
+            None,
+            lambda lane: targets[lane],
+            None,
+            None,
+            factor_cache=factor,
+            factor_valid=jnp.ones(2, bool),
+            reuse_factor=True,
+            max_steps=1,
+            freeze_active_set=False,
+        )
+    )(moments, incoming)
+    jax.block_until_ready(result)
+    jax.effects_barrier()
+    assert sorted(builds) == [(-0.75, 1.0), (0.25, 1.0)]
+    np.testing.assert_array_equal(result.steps, [1, 1])
+    np.testing.assert_array_equal(result.refactors, [1, 1])
+    np.testing.assert_array_equal(result.reads, [3, 3])
+    assert np.all(result.converged) and np.all(result.factor_valid)
+    assert np.all(result.residual <= 1e-10)
+    for values in result.moments:
+        np.testing.assert_allclose(values[:, 0], targets, rtol=0, atol=1e-10)
+    print(
+        "INCOMING_REBUILD",
+        "builds",
+        builds,
+        "reads",
+        np.asarray(result.reads),
+        "certified",
+        np.asarray(result.converged),
+        "residual",
+        np.asarray(result.residual),
+    )

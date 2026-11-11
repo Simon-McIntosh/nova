@@ -39,8 +39,9 @@ def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
 
     A rectangular strip narrower than h/2 has centroid clearance below h/4;
     merging on that bound removes strips even when their area exceeds the
-    sliver floor. The area target is h**2/2. Repeat longest-edge merges until
-    both targets hold or no hole-free neighbour remains. A physically thin
+    sliver floor. The area target is h**2/2. Prefer the smallest union already
+    meeting both targets, with longest-edge merges for pieces needing further
+    agglomeration. A physically thin
     component can miss the targets, but must admit an interior point at 0.01 h.
     The cell union preserves the authored material to floating-point roundoff.
     A hole inside one grid square is triangulated before merging.
@@ -93,14 +94,33 @@ def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
                 for j, other in enumerate(pieces)
                 if j != k and other is not None
             ]
-            for shared, j in sorted(neighbours, reverse=True):
+            candidates = []
+            for shared, j in neighbours:
                 if shared <= 0:
-                    break
+                    continue
                 merged = piece.union(pieces[j])
                 if isinstance(merged, shapely.Polygon) and not merged.interiors:
-                    pieces[j], pieces[k] = merged, None
-                    changed = True
-                    break
+                    centre = merged.centroid
+                    qualified = (
+                        merged.area >= floor * (1 - 1e-12)
+                        and merged.contains(centre)
+                        and centre.distance(merged.boundary) >= clearance * (1 - 1e-12)
+                    )
+                    # The smallest qualified union preserves resolution across
+                    # thin material; an inward full cell need not be consumed.
+                    candidates.append(
+                        (
+                            not qualified,
+                            merged.area if qualified else -shared,
+                            -shared,
+                            j,
+                            merged,
+                        )
+                    )
+            if candidates:
+                *_, j, merged = min(candidates, key=lambda candidate: candidate[:4])
+                pieces[j], pieces[k] = merged, None
+                changed = True
         if not changed:
             break
     polygons, centres, areas = [], [], []

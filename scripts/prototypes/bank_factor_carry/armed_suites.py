@@ -26,7 +26,8 @@ def main():
             tree = scratch / arm
             snapshot(args.root, revision, tree)
             command = (
-                f"PYTHONPATH=. JAX_PLATFORMS=cpu {PYTHON} -m pytest -p no:cacheprovider -q "
+                f"PYTHONPATH=. JAX_PLATFORMS=cpu {PYTHON} "
+                "-m pytest -p no:cacheprovider -q "
                 + " ".join(FILES)
             )
             log = args.run / f"armed-{arm}.log"
@@ -41,7 +42,8 @@ def main():
                         PYTHON,
                         "-c",
                         "from pathlib import Path; "
-                        "from nova.equilibrium import drive_continuation, support_read; "
+                        "from nova.equilibrium import drive_continuation; "
+                        "from nova.equilibrium import support_read; "
                         'print("# module:", drive_continuation.__file__); '
                         'print("# support_module:", support_read.__file__); '
                         'print("# cwd:", Path.cwd().resolve())',

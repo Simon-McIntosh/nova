@@ -58,9 +58,24 @@
     within ten corrections. No refinement or mesh-pair acceptance is inferred.</p>
 
   <h3 id="icm-newton-trust-region-validation">CPU suite pair</h3>
-  <p>The exact scoped baseline and after commands are running as one sirius job
-    with a three-hour allocation, fresh processes and separate extracted trees.
-    This paragraph is updated when both suite receipts are available.</p>
+  <p>The exact scoped command passed in both fresh-process arms of sirius job
+    1311012, which had a three-hour allocation. Baseline
+    <code>6abcdfe84ec3df3b707ae6a2e21aed1b7da02296</code>: 28 passed in 1379.37 s,
+    EXIT=0. Product head <code>80c194ee3fb321b3548da7581ae04fb2fb4191e1</code>:
+    30 passed in 1368.02 s, EXIT=0. There are zero added failures. Later commits
+    change this evidence fragment only.</p>
+  <p>Both arms ran <code>PYTHONPATH=. JAX_PLATFORMS=cpu
+    /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q
+    tests/test_magnetisation.py</code>. Each extracted tree printed the actual
+    imported module and working directory before its suite; x64 was configured
+    and asserted before constructing arrays. Both temporary trees were removed
+    when the job completed.</p>
+  <p>The nonlinear shell has exactly three unregularised corrections and the
+    identical residual history in both arms: 0.995437821501903,
+    0.0004873816814920752, 6.435774840540602e-8, 5.994298257758251e-14.
+    Its quadratic ratio remains 0.00705351942949, against 1.04458978683 for the
+    frozen-permeability control. The suite enforces both the three-correction
+    count and a quadratic ratio below 0.1.</p>
   <p>Raw receipts and logs are retained under
     <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T205006716359-icm-newton-trust-region/</code>:
     <code>measurement.json</code>, <code>measurement.log</code>,

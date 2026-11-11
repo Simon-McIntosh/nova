@@ -25,8 +25,8 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="274">
-<meta name="plan-modified" content="2026-11-10">
+<meta name="plan-version" content="275">
+<meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
   <main class="plan-doc">
@@ -263,6 +263,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T155355049142-review-of-bank-compact-followups-a663fcd2e239" data-who="reckon-build" data-when="2026-11-06T16:02:26.518Z">
     <div class="r-comment-body"><p>Review of the compact-candidate follow-up node stored at both declared record paths: scores 20/18/19/16/18/20 with added_failure_count 0, one non-blocking finding at tests/test_candidate_inspection_batched.py:300 (the new guard binds to the cond predicate, not to which branch the cond runs, so swapping the operands at nova/equilibrium/topology.py:3357-3358 would lose the compaction with no red test. The four follow-up findings themselves are answered in place and behaviour is unchanged.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261109T044945756828-bank-carried-decision" data-who="reckon-build" data-when="2026-11-11T04:49:02Z">
+    <div class="r-comment-body"><p>[Carried-decision evidence](/nova/evidence/fragments/sub-millisecond-forward-path/bank-carried-decision.html#bank-carried-decision-result): CPU evidence lands (35 base / 44 head passes, zero added failures; stale-edge control fails three cases); H200 width-16 paired wall and precision verdict deferred to a later timing node. Coordinator cancelled job1309825 unrun; titan receipts are information only.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261029T064352171540-review-of-bank-newton-step-425d44581fee" data-who="reckon-build" data-when="2026-10-29T06:56:01Z">
     <div class="r-comment-body"><p>Parsed independent review of c8e424a78957b379be997296e09e374ee6ba6a10..425d44581fee3c17f335358fed320009e7f845e8 stored under the reviewed run's review-records, with 3 blocking and 2 non-blocking findings.</p></div>

@@ -19,10 +19,12 @@ from nova.equilibrium.stencil_mesh import CellCurrentMoments
 assert jax.config.jax_enable_x64 is True
 
 
-def _case(kind):
+def _case(kind, *, wall=None):
     from tests.equilibrium import test_topology_read as fixture
 
-    _, analytic, wall, axis, saddle = fixture._analytic_inputs(kind)
+    _, analytic, default_wall, axis, saddle = fixture._analytic_inputs(kind)
+    if wall is None:
+        wall = default_wall
     geometry = fixture._realised_hex_geometry(wall, 50)
     samples = np.asarray(geometry.sample_points)
     nodes = np.unique(np.round(samples.reshape(-1, 2), 12), axis=0)
@@ -316,6 +318,54 @@ def test_certificate_replaces_carried_read_with_full_fresh_read(diverted_case):
     _assert_continuous_equal(certified.reading, fresh.reading)
 
 
+def test_a_certificate_request_executes_the_whole_mesh_read(diverted_case, monkeypatch):
+    """A certificate request must reach the full topology read, not the carry.
+
+    At an unchanged state the carried decision and a fresh one agree on every
+    continuous quantity, so equal geometry beside a raised rebuilt flag cannot
+    show that the certificate executed the whole-mesh read: a carried result
+    relabelled as rebuilt would pass that comparison. The full read itself is
+    observed here, and it must run for a certificate and never for a carry.
+    """
+    operands, cache, roots, convention, policy, moments, _, first, _ = diverted_case
+    states = jax.tree.map(lambda value: value[None], moments)
+    tracking = jax.tree.map(lambda value: value[None], support_read.tracking_of(first))
+    whole_mesh_reads = []
+    origin = topology.read_at_stationary_points
+
+    def observed(*args, **kwargs):
+        jax.debug.callback(lambda _: whole_mesh_reads.append(1), jnp.asarray(0))
+        return origin(*args, **kwargs)
+
+    monkeypatch.setattr(topology, "read_at_stationary_points", observed)
+    run = jax.jit(
+        lambda tracked, certify: support_read.read_batch(
+            operands,
+            cache,
+            states,
+            roots[None],
+            roots[None],
+            convention,
+            policy,
+            tracking=tracked,
+            certificate=lambda _: certify,
+        )
+    )
+    carried = run(tracking, jnp.asarray(False))
+    jax.block_until_ready(carried)
+    jax.effects_barrier()
+    assert not bool(carried.rebuilt[0])
+    assert not whole_mesh_reads, "the carry executed the whole-mesh read"
+
+    certified = run(tracking, jnp.asarray(True))
+    jax.block_until_ready(certified)
+    jax.effects_barrier()
+    assert bool(certified.rebuilt[0])
+    assert int(certified.rebuilds[0]) == int(first.rebuilds) + 1
+    print("WHOLE_MESH_READS", len(whole_mesh_reads), flush=True)
+    assert whole_mesh_reads, "a certificate request answered without a full read"
+
+
 @pytest.mark.parametrize("certificate_valid", [True, False])
 def test_solve_requires_full_certificate_after_carried_candidate(
     monkeypatch, certificate_valid
@@ -404,6 +454,43 @@ def test_in_cell_motion_that_changes_normal_cells_requires_full_read(diverted_ca
     fresh = run(None)
     assert bool(result.rebuilt[0])
     _assert_continuous_equal(result.reading, fresh.reading)
+
+
+def test_a_wall_contact_winner_change_rebuilds_at_a_limited_boundary():
+    """Opposite small tilts select two physically distinct limiter contacts."""
+    from tests.equilibrium import test_topology_read as fixture
+
+    oracle, *_ = fixture._analytic_inputs("limited")
+    inboard, outboard = oracle.boundary_midplane_radii()
+    height = 1.5 * np.sqrt(oracle.axis_flux / oracle.field_coefficient)
+    wall = np.asarray(
+        ((inboard, -height), (outboard, -height), (outboard, height), (inboard, height))
+    )
+    operands, cache, roots, convention, policy, moments, _analytic = _case(
+        "limited", wall=wall
+    )
+    # Both radial wall faces touch the untilted analytic boundary. The tilt
+    # separates their contact fluxes by 0.001 * (outboard - inboard), far
+    # above roundoff between Newton seeds for the same physical contact.
+    gradient = jnp.asarray((0.001, 0.0), dtype=jnp.float64)
+    initial, initial_cache = _shifted(operands, cache, -gradient)
+    first, _pitch = _read(initial, initial_cache, roots, convention, policy, moments)
+    assert bool(first.rebuilt) and bool(first.valid)
+    assert int(first.reading.boundary_class) == int(topology.TopologyClass.LIMITED)
+    np.testing.assert_allclose(first.reading.boundary, (inboard, 0.0), atol=1e-10)
+    assert 0.001 * (outboard - inboard) > 0.003
+
+    moved, moved_cache = _shifted(operands, cache, gradient)
+    tracking = support_read.tracking_of(first)
+    result, _ = _read(
+        moved, moved_cache, roots, convention, policy, moments, tracking=tracking
+    )
+    assert bool(result.valid)
+    assert bool(result.rebuilt)
+    assert int(result.rebuilds) == int(first.rebuilds) + 1
+    assert int(result.reading.boundary_class) == int(topology.TopologyClass.LIMITED)
+    np.testing.assert_array_equal(result.cells, first.cells)
+    np.testing.assert_allclose(result.reading.boundary, (outboard, 0.0), atol=1e-10)
 
 
 def test_changed_fragment_incidence_refuses_carried_labels(diverted_case):

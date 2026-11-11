@@ -1,0 +1,46 @@
+# Data-ink base style: plt.style.use("data-ink"). Colours come from each repository's style
+# module, where every recurring component of a study has its own named colour.
+#
+# Sizes are set for one canvas, 14 in wide at 100 dpi (1400 px), so text and lines read
+# the same in every full-width figure on a page; keep the width and vary only the height.
+# In a ~900 px document column, 16/14 pt text renders at 14/12 px, a little under body text,
+# which is where figure text should sit: legible without competing with the prose.
+#
+# Line roles (set per call, not here): headline series 3.0, other data 2.6, setpoints and
+# reference steps 2.4 in neutral grey, limits and thresholds 1.2 dotted grey.
+
+figure.figsize      : 14, 8
+figure.dpi          : 100
+savefig.dpi         : 100
+figure.facecolor    : white
+savefig.facecolor   : white
+axes.facecolor      : white
+
+font.family         : sans-serif
+font.size           : 14
+axes.labelsize      : 16
+axes.titlesize      : 16
+figure.titlesize    : 16
+xtick.labelsize     : 14
+ytick.labelsize     : 14
+legend.fontsize     : 14
+text.color          : 0b0b0b
+axes.labelcolor     : 0b0b0b
+
+lines.linewidth     : 2.6
+lines.markersize    : 9
+axes.linewidth      : 1.2
+axes.edgecolor      : 52514e
+axes.spines.top     : False
+axes.spines.right   : False
+axes.grid           : False
+axes.titlelocation  : left
+xtick.color         : 52514e
+ytick.color         : 52514e
+xtick.major.width   : 1.2
+ytick.major.width   : 1.2
+xtick.major.size    : 6
+ytick.major.size    : 6
+
+legend.frameon      : False
+legend.handlelength : 1.6

@@ -101,6 +101,9 @@ def main():
     parser.add_argument("--cpu-files", type=Path)
     parser.add_argument("--resume-from", type=Path)
     parser.add_argument("--plan-only", action="store_true")
+    parser.add_argument(
+        "--forward-arms", choices=("missing", "both"), default="missing"
+    )
     args = parser.parse_args()
     revisions = (("base", args.base), ("head", args.head))
     summary, retained = {}, {}
@@ -108,6 +111,9 @@ def main():
         if args.cpu_files:
             raise ValueError("solver continuation cannot include CPU regression files")
         summary, retained = resume_plan(args.resume_from, revisions)
+    if args.forward_arms == "both":
+        for arm, _ in revisions:
+            summary.pop(arm + ":forward", None)
     plan = dict(
         retained={key: str(path) for key, path in retained.items()},
         pending=[

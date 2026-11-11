@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="read-tie-break">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s2">
+<meta name="plan-recorded-at" content="2026-11-11">
+<meta name="plan-verdict" content="pass">
+<title>Deterministic read candidate ties | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<section id="read-tie-break-rule">
+<h1>One rule for near-tied read candidates</h1>
+<p><code>topology.extremum_index</code> delegates to the shared
+<code>connectivity_boundary._arg_extreme</code> owner and selects the lowest canonical candidate
+index among scores within <code>1e-12 * abs(best)</code> of the best. Minima apply
+the same relative margin around the minimum. The margin exceeds the reproduced equivalent-seed
+roundoff, while preserving every leader separated by more than that margin.
+There is no absolute floor: a zero best ties only exactly. Candidate order is the
+canonical order of the fixed mesh, wall or null slots; a reordered array must
+carry those canonical indices. The returned value is the winning array position.
+JAX reductions implement the rule under both <code>jit</code> and <code>vmap</code>.
+NaNs are ignored when another score is available; all-NaN score sets select
+position 0. Validity is a separate caller decision: the explicit X-point mask
+continues to refuse when no contained candidate has a finite score. Equal masked infinities choose the
+first index, with admission still decided by each caller's existing validity mask.</p>
+<p>The assigned base was reproduced before the product edit: <code>winner 1327
+runner_up 1325 gap 1.7763568394002505e-15 best -0.039006978946510174</code>.
+The margin there is approximately 3.90e-14. These are aliases of one physical
+wall contact, not two separated limiter contacts. The reproduction receipt is
+<code>reproduction.log</code>, with <code>EXIT=0</code>, under the run directory
+named below. The raw points and scores are preserved in <code>original-events.npz</code>.
+Its tied indices are 1325, 1326 and 1327, so the rule selects canonical index 1325.</p>
+</section>
+<section id="read-tie-break-decisions">
+<h2>Discrete decisions examined</h2>
+<p>Every argmax/argmin in <code>topology.py</code> and <code>support_read.py</code>
+was examined. Fifteen floating-point rankings share the helper:</p>
+<table><thead><tr><th>Owner</th><th>Ranking</th></tr></thead><tbody>
+<tr><td><code>Topology.x_point_index</code></td><td>Contained saddle signed flux</td></tr>
+<tr><td><code>Topology.o_point_index</code></td><td>Qualified axis signed flux</td></tr>
+<tr><td><code>Topology._wall_anchor_selection</code></td><td>Eligible structured-wall signed flux</td></tr>
+<tr><td><code>Topology.boundary</code></td><td>Saddle versus wall signed flux; saddle has the lower slot</td></tr>
+<tr><td><code>Topology.axis_component</code></td><td>Confined flood seed distance squared</td></tr>
+<tr><td><code>Topology.qualified_o_candidates</code></td><td>Nearest grid owner for each axis seed</td></tr>
+<tr><td><code>Topology.read_qualification</code></td><td>Nearest wall node for unit attribution</td></tr>
+<tr><td><code>saddle_cell_fragments</code></td><td>First positive ray intersection, per ray</td></tr>
+<tr><td><code>_null_census</code></td><td>Nearest critical-tree slot, per seed</td></tr>
+<tr><td><code>_read_at_nulls</code>, saddle</td><td>Admitted saddle signed flux</td></tr>
+<tr><td><code>_read_at_nulls</code>, initial wall</td><td>All wall-event signed flux; includes the reproduced tie</td></tr>
+<tr><td><code>_read_at_nulls</code>, confined wall</td><td>Core-connected wall-event signed flux</td></tr>
+<tr><td><code>refresh_at_stationary_points</code>, contact</td><td>Nearest event to the carried contact</td></tr>
+<tr><td><code>refresh_at_stationary_points</code>, winner</td><td>Core-connected wall-event signed flux</td></tr>
+<tr><td><code>support_read._normal_ring_rates</code></td><td>Farthest vertex defining the ray bound and its rate</td></tr>
+</tbody></table>
+<p>Ten Boolean argmax lookups retain their existing exact first-true-index rule:
+fragment-label owner and vertical branch in <code>quadratic_cell_fragments</code>;
+axis cell and interval in <code>_support_at_level</code>; axis and saddle-owner cell
+in <code>_read_at_nulls</code>; wall-containing cells in that function and in
+<code>refresh_at_stationary_points</code>; admitted saddle in the refresh; and
+admitted saddle in <code>support_read.rebuild_needed</code>. These rank masks,
+not floating-point scores. The helper's own argmin ranks integer identities.</p>
+</section>
+<section id="read-tie-break-measure">
+<h2>Verification</h2>
+<p>The delivered repair gate is seven-CPU <code>sirius</code> job <code>1310600</code>,
+which tests <code>3d58ba4688d8774aa7f4f810f1216bb670dddb2e</code> and reports twelve
+passing tie cases. The shared all-NaN policy gate is seven-CPU <code>sirius</code>
+job <code>1310648</code>, whose paired product/test head is
+<code>7d5bff012b922eb4d39249afbc28bf1f8d755d11</code> and whose tie file reports sixteen passing cases.
+The table cites those delivered and current receipts, with their runner summaries
+unchanged. Base is <code>b48deaa93f55ad2c759c5977ed611b9047e393fb</code>; it lacks the
+added tie file, so its tracked-read and support-read files run there. The current
+job also reruns the twelve-case file at the reviewed head. Both paired jobs add
+zero failures in tracked-read and support-read.</p>
+<table><thead><tr><th>Job</th><th>Arm</th><th>Log</th><th>Runner summary</th><th>Exit</th></tr></thead><tbody>
+<tr><td>1310600</td><td>base-tracked</td><td><code>resume-base-tracked.log</code></td><td>15 passed in 1022.56s (0:17:02)</td><td>0</td></tr>
+<tr><td>1310600</td><td>base-support</td><td><code>resume-base-support.log</code></td><td>13 passed, 2 skipped in 182.13s (0:03:02)</td><td>0</td></tr>
+<tr><td>1310600</td><td>head-tracked</td><td><code>resume-head-tracked.log</code></td><td>15 passed in 1025.69s (0:17:05)</td><td>0</td></tr>
+<tr><td>1310600</td><td>head-support</td><td><code>resume-head-support.log</code></td><td>13 passed, 2 skipped in 183.26s (0:03:03)</td><td>0</td></tr>
+<tr><td>1310600</td><td>head-ties</td><td><code>resume-head-ties.log</code></td><td>12 passed in 94.86s (0:01:34)</td><td>0</td></tr>
+<tr><td>1310600</td><td>reviewed-ties</td><td><code>resume-reviewed-ties.log</code></td><td>7 passed in 91.22s (0:01:31)</td><td>0</td></tr>
+<tr><td>1310600</td><td>initial-wall-control</td><td><code>resume-initial-wall-control.log</code></td><td>1 failed, 11 deselected in 6.12s</td><td>1</td></tr>
+<tr><td>1310600</td><td>confined-wall-control</td><td><code>resume-confined-wall-control.log</code></td><td>1 failed, 11 deselected in 5.50s</td><td>1</td></tr>
+<tr><td>1310600</td><td>nan-control</td><td><code>resume-nan-control.log</code></td><td>2 failed, 10 deselected in 6.23s</td><td>1</td></tr>
+<tr><td>1310648</td><td>base-tracked</td><td><code>nan-base-tracked.log</code></td><td>15 passed in 854.85s (0:14:14)</td><td>0</td></tr>
+<tr><td>1310648</td><td>base-support</td><td><code>nan-base-support.log</code></td><td>13 passed, 2 skipped in 141.09s (0:02:21)</td><td>0</td></tr>
+<tr><td>1310648</td><td>head-tracked</td><td><code>nan-head-tracked.log</code></td><td>15 passed in 844.21s (0:14:04)</td><td>0</td></tr>
+<tr><td>1310648</td><td>head-support</td><td><code>nan-head-support.log</code></td><td>13 passed, 2 skipped in 142.43s (0:02:22)</td><td>0</td></tr>
+<tr><td>1310648</td><td>head-ties</td><td><code>nan-head-ties.log</code></td><td>16 passed in 75.05s (0:01:15)</td><td>0</td></tr>
+<tr><td>1310648</td><td>reviewed-ties</td><td><code>nan-reviewed-ties.log</code></td><td>12 passed in 71.32s (0:01:11)</td><td>0</td></tr>
+<tr><td>1310648</td><td>negative-control</td><td><code>nan-negative-control.log</code></td><td>4 failed, 12 deselected in 8.40s</td><td>1</td></tr>
+</tbody></table>
+<p>Every file runs in a fresh process. An additional tie-file arm in the current
+job checks the evidence-only delivered revision; its exact revision and receipt
+are recorded in the manifest. <code>resume-measurements.json</code> and
+<code>nan-measurements.json</code> preserve the parsed receipts. The same failure-ID
+parser observes the known control failures and no base/head failures, so an empty
+failure list has a positive control. The two support-read skips remain the limited
+fixture's absent saddle and X-point.</p>
+<p>Scripts, logs, imported-module paths and resolved working directories are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T131359627137-read-tie-break</code>.
+Commands use repository-relative form with no cd prefix:
+<code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_tracked_read.py</code>,
+with <code>tests/test_support_read.py</code> or <code>tests/test_read_tie_break.py</code>
+for the other processes. Gate logs begin with revision, tree and command, name the
+imported module and resolved working directory, and end with a bare EXIT line.
+Temporary trees and per-process pytest directories are node-local and removed by
+the job; receipts remain on shared storage. No dependency or environment changes
+are made.</p>
+</section>
+<section id="read-tie-break-review-repair">
+<h2>Call-site refusal, wiring and one selection owner</h2>
+<p>The resumed repair addresses only the three folded findings. At the reviewed
+head, two contained X-point candidates with scores <code>[NaN, NaN]</code> and
+one outside candidate masked to <code>-inf</code> reproduce
+<code>nanargmax 0 extremum_index 2</code>, with <code>x_point_data [3. 0. 4.]</code>.
+The outside point has no authority to become the primary saddle. The repair
+chooses explicit invalidity: <code>x_point_index</code> returns -1 when no contained
+candidate has a finite score; <code>x_point_data</code> checks that flag and returns
+an all-NaN row, gathering only a nonnegative safe slot. Refusal is preferable to
+selecting any candidate without a usable axis-flux comparison. The X-point regression retains a finite-axis
+positive control. The pre-repair test fails at <code>X_POINT_REFUSAL [3. 0. 4.]</code>.</p>
+<p><code>test_read_at_nulls_uses_tie_rule_for_both_wall_rankings</code> drives the
+actual <code>_read_at_nulls</code> control flow with one qualified axis and two
+constructed wall fluxes, 1 and 1 + 5e-13, at distinct points. Component geometry is
+held unambiguous by the test's geometric collaborators. An ordered runtime callback
+observes both wall levels; both must equal 1, and the returned boundary must be the
+first point. Thus a wrong initial selection cannot hide behind a correct terminal
+selection. Two scratch controls independently replace the initial and confined-wall
+call sites with plain <code>jnp.argmax</code>; the receipts are
+<code>resume-initial-wall-control.log</code> and
+<code>resume-confined-wall-control.log</code>. A separate NaN-guard control is
+<code>resume-nan-control.log</code>.</p>
+<p><code>connectivity_boundary._arg_extreme</code> retains its dtype-exact reduction
+seed and first-position exact rule, extended with the relative tolerance, axis and
+canonical-index options. Both exact wrappers and the topology policy wrapper call
+that one owner. No selection algorithm remains in <code>topology.extremum_index</code>.
+The new precision cases exercise the exact owner and topology wrapper with both
+float32 and float64 arrays.</p>
+<p>The repair's paired receipts use the assigned base
+<code>b48deaa93f55ad2c759c5977ed611b9047e393fb</code>, the repaired committed head,
+and an additional reviewed-head tie arm at
+<code>b9ca3cd7b2ee8a9250936915d6643087eabb2fe7</code>. Each file runs in a fresh process
+in one seven-CPU <code>sirius</code> job. Commands retain the repository-relative
+form shown above. Exact revisions, summaries, failure IDs and scheduler completion
+are recorded in the manifest and <code>resume-measurements.json</code> alongside
+the <code>resume-base-*</code> and <code>resume-head-*</code> logs. The added tie file
+is absent at the assigned base and runs only where that revision contains it.</p>
+</section>
+<section id="read-tie-break-nan-policy">
+<h2>All-NaN score sets retain first-position selection</h2>
+<p>The shared owner now returns index 0 for all-NaN score sets in both exact and
+relative-tolerance modes. No further call-site patches define this fallback.
+The explicit X-point qualification still returns an invalid index and all-NaN
+data when its comparison is unusable; that validity decision remains separate.</p>
+<p><code>test_all_nan_call_sites_select_first_candidate</code> drives the mode
+selector, initial wall ranking, confined-wall ranking and carried-contact index
+with all-NaN scores. It observes the index selected by each production call and
+requires 0; the returned boundary/contact must be the first candidate. Constructed
+wall scores and the carried boundary enter as runtime inputs. The pre-repair
+runtime-input diagnostic records four ordinary failures with selected index -1
+in <code>nan-before-fix-runtime.log</code>, including contact [1, 1] rather than
+[1, -1]. Earlier closure-constant diagnostics aborted during compilation and are
+preserved as instrument failures, not gate results.</p>
+<p>The scratch copy changes only the shared <code>empty_index</code> fallback from
+0 to -1. <code>nan-negative-control.log</code> reports
+4 failed, 12 deselected in 8.40s and EXIT=1, naming all four
+call-site cases. The fixed head passes those cases while preserving the explicit
+X-point refusal and all existing finite-score, tie-margin, order and precision
+checks.</p>
+</section>
+</main></body></html>

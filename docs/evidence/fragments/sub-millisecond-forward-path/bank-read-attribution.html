@@ -1,0 +1,113 @@
+<section id="bank-read-attribution-result">
+<h2>Read cost belongs to booking and refreshed geometry</h2>
+<p>Two fresh CPU processes per read kind, at widths one and sixteen, measure the diverted 550-cell bank without changing product source. At width sixteen, carried: 4569.8/4564.6 ms per batch; full: 8953.1/8893.0 ms per batch. The exclusive stage sums meet the 10% native-wall bound in every process, kind and width. Maximum end-to-end process spread is 1.08%; the maximum individual-stage spread is 48.56%. The tables retain every spread rather than hiding small-stage variability. These are paired CPU measurements, not an H200 speed verdict.</p>
+<figure id="bank-read-attribution-figure"><img src="/nova/figures/sub-millisecond-forward-path/bank-read-attribution/stage-cost.svg" alt="Function-owned CPU costs of full and carried sixteen-lane reads"><figcaption>Width sixteen, synchronized warm CPU wall divided by sixteen. Squares show full reads and circles carried reads; horizontal segments join the two process medians. Separate linear axes show the five largest stages on the left and the smaller stages on the right, both in milliseconds per slice. Tables use total batch milliseconds. The single 1400 by 720 canvas passes the shared text-bound and collision checks; the rendered artifact is inspected before delivery.</figcaption></figure>
+<h3 id="bank-read-attribution-method">What one read includes</h3>
+<p>The end-to-end owner calls native <code>support_read.read_batch</code> then <code>support_read.book</code>, using the booking owner of <code>read_and_book</code>. The full arm uses <code>tracking=None</code>: its <code>whole_mesh</code> is the same full geometry and qualification work used by <code>full_verdict</code>, with an initial counter instead of incrementing a prior counter. It does not include a preceding carried trial. The carried arm supplies tracking from a full read of the identical state; every lane is valid and reports no rebuild. Both arms include current quadrature and normalization, but exclude Newton updates and residual-norm reductions.</p>
+<p>The fixture is <code>bank_newton_step.measure.machine("diverted")</code>, with its cached 2048-node, 550-cell, three-moment bank. Its content digest is <code>sha256:6ebe02e02ae9ed8646077b3116596fa08ff0f18cb7f17d2566f91f779b4c17be</code>. Both widths take a prefix of the same sixteen perturbations from 2e-5 to 6e-5; warm seeds are offset by 0.03 median cell pitch. Each lane admits one saddle and has 117 cut cells. <code>configure_dtypes()</code> precedes array construction and x64 is asserted. One <code>all_debug</code> job, 1310597, runs the four fresh processes serially on one node with eight CPUs and 96 GB.</p>
+<p>The prototype exposes the measured steady branch and the compact candidate branch with anchored source extraction. Overflow and incidence-change predicates remain live through the validity output; a violated branch assumption fails native parity. Function-source metadata partitions the straight-line JAX graph after sharing pure common expressions, retaining every live crossing value as a runtime operand. The stationary solve, strip loops, connectivity propagation and booking population loops remain intact. Twelve warm dependency-chain repetitions time each synchronized exclusive region; regions with the same owner are added within each repetition before taking a median. Six native calls before and six after bracket the chain, twelve native samples in total. Every returned leaf is checked against the unspecialized native executable at rtol 1e-10, atol 1e-12, with validity and rebuild flags asserted. Compilation-boundary effects are retained as the reported stage-sum gap, without normalization.</p>
+<p><code>_fragments_at_level</code> includes quadratic clipping, strip-area quadrature and normal-form fragment geometry. On full reads these calculations and connected-label propagation remain with field construction in one <code>support_read._rebuilt_reading</code> stage, so the initial and terminal support evaluations keep XLA's geometry sharing. The carried arm separates clipping from the incidence comparison. The finer full split is diagnostic only: its +12.644% control failed the coverage bound even after graph sharing and is retained under the run's full-control receipt rather than added to the accepted table. Consequently full clipping and connectivity are covered jointly, not independently timed in the additive partition. Missing points and not-separate table entries mean work included under another owner, never a zero execution cost. <code>_support_at_level/connectivity</code> includes component propagation and axis ownership on full reads, and the local incidence comparison on carried reads. <code>current.book</code> includes whole-cell, conic and normal-form current quadrature and normalization. Curvature and saddle normal forms are separated from the axis/saddle qualification arithmetic. The remaining dispatch and validity masks have their own row.</p>
+<h3 id="bank-read-attribution-tables">Paired stages and lowered programs</h3>
+<p>Process spread is the absolute difference of the two medians divided by their mean. Counts describe independently compiled stage regions: optimized HLO operations, StableHLO operations and static fusion, while and custom-call sites. These are lowered launch sites, not dynamic GPU kernel counts; while-body executions and custom calls can execute repeatedly. Both fresh processes must reproduce the same counts. Native conditional programs also contain the untaken fallback branch; their counts are retained in each raw receipt.</p>
+<table><thead><tr><th>Width</th><th>Read</th><th>Native process 1 [ms]</th><th>Native process 2 [ms]</th><th>Process spread</th><th>Stage sum gap 1</th><th>Stage sum gap 2</th></tr></thead><tbody>
+<tr><td>1</td><td>carried</td><td>304.850</td><td>306.289</td><td>0.47%</td><td>-2.64%</td><td>-3.72%</td></tr>
+<tr><td>1</td><td>full</td><td>579.071</td><td>572.846</td><td>1.08%</td><td>+3.34%</td><td>+3.10%</td></tr>
+<tr><td>16</td><td>carried</td><td>4569.833</td><td>4564.577</td><td>0.12%</td><td>+6.73%</td><td>+6.20%</td></tr>
+<tr><td>16</td><td>full</td><td>8953.055</td><td>8892.991</td><td>0.67%</td><td>+6.13%</td><td>+7.25%</td></tr>
+</tbody></table>
+<table><thead><tr><th>Width</th><th>Read</th><th>Owning function</th><th>Process 1 [ms]</th><th>Process 2 [ms]</th><th>Spread</th></tr></thead><tbody>
+<tr><td>1</td><td>carried</td><td>support_read._rebuilt_reading</td><td>not separate</td><td>not separate</td><td>—</td></tr>
+<tr><td>1</td><td>carried</td><td>current.book</td><td>152.7001</td><td>153.1613</td><td>0.30%</td></tr>
+<tr><td>1</td><td>carried</td><td>topology._fragments_at_level</td><td>81.6370</td><td>77.5752</td><td>5.10%</td></tr>
+<tr><td>1</td><td>carried</td><td>topology._wall_events</td><td>31.0519</td><td>31.1821</td><td>0.42%</td></tr>
+<tr><td>1</td><td>carried</td><td>fixed_points.solve</td><td>3.1426</td><td>3.0995</td><td>1.38%</td></tr>
+<tr><td>1</td><td>carried</td><td>topology._support_at_level/connectivity</td><td>1.4908</td><td>1.4943</td><td>0.24%</td></tr>
+<tr><td>1</td><td>carried</td><td>support_read.read_batch/verdict</td><td>2.9976</td><td>4.9201</td><td>48.56%</td></tr>
+<tr><td>1</td><td>carried</td><td>support_read.nodal_jets/field_from_jets</td><td>21.7486</td><td>21.4771</td><td>1.26%</td></tr>
+<tr><td>1</td><td>carried</td><td>topology._curvature_derivatives/saddle_normal_form</td><td>0.9302</td><td>0.9018</td><td>3.11%</td></tr>
+<tr><td>1</td><td>carried</td><td>topology._read_at_nulls/qualification</td><td>1.0883</td><td>1.0977</td><td>0.86%</td></tr>
+<tr><td>1</td><td>full</td><td>support_read._rebuilt_reading</td><td>402.9275</td><td>398.8796</td><td>1.01%</td></tr>
+<tr><td>1</td><td>full</td><td>current.book</td><td>158.2329</td><td>154.9523</td><td>2.09%</td></tr>
+<tr><td>1</td><td>full</td><td>topology._fragments_at_level</td><td>not separate</td><td>not separate</td><td>—</td></tr>
+<tr><td>1</td><td>full</td><td>topology._wall_events</td><td>31.9299</td><td>31.4839</td><td>1.41%</td></tr>
+<tr><td>1</td><td>full</td><td>fixed_points.solve</td><td>3.1702</td><td>3.1449</td><td>0.80%</td></tr>
+<tr><td>1</td><td>full</td><td>topology._support_at_level/connectivity</td><td>not separate</td><td>not separate</td><td>—</td></tr>
+<tr><td>1</td><td>full</td><td>support_read.read_batch/verdict</td><td>0.4809</td><td>0.4467</td><td>7.37%</td></tr>
+<tr><td>1</td><td>full</td><td>support_read.nodal_jets/field_from_jets</td><td>not separate</td><td>not separate</td><td>—</td></tr>
+<tr><td>1</td><td>full</td><td>topology._curvature_derivatives/saddle_normal_form</td><td>1.3079</td><td>1.3326</td><td>1.86%</td></tr>
+<tr><td>1</td><td>full</td><td>topology._read_at_nulls/qualification</td><td>0.3873</td><td>0.3684</td><td>4.99%</td></tr>
+<tr><td>16</td><td>carried</td><td>support_read._rebuilt_reading</td><td>not separate</td><td>not separate</td><td>—</td></tr>
+<tr><td>16</td><td>carried</td><td>current.book</td><td>2598.0351</td><td>2602.5586</td><td>0.17%</td></tr>
+<tr><td>16</td><td>carried</td><td>topology._fragments_at_level</td><td>1245.1970</td><td>1220.4292</td><td>2.01%</td></tr>
+<tr><td>16</td><td>carried</td><td>topology._wall_events</td><td>644.6633</td><td>638.1935</td><td>1.01%</td></tr>
+<tr><td>16</td><td>carried</td><td>fixed_points.solve</td><td>290.8925</td><td>289.7787</td><td>0.38%</td></tr>
+<tr><td>16</td><td>carried</td><td>topology._support_at_level/connectivity</td><td>32.1423</td><td>30.2241</td><td>6.15%</td></tr>
+<tr><td>16</td><td>carried</td><td>support_read.read_batch/verdict</td><td>32.1258</td><td>31.8470</td><td>0.87%</td></tr>
+<tr><td>16</td><td>carried</td><td>support_read.nodal_jets/field_from_jets</td><td>28.7009</td><td>28.6643</td><td>0.13%</td></tr>
+<tr><td>16</td><td>carried</td><td>topology._curvature_derivatives/saddle_normal_form</td><td>3.3977</td><td>3.6349</td><td>6.74%</td></tr>
+<tr><td>16</td><td>carried</td><td>topology._read_at_nulls/qualification</td><td>2.1054</td><td>2.1268</td><td>1.01%</td></tr>
+<tr><td>16</td><td>full</td><td>support_read._rebuilt_reading</td><td>5892.1613</td><td>5938.4874</td><td>0.78%</td></tr>
+<tr><td>16</td><td>full</td><td>current.book</td><td>2629.7618</td><td>2620.7750</td><td>0.34%</td></tr>
+<tr><td>16</td><td>full</td><td>topology._fragments_at_level</td><td>not separate</td><td>not separate</td><td>—</td></tr>
+<tr><td>16</td><td>full</td><td>topology._wall_events</td><td>680.1838</td><td>678.6440</td><td>0.23%</td></tr>
+<tr><td>16</td><td>full</td><td>fixed_points.solve</td><td>289.9328</td><td>290.2032</td><td>0.09%</td></tr>
+<tr><td>16</td><td>full</td><td>topology._support_at_level/connectivity</td><td>not separate</td><td>not separate</td><td>—</td></tr>
+<tr><td>16</td><td>full</td><td>support_read.read_batch/verdict</td><td>0.6745</td><td>0.7056</td><td>4.50%</td></tr>
+<tr><td>16</td><td>full</td><td>support_read.nodal_jets/field_from_jets</td><td>not separate</td><td>not separate</td><td>—</td></tr>
+<tr><td>16</td><td>full</td><td>topology._curvature_derivatives/saddle_normal_form</td><td>8.2105</td><td>8.0720</td><td>1.70%</td></tr>
+<tr><td>16</td><td>full</td><td>topology._read_at_nulls/qualification</td><td>0.6855</td><td>0.6965</td><td>1.58%</td></tr>
+</tbody></table>
+<table><thead><tr><th>Width</th><th>Read</th><th>Owning function</th><th>Optimized HLO ops</th><th>StableHLO ops</th><th>Fusion sites</th><th>While sites</th><th>Custom-call sites</th></tr></thead><tbody>
+<tr><td>1</td><td>carried</td><td>support_read._rebuilt_reading</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td></tr>
+<tr><td>1</td><td>carried</td><td>current.book</td><td>9176</td><td>6610</td><td>409</td><td>7</td><td>0</td></tr>
+<tr><td>1</td><td>carried</td><td>topology._fragments_at_level</td><td>5825</td><td>2595</td><td>194</td><td>2</td><td>0</td></tr>
+<tr><td>1</td><td>carried</td><td>topology._wall_events</td><td>6358</td><td>3227</td><td>238</td><td>1</td><td>0</td></tr>
+<tr><td>1</td><td>carried</td><td>fixed_points.solve</td><td>3930</td><td>4623</td><td>219</td><td>4</td><td>6</td></tr>
+<tr><td>1</td><td>carried</td><td>topology._support_at_level/connectivity</td><td>201</td><td>154</td><td>13</td><td>0</td><td>0</td></tr>
+<tr><td>1</td><td>carried</td><td>support_read.read_batch/verdict</td><td>474</td><td>306</td><td>25</td><td>0</td><td>0</td></tr>
+<tr><td>1</td><td>carried</td><td>support_read.nodal_jets/field_from_jets</td><td>680</td><td>339</td><td>49</td><td>0</td><td>0</td></tr>
+<tr><td>1</td><td>carried</td><td>topology._curvature_derivatives/saddle_normal_form</td><td>4453</td><td>1974</td><td>85</td><td>0</td><td>1</td></tr>
+<tr><td>1</td><td>carried</td><td>topology._read_at_nulls/qualification</td><td>600</td><td>359</td><td>47</td><td>0</td><td>1</td></tr>
+<tr><td>1</td><td>full</td><td>support_read._rebuilt_reading</td><td>20535</td><td>8657</td><td>839</td><td>12</td><td>2</td></tr>
+<tr><td>1</td><td>full</td><td>current.book</td><td>9169</td><td>6605</td><td>409</td><td>7</td><td>0</td></tr>
+<tr><td>1</td><td>full</td><td>topology._fragments_at_level</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td></tr>
+<tr><td>1</td><td>full</td><td>topology._wall_events</td><td>6111</td><td>3235</td><td>235</td><td>1</td><td>0</td></tr>
+<tr><td>1</td><td>full</td><td>fixed_points.solve</td><td>3930</td><td>4623</td><td>219</td><td>4</td><td>6</td></tr>
+<tr><td>1</td><td>full</td><td>topology._support_at_level/connectivity</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td></tr>
+<tr><td>1</td><td>full</td><td>support_read.read_batch/verdict</td><td>48</td><td>19</td><td>5</td><td>0</td><td>0</td></tr>
+<tr><td>1</td><td>full</td><td>support_read.nodal_jets/field_from_jets</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td></tr>
+<tr><td>1</td><td>full</td><td>topology._curvature_derivatives/saddle_normal_form</td><td>4357</td><td>1995</td><td>83</td><td>0</td><td>1</td></tr>
+<tr><td>1</td><td>full</td><td>topology._read_at_nulls/qualification</td><td>442</td><td>218</td><td>24</td><td>0</td><td>1</td></tr>
+<tr><td>16</td><td>carried</td><td>support_read._rebuilt_reading</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td></tr>
+<tr><td>16</td><td>carried</td><td>current.book</td><td>9007</td><td>6625</td><td>418</td><td>7</td><td>0</td></tr>
+<tr><td>16</td><td>carried</td><td>topology._fragments_at_level</td><td>5693</td><td>2621</td><td>197</td><td>2</td><td>0</td></tr>
+<tr><td>16</td><td>carried</td><td>topology._wall_events</td><td>5451</td><td>3227</td><td>226</td><td>1</td><td>0</td></tr>
+<tr><td>16</td><td>carried</td><td>fixed_points.solve</td><td>3838</td><td>4623</td><td>240</td><td>4</td><td>6</td></tr>
+<tr><td>16</td><td>carried</td><td>topology._support_at_level/connectivity</td><td>205</td><td>154</td><td>13</td><td>0</td><td>0</td></tr>
+<tr><td>16</td><td>carried</td><td>support_read.read_batch/verdict</td><td>462</td><td>310</td><td>30</td><td>0</td><td>0</td></tr>
+<tr><td>16</td><td>carried</td><td>support_read.nodal_jets/field_from_jets</td><td>698</td><td>351</td><td>51</td><td>0</td><td>0</td></tr>
+<tr><td>16</td><td>carried</td><td>topology._curvature_derivatives/saddle_normal_form</td><td>4262</td><td>1979</td><td>86</td><td>0</td><td>1</td></tr>
+<tr><td>16</td><td>carried</td><td>topology._read_at_nulls/qualification</td><td>605</td><td>362</td><td>60</td><td>0</td><td>1</td></tr>
+<tr><td>16</td><td>full</td><td>support_read._rebuilt_reading</td><td>19855</td><td>8735</td><td>873</td><td>12</td><td>2</td></tr>
+<tr><td>16</td><td>full</td><td>current.book</td><td>9012</td><td>6616</td><td>417</td><td>7</td><td>0</td></tr>
+<tr><td>16</td><td>full</td><td>topology._fragments_at_level</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td></tr>
+<tr><td>16</td><td>full</td><td>topology._wall_events</td><td>5982</td><td>3235</td><td>235</td><td>1</td><td>0</td></tr>
+<tr><td>16</td><td>full</td><td>fixed_points.solve</td><td>3838</td><td>4623</td><td>240</td><td>4</td><td>6</td></tr>
+<tr><td>16</td><td>full</td><td>topology._support_at_level/connectivity</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td></tr>
+<tr><td>16</td><td>full</td><td>support_read.read_batch/verdict</td><td>48</td><td>19</td><td>8</td><td>0</td><td>0</td></tr>
+<tr><td>16</td><td>full</td><td>support_read.nodal_jets/field_from_jets</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td><td>not separate</td></tr>
+<tr><td>16</td><td>full</td><td>topology._curvature_derivatives/saddle_normal_form</td><td>4257</td><td>1995</td><td>85</td><td>0</td><td>1</td></tr>
+<tr><td>16</td><td>full</td><td>topology._read_at_nulls/qualification</td><td>441</td><td>218</td><td>25</td><td>0</td><td>1</td></tr>
+</tbody></table>
+<h3 id="bank-read-attribution-controls">Controls and provenance</h3>
+<p>The coverage guard is exercised by dropping the largest stage from each actual receipt; every omission is refused. The final report repeats the omission on the full width-sixteen receipt. A pilot first reproduced a +11.817% coverage refusal despite exact native outputs: splitting <code>step_residual</code> materialized zero-direction field work that the native compiler removed. The accepted instrument uses the requested direct booking owner. A subsequent full-read pilot was also refused at +19.490% because independently compiled cuts repeated common normal-form geometry and bank contractions. The accepted graph shares these pure expressions before partitioning. A common-expression control merges identical sines but keeps cosine and opposite signed-zero products distinct. A separate profile-argument error and a native-trace-cache pilot are retained as instrumentation failures; none changed product code.</p>
+<p>Raw receipts and complete per-process logs are in <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130620416417-bank-read-attribution/geometry</code>. Their first lines carry the revision, tree and actual command and their last lines are <code>EXIT=0</code>. The measured source digest and imported product module are printed in each receipt. Product-equivalence checks bind all five read owners to the base bytes; only prototype and evidence commits advance during the run. The product base is <code>7ca1b11a36f16779d583edb6ddbfb264218d24cb</code>. The committed root-argument driver and <code>h200.sh</code> can be submitted from main with <code>TMPDIR=/tmp</code> in the submit environment. No test suite pair is armed for this measurement node.</p>
+<p>Context: the earlier <a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-four-read.html">four-read H200 trace</a> measured 35.692 ms per width-sixteen read plus fresh booking. <a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-head.html">The preceding trace</a> supplies the older call-level attribution. <a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-carried-decision.html">Carried-decision evidence</a> defines the fresh geometry and certificate contract; <a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-booking-cost.html">booking-cost evidence</a> motivates the scalar-tile experiment. Their GPU numbers are not rescaled from this CPU table.</p>
+<h3 id="bank-read-attribution-next">Ranked read-cost changes</h3>
+<p>Ranked by the conservative estimated CPU saving on this fixture. The following savings are proposals inferred from measured stage costs and source execution shape, not implemented speedups. They do not establish a per-slice H200 wall.</p>
+<ol>
+<li><strong>Inspect only live saddle candidates.</strong> Target <code>topology._read_at_nulls.compact_candidates</code>, <code>_fragments_at_level</code> and <code>_support_at_level</code>. This single-saddle fixture packs three slots: the axis, the saddle and a padded axis duplicate. Keep the axis normal form for the limited fallback, but avoid the axis and padding's unnecessary support inspections. The full read makes three candidate support evaluations plus initial and terminal support evaluations; removing two of these five gives a first CPU estimate of 2070.4 ms per full read (a discounted 35% budget of its joint field/support stage). Vectorization and fusion make this a scaling estimate, not a timed saving. Verify admitted saddles, boundary ownership, membership and qualification against the full owner, including zero, one and multiple saddles and the overflow fallback; then measure the candidate dimension and device time on the H200.</li>
+<li><strong>Widen scalar booking's conic tile.</strong> Target <code>current.book</code> and <code>current._SCALAR_CUT_BATCH_WIDTH</code>: try 128 instead of 32. The 113 conic cut cells then need one bucket instead of four; the four normal-form cut cells keep their independent bucket. Expected CPU saving: 653.2–1306.4 ms per width-sixteen read, a 25–50% reduction of the measured 2612.8 ms booking stage. This range is an engineering estimate informed by the analogous tangent-booking tile result, not a scalar-booking ablation. Verify both process pairs, all booked moments and normalization against the unchanged scalar owner, trial and converged residuals at the existing tolerance, and dynamic conic-bucket counts on the H200. Include fewer than 32 and more than 128 cut cells so the population bound is tested.</li>
+<li><strong>Move diverted wall skipping outside the lane map.</strong> Target <code>topology.refresh_at_stationary_points.wall_contact</code> and its batched caller. The per-lane conditional becomes a select under vmap, so this all-diverted carried batch still executes <code>_wall_events</code>. A batch-uniform diverted branch can remove approximately the measured 641.4 ms wall stage per carried width-sixteen read, less dispatch overhead. Retain wall competition in a full certificate and wall evaluation for limited and mixed batches. Verify all-diverted, all-limited and mixed batches against the native read; force a limited contact change to prove the wall path still runs and requests a rebuild. Confirm the missing wall executions with a device trace whose limited positive control sees the known wall kernels.</li>
+</ol>
+</section>

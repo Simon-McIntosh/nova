@@ -3,6 +3,7 @@
 import argparse
 from html import escape
 import json
+import math
 from pathlib import Path
 import re
 import statistics
@@ -129,8 +130,9 @@ def fragment(root, run, summary, tables, job):
         'alt="Function-owned CPU costs of full and carried sixteen-lane reads">'
         "<figcaption>Width sixteen, synchronized warm CPU wall divided by "
         "sixteen. Squares show full reads and circles carried reads; horizontal "
-        "segments join the two process medians. The logarithmic axis keeps "
-        "small qualification and stationary stages visible. Tables use total "
+        "segments join the two process medians. Separate linear axes show "
+        "the five largest stages on the left and the smaller stages on the "
+        "right, both in milliseconds per slice. Tables use total "
         "batch milliseconds. The single 1400 by 720 canvas passes the shared "
         "text-bound and collision checks; the rendered artifact is inspected "
         "before delivery.</figcaption></figure>\n"
@@ -455,40 +457,57 @@ def main():
         "support_read.read_batch/verdict": "read dispatch + booking verdict",
     }
     plt.style.use("data-ink")
-    fig, ax = plt.subplots(figsize=(14, 7.2), dpi=100)
-    for offset, kind, colour, marker in (
-        (-0.13, "full", "#929292", "s"),
-        (0.13, "carried", "#1f5d92", "o"),
+    fig = plt.figure(figsize=(14, 7.2), dpi=100)
+    for position, subset, tick_step in (
+        ((0.30, 0.15, 0.19, 0.72), stages[:5], 100.0),
+        ((0.78, 0.15, 0.19, 0.72), stages[5:], 0.5),
     ):
-        for index, name in enumerate(stages):
-            values = [
-                receipts[kind, p, 16]["stages"].get(name, {"median_ms": 0})["median_ms"]
-                / 16
-                for p in (1, 2)
-            ]
-            if max(values):
-                ax.plot(
-                    values, [index + offset] * 2, color=colour, linewidth=2.6, zorder=2
-                )
-                ax.plot(
-                    statistics.mean(values),
-                    index + offset,
-                    marker=marker,
-                    color=colour,
-                    markersize=7,
-                    label=kind if index == 0 else None,
-                    zorder=3 if kind == "carried" else 2,
-                )
-    ax.set_xscale("log")
-    ax.set_yticks(range(len(stages)), [labels[name] for name in stages])
-    ax.invert_yaxis()
-    ax.set_xlabel("CPU wall per slice, sixteen-lane batch [ms]")
-    ax.spines[["left", "top", "right"]].set_visible(False)
-    ax.tick_params(axis="y", length=0)
-    ax.grid(False)
-    handles, legend_labels = ax.get_legend_handles_labels()
+        ax = fig.add_axes(position)
+        maximum = 0.0
+        for offset, kind, colour, marker in (
+            (-0.13, "full", "#929292", "s"),
+            (0.13, "carried", "#1f5d92", "o"),
+        ):
+            for index, name in enumerate(subset):
+                values = [
+                    receipts[kind, p, 16]["stages"].get(name, {"median_ms": 0})[
+                        "median_ms"
+                    ]
+                    / 16
+                    for p in (1, 2)
+                ]
+                maximum = max(maximum, *values)
+                if max(values):
+                    ax.plot(
+                        values,
+                        [index + offset] * 2,
+                        color=colour,
+                        linewidth=2.6,
+                        zorder=2,
+                    )
+                    ax.plot(
+                        statistics.mean(values),
+                        index + offset,
+                        marker=marker,
+                        color=colour,
+                        markersize=7,
+                        label=kind if name == "current.book" else None,
+                        zorder=3 if kind == "carried" else 2,
+                    )
+        upper = math.ceil(1.05 * maximum / tick_step) * tick_step
+        ax.set_xlim(-0.03 * upper, upper)
+        ax.set_xticks(
+            [tick_step * index for index in range(round(upper / tick_step) + 1)]
+        )
+        ax.ticklabel_format(axis="x", style="plain", useOffset=False)
+        ax.set_yticks(range(len(subset)), [labels[name] for name in subset])
+        ax.invert_yaxis()
+        ax.set_xlabel("CPU wall per slice [ms]")
+        ax.spines[["left", "top", "right"]].set_visible(False)
+        ax.tick_params(axis="y", length=0)
+        ax.grid(False)
+    handles, legend_labels = fig.axes[0].get_legend_handles_labels()
     fig.legend(handles, legend_labels, loc="upper center", ncol=2, frameon=False)
-    fig.subplots_adjust(left=0.39, right=0.97, bottom=0.14, top=0.88)
     destination = (
         args.root
         / "docs/figures/sub-millisecond-forward-path/bank-read-attribution"

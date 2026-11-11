@@ -23,6 +23,7 @@ class Stationary(NamedTuple):
 
 class Support(NamedTuple):
     stationary: Stationary
+    reading: object = None
 
 
 class Result(NamedTuple):
@@ -160,6 +161,7 @@ def test_different_start_target_and_stationary_lane_certify():
 @pytest.mark.parametrize("reuse", [False, True])
 def test_solve_batch_maps_lane_profile_into_residual_and_booking(monkeypatch, reuse):
     monkeypatch.setattr(bank, "read_batch", solver_toy._toy_read)
+    observed = []
 
     def residual(_operands, _base, state, support, profile, _quadrature):
         return bank.StepResidual(
@@ -170,8 +172,16 @@ def test_solve_batch_maps_lane_profile_into_residual_and_booking(monkeypatch, re
         )
 
     def newton(_operands, state, _support, profile, *_args, **_kwargs):
+        cached = _kwargs.get("factor_cache") is not None
+        jax.debug.callback(
+            lambda reuse, target: observed.append((bool(reuse), float(target))),
+            jnp.asarray(cached),
+            profile,
+        )
         template = solver_toy._unit_update(None, state, None)
-        return template._replace(update=tuple(profile - value for value in state))
+        return template._replace(
+            update=tuple(0.875 * (profile - value) for value in state)
+        )
 
     monkeypatch.setattr(bank, "step_residual", residual)
     monkeypatch.setattr(bank, "newton_step", newton)
@@ -190,25 +200,49 @@ def test_solve_batch_maps_lane_profile_into_residual_and_booking(monkeypatch, re
             lambda lane: targets[lane],
             None,
             None,
-            max_steps=3,
+            max_steps=14,
             reuse_factor=reuse,
         )
     )(moments)
+    jax.block_until_ready(result)
+    jax.effects_barrier()
+    cached_profiles = [profile for cached, profile in observed if cached]
+    assert np.all(result.steps > 1)
+    if reuse:
+        assert len(cached_profiles) >= 4
+        assert set(cached_profiles) == set(np.asarray(targets))
+        np.testing.assert_array_equal(result.refactors, jnp.ones(2, jnp.int32))
+    else:
+        assert not cached_profiles
     assert np.all(result.converged)
     for values in result.moments:
-        np.testing.assert_array_equal(values[:, 0], targets)
+        np.testing.assert_allclose(values[:, 0], targets, rtol=0, atol=1e-10)
     assert np.all(result.residual <= 1e-10)
+    print(
+        "PROFILE_BRANCH",
+        "reuse",
+        reuse,
+        "steps",
+        np.asarray(result.steps),
+        "cached_calls",
+        len(cached_profiles),
+        "cached_profiles",
+        cached_profiles,
+    )
 
 
-def test_rejected_first_attempt_returns_incumbent_state():
+@pytest.mark.parametrize("warm_support", [False, True])
+@pytest.mark.parametrize("stop", ["floor", "ceiling"])
+def test_rejected_first_attempt_returns_incumbent_state(warm_support, stop):
     """A failed continuation must not expose a rejected trial as its state."""
     state = (jnp.ones((2, 1)),)
-    seeds = jnp.zeros((2, 1, 2))
+    seeds = jnp.asarray([[[1.0, 2.0]], [[3.0, 4.0]]])
+    incumbent = Support(Stationary(seeds), state[0])
 
     def rejected(_operands, _cache, moments, _seeds, previous, *_args, **_kwargs):
         return Result(
             (moments[0] + 100.0,),
-            Support(Stationary(previous)),
+            Support(Stationary(previous + 100.0), moments[0] + 100.0),
             jnp.ones(2),
             jnp.zeros(2, bool),
             jnp.ones(2, jnp.int32),
@@ -229,9 +263,67 @@ def test_rejected_first_attempt_returns_incumbent_state():
         start_drive=jnp.ones(2),
         target_drive=jnp.full(2, 1.03),
         max_substeps=1,
+        minimum_relative_step=1.0 if stop == "floor" else 1e-9,
+        **({"initial_support": incumbent} if warm_support else {}),
         solve=rejected,
     )
     assert not result.certified
     np.testing.assert_array_equal(result.drive, jnp.ones(2))
     np.testing.assert_array_equal(result.result.moments[0], state[0])
     assert not np.any(result.result.converged)
+    assert result.reason == f"sub-step {stop} reached"
+    np.testing.assert_array_equal(result.result.support.stationary.position, seeds)
+    np.testing.assert_array_equal(result.support_available, [warm_support] * 2)
+    if warm_support:
+        np.testing.assert_array_equal(result.result.support.reading, incumbent.reading)
+    else:
+        assert np.all(np.isnan(result.result.support.reading))
+
+
+def test_rejected_attempt_keeps_last_accepted_lane_support():
+    """Accepted support survives alongside a lane without any admitted read."""
+    state = (jnp.ones((2, 1)),)
+    seeds = jnp.asarray([[[1.0, 2.0]], [[3.0, 4.0]]])
+    calls = 0
+
+    def solve(_operands, _cache, moments, _seeds, previous, *_args, **_kwargs):
+        nonlocal calls
+        calls += 1
+        change = 1.0 if calls == 1 else 100.0
+        accepted = jnp.asarray([calls == 1, False])
+        return Result(
+            (moments[0] + change,),
+            Support(Stationary(previous + change), moments[0] + change),
+            jnp.where(accepted, 0.0, 1.0),
+            accepted,
+            jnp.ones(2, jnp.int32),
+            jnp.ones(2, jnp.int32),
+        )
+
+    result = driver.advance_drive(
+        None,
+        None,
+        state,
+        seeds,
+        seeds,
+        None,
+        None,
+        lambda d: d,
+        None,
+        None,
+        start_drive=jnp.ones(2),
+        target_drive=jnp.full(2, 1.03),
+        max_substeps=2,
+        solve=solve,
+    )
+    assert calls == 2
+    np.testing.assert_array_equal(result.support_available, [True, False])
+    np.testing.assert_array_equal(result.result.moments[0][:, 0], [2.0, 1.0])
+    np.testing.assert_array_equal(
+        result.result.support.stationary.position[0], seeds[0] + 1
+    )
+    np.testing.assert_array_equal(
+        result.result.support.stationary.position[1], seeds[1]
+    )
+    np.testing.assert_array_equal(result.result.support.reading[0], [2.0])
+    assert np.all(np.isnan(result.result.support.reading[1]))

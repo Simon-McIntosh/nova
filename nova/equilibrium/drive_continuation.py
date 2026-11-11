@@ -72,7 +72,13 @@ class SubStep(NamedTuple):
 
 
 class DriveContinuationResult(NamedTuple):
-    """The state reached at the target drive and how it was reached."""
+    """The state reached and the availability of its incumbent lane supports.
+
+    Array-drive calls expose ``support_available`` per lane. Without a supplied
+    warm support, an unaccepted lane retains its warm stationary points, but
+    its other floating support fields are NaN and its flags are false. Scalar
+    calls retain their result contract and leave the availability mask unset.
+    """
 
     result: support_read.SolveResult
     drive: float | jax.Array
@@ -82,6 +88,7 @@ class DriveContinuationResult(NamedTuple):
     reads: int
     sub_step: float | jax.Array
     reason: str | None
+    support_available: jax.Array | None = None
 
 
 def _batch_count(values) -> int:
@@ -150,6 +157,7 @@ def advance_drive(
     solve_options: dict | None = None,
     previous_moments=None,
     previous_drive: float | jax.Array | None = None,
+    initial_support=None,
 ) -> DriveContinuationResult:
     """Reach ``target_drive`` from lanes converged at ``start_drive``.
 
@@ -179,6 +187,11 @@ def advance_drive(
     telemetry are per-lane arrays; ``certified`` means every lane certified.
     A zero-span lane is read at its target once, then held. Scalar start and
     target drives keep the shared-step behaviour described above.
+
+    For array drives, ``initial_support`` may supply the full support of the
+    warm state. Otherwise, ``support_available`` marks lanes whose support is
+    absent until their first accepted sub-solve. Rejected trial reads never
+    become incumbent support.
     """
     solve = solve or support_read.solve_batch
     options = dict(solve_options or {})
@@ -209,6 +222,7 @@ def advance_drive(
             solve_options=options,
             previous_moments=previous_moments,
             previous_drive=previous_drive,
+            initial_support=initial_support,
         )
     span = abs(target_drive - start_drive)
     if span == 0:
@@ -336,6 +350,7 @@ def _advance_lanes(
     solve_options,
     previous_moments,
     previous_drive,
+    initial_support,
 ):
     """Keep accepted state, certification and secant history independently.
 
@@ -361,6 +376,7 @@ def _advance_lanes(
         else jnp.broadcast_to(jnp.asarray(previous_drive), (lanes,))
     )
     result = None
+    support_available = jnp.full(lanes, initial_support is not None)
     substeps = []
     updates = reads = 0
 
@@ -430,12 +446,29 @@ def _advance_lanes(
             )
         )
         if result is None:
+            incumbent_support = initial_support
+            if incumbent_support is None:
+                incumbent_support = jax.tree.map(
+                    lambda value: (
+                        jnp.full_like(value, jnp.nan)
+                        if jnp.issubdtype(value.dtype, jnp.inexact)
+                        else jnp.zeros_like(value)
+                    ),
+                    attempt.support,
+                )
+                incumbent_support = incumbent_support._replace(
+                    stationary=incumbent_support.stationary._replace(
+                        position=stationary
+                    )
+                )
             result = attempt._replace(
                 moments=state,
+                support=incumbent_support,
                 residual=jnp.full_like(attempt.residual, jnp.inf),
                 converged=jnp.zeros_like(attempt.converged),
             )
         result = choose(accepted, attempt, result)
+        support_available = support_available | accepted
         older = choose(accepted, state, older)
         old_drive = jnp.where(accepted, drive, old_drive)
         state = choose(accepted, attempt.moments, state)
@@ -463,5 +496,13 @@ def _advance_lanes(
         )
     )
     return DriveContinuationResult(
-        result, drive, certified, tuple(substeps), updates, reads, sub_step, reason
+        result,
+        drive,
+        certified,
+        tuple(substeps),
+        updates,
+        reads,
+        sub_step,
+        reason,
+        support_available,
     )

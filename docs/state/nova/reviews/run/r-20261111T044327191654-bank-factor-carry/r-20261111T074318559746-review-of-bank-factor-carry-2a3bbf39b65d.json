@@ -1,0 +1,98 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from completed opt-in-cpu/armed-base.log (18 passed, EXIT=0) and armed-head.log (24 passed, EXIT=0); both have no FAILED ids and the tested source/test blobs are identical at reviewed head.",
+  "assertion_audit": [
+    "Continuation: certified plus exactly two calls fails if the driver stalls or accepts only one substep; first and second observed seeds 1.001 and 1.002 fail if predict_seed is bypassed.",
+    "Continuation: first factor absent and second factor identical to the first returned factor fail if forwarding is removed or the wrong call supplies the factor; this is cross-call plumbing observation, not a same-input tautology.",
+    "Default: certified/two calls and three absence checks fail if reuse is enabled implicitly or incoming factors leak through without opt-in; the recorded pre-fix reproduction is red.",
+    "Guarded solver: convergence and residual <=1e-10 fail for slope=4 or NaN if the retry branch is disabled, as the mutant log demonstrates; the residual-path equality only checks consistency between recorded and terminal residual.",
+    "Guarded solver: refactor counters and debug-callback build count fail if reuse always rebuilds, no rebuild occurs on refusal, or the counter disagrees with real Jacobian construction; factor_valid and independently expected identity matrix fail if the returned factor is missing or stale after rebuild.",
+    "Returned-factor test: first refactors=1, second=0 fail if the returned factor is discarded or not consumed; second convergence and residual fail if reusing it gives the wrong correction.",
+    "Measurement asserts exact imported source, GPU backend, x64 before arrays and requested lane width; each fails on a wrong tree, CPU fallback, single precision or insufficient saved lanes.",
+    "Per-slice measurement convergence/residual checks fail on any uncertified lane; no counters or timing claim can override them.",
+    "Suite wrappers check mutation-marker uniqueness, nonzero mutant exit and the intended failure id; zero or unintended failures cannot satisfy the negative control; paired failure-set checks fail on an added failure.",
+    "Report asserts completed scheduler/CPU receipts and EXITs, known mutant failure, complete 14-slice/8-lane data, digests and common inputs; damaged, incomplete, mismatched or unguarded evidence fails these checks.",
+    "Report precision uses inherited independent cross-arm arrays and locked constants; four deliberate perturbations exceed those constants and must all be refused, preventing uniform-zero output from being accepted without a positive control."
+  ],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/drive_continuation.py:217 advance_drive to solve_batch",
+    "nova/equilibrium/support_read.py:1948 solve to solve_batch",
+    "scripts/prototypes/bank_drive_continuation/measure.py:202 advance_drive caller",
+    "scripts/prototypes/bank_solve_driver/measure.py:138 solve caller",
+    "scripts/prototypes/bank_factor_carry/measure.py:83 solve_batch caller"
+  ],
+  "completed_at": "2026-11-11T07:52:52Z",
+  "dispatched_at": "2026-11-11T07:44:44Z",
+  "failure_evidence_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry/opt-in-cpu/armed-base.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T044327191654-bank-factor-carry/opt-in-cpu/armed-head.log"
+  ],
+  "figure_review": "Rendered exact reviewed-head SVG via ImageMagick using granted temporary directory; visually inspected both panels: no clipping, text collisions or unreadable marks.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "prototype suite runner under scripts/prototypes; no product path",
+      "recorded_at": "2026-11-11T08:07:33.137715+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "prototype report generator; the committed fragment and receipts are the evidence of record and the negative result needs no regeneration",
+      "recorded_at": "2026-11-11T08:07:42.718260+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_factor_carry/armed_suites.py",
+      "line": "36",
+      "severity": "non-blocking",
+      "text": "non-blocking: The new runner duplicates subprocess execution, provenance headers, EXIT capture and failure/receipt parsing from scripts/prototypes/bank_warm_predictor/suites.py:43; importing snapshot and constants does not extend the owning run function, so future receipt fixes can diverge between two implementations."
+    },
+    {
+      "file": "scripts/prototypes/bank_factor_carry/report.py",
+      "line": "84",
+      "severity": "non-blocking",
+      "text": "non-blocking: The retained generator requires current product source hashes to equal the historical measured head, but the final opt-in revision changes drive_continuation.py; the delivered root therefore fails this check, and using a historical root would regenerate the older fragment without the final opt-in policy and updated CPU evidence, so regeneration needs an explicit historical-input binding and current publication policy."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read all thirteen commits from 101d1d839d90b4859f42df114707bff1ee2dbeae through 2a3bbf39b65d34bde31f820abe45175343fe3b9b, the final eleven-file diff and rendered committed SVG; runtime changes are focused, with two non-blocking harness maintenance defects.",
+    "done_when": "Read brief.txt's three clauses; opt-in-cpu/armed-base.log and armed-head.log record 18 and 24 passes with EXIT=0, the mutant records two rebuild failures with EXIT=1, and counts-gpu-allocation.log plus count-report.json record successful titan precision/count evidence and committed artifacts.",
+    "goal": "Read prompt.txt's goal to carry the converged factor across drive slices; nova/equilibrium/drive_continuation.py:229 and support_read.py:1833 implement opt-in forwarding and guarded first-update reuse, preserving the later coordinator instruction to keep carry opt-in.",
+    "manifest": "Read the complete source manifest.md and opened its latest baseline_suite, after_suite and negative-control logs; the tested product and test files at f9f4bd34738c4681e87a6a01fb29d4197cb11a3c are byte-identical at reviewed head, and added failures derived from the complete paired logs are zero.",
+    "write_paths": "Read prompt.txt's six declared paths and brief.txt's explicit support_read.py exception; all eleven changed files fall inside those paths or the narrowly authorized SolveResult/solve_batch plumbing exception recorded in manifest.md scope_note."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_solve_driver.py:683-690 would fail under unconditional reuse or assembly on every first update, and tests/test_bank_drive_continuation.py:350-383 observe independently expected secant seeds, cross-call factor identity and disabled default options; the residual-path equality alone is only a consistency check.",
+    "evidence": "opt-in-cpu/armed-head.log records 24 passed and EXIT=0 against base's 18 passed, opt-in-cpu/unguarded-reuse-mutant.log records the two intended failures, and count-report.json supports all 224 lane-slice precision results while the committed fragment correctly labels H200 numbers as estimates.",
+    "fit": "nova/equilibrium/support_read.py:1833 uses the existing NewtonFactor, fresh-read line search and JAX control flow, and the rendered docs/figures/sub-millisecond-forward-path/bank-factor-carry/factor-assemblies.svg has readable labels and no clipping, though report.py retains outdated publication text.",
+    "goal_fidelity": "nova/equilibrium/drive_continuation.py:229 forwards the accepted factor only when requested, and nova/equilibrium/support_read.py:1833 rebuilds a carried first trial whose measured fresh residual fails contraction.",
+    "reuse": "scripts/prototypes/bank_factor_carry/armed_suites.py:36-90 duplicates execution, provenance, exit capture and receipt parsing already owned by scripts/prototypes/bank_warm_predictor/suites.py:43 rather than extending that runner, while the numerical change correctly extends existing NewtonFactor and solve_batch owners.",
+    "scope_discipline": "The eleven-file diff stays inside prompt.txt's declared source, tests, scripts and artifact paths plus the explicit brief.txt authorization for support_read.py's solve_batch and result plumbing."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read prompt.txt's goal to carry the converged factor across drive slices; nova/equilibrium/drive_continuation.py:229 and support_read.py:1833 implement opt-in forwarding and guarded first-update reuse, preserving the later coordinator instruction to keep carry opt-in.\nVERDICT done_when: Read brief.txt's three clauses; opt-in-cpu/armed-base.log and armed-head.log record 18 and 24 passes with EXIT=0, the mutant records two rebuild failures with EXIT=1, and counts-gpu-allocation.log plus count-report.json record successful titan precision/count evidence and committed artifacts.\nVERDICT write_paths: Read prompt.txt's six declared paths and brief.txt's explicit support_read.py exception; all eleven changed files fall inside those paths or the narrowly authorized SolveResult/solve_batch plumbing exception recorded in manifest.md scope_note.\nVERDICT manifest: Read the complete source manifest.md and opened its latest baseline_suite, after_suite and negative-control logs; the tested product and test files at f9f4bd34738c4681e87a6a01fb29d4197cb11a3c are byte-identical at reviewed head, and added failures derived from the complete paired logs are zero.\nVERDICT diff: Read all thirteen commits from 101d1d839d90b4859f42df114707bff1ee2dbeae through 2a3bbf39b65d34bde31f820abe45175343fe3b9b, the final eleven-file diff and rendered committed SVG; runtime changes are focused, with two non-blocking harness maintenance defects.\nCALL_SITES: nova/equilibrium/drive_continuation.py:217 advance_drive to solve_batch, nova/equilibrium/support_read.py:1948 solve to solve_batch, scripts/prototypes/bank_drive_continuation/measure.py:202 advance_drive caller, scripts/prototypes/bank_solve_driver/measure.py:138 solve caller, scripts/prototypes/bank_factor_carry/measure.py:83 solve_batch caller\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/drive_continuation.py:229 forwards the accepted factor only when requested, and nova/equilibrium/support_read.py:1833 rebuilds a carried first trial whose measured fresh residual fails contraction.\nSCORE evidence: 19\nJUSTIFICATION evidence: opt-in-cpu/armed-head.log records 24 passed and EXIT=0 against base's 18 passed, opt-in-cpu/unguarded-reuse-mutant.log records the two intended failures, and count-report.json supports all 224 lane-slice precision results while the committed fragment correctly labels H200 numbers as estimates.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The eleven-file diff stays inside prompt.txt's declared source, tests, scripts and artifact paths plus the explicit brief.txt authorization for support_read.py's solve_batch and result plumbing.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_bank_solve_driver.py:683-690 would fail under unconditional reuse or assembly on every first update, and tests/test_bank_drive_continuation.py:350-383 observe independently expected secant seeds, cross-call factor identity and disabled default options; the residual-path equality alone is only a consistency check.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/support_read.py:1833 uses the existing NewtonFactor, fresh-read line search and JAX control flow, and the rendered docs/figures/sub-millisecond-forward-path/bank-factor-carry/factor-assemblies.svg has readable labels and no clipping, though report.py retains outdated publication text.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/bank_factor_carry/armed_suites.py:36-90 duplicates execution, provenance, exit capture and receipt parsing already owned by scripts/prototypes/bank_warm_predictor/suites.py:43 rather than extending that runner, while the numerical change correctly extends existing NewtonFactor and solve_batch owners.\nFINDING scripts/prototypes/bank_factor_carry/armed_suites.py:36 non-blocking: The new runner duplicates subprocess execution, provenance headers, EXIT capture and failure/receipt parsing from scripts/prototypes/bank_warm_predictor/suites.py:43; importing snapshot and constants does not extend the owning run function, so future receipt fixes can diverge between two implementations.\nFINDING scripts/prototypes/bank_factor_carry/report.py:84 non-blocking: The retained generator requires current product source hashes to equal the historical measured head, but the final opt-in revision changes drive_continuation.py; the delivered root therefore fails this check, and using a historical root would regenerate the older fragment without the final opt-in policy and updated CPU evidence, so regeneration needs an explicit historical-input binding and current publication policy.\n",
+  "remaining": "Coordinator must dispose both non-blocking findings as folded into a named node or exempted with a reason; no blocking runtime defect found.",
+  "review_limit": "No full suite rerun and no product modifications; reviewed recorded CPU/GPU results and exact git objects.",
+  "review_run_id": "r-20261111T074318559746-review-of-bank-factor-carry-2a3bbf39b65d",
+  "reviewed_base_sha": "101d1d839d90b4859f42df114707bff1ee2dbeae",
+  "reviewed_head_sha": "2a3bbf39b65d34bde31f820abe45175343fe3b9b",
+  "reviewed_run_id": "r-20261111T044327191654-bank-factor-carry",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T09:54:23.243648+00:00",
+  "total": 101
+}

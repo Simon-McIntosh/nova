@@ -76,7 +76,7 @@ def _sampled_flux_with_edges(
     )
 
 
-def _closed_sampled_flux(coordinate, values):
+def _closed_sampled_flux(coordinate, values, *, hold_core=False):
     """Build the reference closure with its edge arithmetic evaluated once."""
     grid = jnp.asarray(coordinate, dtype=jnp.float64)
     samples = jnp.asarray(values, dtype=jnp.float64)
@@ -85,13 +85,16 @@ def _closed_sampled_flux(coordinate, values):
     upper_slope = (samples[-1] - samples[-2]) / edge_width
 
     def evaluate(psi_norm):
-        return _sampled_flux_with_edges(
+        result = _sampled_flux_with_edges(
             grid,
             samples,
             edge_width,
             lower_slope,
             upper_slope,
             psi_norm,
+        )
+        return (
+            jnp.where(psi_norm < grid[0], samples[0], result) if hold_core else result
         )
 
     return evaluate
@@ -128,13 +131,19 @@ def test_dynamic_edge_control_reproduces_batched_difference():
 
 
 def test_vmap_preserves_unbatched_sampled_values_and_state_derivatives():
+    """Member values and derivatives share the constant hold below every knot.
+
+    Bit identity to the capped reference applies at and above the first knot,
+    including above the last knot. Negative flux on a zero-start grid holds its
+    first value and has zero derivative.
+    """
     assert jax.config.jax_enable_x64 is True
     coordinate = np.linspace(0.0, 1.0, 65)
     values = np.sin(coordinate) * 12345.6789
     sampled = SampledFluxFunction(coordinate, values)
     points = jnp.linspace(-0.02, 1.02, 3759, dtype=jnp.float64)
     tangents = jnp.linspace(0.5, 1.5, points.size, dtype=jnp.float64)
-    closure = _closed_sampled_flux(coordinate, values)
+    closure = _closed_sampled_flux(coordinate, values, hold_core=True)
     batched_sampled = jax.tree_util.tree_map(
         lambda value: jnp.stack((value, value)), sampled
     )
@@ -173,7 +182,8 @@ def _compare_at_recorded_points(
     batches: list[np.ndarray],
 ) -> dict[str, object]:
     points = np.concatenate([batch.reshape(-1) for batch in batches])
-    closure_values = np.asarray(closure(jnp.asarray(points)))
+    # The MAST reference table starts at zero; its core continuation is constant.
+    closure_values = np.asarray(closure(jnp.maximum(jnp.asarray(points), 0.0)))
     sampled_values = np.asarray(sampled(jnp.asarray(points)))
     different = closure_values != sampled_values
     absolute_difference = np.abs(closure_values - sampled_values)

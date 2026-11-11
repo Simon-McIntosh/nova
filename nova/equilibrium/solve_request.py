@@ -71,12 +71,12 @@ def _evaluate_sampled_flux_function(
         -6.0 + parameter * (8.0 - 3.0 * parameter)
     )
     exterior = value_basis * edge_value + slope_basis * outward_increment
-    exterior = jnp.where(below, samples[0], exterior)
-    return jnp.where(
+    result = jnp.where(
         (evaluation_coordinate >= grid[0]) & (evaluation_coordinate <= grid[-1]),
         interior,
         exterior,
     )
+    return jnp.where(below, samples[0], result)
 
 
 @jax.tree_util.register_pytree_node_class

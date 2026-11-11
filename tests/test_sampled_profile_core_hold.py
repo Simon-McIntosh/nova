@@ -1,4 +1,8 @@
-"""Pin the axis continuation and preserve the exterior sampled-profile rule."""
+"""Hold below every first knot, including negative flux on zero-start grids.
+
+Bit identity to the capped evaluator applies for psi_norm >= grid[0], including
+above grid[-1]. Flux below the normalizing axis value still carries core current.
+"""
 
 import jax
 import jax.numpy as jnp
@@ -41,14 +45,22 @@ def test_axis_and_inner_core_hold_first_sample(sign):
     assert float(jax.grad(profile)(0.02)) == 0.0
 
 
-def test_zero_start_physical_domain_is_bit_identical():
-    profile = SampledFluxFunction(np.linspace(0, 1, 65), np.linspace(7, -2, 65))
-    points = jnp.linspace(0, 1.04, 4001, dtype=jnp.float64)
+@pytest.mark.parametrize("start", [0.0, 0.05])
+def test_at_and_above_first_knot_is_bit_identical(start):
+    profile = SampledFluxFunction(np.linspace(start, 1, 65), np.linspace(7, -2, 65))
+    points = jnp.linspace(start, 1.04, 4001, dtype=jnp.float64)
     np.testing.assert_array_equal(profile(points), capped_reference(profile, points))
     np.testing.assert_array_equal(
         jax.jit(lambda f, x: f(x))(profile, points),
         jax.jit(capped_reference)(profile, points),
     )
+
+
+def test_zero_start_holds_beyond_normalizing_axis():
+    profile = SampledFluxFunction([0.0, 0.1, 1.0], [7, 5, 1])
+    points = jnp.array([-1.0, -0.02, -1e-12, 0.0], dtype=jnp.float64)
+    np.testing.assert_array_equal(profile(points), np.full(points.shape, 7.0))
+    assert float(jax.grad(profile)(-0.02)) == 0.0
 
 
 def test_upper_end_cap_is_bit_identical():

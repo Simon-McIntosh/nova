@@ -40,6 +40,11 @@
       "kind": "exempted",
       "reason": "overprinting occurs only where the solved and EFIT critical points coincide outside the plasma; the census table in the fragment lists both sets",
       "recorded_at": "2026-11-11T14:53:03.673146+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "diiid-hollow-current-source",
+      "recorded_at": "2026-11-11T14:53:25.293603+00:00"
     }
   },
   "findings": [

@@ -1,6 +1,9 @@
 #!/bin/bash
 set -uo pipefail
 export TMPDIR=/tmp JAX_PLATFORMS=cuda PYTHONPATH="$MEASURE_ROOT"
+if [[ "${MEASURE_DRIVER:-measure}" == geometry ]]; then
+    export JAX_PLATFORMS=cpu
+fi
 export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK:-4} OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-4} MPLBACKEND=Agg
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
 cd "$MEASURE_ROOT"

@@ -46,8 +46,23 @@ def dipole(points):
     )
 
 
-def volume(region):
-    return 2 * np.pi * region.area * region.centroid.x
+def shell_mesh_volumes(cells):
+    """Recover both enclosed volumes from the actual mesh boundary moments."""
+    merged = shapely.union_all([shapely.Polygon(p) for p in cells.polygons])
+    assert isinstance(merged, shapely.Polygon) and merged.is_valid
+    ring = np.asarray(shapely.orient_polygons(merged).exterior.coords)
+    start, end = ring[:-1], ring[1:]
+    moment = (
+        np.pi
+        / 3
+        * (start[:, 0] ** 2 + start[:, 0] * end[:, 0] + end[:, 0] ** 2)
+        * (end[:, 1] - start[:, 1])
+    )
+    outer = np.linalg.norm((start + end) / 2, axis=1) > 0.95
+    vo, vi = float(moment[outer].sum()), float(-moment[~outer].sum())
+    cell_volume = 2 * np.pi * np.sum(cells.areas * cells.centroids[:, 0])
+    assert abs(vo - vi - cell_volume) < 2e-14
+    return vo, vi, merged
 
 
 def dump(path, record):
@@ -102,7 +117,8 @@ def main():
         cells = native_mesh(region, size)
         iron._mesh = lambda region, size: cells
         meshed_volume = 2 * np.pi * np.sum(cells.areas * cells.centroids[:, 0])
-        vo, vi = volume(outer), volume(inner)
+        vo, vi, merged = shell_mesh_volumes(cells)
+        assert merged.symmetric_difference(region).area < 1e-14
         geometry = dict(
             h=size,
             cells=len(cells.polygons),
@@ -181,8 +197,10 @@ def main():
         )
         cells = native_mesh(region, size)
         iron._mesh = lambda region, size: cells
+
         def uniform(points):
             return np.tile([0.0, 0.01], (len(points), 1))
+
         result = iron.solve_magnetisation(
             region, uniform, [0, 10], [1000, 1000], cell_size=size, tolerance=1e-12
         )

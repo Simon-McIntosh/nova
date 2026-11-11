@@ -13,6 +13,11 @@ if [[ "$PARTITION" == titan && "$MEASURE_DRIVER" == directional ]]; then
     MEMORY=8G
 fi
 GPU_ARGS=(--partition="$PARTITION" --gres=gpu:1)
+if [[ "$PARTITION" == all_debug && "$MEASURE_DRIVER" == geometry ]]; then
+    GPU_ARGS=(--partition="$PARTITION")
+    CPUS=2
+    MEMORY=8G
+fi
 if [[ "$PARTITION" == betelgeuse ]]; then
     GPU_ARGS+=(--reservation=gpu_0003_grpA)
 fi

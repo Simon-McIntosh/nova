@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-11T19:45:37.143Z",
+  "dispatched_at": "2026-11-11T19:32:39Z",
+  "figures_reviewed": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T191714430350-review-of-icm-law-fit-fdb99418c929-figure/image-0.png"
+  ],
+  "findings": [
+    {
+      "disposition": "folded: icm-law-fit-evidence-figure",
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html",
+      "id": "f05e149bac4",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The attached figure is not reachable from the reviewed deliverable. The evidence fragment embeds no image and cites no figure path, no PNG exists under docs/figures/iron-core-magnetisation/ at the reviewed head, and no tracked file emits this figure's legend strings ('authored knots', 'inserted breakpoints', 'held tail'), so the picture cannot be regenerated from the repository. A reader of the run's evidence never meets it, and a later reader cannot tell which revision it depicts. The picture itself is sound, so this does not hold the node; the work goes to a node that renders the law figure through the committed style module and cites it from the fragment."
+    },
+    {
+      "disposition": "folded: icm-law-fit-evidence-figure",
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html",
+      "id": "f05e149bac4",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Neither panel is identified and the figure carries no caption, so nothing in the picture says what distinguishes the two views. Both panels share one legend and one pair of axis labels, and a reader has to infer from the tick labels alone that the right panel is a 0-0.5 T zoom of the same law on a linear y axis while the left is the full 0-12 T range on a logarithmic one - a reader meeting the figure cold would reasonably read it as two different materials, which is what I did until the pixel measurements showed the two agree (B=0.5 reads 0.119 and 0.120). The plotting rules put this identity in the caption rather than a title, and there is no caption here at all. Nothing is clipped or unreadable, so this does not hold the node."
+    }
+  ],
+  "measurements": {
+    "ink_bbox": "x 28-1365 of 1400, y 31-677 of 721; the tightest margin is 28 px, so no text is clipped by the canvas",
+    "los_1_axes": "left panel x 118-672 px (0-12 T, 44.5 px/T), y 114-619 px (log, 107.375 px/decade, 0.1 tick at y=576.5); right panel x 816-1380 px (0.0-0.5 T, 1036 px/T), y 114-619 px (linear, 123 px/unit, 0 tick at y=619)",
+    "marker_colours": "authored knots #929292 (3.0:1 on white), inserted breakpoints #7b4fb3, fit #222222 dashed, held tail grey solid",
+    "panel_agreement": "the right panel is a low-field zoom of the left panel's law, not a second material: B=0.000 reads 3.698 both panels, B=0.500 reads 0.119 (right, grey knot) against 0.120 (left, knot at B=0.505), and both purple inserted-breakpoint pairs sit at 0.635-0.637 kA/(m.T) at B=0.050 and B=0.450",
+    "text_overlap": "0 pairwise 2D bounding-box intersections among text chunks in the legend band (20 chunks), the x-label band (37), the left y-label band (26) and the right y-label band (12); no text artist sits inside either plotting rectangle"
+  },
+  "notes": "Read-only review: no file, figure or caption was edited, created, moved, deleted or redrawn. The one judgement that mattered - whether the two panels disagree - was settled by calibrating each axis from its rendered tick marks and reading the marker centroids, and it shows the panels agree to the pixel at B=0.5. The two remaining findings are about the figure's provenance and its missing caption, both presentation rather than data.",
+  "orientation": "Judge only from the rendered PNG. No SVG was opened, listed, searched, rendered or shown. The attached PNG has no counterpart path in the reviewed tree: the run's five commits (284dce417, 1f6e061e4, 9d86f3f25, af2ca315f, fdb99418c) change only nova/biot/magnetisation.py, tests/test_magnetisation.py and docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html, and the tree contains no PNG under docs/figures/iron-core-magnetisation/ and no script emitting the legend strings. Measurements below are taken from the PNG's pixels (axes calibrated from the rendered tick marks), not from any source markup.",
+  "project": "nova",
+  "review_run_id": "r-20261111T191714430350-review-of-icm-law-fit-fdb99418c929-figure",
+  "reviewed_base_sha": "d42e6878e7b98ad690d510103f80b487d1973606",
+  "reviewed_head_sha": "fdb99418c929084264fd773c472a24841b337c36",
+  "reviewed_run_id": "r-20261111T144605264038-icm-law-fit",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "PASS - all text (#222222 on white) is far above any contrast floor; the population grey #929292 measures about 3.0:1 on white, which the plotting rules name as the target for authored points, and the purple breakpoints and near-black fit line both exceed it.",
+    "data_ink": "PASS - the data carry the weight. One figure-level legend serves both panels, so nothing is repeated per panel; four series only, each used in the picture; no gridlines, no fills, no gradient, both axes despined (only the left and bottom spines are drawn). The left panel spends its right half on the flat held tail, which is data the brief names as a held series rather than decoration.",
+    "decoration": "PASS - no background fill, shading, span band, frame, shadow or themed styling is present. Series are separated by colour and dash as the style module intends.",
+    "label_collision": "PASS - measured, not eyeballed: no text artist is clipped by the canvas, and no two text artists intersect, nor does any text sit over plotted data. The legend sits in clear space above both panels; tick labels clear each other and their axis labels. There are no direct labels or annotations in this figure to collide.",
+    "legibility": "PASS - at 1400x721 both panels read at a glance: the left panel shows the law rising from 3.7 kA/(m.T) at B=0 through a minimum near 0.09 kA/(m.T) at 0.70 T to saturation at 796 kA/(m.T), the right panel isolates the 0-0.5 T knee. Axis labels carry the quantity and unit (dH/dB [kA/(m.T)], B [T]); tick labels are 18 px high and legible; no marker or line falls outside its axes (lowest data 0.094 against an axis floor of 0.041; highest 1.3e3 against a ceiling of 2.0e3).",
+    "table_form": "PASS - the image is a pair of plotted curves over a continuous field, which is exactly the case a figure serves; there is no table-shaped content here that a table would carry better."
+  },
+  "scores_omitted": "a figure record carries no text-dimension scores and runs no suite; added_failure_count 0 with an empty id list is the suite position, not a measurement",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T19:58:43.008308+00:00",
+  "total": null
+}

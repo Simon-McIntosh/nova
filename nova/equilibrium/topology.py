@@ -3525,14 +3525,17 @@ def _read_at_nulls(
     )
 
 
-def refresh_at_stationary_points(field, geometry, convention, policy, solved, decision):
+def refresh_at_stationary_points(
+    field, geometry, convention, policy, solved, decision, *, skip_wall=False
+):
     """Refresh continuous geometry while carrying the connected decision.
 
     Fragment ownership, component labels, admitted saddle slots and represented
     normal-form cells stay fixed. Coefficients, stationary positions and fluxes,
     saddle curvature, fragment areas, edge intervals and fractional membership
     are evaluated at the supplied state. Limited boundaries re-evaluate wall
-    events and retain the contact nearest the carried boundary.
+    events and retain the contact nearest the carried boundary. ``skip_wall``
+    is static and is permitted only when every lane carries diverted ownership.
     """
     policy = _read_policy(geometry, policy)
     sigma = convention.sigma
@@ -3558,12 +3561,19 @@ def refresh_at_stationary_points(field, geometry, convention, policy, solved, de
         winner = jnp.argmax(jnp.where(on_core, sigma * flux, -jnp.inf))
         return points[index], flux[index], winner == index
 
-    boundary, level, wall_stable = jax.lax.cond(
-        diverted,
-        lambda _: (point, solved.jet.value[saddle_index], jnp.asarray(True)),
-        wall_contact,
-        None,
-    )
+    if skip_wall:
+        boundary, level, wall_stable = (
+            point,
+            solved.jet.value[saddle_index],
+            jnp.asarray(True),
+        )
+    else:
+        boundary, level, wall_stable = jax.lax.cond(
+            diverted,
+            lambda _: (point, solved.jet.value[saddle_index], jnp.asarray(True)),
+            wall_contact,
+            None,
+        )
     coefficient = field.sampled_coefficient(geometry)
     area, intervals, fragment_valid, required, *_ = _fragments_at_level(
         geometry, coefficient, sigma, level, form, decision.normal_form_cells, policy

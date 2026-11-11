@@ -25,6 +25,7 @@ stalling.
 
 from typing import Callable, NamedTuple
 
+import jax
 import jax.numpy as jnp
 
 from nova.equilibrium import support_read
@@ -115,7 +116,9 @@ def predict_seed(
         0.0,
     )
     return tuple(
-        current + ratio * (current - previous)
+        current
+        + ratio.reshape(ratio.shape + (1,) * (current.ndim - ratio.ndim))
+        * (current - previous)
         for current, previous in zip(moments, previous_moments, strict=True)
     )
 
@@ -172,6 +175,34 @@ def advance_drive(
     """
     solve = solve or support_read.solve_batch
     options = dict(solve_options or {})
+    if jnp.ndim(start_drive) or jnp.ndim(target_drive):
+        return _advance_lanes(
+            operands,
+            cache,
+            moments,
+            seeds,
+            seeds_previous,
+            convention,
+            policy,
+            profile_at,
+            density_gradient,
+            quadrature,
+            start_drive=start_drive,
+            target_drive=target_drive,
+            axis_sign=axis_sign,
+            initial_relative_step=initial_relative_step,
+            growth=growth,
+            shrink=shrink,
+            minimum_relative_step=minimum_relative_step,
+            update_budget=update_budget,
+            intermediate_tolerance=intermediate_tolerance,
+            certification_tolerance=certification_tolerance,
+            max_substeps=max_substeps,
+            solve=solve,
+            solve_options=options,
+            previous_moments=previous_moments,
+            previous_drive=previous_drive,
+        )
     span = abs(target_drive - start_drive)
     if span == 0:
         raise ValueError("the target drive equals the start drive")
@@ -268,4 +299,159 @@ def advance_drive(
         reads,
         sub_step,
         reason,
+    )
+
+
+def _advance_lanes(
+    operands,
+    cache,
+    moments,
+    seeds,
+    seeds_previous,
+    convention,
+    policy,
+    profile_at,
+    density_gradient,
+    quadrature,
+    *,
+    start_drive,
+    target_drive,
+    axis_sign,
+    initial_relative_step,
+    growth,
+    shrink,
+    minimum_relative_step,
+    update_budget,
+    intermediate_tolerance,
+    certification_tolerance,
+    max_substeps,
+    solve,
+    solve_options,
+    previous_moments,
+    previous_drive,
+):
+    """Keep accepted state, certification and secant history independently.
+
+    Array drive calls pass an array to ``profile_at`` and an array tolerance
+    to the solve. Certified lanes retain their state and ask for no updates.
+    Scalar calls retain the shared-step contract of :func:`advance_drive`.
+    """
+    lanes = moments[0].shape[0]
+    drive = jnp.broadcast_to(jnp.asarray(start_drive, moments[0].dtype), (lanes,))
+    target = jnp.broadcast_to(jnp.asarray(target_drive, moments[0].dtype), (lanes,))
+    span = jnp.abs(target - drive)
+    scale = jnp.where(drive != 0, jnp.abs(drive), jnp.where(span > 0, span, 1.0))
+    direction = jnp.sign(target - drive)
+    sub_step = jnp.broadcast_to(jnp.asarray(initial_relative_step) * scale, (lanes,))
+    done = jnp.zeros(lanes, bool)
+    stopped = jnp.zeros(lanes, bool)
+    state = moments
+    stationary = seeds_previous
+    older = moments if previous_moments is None else previous_moments
+    old_drive = (
+        drive
+        if previous_drive is None
+        else jnp.broadcast_to(jnp.asarray(previous_drive), (lanes,))
+    )
+    result = None
+    substeps = []
+    updates = reads = 0
+
+    def choose(mask, candidate, incumbent):
+        return jax.tree.map(
+            lambda value, prior: jnp.where(
+                mask.reshape((lanes,) + (1,) * (value.ndim - 1)), value, prior
+            ),
+            candidate,
+            incumbent,
+        )
+
+    while bool(jnp.any(~done & ~stopped)) and len(substeps) < max_substeps:
+        active = ~done & ~stopped
+        remaining = jnp.abs(target - drive)
+        change = jnp.where(active, jnp.minimum(sub_step, remaining), 0.0)
+        final = change >= remaining
+        next_drive = jnp.where(final & active, target, drive + direction * change)
+        tolerance = jnp.where(final, certification_tolerance, intermediate_tolerance)
+        predicted = choose(
+            active,
+            predict_seed(
+                state,
+                drive,
+                next_drive,
+                previous_moments=older,
+                previous_drive=old_drive,
+            ),
+            state,
+        )
+        attempt = solve(
+            operands,
+            cache,
+            predicted,
+            seeds,
+            stationary,
+            convention,
+            policy,
+            profile_at(next_drive),
+            density_gradient,
+            quadrature,
+            axis_sign,
+            max_steps=update_budget,
+            tolerance=jnp.where(active, tolerance, jnp.inf),
+            **solve_options,
+        )
+        accepted = (
+            active
+            & attempt.converged
+            & jnp.isfinite(attempt.residual)
+            & (attempt.residual <= tolerance)
+            & (attempt.steps <= update_budget)
+        )
+        updates += _batch_count(attempt.steps)
+        reads += _batch_count(attempt.reads)
+        substeps.append(
+            SubStep(
+                next_drive,
+                change,
+                sub_step,
+                tolerance,
+                attempt.steps,
+                attempt.reads,
+                attempt.residual,
+                accepted,
+                final & active,
+            )
+        )
+        if result is None:
+            result = attempt
+        else:
+            result = choose(accepted, attempt, result)
+        older = choose(accepted, state, older)
+        old_drive = jnp.where(accepted, drive, old_drive)
+        state = choose(accepted, attempt.moments, state)
+        stationary = choose(accepted, attempt.support.stationary.position, stationary)
+        drive = jnp.where(accepted, next_drive, drive)
+        done = done | (accepted & final)
+        sub_step = jnp.where(
+            active,
+            jnp.where(
+                accepted, jnp.minimum(sub_step * growth, scale), sub_step * shrink
+            ),
+            sub_step,
+        )
+        stopped = stopped | (
+            active & ~accepted & (sub_step < minimum_relative_step * scale)
+        )
+    certified = bool(jnp.all(done))
+    reason = (
+        None
+        if certified
+        else (
+            "sub-step floor reached"
+            if bool(jnp.any(stopped))
+            else "sub-step ceiling reached"
+        )
+    )
+    return DriveContinuationResult(
+        result, drive, certified, tuple(substeps), updates, reads, sub_step, reason
     )

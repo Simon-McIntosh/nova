@@ -1690,8 +1690,14 @@ def solve_batch(
     retain the smallest-residual valid trial: retaining the incumbent can stall
     at a non-smooth residual plateau above tolerance. Factor reuse is opt-in
     because extra iterations can cost more than skipped refactors.
+
+    ``profile`` is either one shared profile or a callable taking a traced
+    lane index and returning that lane's profile. The callable is evaluated
+    inside the lane map for both residuals and Newton booking derivatives.
     """
     lanes, cells = moments[0].shape
+    lane_profile = profile if callable(profile) else lambda _: profile
+    lane_indices = jnp.arange(lanes)
     support = read_batch(
         operands,
         cache,
@@ -1706,10 +1712,10 @@ def solve_batch(
 
     def magnitude(state, reading):
         result = jax.vmap(
-            lambda one, one_read: step_residual(
-                operands, one, one, one_read, profile, quadrature
+            lambda one, one_read, lane: step_residual(
+                operands, one, one, one_read, lane_profile(lane), quadrature
             )
-        )(state, reading)
+        )(state, reading, lane_indices)
         return jnp.max(jnp.abs(jnp.concatenate(result.residual, axis=-1)), axis=-1)
 
     def selection_changed(reading, cut_set, normal_set, fragments):
@@ -1832,12 +1838,12 @@ def solve_batch(
             rebuild = jnp.asarray(True)
 
         def one_with_factor(items):
-            one, one_read, prior = items
+            one, one_read, prior, lane = items
             return newton_step(
                 operands,
                 one,
                 one_read,
-                profile,
+                lane_profile(lane),
                 density_gradient,
                 quadrature,
                 fresh_geometry=True,
@@ -1847,12 +1853,12 @@ def solve_batch(
             )
 
         def one_fresh(items):
-            one, one_read = items
+            one, one_read, lane = items
             return newton_step(
                 operands,
                 one,
                 one_read,
-                profile,
+                lane_profile(lane),
                 density_gradient,
                 quadrature,
                 fresh_geometry=True,
@@ -1861,8 +1867,10 @@ def solve_batch(
 
         correction = jax.lax.cond(
             rebuild,
-            lambda _: jax.vmap(one_fresh)((state, step_support)),
-            lambda _: jax.lax.map(one_with_factor, (state, step_support, factor)),
+            lambda _: jax.vmap(one_fresh)((state, step_support, lane_indices)),
+            lambda _: jax.lax.map(
+                one_with_factor, (state, step_support, factor, lane_indices)
+            ),
             None,
         )
 

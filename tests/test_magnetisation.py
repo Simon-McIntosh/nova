@@ -154,24 +154,7 @@ def shell_observation(mu, cell_size, capsys):
     return error, result.cell_count, wall
 
 
-@pytest.mark.parametrize(
-    "mu",
-    [
-        10,
-        100,
-        pytest.param(
-            1000,
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=(
-                    "At mu_r=1000, 20 -> 10 mm errors fall at orders 1.3 to 1.5; "
-                    "40 -> 20 mm refinement is pre-asymptotic."
-                ),
-            ),
-        ),
-    ],
-)
+@pytest.mark.parametrize("mu", [10, 100, 1000])
 @pytest.mark.slow
 @pytest.mark.timeout(3600)
 def test_closed_shell_refines_toward_exact_shielding(mu, capsys):

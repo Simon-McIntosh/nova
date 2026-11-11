@@ -10,39 +10,76 @@ import jax.numpy as jnp
 import hashlib
 import numpy as np
 import pytest
+from pathlib import Path
 from types import SimpleNamespace
 
 from nova.equilibrium import current, support_read, topology
 
+REFERENCE_PATH = Path(__file__).with_name("data") / "booking_primal_diverted.npz"
 
-def test_book_primal_keeps_exact_diverted_moments():
+# The booked arrays are a deterministic function of the case, so agreement
+# within double-precision roundoff of the sums the read performs is all that is
+# required. A reordered accumulation moves the bits and stays inside this.
+RELATIVE_TOLERANCE = 1e-12
+# cell_current carries exact zeros and the moments cross zero, where a relative
+# comparison has no meaning. Against fields peaking between 1e-3 and 1e-1 this
+# floor sits well above the roundoff a reordered sum can leave on a zero entry
+# and far below any entry that carries a physical contribution.
+ABSOLUTE_FLOOR = 1e-15
+
+
+def _booked_diverted():
+    """The booked result of the diverted case's contracted step."""
     from tests.test_support_read import _case
 
     operands, cache, roots, pitch, step, _, _ = _case("diverted")
     _, booked = step(operands, cache, roots + 0.03 * pitch, roots)
-    # Broadwell Xeon E5-2680 v4, the fleet CPU family.
-    expected = (
-        "9102f14452c29d0995569ec2e92bae1ffbcac91819fafd01c16516b221758e23",
-        "2b31e39feed3d9d543f6fdcf221637731ca13c95f12291abdf6ba9b7dd9f9c64",
-        "4a66eda60cc8cd136092a9b9bbcdafa9812dfedfe66a335231df7d439708d23c",
-        "8f55488d671b15a882491e03214f7ce8999b9f833890164b210b5d84d61875fb",
-        "6c3c396ed6b5c36dcae172271f462051b1266b851e92df3deea8ac65478fd712",
-        "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a",
-    )
-    # Sapphire Rapids Xeon Gold 6416H, the sirius partition.
-    sirius_cpu = (
-        "91015d678026ed0b2172d02739b2a9536ae1d73bae2400424e682f4beedaf123",
-        "1376d8a0be97e0077c5a5df7d4051f8749c81f88b57df9ca49228239d8b8804c",
-        "bfbdeacba130a64bc782bfd676faac542eba5281b8e156fcdf06a1d8d9fc9eae",
-        "15ec33f7d6a711e79530de4938ee25aaf9952221dfac67a1441bfc04d2b741fe",
-        "6c3c396ed6b5c36dcae172271f462051b1266b851e92df3deea8ac65478fd712",
-        "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a",
-    )
-    actual = tuple(
-        hashlib.sha256(np.asarray(getattr(booked, name)).tobytes()).hexdigest()
+    return booked
+
+
+def test_book_primal_keeps_exact_diverted_moments():
+    """Every booked field reproduces the stored reference within tolerance.
+
+    ``tests/data/booking_primal_diverted.npz`` was written from the diverted
+    case at revision ``b48deaa93f55ad2c759c5977ed611b9047e393fb`` on the CPU
+    lane with::
+
+        PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -c '
+        import numpy as np
+        from tests.test_bank_step_booking import _booked_diverted
+        b = _booked_diverted()
+        np.savez("tests/data/booking_primal_diverted.npz",
+                 **{n: np.asarray(v) for n, v in zip(b._fields, b)})'
+
+    The digests below are printed only when a field disagrees, so a failure
+    says which field moved and by how much without pinning the bits.
+    """
+    booked = _booked_diverted()
+    reference = np.load(REFERENCE_PATH)
+    assert sorted(reference.files) == sorted(booked._fields)
+    digests = [
+        "%s: reference=%s actual=%s"
+        % (
+            name,
+            hashlib.sha256(np.asarray(reference[name]).tobytes()).hexdigest(),
+            hashlib.sha256(np.asarray(getattr(booked, name)).tobytes()).hexdigest(),
+        )
         for name in booked._fields
-    )
-    assert actual in (expected, sirius_cpu)
+    ]
+    report = "booked field digests\n" + "\n".join(digests)
+    for name in booked._fields:
+        actual = np.asarray(getattr(booked, name))
+        expected = reference[name]
+        if expected.dtype.kind == "b":
+            np.testing.assert_array_equal(actual, expected, err_msg=report)
+        else:
+            np.testing.assert_allclose(
+                actual,
+                expected,
+                rtol=RELATIVE_TOLERANCE,
+                atol=ABSOLUTE_FLOOR,
+                err_msg=report,
+            )
 
 
 def test_batched_booking_tangent_matches_single_channel_reference():

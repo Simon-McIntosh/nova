@@ -37,6 +37,11 @@
       "kind": "exempted",
       "reason": "the delta now labels the grad(h)(0) assertion as the zero-magnitude branch check, and the independent origin-slope guard at tests/test_magnetisation.py:258 is the cited evidence",
       "recorded_at": "2026-11-11T19:54:16.969815+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "icm-law-fit",
+      "recorded_at": "2026-11-11T19:54:47.766279+00:00"
     }
   },
   "findings": [

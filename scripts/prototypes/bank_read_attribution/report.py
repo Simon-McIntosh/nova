@@ -1,12 +1,14 @@
 """Validate paired attribution receipts and draw their width-sixteen costs."""
 
 import argparse
+import hashlib
 from html import escape
 import json
 import math
 from pathlib import Path
 import re
 import statistics
+import subprocess
 
 
 def table(headers, rows):
@@ -30,7 +32,39 @@ def spread(values):
     return 100 * (max(values) - min(values)) / statistics.mean(values)
 
 
-def fragment(root, run, summary, tables, job):
+def instrument_provenance(root, run):
+    """Bind each recorded source digest to identical committed file bytes."""
+    path = "scripts/prototypes/bank_read_attribution/measure.py"
+    history = subprocess.check_output(
+        ["git", "-C", str(root), "log", "--format=%H", "--", path], text=True
+    ).splitlines()
+    revisions = {}
+    for revision in history:
+        source = subprocess.check_output(
+            ["git", "-C", str(root), "show", f"{revision}:{path}"]
+        )
+        revisions.setdefault(hashlib.sha256(source).hexdigest(), revision)
+    rows = []
+    for kind in ("full", "carried"):
+        for process in (1, 2):
+            name = f"{kind}-{process}.json"
+            receipt = json.loads((run / name).read_text())
+            digest = receipt["instrument_sha256"]
+            assert digest in revisions, f"uncommitted instrument: {name} {digest}"
+            rows.append([name, receipt["revision"], digest, revisions[digest]])
+            print("INSTRUMENT_SOURCE", json.dumps(rows[-1]), flush=True)
+    return table(
+        [
+            "Receipt",
+            "Recorded revision",
+            "Instrument SHA-256",
+            "Matching file revision",
+        ],
+        rows,
+    )
+
+
+def fragment(root, run, summary, tables, job, provenance):
     """Bind the measured table to a bounded, explicitly estimated next brief."""
     wide = {row["kind"]: row for row in summary if row["width"] == 16}
 
@@ -231,6 +265,15 @@ def fragment(root, run, summary, tables, job):
         "The committed root-argument driver and <code>h200.sh</code> can be "
         "submitted from main with <code>TMPDIR=/tmp</code> in the submit "
         "environment. No test suite pair is armed for this measurement node.</p>\n"
+        "<p>The following bindings compare each receipt's instrument hash "
+        "with the exact committed <code>measure.py</code> bytes. The first "
+        "full process captured an uncommitted instrument; its exact bytes "
+        "were recovered from the recorded edit sequence and committed. "
+        "The other three processes used the retained canonical instrument. "
+        "Original receipt revisions and hashes remain unchanged; a matching "
+        "file revision identifies source bytes, not a new measurement.</p>\n"
+        + provenance
+        + "\n"
         "<p>Context: the earlier "
         '<a href="/nova/evidence/fragments/sub-millisecond-forward-path/'
         'bank-solve-trace-four-read.html">four-read H200 trace</a> measured '
@@ -271,6 +314,7 @@ def main():
     from scripts.prototypes.bank_read_attribution.measure import coverage
 
     receipts = {}
+    provenance = instrument_provenance(args.root, args.run)
     jobs = set()
     stages = set()
     for kind in ("carried", "full"):
@@ -516,7 +560,7 @@ def main():
     save_checked(fig, destination)
     fig.savefig(args.run / "stage-cost.png", dpi=100)
     plt.close(fig)
-    fragment(args.root, args.run, summary, tables, next(iter(jobs)))
+    fragment(args.root, args.run, summary, tables, next(iter(jobs)), provenance)
     print("SUMMARY", json.dumps(summary), flush=True)
     print(
         "GATE_SUMMARY",

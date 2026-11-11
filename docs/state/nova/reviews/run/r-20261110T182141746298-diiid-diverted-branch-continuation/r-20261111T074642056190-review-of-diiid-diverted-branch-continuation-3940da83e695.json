@@ -1,0 +1,179 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Scoped pair only: the base has no scoped test and its positive-presence/absence probe exits zero; head has eight passes. Broad CPU aborts prevent a clean regression delta; the zero here is not a claim about broad CPU coverage.",
+  "assertion_audit": [
+    {
+      "condition_to_fail": "x64 configuration is disabled; environment precondition, not branch coverage",
+      "path": "tests/test_diverted_branch_continuation.py:20"
+    },
+    {
+      "condition_to_fail": "Remove Newton qualification: map advances zero toward 4/3, state and trajectory retention fail, accepted promotions become nonzero, refusal counters/index cease to match",
+      "path": "tests/test_diverted_branch_continuation.py:74-78"
+    },
+    {
+      "condition_to_fail": "Remove warm-up qualification: proposals leave zero; retained state, trajectory, branch refusal count and first index fail; finite-refusal assertion distinguishes a topology veto from a NaN veto",
+      "path": "tests/test_diverted_branch_continuation.py:86-91"
+    },
+    {
+      "condition_to_fail": "Protect a limited seed or break Newton progress: output no longer reaches independently derived analytic fixed point 4/3, convergence or zero-veto assertion fails",
+      "path": "tests/test_diverted_branch_continuation.py:100-102"
+    },
+    {
+      "condition_to_fail": "Restore relaxation after acceptance: third warm-up reaches 1.5 instead of independently calculated 1.25; remove finite guard: refusal count changes or nonfinite result appears",
+      "path": "tests/test_diverted_branch_continuation.py:125-126"
+    },
+    {
+      "condition_to_fail": "Forward a pinned requested_class instead of None to the class-free topology reader",
+      "path": "tests/test_diverted_branch_continuation.py:134"
+    },
+    {
+      "condition_to_fail": "Drop augmented reader, physical-unit split or runtime binding: first flux coordinate moves toward 4/3 and positive refusal check fails; specialize seed values statically and cache-size check exceeds one",
+      "path": "tests/test_diverted_branch_continuation.py:173-183"
+    },
+    {
+      "self_comparisons": "No retention assertion is vacuous merely because its expected incumbent equals the seed: the independent affine map moves that seed to 4/3 without qualification, as the recorded red control demonstrates; the unchanged second coordinate alone is not credited as branch coverage."
+    }
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/forward.py:2310 assemble_augmented_system",
+    "nova/equilibrium/forward.py:2321 fixed_point.newton_krylov",
+    "nova/equilibrium/fixed_point.py:5513 _active_set_newton_krylov",
+    "nova/equilibrium/fixed_point.py:4408 _complete_newton_promotion"
+  ],
+  "completed_at": "2026-11-11T07:57:37Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-diiid-diverted-branch-continuation-3940da83e695",
+      "recorded_at": "2026-11-11T13:01:52.405137+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-11T07:48:47Z",
+  "figure_review": {
+    "inspected": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T074642056190-review-of-diiid-diverted-branch-continuation-3940da83e695/frame-137.png",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T074642056190-review-of-diiid-diverted-branch-continuation-3940da83e695/frame-146.png"
+    ],
+    "rendered_from_reviewed_git_blobs": true,
+    "renderer": "ImageMagick convert with explicit writable TMPDIR and MAGICK_TMPDIR",
+    "result": "Both paired figures legible, no clipped or overlapping text, reference and solved lower-X endpoints visible, distinct marker shapes; machine/frame supplied by fragment captions."
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-diiid-diverted-branch-continuation-3940da83e695",
+      "recorded_at": "2026-11-11T10:12:51.446934+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "repair-of-diiid-diverted-branch-continuation-3940da83e695",
+      "recorded_at": "2026-11-11T10:12:51.954421+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/fixed_point.py",
+      "id": "f3edb37359c",
+      "line": "3726",
+      "severity": "blocking",
+      "text": "blocking: Automatic branch protection changes the MAST 21978/35 control from converged residual 2.209696562e-16 to nonconverged residual 0.002161879175, reason 12, with eight warm-up and two Newton vetoes and 0.0252656231 Wb state difference; the explicitly required unchanged-to-round-off control fails, so the production guard needs repair before acceptance."
+    },
+    {
+      "file": "nova/equilibrium/fixed_point.py",
+      "id": "ffa061b6893",
+      "line": "3870",
+      "severity": "blocking",
+      "text": "blocking: The newly traced qualification path changes the limited-seed 179L result despite zero branch vetoes: the paired terminal states differ by 0.0006558935 Wb and residual moves from 0.002214190774 to 0.002214837916; this contradicts the requirement that a limited seed behave exactly as before, and the scalar limited-seed test does not catch it."
+    },
+    {
+      "file": "scripts/prototypes/diiid_diverted_branch/refresh.py",
+      "id": "fb5575c1b61",
+      "line": "38",
+      "severity": "non-blocking",
+      "text": "non-blocking: The roots and refresh helpers duplicate measure.py:258-278 lower-saddle fitting, polishing and qualification rather than wrapping that owner, and already disagree on the axis-height criterion, creating two diagnostic definitions of a lower root."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read all twelve commits from 04337b991e8aed9d0904494437e02a1b66fa24dc to 3940da83e695b31f6edd3213cd1ef6f581e66add; qualification, augmented routing, tests, measurement utilities, reader repairs and both rendered figures match the described delivery.",
+    "done_when": "Read brief.md:53-85 and the final scoped-arm logs; eight head tests pass and the six-case red control fails, while the five-row measurements explicitly fail both DIII-D distance thresholds and MAST invariance, with broad CPU coverage incomplete.",
+    "goal": "The goal in the source prompt.txt:38 is branch retention through warm-up and Newton; fixed_point.py:3706 implements that mechanism, but the paired physical results fail the geometry and unchanged-control targets.",
+    "manifest": "Read source manifest.md:1-26 and its cited final-base-suite/suite.log and final-head-suite/suite.log; the empty base probe and eight passing head tests are recorded, and the negative physical result and incomplete CPU arms are disclosed.",
+    "write_paths": "Read prompt.txt:133 and resume-1, resume-2 and resume-4 advice; all 20 changed paths fit the initial grant plus explicit extensions for fixed_point.py, constraint.py and five prototype readers."
+  },
+  "justifications": {
+    "durability": "tests/test_diverted_branch_continuation.py:72-95 and :127-183 fail when qualification is disabled, but the limited toy control at :98 does not guard the observed 179L drift or the real MAST convergence regression.",
+    "evidence": "Source final-head-suite/suite.log records eight passes and augmented-head-verification/negative-control.log records six failures, while the evidence fragment:20-43 honestly records missed thresholds and incomplete CPU coverage instead of treating driver exits as test passes.",
+    "fit": "nova/equilibrium/fixed_point.py:3958-3983 uses the existing traced retention and damping idiom and constraint.py:2129 extends its map capability attributes, although the new prototype utilities carry duplicated lower-root logic.",
+    "goal_fidelity": "nova/equilibrium/fixed_point.py:3706 and :3958 retain toy branches, but the paired receipts documented in docs/evidence/fragments/diiid-vertical-force-balance/diiid-diverted-branch-continuation.html:20-23 show no DIII-D veto benefit and loss of MAST convergence.",
+    "reuse": "scripts/prototypes/diiid_diverted_branch/refresh.py:38-58 duplicates the lower-root polishing and selection capability already implemented by measure.py:258-278 instead of extending that owner, while the main measurement and rendering wrappers correctly reuse diiid_warmup_admission.",
+    "scope_discipline": "Source resume-1-advice.txt, resume-2-advice.txt and resume-4-advice.txt explicitly authorize the seven additional production and prototype paths listed in manifest.md:12, and the remaining diff stays within the original scope."
+  },
+  "live_plan": {
+    "project": "nova",
+    "slug": "diiid-vertical-force-balance",
+    "version": 65
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal in the source prompt.txt:38 is branch retention through warm-up and Newton; fixed_point.py:3706 implements that mechanism, but the paired physical results fail the geometry and unchanged-control targets.\nVERDICT done_when: Read brief.md:53-85 and the final scoped-arm logs; eight head tests pass and the six-case red control fails, while the five-row measurements explicitly fail both DIII-D distance thresholds and MAST invariance, with broad CPU coverage incomplete.\nVERDICT write_paths: Read prompt.txt:133 and resume-1, resume-2 and resume-4 advice; all 20 changed paths fit the initial grant plus explicit extensions for fixed_point.py, constraint.py and five prototype readers.\nVERDICT manifest: Read source manifest.md:1-26 and its cited final-base-suite/suite.log and final-head-suite/suite.log; the empty base probe and eight passing head tests are recorded, and the negative physical result and incomplete CPU arms are disclosed.\nVERDICT diff: Read all twelve commits from 04337b991e8aed9d0904494437e02a1b66fa24dc to 3940da83e695b31f6edd3213cd1ef6f581e66add; qualification, augmented routing, tests, measurement utilities, reader repairs and both rendered figures match the described delivery.\nCALL_SITES: nova/equilibrium/forward.py:2310 assemble_augmented_system, nova/equilibrium/forward.py:2321 fixed_point.newton_krylov, nova/equilibrium/fixed_point.py:5513 _active_set_newton_krylov, nova/equilibrium/fixed_point.py:4408 _complete_newton_promotion\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: nova/equilibrium/fixed_point.py:3706 and :3958 retain toy branches, but the paired receipts documented in docs/evidence/fragments/diiid-vertical-force-balance/diiid-diverted-branch-continuation.html:20-23 show no DIII-D veto benefit and loss of MAST convergence.\nSCORE evidence: 17\nJUSTIFICATION evidence: Source final-head-suite/suite.log records eight passes and augmented-head-verification/negative-control.log records six failures, while the evidence fragment:20-43 honestly records missed thresholds and incomplete CPU coverage instead of treating driver exits as test passes.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Source resume-1-advice.txt, resume-2-advice.txt and resume-4-advice.txt explicitly authorize the seven additional production and prototype paths listed in manifest.md:12, and the remaining diff stays within the original scope.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_diverted_branch_continuation.py:72-95 and :127-183 fail when qualification is disabled, but the limited toy control at :98 does not guard the observed 179L drift or the real MAST convergence regression.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/fixed_point.py:3958-3983 uses the existing traced retention and damping idiom and constraint.py:2129 extends its map capability attributes, although the new prototype utilities carry duplicated lower-root logic.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/diiid_diverted_branch/refresh.py:38-58 duplicates the lower-root polishing and selection capability already implemented by measure.py:258-278 instead of extending that owner, while the main measurement and rendering wrappers correctly reuse diiid_warmup_admission.\nFINDING nova/equilibrium/fixed_point.py:3726 blocking: Automatic branch protection changes the MAST 21978/35 control from converged residual 2.209696562e-16 to nonconverged residual 0.002161879175, reason 12, with eight warm-up and two Newton vetoes and 0.0252656231 Wb state difference; the explicitly required unchanged-to-round-off control fails, so the production guard needs repair before acceptance.\nFINDING nova/equilibrium/fixed_point.py:3870 blocking: The newly traced qualification path changes the limited-seed 179L result despite zero branch vetoes: the paired terminal states differ by 0.0006558935 Wb and residual moves from 0.002214190774 to 0.002214837916; this contradicts the requirement that a limited seed behave exactly as before, and the scalar limited-seed test does not catch it.\nFINDING scripts/prototypes/diiid_diverted_branch/refresh.py:38 non-blocking: The roots and refresh helpers duplicate measure.py:258-278 lower-saddle fitting, polishing and qualification rather than wrapping that owner, and already disagree on the axis-height criterion, creating two diagnostic definitions of a lower root.\n",
+  "reuse_audit": {
+    "measurement": "Opened diiid_warmup_admission/measure.py and render.py: row/batch and painter wrappers extend existing owners; gates uses existing extract and regression.gate; recovery guards existing solve entrypoints and enriches saved arrays; analyze audits persisted data rather than re-solving; smoke exercises repaired readers. refresh independently forks measure lower-root capability, recorded as a finding.",
+    "production": "Searched topology, support_read, forward_operator, fixed_point and drive_continuation by branch admission and preservation capability; existing _fixed_design_read owns fresh classification and is reused, with the new veto extending the solver owner. constraint reader and bound callable wrap that capability. Test Partition and affine closures are isolated fixtures."
+  },
+  "review_run_id": "r-20261111T074642056190-review-of-diiid-diverted-branch-continuation-3940da83e695",
+  "reviewed_base_sha": "04337b991e8aed9d0904494437e02a1b66fa24dc",
+  "reviewed_commits": [
+    "c325c25e14343e46c60433fd17cf519794e7e4a5",
+    "e9cf3a8949e694c22960b072959f11ba3a32289c",
+    "d0b5435a181ee9d94013dbc26e6d10fded9fa37b",
+    "ff03761a1d9d3f6d42b4f54d4886052a041a9123",
+    "8fb2118e30f902fce846de297220c3703ac27417",
+    "4464c08533c45fead6fed0fc0590d5860e974ab3",
+    "dc4512faba5aa6bee83d28f20807da5f1533173a",
+    "b92ad6b61c2615fe8510d0eaa50872ee31822379",
+    "15631d22e6eef1b8a6d0c526ae06cf88982267d5",
+    "07378642ef46693e73145671e29aaf8a2d08862a",
+    "4ef124881cd67d9e3b4260189bdcbc26c914f0c7",
+    "3940da83e695b31f6edd3213cd1ef6f581e66add"
+  ],
+  "reviewed_head_sha": "3940da83e695b31f6edd3213cd1ef6f581e66add",
+  "reviewed_run_id": "r-20261110T182141746298-diiid-diverted-branch-continuation",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 12,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_diverted_branch_continuation.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/final-head-suite/suite.log",
+      "revision": "4ef124881cd67d9e3b4260189bdcbc26c914f0c7"
+    },
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -c 'import os; from pathlib import Path; from nova.equilibrium import fixed_point; print('\"'\"'IMPORTED_MODULE='\"'\"' + fixed_point.__file__); print('\"'\"'RESOLVED_CWD='\"'\"' + os.getcwd()); assert Path('\"'\"'nova/equilibrium/fixed_point.py'\"'\"').is_file(); assert not Path('\"'\"'tests/test_diverted_branch_continuation.py'\"'\"').exists(); print('\"'\"'BASE_SCOPE_EMPTY; KNOWN_PRESENT=nova/equilibrium/fixed_point.py'\"'\"')'",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261110T182141746298-diiid-diverted-branch-continuation/final-base-suite/suite.log",
+      "note": "No scoped tests exist at base; positive module-presence and scoped-test-absence probe substituted.",
+      "revision": "04337b991e8aed9d0904494437e02a1b66fa24dc"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T08:12:26.648870+00:00",
+  "total": 88
+}

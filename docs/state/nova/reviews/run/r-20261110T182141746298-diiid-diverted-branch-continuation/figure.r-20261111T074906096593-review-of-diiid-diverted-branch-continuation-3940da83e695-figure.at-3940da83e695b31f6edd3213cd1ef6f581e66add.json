@@ -1,0 +1,112 @@
+{
+  "absent": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit",
+    "reuse"
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "Figure record. No suite was run and no base/head gate pair was read, so the count and empty id list are the record shape's neutral values, not a measurement, and no suite-delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1399x720 RGBA, attached to this review run)": "docs/figures/diiid-diverted-branch-continuation/frame-137-diverted.svg",
+    "image-1.png (1399x720 RGBA, attached to this review run)": "docs/figures/diiid-diverted-branch-continuation/frame-146-diverted.svg"
+  },
+  "attachment_note": "Both attached PNGs were opened with Read and judged as pictures. The mapping was read off the artifacts rather than assumed: image-0's in-image caption reports 'lower saddle gap 7.30 cm', which matches the reviewed run's own fragment text for frame 137 ('the lower gap is 7.2958 cm'), and image-1 reports '6.59 cm', matching frame 146 ('6.5906 and 6.5890 cm'); the reviewed fragment also lists exactly these two figure paths as its artifacts. Both PNGs are 1399x720 RGBA, i.e. the 14 x 7.2 in at 100 dpi canvas. No SVG was opened, read or rendered for this review; every verdict below comes from the two attached PNGs and 2x-8x nearest/Lanczos crops of those same PNGs.",
+  "completed_at": "2026-11-11T08:02:12.909Z",
+  "dispatched_at": "2026-11-11T07:50:39Z",
+  "figure_checks": {
+    "caption_independence": "The in-image caption is not a restatement of a title: it carries support, boundary class, residual, converged flag and the lower-saddle gap. It does not name the machine or the frame (finding 1); the reviewed page's figcaption does ('DIII-D frame 137' / 'DIII-D frame 146').",
+    "clipping": "For each PNG, the non-white bounding box is x 111-1357 and y 23-705 inside a 1399x720 canvas, leaving a clear margin on all four sides. Nothing is clipped at a canvas edge.",
+    "endpoints_visible": "In both insets the solved saddle (bold green X) and the EFIT X-point (grey plus) are both inside the inset, confirming the caption's distance endpoints are visible at both ends for the reported 7.30 cm and 6.59 cm gaps.",
+    "marker_vocabulary": "The legend's eight entries match what is drawn: solid green flux, dashed grey EFIT flux, dotted grey EFIT boundary, black limiter, filled green triangle solved axis, bold green X solved saddle, hollow grey circle EFIT axis, grey plus EFIT X-point. EFIT and solved nulls are distinguished by shape and weight as well as by hue.",
+    "rendered_artifact": "Both attached PNGs were opened with Read at native 1399x720 and inspected in crops enlarged 2x, 5x, 7x and 8x (main panels, the lower X-point region of each main panel, the two inset centres, the legend marker swatches and the caption blocks). All crops were made from the same two attached PNGs; no SVG and no other image was opened, read or rendered."
+  },
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/diiid-diverted-branch-continuation/frame-137-diverted.svg",
+      "rubric": {
+        "contrast": "pass. Text near-black on white. Solved green against white is well above 3:1 and the dashed/dotted grey EFIT marks read as a lighter second vocabulary; the grey plus is legible against white in both the main panel and the inset.",
+        "data_ink": "pass. Ink is contour strokes, the wall, four null marks per panel and the inset plus marks. No gradient, no filled contour band, no painted scatter.",
+        "decoration": "pass. Axis off in every panel: no spines, ticks, tick labels or gridlines. The figure legend is two frameless rows in clear space at the top.",
+        "label_collision": "pass. Ink stops at x=1357 of a 1399 px canvas and y=705 of 720, so nothing is clipped. 'base', 'head' and both 'lower X-point zoom' titles sit above their panels with clear margin; the caption lines do not touch the panels. No label overlaps another or the data.",
+        "legibility": "pass. A 2x2 grid: base poloidal panel with its 'lower X-point zoom' inset, then the same pair for head. Each main panel draws nested solid green solved-flux contours, dashed grey EFIT flux, dotted grey EFIT boundary, a solid black governed limiter, a filled green triangle at the solved axis, a hollow grey circle at the EFIT axis, a bold green X at the solved lower saddle and a grey plus at the EFIT X-point. A caption block sits under each column: 'support 314; diverted boundary' / 'residual 0.017782; converged false' / 'lower saddle gap 7.30 cm' \u2014 identical for base and head, which is the run's claim (the branch veto is inert on this seed). The base and head panels are visually indistinguishable, so that null result is established by the printed numbers rather than by a visible difference; that is the evidence, not a defect.",
+        "table_form": "pass. The figure is a spatial field comparison (contours, wall, null positions), which no table carries; the numeric readout in the caption is figure text, and the page's own table carries the row values."
+      }
+    },
+    {
+      "attachment": "image-1.png",
+      "figure": "docs/figures/diiid-diverted-branch-continuation/frame-146-diverted.svg",
+      "rubric": {
+        "contrast": "pass. All text near-black on white. The EFIT X-point plus is the faintest mark on the canvas and sits on a dotted EFIT line (finding 2), but it is still identifiable at native size.",
+        "data_ink": "pass. Contour strokes, the wall and the null marks only; no fills, gradients or decorative bands.",
+        "decoration": "pass. Axes off, no gridlines, frameless legend, white background throughout.",
+        "label_collision": "pass. Outer frame empty (ink bbox x111-1357 of 1399, y23-705 of 720); no label clipped, no label over another label or over the data. The single overlap is a marker beneath a contour line, recorded as finding 2.",
+        "legibility": "pass, with the encoding weakness recorded as finding 2. Same layout and vocabulary as frame-137. Captions read 'support 330; diverted boundary' / 'residual 0.010214; converged false' / 'lower saddle gap 6.59 cm' for base and 'residual 0.010199' for head, so the pair is visibly a comparison only through those numbers. The lower X-point inset shows both endpoints of the reported distance: the bold green solved saddle X and the grey EFIT plus, about 85 px apart, labelled 'lower saddle gap 6.59 cm' beneath.",
+        "table_form": "pass. Spatial field comparison, not an image of a table."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "evidence": "attached image-0.png and image-1.png caption blocks; scripts/prototypes/diiid_diverted_branch/render.py:98-114 (the fig.text tuple emits arm, 'lower X-point zoom', support/boundary, residual/converged and the gap, and no frame string); reviewed fragment figcaptions naming the machine and frame.",
+      "file": "scripts/prototypes/diiid_diverted_branch/render.py",
+      "id": "fdf2c58104c",
+      "line": 98,
+      "severity": "non-blocking",
+      "summary": "The in-image caption block writes only the arm name, the inset title, support/boundary, residual/converged and the lower-saddle gap, so neither attached PNG names its machine or frame. Delivered as two separate files whose captions differ only by three numbers (support 314 / gap 7.30 cm in image-0 against 330 / 6.59 cm in image-1), the figures are not self-identifying: a reader who receives the PNG alone cannot tell which is DIII-D frame 137 and which is frame 146. This is why it does not block: the published page carries a figcaption naming 'DIII-D frame 137, admitted diverted seed' and 'DIII-D frame 146', so the figure is identifiable where it is read."
+    },
+    {
+      "evidence": "attached image-1.png, lower X-point zoom of the base and head columns; 7x crop of the inset centre (source pixels x500-640, y330-470) showing the grey plus at the junction of the green contour and the grey dotted boundary.",
+      "file": "docs/figures/diiid-diverted-branch-continuation/frame-146-diverted.svg",
+      "id": "f4e07513f0a",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "In the 'lower X-point zoom' of image-1, the EFIT X-point plus that marks the far end of the reported 6.59 cm distance is the faintest mark on the canvas: a thin grey plus on white, drawn on top of the dotted grey EFIT boundary, with its right arm partly covered by the thick green solved-flux contour that bends through the same point. In a 7x crop the plus is still identifiable by its left, top and bottom arms, so the endpoint a reader needs is visible and no label is involved; the weakness is that at native size the plus is easy to miss against the green line and the dotted boundary, where the solved saddle X is a solid bold mark."
+    }
+  ],
+  "item_verdicts": {
+    "caption_independence": "The in-image captions report data (support, boundary class, residual, converged flag, lower-saddle gap), not a title restatement. They omit the machine and frame, which is recorded as finding 1 and is supplied by the page figcaption.",
+    "finding_materiality": "Two non-blocking findings, no blocking finding. Nothing is clipped, no text overlaps another text or the data, no text is unreadable, and both figure insets show the endpoints of the distances they report; so none of the blocking categories is met.",
+    "rendered_artifact": "Both attached PNGs were opened and inspected directly at native resolution and in upscaled crops; the verdicts are about the pictures, and no SVG was read.",
+    "scope": "Read-only. No figure, caption, script or other file in the reviewed tree was edited, created, moved, deleted, redrawn, relabelled or reformatted. The only writes are this record at its two declared paths and the run manifest."
+  },
+  "justifications": {
+    "durability": "The record is written at both declared paths and checked with `reckon crew check --review --record` before the manifest is closed.",
+    "evidence": "Attachment identity is established from the in-image gap values against the reviewed run's own fragment text and artifact list (7.30 cm to frame 137's 7.2958 cm; 6.59 cm to frame 146's 6.5906/6.5890 cm), not assumed from file order.",
+    "legibility": "Read from the two attached PNGs at native size and in 2x-8x crops of the panels, insets, legend and captions.",
+    "scope_discipline": "Read-only review; every observation is recorded here and no file was modified."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261111T074906096593-review-of-diiid-diverted-branch-continuation-3940da83e695-figure",
+  "reviewed_base_sha": "04337b991e8aed9d0904494437e02a1b66fa24dc",
+  "reviewed_figures": [
+    "docs/figures/diiid-diverted-branch-continuation/frame-137-diverted.svg",
+    "docs/figures/diiid-diverted-branch-continuation/frame-146-diverted.svg"
+  ],
+  "reviewed_head_sha": "3940da83e695b31f6edd3213cd1ef6f581e66add",
+  "reviewed_run_id": "r-20261110T182141746298-diiid-diverted-branch-continuation",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass (image-0 frame-137). Two poloidal panels (base, head) with a lower X-point inset beside each; nested solved-flux contours, EFIT contours and the wall are separable, the axis and saddle marks are distinct, and all six text lines are readable at native size.",
+    "RUBRIC data_ink: pass (image-0 frame-137). Only contour strokes, one wall outline, four null marks per panel and one X-point plus per inset carry ink; no fill, shading or decorative band, and nothing competes with the flux lines.",
+    "RUBRIC decoration: pass (image-0 frame-137). Axes are off, no grid, no spines, no background; the figure legend is frameless and sits in clear white above the panels.",
+    "RUBRIC contrast: pass (image-0 frame-137). All text is near-black on white; the solved green and the EFIT grey separate clearly, and the faintest mark (the grey EFIT X-point plus) is still identifiable.",
+    "RUBRIC table_form: pass (image-0 frame-137). The panels show a spatial relationship (field contours, wall, null positions); the numeric caption is text on the figure, not an image of a table.",
+    "RUBRIC label_collision: pass (image-0 frame-137). No text is clipped (ink bbox spans x111-1357 of 1399, y23-705 of 720), panel titles and the legend sit clear of the data, and no label overlaps another or a contour.",
+    "RUBRIC legibility: pass (image-1 frame-146). Same layout and vocabulary as frame-137 and readable at a glance; base and head now differ slightly (residual 0.010214 vs 0.010199) while both remain nonconverged.",
+    "RUBRIC data_ink: pass (image-1 frame-146). Data-only ink as in frame-137.",
+    "RUBRIC decoration: pass (image-1 frame-146). No gradient, fill, grid or styled background; frameless legend above the panels.",
+    "RUBRIC contrast: pass (image-1 frame-146). Text clears its white background; the grey EFIT X-point plus is the weakest mark on the canvas (see finding 2) but remains visible.",
+    "RUBRIC table_form: pass (image-1 frame-146). Spatial content, not a table rendered as an image.",
+    "RUBRIC label_collision: pass (image-1 frame-146). No clipping and no label-on-label overlap; the one overlap is a marker under a contour, recorded as finding 2 rather than as a text collision."
+  ],
+  "scores": {},
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T13:03:21.139532+00:00",
+  "total": null
+}

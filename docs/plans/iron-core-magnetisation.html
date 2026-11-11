@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-modified" content="2026-11-11">
 </head>
 <body>
@@ -640,6 +640,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261110T224704629308-review-of-icm-sheet-axis-limits-c7d2eb71c9d1" data-who="reckon-build" data-when="2026-11-10T23:09:30Z">
     <div class="r-comment-body"><p>Incremental review parsed at d9ace267d24b7d54871c9a1d32e7d84f6ca245ae..c7d2eb71c9d18fc58f28fd58ef9e12d73ed31302; six scores 20/19/20/18/20/20, zero added failures, zero blocking and one non-blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261109T220119790593-icm-magnetisation-solve" data-who="reckon-build" data-when="2026-11-11T04:55:49Z">
+    <div class="r-comment-body"><p>Solve qualified through mu_r=100: exact-shell errors fall at all probes from 228 to 828 cells, orders [2.14190,1.26045,1.81045] at 10 and [0.74379,1.16846,0.64474] at 100. Exact-command sirius head: 17 passed, 1 xfailed in 1148.84s. Strict mu_r=1000 expected failure retains the same assertion; 828-cell factors are 2.37-3.25% below exact with 0.89846% probe spread. Separate investigation owns that limitation.</p></div>
 </div>
 </section>
 </main>

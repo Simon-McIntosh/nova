@@ -48,8 +48,29 @@ def dipole(points):
 
 def shell_mesh_volumes(cells):
     """Recover both enclosed volumes from the actual mesh boundary moments."""
-    merged = shapely.union_all([shapely.Polygon(p) for p in cells.polygons])
-    assert isinstance(merged, shapely.Polygon) and merged.is_valid
+    polygons = [shapely.Polygon(p) for p in cells.polygons]
+    raw = shapely.union_all(polygons)
+    # Stitch floating-coordinate grid seams far below the sheet operand's
+    # picometre edge-identity rounding, then bound the affected material area.
+    merged = shapely.union_all(polygons, grid_size=1e-14)
+    difference = raw.symmetric_difference(merged).area
+    print(
+        "BOUNDARY_STITCH",
+        json.dumps(
+            dict(
+                raw_type=raw.geom_type,
+                raw_valid=raw.is_valid,
+                raw_parts=len(shapely.get_parts(raw)),
+                grid_size=1e-14,
+                changed_area=difference,
+            )
+        ),
+        flush=True,
+    )
+    assert difference < 1e-13
+    assert isinstance(merged, shapely.Polygon) and merged.is_valid, (
+        "mesh boundary remains disconnected at measurement precision"
+    )
     ring = np.asarray(shapely.orient_polygons(merged).exterior.coords)
     start, end = ring[:-1], ring[1:]
     moment = (
@@ -118,7 +139,7 @@ def main():
         iron._mesh = lambda region, size: cells
         meshed_volume = 2 * np.pi * np.sum(cells.areas * cells.centroids[:, 0])
         vo, vi, merged = shell_mesh_volumes(cells)
-        assert merged.symmetric_difference(region).area < 1e-14
+        assert merged.symmetric_difference(region).area < 1e-13
         geometry = dict(
             h=size,
             cells=len(cells.polygons),

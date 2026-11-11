@@ -25,7 +25,7 @@ def main():
         cells = iron._mesh(region, size)
         vo, vi, merged = shell_mesh_volumes(cells)
         difference = merged.symmetric_difference(region).area
-        assert difference < 1e-14
+        assert difference < 1e-13
         row = dict(
             h=size,
             cells=len(cells.polygons),
@@ -41,6 +41,21 @@ def main():
         record["geometry"].append(row)
         dump(args.output, record)
         print("MESH_UNION", json.dumps(row), flush=True)
+    boxes = [shapely.box(0.9, -0.1, 1.0, -0.01), shapely.box(0.9, 0.01, 1.0, 0.1)]
+    separated = iron._Mesh(
+        tuple(np.asarray(p.exterior.coords)[:-1] for p in boxes),
+        np.asarray([p.centroid.coords[0] for p in boxes]),
+        np.asarray([p.area for p in boxes]),
+    )
+    try:
+        shell_mesh_volumes(separated)
+    except AssertionError as error:
+        assert "remains disconnected" in str(error)
+        record["real_gap_refused"] = True
+        print(f"REAL_GAP_REFUSED {error}", flush=True)
+    else:
+        raise AssertionError("measurement precision closed a genuine gap")
+    dump(args.output, record)
     print("GEOMETRY_SUMMARY", json.dumps(record), flush=True)
 
 

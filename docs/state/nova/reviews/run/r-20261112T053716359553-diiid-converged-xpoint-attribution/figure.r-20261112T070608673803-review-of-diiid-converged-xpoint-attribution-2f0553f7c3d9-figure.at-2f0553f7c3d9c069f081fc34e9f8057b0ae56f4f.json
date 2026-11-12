@@ -22,6 +22,13 @@
       "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/figure-previews-2f0553f7c/profiles.png"
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "cosmetic: series stay separable by style and caption; values and claims are legible",
+      "recorded_at": "2026-11-12T07:27:01.473105+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_xpoint_attribution/render.py",

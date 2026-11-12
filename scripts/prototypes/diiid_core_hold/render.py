@@ -17,6 +17,7 @@ import numpy as np
 
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import draw_flux_contours, draw_wall
+from scripts.prototypes.diiid_core_hold.check_core_zoom import check_core_zoom
 from scripts.prototypes.diiid_xpoint_offset.render import draw_critical_points
 from scripts.prototypes.diiid_xpoint_offset.style import (
     CANVAS,
@@ -58,19 +59,19 @@ def poloidal(root, case, output, previews):
             for _, _, analysis in pair
             for key in ("census", "reference_census")
             for point in analysis[key]["points"]
-            if point["in_plasma"]
+            if point["in_plasma"] and point["kind"] in ("maximum", "minimum")
         ]
     )
     center = (points.min(axis=0) + points.max(axis=0)) / 2
-    span = max(float(np.max(np.ptp(points, axis=0))) + 0.06, 0.12)
+    span = np.maximum(np.ptp(points, axis=0) + 0.10, 0.12)
     figure = plt.figure(figsize=CANVAS, dpi=100)
     axes = [
         figure.add_axes(box)
         for box in (
             (0.02, 0.17, 0.26, 0.56),
-            (0.29, 0.25, 0.19, 0.38),
+            (0.29, 0.17, 0.19, 0.56),
             (0.52, 0.17, 0.26, 0.56),
-            (0.79, 0.25, 0.19, 0.38),
+            (0.79, 0.17, 0.19, 0.56),
         )
     ]
     solved_style = replace(
@@ -115,15 +116,27 @@ def poloidal(root, case, output, previews):
                 *data["label_boundary"].T, color=REFERENCE, ls=":", lw=1.2, zorder=4
             )
             draw_wall(ax, units=data["limiter"], color=WALL, linewidth=1.5, zorder=5)
+            marker_size = 7
+            first_marker = len(ax.lines)
             draw_critical_points(
-                ax, analysis["census"], np.zeros(2), solved_style, "o", 7
+                ax, analysis["census"], np.zeros(2), solved_style, "o", marker_size
             )
             draw_critical_points(
-                ax, analysis["reference_census"], np.zeros(2), reference_style, "s", 7
+                ax,
+                analysis["reference_census"],
+                np.zeros(2),
+                reference_style,
+                "s",
+                marker_size,
             )
             if j:
-                ax.set_xlim(center[0] - span / 2, center[0] + span / 2)
-                ax.set_ylim(center[1] - span / 2, center[1] + span / 2)
+                for marker in ax.lines[first_marker:]:
+                    if marker.get_markerfacecolor() != "none":
+                        marker.set_markeredgecolor("white")
+                        marker.set_markeredgewidth(0.8)
+            if j:
+                ax.set_xlim(center[0] - span[0] / 2, center[0] + span[0] / 2)
+                ax.set_ylim(center[1] - span[1] / 2, center[1] + span[1] / 2)
             else:
                 ax.set_xlim(data["radius"][[0, -1]])
                 ax.set_ylim(data["height"][[0, -1]])
@@ -131,7 +144,7 @@ def poloidal(root, case, output, previews):
         distance = topology["lower_saddle_distance_m"]
         for x, y, label in (
             (0.22, 0.76, arm),
-            (0.385, 0.67, "core zoom"),
+            (0.385, 0.76, "core zoom"),
             (
                 0.25,
                 0.12,
@@ -184,6 +197,8 @@ def poloidal(root, case, output, previews):
         previews / (case + "-poloidal.png"),
     )
     (output / (case + "-levels.json")).write_text(json.dumps(levels.tolist()) + "\n")
+    if case == "frame-137-diverted":
+        check_core_zoom(output / (case + "-poloidal.svg"))
     plt.close(figure)
 
 
@@ -287,9 +302,13 @@ def main():
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--previews", type=Path, required=True)
+    parser.add_argument("--only", choices=("frame-137-diverted-poloidal",))
     args = parser.parse_args()
     plt.style.use(Path.home() / ".config/matplotlib/stylelib/data-ink.mplstyle")
     plt.rcParams.update({"svg.fonttype": "none", "font.size": 14})
+    if args.only:
+        poloidal(args.input, "frame-137-diverted", args.output, args.previews)
+        return
     for case in ("frame-137-diverted", "frame-146-diverted"):
         poloidal(args.input, case, args.output, args.previews)
     for case in ("frame-137-diverted", "frame-146-diverted", "mast-21978-35"):

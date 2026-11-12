@@ -7,6 +7,7 @@ above grid[-1]. Flux below the normalizing axis value still carries core current
 import jax
 import jax.numpy as jnp
 import numpy as np
+from pathlib import Path
 import pytest
 
 from nova.equilibrium.solve_request import SampledFluxFunction
@@ -95,3 +96,15 @@ def test_member_tables_remain_dynamic_array_leaves():
     batched = jax.jit(jax.vmap(lambda profile: profile(points)))(stacked)
     np.testing.assert_array_equal(batched, jnp.stack(singles))
     np.testing.assert_array_equal(batched[:, :2], [[7, 7], [9, 9]])
+
+
+def test_saved_core_zoom_separates_every_maximum_and_saddle():
+    from scripts.prototypes.diiid_core_hold.check_core_zoom import check_core_zoom
+
+    figure = (
+        Path(__file__).resolve().parents[1]
+        / "docs/figures/sampled-profile-core-hold/frame-137-diverted-poloidal.svg"
+    )
+    result = check_core_zoom(figure)
+    assert result["counts"] == {"maximum": 4, "saddle": 3}
+    assert result["closest_pair"]["separation_in_marker_diameters"] >= 1.25

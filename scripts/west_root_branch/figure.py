@@ -21,6 +21,7 @@ from scripts.edge_sheet.figure import (  # noqa: E402
     WIDTH_INCHES,
     save_checked,
 )
+from scripts.west_root_branch.origin import audit_origin  # noqa: E402
 
 # Retain the iron study's candidate purple and neutral comparison vocabulary.
 RAMP = "#7b4fb3"
@@ -114,4 +115,6 @@ def render(run):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", required=True, type=Path)
-    render(parser.parse_args().run)
+    run = parser.parse_args().run
+    audit_origin(run)
+    render(run)

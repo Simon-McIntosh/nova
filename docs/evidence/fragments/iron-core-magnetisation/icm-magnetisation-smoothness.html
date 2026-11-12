@@ -1,0 +1,45 @@
+<section id="icm-magnetisation-smoothness-state">
+  <h2>Within-body magnetisation smoothness</h2>
+  <p>The opt-in spatial penalty and its zero-terminal continuation are committed.
+    Validation is in progress: the fresh unpenalised WEST replay reproduces
+    248 corrections to 2.100506605937123e-12 exactly, while the first two
+    tenfold-continuation trials exhaust their 400-correction budgets. This
+    record does not yet claim the saved-state acceptance.</p>
+  <h3 id="icm-magnetisation-smoothness-method">Discrete energy and body boundaries</h3>
+  <p>For each shared cell face inside one authored iron body,
+    <code>w = shared face length / centroid distance</code>. The energy is
+    <code>(lambda/2) sum w |M_i - M_j|²</code>, whose gradient is a graph
+    Laplacian applied independently to the radial and vertical components.
+    This two-point face approximation integrates the squared poloidal gradient:
+    the face measure times the distance represents the dual area and the
+    difference divided by that distance represents its normal gradient.</p>
+  <p>Outer faces, point contacts and vacuum gaps contribute nothing. Authored
+    bodies carry separate constant null modes even when they touch. Callers
+    pass the distinct outlines through <code>smoothness_bodies</code> when the
+    meshed region is their union; a union cannot retain a touching segment
+    boundary. A cell spanning an authored boundary is excluded rather than
+    assigned one body's unresolved trace.</p>
+  <p><code>smoothness_strength</code> defaults to zero. A positive strength sets
+    a frozen base lambda from the initial differential Jacobian's infinity
+    norm, an operator scale with no singular-value decomposition. The solve
+    exposes that scale, the active lambda history, and separate original and
+    penalised residual histories. Convergence requires the original material
+    residual at zero spatial penalty. The mesh, material fit, material
+    coefficient, original residual and interaction bodies remain byte-identical
+    to the base.</p>
+  <h3 id="icm-magnetisation-smoothness-controls">Controls already measured</h3>
+  <table>
+    <thead><tr><th>Control</th><th>Observed result</th></tr></thead>
+    <tbody>
+      <tr><td>Saved WEST state replay</td><td>3447 cells; seed residual 5.844633900691807e-4; 248 corrections to 2.100506605937123e-12; zero G rebuilds</td></tr>
+      <tr><td>Boundary, energy and synthetic homotopy</td><td>3 passed, 36 deselected; EXIT=0</td></tr>
+      <tr><td>Runtime penalty operand</td><td>1 passed; EXIT=0; lowered update contains a runtime penalty matrix and its exact differential form matches the independent block graph matrix</td></tr>
+      <tr><td>Removed body-boundary exclusion</td><td>The two-body different-M null-mode test fails; 1 failed; EXIT=1; mutant import and digest asserted, original source verified against HEAD</td></tr>
+    </tbody>
+  </table>
+  <p>Logs and numeric receipts are retained in
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T000127065672-icm-magnetisation-smoothness/</code>.
+    The exact CPU baseline/head arms run as one three-hour sirius job without
+    a suite timeout. The WEST comparison uses the saved interaction and
+    external-field operands on titan.</p>
+</section>

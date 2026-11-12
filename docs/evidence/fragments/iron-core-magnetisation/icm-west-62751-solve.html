@@ -1,0 +1,263 @@
+<section id="icm-west-62751-solve-diagnosis">
+  <h3>Diagnosis complete: conditioning and Newton globalisation</h3>
+  <p><strong>Verdict.</strong> The observed stall is an ill-conditioned Newton
+    correction followed by failure of the fixed backtracking budget. At the
+    saved state the Jacobian infinity-norm condition number is 3.1670348365e6;
+    after one further accepted correction it is 2.3215708367e7. The linear
+    systems are solved accurately, but their directions grow from 18.3628 to
+    395.400 million A/m in vector norm, against a saved-state norm of 17.4199
+    million A/m. Full corrections increase the residual norm by factors of
+    1198.32 and 25424.43. The residual is concentrated on thin clipped cells.
+    This identifies conditioning/globalisation as the mechanism requiring
+    repair; the geometry association is evidence of where to investigate,
+    without a cell-removal counterfactual proving individual-cell causality.</p>
+  <p><strong>Repair and owner.</strong> In
+    <code>nova/biot/magnetisation.py</code>, make
+    <code>solve_magnetisation</code>'s correction condition-aware: bound the
+    correction with a trust region or regularisation, using the Jacobian/factor
+    owned by <code>_factor</code>, rather than relying only on fifteen halvings
+    of an arbitrarily large Newton direction. Preserve the material residual
+    and ten-correction acceptance criterion. The concurrent <code>_mesh</code>
+    repair must also check the narrow clipped strips highlighted below;
+    matching shared edges and clearance-aware merging are the geometric repair
+    targets. Re-measure after the in-flight repairs merge before deciding
+    whether a solver change is still needed. This node changes no production
+    solver, law or mesh.</p>
+  <h4 id="icm-west-62751-solve-jacobian">Jacobian and material-law checks</h4>
+  <p>The 3447-cell matrix was loaded from the saved operand: zero interaction
+    builds. Replaying the original ten corrections reproduces the saved state
+    exactly (relative replay error 0). Ten seeded random unit directions and
+    the last accepted Newton direction, normalised to unit length, were checked
+    against central differences at 1, 0.1 and 0.01 A/m.</p>
+  <table>
+    <thead><tr><th>Step [A/m]</th><th>Random-direction relative mismatch</th><th>Last-direction relative mismatch</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>3.23224e-9–3.50382e-9</td><td>3.58984e-7</td></tr>
+      <tr><td>0.1</td><td>3.19731e-08–3.43385e-08</td><td>3.77127e-6</td></tr>
+      <tr><td>0.01</td><td>3.17883e-07–3.49748e-07</td><td>3.73403e-5</td></tr>
+    </tbody>
+  </table>
+  <p>The mismatch grows approximately inversely with the finite-difference
+    increment, consistent with subtraction roundoff. The last direction is
+    particularly sensitive because its Jacobian-product norm is only
+    0.00573406466. Freezing the permeability derivative supplies an observable
+    counterfactual: its 1 A/m mismatch is 0.00213137–0.0143295 on random directions
+    and 2.50645 on the last direction. The check therefore detects an omitted
+    differential term. The measured results support a consistent production
+    Jacobian.</p>
+  <p>The fitted law's largest value jump at an internal breakpoint is
+    2.32831e-10 A/m, and its largest relative derivative jump is 8.35487e-16.
+    Differential relative permeability at the saved cells is positive,
+    2.30439–14168.0. The nearest breakpoint among the twenty dominant cells is
+    2.11029 mT away. Their stall is not located on a derivative discontinuity.
+    All saved |B| values are between 0.000798229 and 2.099785 T, below the
+    6 T tail; the concurrent tail repair is outside the active branch here.</p>
+  <h4 id="icm-west-62751-solve-residual-cells">Where the residual lives</h4>
+  <p>The top twenty cells carry <strong>99.3710630091 %</strong> of the squared
+    residual, with 81.8695346891 % in the first three. Their clearance is
+    1.25–8.90 mm, against the mesh median of 28.3 mm, and every one has area
+    below 0.42 nominal squares. For example, cell 3067 is a 7.9 mm wide strip
+    on segment 3; cell 733 is a 5 mm high strip on segment 0. The area floor
+    alone admits these elongated cells.</p>
+  <p>The segment column binds directly to <code>iron_core.segment[i]</code> in
+    the DD 4.1.0 machine description. All six authored segment names are empty,
+    so ordinal source bindings are retained explicitly. The cell-table receipt
+    also gives cell and segment bounding boxes; each binding has positive
+    polygon overlap with the production-reader segment.</p>
+  <table>
+    <thead><tr><th>Cell</th><th>Segment i</th><th>Share [%]</th><th>|B| [T]</th><th>μr</th><th>Differential μr</th><th>Knot distance [mT]</th><th>A/h²</th><th>Clearance [mm]</th></tr></thead>
+    <tbody><tr><td>3067</td><td>3</td><td>32.993</td><td>1.956633</td><td>100.551</td><td>10.382</td><td>6.633</td><td>0.2792</td><td>3.950</td></tr><tr><td>733</td><td>0</td><td>26.993</td><td>1.570647</td><td>328.369</td><td>23.707</td><td>29.353</td><td>0.1767</td><td>2.500</td></tr><tr><td>3066</td><td>3</td><td>21.884</td><td>1.419068</td><td>886.740</td><td>117.754</td><td>19.068</td><td>0.2792</td><td>3.950</td></tr><tr><td>3065</td><td>3</td><td>3.550</td><td>1.302821</td><td>1263.304</td><td>301.084</td><td>97.179</td><td>0.2792</td><td>3.950</td></tr><tr><td>3063</td><td>3</td><td>3.191</td><td>1.414095</td><td>906.558</td><td>128.508</td><td>14.095</td><td>0.2792</td><td>3.950</td></tr><tr><td>3062</td><td>3</td><td>1.792</td><td>1.597551</td><td>267.358</td><td>21.976</td><td>2.449</td><td>0.2792</td><td>3.950</td></tr><tr><td>3064</td><td>3</td><td>1.729</td><td>1.322576</td><td>1201.135</td><td>266.501</td><td>77.424</td><td>0.2792</td><td>3.950</td></tr><tr><td>1894</td><td>1</td><td>1.139</td><td>1.514452</td><td>505.734</td><td>49.747</td><td>5.548</td><td>0.2347</td><td>1.250</td></tr><tr><td>2012</td><td>4</td><td>1.039</td><td>2.099785</td><td>39.110</td><td>2.304</td><td>49.785</td><td>0.2014</td><td>5.700</td></tr><tr><td>2089</td><td>4</td><td>0.966</td><td>1.670979</td><td>165.584</td><td>18.681</td><td>10.979</td><td>0.2014</td><td>5.700</td></tr><tr><td>3068</td><td>3</td><td>0.962</td><td>1.430335</td><td>838.953</td><td>99.367</td><td>30.335</td><td>0.4187</td><td>3.950</td></tr><tr><td>995</td><td>0</td><td>0.772</td><td>1.689949</td><td>153.245</td><td>23.922</td><td>10.051</td><td>0.1767</td><td>2.500</td></tr><tr><td>472</td><td>0</td><td>0.420</td><td>1.710631</td><td>146.860</td><td>43.158</td><td>10.631</td><td>0.1767</td><td>2.500</td></tr><tr><td>3055</td><td>3</td><td>0.391</td><td>0.260231</td><td>851.851</td><td>1245.068</td><td>189.592</td><td>0.2792</td><td>3.950</td></tr><tr><td>1585</td><td>5</td><td>0.389</td><td>1.503885</td><td>539.431</td><td>52.618</td><td>16.115</td><td>0.1572</td><td>4.450</td></tr><tr><td>3061</td><td>3</td><td>0.383</td><td>1.425537</td><td>859.686</td><td>106.370</td><td>25.537</td><td>0.2792</td><td>3.950</td></tr><tr><td>1683</td><td>5</td><td>0.371</td><td>1.577223</td><td>311.389</td><td>22.981</td><td>22.777</td><td>0.1591</td><td>4.370</td></tr><tr><td>1930</td><td>4</td><td>0.175</td><td>1.551800</td><td>384.361</td><td>27.395</td><td>31.800</td><td>0.2014</td><td>5.700</td></tr><tr><td>2027</td><td>5</td><td>0.118</td><td>1.420559</td><td>880.617</td><td>114.898</td><td>20.559</td><td>0.3145</td><td>8.900</td></tr><tr><td>3060</td><td>3</td><td>0.113</td><td>1.202110</td><td>1518.453</td><td>641.839</td><td>2.110</td><td>0.2792</td><td>3.950</td></tr></tbody>
+  </table>
+  <h4 id="icm-west-62751-solve-continuation">Continuation and rate</h4>
+  <p>The diagnostic continuation was capped at forty total corrections. The
+    unchanged production update accepts correction 11 with scale 1/512, moving
+    the residual from 5.84463390069e-4 to 5.83896987188e-4: a ratio of
+    0.999030901, or only 0.09691 % reduction. At that state every one of the
+    original fifteen backtracking grades is refused, including 1/16384.
+    The trajectory therefore stops at eleven accepted corrections; forty
+    accepted corrections cannot be produced by this unchanged algorithm.
+    The observed local behaviour is stagnation, without a quadratic phase.</p>
+  <table>
+    <thead><tr><th>State after corrections</th><th>Relative residual</th><th>Next accepted scale</th><th>Linear-solve relative residual</th><th>Full-step norm growth</th></tr></thead>
+    <tbody>
+      <tr><td>10</td><td>5.84463390069e-4</td><td>1/512</td><td>2.70790e-13</td><td>1198.32</td></tr>
+      <tr><td>11</td><td>5.83896987188e-4</td><td>refused</td><td>4.57490e-12</td><td>25424.43</td></tr>
+    </tbody>
+  </table>
+  <figure>
+    <img src="/nova/figures/iron-core-magnetisation/icm-west-62751-solve/newton-stall.svg" alt="WEST iron cell edges with twenty residual-dominant cells highlighted, beside Newton residual and accepted step scale">
+    <figcaption>WEST 62751, 0.0566 m iron mesh. Grey edges are all 3447 cells;
+      purple edges select the twenty largest cell residual norms at correction
+      ten. Black is the wall and grey outlines are coils, using the source-matched
+      equilibrium-limiter description and the production painters. The right
+      panels show the relative residual in purple and accepted step scales in
+      grey through correction eleven. The next correction is refused. This is
+      diagnostic evidence, with no claim of satisfying the ten-iteration gate.
+      The checked save refused an initial tick-label collision; explicit
+      in-range ticks then passed, and the producer inspected the rendered PNG.</figcaption>
+  </figure>
+  <p>Titan job <code>1310949</code> completed in 50 s with <code>EXIT=0</code>.
+    Its measurement revision is <code>2bc1f557f4f0bf7e0f161762dabe9f6726cd5d74</code>.
+    Under the run directory below, <code>diagnostic.log</code> prints every
+    directional check, top-cell quantity and continuation attempt;
+    <code>diagnosis/diagnosis.json</code> retains the numeric receipt;
+    <code>diagnosis/cell-table.json</code> and
+    <code>figure-diagnostic-checked.log</code> provide explicit segment bindings.
+    The original mesh-pair solve remains pending the repairs and a fresh
+    acceptance measurement.</p>
+</section>
+<section id="icm-west-62751-solve-newton-budget">
+  <h3>Accepted coarse mesh exhausts the Newton bound</h3>
+  <p>The accepted 0.0566 m mesh reaches the production material solve, but does
+    not converge within ten accepted Newton corrections. The relative material
+    residual falls from 0.997707865074 to <strong>0.000584463390069</strong>,
+    above the required <code>1e-8</code> tolerance. The returned state has
+    <code>converged=False</code> and <code>termination=iteration-budget</code>;
+    the measurement's convergence assertion refuses it.</p>
+  <table>
+    <thead><tr><th>Accepted corrections</th><th>Relative residual</th><th>Step scale</th></tr></thead>
+    <tbody><tr><td>0</td><td>0.997707865074</td><td>seed</td></tr><tr><td>1</td><td>0.210529617833</td><td>0.25</td></tr><tr><td>2</td><td>0.00601904784909</td><td>1</td></tr><tr><td>3</td><td>0.00167734044861</td><td>1</td></tr><tr><td>4</td><td>0.00113665841367</td><td>0.5</td></tr><tr><td>5</td><td>0.000885494115893</td><td>0.25</td></tr><tr><td>6</td><td>0.000829276335873</td><td>0.125</td></tr><tr><td>7</td><td>0.000688292890475</td><td>0.25</td></tr><tr><td>8</td><td>0.000683879461055</td><td>0.125</td></tr><tr><td>9</td><td>0.000683240396603</td><td>0.001953125</td></tr><tr><td>10</td><td>0.000584463390069</td><td>0.25</td></tr></tbody>
+  </table>
+  <p>The mesh has 3447 cells, area 10.096691 m² and zero symmetric-difference
+    area against the authored iron union. Its minimum cell area is
+    0.154179753617 times the nominal square area, and its minimum centroid-to-edge
+    distance is 1.25 mm. The terminal relative permeability range is
+    <strong>39.1095379421–1691.71520535</strong>, inside the CEA table's
+    1.521395–1692.4255 range. At this nonconverged state, 99.9954884828 % of the
+    axisymmetric iron volume has relative permeability above 100. This is not a
+    converged-volume estimate.</p>
+  <p>Job <code>1310799</code> ran on the Titan P100 and ended FAILED with
+    <code>EXIT=1</code> after 18 min 51 s. The production matrix build took
+    1045.63994365 s, and the three-target iron response took 38.1583721638 s.
+    The source-field control remains 0.109034645394 %. No product source was
+    changed, no tolerance was relaxed, and no extra Newton corrections were run.</p>
+  <p>The driver saved its row and terminal solution before checking convergence.
+    That check stopped the job before the coarse flat-law and Picard arms and
+    before the 0.04 m solve. Consequently no two-mesh discretisation error bar,
+    converged material-law comparison or converged-state figure is available.
+    The committed figure renderer awaits a successful pair receipt.</p>
+  <p>Current receipts under the run directory below:
+    <code>titan-pair.log</code> and
+    <code>measurement-pair/0.0566/receipt.json</code>.
+    The production operand <code>measurement-pair/0.0566/gram.npy</code>
+    and terminal state <code>measurement-pair/0.0566/solution.pkl</code>
+    are retained outside git for a subsequent solver investigation.
+    Measurement revision: <code>d4bfeb872bfe63e9761c1f0c837b34bf85860e5c</code>.</p>
+</section>
+<section id="icm-west-62751-solve-mesh-census">
+  <h3>Production mesh census and selected pair</h3>
+  <p>The lead authorized a mesh acceptance census while a separate node repairs
+    the production mesher. One CPU job on sirius, <code>1310797</code>,
+    tested the five requested sizes through the production reader and mesher,
+    stopping before interaction assembly. A known four-cell square was accepted,
+    verifying the probe can observe a successful mesh.</p>
+  <table>
+    <thead><tr><th>Cell size [m]</th><th>Result</th><th>Cells</th><th>Mesh wall [s]</th></tr></thead>
+    <tbody><tr><td>0.08</td><td>refused: unresolved iron sliver</td><td>not returned</td><td>0.901</td></tr><tr><td>0.0566</td><td>accepted</td><td>3447</td><td>3.250</td></tr><tr><td>0.04</td><td>accepted</td><td>6632</td><td>6.777</td></tr><tr><td>0.0283</td><td>refused: unresolved iron sliver</td><td>not returned</td><td>10.569</td></tr><tr><td>0.02</td><td>refused: unresolved iron sliver</td><td>not returned</td><td>32.551</td></tr></tbody>
+  </table>
+  <p>The coarsest accepted pair is <strong>0.0566 m and 0.04 m</strong>, with
+    3447 and 6632 cells. Their size ratio is 1.415, the rounded square-root-of-two
+    spacing requested. The finer dense system has 13264 unknowns and occupies
+    1.407469568 GB per float64 matrix, within the prescribed 26000-unknown ceiling.
+    Both accepted meshes cover 10.096691 m² of iron.</p>
+  <p>This pair departs from the original 0.08/0.04 m brief because the unchanged
+    production mesher refuses 0.08 m; its repair is in flight separately.
+    One Titan job, <code>1310799</code>, attempted the selected pair and
+    stopped at the coarse convergence check, as recorded above.
+    Mesh acceptance alone makes no convergence or field-accuracy claim.</p>
+  <p>Probe receipts are <code>mesh-probe.log</code> (ending EXIT=0) and
+    <code>mesh-probe.json</code> in the run directory below. Refused rows have
+    no returned cell count; a missing count is not reported as zero.</p>
+</section>
+<section id="icm-west-62751-solve-resumed">
+  <h3>Resumed WEST measurement: production mesh refusal</h3>
+  <p>The coordinator merged the split-interval B-H fit into this worktree at
+    <code>1e0764d0dcc24ff8a0d17e75b1f825f8e89b725d</code>. The resumed
+    production solve accepts the unchanged DD 4.1.0 CEA table and reaches the
+    mesher. At the required 0.08 m cell size it stops with:</p>
+  <blockquote><code>ValueError: unresolved iron sliver; reduce cell_size</code></blockquote>
+  <p>This refusal originates in <code>nova/biot/magnetisation.py:_mesh</code>,
+    called by <code>solve_magnetisation</code> on the valid union of all six
+    production-reader iron outlines. No material geometry, cell size or
+    meshing guard was changed to bypass it. Neither interaction assembly nor
+    a Newton correction was reached, so the cell count, residual history,
+    converged permeability and mesh-difference quantities remain unmeasured.</p>
+  <p>One Titan job, <code>1310686</code>, ran the committed driver at the
+    coordinator-merged head on <code>98dci4-gpu-0002</code> with a Tesla P100.
+    Its log ends with <code>EXIT=1</code>. The earlier source-field control
+    reproduces unchanged: maximum relative difference
+    <strong>0.109034645394 %</strong> against the stored CoilSet field,
+    below the declared 0.2 % bound. The input SHA-256, time, six segment
+    count, CEA table and three air-core probes match the initial attempt.</p>
+  <p>The current log is <code>titan-resumed.log</code> and its row receipt is
+    <code>measurement-resumed/0.08/receipt.json</code>, under the same run
+    directory listed below. These fresh paths retain the initial failed
+    attempt separately. The requested 0.04 m solve, coarse Picard control,
+    flat-permeability comparison, iron fraction above relative permeability
+    100 and converged-state figure remain outstanding. No test file belongs
+    to this node's write scope, so no baseline/head suite pair is claimed.</p>
+</section>
+<section id="icm-west-62751-solve-state">
+  <h3>Initial attempt: material-table refusal (resolved upstream)</h3>
+  <p>The production reader returned all six WEST iron segments at DD 4.1.0.
+    The first 0.08 m production solve then refused the unchanged CEA material
+    table before meshing or interaction assembly. This is an incomplete
+    measurement: neither mesh has a Newton convergence result, and the Picard
+    control and the requested converged-state figure have not run.</p>
+  <p>The committed driver uses <code>StaticMachineDescription.read_iron_core</code>
+    and <code>solve_magnetisation</code>, with no product-source changes.
+    One Titan job runs the two requested mesh sizes, flat-permeability arms
+    and the coarse Picard control, saving each completed row before proceeding.
+    Identical production interaction operands are memoised between the material
+    arms; their values are not changed.</p>
+  <h4 id="icm-west-62751-solve-refusal">Observed refusal</h4>
+  <blockquote><code>ValueError: origin permeability is incompatible with the first B-H interval</code></blockquote>
+  <p>Job <code>1310552</code> ran on <code>98dci4-gpu-0002</code>, using a
+    Tesla P100 with float64 enabled. The job ended with <code>EXIT=1</code>
+    after 26 seconds. The log names the imported production module and working
+    directory. It ran measurement revision
+    <code>97be7b243d1bdaec0f32b1197b274d322e634388</code>.</p>
+  <table>
+    <thead><tr><th>Material quantity</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>First two B knots</td><td>0 and 0.5 T</td></tr>
+      <tr><td>Corresponding relative permeabilities</td><td>215.11019 and 1037.9637</td></tr>
+      <tr><td>Origin tangent dH/dB</td><td>3699.38177015 A/(m T)</td></tr>
+      <tr><td>First interval secant dH/dB</td><td>766.669119026 A/(m T)</td></tr>
+      <tr><td>Validator upper bound: twice that secant</td><td>1533.33823805 A/(m T)</td></tr>
+      <tr><td>Origin tangent / interval secant</td><td>4.82526513505</td></tr>
+    </tbody>
+  </table>
+  <p>The table's H knots increase strictly, but the production interpolant also
+    requires the origin tangent to be no larger than twice the first secant.
+    The unchanged WEST table violates that additional condition. No table knots,
+    permeability values, validator or solver were altered to bypass the refusal.</p>
+  <h4 id="icm-west-62751-solve-inputs">Source and probe controls</h4>
+  <p>The prescribed source is WEST 62751 at 38.4395796373 s, from the existing
+    hexagonal-plasma stray-field state. Its SHA-256 is
+    <code>228e9c7a277e6d16f180cae4566eaadbb4e8df13ae2b49e78a33c53bd5918533</code>.
+    The driver reuses the prototype's 6 by 6 coil-filament quadrature and
+    prescribed plasma-cell currents. Beyond 0.3 m from the coil edge, their
+    field differs from the stored production CoilSet magnitude by at most
+    <strong>0.109034645394 %</strong>, passing the predeclared 0.2 % check.</p>
+  <table>
+    <thead><tr><th>Distance beyond Fh/Fb edge [m]</th><th>R [m]</th><th>Z [m]</th><th>Air-core |B| [mT]</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>5.52</td><td>0</td><td>7.02407743131</td></tr>
+      <tr><td>2</td><td>6.52</td><td>0</td><td>4.39682051236</td></tr>
+      <tr><td>4</td><td>8.52</td><td>0</td><td>1.79996152911</td></tr>
+    </tbody>
+  </table>
+  <p>Iron fields, mesh counts and quality, per-iteration residuals, converged
+    permeability ranges, the volume fraction above relative permeability 100,
+    mesh-difference error bars and the CEA-versus-215 comparison are unmeasured.
+    The model remains anhysteretic and single-valued: it includes neither
+    remanence nor minor-loop permeability.</p>
+  <h4 id="icm-west-62751-solve-receipts">Durable receipts</h4>
+  <p>Run directory:
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130417404611-icm-west-62751-solve</code>.
+    The complete refusal is in <code>titan.log</code>; input provenance and
+    the actual material table are in <code>measurement/inputs.json</code> and
+    <code>measurement/0.08/receipt.json</code>. The independent scalar
+    calculation of the validator's bound is in <code>law-diagnostic.log</code>.</p>
+</section>

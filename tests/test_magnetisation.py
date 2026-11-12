@@ -700,7 +700,7 @@ def test_regularised_newton_crosses_ill_conditioned_material_stall(monkeypatch, 
         .reshape(2, 2)
         .T
     )
-    monkeypatch.setattr(iron, "_interaction", lambda *args: response)
+    monkeypatch.setattr(iron, "_galerkin_interaction", lambda *args: response)
     monkeypatch.setattr(iron, "_average_external", lambda cells, callback: external)
     b, mu = nonlinear_law()
     operands = tuple(
@@ -746,7 +746,7 @@ def test_regularised_newton_crosses_ill_conditioned_material_stall(monkeypatch, 
 
 def test_material_restart_preserves_component_order_and_checks_shape(monkeypatch):
     response = np.eye(4) * iron._MU0 * 0.5
-    monkeypatch.setattr(iron, "_interaction", lambda *args: response)
+    monkeypatch.setattr(iron, "_galerkin_interaction", lambda *args: response)
     monkeypatch.setattr(iron, "_average_external", lambda cells, callback: external)
     region = shapely.box(1, 0, 2, 2)
     initial = np.array([[100.0, -200.0], [300.0, -400.0]])

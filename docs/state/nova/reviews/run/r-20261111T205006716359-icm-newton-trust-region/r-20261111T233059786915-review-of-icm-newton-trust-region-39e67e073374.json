@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/magnetisation_high_permeability/directional.py:52",
+    "scripts/magnetisation_high_permeability/measure.py:218",
+    "scripts/magnetisation_high_permeability/measure.py:284"
+  ],
+  "completed_at": "2026-11-12T00:03:08.689Z",
+  "dispatched_at": "2026-11-11T23:46:20Z",
+  "findings": [
+    {
+      "file": "nova/biot/magnetisation.py",
+      "line": "351",
+      "severity": "non-blocking",
+      "text": "non-blocking: the regularisation schedule is a set of bare literals (initial lambda 1e-6 at :351, refusal growth x10 and 35 attempts at :365-368, acceptance 0.25 at :371, shrink 0.9/0.5 and factors x0.3/x2 at :376-380) with no named constant and no derivation in the source or in docs/evidence/fragments/iron-core-magnetisation/icm-newton-trust-region.html, although the section asked for the chosen globalisation to be derived and justified; a reader cannot tell whether the values are tuned to the WEST mesh or transfer to another one, and the nearest in-repo analogue (nova/equilibrium/fixed_point.py:1677) names its growth factor."
+    },
+    {
+      "file": "tests/test_magnetisation.py",
+      "line": "596",
+      "severity": "non-blocking",
+      "text": "non-blocking: the consistency assertion derives its expected label from regularisation_history, another field of the same result the code under test returned, so it holds for any implementation that labels its two fields consistently, including one that labels every regularised step wrongly; the length chain at :591-595 has the same self-referential shape. Neither reddens on the regression it appears to guard, though the independent assertions at :582-590 do."
+    },
+    {
+      "file": "nova/biot/magnetisation.py",
+      "line": "300",
+      "severity": "non-blocking",
+      "text": "non-blocking: max_iterations keeps its default of 60 while the saved WEST stall the node was dispatched for needed 248 accepted corrections, so a default-budget call on that mesh still returns converged=False; the evidence fragment discloses this, but the solve docstring's convergence claim says nothing about the budget the target case requires."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "three production call sites, all in scripts/magnetisation_high_permeability, each read and each using only result.converged, result.residual_history, result.cell_count and result.field; none reads step_scales or the termination string, so the renamed refusal and the now-constant step scale reach no consumer.",
+    "diff": "read commit by commit against 6abcdfe84: 80c194ee is the product change (66 changed lines in nova/biot/magnetisation.py: the diagonal shift in _factor, the adaptive-lambda loop and the initial_magnetisation restart in solve_magnetisation, and three receipt fields on MagnetisationSolution) plus 130 lines of tests; 48b63698 and 39e67e07 add the evidence fragment only.",
+    "done_when": "all three clauses are measured and recorded: measurement.log carries one residual/step/lambda/ratio line per iteration through ITERATION 248 and a SUMMARY with iterations=248, terminal_residual=2.1005066059371227e-12 from the saved seed 5.844633900691807e-4 and matrix_builds=0 on a Tesla P100; after-suite.log reads 30 passed EXIT=0 at 80c194ee against baseline-suite.log 28 passed EXIT=0 at 6abcdfe84; and negative-backtracking.log reads 1 failed EXIT=1 after MUTANT_IMPORT_ASSERTED, ending HEAD_SOURCE_BLOB_VERIFIED.",
+    "goal": "the node's goal is to make the magnetisation Newton converge through ill-conditioning with a trust-region or regularised step; nova/biot/magnetisation.py:222-226 keeps the exact jax.jacfwd Jacobian in _factor and adds only a runtime diagonal shift, and nova/biot/magnetisation.py:364-388 replaces the backtracking ladder with an adaptive lambda, while _mesh, _fit_law and _coefficient are untouched.",
+    "manifest": "read; status complete, commits 80c194ee/48b63698/39e67e07, changed_paths the three landed files, tests the literal scoped pytest command, baseline_suite and after_suite both completed with zero failures, negative_control_log negative-backtracking.log; every figure it states reconciles with the logs opened here (28/30 passed, 248 corrections, 1 failed at EXIT=1).",
+    "write_paths": "the fence was nova/biot/magnetisation.py, tests/test_magnetisation.py, docs/evidence/fragments/iron-core-magnetisation/icm-newton-trust-region.html and a figures directory; git diff --stat 6abcdfe84..39e67e073 lists exactly the first three files and nothing else, so no figure was written and no path outside the fence was touched."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:582 genuinely reddens under the restored-backtracking mutant (negative-backtracking.log 1 failed, EXIT=1), but :596-601 compares step_types against regularisation_history from the same result, so it cannot fail on a consistent mislabelling, and no test pins the lambda growth factors or the regularisation-refused termination.",
+    "evidence": "the done_when's own measures are in the receipts: measurement.log's per-iteration lines and SUMMARY (248, 2.1005066059371227e-12, matrix_builds=0), baseline-suite.log 28 passed EXIT=0, after-suite.log 30 passed EXIT=0, and negative-backtracking.log 1 failed EXIT=1 with the mutant import asserted and the head blob verified.",
+    "fit": "ruff check and ruff format --check both pass on nova/biot/magnetisation.py, but the schedule literals at :351 and :365 (1e-6, x10, 35 attempts, 0.25/0.9/0.5, x0.3/x2) are unnamed magic numbers, where the nearest in-repo analogue names its growth constant.",
+    "goal_fidelity": "nova/biot/magnetisation.py:364-388 implements the regularised step and :259-262 exposes lambda, ratio and step type beside step_scales, but the shipped default max_iterations=60 at :300 still cannot reach the target the node recovered at 248 corrections, so the convergence is conditional on a caller-raised budget.",
+    "reuse": "the addition extends the existing owner of the material Newton (_factor and solve_magnetisation in nova/biot/magnetisation.py) rather than forking a callable mechanism; the capability search over nova/ for levenberg, marquardt, dogleg, trust-region and regularisation found only subsystem-internal drivers (nova/equilibrium/fixed_point.py:1677 damping_trial, nova/equilibrium/solve.py:98 _damped_scale, nova/equilibrium/shape_inverse.py:594) that a dense material solve cannot call.",
+    "scope_discipline": "git diff --stat 6abcdfe84..39e67e073 touches exactly the three fenced files, and the product hunks are confined to _factor, MagnetisationSolution and solve_magnetisation with _mesh, _fit_law and _coefficient unmodified."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to make the magnetisation Newton converge through ill-conditioning with a trust-region or regularised step; nova/biot/magnetisation.py:222-226 keeps the exact jax.jacfwd Jacobian in _factor and adds only a runtime diagonal shift, and nova/biot/magnetisation.py:364-388 replaces the backtracking ladder with an adaptive lambda, while _mesh, _fit_law and _coefficient are untouched.\nVERDICT done_when: all three clauses are measured and recorded: measurement.log carries one residual/step/lambda/ratio line per iteration through ITERATION 248 and a SUMMARY with iterations=248, terminal_residual=2.1005066059371227e-12 from the saved seed 5.844633900691807e-4 and matrix_builds=0 on a Tesla P100; after-suite.log reads 30 passed EXIT=0 at 80c194ee against baseline-suite.log 28 passed EXIT=0 at 6abcdfe84; and negative-backtracking.log reads 1 failed EXIT=1 after MUTANT_IMPORT_ASSERTED, ending HEAD_SOURCE_BLOB_VERIFIED.\nVERDICT write_paths: the fence was nova/biot/magnetisation.py, tests/test_magnetisation.py, docs/evidence/fragments/iron-core-magnetisation/icm-newton-trust-region.html and a figures directory; git diff --stat 6abcdfe84..39e67e073 lists exactly the first three files and nothing else, so no figure was written and no path outside the fence was touched.\nVERDICT manifest: read; status complete, commits 80c194ee/48b63698/39e67e07, changed_paths the three landed files, tests the literal scoped pytest command, baseline_suite and after_suite both completed with zero failures, negative_control_log negative-backtracking.log; every figure it states reconciles with the logs opened here (28/30 passed, 248 corrections, 1 failed at EXIT=1).\nVERDICT diff: read commit by commit against 6abcdfe84: 80c194ee is the product change (66 changed lines in nova/biot/magnetisation.py: the diagonal shift in _factor, the adaptive-lambda loop and the initial_magnetisation restart in solve_magnetisation, and three receipt fields on MagnetisationSolution) plus 130 lines of tests; 48b63698 and 39e67e07 add the evidence fragment only.\nCALL_SITES: scripts/magnetisation_high_permeability/directional.py:52, scripts/magnetisation_high_permeability/measure.py:218, scripts/magnetisation_high_permeability/measure.py:284\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/biot/magnetisation.py:364-388 implements the regularised step and :259-262 exposes lambda, ratio and step type beside step_scales, but the shipped default max_iterations=60 at :300 still cannot reach the target the node recovered at 248 corrections, so the convergence is conditional on a caller-raised budget.\nSCORE evidence: 19\nJUSTIFICATION evidence: the done_when's own measures are in the receipts: measurement.log's per-iteration lines and SUMMARY (248, 2.1005066059371227e-12, matrix_builds=0), baseline-suite.log 28 passed EXIT=0, after-suite.log 30 passed EXIT=0, and negative-backtracking.log 1 failed EXIT=1 with the mutant import asserted and the head blob verified.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 6abcdfe84..39e67e073 touches exactly the three fenced files, and the product hunks are confined to _factor, MagnetisationSolution and solve_magnetisation with _mesh, _fit_law and _coefficient unmodified.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_magnetisation.py:582 genuinely reddens under the restored-backtracking mutant (negative-backtracking.log 1 failed, EXIT=1), but :596-601 compares step_types against regularisation_history from the same result, so it cannot fail on a consistent mislabelling, and no test pins the lambda growth factors or the regularisation-refused termination.\nSCORE fit: 16\nJUSTIFICATION fit: ruff check and ruff format --check both pass on nova/biot/magnetisation.py, but the schedule literals at :351 and :365 (1e-6, x10, 35 attempts, 0.25/0.9/0.5, x0.3/x2) are unnamed magic numbers, where the nearest in-repo analogue names its growth constant.\nSCORE reuse: 18\nJUSTIFICATION reuse: the addition extends the existing owner of the material Newton (_factor and solve_magnetisation in nova/biot/magnetisation.py) rather than forking a callable mechanism; the capability search over nova/ for levenberg, marquardt, dogleg, trust-region and regularisation found only subsystem-internal drivers (nova/equilibrium/fixed_point.py:1677 damping_trial, nova/equilibrium/solve.py:98 _damped_scale, nova/equilibrium/shape_inverse.py:594) that a dense material solve cannot call.\nFINDING nova/biot/magnetisation.py:351 non-blocking: the regularisation schedule is a set of bare literals (initial lambda 1e-6 at :351, refusal growth x10 and 35 attempts at :365-368, acceptance 0.25 at :371, shrink 0.9/0.5 and factors x0.3/x2 at :376-380) with no named constant and no derivation in the source or in docs/evidence/fragments/iron-core-magnetisation/icm-newton-trust-region.html, although the section asked for the chosen globalisation to be derived and justified; a reader cannot tell whether the values are tuned to the WEST mesh or transfer to another one, and the nearest in-repo analogue (nova/equilibrium/fixed_point.py:1677) names its growth factor.\nFINDING tests/test_magnetisation.py:596 non-blocking: the consistency assertion derives its expected label from regularisation_history, another field of the same result the code under test returned, so it holds for any implementation that labels its two fields consistently, including one that labels every regularised step wrongly; the length chain at :591-595 has the same self-referential shape. Neither reddens on the regression it appears to guard, though the independent assertions at :582-590 do.\nFINDING nova/biot/magnetisation.py:300 non-blocking: max_iterations keeps its default of 60 while the saved WEST stall the node was dispatched for needed 248 accepted corrections, so a default-budget call on that mesh still returns converged=False; the evidence fragment discloses this, but the solve docstring's convergence claim says nothing about the budget the target case requires.",
+  "review_run_id": "r-20261111T233059786915-review-of-icm-newton-trust-region-39e67e073374",
+  "reviewed_base_sha": "6abcdfe84ec3df3b707ae6a2e21aed1b7da02296",
+  "reviewed_head_sha": "39e67e073374daae459db8f327284e0e4de53a4f",
+  "reviewed_run_id": "r-20261111T205006716359-icm-newton-trust-region",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261111T233059786915-review-of-icm-newton-trust-region-39e67e073374"
+  },
+  "reviewer_run_id": "r-20261111T233059786915-review-of-icm-newton-trust-region-39e67e073374",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T00:27:21.282651+00:00",
+  "total": 106
+}

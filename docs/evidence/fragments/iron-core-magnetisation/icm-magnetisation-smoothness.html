@@ -1,45 +1,125 @@
 <section id="icm-magnetisation-smoothness-state">
-  <h2>Within-body magnetisation smoothness</h2>
-  <p>The opt-in spatial penalty and its zero-terminal continuation are committed.
-    Validation is in progress: the fresh unpenalised WEST replay reproduces
-    248 corrections to 2.100506605937123e-12 exactly, while the first two
-    tenfold-continuation trials exhaust their 400-correction budgets. This
-    record does not yet claim the saved-state acceptance.</p>
-  <h3 id="icm-magnetisation-smoothness-method">Discrete energy and body boundaries</h3>
-  <p>For each shared cell face inside one authored iron body,
-    <code>w = shared face length / centroid distance</code>. The energy is
-    <code>(lambda/2) sum w |M_i - M_j|²</code>, whose gradient is a graph
-    Laplacian applied independently to the radial and vertical components.
-    This two-point face approximation integrates the squared poloidal gradient:
-    the face measure times the distance represents the dual area and the
-    difference divided by that distance represents its normal gradient.</p>
-  <p>Outer faces, point contacts and vacuum gaps contribute nothing. Authored
-    bodies carry separate constant null modes even when they touch. Callers
-    pass the distinct outlines through <code>smoothness_bodies</code> when the
-    meshed region is their union; a union cannot retain a touching segment
-    boundary. A cell spanning an authored boundary is excluded rather than
-    assigned one body's unresolved trace.</p>
+  <h2>Within-body smoothness: modest correction reduction, different terminal root</h2>
+  <p>The opt-in penalty with strength 1e-4 reaches zero penalty in 222 corrections,
+    against the freshly reproduced 248-correction diagonal-regularisation baseline.
+    Its original material residual is 1.04424954076e-11, with zero
+    interaction-matrix rebuilds. This is a 10.48% reduction in corrections, not a
+    wall-time improvement: the same P100 measurement takes 185.155 s
+    against 151.044 s. These include each arm's compilation.</p>
+  <p><strong>The zero-penalty state is a different discrete root.</strong>
+    Both states satisfy the original map, but the maximum cell-vector difference
+    normalised by the baseline maximum is 1.9984613202. Sign changes
+    of saturated magnetisation remain in the thin segment-3 strip. The +1/+2/+4 m
+    field vectors change by 38.2981%, 19.2474% and 12.7041%. Continuing the penalty
+    to zero removes the added term; it does not prove uniqueness or physical
+    equivalence of the roots. The option remains off by default.</p>
+  <h3 id="icm-magnetisation-smoothness-method">Energy and explicit body boundaries</h3>
+  <p>Each internal shared face contributes
+    <code>(lambda/2) (face length / centroid distance) |M_i - M_j|²</code>.
+    The face measure times the centroid distance represents a dual area;
+    the difference divided by distance approximates its normal gradient.
+    The resulting positive-semidefinite graph Laplacian is applied separately
+    to radial and vertical components. The 3447-cell saved mesh gives 17444
+    nonzero entries; maximum absolute row sum is 9.99e-16.</p>
+  <p>Outer faces, point contacts and vacuum cuts contribute nothing. Distinct
+    touching bodies retain independent constant null modes. Pass authored
+    outlines through <code>smoothness_bodies</code> when <code>region</code>
+    is their union, because a geometric union discards touching segment
+    identities. A boundary-spanning cell is excluded rather than assigned an
+    unresolved trace. WEST uses all six DD-pinned authored segment outlines.</p>
   <p><code>smoothness_strength</code> defaults to zero. A positive strength sets
-    a frozen base lambda from the initial differential Jacobian's infinity
-    norm, an operator scale with no singular-value decomposition. The solve
-    exposes that scale, the active lambda history, and separate original and
-    penalised residual histories. Convergence requires the original material
-    residual at zero spatial penalty. The mesh, material fit, material
-    coefficient, original residual and interaction bodies remain byte-identical
-    to the base.</p>
-  <h3 id="icm-magnetisation-smoothness-controls">Controls already measured</h3>
-  <table>
-    <thead><tr><th>Control</th><th>Observed result</th></tr></thead>
-    <tbody>
-      <tr><td>Saved WEST state replay</td><td>3447 cells; seed residual 5.844633900691807e-4; 248 corrections to 2.100506605937123e-12; zero G rebuilds</td></tr>
-      <tr><td>Boundary, energy and synthetic homotopy</td><td>3 passed, 36 deselected; EXIT=0</td></tr>
-      <tr><td>Runtime penalty operand</td><td>1 passed; EXIT=0; lowered update contains a runtime penalty matrix and its exact differential form matches the independent block graph matrix</td></tr>
-      <tr><td>Removed body-boundary exclusion</td><td>The two-body different-M null-mode test fails; 1 failed; EXIT=1; mutant import and digest asserted, original source verified against HEAD</td></tr>
-    </tbody>
-  </table>
-  <p>Logs and numeric receipts are retained in
-    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T000127065672-icm-magnetisation-smoothness/</code>.
-    The exact CPU baseline/head arms run as one three-hour sirius job without
-    a suite timeout. The WEST comparison uses the saved interaction and
-    external-field operands on titan.</p>
+    a frozen base scale <code>lambda = strength * ||F'(M_seed)||_infinity</code>,
+    an induced operator norm with no singular-value decomposition. The
+    homotopy solves at full, tenth and hundredth scale and then zero.
+    Intermediate stages advance at penalised relative residual at most
+    <code>max(tolerance, 1e-7)</code>; terminal convergence requires the original
+    residual at zero penalty. The receipt exposes <code>smoothness_lambda</code>,
+    <code>smoothness_history</code> and <code>penalised_residual_history</code>;
+    <code>residual_history</code> always names the original equation.</p>
+  <p>State, penalty, operands and LU factor remain runtime arguments of the
+    compiled update. The mesh, material fit, material coefficient, original
+    residual and interaction function bodies are byte-identical to base
+    <code>95c7572523c61ac5e8761082c4224e306cdd85b8</code>.</p>
+  <figure id="icm-magnetisation-smoothness-history">
+    <img src="/nova/figures/iron-core-magnetisation/icm-magnetisation-smoothness/west-homotopy.svg"
+         alt="Original residual histories and both magnetisation components along the thin outer-limb strip; both roots contain cell-to-cell sign oscillations">
+    <figcaption>WEST 62751, saved 3447-cell stall state. Left: original material
+      residual after accepted corrections, with the 1e-8 target dotted.
+      Right: terminal radial and vertical magnetisation in the 23-cell
+      segment-3 strip column at R = 4.80045 m. Purple is the homotopy with
+      starting strength 1e-4; grey is the diagonal-only baseline. Both terminal
+      spatial penalties are zero. The sign oscillations and branch difference
+      are visible rather than averaged away. Rendered to PNG and inspected;
+      the shared save guard checks all text, and the target label is checked
+      against plotted paths.</figcaption>
+  </figure>
+  <h3 id="icm-magnetisation-smoothness-west">Saved-state measurements</h3>
+  <p>Before the comparison, the saved seed reproduces relative residual
+    5.844633900691807e-4. The baseline repeats exactly: 248 corrections to
+    2.100506605937123e-12, and its magnetisation is bit-identical to the
+    independent prior <code>solution.pkl</code>. The successful homotopy has
+    214, 4, 2 and 2 corrections at the four levels, with its final receipt
+    at zero penalty. At the seed, the infinity-norm condition number falls
+    from 3167034.8365 to 1947976.67096
+    at frozen lambda 0.000741976466917. The graph does not remove
+    the strong conditioning problem.</p>
+  <table><thead><tr><th>Starting strength</th><th>Frozen lambda</th><th>Corrections</th><th>Original terminal residual</th><th>Termination</th></tr></thead><tbody>
+<tr><td>0.01</td><td>0.0741976467</td><td>400</td><td>0.00195178677</td><td>iteration-budget</td></tr>
+<tr><td>0.001</td><td>0.00741976467</td><td>400</td><td>0.000315219329</td><td>iteration-budget</td></tr>
+<tr><td>0.0001</td><td>0.000741976467</td><td>222</td><td>1.04424954e-11</td><td>converged</td></tr>
+  </tbody></table>
+  <p>The separately bounded halving-continuation counterfactual remains in progress; it is not part of the delivered solver.</p>
+  <p>The three probe fields use one new external-target response from the
+    production sheet route, applied to both roots; no centroid G is rebuilt.
+    The percentage is <code>||B_homotopy - B_baseline|| / ||B_baseline||</code>,
+    not the difference of field magnitudes.</p>
+  <table><thead><tr><th>Distance beyond coil edge [m]</th><th>Baseline |B| [µT]</th><th>Homotopy |B| [µT]</th><th>Vector change [%]</th></tr></thead><tbody>
+<tr><td>1</td><td>213.236</td><td>278.665</td><td>38.2981</td></tr>
+<tr><td>2</td><td>174.427</td><td>195.484</td><td>19.2474</td></tr>
+<tr><td>4</td><td>86.5038</td><td>88.3016</td><td>12.7041</td></tr>
+  </tbody></table>
+  <h3 id="icm-magnetisation-smoothness-cells">Original residual at the twenty recorded strip cells</h3>
+  <p>The same twenty source-bound cells carry 99.3711% of the seed's squared
+    residual. On the 23-cell segment-3 column, the largest cell residual falls
+    from 5.84805 kA/m to 1.78953 µA/m. The
+    largest terminal cell residual over the full mesh is
+    167.092 µA/m.</p>
+  <table><thead><tr><th>Cell</th><th>Authored segment</th><th>R, Z [m]</th><th>Seed residual [kA/m]</th><th>Terminal residual [µA/m]</th></tr></thead><tbody>
+<tr><td>3067</td><td>iron_core.segment[3]</td><td>4.80045, -0.3196</td><td>5.84805</td><td>9.09495e-06</td></tr>
+<tr><td>733</td><td>iron_core.segment[0]</td><td>0.333, 0.8715</td><td>5.28966</td><td>0.00118721</td></tr>
+<tr><td>3066</td><td>iron_core.segment[3]</td><td>4.80045, -0.4328</td><td>4.7628</td><td>0.000234028</td></tr>
+<tr><td>3065</td><td>iron_core.segment[3]</td><td>4.80045, -0.546</td><td>1.91834</td><td>0.000233086</td></tr>
+<tr><td>3063</td><td>iron_core.segment[3]</td><td>4.80045, -0.7724</td><td>1.81863</td><td>1.63709e-05</td></tr>
+<tr><td>3062</td><td>iron_core.segment[3]</td><td>4.80045, -0.8856</td><td>1.36286</td><td>0.000232895</td></tr>
+<tr><td>3064</td><td>iron_core.segment[3]</td><td>4.80045, -0.6592</td><td>1.33877</td><td>0.000698564</td></tr>
+<tr><td>1894</td><td>iron_core.segment[1]</td><td>0.8796, 2.39845</td><td>1.08645</td><td>0.00093314</td></tr>
+<tr><td>2012</td><td>iron_core.segment[4]</td><td>1.0405, -2.4081</td><td>1.03782</td><td>0.139902</td></tr>
+<tr><td>2089</td><td>iron_core.segment[4]</td><td>1.0971, -2.4081</td><td>1.00087</td><td>1.79547</td></tr>
+<tr><td>3068</td><td>iron_core.segment[3]</td><td>4.80045, -0.1781</td><td>0.998757</td><td>0.000465662</td></tr>
+<tr><td>995</td><td>iron_core.segment[0]</td><td>0.4462, 0.8715</td><td>0.894643</td><td>0.000508277</td></tr>
+<tr><td>472</td><td>iron_core.segment[0]</td><td>0.2198, 0.8715</td><td>0.660061</td><td>0.000350457</td></tr>
+<tr><td>3055</td><td>iron_core.segment[3]</td><td>4.80045, -1.678</td><td>0.636554</td><td>0.000239562</td></tr>
+<tr><td>1585</td><td>iron_core.segment[5]</td><td>0.7575, -0.88115</td><td>0.635122</td><td>8.30845</td></tr>
+<tr><td>3061</td><td>iron_core.segment[3]</td><td>4.80045, -0.9988</td><td>0.630492</td><td>1.81899e-06</td></tr>
+<tr><td>1683</td><td>iron_core.segment[5]</td><td>0.814465, -0.88123</td><td>0.620386</td><td>0.0866509</td></tr>
+<tr><td>1930</td><td>iron_core.segment[4]</td><td>0.9839, -2.4081</td><td>0.426147</td><td>0.11882</td></tr>
+<tr><td>2027</td><td>iron_core.segment[5]</td><td>1.0211, -1.5931</td><td>0.349065</td><td>3.13553</td></tr>
+<tr><td>3060</td><td>iron_core.segment[3]</td><td>4.80045, -1.112</td><td>0.342734</td><td>0.000232859</td></tr>
+  </tbody></table>
+  <h3 id="icm-magnetisation-smoothness-validation">Analytic and scoped regression controls</h3>
+  <p>The exact baseline/head CPU suite pair is still running in sirius job 1311175. Analytic and default-off quadratic measurements will be inserted only from the completed receipts.</p>
+  <p>The two-body control removes the body-label equality from shared-face
+    assembly in a scratch extraction. The run asserts the imported mutant's
+    absolute module path and source digest. Its different-M body-null-mode
+    assertion fails: <code>test_smoothness_respects_touching_body_boundaries</code>,
+    1 failed, EXIT=1. <code>HEAD_SOURCE_BLOB_VERIFIED</code> confirms the actual
+    working source remains its committed blob. Boundary, energy, synthetic
+    homotopy and runtime-operand focused controls pass.</p>
+  <p>Raw logs, script inputs, full histories, both root arrays, conditioning,
+    per-cell residuals, probe response and PNG preview are retained under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T000127065672-icm-magnetisation-smoothness</code>: <code>measurement.log</code>, <code>west-*.json</code>,
+    <code>diagnostics.json</code>, <code>root-comparison.json</code>,
+    <code>strip-residuals.json</code>, <code>continuation.log</code>,
+    <code>negative-control.log</code>, <code>baseline-suite.log</code> and
+    <code>after-suite.log</code>.</p>
 </section>

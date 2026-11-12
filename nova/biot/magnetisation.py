@@ -35,16 +35,12 @@ class _Mesh:
 
 
 def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
-    """Clip a shared-edge grid and merge cells with insufficient clearance.
+    """Clip a square grid and merge small pieces along their longest boundary.
 
-    A rectangular strip narrower than h/2 has centroid clearance below h/4;
-    merging on that bound removes strips even when their area exceeds the
-    sliver floor. The area target is h**2/2. Prefer the smallest union already
-    meeting both targets, with longest-edge merges for pieces needing further
-    agglomeration. A physically thin
-    component can miss the targets, but must admit an interior point at 0.01 h.
     The cell union preserves the authored material to floating-point roundoff.
-    A hole inside one grid square is triangulated before merging.
+    A hole inside one grid square is triangulated before merging. A disconnected
+    sliver that cannot acquire a full edge neighbour is refused rather than
+    passed to a near-singular collocation calculation.
     """
     if not np.isfinite(size) or size <= 0:
         raise ValueError("cell_size must be finite and positive")
@@ -73,56 +69,23 @@ def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
                         )
                     else:
                         pieces.append(piece)
-    floor = max(sliver, 0.5) * size**2
-    clearance = 0.25 * size
-    while True:
-        changed = False
-        pending = sorted(
-            (k for k, piece in enumerate(pieces) if piece is not None),
-            key=lambda k: pieces[k].area,
-        )
-        for k in pending:
-            piece = pieces[k]
-            if piece is None or (
-                piece.area >= floor * (1 - 1e-12)
-                and piece.contains(piece.centroid)
-                and piece.centroid.distance(piece.boundary) >= clearance * (1 - 1e-12)
-            ):
-                continue
-            neighbours = [
-                (piece.boundary.intersection(other.boundary).length, j)
-                for j, other in enumerate(pieces)
-                if j != k and other is not None
-            ]
-            candidates = []
-            for shared, j in neighbours:
-                if shared <= 0:
-                    continue
-                merged = piece.union(pieces[j])
-                if isinstance(merged, shapely.Polygon) and not merged.interiors:
-                    centre = merged.centroid
-                    qualified = (
-                        merged.area >= floor * (1 - 1e-12)
-                        and merged.contains(centre)
-                        and centre.distance(merged.boundary) >= clearance * (1 - 1e-12)
-                    )
-                    # The smallest qualified union preserves resolution across
-                    # thin material; an inward full cell need not be consumed.
-                    candidates.append(
-                        (
-                            not qualified,
-                            merged.area if qualified else -shared,
-                            -shared,
-                            j,
-                            merged,
-                        )
-                    )
-            if candidates:
-                *_, j, merged = min(candidates, key=lambda candidate: candidate[:4])
+    floor = sliver * size**2
+    for k in sorted(range(len(pieces)), key=lambda k: pieces[k].area):
+        piece = pieces[k]
+        if piece is None or piece.area >= floor:
+            continue
+        neighbours = [
+            (piece.boundary.intersection(other.boundary).length, j)
+            for j, other in enumerate(pieces)
+            if j != k and other is not None
+        ]
+        for shared, j in sorted(neighbours, reverse=True):
+            if shared <= 0:
+                break
+            merged = piece.union(pieces[j])
+            if isinstance(merged, shapely.Polygon) and not merged.interiors:
                 pieces[j], pieces[k] = merged, None
-                changed = True
-        if not changed:
-            break
+                break
     polygons, centres, areas = [], [], []
     duplicate_tolerance = 1024 * np.finfo(float).eps * max(1.0, *np.abs(region.bounds))
     for piece in pieces:
@@ -132,16 +95,11 @@ def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
         # Such duplicates are not physical edges and collapse in the sheet tile.
         piece = shapely.remove_repeated_points(piece, tolerance=duplicate_tolerance)
         centre = piece.centroid
-        if not piece.contains(centre) or centre.distance(piece.boundary) < clearance:
-            # An irreducible concave or thin component needs an interior
-            # collocation point; its area centroid can lie outside the iron.
-            circle = shapely.maximum_inscribed_circle(piece, tolerance=1e-5 * size)
-            interior = shapely.Point(circle.coords[0])
-            if interior.distance(piece.boundary) > centre.distance(
-                piece.boundary
-            ) or not piece.contains(centre):
-                centre = interior
-        if not piece.contains(centre) or centre.distance(piece.boundary) < 0.01 * size:
+        if (
+            piece.area < floor * (1 - 1e-12)
+            or not piece.contains(centre)
+            or centre.distance(piece.boundary) < 0.01 * size
+        ):
             raise ValueError("unresolved iron sliver; reduce cell_size")
         polygons.append(np.asarray(piece.exterior.coords)[:-1])
         centres.append(centre.coords[0])

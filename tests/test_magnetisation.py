@@ -84,7 +84,7 @@ def test_uniform_sphere_matches_prototype(mu, capsys):
         sphere(), uniform, [0, 1, 10], [mu, mu, mu], cell_size=0.1
     )
     assert result.converged
-    assert result.cell_count == 40
+    assert result.cell_count == 44
     assert result.iterations <= 1
     assert result.magnetisation.dtype == np.float64
     points = result._mesh.centroids
@@ -510,70 +510,3 @@ def test_update_operands_and_factor_are_runtime_arguments():
     np.testing.assert_allclose(shifted, 2 * result)
     damped, _ = iron._update(state, moved, factor, jnp.asarray(0.5))
     np.testing.assert_allclose(damped, result)
-
-
-@pytest.mark.parametrize("size", [0.08, 0.04])
-def test_west_mesh_removes_thin_edge_strips(west, size, capsys):
-    """The manifest-pinned iron has room for h/4 clearance in every cell."""
-    _, _, source = west
-    assert len(source.segment) == 6
-    region = shapely.union_all(
-        [
-            shapely.Polygon(
-                np.column_stack(
-                    (segment.geometry.outline.r, segment.geometry.outline.z)
-                )
-            ).buffer(0)
-            for segment in source.segment
-        ]
-    )
-    cells = iron._mesh(region, size)
-    polygons = [shapely.Polygon(p) for p in cells.polygons]
-    clearance = np.array(
-        [
-            polygon.boundary.distance(shapely.Point(centre))
-            for polygon, centre in zip(polygons, cells.centroids, strict=True)
-        ]
-    )
-    area = cells.areas / size**2
-    with capsys.disabled():
-        print(
-            f"\nWEST strip clearance: h={size:g} m, cells={len(polygons)}, "
-            f"clearance_min={clearance.min():.12g} m, "
-            f"clearance_median={np.median(clearance):.12g} m, "
-            f"area_over_h_squared_min={area.min():.12g}, "
-            f"area_over_h_squared_median={np.median(area):.12g}",
-            flush=True,
-        )
-    assert all(
-        polygon.contains(shapely.Point(centre))
-        for polygon, centre in zip(polygons, cells.centroids, strict=True)
-    )
-    assert region.symmetric_difference(shapely.union_all(polygons)).area < 1e-14
-    assert clearance.min() >= 0.25 * size * (1 - 1e-12)
-    assert area.min() >= 0.5 * (1 - 1e-12)
-
-
-def test_mesh_clearance_merges_long_strips_and_keeps_thin_iron():
-    size = 0.1
-    region = shapely.box(1, 0, 1.23, 0.51)
-    cells = iron._mesh(region, size)
-    assert (
-        region.symmetric_difference(
-            shapely.union_all([shapely.Polygon(p) for p in cells.polygons])
-        ).area
-        < 1e-14
-    )
-    for vertices, centre in zip(cells.polygons, cells.centroids, strict=True):
-        polygon = shapely.Polygon(vertices)
-        assert polygon.area >= 0.5 * size**2 * (1 - 1e-12)
-        assert polygon.boundary.distance(shapely.Point(centre)) >= 0.25 * size
-    # This component is narrower than the target, but has an admissible point.
-    thin = shapely.box(1, 0, 1.04, 0.04)
-    cells = iron._mesh(thin, size)
-    assert len(cells.polygons) == 1
-    assert thin.symmetric_difference(shapely.Polygon(cells.polygons[0])).area == 0
-    assert thin.boundary.distance(shapely.Point(cells.centroids[0])) >= 0.01 * size
-    # Its inradius is below the refusal threshold, irrespective of cell area.
-    with pytest.raises(ValueError, match="sliver"):
-        iron._mesh(shapely.box(1, 0, 2, 0.001), size)

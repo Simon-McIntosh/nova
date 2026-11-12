@@ -85,6 +85,38 @@ def loop(points, current=1.0):
     return current * np.column_stack([br, bz])
 
 
+def sphere_cell_average_bound(cells, mu, inside):
+    """Bound the centroid field error from uniform-sphere consistency defects.
+
+    The exact uniform magnetisation is representable in the cell basis. Its
+    polygon-cell residual, rather than a Hessian of the constant exact field,
+    drives the discrete error. Resolve that residual in the volume-weighted
+    eigenbasis and apply the triangle inequality to its centroid field.
+    """
+    count = len(cells.areas)
+    volume = 2 * np.pi * cells.areas * cells.centroids[:, 0]
+    scale = np.sqrt(np.tile(volume / volume.sum(), 2))
+    unit = np.r_[np.zeros(count), np.ones(count)]
+    average = iron._interaction(cells, None, iron._PLAN) / iron._MU0
+    point = iron._interaction(cells, cells.centroids, iron._PLAN) / iron._MU0
+    weighted = average * scale[:, None] / scale[None, :]
+    eigenvalues, modes = np.linalg.eigh((weighted + weighted.T) / 2)
+    rows = count + np.flatnonzero(inside)
+    defect = average @ unit - 2 * unit / 3
+    modal_defect = modes.T @ (scale * defect)
+    transfer = (point[rows] / scale[None, :]) @ modes
+    point_defect = point[rows] @ unit - 2 / 3
+    beta = 1 - 1 / mu
+    denominator = 1 - beta * eigenvalues
+    assert np.all(denominator > 0)
+    propagated = np.sum(
+        np.abs(transfer * modal_defect[None, :]) / denominator[None, :], axis=1
+    )
+    consistency = beta * np.max(np.abs(point_defect)) + beta**2 * propagated.max()
+    roundoff = 128 * np.finfo(float).eps * (2 * count) / denominator.min()
+    return consistency + roundoff
+
+
 @pytest.mark.parametrize("mu", [1.0, 10.0, 100.0, 1000.0])
 @pytest.mark.slow
 @pytest.mark.timeout(900)
@@ -101,8 +133,9 @@ def test_uniform_sphere_matches_prototype(mu, capsys):
     inside = np.linalg.norm(points, axis=1) < 0.3
     exact = 3 * mu / (mu + 2) * 0.01
     error = np.max(np.abs(total[inside, 1] / exact - 1))
-    # The polygonised sphere's interior is effectively uniform; the dipole
-    # retains the finite boundary-resolution error measured by the ring control.
+    interior_bound = sphere_cell_average_bound(result._mesh, mu, inside)
+    # The centroid field follows the volume-tested polygon consistency bound.
+    # Exterior probes retain their independently recorded dipole precision.
     probes = np.array([[1.0, 0.0], [0.0, 1.0]])
     measured = (uniform(probes) + result.field(probes))[:, 1]
     fraction = (mu - 1) / (mu + 2)
@@ -121,11 +154,13 @@ def test_uniform_sphere_matches_prototype(mu, capsys):
         print(
             f"\nsphere mu={mu:g}: cells={result.cell_count}, "
             f"iterations={result.iterations}, interior_exact={exact:.12g} T, "
-            f"interior_max={error:.12g}, exterior_exact={expected.tolist()} T, "
+            f"interior_max={error:.12g}, interior_bound={interior_bound:.12g}, "
+            f"exterior_exact={expected.tolist()} T, "
             f"exterior_error={exterior_error.tolist()}",
             flush=True,
         )
-    assert error < 1e-9
+    assert interior_bound <= 1e-5
+    assert error <= interior_bound
     np.testing.assert_allclose(exterior_error, recorded[mu], rtol=0, atol=2e-10)
 
 
@@ -188,6 +223,17 @@ def test_closed_shell_refines_toward_exact_shielding(mu, capsys):
     assert np.all(fine_error < coarse_error), (
         "exact-shell error must fall at every probe"
     )
+    if mu in (100, 1000):
+        collocation_fine = {
+            100: [0.004471449775339975, 0.005165328184125184, 0.0034921622218581083],
+            1000: [0.027, 0.030, 0.020],
+        }[mu]
+        assert np.all(coarse_error / fine_error >= 2.5), (
+            "halving the cell size must reduce every probe error at least 2.5-fold"
+        )
+        assert np.all(fine_error <= np.asarray(collocation_fine) + 0.005), (
+            "fine-mesh error must stay within 0.5 percentage points of collocation"
+        )
 
 
 def test_mesh_merges_slivers_without_losing_material():

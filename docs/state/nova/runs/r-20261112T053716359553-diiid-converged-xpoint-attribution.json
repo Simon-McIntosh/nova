@@ -1,0 +1,1301 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "bb24db5f63759c900802d2f9fd971ab16b9f6282",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/brief.md",
+    "sha256": "56b316b6294e4bc2f1d62a8464274ca463da12531fce56281ff20351d2458b14"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 23015040,
+      "cached_input_tokens_cumulative": 23015040,
+      "input_tokens": 23311534,
+      "input_tokens_cumulative": 23311534,
+      "output_tokens": 125231,
+      "output_tokens_cumulative": 125231,
+      "reasoning_output_tokens": 52322,
+      "reasoning_output_tokens_cumulative": 52322
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 26304,
+    "files": 11,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "_schema_payload",
+        "path": "tests/imas/test_diiid_dataset_recheck.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_pf_active_supply_and_circuit_round_trip_without_losing_uncertainty",
+        "path": "tests/imas/test_diiid_description.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_omissions_and_grid_margins_are_quantified",
+        "path": "tests/imas/test_diiid_geometry_corroboration.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "test_mast_frame_exposes_exact_shared_helper_surface",
+        "path": "tests/test_efit_parity_warm_neighbour.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 306,
+        "name": "attribution",
+        "path": "scripts/prototypes/diiid_xpoint_attribution/render.py"
+      },
+      "window_line": 317
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "efec5147513ff52f0906379509781b3e72646953",
+    "fc0ec40fe99fa0a128c820349def81f9d6e00247",
+    "3854fbebf5662810f15de34457e3fae6ddc077bf",
+    "21219636f8c15c4c0a37c5eb0f5e697f6870c28a",
+    "e9f8b0865b05e85f441972fe30a43a2339b6ea00",
+    "2f0553f7c3d9c069f081fc34e9f8057b0ae56f4f"
+  ],
+  "completed_at": "2026-11-12T07:03:57Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-12T05:39:07Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_xpoint_attribution.py",
+    "exit_status": 0,
+    "log_digest": "ca414cc2d05299fda6c5eaa76cec85971dcb68577d6a377d172286824371e2e1",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/final-focused-tests.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "",
+    "reason": "brief-names-no-plan",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.5099181431662403,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-13T19:56:02Z, which is after this node's 10800s horizon ending 2026-11-12T08:37:20.077098+00:00",
+    "horizon_ends_at": "2026-11-12T08:37:20.077098+00:00",
+    "horizon_seconds": 10800,
+    "metered": true,
+    "observed_at": "2026-11-12T05:37:18Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-13T19:56:02Z",
+    "resets_at": "2026-11-14T15:28:13Z",
+    "seconds_until_reset": 208254,
+    "state": "quiet",
+    "utilisation_pct": 99.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-12T05:37:18Z",
+    "read_at": "2026-11-12T05:37:20Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 99.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-12T07:03:57Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-12T07:03:57Z",
+        "resets_at": 1794670093,
+        "used_percent": 100.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/manifest.md",
+  "member": "disposable-r-20261112T053716359553-diiid-converged-xpoint-attribution",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_xpoint_attribution.py::test_known_coil_current_error_moves_saddle_in_coil_term",
+      "tests/test_xpoint_attribution.py::test_profile_shape_error_moves_saddle_in_profile_term"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_xpoint_attribution.py::test_known_coil_current_error_moves_saddle_in_coil_term",
+      "tests/test_xpoint_attribution.py::test_profile_shape_error_moves_saddle_in_profile_term"
+    ],
+    "control_run_failed": true,
+    "declaration": "disable the attribution in attribute.py and show tests/test_xpoint_attribution.py fails",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/final-negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/final-negative-control.log",
+    "test_paths": [
+      "tests/test_xpoint_attribution.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "diiid-converged-xpoint-attribution",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/briefs/nova-diiid-converged-xpoint-attribution.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/brief.md",
+    "brief_sha256": "56b316b6294e4bc2f1d62a8464274ca463da12531fce56281ff20351d2458b14",
+    "capability": null,
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 791,
+          "cached_input_tokens": 716021,
+          "input_tokens": 716814,
+          "output_tokens": 2686,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 719500,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "session_id": "35a66cc6-f4f1-4358-8dbb-99c9333c7249"
+    },
+    "done_when": "attribute.py quantifies each input's difference from EFIT and its linear X-point sensitivity for 137D and 146D and names the dominant term, tested on synthetic coil and profile errors with a red control; the record recommends one input fix with file:line and predicted residual; the fragment and inspected X-point, attribution and profile panels are committed",
+    "estimated_hours": null,
+    "goal": "attribute the remaining lower X-point offset on converged DIII-D 137D and 146D to profile, current, external-field or boundary inputs",
+    "id": "diiid-converged-xpoint-attribution",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-12T05:37:18Z",
+      "read_at": "2026-11-12T05:37:20Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 99.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/manifest.md",
+    "negative_control": "disable the attribution in attribute.py and show tests/test_xpoint_attribution.py fails",
+    "over_fence_reason": "a multi-input physics attribution across two converged frames with sensitivities, figures and tests needs about three hours of worker time",
+    "peer_scopes": {
+      "icm-law-saturation-tail": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-law-saturation-tail.html",
+        "docs/figures/iron-core-magnetisation/icm-law-saturation-tail",
+        "nova/biot/magnetisation.py",
+        "tests/test_magnetisation.py"
+      ],
+      "icm-magnetisation-smoothness": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-magnetisation-smoothness.html",
+        "docs/figures/iron-core-magnetisation/icm-magnetisation-smoothness",
+        "nova/biot/magnetisation.py",
+        "tests/test_magnetisation.py"
+      ],
+      "icm-mesh-edge-strips": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-mesh-edge-strips.html",
+        "docs/figures/iron-core-magnetisation/icm-mesh-edge-strips",
+        "nova/biot/magnetisation.py",
+        "tests/test_magnetisation.py"
+      ],
+      "icm-west-62751-solve": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-solve.html",
+        "docs/figures/iron-core-magnetisation/icm-west-62751-solve",
+        "scripts/west_iron_solve"
+      ]
+    },
+    "plan": "",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "",
+    "spec_level": "guided",
+    "time_budget": "180m",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "scripts/prototypes/diiid_xpoint_attribution",
+      "tests/test_xpoint_attribution.py",
+      "docs/evidence/fragments/diiid-vertical-force-balance/diiid-converged-xpoint-attribution.html",
+      "docs/figures/diiid-converged-xpoint-attribution"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2272146.0,
+  "outcome": "on converged 137D the remaining lower X-point offset is dominated by five held nodes kept at their seed values in the residual shadow next to the X-point (4.51 cm of the vertical share); reading the X-point from the physical image moves 137D 6.03->2.43 cm while 146D stays 2.86->2.92; profiles match EFIT's extraction to rounding on 19 knots (0.05-0.95), the measured-coil field differs from EFIT's implied external field by about 4 mT at the X-point",
+  "outside_scope_paths": [
+    "nova/equilibrium/forward_operator.py:2966",
+    "source/topology",
+    "nova/benchmarks."
+  ],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 1.5098031840692747,
+      "derived": 0.721286066614914,
+      "drain_hours": 168.0,
+      "effective_limit": 0.721286066614914,
+      "elapsed_fraction": 0.6557146060135581,
+      "elapsed_hours": 110.16005381027777,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-11-12T05:37:49+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "re_anchor": {
+        "allowance": 0.836514637619476,
+        "lift_id": "codex-sub-1794082577-c029e5",
+        "multiple": 1.1,
+        "t_end": "2026-11-11T09:00:01Z",
+        "u_end": 0.77
+      },
+      "reason": null,
+      "remaining_budget": 0.010000000000000009,
+      "remaining_windows": null,
+      "resets_at": "2026-11-14T15:28:13Z",
+      "state": "observed",
+      "utilisation": 0.99,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.999702,
+      "decided_by": "window",
+      "margin": -0.26220199999999994,
+      "name": "diiid-converged-xpoint-attribution",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "hold",
+      "window_fill": 0.99
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.193717,
+        "observed_at": "2026-11-12T05:37:49+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-14T15:28:13Z",
+        "state": "observed",
+        "utilisation": 0.99,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "diiid-converged-xpoint-attribution",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-12T05:37:49.193717+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "physics attribution of the remaining X-point error: codex sol per the lead's routing for hard nodes",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.964,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_link": "diiid-vertical-force-balance",
+  "promoted_by": null,
+  "promoted_revision": "2f0553f7c3d9c069f081fc34e9f8057b0ae56f4f",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "bb24db5f63759c900802d2f9fd971ab16b9f6282",
+    "reviewed_head_sha": "2f0553f7c3d9c069f081fc34e9f8057b0ae56f4f",
+    "scores": {
+      "durability": 16,
+      "evidence": 18,
+      "fit": 17,
+      "goal_fidelity": 18,
+      "reuse": 5,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 94
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261112T053716359553-diiid-converged-xpoint-attribution",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+  "session_harness": "codex",
+  "session_id": "01a1ce45-1e30-7500-8f6d-fb6061f1db07",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_xpoint_attribution.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/final-focused-tests.log",
+      "revision": "2f0553f7c3d9c069f081fc34e9f8057b0ae56f4f"
+    },
+    "baseline_measured_nothing": true,
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_xpoint_attribution.py",
+      "completed": true,
+      "exit_status": 4,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/baseline-suite.log",
+      "revision": "bb24db5f63759c900802d2f9fd971ab16b9f6282"
+    },
+    "failure_attribution": {},
+    "measured_by": "run",
+    "status": "clean",
+    "suite_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_xpoint_attribution.py",
+    "waiver_reason": null
+  },
+  "tests_added": 3,
+  "throughput": {
+    "cumulative_cached_input_tokens": 23015040,
+    "cumulative_input_tokens": 46326574,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 177553
+  },
+  "time_budget": "180m",
+  "tool_steps": 53.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 5090,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-12T07:04:00Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-12T05:48:18Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 69817300,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/codex-home/cache"
+      },
+      {
+        "bytes": 28814443,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261112T053716359553-diiid-converged-xpoint-attribution",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 701,
+    "worker_pid": 3015663
+  },
+  "worker_seconds": 5037,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

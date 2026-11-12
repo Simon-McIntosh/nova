@@ -42,7 +42,17 @@ def reuse_identical_interactions():
             cache[key] = original(polygons, radial, height, plan=plan)
         return cache[key]
 
+    original_average = iron.galerkin_cell_interaction
+    averages = {}
+
+    def averaged_response(polygons, *, plan):
+        key = (tuple(p.tobytes() for p in polygons), plan)
+        if key not in averages:
+            averages[key] = original_average(polygons, plan=plan)
+        return averages[key]
+
     with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(iron, "galerkin_cell_interaction", averaged_response)
         patch.setattr(iron, "cell_interaction", response)
         yield
 
@@ -645,6 +655,7 @@ def test_regularised_newton_crosses_ill_conditioned_material_stall(monkeypatch, 
         .T
     )
     monkeypatch.setattr(iron, "_interaction", lambda *args: response)
+    monkeypatch.setattr(iron, "_average_external", lambda cells, callback: external)
     b, mu = nonlinear_law()
     operands = tuple(
         jnp.asarray(x)
@@ -690,6 +701,7 @@ def test_regularised_newton_crosses_ill_conditioned_material_stall(monkeypatch, 
 def test_material_restart_preserves_component_order_and_checks_shape(monkeypatch):
     response = np.eye(4) * iron._MU0 * 0.5
     monkeypatch.setattr(iron, "_interaction", lambda *args: response)
+    monkeypatch.setattr(iron, "_average_external", lambda cells, callback: external)
     region = shapely.box(1, 0, 2, 2)
     initial = np.array([[100.0, -200.0], [300.0, -400.0]])
     external = np.array([[0.01, 0.02], [-0.03, 0.04]])
@@ -723,3 +735,61 @@ def test_material_restart_preserves_component_order_and_checks_shape(monkeypatch
                 cell_size=1,
                 initial_magnetisation=invalid,
             )
+
+
+@pytest.mark.parametrize(
+    "region,size",
+    [
+        (shapely.box(1, 0, 1.7, 0.2), 0.3),
+        (
+            shapely.Point(0, 0)
+            .buffer(0.5, 8)
+            .intersection(shapely.box(0, -0.5, 0.5, 0.5)),
+            0.2,
+        ),
+    ],
+)
+def test_cell_average_interaction_is_reciprocal_and_energy_bounded(region, size):
+    cells = iron._mesh(region, size)
+    gram = iron._interaction(cells, None, iron._PLAN)
+    volume = np.tile(2 * np.pi * cells.areas * cells.centroids[:, 0], 2)
+    energy = volume[:, None] * gram
+    symmetry = np.linalg.norm(energy - energy.T) / np.linalg.norm(energy)
+    assert symmetry < 5e-15, f"weighted reciprocity defect {symmetry}"
+    scale = np.sqrt(volume)
+    weighted = gram * scale[:, None] / scale[None, :] / iron._MU0
+    spectrum = np.linalg.eigvalsh((weighted + weighted.T) / 2)
+    assert spectrum[0] >= -2e-7, spectrum
+    assert spectrum[-1] <= 1 + 2e-7, spectrum
+
+
+def test_cell_average_external_uses_axisymmetric_volume():
+    cells = iron._mesh(shapely.box(1, 0, 2, 1), 1)
+    observed = []
+
+    def field(points):
+        observed.append(points.copy())
+        return points.copy()
+
+    average = iron._average_external(cells, field)
+    np.testing.assert_allclose(average, [[14 / 9, 0.5]], rtol=2e-15)
+    assert len(observed[0]) > len(cells.centroids)
+
+
+def test_mutual_self_block_converges_with_logarithmic_quadrature():
+    from nova.biot.tiledassembly import galerkin_cell_interaction
+
+    polygon = np.array([[1.0, 0.0], [1.3, 0.0], [1.3, 0.2], [1.0, 0.2]])
+    matrices = [
+        galerkin_cell_interaction((polygon,), plan=iron._PLAN, order=order) / iron._MU0
+        for order in (8, 16, 24, 32)
+    ]
+    errors = [np.linalg.norm(matrix - matrices[-1]) for matrix in matrices[:-1]]
+    print(
+        "self-block quadrature orders 8,16,24,32:",
+        [matrix.tolist() for matrix in matrices],
+        "errors:",
+        errors,
+    )
+    assert errors[1] < errors[0]
+    assert errors[2] < 2e-8

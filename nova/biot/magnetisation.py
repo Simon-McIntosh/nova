@@ -17,7 +17,11 @@ import numpy as np
 from scipy.interpolate import PchipInterpolator
 import shapely
 
-from nova.biot.tiledassembly import TilePlan, cell_interaction
+from nova.biot.tiledassembly import (
+    TilePlan,
+    cell_interaction,
+    galerkin_cell_interaction,
+)
 from nova.jax.config import configure_dtypes
 
 __all__ = ["MagnetisationSolution", "solve_magnetisation"]
@@ -110,6 +114,11 @@ def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
 
 
 def _interaction(cells, points, plan):
+    if points is None:
+        scale = _SHEET_LENGTH_SCALE
+        return galerkin_cell_interaction(
+            tuple(p * scale for p in cells.polygons), plan=plan
+        )
     # B/M is invariant under a common dilation of source and target coordinates.
     # A power of two preserves input bits while moving the tile's nanometre edge
     # identity grid below a picometre in the authored geometry.
@@ -120,6 +129,35 @@ def _interaction(cells, points, plan):
         points[:, 1] * scale,
         plan=plan,
     )
+
+
+def _average_external(cells, external_field, order=6):
+    """Integrate the prescribed field with the same 2*pi*r cell-volume test."""
+    nodes, weights = np.polynomial.legendre.leggauss(order)
+    u, v = np.meshgrid((nodes + 1) / 2, (nodes + 1) / 2, indexing="ij")
+    quadrature = np.outer(weights, weights).reshape(-1) / 4
+    u, v = u.reshape(-1), v.reshape(-1)
+    points, moments, owners = [], [], []
+    for cell, polygon in enumerate(cells.polygons):
+        centre = cells.centroids[cell]
+        for a, b in zip(polygon, np.roll(polygon, -1, axis=0), strict=True):
+            first, second = a - centre, b - centre
+            determinant = first[0] * second[1] - first[1] * second[0]
+            sample = centre + u[:, None] * first + ((1 - u) * v)[:, None] * second
+            points.append(sample)
+            moments.append(determinant * (1 - u) * quadrature * sample[:, 0])
+            owners.extend([cell] * len(sample))
+    points, moments = np.concatenate(points), np.concatenate(moments)
+    values = np.asarray(external_field(points), dtype=np.float64)
+    if values.shape != points.shape or not np.isfinite(values).all():
+        raise ValueError(
+            "external_field must return finite (points, 2) field components"
+        )
+    average = np.zeros_like(cells.centroids)
+    normalisation = np.zeros(len(average))
+    np.add.at(average, owners, values * moments[:, None])
+    np.add.at(normalisation, owners, moments)
+    return average / normalisation[:, None]
 
 
 def _fit_law(b_field, permeability_relative):
@@ -326,7 +364,7 @@ def solve_magnetisation(
     """Mesh iron and solve M = c(|B|) B for B = B_external + G M.
 
     ``region`` is a shapely poloidal Polygon or MultiPolygon [m]. The callback
-    receives (cells, 2) centroid coordinates and returns (B_R, B_Z) [T] in the
+    receives (points, 2) volume-quadrature coordinates and returns (B_R, B_Z) [T] in the
     same shape. The table contains B [T] starting at zero and secant relative
     permeability. Its implied H [A/m] must increase strictly. The law is
     single-valued and has no hysteresis or remanence. An optional initial
@@ -350,12 +388,12 @@ def solve_magnetisation(
         raise ValueError("max_iterations must be a nonnegative integer")
     law = _fit_law(b_field, permeability_relative)
     cells = _mesh(region, cell_size)
-    external = np.asarray(external_field(cells.centroids.copy()), dtype=np.float64)
+    external = _average_external(cells, external_field)
     if external.shape != cells.centroids.shape or not np.all(np.isfinite(external)):
         raise ValueError(
             "external_field must return finite (cells, 2) field components"
         )
-    gram = _interaction(cells, cells.centroids, tile_plan)
+    gram = _interaction(cells, None, tile_plan)
     if not np.all(np.isfinite(gram)):
         raise ValueError("the sheet interaction contains nonfinite entries")
     operands = tuple(

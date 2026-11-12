@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/biot/magnetisation.py:329",
+    "scripts/magnetisation_high_permeability/measure.py:218",
+    "scripts/magnetisation_high_permeability/directional.py:52"
+  ],
+  "completed_at": "2026-11-12T04:19:06.367Z",
+  "dispatched_at": "2026-11-12T04:10:23Z",
+  "findings": [
+    {
+      "file": "nova/biot/magnetisation.py",
+      "line": "196",
+      "severity": "blocking",
+      "text": "blocking: the landed tail begins at the table secant slope s = 1/(mu0 mu_n) and reaches q = 1/mu0 only at B_end = b_n + 2*(H_n-H_(n-1))/(s+q) (7.206787508491296 T for WEST), so M rises from M_n = 1.6363125595929811 MA/m to 1.8008693560016667 MA/m; done_when clause 1 requires M constant at M_n on [B_n, 100 T] and dH/dB = 1/mu0 past B_n, and tests/test_magnetisation.py:316 was rewritten to assert the blend instead, leaving the node's declared acceptance measure with no asserting test."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-law-saturation-tail.html",
+      "line": "118",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment declares the done_when's constant-M-at-the-last-knot verdict superseded, which changes the node's acceptance criterion rather than reporting a code finding; the coordinator must amend \u00a74 and the done_when (or reject the blend) before the record can read as meeting its own gate."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read both gained commits against base 77b424b3; 5fdc4fb78 changes _fit_law and _coefficient plus the material tests, 483bcfbb1 adds only evidence prose, 176 insertions and 35 deletions across the three declared files.",
+    "done_when": "clause 2 and clause 3 are recorded (baseline 23 passed 1 xfailed EXIT=0, after 30 passed 1 xfailed EXIT=0, iterations 3 to 3, quadratic ratio 0.00709686967603 to 0.00709910478702, mutant EXIT=1 with three failing saturation cases), but clause 1's constant-M and vacuum-slope-past-B_n assertions are not met or tested.",
+    "goal": "the node's goal is to continue the B-H law past the last table knot with dB/dH = mu0 so M is bounded and sits at M_n; nova/biot/magnetisation.py:159 and :196 resume the secant slope and blend to the vacuum slope only at 7.2068 T, so M reaches 1.8008693560016667 MA/m instead of staying at M_n.",
+    "manifest": "read; status complete, commits 34f109aa..483bcfbb, baseline 23 passed 1 xfailed EXIT=0 at 77b424b3 and after 30 passed 1 xfailed EXIT=0 at 483bcfbb, zero added failures, and the end-secant-hold mutant at EXIT=1.",
+    "write_paths": "the two gained commits touch only nova/biot/magnetisation.py, tests/test_magnetisation.py and docs/evidence/fragments/iron-core-magnetisation/icm-law-saturation-tail.html, all inside the declared paths; the declared docs/figures path is unused."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:380 fails if an interior breakpoint returns to a two-knot table (the exact defect at 77b424b3), :393 and :401 fail if either new width guard is removed, and the end-secant-hold mutant reddens three saturation cases.",
+    "evidence": "tail-blend-baseline-suite.log and tail-blend-after-suite.log carry revision headers and bare EXIT=0 with zero FAILED lines, and tail-blend-negative-control.log is EXIT=1, but the gate asserts the new blend rather than the done_when's constant-M and vacuum-slope-past-B_n clauses.",
+    "fit": "nova/biot/magnetisation.py:126-135 restates the mechanism in the module's own docstring, the added names are mechanism words with no plan label or attribution, and no lint finding is recorded on either changed file.",
+    "goal_fidelity": "nova/biot/magnetisation.py:196 starts the tail at end_slope = 1/(mu0 mu[-1]) and reaches 1/mu0 only at blend_end, so M is not constant at M_n from B_n (WEST reaches 1.8008693560016667 MA/m, above the 1.64 MA/m the goal states).",
+    "reuse": "the change adds no definition; it extends _fit_law and _coefficient in place, and the only other material law (scripts/prototypes/iron_magnetisation/magnetisation.py) is prototype code the diff does not fork.",
+    "scope_discipline": "the two gained commits touch only the three declared source, test and evidence paths; no file outside the fence changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to continue the B-H law past the last table knot with dB/dH = mu0 so M is bounded and stays at M_n; nova/biot/magnetisation.py:159 and :196 resume the table secant slope and blend to the vacuum slope only at 7.206787508491296 T, so M rises to 1.8008693560016667 MA/m rather than remaining at M_n.\nVERDICT done_when: clause 2 and clause 3 are recorded (baseline 23 passed 1 xfailed EXIT=0, after 30 passed 1 xfailed EXIT=0, iterations 3 to 3, quadratic ratio 0.00709686967603 to 0.00709910478702, mutant EXIT=1 with three failing saturation cases), but clause 1's constant-M and vacuum-slope-past-B_n assertions are not met or tested.\nVERDICT write_paths: the two gained commits touch only nova/biot/magnetisation.py, tests/test_magnetisation.py and docs/evidence/fragments/iron-core-magnetisation/icm-law-saturation-tail.html, all inside the declared paths; the declared docs/figures path is unused.\nVERDICT manifest: read; status complete, commits 34f109aa..483bcfbb, baseline 23 passed 1 xfailed EXIT=0 at 77b424b3 and after 30 passed 1 xfailed EXIT=0 at 483bcfbb, zero added failures, and the end-secant-hold mutant at EXIT=1.\nVERDICT diff: read both gained commits against base 77b424b3; 5fdc4fb78 changes _fit_law and _coefficient plus the material tests, 483bcfbb1 adds only evidence prose, 176 insertions and 35 deletions across the three declared files.\nCALL_SITES: nova/biot/magnetisation.py:329, scripts/magnetisation_high_permeability/measure.py:218, scripts/magnetisation_high_permeability/directional.py:52\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: nova/biot/magnetisation.py:196 starts the tail at end_slope = 1/(mu0 mu[-1]) and reaches 1/mu0 only at blend_end, so M is not constant at M_n from B_n (WEST reaches 1.8008693560016667 MA/m, above the 1.64 MA/m the goal states).\nSCORE evidence: 13\nJUSTIFICATION evidence: tail-blend-baseline-suite.log and tail-blend-after-suite.log carry revision headers and bare EXIT=0 with zero FAILED lines, and tail-blend-negative-control.log is EXIT=1, but the gate asserts the new blend rather than the done_when's constant-M and vacuum-slope-past-B_n clauses.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two gained commits touch only the three declared source, test and evidence paths; no file outside the fence changed.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_magnetisation.py:380 fails if an interior breakpoint returns to a two-knot table (the exact defect at 77b424b3), :393 and :401 fail if either new width guard is removed, and the end-secant-hold mutant reddens three saturation cases.\nSCORE fit: 19\nJUSTIFICATION fit: nova/biot/magnetisation.py:126-135 restates the mechanism in the module's own docstring, the added names are mechanism words with no plan label or attribution, and no lint finding is recorded on either changed file.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition; it extends _fit_law and _coefficient in place, and the only other material law (scripts/prototypes/iron_magnetisation/magnetisation.py) is prototype code the diff does not fork.\nFINDING nova/biot/magnetisation.py:196 blocking: the landed tail begins at the table secant slope s = 1/(mu0 mu_n) and reaches q = 1/mu0 only at B_end = b_n + 2*(H_n-H_(n-1))/(s+q) (7.206787508491296 T for WEST), so M rises from M_n = 1.6363125595929811 MA/m to 1.8008693560016667 MA/m; done_when clause 1 requires M constant at M_n on [B_n, 100 T] and dH/dB = 1/mu0 past B_n, and tests/test_magnetisation.py:316 was rewritten to assert the blend instead, leaving the node's declared acceptance measure with no asserting test.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-law-saturation-tail.html:118 non-blocking: the fragment declares the done_when's constant-M-at-the-last-knot verdict superseded, which changes the node's acceptance criterion rather than reporting a code finding; the coordinator must amend \u00a74 and the done_when (or reject the blend) before the record can read as meeting its own gate.",
+  "review_run_id": "r-20261112T040553972669-review-of-icm-law-saturation-tail-483bcfbb1ccf",
+  "reviewed_base_sha": "77b424b3cab3297fdfa4b70c0ec52d87fb80e15b",
+  "reviewed_head_sha": "483bcfbb1ccf4eb3cee03fb21e544da6caf8cd22",
+  "reviewed_run_id": "r-20261111T182356721911-icm-law-saturation-tail",
+  "reviewer_run_id": "r-20261112T040553972669-review-of-icm-law-saturation-tail-483bcfbb1ccf",
+  "scores": {
+    "durability": 18,
+    "evidence": 13,
+    "fit": 19,
+    "goal_fidelity": 11,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T04:24:12.642219+00:00",
+  "total": 101
+}

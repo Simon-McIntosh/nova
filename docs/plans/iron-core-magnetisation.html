@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="56">
+<meta name="plan-version" content="57">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -679,6 +679,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261111T205006716359-icm-newton-trust-region" data-who="reckon-build" data-when="2026-11-12T01:08:29Z">
     <div class="r-comment-body"><p>Adaptive diagonal regularisation preserves the exact Jacobian and exposes per-step lambda, type and local-equation reduction ratios. Saved WEST stall recovers 5.844633900691807e-4 to 2.100506605937123e-12 in 248 corrections with zero G builds; synthetic condition 1.46276e5 converges in sixteen corrections while restored backtracking fails. Exact CPU suite arms pass 28 then 30 tests with zero added failures; nonlinear shell keeps three unregularised corrections and quadratic ratio 0.00705351942949 versus secant 1.04458978683. Evidence: docs/evidence/fragments/iron-core-magnetisation/icm-newton-trust-region.html#icm-newton-trust-region-state.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261112T040553972669-review-of-icm-law-saturation-tail-483bcfbb1ccf" data-who="reckon-build" data-when="2026-11-12T04:19:06.367Z">
+    <div class="r-comment-body"><p>Independent review of r-20261111T182356721911-icm-law-saturation-tail at head 483bcfbb1ccf4eb3cee03fb21e544da6caf8cd22 from base 77b424b3cab3297fdfa4b70c0ec52d87fb80e15b is stored and parsed; scores goal_fidelity 11, evidence 13, scope_discipline 20, durability 18, fit 19, reuse 20 (total 101), added_failure_count 0, one blocking and one non-blocking finding. Blocking: the tail resumes the table secant slope and reaches 1/mu0 only at B_end = b_n + 2*(H_n-H_(n-1))/(s+q) = 7.206787508491296 T, so M rises to 1.8008693560016667 MA/m rather than remaining at M_n = 1.6363125595929811 MA/m, and tests/test_magnetisation.py:316 pins the blend rather than the done_when&#x27;s constant-M and dH/dB = 1/mu0-past-B_n clauses.</p></div>
 </div>
 </section>
 </main>

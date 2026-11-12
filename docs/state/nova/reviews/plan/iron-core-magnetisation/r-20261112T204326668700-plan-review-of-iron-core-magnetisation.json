@@ -79,6 +79,13 @@
       "note": "Done-when (1) now asserts the tail: the in-table fit exact, the rise beyond B_n at most 1 % of M_n, M constant beyond the blend, with a secant-resuming mutant that must fail (the landed rise-cap tests and mutants).",
       "reason": "",
       "when": "2026-11-12T21:29:59.549185+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "The iron-read half has landed: nova/imas/machine.py read_iron_core is the only reader and both script readers call it, so clause (3)'s read is met; what remains is one goal (the solved WEST stray field on the Galerkin operator), now in flight as icm-west-62751-galerkin-pair. Splitting would only relabel landed work.",
+      "when": "2026-11-12T21:30:29.524856+00:00"
     }
   ],
   "responses": {
@@ -99,6 +106,12 @@
       "note": "Done-when (1) no longer asks for the centroid prototype numbers: accuracy is judged by refinement (shell errors fall >= 2.5x per halving at mu_r 100 and 1000, 20 mm errors within the collocated values plus 0.5 points) and the sphere interior against its derived Galerkin bound, matching the landed acceptance.",
       "reason": "",
       "when": "2026-11-12T21:28:53.611014+00:00"
+    },
+    "single_goal-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The iron-read half has landed: nova/imas/machine.py read_iron_core is the only reader and both script readers call it, so clause (3)'s read is met; what remains is one goal (the solved WEST stray field on the Galerkin operator), now in flight as icm-west-62751-galerkin-pair. Splitting would only relabel landed work.",
+      "when": "2026-11-12T21:30:29.524856+00:00"
     },
     "wiring-1": {
       "action": "acted",

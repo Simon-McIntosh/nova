@@ -21,17 +21,32 @@ from scripts.edge_sheet.figure import (  # noqa: E402
     WIDTH_INCHES,
     save_checked,
 )
-from scripts.west_root_branch.origin import audit_origin  # noqa: E402
 
 # Retain the iron study's candidate purple and neutral comparison vocabulary.
 RAMP = "#7b4fb3"
 ROOT_STYLES = {"A": ("#929292", "--"), "B": ("#555555", ":"), "C": (RAMP, "-")}
 
 
-def render(run):
+def render(run, partial=False):
     record = json.loads((run / "measurement.json").read_text())
-    assert record["complete"]
-    column = np.load(run / "strip-roots.npz")
+    if partial:
+        saved = run.parent / "r-20261112T000127065672-icm-magnetisation-smoothness"
+        column = np.load(saved / "strip-column.npz")
+        profiles = {
+            "A": column["baseline"],
+            "B": column["homotopy"],
+            "C": np.load(run / "ramp-latest.npy")[column["cells"]],
+        }
+        labels = {
+            "A": "root A",
+            "B": "root B",
+            "C": f"ramp at {record['steps'][-1]['drive']:.6f}",
+        }
+    else:
+        assert record["complete"]
+        column = np.load(run / "strip-roots.npz")
+        profiles = {name: column[name] for name in ROOT_STYLES}
+        labels = {name: "root " + name for name in ROOT_STYLES}
     plt.style.use("scripts/magnetisation_high_permeability/data-ink.mplstyle")
     plt.rcParams["svg.fonttype"] = "none"
     fig, axes = plt.subplots(2, 2, figsize=(WIDTH_INCHES, HEIGHT_INCHES), dpi=100)
@@ -68,12 +83,12 @@ def render(run):
         for name, (colour, dash) in ROOT_STYLES.items():
             axis.plot(
                 column["z"],
-                column[name][:, component] / 1e6,
+                profiles[name][:, component] / 1e6,
                 color=colour,
                 linestyle=dash,
                 linewidth=3.0 if name == "C" else 2.6,
                 zorder=5 if name == "C" else 2,
-                label="root " + name,
+                label=labels[name],
             )
         axis.set_xlabel("height in strip [m]")
         axis.set_ylabel(("radial M", "vertical M")[component] + " [MA/m]")
@@ -109,12 +124,28 @@ def render(run):
         f"SVG={output} PNG={run / 'root-branch.png'}",
         flush=True,
     )
+    (run / "figure-summary.json").write_text(
+        json.dumps(
+            {
+                "partial": partial,
+                "drive": record["steps"][-1]["drive"],
+                "labels": labels,
+                "checked_text_artists": len(artists),
+            },
+            indent=2,
+        )
+        + "\n"
+    )
     plt.close(fig)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", required=True, type=Path)
-    run = parser.parse_args().run
-    audit_origin(run)
-    render(run)
+    parser.add_argument("--partial", action="store_true")
+    args = parser.parse_args()
+    if not args.partial:
+        from scripts.west_root_branch.origin import audit_origin
+
+        audit_origin(args.run)
+    render(args.run, args.partial)

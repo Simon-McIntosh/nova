@@ -1,0 +1,42 @@
+<section id="h200-levers-retained">
+<h2>H200 lever measurements: retained receipts, execution incomplete</h2>
+<p>Job <code>1312287</code> ran on an NVIDIA H200 NVL with 64-bit JAX enabled.
+The carried-decision comparisons at widths 1 and 16 and the booking-off width-1
+arm completed. The job failed in a timing-helper source-text assertion while
+preparing booking-on, before its timed product call. These completed receipts
+are preserved; they will not be rerun.</p>
+<p>No product default has changed. The remaining H200 measurements, precision
+audits and default adjudications are pending. The numbers below are retained
+observations, with no speed verdict assigned yet. Compile/cache-load walls are
+separate from warm execution walls. Each carried-decision row shows the two
+selected fresh processes; their spread is at most 5%. Earlier disagreeing pairs
+remain in the run directory and are excluded from those rows.</p>
+<table id="h200-levers-retained-walls">
+<thead><tr><th>Measurement</th><th>Width</th><th>Arm</th><th>Stage</th><th>Process 1 [ms]</th><th>Process 2 [ms]</th><th>Spread</th><th>Compile/cache-load [s]</th></tr></thead>
+<tbody>
+<tr><td>carried-decisions</td><td>1</td><td>off</td><td>full</td><td>6.832168</td><td>6.512109</td><td>4.915%</td><td>0.087398, 0.087246</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>off</td><td>carried</td><td>1.940487</td><td>1.958208</td><td>0.913%</td><td>5.640779, 5.712846</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>on</td><td>full</td><td>6.858742</td><td>6.880885</td><td>0.323%</td><td>0.091832, 0.091536</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>on</td><td>carried</td><td>3.059946</td><td>3.167046</td><td>3.500%</td><td>14.384178, 14.407404</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>off</td><td>full</td><td>30.101346</td><td>30.093079</td><td>0.027%</td><td>0.088507, 0.088643</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>off</td><td>carried</td><td>3.766643</td><td>3.766259</td><td>0.010%</td><td>5.427391, 5.378308</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>on</td><td>full</td><td>20.872401</td><td>21.020811</td><td>0.711%</td><td>0.092736, 0.092345</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>on</td><td>carried</td><td>9.301983</td><td>9.237671</td><td>0.696%</td><td>13.174718, 13.011182</td></tr>
+<tr><td>booking cost (1)</td><td>1</td><td>off</td><td>assembly</td><td>7.586610</td><td>pending on arm</td><td>pending comparison</td><td>3.723689</td></tr>
+<tr><td>booking cost (1)</td><td>1</td><td>off</td><td>update</td><td>15.279071</td><td>pending on arm</td><td>pending comparison</td><td>4.946139</td></tr>
+<tr><td>booking cost (2)</td><td>1</td><td>off</td><td>assembly</td><td>7.446166</td><td>pending on arm</td><td>pending comparison</td><td>3.748520</td></tr>
+<tr><td>booking cost (2)</td><td>1</td><td>off</td><td>update</td><td>15.294110</td><td>pending on arm</td><td>pending comparison</td><td>5.054231</td></tr>
+</tbody></table>
+<p>The durable receipts, compilation cache and individual arm logs are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T182638024068-h200-levers/h200-levers-corrected</code>.
+The selected process identities, arrays and lowered-program fingerprints are
+recorded in <code>summary.json</code> and its referenced receipts. Booking-on
+failed with <code>AssertionError</code> at the helper's outdated mapper-source
+anchor; the replacement compares assembly with the update factor matrix.</p>
+<p>The CPU smoke gate runs separately on <code>all_debug</code> before the
+remaining measurements are queued as independent H200 jobs. A synthetic
+instrument control admits distinct program fingerprints and rejects identical
+ones with <code>ValueError: inert lever: identical lowered programs and execution counts</code>
+and <code>EXIT=1</code>. This control does not substitute for a measured off/on
+program distinction.</p>
+</section>

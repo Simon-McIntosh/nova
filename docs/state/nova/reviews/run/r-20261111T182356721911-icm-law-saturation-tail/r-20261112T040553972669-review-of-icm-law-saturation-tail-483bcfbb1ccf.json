@@ -11,6 +11,13 @@
   ],
   "completed_at": "2026-11-12T04:19:06.367Z",
   "dispatched_at": "2026-11-12T04:10:23Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-icm-law-saturation-tail-483bcfbb1ccf",
+      "recorded_at": "2026-11-12T05:35:16.092182+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/biot/magnetisation.py",

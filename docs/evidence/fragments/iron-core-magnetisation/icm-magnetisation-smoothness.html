@@ -5,7 +5,7 @@
     Its original material residual is 1.04424954076e-11, with zero
     interaction-matrix rebuilds. This is a 10.48% reduction in corrections, not a
     wall-time improvement: the same P100 measurement takes 185.155 s
-    against 151.044 s. These include each arm's compilation.</p>
+    against 151.044 s. Compilation and cache state were not normalised between these observed walls.</p>
   <p><strong>The zero-penalty state is a different discrete root.</strong>
     Both states satisfy the original map, but the maximum cell-vector difference
     normalised by the baseline maximum is 1.9984613202. Sign changes
@@ -68,7 +68,7 @@
 <tr><td>0.001</td><td>0.00741976467</td><td>400</td><td>0.000315219329</td><td>iteration-budget</td></tr>
 <tr><td>0.0001</td><td>0.000741976467</td><td>222</td><td>1.04424954e-11</td><td>converged</td></tr>
   </tbody></table>
-  <p>The separately bounded halving-continuation counterfactual remains in progress; it is not part of the delivered solver.</p>
+  <p>A scratch halving continuation from strength 0.01 also terminates as <code>iteration-budget</code>: 800 corrections, original residual 0.0062314779, 623.804 s. Its import path is asserted and the product source stays unchanged. This counterfactual is not part of the delivered solver.</p>
   <p>The three probe fields use one new external-target response from the
     production sheet route, applied to both roots; no centroid G is rebuilt.
     The percentage is <code>||B_homotopy - B_baseline|| / ||B_baseline||</code>,
@@ -107,7 +107,7 @@
 <tr><td>3060</td><td>iron_core.segment[3]</td><td>4.80045, -1.112</td><td>0.342734</td><td>0.000232859</td></tr>
   </tbody></table>
   <h3 id="icm-magnetisation-smoothness-validation">Analytic and scoped regression controls</h3>
-  <p>The exact baseline/head CPU suite pair is still running in sirius job 1311175. Analytic and default-off quadratic measurements will be inserted only from the completed receipts.</p>
+  <p>The exact baseline/head CPU suite pair is still running in sirius job 1311194. Analytic and default-off quadratic measurements will be inserted only from the completed receipts.</p>
   <p>The two-body control removes the body-label equality from shared-face
     assembly in a scratch extraction. The run asserts the imported mutant's
     absolute module path and source digest. Its different-M body-null-mode
@@ -120,6 +120,6 @@
     <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T000127065672-icm-magnetisation-smoothness</code>: <code>measurement.log</code>, <code>west-*.json</code>,
     <code>diagnostics.json</code>, <code>root-comparison.json</code>,
     <code>strip-residuals.json</code>, <code>continuation.log</code>,
-    <code>negative-control.log</code>, <code>baseline-suite.log</code> and
-    <code>after-suite.log</code>.</p>
+    <code>negative-control.log</code>, <code>baseline-suite-verified.log</code> and
+    <code>after-suite-verified.log</code>.</p>
 </section>

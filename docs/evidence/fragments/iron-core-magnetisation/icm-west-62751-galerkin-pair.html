@@ -1,0 +1,74 @@
+<section id="icm-west-62751-galerkin-pair-state">
+<h3>WEST 62751 on the Galerkin operator: two meshes converge from M = 0, and the +2 and +4 m probes carry a 13 to 17 per cent mesh-pair error bar</h3>
+<p>Both meshes converge through the production material path from a demagnetised state at full drive, in four and five Newton corrections with every accepted step exact. The far field at the plan's probes is then read off each mesh, and the pair separation is the discretisation error bar the lead asked for: 0.006, 26.3 and 16.6 µT at +1, +2 and +4 m, which is 0.0026, 13.1 and 17.2 per cent of the coarse value. The +1 m probe is mesh-independent to five significant figures; the +2 and +4 m probes are not, and that is the substantive result of this section rather than a shortfall of it.</p>
+<h4>Inputs and controls</h4>
+<p>The iron is read through <code>StaticMachineDescription.read_iron_core</code> at the DD pin its curation manifest declares (DD 4.1.0, six segments, one CEA B-H table, 25 rows), which is the same route <code>tests/test_imas_iron_read.py</code> exercises. The external field is rebuilt from the saved coil quadrature and the 1128 prescribed plasma currents. Two independent controls confirm that the source was reconstructed rather than replaced. The rebuilt field at the three probes reproduces the saved air field with a maximum relative difference of exactly 0 in both components, and the poloidal line of <code>B</code> magnitudes matches the recorded profile to a maximum relative 0.001090, below the 0.002 the earlier measurement asserted. The B-H table matches the recorded table bit for bit. A difference between the meshes therefore cannot come from a changed source.</p>
+<table><thead><tr><th>quantity</th><th>0.08 m mesh</th><th>0.04 m mesh</th></tr></thead><tbody>
+<tr><td>cells</td><td>1695</td><td>6632</td></tr>
+<tr><td>cell area / h² (mean)</td><td>0.930742164454</td><td>0.951512647014</td></tr>
+<tr><td>minimum centroid clearance [m]</td><td>0.00654374052568</td><td>0.00340004817924</td></tr>
+<tr><td>median centroid clearance [m]</td><td>0.04</td><td>0.02</td></tr>
+<tr><td>mesh area [m²]</td><td>10.096691</td><td>10.096691</td></tr>
+<tr><td>authored-region symmetric-difference area [m²]</td><td>0</td><td>0</td></tr>
+<tr><td>iron volume [m³]</td><td>93.5019393552</td><td>93.5019393552</td></tr>
+<tr><td>Galerkin operator build [s]</td><td>11.9829212055</td><td>84.8059657514</td></tr>
+<tr><td>Newton corrections accepted</td><td>4</td><td>5</td></tr>
+<tr><td>termination</td><td>converged</td><td>converged</td></tr>
+<tr><td>final relative residual</td><td>5.83681956373e-14</td><td>1.79364975427e-15</td></tr>
+<tr><td>steps taken without regularisation</td><td>4 of 4</td><td>5 of 5</td></tr>
+<tr><td>converged μr range</td><td>215.555298626 to 1616.96337438</td><td>215.706537219 to 1683.24289873</td></tr>
+<tr><td>max |M| [A/m]</td><td>680046.406975</td><td>755193.424793</td></tr>
+<tr><td>min symmetric eigenvalue of G / μ₀</td><td>0.000211078788405</td><td>4.86860066498e-05</td></tr>
+<tr><td>maximum eigenvalue</td><td>0.999733784575</td><td>0.999955266714</td></tr>
+<tr><td>||WG − (WG)<sup>T</sup>|| / ||WG||</td><td>1.78097570538e-17</td><td>1.81303944848e-17</td></tr>
+<tr><td>solve wall [s]</td><td>144.939923018</td><td>580.599684611</td></tr>
+</tbody></table>
+<p>Both symmetric spectra stay inside [0, 1] with symmetry defects at double-precision roundoff, so the energy operator is positive semidefinite with the expected upper bound on both meshes. The 0.08 m spectrum reproduces the independently recorded 1695-cell spectrum to every printed digit, which is a cross-check of this measurement path against the operator measurement that established the formulation. The converged μr range is inside the table's own [1.521395, 1692.4255] on both meshes, so no cell is driven past the tabulated end.</p>
+<h4>Convergence from M = 0 at full drive</h4>
+<table><thead><tr><th>mesh</th><th>correction</th><th>relative residual after the correction</th><th>step type</th></tr></thead><tbody>
+<tr><td>0.08 m</td><td>0 (seed)</td><td>0.9977262521437867</td><td>—</td></tr>
+<tr><td>0.08 m</td><td>1</td><td>0.0012376744104717209</td><td>exact Newton</td></tr>
+<tr><td>0.08 m</td><td>2</td><td>1.2950440503512115e-05</td><td>exact Newton</td></tr>
+<tr><td>0.08 m</td><td>3</td><td>1.4589653246586654e-08</td><td>exact Newton</td></tr>
+<tr><td>0.08 m</td><td>4</td><td>5.83681956373011e-14</td><td>exact Newton</td></tr>
+<tr><td>0.04 m</td><td>0 (seed)</td><td>0.9977170861028701</td><td>—</td></tr>
+<tr><td>0.04 m</td><td>1</td><td>0.0012005442335766576</td><td>exact Newton</td></tr>
+<tr><td>0.04 m</td><td>2</td><td>2.3431982100275703e-05</td><td>exact Newton</td></tr>
+<tr><td>0.04 m</td><td>3</td><td>6.838640783326334e-07</td><td>exact Newton</td></tr>
+<tr><td>0.04 m</td><td>4</td><td>6.594735894403882e-10</td><td>exact Newton</td></tr>
+<tr><td>0.04 m</td><td>5</td><td>1.7936497542729163e-15</td><td>exact Newton</td></tr>
+</tbody></table>
+<p>Neither mesh needs the drive ramp the brief reserves for a case exceeding ten corrections, so every step above is the full drive and no continuation is involved. No step required the diagonal regularisation, so the reported corrections are ordinary Newton corrections on the exact differential Jacobian.</p>
+<h4>Far field at the probes and the mesh-pair error bar</h4>
+<p>Probes are R = 5.52, 6.52 and 8.52 m at Z = 0: +1, +2 and +4 m from the outer iron edge, 4.52 m. The air-core field magnitudes there are 7024.08, 4396.82 and 1799.96 µT.</p>
+<table><thead><tr><th>probe</th><th>0.08 m mesh [µT]</th><th>0.04 m mesh [µT]</th><th>fine − coarse [µT]</th><th>of the coarse value [%]</th><th>of the air-core field [%]</th><th>iron / air, coarse → fine [%]</th></tr></thead><tbody>
+<tr><td>+1 m</td><td>242.651092807</td><td>242.644735631</td><td>-0.00635717599</td><td>-0.0026</td><td>-0.00009</td><td>3.4546 → 3.4545</td></tr>
+<tr><td>+2 m</td><td>200.369378227</td><td>174.104623884</td><td>-26.264754343</td><td>-13.11</td><td>-0.597</td><td>4.5571 → 3.9598</td></tr>
+<tr><td>+4 m</td><td>96.325592193</td><td>79.769382215</td><td>-16.556209979</td><td>-17.19</td><td>-0.920</td><td>5.3515 → 4.4317</td></tr>
+</tbody></table>
+<p>The error bar is the third column. At +1 m the two meshes agree to five significant figures, so the near probe is mesh-robust and the number to quote. At +2 and +4 m the finer mesh is 13 and 17 per cent below the coarse one, and that change is one-directional rather than scatter: it is the discretisation error of the 0.08 m mesh showing itself, not a solution branch difference, because both meshes reach the same root from a demagnetised start with exact Newton steps.</p>
+<figure><img src="/nova/figures/iron-core-magnetization/icm-west-62751-galerkin-pair/west-62751-mesh-pair.svg" alt="Converged WEST iron permeability on the 0.04 m mesh, and the probe field for both meshes with their separation drawn as an error bar"><figcaption>Left: the 0.04 m mesh, 6632 cells, drawn as unfilled cell edges coloured by the converged relative permeability on a viridis scale spanning the CEA table's own range, 215.1 to 1692.4, with the WEST wall units and coil outlines for scale. High permeability concentrates in the lower inner corner of the frame and falls towards the outer corners. Right: |B| at the three probes for both meshes, the finer mesh in blue and the coarser in grey, with the separation of each pair drawn as a grey error bar; the three values printed inside the panel are the fine-minus-coarse difference in µT. The 14 × 7.2 in figure declares a 16 cm height, all 44 text artists pass the layout check, and the producer inspected the rendered PNG with no collision or clipping.</figcaption></figure>
+<h4>The CEA table against a flat μr = 215</h4>
+<p>Most WEST iron sits on the steep low-field branch whose measurement status imas-efit records as unconfirmed, so the same solve is repeated with the table replaced by a flat μr = 215, which is the table's origin value. The flat solve converges in one correction on both meshes because the law is then linear.</p>
+<table><thead><tr><th>probe</th><th>CEA table [µT]</th><th>flat μr = 215 [µT]</th><th>table − flat [µT]</th><th>of the air-core field, 0.04 m [%]</th><th>of the air-core field, 0.08 m [%]</th></tr></thead><tbody>
+<tr><td>+1 m</td><td>242.644735631</td><td>905.98379883</td><td>-663.339063199</td><td>-9.444</td><td>-9.235</td></tr>
+<tr><td>+2 m</td><td>174.104623884</td><td>575.066689704</td><td>-400.96206582</td><td>-9.119</td><td>-8.958</td></tr>
+<tr><td>+4 m</td><td>79.769382215</td><td>239.860354844</td><td>-160.090972629</td><td>-8.894</td><td>-8.766</td></tr>
+</tbody></table>
+<p>The prototype recorded a far-field change of 14 per cent at one probe and 8 per cent at another, as a fraction of the air-core field. The Galerkin mesh pair measures 9.44, 9.12 and 8.89 per cent at the finer mesh, inside that recorded range, and the pair moves the figure by at most 0.21 percentage points. So the size of this modelling difference is a property of the constitutive choice, not of the discretisation: refining the mesh changes the probe field by up to 17 per cent while changing the table-versus-flat change by two tenths of a point. The flat-215 iron leaves the probes at 12.9 to 13.3 per cent of the air-core field; the table iron leaves them at 3.45 to 4.43 per cent.</p>
+<h4>Converged permeability distribution</h4>
+<p>Every cell exceeds μr = 100 on both meshes: the volume fraction above 100 is 1.0 exactly, because the table's origin permeability is 215. The fraction of iron volume above μr = 1000 is 6.564 per cent at 0.08 m and 6.652 per cent at 0.04 m, so the high-permeability core of the frame is a small and mesh-stable part of the iron, concentrated where the figure shows it at 0.04 m.</p>
+<h4>The law is anhysteretic</h4>
+<p>The constitutive law is the monotone H(B) fit with the one per cent saturation-tail cap. It is single-valued: the model carries no remanent magnetisation, so a drive that returns to zero returns to zero magnetisation, and no minor-loop permeability is represented after the central-solenoid swing. Both would change the shielding and neither is in these numbers. Hysteresis is out of scope by the lead's ruling of 2026-11-05.</p>
+<h4>Beside the former collocated roots A and B</h4>
+<p>The two former collocated roots were a branch disagreement, not a discretisation one: at +1 m they read 213.24 and 278.66 µT, 30 per cent apart. The Galerkin pair places the answer at 242.65 µT there, between them and stable to 0.003 per cent across the two meshes, which is the branch ambiguity resolved rather than inherited.</p>
+<table><thead><tr><th>state</th><th>|B| at +1 m [µT]</th><th>|B| at +2 m [µT]</th><th>|B| at +4 m [µT]</th></tr></thead><tbody>
+<tr><td>collocated root A</td><td>213.236263035</td><td>174.426899223</td><td>86.503807271</td></tr>
+<tr><td>collocated root B</td><td>278.664706982</td><td>195.484016052</td><td>88.3016157605</td></tr>
+<tr><td>this pair, 0.08 m</td><td>242.651092807</td><td>200.369378227</td><td>96.325592193</td></tr>
+<tr><td>this pair, 0.04 m</td><td>242.644735631</td><td>174.104623884</td><td>79.769382215</td></tr>
+</tbody></table>
+<p>Against the roots, the coarse mesh lies between A and B at every probe. The fine mesh passes very close to A at +2 m, 0.32 µT below it, and below both roots at +4 m, where the roots themselves agreed to 2 per cent and the mesh pair does not.</p>
+<h4>What the pair does and does not establish</h4>
+<p>The pair bounds the 0.08 m error and the fine mesh is the best available discretisation: a 0.02 m rung would be about 24000 cells, 48000 unknowns, and an 18 GB dense operator, beyond the 16 GB of the P100 this ran on, so the finer rung is out of reach on this device rather than merely untried. Three meshes are available in total once the saved 3447-cell solve is counted, and the +2 m probe walks 200.37, 183.52 and 174.10 µT at 1695, 3447 and 6632 cells. That sequence is monotone and decelerating, which supports reading the 0.04 m value as the better one, but the decrements are 16.9 and 9.4 µT and no order of convergence is demonstrated. The fine-mesh +2 and +4 m values should be read as carrying a residual error of order a few per cent, not as converged. The +1 m value, the table-versus-flat change and the permeability distribution are robust across the pair.</p>
+</section>

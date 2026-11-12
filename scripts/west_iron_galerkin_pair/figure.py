@@ -157,7 +157,8 @@ def render(run: Path, destination: Path):
         0.96,
         "fine − coarse: "
         + ", ".join(
-            "0.0" if abs(value) < 0.05 else f"{value:+.1f}" for value in difference
+            f"{value:+.2f}" if abs(value) < 0.5 else f"{value:+.1f}"
+            for value in difference
         )
         + " µT",
         transform=trace.transAxes,

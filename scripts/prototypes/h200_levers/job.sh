@@ -14,6 +14,9 @@ cleanup() {
     printf 'EXIT=%s\n' "$code"
 }
 trap cleanup EXIT
-printf '# revision: %s tree: %s command: python run.py %s %s --revision %s %s\n' "$revision" "$root" "$root" "$output" "$revision" "$*"
+python=/home/ITER/mcintos/Code/nova/.venv/bin/python
+printf '# revision: %s tree: %s command: %q %q %q %q --revision %q' "$revision" "$root" "$python" "$scratch/run.py" "$root" "$output" "$revision"
+printf ' %q' "$@"
+printf '\n'
 git -C "$root" show "$revision:scripts/prototypes/h200_levers/run.py" > "$scratch/run.py"
-/home/ITER/mcintos/Code/nova/.venv/bin/python "$scratch/run.py" "$root" "$output" --revision "$revision" "$@"
+"$python" "$scratch/run.py" "$root" "$output" --revision "$revision" "$@"

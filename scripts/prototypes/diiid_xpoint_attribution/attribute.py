@@ -115,6 +115,121 @@ def fit_conductors(response, difference, selected, rcond=1e-8):
     )
 
 
+def operator_decomposition(
+    reference,
+    solved,
+    vacuum,
+    reference_plasma,
+    source_reference,
+    source_solved,
+    target,
+    reference_current,
+    shadow,
+    tolerance=1e-8,
+):
+    """Keep held field values separate from the physical source image.
+
+    The physical image must close on every unshadowed node before a remainder
+    can be named a shadow contribution. This positive closure check prevents
+    an operator reconstruction error being assigned to a boundary input.
+    """
+    boundary = solved - vacuum - source_solved
+    if np.max(np.abs(boundary[~shadow]), initial=0) > tolerance:
+        raise ValueError("physical operator does not close on unshadowed nodes")
+    return dict(
+        profiles=source_reference * reference_current / target - reference_plasma,
+        total_current=source_reference * (1 - reference_current / target),
+        external=vacuum + reference_plasma - reference,
+        plasma_response=source_solved - source_reference,
+        boundary_shadow=boundary,
+    )
+
+
+def split_operator(folder, frame):
+    """Combine native EFIT taring with the actual saved-state source images."""
+    data = dict(np.load(folder / "native" / f"fields-{frame}.npz"))
+    result = json.loads((folder / "native" / f"result-{frame}.json").read_text())
+    count = data["reference"].size
+    shape = data["reference"].shape
+    saved = dict(np.load(Path(result["folder"]) / "terminal.npz"))
+    reference = dict(np.load(folder / f"operator-{frame}-reference.npz"))
+    solved = dict(np.load(folder / f"operator-{frame}-solved.npz"))
+    shadow = np.asarray(saved["shadow"][:count], bool).reshape(shape)
+    vacuum = solved["external"][:count].reshape(shape)
+    np.testing.assert_allclose(vacuum, data["vacuum"], atol=3e-14, rtol=0)
+    parts = operator_decomposition(
+        data["reference"],
+        data["solved"],
+        vacuum,
+        data["reference_plasma"],
+        reference["source_image"][:count].reshape(shape),
+        solved["source_image"][:count].reshape(shape),
+        result["current"]["prescribed_a"],
+        result["current"]["reference_tare_a"],
+        shadow,
+    )
+    np.testing.assert_allclose(
+        sum(parts.values()), data["solved"] - data["reference"], atol=1e-12, rtol=0
+    )
+    raw = vacuum + solved["source_image"][:count].reshape(shape)
+    raw_point, _ = saddle(
+        data["radius"], data["height"], raw, result["solved_saddle_m"]
+    )
+    result["stencil_decomposition_control"] = result["attribution"]
+    result["attribution"] = attribute_fields(
+        data["radius"],
+        data["height"],
+        data["reference"],
+        result["reference_saddle_m"],
+        parts,
+    )
+    result["physical_image_saddle_m"] = raw_point
+    result["physical_image_offset_cm"] = 100 * (
+        raw_point - result["reference_saddle_m"]
+    )
+    result["physical_image_distance_cm"] = float(
+        np.linalg.norm(result["physical_image_offset_cm"])
+    )
+    result["shadow_nodes"] = np.argwhere(shadow)
+    result["unshadowed_closure_sup_wb"] = float(
+        np.max(np.abs(parts["boundary_shadow"][~shadow]))
+    )
+    result["shadow_sup_wb"] = float(np.max(np.abs(parts["boundary_shadow"][shadow])))
+    result["current"]["operator_solved_total_a"] = float(solved["source_current"].sum())
+    rr, zz = np.meshgrid(data["radius"], data["height"], indexing="ij")
+    physical_current = solved["source_current"]
+    nonzero = physical_current > 0
+    result["current"]["operator_solved"] = dict(
+        total_a=float(physical_current.sum()),
+        centroid_rz_m=[
+            float(physical_current @ rr.ravel() / physical_current.sum()),
+            float(physical_current @ zz.ravel() / physical_current.sum()),
+        ],
+        peaking=float(
+            physical_current[nonzero].max() / physical_current[nonzero].mean()
+        ),
+    )
+    data.update(parts)
+    data.update(physical_image=raw, shadow=shadow)
+    write(folder / "native" / f"result-{frame}.json", result)
+    np.savez_compressed(folder / "native" / f"fields-{frame}.npz", **data)
+    print(
+        "OPERATOR_ATTRIBUTION",
+        frame,
+        json.dumps(
+            portable(
+                dict(
+                    physical_miss_cm=result["physical_image_distance_cm"],
+                    published_miss_cm=result["measured_distance_cm"],
+                    unshadowed_closure_wb=result["unshadowed_closure_sup_wb"],
+                )
+            )
+        ),
+        flush=True,
+    )
+    return result
+
+
 def portable(value):
     if isinstance(value, dict):
         return {key: portable(item) for key, item in value.items()}
@@ -541,6 +656,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--input-audit", type=Path, required=True)
+    parser.add_argument(
+        "--complete",
+        action="store_true",
+        help="also recover the actual source operator and native EFIT tare",
+    )
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     rows = []
@@ -554,6 +674,23 @@ def main():
         archive = Path(item["files"][-1]["path"])
         rows.append(analyze(item["frame"], folder, archive, args.output))
         write(args.output / "results.json", dict(rows=rows, forward_solves=0))
+    if args.complete:
+        from scripts.prototypes.diiid_xpoint_attribution.operator_probe import probe
+        from scripts.prototypes.diiid_xpoint_attribution.native_reference import refine
+        from scripts.prototypes.diiid_xpoint_attribution.sensitivity import (
+            path_response,
+        )
+
+        probe(args.output)
+        for frame in (137, 146):
+            refine(args.output, frame)
+            result = split_operator(args.output, frame)
+            arrays = dict(np.load(args.output / "native" / f"fields-{frame}.npz"))
+            integrated = path_response(arrays, result, 32)
+            write(
+                args.output / "native" / f"sensitivity-{frame}.json",
+                dict(path=integrated),
+            )
     print("MEASUREMENT: 2 converged saved states; zero forward solves", flush=True)
 
 

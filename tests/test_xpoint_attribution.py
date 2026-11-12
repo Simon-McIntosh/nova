@@ -6,6 +6,7 @@ import pytest
 from scripts.prototypes.diiid_xpoint_attribution.attribute import (
     attribute_fields,
     fit_conductors,
+    operator_decomposition,
     saddle,
 )
 
@@ -91,3 +92,42 @@ def test_conductor_fit_keeps_unexplained_spatial_residual(maps):
     )
     assert np.linalg.norm(result["residual_flux_wb"]) > 0.1
     assert result["rank"] == 2
+
+
+def test_held_field_is_separate_from_physical_current_error(maps):
+    radius, height, rr, zz, reference = maps
+    physical = reference + 0.003 * rr**2
+    shadow = (abs(rr - 1.5) < 0.1) & (abs(zz + 0.1) < 0.1)
+    held = np.where(shadow, 0.01 * (zz + 0.1), 0)
+    parts = operator_decomposition(
+        reference,
+        physical + held,
+        np.zeros_like(rr),
+        reference,
+        reference,
+        physical,
+        1,
+        1,
+        shadow,
+    )
+    np.testing.assert_allclose(parts["boundary_shadow"], held, atol=1e-15)
+    np.testing.assert_allclose(
+        sum(parts.values()), physical + held - reference, atol=1e-15
+    )
+    np.testing.assert_allclose(parts["plasma_response"], 0.003 * rr**2, atol=1e-15)
+
+
+def test_unshadowed_operator_mismatch_cannot_be_called_boundary_input(maps):
+    radius, height, rr, zz, reference = maps
+    with pytest.raises(ValueError, match="does not close"):
+        operator_decomposition(
+            reference,
+            reference + 0.01,
+            np.zeros_like(rr),
+            reference,
+            reference,
+            reference,
+            1,
+            1,
+            np.zeros_like(rr, dtype=bool),
+        )

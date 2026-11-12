@@ -186,4 +186,34 @@
     and the comparison of the delivered source blob against HEAD. Historical
     receipts above remain historical; the repair receipts and verdict in the
     manifest are authoritative for this correction.</p>
+  <h3 id="icm-law-saturation-tail-review-authority">Review disposition: the tail-only repair remains authoritative</h3>
+  <p id="icm-law-saturation-tail-review-disposition">Finding
+    <code>f184ed8d2e7</code> is declined. Its observation of the blend and WEST
+    asymptote is correct, but its acceptance premise is the superseded
+    constant-magnetisation-at-the-last-knot condition. The subsequent explicit
+    repair instruction in this run says: <q>On [0, B_n], H(B) must be exactly
+    the existing fit</q> and <q>Put the C1 transition in the tail, beyond the
+    last knot</q>. It also explicitly requires the asymptotic magnetisation,
+    <q>not exactly M_n</q>. The implemented blend and the asserting tests follow
+    that correction; changing them back would restore the defect it rejected.</p>
+  <p id="icm-law-saturation-tail-endpoint-incompatibility">For the valid
+    two-knot table [0, 10] T with relative permeability 1000, preserving the
+    fitted law gives H(B) = B/(1000 mu0) throughout the table. Its left
+    derivative at 10 T is therefore 1/(1000 mu0). A continuation with
+    derivative 1/mu0 immediately to the right cannot join it continuously in
+    derivative. An immediate last-knot plateau, an unchanged in-table fit and
+    a continuous derivative are incompatible for this table. The repair
+    resolves this by placing the positive-slope transition beyond the table,
+    exactly as instructed.</p>
+  <p id="icm-law-saturation-tail-review-verification">This review disposition
+    changes evidence only. The production module and tests retain the repair
+    measured above: WEST has a 1.2067875084912956 T blend and a
+    1.8008693560016667 MA/m asymptote, every knot is reproduced, the in-table
+    fit is preserved, and the two-knot linear-law and width-refusal tests
+    remain enabled. The manifest records fresh exact-command suite arms at
+    this round's base and final documentation head, with imported-source
+    assertions. There is no behavioural answering commit to revert for a
+    declined finding: reverting this evidence paragraph does not change any
+    assertion. The separately retained end-secant-hold mutation remains the
+    negative control for the active saturation bound.</p>
 </section>

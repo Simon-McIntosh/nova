@@ -2,7 +2,7 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "caption_review": "All five captions (docs/evidence/fragments/diiid-vertical-force-balance/sampled-profile-core-hold.html:14,15,27,28,29) do far more than repeat a title: they name the machine and frame, the arm order, the residuals, the 21 shared flux levels with their values, and what each marker family means, including that hollow markers are unconfined roots. They are not recorded as findings. One caption clause is not matched by the picture: the three midplane captions list dark crosses among the series (\"Blue squares are head, grey circles base and dark crosses EFIT map\") without saying those crosses appear only in the left panel, which is the finding recorded against scripts/prototypes/diiid_core_hold/render.py:234.",
-  "completed_at": "",
+  "completed_at": "2026-11-12T01:51:15.309Z",
   "dispatched_at": "2026-11-12T01:33:44Z",
   "figures_reviewed": [
     {
@@ -119,6 +119,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-12T01:51:30.820303+00:00",
+  "timestamp": "2026-11-12T01:54:23.539877+00:00",
   "total": null
 }

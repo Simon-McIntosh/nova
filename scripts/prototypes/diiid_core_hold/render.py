@@ -121,14 +121,18 @@ def poloidal(root, case, output, previews):
             draw_critical_points(
                 ax, analysis["census"], np.zeros(2), solved_style, "o", marker_size
             )
+            first_reference = len(ax.lines)
             draw_critical_points(
                 ax,
                 analysis["reference_census"],
                 np.zeros(2),
                 reference_style,
                 "s",
-                marker_size,
+                10,
             )
+            for marker in ax.lines[first_reference:]:
+                marker.set_markerfacecolor("none")
+                marker.set_markeredgewidth(1.2)
             if j:
                 for marker in ax.lines[first_marker:]:
                     if marker.get_markerfacecolor() != "none":
@@ -179,7 +183,16 @@ def poloidal(root, case, output, previews):
         (REFERENCE, "s", "EFIT minima"),
     ):
         handles.append(
-            Line2D([], [], color=color, marker=marker, ls="none", label=label)
+            Line2D(
+                [],
+                [],
+                color=color,
+                marker=marker,
+                ls="none",
+                label=label,
+                markerfacecolor="none" if color == REFERENCE else color,
+                markersize=10 if color == REFERENCE else 7,
+            )
         )
     figure.legend(
         handles=handles,
@@ -266,6 +279,22 @@ def midplane(root, case, output, previews):
                 markevery=(7, 30),
                 zorder=8,
             )
+            ax.legend(
+                handles=[
+                    Line2D(
+                        [],
+                        [],
+                        color=REFERENCE,
+                        lw=2.6,
+                        ls="--",
+                        marker="x",
+                        label="EFIT map",
+                    )
+                ],
+                loc="upper center",
+                bbox_to_anchor=(0.5, 1.24),
+                frameon=False,
+            )
         ax.set_xlabel("radius [m]")
         ax.set_ylabel("current density [MA/m²]")
         ax.spines[["top", "right"]].set_visible(False)
@@ -277,7 +306,6 @@ def midplane(root, case, output, previews):
             [], [], color=WALL, lw=2.6, ls="--", marker="o", mfc="white", label="base"
         ),
         Line2D([], [], color=SOLVED, lw=3, marker="s", mfc="white", label="head"),
-        Line2D([], [], color=REFERENCE, lw=2.6, ls="--", marker="x", label="EFIT map"),
     ]
     figure.legend(
         handles=handles,

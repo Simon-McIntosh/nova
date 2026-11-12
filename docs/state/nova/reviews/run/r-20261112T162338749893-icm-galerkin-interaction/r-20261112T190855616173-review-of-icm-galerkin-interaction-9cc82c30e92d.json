@@ -4,6 +4,13 @@
   "added_failures_note": "Measured from the reviewed run's own gate logs. baseline_suite: revision 9c467b05, 38 passed, failure_count 0, EXIT=0 (baseline-suite.log). after_suite: revision 9cc82c30e92d258e7fae9b7800f8de4e4fc87a76, exact suite command on a fresh extraction, 43 passed, no FAILED or ERROR line, EXIT=0, job 1312314 COMPLETED 00:29:45 (after-suite-final.log). Head minus baseline is 0 added failures; the 5-test difference is the new tests this node adds.",
   "completed_at": "2026-11-12T19:36:02.230Z",
   "dispatched_at": "2026-11-12T19:18:15Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-galerkin-cleanup",
+      "recorded_at": "2026-11-12T20:18:31.890953+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/biot/tiledassembly.py",

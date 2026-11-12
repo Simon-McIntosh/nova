@@ -3027,6 +3027,8 @@ def picard(
             mapped = mapped_with_shadow(value, previous_shadow)
             trace = trace.at[index].set(_relative_residual(mapped, value))
             candidate = value + relaxation * (mapped - value)
+            if observe_shadows:
+                candidate = jnp.where(previous_shadow, mapped, candidate)
             current_shadow = promoted_shadow(candidate, previous_shadow)
             changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
             shadow_changes = shadow_changes.at[index].set(
@@ -3245,6 +3247,8 @@ def anderson(
         )
         accept = (index >= warmup) & ~grew & jnp.all(jnp.isfinite(mixed))
         state_next = jnp.where(accept, mixed, relaxed)
+        if observe_shadows:
+            state_next = jnp.where(previous_shadow, mapped, state_next)
         current_shadow = promoted_shadow(state_next, previous_shadow)
         changed = jnp.sum(current_shadow != previous_shadow, dtype=jnp.int32)
         shadow_changes = shadow_changes.at[index].set(
@@ -3850,6 +3854,8 @@ def _newton_krylov_inner(
                 jnp.asarray(True),
             )
             proposal = state + warm_relaxation * (mapped - state)
+            if observe_shadows:
+                proposal = jnp.where(previous_shadow, mapped, proposal)
             proposed_shadow = promoted_shadow(proposal, previous_shadow)
             proposed_image = mapped_with_shadow(proposal, proposed_shadow)
             proposed_residual = _relative_residual(proposed_image, proposal)

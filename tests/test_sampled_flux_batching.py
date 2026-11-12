@@ -51,6 +51,8 @@ def _sampled_flux_with_edges(
     lower_slope,
     upper_slope,
     psi_norm,
+    *,
+    edge_increments=None,
 ):
     """Evaluate the interpolant with edge quantities supplied by its owner."""
     interior = jnp.interp(psi_norm, coordinate, values)
@@ -68,7 +70,11 @@ def _sampled_flux_with_edges(
     slope_basis = parameter + parameter_cubed * (
         -6.0 + parameter * (8.0 - 3.0 * parameter)
     )
-    exterior = value_basis * edge_value + slope_basis * edge_width * outward_slope
+    if edge_increments is None:
+        exterior = value_basis * edge_value + slope_basis * edge_width * outward_slope
+    else:
+        increment = jnp.where(below, -edge_increments[0], edge_increments[1])
+        exterior = value_basis * edge_value + slope_basis * increment
     return jnp.where(
         (psi_norm >= coordinate[0]) & (psi_norm <= coordinate[-1]),
         interior,
@@ -182,8 +188,9 @@ def _compare_at_recorded_points(
     batches: list[np.ndarray],
 ) -> dict[str, object]:
     points = np.concatenate([batch.reshape(-1) for batch in batches])
-    # The MAST reference table starts at zero; its core continuation is constant.
-    closure_values = np.asarray(closure(jnp.maximum(jnp.asarray(points), 0.0)))
+    closure_values = np.asarray(
+        closure(jnp.maximum(jnp.asarray(points), sampled.coordinate[0]))
+    )
     sampled_values = np.asarray(sampled(jnp.asarray(points)))
     different = closure_values != sampled_values
     absolute_difference = np.abs(closure_values - sampled_values)
@@ -197,6 +204,19 @@ def _compare_at_recorded_points(
         "closure_value_sha256": _array_sha256(closure_values),
         "sampled_value_sha256": _array_sha256(sampled_values),
     }
+
+
+@pytest.mark.parametrize("start", [0.0, 0.05])
+def test_recorded_points_hold_at_the_first_profile_knot(start):
+    coordinate = np.linspace(start, 1.0, 65)
+    values = np.linspace(7.0, 1.0, 65)
+    sampled = SampledFluxFunction(coordinate, values)
+    closure = _closed_sampled_flux(coordinate, values)
+    record = _compare_at_recorded_points(
+        closure, sampled, [np.array([-0.02, 0.0, 0.02, start, 0.4])]
+    )
+    assert record["different_point_occurrences"] == 0
+    assert record["largest_absolute_difference"] == 0.0
 
 
 @pytest.mark.slow

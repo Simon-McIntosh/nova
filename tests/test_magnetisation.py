@@ -785,11 +785,27 @@ def test_smoothness_homotopy_preserves_closed_shell(mu, cell_size, capsys):
     )
     exact = ((2 * mu + 1) * (mu + 2) - 2 * (mu - 1) ** 2 * 0.9**3) / (9 * mu)
     error = np.abs(shielding / exact - 1)
-    bounds = {
-        (100.0, 0.04): [0.013, 0.020, 0.009],
-        (100.0, 0.02): [0.007, 0.008, 0.006],
-        (1000.0, 0.04): [0.035, 0.077, 0.022],
-        (1000.0, 0.02): [0.027, 0.030, 0.020],
+    recorded = {
+        (100.0, 0.04): [
+            0.008760999250693402,
+            0.012867173303804269,
+            0.006718870831401547,
+        ],
+        (100.0, 0.02): [
+            0.0044714497753417515,
+            0.005165328184123408,
+            0.0034921622218586634,
+        ],
+        (1000.0, 0.04): [
+            0.03493127489946979,
+            0.07722161179548037,
+            0.022268904703290016,
+        ],
+        (1000.0, 0.02): [
+            0.027343143036576145,
+            0.030449420798218996,
+            0.02036826063884911,
+        ],
     }
     with capsys.disabled():
         print(
@@ -799,7 +815,7 @@ def test_smoothness_homotopy_preserves_closed_shell(mu, cell_size, capsys):
             f"residual={result.residual_history[-1]:.12g}",
             flush=True,
         )
-    assert np.all(error < bounds[mu, cell_size])
+    np.testing.assert_allclose(error, recorded[mu, cell_size], rtol=0, atol=2e-10)
 
 
 def test_smoothness_penalty_is_a_runtime_operand():

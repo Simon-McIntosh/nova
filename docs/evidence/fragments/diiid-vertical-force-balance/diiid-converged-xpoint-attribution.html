@@ -1,0 +1,212 @@
+<section id="diiid-converged-xpoint-attribution">
+<h2>Frozen field values dominate the extra lower-X displacement in 137D</h2>
+<p><strong>The principal 137D excess is a boundary-field/read-input effect.</strong> Five nodes excluded from the residual retain their request-seed flux values exactly. Their difference from the physical Biot–Savart image is then interpolated into the lower-X neighborhood. At the same saved plasma and external currents, reading the physical image reduces the 137D lower-X distance from <strong>6.03317 cm to 2.42911 cm</strong>, a 59.7% reduction. The corresponding 146D read changes 2.85632 cm to 2.91942 cm. The physical-image errors are therefore similar; the published 137D error acquires a much larger held-field contribution.</p>
+<p>This is an attribution of saved states, with <strong>zero forward solves</strong>. The 2.42911 cm figure is a fixed-current counterfactual, not a certificate for a newly converged equilibrium. Product inputs and implementation remain unchanged.</p>
+
+<table><thead><tr><th>frame</th><th>saved residual</th><th>converged</th><th>published ΔR / ΔZ [cm]</th><th>published miss [cm]</th><th>physical-image miss [cm]</th><th>live-node closure sup [Wb]</th></tr></thead><tbody>
+<tr><td>137D</td><td>8.98111e-12</td><td>true</td><td>+0.14490 / +6.03143</td><td>6.033175</td><td>2.429106</td><td>3.62812e-11</td></tr>
+<tr><td>146D</td><td>4.6696e-13</td><td>true</td><td>+0.48567 / +2.81473</td><td>2.856318</td><td>2.919421</td><td>1.89138e-12</td></tr>
+</tbody></table>
+
+<h3>Measured-current provenance and EFIT external-field inference</h3>
+<p><code>benchmarks/diiid_forward_gs_match.py:1171</code>, <code>_source_current</code>, interpolates each of the nineteen poloidal conductors’ <code>input_column</code> against <code>magnetics_time</code> at <code>efit_times[frame]</code>, multiplies kA by 1000 and by <code>turns.applied_multiplier</code>, and supplies those measured channels with zero fitted coefficients (the declaration at line 465). The saved cohort additionally called <code>complete_profile_current_adapter</code>: five fixed circuit-driven ohmic columns are included here, with their actual currents, instead of being misclassified as an omitted or passive field. The nineteen coefficients fitted below are diagnostic equivalent currents and are never applied to the forward solve.</p>
+<p>The supplied Parquets contain no EFIT-fitted conductor or passive currents and no stored p′/FF′. This is allowed by the coordinator’s amended measure. In Nova’s total-flux convention, <code>jφ = −Δ*Φ / (2π μ₀ R)</code>. The EFIT label is converted once to COCOS 17, its native 65×65 Grad–Shafranov current is restricted to nodes inside its own LCFS and the complete-stencil interior, and the benchmark’s finite-cell <code>hybrid_greens</code>/<code>_green_block</code> kernel images that current onto the saved 33×33 receiver grid. Thus <code>Φ_external,EFIT = Φ_label − G j_EFIT</code>. It contains all external sources implied by that map, including any passive contribution and reconstruction inconsistency. The comparison is <code>Φ_vacuum,forward − Φ_external,EFIT</code>.</p>
+<p>A constant gauge is removed using the mean difference over the EFIT plasma interior. Field derivatives are unaffected. Native-grid taring is the reported result; the strided-grid control overestimates the external discrepancy, about 8 mT versus about 4 mT in radial field. This grid dependence is retained as numerical qualification, rather than interpreted as a change in measured current.</p>
+
+<table><thead><tr><th>frame</th><th>ΔΦ at lower X [mWb]</th><th>ΔB_R [mT]</th><th>ΔB_Z [mT]</th><th>forward vacuum B_R / B_Z [mT]</th><th>EFIT-implied external B_R / B_Z [mT]</th></tr></thead><tbody>
+<tr><td>137D</td><td>19.09722</td><td>+4.09357</td><td>-2.11876</td><td>+225.95280 / -258.58912</td><td>+221.85923 / -256.47036</td></tr>
+<tr><td>146D</td><td>16.50417</td><td>+3.81115</td><td>-1.83182</td><td>+224.40186 / -257.70577</td><td>+220.59071 / -255.87395</td></tr>
+</tbody></table>
+
+<h3>Source, current and boundary comparisons</h3>
+<p>Both prescribed tables reproduce the native EFIT map extraction at all reliable knots to rounding: the maximum absolute p′ differences are 4.366e-11 and 5.457e-11 Pa/Wb; FF′ differences are 2.22e-16 and 3.331e-16 T² m²/Wb. Each frame has nineteen reliable surfaces, first knot 0.05 and last knot 0.95, with no internal gap above one 0.05 interval. The same coverage holds for the solved-map extraction. Below 0.05 the source holds its first sample; beyond 0.95 the existing quintic cap reaches zero at 1.0. The edge and core extrapolation regions are therefore not directly measured reliable surfaces.</p>
+<p>The solved-map profiles below are re-extractions from a coarser state, not changed input tables. In particular, noisy coarse-grid p′ does not establish a wrong prescribed p′. The “profiles” attribution includes sampled-profile evaluation, affine-extraction closure and native-to-forward quadrature effects at fixed EFIT geometry and current; it is not a uniquely identified bad profile coefficient.</p>
+
+<table><thead><tr><th>frame</th><th>EFIT native Ip [MA]</th><th>prescribed / actual source Ip [MA]</th><th>EFIT centroid R [m], Z [mm]</th><th>source centroid R [m], Z [mm]</th><th>EFIT / source peaking</th><th>archived EFIT li</th></tr></thead><tbody>
+<tr><td>137D</td><td>1.62989383</td><td>1.62909537 / 1.62909537</td><td>1.652709, -15.2468</td><td>1.654369, -21.9846</td><td>2.51733 / 2.85233</td><td>0.941488</td></tr>
+<tr><td>146D</td><td>1.63125823</td><td>1.62356320 / 1.62356320</td><td>1.658351, -17.0516</td><td>1.656104, -20.5140</td><td>2.88294 / 3.21830</td><td>1.005038</td></tr>
+</tbody></table>
+
+<p>Peaking is maximum divided by mean positive current density on each representation’s stated plasma support. Actual source current and centroid come from the operator’s normalized cell currents; the separate Ampere read on the saved grid undercounts the prescribed current by about 1%, so that stencil integral is not presented as a current-normalization failure. EFIT li is an archive observation; solved peaking supplies the requested shape comparator.</p>
+<table><thead><tr><th>frame</th><th>EFIT / saved boundary flux [Wb]</th><th>EFIT / saved closed-boundary wall gap [cm]</th><th>governing limiter contact</th></tr></thead><tbody>
+<tr><td>137D</td><td>0.15012779 / 0.12188626</td><td>3.11459 / 2.49173</td><td>none: both diverted</td></tr>
+<tr><td>146D</td><td>0.00046679 / -0.03320669</td><td>3.12577 / 2.25946</td><td>none: both diverted</td></tr>
+</tbody></table>
+
+<p>Boundary fluxes above are raw local-field normalization anchors and carry their respective gauges; they are emergent, not independently prescribed Dirichlet values. A uniform boundary-flux/gauge change has zero X-point sensitivity, tested explicitly. The saved closed curve is read 0.1% inward in flux to resolve the tangent crossing, so its wall gap is a geometry diagnostic. A global maximum of flux on the wall is not a qualified limiter contact: the private-flux wall segment must not outrank the axis-connected saddle. Both states remain diverted on the same governed physical ring.</p>
+
+<figure><img src="/nova/figures/diiid-converged-xpoint-attribution/profiles.svg" alt="137D and 146D profile comparison. Blue solid triangles: solved-map extraction on the saved grid. Dark dashed downward triangles: native EFIT-map extraction. Hollow grey circles: prescribed table knots. Reliable coverage is 0.05–0.95 in all four reads; no stored archive profiles are available. The coarse solved p′ projection is visibly less stable than FF′ and is not evidence that the prescribed knot values changed."><figcaption>137D and 146D profile comparison. Blue solid triangles: solved-map extraction on the saved grid. Dark dashed downward triangles: native EFIT-map extraction. Hollow grey circles: prescribed table knots. Reliable coverage is 0.05–0.95 in all four reads; no stored archive profiles are available. The coarse solved p′ projection is visibly less stable than FF′ and is not evidence that the prescribed knot values changed.</figcaption></figure>
+
+<h3>Signed attribution and sensitivity</h3>
+<p>Let S<sub>ref</sub> be the actual forward-source image evaluated at the saved EFIT seed with target current I<sub>t</sub>, and S<sub>sol</sub> its image at the terminal saved state. With native EFIT current I<sub>e</sub>, the exact field partition is: profiles = (I<sub>e</sub>/I<sub>t</sub>)S<sub>ref</sub> − G j<sub>e</sub>; total current = (1 − I<sub>e</sub>/I<sub>t</sub>)S<sub>ref</sub>; external = Φ<sub>vac</sub> + G j<sub>e</sub> − Φ<sub>ref</sub>; plasma response = S<sub>sol</sub> − S<sub>ref</sub>; held nodes = Φ<sub>saved</sub> − Φ<sub>vac</sub> − S<sub>sol</sub>. These five fields sum to the complete saved-minus-EFIT difference. A live-node closure check refuses any attempt to name an operator-reconstruction error a held-node effect.</p>
+<p>The local displacement per unit amplitude of each difference field is <code>δx = −H⁻¹ ∇δΦ</code>, where H is the EFIT-saddle Hessian. Both Hessians are well conditioned, about 1.085. Nevertheless, the single reference-point linearization substantially overpredicts the finite 137D offset. The next table preserves that estimate rather than calibrating it to the answer.</p>
+
+<table><thead><tr><th>term</th><th>137D local ΔR / ΔZ [cm]</th><th>146D local ΔR / ΔZ [cm]</th></tr></thead><tbody>
+<tr><td>profile/extraction and quadrature</td><td>+0.54547 / +1.79056</td><td>+0.56301 / +1.96344</td></tr>
+<tr><td>total plasma-current input</td><td>+0.00043 / +0.02077</td><td>+0.00460 / +0.20350</td></tr>
+<tr><td>external supply</td><td>+0.22925 / +0.56405</td><td>+0.23163 / +0.52334</td></tr>
+<tr><td>plasma redistribution response</td><td>-0.03517 / -0.30164</td><td>-0.12727 / -0.14948</td></tr>
+<tr><td>held shadow-node field values</td><td>-3.99657 / +9.53575</td><td>+1.04802 / +1.04996</td></tr>
+</tbody></table>
+
+<p>For a finite comparison, local sensitivities are integrated along <code>Φ(t)=Φ_EFIT+t(Φ_saved−Φ_EFIT)</code>, with the lower saddle qualified at each point. This is an integration of local linear responses on saved fields, not an equilibrium solve. The shares depend on this stated path; they are not independent reconverged counterfactual equilibria. Sixteen- and thirty-two-point Gauss quadratures agree, and their sum closes against the measured displacement without a fitted multiplier.</p>
+
+<table><thead><tr><th>term</th><th>137D integrated ΔR / ΔZ [cm]</th><th>146D integrated ΔR / ΔZ [cm]</th></tr></thead><tbody>
+<tr><td>profile/extraction and quadrature</td><td>+0.35005 / +1.31887</td><td>+0.13619 / +1.87749</td></tr>
+<tr><td>total plasma-current input</td><td>+0.00306 / +0.01439</td><td>-0.03930 / +0.19054</td></tr>
+<tr><td>external supply</td><td>+0.20211 / +0.38430</td><td>+0.14938 / +0.49275</td></tr>
+<tr><td>plasma redistribution response</td><td>-0.07006 / -0.19295</td><td>-0.12842 / -0.12488</td></tr>
+<tr><td>held shadow-node field values</td><td>-0.34025 / +4.50682</td><td>+0.36782 / +0.37883</td></tr>
+<tr><td>sum</td><td>+0.14490 / +6.03143</td><td>+0.48567 / +2.81473</td></tr>
+<tr><td>measured</td><td>+0.14490 / +6.03143</td><td>+0.48567 / +2.81473</td></tr>
+</tbody></table>
+
+<p><strong>Why 146D is about half the published miss:</strong> its held-node vertical share is only 0.37883 cm versus 4.50682 cm in 137D. The profile/extraction share is actually larger in 146D (1.87749 versus 1.31887 cm), and the external shares are similar (0.49275 versus 0.38430 cm). The difference is therefore not explained by doubling the coil error or plasma-current error in 137D. Once the retained field values are removed from the geometry-read input, the two frozen physical-image misses are 2.429 and 2.919 cm.</p>
+<figure><img src="/nova/figures/diiid-converged-xpoint-attribution/attribution.svg" alt="Signed radial and vertical displacement shares for 137D (blue circles) and 146D (grey triangles). Each share integrates the local saddle response along the straight saved-field path. “Response” is the plasma-current redistribution between saved states; “held nodes” is the residual-excluded field extension. Sum and observed coincide without fitting."><figcaption>Signed radial and vertical displacement shares for 137D (blue circles) and 146D (grey triangles). Each share integrates the local saddle response along the straight saved-field path. “Response” is the plasma-current redistribution between saved states; “held nodes” is the residual-excluded field extension. Sum and observed coincide without fitting.</figcaption></figure>
+
+<figure><img src="/nova/figures/diiid-converged-xpoint-attribution/frame-137-xpoint.svg" alt="DIII-D 137D: full poloidal view and lower-X zoom, saved residual 8.98111e-12, converged true. Blue solid/filled cross and triangle: saved solved field. Dark dashed/hollow plus and downward triangle: EFIT. Grey dash-dot/hollow diamond and square: physical image of the same saved source currents. Grey solid: governed wall. One constant gauge per field places its own saddle at zero; all three fields use the identical physical contour levels −0.02, 0, 0.02, 0.2, 0.6, 1.0, 1.6 and 2.0 Wb, with the zero separatrices thicker. No amplitude or spatial alignment is fitted. Axes are off. The physical-image miss is 2.42911 cm versus the saved 6.03317 cm."><figcaption>DIII-D 137D: full poloidal view and lower-X zoom, saved residual 8.98111e-12, converged true. Blue solid/filled cross and triangle: saved solved field. Dark dashed/hollow plus and downward triangle: EFIT. Grey dash-dot/hollow diamond and square: physical image of the same saved source currents. Grey solid: governed wall. One constant gauge per field places its own saddle at zero; all three fields use the identical physical contour levels −0.02, 0, 0.02, 0.2, 0.6, 1.0, 1.6 and 2.0 Wb, with the zero separatrices thicker. No amplitude or spatial alignment is fitted. Axes are off. The physical-image miss is 2.42911 cm versus the saved 6.03317 cm.</figcaption></figure>
+
+<figure><img src="/nova/figures/diiid-converged-xpoint-attribution/frame-146-xpoint.svg" alt="DIII-D 146D: full poloidal view and lower-X zoom, saved residual 4.6696e-13, converged true. Blue solid/filled cross and triangle: saved solved field. Dark dashed/hollow plus and downward triangle: EFIT. Grey dash-dot/hollow diamond and square: physical image of the same saved source currents. Grey solid: governed wall. One constant gauge per field places its own saddle at zero; all three fields use the identical physical contour levels −0.02, 0, 0.02, 0.2, 0.6, 1.0, 1.6 and 2.0 Wb, with the zero separatrices thicker. No amplitude or spatial alignment is fitted. Axes are off. The physical-image miss is 2.91942 cm versus the saved 2.85632 cm."><figcaption>DIII-D 146D: full poloidal view and lower-X zoom, saved residual 4.6696e-13, converged true. Blue solid/filled cross and triangle: saved solved field. Dark dashed/hollow plus and downward triangle: EFIT. Grey dash-dot/hollow diamond and square: physical image of the same saved source currents. Grey solid: governed wall. One constant gauge per field places its own saddle at zero; all three fields use the identical physical contour levels −0.02, 0, 0.02, 0.2, 0.6, 1.0, 1.6 and 2.0 Wb, with the zero separatrices thicker. No amplitude or spatial alignment is fitted. Axes are off. The physical-image miss is 2.91942 cm versus the saved 2.85632 cm.</figcaption></figure>
+
+<h3>Nineteen-conductor fit and passive or unassigned remainder</h3>
+<p>The gauge-free external difference over the governed vessel and complete-stencil grid interior is projected onto the nineteen conductor response columns. Columns are normalized before an SVD least-squares solve with relative cutoff 10⁻⁸. Both fits have rank 19 and scaled condition number 2984.57. The following “equivalent error” is the coefficient of the forward-minus-implied-EFIT field, not EFIT’s own fitted current and not a measured current correction. A compensating diagnostic change would have the opposite sign. A smooth cubic interpolant of the remaining grid field is retained as <strong>passive or unassigned</strong>; it can include EFIT/GS and plasma-tare discretization error, so it is not proof of a vessel current.</p>
+
+<table><thead><tr><th>frame</th><th>squared external-field mismatch represented by conductors</th><th>local conductor-fit ΔR / ΔZ [cm]</th><th>local passive/unassigned ΔR / ΔZ [cm]</th></tr></thead><tbody>
+<tr><td>137D</td><td>98.0161%</td><td>+0.19025 / +0.54113</td><td>+0.03899 / +0.02292</td></tr>
+<tr><td>146D</td><td>95.1647%</td><td>+0.18274 / +0.50598</td><td>+0.04889 / +0.01736</td></tr>
+</tbody></table>
+
+<table><thead><tr><th>conductor</th><th>measured column</th><th>turn multiplier</th><th>137D used [kA·turn]</th><th>137D equivalent error [kA·turn]</th><th>146D used [kA·turn]</th><th>146D equivalent error [kA·turn]</th></tr></thead><tbody>
+<tr><td>F1A</td><td><code>magnetics_F1A</code></td><td>1</td><td>-177.2350</td><td>-2.5108</td><td>-182.9003</td><td>-0.2693</td></tr>
+<tr><td>F2A</td><td><code>magnetics_F2A</code></td><td>1</td><td>-168.8194</td><td>-3.2859</td><td>-168.9205</td><td>-0.7014</td></tr>
+<tr><td>F3A</td><td><code>magnetics_F3A</code></td><td>1</td><td>-3.6998</td><td>-0.9969</td><td>-11.5902</td><td>-1.8637</td></tr>
+<tr><td>F4A</td><td><code>magnetics_F4A</code></td><td>1</td><td>+30.4029</td><td>+2.5800</td><td>+34.1169</td><td>+4.6289</td></tr>
+<tr><td>F5A</td><td><code>magnetics_F5A</code></td><td>1</td><td>+160.3685</td><td>+6.0268</td><td>+166.5298</td><td>+10.3485</td></tr>
+<tr><td>F6A</td><td><code>magnetics_F6A</code></td><td>1</td><td>-248.2546</td><td>+0.7927</td><td>-257.5588</td><td>+1.6078</td></tr>
+<tr><td>F7A</td><td><code>magnetics_F7A</code></td><td>1</td><td>-251.1146</td><td>-3.2832</td><td>-241.1282</td><td>-0.9302</td></tr>
+<tr><td>F8A</td><td><code>magnetics_F8A</code></td><td>1</td><td>+113.4566</td><td>+7.2769</td><td>+116.7388</td><td>+9.7013</td></tr>
+<tr><td>F9A</td><td><code>magnetics_F9A</code></td><td>1</td><td>-86.9636</td><td>+2.8460</td><td>-86.3028</td><td>+5.4345</td></tr>
+<tr><td>F1B</td><td><code>magnetics_F1B</code></td><td>1</td><td>-155.9238</td><td>-0.7261</td><td>-159.5529</td><td>-1.1658</td></tr>
+<tr><td>F2B</td><td><code>magnetics_F2B</code></td><td>1</td><td>-122.7008</td><td>-1.4392</td><td>-122.9443</td><td>+1.6709</td></tr>
+<tr><td>F3B</td><td><code>magnetics_F3B</code></td><td>1</td><td>-168.6245</td><td>-0.0520</td><td>-166.7918</td><td>+1.4516</td></tr>
+<tr><td>F4B</td><td><code>magnetics_F4B</code></td><td>1</td><td>+124.4558</td><td>+2.2324</td><td>+123.7205</td><td>+6.5816</td></tr>
+<tr><td>F5B</td><td><code>magnetics_F5B</code></td><td>1</td><td>+195.5523</td><td>+8.3470</td><td>+197.8397</td><td>+12.5434</td></tr>
+<tr><td>F6B</td><td><code>magnetics_F6B</code></td><td>1</td><td>-195.3980</td><td>+1.7217</td><td>-206.9979</td><td>+2.9402</td></tr>
+<tr><td>F7B</td><td><code>magnetics_F7B</code></td><td>1</td><td>-400.0163</td><td>-6.2823</td><td>-383.5108</td><td>-3.9807</td></tr>
+<tr><td>F8B</td><td><code>magnetics_F8B</code></td><td>1</td><td>+181.4357</td><td>+6.9513</td><td>+173.7123</td><td>+7.5447</td></tr>
+<tr><td>F9B</td><td><code>magnetics_F9B</code></td><td>1</td><td>-8.0235</td><td>+4.6230</td><td>-4.8679</td><td>+5.6301</td></tr>
+<tr><td>ECOILA</td><td><code>magnetics_ECOILA</code></td><td>1</td><td>-12.9931</td><td>+137.4773</td><td>-15.4383</td><td>+177.6385</td></tr>
+</tbody></table>
+
+<details><summary>Per-conductor local X-point sensitivity, cm per kA·turn</summary>
+<table><thead><tr><th>conductor</th><th>137D ΔR / ΔZ</th><th>146D ΔR / ΔZ</th></tr></thead><tbody>
+<tr><td>F1A</td><td>-0.00242 / -0.00678</td><td>-0.00249 / -0.00688</td></tr>
+<tr><td>F2A</td><td>-0.00104 / -0.00490</td><td>-0.00108 / -0.00498</td></tr>
+<tr><td>F3A</td><td>-0.00038 / -0.00354</td><td>-0.00040 / -0.00361</td></tr>
+<tr><td>F4A</td><td>-0.00006 / -0.00258</td><td>-0.00007 / -0.00263</td></tr>
+<tr><td>F5A</td><td>+0.00015 / -0.00254</td><td>+0.00014 / -0.00259</td></tr>
+<tr><td>F6A</td><td>+0.00534 / -0.01775</td><td>+0.00537 / -0.01819</td></tr>
+<tr><td>F7A</td><td>+0.00266 / -0.01109</td><td>+0.00267 / -0.01135</td></tr>
+<tr><td>F8A</td><td>+0.00035 / -0.00346</td><td>+0.00034 / -0.00354</td></tr>
+<tr><td>F9A</td><td>+0.00087 / -0.00552</td><td>+0.00086 / -0.00565</td></tr>
+<tr><td>F1B</td><td>-0.00534 / -0.00912</td><td>-0.00547 / -0.00924</td></tr>
+<tr><td>F2B</td><td>-0.01136 / -0.01052</td><td>-0.01157 / -0.01062</td></tr>
+<tr><td>F3B</td><td>-0.02075 / -0.00365</td><td>-0.02100 / -0.00366</td></tr>
+<tr><td>F4B</td><td>-0.01440 / +0.01935</td><td>-0.01470 / +0.01948</td></tr>
+<tr><td>F5B</td><td>+0.01753 / +0.03179</td><td>+0.01759 / +0.03250</td></tr>
+<tr><td>F6B</td><td>+0.01244 / -0.02797</td><td>+0.01261 / -0.02872</td></tr>
+<tr><td>F7B</td><td>+0.02553 / -0.03403</td><td>+0.02604 / -0.03507</td></tr>
+<tr><td>F8B</td><td>+0.04972 / +0.02427</td><td>+0.05090 / +0.02522</td></tr>
+<tr><td>F9B</td><td>+0.05820 / -0.01925</td><td>+0.05998 / -0.01992</td></tr>
+<tr><td>ECOILA</td><td>-0.00314 / -0.00022</td><td>-0.00321 / -0.00023</td></tr>
+</tbody></table>
+
+</details>
+<table><thead><tr><th>additional circuit-driven conductor</th><th>137D used [kA·turn]</th><th>146D used [kA·turn]</th></tr></thead><tbody>
+<tr><td>ECOILB</td><td>-25.9863</td><td>-30.8766</td></tr>
+<tr><td>E567UP</td><td>-12.9931</td><td>-15.4383</td></tr>
+<tr><td>E567DN</td><td>-12.9931</td><td>-15.4383</td></tr>
+<tr><td>E89UP</td><td>-13.5869</td><td>-16.1437</td></tr>
+<tr><td>E89DN</td><td>-13.5859</td><td>-16.1426</td></tr>
+</tbody></table>
+
+<details><summary>External difference at and around each EFIT lower X-point</summary>
+<h4>137D</h4>
+<table><thead><tr><th>ΔR / ΔZ from X [cm]</th><th>gauge-free ΔΦ [mWb]</th><th>ΔB_R [mT]</th><th>ΔB_Z [mT]</th></tr></thead><tbody>
+<tr><td>-5.00000 / -5.00000</td><td>+21.39746</td><td>+4.09387</td><td>-1.65940</td></tr>
+<tr><td>-5.00000 / +0.00000</td><td>+19.83405</td><td>+3.93418</td><td>-1.58379</td></tr>
+<tr><td>-5.00000 / +5.00000</td><td>+18.32385</td><td>+3.79864</td><td>-1.67710</td></tr>
+<tr><td>+0.00000 / -5.00000</td><td>+20.68704</td><td>+3.79082</td><td>-1.94460</td></tr>
+<tr><td>+0.00000 / +0.00000</td><td>+19.09722</td><td>+4.09357</td><td>-2.11876</td></tr>
+<tr><td>+0.00000 / +5.00000</td><td>+17.41411</td><td>+4.09657</td><td>-2.77432</td></tr>
+<tr><td>+5.00000 / -5.00000</td><td>+19.76340</td><td>+3.53226</td><td>-2.52578</td></tr>
+<tr><td>+5.00000 / +0.00000</td><td>+18.14406</td><td>+4.22126</td><td>-2.47476</td></tr>
+<tr><td>+5.00000 / +5.00000</td><td>+16.31473</td><td>+4.25868</td><td>-2.47334</td></tr>
+</tbody></table>
+
+<h4>146D</h4>
+<table><thead><tr><th>ΔR / ΔZ from X [cm]</th><th>gauge-free ΔΦ [mWb]</th><th>ΔB_R [mT]</th><th>ΔB_Z [mT]</th></tr></thead><tbody>
+<tr><td>-5.00000 / -5.00000</td><td>+18.62953</td><td>+3.76757</td><td>-1.65167</td></tr>
+<tr><td>-5.00000 / +0.00000</td><td>+17.16663</td><td>+3.72408</td><td>-1.49615</td></tr>
+<tr><td>-5.00000 / +5.00000</td><td>+15.71300</td><td>+3.69370</td><td>-1.53362</td></tr>
+<tr><td>+0.00000 / -5.00000</td><td>+17.95064</td><td>+3.36160</td><td>-1.80147</td></tr>
+<tr><td>+0.00000 / +0.00000</td><td>+16.50417</td><td>+3.81115</td><td>-1.83182</td></tr>
+<tr><td>+0.00000 / +5.00000</td><td>+14.90039</td><td>+3.95169</td><td>-2.38082</td></tr>
+<tr><td>+5.00000 / -5.00000</td><td>+17.10025</td><td>+3.02018</td><td>-2.29317</td></tr>
+<tr><td>+5.00000 / +0.00000</td><td>+15.67554</td><td>+3.81454</td><td>-2.16448</td></tr>
+<tr><td>+5.00000 / +5.00000</td><td>+13.97585</td><td>+4.02631</td><td>-2.08027</td></tr>
+</tbody></table>
+
+</details>
+<h3>One recommendation and its limit</h3>
+<p><strong>Supply the physical current-state source image to the geometry read at residual-shadow nodes.</strong> The source binding is <code>nova/equilibrium/forward_operator.py:2966</code>, <code>null_flux_pool</code>, which currently returns the grid values carried in the state; <code>_exclude_shadow_residual</code> at line 3974 preserves those trial values on excluded nodes through <code>where(shadow, psi, mapped)</code>. The proposed change is to the field input of the geometry/read path: reconstruct it from the declared external currents and normalized plasma moments before interpolating the null neighborhood. This node makes no product change.</p>
+<p>The directly evaluated fixed-state prediction is <strong>2.42911 cm residual miss in 137D</strong>, compared with 6.03317 cm now. It removes 3.60407 cm of distance, about 59.7%. In 137D every held node equals its request-seed value exactly; in 146D the held set includes values updated earlier in the solve. The table below preserves their physical locations and field differences. A subsequent forward solve is needed to measure how corrected geometry feeds back into the source and topology; the fixed-state estimate does not promise that reconverged result.</p>
+
+<table><thead><tr><th>frame</th><th>held node count</th><th>max retained/source difference [mWb]</th><th>max retained/request-seed difference [mWb]</th></tr></thead><tbody>
+<tr><td>137D</td><td>5</td><td>26.857776</td><td>0.000000</td></tr>
+<tr><td>146D</td><td>7</td><td>17.495354</td><td>28.569223</td></tr>
+</tbody></table>
+
+<details><summary>Held node values</summary>
+<table><thead><tr><th>frame</th><th>R / Z [m]</th><th>saved [Wb]</th><th>physical image [Wb]</th><th>request seed [Wb]</th></tr></thead><tbody>
+<tr><td>137D</td><td>+1.15875 / -1.30000</td><td>0.203596767</td><td>0.188732730</td><td>0.203596767</td></tr>
+<tr><td>137D</td><td>+1.21187 / -1.30000</td><td>0.200458047</td><td>0.183825405</td><td>0.200458047</td></tr>
+<tr><td>137D</td><td>+1.26500 / -1.30000</td><td>0.187382661</td><td>0.168964321</td><td>0.187382661</td></tr>
+<tr><td>137D</td><td>+1.26500 / -1.20000</td><td>0.150546465</td><td>0.123688689</td><td>0.150546465</td></tr>
+<tr><td>137D</td><td>+1.31812 / -1.30000</td><td>0.162960144</td><td>0.143015045</td><td>0.162960144</td></tr>
+<tr><td>146D</td><td>+1.15875 / -1.30000</td><td>0.051247074</td><td>0.042381086</td><td>0.051247074</td></tr>
+<tr><td>146D</td><td>+1.21187 / -1.30000</td><td>0.048649396</td><td>0.036814930</td><td>0.048649396</td></tr>
+<tr><td>146D</td><td>+1.21187 / -1.20000</td><td>-0.026935245</td><td>-0.026935245</td><td>-0.007702810</td></tr>
+<tr><td>146D</td><td>+1.26500 / -1.30000</td><td>0.036556225</td><td>0.021740679</td><td>0.036556225</td></tr>
+<tr><td>146D</td><td>+1.26500 / -1.20000</td><td>-0.024025798</td><td>-0.024025798</td><td>0.000140686</td></tr>
+<tr><td>146D</td><td>+1.31812 / -1.30000</td><td>0.013605510</td><td>-0.003889844</td><td>0.013605510</td></tr>
+<tr><td>146D</td><td>+1.31812 / -1.20000</td><td>-0.030563552</td><td>-0.030563552</td><td>-0.001994329</td></tr>
+</tbody></table>
+
+</details><p>The remaining physical-image miss cannot be uniquely assigned to named external conductors from this projection alone. Exact-shot vessel-current data, or a provenance-bound EFIT fitted-current archive, would discriminate a passive contribution from conductor and reconstruction error. The supplied Parquets have neither; the <code>200000.nc</code> entry here supplies geometry at DD 3.41.0 and is not assumed to provide the matching shot’s fitted currents.</p>
+<h3>Checks, artifacts and input binding</h3>
+<p>The scientific measure runs CPU-only on <code>all_debug</code>, four CPUs and 32 GB, through the shared root interpreter with <code>TMPDIR=/tmp</code>. A solve refusal is installed before recovering the operator. The complete run banks both frames in one scheduler job. The actual source image agrees with the saved state outside its residual shadows to 3.63×10⁻¹¹ Wb and 1.90×10⁻¹² Wb, and reproduces the saved normalization amplitudes; this establishes the recovered operator by content rather than assuming historical revisions are identical.</p>
+<p>The scoped head gate passes <strong>8 tests</strong>. The absent base test is recorded as an empty baseline with pytest exit 4, failure count zero; it is not a passing test suite. Replacing <code>−solve(H, gradient)</code> with zero displacement gives <strong>2 failed, 6 passed</strong>: <code>test_known_coil_current_error_moves_saddle_in_coil_term</code> and <code>test_profile_shape_error_moves_saddle_in_profile_term</code>. The head fails neither. The guard that refuses unshadowed operator mismatch is also made to refuse deliberately. The finite-perturbation test verifies integrated sensitivities against an analytic saddle shift, and a known F1A response is recovered by the conductor-fit positive control before the unassigned residual is interpreted.</p>
+<p>All four SVGs have checked text bounds, text overlap and label placement, and all four PNG previews were inspected. Their files are below 300,000 bytes. Early render refusals for file size and tick/category-label placement remain in the run logs; the final checked render reports zero defects. No PNG twin or large numerical receipt is committed.</p>
+
+<p>Source revision for the self-contained measurement: <code>21219636f8c15c4c0a37c5eb0f5e697f6870c28a</code>. Durable run root: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution</code>. Primary receipts: <code>complete-measurement/native/result-137.json</code>, <code>result-146.json</code>, <code>sensitivity-137.json</code> and <code>sensitivity-146.json</code>; full physical/source fields and Green matrices are banked alongside them. Gate logs: <code>armed-focused-tests.log</code>, <code>armed-negative-control.log</code>, <code>baseline-suite.log</code>. Input hashes and source/figure hashes are in <code>input-audit.json</code> and <code>provenance.json</code>.</p>
+<details><summary>SHA-256 of every supplied saved input and source Parquet</summary>
+<table><thead><tr><th>frame</th><th>input path</th><th>SHA-256</th></tr></thead><tbody>
+<tr><td>137D</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort/head/frame-137-diverted/terminal.npz</td><td><code>5a67d31bca0535e3374635866e4e75be1b00c9c6891ddec3e81db02c35b562c4</code></td></tr>
+<tr><td>137D</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort/head/frame-137-diverted/source-inputs.json</td><td><code>9d637632995830eb11f9efcfd1201c911a63befb1db8a4561e2d247b49c0ceed</code></td></tr>
+<tr><td>137D</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort/head/frame-137-diverted/solve-receipt.json</td><td><code>674146b636c330102505ecd1860b17cad1b7c326ecfcd7a799de442e2fbdfc40</code></td></tr>
+<tr><td>137D</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort/head/frame-137-diverted/core-analysis.json</td><td><code>76846833f9eea6427adec7e7b1c1294981119653c69174bc1717bf2e6ccaef63</code></td></tr>
+<tr><td>137D</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort/head/frame-137-diverted/request-seed.npz</td><td><code>c80121c6a63be3751e37f66ecc9d52b15f19679f9cb5cdb25fa255da157610f5</code></td></tr>
+<tr><td>137D</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort/head/frame-137-diverted/receipt.json</td><td><code>e2276a236174fc74e67b7dca1c6e272799abae56f78213a0f097da3240a944f7</code></td></tr>
+<tr><td>137D</td><td>/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_0040ca9bdc.parquet</td><td><code>6d3dcfd15b711fd4dd8334a54b3a94edeb9d16cbb108fd9683d9b9eaa22d7383</code></td></tr>
+<tr><td>146D</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort-six-hour/head/frame-146-diverted/terminal.npz</td><td><code>2938676ec3ab4ef431cf08b95c0723f7c6d59c794802b686ba8076a8baaa85eb</code></td></tr>
+<tr><td>146D</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort-six-hour/head/frame-146-diverted/source-inputs.json</td><td><code>eeea2516c90c6c1ee27588beeae307037ebe8a11dd0e3fab4244d0681484059b</code></td></tr>
+<tr><td>146D</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort-six-hour/head/frame-146-diverted/solve-receipt.json</td><td><code>d9745ffecc8b69479f49f31b5e503bc7702b597688ef46081968315eac5875cc</code></td></tr>
+<tr><td>146D</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort-six-hour/head/frame-146-diverted/core-analysis.json</td><td><code>163d33ac9f32402bea4ecc3ddffb9962d6abef9476d87c1abb493d11928270af</code></td></tr>
+<tr><td>146D</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort-six-hour/head/frame-146-diverted/request-seed.npz</td><td><code>2b59c44c0ae2a69d61647c92daf9d5c7eb598bd4a4bae6ee1b4f6aa69d05c3e2</code></td></tr>
+<tr><td>146D</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort-six-hour/head/frame-146-diverted/receipt.json</td><td><code>bc5b9053120e8416f029f2bcb17749bfa6b9afcc3ee99d587f4ef6252f979924</code></td></tr>
+<tr><td>146D</td><td>/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_002495e835.parquet</td><td><code>1a6e401e76d69352fda53dfb4b91e3e8a797387b331d12c3e1e0e9858ae41e9e</code></td></tr>
+</tbody></table>
+
+</details>
+</section>

@@ -99,6 +99,38 @@
     <code>EXIT=1</code>) and the product source blob matches HEAD, so the test
     reports an assembly defect rather than restating a symmetry the assembly
     already imposed.</p>
+    <h3 id="icm-galerkin-cleanup-reuse">One mutant harness</h3>
+    <p>Two negative controls had been written as separate programs, and each
+    carried its own copy of the same seven steps: resolve the revision, keep
+    the tracked blob, extract the sources with <code>git archive</code>, mutate
+    one file in place, prove the imported module is that extraction, run the
+    selected tests, and prove the product source is unchanged.
+    <code>mutant.require_rejection</code> now owns that sequence, and a second
+    control supplies only what differs about it: the file it edits, the mutation
+    as a string edit, the marker the mutation introduces, the test selection and
+    the log path. A change to the extraction set or to the identity guard is
+    made once.</p>
+    <p><code>duplication.py</code> is the check that keeps it that way. It
+    reports every module carrying the whole extract-mutate-verify sequence and
+    requires exactly one carrier, <code>mutant.py</code>:</p>
+    <table id="icm-galerkin-cleanup-reuse-table"><thead><tr><th>revision</th><th>carriers of the sequence</th></tr></thead><tbody>
+<tr><td>before the factoring, <code>013ead990</code></td><td><code>negative.py</code>, <code>negative_asymmetry.py</code></td></tr>
+<tr><td>head, <code>03aa5258d</code></td><td><code>mutant.py</code></td></tr>
+</tbody></table>
+    <p>The check fails at the revision before the factoring and passes at the
+    head, so the commit that answers the finding is the one that makes it pass.
+    Run through the shared harness, the surviving mirrored-pair mutant still
+    turns the selected defect tests red: <code>5 failed, 43 deselected in
+    70.55s</code>, <code>EXIT=1</code>, with the imported module proved to be
+    the scratch extraction and the product blob proved equal to HEAD.</p>
+    <p>The centroid mutant was removed rather than kept beside the survivor. Run
+    through the shared harness it completed with <code>3 passed, 45 deselected
+    in 14.85s</code>: sampling a cell's centroids leaves the energy symmetric
+    and bounded on the meshes the test selects, so the mutation cannot turn its
+    own check red and asserts nothing. Its red log is retained as the record of
+    that measurement, and the mirrored off-diagonal perturbation is the control
+    that covers the reciprocity property.</p>
+
     <h3 id="icm-galerkin-cleanup-suite">Suite arms</h3>
     <p>Both arms run the same command in one sirius job each, from a tree extracted
     with <code>git archive</code> so the imported module is the revision under
@@ -120,7 +152,9 @@
     <code>baseline-arm.log</code>, <code>after-arm.log</code>,
     <code>after-arm-stale-patch.log</code>, <code>parity.log</code>,
     <code>parity-job.log</code>, <code>asymmetry.log</code>,
-    <code>negative-control.log</code>.</p>
+    <code>negative-control.log</code>, <code>negative-control-centroid.log</code>,
+    <code>negative-centroid-runner.log</code>, <code>mutants-job.log</code>,
+    <code>reuse-negative-control.log</code>.</p>
 
     <h3 id="icm-galerkin-cleanup-records">Corrected records</h3>
     <p>The guard-refusal paragraph of

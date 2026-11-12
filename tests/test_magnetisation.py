@@ -741,6 +741,7 @@ def test_material_restart_preserves_component_order_and_checks_shape(monkeypatch
     "region,size",
     [
         (shapely.box(1, 0, 1.7, 0.2), 0.3),
+        (shapely.box(4.78, -0.7, 4.81, 0.7), 0.05),
         (
             shapely.Point(0, 0)
             .buffer(0.5, 8)

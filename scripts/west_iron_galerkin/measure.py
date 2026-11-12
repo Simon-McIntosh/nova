@@ -20,6 +20,7 @@ import numpy as np  # noqa: E402
 import shapely  # noqa: E402
 
 from nova.biot import magnetisation as iron  # noqa: E402
+from nova.biot.tiledassembly import galerkin_cell_interaction  # noqa: E402
 from nova.imas.machine import StaticMachineDescription  # noqa: E402
 from tests.test_magnetisation import sphere, shell, uniform, loop  # noqa: E402
 
@@ -205,6 +206,14 @@ def main():
             symmetric_minimum=float(eigenvalues[0]),
             symmetric_maximum=float(eigenvalues[-1]),
         )
+        volume_scale = jnp.asarray(
+            np.tile(np.sqrt(seed._mesh.areas * seed._mesh.centroids[:, 0]), 2)
+        )
+        weighted = matrix * volume_scale[:, None] / volume_scale[None, :]
+        weighted_values = np.asarray(jnp.linalg.eigvalsh((weighted + weighted.T) / 2))
+        record["jacobian"][name]["volume_weighted_symmetric_minimum"] = float(
+            weighted_values[0]
+        )
         print(
             "JACOBIAN " + name + " " + json.dumps(record["jacobian"][name]), flush=True
         )
@@ -297,6 +306,40 @@ def main():
                     g, result._mesh, out, label + str(size)
                 )
             persist()
+    coarse = iron._mesh(shell(), 0.04)
+    scaled = tuple(p * iron._SHEET_LENGTH_SCALE for p in coarse.polygons)
+    response = galerkin_cell_interaction(scaled, plan=iron._PLAN, order=32)
+    iron.galerkin_cell_interaction = lambda polygons, plan: response
+    check = iron.solve_magnetisation(
+        shell(), loop, [0, 10], [1000, 1000], cell_size=0.04
+    )
+    probes = np.array([[2.0, 0.0], [0.0, 2.0], [3.0, 1.0]])
+    exact = ((2001 * 1002) - 2 * 999**2 * 0.9**3) / 9000
+    shielding = np.linalg.norm(loop(probes), axis=1) / np.linalg.norm(
+        loop(probes) + check.field(probes), axis=1
+    )
+    errors = np.abs(shielding / exact - 1)
+    regular = next(
+        row
+        for row in record["analytic"]
+        if row["shape"] == "shell" and row["size"] == 0.04 and row["mu"] == 1000
+    )
+    change = errors - np.asarray(regular["errors"])
+    record["shell_quadrature_check"] = dict(
+        order=32, errors=errors.tolist(), change_from_order24=change.tolist()
+    )
+    print(
+        "QUADRATURE_CHECK " + json.dumps(record["shell_quadrature_check"]), flush=True
+    )
+    assert np.max(np.abs(change)) < 2e-4
+    iron.galerkin_cell_interaction = production
+    record["analytic_no_worse"] = False
+    record["acceptance_limitation"] = (
+        "The coarse high-permeability shell error is larger than collocation; "
+        "the sphere centroid-uniformity test also changes. "
+        "No existing analytic tolerance is relaxed."
+    )
+    persist()
     for name, value in record["spectra"].items():
         if name.startswith("collocation"):
             continue

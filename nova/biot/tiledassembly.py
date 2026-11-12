@@ -776,12 +776,12 @@ def galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 24):
                 mutual[columns[chosen], rows[chosen]] = value
     # Sparse incidence keeps contraction proportional to the cell boundary count.
     energy = np.asarray((coefficient @ mutual) @ coefficient.T)
-    volumes = []
-    for polygon in polygons:
-        p = np.asarray(polygon)
-        q = np.roll(p, -1, axis=0)
-        cross = p[:, 0] * q[:, 1] - q[:, 0] * p[:, 1]
-        volumes.append(abs(np.pi / 3 * np.sum((p[:, 0] + q[:, 0]) * cross)))
+    import shapely
+
+    # Geometry centroids evaluate first moments without subtracting large
+    # shoelace terms in thin cells far from the axis.
+    bodies = [shapely.Polygon(polygon) for polygon in polygons]
+    volumes = [2 * np.pi * body.area * body.centroid.x for body in bodies]
     volume = np.tile(volumes, 2)
     # Reciprocity is assembled once per cell pair too, avoiding reduction-order skew.
     upper = np.triu(energy)

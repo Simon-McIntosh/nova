@@ -85,7 +85,8 @@ def main():
                 "from nova.biot import magnetisation as m; "
                 + f"assert Path(m.__file__).resolve() == "
                 f"Path({str(target)!r}).resolve(); "
-                + 'assert "points = cells.centroids" in inspect.getsource(m._interaction); '
+                + 'assert "points = cells.centroids" '
+                "in inspect.getsource(m._interaction); "
                 'print("MUTANT_MODULE="+m.__file__+" CWD="'
                 "+str(Path.cwd().resolve()), flush=True)"
             )

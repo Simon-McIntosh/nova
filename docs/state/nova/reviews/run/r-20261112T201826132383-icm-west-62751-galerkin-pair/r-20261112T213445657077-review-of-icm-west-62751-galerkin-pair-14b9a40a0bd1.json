@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/west_iron_galerkin_pair/figure.py:38 imports SOURCE and machine_source from measure.py",
+    "scripts/west_iron_galerkin_pair/figure.py:33 imports save_checked from scripts/edge_sheet/figure.py"
+  ],
+  "completed_at": "2026-11-12T22:05:54.005Z",
+  "dispatched_at": "2026-11-12T21:46:39Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html",
+      "line": "21 blocking the 0.04 m minimum symmetric eigenvalue of G/mu0 is printed as 4.86860066498e-05, but measurement/0.04/receipt.json and measurement/measurement.json both record 4.4705835785599244e-05 and the printed value appears in no receipt or log, so the permanent record misstates a quantity done_when clause 1 requires; the spectrum still lies inside [0, 1] and no conclusion rests on the digit.",
+      "severity": "the 0.04 m minimum symmetric eigenvalue of G/mu0 is printed as 4.86860066498e-05, but measurement/0.04/receipt.json and measurement/measurement.json both record 4.4705835785599244e-05 and the printed value appears in no receipt or log, so the permanent record misstates a quantity done_when clause 1 requires; the spectrum still lies inside [0, 1] and no conclusion rests on the digit.",
+      "text": "the 0.04 m minimum symmetric eigenvalue of G/mu0 is printed as 4.86860066498e-05, but measurement/0.04/receipt.json and measurement/measurement.json both record 4.4705835785599244e-05 and the printed value appears in no receipt or log, so the permanent record misstates a quantity done_when clause 1 requires; the spectrum still lies inside [0, 1] and no conclusion rests on the digit."
+    },
+    {
+      "file": "scripts/west_iron_galerkin_pair/measure.py",
+      "line": "293 non-blocking the receipt's revision is read with git rev-parse HEAD at launch, and the completed run stamped 8e5baf8c8 while executing an uncommitted measure.py -- the committed file at that revision still divides a list by a list at line 392 -- so a reader reproducing from the named revision gets an exception; the control is further described in the fragment as run twice from the same revision when attempt 1 logged revision a7dac4ab5.",
+      "severity": "the receipt's revision is read with git rev-parse HEAD at launch, and the completed run stamped 8e5baf8c8 while executing an uncommitted measure.py -- the committed file at that revision still divides a list by a list at line 392 -- so a reader reproducing from the named revision gets an exception; the control is further described in the fragment as run twice from the same revision when attempt 1 logged revision a7dac4ab5.",
+      "text": "the receipt's revision is read with git rev-parse HEAD at launch, and the completed run stamped 8e5baf8c8 while executing an uncommitted measure.py -- the committed file at that revision still divides a list by a list at line 392 -- so a reader reproducing from the named revision gets an exception; the control is further described in the fragment as run twice from the same revision when attempt 1 logged revision a7dac4ab5."
+    },
+    {
+      "file": "scripts/west_iron_galerkin_pair/measure.py",
+      "line": "65 non-blocking source_field re-implements, in the same six-subfilament quadrature and plasma-centroid scheme, the source builder at scripts/prototypes/iron_magnetisation/west.py",
+      "severity": "source_field re-implements, in the same six-subfilament quadrature and plasma-centroid scheme, the source builder at scripts/prototypes/iron_magnetisation/west.py",
+      "text": "source_field re-implements, in the same six-subfilament quadrature and plasma-centroid scheme, the source builder at scripts/prototypes/iron_magnetisation/west.py:63-86, leaving a third copy of the WEST external-field recipe; the prototype is script code that executes on import, so extracting an importable owner exceeds this node's no-product-change scope."
+    },
+    {
+      "file": "scripts/west_iron_galerkin_pair/figure.py",
+      "line": "166 non-blocking the panel formats the near-probe difference at two decimals, so the measured -0.0064 uT separation is drawn as -0.01 uT, overstating it by more than half in the one label the figure uses to report the mesh pair at the near probe.",
+      "severity": "the panel formats the near-probe difference at two decimals, so the measured -0.0064 uT separation is drawn as -0.01 uT, overstating it by more than half in the one label the figure uses to report the mesh pair at the near probe.",
+      "text": "the panel formats the near-probe difference at two decimals, so the measured -0.0064 uT separation is drawn as -0.01 uT, overstating it by more than half in the one label the figure uses to report the mesh pair at the near probe."
+    },
+    {
+      "file": "scripts/west_iron_galerkin_pair/figure.py",
+      "line": "197 non-blocking the canvas size is declared by rewriting the SVG root after save_checked returns, restating a declaration the plotting convention places in the repository's save function; scripts/edge_sheet/figure.py",
+      "severity": "the canvas size is declared by rewriting the SVG root after save_checked returns, restating a declaration the plotting convention places in the repository's save function; scripts/edge_sheet/figure.py",
+      "text": "the canvas size is declared by rewriting the SVG root after save_checked returns, restating a declaration the plotting convention places in the repository's save function; scripts/edge_sheet/figure.py:52 save_checked is that owner and was not extended."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read all four commits against base a7dac4ab5 -- a new measure.py (407 lines), figure.py (216), run.sh (24), the evidence fragment (74) and the rendered SVG; 211a595ca repairs an inverted arm ordering and a list-by-list division that aborted attempt 1, and 14b9a40a0 sizes the geometry panel and records the determinism run.",
+    "done_when": "the brief's three clauses are each answered by two tables and a figure in the fragment -- per-mesh cell count, clearance, area/h^2, per-iteration residual, iteration count and the minimum symmetric eigenvalue of G/mu0 at lines 12-26; the probes, their difference, the CEA-versus-flat-215 change and the converged mu_r range and volume fractions at lines 46-70; the two-panel figure at line 72 -- and the gate log titan-pair.log ends EXIT=0 with measurement.json complete: true.",
+    "goal": "the node's goal is the mesh-pair discretisation error bar for WEST 62751 on the Galerkin operator; docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html records both meshes converged from M = 0 at full drive (1695 cells, 4 exact Newton corrections; 6632 cells, 5) and the probe pair with its separation.",
+    "manifest": "read; status complete, commits 8e5baf8c8 211a595ca 686b9d3b0 14b9a40a0, tests the measure.py command with its titan-pair.log, and a determinism control kept at measurement-attempt1; its stated 1321 s of solve and build wall does not reconcile with the receipt, whose build and solve seconds sum to 1472.5 s inside a 1531 s job.",
+    "write_paths": "the node's fence was scripts/west_iron_galerkin_pair, the fragment and the figure directory; git diff --stat a7dac4ab5..14b9a40a0 lists exactly those three paths and nothing under nova/ or tests/."
+  },
+  "justifications": {
+    "durability": "no test file is in scope, and scripts/west_iron_galerkin_pair/figure.py:83 orders the arms by a descending sort with no assertion that the last entry is the smaller cell size, so the inverted-pairing bug repaired in 211a595ca could return unreddened.",
+    "evidence": "titan-pair.log:1 stamps revision 8e5baf8c8, but the committed measure.py at that revision raises on scripts/west_iron_galerkin_pair/measure.py:392, so the completed receipt is reproducible only from 211a595ca.",
+    "fit": "scripts/west_iron_galerkin_pair/measure.py:4 and figure.py:5 both write the plan's probes, the changelog-prose pattern the naming check refuses, and measure.py:376 monkeypatches the module global iron._interaction to memoise.",
+    "goal_fidelity": "docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html:21 reports the 0.04 m minimum eigenvalue as 4.86860066498e-05 where measurement/0.04/receipt.json records 4.4705835785599244e-05.",
+    "reuse": "scripts/west_iron_galerkin_pair/measure.py:65 re-implements the WEST filament source builder already present at scripts/prototypes/iron_magnetisation/west.py:63-86, while figure.py:194 reuses save_checked and the nova.media painters instead of forking them.",
+    "scope_discipline": "every path in the diff -- scripts/west_iron_galerkin_pair/measure.py, figure.py, run.sh, the fragment and the SVG -- lies inside the manifest's three declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is the mesh-pair discretisation error bar for WEST 62751 on the Galerkin operator; docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html records both meshes converged from M = 0 at full drive (1695 cells, 4 exact Newton corrections; 6632 cells, 5) and the probe pair with its separation.\nVERDICT done_when: the brief's three clauses are each answered by two tables and a figure in the fragment -- per-mesh cell count, clearance, area/h^2, per-iteration residual, iteration count and the minimum symmetric eigenvalue of G/mu0 at lines 12-26; the probes, their difference, the CEA-versus-flat-215 change and the converged mu_r range and volume fractions at lines 46-70; the two-panel figure at line 72 -- and the gate log titan-pair.log ends EXIT=0 with measurement.json complete: true.\nVERDICT write_paths: the node's fence was scripts/west_iron_galerkin_pair, the fragment and the figure directory; git diff --stat a7dac4ab5..14b9a40a0 lists exactly those three paths and nothing under nova/ or tests/.\nVERDICT manifest: read; status complete, commits 8e5baf8c8 211a595ca 686b9d3b0 14b9a40a0, tests the measure.py command with its titan-pair.log, and a determinism control kept at measurement-attempt1; its stated 1321 s of solve and build wall does not reconcile with the receipt, whose build and solve seconds sum to 1472.5 s inside a 1531 s job.\nVERDICT diff: read all four commits against base a7dac4ab5 -- a new measure.py (407 lines), figure.py (216), run.sh (24), the evidence fragment (74) and the rendered SVG; 211a595ca repairs an inverted arm ordering and a list-by-list division that aborted attempt 1, and 14b9a40a0 sizes the geometry panel and records the determinism run.\nCALL_SITES: scripts/west_iron_galerkin_pair/figure.py:38 imports SOURCE and machine_source from measure.py, scripts/west_iron_galerkin_pair/figure.py:33 imports save_checked from scripts/edge_sheet/figure.py; none in nova/ or tests/\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments_placeholder\nSCORE evidence: 14\nJUSTIFICATION evidence: titan-pair.log:1 stamps revision 8e5baf8c8, but the committed measure.py at that revision raises on scripts/west_iron_galerkin_pair/measure.py:392, so the completed receipt is reproducible only from 211a595ca.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff -- scripts/west_iron_galerkin_pair/measure.py, figure.py, run.sh, the fragment and the SVG -- lies inside the manifest's three declared write paths.\nSCORE durability: 8\nJUSTIFICATION durability: no test file is in scope, and scripts/west_iron_galerkin_pair/figure.py:83 orders the arms by a descending sort with no assertion that the last entry is the smaller cell size, so the inverted-pairing bug repaired in 211a595ca could return unreddened.\nSCORE fit: 13\nJUSTIFICATION fit: scripts/west_iron_galerkin_pair/measure.py:4 and figure.py:5 both write the plan's probes, the changelog-prose pattern the naming check refuses, and measure.py:376 monkeypatches the module global iron._interaction to memoise.\nSCORE reuse: 11\nJUSTIFICATION reuse: scripts/west_iron_galerkin_pair/measure.py:65 re-implements the WEST filament source builder already present at scripts/prototypes/iron_magnetisation/west.py:63-86, while figure.py:194 reuses save_checked and the nova.media painters instead of forking them.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html:21 blocking: the 0.04 m minimum symmetric eigenvalue of G/mu0 is printed as 4.86860066498e-05, but measurement/0.04/receipt.json and measurement/measurement.json both record 4.4705835785599244e-05 and the printed value appears in no receipt or log, so the permanent record misstates a quantity done_when clause 1 requires; the spectrum still lies inside [0, 1] and no conclusion rests on the digit.\nFINDING scripts/west_iron_galerkin_pair/measure.py:293 non-blocking: the receipt's revision is read with git rev-parse HEAD at launch, and the completed run stamped 8e5baf8c8 while executing an uncommitted measure.py -- the committed file at that revision still divides a list by a list at line 392 -- so a reader reproducing from the named revision gets an exception; the control is further described in the fragment as run twice from the same revision when attempt 1 logged revision a7dac4ab5.\nFINDING scripts/west_iron_galerkin_pair/measure.py:65 non-blocking: source_field re-implements, in the same six-subfilament quadrature and plasma-centroid scheme, the source builder at scripts/prototypes/iron_magnetisation/west.py:63-86, leaving a third copy of the WEST external-field recipe; the prototype is script code that executes on import, so extracting an importable owner exceeds this node's no-product-change scope.\nFINDING scripts/west_iron_galerkin_pair/figure.py:166 non-blocking: the panel formats the near-probe difference at two decimals, so the measured -0.0064 uT separation is drawn as -0.01 uT, overstating it by more than half in the one label the figure uses to report the mesh pair at the near probe.\nFINDING scripts/west_iron_galerkin_pair/figure.py:197 non-blocking: the canvas size is declared by rewriting the SVG root after save_checked returns, restating a declaration the plotting convention places in the repository's save function; scripts/edge_sheet/figure.py:52 save_checked is that owner and was not extended.\n",
+  "review_run_id": "r-20261112T213445657077-review-of-icm-west-62751-galerkin-pair-14b9a40a0bd1",
+  "reviewed_base_sha": "a7dac4ab557e56bcd9e634c349b036c0e8979519",
+  "reviewed_head_sha": "14b9a40a0bd168c326a0a92df98133ec4d27f8e2",
+  "reviewed_run_id": "r-20261112T201826132383-icm-west-62751-galerkin-pair",
+  "reviewer_run_id": "r-20261112T213445657077-review-of-icm-west-62751-galerkin-pair-14b9a40a0bd1",
+  "scores": {
+    "durability": 8,
+    "evidence": 14,
+    "fit": 13,
+    "goal_fidelity": 17,
+    "reuse": 11,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T22:09:26.725987+00:00",
+  "total": 83
+}

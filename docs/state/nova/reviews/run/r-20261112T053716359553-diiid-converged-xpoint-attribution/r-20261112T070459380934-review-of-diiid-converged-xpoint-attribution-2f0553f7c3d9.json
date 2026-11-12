@@ -7,6 +7,13 @@
   "call_sites": [],
   "completed_at": "2026-11-12T07:19:49.563Z",
   "dispatched_at": "2026-11-12T07:05:55Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "prototype diagnostic; the conductor fit is a one-off attribution read, and the owner in benchmarks/diiid_boundary_current_recovery.py is named in the record for any reuse",
+      "recorded_at": "2026-11-12T07:25:18.467759+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_xpoint_attribution/attribute.py",

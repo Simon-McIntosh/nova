@@ -25,7 +25,7 @@ def independent_reference_arguments(coordinate, values):
     samples = jnp.asarray(values, dtype=jnp.float64)
     width = grid[1] - grid[0]
     lower_slope = (samples[1] - samples[0]) / width
-    upper_slope = (samples[-1] - samples[-2]) / (grid[-1] - grid[-2])
+    upper_slope = (samples[-1] - samples[-2]) / width
     return dict(
         coordinate=grid,
         values=samples,

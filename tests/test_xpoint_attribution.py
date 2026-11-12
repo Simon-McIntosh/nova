@@ -131,3 +131,26 @@ def test_unshadowed_operator_mismatch_cannot_be_called_boundary_input(maps):
             1,
             np.zeros_like(rr, dtype=bool),
         )
+
+
+def test_integrated_local_sensitivity_closes_a_finite_perturbation(maps):
+    from scripts.prototypes.diiid_xpoint_attribution.sensitivity import path_response
+
+    radius, height, rr, zz, reference = maps
+    perturbation = 0.2 * rr**2
+    zero = np.zeros_like(rr)
+    data = dict(
+        radius=radius,
+        height=height,
+        reference=reference,
+        solved=reference + perturbation,
+        profiles=zero,
+        total_current=zero,
+        external=perturbation,
+        plasma_response=zero,
+        boundary_shadow=zero,
+    )
+    result = path_response(data, dict(reference_saddle_m=[1.5, -0.1]), 16)
+    exact = np.array([1.5 / 1.2 - 1.5, 0])
+    np.testing.assert_allclose(result["total_m"], exact, atol=1e-10)
+    np.testing.assert_allclose(result["shifts_m"]["external"], exact, atol=1e-10)

@@ -152,6 +152,7 @@ def split_operator(folder, frame):
     count = data["reference"].size
     shape = data["reference"].shape
     saved = dict(np.load(Path(result["folder"]) / "terminal.npz"))
+    seed = np.load(Path(result["folder"]) / "request-seed.npz")["state"]
     reference = dict(np.load(folder / f"operator-{frame}-reference.npz"))
     solved = dict(np.load(folder / f"operator-{frame}-solved.npz"))
     shadow = np.asarray(saved["shadow"][:count], bool).reshape(shape)
@@ -195,6 +196,13 @@ def split_operator(folder, frame):
         np.max(np.abs(parts["boundary_shadow"][~shadow]))
     )
     result["shadow_sup_wb"] = float(np.max(np.abs(parts["boundary_shadow"][shadow])))
+    result["shadow_vs_request_seed_sup_wb"] = float(
+        np.max(
+            np.abs(
+                saved["state"][:count][shadow.ravel()] - seed[:count][shadow.ravel()]
+            )
+        )
+    )
     result["current"]["operator_solved_total_a"] = float(solved["source_current"].sum())
     rr, zz = np.meshgrid(data["radius"], data["height"], indexing="ij")
     physical_current = solved["source_current"]
@@ -209,6 +217,16 @@ def split_operator(folder, frame):
             physical_current[nonzero].max() / physical_current[nonzero].mean()
         ),
     )
+    result["held_node_values"] = [
+        dict(
+            index=index.tolist(),
+            rz_m=[data["radius"][index[0]], data["height"][index[1]]],
+            published_wb=float(data["solved"][tuple(index)]),
+            source_image_wb=float(raw[tuple(index)]),
+            request_seed_wb=float(seed[:count].reshape(shape)[tuple(index)]),
+        )
+        for index in np.argwhere(shadow)
+    ]
     data.update(parts)
     data.update(physical_image=raw, shadow=shadow)
     write(folder / "native" / f"result-{frame}.json", result)
@@ -581,6 +599,16 @@ def analyze(frame, folder, archive, output):
         conductor_fit=fit,
         conductor_names=names,
         conductor_current_a_turn=currents,
+        conductor_input_bindings=[
+            dict(
+                name=name,
+                input_column=conductor.input_column,
+                applied_multiplier=float(conductor.turns.applied_multiplier),
+            )
+            for name in names
+            for conductor in machine.physical.conductors
+            if conductor.name == name
+        ],
         extra_names=extra_names,
         extra_current_a_turn=extra_currents,
         extra_response_receipt=extra_receipt,
@@ -678,19 +706,20 @@ def main():
         from scripts.prototypes.diiid_xpoint_attribution.operator_probe import probe
         from scripts.prototypes.diiid_xpoint_attribution.native_reference import refine
         from scripts.prototypes.diiid_xpoint_attribution.sensitivity import (
-            path_response,
+            analyze as integrate,
         )
 
         probe(args.output)
+        completed_rows = []
         for frame in (137, 146):
             refine(args.output, frame)
             result = split_operator(args.output, frame)
-            arrays = dict(np.load(args.output / "native" / f"fields-{frame}.npz"))
-            integrated = path_response(arrays, result, 32)
-            write(
-                args.output / "native" / f"sensitivity-{frame}.json",
-                dict(path=integrated),
-            )
+            integrate(args.output / "native", frame)
+            completed_rows.append(result)
+        write(
+            args.output / "native/results.json",
+            dict(rows=completed_rows, forward_solves=0),
+        )
     print("MEASUREMENT: 2 converged saved states; zero forward solves", flush=True)
 
 

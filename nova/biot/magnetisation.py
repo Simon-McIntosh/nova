@@ -218,21 +218,65 @@ def _residual(state, operands):
     return state - (coefficient * total).reshape(-1)
 
 
+def _smoothness(cells, bodies):
+    """Assemble the natural-boundary Dirichlet energy on each body separately.
+
+    A face contributes length / centroid distance times |M_i - M_j|**2.
+    This is the face-normal finite-volume approximation to integral |grad M|**2
+    in the poloidal section. No outer face contributes. Cells spanning an
+    authored body boundary are excluded because a constant cell value cannot
+    represent the two independent traces there.
+    """
+    polygons = [shapely.Polygon(p) for p in cells.polygons]
+    labels = np.full(len(polygons), -1)
+    for i, polygon in enumerate(polygons):
+        owners = [
+            k
+            for k, body in enumerate(bodies)
+            if polygon.difference(body).area <= 1e-10 * polygon.area
+        ]
+        if len(owners) == 1:
+            labels[i] = owners[0]
+    laplacian = np.zeros((len(polygons), len(polygons)))
+    tree = shapely.STRtree(polygons)
+    for i, polygon in enumerate(polygons):
+        for j in tree.query(polygon, predicate="intersects"):
+            if j <= i or labels[i] < 0 or labels[i] != labels[j]:
+                continue
+            shared = polygon.boundary.intersection(polygons[j].boundary).length
+            if shared == 0:
+                continue
+            distance = np.linalg.norm(cells.centroids[i] - cells.centroids[j])
+            weight = shared / distance
+            laplacian[i, i] += weight
+            laplacian[j, j] += weight
+            laplacian[i, j] -= weight
+            laplacian[j, i] -= weight
+    return laplacian
+
+
+def _smooth_residual(state, operands, penalty):
+    residual = _residual(state, operands)
+    if jnp.ndim(penalty) == 2:
+        residual += (state.reshape(2, -1) @ penalty.T).reshape(-1)
+    return residual
+
+
 @jax.jit
-def _factor(state, operands, regularisation=0.0):
-    """Factor the exact differential Jacobian plus a runtime diagonal shift."""
-    jacobian = jax.jacfwd(_residual, argnums=0)(state, operands)
+def _factor(state, operands, regularisation=0.0, penalty=0.0):
+    """Factor the differential Jacobian with spatial and diagonal penalties."""
+    jacobian = jax.jacfwd(_smooth_residual, argnums=0)(state, operands, penalty)
     jacobian += regularisation * jnp.eye(state.size, dtype=state.dtype)
     return jla.lu_factor(jacobian)
 
 
 @jax.jit
-def _update(state, operands, factor, scale):
+def _update(state, operands, factor, scale, penalty=0.0):
     """Apply one Newton correction with runtime state, operands and LU factor."""
-    residual = _residual(state, operands)
+    residual = _smooth_residual(state, operands, penalty)
     direction = jla.lu_solve(factor, -residual)
     candidate = state + scale * direction
-    return candidate, _residual(candidate, operands)
+    return candidate, _smooth_residual(candidate, operands, penalty)
 
 
 @dataclass(frozen=True)
@@ -259,6 +303,9 @@ class MagnetisationSolution:
     regularisation_history: tuple[float, ...] = ()
     reduction_ratios: tuple[float, ...] = ()
     step_types: tuple[str, ...] = ()
+    smoothness_lambda: float = 0.0
+    smoothness_history: tuple[float, ...] = ()
+    penalised_residual_history: tuple[float, ...] = ()
 
     @property
     def iterations(self) -> int:
@@ -300,6 +347,8 @@ def solve_magnetisation(
     max_iterations: int = 60,
     tile_plan: TilePlan = _PLAN,
     initial_magnetisation: np.ndarray | None = None,
+    smoothness_strength: float = 0.0,
+    smoothness_bodies=None,
 ) -> MagnetisationSolution:
     """Mesh iron and solve M = c(|B|) B for B = B_external + G M.
 
@@ -319,6 +368,18 @@ def solve_magnetisation(
     the nonlinear defect of each regularised step. Trying lambda=0 first
     restores ordinary quadratic Newton convergence near a nonsingular root.
     A budget exhaustion or regularisation refusal has ``converged=False``.
+
+    Optional ``smoothness_strength`` multiplies the initial Jacobian infinity
+    norm to set a frozen spatial-penalty scale, exposed as ``smoothness_lambda``.
+    The penalty is lambda/2 times the within-body Dirichlet energy. Supply
+    ``smoothness_bodies`` as the distinct authored Polygon/MultiPolygon outlines
+    when ``region`` is their union: a union loses touching segment boundaries.
+    Without it, each connected part of ``region`` is one body. Boundary-spanning
+    cells are excluded. The homotopy solves at full, tenth and hundredth scale,
+    then at zero, so convergence always means the unpenalised material root.
+    ``residual_history`` always records the original material residual;
+    ``penalised_residual_history`` and ``smoothness_history`` identify the
+    equation and lambda used for each attempted correction.
     """
     configure_dtypes()
     assert jax.config.jax_enable_x64, "the material solve requires float64"
@@ -326,6 +387,8 @@ def solve_magnetisation(
         raise ValueError("tolerance must be finite and positive")
     if not isinstance(max_iterations, int) or max_iterations < 0:
         raise ValueError("max_iterations must be a nonnegative integer")
+    if not np.isfinite(smoothness_strength) or smoothness_strength < 0:
+        raise ValueError("smoothness_strength must be finite and nonnegative")
     law = _fit_law(b_field, permeability_relative)
     cells = _mesh(region, cell_size)
     external = np.asarray(external_field(cells.centroids.copy()), dtype=np.float64)
@@ -346,17 +409,54 @@ def solve_magnetisation(
         if initial.shape != external.shape or not np.all(np.isfinite(initial)):
             raise ValueError("initial_magnetisation must be finite (cells, 2)")
         state = jnp.asarray(initial.T.reshape(-1))
+    smoothness_lambda, stage = 0.0, 0
+    penalty = jnp.asarray(0.0)
+    if smoothness_strength > 0:
+        bodies = tuple(
+            shapely.get_parts(region)
+            if smoothness_bodies is None
+            else smoothness_bodies
+        )
+        if not bodies or any(
+            not isinstance(body, shapely.Polygon | shapely.MultiPolygon)
+            or body.is_empty
+            or not body.is_valid
+            for body in bodies
+        ):
+            raise ValueError("smoothness_bodies must contain valid iron outlines")
+        laplacian = jnp.asarray(_smoothness(cells, bodies))
+        jacobian = jax.jacfwd(_residual)(state, operands)
+        smoothness_lambda = smoothness_strength * float(
+            jnp.max(jnp.sum(jnp.abs(jacobian), axis=1))
+        )
+        penalty = smoothness_lambda * laplacian
+    smoothness_history, penalised_history = [], []
     history, scales = [], []
     regularisations, ratios, step_types = [], [], []
     regularisation = 1e-6
     reference = max(np.linalg.norm(external) / _MU0, 1e-30)
     termination = "iteration-budget"
     for iteration in range(max_iterations + 1):
-        residual = _residual(state, operands)
+        original = _residual(state, operands)
+        denominator = max(float(jnp.linalg.norm(state)), reference)
+        relative = float(jnp.linalg.norm(original)) / denominator
+        residual = _smooth_residual(state, operands, penalty)
         norm = float(jnp.linalg.norm(residual))
-        relative = norm / max(float(jnp.linalg.norm(state)), reference)
         history.append(relative)
-        if relative <= tolerance:
+        while (
+            smoothness_lambda > 0
+            and stage < 3
+            and norm / denominator <= max(tolerance, 1e-7)
+        ):
+            stage += 1
+            penalty = smoothness_lambda * (10.0**-stage if stage < 3 else 0) * laplacian
+            residual = _smooth_residual(state, operands, penalty)
+            norm = float(jnp.linalg.norm(residual))
+            regularisation = 1e-6
+        active_lambda = smoothness_lambda * (10.0**-stage if stage < 3 else 0)
+        smoothness_history.append(active_lambda)
+        penalised_history.append(norm / denominator)
+        if relative <= tolerance and (smoothness_lambda == 0 or stage >= 3):
             termination = "converged"
             break
         if iteration == max_iterations:
@@ -364,8 +464,10 @@ def solve_magnetisation(
         accepted = False
         for attempt in range(35):
             damping = 0.0 if attempt == 0 else regularisation
-            factor = _factor(state, operands, jnp.asarray(damping))
-            candidate, trial = _update(state, operands, factor, jnp.asarray(1.0))
+            factor = _factor(state, operands, jnp.asarray(damping), penalty)
+            candidate, trial = _update(
+                state, operands, factor, jnp.asarray(1.0), penalty
+            )
             defect = trial + damping * (candidate - state)
             ratio = 1 - (float(jnp.linalg.norm(defect)) / norm) ** 2
             if ratio > 0.25 and bool(jnp.any(candidate != state)):
@@ -402,4 +504,7 @@ def solve_magnetisation(
         tuple(regularisations),
         tuple(ratios),
         tuple(step_types),
+        smoothness_lambda,
+        tuple(smoothness_history),
+        tuple(penalised_history),
     )

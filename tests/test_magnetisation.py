@@ -638,3 +638,165 @@ def test_material_restart_preserves_component_order_and_checks_shape(monkeypatch
                 cell_size=1,
                 initial_magnetisation=invalid,
             )
+
+
+def test_smoothness_respects_touching_body_boundaries():
+    region = shapely.box(1, 0, 3, 2)
+    bodies = (shapely.box(1, 0, 2, 2), shapely.box(2, 0, 3, 2))
+    cells = iron._mesh(region, 1)
+    laplacian = iron._smoothness(cells, bodies)
+    # Distinct bodies have independent constant null modes even when touching.
+    magnetisation = np.where(cells.centroids[:, 0] < 2, 3.0, -7.0)
+    np.testing.assert_allclose(laplacian @ magnetisation, 0, atol=1e-14)
+    assert np.count_nonzero(laplacian - np.diag(laplacian.diagonal())) == 4
+    assert np.linalg.matrix_rank(laplacian) == 2
+    # A whole-body label is a positive control: the shared face then carries energy.
+    joined = iron._smoothness(cells, (region,))
+    assert magnetisation @ joined @ magnetisation > 0
+
+
+def test_smoothness_energy_weights_and_vacuum_exclusion():
+    polygons = (
+        np.array([[1, 0], [3, 0], [3, 1], [1, 1]]),
+        np.array([[3, 0], [4, 0], [4, 1], [3, 1]]),
+        np.array([[4, 1], [5, 1], [5, 2], [4, 2]]),
+        np.array([[5.1, 1], [6.1, 1], [6.1, 2], [5.1, 2]]),
+    )
+    shapes = [shapely.Polygon(p) for p in polygons]
+    cells = iron._Mesh(
+        polygons,
+        np.array([p.centroid.coords[0] for p in shapes]),
+        np.array([p.area for p in shapes]),
+    )
+    laplacian = iron._smoothness(cells, (shapely.union_all(shapes),))
+    expected = np.zeros((4, 4))
+    expected[:2, :2] = np.array([[1, -1], [-1, 1]]) / 1.5
+    np.testing.assert_allclose(laplacian, expected)
+    state = jnp.arange(8.0)
+    matrix = jnp.asarray(laplacian)
+
+    def energy(value):
+        return 0.5 * jnp.sum((value.reshape(2, -1) @ matrix) * value.reshape(2, -1))
+
+    np.testing.assert_allclose(
+        jax.grad(energy)(state), (state.reshape(2, -1) @ matrix).reshape(-1)
+    )
+    assert np.linalg.eigvalsh(laplacian).min() >= -1e-14
+    # A cell spanning an authored cut has no independently resolved body trace.
+    cut = (shapely.box(1, 0, 2, 2), shapely.box(2, 0, 7, 2))
+    assert not iron._smoothness(cells, cut)[0].any()
+
+
+def test_smoothness_homotopy_finishes_at_original_root(monkeypatch):
+    region = shapely.box(1, 0, 3, 2)
+    response = np.eye(8) * iron._MU0 * 0.5
+    monkeypatch.setattr(iron, "_interaction", lambda *args: response)
+    external = np.array([[0.01, 0.03], [0.02, 0.04], [-0.02, 0.01], [0.03, -0.01]])
+    result = iron.solve_magnetisation(
+        region,
+        lambda points: external,
+        [0, 1, 10],
+        [10, 10, 10],
+        cell_size=1,
+        smoothness_strength=0.01,
+    )
+    assert result.converged
+    assert result.smoothness_lambda == pytest.approx(0.0055)
+    np.testing.assert_allclose(
+        result.magnetisation, external * (0.9 / iron._MU0 / 0.55), rtol=2e-14
+    )
+    assert result.smoothness_history[-1] == 0
+    assert result.residual_history[-1] < 1e-8
+    assert set(
+        np.round(np.asarray(result.smoothness_history) / result.smoothness_lambda, 8)
+    ) == {1.0, 0.1, 0.01, 0.0}
+    assert len(result.penalised_residual_history) == len(result.residual_history)
+    for invalid in (-1, np.nan, np.inf):
+        with pytest.raises(ValueError, match="smoothness_strength"):
+            iron.solve_magnetisation(
+                region,
+                lambda points: external,
+                [0, 1],
+                [10, 10],
+                cell_size=1,
+                smoothness_strength=invalid,
+            )
+
+
+@pytest.mark.parametrize("mu", [100.0, 1000.0])
+@pytest.mark.slow
+@pytest.mark.timeout(900)
+def test_smoothness_homotopy_preserves_sphere(mu, capsys):
+    result = iron.solve_magnetisation(
+        sphere(),
+        uniform,
+        [0, 1, 10],
+        [mu, mu, mu],
+        cell_size=0.1,
+        smoothness_strength=0.01,
+    )
+    assert result.converged and result.smoothness_history[-1] == 0
+    points = result._mesh.centroids
+    total = uniform(points) + result.field(points)
+    inside = np.linalg.norm(points, axis=1) < 0.3
+    error = np.max(np.abs(total[inside, 1] / (3 * mu / (mu + 2) * 0.01) - 1))
+    probes = np.array([[1.0, 0.0], [0.0, 1.0]])
+    expected = 0.01 * np.array(
+        [1 - (mu - 1) / (mu + 2) / 8, 1 + (mu - 1) / (mu + 2) / 4]
+    )
+    exterior = np.abs((uniform(probes) + result.field(probes))[:, 1] / expected - 1)
+    with capsys.disabled():
+        print(
+            f"\nsmooth sphere mu={mu:g}: interior={error:.12g}, "
+            f"exterior={exterior.tolist()}, lambda={result.smoothness_lambda:.12g}, "
+            f"iterations={result.iterations}",
+            flush=True,
+        )
+    assert error < 1e-9
+    np.testing.assert_allclose(
+        exterior,
+        {
+            100.0: [1.299614500682722e-6, 1.8379254441702741e-6],
+            1000.0: [1.3400238558780586e-6, 1.8779696518977929e-6],
+        }[mu],
+        rtol=0,
+        atol=2e-10,
+    )
+
+
+@pytest.mark.parametrize("mu", [100.0, 1000.0])
+@pytest.mark.parametrize("cell_size", [0.04, 0.02])
+@pytest.mark.slow
+@pytest.mark.timeout(3600)
+def test_smoothness_homotopy_preserves_closed_shell(mu, cell_size, capsys):
+    result = iron.solve_magnetisation(
+        shell(),
+        loop,
+        [0, 1, 10],
+        [mu, mu, mu],
+        cell_size=cell_size,
+        smoothness_strength=0.01,
+    )
+    assert result.converged and result.smoothness_history[-1] == 0
+    probes = np.array([[2.0, 0.0], [0.0, 2.0], [1.5, 1.5]])
+    reference = loop(probes)
+    shielding = np.linalg.norm(reference, axis=1) / np.linalg.norm(
+        reference + result.field(probes), axis=1
+    )
+    exact = ((2 * mu + 1) * (mu + 2) - 2 * (mu - 1) ** 2 * 0.9**3) / (9 * mu)
+    error = np.abs(shielding / exact - 1)
+    bounds = {
+        (100.0, 0.04): [0.013, 0.020, 0.009],
+        (100.0, 0.02): [0.007, 0.008, 0.006],
+        (1000.0, 0.04): [0.035, 0.077, 0.022],
+        (1000.0, 0.02): [0.027, 0.030, 0.020],
+    }
+    with capsys.disabled():
+        print(
+            f"\nsmooth shell mu={mu:g}, size={cell_size:g}: "
+            f"errors={error.tolist()}, lambda={result.smoothness_lambda:.12g}, "
+            f"iterations={result.iterations}, "
+            f"residual={result.residual_history[-1]:.12g}",
+            flush=True,
+        )
+    assert np.all(error < bounds[mu, cell_size])

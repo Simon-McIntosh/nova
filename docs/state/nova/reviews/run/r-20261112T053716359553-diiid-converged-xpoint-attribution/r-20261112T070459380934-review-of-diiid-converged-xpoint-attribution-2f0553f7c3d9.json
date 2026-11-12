@@ -12,6 +12,11 @@
       "kind": "exempted",
       "reason": "prototype diagnostic; the conductor fit is a one-off attribution read, and the owner in benchmarks/diiid_boundary_current_recovery.py is named in the record for any reuse",
       "recorded_at": "2026-11-12T07:25:18.467759+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "prototype diagnostic helpers; the owners are named in the review and the next node reuses decompose.py and census for its geometry read",
+      "recorded_at": "2026-11-12T07:25:48.235557+00:00"
     }
   },
   "findings": [

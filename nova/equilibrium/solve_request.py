@@ -71,11 +71,12 @@ def _evaluate_sampled_flux_function(
         -6.0 + parameter * (8.0 - 3.0 * parameter)
     )
     exterior = value_basis * edge_value + slope_basis * outward_increment
-    return jnp.where(
+    result = jnp.where(
         (evaluation_coordinate >= grid[0]) & (evaluation_coordinate <= grid[-1]),
         interior,
         exterior,
     )
+    return jnp.where(below, samples[0], result)
 
 
 @jax.tree_util.register_pytree_node_class
@@ -84,8 +85,9 @@ class SampledFluxFunction:
     """A member-varying flux function carried entirely by array leaves.
 
     Values interpolate on a strictly increasing normalized-flux coordinate.
-    Outside that coordinate, a quintic end cap preserves the edge value and
-    slope before reaching zero one edge interval away. The representation is
+    Below the first coordinate, values hold constant toward the magnetic axis.
+    Above the last coordinate, a quintic end cap preserves its value and slope
+    before reaching zero one edge interval away. The representation is
     the array-owned equivalent of a closure around ``jnp.interp`` and can be
     stacked without closing any member's table into a compiled program.
     """
@@ -123,7 +125,7 @@ class SampledFluxFunction:
         object.__setattr__(self, "upper_edge_increment", upper_edge_increment)
 
     def __call__(self, psi_norm):
-        """Evaluate the interpolant and its slope-matched compact end caps."""
+        """Evaluate the interpolant, constant core hold and compact outer cap."""
         return _evaluate_sampled_flux_function(
             self.coordinate,
             self.values,

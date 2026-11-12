@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-11-12T07:54:40.810Z",
   "dispatched_at": "2026-11-12T07:39:58Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "coordinator updates the plan section 4 B-H law text in this session through reckon-edit (C1 blend, 1 % M_n rise cap, then constant M)",
+      "recorded_at": "2026-11-12T19:08:51.177879+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/plans/iron-core-magnetisation.html",

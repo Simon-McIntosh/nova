@@ -385,14 +385,14 @@ def main():
         iron._interaction = production
     coarse, fine = (record["meshes"][f"{size:.4g}"] for size in args.sizes)
     assert coarse["converged"] and fine["converged"]
-    difference = np.asarray(fine["magnitude_T"]) - np.asarray(coarse["magnitude_T"])
+    coarse_field = np.asarray(coarse["magnitude_T"])
+    fine_field = np.asarray(fine["magnitude_T"])
+    difference = fine_field - coarse_field
     record["error_bar"] = dict(
         pair=[float(size) for size in args.sizes],
         difference_T=difference.tolist(),
-        difference_over_coarse=difference.tolist()
-        / np.asarray(coarse["magnitude_T"]).tolist(),
-        difference_over_air=difference.tolist()
-        / np.asarray(np.linalg.norm(air, axis=1)).tolist(),
+        difference_over_coarse=(difference / coarse_field).tolist(),
+        difference_over_air=(difference / np.linalg.norm(air, axis=1)).tolist(),
         cell_ratio=coarse["cells"] / fine["cells"],
         iterations=[coarse["iterations"], fine["iterations"]],
     )

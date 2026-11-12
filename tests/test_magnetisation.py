@@ -79,9 +79,8 @@ def loop(points, current=1.0):
 @pytest.mark.slow
 @pytest.mark.timeout(900)
 def test_uniform_sphere_matches_prototype(mu, capsys):
-    # Keep the analytic probes on a linear interval before the saturation join.
     result = iron.solve_magnetisation(
-        sphere(), uniform, [0, 1, 10], [mu, mu, mu], cell_size=0.1
+        sphere(), uniform, [0, 10], [mu, mu], cell_size=0.1
     )
     assert result.converged
     assert result.cell_count == 44
@@ -121,10 +120,9 @@ def test_uniform_sphere_matches_prototype(mu, capsys):
 
 
 def shell_observation(mu, cell_size, capsys):
-    # Keep the analytic probes on a linear interval before the saturation join.
     started = perf_counter()
     result = iron.solve_magnetisation(
-        shell(), loop, [0, 1, 10], [mu, mu, mu], cell_size=cell_size
+        shell(), loop, [0, 10], [mu, mu], cell_size=cell_size
     )
     assert result.converged
     assert result.iterations <= 1
@@ -143,17 +141,21 @@ def shell_observation(mu, cell_size, capsys):
         (1000, 0.02): [59.463270578450675, 59.38148554001727, 59.91152091657584],
     }[mu, cell_size]
     wall = perf_counter() - started
+    centres = result._mesh.centroids
+    maximum_field = np.linalg.norm(loop(centres) + result.field(centres), axis=1).max()
     with capsys.disabled():
         print(
             f"\nshell mu={mu:g}: cell_size={cell_size:g}, "
             f"cells={result.cell_count}, iterations={result.iterations}, "
             f"shielding_exact={exact:.12g}, production={shielding.tolist()}, "
             f"prototype={recorded}, analytic_relative_error={error.tolist()}, "
+            f"maximum_field={maximum_field:.12g} T, "
             f"wall_seconds={wall:.6f}",
             flush=True,
         )
     assert np.all(np.isfinite(shielding))
     assert np.all(shielding > 0)
+    assert maximum_field < 10, "linear shell must stay inside its two-knot table"
     return error, result.cell_count, wall
 
 
@@ -333,7 +335,7 @@ def assert_material_interpolation(b, mu):
     np.testing.assert_allclose(right_value[:-1], value[1:], rtol=8e-15, atol=0)
     np.testing.assert_allclose(right_slope[:-1], slope[1:], rtol=8e-14, atol=0)
     np.testing.assert_allclose(right_slope[-1], 1 / iron._MU0, rtol=8e-14)
-    np.testing.assert_allclose(right_value[-1], expected[-1], rtol=8e-15)
+    np.testing.assert_allclose(polynomial(b[-1]), expected[-1], rtol=8e-15)
     law = tuple(jnp.asarray(x) for x in (knots, coefficients, ends))
 
     def h(field):
@@ -380,31 +382,83 @@ def test_west_cea_material_interpolation(west_material):
     assert len(knots) > len(b)
 
 
+def test_west_cea_last_table_interval_matches_reference(west_material):
+    """Pin the final table cubic independently of the saturation continuation."""
+    knots, coefficients, _ = iron._fit_law(
+        west_material.b_field, west_material.permeability_relative
+    )
+    np.testing.assert_array_equal(knots[(knots >= 5) & (knots <= 6)], [5, 6])
+    np.testing.assert_allclose(
+        PPoly(coefficients, knots)(np.linspace(5, 6, 5)),
+        [
+            2342561.5433828533,
+            2554288.785523162,
+            2774538.441967889,
+            2977743.1965653542,
+            3138335.7331638793,
+        ],
+        rtol=1e-14,
+    )
+
+
 def assert_saturated_material(b, mu):
-    """Pin the tail value, its tangent and its join to the exact table."""
+    """Pin the tail-only blend, its bound and its joins to the exact table."""
     b, mu = np.asarray(b, dtype=float), np.asarray(mu, dtype=float)
     knots, coefficients, ends = iron._fit_law(b, mu)
     law = tuple(jnp.asarray(x) for x in (knots, coefficients, ends))
-    sample = jnp.asarray(np.linspace(b[-1], 100, 257))
+    vacuum = 1 / iron._MU0
+    end_slope = vacuum / mu[-1]
+    h = b / (iron._MU0 * mu)
+    last_magnetisation = (vacuum - end_slope) * b[-1]
+    expected_width = 0.02 * (
+        iron._MU0 * last_magnetisation if last_magnetisation > 0 else b[-1]
+    )
+    width = knots[-1] - b[-1]
+    expected = (vacuum - end_slope) * (b[-1] + width / 2)
+    assert expected <= 1.01 * last_magnetisation
+    assert ends[1] <= 1.01 * last_magnetisation
+    assert width <= expected_width
+    assert width == pytest.approx(expected_width, rel=2e-12)
+    sample = jnp.asarray(
+        np.r_[np.linspace(b[-1], knots[-1], 257), np.linspace(knots[-1], 100, 257)]
+    )
     magnetisation = sample * iron._coefficient(sample, *law)
-    expected = b[-1] / iron._MU0 * (1 - 1 / mu[-1])
-    np.testing.assert_allclose(magnetisation, expected, rtol=3e-15, atol=1e-9)
+    offset = np.minimum(np.asarray(sample) - b[-1], width)
+    reference = (vacuum - end_slope) * (b[-1] + offset - offset**2 / (2 * width))
+    np.testing.assert_allclose(magnetisation, reference, rtol=3e-15, atol=1e-9)
+    assert np.min(np.diff(magnetisation)) >= -16 * np.finfo(float).eps * max(
+        1, expected
+    )
+    assert float(magnetisation.max()) <= expected * (1 + 4e-15) + 1e-9
+    assert float(magnetisation.max()) <= (
+        1.01 * last_magnetisation * (1 + 4e-15) + 1e-9
+    )
+    np.testing.assert_allclose(magnetisation[257:], expected, rtol=3e-15, atol=1e-9)
 
-    def h(field):
+    def field_strength(field):
         return field * (1 / iron._MU0 - iron._coefficient(field, *law))
 
-    derivative = jax.vmap(jax.grad(h))
-    np.testing.assert_allclose(derivative(sample), 1 / iron._MU0, rtol=3e-15)
-    below = np.nextafter(b[-1], 0)
-    np.testing.assert_allclose(jax.grad(h)(below), 1 / iron._MU0, rtol=2e-10)
+    derivative = jax.vmap(jax.grad(field_strength))
+    slopes = np.asarray(derivative(sample))
+    assert slopes.min() > 0
     np.testing.assert_allclose(
-        jax.vmap(h)(jnp.asarray(b)), b / (iron._MU0 * mu), rtol=2e-12, atol=1e-9
+        slopes, end_slope + (vacuum - end_slope) * offset / width, rtol=2e-12
+    )
+    for join, slope in [(b[-1], end_slope), (knots[-1], vacuum)]:
+        sides = jnp.asarray([np.nextafter(join, 0), join, np.nextafter(join, np.inf)])
+        np.testing.assert_allclose(derivative(sides), slope, rtol=2e-10)
+    np.testing.assert_allclose(
+        jax.vmap(field_strength)(jnp.asarray(b)), h, rtol=2e-12, atol=1e-9
     )
     polynomial = PPoly(coefficients, knots)
-    assert polynomial.derivative()(b[-1]) == pytest.approx(1 / iron._MU0, rel=1e-13)
+    assert polynomial.derivative()(b[-1]) == pytest.approx(end_slope, rel=1e-13)
+    assert polynomial.derivative()(knots[-1]) == pytest.approx(vacuum, rel=1e-13)
+    rise_fraction = expected / last_magnetisation - 1 if last_magnetisation else 0
     print(
-        f"saturation B_end={b[-1]:g} T, M={expected:.12g} A/m, "
-        f"dH_dB={1 / iron._MU0:.12g}"
+        f"saturation B_table={b[-1]:g} T, blend_width={width:.12g} T, "
+        f"M_asymptote={expected:.12g} A/m, "
+        f"rise_fraction={rise_fraction:.12g}, "
+        f"min_dH_dB={slopes.min():.12g}"
     )
 
 
@@ -414,9 +468,40 @@ def test_west_cea_material_saturates(west_material):
     )
 
 
-@pytest.mark.parametrize("b, mu", [([0, 1, 2], [10, 20, 2]), ([0, 1], [2, 1000])])
+@pytest.mark.parametrize(
+    "b, mu",
+    [([0, 1, 2], [10, 20, 2]), ([0, 1], [2, 1000]), ([0, 10], [1, 1])],
+)
 def test_synthetic_material_saturates(b, mu):
     assert_saturated_material(b, mu)
+
+
+@pytest.mark.parametrize("mu", [1.0, 10.0, 1000.0, 3000.0])
+def test_two_knot_material_is_linear_through_table(mu):
+    knots, coefficients, ends = iron._fit_law([0, 10], [mu, mu])
+    polynomial = PPoly(coefficients, knots)
+    sample = np.linspace(0, 10, 1001)
+    np.testing.assert_allclose(
+        polynomial(sample), sample / (iron._MU0 * mu), rtol=1e-14
+    )
+    np.testing.assert_allclose(
+        polynomial.derivative()(sample), 1 / (iron._MU0 * mu), rtol=1e-14
+    )
+    assert knots[1] == 10, "saturation must add no breakpoint inside the table"
+
+
+def test_material_refuses_unrepresentable_split_width():
+    b = np.array([0.0, 1.0, 1.0 + 4 * np.finfo(float).eps])
+    h = 1 / (iron._MU0 * 2)
+    mu = [2.0, 2.0, b[-1] / (iron._MU0 * np.nextafter(h, np.inf))]
+    with pytest.raises(ValueError, match="split width is not representable"):
+        iron._fit_law(b, mu)
+
+
+def test_material_refuses_unrepresentable_tail_width():
+    mu = np.nextafter(1.0, np.inf)
+    with pytest.raises(ValueError, match="tail blend width is not representable"):
+        iron._fit_law([0.0, 1.0], [mu, mu])
 
 
 @pytest.mark.parametrize(
@@ -484,7 +569,7 @@ def test_nonlinear_shell_uses_differential_newton(capsys):
             flush=True,
         )
     assert result.converged
-    assert maximum_field < b[-2], "shell must stay below the altered final interval"
+    assert maximum_field < b[-1], "shell must stay inside the unchanged table fit"
     assert result.iterations == 3
     assert result.regularisation_history == (0.0, 0.0, 0.0)
     assert quadratic_ratio < 0.1, "late residual contractions must accelerate"
@@ -493,7 +578,7 @@ def test_nonlinear_shell_uses_differential_newton(capsys):
 
 
 def test_update_operands_and_factor_are_runtime_arguments():
-    law = iron._fit_law([0, 0.5, 1], [10, 10, 10])
+    law = iron._fit_law([0, 1], [10, 10])
     operands = tuple(
         jnp.asarray(x) for x in (np.eye(6) * iron._MU0 * 0.5, np.ones(6) * 0.01, *law)
     )

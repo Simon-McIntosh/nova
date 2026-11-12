@@ -1,0 +1,114 @@
+<section id="icm-west-root-branch-state">
+<h3>WEST 62751: multiple roots reproduced; physical branch unresolved</h3>
+<p><strong>Blocked.</strong> The bounded drive ramp stops before full drive.
+No full-drive root C was produced, and no physical full-drive root is selected.
+The strongest completed result is an energy defect in the saved collocation
+operator, already present independently of the nonlinear roots.</p>
+<p>Saved root A replays at relative residual
+2.10050660593712e-12; root B at 1.04424954076248e-11.
+The maximum vector difference is
+3.36645763775 MA/m.
+The imported material solver is byte-identical to the saved regularised-Newton
+version; the smoothing branch is not imported or merged. These are two zeros
+of the same discrete equation, not a comparison between two material laws.</p>
+<h4>Continuation refusal</h4>
+<p>On the saved 3447-cell mesh, 11
+nonzero drive steps were accepted in 29 attempts.
+16 attempts exhausted 400 corrections. Two additional converged
+proposals were refined because they took more than 40 corrections.
+The last accepted drive is 0.194855499267578, reached in
+4 corrections with residual 3.19293772852165e-11
+and maximum |M| 1.26475065104 MA/m.</p>
+<p>The final proposal was drive 0.194867086410522, an increment of
+1.15871429443304e-05. It reached residual 1.86686920174598e-09
+after 400 corrections, including 294 regularised
+corrections. Halving that increment would cross the declared 1e-5 floor;
+the driver refused and the measurement log ends with <code>EXIT=1</code>.
+This establishes a bounded continuation failure, not a proof that the
+mathematical branch terminates. Neither a larger correction budget nor
+pseudo-arclength continuation was tested.</p>
+<figure><img
+src="/nova/figures/iron-core-magnetisation/icm-west-root-branch/root-branch.svg"
+alt="Incomplete drive ramp and strip profiles at their stated drives">
+<figcaption>The left panels show accepted steps only, including the zero
+state. The empty interval up to drive 1 is unreached. The 400-correction
+refusals appear in the table below, not in these accepted-step curves.
+The right panels show the saved 23-cell segment-3 strip column: full-drive
+A (dashed grey), full-drive B (dotted dark grey), and the last accepted ramp
+state at drive 0.194855499 (purple). The purple profile is a partial
+state and is not root C. It must not be interpreted as a same-drive
+comparison or as a demonstrated full-drive physical root.
+The 14 × 7.2 in SVG uses a 16 cm slide height. All 42 text artists passed the
+layout check; its PNG was inspected without clipping or text collisions.
+</figcaption></figure>
+<h4>Every drive proposal</h4>
+<p>The zero state has M = 0 and residual 0. Each proposal starts from the
+last accepted root. The original residual is normalised by the greater of
+||M|| and ||drive B_ext||/mu0. Acceptance tolerance is 1e-10.
+The initial proposed increment is 0.05; difficult proposals are halved,
+and easy accepted steps grow the increment by 1.5 up to 0.05.</p>
+<table><thead><tr><th>proposed drive</th><th>corrections</th><th>relative residual</th><th>max |M| [MA/m]</th><th>converged</th><th>regularised corrections</th></tr></thead><tbody><tr><td>0.05</td><td>27</td><td>5.84996722622e-13</td><td>0.392236806</td><td>True</td><td>16</td></tr><tr><td>0.1</td><td>70</td><td>3.76712373469e-12</td><td>0.9653331</td><td>True</td><td>36</td></tr><tr><td>0.075</td><td>4</td><td>2.80501859557e-11</td><td>0.699097544</td><td>True</td><td>0</td></tr><tr><td>0.1125</td><td>92</td><td>3.96581323055e-13</td><td>1.07936791</td><td>True</td><td>54</td></tr><tr><td>0.09375</td><td>36</td><td>2.48687009435e-16</td><td>0.926201955</td><td>True</td><td>18</td></tr><tr><td>0.1125</td><td>4</td><td>3.12337343671e-11</td><td>1.07936792</td><td>True</td><td>0</td></tr><tr><td>0.140625</td><td>5</td><td>1.4399078801e-13</td><td>1.18622162</td><td>True</td><td>0</td></tr><tr><td>0.1828125</td><td>4</td><td>9.30911774383e-11</td><td>1.25201718</td><td>True</td><td>0</td></tr><tr><td>0.2328125</td><td>400</td><td>1.81394814471e-05</td><td>1.29666425</td><td>False</td><td>281</td></tr><tr><td>0.2078125</td><td>400</td><td>2.73873208547e-06</td><td>1.27718712</td><td>False</td><td>303</td></tr><tr><td>0.1953125</td><td>400</td><td>9.45611635068e-08</td><td>1.265223</td><td>False</td><td>297</td></tr><tr><td>0.1890625</td><td>3</td><td>1.09017961034e-11</td><td>1.25870215</td><td>True</td><td>0</td></tr><tr><td>0.1984375</td><td>400</td><td>8.14372186121e-07</td><td>1.26845043</td><td>False</td><td>297</td></tr><tr><td>0.19375</td><td>4</td><td>5.30723128878e-13</td><td>1.26360564</td><td>True</td><td>0</td></tr><tr><td>0.20078125</td><td>400</td><td>1.37473024441e-06</td><td>1.27079333</td><td>False</td><td>298</td></tr><tr><td>0.197265625</td><td>400</td><td>3.38406142383e-07</td><td>1.26724541</td><td>False</td><td>297</td></tr><tr><td>0.1955078125</td><td>400</td><td>1.15886355855e-07</td><td>1.26542809</td><td>False</td><td>298</td></tr><tr><td>0.19462890625</td><td>3</td><td>6.39304204415e-11</td><td>1.26451699</td><td>True</td><td>0</td></tr><tr><td>0.195947265625</td><td>400</td><td>1.56766064596e-07</td><td>1.26588175</td><td>False</td><td>295</td></tr><tr><td>0.195288085938</td><td>400</td><td>6.33330402376e-08</td><td>1.2651991</td><td>False</td><td>298</td></tr><tr><td>0.194958496094</td><td>400</td><td>1.70420777692e-08</td><td>1.26485782</td><td>False</td><td>293</td></tr><tr><td>0.194793701172</td><td>3</td><td>3.73443496586e-12</td><td>1.26468728</td><td>True</td><td>0</td></tr><tr><td>0.195040893555</td><td>400</td><td>2.72734204838e-08</td><td>1.26494259</td><td>False</td><td>295</td></tr><tr><td>0.194917297363</td><td>400</td><td>9.59864643198e-09</td><td>1.2648145</td><td>False</td><td>297</td></tr><tr><td>0.194855499268</td><td>4</td><td>3.19293772852e-11</td><td>1.26475065</td><td>True</td><td>0</td></tr><tr><td>0.194948196411</td><td>400</td><td>1.35957684204e-08</td><td>1.2648467</td><td>False</td><td>290</td></tr><tr><td>0.194901847839</td><td>400</td><td>1.05781827779e-08</td><td>1.26479815</td><td>False</td><td>297</td></tr><tr><td>0.194878673553</td><td>400</td><td>3.53857406944e-09</td><td>1.26477475</td><td>False</td><td>293</td></tr><tr><td>0.194867086411</td><td>400</td><td>1.86686920175e-09</td><td>1.26476274</td><td>False</td><td>294</td></tr></tbody></table>
+<h4>Weighted interaction and the zero-drive inference</h4>
+<p>For diagonal W, the reported matrix is G_w = sqrt(W) G / sqrt(W).
+Asymmetry is ||G_w − G_wᵀ||_F / ||G_w||_F. The skew fraction uses the
+half-difference; the symmetric fraction uses the half-sum, each divided
+by ||G_w||_F.
+Area weights are the requested cell areas. Axisymmetric volume weights
+include centroid R; the common 2π cancels.</p>
+<table><thead><tr><th>weight</th><th>G asymmetry</th><th>G skew fraction</th><th>G symmetric fraction</th><th>min sym G / mu0</th><th>max sym G / mu0</th><th>derived min sym J(0)</th><th>derived max sym J(0)</th></tr></thead><tbody><tr><td>area</td><td>0.111039665485</td><td>0.0555198327424</td><td>0.998457584563</td><td>-0.124667790215</td><td>1.12366646569</td><td>-0.118442787233</td><td>1.12408823706</td></tr><tr><td>axisymmetric_volume</td><td>0.065333056076</td><td>0.032666528038</td><td>0.999466306559</td><td>-0.124261845678</td><td>1.12467851496</td><td>-0.119450131709</td><td>1.12368417967</td></tr></tbody></table>
+<p>The negative and above-mu0 eigenvalues violate the [0, mu0] bounds of an
+energy-consistent B/M projection, also with axisymmetric volume weighting.
+G is predominantly symmetric with a nonzero skew part; it is neither
+exactly symmetric nor skew. Symmetrising it alone retains the out-of-bound
+eigenvalues. This is a concrete collocation defect independent of any
+assertion that a particular nonlinear root is physical.</p>
+<p>The last two columns are an algebraic inference from measured G, not the
+unreached raw-J diagnostic arm. At zero drive and M = 0,
+J(0) = I − (1 − 1/mu_r(0)) G/mu0, with mu_r(0) = 215.11019.
+The same weighted symmetric part therefore has the listed extrema.
+Its negative direction disproves monotonicity in these inner products.
+The unweighted Newton spectra, asymmetry, smallest singular values and cell
+localisations at A, B and zero were not measured.</p>
+<p>Deterministic-start Lanczos checks its explicit Ritz residuals.
+The worst measured G/mu0 residual is
+5.77909160137e-11 for area weighting and
+2.01880584459e-12 for volume
+weighting. Before WEST, the instrument detected the known negative
+eigenvalue −2 and positive eigenvalue 4 of a control matrix, and reproduced
+a nonsymmetric small matrix's minimum singular value against NumPy.</p>
+<h4>Verdict, missing evidence and owner</h4>
+<p>Multiple discrete roots and weighted collocation energy-bound violations
+are demonstrated. A physical full-drive root has not been identified.
+The candidate repair is an energy-consistent Galerkin interaction, with
+reciprocity and spectral energy bounds checked before another shielding
+claim. The iron formulation coordinator owns that repair and its assignment.
+This node has not established the offending cells or ruled out an additional
+constitutive-fit contribution; it does not prescribe agglomeration or merge
+the smoothing branch.</p>
+<p>The full-drive C magnetisation and its +1/+2/+4 m fields are absent.
+The driver placed the four raw-J diagnostic arms after the full ramp, so none
+ran when the ramp refused. The separate tiny-drive origin audit, invoked
+after that driver, also did not run. These are unfulfilled acceptance
+clauses, not passing checks. The next concrete action is a coordinator-owned
+operator-only measurement at zero, A, B and this saved near-stall state,
+followed by an explicit choice of larger-budget or arclength continuation.
+An energy-consistent discretisation is required before physical validation.</p>
+<h4>Durability and scope</h4>
+<p>One Titan allocation, job 1311378, Tesla P100, x64 asserted before array
+construction. The batch ended FAILED after 01:02:25 with status 1:0.
+All dense solves, spectral iterations and rendering ran within that same
+Titan allocation. A second figure attempt was
+terminated when the failed batch ended, and its unrendered changes were
+removed. The delivered renderer exactly matches the successful inspected
+version. No product source, test, plan state, mesh or material law changed.
+No G or probe-operator build was performed.</p>
+<p>Measurement revision 39466d14bcf6f0a14d9c428a8b51ea9d9ddf7ac0; material source SHA-256
+98411451c22a624e458b7c6d5bf009d567035bb82ba582cc8c2e7265ba47925c. The figure log binds the inspected render
+to revision 39f76e65c226436d7dc56d90845dda53d8067392.</p>
+<p>Durable run files: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T054008905425-icm-west-root-branch</code>:
+<code>measurement.json</code>, <code>measurement.log</code>,
+<code>ramp-latest.npy</code>, <code>figure-render.log</code>,
+<code>figure-summary.json</code> and <code>root-branch.png</code>.
+The 314,621-byte PNG stays in the run directory; the 34,154-byte SVG is
+the sole published image. No root-C or negative-direction files are claimed.</p>
+</section>

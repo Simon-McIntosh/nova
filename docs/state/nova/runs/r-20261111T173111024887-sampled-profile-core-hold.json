@@ -2378,6 +2378,142 @@
   "plan_link": "diiid-vertical-force-balance",
   "promoted_by": null,
   "promoted_revision": "4cbb5a60d027c87956bbfc85d16dc7670d76a267",
+  "release": {
+    "arms_kept": [
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-regressions",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-continuation-base",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-continuation-head",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-sirius-base-ordinary",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-sirius-base-candidates",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-sirius-base-wall",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-sirius-head-ordinary",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-sirius-head-candidates",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-sirius-head-wall",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-sirius-base-topology-384g",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-sirius-head-topology-384g",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-head-scoped-1cd270e",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort-continuation",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cohort-six-hour",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/cpu-head-scoped-b8d7838",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/strict-exit-verification",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/compiler-isolated-repeat",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/render-previews",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/rendered-svg",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/repair-svg-previews",
+        "reason": "outside the node-local temp root /tmp"
+      }
+    ],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 0,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261111T173111024887-sampled-profile-core-hold",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261111T173111024887-sampled-profile-core-hold"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 1
+      },
+      "worktrees": [
+        {
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "unintegrated",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "4cbb5a60d027c87956bbfc85d16dc7670d76a267",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/sampled-profile-core-hold",
+          "reclaimable": false,
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "its HEAD is not reachable from the integration revision, so removing it would destroy the only copy of that commit; merge it or discard it deliberately"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "its HEAD is not reachable from the integration revision, so removing it would destroy the only copy of that commit; merge it or discard it deliberately"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

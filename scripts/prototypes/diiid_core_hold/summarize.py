@@ -90,7 +90,7 @@ def main():
             pairs[case].update(
                 max_abs_state_difference_wb=maximum,
                 roundoff_tolerance_wb=tolerance,
-                unchanged_to_roundoff=maximum <= tolerance,
+                unchanged_to_roundoff=bool(maximum <= tolerance),
                 converged=h["converged"],
                 negative_source_nodes=observed,
                 changed_source_domain=(

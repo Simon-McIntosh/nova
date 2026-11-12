@@ -230,8 +230,11 @@ def main():
                     step,
                     drivers[1] if drivers else None,
                 )
-                refuse_inert(off["records"][0], on["records"][0])
                 entry = dict(name=name, width=width, step=step, off=off, on=on)
+                try:
+                    refuse_inert(off["records"][0], on["records"][0])
+                except ValueError as error:
+                    entry["refusal"] = str(error)
                 summary["comparisons"].append(entry)
                 save()
 
@@ -245,7 +248,10 @@ def main():
                 for tile in (32, 64, 128)
             ]
             for tile in tiles[1:]:
-                refuse_inert(tiles[0]["records"][0], tile["records"][0])
+                try:
+                    refuse_inert(tiles[0]["records"][0], tile["records"][0])
+                except ValueError as error:
+                    tile["refusal"] = str(error)
             summary["comparisons"].append(
                 dict(name="scalar-tile", width=width, tiles=tiles)
             )

@@ -40,6 +40,7 @@ def main():
     from scripts.prototypes.bank_newton_step.measure import machine
     from scripts.prototypes.bank_solve_profile.fixture import gradient
     from scripts.prototypes.bank_warm_start.streams import scaled_profile
+    from scripts.prototypes.bank_warm_predictor.receipts import array_hash
 
     assert jax.config.jax_enable_x64 is True
     assert jax.default_backend() == "gpu"
@@ -74,6 +75,11 @@ def main():
         roots + 0.03 * jnp.median(bank.geometry.pitch), (width, *roots.shape)
     )
     previous = jnp.broadcast_to(roots, seeds.shape)
+    receipt["bank_sha256"] = array_hash(jax.tree.leaves((bank, cache)))
+    receipt["input_sha256"] = array_hash((*state, seeds, previous))
+    receipt["instrument_sha256"] = hashlib.sha256(
+        Path(__file__).read_bytes()
+    ).hexdigest()
     arrays = {}
 
     def persist():
@@ -222,6 +228,7 @@ def main():
             archive = np.load(args.inputs, allow_pickle=False)
             state = tuple(jnp.asarray(archive[f"m{i}"][:width]) for i in range(3))
             seeds = jnp.asarray(archive["stationary"][:width])
+            receipt["input_sha256"] = array_hash((*state, seeds))
             if args.kind == "lane":
                 import importlib.util
 
@@ -262,6 +269,7 @@ def main():
                 program, row = compiled("mixed-drive", lane_solve, call)
                 jax.block_until_ready(program(*call))
                 calls = []
+                recording_seconds = [0.0]
 
                 def adapter(
                     _b,
@@ -295,9 +303,11 @@ def main():
                             jnp.broadcast_to(jnp.asarray(tolerance), (width,)),
                         )
                     )
+                    elapsed = 1000 * (perf_counter() - start)
+                    recording_start = perf_counter()
                     calls.append(
                         dict(
-                            milliseconds=1000 * (perf_counter() - start),
+                            milliseconds=elapsed,
                             residual=np.asarray(result.residual).tolist(),
                             reads=np.asarray(result.reads).tolist(),
                             updates=np.asarray(result.steps).tolist(),
@@ -305,37 +315,45 @@ def main():
                     )
                     receipt["subsolves"] = calls
                     persist()
+                    recording_seconds[0] += perf_counter() - recording_start
                     return result
 
-                started = perf_counter()
-                result = driver.advance_drive(
-                    bank,
-                    cache,
-                    state,
-                    seeds,
-                    seeds,
-                    convention,
-                    policy,
-                    lambda x: x,
-                    gradient,
-                    rule,
-                    solve=adapter,
-                    start_drive=1000.0 if args.arm == "off" else jnp.ones(width),
-                    target_drive=1007.0 if args.arm == "off" else target,
-                    initial_relative_step=1e-3 if args.arm == "off" else steps,
-                    max_substeps=64,
-                )
-                elapsed = 1000 * (perf_counter() - started)
-                assert result.certified
-                row.update(
-                    median_ms=elapsed,
-                    samples_ms=[elapsed],
-                    execution_counts=dict(
-                        reads=result.reads,
-                        updates=result.updates,
-                        subsolves=len(result.substeps),
-                    ),
-                )
+                samples = []
+                for sample in range(5):
+                    receipt["sample"] = sample
+                    calls.clear()
+                    recording_seconds[0] = 0.0
+                    started = perf_counter()
+                    result = driver.advance_drive(
+                        bank,
+                        cache,
+                        state,
+                        seeds,
+                        seeds,
+                        convention,
+                        policy,
+                        lambda x: x,
+                        gradient,
+                        rule,
+                        solve=adapter,
+                        start_drive=1000.0 if args.arm == "off" else jnp.ones(width),
+                        target_drive=1007.0 if args.arm == "off" else target,
+                        initial_relative_step=1e-3 if args.arm == "off" else steps,
+                        max_substeps=64,
+                    )
+                    elapsed = 1000 * (perf_counter() - started - recording_seconds[0])
+                    assert result.certified
+                    samples.append(elapsed)
+                    row.update(
+                        median_ms=statistics.median(samples),
+                        samples_ms=samples,
+                        execution_counts=dict(
+                            reads=result.reads,
+                            updates=result.updates,
+                            subsolves=len(result.substeps),
+                        ),
+                    )
+                    persist()
                 terminal = result.result
                 geometry("terminal", terminal.support)
                 receipt["residual"] = np.asarray(terminal.residual).tolist()
@@ -345,18 +363,26 @@ def main():
                 amplitude = 1.0
                 factor, valid = None, True
                 program = None
-                predictor = jax.jit(drive.predict_seed)
+                predictor = None
                 for index in range(1, 8):
                     target = 1.0 + index * args.step
+                    if index == 2:
+                        predictor, _ = compiled(
+                            "secant",
+                            lambda m, p, d, pd, t: drive.predict_seed(
+                                m, d, t, previous_moments=p, previous_drive=pd
+                            ),
+                            (state, previous_state, amplitude, previous_drive, target),
+                        )
                     predicted = (
                         state
                         if previous_state is None
                         else predictor(
                             state,
+                            previous_state,
                             amplitude,
+                            previous_drive,
                             target,
-                            previous_moments=previous_state,
-                            previous_drive=previous_drive,
                         )
                     )
                     call = (
@@ -374,9 +400,33 @@ def main():
                             "solve-factor" if signature else "solve-fresh", solve, call
                         )
                         jax.block_until_ready(program(*call))
-                    started = perf_counter()
-                    result = jax.block_until_ready(program(*call))
-                    elapsed = 1000 * (perf_counter() - started)
+                    samples = []
+                    for _ in range(9):
+                        started = perf_counter()
+                        predicted = (
+                            state
+                            if previous_state is None
+                            else predictor(
+                                state,
+                                previous_state,
+                                amplitude,
+                                previous_drive,
+                                target,
+                            )
+                        )
+                        result = jax.block_until_ready(
+                            program(
+                                *inputs,
+                                predicted,
+                                seeds,
+                                seeds,
+                                jnp.asarray(target),
+                                factor,
+                                valid,
+                            )
+                        )
+                        samples.append(1000 * (perf_counter() - started))
+                    elapsed = statistics.median(samples)
                     assert (
                         bool(jnp.all(result.converged))
                         and float(jnp.max(result.residual)) <= 1e-10
@@ -385,6 +435,7 @@ def main():
                     row = dict(
                         name=f"slice-{index}",
                         median_ms=elapsed,
+                        samples_ms=samples,
                         per_slice_ms=elapsed / width,
                         residual=np.asarray(result.residual).tolist(),
                         reads=np.asarray(result.reads).tolist(),

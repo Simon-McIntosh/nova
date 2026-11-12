@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/biot/magnetisation.py:314",
+    "scripts/magnetisation_high_permeability/directional.py:52",
+    "scripts/magnetisation_high_permeability/measure.py:218",
+    "scripts/magnetisation_high_permeability/measure.py:284"
+  ],
+  "completed_at": "2026-11-12T07:54:40.810Z",
+  "dispatched_at": "2026-11-12T07:39:58Z",
+  "findings": [
+    {
+      "file": "docs/plans/iron-core-magnetisation.html",
+      "line": "299",
+      "severity": "non-blocking",
+      "text": "non-blocking: the live plan still requires the B-H law to 'hold its end values outside the table', which is exactly the end-secant hold this node removes, while the amended one-percent-rise criterion exists only in the evidence fragment and the coordinator advice; plan state and landed code therefore disagree until the coordinator's promised plan edit lands."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s) with no fork of the law: the two measurement scripts call solve_magnetisation with two-knot tables, so the appended tail is reached by runtime code.",
+    "diff": "read all nine commits against base f63aa85d; 34f109aa, 5fdc4fb78 and 3fb95fc4e change _fit_law and _coefficient plus the material tests, 00606c8c2 adds the nonlinear-shell field receipt, and the remaining five commits are evidence prose, 516 insertions and 76 deletions across three files.",
+    "done_when": "read the node's three clauses; clause 1 is asserted at tests/test_magnetisation.py:404-462 (one-percent bound, both C1 joins, vacuum slope past the blend, every table knot reproduced) under the amended criterion, clause 2 at tests/test_magnetisation.py:565-579 prints and asserts iterations 3 and quadratic ratio 0.00705357189632 identical to the baseline arm, and clause 3 is recorded in rise-cap-negative-control.log (3 failed, EXIT=1) and rise-cap-width-negative-control.log (1 failed, EXIT=1).",
+    "goal": "the node's goal is to continue the B-H law past the last table knot with dB/dH = mu0 so M is bounded; nova/biot/magnetisation.py:198-213 appends one quadratic whose slope rises from the fitted end slope to 1/mu0 over delta = 0.02*mu0*M_n and nova/biot/magnetisation.py:216-228 holds M constant past b_n + delta, so the physical continuation is landed, but the brief's literal 'M constant at M_n on [B_n, 100 T]' is replaced by the coordinator's amended one-percent-rise criterion recorded at tests/test_magnetisation.py:404.",
+    "manifest": "read; status complete, nine commits 34f109aa..308ea6908, baseline_suite 37 passed EXIT=0 at b6e42046 and after_suite 38 passed EXIT=0 at 308ea6908 with zero added failures, both mutants imported and refused, and the amended criterion carried in evidence_inputs.",
+    "write_paths": "read the dispatch fence at prompt.txt:133-137; the nine node commits touch only nova/biot/magnetisation.py, tests/test_magnetisation.py and docs/evidence/fragments/iron-core-magnetisation/icm-law-saturation-tail.html, all inside it, and the declared docs/figures/iron-core-magnetisation/icm-law-saturation-tail path is unused."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:404-462 fails if the cap is widened (rise-cap-width-negative-control.log reddens at EXIT=1), fails if the end-secant hold returns (rise-cap-negative-control.log reddens three cases), and pins the table cubic at :385-401 independently of the continuation, though the width assertion at :410 restates the production constant rather than an independent derivation.",
+    "evidence": "rise-cap-baseline-suite.log and rise-cap-after-suite.log carry revision headers and bare EXIT=0 with 37 and 38 passed and zero failures, and rise-cap-negative-control.log is EXIT=1 with three failing saturation cases; the baseline arm is measured at b6e42046, which already carries this node's earlier saturation commits, so the recorded delta measures the cap repair rather than the whole node.",
+    "fit": "nova/biot/magnetisation.py:125-138 restates the mechanism in the module's own docstring, the added names are mechanism words with no plan label or attribution, and ruff check over both changed files reports no findings.",
+    "goal_fidelity": "nova/biot/magnetisation.py:200-211 bounds the tail at delta = 0.02*mu0*M_n, giving a WEST rise of 0.3427085010796013 percent rather than the brief's exact M_n plateau, which the coordinator's ruling at resume-5-advice.txt amends but docs/plans/iron-core-magnetisation.html:299 has not yet recorded.",
+    "reuse": "the change adds no production definition: it extends _fit_law and _coefficient in place, and the only other B-H law, scripts/prototypes/iron_magnetisation/magnetisation.py:154 Material, is a linear-interpolation prototype the diff does not fork.",
+    "scope_discipline": "the union of paths across the nine commits is exactly nova/biot/magnetisation.py, tests/test_magnetisation.py and docs/evidence/fragments/iron-core-magnetisation/icm-law-saturation-tail.html, inside the four declared paths in prompt.txt:133-137."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to continue the B-H law past the last table knot with dB/dH = mu0 so M is bounded; nova/biot/magnetisation.py:198-213 appends one quadratic whose slope rises from the fitted end slope to 1/mu0 over delta = 0.02*mu0*M_n and nova/biot/magnetisation.py:216-228 holds M constant past b_n + delta, so the physical continuation is landed but the brief's literal 'M constant at M_n on [B_n, 100 T]' is replaced by the coordinator's amended one-percent-rise criterion recorded at tests/test_magnetisation.py:404.\nVERDICT done_when: read the node's three clauses; clause 1 is asserted at tests/test_magnetisation.py:404-462 (one-percent bound, both C1 joins, vacuum slope past the blend, every table knot reproduced) under the amended criterion, clause 2 at tests/test_magnetisation.py:565-579 prints and asserts iterations 3 and quadratic ratio 0.00705357189632 identical to the baseline arm, and clause 3 is recorded in rise-cap-negative-control.log (3 failed, EXIT=1) and rise-cap-width-negative-control.log (1 failed, EXIT=1).\nVERDICT write_paths: read the dispatch fence at prompt.txt:133-137; the nine node commits touch only nova/biot/magnetisation.py, tests/test_magnetisation.py and docs/evidence/fragments/iron-core-magnetisation/icm-law-saturation-tail.html, all inside it, and the declared docs/figures/iron-core-magnetisation/icm-law-saturation-tail path is unused.\nVERDICT manifest: read; status complete, nine commits 34f109aa..308ea6908, baseline_suite 37 passed EXIT=0 at b6e42046 and after_suite 38 passed EXIT=0 at 308ea6908 with zero added failures, both mutants imported and refused, and the amended criterion carried in evidence_inputs.\nVERDICT diff: read all nine commits against base f63aa85d; 34f109aa, 5fdc4fb78 and 3fb95fc4e change _fit_law and _coefficient plus the material tests, 00606c8c2 adds the nonlinear-shell field receipt, and the remaining five commits are evidence prose, 516 insertions and 76 deletions across three files.\nCALL_SITES: nova/biot/magnetisation.py:314, scripts/magnetisation_high_permeability/directional.py:52, scripts/magnetisation_high_permeability/measure.py:218, scripts/magnetisation_high_permeability/measure.py:284\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: nova/biot/magnetisation.py:200-211 bounds the tail at delta = 0.02*mu0*M_n, giving a WEST rise of 0.3427085010796013 percent rather than the brief's exact M_n plateau, which the coordinator's ruling amends but docs/plans/iron-core-magnetisation.html:299 has not yet recorded.\nSCORE evidence: 16\nJUSTIFICATION evidence: rise-cap-baseline-suite.log and rise-cap-after-suite.log carry revision headers and bare EXIT=0 with 37 and 38 passed and zero failures, and rise-cap-negative-control.log is EXIT=1 with three failing saturation cases; the baseline arm at b6e42046 already carries earlier node commits so the recorded delta measures the cap repair rather than the whole node.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the union of paths across the nine commits is exactly nova/biot/magnetisation.py, tests/test_magnetisation.py and docs/evidence/fragments/iron-core-magnetisation/icm-law-saturation-tail.html, inside the four declared paths in prompt.txt:133-137.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_magnetisation.py:404-462 fails if the cap is widened (rise-cap-width-negative-control.log EXIT=1) and if the end-secant hold returns (rise-cap-negative-control.log three failures), and :385-401 pins the table cubic independently of the continuation, though the width assertion at :410 restates the production constant.\nSCORE fit: 19\nJUSTIFICATION fit: nova/biot/magnetisation.py:125-138 restates the mechanism in the module's own docstring, the added names are mechanism words with no plan label or attribution, and ruff check over both changed files reports no findings.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no production definition and extends _fit_law and _coefficient in place, while the only other B-H law, scripts/prototypes/iron_magnetisation/magnetisation.py:154 Material, is a linear-interpolation prototype the diff does not fork.\nFINDING docs/plans/iron-core-magnetisation.html:299 non-blocking: the live plan still requires the B-H law to 'hold its end values outside the table', which is the end-secant hold this node removes, while the amended one-percent-rise criterion exists only in the evidence fragment and the coordinator advice, so plan state and landed code disagree until the coordinator's promised plan edit lands.",
+  "review_run_id": "r-20261112T073645348838-review-of-icm-law-saturation-tail-308ea69082f7",
+  "reviewed_base_sha": "f63aa85d83e053eecbbd8b00ecd256c3e240ffad",
+  "reviewed_head_sha": "308ea69082f7bd68a548fbdbf5b5e0a09c957c5c",
+  "reviewed_run_id": "r-20261111T182356721911-icm-law-saturation-tail",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T08:07:02.947999+00:00",
+  "total": 108
+}

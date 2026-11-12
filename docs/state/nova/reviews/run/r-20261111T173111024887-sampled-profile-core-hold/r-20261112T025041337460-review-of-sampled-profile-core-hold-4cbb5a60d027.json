@@ -18,6 +18,11 @@
       "kind": "exempted",
       "reason": "MAST passes the amended criterion ruled by the coordinator: the 5.17e-5 Wb change comes only from psi_norm<0 evaluations at one node, and every psi_norm>=0 evaluation is bit-identical; unchanged_to_roundoff=false is the honest raw flag beside it",
       "recorded_at": "2026-11-12T03:10:47.675822+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the excluded pair is the strict-exit test before its expectation-only patch; at the final head that file passes in full (9 passed), and the exclusion is disclosed in the manifest",
+      "recorded_at": "2026-11-12T03:11:09.792628+00:00"
     }
   },
   "findings": [

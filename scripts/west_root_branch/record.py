@@ -21,8 +21,197 @@ def table(headers, rows):
     )
 
 
+def write_fragment(content):
+    output = Path(
+        "docs/evidence/fragments/iron-core-magnetisation/icm-west-root-branch.html"
+    )
+    output.write_text(content)
+    print("EVIDENCE=" + str(output))
+
+
+def partial_record(run, record):
+    last = record["steps"][-1]
+    failed = record["attempts"][-1]
+    nonconverged = sum(not row["converged"] for row in record["attempts"])
+    rows = [
+        [
+            f"{row['drive']:.12g}",
+            row["iterations"],
+            f"{row['residual']:.12g}",
+            f"{row['max_M_A_per_m'] / 1e6:.9g}",
+            row["converged"],
+            row["regularised_steps"],
+        ]
+        for row in record["attempts"]
+    ]
+    ramp_table = table(
+        [
+            "proposed drive",
+            "corrections",
+            "relative residual",
+            "max |M| [MA/m]",
+            "converged",
+            "regularised corrections",
+        ],
+        rows,
+    )
+    weighted = []
+    saved = run.parent / (
+        "r-20261111T130417404611-icm-west-62751-solve/"
+        "measurement-pair/0.0566/receipt.json"
+    )
+    origin_mu = json.loads(saved.read_text())["table_mu_relative"][0]
+    fraction = 1 - 1 / origin_mu
+    for name in ("area", "axisymmetric_volume"):
+        item = record["G_" + name]
+        low, high = item["symmetric_extremes_over_mu0"]
+        weighted.append(
+            [
+                name,
+                f"{item['asymmetry']:.12g}",
+                f"{item['skew_fraction']:.12g}",
+                f"{item['symmetric_fraction']:.12g}",
+                f"{low:.12g}",
+                f"{high:.12g}",
+                f"{1 - fraction * high:.12g}",
+                f"{1 - fraction * low:.12g}",
+            ]
+        )
+    weighted_table = table(
+        [
+            "weight",
+            "G asymmetry",
+            "G skew fraction",
+            "G symmetric fraction",
+            "min sym G / mu0",
+            "max sym G / mu0",
+            "derived min sym J(0)",
+            "derived max sym J(0)",
+        ],
+        weighted,
+    )
+    return f"""<section id="icm-west-root-branch-state">
+<h3>WEST 62751: multiple roots reproduced; physical branch unresolved</h3>
+<p><strong>Blocked.</strong> The bounded drive ramp stops before full drive.
+No full-drive root C was produced, and no physical full-drive root is selected.
+The strongest completed result is an energy defect in the saved collocation
+operator, already present independently of the nonlinear roots.</p>
+<p>Saved root A replays at relative residual
+{record["replay"]["A"]:.15g}; root B at {record["replay"]["B"]:.15g}.
+The maximum vector difference is
+{record["root_pair_max_difference_A_per_m"] / 1e6:.12g} MA/m.
+The imported material solver is byte-identical to the saved regularised-Newton
+version; the smoothing branch is not imported or merged. These are two zeros
+of the same discrete equation, not a comparison between two material laws.</p>
+<h4>Continuation refusal</h4>
+<p>On the saved {record["cells"]}-cell mesh, {len(record["steps"]) - 1}
+nonzero drive steps were accepted in {len(record["attempts"])} attempts.
+{nonconverged} attempts exhausted 400 corrections. Two additional converged
+proposals were refined because they took more than 40 corrections.
+The last accepted drive is {last["drive"]:.15g}, reached in
+{last["iterations"]} corrections with residual {last["residual"]:.15g}
+and maximum |M| {last["max_M_A_per_m"] / 1e6:.12g} MA/m.</p>
+<p>The final proposal was drive {failed["drive"]:.15g}, an increment of
+{failed["increment"]:.15g}. It reached residual {failed["residual"]:.15g}
+after 400 corrections, including {failed["regularised_steps"]} regularised
+corrections. Halving that increment would cross the declared 1e-5 floor;
+the driver refused and the measurement log ends with <code>EXIT=1</code>.
+This establishes a bounded continuation failure, not a proof that the
+mathematical branch terminates. Neither a larger correction budget nor
+pseudo-arclength continuation was tested.</p>
+<figure><img
+src="/nova/figures/iron-core-magnetisation/icm-west-root-branch/root-branch.svg"
+alt="Incomplete drive ramp and strip profiles at their stated drives">
+<figcaption>The left panels show accepted steps only, including the zero
+state. The empty interval up to drive 1 is unreached. The 400-correction
+refusals appear in the table below, not in these accepted-step curves.
+The right panels show the saved 23-cell segment-3 strip column: full-drive
+A (dashed grey), full-drive B (dotted dark grey), and the last accepted ramp
+state at drive {last["drive"]:.9g} (purple). The purple profile is a partial
+state and is not root C. It must not be interpreted as a same-drive
+comparison or as a demonstrated full-drive physical root.
+The 14 × 7.2 in SVG uses a 16 cm slide height. All 42 text artists passed the
+layout check; its PNG was inspected without clipping or text collisions.
+</figcaption></figure>
+<h4>Every drive proposal</h4>
+<p>The zero state has M = 0 and residual 0. Each proposal starts from the
+last accepted root. The original residual is normalised by the greater of
+||M|| and ||drive B_ext||/mu0. Acceptance tolerance is 1e-10.
+The initial proposed increment is 0.05; difficult proposals are halved,
+and easy accepted steps grow the increment by 1.5 up to 0.05.</p>
+{ramp_table}
+<h4>Weighted interaction and the zero-drive inference</h4>
+<p>For diagonal W, the reported matrix is G_w = sqrt(W) G / sqrt(W).
+Asymmetry is ||G_w − G_wᵀ||_F / ||G_w||_F. The skew fraction uses the
+half-difference; the symmetric fraction uses the half-sum, each divided
+by ||G_w||_F.
+Area weights are the requested cell areas. Axisymmetric volume weights
+include centroid R; the common 2π cancels.</p>
+{weighted_table}
+<p>The negative and above-mu0 eigenvalues violate the [0, mu0] bounds of an
+energy-consistent B/M projection, also with axisymmetric volume weighting.
+G is predominantly symmetric with a nonzero skew part; it is neither
+exactly symmetric nor skew. Symmetrising it alone retains the out-of-bound
+eigenvalues. This is a concrete collocation defect independent of any
+assertion that a particular nonlinear root is physical.</p>
+<p>The last two columns are an algebraic inference from measured G, not the
+unreached raw-J diagnostic arm. At zero drive and M = 0,
+J(0) = I − (1 − 1/mu_r(0)) G/mu0, with mu_r(0) = {origin_mu:.12g}.
+The same weighted symmetric part therefore has the listed extrema.
+Its negative direction disproves monotonicity in these inner products.
+The unweighted Newton spectra, asymmetry, smallest singular values and cell
+localisations at A, B and zero were not measured.</p>
+<p>Deterministic-start Lanczos checks its explicit Ritz residuals.
+The worst measured G/mu0 residual is
+{max(record["G_area"]["eigen_residuals"]):.12g} for area weighting and
+{max(record["G_axisymmetric_volume"]["eigen_residuals"]):.12g} for volume
+weighting. Before WEST, the instrument detected the known negative
+eigenvalue −2 and positive eigenvalue 4 of a control matrix, and reproduced
+a nonsymmetric small matrix's minimum singular value against NumPy.</p>
+<h4>Verdict, missing evidence and owner</h4>
+<p>Multiple discrete roots and weighted collocation energy-bound violations
+are demonstrated. A physical full-drive root has not been identified.
+The candidate repair is an energy-consistent Galerkin interaction, with
+reciprocity and spectral energy bounds checked before another shielding
+claim. The iron formulation coordinator owns that repair and its assignment.
+This node has not established the offending cells or ruled out an additional
+constitutive-fit contribution; it does not prescribe agglomeration or merge
+the smoothing branch.</p>
+<p>The full-drive C magnetisation and its +1/+2/+4 m fields are absent.
+The driver placed the four raw-J diagnostic arms after the full ramp, so none
+ran when the ramp refused. The separate tiny-drive origin audit, invoked
+after that driver, also did not run. These are unfulfilled acceptance
+clauses, not passing checks. The next concrete action is a coordinator-owned
+operator-only measurement at zero, A, B and this saved near-stall state,
+followed by an explicit choice of larger-budget or arclength continuation.
+An energy-consistent discretisation is required before physical validation.</p>
+<h4>Durability and scope</h4>
+<p>One Titan allocation, job 1311378, Tesla P100, x64 asserted before array
+construction. The batch ended FAILED after 01:02:25 with status 1:0.
+All dense solves, spectral iterations and rendering ran within that same
+Titan allocation. A second figure attempt was
+terminated when the failed batch ended, and its unrendered changes were
+removed. The delivered renderer exactly matches the successful inspected
+version. No product source, test, plan state, mesh or material law changed.
+No G or probe-operator build was performed.</p>
+<p>Measurement revision {escape(record["revision"])}; material source SHA-256
+{escape(record["source_sha256"])}. The figure log binds the inspected render
+to revision 39f76e65c226436d7dc56d90845dda53d8067392.</p>
+<p>Durable run files: <code>{escape(str(run))}</code>:
+<code>measurement.json</code>, <code>measurement.log</code>,
+<code>ramp-latest.npy</code>, <code>figure-render.log</code>,
+<code>figure-summary.json</code> and <code>root-branch.png</code>.
+The 314,621-byte PNG stays in the run directory; the 34,154-byte SVG is
+the sole published image. No root-C or negative-direction files are claimed.</p>
+</section>
+"""
+
+
 def render(run):
     record = json.loads((run / "measurement.json").read_text())
+    if not record.get("complete", False):
+        write_fragment(partial_record(run, record))
+        return
     origin = json.loads((run / "origin-audit.json").read_text())
     assert record["complete"] and len(record["spectra"]) == 4
     spectra = []
@@ -268,11 +457,7 @@ The SVG was mechanically checked for text clipping/overlap, rendered to a PNG
 in the run directory, and inspected before delivery.</p>
 </section>
 """
-    output = Path(
-        "docs/evidence/fragments/iron-core-magnetisation/icm-west-root-branch.html"
-    )
-    output.write_text(content)
-    print("EVIDENCE=" + str(output))
+    write_fragment(content)
 
 
 if __name__ == "__main__":

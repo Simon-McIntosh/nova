@@ -1,0 +1,674 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 4,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "d42e6878e7b98ad690d510103f80b487d1973606",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T144605264038-icm-law-fit/brief.md",
+    "sha256": "07a5b5290f2d4d8cbf5f2a0aa6d45e5aad288dbd5a12bd0abd5a10130e217d27"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 44347136,
+      "cached_input_tokens_cumulative": 44347136,
+      "input_tokens": 45004140,
+      "input_tokens_cumulative": 45004140,
+      "output_tokens": 121510,
+      "output_tokens_cumulative": 121510,
+      "reasoning_output_tokens": 60423,
+      "reasoning_output_tokens_cumulative": 60423
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 837,
+    "files": 5,
+    "removed": 9
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "284dce417f6d225c7859febdd04d1e7f29cf42cc",
+    "1f6e061e4c36b0d7228298e460a0df24d3dd719f",
+    "9d86f3f25411d725657183dd5d483898415d9f73",
+    "af2ca315f6c6c3447e231027c7644537a78269b6",
+    "fdb99418c929084264fd773c472a24841b337c36",
+    "69cb520b3029445e831405ddbba68248b5c1acc8"
+  ],
+  "completed_at": "2026-11-11T20:52:56Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-11T14:51:05Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_magnetisation.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T144605264038-icm-law-fit/head-after-suite.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.3774703557312253,
+    "plan": "iron-core-magnetisation",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.4278868855039262,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-13T17:41:05Z, which is after this node's 7200s horizon ending 2026-11-11T16:46:20.806205+00:00",
+    "horizon_ends_at": "2026-11-11T16:46:20.806205+00:00",
+    "horizon_seconds": 7200,
+    "metered": true,
+    "observed_at": "2026-11-11T14:46:18Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-13T17:41:05Z",
+    "resets_at": "2026-11-14T15:28:13Z",
+    "seconds_until_reset": 261714,
+    "state": "quiet",
+    "utilisation_pct": 81.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-11T14:46:18Z",
+    "read_at": "2026-11-11T14:46:20Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 81.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-11T20:52:56Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-11T20:52:56Z",
+        "resets_at": 1794670093,
+        "used_percent": 91.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T144605264038-icm-law-fit/manifest.md",
+  "member": "disposable-r-20261111T144605264038-icm-law-fit",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_magnetisation.py::test_west_cea_material_interpolation"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_magnetisation.py::test_west_cea_material_interpolation"
+    ],
+    "control_run_failed": true,
+    "declaration": "restore the origin-permeability refusal branch in _fit_law: the WEST CEA table test must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T144605264038-icm-law-fit/review-negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T144605264038-icm-law-fit/review-negative-control.log",
+    "test_paths": [
+      "tests/test_magnetisation.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "icm-law-fit",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/dev/shm/39486-fleet-1291586/claude-39486/-home-ITER-mcintos-Code-nova/5b10be66-c69b-456f-9a85-3840909f1723/scratchpad/icm-law-fit.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T144605264038-icm-law-fit/brief.md",
+    "brief_sha256": "07a5b5290f2d4d8cbf5f2a0aa6d45e5aad288dbd5a12bd0abd5a10130e217d27",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1234,
+          "cached_input_tokens": 468740,
+          "input_tokens": 469976,
+          "output_tokens": 230,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 470206,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "5b10be66-c69b-456f-9a85-3840909f1723",
+      "session_id": "5b10be66-c69b-456f-9a85-3840909f1723"
+    },
+    "done_when": "(1) the WEST CEA table read through read_iron_core fits without refusal, with a test asserting knot reproduction, origin slope 1/(mu0*215.11), dH/dB > 0 on a dense sample beyond the last knot and dH/dB continuous at every knot, plus a synthetic origin ratio above 10; (2) every existing test in tests/test_magnetisation.py passes unchanged, with the nonlinear shell iteration count and quadratic ratio printed before and after; (3) restoring the refusal branch in a scratch extraction fails the WEST-table test, with the mutant import asserted and the source blob checked against HEAD",
+    "estimated_hours": null,
+    "goal": "Let the production B-H law accept a steel table whose permeability rises from the origin",
+    "id": "icm-law-fit",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-11T14:46:18Z",
+      "read_at": "2026-11-11T14:46:20Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 81.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T144605264038-icm-law-fit/manifest.md",
+    "negative_control": "restore the origin-permeability refusal branch in _fit_law: the WEST CEA table test must fail",
+    "over_fence_reason": "the magnetisation suite arms take about 26 min each on sirius; lead ruled test time is not node work",
+    "peer_scopes": {
+      "bank-read-attribution": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-read-attribution.html",
+        "docs/figures/sub-millisecond-forward-path/bank-read-attribution",
+        "scripts/prototypes/bank_read_attribution"
+      ],
+      "booking-pin-tolerance": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/booking-pin-tolerance.html",
+        "docs/figures/sub-millisecond-forward-path/booking-pin-tolerance",
+        "tests/data/booking_primal_diverted.npz",
+        "tests/test_bank_step_booking.py"
+      ],
+      "diiid-xpoint-offset-decomposition": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-offset-decomposition.html",
+        "docs/figures/diiid-xpoint-offset-decomposition",
+        "scripts/prototypes/diiid_xpoint_offset",
+        "tests/test_xpoint_offset_decomposition.py"
+      ],
+      "icm-west-62751-solve": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-solve.html",
+        "docs/figures/iron-core-magnetisation/icm-west-62751-solve",
+        "scripts/west_iron_solve"
+      ],
+      "read-tie-break": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/read-tie-break.html",
+        "docs/figures/sub-millisecond-forward-path/read-tie-break",
+        "nova/equilibrium/support_read.py",
+        "nova/equilibrium/topology.py",
+        "tests/test_read_tie_break.py"
+      ]
+    },
+    "plan": "iron-core-magnetisation",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "120m",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "nova/biot/magnetisation.py",
+      "tests/test_magnetisation.py",
+      "docs/evidence/fragments/iron-core-magnetisation/icm-law-fit.html",
+      "docs/figures/iron-core-magnetisation/icm-law-fit",
+      "scripts/magnetisation_law",
+      "scripts/magnetisation_law/figure.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 1.4272842148544478,
+      "derived": 0.6242624914694114,
+      "drain_hours": 168.0,
+      "effective_limit": 0.6242624914694114,
+      "elapsed_fraction": 0.567511355881283,
+      "elapsed_hours": 95.34190778805555,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-11-11T14:48:43+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "re_anchor": {
+        "allowance": 0.7887385328199065,
+        "lift_id": "codex-sub-1794082577-c029e5",
+        "multiple": 1.1,
+        "t_end": "2026-11-11T09:00:01Z",
+        "u_end": 0.77
+      },
+      "reason": null,
+      "remaining_budget": 0.18999999999999995,
+      "remaining_windows": null,
+      "resets_at": "2026-11-14T15:28:13Z",
+      "state": "observed",
+      "utilisation": 0.81,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.9054180000000001,
+      "decided_by": "window",
+      "margin": -0.167918,
+      "name": "icm-law-fit",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "hold",
+      "window_fill": 0.81
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.868037,
+        "observed_at": "2026-11-11T14:48:43+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-14T15:28:13Z",
+        "state": "observed",
+        "utilisation": 0.81,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "icm-law-fit",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-11T14:48:43.868037+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "lead: difficult node to codex sol; unblocks WEST 62751. Waiver: the unreconciled run is the WEST solve blocked on this very repair",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.816,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.3774703557312253,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "69cb520b3029445e831405ddbba68248b5c1acc8",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_absent": true,
+    "scratch_bytes": null,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261111T144605264038-icm-law-fit",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-law-fit",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "fdb99418c929084264fd773c472a24841b337c36",
+    "reviewed_head_sha": "69cb520b3029445e831405ddbba68248b5c1acc8",
+    "scores": {
+      "durability": 14,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 108
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261111T144605264038-icm-law-fit",
+  "scope_acceptances": [
+    {
+      "path": "scripts/magnetisation_law/figure.py",
+      "reason": "figure producer committed at the review's request; under nova's shared scripts/ root"
+    }
+  ],
+  "scope_changed": false,
+  "section": "§4",
+  "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+  "session_harness": "codex",
+  "session_id": "01a1cb18-3219-74f1-b4de-5f38f73ec6b5",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_magnetisation.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T144605264038-icm-law-fit/head-after-suite.log",
+      "revision": "69cb520b3029445e831405ddbba68248b5c1acc8"
+    },
+    "baseline_measured_nothing": false,
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_magnetisation.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T144605264038-icm-law-fit/baseline-suite.log",
+      "revision": "d42e6878e7b98ad690d510103f80b487d1973606"
+    },
+    "failure_attribution": {},
+    "status": "clean",
+    "suite_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_magnetisation.py",
+    "waiver_reason": null
+  },
+  "tests_added": 2,
+  "throughput": {
+    "cumulative_cached_input_tokens": 44347136,
+    "cumulative_input_tokens": 45004140,
+    "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+    "generated_tokens": 181933,
+    "generation_seconds": 16135.746,
+    "machine_seconds": 5516.539,
+    "tokens_per_second": 11.28
+  },
+  "time_budget": "120m",
+  "tool_steps": 158.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "source": "coordinator",
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 10800,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: The production material-law validator rejects the unchanged WEST CEA table before meshing; necessary repair is outside granted write paths.",
+        "effective_phase": "complete",
+        "elapsed_seconds": 5994,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-11T13:18:30Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-11T13:07:27Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 68717217,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130417404611-icm-west-62751-solve/codex-home/cache"
+            },
+            {
+              "bytes": 28814443,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130417404611-icm-west-62751-solve/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261111T130417404611-icm-west-62751-solve",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 255,
+          "worker_pid": 2091990
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "The production material-law validator rejects the unchanged WEST CEA table before meshing; necessary repair is outside granted write paths.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-11T13:18:30Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 5294,
+        "log_fresh": false,
+        "manifest_commits": [
+          "97be7b243d1bdaec0f32b1197b274d322e634388",
+          "369f11edbe9f1dc080548dd8c7c94e1f499ef78b"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "d5b843e0361f855036e5ea0752b1e11d4edfc2621c6ef090b90051d73e87cda4",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130417404611-icm-west-62751-solve/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "sol",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T130417404611-icm-west-62751-solve/manifest.md; resolve the blocker before resuming the run",
+        "node": "icm-west-62751-solve",
+        "phase": "complete",
+        "plan": "iron-core-magnetisation",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261111T130417404611-icm-west-62751-solve",
+        "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261111T130417404611-icm-west-62751-solve",
+          "session_id": "01a1cab8-aaab-73a1-b377-3e54a723a9a4",
+          "source": "pointer"
+        },
+        "stored_phase": "complete",
+        "terminal_age_seconds": 5362,
+        "terminal_at": "2026-11-11T13:17:19Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-west-62751-solve"
+      }
+    ]
+  },
+  "wall_seconds": 21711,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-11T20:53:01Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-11T20:20:16Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 69180229,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T144605264038-icm-law-fit/codex-home/cache"
+      },
+      {
+        "bytes": 28814443,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T144605264038-icm-law-fit/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261111T144605264038-icm-law-fit",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 935,
+    "worker_pid": 4129190
+  },
+  "worker_seconds": 21652,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

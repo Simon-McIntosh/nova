@@ -25,8 +25,8 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="47">
-<meta name="plan-modified" content="2026-11-11">
+<meta name="plan-version" content="57">
+<meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -652,6 +652,36 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261111T190116861784-review-of-icm-law-fit-fdb99418c929" data-who="reckon-build" data-when="2026-11-11T19:29:41.864Z">
     <div class="r-comment-body"><p>Independent review of r-20261111T144605264038-icm-law-fit at head fdb99418c929084264fd773c472a24841b337c36 from base 9d86f3f25411d725657183dd5d483898415d9f73; parsed record scores all six dimensions and carries added_failure_count 0 derived from baseline-suite.log (17 passed, 1 xfailed, EXIT=0) and review-after-suite.log (20 passed, 1 xfailed, EXIT=0); two non-blocking findings recorded, no blocking defect found.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261111T191714430350-review-of-icm-law-fit-fdb99418c929-figure" data-who="reckon-build" data-when="2026-11-11T19:45:37.143Z">
+    <div class="r-comment-body"><p>figure review of r-20261111T144605264038-icm-law-fit at fdb99418c929 records status parsed, all six rubric items answered, two non-blocking findings (figure unreachable from the run's evidence; no caption identifying the two panels), no edited file.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261111T202350098829-review-of-icm-west-62751-solve-a6d9a38e3d63" data-who="reckon-build" data-when="2026-11-11T20:48:32.148Z">
+    <div class="r-comment-body"><p>Reviewed 0b642bcfe528444b74d912d462579693610f44a0..a6d9a38e3d63153c725c221ec3963fccd71d02d7 (twelve commits, all inside scripts/west_iron_solve, the icm-west-62751-solve evidence fragment and its figure directory); the plan-section acceptance is UNMET — no test or gate ran that asserts a converged two-mesh solve, a Picard negative control or the converged mu_r figure — and the landed work is the lead-authorized Newton-stall diagnosis: scores goal_fidelity 8, evidence 9, scope_discipline 19, durability 9, fit 17, reuse 13; added failures 0; three non-blocking findings (duplicated source construction at measure.py:37, convergence assertion ahead of the independent arms at measure.py:296, post-guard SVG rewrite at figure.py:66); no production call site.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261111T202001520298-review-of-icm-west-62751-solve-a6d9a38e3d63-figure" data-who="reckon-build" data-when="2026-11-11T20:36:40.585Z">
+    <div class="r-comment-body"><p>Figure review of r-20261111T130417404611-icm-west-62751-solve at head a6d9a38e at base 0b642bcfe is parsed with three non-blocking findings and no blocking finding: the legend swatches are 6x thicker than the marks they key, the twenty highlighted residual cells fuse into seven violet strokes so membership cannot be read, and the 0.3 pt cell lattice renders at about 1.7-2.5:1 rather than the prescribed 3:1. All six rubric items pass; the figure is legible, undeceptive and undecorated, with nothing clipped and no label collision.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261111T144605264038-icm-law-fit" data-who="reckon-build" data-when="2026-11-11T20:52:56Z">
+    <div class="r-comment-body"><p>Final after_suite recorded at 69cb520b3029445e831405ddbba68248b5c1acc8, exact command in one sirius job with --time=02:00:00 and no timeout wrapper: 20 passed, 1 xfailed in 1570.98s (0:26:10), EXIT=0; zero added failures against the retained d42e6878e7b98ad690d510103f80b487d1973606 baseline. Nonlinear shell remains 3 iterations with quadratic ratio 0.00709910478702. No source, test or figure changed in this mechanical followup. The committed renderer and two-panel caption remain delivered; formal scripts scope is refreshed.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261111T204437366965-review-of-icm-mesh-slivers-64a6d45ee1ff" data-who="reckon-build" data-when="2026-11-11T21:01:31.552Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261111T173437295622-icm-mesh-slivers at base 3787f14440a2d1f4927a6ff4b0188591c712fa12 and head 64a6d45ee1fffb22d3456846e82a8ca732970bf3: scores goal_fidelity 19, evidence 18, scope_discipline 19, durability 18, fit 17, reuse 15 (total 116), added_failure_count 0 from the baseline arm (20 passed, 1 xfailed, EXIT=0) and the head arm (25 passed, EXIT=0), no blocking finding and two non-blocking ones (test fixture duplicates the WEST source-resolution idiom; after_suite is recorded at 318a09f, two docs-only commits before the reviewed head).</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261111T223055166076-review-of-icm-law-saturation-tail-77b424b3cab3" data-who="reckon-build" data-when="2026-11-11T23:14:11.618Z">
+    <div class="r-comment-body"><p>Independent review of r-20261111T182356721911-icm-law-saturation-tail at head 77b424b3cab3 against base f63aa85d83e0 is stored and parsed: goal_fidelity 19, evidence 19, scope_discipline 18, durability 15, fit 19, reuse 18 (total 108), added_failure_count 0, four findings of which one is blocking. Blocking: the new final tangent makes the split-interval ramp fire for any table whose last secant sits far below 1/mu0, and its construction leaves the plateau slope at about three quarters of the secant, so a valid two-knot table [0,10], mu=[1000,1000] is exactly linear at f63aa85d and 22.9-25.0% low at 77b424b3 across 0.03-5 T.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261111T173437295622-icm-mesh-slivers" data-who="reckon-build" data-when="2026-11-11T21:41:12Z">
+    <div class="r-comment-body"><p>Shared endpoints mesh WEST at 0.08/0.057/0.04 m with 1695/3333/6632 cells, zero union error and 6.544/5.011/3.400 mm minimum clearance. Promotion after_suite at HEAD 64a6d45ee1fffb22d3456846e82a8ca732970bf3: 25 passed in 1541.02s, EXIT=0; baseline and restored-grid control stand. Hard high-mu refinement and old/new error comparison unchanged; chi^0.8*h needs remeasurement without a refutation claim. docs/evidence/fragments/iron-core-magnetisation/icm-mesh-slivers.html#icm-mesh-slivers-hard-refinement</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261111T233059786915-review-of-icm-newton-trust-region-39e67e073374" data-who="reckon-build" data-when="2026-11-12T00:03:08.689Z">
+    <div class="r-comment-body"><p>Independent review of r-20261111T205006716359-icm-newton-trust-region at head 39e67e073374daae459db8f327284e0e4de53a4f scores goal_fidelity 18, evidence 19, scope_discipline 19, durability 16, fit 16, reuse 18 (total 106) with zero added failures and three non-blocking findings: unjustified schedule literals, two self-referential test assertions, and a 60-correction default budget that cannot reach the target the node recovered at 248.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261111T205006716359-icm-newton-trust-region" data-who="reckon-build" data-when="2026-11-12T01:08:29Z">
+    <div class="r-comment-body"><p>Adaptive diagonal regularisation preserves the exact Jacobian and exposes per-step lambda, type and local-equation reduction ratios. Saved WEST stall recovers 5.844633900691807e-4 to 2.100506605937123e-12 in 248 corrections with zero G builds; synthetic condition 1.46276e5 converges in sixteen corrections while restored backtracking fails. Exact CPU suite arms pass 28 then 30 tests with zero added failures; nonlinear shell keeps three unregularised corrections and quadratic ratio 0.00705351942949 versus secant 1.04458978683. Evidence: docs/evidence/fragments/iron-core-magnetisation/icm-newton-trust-region.html#icm-newton-trust-region-state.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261112T040553972669-review-of-icm-law-saturation-tail-483bcfbb1ccf" data-who="reckon-build" data-when="2026-11-12T04:19:06.367Z">
+    <div class="r-comment-body"><p>Independent review of r-20261111T182356721911-icm-law-saturation-tail at head 483bcfbb1ccf4eb3cee03fb21e544da6caf8cd22 from base 77b424b3cab3297fdfa4b70c0ec52d87fb80e15b is stored and parsed; scores goal_fidelity 11, evidence 13, scope_discipline 20, durability 18, fit 19, reuse 20 (total 101), added_failure_count 0, one blocking and one non-blocking finding. Blocking: the tail resumes the table secant slope and reaches 1/mu0 only at B_end = b_n + 2*(H_n-H_(n-1))/(s+q) = 7.206787508491296 T, so M rises to 1.8008693560016667 MA/m rather than remaining at M_n = 1.6363125595929811 MA/m, and tests/test_magnetisation.py:316 pins the blend rather than the done_when&#x27;s constant-M and dH/dB = 1/mu0-past-B_n clauses.</p></div>
 </div>
 </section>
 </main>

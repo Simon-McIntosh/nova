@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from functools import lru_cache
+import json
+import os
+from pathlib import Path
 from time import perf_counter
 
 import jax
@@ -156,24 +159,7 @@ def shell_observation(mu, cell_size, capsys):
     return error, result.cell_count, wall
 
 
-@pytest.mark.parametrize(
-    "mu",
-    [
-        10,
-        100,
-        pytest.param(
-            1000,
-            marks=pytest.mark.xfail(
-                strict=True,
-                raises=AssertionError,
-                reason=(
-                    "At mu_r=1000, 20 -> 10 mm errors fall at orders 1.3 to 1.5; "
-                    "40 -> 20 mm refinement is pre-asymptotic."
-                ),
-            ),
-        ),
-    ],
-)
+@pytest.mark.parametrize("mu", [10, 100, 1000])
 @pytest.mark.slow
 @pytest.mark.timeout(3600)
 def test_closed_shell_refines_toward_exact_shielding(mu, capsys):
@@ -211,6 +197,89 @@ def test_clipped_sphere_has_no_collapsed_sheet_edges():
     edges = cell_edges(cells.polygons)
     lengths = np.hypot(edges.end_r - edges.start_r, edges.end_z - edges.start_z)
     assert np.all(lengths > 0)
+
+
+@pytest.fixture(scope="module")
+def west_iron_region():
+    """Read every iron segment at the source manifest's dictionary pin."""
+    from nova.imas.machine import StaticMachineDescription
+
+    manifest_path = Path(
+        os.environ.get(
+            "NOVA_WEST_SOURCE_MANIFEST",
+            "/home/ITER/mcintos/Code/imas-efit/tests/data-manifest.json",
+        )
+    )
+    if not manifest_path.is_file():
+        pytest.skip("WEST source manifest is not mounted")
+    manifest = json.loads(manifest_path.read_text())
+    row = next(
+        row for row in manifest["machine_descriptions"] if row["key"] == "west-dd4-1-0"
+    )
+    source = manifest_path.parent.parent / row["target"]
+    machine = StaticMachineDescription.read_iron_core(
+        f"imas:hdf5?path={source}", dd_version=row["dd_version"]
+    )
+    assert len(machine.iron_segments) == 6
+    return shapely.union_all(
+        [
+            shapely.Polygon(np.column_stack((segment.outline.r, segment.outline.z)))
+            for segment in machine.iron_segments
+        ]
+    )
+
+
+@pytest.mark.parametrize("size", [0.08, 0.057, 0.04])
+def test_west_mesh_preserves_iron_and_collocation_clearance(
+    west_iron_region, size, capsys
+):
+    cells = iron._mesh(west_iron_region, size)
+    polygons = [shapely.Polygon(p) for p in cells.polygons]
+    union_error = west_iron_region.symmetric_difference(
+        shapely.union_all(polygons)
+    ).area
+    clearances = np.array(
+        [
+            shapely.Point(centre).distance(polygon.boundary)
+            for polygon, centre in zip(polygons, cells.centroids, strict=True)
+        ]
+    )
+    assert all(
+        polygon.contains(shapely.Point(centre))
+        for polygon, centre in zip(polygons, cells.centroids, strict=True)
+    )
+    assert union_error == 0
+    assert clearances.min() >= 0.01 * size
+    with capsys.disabled():
+        print(
+            f"\nWEST mesh: cell_size={size:g}, cells={len(polygons)}, "
+            f"union_error={union_error:g}, min_clearance={clearances.min():.12g} m",
+            flush=True,
+        )
+
+
+def test_mesh_merges_thin_plate_without_losing_material(capsys):
+    size = 0.1
+    thickness = 0.03 * size
+    region = shapely.box(1, 0, 2, thickness)
+    cells = iron._mesh(region, size)
+    polygons = [shapely.Polygon(p) for p in cells.polygons]
+    assert region.symmetric_difference(shapely.union_all(polygons)).area == 0
+    clearance = min(
+        shapely.Point(centre).distance(polygon.boundary)
+        for polygon, centre in zip(polygons, cells.centroids, strict=True)
+    )
+    assert all(
+        polygon.contains(shapely.Point(centre))
+        for polygon, centre in zip(polygons, cells.centroids, strict=True)
+    )
+    assert clearance >= 0.01 * size
+    with capsys.disabled():
+        print(
+            f"\nthin plate: thickness={thickness:g} m, cells={len(polygons)}, "
+            f"min_clearance={clearance:.12g} m",
+            flush=True,
+        )
 
 
 def test_mesh_preserves_holes_and_refuses_isolated_slivers():
@@ -470,7 +539,8 @@ def test_nonlinear_shell_uses_differential_newton(capsys):
         )
     assert result.converged
     assert maximum_field < b[-1], "shell must stay inside the unchanged table fit"
-    assert result.iterations <= 10
+    assert result.iterations == 3
+    assert result.regularisation_history == (0.0, 0.0, 0.0)
     assert quadratic_ratio < 0.1, "late residual contractions must accelerate"
     assert result.residual_history[-1] < 1e-8
     assert np.all(np.diff(result.residual_history) < 0)
@@ -495,3 +565,130 @@ def test_update_operands_and_factor_are_runtime_arguments():
     np.testing.assert_allclose(shifted, 2 * result)
     damped, _ = iron._update(state, moved, factor, jnp.asarray(0.5))
     np.testing.assert_allclose(damped, result)
+
+
+def test_regularised_newton_crosses_ill_conditioned_material_stall(monkeypatch, capsys):
+    # A cell-volume similarity scaling of a symmetric response makes the
+    # differential system ill-conditioned without changing its eigenvalues.
+    response = (
+        np.array(
+            [
+                [
+                    0.27109626211628385,
+                    6.215590257990723,
+                    0.605505275409036,
+                    -28.29345763919621,
+                ],
+                [
+                    0.16973579554603527,
+                    -0.5154273387446999,
+                    3.2520303434762816,
+                    10.607063515488663,
+                ],
+                [
+                    6.038927604842041e-7,
+                    0.00011876963403776738,
+                    0.9925358710780197,
+                    -0.007598651820290013,
+                ],
+                [
+                    -0.0034226449016746085,
+                    0.046987238944372414,
+                    -0.9216594329649704,
+                    -0.19293680537499014,
+                ],
+            ]
+        )
+        * iron._MU0
+    )
+    external = (
+        np.array(
+            [
+                0.016291980616101504,
+                -0.01907815806338487,
+                -0.025975777223539,
+                0.047051923861125396,
+            ]
+        )
+        .reshape(2, 2)
+        .T
+    )
+    monkeypatch.setattr(iron, "_interaction", lambda *args: response)
+    b, mu = nonlinear_law()
+    operands = tuple(
+        jnp.asarray(x)
+        for x in (response, external.T.reshape(-1), *iron._fit_law(b, mu))
+    )
+    condition = np.linalg.cond(jax.jacfwd(iron._residual)(jnp.zeros(4), operands))
+    assert condition > 1e4
+    result = iron.solve_magnetisation(
+        shapely.box(1, 0, 2, 2),
+        lambda points: external,
+        b,
+        mu,
+        cell_size=1,
+        max_iterations=40,
+    )
+    with capsys.disabled():
+        print(
+            f"\nill-conditioned material: condition={condition:.12g}, "
+            f"converged={result.converged}, iterations={result.iterations}, "
+            f"residual={result.residual_history}, "
+            f"lambda={result.regularisation_history}, ratios={result.reduction_ratios}",
+            flush=True,
+        )
+    assert result.converged
+    assert result.residual_history[-1] < 1e-8
+    assert any(value > 0 for value in result.regularisation_history)
+    assert result.regularisation_history[-1] == 0
+    assert all(value > 0.25 for value in result.reduction_ratios)
+    assert (
+        len(result.regularisation_history)
+        == len(result.reduction_ratios)
+        == len(result.step_types)
+        == result.iterations
+    )
+    assert all(
+        kind == ("newton" if damping == 0 else "regularised")
+        for damping, kind in zip(
+            result.regularisation_history, result.step_types, strict=True
+        )
+    )
+
+
+def test_material_restart_preserves_component_order_and_checks_shape(monkeypatch):
+    response = np.eye(4) * iron._MU0 * 0.5
+    monkeypatch.setattr(iron, "_interaction", lambda *args: response)
+    region = shapely.box(1, 0, 2, 2)
+    initial = np.array([[100.0, -200.0], [300.0, -400.0]])
+    external = np.array([[0.01, 0.02], [-0.03, 0.04]])
+    b, mu = [0, 1, 10], [10, 10, 10]
+    result = iron.solve_magnetisation(
+        region,
+        lambda points: external,
+        b,
+        mu,
+        cell_size=1,
+        initial_magnetisation=initial,
+        max_iterations=0,
+    )
+    np.testing.assert_array_equal(result.magnetisation, initial)
+    operands = tuple(
+        jnp.asarray(x)
+        for x in (response, external.T.reshape(-1), *iron._fit_law(b, mu))
+    )
+    expected = np.linalg.norm(
+        iron._residual(jnp.asarray(initial.T.reshape(-1)), operands)
+    ) / (np.linalg.norm(external) / iron._MU0)
+    assert result.residual_history == pytest.approx((expected,))
+    assert not result.converged
+    for invalid in (np.zeros((4, 1)), np.full((2, 2), np.nan)):
+        with pytest.raises(ValueError, match="initial_magnetisation"):
+            iron.solve_magnetisation(
+                region,
+                lambda points: external,
+                b,
+                mu,
+                cell_size=1,
+                initial_magnetisation=invalid,
+            )

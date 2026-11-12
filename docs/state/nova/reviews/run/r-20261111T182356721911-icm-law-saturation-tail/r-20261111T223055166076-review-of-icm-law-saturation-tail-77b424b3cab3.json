@@ -1,0 +1,98 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/magnetisation_high_permeability/measure.py:218",
+    "scripts/magnetisation_high_permeability/directional.py:52",
+    "scripts/magnetisation_law/figure.py:24"
+  ],
+  "completed_at": "2026-11-11T23:14:11.618Z",
+  "dispatched_at": "2026-11-11T22:55:05Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-law-saturation-tail",
+      "recorded_at": "2026-11-12T01:31:55.322169+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "icm-law-saturation-tail",
+      "recorded_at": "2026-11-12T01:32:55.659089+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "icm-law-saturation-tail",
+      "recorded_at": "2026-11-12T01:33:45.385414+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "plan text is the coordinator's: section 4's 'holds its end values' will be updated through reckon-edit once the corrected tail lands",
+      "recorded_at": "2026-11-12T01:34:26.517573+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/biot/magnetisation.py",
+      "line": "169",
+      "severity": "blocking",
+      "text": "blocking: the split-interval ramp now fires for any table whose final secant is far below 1/mu0, and with fraction = average/(2*(left+right)) its two ramps carry half the interval's H increment, so the plateau slope falls to about three quarters of the secant and the whole final interval is distorted rather than only the join; a pinned base/head probe on the valid two-knot table [0,10], mu=[1000,1000] reads H(B) exactly linear at f63aa85d (deviation 4.6e-14) and 22.9% to 25.0% below it at 77b424b3 over 0.03-5 T, and two in-repo call sites pass that simple table shape."
+    },
+    {
+      "file": "scripts/magnetisation_high_permeability/measure.py",
+      "line": "221",
+      "severity": "non-blocking",
+      "text": "non-blocking: the script and scripts/magnetisation_high_permeability/directional.py:55 still pass two-knot [0, 10] tables with mu in {100,300,1000,3000}, so they now measure the distorted law above and the numbers published in docs/evidence/fragments/iron-core-magnetisation/icm-high-permeability-shell.html no longer describe this module's output; both sites need the interior knot the node added to its own analytic controls."
+    },
+    {
+      "file": "nova/biot/magnetisation.py",
+      "line": "182",
+      "severity": "non-blocking",
+      "text": "non-blocking: left_edge and right_edge are differences of breakpoint coordinates, so a ramp narrower than one unit in the last place of b[i] makes them zero and divides zero by zero in the two quadratic coefficients, where the previous code divided by the product edge; _fit_law validates only secant > 0, so nothing refuses such a table."
+    },
+    {
+      "file": "docs/plans/iron-core-magnetisation.html",
+      "line": "299",
+      "severity": "non-blocking",
+      "text": "non-blocking: the plan's section 4 still states the law \"holds its end values outside the table\", which the lead's 2026-11-11 ruling and this change replace with the vacuum-slope continuation; the plan edit belongs to the coordinator, not to this node's fence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against base f63aa85d; two implementation commits change 36 lines of _fit_law/_coefficient and 81 lines of tests, the last two are docs-only, and the base..head range also carries 36 peer files brought in by merge b56789ef4, which the node did not author.",
+    "done_when": "the done_when's three clauses are asserted by tests/test_magnetisation.py:313-360 (constant M over [B_n,100 T], dH/dB = 1/mu0 past and at the join, every knot reproduced, on the manifest-guarded WEST table plus two synthetic tables) and recorded in baseline-suite.log and after-combined-suite.log with a negative control in negative-control.log.",
+    "goal": "the node's goal is to continue the B-H law past the last table knot with dH/dB = mu0 so M is bounded; nova/biot/magnetisation.py:156 sets the final fitted slope to 1/_MU0 and nova/biot/magnetisation.py:202 returns the constant-tail coefficient M_n/B, which is that goal.",
+    "manifest": "read; it records status complete with four commits, baseline f63aa85d 20 passed 1 xfailed EXIT=0, after b56789ef 23 passed 1 xfailed EXIT=0, zero added failures, and the endpoint-hold mutant at 3 failed EXIT=1.",
+    "write_paths": "the four node commits 34f109aa7, 00606c8c2, fe6f1eb11 and 77b424b3c touch only nova/biot/magnetisation.py, tests/test_magnetisation.py and docs/evidence/fragments/iron-core-magnetisation/icm-law-saturation-tail.html, all inside the declared paths; the declared docs/figures path is unused."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:336 and :344 compare code output against M_n and 1/mu0 derived from the table rather than a value the test passed in, and negative-control.log reddens those three cases, but the analytic controls were moved to the three-knot table [0,1,10] so the distorted final interval is never sampled.",
+    "evidence": "baseline-suite.log and after-combined-suite.log each carry a revision header, an import_assertion line and a bare EXIT= line (0 and 0), and negative-control.log carries EXIT=1 with the three saturation tests named.",
+    "fit": "nova/biot/magnetisation.py:127-131 updates the module's own docstring to the mechanism, ruff reports no finding on either changed file, and no added name carries a plan label or an attribution.",
+    "goal_fidelity": "nova/biot/magnetisation.py:156 and :202 give H = H_n + (B-B_n)/mu0 past the knot and c = M_n/B, so M stays at M_n for every B >= B_n as the goal states.",
+    "reuse": "no definition is added; _fit_law and _coefficient are extended in place, though scripts/prototypes/iron_magnetisation/magnetisation.py:154 keeps a second, now-divergent material law that the change does not reconcile.",
+    "scope_discipline": "the four node commits touch exactly the three declared source, test and evidence paths, while merge b56789ef4 pulls 36 unrelated peer files into the base..head range."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to continue the B-H law past the last table knot with dH/dB = mu0 so M is bounded; nova/biot/magnetisation.py:156 sets the final fitted slope to 1/_MU0 and nova/biot/magnetisation.py:202 returns the constant-tail coefficient M_n/B, which is that goal.\nVERDICT done_when: the done_when's three clauses are asserted by tests/test_magnetisation.py:313-360 (constant M over [B_n,100 T], dH/dB = 1/mu0 past and at the join, every knot reproduced, on the manifest-guarded WEST table plus two synthetic tables) and recorded in baseline-suite.log and after-combined-suite.log with a negative control in negative-control.log.\nVERDICT write_paths: the four node commits 34f109aa7, 00606c8c2, fe6f1eb11 and 77b424b3c touch only nova/biot/magnetisation.py, tests/test_magnetisation.py and docs/evidence/fragments/iron-core-magnetisation/icm-law-saturation-tail.html, all inside the declared paths; the declared docs/figures path is unused.\nVERDICT manifest: read; it records status complete with four commits, baseline f63aa85d 20 passed 1 xfailed EXIT=0, after b56789ef 23 passed 1 xfailed EXIT=0, zero added failures, and the endpoint-hold mutant at 3 failed EXIT=1.\nVERDICT diff: read commit by commit against base f63aa85d; two implementation commits change 36 lines of _fit_law/_coefficient and 81 lines of tests, the last two are docs-only, and the base..head range also carries 36 peer files brought in by merge b56789ef4, which the node did not author.\nCALL_SITES: scripts/magnetisation_high_permeability/measure.py:218, scripts/magnetisation_high_permeability/directional.py:52, scripts/magnetisation_law/figure.py:24\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/biot/magnetisation.py:156 and :202 give H = H_n + (B-B_n)/mu0 past the knot and c = M_n/B, so M stays at M_n for every B >= B_n as the goal states.\nSCORE evidence: 19\nJUSTIFICATION evidence: baseline-suite.log and after-combined-suite.log each carry a revision header, an import_assertion line and a bare EXIT= line (0 and 0), and negative-control.log carries EXIT=1 with the three saturation tests named.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: the four node commits touch exactly the three declared source, test and evidence paths, while merge b56789ef4 pulls 36 unrelated peer files into the base..head range.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_magnetisation.py:336 and :344 compare code output against M_n and 1/mu0 derived from the table rather than a value the test passed in, and negative-control.log reddens those three cases, but the analytic controls were moved to the three-knot table [0,1,10] so the distorted final interval is never sampled.\nSCORE fit: 19\nJUSTIFICATION fit: nova/biot/magnetisation.py:127-131 updates the module's own docstring to the mechanism, ruff reports no finding on either changed file, and no added name carries a plan label or an attribution.\nSCORE reuse: 18\nJUSTIFICATION reuse: no definition is added; _fit_law and _coefficient are extended in place, though scripts/prototypes/iron_magnetisation/magnetisation.py:154 keeps a second, now-divergent material law that the change does not reconcile.\nFINDING nova/biot/magnetisation.py:169 blocking: the split-interval ramp now fires for any table whose final secant is far below 1/mu0, and with fraction = average/(2*(left+right)) its two ramps carry half the interval's H increment, so the plateau slope falls to about three quarters of the secant and the whole final interval is distorted rather than only the join; a pinned base/head probe on the valid two-knot table [0,10], mu=[1000,1000] reads H(B) exactly linear at f63aa85d (deviation 4.6e-14) and 22.9% to 25.0% below it at 77b424b3 over 0.03-5 T, and two in-repo call sites pass that simple table shape.\nFINDING scripts/magnetisation_high_permeability/measure.py:221 non-blocking: the script and scripts/magnetisation_high_permeability/directional.py:55 still pass two-knot [0, 10] tables with mu in {100,300,1000,3000}, so they now measure the distorted law above and the numbers published in docs/evidence/fragments/iron-core-magnetisation/icm-high-permeability-shell.html no longer describe this module's output; both sites need the interior knot the node added to its own analytic controls.\nFINDING nova/biot/magnetisation.py:182 non-blocking: left_edge and right_edge are differences of breakpoint coordinates, so a ramp narrower than one unit in the last place of b[i] makes them zero and divides zero by zero in the two quadratic coefficients, where the previous code divided by the product edge; _fit_law validates only secant > 0, so nothing refuses such a table.\nFINDING docs/plans/iron-core-magnetisation.html:299 non-blocking: the plan's section 4 still states the law \"holds its end values outside the table\", which the lead's 2026-11-11 ruling and this change replace with the vacuum-slope continuation; the plan edit belongs to the coordinator, not to this node's fence.",
+  "review_run_id": "r-20261111T223055166076-review-of-icm-law-saturation-tail-77b424b3cab3",
+  "reviewed_base_sha": "f63aa85d83e053eecbbd8b00ecd256c3e240ffad",
+  "reviewed_head_sha": "77b424b3cab3297fdfa4b70c0ec52d87fb80e15b",
+  "reviewed_run_id": "r-20261111T182356721911-icm-law-saturation-tail",
+  "reviewer_run_id": "r-20261111T223055166076-review-of-icm-law-saturation-tail-77b424b3cab3",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T23:52:47.056039+00:00",
+  "total": 108
+}

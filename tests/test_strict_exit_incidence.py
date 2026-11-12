@@ -108,13 +108,14 @@ def test_mast_profile_tables_become_dynamic_leaves_without_numerical_change():
     assert sampled.boundary_pressure == original.boundary_pressure
     assert sampled.boundary_field_function == original.boundary_field_function
     evaluation = incidence.jnp.linspace(-0.02, 1.02, 101)
+    reference_evaluation = incidence.jnp.maximum(evaluation, psi_norm[0])
     np.testing.assert_array_equal(
         np.asarray(sampled.core.p_prime(evaluation)),
-        np.asarray(original.core.p_prime(evaluation)),
+        np.asarray(original.core.p_prime(reference_evaluation)),
     )
     np.testing.assert_array_equal(
         np.asarray(sampled.core.ff_prime(evaluation)),
-        np.asarray(original.core.ff_prime(evaluation)),
+        np.asarray(original.core.ff_prime(reference_evaluation)),
     )
 
 

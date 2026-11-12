@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "benchmarks/diiid_forward_gs_match.py:1345",
+    "benchmarks/strict_exit_incidence.py:432",
+    "scripts/media/mast_pulse_forward.py:256",
+    "benchmarks/mast_centroid_solve_panels.py:778"
+  ],
+  "completed_at": "2026-11-12T03:04:15.989Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-12T02:51:45Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "MAST passes the amended criterion ruled by the coordinator: the 5.17e-5 Wb change comes only from psi_norm<0 evaluations at one node, and every psi_norm>=0 evaluation is bit-identical; unchanged_to_roundoff=false is the honest raw flag beside it",
+      "recorded_at": "2026-11-12T03:10:47.675822+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the excluded pair is the strict-exit test before its expectation-only patch; at the final head that file passes in full (9 passed), and the exclusion is disclosed in the manifest",
+      "recorded_at": "2026-11-12T03:11:09.792628+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "comparison.json",
+      "line": "1705",
+      "severity": "non-blocking",
+      "text": "non-blocking: the MAST row records \"unchanged_to_roundoff\": false with \"max_abs_state_difference_wb\" 5.168820560819132e-05 against \"roundoff_tolerance_wb\" 1.7894520351463656e-15, yet its own \"passed\" flag at line 1730 reads true, so the row declares a stated done-when criterion unmet and reports the row as passing without a reader-visible reconciliation in the row; the manifest attributes the change correctly to 105 psi_norm<0 source evaluations at one node."
+    },
+    {
+      "file": "cpu-regression-comparison.json",
+      "line": "964",
+      "severity": "non-blocking",
+      "text": "non-blocking: \"paired_completed_files\" is 28 and \"added_failures\" is empty, while the union of the file's own declared inputs holds 29 completed base/head pairs and one added failing id (tests/test_strict_exit_incidence.py::test_mast_profile_tables_become_dynamic_leaves_without_numerical_change); the excluded pair is disclosed only in manifest.md retry_failures and resolved by granted expectation commit 4be441e3a, so a reader of the ledger alone sees a count that silently drops a pair."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s) at head by git grep over nova/, benchmarks/, scripts/, apps/ and tests/: benchmarks/diiid_forward_gs_match.py:1345-1346, benchmarks/strict_exit_incidence.py:432-433, scripts/media/mast_pulse_forward.py:256-257, benchmarks/mast_centroid_solve_panels.py:778; the delta adds no production constructor.",
+    "diff": "read the four delta commits 6da12bb0e, f4750bc16, 569c0249b and 4cbb5a60d against 5329b9ad3 commit by commit; the code delta is scripts/prototypes/diiid_core_hold/check_core_zoom.py (new, 91 lines), render.py marker/legend and core-zoom-window scoping, and the three test modules, the remainder being five regenerated SVGs and the evidence fragment.",
+    "done_when": "the done_when names tests/test_sampled_profile_core_hold.py plus the cohort measurement; folded-suite-corrected/after-suite.log records 21 passed, 1 skipped, EXIT=0 over the three named files and comparison.json carries all ten rows, and I re-ran the delta's core-zoom check against the committed SVG to confirm 4 maxima, 3 saddles and 1.863 marker diameters.",
+    "goal": "the goal is a constant-hold lower continuation for SampledFluxFunction; nova/equilibrium/solve_request.py at head returns samples[0] below grid[0] including negative psi_norm at line 80 while the upper quintic cap at line 73 keeps its arithmetic, and the delta does not touch that module.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/manifest.md; it reads status complete and records the gate command, both suite arms, the red-control logs, the regression ledger and the five inspected figure hashes.",
+    "write_paths": "read the manifest's seven granted paths; all ten paths changed in git diff --name-only 5329b9ad3..4cbb5a60d lie inside them (tests/, scripts/prototypes/diiid_core_hold/, docs/figures/sampled-profile-core-hold/ and the fragment)."
+  },
+  "justifications": {
+    "durability": "tests/test_sampled_profile_core_hold.py:110-121 parses the committed SVG and reddens on the parent tree at 0.524 marker diameters (repair-reverted-layout-control-final.log) while passing at 1.863, and the two test-file mutations in folded-suite-corrected/*-negative.log redden 3 and 1 ids.",
+    "evidence": "the 137D base/head rows reconcile with cohort/base|head/frame-137-diverted/row.log (maxima 4 to 1, residual 1.77822e-2 to 8.98111e-12) and the MAST attribution in mast-attribution.json records 0 changed nonnegative coordinates against 239 changed negative ones.",
+    "fit": "scripts/prototypes/diiid_core_hold/check_core_zoom.py follows the sibling scripts/prototypes/bank_step_booking/check_plot.py argparse-and-assert shape, and the naming checks over the delta's source return no plan, stage, version or ticket label.",
+    "goal_fidelity": "nova/equilibrium/solve_request.py:80 selects samples[0] inside jnp.where(below, ...) after the full interpolant and cap expression, so the lower cap is replaced while the upper cap at :73 is untouched.",
+    "reuse": "tests/test_sampled_profile_core_hold.py:14-16 now imports the fused quintic evaluator owned by tests/test_sampled_flux_batching.py:47 instead of keeping a third copy, and no owner exists for the SVG marker-separation check the delta adds.",
+    "scope_discipline": "every changed path in git diff --name-only 5329b9ad3..4cbb5a60d is inside the manifest's orientation_write_paths, and the delta carries no product-code change at all."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is a constant-hold lower continuation for SampledFluxFunction; nova/equilibrium/solve_request.py at head returns samples[0] below grid[0] including negative psi_norm at line 80 while the upper quintic cap at line 73 keeps its arithmetic, and the delta does not touch that module.\nVERDICT done_when: the done_when names tests/test_sampled_profile_core_hold.py plus the cohort measurement; folded-suite-corrected/after-suite.log records 21 passed, 1 skipped, EXIT=0 over the three named files and comparison.json carries all ten rows, and I re-ran the delta's core-zoom check against the committed SVG to confirm 4 maxima, 3 saddles and 1.863 marker diameters.\nVERDICT write_paths: read the manifest's seven granted paths; all ten paths changed in git diff --name-only 5329b9ad3..4cbb5a60d lie inside them (tests/, scripts/prototypes/diiid_core_hold/, docs/figures/sampled-profile-core-hold/ and the fragment).\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/manifest.md; it reads status complete and records the gate command, both suite arms, the red-control logs, the regression ledger and the five inspected figure hashes.\nVERDICT diff: read the four delta commits 6da12bb0e, f4750bc16, 569c0249b and 4cbb5a60d against 5329b9ad3 commit by commit; the code delta is scripts/prototypes/diiid_core_hold/check_core_zoom.py (new, 91 lines), render.py marker/legend and core-zoom-window scoping, and the three test modules, the remainder being five regenerated SVGs and the evidence fragment.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py:1345, benchmarks/strict_exit_incidence.py:432, scripts/media/mast_pulse_forward.py:256, benchmarks/mast_centroid_solve_panels.py:778\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/solve_request.py:80 selects samples[0] inside jnp.where(below, ...) after the full interpolant and cap expression, so the lower cap is replaced while the upper cap at :73 is untouched.\nSCORE evidence: 18\nJUSTIFICATION evidence: the 137D base/head rows reconcile with cohort/base|head/frame-137-diverted/row.log (maxima 4 to 1, residual 1.77822e-2 to 8.98111e-12) and the MAST attribution in mast-attribution.json records 0 changed nonnegative coordinates against 239 changed negative ones.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every changed path in git diff --name-only 5329b9ad3..4cbb5a60d is inside the manifest's orientation_write_paths, and the delta carries no product-code change at all.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_sampled_profile_core_hold.py:110-121 parses the committed SVG and reddens on the parent tree at 0.524 marker diameters (repair-reverted-layout-control-final.log) while passing at 1.863, and the two test-file mutations in folded-suite-corrected/*-negative.log redden 3 and 1 ids.\nSCORE fit: 19\nJUSTIFICATION fit: scripts/prototypes/diiid_core_hold/check_core_zoom.py follows the sibling scripts/prototypes/bank_step_booking/check_plot.py argparse-and-assert shape, and the naming checks over the delta's source return no plan, stage, version or ticket label.\nSCORE reuse: 19\nJUSTIFICATION reuse: tests/test_sampled_profile_core_hold.py:14-16 now imports the fused quintic evaluator owned by tests/test_sampled_flux_batching.py:47 instead of keeping a third copy, and no owner exists for the SVG marker-separation check the delta adds.\nFINDING comparison.json:1705 non-blocking: the MAST row records \"unchanged_to_roundoff\": false with \"max_abs_state_difference_wb\" 5.168820560819132e-05 against \"roundoff_tolerance_wb\" 1.7894520351463656e-15, yet its own \"passed\" flag at line 1730 reads true, so the row declares a stated done-when criterion unmet and reports the row as passing without a reader-visible reconciliation in the row; the manifest attributes the change correctly to 105 psi_norm<0 source evaluations at one node.\nFINDING cpu-regression-comparison.json:964 non-blocking: \"paired_completed_files\" is 28 and \"added_failures\" is empty, while the union of the file's own declared inputs holds 29 completed base/head pairs and one added failing id (tests/test_strict_exit_incidence.py::test_mast_profile_tables_become_dynamic_leaves_without_numerical_change); the excluded pair is disclosed only in manifest.md retry_failures and resolved by granted expectation commit 4be441e3a, so a reader of the ledger alone sees a count that silently drops a pair.",
+  "review_run_id": "r-20261112T025041337460-review-of-sampled-profile-core-hold-4cbb5a60d027",
+  "reviewed_base_sha": "5329b9ad31b4b2904953beb741df9f861dd0d12a",
+  "reviewed_head_sha": "4cbb5a60d027c87956bbfc85d16dc7670d76a267",
+  "reviewed_run_id": "r-20261111T173111024887-sampled-profile-core-hold",
+  "rubric": "run",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T03:06:54.675196+00:00",
+  "total": 115
+}

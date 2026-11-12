@@ -52,10 +52,13 @@ def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
     ):
         raise ValueError("iron must be a valid nonempty polygon at nonnegative radius")
     r0, z0, r1, z1 = region.bounds
+    # Adjacent squares must use identical endpoints to share exact edges.
+    radial = np.r_[np.arange(r0, r1, size), r1]
+    vertical = np.r_[np.arange(z0, z1, size), z1]
     pieces = []
-    for r in np.arange(r0, r1, size):
-        for z in np.arange(z0, z1, size):
-            clipped = shapely.box(r, z, r + size, z + size).intersection(region)
+    for r, right in zip(radial[:-1], radial[1:], strict=True):
+        for z, top in zip(vertical[:-1], vertical[1:], strict=True):
+            clipped = shapely.box(r, z, right, top).intersection(region)
             for piece in shapely.get_parts(clipped):
                 if isinstance(piece, shapely.Polygon) and piece.area > 0:
                     if piece.interiors:
@@ -232,9 +235,10 @@ def _residual(state, operands):
 
 
 @jax.jit
-def _factor(state, operands):
-    """Form and factor the differential material Jacobian at a runtime state."""
+def _factor(state, operands, regularisation=0.0):
+    """Factor the exact differential Jacobian plus a runtime diagonal shift."""
     jacobian = jax.jacfwd(_residual, argnums=0)(state, operands)
+    jacobian += regularisation * jnp.eye(state.size, dtype=state.dtype)
     return jla.lu_factor(jacobian)
 
 
@@ -253,8 +257,11 @@ class MagnetisationSolution:
 
     ``magnetisation`` is (cells, 2) [A/m], ``permeability_relative`` is (cells,).
     ``residual_history`` is the relative material residual, including the seed;
-    ``iterations`` counts accepted Newton corrections. ``field`` evaluates the
-    iron contribution alone, using the same sheet-tile program at new targets.
+    ``iterations`` counts accepted corrections. ``regularisation_history``,
+    ``reduction_ratios`` and ``step_types`` describe each accepted step beside
+    ``step_scales``. The ratio measures reduction of the regularised local
+    equation, so a regularised step can increase the unregularised residual.
+    ``field`` evaluates the iron contribution alone through the sheet tile.
     """
 
     magnetisation: np.ndarray
@@ -265,6 +272,9 @@ class MagnetisationSolution:
     termination: str
     _mesh: _Mesh = field(repr=False)
     _plan: TilePlan = field(repr=False)
+    regularisation_history: tuple[float, ...] = ()
+    reduction_ratios: tuple[float, ...] = ()
+    step_types: tuple[str, ...] = ()
 
     @property
     def iterations(self) -> int:
@@ -305,6 +315,7 @@ def solve_magnetisation(
     tolerance: float = 1e-8,
     max_iterations: int = 60,
     tile_plan: TilePlan = _PLAN,
+    initial_magnetisation: np.ndarray | None = None,
 ) -> MagnetisationSolution:
     """Mesh iron and solve M = c(|B|) B for B = B_external + G M.
 
@@ -312,8 +323,18 @@ def solve_magnetisation(
     receives (cells, 2) centroid coordinates and returns (B_R, B_Z) [T] in the
     same shape. The table contains B [T] starting at zero and secant relative
     permeability. Its implied H [A/m] must increase strictly. The law is
-    single-valued and has no hysteresis or remanence. A result that exhausts
-    the budget or refuses every backtracking grade has ``converged=False``.
+    single-valued and has no hysteresis or remanence. An optional initial
+    magnetisation has shape (cells, 2) [A/m] on this mesh.
+
+    Try exact Newton first, then adapt a diagonal regularisation lambda.
+    The shifted equation F(M + p) + lambda*p = 0 is an implicit pseudo-time
+    step. Its linear model predicts zero residual because
+    (F'(M) + lambda*I)*p = -F(M). Accept when the actual reduction divided by
+    that prediction exceeds one quarter; good agreement reduces lambda.
+    This permits passage through a nonzero minimum of ||F|| while bounding
+    the nonlinear defect of each regularised step. Trying lambda=0 first
+    restores ordinary quadratic Newton convergence near a nonsingular root.
+    A budget exhaustion or regularisation refusal has ``converged=False``.
     """
     configure_dtypes()
     assert jax.config.jax_enable_x64, "the material solve requires float64"
@@ -336,7 +357,14 @@ def solve_magnetisation(
         for value in (gram, external.T.reshape(-1), *law)
     )
     state = jnp.zeros(external.size, dtype=jnp.float64)
+    if initial_magnetisation is not None:
+        initial = np.asarray(initial_magnetisation, dtype=np.float64)
+        if initial.shape != external.shape or not np.all(np.isfinite(initial)):
+            raise ValueError("initial_magnetisation must be finite (cells, 2)")
+        state = jnp.asarray(initial.T.reshape(-1))
     history, scales = [], []
+    regularisations, ratios, step_types = [], [], []
+    regularisation = 1e-6
     reference = max(np.linalg.norm(external) / _MU0, 1e-30)
     termination = "iteration-budget"
     for iteration in range(max_iterations + 1):
@@ -349,18 +377,30 @@ def solve_magnetisation(
             break
         if iteration == max_iterations:
             break
-        factor = _factor(state, operands)
         accepted = False
-        for grade in range(15):
-            scale = 0.5**grade
-            candidate, trial = _update(state, operands, factor, jnp.asarray(scale))
-            if float(jnp.linalg.norm(trial)) < norm:
+        for attempt in range(35):
+            damping = 0.0 if attempt == 0 else regularisation
+            factor = _factor(state, operands, jnp.asarray(damping))
+            candidate, trial = _update(state, operands, factor, jnp.asarray(1.0))
+            defect = trial + damping * (candidate - state)
+            ratio = 1 - (float(jnp.linalg.norm(defect)) / norm) ** 2
+            if ratio > 0.25 and bool(jnp.any(candidate != state)):
                 state = candidate
-                scales.append(scale)
+                scales.append(1.0)
+                regularisations.append(damping)
+                ratios.append(ratio)
+                step_types.append("newton" if damping == 0 else "regularised")
+                if damping > 0:
+                    if ratio > 0.9:
+                        regularisation *= 0.3
+                    elif ratio < 0.5:
+                        regularisation *= 2
                 accepted = True
                 break
+            if attempt > 0:
+                regularisation *= 10
         if not accepted:
-            termination = "backtracking-refused"
+            termination = "regularisation-refused"
             break
     total = (operands[1] + operands[0] @ state).reshape(2, -1)
     magnitude = jnp.linalg.norm(total, axis=0)
@@ -375,4 +415,7 @@ def solve_magnetisation(
         termination,
         cells,
         tile_plan,
+        tuple(regularisations),
+        tuple(ratios),
+        tuple(step_types),
     )

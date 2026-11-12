@@ -1,0 +1,95 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "benchmarks/diiid_forward_gs_match.py:1345",
+    "benchmarks/strict_exit_incidence.py:432",
+    "scripts/media/mast_pulse_forward.py:256",
+    "benchmarks/mast_centroid_solve_panels.py:778"
+  ],
+  "completed_at": "2026-11-12T01:48:24.240Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-12T01:58:28.487744+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-12T01:29:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-12T01:57:10.730121+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-12T01:57:38.537318+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-12T01:58:04.931887+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_sampled_profile_core_hold.py",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "non-blocking: capped_reference is a third copy of the fused quintic reference evaluator already owned by tests/test_sampled_flux_batching.py:47 (_sampled_flux_with_edges), so a later change to the cap arithmetic has to be mirrored by hand in both modules and the copies can drift apart."
+    },
+    {
+      "file": "tests/test_sampled_profile_core_hold.py",
+      "line": "24",
+      "severity": "non-blocking",
+      "text": "non-blocking: capped_reference reads profile.lower_edge_increment, profile.upper_edge_increment and profile.edge_width from the object under test, so test_at_and_above_first_knot_is_bit_identical and test_upper_end_cap_is_bit_identical would keep passing if __post_init__'s edge-increment arithmetic regressed, because both sides of the assertion move together."
+    },
+    {
+      "file": "tests/test_sampled_flux_batching.py",
+      "line": "186",
+      "severity": "non-blocking",
+      "text": "non-blocking: the MAST solve-point reference clamps queries to a hardcoded 0.0 rather than to the profile's first knot, so the helper silently mis-compares rather than raising if a positive-start table is ever passed to it; the MAST audit is its only caller today."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read all 19 commits from 71d06e032b73106c56386ae3a64fa30605571102 to 5329b9ad31b4b2904953beb741df9f861dd0d12a; the product change is 021c427de plus its correction fad3d4b74, ten lines in nova/equilibrium/solve_request.py, the remainder being drivers, figures and evidence.",
+    "done_when": "read the brief's three done-when blocks; the product measure is tests/test_sampled_profile_core_hold.py and its gate log final-head-suite-beae/suite.log reads 18 passed, 1 skipped, EXIT=0 over the three named files.",
+    "goal": "the brief's goal is a constant-hold lower continuation for SampledFluxFunction; nova/equilibrium/solve_request.py:74-79 lands exactly that, returning samples[0] for psi_norm < grid[0] including negative flux on a zero-start grid, with the upper quintic cap arithmetic unchanged.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/manifest.md; it reads status complete, names the gate command, both suite arms (baseline 11 passed/1 skipped, after 0 failures) and the red-control log path.",
+    "write_paths": "read the manifest's seven granted paths; all 20 paths in git diff --name-only 71d06e03..5329b9ad3 lie inside them, and the two changed test files are the coordinator-granted expectation-only set (manifest scope_resolution, commit 4be441e3a)."
+  },
+  "justifications": {
+    "durability": "tests/test_sampled_profile_core_hold.py:43 asserts the held first sample against a literal at psi_norm 0 and 0.02, and restoring `return result` at solve_request.py:79 reddens five ids in cpu-regressions/negative-control.log.",
+    "evidence": "all ten comparison.json rows reconcile exactly with their cohort receipts' residual, converged, support and terminal_topology.lower_saddle_distance_m, and cpu-regressions/negative-control.log records 5 failing ids against 4 passed.",
+    "fit": "nova/equilibrium/solve_request.py:74-79 keeps the surrounding jnp.where idiom and updates the class docstring at :88-90; the added files carry no plan, version or ticket label.",
+    "goal_fidelity": "nova/equilibrium/solve_request.py:79 selects samples[0] below grid[0] after the complete interpolant, so the lower cap is replaced while the upper cap at :73 keeps its arithmetic.",
+    "reuse": "the drivers import the existing decompose, trace and warmup-admission owners and the nova.media painters, but tests/test_sampled_profile_core_hold.py:18 re-implements the reference evaluator owned by tests/test_sampled_flux_batching.py:47.",
+    "scope_discipline": "every changed path in git diff --name-only 71d06e03..5329b9ad3 is inside the manifest's orientation_write_paths, including docs/figures/sampled-profile-core-hold/ and scripts/prototypes/diiid_core_hold/."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the brief's goal is a constant-hold lower continuation for SampledFluxFunction; nova/equilibrium/solve_request.py:74-79 lands exactly that, returning samples[0] for psi_norm < grid[0] including negative flux on a zero-start grid, with the upper quintic cap arithmetic unchanged.\nVERDICT done_when: read the brief's three done-when blocks; the product measure is tests/test_sampled_profile_core_hold.py and its gate log final-head-suite-beae/suite.log reads 18 passed, 1 skipped, EXIT=0 over the three named files.\nVERDICT write_paths: read the manifest's seven granted paths; all 20 paths in git diff --name-only 71d06e03..5329b9ad3 lie inside them, and the two changed test files are the coordinator-granted expectation-only set (manifest scope_resolution, commit 4be441e3a).\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/manifest.md; it reads status complete, names the gate command, both suite arms (baseline 11 passed/1 skipped, after 0 failures) and the red-control log path.\nVERDICT diff: read all 19 commits from 71d06e032b73106c56386ae3a64fa30605571102 to 5329b9ad31b4b2904953beb741df9f861dd0d12a; the product change is 021c427de plus its correction fad3d4b74, ten lines in nova/equilibrium/solve_request.py, the remainder being drivers, figures and evidence.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py:1345, benchmarks/strict_exit_incidence.py:432, scripts/media/mast_pulse_forward.py:256, benchmarks/mast_centroid_solve_panels.py:778\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/solve_request.py:79 selects samples[0] below grid[0] after the complete interpolant, so the lower cap is replaced while the upper cap at :73 keeps its arithmetic.\nSCORE evidence: 18\nJUSTIFICATION evidence: all ten comparison.json rows reconcile exactly with their cohort receipts' residual, converged, support and terminal_topology.lower_saddle_distance_m, and cpu-regressions/negative-control.log records 5 failing ids against 4 passed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every changed path in git diff --name-only 71d06e03..5329b9ad3 is inside the manifest's orientation_write_paths, including docs/figures/sampled-profile-core-hold/ and scripts/prototypes/diiid_core_hold/.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_sampled_profile_core_hold.py:43 asserts the held first sample against a literal at psi_norm 0 and 0.02, and restoring `return result` at solve_request.py:79 reddens five ids in cpu-regressions/negative-control.log.\nSCORE fit: 19\nJUSTIFICATION fit: nova/equilibrium/solve_request.py:74-79 keeps the surrounding jnp.where idiom and updates the class docstring at :88-90; the added files carry no plan, version or ticket label.\nSCORE reuse: 15\nJUSTIFICATION reuse: the drivers import the existing decompose, trace and warmup-admission owners and the nova.media painters, but tests/test_sampled_profile_core_hold.py:18 re-implements the reference evaluator owned by tests/test_sampled_flux_batching.py:47.\nFINDING tests/test_sampled_profile_core_hold.py:18 non-blocking: capped_reference is a third copy of the fused quintic reference evaluator already owned by tests/test_sampled_flux_batching.py:47 (_sampled_flux_with_edges), so a later change to the cap arithmetic has to be mirrored by hand in both modules and the copies can drift apart.\nFINDING tests/test_sampled_profile_core_hold.py:24 non-blocking: capped_reference reads profile.lower_edge_increment, profile.upper_edge_increment and profile.edge_width from the object under test, so test_at_and_above_first_knot_is_bit_identical and test_upper_end_cap_is_bit_identical would keep passing if __post_init__'s edge-increment arithmetic regressed, because both sides of the assertion move together.\nFINDING tests/test_sampled_flux_batching.py:186 non-blocking: the MAST solve-point reference clamps queries to a hardcoded 0.0 rather than to the profile's first knot, so the helper silently mis-compares rather than raising if a positive-start table is ever passed to it; the MAST audit is its only caller today.",
+  "review_run_id": "r-20261112T012649248378-review-of-sampled-profile-core-hold-5329b9ad31b4",
+  "reviewed_base_sha": "71d06e032b73106c56386ae3a64fa30605571102",
+  "reviewed_head_sha": "5329b9ad31b4b2904953beb741df9f861dd0d12a",
+  "reviewed_run_id": "r-20261111T173111024887-sampled-profile-core-hold",
+  "rubric": "run",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:52:15.271853+00:00",
+  "total": 110
+}

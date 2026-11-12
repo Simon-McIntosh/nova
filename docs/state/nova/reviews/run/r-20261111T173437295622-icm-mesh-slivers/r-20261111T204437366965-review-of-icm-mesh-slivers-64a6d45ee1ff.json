@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-11T21:01:31.552Z",
+  "dispatched_at": "2026-11-11T20:48:01Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-mesh-edge-strips",
+      "recorded_at": "2026-11-11T21:06:52.298672+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "icm-mesh-slivers",
+      "recorded_at": "2026-11-11T21:06:55.629687+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_magnetisation.py",
+      "line": "198",
+      "severity": "non-blocking",
+      "text": "the west_iron_region fixture repeats the manifest-resolution block already owned by tests/test_imas_iron_read.py:26-41 (same NOVA_WEST_SOURCE_MANIFEST variable, default path, west-dd4-1-0 key and DD lookup), and the same file already reads that source by hardcoded path at tests/test_magnetisation.py:294-303, so the repository now resolves the WEST iron source three ways; a shared fixture would own it. The brief instructed following that idiom, so this records the duplication rather than holding the node."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173437295622-icm-mesh-slivers/manifest.md",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "after_suite records revision 318a09f15075ac1360a9a16ab5a723163c4d5852, two commits before the reviewed head 64a6d45ee1ff, so the green suite arm did not run at the head it is offered as evidence for; the intervening commits are docs-only (git diff --stat 318a09f..64a6d45 changes only the evidence fragment) and the measurement carries, but the arm's revision should match the head it evidences."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to let the production mesher mesh thin WEST iron at 0.08 m and 0.04 m without refusing; nova/biot/magnetisation.py:55-62 now builds every grid square from consecutive entries of one shared edge array, and hard-refinement/after-suite.log:35-39 records WEST meshing at 0.08, 0.057 and 0.04 m with 1695, 3333 and 6632 cells, zero union error and no refusal.\nVERDICT done_when: the three clauses are answered by the landed artefacts -- docs/evidence/fragments/iron-core-magnetisation/icm-mesh-slivers.html#icm-mesh-slivers-pieces names the refusing condition per piece beside an inspected figure, tests/test_magnetisation.py:228-253 builds the WEST meshes from read_iron_core with a mounted-source skip and asserts zero union error, interior centroids and the clearance floor, and the suite pair plus control are recorded (complete-suite/baseline-suite.log 20 passed 1 xfailed EXIT=0; hard-refinement/after-suite.log 25 passed EXIT=0; complete-suite/negative-control.log 2 failed EXIT=1).\nVERDICT write_paths: the manifested write paths are nova/biot/magnetisation.py, tests/test_magnetisation.py, docs/evidence/fragments/iron-core-magnetisation/icm-mesh-slivers.html and docs/figures/iron-core-magnetisation/icm-mesh-slivers; every path in the diff -- nova/biot/magnetisation.py, tests/test_magnetisation.py, the fragment and docs/figures/iron-core-magnetisation/icm-mesh-slivers/west-refused-pieces.svg -- is inside them.\nVERDICT manifest: read from the reviewed run directory; it reports status complete, a head suite of 25 passed in 1312.67s EXIT=0 at 318a09f, a baseline of 20 passed and 1 xfailed at 3787f14, and a baseline_suite/after_suite pair with no failures in either arm.\nVERDICT diff: seven commits read against 3787f14 -- 73560e56 changes only the grid construction in _mesh (9 lines), 318a09f converts the strict mu_r=1000 expected-failure marker to a hard test by coordinator ruling (resume-2-advice.txt) without touching its body, a3a545b6/33b4bc05d/a3bbada43/45dfd7735/64a6d45ee are the evidence fragment and its figure, and nothing outside the declared paths changed.\nCALL_SITES: nova/biot/magnetisation.py:312 solve_magnetisation, scripts/magnetisation_high_permeability/geometry.py:28, scripts/sheet_tile_cpu_gate/axis_census.py:29, scripts/sheet_tile_cpu_gate/accuracy_census.py:45\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/biot/magnetisation.py:56-57 shares the radial and vertical edge arrays, and hard-refinement/after-suite.log:35-39 shows the production WEST iron meshing without refusal at 0.08 and 0.04 m.\nSCORE evidence: 18\nJUSTIFICATION evidence: the done_when's measures are printed by the gate itself (tests/test_magnetisation.py:250-252 and hard-refinement/after-suite.log:9-43), and the baseline and head arms are recorded with EXIT lines, though the head arm ran at 318a09f rather than the reviewed head.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 3787f14..64a6d45 lists only the four declared paths, and the two changes beyond the literal brief -- the clearance floor and the xfail removal -- are each ruled explicitly in resume-1-advice.txt and resume-2-advice.txt.\nSCORE durability: 18\nJUSTIFICATION durability: restoring the independent arange grid makes tests/test_magnetisation.py:228-253 fail at the original refusal (complete-suite/negative-control.log, 2 failed EXIT=1, mutant import asserted), which is the regression this change could otherwise allow.\nSCORE fit: 17\nJUSTIFICATION fit: nova/biot/magnetisation.py:55 carries one mechanism comment and the names radial/vertical follow the module's r,z vocabulary, and the new test names state the capability rather than a plan label.\nSCORE reuse: 15\nJUSTIFICATION reuse: _mesh was extended in place as the owner of the meshing capability, but tests/test_magnetisation.py:198-218 re-implements the source-resolution idiom owned by tests/test_imas_iron_read.py:26-41 with no shared helper to extend.\nFINDING tests/test_magnetisation.py:198 non-blocking: the west_iron_region fixture repeats the manifest-resolution block owned by tests/test_imas_iron_read.py:26-41 and the same file already reads that source by hardcoded path at line 294, so one capability now has three spellings.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173437295622-icm-mesh-slivers/manifest.md:1 non-blocking: after_suite is recorded at 318a09f, two docs-only commits before the reviewed head, so the arm's revision should be advanced or re-run to match the head it evidences.",
+  "review_run_id": "r-20261111T204437366965-review-of-icm-mesh-slivers-64a6d45ee1ff",
+  "reviewed_base_sha": "3787f14440a2d1f4927a6ff4b0188591c712fa12",
+  "reviewed_head_sha": "64a6d45ee1fffb22d3456846e82a8ca732970bf3",
+  "reviewed_run_id": "r-20261111T173437295622-icm-mesh-slivers",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-11T21:08:03.662886+00:00",
+  "total": 116
+}

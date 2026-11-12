@@ -48,6 +48,10 @@ DIFFERENCE = "#1a1a1a"
 def draw_machine(axis, source):
     """Draw unit-faithful wall units and coil outlines on a poloidal axis."""
     poloidal_axes(axis)
+    # An axis-off panel keeps its tick labels as invisible artists, which the
+    # layout check still measures; drop them at the source.
+    axis.set_xticks([])
+    axis.set_yticks([])
     uri, dd_version = machine_source()
     with imas.DBEntry(uri, "r", dd_version=dd_version) as entry:
         stored = entry.get("wall", autoconvert=False).description_2d[0].limiter.unit
@@ -68,8 +72,8 @@ def draw_machine(axis, source):
             )
         )
     draw_coils(axis, outlines, DEFAULT_INK, edgecolor=COARSE, linewidth=1.0)
-    axis.set_xlim(-0.1, 5.3)
-    axis.set_ylim(-3.8, 3.8)
+    axis.set_xlim(-0.35, 5.05)
+    axis.set_ylim(-3.72, 3.72)
 
 
 def render(run: Path, destination: Path):
@@ -86,8 +90,10 @@ def render(run: Path, destination: Path):
     plt.style.use("data-ink")
     plt.rcParams["svg.fonttype"] = "none"
     fig = plt.figure(figsize=(WIDTH_INCHES, HEIGHT_INCHES), dpi=100)
-    geometry = fig.add_axes([0.005, 0.05, 0.445, 0.85])
-    trace = fig.add_axes([0.715, 0.20, 0.27, 0.66])
+    # The geometry panel is sized to the poloidal extent so an equal-aspect
+    # cross-section fills it instead of leaving a third of the width empty.
+    geometry = fig.add_axes([0.015, 0.05, 0.317, 0.85])
+    trace = fig.add_axes([0.55, 0.22, 0.42, 0.62])
     trace_axes(trace, DEFAULT_INK.variant(label_fontsize=16))
     table = np.asarray(record["table_mu_relative"])
     norm = Normalize(vmin=float(table.min()), vmax=float(table.max()))
@@ -101,7 +107,7 @@ def render(run: Path, destination: Path):
         )
     )
     draw_machine(geometry, source)
-    scale = fig.add_axes([0.462, 0.25, 0.012, 0.50])
+    scale = fig.add_axes([0.372, 0.25, 0.011, 0.50])
     colour_bar = fig.colorbar(ScalarMappable(norm=norm, cmap="viridis"), cax=scale)
     colour_bar.set_label("converged μr", fontsize=16)
     colour_bar.ax.tick_params(labelsize=14)

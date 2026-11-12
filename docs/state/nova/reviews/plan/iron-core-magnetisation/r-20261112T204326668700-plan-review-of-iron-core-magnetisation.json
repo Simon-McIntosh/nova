@@ -1,0 +1,83 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T20:54:37.645Z",
+  "dispatched_at": "2026-11-12T20:46:34Z",
+  "findings": [
+    {
+      "anchor": "plan.html:304",
+      "id": "reasoning-1",
+      "reason": "a worker implementing the section as written cannot satisfy clause (1), and a worker satisfying clause (1) has not implemented the volume-averaged operator, so the node's one accuracy measure reads as a procedural miss rather than as a physics result.",
+      "text": "\u00a74 says \"Do not sample at centroids, which admits spurious roots and folds\", yet done-when (1) at plan.html:323 requires the production path to \"match the section 1 prototype numbers\", and \u00a71 (plan.html:88) states the prototype \"collocates at cell centroids\", its sphere bounds and shell table measured that way; the plan's own record shows the reference has already been moved rather than met \u2014 the sphere pins are \"updated with unchanged 2e-10 tolerance and maximum drift 2.54098653230e-9\" where \u00a71 reports 1e-11 as its tightest bound and 1e-6 for the exterior dipole, and the \u03bcr = 1000 shell is carried as a strict expected failure at 2.37-3.25 % below exact",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:302",
+      "id": "wiring-1",
+      "reason": "s4's declared depends-on s3 points at a program that cannot produce the operator s4 now requires, so the assembly s4 is missing is unrecorded and a worker will reuse the wrong route.",
+      "text": "\u00a73 (plan.html:232-235 and 248-252) defines G as \"B_R and B_Z at the cell centroids per unit M_R and M_Z\" and states \"\u00a74 and \u00a75 rebuild G on their production meshes through this program without changing it\", but \u00a74's changed text builds G as the 2\u03c0r-volume-weighted average of each source field over each target cell, a different operator the landed centroid program does not compute; the Galerkin evidence records the collocated weighted spectrum as [-0.1243, 1.1247] against Galerkin's [4.9e-5, 0.99994]",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:299",
+      "id": "done_when-1",
+      "reason": "the plan's own review record carries two blocking findings raised because the landed tail did not hold M constant (heads 77b424b3 and 483bcfbb), so a clause asserting the tail at and beyond B_n, with a secant-resuming arm as its control, is the endpoint without which that defect returns.",
+      "text": "\u00a74's own addition fixes a quantitative endpoint for the material law (fit H(B) through every table point, blend C1 beyond the last point B_n over a width \u03b4 \u2264 0.02 \u03bc0M_n with M rising at most 1 % of M_n, then hold M constant at dH/dB = 1/\u03bc0) and no clause of the done-when measures it: clauses (1) and (2) score the sphere and shell agreement and the WEST iteration count, so a tail that resumes the table secant and lets M run past the cap still passes",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:286",
+      "id": "single_goal-1",
+      "reason": "the earlier review raised this and the answer deferred the split to \u00a74's shaping; that shaping has now happened without a split, so the coupling is a live dispatch defect rather than a future edit.",
+      "text": "\u00a74 binds the machine-description iron read in nova/imas/machine.py with the migration of both script readers onto it (done-when 3) to the mesh, the B-H law, the Galerkin operator and the Newton solve (done-when 1 and 2), so no single verdict can close it; the section has since grown the operator construction rather than splitting, and it has been dispatched as at least seven separate nodes (icm-iron-read, icm-law-fit, icm-law-saturation-tail, icm-galerkin-interaction, icm-mesh-slivers, icm-newton-trust-region, icm-west-62751-solve) with the section's acceptance still recorded UNMET",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:331",
+      "id": "evidence_paths-1",
+      "reason": "a worker on the one section that produces the converged permeability range has to invent its durable home, which is the inventing the other sections were repaired to remove.",
+      "text": "done-when (3) says \"the receipt states the mesh, the iteration record and the converged permeability range\" and names no path, while \u00a71 names the GPFS evidence root, \u00a73 names docs/research/compile-cost-evidence.html and \u00a76b names /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/closed-shell/, and the earlier review's answer promised per-section receipt paths for \u00a75, \u00a77, \u00a78 and \u00a79 but not \u00a74",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "e364e0a27187fbbdfcaf4f1f5bb1dbc8d59d4526",
+  "plan_fingerprint": "89c097d70f396304dc9124fdc5683d7eff8cfa99b1fbdb3a568b8e288d9a2a9d",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 68,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261112T204326668700-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "e5f015739c16e573d6136c4aee1bd962fde94736",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every code path \u00a74 cites resolves in the repository (nova/imas/machine.py, nova/biot/magnetisation.py, scripts/prototypes/iron_magnetisation/west.py, scripts/west_stray_field/solve.py, nova/equilibrium/AGENTS.md, nova/equilibrium/reduced_newton.py, nova/biot/sheet.py, scripts/prototypes/iron_magnetisation/shell.py), the imas-efit paths \u00a76b cites resolve there, and \u00a74 carries no href to resolve.",
+    "done_when": "a finding \u2014 the new B-H tail endpoint (C1 blend, \u03b4 \u2264 0.02 \u03bc0Mn, M rises \u2264 1% of Mn, then constant M with dH/dB = 1/\u03bc0) is stated in \u00a74's prose and measured by no clause of its done-when.",
+    "evidence_paths": "a finding \u2014 done-when (3) requires \"the receipt\" to state the mesh, the iteration record and the section's converged permeability range but names no path, while \u00a71, \u00a73 and \u00a76b each name one.",
+    "naming": "pass \u2014 the changed text introduces no plan label, stage name, ticket number or version tag; the terms it uses (Galerkin, C1, \u03bc0Mn) name the mechanism, and no changelog prose was added.",
+    "reasoning": "a finding \u2014 \u00a74 forbids centroid sampling while pinning the production path to a centroid-collocated prototype whose numbers the plan's own evidence has since re-set.",
+    "single_goal": "a finding \u2014 \u00a74 still carries the machine-description iron read and the retirement of both script readers alongside the mesh, the material law, the interaction operator and the Newton solve, and the section's own acceptance is recorded unmet.",
+    "wiring": "a finding \u2014 \u00a74's changed text requires a volume-averaged (Galerkin) interaction operator, while \u00a73, which s4 declares depends-on, is declared done and delivers a centroid-sampled operator and states \u00a74 reuses it \"without changing it\"."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "bf0049ee8c924773ea67dcbe093fb860584392de2ea9a0789d0fabc79578a462",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "d926e738a1f3c62ff747aed181127feda68443d64ca4aa28a4ed0c3c116b46f4",
+    "s5": "18d64dc99773bd89740bde91084ec424e8873aa08afed9991b5bbc40f3395b4a",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "8a8c2cb93f6c3ed1ebbb2171af1a254a72689f0630f9b086c8890ac486595e6e",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T21:26:36.839930+00:00",
+  "total": null
+}

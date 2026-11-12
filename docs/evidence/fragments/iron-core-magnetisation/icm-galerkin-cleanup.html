@@ -32,6 +32,34 @@
     the parameter nodes instead. Every other pair bit-matches the owner's
     arithmetic path.</p>
 
+    <h3 id="icm-galerkin-cleanup-parity">Parity on the saved WEST mesh</h3>
+    <p>One program runs against two trees: the base revision
+    <code>26c4fe159</code> extracted with <code>git archive</code>, and the head
+    worktree. Each arm loads the saved 3447-cell WEST mesh and evaluates the
+    interaction, a uniform external field and a smooth rational field
+    <code>[(1+0.3R+0.2Z²)/s, (0.5-0.4Z+0.1R²)/s]</code> with
+    <code>s = 1+R²+Z²</code>. The arm prints the module it actually imported, and
+    the base arm reports <code>path=points-none</code> while the head arm reports
+    <code>path=named</code>, which is the entry-point rename showing in the evidence
+    rather than in a diff.</p>
+    <table id="icm-galerkin-cleanup-parity-table"><thead><tr><th>quantity</th><th>maximum relative difference</th></tr></thead><tbody>
+<tr><td>cell interaction matrix</td><td>0</td></tr>
+<tr><td>averaged uniform external field</td><td>2.4286128663675264e-15</td></tr>
+<tr><td>averaged smooth rational field</td><td>1.8478693511891946e-15</td></tr>
+</tbody></table>
+    <p>The interaction matrix agrees bit-for-bit: the owner computes the same
+    products in the same order for every distinct pair, so the delegated kernel
+    reproduces the base arithmetic exactly rather than within a tolerance. The
+    two averaged fields differ at the last bits only, which is what an
+    equivalent quadrature on a field smooth over a 0.0566 m cell gives.</p>
+    <p>One probe is reported and deliberately not asserted. A filament placed at
+    <code>r = 0.05 m</code> sits on the inner boundary of this mesh, so the cells
+    beside it carry a nearly singular integrand that no fixed-order rule
+    resolves: the two rules differ by 1.99e-1 relative there, an absolute
+    filament field of 4.53e-7 T, and neither converges as the order rises. It is
+    recorded because it bounds how far the rules can part company, not as
+    evidence about the averaged field, which is smooth where the iron sits.</p>
+
     <h3 id="icm-galerkin-cleanup-asymmetry">Reciprocity defect before symmetrisation</h3>
     <p>The energy matrix is assembled once per undirected cell pair and then has
     its two triangle halves averaged, so a defect test on the returned operator

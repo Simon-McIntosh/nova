@@ -42,7 +42,17 @@ def reuse_identical_interactions():
             cache[key] = original(polygons, radial, height, plan=plan)
         return cache[key]
 
+    original_average = iron.galerkin_cell_interaction
+    averages = {}
+
+    def averaged_response(polygons, *, plan):
+        key = (tuple(p.tobytes() for p in polygons), plan)
+        if key not in averages:
+            averages[key] = original_average(polygons, plan=plan)
+        return averages[key]
+
     with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(iron, "galerkin_cell_interaction", averaged_response)
         patch.setattr(iron, "cell_interaction", response)
         yield
 
@@ -75,6 +85,38 @@ def loop(points, current=1.0):
     return current * np.column_stack([br, bz])
 
 
+def sphere_cell_average_bound(cells, mu, inside):
+    """Bound the centroid field error from uniform-sphere consistency defects.
+
+    The exact uniform magnetisation is representable in the cell basis. Its
+    polygon-cell residual, rather than a Hessian of the constant exact field,
+    drives the discrete error. Resolve that residual in the volume-weighted
+    eigenbasis and apply the triangle inequality to its centroid field.
+    """
+    count = len(cells.areas)
+    volume = 2 * np.pi * cells.areas * cells.centroids[:, 0]
+    scale = np.sqrt(np.tile(volume / volume.sum(), 2))
+    unit = np.r_[np.zeros(count), np.ones(count)]
+    average = iron._interaction(cells, None, iron._PLAN) / iron._MU0
+    point = iron._interaction(cells, cells.centroids, iron._PLAN) / iron._MU0
+    weighted = average * scale[:, None] / scale[None, :]
+    eigenvalues, modes = np.linalg.eigh((weighted + weighted.T) / 2)
+    rows = count + np.flatnonzero(inside)
+    defect = average @ unit - 2 * unit / 3
+    modal_defect = modes.T @ (scale * defect)
+    transfer = (point[rows] / scale[None, :]) @ modes
+    point_defect = point[rows] @ unit - 2 / 3
+    beta = 1 - 1 / mu
+    denominator = 1 - beta * eigenvalues
+    assert np.all(denominator > 0)
+    propagated = np.sum(
+        np.abs(transfer * modal_defect[None, :]) / denominator[None, :], axis=1
+    )
+    consistency = beta * np.max(np.abs(point_defect)) + beta**2 * propagated.max()
+    roundoff = 128 * np.finfo(float).eps * (2 * count) / denominator.min()
+    return consistency + roundoff
+
+
 @pytest.mark.parametrize("mu", [1.0, 10.0, 100.0, 1000.0])
 @pytest.mark.slow
 @pytest.mark.timeout(900)
@@ -91,17 +133,18 @@ def test_uniform_sphere_matches_prototype(mu, capsys):
     inside = np.linalg.norm(points, axis=1) < 0.3
     exact = 3 * mu / (mu + 2) * 0.01
     error = np.max(np.abs(total[inside, 1] / exact - 1))
-    # The polygonised sphere's interior is effectively uniform; the dipole
-    # retains the finite boundary-resolution error measured by the ring control.
+    interior_bound = sphere_cell_average_bound(result._mesh, mu, inside)
+    # The centroid field follows the volume-tested polygon consistency bound.
+    # Exterior probes retain their independently recorded dipole precision.
     probes = np.array([[1.0, 0.0], [0.0, 1.0]])
     measured = (uniform(probes) + result.field(probes))[:, 1]
     fraction = (mu - 1) / (mu + 2)
     expected = 0.01 * np.array([1 - fraction / 8, 1 + fraction / 4])
     recorded = {
-        1.0: [0, 0],
-        10.0: [9.736922259584446e-7, 1.4861685984079998e-6],
-        100.0: [1.299614500682722e-6, 1.8379254441702741e-6],
-        1000.0: [1.3400238558780586e-6, 1.8779696518977929e-6],
+        1.0: [0.0, 0.0],
+        10.0: [9.736427295514716e-07, 1.4865717440359916e-06],
+        100.0: [1.2991625633063109e-06, 1.8395317286090673e-06],
+        1000.0: [1.3394878717321035e-06, 1.8805106384300885e-06],
     }
     exterior_error = np.abs(measured / expected - 1)
     if mu == 1:
@@ -111,11 +154,13 @@ def test_uniform_sphere_matches_prototype(mu, capsys):
         print(
             f"\nsphere mu={mu:g}: cells={result.cell_count}, "
             f"iterations={result.iterations}, interior_exact={exact:.12g} T, "
-            f"interior_max={error:.12g}, exterior_exact={expected.tolist()} T, "
+            f"interior_max={error:.12g}, interior_bound={interior_bound:.12g}, "
+            f"exterior_exact={expected.tolist()} T, "
             f"exterior_error={exterior_error.tolist()}",
             flush=True,
         )
-    assert error < 1e-9
+    assert interior_bound <= 1e-5
+    assert error <= interior_bound
     np.testing.assert_allclose(exterior_error, recorded[mu], rtol=0, atol=2e-10)
 
 
@@ -178,6 +223,17 @@ def test_closed_shell_refines_toward_exact_shielding(mu, capsys):
     assert np.all(fine_error < coarse_error), (
         "exact-shell error must fall at every probe"
     )
+    if mu in (100, 1000):
+        collocation_fine = {
+            100: [0.004471449775339975, 0.005165328184125184, 0.0034921622218581083],
+            1000: [0.027, 0.030, 0.020],
+        }[mu]
+        assert np.all(coarse_error / fine_error >= 2.5), (
+            "halving the cell size must reduce every probe error at least 2.5-fold"
+        )
+        assert np.all(fine_error <= np.asarray(collocation_fine) + 0.005), (
+            "fine-mesh error must stay within 0.5 percentage points of collocation"
+        )
 
 
 def test_mesh_merges_slivers_without_losing_material():
@@ -645,6 +701,7 @@ def test_regularised_newton_crosses_ill_conditioned_material_stall(monkeypatch, 
         .T
     )
     monkeypatch.setattr(iron, "_interaction", lambda *args: response)
+    monkeypatch.setattr(iron, "_average_external", lambda cells, callback: external)
     b, mu = nonlinear_law()
     operands = tuple(
         jnp.asarray(x)
@@ -690,6 +747,7 @@ def test_regularised_newton_crosses_ill_conditioned_material_stall(monkeypatch, 
 def test_material_restart_preserves_component_order_and_checks_shape(monkeypatch):
     response = np.eye(4) * iron._MU0 * 0.5
     monkeypatch.setattr(iron, "_interaction", lambda *args: response)
+    monkeypatch.setattr(iron, "_average_external", lambda cells, callback: external)
     region = shapely.box(1, 0, 2, 2)
     initial = np.array([[100.0, -200.0], [300.0, -400.0]])
     external = np.array([[0.01, 0.02], [-0.03, 0.04]])
@@ -723,3 +781,62 @@ def test_material_restart_preserves_component_order_and_checks_shape(monkeypatch
                 cell_size=1,
                 initial_magnetisation=invalid,
             )
+
+
+@pytest.mark.parametrize(
+    "region,size",
+    [
+        (shapely.box(1, 0, 1.7, 0.2), 0.3),
+        (shapely.box(4.78, -0.7, 4.81, 0.7), 0.05),
+        (
+            shapely.Point(0, 0)
+            .buffer(0.5, 8)
+            .intersection(shapely.box(0, -0.5, 0.5, 0.5)),
+            0.2,
+        ),
+    ],
+)
+def test_cell_average_interaction_is_reciprocal_and_energy_bounded(region, size):
+    cells = iron._mesh(region, size)
+    gram = iron._interaction(cells, None, iron._PLAN)
+    volume = np.tile(2 * np.pi * cells.areas * cells.centroids[:, 0], 2)
+    energy = volume[:, None] * gram
+    symmetry = np.linalg.norm(energy - energy.T) / np.linalg.norm(energy)
+    assert symmetry < 5e-15, f"weighted reciprocity defect {symmetry}"
+    scale = np.sqrt(volume)
+    weighted = gram * scale[:, None] / scale[None, :] / iron._MU0
+    spectrum = np.linalg.eigvalsh((weighted + weighted.T) / 2)
+    assert spectrum[0] >= -2e-7, spectrum
+    assert spectrum[-1] <= 1 + 2e-7, spectrum
+
+
+def test_cell_average_external_uses_axisymmetric_volume():
+    cells = iron._mesh(shapely.box(1, 0, 2, 1), 1)
+    observed = []
+
+    def field(points):
+        observed.append(points.copy())
+        return points.copy()
+
+    average = iron._average_external(cells, field)
+    np.testing.assert_allclose(average, [[14 / 9, 0.5]], rtol=2e-15)
+    assert len(observed[0]) > len(cells.centroids)
+
+
+def test_mutual_self_block_converges_with_logarithmic_quadrature():
+    from nova.biot.tiledassembly import galerkin_cell_interaction
+
+    polygon = np.array([[1.0, 0.0], [1.3, 0.0], [1.3, 0.2], [1.0, 0.2]])
+    matrices = [
+        galerkin_cell_interaction((polygon,), plan=iron._PLAN, order=order) / iron._MU0
+        for order in (8, 16, 24, 32)
+    ]
+    errors = [np.linalg.norm(matrix - matrices[-1]) for matrix in matrices[:-1]]
+    print(
+        "self-block quadrature orders 8,16,24,32:",
+        [matrix.tolist() for matrix in matrices],
+        "errors:",
+        errors,
+    )
+    assert errors[1] < errors[0]
+    assert errors[2] < 2e-8

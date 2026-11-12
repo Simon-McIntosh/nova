@@ -381,8 +381,6 @@ def _traced_psi_gradient(jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm
     )
 
 
-
-
 def _fill_sheet_tile(
     plan: TilePlan, target_r, target_z, start_r, start_z, end_r, end_z
 ):
@@ -537,10 +535,13 @@ def cell_edges(polygons) -> CellEdges:
     cells, edges, values_r, values_z = [], [], [], []
     for cell, polygon in enumerate(polygons):
         vertices = np.asarray(polygon, dtype=np.float64)
-        if np.sum(
-            vertices[:, 0] * np.roll(vertices[:, 1], -1)
-            - np.roll(vertices[:, 0], -1) * vertices[:, 1]
-        ) < 0.0:
+        if (
+            np.sum(
+                vertices[:, 0] * np.roll(vertices[:, 1], -1)
+                - np.roll(vertices[:, 0], -1) * vertices[:, 1]
+            )
+            < 0.0
+        ):
             vertices = vertices[::-1]
         ring = np.concatenate([vertices, vertices[:1]])
         for a, b in zip(ring[:-1], ring[1:]):
@@ -619,6 +620,175 @@ def cell_interaction(
     interaction[: target_r.size, count:] = radial @ coefficient_z.T
     interaction[target_r.size :, count:] = height @ coefficient_z.T
     return interaction
+
+
+def _galerkin_edge_geometry(polygons):
+    """Split collinear overlaps so each mutual integral has one singularity type."""
+    from scipy.sparse import csr_matrix
+    import shapely
+
+    edges = cell_edges(polygons)
+    starts = np.column_stack((edges.start_r, edges.start_z))
+    ends = np.column_stack((edges.end_r, edges.end_z))
+    vertices = np.unique(np.concatenate((starts, ends)), axis=0)
+    tree = shapely.STRtree(shapely.points(vertices))
+    tolerance = 64 * np.finfo(float).eps * max(1.0, np.abs(vertices).max())
+    atoms, index, rows, columns = [], {}, [], []
+    for k, (a, b) in enumerate(zip(starts, ends, strict=True)):
+        candidates = tree.query(
+            shapely.LineString([a, b]), predicate="dwithin", distance=tolerance
+        )
+        step = b - a
+        parameter = (vertices[candidates] - a) @ step / (step @ step)
+        selected = candidates[(parameter >= -tolerance) & (parameter <= 1 + tolerance)]
+        selected = selected[np.argsort((vertices[selected] - a) @ step)]
+        for first, second in zip(selected[:-1], selected[1:]):
+            key = tuple(sorted((int(first), int(second))))
+            if key not in index:
+                index[key] = len(atoms)
+                atoms.append(vertices[list(key)])
+            rows.append(k)
+            columns.append(index[key])
+    incidence = csr_matrix(
+        (np.ones(len(rows)), (rows, columns)), shape=(len(starts), len(atoms))
+    )
+    coefficients = np.concatenate((edges.coefficient_r, edges.coefficient_z))
+    coefficients = csr_matrix(coefficients) @ incidence
+    return np.asarray(atoms), coefficients
+
+
+@functools.lru_cache(maxsize=16)
+def _mutual_edge_evaluator(order, kind):
+    """Compile a shared reciprocal quadrature, including logarithmic edge pairs."""
+    import jax
+    import jax.numpy as jnp
+    from nova.biot.completeelliptic import complete_kind
+    from nova.biot.greens import MU0, _filament_elliptic_combinations
+
+    nodes, weights = np.polynomial.legendre.leggauss(order)
+    x, y = np.meshgrid((nodes + 1) / 2, (nodes + 1) / 2, indexing="ij")
+    weight = jnp.asarray(np.outer(weights, weights).reshape(-1) / 4)
+    x, y = jnp.asarray(x.reshape(-1)), jnp.asarray(y.reshape(-1))
+
+    def flux(r, z, sr, sz, gap=None):
+        dz = z - sz
+        span = (r + sr) ** 2 + dz**2
+        if gap is None:
+            gap = (r - sr) ** 2 + dz**2
+        inactive = (r == 0) | (sr == 0)
+        span = jnp.where(inactive, 1.0, span)
+        gap = jnp.where(inactive, 1.0, gap)
+        complement = gap / span
+        first, second = complete_kind(complement, xp=jnp)
+        _, value, _ = _filament_elliptic_combinations(
+            jnp, 4 * r * sr / span, complement, first, second
+        )
+        return jnp.where(inactive, 0.0, MU0 * jnp.sqrt(span) * value)
+
+    @jax.jit
+    def evaluate(a, b, c, d):
+        a, b, c, d = (value[:, None, :] for value in (a, b, c, d))
+
+        def pair(t, u, gap=None):
+            target = a + t[None, :, None] * (b - a)
+            source = c + u[None, :, None] * (d - c)
+            return flux(
+                target[..., 0], target[..., 1], source[..., 0], source[..., 1], gap
+            )
+
+        if kind == "self":
+            # Fold the square about its diagonal; the graded distance resolves log|t-u|.
+            t, u = x**3, x**3 * (1 - y**3)
+            gap = jnp.sum((b - a) ** 2, axis=-1) * (x**3 * y**3)[None, :] ** 2
+            values = 2 * pair(t, u, gap) * (9 * x**5 * y**2)[None, :]
+        elif kind == "adjacent":
+            # Both segments start at their common endpoint.
+            # Two triangles cover the parameter square.
+            t, u = x**3, x**3 * y
+            values = (pair(t, u) + pair(u, t)) * (3 * x**5)[None, :]
+        else:
+            values = pair(x, y)
+        return values @ weight
+
+    return evaluate
+
+
+def galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 24):
+    """Volume-weighted cell means from reciprocal edge-sheet mutual inductances.
+
+    For total loop flux Phi=2*pi*r*A_phi, Green's theorem gives
+    integral B dV = boundary integral Phi (dr,dz). A cell's sheet current is
+    K ds = M_R dr + M_Z dz. Thus V G = C L C.T, where L is the symmetric
+    double line integral of the filament mutual flux and C carries edge normals.
+    Coincident and endpoint-adjacent pairs use graded Duffy quadrature; smooth
+    distant pairs use Gauss quadrature. Each undirected pair is integrated once.
+    Collinear partial overlaps are split before classifying the singular pairs.
+    """
+    if not isinstance(order, int) or order < 4:
+        raise ValueError("mutual quadrature order must be an integer at least four")
+    atoms, coefficient = _galerkin_edge_geometry(polygons)
+    starts, ends = atoms[:, 0], atoms[:, 1]
+    lengths = np.linalg.norm(ends - starts, axis=1)
+    centres = (starts + ends) / 2
+    count = len(atoms)
+    mutual = np.empty((count, count))
+    block = max(1, plan.block * 8)
+    for begin in range(0, count, 32):
+        row_parts = [
+            np.full(count - row, row, dtype=int)
+            for row in range(begin, min(begin + 32, count))
+        ]
+        rows = np.concatenate(row_parts)
+        columns = np.concatenate(
+            [np.arange(row, count) for row in range(begin, min(begin + 32, count))]
+        )
+        a, b, c, d = starts[rows], ends[rows], starts[columns], ends[columns]
+        same = rows == columns
+        adjacent = np.zeros(len(rows), dtype=bool)
+        for first, second in ((0, 0), (0, 1), (1, 0), (1, 1)):
+            shared = (
+                np.all(atoms[rows, first] == atoms[columns, second], axis=1) & ~same
+            )
+            adjacent |= shared
+            if first:
+                a[shared], b[shared] = b[shared].copy(), a[shared].copy()
+            if second:
+                c[shared], d[shared] = d[shared].copy(), c[shared].copy()
+        near = np.linalg.norm(centres[rows] - centres[columns], axis=1) < 3 * (
+            lengths[rows] + lengths[columns]
+        )
+        for kind, selected, nodes in (
+            ("self", same, order),
+            ("adjacent", adjacent, order),
+            ("regular", near & ~same & ~adjacent, order),
+            ("regular", ~near & ~same & ~adjacent, 8),
+        ):
+            indices = np.flatnonzero(selected)
+            evaluator = _mutual_edge_evaluator(nodes, kind)
+            for offset in range(0, len(indices), block):
+                chosen = indices[offset : offset + block]
+                padded = np.pad(chosen, (0, block - len(chosen)), mode="edge")
+                value = np.asarray(
+                    evaluator(a[padded], b[padded], c[padded], d[padded])
+                )[: len(chosen)]
+                value = value * lengths[rows[chosen]] * lengths[columns[chosen]]
+                mutual[rows[chosen], columns[chosen]] = value
+                mutual[columns[chosen], rows[chosen]] = value
+    # Sparse incidence keeps contraction proportional to the cell boundary count.
+    energy = np.asarray((coefficient @ mutual) @ coefficient.T)
+    import shapely
+
+    # Geometry centroids evaluate first moments without subtracting large
+    # shoelace terms in thin cells far from the axis.
+    bodies = [shapely.Polygon(polygon) for polygon in polygons]
+    volumes = [2 * np.pi * body.area * body.centroid.x for body in bodies]
+    volume = np.tile(volumes, 2)
+    # Reciprocity is assembled once per cell pair too, avoiding reduction-order skew.
+    upper = np.triu(energy)
+    energy = upper + np.triu(energy, 1).T
+    if not np.isfinite(energy).all() or np.any(volume <= 0):
+        raise ValueError("nonfinite mutual interaction or nonpositive cell volume")
+    return energy / volume[:, None]
 
 
 def _fill_tile(plan: TilePlan, target_r, target_z, edge, weight, norm):

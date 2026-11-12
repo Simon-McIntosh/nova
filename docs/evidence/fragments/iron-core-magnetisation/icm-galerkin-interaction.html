@@ -1,0 +1,98 @@
+<section id="icm-galerkin-interaction-state">
+<h3>Reciprocal volume-tested iron interaction: WEST recovered and analytic convergence qualified</h3>
+<p>The lead ruling of 2026-11-12 accepts the Galerkin formulation and replaces fixed-mesh no-worse comparisons with a shell refinement criterion and a derived sphere cell-averaging consistency bound. The energy and root measurements below remain unchanged. Test changes implement that ruling; the final exact-command suite receipt is recorded in the manifest. This worker does not close the plan section.</p>
+<h4>Derivation and production route</h4>
+<p>For counter-clockwise cell boundaries, B<sub>R</sub> = −∂ψ/∂z/r and B<sub>Z</sub> = ∂ψ/∂r/r imply ∫B<sub>R</sub> dV = 2π∮ψ dr and ∫B<sub>Z</sub> dV = 2π∮ψ dz. Nova returns total loop flux Φ = 2πψ, so the implementation uses ∮Φ(dr,dz)/V. The source sheet obeys K ds = M<sub>R</sub> dr + M<sub>Z</sub> dz. Hence VG = CLCᵀ, with L the reciprocal double edge integral of the filament mutual flux and C the signed normal incidence.</p>
+<p>The existing complement-native elliptic filament combinations are reused. The polygon-area flux primitives are not a sheet-sheet mutual integral. Each undirected edge pair is integrated once and reused in the transpose. Coincident pairs fold the parameter square about its diagonal, with cubic grading of both Duffy coordinates; endpoint-adjacent pairs use two graded Duffy triangles. Partial collinear overlaps are split into atomic edges first. Other near pairs use order-24 Gauss quadrature and distant pairs order 8. Cell volumes use geometric first moments to avoid cancellation in thin cells at large R. This integrates the symmetric bilinear form; it does not symmetrise a collocation operator.</p>
+<p>The two-cell collocation reproduction gives ||WG−(WG)ᵀ||/||WG|| = 0.0175572625769523. The rectangular self-block, normalised by μ₀, changes by 4.48007e-6, 7.95662e-8 and 6.12783e-9 at orders 8, 16 and 24 against order 32. Five focused controls pass, including a thin cell far from the axis and the exact weighted mean of a linear external field.</p>
+<p>The residual now averages the external callback using the same 2πR test, by signed triangle quadrature. The saved WEST external vectors are reused as a prescribed piecewise-constant cell field; their exact weighted averages are those same vectors. This isolates the interaction change and is not a new integration of the physical coil/plasma sources. Arbitrary-point MagnetisationSolution.field uses the same sheet-field path. The mesh and constitutive fit and coefficient functions are unchanged.</p>
+<h4>Measured weighted spectra</h4>
+<p>Eigenvalues are those of the symmetric part of W½GW⁻½/μ₀, with W = diag(2πR<sub>centroid</sub> area), repeated for both components. The asserted interval is [−2e-7, 1+2e-7]. Symmetry below uses the requested ||WG−(WG)ᵀ||/||WG||, rather than the norm of a similarity transform.</p>
+<table><thead><tr><th>mesh/operator</th><th>cells</th><th>weighted symmetry defect</th><th>minimum eigenvalue</th><th>maximum eigenvalue</th></tr></thead><tbody>
+<tr><td>collocation_saved</td><td>3447</td><td>0.061585885324</td><td>-0.124261845678</td><td>1.12467851496</td></tr>
+<tr><td>galerkin_saved</td><td>3447</td><td>1.73555933163e-17</td><td>4.88551824662e-05</td><td>0.999942748281</td></tr>
+<tr><td>west_008</td><td>1695</td><td>1.78097570538e-17</td><td>0.000211078788405</td><td>0.999733784575</td></tr>
+<tr><td>sphere0.1</td><td>44</td><td>1.69771782534e-17</td><td>0.000237599015115</td><td>0.993562916575</td></tr>
+<tr><td>shell0.04</td><td>228</td><td>2.69513009679e-17</td><td>1.28417943928e-05</td><td>0.996337524451</td></tr>
+<tr><td>shell0.02</td><td>828</td><td>2.29688176634e-17</td><td>1.51952214883e-06</td><td>0.99960235802</td></tr>
+</tbody></table>
+<figure><img src="/nova/figures/iron-core-magnetisation/icm-galerkin-interaction/spectrum-ramp.svg" alt="Sorted weighted interaction spectra and WEST drive continuation"><figcaption>Saved 3447-cell WEST mesh. Left: sorted eigenvalues of sym(W½GW⁻½)/μ₀; dotted grey lines mark 0 and 1. Right: accepted collocation steps stop at drive 0.1948555, while Galerkin reaches 1 in fixed 0.05 increments. Maximum magnetisation is in MA/m. The grey curve is the prior bounded collocation continuation, not a newly executed continuation. The 14 × 7.2 in figure declares a 16 cm height; all 28 text artists pass the layout check, and the producer inspected the rendered PNG with no collision or clipping.</figcaption></figure>
+<h4>Every Galerkin drive step</h4>
+<table><thead><tr><th>drive</th><th>Newton corrections</th><th>relative residual</th><th>max |M| [MA/m]</th></tr></thead><tbody>
+<tr><td>0.00</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>0.05</td><td>4</td><td>3.39297094527e-13</td><td>0.0467475360688</td></tr>
+<tr><td>0.10</td><td>4</td><td>1.60680557144e-14</td><td>0.10624121064</td></tr>
+<tr><td>0.15</td><td>3</td><td>3.98576613424e-11</td><td>0.158407520863</td></tr>
+<tr><td>0.20</td><td>3</td><td>8.43083126893e-12</td><td>0.205102833003</td></tr>
+<tr><td>0.25</td><td>3</td><td>1.09598513158e-11</td><td>0.249847245837</td></tr>
+<tr><td>0.30</td><td>3</td><td>7.29412554847e-13</td><td>0.293730535795</td></tr>
+<tr><td>0.35</td><td>3</td><td>1.27588353872e-14</td><td>0.337153445198</td></tr>
+<tr><td>0.40</td><td>3</td><td>3.95269538732e-13</td><td>0.380760211403</td></tr>
+<tr><td>0.45</td><td>3</td><td>3.09973008123e-14</td><td>0.427864938883</td></tr>
+<tr><td>0.50</td><td>3</td><td>5.28279960321e-14</td><td>0.479190219341</td></tr>
+<tr><td>0.55</td><td>3</td><td>7.91478312414e-14</td><td>0.536258925599</td></tr>
+<tr><td>0.60</td><td>3</td><td>7.14049191167e-14</td><td>0.598098760789</td></tr>
+<tr><td>0.65</td><td>3</td><td>5.35805736191e-13</td><td>0.662670311354</td></tr>
+<tr><td>0.70</td><td>3</td><td>4.31284274147e-15</td><td>0.727336029773</td></tr>
+<tr><td>0.75</td><td>3</td><td>2.61411756283e-16</td><td>0.789736587967</td></tr>
+<tr><td>0.80</td><td>3</td><td>3.38932039178e-15</td><td>0.847943336775</td></tr>
+<tr><td>0.85</td><td>3</td><td>1.48181539265e-14</td><td>0.900942012072</td></tr>
+<tr><td>0.90</td><td>3</td><td>2.32930517786e-14</td><td>0.948318125827</td></tr>
+<tr><td>0.95</td><td>3</td><td>1.65712914426e-13</td><td>0.989913581367</td></tr>
+<tr><td>1.00</td><td>3</td><td>1.90444485717e-13</td><td>1.02531047617</td></tr>
+</tbody></table>
+<h4>Full-drive starts and Newton matrix</h4>
+<table><thead><tr><th>start</th><th>corrections</th><th>residual</th><th>max vector difference / max |M| versus ramp</th></tr></thead><tbody>
+<tr><td>zero</td><td>5</td><td>7.27866748715e-14</td><td>2.33052592894e-10</td></tr>
+<tr><td>A</td><td>6</td><td>1.47368237546e-12</td><td>2.54914854456e-09</td></tr>
+<tr><td>B</td><td>6</td><td>1.1000113367e-12</td><td>1.80708563314e-09</td></tr>
+</tbody></table>
+<p>The ramp terminal maximum is 1.02531047617 MA/m. Old A and B starts converge to the ramp within 2.55e-9 relative vector difference, against the required 1e-6. The zero start takes five corrections. This establishes common convergence for the specified starts, not an exhaustive numerical search over all starts.</p>
+<table><thead><tr><th>state</th><th>min sym J, Euclidean</th><th>min sym J, volume inner product</th></tr></thead><tbody>
+<tr><td>zero</td><td>-0.0614165796318</td><td>0.00174679857004</td></tr>
+<tr><td>root</td><td>-0.0626567884529</td><td>0.000740955144158</td></tr>
+</tbody></table>
+<p>The raw Euclidean symmetric matrix is still indefinite because it does not use the cell-volume inner product. Its negative minimum must not be omitted when reporting the requested Newton diagnostic. The measured volume-weighted symmetric matrix has positive minima at both zero and the recovered root.</p>
+<h4>Far field beside old roots</h4>
+<p>Probes are R = 5.52, 6.52 and 8.52 m at Z = 0: +1, +2 and +4 m from the outer coil edge. The saved nonzero probe response and the saved air field are reused.</p>
+<table><thead><tr><th>state</th><th>|B| at +1 m [µT]</th><th>|B| at +2 m [µT]</th><th>|B| at +4 m [µT]</th></tr></thead><tbody>
+<tr><td>A</td><td>213.236263035</td><td>174.426899223</td><td>86.503807271</td></tr>
+<tr><td>B</td><td>278.664706982</td><td>195.484016052</td><td>88.3016157605</td></tr>
+<tr><td>Galerkin</td><td>241.429883919</td><td>183.518310217</td><td>85.6297272912</td></tr>
+</tbody></table>
+<h4>Lead ruling and shell refinement</h4>
+<p>For μ<sub>r</sub> = 100 and 1000, every probe error must fall at least 2.5-fold from 40 to 20 mm. Every 20 mm error must be at most its collocation reference plus 0.5 percentage points. At 100, the references are the exact baseline-arm values; at 1000 the ruled references are 2.7/3.0/2.0%, giving ceilings 3.2/3.5/2.5%. The μ<sub>r</sub> = 10 refinement control and every other tolerance remain unchanged.</p>
+<table><thead><tr><th>formulation</th><th>μr</th><th>40 mm errors [%]</th><th>20 mm errors [%]</th><th>reduction factors</th><th>ruled 20 mm ceilings [%]</th></tr></thead><tbody>
+<tr><td>collocation</td><td>100</td><td>0.876099925, 1.28671733, 0.671887083</td><td>0.447144978, 0.516532818, 0.349216222</td><td>1.95931961, 2.49106598, 1.92398589</td><td>0.947144978, 1.01653282, 0.849216222</td></tr>
+<tr><td>Galerkin</td><td>100</td><td>1.28202362, 1.49038152, 1.12922951</td><td>0.487851503, 0.545961456, 0.422107169</td><td>2.62789725, 2.7298292, 2.67521994</td><td>0.947144978, 1.01653282, 0.849216222</td></tr>
+<tr><td>collocation</td><td>1000</td><td>3.49312749, 7.72216118, 2.22689047</td><td>2.7343143, 3.04494208, 2.03682606</td><td>1.27751498, 2.53606176, 1.09331401</td><td>3.2, 3.5, 2.5</td></tr>
+<tr><td>Galerkin</td><td>1000</td><td>6.62954045, 10.609411, 6.68297347</td><td>2.26311523, 3.36740078, 2.15189817</td><td>2.92938705, 3.1506232, 3.1056179</td><td>3.2, 3.5, 2.5</td></tr>
+</tbody></table>
+<p>The Galerkin minimum reduction is 2.628 at μ<sub>r</sub> = 100 and 2.929 at 1000. All three fine-mesh errors meet their ceilings. The former 40 mm no-worse failure is retained above as measured history, not an acceptance condition. Increasing full shell quadrature from order 24 to 32 changes its μ<sub>r</sub> = 1000 errors by at most 0.000588 percentage points; the refinement conclusion is independent of that small quadrature effect.</p>
+<h4>Closed-form sphere consistency bound</h4>
+<p>A constant exact interior field has zero Hessian, so averaging it over a cell introduces no Taylor remainder. A nonzero O(h²) remainder of that constant field cannot justify the observed centroid variation. The discrete error instead comes from the polygon-cell consistency defect of exact uniform sphere magnetisation, amplified by the linear material resolvent. The following bound includes that actual cell-average defect and the independent centroid observation operator.</p>
+<p>Let N = 44, u = (0,…,0,1,…,1)ᵀ, ḡ = G<sub>volume</sub>/μ₀, C = P<sub>interior,Z</sub>G<sub>point</sub>/μ₀, β = 1 − 1/μ<sub>r</sub>, and S = diag(√(V<sub>i</sub>/ΣV)), repeated for both components. Write SḡS⁻¹ = QΛQᵀ. The exact sphere self-field of uniform magnetisation is (2/3)μ₀M, so define d = ḡu − (2/3)u, e = Cu − (2/3)1, a = QᵀSd, and T = CS⁻¹Q. These depend only on geometry, the two field operators and μ<sub>r</sub>; they do not use the solved magnetisation or its measured error.</p>
+<p>The exact uniform magnetisation is M* = 3(μ<sub>r</sub>−1)B₀/[μ₀(μ<sub>r</sub>+2)]. Subtracting its discrete residual from (I−βḡ)M = βB₀u/μ₀ gives M−M*u = βM*(I−βḡ)⁻¹d. Since μ₀M*/B<sub>interior</sub> = β, the relative centroid error is exactly βe + β²T diag((1−βλ<sub>k</sub>)⁻¹)a in exact arithmetic. Applying the triangle inequality gives the closed form</p>
+<p><code>E ≤ β‖e‖∞ + β² max_i Σ_k |T_ik a_k|/(1−βλ_k) + η</code>, with <code>η = 128 ε (2N) / min_k(1−βλ_k)</code> as an explicit floating-point margin. The energy spectrum makes all denominators positive. The test computes this bound independently of the returned state, asserts that it stays below 1e-5, and compares the observed interior error against the computed bound. The 1e-5 ceiling is a rounded envelope of the largest derived bound, rather than a tolerance fitted to the observed interior error.</p>
+<table><thead><tr><th>μr</th><th>derived consistency term</th><th>floating-point margin η</th><th>total bound</th><th>observed interior error</th></tr></thead><tbody>
+<tr><td>1</td><td>0</td><td>2.50111042988e-12</td><td>2.50111042988e-12</td><td>0</td></tr>
+<tr><td>10</td><td>1.03006178022e-06</td><td>2.36414655259e-11</td><td>1.03008542168e-06</td><td>5.42958003003e-08</td></tr>
+<tr><td>100</td><td>4.15725317756e-06</td><td>1.52760907276e-10</td><td>4.15740593847e-06</td><td>6.6526443665e-07</td></tr>
+<tr><td>1000</td><td>7.0778424757e-06</td><td>3.36593926698e-10</td><td>7.07817906962e-06</td><td>1.36437072207e-06</td></tr>
+</tbody></table>
+<p>This is a discrete a posteriori consistency bound for the stated polygon and quadrature, not a claimed global mesh-order theorem. It remains meaningful as the mesh changes because both the consistency defect and its resolvent amplification are recomputed. The largest bound is about 7.08e-6, below the declared 1e-5 ceiling. The diagnostic script and its full order-24/32/48/64 results are stored in <code>scripts/west_iron_galerkin/sphere_bound.py</code> and <code>sphere-bound.log</code>.</p>
+<h4>Exterior regression pins after the formulation change</h4>
+<p>The lead explicitly authorises re-pinning the historical collocation error vectors to measured Galerkin values. These vectors are regression pins; the analytic exterior field formulas, comparison assertion and absolute tolerance 2e-10 are unchanged. The errors against the analytic solution remain about 1–2e-6 (the smallest is 9.736e-7); the maximum pin drift is 2.5409865323e-09 (about 2.54e-9). Values below come directly from the completed CPU after-suite log at 684da5ae1b2f8d7e41591d6dbd0b1970d9d06913; the product operator is unchanged.</p>
+<table><thead><tr><th>μr</th><th>collocation pin: equatorial, polar</th><th>Galerkin pin: equatorial, polar</th><th>maximum absolute drift</th></tr></thead><tbody>
+<tr><td>1</td><td>0, 0</td><td>0, 0</td><td>0</td></tr>
+<tr><td>10</td><td>9.7369222595844462e-07, 1.4861685984079998e-06</td><td>9.7364272955147158e-07, 1.4865717440359916e-06</td><td>4.03145627992e-10</td></tr>
+<tr><td>100</td><td>1.299614500682722e-06, 1.8379254441702741e-06</td><td>1.2991625633063109e-06, 1.8395317286090673e-06</td><td>1.60628443879e-09</td></tr>
+<tr><td>1000</td><td>1.3400238558780586e-06, 1.8779696518977929e-06</td><td>1.3394878717321035e-06, 1.8805106384300885e-06</td><td>2.5409865323e-09</td></tr>
+</tbody></table>
+<p>The final exact-command suite runs at the commit that includes these pins, the shell refinement criteria and the derived sphere interior bound. Its revision, completion and failure delta against the 38-pass baseline are recorded in the manifest. The centroid mutant is rerun at that same final head; its red log verifies that the energy guard still refuses collocation.</p>
+<h4>Guard refusal and durable record</h4>
+<p>A scratch extraction replaces the cell average with centroid sampling. The runner asserts the imported module path and the mutant source marker. Both reciprocal-energy test cases fail with weighted defects 0.0511401 and 0.0910275; pytest reports two failed test IDs and EXIT=1. The non-mutated product source blob is then checked against HEAD. The scratch tree is removed and its red log retained.</p>
+<p>The complete titan measurement ran at 6e066c9c779a8528e1c3e719e6fcd10caa93a259, with x64 asserted before array construction, on a Tesla P100. It rebuilt the saved-mesh interaction once in 26.9718 s and separately measured the current 0.08 m mesh and analytic meshes. The second order shell check is an explicitly separate quadrature convergence arm in the same allocation. Its historical <code>analytic_no_worse=false</code> flag records the acceptance condition before the lead replaced it with convergence. The new criteria are measured and asserted in the tests; the original receipt is retained unchanged.</p>
+<p>Durable run directory: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T162338749893-icm-galerkin-interaction</code>. Files: <code>measurement.json</code>, <code>titan-stable-volume.log</code>, <code>galerkin-gram.npy</code>, <code>ramp-M.npy</code>, all six spectrum arrays, <code>negative-control.log</code>, <code>focused-volume.log</code>, <code>figure.log</code>, <code>spectrum-ramp.png</code>, and the suite receipts and logs named in the manifest. Dense operands and the rendered PNG remain outside git. The sole published graphic is the SVG.</p>
+<p>The lead has selected convergence-based acceptance for this formulation. The product operator, mesh and material law are unchanged by this test-and-record update. Final suite and negative-control receipts are bound to their revisions in the manifest.</p>
+</section>

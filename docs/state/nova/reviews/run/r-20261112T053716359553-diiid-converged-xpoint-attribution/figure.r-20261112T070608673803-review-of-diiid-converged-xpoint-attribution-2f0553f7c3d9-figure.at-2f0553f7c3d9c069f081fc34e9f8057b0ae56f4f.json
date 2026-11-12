@@ -2,7 +2,7 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "caption_review": "None of the four captions merely repeats a title; each names the machine and frame, the series vocabulary, and the quantities a reader needs. The frame-137 and frame-146 captions give the saved residual, convergence, the marker shapes for all three fields (blue solid/filled solved, dark dashed/hollow EFIT, grey dash-dot/hollow physical image), the governed wall, the identical gauge-free contour levels with their values in Wb, the hollow secondary-saddle convention, and both the saved and the physical-image miss in centimetres. The attribution caption defines every row term including 'response' and 'held nodes', and states that sum and observed coincide without fitting, which the plotted marks show. The profiles caption names the shared knot grid. No caption is recorded as a finding.",
-  "completed_at": "",
+  "completed_at": "2026-11-12T07:18:48.536Z",
   "dispatched_at": "2026-11-12T07:07:20Z",
   "figures_reviewed": [
     {
@@ -99,6 +99,6 @@
   ],
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-12T07:18:57.864404+00:00",
+  "timestamp": "2026-11-12T07:22:18.862721+00:00",
   "total": null
 }

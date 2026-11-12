@@ -1,0 +1,124 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_review": "All five captions (docs/evidence/fragments/diiid-vertical-force-balance/sampled-profile-core-hold.html:14,15,27,28,29) do far more than repeat a title: they name the machine and frame, the arm order, the residuals, the 21 shared flux levels with their values, and what each marker family means, including that hollow markers are unconfined roots. They are not recorded as findings. One caption clause is not matched by the picture: the three midplane captions list dark crosses among the series (\"Blue squares are head, grey circles base and dark crosses EFIT map\") without saying those crosses appear only in the left panel, which is the finding recorded against scripts/prototypes/diiid_core_hold/render.py:234.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-12T01:33:44Z",
+  "figures_reviewed": [
+    {
+      "figure": "docs/figures/sampled-profile-core-hold/frame-137-diverted-midplane.svg",
+      "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/figure-previews-5329b9ad3/frame-137-diverted-midplane.png"
+    },
+    {
+      "figure": "docs/figures/sampled-profile-core-hold/frame-137-diverted-poloidal.svg",
+      "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/figure-previews-5329b9ad3/frame-137-diverted-poloidal.png"
+    },
+    {
+      "figure": "docs/figures/sampled-profile-core-hold/frame-146-diverted-midplane.svg",
+      "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/figure-previews-5329b9ad3/frame-146-diverted-midplane.png"
+    },
+    {
+      "figure": "docs/figures/sampled-profile-core-hold/frame-146-diverted-poloidal.svg",
+      "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/figure-previews-5329b9ad3/frame-146-diverted-poloidal.png"
+    },
+    {
+      "figure": "docs/figures/sampled-profile-core-hold/mast-21978-35-midplane.svg",
+      "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/figure-previews-5329b9ad3/mast-21978-35-midplane.png"
+    }
+  ],
+  "findings": [
+    {
+      "anchor": "scripts/prototypes/diiid_core_hold/render.py:118-123",
+      "anchor_note": "the two draw_critical_points calls; the helper they reach, scripts/prototypes/diiid_xpoint_offset/render.py:29-57, marks each point once with no de-overlap, offset or leader, and the checked save of scripts/prototypes/diiid_xpoint_offset/style.py:16-35 validates text artists only, so overlapping markers pass the guard",
+      "file": "docs/figures/sampled-profile-core-hold/frame-137-diverted-poloidal.svg",
+      "id": "f4e47214101",
+      "line": null,
+      "severity": "blocking",
+      "summary": "In the base core zoom the seven in-plasma critical points are drawn on top of one another and read as two blue blobs. On this 1714x882 render the zoom axes are 326 px across a 1.525 m span (4.7 mm/px) and a 7 pt marker is about 12 px (about 56 mm), while the four maxima sit at x 668-676, y 333/351/438/454 and the three saddles at x 671-673, y 344/370/444: pairs are 7 and 11 px apart, so the top three markers (a maximum, a saddle and another maximum) merge into one mass and the lower pair merges into a second. The zoom exists precisely to separate these points and it cannot: a reader can neither count the four maxima the panel footer states nor tell a maximum from a saddle, so the base arm's headline result is stated in the text but not visible in the picture."
+    },
+    {
+      "anchor": "scripts/prototypes/diiid_core_hold/render.py:234-253",
+      "anchor_note": "the EFIT block guarded by `if i == 0`; the legend key is built unconditionally at :265",
+      "file": "scripts/prototypes/diiid_core_hold/render.py",
+      "id": "fd19c6b4a6e",
+      "line": 234,
+      "severity": "non-blocking",
+      "summary": "EFIT is plotted only under `if i == 0`, so the pressure-contribution and field-contribution panels of all three midplane figures carry no EFIT trace at all, while the figure-wide legend advertises an \"EFIT map\" key and each caption lists dark crosses as one of the three series without limiting them to the left panel. On the 1714x882 renders the two right axes contain zero near-black pixels inside their interiors, against 1826 (frame 137), 1906 (frame 146) and 2047 (MAST) in the left axes, so the absence is the drawing order and not an occluded trace. A reader of the component panels is left unable to tell whether EFIT's split agrees with the held source or whether the series is missing; qualifying the legend entry as left-panel-only, or drawing any available EFIT component in those panels, would remove the ambiguity."
+    },
+    {
+      "anchor": "scripts/prototypes/diiid_core_hold/render.py:76-91",
+      "anchor_note": "solved_style sets zorder_markers=12 and reference_style sets zorder_markers=15; the reference set is drawn second at :121-123",
+      "file": "scripts/prototypes/diiid_core_hold/render.py",
+      "id": "f1eea233d9e",
+      "line": 90,
+      "severity": "non-blocking",
+      "summary": "Where the solved and EFIT nulls nearly coincide, the reference markers are drawn at zorder 15 over the solved markers at zorder 12, so the solved marker's shape is erased rather than shown beside or beneath it. In the frame-137 head core zoom the solved maximum reads as a blue fringe under a black downward triangle, and in frame-146 the solved maximum is a blue fringe under a black plus that itself merges with an adjacent EFIT minimum square. Both colours remain visible, so the coincidence the panel is making is still conveyed, but neither marker's shape survives, so a reader cannot match the blue legend entries to what is drawn or tell a maximum from a saddle where the two codes disagree."
+    },
+    {
+      "anchor": "scripts/prototypes/diiid_core_hold/render.py:118-123",
+      "file": "docs/figures/sampled-profile-core-hold/frame-146-diverted-poloidal.svg",
+      "id": "f1d589bbd6e",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "In the base core zoom the filled saddle at (671,365) and the filled minimum at (677,363) are 6 px apart against a 12 px marker, so a blue cross and a blue circle merge into a single mark and the reader cannot tell that two critical points, of different kinds, stand there. The three maxima and the other saddles remain individually readable, so the panel's stated maximum count can still be counted and the node is not held."
+    }
+  ],
+  "notes": "RUBRIC lines emitted by this review, one per item per attached figure. Each verdict was formed from the named rendered PNG only; no SVG was opened, read, listed, searched, rendered or shown.\n\nframe-146-diverted-poloidal.png (docs/figures/sampled-profile-core-hold/frame-146-diverted-poloidal.svg)\nRUBRIC legibility: passes, except the base core zoom where the saddle at (671,365) and the minimum at (677,363) merge at 6 px against a 12 px marker; the three maxima stay countable.\nRUBRIC data_ink: passes, shared contour levels, wall, EFIT boundary and both null sets, no fills.\nRUBRIC decoration: passes, axis off, no grid, gradient, background fill or frame.\nRUBRIC contrast: passes, blue solved, dark EFIT and a #929292 wall, all legible on white.\nRUBRIC table_form: passes, paired poloidal flux maps and a core zoom, not tabular information.\nRUBRIC label_collision: passes with the one defect above; in the head core zoom the black plus is drawn over the blue triangle and itself merges with a black square, leaving only a blue fringe, so both colours are visible but no marker shape survives.\n\nframe-137-diverted-midplane.png (docs/figures/sampled-profile-core-hold/frame-137-diverted-midplane.svg)\nRUBRIC legibility: passes for the plotted series; the radial panels read at a glance, but the right two panels carry no EFIT trace at all (0 near-black pixels in those axes against 1826 in the left panel).\nRUBRIC data_ink: passes, the three traces carry the weight, no fills; the y-axis label is repeated on all three panels.\nRUBRIC decoration: passes, despined, no grid, gradient, background fill or frame.\nRUBRIC contrast: passes, near-black text on white and a #929292 base series at about 3:1 in 2.6 pt dashes with open circles.\nRUBRIC table_form: passes, continuous density against radius, not tabular information.\nRUBRIC label_collision: passes, no clipped text and zero non-white pixels on all four canvas edges.\n\nframe-137-diverted-poloidal.png (docs/figures/sampled-profile-core-hold/frame-137-diverted-poloidal.svg)\nRUBRIC legibility: fails in the base core zoom, where the seven in-plasma critical points read as two blue blobs and the four maxima the panel footer states cannot be counted; the head panel and its zoom are readable.\nRUBRIC data_ink: passes, two contour sets on shared physical levels with the wall and the dotted EFIT boundary, no fills.\nRUBRIC decoration: passes, axes off, no grid, fill, gradient or frame.\nRUBRIC contrast: passes, blue solved and #333333 EFIT dashes both clear white and the #929292 wall reads at about 3:1.\nRUBRIC table_form: passes, paired poloidal flux maps, a spatial comparison not a table.\nRUBRIC label_collision: fails, five of the seven markers fall within 7 to 11 px of each other against a 12 px marker in a 326 px zoom, so points overprint and neither count nor kind survives.\n\nframe-146-diverted-midplane.png (docs/figures/sampled-profile-core-hold/frame-146-diverted-midplane.svg)\nRUBRIC legibility: passes for the plotted series, the base double hump, the head trace and the EFIT crosses read clearly in the map panel; the component panels carry no EFIT trace (0 near-black pixels in those axes against 1906 in the map panel).\nRUBRIC data_ink: passes, the traces carry the weight and no panel is padded with decoration.\nRUBRIC decoration: passes, despined, no grid, gradient or background fill.\nRUBRIC contrast: passes, near-black text on white with the base series at about 3:1.\nRUBRIC table_form: passes, continuous density against radius.\nRUBRIC label_collision: passes, no clipped text, no content on the canvas edge, and the interleaved markers keep the coincident head and base traces separable.\n\nmast-21978-35-midplane.png (docs/figures/sampled-profile-core-hold/mast-21978-35-midplane.svg)\nRUBRIC legibility: passes, the double-humped map current and the two source humps read at a glance and the interleaved base circles and head squares show both arms coincide without one hiding the other.\nRUBRIC data_ink: passes, the traces carry the weight, despined frames, no decorative ink beyond the legend and axis labels.\nRUBRIC decoration: passes, no grid, gradient, background fill or frame.\nRUBRIC contrast: passes, near-black text on white and a base grey at about 3:1 whose open circles stay visible against the blue squares.\nRUBRIC table_form: passes, continuous density against radius.\nRUBRIC label_collision: passes, no clipped text and no content on the canvas edge.",
+  "project": "nova",
+  "review_run_id": "r-20261112T013020582959-review-of-sampled-profile-core-hold-5329b9ad31b4-figure",
+  "reviewed_base_sha": "71d06e032b73106c56386ae3a64fa30605571102",
+  "reviewed_head_sha": "5329b9ad31b4b2904953beb741df9f861dd0d12a",
+  "reviewed_run_id": "r-20261111T173111024887-sampled-profile-core-hold",
+  "rubric": "figure",
+  "rubric_verdicts": [
+    {
+      "contrast": "Passes: titles, tick labels and axis labels are near-black on white; the base series is #929292 at about 3:1, drawn 2.6 pt with open circle markers so it reads as data rather than as faint text.",
+      "data_ink": "Passes: the three traces carry the visual weight, the panels are dense with data and carry no fills; the only repeated ink is the same y-axis label on each of the three panels.",
+      "decoration": "Passes: no gridlines, no gradient, no background fill, no shading band, no frame; top and right spines are hidden and the dashes distinguish base from head.",
+      "figure": "docs/figures/sampled-profile-core-hold/frame-137-diverted-midplane.svg",
+      "label_collision": "Passes: no text is clipped and no content reaches the canvas edge (0 non-white pixels on all four edges of the 1714x882 render), and no label sits over the EFIT, head or base traces.",
+      "legibility": "Passes for the three series that are plotted: all three panels fill their axes, panel titles, 14 pt tick labels and the frameless top legend read without ambiguity, and the base peak, the head peak and the EFIT crosses can be told apart at a glance. One series the legend advertises is not there: the right two panels carry no EFIT trace at all (0 near-black pixels inside those axes on this 1714x882 render against 1826 in the left panel's axes), so a reader who looks for EFIT's pressure and field terms finds nothing.",
+      "table_form": "Passes: continuous current density against radius, with the source decomposition shown as its own panels; nothing here is tabular information drawn as a picture."
+    },
+    {
+      "contrast": "Passes: solved contours #1f6fd0-class blue and EFIT #333333 dashes both clear white, the #929292 wall reads at about 3:1, and every text artist is near-black.",
+      "data_ink": "Passes: the two contour sets are the data, drawn on shared physical levels, with the wall and the dotted EFIT boundary; no fills, no gradients, no panel furniture.",
+      "decoration": "Passes: axes are off, no background fill or shading, and the only non-data marks are the legend and the three margin notes.",
+      "figure": "docs/figures/sampled-profile-core-hold/frame-137-diverted-poloidal.svg",
+      "label_collision": "Fails: in the base core zoom the markers are drawn on top of each other. The zoom axes are 326 px across a 1.525 m span (4.7 mm/px) and a 7 pt marker is about 12 px (about 56 mm), while the four maxima sit at x 668-676, y 333/351/438/454 and the three saddles at x 671-673, y 344/370/444: pairs are 7 and 11 px apart, so five of the seven points merge into two blobs and neither their shape nor their count survives.",
+      "legibility": "Fails in the base core zoom: the seven in-plasma critical points collapse into two blue masses, so a reader cannot count the four maxima the panel's own footer states, nor tell a maximum from a saddle. The full base panel reads at a glance (wall, EFIT boundary, both contour sets, the X-points), and the head panel and its zoom are readable.",
+      "table_form": "Passes: paired poloidal flux maps at shared levels are a spatial comparison and belong in a picture, not a table."
+    },
+    {
+      "contrast": "Passes: near-black text on white, #929292 base at about 3:1 with 2.6 pt dashes and open circle markers.",
+      "data_ink": "Passes: traces carry the weight, panels are free of fills, and the only slack is the y-axis label repeated three times.",
+      "decoration": "Passes: despined, no grid, no gradient or background fill.",
+      "figure": "docs/figures/sampled-profile-core-hold/frame-146-diverted-midplane.svg",
+      "label_collision": "Passes: no clipped text, no content on the canvas edge, and the interleaved markers (base at index 0, head at 15, EFIT at 7 of every 30 samples) keep the coincident head and base traces separable on the outer flank.",
+      "legibility": "Passes for the three series that are plotted: the base double hump, the head trace and the EFIT crosses read clearly in the map panel, and the two component panels are legible on their own axes. As in frame 137, the EFIT key has no trace in the pressure and field panels (0 near-black pixels inside those axes against 1906 in the map panel).",
+      "table_form": "Passes: continuous density against radius, not tabular information."
+    },
+    {
+      "contrast": "Passes: blue solved against dark EFIT against a #929292 wall, all legible on white; margin notes near-black.",
+      "data_ink": "Passes: shared contour levels, wall, EFIT boundary and both null sets; no fills or decorative weight.",
+      "decoration": "Passes: axis off, no grid, fill, gradient or frame; legend frameless above the panels.",
+      "figure": "docs/figures/sampled-profile-core-hold/frame-146-diverted-poloidal.svg",
+      "label_collision": "Passes with the one defect noted under legibility: in the head core zoom the black plus is drawn over the blue upward triangle, and the black plus itself merges with a black square, so only a blue fringe of the solved maximum is visible; both colours remain visible and the coincidence is conveyed, so nothing is hidden, but no marker shape survives.",
+      "legibility": "Passes for the head panel and its zoom. In the base core zoom the filled saddle at (671,365) and the filled minimum at (677,363) are 6 px apart against a 12 px marker and merge into one mark; the three maxima and the remaining saddles stay individually readable, so the stated maximum count can still be counted.",
+      "table_form": "Passes: paired poloidal flux maps and a core zoom, a spatial comparison rather than a table."
+    },
+    {
+      "contrast": "Passes: near-black text on white, base grey at about 3:1 with open circle markers visible against the blue squares.",
+      "data_ink": "Passes: the traces carry the weight, the frames are despined and the only non-data ink is the legend and the three axis labels.",
+      "decoration": "Passes: despined, no grid, no gradient, no background fill or frame.",
+      "figure": "docs/figures/sampled-profile-core-hold/mast-21978-35-midplane.svg",
+      "label_collision": "Passes: no clipped text and no content on the canvas edge; the grey circles sit at different sample indices from the blue squares, so the coincident traces stay visible.",
+      "legibility": "Passes: the double-humped map current and the two source humps read at a glance; the interleaved base circles and head squares show that the two arms coincide without one hiding the other, which is the point of this row.",
+      "table_form": "Passes: continuous density against radius, not tabular information."
+    }
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:51:30.820303+00:00",
+  "total": null
+}

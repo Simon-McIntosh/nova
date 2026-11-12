@@ -663,7 +663,11 @@ def _mutual_edge_evaluator(order, kind):
     import jax
     import jax.numpy as jnp
     from nova.biot.completeelliptic import complete_kind
-    from nova.biot.greens import MU0, _filament_elliptic_combinations
+    from nova.biot.greens import (
+        MU0,
+        _filament_elliptic_combinations,
+        traced_filament_greens,
+    )
 
     nodes, weights = np.polynomial.legendre.leggauss(order)
     x, y = np.meshgrid((nodes + 1) / 2, (nodes + 1) / 2, indexing="ij")
@@ -671,11 +675,28 @@ def _mutual_edge_evaluator(order, kind):
     x, y = jnp.asarray(x.reshape(-1)), jnp.asarray(y.reshape(-1))
 
     def flux(r, z, sr, sz, gap=None):
+        """Return the total loop flux of one source/target pair.
+
+        Every pair of distinct points delegates to the owner in
+        :mod:`nova.biot.greens`. A coincident pair folds its parameter square
+        about the diagonal, where the graded nodes approach the shared point
+        until the coordinate difference underflows to zero -- and the owner
+        derives its own separation from those coordinates. That one pair type
+        supplies the exact squared separation of the folded square instead.
+        """
+        inactive = (r == 0) | (sr == 0)
+        if gap is None:
+            # The modulus is degenerate on the axis, where the loop flux is zero.
+            psi, _, _ = traced_filament_greens(
+                jnp,
+                jnp.where(inactive, 1.0, r),
+                z,
+                jnp.where(inactive, 1.0, sr),
+                sz,
+            )
+            return jnp.where(inactive, 0.0, psi)
         dz = z - sz
         span = (r + sr) ** 2 + dz**2
-        if gap is None:
-            gap = (r - sr) ** 2 + dz**2
-        inactive = (r == 0) | (sr == 0)
         span = jnp.where(inactive, 1.0, span)
         gap = jnp.where(inactive, 1.0, gap)
         complement = gap / span
@@ -713,8 +734,8 @@ def _mutual_edge_evaluator(order, kind):
     return evaluate
 
 
-def galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 24):
-    """Volume-weighted cell means from reciprocal edge-sheet mutual inductances.
+def galerkin_cell_energy(polygons, *, plan: TilePlan, order: int = 24):
+    """Return the reciprocal edge-pair energy matrix and the cell volumes.
 
     For total loop flux Phi=2*pi*r*A_phi, Green's theorem gives
     integral B dV = boundary integral Phi (dr,dz). A cell's sheet current is
@@ -723,6 +744,10 @@ def galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 24):
     Coincident and endpoint-adjacent pairs use graded Duffy quadrature; smooth
     distant pairs use Gauss quadrature. Each undirected pair is integrated once.
     Collinear partial overlaps are split before classifying the singular pairs.
+
+    The returned product is the raw contraction, before its two triangle halves
+    are averaged, so a caller can measure the reciprocity defect of the
+    assembly itself rather than of the symmetrised matrix.
     """
     if not isinstance(order, int) or order < 4:
         raise ValueError("mutual quadrature order must be an integer at least four")
@@ -783,11 +808,22 @@ def galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 24):
     bodies = [shapely.Polygon(polygon) for polygon in polygons]
     volumes = [2 * np.pi * body.area * body.centroid.x for body in bodies]
     volume = np.tile(volumes, 2)
-    # Reciprocity is assembled once per cell pair too, avoiding reduction-order skew.
-    upper = np.triu(energy)
-    energy = upper + np.triu(energy, 1).T
     if not np.isfinite(energy).all() or np.any(volume <= 0):
         raise ValueError("nonfinite mutual interaction or nonpositive cell volume")
+    return energy, volume
+
+
+def galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 24):
+    """Return the volume-weighted cell-mean interaction matrix.
+
+    This is :func:`galerkin_cell_energy` divided by the row cell volume, with the
+    two triangle halves of the energy matrix averaged so a caller sees one
+    reciprocal operator. Reciprocity is assembled once per cell pair, which
+    avoids reduction-order skew between the halves.
+    """
+    energy, volume = galerkin_cell_energy(polygons, plan=plan, order=order)
+    upper = np.triu(energy)
+    energy = upper + np.triu(energy, 1).T
     return energy / volume[:, None]
 
 

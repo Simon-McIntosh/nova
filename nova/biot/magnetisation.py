@@ -17,6 +17,7 @@ import numpy as np
 from scipy.interpolate import PchipInterpolator
 import shapely
 
+from nova.biot.sectionaverage import section_nodes
 from nova.biot.tiledassembly import (
     TilePlan,
     cell_interaction,
@@ -113,12 +114,15 @@ def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
     return _Mesh(tuple(polygons), np.asarray(centres), np.asarray(areas))
 
 
+def _galerkin_interaction(cells, plan=_PLAN):
+    """Return the volume-tested cell interaction for the meshed iron."""
+    return galerkin_cell_interaction(
+        tuple(p * _SHEET_LENGTH_SCALE for p in cells.polygons), plan=plan
+    )
+
+
 def _interaction(cells, points, plan):
-    if points is None:
-        scale = _SHEET_LENGTH_SCALE
-        return galerkin_cell_interaction(
-            tuple(p * scale for p in cells.polygons), plan=plan
-        )
+    """Return the sheet response of the meshed iron at (R, Z) targets."""
     # B/M is invariant under a common dilation of source and target coordinates.
     # A power of two preserves input bits while moving the tile's nanometre edge
     # identity grid below a picometre in the authored geometry.
@@ -133,21 +137,14 @@ def _interaction(cells, points, plan):
 
 def _average_external(cells, external_field, order=6):
     """Integrate the prescribed field with the same 2*pi*r cell-volume test."""
-    nodes, weights = np.polynomial.legendre.leggauss(order)
-    u, v = np.meshgrid((nodes + 1) / 2, (nodes + 1) / 2, indexing="ij")
-    quadrature = np.outer(weights, weights).reshape(-1) / 4
-    u, v = u.reshape(-1), v.reshape(-1)
-    points, moments, owners = [], [], []
+    points, weights, owners = [], [], []
     for cell, polygon in enumerate(cells.polygons):
-        centre = cells.centroids[cell]
-        for a, b in zip(polygon, np.roll(polygon, -1, axis=0), strict=True):
-            first, second = a - centre, b - centre
-            determinant = first[0] * second[1] - first[1] * second[0]
-            sample = centre + u[:, None] * first + ((1 - u) * v)[:, None] * second
-            points.append(sample)
-            moments.append(determinant * (1 - u) * quadrature * sample[:, 0])
-            owners.extend([cell] * len(sample))
-    points, moments = np.concatenate(points), np.concatenate(moments)
+        node, area_weight = section_nodes(polygon, order)
+        points.append(node)
+        # 2*pi*r is the volume element of the axisymmetric cell measure.
+        weights.append(2 * np.pi * node[:, 0] * area_weight)
+        owners.extend([cell] * len(node))
+    points, weights = np.concatenate(points), np.concatenate(weights)
     values = np.asarray(external_field(points), dtype=np.float64)
     if values.shape != points.shape or not np.isfinite(values).all():
         raise ValueError(
@@ -155,8 +152,8 @@ def _average_external(cells, external_field, order=6):
         )
     average = np.zeros_like(cells.centroids)
     normalisation = np.zeros(len(average))
-    np.add.at(average, owners, values * moments[:, None])
-    np.add.at(normalisation, owners, moments)
+    np.add.at(average, owners, values * weights[:, None])
+    np.add.at(normalisation, owners, weights)
     return average / normalisation[:, None]
 
 
@@ -391,9 +388,9 @@ def solve_magnetisation(
     external = _average_external(cells, external_field)
     if external.shape != cells.centroids.shape or not np.all(np.isfinite(external)):
         raise ValueError(
-            "external_field must return finite (cells, 2) field components"
+            "the averaged external field must be finite (cells, 2) components"
         )
-    gram = _interaction(cells, None, tile_plan)
+    gram = _galerkin_interaction(cells, tile_plan)
     if not np.all(np.isfinite(gram)):
         raise ValueError("the sheet interaction contains nonfinite entries")
     operands = tuple(

@@ -45,13 +45,17 @@ def main():
         assert archive.wait() == 0
         target = scratch / "nova/biot/magnetisation.py"
         source = target.read_text()
-        begin, end = (
-            source.index("    if points is None:", source.index("def _interaction")),
-            source.index("    # B/M is invariant", source.index("def _interaction")),
-        )
+        begin = source.index("def _galerkin_interaction")
+        end = source.index("def _interaction(")
         mutated = (
             source[:begin]
-            + "    if points is None:\n        points = cells.centroids\n"
+            + "def _galerkin_interaction(cells, plan=_PLAN):\n"
+            + "    return cell_interaction(\n"
+            + "        tuple(p * _SHEET_LENGTH_SCALE for p in cells.polygons),\n"
+            + "        cells.centroids[:, 0] * _SHEET_LENGTH_SCALE,\n"
+            + "        cells.centroids[:, 1] * _SHEET_LENGTH_SCALE,\n"
+            + "        plan=plan,\n"
+            + "    )\n\n\n"
             + source[end:]
         )
         assert mutated != source
@@ -84,9 +88,8 @@ def main():
                 "from pathlib import Path; import inspect; "
                 "from nova.biot import magnetisation as m; "
                 + f"assert Path(m.__file__).resolve() == "
-                f"Path({str(target)!r}).resolve(); "
-                + 'assert "points = cells.centroids" '
-                "in inspect.getsource(m._interaction); "
+                f"Path({str(target)!r}).resolve(); " + 'assert "cells.centroids[:, 0]" '
+                "in inspect.getsource(m._galerkin_interaction); "
                 'print("MUTANT_MODULE="+m.__file__+" CWD="'
                 "+str(Path.cwd().resolve()), flush=True)"
             )

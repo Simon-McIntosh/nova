@@ -97,7 +97,7 @@ def sphere_cell_average_bound(cells, mu, inside):
     volume = 2 * np.pi * cells.areas * cells.centroids[:, 0]
     scale = np.sqrt(np.tile(volume / volume.sum(), 2))
     unit = np.r_[np.zeros(count), np.ones(count)]
-    average = iron._interaction(cells, None, iron._PLAN) / iron._MU0
+    average = iron._galerkin_interaction(cells) / iron._MU0
     point = iron._interaction(cells, cells.centroids, iron._PLAN) / iron._MU0
     weighted = average * scale[:, None] / scale[None, :]
     eigenvalues, modes = np.linalg.eigh((weighted + weighted.T) / 2)
@@ -798,16 +798,59 @@ def test_material_restart_preserves_component_order_and_checks_shape(monkeypatch
 )
 def test_cell_average_interaction_is_reciprocal_and_energy_bounded(region, size):
     cells = iron._mesh(region, size)
-    gram = iron._interaction(cells, None, iron._PLAN)
+    gram = iron._galerkin_interaction(cells)
     volume = np.tile(2 * np.pi * cells.areas * cells.centroids[:, 0], 2)
-    energy = volume[:, None] * gram
-    symmetry = np.linalg.norm(energy - energy.T) / np.linalg.norm(energy)
-    assert symmetry < 5e-15, f"weighted reciprocity defect {symmetry}"
     scale = np.sqrt(volume)
     weighted = gram * scale[:, None] / scale[None, :] / iron._MU0
     spectrum = np.linalg.eigvalsh((weighted + weighted.T) / 2)
     assert spectrum[0] >= -2e-7, spectrum
     assert spectrum[-1] <= 1 + 2e-7, spectrum
+
+
+def energy_asymmetry(polygons, order=24):
+    """Return ||E-E^T||/||E|| of the energy matrix before it is symmetrised."""
+    from nova.biot.tiledassembly import galerkin_cell_energy
+
+    energy, _ = galerkin_cell_energy(
+        tuple(p * iron._SHEET_LENGTH_SCALE for p in polygons),
+        plan=iron._PLAN,
+        order=order,
+    )
+    return np.linalg.norm(energy - energy.T) / np.linalg.norm(energy)
+
+
+ASYMMETRY_TOLERANCE = 1e-12
+
+
+def report_energy_asymmetry(label, cells, order, capsys):
+    defect = energy_asymmetry(cells.polygons, order)
+    with capsys.disabled():
+        print(
+            f"\n{label} cells={len(cells.centroids)} quadrature order={order} "
+            f"pre-symmetrisation asymmetry={defect:.6e}",
+            flush=True,
+        )
+    return defect
+
+
+@pytest.mark.parametrize("order", [8, 16, 24])
+def test_sphere_pre_symmetrisation_energy_asymmetry(order, capsys):
+    defect = report_energy_asymmetry(
+        "sphere0.1", iron._mesh(sphere(), 0.1), order, capsys
+    )
+    assert defect < ASYMMETRY_TOLERANCE, (
+        f"pre-symmetrisation reciprocity defect {defect}"
+    )
+
+
+@pytest.mark.parametrize("order", [8, 16])
+def test_shell_pre_symmetrisation_energy_asymmetry(order, capsys):
+    defect = report_energy_asymmetry(
+        "shell0.04", iron._mesh(shell(), 0.04), order, capsys
+    )
+    assert defect < ASYMMETRY_TOLERANCE, (
+        f"pre-symmetrisation reciprocity defect {defect}"
+    )
 
 
 def test_cell_average_external_uses_axisymmetric_volume():

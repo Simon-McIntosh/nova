@@ -106,7 +106,7 @@ def main():
     persist()
     print("BUILD saved mesh " + str(len(seed._mesh.centroids)), flush=True)
     started = time.monotonic()
-    gram = iron._interaction(seed._mesh, None, iron._PLAN)
+    gram = iron._galerkin_interaction(seed._mesh)
     record["build_seconds"] = time.monotonic() - started
     np.save(out / "galerkin-gram.npy", gram)
     record["spectra"]["galerkin_saved"] = spectrum(
@@ -121,11 +121,11 @@ def main():
     del old
     original_mesh, original_interaction, original_external = (
         iron._mesh,
-        iron._interaction,
+        iron._galerkin_interaction,
         iron._average_external,
     )
     iron._mesh = lambda region, size: seed._mesh
-    iron._interaction = lambda cells, points, plan: gram
+    iron._galerkin_interaction = lambda cells, plan=None: gram
     iron._average_external = lambda cells, callback: callback(cells.centroids)
     current = np.zeros_like(external)
     for drive in np.linspace(0, 1, 21):
@@ -233,7 +233,7 @@ def main():
         ]
     )
     cells = iron._mesh(region, 0.08)
-    response = iron._interaction(cells, None, iron._PLAN)
+    response = iron._galerkin_interaction(cells)
     record["spectra"]["west_008"] = spectrum(response, cells, out, "west-008")
     persist()
     del response, operands, matrix

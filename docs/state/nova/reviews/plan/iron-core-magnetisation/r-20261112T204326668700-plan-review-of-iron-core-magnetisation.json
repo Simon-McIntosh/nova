@@ -49,7 +49,30 @@
   "plan_slug": "iron-core-magnetisation",
   "plan_version": 68,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ee714999c6c863232b05df0097296eab6a4b8129",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Done-when (1) no longer asks for the centroid prototype numbers: accuracy is judged by refinement (shell errors fall >= 2.5x per halving at mu_r 100 and 1000, 20 mm errors within the collocated values plus 0.5 points) and the sphere interior against its derived Galerkin bound, matching the landed acceptance.",
+      "reason": "",
+      "when": "2026-11-12T21:28:53.611014+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ee714999c6c863232b05df0097296eab6a4b8129",
+      "commit_basis": "edit",
+      "note": "Done-when (1) no longer asks for the centroid prototype numbers: accuracy is judged by refinement (shell errors fall >= 2.5x per halving at mu_r 100 and 1000, 20 mm errors within the collocated values plus 0.5 points) and the sphere interior against its derived Galerkin bound, matching the landed acceptance.",
+      "reason": "",
+      "when": "2026-11-12T21:28:53.611014+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261112T204326668700-plan-review-of-iron-core-magnetisation.json",
   "review_run_id": "r-20261112T204326668700-plan-review-of-iron-core-magnetisation",
   "reviewed_blob_sha": "e5f015739c16e573d6136c4aee1bd962fde94736",
   "rubric": "content",

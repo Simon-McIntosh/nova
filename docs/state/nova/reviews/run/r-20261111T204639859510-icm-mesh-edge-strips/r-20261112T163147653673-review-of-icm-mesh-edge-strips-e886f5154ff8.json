@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-12T16:50:54.362Z",
+  "dispatched_at": "2026-11-12T16:39:31Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-mesh-edge-strips.html",
+      "line": 48,
+      "severity": "non-blocking",
+      "text": "the sentence 'The h/4 and half-square-area markers remain in committed source' is false at the landed head, where nova/biot/magnetisation.py is restored to base with sliver=0.15 and no h/4 clearance target."
+    },
+    {
+      "file": "manifest.md",
+      "line": 15,
+      "severity": "non-blocking",
+      "text": "the tests field records a `git diff --exit-code` command rather than a suite, and baseline_suite/after_suite are empty, so the suite evidence exists only in historical logs run at 746a512, two commits before the reviewed head."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read all eight commits; product and test changes are restored in e886f5154, leaving a 52-line fragment and a 295457-byte SVG.",
+    "done_when": "the done_when asks for a manifest-guarded clearance test, the existing suite and a mutant negative control; the fragment records the numbers and a red mutant but the test is absent at head.",
+    "goal": "the \u00a74 node goal is no thin edge strips in the iron mesh with the change inside _mesh; the net diff changes no source and lands an evidence-only refutation record.",
+    "manifest": "read; it records status complete, eight commits and BASE_IDENTICAL for product and tests, with baseline_suite and after_suite left empty.",
+    "write_paths": "the declared paths are the source, the tests, the evidence fragment and the figure directory; the net diff is only the fragment and docs/figures/iron-core-magnetisation/icm-mesh-edge-strips/west-clearance.svg."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py is byte-identical to base (evidence-only-verification.log BASE_IDENTICAL), so no assertion lands that would fail if this record's claims regressed.",
+    "evidence": "docs/evidence/fragments/iron-core-magnetisation/icm-mesh-edge-strips.html:15-30 carries the WEST clearance and shell-error measurements with named logs, but the done_when's manifest-guarded test is absent at head and evidence-only-verification.log records SUITE_NOT_RUN.",
+    "fit": "docs/evidence/fragments/iron-core-magnetisation/icm-mesh-edge-strips.html follows the evidence-fragment doctype/meta/article-id convention, and the figure is a 31.1x16 cm axis-free matplotlib panel with one shared clearance scale.",
+    "goal_fidelity": "nova/biot/magnetisation.py is byte-identical to base at the reviewed head, so the \u00a74 thin-edge-strip deliverable is not implemented and the node lands a refutation record instead.",
+    "reuse": "the landed diff adds no definition to fork, and the figure uses the repository's existing matplotlib path; a search over nova/ and docs/ for an existing clearance-coloured mesh figure or edge-strip removal mechanism found only this node's own artefacts.",
+    "scope_discipline": "every path touched across 6abcdfe..e886f51 lies inside the manifest's declared write paths, and the net change is only the fragment and its figure."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the \u00a74 node goal is \"no thin edge strips in the iron mesh\" with the change inside `_mesh`; the net diff 6abcdfe..e886f51 changes no source, and the delivered record is the lead-authorized evidence-only outcome that leaves the strips in place.\nVERDICT done_when: the three clauses ask for a manifest-guarded clearance test, the existing suite, and a mutant negative control; docs/evidence/fragments/iron-core-magnetisation/icm-mesh-edge-strips.html records the WEST clearance numbers and a red mutant log, but the test does not exist at the landed head.\nVERDICT write_paths: the declared paths are nova/biot/magnetisation.py, tests/test_magnetisation.py, the evidence fragment and the figure directory; the net diff contains only the fragment and docs/figures/iron-core-magnetisation/icm-mesh-edge-strips/west-clearance.svg, both inside scope.\nVERDICT manifest: read; it records status complete, eight commits, the two net paths, and evidence-only-verification.log showing BASE_IDENTICAL for both product and tests, with baseline_suite and after_suite left empty.\nVERDICT diff: read all eight commits; the product and test changes in the first three are restored in e886f5154, so the landed diff is a 52-line evidence fragment plus a 295457-byte matplotlib SVG.\nCALL_SITES: none\nSCORE goal_fidelity: 8\nJUSTIFICATION goal_fidelity: nova/biot/magnetisation.py is byte-identical to base at the reviewed head, so the \u00a74 \"no thin edge strips\" deliverable is not implemented and the node lands a refutation record instead.\nSCORE evidence: 9\nJUSTIFICATION evidence: docs/evidence/fragments/iron-core-magnetisation/icm-mesh-edge-strips.html:15-30 carries the WEST clearance and shell-error measurements with named logs, but the done_when's manifest-guarded test is absent at head and evidence-only-verification.log records SUITE_NOT_RUN.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path touched across 6abcdfe..e886f51 lies inside the manifest's declared write paths, and the net change is only docs/evidence/fragments/iron-core-magnetisation/icm-mesh-edge-strips.html and its figure.\nSCORE durability: 4\nJUSTIFICATION durability: tests/test_magnetisation.py is byte-identical to base (evidence-only-verification.log BASE_IDENTICAL), so no assertion lands that would fail if this record's claims regressed.\nSCORE fit: 16\nJUSTIFICATION fit: docs/evidence/fragments/iron-core-magnetisation/icm-mesh-edge-strips.html follows the evidence-fragment doctype, docs-project meta and article-id convention, and docs/figures/iron-core-magnetisation/icm-mesh-edge-strips/west-clearance.svg is a 31.1x16 cm axis-free matplotlib panel with one shared clearance scale.\nSCORE reuse: 20\nJUSTIFICATION reuse: the landed diff adds no definition to fork, and the figure is produced through the repository's existing matplotlib/imas-ink path rather than a new plotting module; a search over nova/ and docs/ for an existing clearance-coloured mesh figure and any existing edge-strip removal mechanism found only this node's own artefacts.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-mesh-edge-strips.html:48 non-blocking: the sentence \"The h/4 and half-square-area markers remain in committed source\" is false at the landed head, where nova/biot/magnetisation.py is restored to base with sliver=0.15 and no h/4 clearance target; the disposition paragraph at line 5 states the restore, but this line still asserts the opposite.\nFINDING manifest.md:15 non-blocking: the tests field records a `git diff --exit-code` command rather than a suite, and baseline_suite/after_suite are empty, so the done_when suite evidence exists only in historical logs (second-baseline-suite.log, second-after-suite.log) run at 746a512, two commits before the reviewed head.\n",
+  "review_run_id": "r-20261112T163147653673-review-of-icm-mesh-edge-strips-e886f5154ff8",
+  "reviewed_base_sha": "6abcdfe84ec3df3b707ae6a2e21aed1b7da02296",
+  "reviewed_head_sha": "e886f5154ff8896eb67cfb5fc35f1859f2f0cd0b",
+  "reviewed_run_id": "r-20261111T204639859510-icm-mesh-edge-strips",
+  "scores": {
+    "durability": 4,
+    "evidence": 9,
+    "fit": 16,
+    "goal_fidelity": 8,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T17:04:45.252161+00:00",
+  "total": 76
+}

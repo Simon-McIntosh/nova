@@ -73,6 +73,18 @@ def render(run, partial=False):
         linewidth=3.0,
         zorder=4,
     )
+    rejected = [row for row in record["attempts"] if not row["converged"]]
+    if rejected:
+        axes[1, 0].plot(
+            [row["drive"] for row in rejected],
+            [row["iterations"] for row in rejected],
+            color="#b33a3a",
+            marker="x",
+            linestyle="none",
+            markersize=7,
+            label="iteration budget",
+            zorder=6,
+        )
     axes[0, 0].set_ylabel("maximum |M| [MA/m]")
     axes[1, 0].set_ylabel("Newton corrections")
     for axis in axes[:, 0]:
@@ -94,13 +106,16 @@ def render(run, partial=False):
         axis.set_ylabel(("radial M", "vertical M")[component] + " [MA/m]")
         axis.set_xticks([-2, -1.5, -1, -0.5])
     handles, labels = axes[0, 1].get_legend_handles_labels()
+    failure_handles, failure_labels = axes[1, 0].get_legend_handles_labels()
+    handles.extend(failure_handles)
+    labels.extend(failure_labels)
     fig.legend(
         handles,
         labels,
         loc="upper center",
         bbox_to_anchor=(0.5, 0.995),
         frameon=False,
-        ncol=3,
+        ncol=4 if rejected else 3,
         handlelength=3,
     )
     for axis in axes.flat:

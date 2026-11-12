@@ -17,6 +17,11 @@
       "kind": "exempted",
       "reason": "prototype diagnostic helpers; the owners are named in the review and the next node reuses decompose.py and census for its geometry read",
       "recorded_at": "2026-11-12T07:25:48.235557+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "diiid-xpoint-held-nodes",
+      "recorded_at": "2026-11-12T07:26:12.378280+00:00"
     }
   },
   "findings": [

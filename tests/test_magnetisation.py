@@ -800,3 +800,31 @@ def test_smoothness_homotopy_preserves_closed_shell(mu, cell_size, capsys):
             flush=True,
         )
     assert np.all(error < bounds[mu, cell_size])
+
+
+def test_smoothness_penalty_is_a_runtime_operand():
+    response = np.eye(6) * iron._MU0 * 0.5
+    operands = tuple(
+        jnp.asarray(value)
+        for value in (
+            response,
+            np.ones(6) * 0.01,
+            *iron._fit_law([0, 1, 10], [10, 10, 10]),
+        )
+    )
+    state = jnp.zeros(6)
+    penalty = jnp.asarray([[0.1, -0.1, 0], [-0.1, 0.3, -0.2], [0, -0.2, 0.2]])
+    factor = iron._factor(state, operands, jnp.asarray(0.0), penalty)
+    lowered = iron._update.lower(state, operands, factor, jnp.asarray(1.0), penalty)
+    hlo = lowered.compiler_ir(dialect="hlo").as_hlo_text()
+    assert "f64[3,3]{1,0} parameter(" in hlo
+    assert "f64[3,3]{1,0} constant(" not in hlo
+    expected = np.eye(6) * 0.55 + np.kron(np.eye(2), penalty)
+    jacobian = jax.jacfwd(iron._smooth_residual)(state, operands, penalty)
+    np.testing.assert_allclose(jacobian, expected, rtol=2e-15, atol=1e-15)
+    moved = (operands[0], operands[1] * jnp.arange(1, 7), *operands[2:])
+    result, residual = iron._update(state, moved, factor, jnp.asarray(1.0), penalty)
+    assert float(jnp.linalg.norm(residual)) < 1e-10
+    plain = iron._factor(state, operands)
+    unpenalised, _ = iron._update(state, moved, plain, jnp.asarray(1.0))
+    assert float(jnp.linalg.norm(result - unpenalised)) > 100

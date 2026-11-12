@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="71">
+<meta name="plan-version" content="72">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -738,7 +738,10 @@
     <div class="r-comment-body"><p>Diagnosis complete: zero matrix rebuilds, exact replay; random Jv/central-difference mismatch 3.23–3.50e-9 at 1 A/m, last-direction 3.59e-7 with inverse-step roundoff scaling; condition_inf 3.17e6→2.32e7, accurate linear solves 2.71e-13/4.57e-12, top twenty clipped cells carry 99.3711% squared residual. One extra correction at 1/512 then all 15 grades refused. Verdict conditioning/globalisation; repair owner nova/biot/magnetisation.py. Inspected figure and full cell table in docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-solve.html#icm-west-62751-solve-diagnosis; original ten-iteration mesh-pair gate remains unmet.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261112T213445657077-review-of-icm-west-62751-galerkin-pair-14b9a40a0bd1" data-who="reckon-build" data-when="2026-11-12T22:05:54.005Z">
-    <div class="r-comment-body"><p>review of r-20261112T201826132383-icm-west-62751-galerkin-pair at 14b9a40a0bd168c326a0a92df98133ec4d27f8e2 scores 17/14/20/8/13/11 and raises one blocking finding: the 0.04 m minimum symmetric eigenvalue of G/mu0 is printed 4.86860066498e-05 in the fragment where the receipt records 4.4705835785599244e-05. Four non-blocking findings: the receipt&#x27;s revision stamp names 8e5baf8c8 whose committed measure.py cannot complete the run; source_field duplicates the prototype&#x27;s source builder; the figure prints the near-probe difference at two decimals; the canvas size is declared outside save_checked.</p></div>
+    <div class="r-comment-body"><p>review of r-20261112T201826132383-icm-west-62751-galerkin-pair at 14b9a40a0bd168c326a0a92df98133ec4d27f8e2 scores 17/14/20/8/13/11 and raises one blocking finding: the 0.04 m minimum symmetric eigenvalue of G/mu0 is printed 4.86860066498e-05 in the fragment where the receipt records 4.4705835785599244e-05. Four non-blocking findings: the receipt's revision stamp names 8e5baf8c8 whose committed measure.py cannot complete the run; source_field duplicates the prototype's source builder; the figure prints the near-probe difference at two decimals; the canvas size is declared outside save_checked.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261112T222420428009-review-of-icm-galerkin-cleanup-013ead9900c9" data-who="reckon-build" data-when="2026-11-12T22:49:38.253Z">
+    <div class="r-comment-body"><p>Reviewed r-20261112T202854132114-icm-galerkin-cleanup 26c4fe159bc71f1d3b7b3315f806102d2c507091..013ead9900c985bb3e5bb2cb41b04076b0efd9d3; parsed six-dimension record stored (goal_fidelity 19, evidence 14, scope_discipline 19, durability 18, fit 18, reuse 5; total 93) with added_failure_count 0 and five non-blocking findings.</p></div>
 </div>
 </section>
 </main>

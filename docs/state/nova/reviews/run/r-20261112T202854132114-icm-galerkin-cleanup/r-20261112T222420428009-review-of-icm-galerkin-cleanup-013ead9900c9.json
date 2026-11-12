@@ -1,0 +1,64 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-12T22:49:38.253Z",
+  "dispatched_at": "2026-11-12T22:35:12Z",
+  "findings": [
+    {
+      "file": "scripts/west_iron_galerkin/negative_asymmetry.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "scripts/west_iron_galerkin/negative_asymmetry.py re-implements the mutant harness that scripts/west_iron_galerkin/negative.py:1 already owns \u2014 rev-parse, git archive of the same four paths, tar extract, in-place source mutation, identity assertion, pytest run and blob-versus-HEAD comparison are duplicated line for line rather than factored into a shared helper. It duplicates the owner rather than extending it, so one change to the extraction or the identity guard must be made twice."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-cleanup.html",
+      "line": 46,
+      "severity": "non-blocking",
+      "text": "The cell-interaction row of the parity table records a maximum relative difference of 0, and the run's parity.log header names parity-job.log as its arm log \u2014 but parity-job.log exited 1 with NameError: name 'np' is not defined before printing any PARITY line, and the PARITY record's gram_relative_frobenius field cannot be produced by the parity.py left on disk. The comparison was recomputed by an inline command whose only record is the run stream, so the headline no-behaviour-change number has no reproducible script or readable comparison log behind it."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-cleanup.html",
+      "line": 55,
+      "severity": "non-blocking",
+      "text": "The done_when requires the averaged external field on WEST's saved mesh unchanged to 1e-12, and the near-source probe differs by 0.199 relative (4.53e-7 T absolute). The fragment discloses this and reasons that a filament at r=0.05 m sits on the mesh boundary, so the integrand is not resolvable at fixed order \u2014 but the gate asserts only the uniform and smooth probes, so the clause as written is not met for one recorded input and the gate cannot fail on it."
+    },
+    {
+      "file": "tests/test_magnetisation.py",
+      "line": 837,
+      "severity": "non-blocking",
+      "text": "The pre-symmetrisation asymmetry is asserted only on the 44-cell sphere (orders 8, 16, 24) and the 228-cell shell (orders 8, 16). The brief asked for the sweep on the WEST saved mesh as well, and the fragment records that mesh at order 4 only, outside the suite. The one mesh whose proximity to the production case matters most therefore has a single unasserted sample, so a regression that only shows at higher order there would not be caught."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T202854132114-icm-galerkin-cleanup/manifest.md",
+      "line": 20,
+      "severity": "non-blocking",
+      "text": "changed_paths carries a shell redirect captured into the path: 'docs/figures/iron-core-magnetisation/icm-galerkin-interaction/spectrum-ramp 2>/dev/null' names no file that exists, and the same corruption appears in the orientation_write_paths line at line 3, which also omits docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-cleanup.html and the two icm-galerkin-cleanup figure directories. A consumer that resolves changed_paths against the tree will not find the one figure the node actually changed. The manifest also carries no structured baseline_suite or after_suite block; both arms are recorded only as prose and as logs."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to close the Galerkin interaction review findings; all eight are addressed in the diff \u2014 nova/biot/tiledassembly.py:716 splits galerkin_cell_interaction so galerkin_cell_energy:740 exposes the raw contraction, nova/biot/magnetisation.py:117 adds the named _galerkin_interaction and :124 _interaction no longer carries the points=None switch, :142 calls section_nodes, and the corrected error messages sit at :151 and :391.\nVERDICT done_when: the gate measures the done_when \u2014 baseline-arm.log records 43 passed EXIT=0 and after-arm.log 48 passed EXIT=0 at the same command for zero added failures, parity.log gives gram 0.0 / uniform 2.4e-15 / smooth 1.8e-15 against the stated 1e-12, asymmetry.log prints the defect per mesh and order, and negative-control.log shows the five asymmetry tests failing with EXIT=1 under the mutant.\nVERDICT write_paths: read the declared scope in the source brief and the manifest; every path in the diff is inside it \u2014 the eight source, script and test files and both evidence fragments are named, and the changed figure sits inside the declared docs/figures/iron-core-magnetisation/icm-galerkin-interaction directory.\nVERDICT manifest: read; it reports the six commits, the single suite command at line 21 and five logs at line 22, and its negative-control note describes the asymmetry mutant with its 5-failed red log, but it omits structured baseline_suite and after_suite blocks and carries a redirect-corrupted changed_paths entry at line 20.\nVERDICT diff: read commit by commit against base 26c4fe159 \u2014 0ca1c7d58 is the refactor, 7eab28bcd the figure and fragment correction, 0745a7e4d and 0bf1baad2 the evidence records, 3dcdf21c1 the test patch for the renamed entry point, 013ead990 the suite-arm record; eleven files, all inside the declared scope.\nCALL_SITES: nova/biot/magnetisation.py:333, nova/biot/magnetisation.py:393, scripts/west_iron_galerkin/measure.py:109, scripts/west_iron_galerkin/measure.py:236, scripts/magnetisation_high_permeability/measure.py:176, scripts/magnetisation_high_permeability/measure.py:204, scripts/west_iron_galerkin/probe.py:19, scripts/west_iron_galerkin/sphere_bound.py:19\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/biot/magnetisation.py:117 gives the volume-tested route its own name and :124 keeps _interaction for point targets, which is what finding 6 asked for, and every other finding has a landed change in the same commit.\nSCORE evidence: 14\nJUSTIFICATION evidence: after-arm.log and baseline-arm.log record the arms with a bare EXIT=0, but parity.log's numbers cannot be reproduced from the parity.py left on disk and its named arm log parity-job.log exited 1 before printing PARITY.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every changed path in the diff resolves inside the write paths declared at the source brief's scope fence, including the new scripts/west_iron_galerkin/negative_asymmetry.py inside the declared directory.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_magnetisation.py:837 and :847 fail under the mutant that mirrors one off-diagonal edge-pair quadrature, which negative-control.log records as 5 failed with EXIT=1 after asserting the imported module is the scratch copy.\nSCORE fit: 18\nJUSTIFICATION fit: the added docstrings and the _galerkin_interaction naming follow the surrounding style of nova/biot/magnetisation.py:124, and no added symbol or commit message carries a plan, sprint or ticket identifier.\nSCORE reuse: 5\nJUSTIFICATION reuse: the two owners named by the review are now called \u2014 nova/biot/tiledassembly.py:678 delegates to traced_filament_greens and nova/biot/magnetisation.py:142 to section_nodes \u2014 but the added scripts/west_iron_galerkin/negative_asymmetry.py duplicates the mutant harness scripts/west_iron_galerkin/negative.py:1 already owns instead of extending it.\nFINDING scripts/west_iron_galerkin/negative_asymmetry.py:1 non-blocking: it re-implements the rev-parse, git archive, tar extract, source mutation, identity assertion, pytest run and blob-versus-HEAD comparison that scripts/west_iron_galerkin/negative.py:1 already owns, duplicating the owner rather than extending it, so one change to the extraction or identity guard must be made twice.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-cleanup.html:46 non-blocking: the parity table's zero difference has no reproducible script or readable comparison log behind it \u2014 parity-job.log, the arm log parity.log names, exited 1 with NameError before printing PARITY, and the recorded gram_relative_frobenius field is not produced by the on-disk parity.py.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-cleanup.html:55 non-blocking: the near-source probe differs by 0.199 relative against a done_when that requires 1e-12, and the gate asserts only the uniform and smooth probes, so that clause cannot fail on the input it is recorded against.\nFINDING tests/test_magnetisation.py:837 non-blocking: the pre-symmetrisation asymmetry is asserted only on the sphere and shell meshes; the WEST saved mesh the brief also names is measured at order 4 only and outside the suite, so a higher-order regression there would not be caught.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T202854132114-icm-galerkin-cleanup/manifest.md:20 non-blocking: changed_paths carries 'docs/figures/iron-core-magnetisation/icm-galerkin-interaction/spectrum-ramp 2>/dev/null', a shell redirect captured into the path that names no file, and the manifest carries no structured baseline_suite or after_suite block.\n",
+  "review_run_id": "r-20261112T222420428009-review-of-icm-galerkin-cleanup-013ead9900c9",
+  "reviewed_base_sha": "26c4fe159bc71f1d3b7b3315f806102d2c507091",
+  "reviewed_head_sha": "013ead9900c985bb3e5bb2cb41b04076b0efd9d3",
+  "reviewed_run_id": "r-20261112T202854132114-icm-galerkin-cleanup",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T23:00:02.076385+00:00",
+  "total": 93,
+  "verdicts": {
+    "call_sites": "Production call sites read at head 013ead990: nova/biot/magnetisation.py:333 (_interaction point path) and :393 (solve_magnetisation now calls _galerkin_interaction), scripts/west_iron_galerkin/measure.py:109,124,128,236, scripts/magnetisation_high_permeability/measure.py:176,191,195,204, scripts/west_iron_galerkin/probe.py:19, scripts/west_iron_galerkin/sphere_bound.py:19,22, and the two mutant scripts that patch the entry points.",
+    "diff": "Read commit by commit against base 26c4fe159: 0ca1c7d58 is the refactor, 7eab28bcd the figure and fragment correction, 0745a7e4d and 0bf1baad2 the evidence records, 3dcdf21c1 the test patch for the renamed entry point, and 013ead990 the suite-arm record; eleven files, all inside the declared scope, no production code outside the refactor commit.",
+    "done_when": "The gate measures the done_when: baseline-arm.log (43 passed, EXIT=0) and after-arm.log (48 passed, EXIT=0) at the same command give zero added failures, parity.log gives gram 0.0 / uniform 2.4e-15 / smooth 1.8e-15 against the stated 1e-12, asymmetry.log prints the defect for sphere, shell and WEST meshes, and negative-control.log shows the five asymmetry tests failing with EXIT=1 under the mutant.",
+    "goal": "The node goal is to close the Galerkin interaction review findings; all eight are addressed in the diff \u2014 nova/biot/tiledassembly.py:716 galerkin_cell_interaction is split so galerkin_cell_energy:740 exposes the raw contraction, nova/biot/magnetisation.py:117 adds the named _galerkin_interaction and :124 _interaction no longer carries the points=None switch, :142 calls section_nodes, and the two corrected error messages sit at :151 and :391.",
+    "manifest": "Read; it reports the six commits, the single suite command at line 21, the five logs at line 22, and the negative-control note describing the asymmetry mutant and its 5-failed red log, but it omits the structured baseline_suite and after_suite blocks and carries a redirect-corrupted changed_paths entry at line 20.",
+    "write_paths": "Read the declared scope in the source brief and the manifest; every path in the diff is inside it \u2014 the eight source/script/test files and both evidence fragments are named, and the changed figure sits inside the declared docs/figures/iron-core-magnetisation/icm-galerkin-interaction directory."
+  }
+}

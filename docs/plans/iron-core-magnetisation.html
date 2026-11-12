@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="67">
+<meta name="plan-version" content="68">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -296,7 +296,14 @@
       a meshed iron region for a given external field; nothing else in the package sees the mesh
       or the law. Mesh it without slivers (quality triangles or
       merged quads; the prototype's merge rule is the floor), and fit the B-H relation as a
-      monotone law with dB/dH &gt; 0 that holds its end values outside the table. Solve
+      monotone law with dB/dH &gt; 0: fit H(B) through every table point, and beyond the last point
+      B<sub>n</sub> blend C<sup>1</sup> over a width &delta; &le; 0.02&nbsp;&mu;<sub>0</sub>M<sub>n</sub>, so that M
+      rises by at most 1&nbsp;% of M<sub>n</sub>, then hold M constant with dH/dB = 1/&mu;<sub>0</sub>. Build
+      the interaction G by Galerkin cell averaging: the 2&pi;r-volume-weighted average of each source
+      field over each target cell, so that G is symmetric in the volume inner product, its symmetric
+      spectrum lies in [0,&nbsp;1] and the Newton matrix is monotone. Do not sample at centroids,
+      which admits spurious roots and folds. Average the external field the same way, and judge
+      accuracy by refinement rather than at a fixed mesh. Solve
       F(M) = M &minus; c(|B|)B = 0 with B = B<sub>ext</sub> + G&nbsp;M by Newton on the
       differential permeability, written so that the state, operands and factor are runtime
       variables of one compiled update (the rule in <code>nova/equilibrium/AGENTS.md</code>), on the

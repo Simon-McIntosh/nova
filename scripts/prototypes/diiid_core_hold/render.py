@@ -288,7 +288,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--previews", type=Path, required=True)
     args = parser.parse_args()
-    plt.style.use("data-ink")
+    plt.style.use(Path.home() / ".config/matplotlib/stylelib/data-ink.mplstyle")
     plt.rcParams.update({"svg.fonttype": "none", "font.size": 14})
     for case in ("frame-137-diverted", "frame-146-diverted"):
         poloidal(args.input, case, args.output, args.previews)

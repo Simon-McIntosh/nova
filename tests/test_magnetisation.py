@@ -733,7 +733,7 @@ def test_smoothness_homotopy_preserves_sphere(mu, capsys):
         [0, 1, 10],
         [mu, mu, mu],
         cell_size=0.1,
-        smoothness_strength=0.01,
+        smoothness_strength=0.0001,
     )
     assert result.converged and result.smoothness_history[-1] == 0
     points = result._mesh.centroids
@@ -775,7 +775,7 @@ def test_smoothness_homotopy_preserves_closed_shell(mu, cell_size, capsys):
         [0, 1, 10],
         [mu, mu, mu],
         cell_size=cell_size,
-        smoothness_strength=0.01,
+        smoothness_strength=0.0001,
     )
     assert result.converged and result.smoothness_history[-1] == 0
     probes = np.array([[2.0, 0.0], [0.0, 2.0], [1.5, 1.5]])

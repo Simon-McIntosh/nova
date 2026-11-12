@@ -115,4 +115,75 @@
     <code>combined-measurement.json</code>,
     <code>combined-source-identity.json</code>, and
     <code>slurm-combined.log</code>. This verification adds evidence only.</p>
+  <h3 id="icm-law-saturation-tail-table-preserving">Correction: preserve the table fit and blend beyond it</h3>
+  <p id="icm-law-saturation-tail-supersession">The review rejected the endpoint
+    condition used above: forcing the vacuum slope at the last table knot
+    changes the final table interval. The earlier constant-M-at-the-last-knot
+    verdict and the interior-knot analytic controls are superseded. At the
+    pre-repair head, a two-knot table [0, 10] T with relative permeability 1000
+    gives H(5 T) = 2986.142632312447 A/m instead of
+    3978.8735772973837 A/m, a relative error of -0.24950049950047437.
+    The reproduction also produces repeated split breakpoints and nonfinite
+    coefficients when a split width rounds to zero.</p>
+  <p id="icm-law-saturation-tail-blend-definition">The repair restores the
+    original fitted endpoint slope s = 1/(mu0 mu_r,n), preserving the complete
+    pre-saturation fit on [0, B_n]. Let q = 1/mu0 and let D = H_n - H_(n-1),
+    which is positive for an admitted table. Choose delta = 2D/(s + q): the
+    tail blend gains exactly one further last-interval H increment. This is an
+    extrapolation convention, independent of the in-table fit. For
+    t = B - B_n in [0, delta], set
+    H = H_n + s t + (q - s)t²/(2 delta). The represented endpoint minus B_n
+    supplies the actual width; an unrepresentable width is refused.</p>
+  <p id="icm-law-saturation-tail-blend-proof">The blend derivative is
+    s + (q - s)t/delta. Since the admitted relative permeability is at least
+    one, 0 &lt; s &lt;= q, so this derivative stays positive and joins the
+    fitted derivative continuously at B_n. It reaches q continuously at
+    B_end = B_n + delta. Beyond that point,
+    H = H_end + q(B - B_end). The magnetisation is
+    M = M_n + (q - s)(t - t²/(2 delta)), with asymptote
+    M_infinity = M_n + (q - s)delta/2. Its derivative is
+    (q - s)(1 - t/delta) &gt;= 0 and its distance below the asymptote is
+    (q - s)(delta - t)²/(2 delta) &gt;= 0. Thus M approaches its finite
+    asymptote monotonically without overshoot, reaching it at B_end. The
+    coefficient uses this expression directly to avoid cancellation when the
+    saturated magnetisation is small or zero.</p>
+  <p id="icm-law-saturation-tail-repaired-checks">The analytic sphere and shell
+    controls again use their original two-knot constant-permeability tables.
+    A new test checks the fitted H and its derivative on 1001 points over
+    [0, 10] T at relative tolerance 1e-14 for relative permeabilities 1, 10,
+    1000 and 3000. Dedicated tests force both an unrepresentable internal
+    split and an unrepresentable tail width and require clear ValueErrors.
+    WEST and synthetic tail checks assert every knot, the derived asymptote,
+    positive derivative, monotonicity, bounded M through 100 T, and both C1
+    joins. WEST has delta = 1.2067875084912956 T and B_end =
+    7.206787508491296 T: M rises from 1.6363125595929811 MA/m at the last
+    knot to 1.8008693560016667 MA/m. Its minimum blend derivative is
+    523055.95552731317 A/(m T). The sampled in-table difference from the
+    original fit is exactly zero for WEST and the two constant-endpoint
+    cases, and at most 2.132e-16 relative for the nonlinear control.
+    The focused repair gate reports 20 passed, 11 deselected in 63.92 s.
+    A direct comparison with the original pre-saturation fit is retained in
+    the derivation receipt, rather than treating an unchanged suite as proof
+    that the in-table law is unchanged.</p>
+  <p id="icm-law-saturation-tail-high-mu-validity">The high-permeability study
+    scripts retain their two-knot [0, 10] T tables. No existing high-mu
+    shielding or refinement number needs remeasurement provided the shell
+    fields stay below 10 T: the intended linear law is restored throughout
+    that interval. The field-range-only receipt checks all 24 square-mesh
+    material/source cases and five directional annular cases, recording each
+    total cell-centroid field maximum. The final manifest records whether
+    all 29 cases satisfy this condition and their maximum; these checks do
+    not replace or revise the existing shielding and refinement numbers.</p>
+  <p id="icm-law-saturation-tail-repaired-receipts">The repair measurement uses
+    one Sirius job with a 03:00:00 allocation and no timeout wrapper. Its
+    baseline is the current pre-repair head
+    77b424b3cab3297fdfa4b70c0ec52d87fb80e15b; its after arm is the final repair
+    commit. Both use the exact scoped command printed above. The run manifest
+    carries the immutable revision, imported module, command, completed
+    summary, failure IDs and terminal EXIT receipt for each arm. It also
+    carries nonlinear-shell iteration counts, quadratic ratios and field
+    maxima from both logs, the failing endpoint-hold mutant import assertion,
+    and the comparison of the delivered source blob against HEAD. Historical
+    receipts above remain historical; the repair receipts and verdict in the
+    manifest are authoritative for this correction.</p>
 </section>

@@ -216,4 +216,51 @@
     declined finding: reverting this evidence paragraph does not change any
     assertion. The separately retained end-secant-hold mutation remains the
     negative control for the active saturation bound.</p>
+  <h3 id="icm-law-saturation-tail-rise-cap">Coordinator amendment: at most one percent additional magnetisation</h3>
+  <p id="icm-law-saturation-tail-rise-cap-authority">The coordinator ruling
+    supplied in this run on 2026-11-12 amends the acceptance criterion for
+    finding <code>f184ed8d2e7</code>: <q>Past the last knot, M may rise by at
+    most 1 % of M_n across a C1 blend, then stays constant</q>, with vacuum
+    differential slope beyond the blend. This ruling supersedes the
+    last-H-increment width and the earlier review disposition above. The
+    in-table fit remains exact. At merged baseline
+    <code>b6e42046f4c4309b89fbfa078d307f1214d7c078</code>, WEST reproduced a
+    10.056562570760792 % rise, from 1.6363125595929811 to
+    1.8008693560016667 MA/m, across 1.2067875084912956 T.</p>
+  <p id="icm-law-saturation-tail-rise-cap-derivation">For q = 1/mu0 and fitted
+    endpoint slope s, the quadratic blend adds Delta M = delta(q - s)/2.
+    Since 0 &lt; s &lt;= q, choosing delta &lt;= 0.02 mu0 M_n gives
+    Delta M &lt;= 0.01 M_n without dividing by q - s. This conservative
+    vacuum-slope bound gives WEST approximately 41.1250201296 mT, rather
+    than the 120 mT permitted by the exact bound 0.02 M_n/(q - s).
+    Its predicted asymptote is 1.6419203418389396 MA/m, a
+    0.3427085010796013 % rise. The represented blend endpoint is rounded
+    inward when necessary so its width cannot exceed the selected allowance.</p>
+  <p id="icm-law-saturation-tail-rise-cap-joins">The quadratic law and C1 joins
+    derived above are retained. Its slope rises between positive s and q;
+    M approaches the capped asymptote monotonically without overshoot and is
+    constant afterward. For s = q, M_n is zero and no slope change is needed;
+    an appended linear segment represents the same vacuum law. A near-vacuum
+    allowance that cannot form a positive represented width is refused with
+    the existing clear tail-width ValueError.</p>
+  <p id="icm-law-saturation-tail-rise-cap-checks">Implementation commit
+    <code>3fb95fc4e3ec661ee20f310b426b3d150ca7dff3</code> changes only the
+    material-fit and coefficient functions in production. Tests assert the
+    one-percent bound, the capped asymptote through 100 T, every table knot,
+    positive derivative, both continuous joins and vacuum differential slope
+    beyond the blend. Five frozen H values over the WEST final table interval
+    [5, 6] T pin its cubic independently of the continuation; the two-knot
+    constant-permeability controls remain exact at relative tolerance 1e-14.
+    Focused gates report 22 passed, 15 deselected, and 3 passed. The merged
+    nonlinear-shell assertions retain a field below the table end, exactly
+    three iterations and three zero regularisation values.</p>
+  <p id="icm-law-saturation-tail-rise-cap-receipts">The final manifest carries
+    the exact-command baseline at the merged revision above and the after arm
+    at the final evidence head, run in one Sirius allocation with a 03:00:00
+    limit and no timeout wrapper. The end-secant-hold mutant is retained.
+    A separate mutant restores the last-H-increment width and must fail the
+    WEST one-percent assertion. Imported paths, source-blob identity, original
+    table-fit comparisons and actual width refusals are retained in the run
+    receipts. Finding f184ed8d2e7 is now answered as acted under the amended
+    criterion.</p>
 </section>

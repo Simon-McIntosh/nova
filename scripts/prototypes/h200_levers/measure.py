@@ -18,7 +18,7 @@ def main():
     parser.add_argument("--revision", required=True)
     parser.add_argument(
         "--kind",
-        choices=["inputs", "read", "booking", "scalar", "stream", "lane"],
+        choices=["inputs", "read", "wall", "booking", "scalar", "stream", "lane"],
         required=True,
     )
     parser.add_argument("--width", type=int, choices=[1, 16], required=True)
@@ -27,6 +27,11 @@ def main():
     parser.add_argument("--inputs", type=Path, required=True)
     parser.add_argument("--driver", type=Path)
     parser.add_argument("--step", type=float, default=1e-5)
+    parser.add_argument("--backend", choices=["gpu", "cpu"], default="gpu")
+    parser.add_argument("--smoke", action="store_true")
+    parser.add_argument(
+        "--population", choices=["diverted", "mixed"], default="diverted"
+    )
     args = parser.parse_args()
     root = args.root.resolve()
     sys.path.insert(0, str(root))
@@ -43,8 +48,9 @@ def main():
     from scripts.prototypes.bank_warm_predictor.receipts import array_hash
 
     assert jax.config.jax_enable_x64 is True
-    assert jax.default_backend() == "gpu"
-    assert "H200" in jax.devices()[0].device_kind
+    assert jax.default_backend() == args.backend
+    if args.backend == "gpu":
+        assert "H200" in jax.devices()[0].device_kind
     assert Path(sr.__file__).resolve() == root / "nova/equilibrium/support_read.py"
     receipt = dict(
         revision=args.revision,
@@ -57,11 +63,14 @@ def main():
         width=args.width,
         complete=False,
         rows=[],
+        population=args.population,
+        smoke=args.smoke,
     )
     print("HEADER", json.dumps(receipt), flush=True)
     args.output.write_text(json.dumps(receipt, indent=2))
-    parts = machine("diverted")
-    bank, cache, roots, convention, policy, profile, rule, moments, _ = parts
+    parts = None if args.kind == "wall" else machine("diverted")
+    if parts is not None:
+        bank, cache, roots, convention, policy, profile, rule, moments, _ = parts
     if args.kind == "scalar":
         rule = replace(rule, scalar_cut_batch_width=int(args.arm))
     from tests.equilibrium.test_topology_read import _analytic_inputs
@@ -69,12 +78,27 @@ def main():
     _, _, wall, _, _ = _analytic_inputs("diverted")
     receipt["minor_radius"] = float(np.ptp(np.asarray(wall)[:, 0]) / 2)
     width = args.width
-    scales = jnp.linspace(2e-5, 6e-5, 16)[:width]
-    state = tuple(x[None] * (1 + scales[:, None]) for x in moments)
-    seeds = jnp.broadcast_to(
-        roots + 0.03 * jnp.median(bank.geometry.pitch), (width, *roots.shape)
-    )
-    previous = jnp.broadcast_to(roots, seeds.shape)
+    if args.kind == "wall":
+        from tests.test_read_wall_skip import wall_case, batch_inputs
+
+        classes = (
+            [0] * width
+            if args.population == "diverted"
+            else [i % 2 for i in range(width)]
+        )
+        if args.population == "mixed" and width == 1:
+            classes = [1]
+        bank, cache, state, seeds, previous, convention, policy = batch_inputs(
+            wall_case(550), classes
+        )
+        receipt["classes"] = classes
+    else:
+        scales = jnp.linspace(2e-5, 6e-5, 16)[:width]
+        state = tuple(x[None] * (1 + scales[:, None]) for x in moments)
+        seeds = jnp.broadcast_to(
+            roots + 0.03 * jnp.median(bank.geometry.pitch), (width, *roots.shape)
+        )
+        previous = jnp.broadcast_to(roots, seeds.shape)
     receipt["bank_sha256"] = array_hash(jax.tree.leaves((bank, cache)))
     receipt["input_sha256"] = array_hash((*state, seeds, previous))
     receipt["instrument_sha256"] = hashlib.sha256(
@@ -114,7 +138,7 @@ def main():
         program, row = compiled(name, fn, values)
         result = jax.block_until_ready(program(*values))
         samples = []
-        for _ in range(9):
+        for _ in range(1 if args.smoke else 9):
             start = perf_counter()
             result = jax.block_until_ready(program(*values))
             samples.append(1000 * (perf_counter() - start))
@@ -140,9 +164,9 @@ def main():
         arrays[label + "-span"] = np.asarray(reading.boundary_flux - reading.axis_flux)
         assert np.all(np.asarray(support.valid))
 
-    if args.kind in ("read", "scalar"):
+    if args.kind in ("read", "wall", "scalar"):
         for kind, tracked in [("full", None), ("carried", tracking)]:
-            if args.kind == "read":
+            if args.kind in ("read", "wall"):
                 fn, values = read, (bank, cache, state, seeds, previous, tracked)
             else:
 
@@ -168,7 +192,15 @@ def main():
         state, support, booked = inputs(width, parts)
         matrix = timed(
             "assembly",
-            lambda b, m, s, p: jacobians(b, m, s, p, profile, rule),
+            lambda b, m, s, p: jacobians(
+                b,
+                m,
+                s,
+                p,
+                profile,
+                rule,
+                mapping=lambda function, values: jax.vmap(function)(values),
+            ),
             (bank, state, support, booked),
         )
         arrays["matrix"] = np.asarray(matrix)
@@ -182,6 +214,8 @@ def main():
             (bank, state, support),
         )
         assert bool(jnp.all(update.converged))
+        np.testing.assert_allclose(update.factor.matrix, matrix, rtol=1e-12, atol=1e-12)
+        receipt["assembly_matches_update_factor"] = True
         geometry("input", support)
     else:
         reuse = args.kind == "stream" and args.arm == "on"
@@ -319,7 +353,7 @@ def main():
                     return result
 
                 samples = []
-                for sample in range(5):
+                for sample in range(1 if args.smoke else 5):
                     receipt["sample"] = sample
                     calls.clear()
                     recording_seconds[0] = 0.0
@@ -364,7 +398,7 @@ def main():
                 factor, valid = None, True
                 program = None
                 predictor = None
-                for index in range(1, 8):
+                for index in range(1, 3 if args.smoke else 8):
                     target = 1.0 + index * args.step
                     if index == 2:
                         predictor, _ = compiled(
@@ -401,7 +435,7 @@ def main():
                         )
                         jax.block_until_ready(program(*call))
                     samples = []
-                    for _ in range(9):
+                    for _ in range(1 if args.smoke else 9):
                         started = perf_counter()
                         predicted = (
                             state

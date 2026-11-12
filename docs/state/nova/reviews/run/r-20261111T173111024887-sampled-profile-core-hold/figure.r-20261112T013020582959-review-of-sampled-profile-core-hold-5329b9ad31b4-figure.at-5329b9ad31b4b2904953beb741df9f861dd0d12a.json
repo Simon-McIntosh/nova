@@ -26,6 +26,13 @@
       "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/figure-previews-5329b9ad3/mast-21978-35-midplane.png"
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-12T01:58:53.978659+00:00"
+    }
+  },
   "findings": [
     {
       "anchor": "scripts/prototypes/diiid_core_hold/render.py:118-123",

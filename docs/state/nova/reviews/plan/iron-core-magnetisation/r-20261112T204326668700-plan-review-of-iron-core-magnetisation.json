@@ -69,9 +69,28 @@
       "note": "Section 4 now states that it extends the section 3 tile program with a Galerkin cell-average assembly (galerkin_cell_interaction beside cell_interaction in nova/biot/tiledassembly.py, landed with icm-galerkin-interaction); the centroid program remains for evaluating the solved field at points.",
       "reason": "",
       "when": "2026-11-12T21:29:26.639566+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ee714999c6c863232b05df0097296eab6a4b8129",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Done-when (1) now asserts the tail: the in-table fit exact, the rise beyond B_n at most 1 % of M_n, M constant beyond the blend, with a secant-resuming mutant that must fail (the landed rise-cap tests and mutants).",
+      "reason": "",
+      "when": "2026-11-12T21:29:59.549185+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ee714999c6c863232b05df0097296eab6a4b8129",
+      "commit_basis": "edit",
+      "note": "Done-when (1) now asserts the tail: the in-table fit exact, the rise beyond B_n at most 1 % of M_n, M constant beyond the blend, with a secant-resuming mutant that must fail (the landed rise-cap tests and mutants).",
+      "reason": "",
+      "when": "2026-11-12T21:29:59.549185+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",

@@ -11,6 +11,13 @@
     "benchmarks/mast_centroid_solve_panels.py:778"
   ],
   "completed_at": "2026-11-12T01:48:24.240Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-12T01:58:28.487744+00:00"
+    }
+  },
   "dispatched_at": "2026-11-12T01:29:51Z",
   "finding_dispositions": {
     "0": {

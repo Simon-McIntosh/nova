@@ -132,8 +132,9 @@ def _fit_law(b_field, permeability_relative):
     derivative ramps whose areas reproduce the tabulated H increment exactly.
     Saturation adds one quadratic beyond the table, leaving its fit intact.
     Its derivative rises linearly from the fitted end slope s to q = 1/mu0.
-    One further tabulated H increment gives delta = 2*dH/(s+q). Thus M rises
-    monotonically to M_n + (q-s)*delta/2, and is constant beyond the blend.
+    Choose delta <= 0.02*mu0*M_n so the rise (q-s)*delta/2 is at most
+    one percent of M_n. M rises monotonically to that bounded asymptote.
+    When s=q no transition is needed; the appended segment remains linear.
     Return the knots, coefficients, and [origin reluctivity, asymptotic M].
     """
     b = np.asarray(b_field, dtype=np.float64)
@@ -196,7 +197,12 @@ def _fit_law(b_field, permeability_relative):
         knots.append(b[i + 1])
     vacuum = 1 / _MU0
     end_slope = slopes[-1]
-    blend_end = b[-1] + 2 * (h[-1] - h[-2]) / (end_slope + vacuum)
+    end_magnetisation = (vacuum - end_slope) * b[-1]
+    # The vacuum-slope bound avoids division by a vanishing q-s.
+    allowance = 0.02 * (_MU0 * end_magnetisation if end_magnetisation > 0 else b[-1])
+    blend_end = b[-1] + allowance
+    if blend_end - b[-1] > allowance:
+        blend_end = np.nextafter(blend_end, b[-1])
     blend_width = blend_end - b[-1]
     if not np.isfinite(blend_end) or blend_width <= 0:
         raise ValueError("B-H tail blend width is not representable")
@@ -208,7 +214,7 @@ def _fit_law(b_field, permeability_relative):
 
 
 def _coefficient(magnitude, knots, coefficients, end_values):
-    """Return M(B)/B, blending to constant M strictly beyond the last table knot."""
+    """Return M(B)/B with a C1 tail rising by at most one percent of last-knot M."""
     index = jnp.clip(
         jnp.searchsorted(knots, magnitude, side="right") - 1, 0, knots.size - 2
     )

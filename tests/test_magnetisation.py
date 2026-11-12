@@ -382,6 +382,25 @@ def test_west_cea_material_interpolation(west_material):
     assert len(knots) > len(b)
 
 
+def test_west_cea_last_table_interval_matches_reference(west_material):
+    """Pin the final table cubic independently of the saturation continuation."""
+    knots, coefficients, _ = iron._fit_law(
+        west_material.b_field, west_material.permeability_relative
+    )
+    np.testing.assert_array_equal(knots[(knots >= 5) & (knots <= 6)], [5, 6])
+    np.testing.assert_allclose(
+        PPoly(coefficients, knots)(np.linspace(5, 6, 5)),
+        [
+            2342561.5433828533,
+            2554288.785523162,
+            2774538.441967889,
+            2977743.1965653542,
+            3138335.7331638793,
+        ],
+        rtol=1e-14,
+    )
+
+
 def assert_saturated_material(b, mu):
     """Pin the tail-only blend, its bound and its joins to the exact table."""
     b, mu = np.asarray(b, dtype=float), np.asarray(mu, dtype=float)
@@ -390,10 +409,16 @@ def assert_saturated_material(b, mu):
     vacuum = 1 / iron._MU0
     end_slope = vacuum / mu[-1]
     h = b / (iron._MU0 * mu)
-    expected_width = 2 * (h[-1] - h[-2]) / (end_slope + vacuum)
+    last_magnetisation = (vacuum - end_slope) * b[-1]
+    expected_width = 0.02 * (
+        iron._MU0 * last_magnetisation if last_magnetisation > 0 else b[-1]
+    )
     width = knots[-1] - b[-1]
-    assert width == pytest.approx(expected_width, rel=2e-12)
     expected = (vacuum - end_slope) * (b[-1] + width / 2)
+    assert expected <= 1.01 * last_magnetisation
+    assert ends[1] <= 1.01 * last_magnetisation
+    assert width <= expected_width
+    assert width == pytest.approx(expected_width, rel=2e-12)
     sample = jnp.asarray(
         np.r_[np.linspace(b[-1], knots[-1], 257), np.linspace(knots[-1], 100, 257)]
     )
@@ -405,6 +430,9 @@ def assert_saturated_material(b, mu):
         1, expected
     )
     assert float(magnetisation.max()) <= expected * (1 + 4e-15) + 1e-9
+    assert float(magnetisation.max()) <= (
+        1.01 * last_magnetisation * (1 + 4e-15) + 1e-9
+    )
     np.testing.assert_allclose(magnetisation[257:], expected, rtol=3e-15, atol=1e-9)
 
     def field_strength(field):
@@ -425,9 +453,12 @@ def assert_saturated_material(b, mu):
     polynomial = PPoly(coefficients, knots)
     assert polynomial.derivative()(b[-1]) == pytest.approx(end_slope, rel=1e-13)
     assert polynomial.derivative()(knots[-1]) == pytest.approx(vacuum, rel=1e-13)
+    rise_fraction = expected / last_magnetisation - 1 if last_magnetisation else 0
     print(
         f"saturation B_table={b[-1]:g} T, blend_width={width:.12g} T, "
-        f"M_asymptote={expected:.12g} A/m, min_dH_dB={slopes.min():.12g}"
+        f"M_asymptote={expected:.12g} A/m, "
+        f"rise_fraction={rise_fraction:.12g}, "
+        f"min_dH_dB={slopes.min():.12g}"
     )
 
 
@@ -468,9 +499,9 @@ def test_material_refuses_unrepresentable_split_width():
 
 
 def test_material_refuses_unrepresentable_tail_width():
-    b = [0.0, 1.0, np.nextafter(1.0, np.inf)]
+    mu = np.nextafter(1.0, np.inf)
     with pytest.raises(ValueError, match="tail blend width is not representable"):
-        iron._fit_law(b, [1000.0] * 3)
+        iron._fit_law([0.0, 1.0], [mu, mu])
 
 
 @pytest.mark.parametrize(

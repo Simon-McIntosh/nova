@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="69">
+<meta name="plan-version" content="70">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -320,16 +320,30 @@
       flat &mu;<sub>r</sub> = 215 (14&nbsp;% against 8&nbsp;% of the air-core field in the prototype).
     </p>
     <p>
-      Done when (1) the uniform-field sphere and the closed shell, run through the production
-      path, match the §1 prototype numbers to within their reported precision; (2) WEST 62751
-      converges in at most ten Newton iterations with every &mu;<sub>r</sub> inside the table, and a
-      frozen-permeability Picard run on the same case is recorded as failing to converge (the
-      negative control for choosing Newton); (3) the iron read extends
+      This extends the §3 tile program with a Galerkin cell-average assembly
+      (<code>galerkin_cell_interaction</code> beside <code>cell_interaction</code> in
+      <code>nova/biot/tiledassembly.py</code>); the centroid program remains for evaluating the
+      solved field at points.
+      Done when (1) the law and the operator hold their contracts: the law tests assert the fit
+      exact at every table point, a rise beyond B<sub>n</sub> of at most 1&nbsp;% of M<sub>n</sub> and M
+      constant beyond the blend, and a secant-resuming mutant fails them; G is symmetric in the
+      volume inner product with the symmetric spectrum of G/&mu;<sub>0</sub> inside [0,&nbsp;1] on WEST and
+      on the analytic meshes, and a centroid-sampling mutant fails that test; the closed-shell
+      errors at &mu;<sub>r</sub> 100 and 1000 fall at least 2.5&times; from 40 to 20&nbsp;mm, with the 20&nbsp;mm
+      errors within the collocated values plus 0.5 percentage points, and the sphere interior
+      stays within its derived discretisation bound; (2) WEST 62751 converges from M = 0 at
+      0.08 and 0.04&nbsp;m in at most ten Newton iterations, or by a drive ramp of at most ten per
+      step, with every &mu;<sub>r</sub> inside the table; starts from different initial states reach
+      one root; and a frozen-permeability Picard run on the same case is recorded as failing to
+      converge (the negative control for choosing Newton); (3) the iron read extends
       <code>nova/imas/machine.py</code> and both script readers
       (<code>scripts/prototypes/iron_magnetisation/west.py</code>,
       <code>scripts/west_stray_field/solve.py</code>) call it, with no third iron reader in the
-      tree, and the receipt states the mesh, the iteration record and the converged permeability
-      range.
+      tree. The receipt, <code>docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html</code>
+      with large files under
+      <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/</code>,
+      states the mesh pair, the iteration record, the converged permeability range and the
+      far field with its mesh-pair error bar.
     </p>
 
     <h2 id="s5">§5 — Accuracy for thin high-permeability parts</h2>

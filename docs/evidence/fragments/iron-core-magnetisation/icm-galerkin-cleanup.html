@@ -99,7 +99,28 @@
     <code>EXIT=1</code>) and the product source blob matches HEAD, so the test
     reports an assembly defect rather than restating a symmetry the assembly
     already imposed.</p>
-    <p>Durable log: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T202854132114-icm-galerkin-cleanup/negative-control.log</code>.</p>
+    <h3 id="icm-galerkin-cleanup-suite">Suite arms</h3>
+    <p>Both arms run the same command in one sirius job each, from a tree extracted
+    with <code>git archive</code> so the imported module is the revision under
+    test rather than the checkout: <code>PYTHONPATH=. JAX_PLATFORMS=cpu
+    /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider
+    -q tests/test_magnetisation.py</code>. The baseline arm at
+    <code>26c4fe159</code> passes 43 tests in 1473.67 s; the head arm at
+    <code>48 passed in 2135.32s (0:35:35)</code>, exit 0. The five extra tests
+    are the pre-symmetrisation asymmetry cases. <strong>Added failures: zero.</strong></p>
+    <p>The first head arm reported 2 failed and 46 passed, and the failure was
+    real: two solve tests replaced <code>_interaction</code> with a fixed
+    response so the Newton iteration could be driven on a known operator, and
+    the rename left those patches reaching nothing, so both ran a real solve.
+    The arm is retained as <code>after-arm-stale-patch.log</code>. Both now patch
+    <code>_galerkin_interaction</code>, and the rerun above is the head arm of
+    record.</p>
+    <p>Durable logs, all under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T202854132114-icm-galerkin-cleanup</code>:
+    <code>baseline-arm.log</code>, <code>after-arm.log</code>,
+    <code>after-arm-stale-patch.log</code>, <code>parity.log</code>,
+    <code>parity-job.log</code>, <code>asymmetry.log</code>,
+    <code>negative-control.log</code>.</p>
 
     <h3 id="icm-galerkin-cleanup-records">Corrected records</h3>
     <p>The guard-refusal paragraph of

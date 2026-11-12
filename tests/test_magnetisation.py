@@ -778,7 +778,7 @@ def test_smoothness_homotopy_preserves_closed_shell(mu, cell_size, capsys):
         smoothness_strength=0.0001,
     )
     assert result.converged and result.smoothness_history[-1] == 0
-    probes = np.array([[2.0, 0.0], [0.0, 2.0], [1.5, 1.5]])
+    probes = np.array([[2.0, 0.0], [0.0, 2.0], [3.0, 1.0]])
     reference = loop(probes)
     shielding = np.linalg.norm(reference, axis=1) / np.linalg.norm(
         reference + result.field(probes), axis=1

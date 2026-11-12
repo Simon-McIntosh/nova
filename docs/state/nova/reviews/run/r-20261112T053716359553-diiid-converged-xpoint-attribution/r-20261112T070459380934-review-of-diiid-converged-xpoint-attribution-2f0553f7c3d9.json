@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-12T07:19:49.563Z",
+  "dispatched_at": "2026-11-12T07:05:55Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_xpoint_attribution/attribute.py",
+      "id": "fd5accdec23",
+      "line": "80",
+      "severity": "non-blocking",
+      "text": "non-blocking: fit_conductors duplicates the gauge-eliminated, column-scaled SVD conductor-current recovery owned by benchmarks/diiid_boundary_current_recovery.py:276 recover_currents, so the two fits can drift; it should extend or wrap that owner."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_attribution/attribute.py",
+      "id": "f25e292bf6a",
+      "line": "23",
+      "severity": "non-blocking",
+      "text": "non-blocking: field and plasma_mask (:269) duplicate spline and polygon_mask at scripts/prototypes/diiid_xpoint_offset/decompose.py:32 and :40, and saddle (:35) re-implements the stationary-point refinement owned by scripts/diiid_map_fidelity/measure.py polish and scripts/prototypes/diiid_axis_identification/census.py _critical_points, which decompose.py already uses as the null owner."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_attribution/attribute.py",
+      "id": "feff059270f",
+      "line": "148",
+      "severity": "non-blocking",
+      "text": "non-blocking: no test exercises split_operator or the physical-image saddle read, so the shadow-mask handling and the 6.033175 to 2.429106 cm headline have no asserting test and a regression there leaves the suite green."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read all six commits against bb24db5f6; 11 files and 26304 insertions, of which 5902 lines are the four SVG panels and the remainder is five prototype modules, one test module and the evidence fragment.",
+    "done_when": "the done_when asks for a per-input attribution table, a named dominant term, one recommendation with file:line and predicted residual, the fragment and panels, and a synthetic coil/profile test pair with a red control; the manifest records 8 passed EXIT=0 and final-negative-control.log records 2 failed, 6 passed, EXIT=1, and the fragment reports the 2.42911 cm residual.",
+    "goal": "the node goal is to attribute the remaining lower-X offset on the saved converged 137D and 146D states and name one file:line input fix; scripts/prototypes/diiid_xpoint_attribution/attribute.py:57 builds the per-input attribution, sensitivity.py:25 integrates the 4.50682 cm held-node share, and the fragment's recommendation cites nova/equilibrium/forward_operator.py:2966, all with zero forward solves.",
+    "manifest": "read; status complete, six commits efec5147..2f0553f7, baseline recorded as absent at exit 4, head as 8 passed EXIT=0, zero added failures, negative control and its mutant copy named.",
+    "write_paths": "the declared scope is scripts/prototypes/diiid_xpoint_attribution/, tests/test_xpoint_attribution.py, the fragment and docs/figures/diiid-converged-xpoint-attribution/; every one of the 11 files in git diff --stat bb24db5f6..2f0553f7c lies inside them, and nova/ and benchmarks/ are untouched."
+  },
+  "justifications": {
+    "durability": "tests/test_xpoint_attribution.py:38 and :58 redden when attribute.py:63 replaces the Hessian displacement with zeros (final-negative-control.log, 2 failed), but attribute.py:148 split_operator and the physical-image saddle read have no asserting test.",
+    "evidence": "final-focused-tests.log and final-negative-control.log carry revision headers and bare EXIT=0 and EXIT=1, result-137.json records unshadowed closure 3.63e-11 Wb and physical-image distance 2.429106 cm, and the live-node closure guard at attribute.py:130 is made to refuse by the test at tests/test_xpoint_attribution.py:120.",
+    "fit": "the modules follow the prototype idiom of scripts/prototypes/diiid_xpoint_offset/decompose.py:32 and carry mechanism names only, with no plan label or author attribution, though attribute.py:118 leaves a reference parameter it never reads.",
+    "goal_fidelity": "sensitivity.py:25 puts 4.50682 cm of the 6.03143 cm 137D vertical offset on the held shadow-node term, attribute.py:57 quantifies the other four inputs, and the fragment names forward_operator.py:2966 as the input fix with a 2.42911 cm predicted residual.",
+    "reuse": "attribute.py:80 re-implements recover_currents at benchmarks/diiid_boundary_current_recovery.py:276 and attribute.py:23 and :269 re-implement decompose.py:32 and :40, so the added definitions duplicate capabilities the repository already owns instead of extending their owners.",
+    "scope_discipline": "git diff --stat bb24db5f6..2f0553f7c lists 11 files and every path is inside the four declared prefixes, with the product change at nova/equilibrium/forward_operator.py left unimplemented."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to attribute the remaining lower-X offset on the saved converged 137D and 146D states and name one file:line input fix; scripts/prototypes/diiid_xpoint_attribution/attribute.py:57 builds the per-input attribution, sensitivity.py:25 integrates the 4.50682 cm held-node share, and the fragment's recommendation cites nova/equilibrium/forward_operator.py:2966, all with zero forward solves.\nVERDICT done_when: the done_when asks for a per-input attribution table, a named dominant term, one recommendation with file:line and predicted residual, the fragment and panels, and a synthetic coil/profile test pair with a red control; the manifest records 8 passed EXIT=0 and final-negative-control.log records 2 failed, 6 passed, EXIT=1, and the fragment reports the 2.42911 cm residual.\nVERDICT write_paths: the declared scope is scripts/prototypes/diiid_xpoint_attribution/, tests/test_xpoint_attribution.py, the fragment and docs/figures/diiid-converged-xpoint-attribution/; every one of the 11 files in git diff --stat bb24db5f6..2f0553f7c lies inside them, and nova/ and benchmarks/ are untouched.\nVERDICT manifest: read; status complete, six commits efec5147..2f0553f7, baseline recorded as absent at exit 4, head as 8 passed EXIT=0, zero added failures, negative control and its mutant copy named.\nVERDICT diff: read all six commits against bb24db5f6; 11 files and 26304 insertions, of which 5902 lines are the four SVG panels and the remainder is five prototype modules, one test module and the evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: sensitivity.py:25 puts 4.50682 cm of the 6.03143 cm 137D vertical offset on the held shadow-node term, attribute.py:57 quantifies the other four inputs, and the fragment names forward_operator.py:2966 as the input fix with a 2.42911 cm predicted residual.\nSCORE evidence: 18\nJUSTIFICATION evidence: final-focused-tests.log and final-negative-control.log carry revision headers and bare EXIT=0 and EXIT=1, result-137.json records unshadowed closure 3.63e-11 Wb and physical-image distance 2.429106 cm, and the live-node closure guard at attribute.py:130 is made to refuse by the test at tests/test_xpoint_attribution.py:120.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat bb24db5f6..2f0553f7c lists 11 files and every path is inside the four declared prefixes, with the product change at nova/equilibrium/forward_operator.py left unimplemented.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_xpoint_attribution.py:38 and :58 redden when attribute.py:63 replaces the Hessian displacement with zeros (final-negative-control.log, 2 failed), but attribute.py:148 split_operator and the physical-image saddle read have no asserting test.\nSCORE fit: 17\nJUSTIFICATION fit: the modules follow the prototype idiom of scripts/prototypes/diiid_xpoint_offset/decompose.py:32 and carry mechanism names only, with no plan label or author attribution, though attribute.py:118 leaves a reference parameter it never reads.\nSCORE reuse: 5\nJUSTIFICATION reuse: attribute.py:80 re-implements recover_currents at benchmarks/diiid_boundary_current_recovery.py:276 and attribute.py:23 and :269 re-implement decompose.py:32 and :40, so the added definitions duplicate capabilities the repository already owns instead of extending their owners.\nFINDING scripts/prototypes/diiid_xpoint_attribution/attribute.py:80 non-blocking: fit_conductors duplicates the gauge-eliminated, column-scaled SVD conductor-current recovery owned by benchmarks/diiid_boundary_current_recovery.py:276 recover_currents, so the two fits can drift; it should extend or wrap that owner.\nFINDING scripts/prototypes/diiid_xpoint_attribution/attribute.py:23 non-blocking: field and plasma_mask (:269) duplicate spline and polygon_mask at scripts/prototypes/diiid_xpoint_offset/decompose.py:32 and :40, and saddle (:35) re-implements the stationary-point refinement owned by scripts/diiid_map_fidelity/measure.py polish and scripts/prototypes/diiid_axis_identification/census.py _critical_points, which decompose.py already uses as the null owner.\nFINDING scripts/prototypes/diiid_xpoint_attribution/attribute.py:148 non-blocking: no test exercises split_operator or the physical-image saddle read, so the shadow-mask handling and the 6.033175 to 2.429106 cm headline have no asserting test and a regression there leaves the suite green.\n",
+  "review_run_id": "r-20261112T070459380934-review-of-diiid-converged-xpoint-attribution-2f0553f7c3d9",
+  "reviewed_base_sha": "bb24db5f63759c900802d2f9fd971ab16b9f6282",
+  "reviewed_head_sha": "2f0553f7c3d9c069f081fc34e9f8057b0ae56f4f",
+  "reviewed_run_id": "r-20261112T053716359553-diiid-converged-xpoint-attribution",
+  "reviewer_run_id": [
+    "r-20261112T070459380934-review-of-diiid-converged-xpoint-attribution-2f0553f7c3d9"
+  ],
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T07:17:52.406968+00:00",
+  "total": 94
+}

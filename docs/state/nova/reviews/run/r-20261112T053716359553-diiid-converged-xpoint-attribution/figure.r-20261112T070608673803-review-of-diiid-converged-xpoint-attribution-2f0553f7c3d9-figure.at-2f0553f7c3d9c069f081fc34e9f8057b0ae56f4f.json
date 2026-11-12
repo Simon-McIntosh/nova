@@ -1,0 +1,104 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_review": "None of the four captions merely repeats a title; each names the machine and frame, the series vocabulary, and the quantities a reader needs. The frame-137 and frame-146 captions give the saved residual, convergence, the marker shapes for all three fields (blue solid/filled solved, dark dashed/hollow EFIT, grey dash-dot/hollow physical image), the governed wall, the identical gauge-free contour levels with their values in Wb, the hollow secondary-saddle convention, and both the saved and the physical-image miss in centimetres. The attribution caption defines every row term including 'response' and 'held nodes', and states that sum and observed coincide without fitting, which the plotted marks show. The profiles caption names the shared knot grid. No caption is recorded as a finding.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-12T07:07:20Z",
+  "figures_reviewed": [
+    {
+      "figure": "docs/figures/diiid-converged-xpoint-attribution/attribution.svg",
+      "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/figure-previews-2f0553f7c/attribution.png"
+    },
+    {
+      "figure": "docs/figures/diiid-converged-xpoint-attribution/frame-137-xpoint.svg",
+      "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/figure-previews-2f0553f7c/frame-137-xpoint.png"
+    },
+    {
+      "figure": "docs/figures/diiid-converged-xpoint-attribution/frame-146-xpoint.svg",
+      "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/figure-previews-2f0553f7c/frame-146-xpoint.png"
+    },
+    {
+      "figure": "docs/figures/diiid-converged-xpoint-attribution/profiles.svg",
+      "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T053716359553-diiid-converged-xpoint-attribution/figure-previews-2f0553f7c/profiles.png"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_xpoint_attribution/render.py",
+      "id": "fcb1bac0b8f",
+      "line": 255,
+      "severity": "non-blocking",
+      "summary": "In profiles.png the hollow grey 'prescribed knots' circles are drawn above both traces (zorder 6, markersize 6) at the same normalized-flux abscissae as the 4 pt solved triangles, so in the two FF' panels no solved triangle is visible at any knot: the blue trace reads as a bare line with grey circles sitting on it, while the legend advertises a triangle for that series. Both series remain separable by line style and the FF' disagreement is still visible, so nothing is concealed; the cost is that the fixed legend marker for 'solved extraction' does not appear in two of the four panels."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_attribution/render.py",
+      "id": "fca207ffaa8",
+      "line": 199,
+      "severity": "non-blocking",
+      "summary": "Within each frame figure the same grey carries two different series: the governed wall (line 166, solid 1.5 pt) and the physical-image field (dash-dot 2.6 pt with hollow diamonds). In the lower-X zoom both appear as nearby grey strokes, and the right-hand wall fragment is a plain grey polyline that a reader scanning the panel can take for the physical-image field before checking the dash pattern. The two do have separate legend entries and different line styles, so the picture is readable; the defect is that colour no longer names one component within the figure."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_attribution/render.py",
+      "id": "fa20482a549",
+      "line": 217,
+      "severity": "non-blocking",
+      "summary": "The strip under each frame panel renders the Python boolean directly, so the reader sees 'converged True' rather than 'converged: yes' or 'converged, residual 8.98e-12'. It reads as program output on an otherwise presentational figure, though the meaning is unambiguous."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_attribution/render.py",
+      "id": "fd161807810",
+      "line": 167,
+      "severity": "non-blocking",
+      "summary": "The lower-X zooms are drawn at the same on-page width as the full poloidal panel while covering a window about 4.2 times smaller (a 0.36 m box against the full panel's 1.5 m range), and the window extent is stated nowhere: axes are off and the caption says only 'lower-X zoom'. The wall fragment at the right edge is the only geometric scale clue inside the zoom, so a reader comparing the two panels can over-read the size of the features in the zoom. The caption's miss in centimetres is what actually fixes the scale."
+    }
+  ],
+  "notes": "RUBRIC lines emitted by this review, one per item per attached figure. Every verdict was formed from the named rendered PNG only; no SVG was opened, read, listed, searched, rendered or shown. No figure, caption or script was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only files written are this record at the two declared review-record paths.\n\nattribution.png (docs/figures/diiid-converged-xpoint-attribution/attribution.svg)\nRUBRIC legibility: passes; seven input rows against two displacement panels read at a glance, 137D blue circles separate from 146D grey triangles, and the 'sum' and 'observed' marks visibly coincide in both panels as the caption states.\nRUBRIC data_ink: passes; the mark positions carry the weight; the only non-data ink is the dotted zero rule, the frameless legend and two axis labels.\nRUBRIC decoration: passes; despined both panels, no gridlines, no gradient, no background fill, no frame.\nRUBRIC contrast: passes; all text near-black on white, blue and grey marks clear white comfortably.\nRUBRIC table_form: passes; a signed contribution chart is what the section is about, and the exact values sit in the fragment text beside it.\nRUBRIC label_collision: passes; 0 non-white pixels on all four edges of the 1714x882 render, and no label overlaps another or a mark.\n\nframe-137-xpoint.png (docs/figures/diiid-converged-xpoint-attribution/frame-137-xpoint.svg)\nRUBRIC legibility: passes; the full poloidal view shows the held equilibrium against EFIT and the lower-left zoom shows three separatrices and three X-points clearly; the large separation between the blue solved saddle and the dark EFIT saddle is unmistakable.\nRUBRIC data_ink: passes; contours, wall and null markers are the ink, with axes off and no panel furniture.\nRUBRIC decoration: passes; axes off in both panels, no grid, no fill, no frame, no gradient.\nRUBRIC contrast: passes; blue solved, near-black EFIT and grey wall/physical image all read on white; every text artist is near-black.\nRUBRIC table_form: passes; a spatial flux and separatrix comparison no table could carry.\nRUBRIC label_collision: passes; nothing clipped and nothing on a canvas edge, and the filled solved star, hollow EFIT plus and hollow diamond render distinctly without overprinting.\n\nframe-146-xpoint.png (docs/figures/diiid-converged-xpoint-attribution/frame-146-xpoint.svg)\nRUBRIC legibility: passes; the zoom shows the solved and EFIT saddles much closer than in 137D, matching the caption's smaller miss, with all marker shapes and line styles distinguishable.\nRUBRIC data_ink: passes; contours, wall and nulls only.\nRUBRIC decoration: passes; axes off, no grid, no fill, no frame.\nRUBRIC contrast: passes; all marks and text legible on white.\nRUBRIC table_form: passes; spatial comparison.\nRUBRIC label_collision: passes; nothing clipped, nothing on a canvas edge, no marker overprint.\n\nprofiles.png (docs/figures/diiid-converged-xpoint-attribution/profiles.svg)\nRUBRIC legibility: passes; four panels read at a glance against the same normalized flux; the solved p' oscillation in both frames and the near-coincident FF' curves are clear, and both axes carry named units.\nRUBRIC data_ink: passes; the traces carry the weight, with despined panels and no furniture.\nRUBRIC decoration: passes; no grid, no gradient, no fill, no frame in any panel.\nRUBRIC contrast: passes; blue solved, near-black EFIT and grey knot circles all legible on white.\nRUBRIC table_form: passes; continuous profiles against normalized flux.\nRUBRIC label_collision: passes; no text overlaps and nothing reaches a canvas edge; the only marker occlusion is the knot circle over the solved triangle, recorded as a finding rather than as a label collision.\n\nNo suite was run for this review, so added_failure_count is 0 with an empty id list by construction.",
+  "project": "nova",
+  "review_run_id": "r-20261112T070608673803-review-of-diiid-converged-xpoint-attribution-2f0553f7c3d9-figure",
+  "reviewed_base_sha": "bb24db5f63759c900802d2f9fd971ab16b9f6282",
+  "reviewed_head_sha": "2f0553f7c3d9c069f081fc34e9f8057b0ae56f4f",
+  "reviewed_run_id": "r-20261112T053716359553-diiid-converged-xpoint-attribution",
+  "rubric": "figure",
+  "rubric_verdicts": [
+    {
+      "contrast": "Passes: all text near-black on white; 137D blue and 146D grey marks clear white comfortably.",
+      "data_ink": "Passes: the mark positions carry the weight; the only non-data ink is the dotted zero rule, the frameless legend and two axis labels.",
+      "decoration": "Passes: despined both panels, no gridlines, no gradient, no background fill, no frame.",
+      "figure": "docs/figures/diiid-converged-xpoint-attribution/attribution.svg",
+      "label_collision": "Passes: 0 non-white pixels on all four edges of the 1714x882 render; no label overlaps another or a mark.",
+      "legibility": "Passes: seven input rows against two displacement panels read at a glance, 137D circles separate from 146D triangles, and 'sum' and 'observed' visibly coincide in both panels.",
+      "table_form": "Passes: a signed contribution chart, with the exact values in the fragment text beside it."
+    },
+    {
+      "contrast": "Passes: blue solved, near-black EFIT and grey wall/physical image all read on white; every text artist is near-black.",
+      "data_ink": "Passes: contours, wall and nulls are the ink, with axes off and no panel furniture.",
+      "decoration": "Passes: axes off in both panels, no grid, no fill, no frame, no gradient.",
+      "figure": "docs/figures/diiid-converged-xpoint-attribution/frame-137-xpoint.svg",
+      "label_collision": "Passes: nothing clipped and nothing on a canvas edge; the filled solved star, hollow EFIT plus and hollow diamond render distinctly without overprinting.",
+      "legibility": "Passes: the full poloidal view shows the held equilibrium against EFIT, and the lower-X zoom shows three separatrices and three X-points; the large solved-to-EFIT saddle separation is unmistakable.",
+      "table_form": "Passes: a spatial flux and separatrix comparison."
+    },
+    {
+      "contrast": "Passes: all marks and text legible on white.",
+      "data_ink": "Passes: contours, wall and nulls only.",
+      "decoration": "Passes: axes off, no grid, no fill, no frame.",
+      "figure": "docs/figures/diiid-converged-xpoint-attribution/frame-146-xpoint.svg",
+      "label_collision": "Passes: nothing clipped, nothing on a canvas edge, no marker overprint.",
+      "legibility": "Passes: the zoom shows the solved and EFIT saddles much closer than in 137D, matching the caption's smaller miss, with every marker shape and line style distinguishable.",
+      "table_form": "Passes: a spatial comparison."
+    },
+    {
+      "contrast": "Passes: blue solved, near-black EFIT and grey knot circles all legible on white.",
+      "data_ink": "Passes: the traces carry the weight, with despined panels and no furniture.",
+      "decoration": "Passes: no grid, no gradient, no fill and no frame in any panel.",
+      "figure": "docs/figures/diiid-converged-xpoint-attribution/profiles.svg",
+      "label_collision": "Passes: no text overlaps and nothing reaches a canvas edge; the knot circles over the solved triangles are recorded as a finding, not as a label collision.",
+      "legibility": "Passes: four panels read at a glance against normalized flux; the solved p' oscillation and the near-coincident FF' curves are clear, and both axes carry named units.",
+      "table_form": "Passes: continuous profiles against normalized flux."
+    }
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T07:18:57.864404+00:00",
+  "total": null
+}

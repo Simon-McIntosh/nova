@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 4,
+  "added_failure_ids": [
+    "tests/test_magnetisation.py::test_smoothness_homotopy_preserves_closed_shell[0.04-100.0]",
+    "tests/test_magnetisation.py::test_smoothness_homotopy_preserves_closed_shell[0.04-1000.0]",
+    "tests/test_magnetisation.py::test_smoothness_homotopy_preserves_closed_shell[0.02-100.0]",
+    "tests/test_magnetisation.py::test_smoothness_homotopy_preserves_closed_shell[0.02-1000.0]"
+  ],
+  "added_failures_note": "Derived from baseline-suite-verified.log (0 failures, EXIT=0) and after-suite-verified.log (4 failed, 36 passed, EXIT=1) at revision 5fdbf629f1974217bd7dbacc38e8340bf954e1cf. The delivered head c78a4f25c restores tests/test_magnetisation.py and nova/biot/magnetisation.py byte-identically to base, so the delivered head cannot carry these fixture failures; they describe the experimental head only.",
+  "completed_at": "2026-11-12T17:11:11.659Z",
+  "dispatched_at": "2026-11-12T16:58:42Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-magnetisation-smoothness.html",
+      "line": 132,
+      "severity": "non-blocking",
+      "text": "the penalty-on closed-shell preservation clause has no passing receipt: the corrected fixture at 512ca5b0df4d1a53119533ebf7efe4d9903d2355 was never rerun and the last executed head suite at 5fdbf629f1974217bd7dbacc38e8340bf954e1cf is red with four failures, so the third-probe preservation claim is unverified for the experimental solver."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-magnetisation-smoothness.html",
+      "line": 133,
+      "severity": "non-blocking",
+      "text": "the done_when clause 3 negative control cannot be reproduced from the delivered head: the mutant body-exclusion code and test_smoothness_respects_touching_body_boundaries do not exist at c78a4f25c, so negative-control.log records a historical extraction rather than a refusal reachable from the landed tree."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T000127065672-icm-magnetisation-smoothness/manifest.md",
+      "line": 21,
+      "severity": "non-blocking",
+      "text": "baseline_suite and after_suite are empty, so the suite arm pair the run actually executed survives only as an artifacts entry and cannot be read from the manifest by a promotion gate that expects those fields."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is an opt-in within-body gradient penalty in nova/biot/magnetisation.py; the landed diff contains no product change \u2014 nova/biot/magnetisation.py and tests/test_magnetisation.py at c78a4f25c are byte-identical to base 95c7572 \u2014 because a lead ruling of 2026-11-12, recorded at docs/evidence/fragments/iron-core-magnetisation/icm-magnetisation-smoothness.html:8, refuted the approach and made the delivery evidence-only; that superseding disposition is delivered in full.\nVERDICT done_when: the three quantitative clauses are answered by historical receipts (measurement.log, diagnostics.json, root-comparison.json, strip-residuals.json) but the terminal gate recorded for the delivery is the source-identity command at manifest.md:15, not a numerical gate, and the corrected head 512ca5b was never rerun while the last executed head suite at 5fdbf629 is red with four failures (after-suite-verified.log).\nVERDICT write_paths: the manifest declares four paths; the net diff at c78a4f25c adds exactly docs/evidence/fragments/iron-core-magnetisation/icm-magnetisation-smoothness.html and docs/figures/iron-core-magnetisation/icm-magnetisation-smoothness/west-homotopy.svg, both inside the declared scope, and nothing outside it.\nVERDICT manifest: read in full at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T000127065672-icm-magnetisation-smoothness/manifest.md; it records status complete, the ten commits, the evidence-only ruling, the historical measurement artifacts and a source-identity test command, while its baseline_suite and after_suite fields are empty.\nVERDICT diff: read all ten commits 97d3be8..c78a4f25 against base 95c7572; nine implement, measure and calibrate the experimental penalty, and the tenth (c78a4f25, docs(biot)) restores both product files to base and lands only the fragment and the figure.\nCALL_SITES: none\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: nova/biot/magnetisation.py at c78a4f25 is byte-identical to base 95c7572, so the goal's product deliverable is absent from the landed tree even though the superseding evidence-only disposition is complete.\nSCORE evidence: 12\nJUSTIFICATION evidence: docs/evidence/fragments/iron-core-magnetisation/icm-magnetisation-smoothness.html:132 concedes no passing corrected-head receipt is claimed, and the executed head suite at 5fdbf629 is red with four added failures against a clean baseline.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the net diff at c78a4f25 is exactly the fragment and west-homotopy.svg, both under the declared write paths, with no plan edit and no environment mutation.\nSCORE durability: 9\nJUSTIFICATION durability: no test lands \u2014 the recorded gate is the one-off git diff --exit-code at evidence-only-proof.log and tests/test_magnetisation.py is identical to base, so nothing in the tree fails if the refuted implementation is re-landed.\nSCORE fit: 17\nJUSTIFICATION fit: docs/evidence/fragments/iron-core-magnetisation/icm-magnetisation-smoothness.html follows the sibling idiom of docs/evidence/fragments/iron-core-magnetisation/icm-newton-trust-region.html with prefixed section ids, a project-absolute figure src and a caption, and its SVG obeys the data-ink rules.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, so no capability is forked; the fragment cites the existing icm-west-root-branch.html study and reuses the saved operands, the existing figure and the prior baseline receipt.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-magnetisation-smoothness.html:132 non-blocking: the penalty-on closed-shell preservation clause has no passing receipt \u2014 the corrected fixture at 512ca5b was never rerun and the last executed head suite at 5fdbf629 is red with four failures, so the third-probe preservation claim is unverified for the experimental solver.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-magnetisation-smoothness.html:133 non-blocking: the done_when clause 3 negative control cannot be reproduced from the delivered head \u2014 the mutant body-exclusion code and test_smoothness_respects_touching_body_boundaries do not exist at c78a4f25, so negative-control.log records a historical extraction rather than a refusal reachable from the landed tree.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T000127065672-icm-magnetisation-smoothness/manifest.md:21 non-blocking: baseline_suite and after_suite are empty, so the suite arm pair the run actually executed survives only as an artifacts entry and cannot be read from the manifest by a promotion gate that expects those fields.",
+  "review_run_id": "r-20261112T165048400766-review-of-icm-magnetisation-smoothness-c78a4f25c070",
+  "reviewed_base_sha": "95c7572523c61ac5e8761082c4224e306cdd85b8",
+  "reviewed_head_sha": "c78a4f25c070a66a3bc6923cae3258b178edf508",
+  "reviewed_run_id": "r-20261112T000127065672-icm-magnetisation-smoothness",
+  "scores": {
+    "durability": 9,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 9,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T17:14:25.015301+00:00",
+  "total": 87
+}

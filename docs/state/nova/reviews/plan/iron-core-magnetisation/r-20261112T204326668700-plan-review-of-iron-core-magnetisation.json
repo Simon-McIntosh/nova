@@ -86,6 +86,16 @@
       "finding": "single_goal-1",
       "reason": "The iron-read half has landed: nova/imas/machine.py read_iron_core is the only reader and both script readers call it, so clause (3)'s read is met; what remains is one goal (the solved WEST stray field on the Galerkin operator), now in flight as icm-west-62751-galerkin-pair. Splitting would only relabel landed work.",
       "when": "2026-11-12T21:30:29.524856+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ee714999c6c863232b05df0097296eab6a4b8129",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "Done-when (3) names the receipt: docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html, with large receipts under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/.",
+      "reason": "",
+      "when": "2026-11-12T21:30:55.124511+00:00"
     }
   ],
   "responses": {
@@ -97,6 +107,15 @@
       "note": "Done-when (1) now asserts the tail: the in-table fit exact, the rise beyond B_n at most 1 % of M_n, M constant beyond the blend, with a secant-resuming mutant that must fail (the landed rise-cap tests and mutants).",
       "reason": "",
       "when": "2026-11-12T21:29:59.549185+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ee714999c6c863232b05df0097296eab6a4b8129",
+      "commit_basis": "edit",
+      "note": "Done-when (3) names the receipt: docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html, with large receipts under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/.",
+      "reason": "",
+      "when": "2026-11-12T21:30:55.124511+00:00"
     },
     "reasoning-1": {
       "action": "acted",

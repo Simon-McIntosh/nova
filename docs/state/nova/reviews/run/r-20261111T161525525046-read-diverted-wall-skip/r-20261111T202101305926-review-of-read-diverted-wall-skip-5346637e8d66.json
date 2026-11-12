@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:_rebuilt_reading",
+    "nova/equilibrium/support_read.py:read_batch",
+    "nova/equilibrium/support_read.py:step_batch",
+    "nova/equilibrium/support_read.py:solve_batch"
+  ],
+  "completed_at": "2026-11-11T20:37:18.985Z",
+  "dispatched_at": "2026-11-11T20:25:28Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking: duplicated predicate, a pre-guard CPU timing table that the H200 section supersedes, and an empty evidence heading; none affects the read",
+      "recorded_at": "2026-11-11T20:38:43.699817+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "non-blocking: duplicated predicate, a pre-guard CPU timing table that the H200 section supersedes, and an empty evidence heading; none affects the read",
+      "recorded_at": "2026-11-11T20:38:50.279334+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "non-blocking: duplicated predicate, a pre-guard CPU timing table that the H200 section supersedes, and an empty evidence heading; none affects the read",
+      "recorded_at": "2026-11-11T20:38:57.734738+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": "3601",
+      "severity": "non-blocking",
+      "text": "non-blocking: the needs_wall custom_vmap closure repeats the scalar-reducing predicate capability that any_lane_overflow already provides at nova/equilibrium/topology.py:3384, so one module now carries two identical def_vmap bodies (jnp.any of a negated lane flag) that a reader must compare to see they agree."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/read-diverted-wall-skip.html",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "non-blocking: the published timing table and its 29.85% / 37.10% reductions describe measured head 06e3ee356, which predates the diverted-ownership guard at 190546a5a414; the landed carried path adds a predicate and a cond, so the table does not describe the code being reviewed."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/read-diverted-wall-skip.html",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "non-blocking: the heading <h3 id=\"read-diverted-wall-skip-provenance\">Provenance and verification</h3> is followed immediately by another h3, leaving an empty section in an evidence document a reader is meant to follow."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against base 519d378f9e6f8d2786f69af64569625971651a73: fbd580449 carries the product change (a base-to-head diff hunk in _normal_ring_rates comes from peer commit ba23b17df via merge bd8a59666 and is not this node's work), c5db194c4 to cc251d95e harden the fixtures and measurement drivers, 085523289f79 adds the reproduction and its two test ids, 190546a5a414 adds the diverted-ownership guard, and 5346637e8d66 appends one evidence paragraph.",
+    "done_when": "read all three clauses against artefacts: the batch decision is in both named modules and tests/test_read_wall_skip.py passes 10 with EXIT=0 at guarded-skip/head/test_read_wall_skip.py.log, the negative control guarded-skip/reproduce/unguarded-skip.log is red with 2 failed and EXIT=1 on real boundary divergence, sirius job 1310950 runs one fresh process per file (15/15 tracked-read, 13 passed + 2 existing skips support-read), and verified/summary.json carries all eight population x width x kind cells with two agreeing processes per arm.",
+    "goal": "the goal is one wall decision per carried batch; nova/equilibrium/support_read.py:506 computes jnp.all(tracking.reading.boundary_class == DIVERTED) and :509-511 routes the carried refresh through a static skip_wall, whose omission of topology._wall_events is guarded by diverted ownership at nova/equilibrium/topology.py:3601 rather than trusted from the hint.",
+    "manifest": "read manifest.md at the reviewed run; it reports status complete, names the thirteen commits and ten changed paths, records sirius jobs 1310794, 1310858 and 1310950, states the final head is docs-only beyond the tested product head, and quotes gate results that match the logs on disk.",
+    "write_paths": "read the manifest's declared paths (tests/test_read_wall_skip.py, scripts/prototypes/read_diverted_wall_skip, the fragment, the figure directory); the node's own commits also touch nova/equilibrium/support_read.py and nova/equilibrium/topology.py, which manifest.md scope_note records as a coordinator grant accepted with --accept-path at landing."
+  },
+  "justifications": {
+    "durability": "tests/test_read_wall_skip.py:217-254 asserts zero wall calls for the all-diverted carry beside three positive controls, and guarded-skip/reproduce/unguarded-skip.log shows the test_skip_hint_preserves_nondiverted_wall_contact cases reddening with a 0.63967905 boundary shift at the unguarded revision.",
+    "evidence": "guarded-skip/head/wall-controls.log records exact counts 0/1/1/1 with known-present positive controls, and verified/summary.json records max_absolute_error 0.0 over eight paired cells, but the timing table at docs/evidence/fragments/sub-millisecond-forward-path/read-diverted-wall-skip.html:8 describes measured head 06e3ee356 rather than the landed head.",
+    "fit": "nova/equilibrium/topology.py:3600 follows the custom_vmap scalar-cond idiom already used at topology.py:3384, and the added comments and docstring state the mechanism with no plan or ticket identifier.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:506-510 takes the all-diverted branch outside the lane map and nova/equilibrium/topology.py:3599-3610 keeps the wall path for limited and mixed ownership, so the diverted carry skips wall evaluation and every other path is unchanged.",
+    "reuse": "the change extends refresh_at_stationary_points rather than forking the read, but topology.py:3601 re-implements the scalar-reducing custom_vmap that topology.py:3384 already carries in the same module.",
+    "scope_discipline": "manifest.md scope_note admits nova/equilibrium/topology.py outside the registered write paths, and support_read.py was granted by crew widen; every other changed path sits inside the declaration."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is one wall decision per carried batch; nova/equilibrium/support_read.py:506 computes jnp.all(tracking.reading.boundary_class == DIVERTED) and :509-511 routes the carried refresh through a static skip_wall, whose omission of topology._wall_events is guarded by diverted ownership at nova/equilibrium/topology.py:3601 rather than trusted from the hint.\nVERDICT done_when: read all three clauses against artefacts: the batch decision is in both named modules and tests/test_read_wall_skip.py passes 10 with EXIT=0 at guarded-skip/head/test_read_wall_skip.py.log, the negative control guarded-skip/reproduce/unguarded-skip.log is red with 2 failed and EXIT=1 on real boundary divergence, sirius job 1310950 runs one fresh process per file (15/15 tracked-read, 13 passed + 2 existing skips support-read), and verified/summary.json carries all eight population x width x kind cells with two agreeing processes per arm.\nVERDICT write_paths: read the manifest's declared paths (tests/test_read_wall_skip.py, scripts/prototypes/read_diverted_wall_skip, the fragment, the figure directory); the node's own commits also touch nova/equilibrium/support_read.py and nova/equilibrium/topology.py, which manifest.md scope_note records as a coordinator grant accepted with --accept-path at landing.\nVERDICT manifest: read manifest.md at the reviewed run; it reports status complete, names the thirteen commits and ten changed paths, records sirius jobs 1310794, 1310858 and 1310950, states the final head is docs-only beyond the tested product head, and quotes gate results that match the logs on disk.\nVERDICT diff: read commit by commit against base 519d378f9e6f8d2786f69af64569625971651a73: fbd580449 carries the product change (a base-to-head diff hunk in _normal_ring_rates comes from peer commit ba23b17df via merge bd8a59666 and is not this node's work), c5db194c4 to cc251d95e harden the fixtures and measurement drivers, 085523289f79 adds the reproduction and its two test ids, 190546a5a414 adds the diverted-ownership guard, and 5346637e8d66 appends one evidence paragraph.\nCALL_SITES: nova/equilibrium/support_read.py:_rebuilt_reading, nova/equilibrium/support_read.py:read_batch, nova/equilibrium/support_read.py:step_batch, nova/equilibrium/support_read.py:solve_batch\nSCORE goal_fidelity: 19\nSCORE evidence: 18\nSCORE scope_discipline: 15\nSCORE durability: 18\nSCORE fit: 18\nSCORE reuse: 15\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:506-510 takes the all-diverted branch outside the lane map and nova/equilibrium/topology.py:3599-3610 keeps the wall path for limited and mixed ownership, so the diverted carry skips wall evaluation and every other path is unchanged.\nJUSTIFICATION evidence: guarded-skip/head/wall-controls.log records exact counts 0/1/1/1 with known-present positive controls, and verified/summary.json records max_absolute_error 0.0 over eight paired cells, but the timing table at docs/evidence/fragments/sub-millisecond-forward-path/read-diverted-wall-skip.html:8 describes measured head 06e3ee356 rather than the landed head.\nJUSTIFICATION scope_discipline: manifest.md scope_note admits nova/equilibrium/topology.py outside the registered write paths, and support_read.py was granted by crew widen; every other changed path sits inside the declaration.\nJUSTIFICATION durability: tests/test_read_wall_skip.py:217-254 asserts zero wall calls for the all-diverted carry beside three positive controls, and guarded-skip/reproduce/unguarded-skip.log shows the test_skip_hint_preserves_nondiverted_wall_contact cases reddening with a 0.63967905 boundary shift at the unguarded revision.\nJUSTIFICATION fit: nova/equilibrium/topology.py:3600 follows the custom_vmap scalar-cond idiom already used at topology.py:3384, and the added comments and docstring state the mechanism with no plan or ticket identifier.\nJUSTIFICATION reuse: the change extends refresh_at_stationary_points rather than forking the read, but topology.py:3601 re-implements the scalar-reducing custom_vmap that topology.py:3384 already carries in the same module.\nFINDING nova/equilibrium/topology.py:3601 non-blocking: the needs_wall custom_vmap closure repeats the scalar-reducing predicate capability that any_lane_overflow already provides at nova/equilibrium/topology.py:3384, so one module now carries two identical def_vmap bodies (jnp.any of a negated lane flag) that a reader must compare to see they agree.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/read-diverted-wall-skip.html:8 non-blocking: the published timing table and its 29.85% / 37.10% reductions describe measured head 06e3ee356, which predates the diverted-ownership guard at 190546a5a414; the landed carried path adds a predicate and a cond, so the table does not describe the code being reviewed.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/read-diverted-wall-skip.html:13 non-blocking: the heading <h3 id=\"read-diverted-wall-skip-provenance\">Provenance and verification</h3> is followed immediately by another h3, leaving an empty section in an evidence document a reader is meant to follow.",
+  "review_run_id": "r-20261111T202101305926-review-of-read-diverted-wall-skip-5346637e8d66",
+  "reviewed_base_sha": "519d378f9e6f8d2786f69af64569625971651a73",
+  "reviewed_head_sha": "5346637e8d6650b4f55f00d0fb380c5fdbe025a7",
+  "reviewed_run_id": "r-20261111T161525525046-read-diverted-wall-skip",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 15,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T21:01:22.370659+00:00",
+  "total": 103
+}

@@ -59,6 +59,16 @@
       "note": "Done-when (1) no longer asks for the centroid prototype numbers: accuracy is judged by refinement (shell errors fall >= 2.5x per halving at mu_r 100 and 1000, 20 mm errors within the collocated values plus 0.5 points) and the sphere interior against its derived Galerkin bound, matching the landed acceptance.",
       "reason": "",
       "when": "2026-11-12T21:28:53.611014+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ee714999c6c863232b05df0097296eab6a4b8129",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 4 now states that it extends the section 3 tile program with a Galerkin cell-average assembly (galerkin_cell_interaction beside cell_interaction in nova/biot/tiledassembly.py, landed with icm-galerkin-interaction); the centroid program remains for evaluating the solved field at points.",
+      "reason": "",
+      "when": "2026-11-12T21:29:26.639566+00:00"
     }
   ],
   "responses": {
@@ -70,6 +80,15 @@
       "note": "Done-when (1) no longer asks for the centroid prototype numbers: accuracy is judged by refinement (shell errors fall >= 2.5x per halving at mu_r 100 and 1000, 20 mm errors within the collocated values plus 0.5 points) and the sphere interior against its derived Galerkin bound, matching the landed acceptance.",
       "reason": "",
       "when": "2026-11-12T21:28:53.611014+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ee714999c6c863232b05df0097296eab6a4b8129",
+      "commit_basis": "edit",
+      "note": "Section 4 now states that it extends the section 3 tile program with a Galerkin cell-average assembly (galerkin_cell_interaction beside cell_interaction in nova/biot/tiledassembly.py, landed with icm-galerkin-interaction); the centroid program remains for evaluating the solved field at points.",
+      "reason": "",
+      "when": "2026-11-12T21:29:26.639566+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261112T204326668700-plan-review-of-iron-core-magnetisation.json",

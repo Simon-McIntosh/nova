@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-11-12T01:48:24.240Z",
   "dispatched_at": "2026-11-12T01:29:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sampled-profile-core-hold",
+      "recorded_at": "2026-11-12T01:57:10.730121+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_sampled_profile_core_hold.py",

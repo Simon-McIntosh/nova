@@ -181,7 +181,7 @@ def main():
 
                 fn, values = whole, (bank, cache, state, seeds, previous, tracked, rule)
             result = timed(kind, fn, values)
-            support = result if args.kind == "read" else result[0]
+            support = result if args.kind in ("read", "wall") else result[0]
             geometry(kind, support)
             if args.kind == "scalar":
                 assert bool(jnp.all(result[1].valid))

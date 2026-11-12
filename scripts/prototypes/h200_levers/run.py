@@ -52,6 +52,7 @@ def main():
             "candidates",
             "wall",
             "headline",
+            "remaining-smoke",
         ],
         default="all",
     )
@@ -406,10 +407,10 @@ def main():
             )
         if chosen in ("all", "candidates"):
             paired("live-candidates", "read", "candidates")
-        if chosen in ("all", "wall"):
+        if chosen in ("all", "wall", "remaining-smoke"):
             for population in ("diverted", "mixed"):
                 paired("wall-skip", "wall", "wall", population=population)
-        if chosen in ("all", "headline"):
+        if chosen in ("all", "headline", "remaining-smoke"):
             summary["headline"] = arm(
                 "secant-flattop", "main", "stream", "off", 1 if args.smoke else 16
             )

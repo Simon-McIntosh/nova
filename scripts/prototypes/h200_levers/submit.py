@@ -14,11 +14,32 @@ def main():
     parser.add_argument("run", type=Path)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--smoke", type=Path, required=True)
+    parser.add_argument("--smoke-prefix", type=Path)
     args = parser.parse_args()
     root, run = args.root.resolve(), args.run.resolve()
     smoke = json.loads((args.smoke / "summary.json").read_text())
     assert smoke["completed"] and smoke["smoke"]
+    assert args.smoke_prefix or smoke["measurement"] == "all"
     assert smoke["revision"] == args.revision
+    if args.smoke_prefix:
+        prefix = json.loads((args.smoke_prefix / "summary.json").read_text())
+        assert prefix["smoke"] and smoke["measurement"] == "remaining-smoke"
+        names = {c["name"] for value in (prefix, smoke) for c in value["comparisons"]}
+        assert {
+            "booking",
+            "factor-carry",
+            "scalar-tile",
+            "lane-drive",
+            "live-candidates",
+            "wall-skip",
+        } <= names
+        assert "headline" in smoke
+        assert all(arm["exit_status"] == 0 for arm in smoke["arms"])
+        for arm in prefix["arms"]:
+            if arm["exit_status"] == 0:
+                record = json.loads(Path(arm["receipt"]).read_text())
+                assert record["complete"] and record["smoke"]
+                assert Path(arm["log"]).read_text().splitlines()[-1] == "EXIT=0"
     assert (args.smoke / "job.log").read_text().splitlines()[-1] == "EXIT=0"
     prior = run / "h200-levers-corrected"
     existing = json.loads((prior / "summary.json").read_text())

@@ -1,0 +1,51 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-12T19:58:00.000Z",
+  "dispatched_at": "2026-11-12T19:30:48Z",
+  "figures": [
+    {
+      "file": "docs/figures/iron-core-magnetisation/icm-galerkin-interaction/spectrum-ramp.svg",
+      "rendered": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T192014061024-review-of-icm-galerkin-interaction-9cc82c30e92d-figure/image-0.png"
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The near-coincidence is the measurement: the two weighted spectra agree to a few thousandths of unity between eigenvalue fractions 0.13 and 0.95, so the grey line has no separate path to show there, and the difference the panel exists to report is visible at both ends, where collocation leaves the drawn 0 and 1 rules at about -0.12 and 1.12 while Galerkin stays inside them.",
+      "file": "docs/figures/iron-core-magnetisation/icm-galerkin-interaction/spectrum-ramp.svg",
+      "id": "f847ca09129",
+      "line": 45,
+      "severity": "non-blocking",
+      "summary": "In the left panel the dashed collocation series is drawn beneath the Galerkin series, and because the two weighted spectra nearly coincide, grey pixels cover only 16-30 per 40-pixel column strip against 140-250 for the purple line between eigenvalue fractions 0.13 and 0.95: a reader sees the collocation curve only as short dash ends either side of zero and above one, and cannot follow it across the middle of the panel."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The rules are 1.2 pt dotted against the series' 2.6 pt dashed, and the caption states that dotted grey lines mark 0 and 1, so the two roles are separated by weight and by the caption rather than by hue.",
+      "file": "docs/figures/iron-core-magnetisation/icm-galerkin-interaction/spectrum-ramp.svg",
+      "id": "f41aa16e803",
+      "line": 57,
+      "severity": "non-blocking",
+      "summary": "The 0 and 1 bound rules are dotted in the same grey (#929292) as the collocation series, so a reader must use the caption to tell which grey marks are the bounds and which are measured data; the right panel carries no equivalent grey reference at all, so the grey dash there reads unambiguously as data."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: pass - both panels are readable at the rendered 1400x721 size: axis labels 'eigenvalue of volume-weighted G / \u03bc\u2080', 'sorted eigenvalue fraction', 'maximum |M| [MA/m]' and 'drive fraction' are full and unclipped, every tick label (0.00/0.25/0.50/0.75/1.00 left, 0.0-1.2 right, 0.00-1.00 on both x axes) is legible, and the two-entry legend sits frameless above the panels clear of the data.\nRUBRIC data_ink: pass - the marks are two curves per panel plus two dotted bound rules in the left panel; there is no gradient, fill, shading, marker clutter or secondary series.\nRUBRIC decoration: pass - white background, no gridlines, no band or theme; only the left and bottom spines carry a scale and the dotted 0/1 rules are stated data bounds rather than decoration.\nRUBRIC contrast: pass - all text is near-black on white, the purple series (#7b4fb3) and the grey series (#929292) each clear 3:1 against the white background, and the dotted rules are legible without being mistaken for text.\nRUBRIC table_form: pass - both panels plot continuous relationships (sorted eigenvalue against fraction, maximum |M| against drive); the per-step numbers live in the evidence fragment's table, not in the picture.\nRUBRIC label_collision: pass - no label touches any canvas edge (content ends at x=1394 of 1400 and y=667 of 721), no two text artists overlap, and no label sits on the data; the nearest approach is the right panel's 1.00 x tick, which still clears the edge.\nFINDING (non-blocking) docs/figures/iron-core-magnetisation/icm-galerkin-interaction/spectrum-ramp.svg:45 - the collocation series is drawn under the Galerkin series and the two spectra nearly coincide, so between eigenvalue fractions 0.13 and 0.95 the grey line is visible only as short dash ends (16-30 grey pixels per 40-pixel column strip against 140-250 purple) and a reader cannot follow it across the middle of the panel.\nFINDING (non-blocking) docs/figures/iron-core-magnetisation/icm-galerkin-interaction/spectrum-ramp.svg:57 - the 0 and 1 bound rules share the collocation series' grey (#929292), so distinguishing bounds from measured data depends on line weight and on the caption.\n",
+  "review_run_id": "r-20261112T192014061024-review-of-icm-galerkin-interaction-9cc82c30e92d-figure",
+  "reviewed_base_sha": "9c467b0523b1ac86fb9770fee8238e06bbafa45a",
+  "reviewed_head_sha": "9cc82c30e92d258e7fae9b7800f8de4e4fc87a76",
+  "reviewed_run_id": "r-20261112T162338749893-icm-galerkin-interaction",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass \u2014 all text is near-black on white, the purple series (#7b4fb3) and the grey series (#929292) each clear 3:1 against the white background, and the dotted rules are legible without being mistaken for text.",
+    "data_ink": "pass \u2014 the marks are two curves per panel plus two dotted bound rules in the left panel; there is no gradient, fill, shading, marker clutter or secondary series.",
+    "decoration": "pass \u2014 white background, no gridlines, no band or theme; only the left and bottom spines carry a scale and the dotted 0/1 rules are stated data bounds rather than decoration.",
+    "label_collision": "pass \u2014 no label touches any canvas edge (content ends at x=1394 of 1400 and y=667 of 721), no two text artists overlap, and no label sits on the data; the nearest approach is the right panel's 1.00 x tick, which still clears the edge.",
+    "legibility": "pass \u2014 both panels are readable at the rendered 1400x721 size: axis labels 'eigenvalue of volume-weighted G / \u03bc\u2080', 'sorted eigenvalue fraction', 'maximum |M| [MA/m]' and 'drive fraction' are full and unclipped, every tick label is legible, and the two-entry legend sits frameless above the panels clear of the data.",
+    "table_form": "pass \u2014 both panels plot continuous relationships (sorted eigenvalue against fraction, maximum |M| against drive); the per-step numbers live in the evidence fragment's table, not in the picture."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T19:38:16.395628+00:00",
+  "total": null
+}

@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Measured from the reviewed run's own gate logs. baseline_suite: revision 9c467b05, 38 passed, failure_count 0, EXIT=0 (baseline-suite.log). after_suite: revision 9cc82c30e92d258e7fae9b7800f8de4e4fc87a76, exact suite command on a fresh extraction, 43 passed, no FAILED or ERROR line, EXIT=0, job 1312314 COMPLETED 00:29:45 (after-suite-final.log). Head minus baseline is 0 added failures; the 5-test difference is the new tests this node adds.",
+  "completed_at": "2026-11-12T19:36:02.230Z",
+  "dispatched_at": "2026-11-12T19:18:15Z",
+  "findings": [
+    {
+      "file": "nova/biot/tiledassembly.py",
+      "line": 673,
+      "severity": "non-blocking",
+      "text": "non-blocking: the inner flux() of _mutual_edge_evaluator re-implements the circular-filament flux the repository already owns at nova/biot/greens.py:405 traced_filament_greens (and greens.py:324 greens_psi): same span/gap/complement algebra, same MU0*sqrt(span)*value form. The fragment correctly refutes the plan's two named primitives (_traced_psi_gradient, _edge_flux), but traced_filament_greens is the direct owner and is never named; the graded quadrature and the r==0|sr==0 guard could have been added to that owner instead of to a second copy."
+    },
+    {
+      "file": "nova/biot/magnetisation.py",
+      "line": 134,
+      "severity": "non-blocking",
+      "text": "non-blocking: _average_external builds its own triangle fan and Gauss rule per polygon, duplicating the polygonal-section quadrature the repository owns at nova/biot/sectionaverage.py:185 section_nodes, which already accepts an (n,2) corner array at any order and returns positive weights summing to the material area; the axisymmetric weight this needs is that area weight times the sample radius. A second copy of an owned capability rather than an extension of it."
+    },
+    {
+      "file": "tests/test_magnetisation.py",
+      "line": 805,
+      "severity": "non-blocking",
+      "text": "non-blocking: the weighted-reciprocity assertion cannot fail for the landed implementation. energy is formed as volume[:, None] * gram while gram is returned as the symmetrised energy divided by volume[:, None] in galerkin_cell_interaction, and tiledassembly.py:787-788 forces exact symmetry, so energy - energy.T is zero whatever the quadrature computes. The two sides are not independent: it does redden on the centroid mutant (a different formulation), but it does not guard a regression inside the Galerkin kernel."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-interaction.html",
+      "line": 94,
+      "severity": "non-blocking",
+      "text": "non-blocking: the negative-control paragraph says 'Both reciprocal-energy test cases fail ... two failed test IDs', but the delivered pin-control/negative-control.log records three failing ids (regions 0, 1, 2) with weighted defects 0.0511401, 0.0002193 and 0.0910275, and the manifest records '3 failed'. The fragment understates the control it reports."
+    },
+    {
+      "file": "nova/biot/magnetisation.py",
+      "line": 394,
+      "severity": "non-blocking",
+      "text": "non-blocking: the external-field error message still says '(cells, 2)' while the callback now receives volume-quadrature points (docstring line 367, _average_external line 134). The message names a shape the callback no longer receives and misdirects a caller debugging it."
+    },
+    {
+      "file": "nova/biot/magnetisation.py",
+      "line": 117,
+      "severity": "non-blocking",
+      "text": "non-blocking: points is an implicit None sentinel that switches cell_interaction from point collocation to the Galerkin operator behind one signature. scripts/magnetisation_high_permeability/measure.py:178 wraps that callable and keys a cache on points, so the new runtime path cell_interaction(cells, None, plan) reaches points.tobytes() with None; a separately named function would have left the point route's contract intact."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261112T190855616173-review-of-icm-galerkin-interaction-9cc82c30e92d",
+  "reviewed_base_sha": "9c467b0523b1ac86fb9770fee8238e06bbafa45a",
+  "reviewed_head_sha": "9cc82c30e92d258e7fae9b7800f8de4e4fc87a76",
+  "reviewed_run_id": "r-20261112T162338749893-icm-galerkin-interaction",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T19:39:03.219470+00:00",
+  "total": 92
+}

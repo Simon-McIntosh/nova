@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="55">
+<meta name="plan-version" content="56">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -676,6 +676,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261111T233059786915-review-of-icm-newton-trust-region-39e67e073374" data-who="reckon-build" data-when="2026-11-12T00:03:08.689Z">
     <div class="r-comment-body"><p>Independent review of r-20261111T205006716359-icm-newton-trust-region at head 39e67e073374daae459db8f327284e0e4de53a4f scores goal_fidelity 18, evidence 19, scope_discipline 19, durability 16, fit 16, reuse 18 (total 106) with zero added failures and three non-blocking findings: unjustified schedule literals, two self-referential test assertions, and a 60-correction default budget that cannot reach the target the node recovered at 248.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261111T205006716359-icm-newton-trust-region" data-who="reckon-build" data-when="2026-11-12T01:08:29Z">
+    <div class="r-comment-body"><p>Adaptive diagonal regularisation preserves the exact Jacobian and exposes per-step lambda, type and local-equation reduction ratios. Saved WEST stall recovers 5.844633900691807e-4 to 2.100506605937123e-12 in 248 corrections with zero G builds; synthetic condition 1.46276e5 converges in sixteen corrections while restored backtracking fails. Exact CPU suite arms pass 28 then 30 tests with zero added failures; nonlinear shell keeps three unregularised corrections and quadratic ratio 0.00705351942949 versus secant 1.04458978683. Evidence: docs/evidence/fragments/iron-core-magnetisation/icm-newton-trust-region.html#icm-newton-trust-region-state.</p></div>
 </div>
 </section>
 </main>

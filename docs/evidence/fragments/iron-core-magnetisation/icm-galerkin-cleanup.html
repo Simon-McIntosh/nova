@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="iron-core-magnetisation">
+  <title>Galerkin interaction cleanup: shared owners and a symmetry test that can fail | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="icm-galerkin-cleanup-state">§4 — Galerkin interaction cleanup</h2>
+    <p>Node <code>icm-galerkin-cleanup</code> closes the review findings on the
+    volume-tested iron interaction. Two duplicated capabilities now call their
+    owners: the filament loop flux of every distinct quadrature pair comes from
+    <code>nova.biot.greens.traced_filament_greens</code>, and the averaged
+    external field is integrated by
+    <code>nova.biot.sectionaverage.section_nodes</code> with the axisymmetric
+    <code>2*pi*r</code> volume weight. The volume-tested route is a named
+    <code>_galerkin_interaction</code>, so <code>_interaction</code> evaluates
+    point targets only and the measurement caches key on what they are handed.
+    The reciprocity test is no longer vacuous: it measures the defect of the raw
+    contraction before the two triangle halves are averaged, and a scratch
+    mutant that mirrors one off-diagonal edge-pair quadrature fails it.</p>
+    <p>One pair type cannot delegate, and the reason is numerical rather than
+    architectural. The owner derives its squared separation from the target and
+    source coordinates, <code>(ar-r)**2 + dz**2</code>, which cancels to exactly
+    zero at the graded corner nodes of a coincident pair once the parameter
+    square is folded about its diagonal at quadrature order 16 and above; the
+    flux then returns a non-finite value and the energy guard refuses the
+    assembly. A coincident pair therefore keeps the exact squared separation of
+    the folded square, <code>|b-a|^2 (x^3 y^3)^2</code>, which is derived from
+    the parameter nodes instead. Every other pair bit-matches the owner's
+    arithmetic path.</p>
+
+    <h3 id="icm-galerkin-cleanup-asymmetry">Reciprocity defect before symmetrisation</h3>
+    <p>The energy matrix is assembled once per undirected cell pair and then has
+    its two triangle halves averaged, so a defect test on the returned operator
+    measures the average rather than the assembly. <code>galerkin_cell_energy</code>
+    returns the raw contraction, and the defect below is
+    <code>||E-E^T|| / ||E||</code> of that matrix. Nothing in the test symmetrises
+    it first.</p>
+    <table id="icm-galerkin-cleanup-asymmetry-table"><thead><tr><th>mesh</th><th>cells</th><th>quadrature order</th><th>asymmetry</th></tr></thead><tbody>
+<tr><td>sphere 0.1 m</td><td>44</td><td>8</td><td>5.439639e-16</td></tr>
+<tr><td>sphere 0.1 m</td><td>44</td><td>16</td><td>4.336897e-16</td></tr>
+<tr><td>sphere 0.1 m</td><td>44</td><td>24</td><td>4.220142e-16</td></tr>
+<tr><td>shell 0.04 m</td><td>228</td><td>8</td><td>9.810926e-16</td></tr>
+<tr><td>shell 0.04 m</td><td>228</td><td>16</td><td>9.944179e-16</td></tr>
+<tr><td>shell 0.04 m</td><td>228</td><td>24</td><td>9.899153e-16</td></tr>
+<tr><td>shell 0.02 m</td><td>828</td><td>8</td><td>1.013396e-15</td></tr>
+<tr><td>WEST saved</td><td>3447</td><td>4</td><td>6.191599e-16</td></tr>
+</tbody></table>
+    <p>Worst 1.013396e-15 against an asserted tolerance of 1e-12, at every order
+    measured. The suite asserts the defect on the sphere mesh at orders 8, 16 and
+    24 and on the 0.04 m shell at orders 8 and 16; the 828-cell shell and the
+    saved 3447-cell WEST mesh are measured here instead of in the suite, because
+    the quadratically growing pair count puts one raw assembly of that size
+    beyond a test's budget and its asymmetry is not order-sensitive (1e-16 to
+    1e-15 across the sweep). The WEST mesh is measured at the lowest permitted
+    order for the same reason.</p>
+
+    <h3 id="icm-galerkin-cleanup-control">Negative control</h3>
+    <p>A scratch extraction of the head revision mirrors one off-diagonal
+    edge-pair quadrature entry, <code>mutual[columns[0], rows[0]] = 1.001 *
+    value[0]</code>, so one pair is no longer reciprocal while everything else is
+    exact. The runner asserts that the imported
+    <code>nova.biot.tiledassembly</code> is the scratch copy and that the marker
+    is present in <code>galerkin_cell_energy</code>, runs the selected defect
+    tests, and afterwards compares the worktree's source blob against
+    <code>git show HEAD:nova/biot/tiledassembly.py</code>. All five selected
+    identifiers fail (<code>5 failed, 43 deselected in 90.81s</code>,
+    <code>EXIT=1</code>) and the product source blob matches HEAD, so the test
+    reports an assembly defect rather than restating a symmetry the assembly
+    already imposed.</p>
+    <p>Durable log: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T202854132114-icm-galerkin-cleanup/negative-control.log</code>.</p>
+
+    <h3 id="icm-galerkin-cleanup-records">Corrected records</h3>
+    <p>The guard-refusal paragraph of
+    <a href="/nova/evidence/fragments/iron-core-magnetisation/icm-galerkin-interaction.html#icm-galerkin-interaction-state">the interaction record</a>
+    counted two failing test identifiers; the retained log records three, one
+    per mesh region, and the paragraph now gives all three with their weighted
+    defects. The treatment's own error message said the callback must return
+    <code>(cells, 2)</code> components while it checks the averaged field, which
+    is a correction to the guard that reports a defect rather than a behaviour
+    change.</p>
+    <p>In the figure, the collocation continuation lay beneath the Galerkin
+    series wherever the two nearly coincide. It is now drawn thinner and above
+    the subject, and the 0 and 1 bound rules take a dark neutral
+    (<code>#4d4d4d</code>) distinct from the collocation grey, so a rule no
+    longer reads as a third series.</p>
+    <figure><img src="/nova/figures/iron-core-magnetisation/icm-galerkin-interaction/spectrum-ramp.svg" alt="Sorted weighted interaction spectra and WEST drive continuation"><figcaption>Saved 3447-cell WEST mesh. Left: sorted eigenvalues of sym(W½GW⁻½)/μ₀; dotted dark-neutral rules mark 0 and 1. Right: the prior bounded collocation continuation drawn thinner and above the Galerkin series, so a nearly coincident pair stays readable. Re-rendered at the corrected z-order; the producer inspected the PNG with no collision or clipping.</figcaption></figure>
+
+  </main>
+</body>
+</html>

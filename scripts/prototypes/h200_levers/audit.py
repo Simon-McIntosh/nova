@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import subprocess
 from pathlib import Path
 
 from scripts.prototypes.h200_levers.run import refuse_inert
@@ -49,6 +50,8 @@ def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("run", type=Path)
     parser.add_argument("--negative-control", action="store_true")
+    parser.add_argument("--inventory", action="store_true")
+    parser.add_argument("--partial", action="store_true")
     args = parser.parse_args()
     if args.negative_control:
         sample = dict(rows=[dict(lowered_sha256="known-program")])
@@ -60,16 +63,76 @@ def main():
     import numpy as np
 
     run = args.run.resolve()
-    summary = json.loads((run / "summary.json").read_text())
-    assert summary["completed"], "job has not completed every comparison"
-    assert (run / "job.log").read_text().splitlines()[-1] == "EXIT=0"
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    from tests.equilibrium.test_topology_read import _analytic_inputs
+
+    oracle, *_ = _analytic_inputs("diverted")
+    radius = float(oracle.minor_radius)
+    assert radius > 0
+    if args.inventory:
+        inventory = json.loads((run / "measurement-jobs.json").read_text())
+        jobs = [item["job_id"] for item in inventory["jobs"]]
+        output = subprocess.check_output(
+            [
+                "sacct",
+                "-n",
+                "-X",
+                "-j",
+                ",".join(jobs),
+                "-o",
+                "JobIDRaw,State%30,ExitCode",
+                "-P",
+            ],
+            text=True,
+        )
+        observed = {
+            fields[0]: fields[1:3]
+            for row in output.splitlines()
+            if len(fields := row.split("|")) >= 3
+        }
+        assert all(observed.get(job) == ["COMPLETED", "0:0"] for job in jobs), observed
+        retained = json.loads((run / "retained-receipts.json").read_text())
+        import hashlib
+
+        for path, digest in retained.items():
+            assert hashlib.sha256(Path(path).read_bytes()).hexdigest() == digest
+        summaries = [
+            json.loads((run / "h200-levers-corrected/summary.json").read_text())
+        ]
+        for item in inventory["jobs"]:
+            directory = Path(item["output"])
+            value = json.loads((directory / "summary.json").read_text())
+            assert value["completed"] and not value["smoke"]
+            assert (directory / "job.log").read_text().splitlines()[-1] == "EXIT=0"
+            summaries.append(value)
+    else:
+        value = json.loads((run / "summary.json").read_text())
+        assert args.partial or value["completed"], (
+            "job has not completed every comparison"
+        )
+        if not args.partial:
+            assert (run / "job.log").read_text().splitlines()[-1] == "EXIT=0"
+        summaries = [value]
+    summary = dict(
+        arms=[
+            arm
+            for value in summaries
+            for arm in value["arms"]
+            if arm["exit_status"] == 0
+        ],
+        comparisons=[
+            comparison for value in summaries for comparison in value["comparisons"]
+        ],
+    )
     receipts = {}
     for arm in summary["arms"]:
         assert arm["exit_status"] == 0
         assert Path(arm["log"]).read_text().splitlines()[-1] == "EXIT=0"
         path = Path(arm["receipt"])
         value = json.loads(path.read_text())
-        assert value["complete"] and value["x64"]
+        assert value["complete"] and value["x64"] and not value.get("smoke", False)
         assert value["device"] == "NVIDIA H200 NVL"
         for row in value["rows"]:
             if "residual" in row:
@@ -95,7 +158,7 @@ def main():
                     np.load(left, allow_pickle=False) as a,
                     np.load(right, allow_pickle=False) as b,
                 ):
-                    errors = precision(a, b, reference["minor_radius"])
+                    errors = precision(a, b, radius)
                 verified.append(
                     dict(
                         name=comparison["name"],
@@ -105,6 +168,42 @@ def main():
                         errors=errors,
                     )
                 )
+    # The decision-free read rebuilds geometry. Its frozen-reading branch is
+    # retained for attribution and cannot be the refreshed-work comparison.
+    for comparison in summary["comparisons"]:
+        if comparison["name"] != "carried-decisions":
+            continue
+        for reference, candidate in zip(
+            comparison["off"]["records"], comparison["on"]["records"], strict=True
+        ):
+            left = receipts[json.dumps(reference, sort_keys=True)].with_suffix(".npz")
+            right = receipts[json.dumps(candidate, sort_keys=True)].with_suffix(".npz")
+            with (
+                np.load(left, allow_pickle=False) as a,
+                np.load(right, allow_pickle=False) as b,
+            ):
+                full = {
+                    key.removeprefix("full-"): a[key]
+                    for key in a
+                    if key.startswith("full-")
+                }
+                carried = {
+                    key.removeprefix("carried-"): b[key]
+                    for key in b
+                    if key.startswith("carried-")
+                }
+                errors = precision(
+                    {"reading-" + k: v for k, v in full.items()},
+                    {"reading-" + k: v for k, v in carried.items()},
+                    radius,
+                )
+            verified.append(
+                dict(
+                    name="decision-free-full-to-carried",
+                    width=comparison["width"],
+                    errors=errors,
+                )
+            )
     (run / "precision-audit.json").write_text(json.dumps(verified, indent=2))
     print(f"SUMMARY {len(verified)} paired process receipts inside precision budget")
 

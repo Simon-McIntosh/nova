@@ -124,11 +124,14 @@ def _fit_law(b_field, permeability_relative):
 
     Interpolate H, not permeability: a rising permeability is compatible with
     positive differential permeability only while H still rises. Restrict each
-    interior Hermite slope to (0, 2*adjacent secant]. The origin slope matches
-    its secant permeability; the final slope is 1/mu0 for saturation. An
-    interval whose end slope exceeds twice its secant uses positive linear
-    derivative ramps joined by a positive constant derivative, integrated as
-    two quadratics and a line. Their areas reproduce the interval's H increment exactly.
+    interior Hermite slope to (0, 2*adjacent secant]. Both table endpoint slopes
+    match their secant permeabilities. Steep endpoint slopes use positive
+    derivative ramps whose areas reproduce the tabulated H increment exactly.
+    Saturation adds one quadratic beyond the table, leaving its fit intact.
+    Its derivative rises linearly from the fitted end slope s to q = 1/mu0.
+    One further tabulated H increment gives delta = 2*dH/(s+q). Thus M rises
+    monotonically to M_n + (q-s)*delta/2, and is constant beyond the blend.
+    Return the knots, coefficients, and [origin reluctivity, asymptotic M].
     """
     b = np.asarray(b_field, dtype=np.float64)
     mu = np.asarray(permeability_relative, dtype=np.float64)
@@ -153,7 +156,7 @@ def _fit_law(b_field, permeability_relative):
     bound = np.r_[secant[0], np.minimum(secant[:-1], secant[1:]), secant[-1]]
     slopes = np.clip(slopes, bound * 1e-6, 2 * bound)
     slopes[0] = 1 / (_MU0 * mu[0])
-    slopes[-1] = 1 / _MU0
+    slopes[-1] = 1 / (_MU0 * mu[-1])
     width = np.diff(b)
     cubic = (slopes[:-1] + slopes[1:] - 2 * secant) / width**2
     quadratic = (3 * secant - 2 * slopes[:-1] - slopes[1:]) / width
@@ -170,6 +173,8 @@ def _fit_law(b_field, permeability_relative):
             edge = fraction * width[i]
             start, stop = b[i] + edge, b[i + 1] - edge
             left_edge, right_edge = start - b[i], b[i + 1] - stop
+            if left_edge <= 0 or right_edge <= 0 or start >= stop:
+                raise ValueError("B-H interval split width is not representable")
             # Use the represented knot distances so even narrow ramps join
             # at the tabulated value and tangent after coordinate rounding.
             middle = (h[i + 1] - h[i] - (left_edge * left + right_edge * right) / 2) / (
@@ -186,11 +191,21 @@ def _fit_law(b_field, permeability_relative):
             )
             knots.extend([start, stop])
         knots.append(b[i + 1])
-    return np.asarray(knots), np.asarray(pieces).T, 1 / (_MU0 * mu[[0, -1]])
+    vacuum = 1 / _MU0
+    end_slope = slopes[-1]
+    blend_end = b[-1] + 2 * (h[-1] - h[-2]) / (end_slope + vacuum)
+    blend_width = blend_end - b[-1]
+    if not np.isfinite(blend_end) or blend_width <= 0:
+        raise ValueError("B-H tail blend width is not representable")
+    pieces.append([0, (vacuum - end_slope) / (2 * blend_width), end_slope, h[-1]])
+    knots.append(blend_end)
+    saturated = (vacuum - end_slope) * (b[-1] + blend_width / 2)
+    ends = np.array([slopes[0], saturated])
+    return np.asarray(knots), np.asarray(pieces).T, ends
 
 
-def _coefficient(magnitude, knots, coefficients, end_reluctivity):
-    """Return c(B) = M(B)/B with constant magnetisation above the table."""
+def _coefficient(magnitude, knots, coefficients, end_values):
+    """Return M(B)/B, blending to constant M strictly beyond the last table knot."""
     index = jnp.clip(
         jnp.searchsorted(knots, magnitude, side="right") - 1, 0, knots.size - 2
     )
@@ -198,9 +213,10 @@ def _coefficient(magnitude, knots, coefficients, end_reluctivity):
     a, b, c, d = coefficients[:, index]
     h = ((a * offset + b) * offset + c) * offset + d
     safe = jnp.where(magnitude > 0, magnitude, 1.0)
-    reluctivity = jnp.where(magnitude > 0, h / safe, end_reluctivity[0])
-    saturated = knots[-1] * (1 / _MU0 - end_reluctivity[1]) / safe
-    return jnp.where(magnitude >= knots[-1], saturated, 1 / _MU0 - reluctivity)
+    reluctivity = jnp.where(magnitude > 0, h / safe, end_values[0])
+    remaining = jnp.maximum(knots[-1] - magnitude, 0)
+    tail = (end_values[1] - coefficients[1, -1] * remaining**2) / safe
+    return jnp.where(magnitude >= knots[-2], tail, 1 / _MU0 - reluctivity)
 
 
 def _residual(state, operands):

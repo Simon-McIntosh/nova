@@ -18,7 +18,11 @@ from scipy.optimize import root
 
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import draw_flux_contours, draw_nulls, draw_wall
-from scripts.prototypes.diiid_xpoint_attribution.attribute import field, gradient
+from scripts.prototypes.diiid_xpoint_attribution.attribute import (
+    field,
+    gradient,
+    saddle,
+)
 from scripts.prototypes.diiid_xpoint_offset.style import (
     CANVAS,
     REFERENCE,
@@ -46,6 +50,29 @@ def geometry(data, result, output, previews):
     point = np.asarray(result["reference_saddle_m"])
     other = np.asarray(result["solved_saddle_m"])
     notes = []
+    census = json.loads((Path(result["folder"]) / "core-analysis.json").read_text())
+    secondary = {}
+    for key, owner in (("reference", "reference_census"), ("solved", "census")):
+        admitted = point if key == "reference" else other
+        secondary[key] = np.array(
+            [
+                item["rz_m"]
+                for item in census[owner]["points"]
+                if item["kind"] == "saddle"
+                and np.linalg.norm(np.asarray(item["rz_m"]) - admitted) > 1e-5
+            ]
+        )
+    secondary["physical_image"] = []
+    for guess in secondary["solved"]:
+        try:
+            candidate, _ = saddle(radius, height, data["physical_image"], guess)
+        except ValueError:
+            continue
+        if not any(
+            np.linalg.norm(candidate - prev) < 1e-5
+            for prev in secondary["physical_image"]
+        ):
+            secondary["physical_image"].append(candidate)
     physical_style = replace(
         DEFAULT_INK,
         axis_color=WALL,
@@ -128,6 +155,7 @@ def geometry(data, result, output, previews):
                 ax,
                 magnetic_axis=axis,
                 x_points=np.array([xpoint]),
+                other_x_points=np.asarray(secondary[key]),
                 style=style,
                 contain=data["limiter"],
             )

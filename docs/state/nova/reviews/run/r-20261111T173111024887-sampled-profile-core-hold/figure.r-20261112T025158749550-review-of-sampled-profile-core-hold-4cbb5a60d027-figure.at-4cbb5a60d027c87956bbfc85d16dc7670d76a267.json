@@ -26,6 +26,13 @@
       "rendered_png_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T173111024887-sampled-profile-core-hold/figure-previews-4cbb5a60d/mast-21978-35-midplane.png"
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the base core counts are stated in the caption and table; a residual near-overprint of one maximum and one minimum on the superseded base panel does not hide the head result",
+      "recorded_at": "2026-11-12T03:11:28.888818+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/sampled-profile-core-hold/frame-137-diverted-poloidal.svg",

@@ -1,0 +1,51 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T01:07:21.290Z",
+  "dispatched_at": "2026-11-13T00:59:41Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261113T005753594488-plan-review-of-iron-core-magnetisation/plan.html:304",
+      "id": "reasoning-1",
+      "reason": "the one-word normalisation (\"G/\u03bc0\") is the quantity the convexity and single-root claim depends on, and without it the sentence is dimensionally wrong in exactly the place a worker may take its guard from.",
+      "text": "the sentence \"its symmetric spectrum lies in [0, 1], and the demagnetising operator is positive semidefinite\" states the bound of G, but G is the field-per-unit-magnetisation matrix and carries units of \u03bc0 (measured eigenvalues of G/\u03bc0 are 4.9e-5 to 0.99994, i.e. 6.2e-5 to 1.26 in G), so the spectrum statement and the convexity conclusion that now rests on it hold only for G/\u03bc0, as the done-when at line 332 correctly writes \u2014 and a guard built from the narrative rather than the done-when would test G's eigenvalues and pass for any physical operator",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "a732ede0a545a4c6524cfd3ccfb1fbc6aa125642",
+  "plan_fingerprint": "5ef18d1f95bacaf5d900f148b85f3699db3e1647999728d3964def799e90f5bd",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 77,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T005753594488-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "20c9e68dec593571812b9ca0167d21a1d306438d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 nova/imas/machine.py, scripts/prototypes/iron_magnetisation/west.py, scripts/west_stray_field/solve.py, nova/biot/magnetisation.py, nova/equilibrium/AGENTS.md, nova/equilibrium/reduced_newton.py, nova/biot/tiledassembly.py (galerkin_cell_interaction at line 816) and the receipt fragment all resolve in the reviewed tree.",
+    "done_when": "pass \u2014 clause (1) carries two negative controls (a secant-resuming law mutant and a centroid-sampling mutant), clause (2) the frozen-permeability Picard control, and the added per-probe ceilings reconcile with docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-interaction.html (\u03bcr 100: 0.447/0.517/0.349 % \u2192 0.947/1.017/0.849 %; \u03bcr 1000: 2.7/3.0/2.0 % \u2192 3.2/3.5/2.5 %) as does the sphere clause (derived bound 7.08e-6, ceiling 1e-5, observed 1.36e-6 within it).",
+    "evidence_paths": "pass \u2014 the section names docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html and /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/, and the fragment exists and states the mesh pair, the iteration record, the converged permeability range and the far field with its mesh-pair error bar.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach the prose or the symbols the section names.",
+    "reasoning": "a finding \u2014 the added convexity argument rests on a spectrum claimed of G itself, while the argument and the done-when are true only of G/\u03bc0.",
+    "single_goal": "pass \u2014 the earlier single_goal finding was declined on the ground that the iron read has landed, so what remains is the Galerkin-solve endpoint; nothing in the changed text adds a second deliverable.",
+    "wiring": "pass \u2014 s4's depends-on entries (s2, s3) exist, and s5, s6 and s9 all declare s4 in plan-section-depends-on, so the consumers are wired; the \u00a73 \"without changing it\" wording against \u00a74's Galerkin extension was adjudicated in an earlier round and is unchanged."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "bf0049ee8c924773ea67dcbe093fb860584392de2ea9a0789d0fabc79578a462",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "10b52bb8ede13a0d047b108f7287a8043292ebcbbfa1866a1159976a1d390f08",
+    "s5": "18d64dc99773bd89740bde91084ec424e8873aa08afed9991b5bbc40f3395b4a",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "8a8c2cb93f6c3ed1ebbb2171af1a254a72689f0630f9b086c8890ac486595e6e",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T01:31:06.385021+00:00",
+  "total": null
+}

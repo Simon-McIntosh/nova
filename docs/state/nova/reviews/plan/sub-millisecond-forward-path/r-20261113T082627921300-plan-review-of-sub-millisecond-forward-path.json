@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T08:41:34.839Z",
+  "dispatched_at": "2026-11-13T08:29:06Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/sub-millisecond-forward-path/r-20261113T082627921300-plan-review-of-sub-millisecond-forward-path/plan.html:120",
+      "id": "done_when-1",
+      "reason": "as written a worker cannot say which of three widths it selected, nor how an unresolved lever is recorded as matching clause (2), which is exactly the state the section's whole product is.",
+      "text": "the margin paragraph defines a decision as \"its on arm is slower than its off arm by more than the larger of 3% and the two arms' larger process spread\", but the shape paragraph above it times \"each tile width\" for the scalar booking tile, whose stated question is \"the tile among 32, 64 and 128 that minimises read wall\" \u2014 so for that family no pair is identified as the comparison and no criterion is given for picking a minimum rather than judging one arm slower, and the negative control inherits the same two-arm vocabulary (\"the lowered program digest ... of the off arm differs from the on arm\") although a width family has no off arm; separately, the margin admits \"the difference was not resolved\" while done-when clause (2) enumerates the verdict only as \"on, off or best tile width\", so an unresolved lever has no verdict clause (2) accepts",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/sub-millisecond-forward-path/r-20261113T082627921300-plan-review-of-sub-millisecond-forward-path/plan.html:120",
+      "id": "anchors_resolve-1",
+      "reason": "a worker reading the row today can record the section as measured while timing neither read lever, which is the one pair of levers \u00a75 exists to put a wall on, and the off-GPU column understates what already exists to compare against.",
+      "text": "the row \"Live saddle candidates, diverted wall skip (read-live-candidates, read-diverted-wall-skip)\" records both levers as \"in flight\" with \"CPU estimates from bank-read-attribution\" as their only off-GPU evidence, but both have landed: merge 21e32d41d (live candidates) and head 5346637e8 (guarded wall skip) are ancestors of the snapshot's HEAD 097f54acb, `docs/evidence/fragments/sub-millisecond-forward-path/read-live-candidates.html` and `read-diverted-wall-skip.html` are present in the tree, and the plan's own comment record at :301\u2013:311 describes both as merged and verified, the live-candidates fragment carrying a measured paired width-sixteen CPU full-read wall of 7.726588 to 6.118481 seconds (-20.81%), not an estimate; the newly added sentence \"Levers still in flight when the card frees are timed only if they have landed by then\" converts that stale label into a rule a worker may follow",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/sub-millisecond-forward-path/r-20261113T082627921300-plan-review-of-sub-millisecond-forward-path/plan.html:120",
+      "id": "reasoning-1",
+      "reason": "one clause naming the timed revision per arm (and re-timing a family whose main moved) is the difference between a verdict about the code on main and one about code that no longer exists, and without it clause (2)'s comparison has no stated head to compare against.",
+      "text": "the shape paragraph says \"each lever's committed timing driver runs from main\" and, in the same sentence, that each family is \"its own job, all queued at once so they take cards as they free\", so each family archives whatever main holds when its card frees; nothing in the section pins the revision an arm was timed at, and clause (2) then changes defaults on main \"in the same node where the measurement disagrees with main\" \u2014 the section is being run in a period when this plan's own levers are still landing, so families timed at different revisions are tabled beside one another and a verdict is left with nothing saying which revision it describes",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "be5917750ebc2597c853f8d5c4038e09af8b76e1",
+  "plan_fingerprint": "52721a03f24a40024235f534b040745792e55c33b7922758a470ed1eae7aa748",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 306,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T082627921300-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "eb6f4f133444c6b568484d85156a2db7ddc392ce",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the lever table's \"State on main\" still labels read-live-candidates and read-diverted-wall-skip \"in flight\" and gives CPU estimates as their off-GPU evidence, while both landings are ancestors of HEAD and both fragments are in the tree; the newly added deferral sentence turns that stale label into a licence to skip them.",
+    "done_when": "a finding \u2014 the newly added \"Agreement and decision margin\" paragraph decides from \"its on arm\" against \"its off arm\", but \u00a75 times a three-arm tile-width family and permits an unresolved outcome that done-when clause (2) does not enumerate.",
+    "evidence_paths": "pass \u2014 the added paragraph now requires gate logs, per-arm receipts and the job log on GPFS (the node's run directory or `~/.cache/nova-h200-timing/`), never only node `/tmp`, which closes the prior finding.",
+    "naming": "pass \u2014 the identifiers \u00a75 carries (`bank-carried-decision`, `booking-scalar-tile`, `precision-budget`) are run and decision keys, i.e. data labels, and the section asks no plan label or stage name to appear in source.",
+    "reasoning": "a finding \u2014 the section times \"from main\" with every family's job queued at once and never pins the revision an arm was measured at, so the fragment can table arms drawn from different revisions while clause (2) alters main in the same node.",
+    "single_goal": "pass \u2014 the section delivers one verdict per lever (its measured H200 wall and the default that follows from it), which is one closable outcome; the table's six rows are six instances of that one decision.",
+    "wiring": "pass \u2014 \u00a75's `data-links` name `sub-millisecond-forward-path#s2` and `#s3` as provenance while `plan-section-depends-on` (:24) declares no wait for s5, which the prior review's decline reasons stand on since those sections stay open for further levers; no relationship points at a node that does not exist."
+  },
+  "section_digests": {
+    "_document": "8c945b8c070d0a15c7d6a0cd55b55b5cfd0bfa8d7ce464a6865003332f649b3d",
+    "s0": "02c484da982db49df058949810d449b2e95a1a134ec03272e31dda4df5bed6d2",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "5aa72ecf3d63060b466bd064d76dc02fa5439343113fd1657038c73094f830b2",
+    "s4": "91bd28dc1cffb091dd5b8e3154b8052ae494fc161f98b81c4aa3d7fc4b7d4fca",
+    "s5": "e3da218239598b259b9ace1454842c589c658bc74ad36b354b6f1f11346d64c2"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T11:30:50.953189+00:00",
+  "total": null
+}

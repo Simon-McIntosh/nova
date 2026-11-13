@@ -51,6 +51,10 @@ class SupportOperands:
     ``geometry``. The total nodal jet of a state is ``exterior`` plus ``rows``
     contracted with the state's booked moments.
 
+    ``coil_exterior`` has shape (nodes, coils, six jet entries), one
+    unit-current response per driven coil, with signed turns already included.
+    ``coil_count`` is a traced scalar. ``exterior`` holds only the fixed field.
+
     Padded to a shape bucket, ``rows``, ``exterior`` and ``nodes`` carry
     ``bucket`` rows of which the first ``active_nodes`` are the machine's own
     and the rest are zero, so one program serves every geometry of the bucket.
@@ -67,6 +71,8 @@ class SupportOperands:
     exterior: jax.Array
     bucket: int | None = field(default=None, metadata=dict(static=True))
     active_nodes: jax.Array | None = None
+    coil_exterior: jax.Array | None = None
+    coil_count: jax.Array | None = None
 
     @classmethod
     def from_rows(
@@ -77,6 +83,8 @@ class SupportOperands:
         nodes=None,
         sample_index=None,
         bucket=None,
+        *,
+        coil_exterior=None,
     ):
         """Assemble operands from prebuilt rows; nodes follow the sample points.
 
@@ -92,6 +100,14 @@ class SupportOperands:
         nodes = np.asarray(nodes)
         rows = np.asarray(rows)
         exterior = np.asarray(exterior)
+        coil_exterior = (
+            np.zeros((len(nodes), 0, 6), dtype=exterior.dtype)
+            if coil_exterior is None
+            else np.asarray(coil_exterior)
+        )
+        if coil_exterior.ndim != 3 or coil_exterior.shape[::2] != (len(nodes), 6):
+            raise ValueError("coil_exterior must have shape (nodes, coils, 6)")
+        coil_count = coil_exterior.shape[1]
         mesh_nodes = nodes
         active = len(nodes)
         if bucket is not None:
@@ -104,6 +120,9 @@ class SupportOperands:
                 (bucket, *exterior.shape[1:]), dtype=exterior.dtype
             )
             padded_exterior[:active] = exterior
+            padded_coils = np.zeros((bucket, coil_count, 6), dtype=coil_exterior.dtype)
+            padded_coils[:active] = coil_exterior
+            coil_exterior = padded_coils
             padded_nodes = np.zeros((bucket, nodes.shape[-1]), dtype=nodes.dtype)
             padded_nodes[:active] = nodes
             rows, exterior, nodes = padded_rows, padded_exterior, padded_nodes
@@ -117,6 +136,8 @@ class SupportOperands:
             jnp.asarray(exterior),
             bucket,
             jnp.asarray(active),
+            jnp.asarray(coil_exterior),
+            jnp.asarray(coil_count, dtype=jnp.int32),
         )
 
 
@@ -2132,6 +2153,12 @@ def _bank_payload(operands: SupportOperands) -> bytes:
         buffer,
         rows=np.asarray(operands.rows),
         exterior=np.asarray(operands.exterior),
+        coil_exterior=np.asarray(operands.coil_exterior)
+        if operands.coil_exterior is not None
+        else np.zeros((len(operands.nodes), 0, 6), dtype=operands.exterior.dtype),
+        coil_count=np.asarray(
+            0 if operands.coil_count is None else operands.coil_count
+        ),
         nodes=np.asarray(operands.nodes),
         sample_index=np.asarray(operands.sample_index),
         bucket=np.asarray(-1 if operands.bucket is None else operands.bucket),
@@ -2161,6 +2188,9 @@ def write_bank(operands: SupportOperands, cache_directory) -> str:
         {
             "kind": "nova-support-operator-bank",
             "bucket": operands.bucket,
+            "coil_count": 0
+            if operands.coil_count is None
+            else int(operands.coil_count),
             "active_nodes": None
             if operands.active_nodes is None
             else int(operands.active_nodes),
@@ -2192,6 +2222,12 @@ def read_bank(cache_directory, digest: str, geometry, mesh) -> SupportOperands:
         sample_index = archive["sample_index"]
         bucket = int(archive["bucket"])
         active_nodes = int(archive["active_nodes"])
+        coil_exterior = (
+            archive["coil_exterior"]
+            if "coil_exterior" in archive
+            else np.zeros((len(nodes), 0, 6), dtype=exterior.dtype)
+        )
+        coil_count = int(archive["coil_count"]) if "coil_count" in archive else 0
     return SupportOperands(
         geometry,
         mesh,
@@ -2201,4 +2237,6 @@ def read_bank(cache_directory, digest: str, geometry, mesh) -> SupportOperands:
         jnp.asarray(exterior),
         None if bucket < 0 else bucket,
         jnp.asarray(active_nodes),
+        jnp.asarray(coil_exterior),
+        jnp.asarray(coil_count, dtype=jnp.int32),
     )

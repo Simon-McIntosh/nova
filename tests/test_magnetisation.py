@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -234,6 +235,121 @@ def test_closed_shell_refines_toward_exact_shielding(mu, capsys):
         assert np.all(fine_error <= np.asarray(collocation_fine) + 0.005), (
             "fine-mesh error must stay within 0.5 percentage points of collocation"
         )
+
+
+# The graded shell arm: spacing at the shell faces, the coarse limit away from
+# them, and the cells the 0.1 m wall keeps across its thickness.
+GRADED_FINE = 0.002
+GRADED_COARSE = 0.02
+GRADED_CELLS_ACROSS = 20.0
+
+
+def mesh_digest(cells):
+    """Return a digest of the cell basis: every polygon, centroid and area."""
+    digest = hashlib.sha256()
+    for polygon in cells.polygons:
+        digest.update(polygon.tobytes())
+    digest.update(cells.centroids.tobytes())
+    digest.update(cells.areas.tobytes())
+    return digest.hexdigest()
+
+
+def graded_shell_field(scale=1.0):
+    """Return the shell's grading, optionally coarsened by ``scale``."""
+    return iron.graded_cell_size(
+        [0.9, 1.0],
+        [-1.0, 1.0],
+        GRADED_FINE * scale,
+        GRADED_COARSE * scale,
+        cells_across=GRADED_CELLS_ACROSS,
+    )
+
+
+def test_uniform_cell_size_reproduces_the_recorded_grid():
+    # Digests recorded from the uniform grid before the spacing field existed,
+    # so any perturbation of the default mesh changes them.
+    recorded = {
+        0.1: (46, "0a354c798c78a034dfdb0a729c1778689309dd36a9811bfd510a551386c313be"),
+        0.04: (228, "aa787e3776037d958c92c61754003913177d66f63719b18a9a573a8c97aee7ec"),
+    }
+    region = shell()
+    for size, (count, digest) in recorded.items():
+        cells = iron._mesh(region, size)
+        assert len(cells.polygons) == count
+        assert mesh_digest(cells) == digest
+
+
+def test_graded_cell_size_grades_away_from_named_surfaces():
+    field = graded_shell_field()
+    assert field.radial(0.9) == pytest.approx(GRADED_FINE)
+    assert field.radial(1.0) == pytest.approx(GRADED_FINE)
+    # The 0.1 m shell wall keeps its prescribed cells across the thickness.
+    assert field.radial(0.95) == pytest.approx(0.1 / GRADED_CELLS_ACROSS)
+    # Far inside the bore the spacing coarsens to the coarse limit.
+    assert field.radial(0.5) == pytest.approx(GRADED_COARSE)
+    assert field.vertical(0.0) == pytest.approx(GRADED_COARSE)
+    assert field.scaled(0.5).radial(0.95) == pytest.approx(0.05 / GRADED_CELLS_ACROSS)
+    with pytest.raises(ValueError):
+        iron.graded_cell_size([], [-1.0, 1.0], 0.002, 0.02)
+    with pytest.raises(ValueError):
+        iron.graded_cell_size([0.9, 1.0], [-1.0, 1.0], 0.03, 0.02)
+    with pytest.raises(ValueError):
+        iron.graded_cell_size([0.9, 1.0], [-1.0, 1.0], 0.002, 0.02, growth=1.0)
+
+
+def test_graded_mesh_resolves_the_shell_with_fewer_cells_than_the_uniform_mesh():
+    field = graded_shell_field()
+    cells = iron._mesh(shell(), field)
+    axis = iron._axis(0.9, 1.0, field.radial)
+    assert np.max(np.diff(axis)) <= 0.1 / GRADED_CELLS_ACROSS + 1e-12
+    uniform = iron._mesh(shell(), 0.01)
+    assert cells.areas.sum() == pytest.approx(shell().area, abs=1e-9)
+    merged = shapely.union_all([shapely.Polygon(p) for p in cells.polygons])
+    assert shell().symmetric_difference(merged).area < 1e-14
+    assert all(
+        shapely.Polygon(p).contains(shapely.Point(c))
+        for p, c in zip(cells.polygons, cells.centroids)
+    )
+    assert len(cells.polygons) < len(uniform.polygons)
+
+
+def graded_shell_error(field, capsys):
+    """Return the exact-shielding relative error at the shell's three probes."""
+    started = perf_counter()
+    result = iron.solve_magnetisation(
+        shell(), loop, [0, 10], [1000, 1000], cell_size=field
+    )
+    wall = perf_counter() - started
+    assert result.converged
+    probes = np.array([[2.0, 0], [0, 2.0], [3.0, 1.0]])
+    air = loop(probes)
+    total = air + result.field(probes)
+    shielding = np.linalg.norm(air, axis=1) / np.linalg.norm(total, axis=1)
+    mu = 1000.0
+    exact = ((2 * mu + 1) * (mu + 2) - 2 * (mu - 1) ** 2 * 0.9**3) / (9 * mu)
+    error = np.abs(shielding / exact - 1)
+    with capsys.disabled():
+        print(
+            f"\ngraded shell: cells={result.cell_count}, iterations={result.iterations}, "
+            f"shielding={shielding.tolist()}, analytic_relative_error={error.tolist()}, "
+            f"wall_seconds={wall:.6f}",
+            flush=True,
+        )
+    return error, result.cell_count
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(3600)
+def test_graded_shell_reaches_half_percent_where_its_doubled_arm_misses(capsys):
+    error, count = graded_shell_error(graded_shell_field(), capsys)
+    doubled, doubled_count = graded_shell_error(graded_shell_field(2.0), capsys)
+    assert doubled_count < count
+    assert np.all(error <= 0.005), (
+        "the graded Galerkin solve must reach 0.5 percent at every probe"
+    )
+    assert np.any(doubled > 0.005), (
+        "doubling the cell-size field through the shell must miss 0.5 percent"
+    )
 
 
 def test_mesh_merges_slivers_without_losing_material():

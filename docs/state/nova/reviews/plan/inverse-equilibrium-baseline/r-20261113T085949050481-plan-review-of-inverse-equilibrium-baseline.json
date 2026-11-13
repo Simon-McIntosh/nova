@@ -43,6 +43,16 @@
       "note": "Section 4 gains a constructed timing control: the same measurement with the iteration cap doubled and the convergence exit disabled must exceed the ceiling, and both walls exclude compile.",
       "reason": "",
       "when": "2026-11-13T09:07:32.989657+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c14e7b1d01b84e4d365f43c46d702eed06998396",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The ceiling denominator is stated as the warm forward solve wall per slice at the same shape and batch width, measured in the same job.",
+      "reason": "",
+      "when": "2026-11-13T09:07:55.308957+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "Section 4 gains a constructed timing control: the same measurement with the iteration cap doubled and the convergence exit disabled must exceed the ceiling, and both walls exclude compile.",
       "reason": "",
       "when": "2026-11-13T09:07:32.989657+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c14e7b1d01b84e4d365f43c46d702eed06998396",
+      "commit_basis": "edit",
+      "note": "The ceiling denominator is stated as the warm forward solve wall per slice at the same shape and batch width, measured in the same job.",
+      "reason": "",
+      "when": "2026-11-13T09:07:55.308957+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261113T085949050481-plan-review-of-inverse-equilibrium-baseline.json",

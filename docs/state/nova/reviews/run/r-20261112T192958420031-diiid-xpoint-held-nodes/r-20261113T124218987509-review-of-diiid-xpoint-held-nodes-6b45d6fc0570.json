@@ -13,7 +13,7 @@
     "nova/equilibrium/forward_operator.py:2997",
     "nova/equilibrium/topology.py:1418"
   ],
-  "completed_at": "",
+  "completed_at": "2026-11-13T13:04:09.775Z",
   "dispatched_at": "2026-11-13T12:44:10Z",
   "finding_dispositions": {
     "0": {
@@ -30,14 +30,12 @@
   "findings": [
     {
       "file": "tests/test_equilibrium_forward_solve.py",
-      "id": "fe7d712e724",
       "line": "921",
       "severity": "non-blocking",
       "text": "non-blocking: the non-degeneracy floor on the analytic moment tangent was lowered from greater-than-1.0 to greater-than-0.0, so a collapse of the Jacobian toward zero no longer trips this line; the finite-difference ordering assertion at :943 still fails on a zero tangent because it normalises by max|analytic|."
     },
     {
       "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-held-nodes.html",
-      "id": "f6f5fc2db14",
       "line": "7",
       "severity": "non-blocking",
       "text": "non-blocking: the done_when clause that the change does not change which nodes are shadowed is not met literally, since measured head membership differs from base (137D 6 to 7, 146D 9 to 8, MAST 49 to 46) because the mask is a state function; the fragment discloses the counts and the membership rule is untouched, but no gate asserts the clause as written."
@@ -76,6 +74,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-13T13:05:33.606003+00:00",
+  "timestamp": "2026-11-13T13:12:13.956208+00:00",
   "total": 113
 }

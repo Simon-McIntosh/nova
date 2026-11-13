@@ -335,6 +335,21 @@ def main():
 
     production, installed, cold_assembly = install_assembly_cache()
 
+    if (OUT / "measurement.json").is_file():
+        # An allocation that ended part-way leaves the arms it finished; adopt
+        # them so a rerun of the same command spends its time on the rest.
+        for section in ("shell", "sweep", "west"):
+            for label, row in (
+                json.loads((OUT / "measurement.json").read_text())
+                .get(section, {})
+                .items()
+            ):
+                if row.get("converged"):
+                    record[section][label] = row
+
+    def finished(section, label):
+        return record[section].get(label, {}).get("converged", False)
+
     def shell_update(row, label=None):
         if label is not None:
             record["shell"][label] = row
@@ -358,6 +373,9 @@ def main():
         if "shell" in arms:
             for size in SHELL_UNIFORM:
                 label = f"uniform-{size:.4g}"
+                if finished("shell", label):
+                    print(f"SKIP shell {label}: receipt already converged", flush=True)
+                    continue
                 (OUT / "shell" / label).mkdir(parents=True, exist_ok=True)
                 shell_arm(
                     label, size, lambda row, label=label: shell_update(row, label)
@@ -365,6 +383,9 @@ def main():
             # The pinned grading and its deliberately under-resolved doubling:
             # the pair the accuracy test asserts on.
             for label, scale in (("graded-double", 2.0), ("graded-fine", 1.0)):
+                if finished("shell", label):
+                    print(f"SKIP shell {label}: receipt already converged", flush=True)
+                    continue
                 field = iron.graded_cell_size(
                     SHELL_SURFACES["radial"],
                     SHELL_SURFACES["vertical"],
@@ -380,6 +401,9 @@ def main():
                 save(OUT / "measurement.json", record)
         if "sweep" in arms:
             for label, fine, coarse, across in SHELL_SWEEP:
+                if finished("sweep", label):
+                    print(f"SKIP sweep {label}: receipt already converged", flush=True)
+                    continue
                 field = iron.graded_cell_size(
                     SHELL_SURFACES["radial"],
                     SHELL_SURFACES["vertical"],
@@ -410,6 +434,9 @@ def main():
             )
             save(OUT / "measurement.json", record)
             for label, scale in (("graded-fine", 1.0), ("graded-half", 0.5)):
+                if finished("west", label):
+                    print(f"SKIP west {label}: receipt already converged", flush=True)
+                    continue
                 field = iron.graded_cell_size(
                     inputs["surfaces"]["radial"],
                     inputs["surfaces"]["vertical"],

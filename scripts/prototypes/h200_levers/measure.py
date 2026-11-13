@@ -85,7 +85,7 @@ def main():
         with np.load(args.fixture_seed, allow_pickle=False) as frozen:
             moments = tuple(jnp.asarray(frozen[f"m{i}"]) for i in range(3))
             roots = jnp.asarray(frozen["roots"])
-        parts = (*parts[:2], roots, *parts[3:7], moments, parts[9])
+        parts = (*parts[:2], roots, *parts[3:7], moments, parts[8])
     if args.kind == "scalar":
         rule = replace(rule, scalar_cut_batch_width=int(args.arm))
     from tests.equilibrium.test_topology_read import _analytic_inputs

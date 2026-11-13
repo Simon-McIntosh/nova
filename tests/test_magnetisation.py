@@ -370,7 +370,11 @@ def graded_shell_error(field, capsys):
 
 
 @pytest.mark.slow
-@pytest.mark.timeout(3600)
+# Both arms assemble a dense cell interaction: the pinned grading measured
+# 3660 s of assembly plus 237 s of solve at 13410 cells, and the doubled arm
+# 566 s plus 26 s at 4017 cells, on 16 CPU threads. The bound leaves room for
+# a slower node without letting a hung run hold the lane indefinitely.
+@pytest.mark.timeout(7200)
 def test_graded_shell_reaches_half_percent_where_its_doubled_arm_misses(capsys):
     error, count = graded_shell_error(graded_shell_field(), capsys)
     doubled, doubled_count = graded_shell_error(graded_shell_field(2.0), capsys)

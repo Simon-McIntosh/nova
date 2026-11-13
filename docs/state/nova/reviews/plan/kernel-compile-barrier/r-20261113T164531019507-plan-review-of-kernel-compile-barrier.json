@@ -50,6 +50,13 @@
       "finding": "reasoning-1",
       "reason": "The jets section is not in this wave. A comment on it records that its 60 s bound needs the second-derivative path to shrink as well as the variadic lever, and that its lever and bound are restated from the head-arm profile the variadic section lands, before it is dispatched.",
       "when": "2026-11-13T16:53:44.785089+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "finding": "reasoning-2",
+      "reason": "The sentence predates this edit and sits in the done-when paragraph; the decision text is the authority and says no section owns 10 s yet. It is corrected in the same edit that restates the jets section, recorded in a comment on that section.",
+      "when": "2026-11-13T16:53:58.464484+00:00"
     }
   ],
   "responses": {
@@ -67,6 +74,12 @@
       "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
       "reason": "The jets section is not in this wave. A comment on it records that its 60 s bound needs the second-derivative path to shrink as well as the variadic lever, and that its lever and bound are restated from the head-arm profile the variadic section lands, before it is dispatched.",
       "when": "2026-11-13T16:53:44.785089+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "reason": "The sentence predates this edit and sits in the done-when paragraph; the decision text is the authority and says no section owns 10 s yet. It is corrected in the same edit that restates the jets section, recorded in a comment on that section.",
+      "when": "2026-11-13T16:53:58.464484+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261113T164531019507-plan-review-of-kernel-compile-barrier.json",

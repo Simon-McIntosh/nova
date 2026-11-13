@@ -52,6 +52,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--files", type=Path)
     parser.add_argument("--mutation", action="store_true")
+    parser.add_argument("--wall-tangent-mutation", action="store_true")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     results = {}
@@ -61,7 +62,26 @@ def main():
         scratch = Path(temporary)
         tree = scratch / "tree"
         extract(tree, args.revision, ROOT)
-        if args.mutation:
+        if args.wall_tangent_mutation:
+            source = tree / "nova/equilibrium/topology.py"
+            text = source.read_text()
+            marker = "            boundary_position = data_b[:2]\n"
+            assert text.count(marker) == 1
+            source.write_text(
+                text.replace(
+                    marker,
+                    "            boundary_position = "
+                    "jax.lax.stop_gradient(data_b[:2])\n",
+                )
+            )
+            results["wall_tangent_negative_control"] = gate(
+                tree,
+                args.revision,
+                list(SCOPED),
+                args.output / "wall-tangent-negative-control.log",
+                scratch,
+            )
+        elif args.mutation:
             source = tree / "nova/equilibrium/forward_operator.py"
             text = source.read_text()
             marker = "            jnp.zeros_like(psi, dtype=bool),\n"
@@ -127,6 +147,8 @@ def main():
         (args.output / "results.json").write_text(json.dumps(results, indent=2) + "\n")
     if args.mutation:
         assert results["negative_control"]["exit_status"] != 0
+    if args.wall_tangent_mutation:
+        assert results["wall_tangent_negative_control"]["exit_status"] != 0
 
 
 if __name__ == "__main__":

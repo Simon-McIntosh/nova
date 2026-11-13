@@ -73,7 +73,11 @@ def main():
     assert radius > 0
     if args.inventory:
         inventory = json.loads((run / "measurement-jobs.json").read_text())
-        jobs = [item["job_id"] for item in inventory["jobs"]]
+        items = list(inventory["jobs"])
+        repairs = run / "repair-jobs.json"
+        if repairs.exists():
+            items += json.loads(repairs.read_text())["jobs"]
+        jobs = [item["job_id"] for item in items]
         output = subprocess.check_output(
             [
                 "sacct",
@@ -101,7 +105,7 @@ def main():
         summaries = [
             json.loads((run / "h200-levers-corrected/summary.json").read_text())
         ]
-        for item in inventory["jobs"]:
+        for item in items:
             directory = Path(item["output"])
             value = json.loads((directory / "summary.json").read_text())
             assert value["completed"] and not value["smoke"]
@@ -115,6 +119,16 @@ def main():
         if not args.partial:
             assert (run / "job.log").read_text().splitlines()[-1] == "EXIT=0"
         summaries = [value]
+    selected_comparisons = {}
+    for value in summaries:
+        for comparison in value["comparisons"]:
+            key = (
+                comparison["name"],
+                comparison["width"],
+                comparison.get("step", 1e-5),
+                comparison.get("population", "diverted"),
+            )
+            selected_comparisons[key] = comparison
     summary = dict(
         arms=[
             arm
@@ -122,9 +136,7 @@ def main():
             for arm in value["arms"]
             if arm["exit_status"] == 0
         ],
-        comparisons=[
-            comparison for value in summaries for comparison in value["comparisons"]
-        ],
+        comparisons=list(selected_comparisons.values()),
     )
     receipts = {}
     for arm in summary["arms"]:

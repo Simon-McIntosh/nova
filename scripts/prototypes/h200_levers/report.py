@@ -19,7 +19,12 @@ def load(run):
         if "repair" in path.parent.name and not value["completed"]:
             continue
         for row in value["comparisons"]:
-            key = (row["name"], row["width"], row.get("step"), row.get("population"))
+            key = (
+                row["name"],
+                row["width"],
+                row.get("step", 1e-5),
+                row.get("population", "diverted"),
+            )
             comparisons[key] = row
         if "headline" in value:
             headline = value["headline"]

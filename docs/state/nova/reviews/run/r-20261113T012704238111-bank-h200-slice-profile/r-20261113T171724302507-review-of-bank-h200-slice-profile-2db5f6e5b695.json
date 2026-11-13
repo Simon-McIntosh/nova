@@ -1,0 +1,55 @@
+{
+  "added_failure_basis": "The reviewed run's manifest carries 'baseline_suite:' and 'after_suite:' both empty, and its declared write paths hold no test file, so the suite pair was unarmed and no suite verdict exists to compare. Derived from those two absent arms the added-failure set is empty, not zero-measured; no pytest run was substituted for the unarmed pair.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-13T17:28:20.081Z",
+  "dispatched_at": "2026-11-13T17:18:00Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_h200_slice_profile/report.py",
+      "line": 175,
+      "severity": "non-blocking",
+      "summary": "'assert abs(sum(totals.values()) - kernel_ms) < 1e-7' compares two sums over the same kernel ledger: every row adds its device_ms to exactly one label, so the two sides are equal by construction and the assertion can only fire on a float-order artefact. It cannot catch a kernel charged to the wrong stage, which is the failure the surrounding attribution logic exists to prevent, so it reads as an accounting guard it is not."
+    },
+    {
+      "file": "scripts/prototypes/bank_h200_slice_profile/run.py",
+      "line": 144,
+      "severity": "non-blocking",
+      "summary": "The width loop '[1, 16, 64, 256, 1024]' breaks at the first memory-limited width (256) and never attempts 128, so the goal's 'or the largest width that fits' is answered only for the requested set; compiled working bytes grow 1.675/16.589/65.295 GB with width, so a 128-lane arm would sit between 65 GB and the 191 GB refusal and could have fitted under the 101 GB admission ceiling. The fragment states 64 is the largest requested admitted width rather than the largest that fits, so nothing is misreported, but the throughput ceiling is left unprobed."
+    }
+  ],
+  "justifications": {
+    "durability": "No test file lies in scope and the suite pair is unarmed, so the guards in measure.py and report.py:17 run only against a populated run directory; report.py:175 additionally asserts a partition that holds by construction.",
+    "evidence": "Every fragment number reconciles against h200/audited.json and the per-arm receipt.json, and review-report-fixed.log records the report gate's PANEL_VISIBLE lines, all four PROVENANCE_MUTATION_REFUSED exits and NUMERICAL_ATTRIBUTION_UNCHANGED before EXIT=0.",
+    "fit": "report.py and measure.py follow the sibling prototypes' idiom (scripts/prototypes/bank_solve_trace/analyse.py, bank_solve_profile/plot.py) and carry no plan, sprint or ticket label; a grep over the added sources finds none.",
+    "goal_fidelity": "The fragment's three tables and ranked list answer all three goal clauses, but run.py:144 breaks the width loop at the first memory-limited width and never probes 128, so 'the largest width that fits' between 64 and 256 is unmeasured.",
+    "reuse": "The instrument imports scripts.prototypes.bank_solve_trace.analyse and .provenance.metadata and scripts.prototypes.bank_solve_profile.plot.save_checked instead of copying them; report.py's attributed() extends branch attribution beyond bank_solve_trace_head/report.py:45 rather than duplicating its read/update split.",
+    "scope_discipline": "git diff --stat a732ede0a545a4c6524cfd3ccfb1fbc6aa125642 2db5f6e5b695eb9782dc0b730ad1b36b71ce514e lists only the eight paths inside the three declared write roots."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261113T171724302507-review-of-bank-h200-slice-profile-2db5f6e5b695",
+  "review_text": "VERDICT goal: the node profiled a warm flattop slice on the H200 across batch widths and attributed the carried-read regression; docs/evidence/fragments/sub-millisecond-forward-path/bank-h200-slice-profile.html tables per-stage cost at widths 1/16/64 (39.880/7.685/5.782 ms per slice), records the width-256 memory refusal, names support_read._rebuilt_reading and topology.refresh_at_stationary_points, and ends with four ranked conditional saving targets.\nVERDICT done_when: h200/job.log ends EXIT=0 with two agreeing fresh processes per width (0.232%/0.181%/0.169%), the precision budget is asserted in measure.py and reflected in h200/audited.json, the carried pair 3.394 to 8.917 ms reconciles to h200/audited.json, and the committed SVG digest matches the inspected SHA256 d0c1ac24.\nVERDICT write_paths: git diff --stat a732ede0..2db5f6e5 lists eight added files, all inside the three declared write roots, with no nova/ product source, test or pyproject.toml change.\nVERDICT manifest: read; it names the H200 job 1312890 and corrected report job 1314491, the widths that fitted, the 256-lane memory stop, the four exercised provenance refusals, the missed 5.78x gap and conditional saving targets, and states the suite pair is unarmed.\nVERDICT diff: read commit by commit at scripts/prototypes/bank_h200_slice_profile/{measure,run,report,provenance_controls}.py, job.sh and report_gate.sh; measurement code, evidence and figure only.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the fragment's three tables and ranked list answer all three goal clauses, but run.py:144 breaks at the first memory-limited width and never probes 128, so 'the largest width that fits' between 64 and 256 is unmeasured.\nSCORE evidence: 18\nJUSTIFICATION evidence: every fragment number reconciles against h200/audited.json and the per-arm receipt.json, and review-report-fixed.log records PANEL_VISIBLE, four PROVENANCE_MUTATION_REFUSED exits and NUMERICAL_ATTRIBUTION_UNCHANGED before EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat a732ede0a545a4c6524cfd3ccfb1fbc6aa125642 2db5f6e5b695eb9782dc0b730ad1b36b71ce514e lists only the eight paths inside the three declared write roots.\nSCORE durability: 14\nJUSTIFICATION durability: no test file lies in scope and the suite pair is unarmed, so the guards run only against a populated run directory, and report.py:175 asserts a partition that holds by construction.\nSCORE fit: 18\nJUSTIFICATION fit: report.py and measure.py follow the sibling prototypes' idiom (scripts/prototypes/bank_solve_trace/analyse.py, bank_solve_profile/plot.py) and carry no plan, sprint or ticket label.\nSCORE reuse: 17\nJUSTIFICATION reuse: the instrument imports bank_solve_trace.analyse and provenance.metadata and bank_solve_profile.plot.save_checked rather than copying them, and attributed() extends the branch split beyond bank_solve_trace_head/report.py:45.\nFINDING scripts/prototypes/bank_h200_slice_profile/report.py:175 non-blocking: the assertion sums two views of the same kernel ledger and holds by construction, so it cannot catch a kernel charged to the wrong stage.\nFINDING scripts/prototypes/bank_h200_slice_profile/run.py:144 non-blocking: the width loop stops at the first memory-limited width and never attempts 128, so the largest width that actually fits between 64 and 256 is left unprobed.\n",
+  "reviewed_base_sha": "a732ede0a545a4c6524cfd3ccfb1fbc6aa125642",
+  "reviewed_head_sha": "2db5f6e5b695eb9782dc0b730ad1b36b71ce514e",
+  "reviewed_run_id": "r-20261113T012704238111-bank-h200-slice-profile",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T18:07:13.415530+00:00",
+  "total": 104,
+  "verdicts": {
+    "diff": "Read commit by commit: 9610a36ba and 0d9c84930 add the instrument and stage audit, a64700cb6 records the CPU dry run, 958192c8d/880e3d13c/cacc862e3/7f6c5977c/279beff36 repair kernel attribution, de3976e31/1b8fcec5d bind receipts to retained input and measured source with exercised provenance refusals, 94724b894 reserves figure margin, and 2db5f6e5b corrects the fragment and republishes the SVG; every hunk is measurement code, evidence or figure.",
+    "done_when": "Clause 1: h200/job.log ends EXIT=0 with two agreeing fresh processes per width (h200/summary.json agreement 0.232%/0.181%/0.169%, h200/audited.json residual 1.84e-11..3.38e-11) and per-lane precision asserted in measure.py; clause 2: the paired carried table reconciles to h200/audited.json carried.historical 3.394 ms and carried.main 8.917 ms; clause 3: the fragment, its ranked list and the SVG are committed, and committed-artifact-check.log matches the inspected SHA256 d0c1ac24.",
+    "goal": "The node profiled a warm flattop slice on the H200 across batch widths and attributed the carried-read regression: docs/evidence/fragments/sub-millisecond-forward-path/bank-h200-slice-profile.html tables per-stage cost at widths 1/16/64 (39.880/7.685/5.782 ms per slice), records the width-256 memory refusal, names support_read._rebuilt_reading and topology.refresh_at_stationary_points, and ends with four ranked conditional saving targets.",
+    "manifest": "Read in full; it names the thirteen commits, eight changed paths, the H200 job 1312890 and the corrected all_debug report job 1314491, the widths that fitted, the 256-lane memory refusal, the provenance refusals, and states plainly that the 1 ms target is missed by 5.78x and that its four saving figures are conditional targets, not measured speedups.",
+    "write_paths": "Declared paths are scripts/prototypes/bank_h200_slice_profile, docs/evidence/fragments/sub-millisecond-forward-path/bank-h200-slice-profile.html and docs/figures/sub-millisecond-forward-path/bank-h200-slice-profile; git diff --stat a732ede0..2db5f6e5 lists eight files, all inside those three, and changes no nova/ product source, test or pyproject.toml."
+  }
+}

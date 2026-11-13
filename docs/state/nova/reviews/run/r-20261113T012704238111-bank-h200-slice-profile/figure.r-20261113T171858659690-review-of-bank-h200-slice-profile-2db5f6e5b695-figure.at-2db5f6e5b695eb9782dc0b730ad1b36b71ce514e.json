@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-13T17:19:41Z",
+  "figure": {
+    "canvas_px": [
+      1400,
+      1041
+    ],
+    "drawing_script": "scripts/prototypes/bank_h200_slice_profile/report.py",
+    "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T171858659690-review-of-bank-h200-slice-profile-2db5f6e5b695-figure/image-0.png",
+    "repository_path": "docs/figures/sub-millisecond-forward-path/bank-h200-slice-profile/per-slice-stages.svg"
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_h200_slice_profile/report.py",
+      "id": "fa68030f18f",
+      "line": 348,
+      "severity": "non-blocking",
+      "summary": "The vertical ticks are placed at the series' own minimum, geometric mean and maximum and printed to five decimals, so each y axis is a legend for its three extreme values rather than a scale a reader can interpolate. In the assembly panel the rendered labels read 2.95416 / 2.01793 / 1.37841, while the measured per-slice values are 2.9542, 1.4633 and 1.3784: the middle label is a computed geometric mean and corresponds to no measurement, and the actual middle data point at width 16 sits between two labels with nothing marking it. A reader can therefore read three numbers off a log axis but cannot place the middle marker from them, and the five-decimal format gives a computed tick the same apparent precision as a measured one. Round ticks at decade or half-decade positions, with the exact values left to the fragment's table, would let a reader place all three markers and would drop the false precision."
+    },
+    {
+      "file": "scripts/prototypes/bank_h200_slice_profile/report.py",
+      "id": "fa4df4ee39e",
+      "line": 345,
+      "severity": "non-blocking",
+      "summary": "Each of the twelve panels sets its own limits to [minimum/1.7, maximum*1.7] on a log axis, so every curve fills its panel from top to bottom whatever the size of its fall. Drawn this way a 2.9x fall (carried geometry, 0.78502 to 0.27144 ms/slice) and a 47x fall (predictor, 0.00474 to 0.00010) have identical height and identical apparent slope, and the grid cannot show which stages carry the 5.78 ms/slice that the fragment measures at width 64. That ranking is exactly what the fragment's ranked list rests on, so a reader who looks only at the figure gets twelve equivalent decays and has to return to the table to learn that assembly and the two geometry stages dominate. A shared logarithmic range across the twelve panels, or one common reference line per panel, would let the grid carry the comparison the figure exists to make; per-panel ranges are the right choice only if the panels are read one at a time, which a twelve-panel grid does not invite."
+    },
+    {
+      "file": "scripts/prototypes/bank_h200_slice_profile/report.py",
+      "id": "f8b8a530073",
+      "line": 376,
+      "severity": "non-blocking",
+      "summary": "All twelve panels are labelled [ms/slice], so the predictor panel prints its three measured values as 0.00474 / 0.00069 / 0.00010 and the transfer/fills panel runs down to 0.02121. The plot rule asks engineering quantities to take an SI prefix sized so ticks read between about 0.1 and 1000, and these values are three orders below the range a millisecond axis is sized for, so the cheapest stages in the split read as approximately zero. The same rule also asks panels comparing one quantity to share one prefix, and the two halves conflict for this grid; the figure resolved it toward the shared prefix, and the caption discloses the choice ('Every panel uses ms/slice and five decimal places on vertical ticks'), which is why this is recorded rather than blocking. The residual cost is that a reader scanning the grid cannot see that the predictor is a real cost rather than an empty panel, which matters because two of the ranked repairs target exactly these small stages."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261113T171858659690-review-of-bank-h200-slice-profile-2db5f6e5b695-figure",
+  "reviewed_base_sha": "a732ede0a545a4c6524cfd3ccfb1fbc6aa125642",
+  "reviewed_head_sha": "2db5f6e5b695eb9782dc0b730ad1b36b71ce514e",
+  "reviewed_run_id": "r-20261113T012704238111-bank-h200-slice-profile",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass - sampled from the 1400x1041 render itself: the series line and markers are rgb(31,93,146) at 6.91:1 against white, tick labels rgb(82,81,78) at 7.94:1, axis labels rgb(72,72,72) at 9.15:1 and the axis lines rgb(125,124,122) at 4.17:1. Every text element clears 4.5:1 and the axis rules clear the 3:1 non-text threshold, and no text sits on a coloured background.",
+    "data_ink": "pass - per panel the ink is one 3 pt blue curve and three filled markers, with no fills, gradients, error bands or annotation furniture. The one repeated element is the per-panel x-axis caption, which sits in each panel's own gutter and does not compete with the data; the remaining area is empty canvas.",
+    "decoration": "pass - no gridline, no background fill and no shading band on any of the twelve panels. The top and right spines are absent so only the bottom and left axes carry a scale, and the tick marks are short and outside the plot.",
+    "label_collision": "pass - measured on the render, the non-white content bbox is x 34-1373 and y 13-1006 in a 1400x1041 canvas, so no artist is clipped and at least 13 px of white remains on every edge. No two text artists overlap and none overlaps a marker: the rotated panel labels occupy the gutters between columns, and the longest of them (GMRES / scaling) ends in clear space between the legend band and that column's tick labels.",
+    "legibility": "defect - the twelve panels, their labels and their tick labels are readable at a glance, the dashed-square native panel is visibly distinguished from the eleven solid-circle stage panels, and the previous review's blocking defect is answered: every y axis is now logarithmic and the limits hold each panel's smallest marker at least 10% of the panel height above the lower spine, so no marker is drawn on the axis line any more. What remains is the scale rather than the drawing: three data-derived tick positions printed to five decimals, and a per-panel range that makes very different falls look identical (the two non-blocking findings anchored to lines 348 and 345).",
+    "table_form": "pass - the image is twelve small multiples of one two-variable relationship, per-slice cost against batch width, whose message is the shape of the decay and the knee at width 16; a table of thirty-six numbers would state the values but not show that shape. The exact values are already a table inside this figure's own fragment, so the image is not being used to carry what a table carries better."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T17:31:34.249373+00:00",
+  "total": null
+}

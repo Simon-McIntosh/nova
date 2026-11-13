@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import os
 from pathlib import Path
@@ -18,9 +19,32 @@ from scripts.prototypes.diiid_core_hold.regressions import (
 
 ROOT = CORE_ROOT
 SCOPED = (
+    "tests/test_boundary_flux_derivative.py",
     "tests/test_shadow_follows_image.py",
     "tests/test_xpoint_attribution_image_read.py",
 )
+
+
+def replace_boundary_position(source, expression):
+    """Mutate only the selected-position assignment in an extracted tree."""
+    text = source.read_text()
+    assignments = [
+        node
+        for node in ast.walk(ast.parse(text))
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "boundary_position"
+            for target in node.targets
+        )
+    ]
+    assert len(assignments) == 1
+    assignment = assignments[0]
+    lines = text.splitlines(keepends=True)
+    indent = " " * assignment.col_offset
+    lines[assignment.lineno - 1 : assignment.end_lineno] = [
+        f"{indent}boundary_position = {expression}\n"
+    ]
+    source.write_text("".join(lines))
 
 
 def gate(tree, revision, paths, log, scratch):
@@ -53,6 +77,8 @@ def main():
     parser.add_argument("--files", type=Path)
     parser.add_argument("--mutation", action="store_true")
     parser.add_argument("--wall-tangent-mutation", action="store_true")
+    parser.add_argument("--diverted-tangent-mutation", action="store_true")
+    parser.add_argument("--node", action="append")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     results = {}
@@ -62,18 +88,23 @@ def main():
         scratch = Path(temporary)
         tree = scratch / "tree"
         extract(tree, args.revision, ROOT)
-        if args.wall_tangent_mutation:
+        if args.diverted_tangent_mutation:
             source = tree / "nova/equilibrium/topology.py"
-            text = source.read_text()
-            marker = "            boundary_position = data_b[:2]\n"
-            assert text.count(marker) == 1
-            source.write_text(
-                text.replace(
-                    marker,
-                    "            boundary_position = "
-                    "jax.lax.stop_gradient(data_b[:2])\n",
-                )
+            replace_boundary_position(source, "data_b[:2]")
+            paths = [
+                SCOPED[0]
+                + "::test_diverted_boundary_tangent_is_finite_without_wall_contact"
+            ]
+            results["diverted_tangent_negative_control"] = gate(
+                tree,
+                args.revision,
+                paths,
+                args.output / "diverted-tangent-negative-control.log",
+                scratch,
             )
+        elif args.wall_tangent_mutation:
+            source = tree / "nova/equilibrium/topology.py"
+            replace_boundary_position(source, "jax.lax.stop_gradient(data_b[:2])")
             results["wall_tangent_negative_control"] = gate(
                 tree,
                 args.revision,
@@ -95,13 +126,19 @@ def main():
                     "            partition,\n",
                 )
             )
-            paths = [SCOPED[0]]
+            paths = ["tests/test_shadow_follows_image.py"]
             results["negative_control"] = gate(
                 tree,
                 args.revision,
                 paths,
                 args.output / "negative-control.log",
                 scratch,
+            )
+        elif args.node:
+            for path in args.node:
+                assert (tree / path.split("::")[0]).is_file()
+            results["selected"] = gate(
+                tree, args.revision, args.node, args.output / "selected.log", scratch
             )
         elif args.files:
             paths = json.loads(args.files.read_text())
@@ -149,6 +186,8 @@ def main():
         assert results["negative_control"]["exit_status"] != 0
     if args.wall_tangent_mutation:
         assert results["wall_tangent_negative_control"]["exit_status"] != 0
+    if args.diverted_tangent_mutation:
+        assert results["diverted_tangent_negative_control"]["exit_status"] != 0
 
 
 if __name__ == "__main__":

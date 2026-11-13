@@ -35,6 +35,24 @@ def _directions(shape: tuple[int, ...]) -> list[jax.Array]:
     ]
 
 
+def test_diverted_boundary_tangent_is_finite_without_wall_contact(terminal_fixture):
+    """A stationary saddle value needs no wall-position derivative."""
+    topology, flux, inside = terminal_fixture
+    state = topology.read_qualification(
+        flux, -1.0, inside, TopologyClass.DIVERTED
+    ).state
+    assert bool(state.boundary_is_xpoint)
+
+    def boundary_value(field):
+        return topology.read_qualification(
+            field, -1.0, inside, TopologyClass.DIVERTED
+        ).state.boundary_flux
+
+    value, tangent = jax.jvp(boundary_value, (flux,), (_directions(flux.shape)[0],))
+    assert bool(jnp.isfinite(value))
+    assert bool(jnp.isfinite(tangent))
+
+
 @pytest.mark.parametrize(
     "topology_class", (TopologyClass.DIVERTED, TopologyClass.LIMITED)
 )

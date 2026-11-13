@@ -4032,7 +4032,9 @@ class ForwardFluxOperator:
                 if target_current is not None
                 else None
             )
-            return gs.apply(psi, external, active, requested_class, active_target)
+            return active._physical_flux_image(
+                psi, external, requested_class, active_target
+            )
 
         return mapped
 
@@ -4070,7 +4072,12 @@ class ForwardFluxOperator:
         requested_class=None,
         target_current=None,
     ) -> Callable[[jax.Array, jax.Array, jax.Array], jax.Array]:
-        """Return a shadowed map taking the exterior flux as traced data."""
+        """Return the physical update with a separately carried residual shadow.
+
+        Shadow membership controls residual qualification and topology reads;
+        it does not prescribe field values. The field extension is imaged from
+        the same booked current as every other node.
+        """
 
         def mapped(
             psi: jax.Array,
@@ -4085,8 +4092,8 @@ class ForwardFluxOperator:
                 if target_current is not None
                 else None
             )
-            return gs.apply(
-                psi, external, active, requested_class, active_target, shadow
+            return active._physical_flux_image(
+                psi, external, requested_class, active_target
             )
 
         if target_current is None and (
@@ -4109,13 +4116,11 @@ class ForwardFluxOperator:
                 psi, partition, external, operator=None, _target_value=None
             ):
                 active = self if operator is None else operator
-                return gs.apply(
+                return active._physical_flux_image(
                     psi,
                     external,
-                    active,
                     requested_class,
                     target_current,
-                    partition.residual_shadow,
                     partition,
                 )
 
@@ -4127,3 +4132,23 @@ class ForwardFluxOperator:
             mapped._frozen_partition_usable = self.frozen_partition_usable
 
         return mapped
+
+    def _physical_flux_image(
+        self, psi, external, requested_class=None, target_current=None, partition=None
+    ) -> jax.Array:
+        """Image all nodes without altering the current-support partition.
+
+        A residual shadow removes an equation from the public residual; the
+        solve's extension equations instead require flux equal to its physical
+        image. Passing an empty exclusion to the shared map keeps those nodes
+        free of seed values while preserving the partition that books current.
+        """
+        return gs.apply(
+            psi,
+            external,
+            self,
+            requested_class,
+            target_current,
+            jnp.zeros_like(psi, dtype=bool),
+            partition,
+        )

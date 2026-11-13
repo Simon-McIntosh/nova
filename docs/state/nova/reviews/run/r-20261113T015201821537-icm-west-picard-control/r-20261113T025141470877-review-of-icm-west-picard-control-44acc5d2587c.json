@@ -14,6 +14,11 @@
       "node": "icm-west-picard-control",
       "recorded_at": "2026-11-13T05:51:47.130685+00:00"
     },
+    "1": {
+      "kind": "exempted",
+      "reason": "The closed-shell formula copy is script duplication; it joins the deferred scripts-cleanup node, which extracts the shared shell and WEST helpers into one module.",
+      "recorded_at": "2026-11-13T05:53:04.076810+00:00"
+    },
     "3": {
       "kind": "folded",
       "node": "icm-west-picard-control",

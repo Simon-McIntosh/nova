@@ -119,6 +119,15 @@ def main():
     if args.reproduce:
         reproduce()
         return
+    for name in ("base", "head"):
+        setattr(
+            args,
+            name,
+            subprocess.check_output(
+                ["git", "-C", str(args.source), "rev-parse", getattr(args, name)],
+                text=True,
+            ).strip(),
+        )
     args.output.mkdir(parents=True, exist_ok=True)
     receipts = {}
     with tempfile.TemporaryDirectory(

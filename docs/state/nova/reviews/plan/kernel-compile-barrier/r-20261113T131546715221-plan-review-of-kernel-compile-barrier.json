@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T13:24:21.365Z",
+  "dispatched_at": "2026-11-13T13:16:17Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:59",
+      "id": "reasoning-1",
+      "reason": "as written the node's gate cannot pass however well the restructure works, so a worker either reports a failed gate it could not have satisfied or leaves the section's stated lever for one the plan never measured; the bound has to be re-derived from the 351.44 s base (for example from the 220.67 s the two passes hold, with the residual 130.8 s stated) before dispatch.",
+      "text": "done-when (2) requires the production row program's cold compile to reach \"45 s or less (351.4 s at that base)\" while the section's own cited profile gives that base 351.44 s of XLA compile with `variadic-op-splitter` at 160.48 s and `multi_output_fusion` at 60.19 s; even if the restructure removed both passes entirely it would leave 130.8 s, and this profile states the splitter costs `39.9 s per 100,000` post-splitter instructions, so the done-when's companion clause of halving 402,141 to about 201,070 instructions lands near 80 s of splitter time alone and a head arm near 240 s. The bound is the decision `compile-target-shared` value of 45 s (95.1 s \u2212 51.3 s \u2248 44 s, at line 103), carried to a base 3.7 times larger; the sentence \"it is not relaxed for the larger base\" applies an arithmetic that only held at 95.1 s.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "eaed8176ab8a886b38b70cf8ecd2c15db2071f3a",
+  "plan_fingerprint": "035a6e4f3fd2eb01648a41b7363d50e623f36b3a559086ffcea4ca12156e1f67",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 39,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "2441e806f978d8f1db9707a521e89aefc12b70a3",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Done-when (2) now requires the cold compile to fall by at least the two passes base seconds (130.8 s or less) instead of 45 s, by lead decision variadic-share-on-production-base of 2026-11-13; the jets section keeps 60 s on the same program.",
+      "reason": "",
+      "when": "2026-11-13T15:42:23.680316+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "2441e806f978d8f1db9707a521e89aefc12b70a3",
+      "commit_basis": "edit",
+      "note": "Done-when (2) now requires the cold compile to fall by at least the two passes base seconds (130.8 s or less) instead of 45 s, by lead decision variadic-share-on-production-base of 2026-11-13; the jets section keeps 60 s on the same program.",
+      "reason": "",
+      "when": "2026-11-13T15:42:23.680316+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-kernel-compile-barrier.v39.json",
+  "review_run_id": "r-20261113T131546715221-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "af96efabc191bd2855f11db402ec67fda0498e77",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/equilibrium/fixed_points.py:323` is `def _source_jets`, `:521` is `_row_program = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))`, `maintain_rows` is defined at `:543`, `production_point_batch` at 132 is the name the cited profile builds from `scripts/prototypes/kernel_compile_census/row.py`, the commits `7bd1d912c`, `da28fc4e5`, `cb42f656f` and `56097c60b` all resolve, both cited evidence fragments exist, `/nova/sub-millisecond-forward-path.html` resolves as `docs/plans/sub-millisecond-forward-path.html`, and both cited decision keys (`tangent-bound-retired`, `compile-target-shared`) are present.",
+    "done_when": "pass \u2014 each of the three clauses is measurable and carries a control that can fail: clause (1) compares primal bits and tangent rows against `jax.jvp` of the base, clause (2) measures a base arm and a head arm in one job, and clause (3) is a base/head suite pair.",
+    "evidence_paths": "pass \u2014 the section's two cited fragments resolve under `docs/evidence/fragments/kernel-compile-barrier/`, and nothing in the done-when places a gate log on a session scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 the new prose carries plan-internal cross-references and commit shas, which are plan text, and introduces no plan label, stage name or ticket number into any symbol, file or comment it names.",
+    "reasoning": "a finding \u2014 done-when (2) sets a 45 s cold-compile bound on a base where the two passes its own lever targets take 220.67 s of 351.44 s, so the bound is unreachable by the named mechanism, and the decision it appeals to derived 45 s from a 95.1 s base.",
+    "single_goal": "pass \u2014 the section delivers one thing, a point program that hands XLA narrow ops or a fixed-capacity scan instead of wide variadic ones, and the second-derivative path is in scope as part of that same restructure rather than as a second deliverable.",
+    "wiring": "pass \u2014 \u00a72 declares `data-links=\"kernel-compile-barrier#s5\"`, and \u00a73 and \u00a74 each declare `#s2` and `#s5`, so the attribution \u00a75 produced is the declared input to the sections that consume it, and every link names a section that exists."
+  },
+  "section_digests": {
+    "_document": "207605f7092f29d006185c762136bff3fd2f647e0894d2b7f17da13ec791a1a4",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "c696d2600e902be5f7c1fa0511dc5bd2ab627b9a734c5829a7a877d2ae402ae3",
+    "s3": "ab68c20ce5d3e9242532f0e5cb72a8baf8b9ce57666cac7db68cee8904360fa1",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T15:42:12.235586+00:00",
+  "total": null
+}

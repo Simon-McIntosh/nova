@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's manifest carries no baseline_suite and no after_suite block: its suite fence is unarmed because no test file lies in its write scope (scripts/prototypes/compile_pass_profile/lowered_size.py, docs/evidence/fragments/kernel-compile-barrier/graph-growth-history.html, docs/figures/kernel-compile-barrier/graph-growth-history). The zero is an absent pair, not a green one, and no suite result is claimed for this node.",
+  "call_sites": "none",
+  "completed_at": "2026-11-13T12:45:28.538Z",
+  "dispatched_at": "2026-11-13T12:32:11Z",
+  "findings": [
+    {
+      "category": "reuse",
+      "file": "scripts/prototypes/compile_pass_profile/lowered_size.py",
+      "line": 65,
+      "severity": "non-blocking",
+      "text": "The trace and lower steps (jax.make_jaxpr(...); jax.jit(function).lower(*operands); len(lowered.as_text().encode())) duplicate profile.py:86-94 rather than sharing them, and the module docstring asserts they 'are the ones the profile harness uses'. The fence forbade editing an existing harness file, so the copy is the only compliant route; the residual risk is that the two copies drift and only the control rows would notice. The near-owner is scripts/prototypes/compile_pass_profile/profile.py; no importable step function exists, and moment_hessian/profile.py:91 and kernel_compile_census/row.py:251 inline the same idiom, so the repository owns no shared implementation to extend."
+    },
+    {
+      "category": "scope",
+      "file": "docs/evidence/fragments/kernel-compile-barrier/graph-growth-history.html",
+      "line": 12,
+      "severity": "non-blocking",
+      "text": "The table carries 45 rows while the recorded commit list in commits.txt has 42 lines: the extra rows are 56097c60b, 7bd1d912c and c85cb0591, and 7bd1d912c is outside the brief's stated list definition (log output + 56097c60b + base). It is the published control revision, so including it is defensible, but the fragment does not say why the row is there, so a reader cannot reconcile the row count against the committed list."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "pass \u2014 the landed script is a standalone prototype entry point with no importer; searched nova/ and scripts/ for imports of lowered_size and found none, so no production runtime path reaches it.",
+    "diff": "pass \u2014 read commit by commit: b96a2bd7d adds the 74-line measuring script, 9613239ff adds the fragment (85 lines) and one SVG (1784 lines); nothing else is in the diff.",
+    "done_when": "pass \u2014 the gate log /home/ITER/mcintos/.cache/nova-kernel-compile-barrier/graph-growth-history/graph-growth-gate.log records 45 commits, 90 of 90 receipts, and both controls (3043948 vs published 3043945 at 56097c60b; 10315095 vs 10315092 at 7bd1d912c) on one rigel job, with a bare EXIT=0 line.",
+    "goal": "pass \u2014 the goal is to name the commit or commits at which the point jet's lowered graph grew, and docs/evidence/fragments/kernel-compile-barrier/graph-growth-history.html names exactly two, da28fc4e5 (x2.524 point jet, x2.137 batch) and cb42f656f (x1.345, x1.291), with date and subject for each.",
+    "manifest": "pass \u2014 the reviewed run's manifest.md states status complete, the two commits b96a2bd7d and 9613239ff, the three changed paths, one landing line naming both step commits and their factors, and the gate command with its log path.",
+    "write_paths": "pass \u2014 the diff against c85cb059 changes exactly three files, all three inside the declared write paths, and no product source or existing harness file is read or written."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: pass \u2014 the fragment names exactly two step commits, da28fc4e5 and cb42f656f.\nVERDICT done_when: pass \u2014 the gate log records 45 commits, 90 of 90 receipts and both control rows within three bytes, ending in EXIT=0.\nVERDICT write_paths: pass \u2014 three files changed, all inside the declared write paths.\nVERDICT manifest: pass \u2014 read; it names the two commits, the three paths and one landing line.\nVERDICT diff: pass \u2014 read commit by commit; two commits, three files, nothing else.\nVERDICT call_sites: pass \u2014 no importer exists in nova/ or scripts/.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nSCORE evidence: 19\nSCORE scope_discipline: 18\nSCORE durability: 10\nSCORE fit: 18\nSCORE reuse: 16\nFINDING scripts/prototypes/compile_pass_profile/lowered_size.py:65 non-blocking: the trace and lower steps duplicate profile.py:86-94 rather than sharing them.\nFINDING docs/evidence/fragments/kernel-compile-barrier/graph-growth-history.html:12 non-blocking: the table has 45 rows against a 42-line recorded commit list, and the fragment does not say why 7bd1d912c is a row.\n",
+  "review_run_id": "r-20261113T121929181901-review-of-graph-growth-history-9613239ffe22",
+  "reviewed_base_sha": "c85cb059165979d7a3e28cf150f970644f85168c",
+  "reviewed_head_sha": "9613239ffe22eecaadda3561f041c62ae54b0db2",
+  "reviewed_run_id": "r-20261113T113725763360-graph-growth-history",
+  "rubric": "code_review",
+  "scores": {
+    "durability": 10,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T12:54:29.343826+00:00",
+  "total": 101,
+  "verdicts": [
+    "VERDICT goal: the goal is to name the commit or commits at which the point jet's lowered graph grew, and docs/evidence/fragments/kernel-compile-barrier/graph-growth-history.html names exactly two, da28fc4e5 and cb42f656f, each with its date, subject and per-program factor.",
+    "VERDICT done_when: the gate log records 45 commits, 90 of 90 receipts, and both published control rows reproduced to three bytes on one rigel job, ending in a bare EXIT=0.",
+    "VERDICT write_paths: the diff against c85cb059 changes three files and all three are inside the declared write paths; no product source or harness file is touched.",
+    "VERDICT manifest: read; it states status complete, names b96a2bd7d and 9613239ff, lists the three changed paths, and carries exactly one landing line with both step commits and their factors.",
+    "VERDICT diff: read commit by commit; b96a2bd7d adds the measuring script, 9613239ff adds the fragment and one SVG, and nothing else changed.",
+    "VERDICT call_sites: searched nova/ and scripts/ for an importer of lowered_size and found none; the script is invoked only from the cache-root run.sh, so no production call site exists."
+  ]
+}

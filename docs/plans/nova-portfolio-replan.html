@@ -16,9 +16,8 @@
 <meta name="plan-sprint" content="S21">
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="3.0">
-<meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="70">
-<meta name="plan-modified" content="2026-11-06">
+<meta name="plan-version" content="71">
+<meta name="plan-modified" content="2026-11-13">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
 <meta name="plan-capability-version" content="1.0">
@@ -26,7 +25,7 @@
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="moderate">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
 <main class="plan-doc">
@@ -85,20 +84,23 @@
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-replan-001" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-replan-001" data-status="resolved" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="2026-11-13T09:04:12+00:00" data-resolved-by="reckon-review">
     <h4 class="r-fu-title">Evaluate, re-plan and hand off the nova portfolio</h4>
     <div class="r-fu-body">Run §1 and §2 as two local-lane nodes, then fold them with S19's summary into §3.</div>
     <pre class="r-fu-prompt">/reckon-build nova-portfolio-replan</pre>
+    <p class="r-fu-outcome"><p>Done by the portfolio review of 2026-11-13; see the §1 and §3 close comments.</p></p>
     </article>
-<article class="r-fu" data-id="f-replan-002" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-replan-002" data-status="resolved" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="2026-11-13T09:04:12+00:00" data-resolved-by="reckon-review">
     <h4 class="r-fu-title">Evaluate the fourteen non-S19 pending plans against the code</h4>
     <div class="r-fu-body">The nodes in §1 were not run before the handoff: the local lane took over an hour per node on 2026-09-23 and the deadline was under an hour away. Run replan-currency-depth-a and replan-currency-depth-b as two local-lane investigate nodes, read-only with no source changes, writing docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md and -b.md. Then set each plan's status and impl to what the code supports: close a plan whose scope landed, supersede one whose scope moved, and give each live plan a followup with a done-when. Done when: both reports carry one row per assigned plan with commit, file and line evidence, and each of the fourteen plans has a status, impl and followup matching its row.</div>
     <pre class="r-fu-prompt">/reckon-build nova-portfolio-replan</pre>
+    <p class="r-fu-outcome"><p>The pending plans were evaluated against the code on 2026-11-13; dispositions are in the review resource.</p></p>
     </article>
-<article class="r-fu" data-id="f-replan-003" data-status="open" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-replan-003" data-status="resolved" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="2026-11-13T09:04:12+00:00" data-resolved-by="reckon-review">
     <h4 class="r-fu-title">Close the stale sprints S10-S19</h4>
     <div class="r-fu-body">S21 is the one active sprint; S10, S11, S12, S15, S16, S17, S18 and S19 remain open with pending members, and S20 is an unrelated planned sprint with no items (forward-solve seam). After f-replan-002 decides each member: move live members into S21, or into S20 if the forward-solve seam work is taken up. Record closed or superseded members, then set each stale sprint to done. Completed plans stay closed and are never reopened. Done when: roadmap lists S21 active, no stale sprint open, every pending plan in S21 or S20, and no error-level wiring finding.</div>
     <pre class="r-fu-prompt">/reckon-build nova-portfolio-replan</pre>
+    <p class="r-fu-outcome"><p>S10 to S19 are all closed; S26 was closed on 2026-11-13.</p></p>
     </article>
 <article class="r-fu" data-id="f-replan-004" data-status="resolved" data-written-by="s18-fable-20260922" data-written-at="2026-09-24" data-recommends-skill="/reckon-build nova-portfolio-replan" data-resolved-at="2026-10-01T20:58:32+00:00" data-resolved-by="s21-nova coordinator">
     <h4 class="r-fu-title">Thin interfaces to shared infrastructure</h4>
@@ -142,6 +144,9 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261001T213722627131-review-of-replan-currency-depth-b" data-who="reckon-build" data-when="2026-10-01T22:25:28.806Z">
     <div class="r-comment-body"><p>independent review of run r-20261001T191426544316-replan-currency-depth-b at head 4f1bfbdda (base a71934910): parsed record stored with 5 dimensions scored and total 89; verifies the head commit's correction is sound and every citation resolves, and records one follow-on (the reviewed manifest cites an unresolvable third commit sha).</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-close-s1" data-who="reckon-review" data-when="2026-11-13T09:10:00Z">
+    <div class="r-comment-body"><p>§1 closed by the portfolio review of 2026-11-13: every pending plan was evaluated against the code, by stored review <code>r-20261113T081416459401-review-portfolio-926b2b4883d1</code> (one disposition for each of 36 plans) and by the coordinator's own read. The dispositions and priority order are in the project <a href="/nova/state/nova/review.html">review resource</a>.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20261001T2300-thin" data-who="reckon-build" data-when="2026-10-01T23:00:00+02:00">
     <div class="r-comment-body">gate review passed (18/18/20/19/19, no added failure); section closed at f24792a21; unowned refactors moved to §5.</div>
@@ -265,6 +270,9 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T174920487824-review-of-replan-evidence-tooling-paths-6bd5d0ac027c" data-who="reckon-build" data-when="2026-10-27T18:24:09.259Z">
     <div class="r-comment-body"><p>The commit gained since the prior review (6bd5d0ac) restores the three per-benchmark receipt overrides the prior review called lost, imports Any so the accessor passes the repository lint gate, and adds two subprocess probes that redden if either the override precedence or the crew-root fallback regresses; scores are goal_fidelity 19, evidence 15, scope_discipline 20, durability 17, fit 18, reuse 20, with three non-blocking findings on the manifest's stale after-arm revision, an unlogged head run of the test module, and the unchanged base-arm self-check.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-review" data-when="2026-11-13T09:10:00Z">
+    <div class="r-comment-body"><p>§3 closed on 2026-11-13: sprints S1 to S20, S22, S26 and S27 are done; four sprints hold all open work (S21 the converged solve, S23 held behind it, S24 machines and off-core, S25 the EFIT line); nineteen settled dependency links were removed and eight superseded plans archived. The three live coordinator sessions were consulted and keep their plans.</p></div>
 </div>
 </section>
 </main>

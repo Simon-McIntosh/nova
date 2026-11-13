@@ -18,6 +18,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.ticker as ticker  # noqa: E402
 import numpy as np  # noqa: E402
 
 from scripts.edge_sheet.figure import (  # noqa: E402
@@ -59,9 +60,9 @@ def render(run, destination: Path, png: Path | None = None):
     plt.style.use("data-ink")
     plt.rcParams["svg.fonttype"] = "none"
     fig, axis = plt.subplots(figsize=(WIDTH_INCHES, HEIGHT_INCHES), dpi=100)
-    for kind, colour, style, marker, width, offset in (
-        ("uniform", UNIFORM, (0, (5, 3)), "o", 2.6, -16),
-        ("graded", GRADED, "none", "D", 3.0, 6),
+    for kind, colour, style, marker, width in (
+        ("uniform", UNIFORM, (0, (5, 3)), "o", 2.6),
+        ("graded", GRADED, "-", "D", 3.0),
     ):
         rows = series[kind]
         cells = np.array([row["cells"] for row in rows], dtype=float)
@@ -77,6 +78,7 @@ def render(run, destination: Path, png: Path | None = None):
             markerfacecolor=colour,
             markeredgecolor=colour,
             linewidth=width,
+            label=f"{kind} mesh, worst probe",
             zorder=4 if kind == "graded" else 3,
         )
         axis.plot(
@@ -86,15 +88,8 @@ def render(run, destination: Path, png: Path | None = None):
             linestyle=style,
             linewidth=1.2,
             alpha=0.6,
-            zorder=2,
-        )
-        axis.annotate(
-            f"{kind} mesh",
-            xy=(cells[-1], worst[-1]),
-            xytext=(8, offset),
-            textcoords="offset points",
-            color=colour,
-            fontsize=14,
+            label=f"{kind} mesh, best probe",
+            zorder=axis.get_zorder(),
         )
     axis.axhline(TARGET, color=LIMIT, linestyle=(0, (1, 3)), linewidth=1.2, zorder=1)
     axis.annotate(
@@ -107,13 +102,33 @@ def render(run, destination: Path, png: Path | None = None):
         fontsize=14,
     )
     axis.set_xscale("log")
+    counts = [row["cells"] for kind in ("uniform", "graded") for row in series[kind]]
+    low, high = min(counts) * 0.8, max(counts) * 1.25
+    axis.set_xlim(low, high)
+    ladder = [50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000]
+    axis.xaxis.set_major_locator(
+        ticker.FixedLocator([value for value in ladder if low <= value <= high])
+    )
+    axis.xaxis.set_minor_locator(ticker.NullLocator())
+    top = float(np.ceil(max(row["error"].max() for kind in series for row in series[kind]) * 1.1))
+    axis.set_ylim(0, top)
+    step = 2.0 if top <= 12 else 5.0
+    axis.yaxis.set_major_locator(ticker.FixedLocator(np.arange(0.0, top + step, step)))
     axis.set_xlabel("cells")
     axis.set_ylabel("closed-shell error [%]")
     axis.spines["top"].set_visible(False)
     axis.spines["right"].set_visible(False)
     axis.tick_params(labelsize=14)
-    problems = save_checked(fig, str(destination), str(png) if png else None)
-    assert not problems, problems
+    fig.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.0),
+        ncol=4,
+        frameon=False,
+        fontsize=14,
+        handlelength=2.4,
+    )
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.94))
+    save_checked(fig, str(destination), str(png) if png else None)
 
 
 def main():

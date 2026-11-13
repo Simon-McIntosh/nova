@@ -426,7 +426,13 @@ def main():
             raise AssertionError("identical-program negative control escaped refusal")
         summary["completed"] = True
         save()
-    print("SUMMARY all arms completed with two agreeing processes", flush=True)
+    if args.smoke:
+        print(
+            "SUMMARY CPU smoke arms completed with one measured warm sample each",
+            flush=True,
+        )
+    else:
+        print("SUMMARY all arms completed with two agreeing processes", flush=True)
 
 
 if __name__ == "__main__":

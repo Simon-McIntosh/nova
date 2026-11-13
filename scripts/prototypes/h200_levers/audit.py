@@ -139,6 +139,7 @@ def main():
                 assert max(row["residual"]) <= 1e-10
         receipts[json.dumps(value, sort_keys=True)] = path
     verified = []
+    provenance_errors = []
     for comparison in summary["comparisons"]:
         arms = comparison.get("tiles") or [comparison["off"], comparison["on"]]
         references = arms[0]["records"]
@@ -146,7 +147,17 @@ def main():
             assert all(spread <= 0.05 for spread in arm["spreads"].values())
             for index, candidate in enumerate(arm["records"]):
                 reference = references[index]
-                assert candidate["input_sha256"] == reference["input_sha256"]
+                if candidate["input_sha256"] != reference["input_sha256"]:
+                    provenance_errors.append(
+                        dict(
+                            name=comparison["name"],
+                            width=comparison["width"],
+                            arm=arm["arm"],
+                            process=index + 1,
+                            reference=reference["input_sha256"],
+                            candidate=candidate["input_sha256"],
+                        )
+                    )
                 assert candidate["bank_sha256"] == reference["bank_sha256"]
                 left = receipts[json.dumps(reference, sort_keys=True)].with_suffix(
                     ".npz"
@@ -205,6 +216,17 @@ def main():
                 )
             )
     (run / "precision-audit.json").write_text(json.dumps(verified, indent=2))
+    (run / "input-provenance-errors.json").write_text(
+        json.dumps(provenance_errors, indent=2)
+    )
+    print(
+        f"GEOMETRY {len(verified)} paired process receipts inside precision budget",
+        flush=True,
+    )
+    assert not provenance_errors, (
+        "paired input fingerprints differ",
+        provenance_errors,
+    )
     print(f"SUMMARY {len(verified)} paired process receipts inside precision budget")
 
 

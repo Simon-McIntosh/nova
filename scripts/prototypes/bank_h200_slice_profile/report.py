@@ -26,6 +26,12 @@ def attributed(record, directory, program):
         names = {f["function"].split(".<locals>")[0] for f in frames}
         branch = None
         for item in reversed(contexts):
+            if "full_geometry" in item["op_name"]:
+                branch = "full"
+                break
+            if "carried_geometry" in item["op_name"]:
+                branch = "carried"
+                break
             for frame in reversed(item["stack"]):
                 function = frame["function"]
                 if (
@@ -88,6 +94,10 @@ def attributed(record, directory, program):
                 mechanism = "refresh qualification and shared operations"
             mechanisms[mechanism] += row["device_ms"]
         row["audited_group"] = label
+        row["context_provenance"] = [
+            dict(op_name=i["op_name"], stack=i["stack"]) for i in contexts
+        ]
+        row["executed_branch"] = branch
     assert sum(row["launches"] for row in ledger) == profile["kernel_launches"]
     kernel_ms = sum(row["device_ms"] for row in ledger)
     assert abs(sum(totals.values()) - kernel_ms) < 1e-7

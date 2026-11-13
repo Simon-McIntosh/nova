@@ -1339,7 +1339,13 @@ class Topology(Pytree):
         data_o, data_x = published_stationary
         data_b = jnp.where(boundary_is_xpoint, data_x, data_w)
         if structured:
-            boundary_position = data_b[:2]
+            # Stationary saddles need no position term; wall contacts move.
+            boundary_position = jax.lax.cond(
+                boundary_is_xpoint,
+                jax.lax.stop_gradient,
+                lambda position: position,
+                data_b[:2],
+            )
             boundary_value = surface(boundary_position[0], boundary_position[1])
             data_b = data_b.at[2].set(boundary_value)
         boundary_uncertainty = self.boundary_interpolation_uncertainty(

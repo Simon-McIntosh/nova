@@ -24,8 +24,11 @@
     <p><code>nova/biot/magnetisation.py</code> gains a cell-size field. Given a
     <code>fine</code> spacing, a <code>coarse</code> limit and a set of iron
     surfaces, the spacing along each axis at distance <code>d</code> from the
-    nearest surface is <code>fine * (coarse / fine) ** (d / coarse)</code>, capped
-    at <code>coarse</code>, and the thin-feature rule raises the spacing to
+    nearest surface is <code>fine * growth ** (d / fine)</code>, with
+    <code>growth</code> fixed at 2.0, capped at <code>coarse</code>. A doubling
+    per fine cell means the cap is reached one coarse length in ten at the
+    pinned grading (2 mm fine, 4.8 mm coarse), so the interior is coarse and the
+    transition is short. The spacing is additionally capped at
     <code>max(width, fine) / cells_across</code> where a part is thin enough for
     that to be finer. The rectilinear mesh is then clipped to the region as
     before, so the sliver rule and the cell construction are the ones already
@@ -191,7 +194,8 @@
     <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/graded-refinement/</code>:
     <code>gpu/</code> (uniform arms, P100), <code>cpu/</code> (graded arm, CPU),
     <code>west-cpu/</code> (WEST levels, CPU), <code>suite-fast2/</code> (gate
-    record), <code>control/</code> (mutants). Each measurement stamps the
+    record), <code>control2/</code> (mutants, one transcript each). Each
+    measurement stamps the
     revision it ran and the blob of the script it executed.</p>
   </main>
 </body>

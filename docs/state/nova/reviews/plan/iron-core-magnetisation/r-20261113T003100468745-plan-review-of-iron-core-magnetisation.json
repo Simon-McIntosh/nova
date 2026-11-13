@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T00:40:39.928Z",
+  "dispatched_at": "2026-11-13T00:32:59Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261113T003100468745-plan-review-of-iron-core-magnetisation/plan.html:332",
+      "id": "done_when-1",
+      "reason": "without the references stated per probe the node cannot compute its own ceiling from the plan, and the max-over-probes reading admits a probe error above its own ceiling.",
+      "text": "\"the 20 mm errors within the collocated values plus 0.5 percentage points\" names no reference values and no per-probe reading, while the landed acceptance it compresses is per probe (at mu_r = 1000 the references are 2.7/3.0/2.0 %, ceilings 3.2/3.5/2.5 %) and \u00a71's table gives a different, max-over-probes number for the same case (0.49 % at 20 mm and mu_r = 100, against the landed collocation arm's 0.517 % worst probe), so a worker reading \"the errors\" as the worst case measures a looser condition than the one that was accepted",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261113T003100468745-plan-review-of-iron-core-magnetisation/plan.html:304",
+      "id": "reasoning-1",
+      "reason": "the claim is justificatory prose and no clause of the done-when tests it, so correcting it changes no node's deliverable or measure.",
+      "text": "the sentence closes \"\u2026its symmetric spectrum lies in [0, 1] and the Newton matrix is monotone\", but the spectrum bound supports only the energy/demagnetising operator (I - G/mu_0 positive semidefinite, which is what the landed tests assert as reciprocal energy), not the material Newton matrix dF/dM = I - (dcB/dB)G, whose lower bound is set by the differential permeability and is not bounded by that spectrum; on the CEA curve's steep branch (215 at B = 0 to 1692 at 1 T) the differential susceptibility exceeds the secant by orders of magnitude, so dF/dM is indefinite in some modes even though the solve converges",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "53b2f581398edbd90e0e09aa99d43b918b3d773c",
+  "plan_fingerprint": "7fd494e497798193f8b0640ef2e9fdc6eabf0a98cf01c36eaeb8c652faeff6b3",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 74,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T003100468745-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "2ad77cc4e33ea9310a876e18890a0b13756927b0",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every path and symbol \u00a74 names resolves: nova/imas/machine.py (ImasGeometryReader:294, StaticMachineDescription:603), nova/biot/magnetisation.py, nova/equilibrium/reduced_newton.py, nova/equilibrium/AGENTS.md:193-197 (the runtime-variable Newton rule, quoted nearly verbatim), both script readers, and the receipt fragment.",
+    "done_when": "a finding \u2014 clause (1)'s shell criterion cites \"the collocated values\" without naming the per-probe references it depends on, and \u00a71's own table disagrees with the landed collocation arm; clause (2)'s Picard control is now falsifiable because it is given the same continuation as Newton.",
+    "evidence_paths": "pass \u2014 the named receipt docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html exists with its GPFS large-file root in place, and clause (1)'s measurements sit in durable fragments (icm-galerkin-interaction.html, icm-law-fit.html, icm-high-permeability-shell.html) beside tests/test_magnetisation.py.",
+    "naming": "pass \u2014 \u00a74 carries no plan labels, stage names, ticket numbers or version tags, and its comments state the mechanism rather than a changelog.",
+    "reasoning": "a finding \u2014 the third check (implementation prescription) is met and was accepted by the author on the ground that the named entry points have landed, and the first two checks hold (the refinement table and the centroid mutant support the root cause, and the endpoint is measured); the defect is that the Galerkin justification's closing clause, \"the Newton matrix is monotone\", does not follow from the spectrum bound it is drawn from.",
+    "single_goal": "pass \u2014 the iron read has landed (both script readers call StaticMachineDescription.read_iron_core, and no script naming iron_core bypasses it), so what remains is the one deliverable the receipt records: the solved WEST field on the Galerkin operator.",
+    "wiring": "pass \u2014 \u00a74's declared depends-on (s2, s3, both done) is what it consumes, and the extension it names resolves: galerkin_cell_interaction sits beside cell_interaction in nova/biot/tiledassembly.py:578/816, with the centroid program kept for point evaluation as \u00a73 states."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "bf0049ee8c924773ea67dcbe093fb860584392de2ea9a0789d0fabc79578a462",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "c645f430b6abdb211a9ad4f0c49bac5f02c7d3bd736938750b063ee02c592afa",
+    "s5": "18d64dc99773bd89740bde91084ec424e8873aa08afed9991b5bbc40f3395b4a",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "8a8c2cb93f6c3ed1ebbb2171af1a254a72689f0630f9b086c8890ac486595e6e",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T00:51:35.802325+00:00",
+  "total": null
+}

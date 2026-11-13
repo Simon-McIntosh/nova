@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="79">
+<meta name="plan-version" content="80">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -339,9 +339,12 @@
       1e-5; (2) WEST 62751 converges from M = 0 at
       0.08 and 0.04&nbsp;m in at most ten Newton iterations, or by a drive ramp of at most ten per
       step, with every &mu;<sub>r</sub> inside the table; starts from different initial states reach
-      one root; and a frozen-permeability Picard run on the same case, with the same continuation
-      (direct from M = 0, or the same drive ramp), is recorded as failing to
-      converge (the negative control for choosing Newton); (3) the iron read extends
+      one root; a frozen-permeability Picard run on the same case, with the same continuation
+      (direct from M = 0, or the same drive ramp), is recorded with its iteration count, and Newton
+      needs fewer corrections than it does (Newton is kept for its quadratic rate, which steep
+      saturation would otherwise erode); and the same Picard iteration on the centroid-sampled
+      operator of the same mesh is recorded failing to converge (the negative control showing that
+      the Galerkin operator, not the iteration, is what makes the solve well posed); (3) the iron read extends
       <code>nova/imas/machine.py</code> and both script readers
       (<code>scripts/prototypes/iron_magnetisation/west.py</code>,
       <code>scripts/west_stray_field/solve.py</code>) call it, with no third iron reader in the

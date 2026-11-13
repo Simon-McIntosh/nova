@@ -78,6 +78,7 @@
         <tr><td>graded 8 mm / 2 mm, across 20</td><td>5447</td><td>0.629</td><td>0.811</td><td>0.570</td><td>0.811</td><td>—</td><td>76.8</td><td>41.5</td><td>P100</td></tr>
         <tr><td>graded 6 mm / 2 mm, across 20</td><td>9082</td><td>0.435</td><td>0.541</td><td>0.391</td><td>0.541</td><td>—</td><td>192.1</td><td>83.8</td><td>P100</td></tr>
         <tr><td>graded, doubled field (4 mm / 9.6 mm)</td><td>4017</td><td>0.776</td><td>1.052</td><td>0.713</td><td>1.052</td><td>2e-7 … 0.999955</td><td>566.4</td><td>25.5</td><td>CPU</td></tr>
+        <tr><td>graded, pinned field (2 mm / 4.8 mm)</td><td>13410</td><td>0.326</td><td>0.397</td><td>0.291</td><td>0.397</td><td>2.1e-8 … 0.999992</td><td>3659.8</td><td>236.6</td><td>CPU</td></tr>
       </tbody>
     </table>
     <p>The three graded rows without a spectrum predate the volume-weighted
@@ -94,18 +95,24 @@
     not change where the error sits for a given cell count; what it changes is
     the shape of the mesh, not the resolution the projection sees. That is the
     substantive measurement.</p>
-    <p>The consequence for the 0.5 per cent bound is that neither family reaches
-    it at the coarsest cell counts, and each reaches it only well above eight
-    thousand cells. The graded arm is not the cheaper way to the bound on this
-    geometry.</p>
+    <p>The consequence for the 0.5 per cent bound is that both families reach it,
+    at different costs. The graded arm reaches 0.326, 0.397 and 0.291 per cent
+    at 13 410 cells, and its doubled field misses the bound at 4017 cells
+    (1.052 per cent), which is the negative control. The uniform arm reaches
+    0.548 per cent at 8630 cells, so it needs roughly nine and a half thousand
+    cells to clear the bound, fewer than the graded arm's 13 410. On this
+    closed shell, grading to a fine spacing at the surfaces and 4.8 mm inside
+    costs about four thousand extra cells to reach the same accuracy.</p>
 
     <h2 id="icm-graded-refinement-device">Why the graded arms run on the CPU lane</h2>
     <p>The P100 admits a single HLO argument of at most 13 653 508 096 bytes.
     A mesh of <code>n</code> cells carries <code>3n</code> unknowns and a dense
     factor near <code>8 (3n)^2</code> bytes: 11 000 cells needs about 8.7 GB and
     failed at 5.37 GiB more; 12 851 cells failed earlier at 11.09 GiB. The
-    pinned graded arm needs a factor the device refuses, so it runs on the CPU
-    lane with 110 GB of host memory. No grading that meets 0.5 per cent at every
+    pinned graded arm measured 13 410 cells, 40 230 unknowns and a factor of
+    about 12.9 GB before the interaction matrix is counted, which is the
+    argument the device refuses. It runs on the CPU lane with 110 GB of host
+    memory, assembling in 3660 s and solving in 237 s. No grading that meets 0.5 per cent at every
     probe both fits the card and stays inside the bound, so the choice was the
     lane, not a looser target: the 0.5 per cent bound and the doubled-arm
     negative control are unchanged.</p>
@@ -145,7 +152,7 @@
     at the head. Both are green.</p>
 
     <h2 id="icm-graded-refinement-figure">Figure</h2>
-    <figure><img src="/nova/figures/iron-core-magnetisation/icm-graded-refinement/shell-error-vs-cells.svg" alt="Closed-shell worst-probe error against cell count for the uniform and graded meshes, with best-probe traces and the 0.5 per cent target"><figcaption>Closed-shell error against cell count. The uniform family is the near-black dashed line, the graded family the blue solid line with diamonds; thin traces are the best probe of each mesh and the thick ones the worst probe, which is what the 0.5 per cent bound constrains. The dotted grey line is the 0.5 per cent target. Both families fall on one curve: at equal cell count the graded mesh is not closer to the analytic shielding than the uniform one, and the coarse end of both sits well above the target. All text artists pass the layout check and the rendered PNG was inspected with no clipping or collision.</figcaption></figure>
+    <figure><img src="/nova/figures/iron-core-magnetisation/icm-graded-refinement/shell-error-vs-cells.svg" alt="Closed-shell worst-probe error against cell count for the uniform and graded meshes, with best-probe traces and the 0.5 per cent target"><figcaption>Closed-shell error against cell count. The uniform family is the near-black dashed line, the graded family the blue solid line with diamonds; thin traces are the best probe of each mesh and the thick ones the worst probe, which is what the 0.5 per cent bound constrains. The dotted grey line is the 0.5 per cent target. Both families fall on one curve: at equal cell count the graded mesh is not closer to the analytic shielding than the uniform one, and the coarse end of both sits well above the target. The graded family is the one that extends far enough to cross below 0.5 per cent, at 13 410 cells and 0.397 per cent, because it is the family that was pushed to that size; the uniform curve stops at 8630 cells and 0.548 per cent, above the target. All text artists pass the layout check and the rendered PNG was inspected with no clipping or collision.</figcaption></figure>
 
     <h2 id="icm-graded-refinement-receipts">Receipts</h2>
     <p>Everything under

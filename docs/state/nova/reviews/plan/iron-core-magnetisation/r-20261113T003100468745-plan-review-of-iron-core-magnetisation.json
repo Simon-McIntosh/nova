@@ -35,6 +35,16 @@
       "note": "Clause (1) now names the per-probe collocated 20 mm references and their ceilings (mu_r 1000: 2.7/3.0/2.0 % -> 3.2/3.5/2.5 %; mu_r 100: the per-probe collocation values recorded in icm-galerkin-interaction.html, each plus 0.5 points), probe by probe, not as a worst case.",
       "reason": "",
       "when": "2026-11-13T00:53:20.033919+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "37faa0e80e75616d60badec424999642806a9110",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The justification now says the [0, 1] spectrum makes the demagnetising operator positive semidefinite, so that with the monotone law the discrete problem is the stationary point of a convex energy with a single root; it no longer claims the Newton matrix itself is monotone.",
+      "reason": "",
+      "when": "2026-11-13T00:53:58.726095+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "Clause (1) now names the per-probe collocated 20 mm references and their ceilings (mu_r 1000: 2.7/3.0/2.0 % -> 3.2/3.5/2.5 %; mu_r 100: the per-probe collocation values recorded in icm-galerkin-interaction.html, each plus 0.5 points), probe by probe, not as a worst case.",
       "reason": "",
       "when": "2026-11-13T00:53:20.033919+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "37faa0e80e75616d60badec424999642806a9110",
+      "commit_basis": "edit",
+      "note": "The justification now says the [0, 1] spectrum makes the demagnetising operator positive semidefinite, so that with the monotone law the discrete problem is the stationary point of a convex energy with a single root; it no longer claims the Newton matrix itself is monotone.",
+      "reason": "",
+      "when": "2026-11-13T00:53:58.726095+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261113T003100468745-plan-review-of-iron-core-magnetisation.json",

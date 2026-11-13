@@ -105,6 +105,13 @@
       "note": "The s1 brief makes one fit receipt the class's single output (coefficients, terminal forward receipt, iterations, spectrum, undetermined coefficients, per-row residuals) and forbids a second public entry point, so the scoreboard and cost sections read that receipt.",
       "reason": "",
       "when": "2026-11-13T16:23:13.820512+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "finding": "duplicate_owner-2",
+      "reason": "Section s3 is deferred and not built in this wave. The finding is accepted as a constraint on its brief (generalise score_with_efit_referee and parity_tolerances over a supplied IMAS state, read cases through nova.imas.dataset.Ids) and is carried from this stored review when s3 is dispatched; the plan states endpoints and names no module.",
+      "when": "2026-11-13T16:23:29.672425+00:00"
     }
   ],
   "responses": {
@@ -125,6 +132,12 @@
       "note": "The s1 node brief names virtual_flux_loops and virtual_poloidal_probes as the owners of the synthetic rows and Magnetics/SliceMeasurement as the row order, and forbids a second sensor synthesiser. The plan names no module by rule, so the map is carried in the brief.",
       "reason": "",
       "when": "2026-11-13T16:22:40.977152+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "reason": "Section s3 is deferred and not built in this wave. The finding is accepted as a constraint on its brief (generalise score_with_efit_referee and parity_tolerances over a supplied IMAS state, read cases through nova.imas.dataset.Ids) and is carried from this stored review when s3 is dispatched; the plan states endpoints and names no module.",
+      "when": "2026-11-13T16:23:29.672425+00:00"
     },
     "reuse_search-1": {
       "action": "acted",

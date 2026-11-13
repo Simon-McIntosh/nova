@@ -32,6 +32,11 @@
       "kind": "exempted",
       "reason": "Agreed: the air-field check establishes determinism; the poloidal |B| profile is the independent control. The scripts-cleanup node rewords the fragment's 'two independent controls'.",
       "recorded_at": "2026-11-13T12:08:34.493174+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "Deferred to the scripts-cleanup node: the docstrings name the probe positions instead of the plan.",
+      "recorded_at": "2026-11-13T12:08:53.458272+00:00"
     }
   },
   "findings": [

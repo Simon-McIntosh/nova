@@ -36,12 +36,38 @@ def compile_profiles():
 
 def _splitter(profile):
     rows = [
-        row for row in profile["table"] if row["pass"].endswith("/variadic-op-splitter")
+        (index, row)
+        for index, row in enumerate(profile["gaps"])
+        if row["pass"].endswith("/variadic-op-splitter")
     ]
     assert len(rows) == 1
-    row = rows[0]
-    assert row["instructions_after"] > row["instructions_entry"] > 0
-    return row
+    index, entry = rows[0]
+    # Fusion diagnostics have no HLO instructions; the next HLO dump carries
+    # the program the splitter produced.
+    following = next(
+        row
+        for row in profile["gaps"][index + 1 :]
+        if not row["pass"].endswith(("priority_fusion_dump.txt", ".ll"))
+    )
+    assert following["instructions"] > entry["instructions"] > 0
+    return {
+        "instructions_entry": entry["instructions"],
+        "instructions_after": following["instructions"],
+    }
+
+
+def test_splitter_count_skips_fusion_diagnostics():
+    profile = {
+        "gaps": [
+            {"pass": "pipeline/variadic-op-splitter", "instructions": 750},
+            {"pass": "jit_source.priority_fusion_dump.txt", "instructions": 0},
+            {"pass": "after_priority-fusion/cse", "instructions": 402141},
+        ]
+    }
+    assert _splitter(profile) == {
+        "instructions_entry": 750,
+        "instructions_after": 402141,
+    }
 
 
 def test_production_row_splitter_instruction_budget(compile_profiles):

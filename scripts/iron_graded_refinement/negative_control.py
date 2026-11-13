@@ -49,7 +49,7 @@ MUTATIONS = {
             "graded_shell_error(graded_shell_field(4.0), capsys)\n"
         ),
         node=ACCURACY,
-        platforms="cuda",
+        platforms="cpu",
         marker="0.5 percent at every probe",
     ),
     "perturbed-uniform": dict(

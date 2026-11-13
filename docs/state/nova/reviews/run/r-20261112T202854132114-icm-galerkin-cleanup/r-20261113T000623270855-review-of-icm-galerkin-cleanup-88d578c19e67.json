@@ -1,0 +1,52 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-13T00:26:41.220Z",
+  "dispatched_at": "2026-11-13T00:15:29Z",
+  "findings": [
+    {
+      "file": "scripts/west_iron_galerkin/mutant.py",
+      "line": 42,
+      "severity": "non-blocking",
+      "text": "extract() duplicates the git-archive extraction that scripts/west_iron_galerkin/suite.py:25-53 already owns: same tempfile.mkdtemp under TMPDIR, same 'git archive' Popen, same tar.extractall(filter='data'), and the identical five-path set at mutant.py:19 and suite.py:43-47. The node removed the duplication in the mutation half and left it in the extraction half, so a change to the extraction set still has to be made in two places."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-cleanup.html",
+      "line": 111,
+      "severity": "non-blocking",
+      "text": "The fragment states 'A change to the extraction set or to the identity guard is made once', but the extraction set is carried in mutant.py:19 ARCHIVE_PATHS and again inline at suite.py:43-47, so the sentence overstates what the factoring achieved and a reader who trusts it will edit one copy only."
+    },
+    {
+      "file": "scripts/west_iron_galerkin/duplication.py",
+      "line": 18,
+      "severity": "non-blocking",
+      "text": "The carrier guard is a standalone script with no caller anywhere in tests/ or conftest.py, so a regression that re-adds a second mutant program fails no suite and is caught only if someone runs duplication.py by hand; its own demonstration in reuse-negative-control.log shows it can fail, but nothing schedules it."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: The reviewed change was dispatched to answer the prior review's reuse finding that two mutant programs carried one extract-mutate-verify sequence; at 03aa5258d scripts/west_iron_galerkin/mutant.py:96 require_rejection owns that sequence, negative_asymmetry.py:5 imports it, and scripts/west_iron_galerkin/negative.py is deleted at 2180ef21a, so the two carriers the finding named are one.\nVERDICT done_when: Read the reviewed run's baseline_suite and after_suite records against the logs they cite: baseline-arm.log ends '43 passed in 1473.67s (0:24:33)' and 'EXIT=0' at 26c4fe159, after-arm.log ends '48 passed in 1622.10s (0:27:02)' and 'EXIT=0' at 4df2d87b2, so added_failure_count is 0 with an empty id list; the fix's own control, reuse-negative-control.log, records CARRIERS=['negative.py', 'negative_asymmetry.py'] at 013ead990 and ['mutant.py'] at head, with DUPLICATION_CHECK_REJECTED_THE_BASE and EXIT=0.\nVERDICT write_paths: The reviewed node's declared write paths include scripts/west_iron_galerkin (directory) and docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-cleanup.html; every one of the five paths in the diff 013ead990..88d578c19 is inside them.\nVERDICT manifest: Read .../r-20261112T202854132114-icm-galerkin-cleanup/manifest.md: status complete, ten commits listed, the repair recorded at 03aa5258d, 2180ef21a and 4df2d87b2, and both suite arms recorded with their logs; its changed_paths omits the deleted scripts/west_iron_galerkin/negative.py, which its evidence_inputs block discloses instead.\nVERDICT diff: Read all four commits 013ead990..88d578c19 individually: 03aa5258d adds mutant.py and rewrites negative_asymmetry.py onto it, 2180ef21a deletes negative.py and adds duplication.py, 4df2d87b2 and 88d578c19 record the runs in the fragment; five files, 277 insertions and 228 deletions, no runtime code under nova/ touched.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/west_iron_galerkin/mutant.py:96 require_rejection owns the extract-mutate-verify sequence and negative_asymmetry.py:23 delegates to it, which is exactly the consolidation the prior review's reuse finding asked for.\nSCORE evidence: 17\nJUSTIFICATION evidence: after-arm.log's own summary line '48 passed in 1622.10s (0:27:02)' and baseline-arm.log's '43 passed in 1473.67s' are the receipts behind the zero added failures, and reuse-negative-control.log records both arms of the new guard run; the one evidence defect is the fragment's claim at line 111 that the extraction set is defined once.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every path in the diff is under the declared scripts/west_iron_galerkin directory or is the declared icm-galerkin-cleanup.html fragment, and nothing outside the goal's four commits is carried.\nSCORE durability: 10\nJUSTIFICATION durability: reuse-negative-control.log proves duplication.py:18 rejects the base and accepts the head, but no test under tests/ invokes duplication.py, so a regression that adds a second carrier turns no suite red.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/west_iron_galerkin/mutant.py:19 ARCHIVE_PATHS and the keyword-only require_rejection signature follow the argparse-and-Path idiom of scripts/west_iron_galerkin/suite.py, and no added name carries a plan or version label.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/west_iron_galerkin/mutant.py:42 extract() re-implements the git-archive extraction that scripts/west_iron_galerkin/suite.py:25-53 already owns, carrying the same five paths at mutant.py:19 as suite.py:43-47 instead of extending that owner.\nFINDING scripts/west_iron_galerkin/mutant.py:42 non-blocking: extract() duplicates the git-archive extraction that scripts/west_iron_galerkin/suite.py:25-53 already owns: same tempfile.mkdtemp under TMPDIR, same 'git archive' Popen, same tar.extractall(filter='data'), and the identical five-path set at mutant.py:19 and suite.py:43-47. The node removed the duplication in the mutation half and left it in the extraction half, so a change to the extraction set still has to be made in two places.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-cleanup.html:111 non-blocking: The fragment states 'A change to the extraction set or to the identity guard is made once', but the extraction set is carried in mutant.py:19 ARCHIVE_PATHS and again inline at suite.py:43-47, so the sentence overstates what the factoring achieved and a reader who trusts it will edit one copy only.\nFINDING scripts/west_iron_galerkin/duplication.py:18 non-blocking: The carrier guard is a standalone script with no caller anywhere in tests/ or conftest.py, so a regression that re-adds a second mutant program fails no suite and is caught only if someone runs duplication.py by hand; its own demonstration in reuse-negative-control.log shows it can fail, but nothing schedules it.\n",
+  "review_run_id": "r-20261113T000623270855-review-of-icm-galerkin-cleanup-88d578c19e67",
+  "reviewed_base_sha": "013ead9900c985bb3e5bb2cb41b04076b0efd9d3",
+  "reviewed_head_sha": "88d578c19e67e305d52327d76026bb973a3e9868",
+  "reviewed_run_id": "r-20261112T202854132114-icm-galerkin-cleanup",
+  "scores": {
+    "durability": 10,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T00:34:01.203500+00:00",
+  "total": 88,
+  "verdicts": {
+    "call_sites": "No production runtime code under nova/ reaches the change: the only importers of the added mutant harness are scripts/west_iron_galerkin/duplication.py:7 and scripts/west_iron_galerkin/negative_asymmetry.py:5, both verification harness scripts in the node's own directory.",
+    "diff": "Read all four commits 013ead990..88d578c19 individually: 03aa5258d adds mutant.py and rewrites negative_asymmetry.py onto it, 2180ef21a deletes negative.py and adds duplication.py, 4df2d87b2 and 88d578c19 record the runs in the fragment; five files, 277 insertions and 228 deletions, no runtime code under nova/ touched.",
+    "done_when": "Read the reviewed run's baseline_suite and after_suite records against the logs they cite: baseline-arm.log ends '43 passed in 1473.67s (0:24:33)' and 'EXIT=0' at 26c4fe159, after-arm.log ends '48 passed in 1622.10s (0:27:02)' and 'EXIT=0' at 4df2d87b2, so added_failure_count is 0 with an empty id list; the fix's own control, reuse-negative-control.log, records CARRIERS=['negative.py', 'negative_asymmetry.py'] at 013ead990 and ['mutant.py'] at head, with DUPLICATION_CHECK_REJECTED_THE_BASE and EXIT=0.",
+    "goal": "The reviewed change was dispatched to answer the prior review's reuse finding that two mutant programs carried one extract-mutate-verify sequence; at 03aa5258d scripts/west_iron_galerkin/mutant.py:96 require_rejection owns that sequence, negative_asymmetry.py:5 imports it, and scripts/west_iron_galerkin/negative.py is deleted at 2180ef21a, so the two carriers the finding named are one.",
+    "manifest": "Read .../r-20261112T202854132114-icm-galerkin-cleanup/manifest.md: status complete, ten commits listed, the repair recorded at 03aa5258d, 2180ef21a and 4df2d87b2, and both suite arms recorded with their logs; its changed_paths omits the deleted scripts/west_iron_galerkin/negative.py, which its evidence_inputs block discloses instead.",
+    "write_paths": "The reviewed node's declared write paths include scripts/west_iron_galerkin (directory) and docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-cleanup.html; every one of the five paths in the diff 013ead990..88d578c19 is inside them."
+  }
+}

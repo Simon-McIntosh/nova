@@ -33,7 +33,43 @@
   "plan_slug": "iron-limb-fill-fraction",
   "plan_version": 3,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "4fd38a3dfa8d575b13eee92698254c3d69bcb72b",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The imas-efit hand-off question no longer hangs on section 4: it is anchored to the motivation section, which no node builds, so no section owner inherits it.",
+      "reason": "",
+      "when": "2026-11-13T16:21:14.388659+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "finding": "wiring-2",
+      "reason": "The store keeps a followup's prompt line on the resolved record and offers no verb to delete a followup; the record is resolved with an outcome naming the foreign owner, and resolved followups are excluded from pending work and from every handoff.",
+      "when": "2026-11-13T16:21:25.527925+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "4fd38a3dfa8d575b13eee92698254c3d69bcb72b",
+      "commit_basis": "edit",
+      "note": "The imas-efit hand-off question no longer hangs on section 4: it is anchored to the motivation section, which no node builds, so no section owner inherits it.",
+      "reason": "",
+      "when": "2026-11-13T16:21:14.388659+00:00"
+    },
+    "wiring-2": {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "reason": "The store keeps a followup's prompt line on the resolved record and offers no verb to delete a followup; the record is resolved with an outcome naming the foreign owner, and resolved followups are excluded from pending work and from every handoff.",
+      "when": "2026-11-13T16:21:25.527925+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-limb-fill-fraction/r-20261113T154804461355-plan-review-of-iron-limb-fill-fraction.json",
   "review_run_id": "r-20261113T154804461355-plan-review-of-iron-limb-fill-fraction",
   "reviewed_blob_sha": "cac938cfae444de51c798f6d4cfce008d430e5bd",
   "rubric": "content",

@@ -62,8 +62,7 @@ def main():
     plan = dict(
         slots=args.slots,
         pending=[
-            f"{arm}:{case_name(frame, branch)}"
-            for arm, frame, branch, _ in pending
+            f"{arm}:{case_name(frame, branch)}" for arm, frame, branch, _ in pending
         ],
     )
     (args.output / "plan.json").write_text(json.dumps(plan, indent=2) + "\n")
@@ -113,7 +112,9 @@ def main():
             )
             environment["CUDA_VISIBLE_DEVICES"] = str(card)
             process = subprocess.Popen(
-                command, cwd=args.tree, env=environment,
+                command,
+                cwd=args.tree,
+                env=environment,
             )
             running[process] = (arm, frame, branch, folder, stream)
             print("STARTED", arm, case_name(frame, branch), "card", card, flush=True)
@@ -121,24 +122,26 @@ def main():
         for process in list(running):
             if process.poll() is None:
                 continue
-            arm, frame, branch, folder, stream.write(f"EXIT={process.returncode}\n")
+            arm, frame, branch, folder, stream = running.pop(process)
+            stream.write(f"EXIT={process.returncode}\n")
             stream.close()
-            del running[process]
             name = case_name(frame, branch)
             results[f"{arm}:{name}"] = dict(
                 revision=args.revision,
                 exit_status=process.returncode,
                 log_path=str(folder / "row.log"),
             )
-            if process.returncode == 0:
-                results[f"{arm}:{name}"].update(
-                    json.loads((folder / "receipt.json").read_text())
-                )
+            receipt = folder / "receipt.json"
+            if process.returncode == 0 and receipt.is_file():
+                results[f"{arm}:{name}"].update(json.loads(receipt.read_text()))
                 image = folder / "shadow-image.json"
                 if image.is_file():
                     results[f"{arm}:{name}"].update(json.loads(image.read_text()))
             path.write_text(json.dumps(results, indent=2, default=str) + "\n")
             print("ROW", arm, name, process.returncode, flush=True)
+    unreceipted = [name for name, item in results.items() if "converged" not in item]
+    if unreceipted:
+        raise SystemExit(f"rows finished without a receipt: {unreceipted}")
     if any(item["exit_status"] for item in results.values()):
         raise SystemExit(1)
 

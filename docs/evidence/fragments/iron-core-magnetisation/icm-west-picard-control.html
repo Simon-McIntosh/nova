@@ -55,11 +55,12 @@
 <h4 id="icm-west-picard-control-disposition">Disposition</h4>
 <p>Measured on the operator the solve uses, clause (2) of this section's done-when is not met: the control that was to fail does not fail.</p>
 <table id="icm-west-picard-control-provenance"><thead><tr><th>item</th><th>value</th></tr></thead><tbody>
-<tr><td>executed script</td><td><code>scripts/west_picard_control/measure.py</code>, git blob 061e66056bdc3cd65dc7469ce5bcf6f9bd372fce</td></tr>
+<tr><td>executed script</td><td><code>scripts/west_picard_control/measure.py</code>, git blob 061e66056bdc3cd65dc7469ce5bcf6f9bd372fce, sha256 7a3474c36abc18c526b536ba5d5bc52829597491ff0d0d957890f0c8248133fe</td></tr>
 <tr><td>revision</td><td>22e66e61a7743f4dfeba452572678d41abb30a09</td></tr>
-<tr><td>material operator</td><td><code>nova/biot/magnetisation.py</code> at that revision, unmodified</td></tr>
+<tr><td>material operator</td><td><code>nova/biot/magnetisation.py</code> at that revision, unmodified, sha256 85cc12c852eb0a8b155ceb927a00467717b75b3010fe4429ed9d4dc3c8028963</td></tr>
 <tr><td>mesh and machine</td><td>WEST 62751 iron, 0.08 m, 1695 cells, DD 4.1.0, CEA table, 14.40 s operator build</td></tr>
-<tr><td>device</td><td>Tesla P100-PCIE-16GB, JAX x64 asserted</td></tr>
-<tr><td>full receipt</td><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T015201821537-icm-west-picard-control/picard-control/measurement.json</code> (40 KB: every Picard and centroid-sampled row, both controls, both residual histories)</td></tr>
+<tr><td>device</td><td>Tesla P100-PCIE-16GB, JAX x64 asserted. The recorded run executed the earlier blob above on that device; the current script differs from it only in where it reads the mesh-pair receipt from, and in recording the device kind rather than asserting a P100, so the recipe re-runs unchanged on any lane.</td></tr>
+<tr><td>full receipt</td><td><code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/picard-control/measurement.json</code>, sha256 f6d1f9fecb47fa594942a35ad069fd8df116283d1a216b2769d180149df4acf6 (40 KB: every Picard and centroid-sampled row, both controls, both residual histories). Committed Picard states beside it: <code>picard-state.npy</code>, sha256 f6c88e61f9e6b029661c791b98d006032b231a86c0a8778a783ad046ad48a54f, and <code>picard-maximum-M.npy</code>, sha256 558bb6015635f5bcd549bf7fe20fa759bec05c5758a6b6ec31411a84aaf57540.</td></tr>
+<tr><td>Newton history</td><td><code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/mesh-pair/measurement.json</code>, sha256 b1b178c34a9c695a7b35b27fb6a865960ab5d1b5721a66199e70c842c71dff03 — the mesh-pair node's receipt, from which the recorded Newton history and its correction count are read</td></tr>
 </tbody></table>
 </section>

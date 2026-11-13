@@ -52,9 +52,8 @@ from scripts.west_iron_galerkin_pair.measure import (  # noqa: E402
 from tests.test_magnetisation import loop, shell  # noqa: E402
 
 PAIR_RECEIPT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/"
-    "r-20261112T201826132383-icm-west-62751-galerkin-pair/"
-    "measurement/measurement.json"
+    "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/"
+    "west-62751/mesh-pair/measurement.json"
 )
 NEWTON_TOLERANCE = 1e-10
 PICARD_ITERATIONS = 50
@@ -322,7 +321,6 @@ def main():
     )
     assert jax.config.jax_enable_x64, "the material solve requires float64"
     assert Path(iron.__file__).resolve().is_relative_to(root), iron.__file__
-    assert "P100" in jax.devices()[0].device_kind, jax.devices()[0].device_kind
     digest = hashlib.sha256(SOURCE.read_bytes()).hexdigest()
     assert digest == SOURCE_SHA256, digest
     with SOURCE.open("rb") as stream:
@@ -352,6 +350,7 @@ def main():
         material_module=iron.__file__,
         cwd=str(Path.cwd().resolve()),
         device=jax.devices()[0].device_kind,
+        devices=[str(device) for device in jax.devices()],
         machine=uri.removeprefix("imas:hdf5?path="),
         dd_version=dd_version,
         cell_size_m=WEST_SIZE,

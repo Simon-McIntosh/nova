@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="319">
+<meta name="plan-version" content="320">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -1021,6 +1021,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261113T035507897680-review-of-bank-h200-slice-profile-5f868e16a4e5-figure" data-who="reckon-build" data-when="2026-11-13T04:13:55.555Z">
     <div class="r-comment-body"><p>Attached a parsed read-only figure review to r-20261113T012704238111-bank-h200-slice-profile at head 5f868e16a4e5: six rubric items recorded, one blocking finding (host gaps, transfer/fills, other/fused and predictor draw their width-64 point on the zero baseline at 0.002-3.6% of axis height, marker straddling the spine, caused by report.py:300 `set_ylim(0, max*1.15)`) and three non-blocking findings. No file was edited, redrawn or relabelled.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261113T163345570540-review-of-bank-h200-slice-profile-5f868e16a4e5" data-who="reckon-build" data-when="2026-11-13T16:48:08.554Z">
+    <div class="r-comment-body"><p>Independent review of r-20261113T012704238111-bank-h200-slice-profile at base a732ede0a545a4c6524cfd3ccfb1fbc6aa125642 and head 5f868e16a4e51c34a60160be6d7da29df7640427 scores goal_fidelity 16, evidence 17, scope_discipline 20, durability 12, fit 18, reuse 17, added_failure_count 0; one blocking finding (report.py:300 draws the width-64 point on a zero floor in four figure panels) and two non-blocking (run.py:39 pins the measurement input to another run&#x27;s directory; report.py:17 binds attribution line numbers to the reporting tree rather than the measured revision).</p></div>
 </div>
 </section>
 </main>

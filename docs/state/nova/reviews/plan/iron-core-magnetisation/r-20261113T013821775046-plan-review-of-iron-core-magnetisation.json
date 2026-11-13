@@ -1,0 +1,42 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T01:46:01.114Z",
+  "dispatched_at": "2026-11-13T01:40:14Z",
+  "findings": [],
+  "plan_commit": "07c248ca5bd4223d1119b8ea549eaa2ab9bfb1cc",
+  "plan_fingerprint": "68d12e949e3490427a42b2979ac55234bd9a7f079273e069f5b6b91de1cbb49b",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 78,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T013821775046-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "34eaac840df3808cb408369c24c4134cbd45721a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every path \u00a74 cites resolves at HEAD (nova/imas/machine.py, nova/biot/magnetisation.py, scripts/prototypes/iron_magnetisation/west.py, scripts/west_stray_field/solve.py, nova/biot/tiledassembly.py, nova/equilibrium/reduced_newton.py, nova/equilibrium/AGENTS.md, docs/research/compile-cost-evidence.html, the icm-west-62751-galerkin-pair fragment), and \u00a74 names no href to resolve.",
+    "done_when": "pass \u2014 \u00a74's three clauses each name an observable endpoint and a negative control (secant-resuming mutant on the law, centroid-sampling mutant on the operator, frozen-permeability Picard on the Newton choice), and clause (1)'s spectrum assertion reads G/\u03bc0, so it can fail.",
+    "evidence_paths": "pass \u2014 done-when (3) names docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html with large files under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/, both durable paths, and the fragment exists at HEAD.",
+    "naming": "pass \u2014 the changed sentence introduces no plan label, stage name, ticket number or version tag, and no changelog prose.",
+    "reasoning": "pass \u2014 the stated bound now holds of the operator the tests assert: the landed receipts record the symmetric eigenvalues of G/\u03bc0 at 4.87e-5 to 0.99995 on the two WEST meshes and inside [0, 1] with symmetry defect at roundoff (icm-west-62751-galerkin-pair.html:21-26; icm-galerkin-interaction.html:13), and the Galerkin averaging is what keeps that bound where the centroid operator violated it (icm-west-root-branch.html:59-63), so the convex-energy and single-root inference rests on the operator the section actually builds.",
+    "single_goal": "pass \u2014 on the changed unit \u00a74 now carries one remaining deliverable (the solved WEST 62751 stray field on the Galerkin operator): the iron-read half of clause (3) is landed (nova/imas/machine.py read_iron_core, both script readers calling it), so it adds no second goal.",
+    "wiring": "pass \u2014 \u00a74's declared waits (s2, s3) are both declared done, and s5 depends on s4 as its first consumer; the changed sentence adds no new dependency."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "bf0049ee8c924773ea67dcbe093fb860584392de2ea9a0789d0fabc79578a462",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "578d2eaf9406c5674837d13e1daa7bc2db8e080f67f2129de0b20ec4883a3e06",
+    "s5": "18d64dc99773bd89740bde91084ec424e8873aa08afed9991b5bbc40f3395b4a",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "8a8c2cb93f6c3ed1ebbb2171af1a254a72689f0630f9b086c8890ac486595e6e",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T01:49:27.420076+00:00",
+  "total": null
+}

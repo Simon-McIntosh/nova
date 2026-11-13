@@ -33,7 +33,30 @@
   "plan_slug": "sub-millisecond-forward-path",
   "plan_version": 316,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1686476e9a88b1259549c285ae48656ee772e803",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "Section 6 now cites the slice-profile run H200 receipts under its run directory, which resolve today; the fragment lands with that run, whose code review and figure redraw are in flight.",
+      "reason": "",
+      "when": "2026-11-13T16:37:10.167995+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1686476e9a88b1259549c285ae48656ee772e803",
+      "commit_basis": "edit",
+      "note": "Section 6 now cites the slice-profile run H200 receipts under its run directory, which resolve today; the fragment lands with that run, whose code review and figure redraw are in flight.",
+      "reason": "",
+      "when": "2026-11-13T16:37:10.167995+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261113T162124319621-plan-review-of-sub-millisecond-forward-path.json",
   "review_run_id": "r-20261113T162124319621-plan-review-of-sub-millisecond-forward-path",
   "reviewed_blob_sha": "717a69015924390b018be457e21ef5787849df97",
   "rubric": "content",

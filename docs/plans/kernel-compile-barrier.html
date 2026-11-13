@@ -24,7 +24,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -154,8 +154,14 @@
 <div class="r-comment" data-section="s2" data-id="c-20261113-lever-share-decision-entered" data-who="reckon-build" data-when="2026-11-13T16:40:00Z">
     <div class="r-comment-body"><p>Correction to the lead-ruling comment above: decision <code>variadic-share-on-production-base</code> is entered and locked (2026-11-13), and decision <code>compile-target-shared</code> now carries a superseded note for its 45 s figure in §2. The per-pass table for both arms of §2's gate is delivered in <code>docs/evidence/fragments/kernel-compile-barrier/variadic-split.html</code>, which the node's dispatch names as a write path.</p></div>
 </div>
+<div class="r-comment" data-section="s2" data-id="c-20261113-pass-table-owed" data-who="reckon-build" data-when="2026-11-13T17:00:00Z">
+    <div class="r-comment-body"><p>Correction: the per-pass table for both arms of §2's gate does not exist yet. It is owed by node <code>variadic-split</code> at <code>docs/evidence/fragments/kernel-compile-barrier/variadic-split.html</code>, the path its dispatch assigns, and §2 is not accepted without it.</p></div>
+</div>
 <div class="r-comment" data-section="s3" data-id="c-20261020-coarse-tie-run-phase" data-who="reckon-build" data-when="2026-10-20T07:03:00Z">
     <div class="r-comment-body"><p>From crew run <code>r-20261019T223150157038-coarse-tie-census-memory</code>, landed as evidence at merge <code>19a02ca16</code> (failed, correct refusal): a second provisioning job (sirius 1290676, 450G, 5 h) reproduced the cold compile at 7,013 s and about 378 GB, then held that memory for a further ~11,000 s in the 533-batch node loop without publishing the operand. So the jets build's cost is not only its compile: the batch loop after it also outlasts a five-hour wall at 2,132 nodes. §3's done-when (1) bounds the compile; the node that builds §3 should also report the loop's wall per batch, so a bounded compile is not followed by an unbounded run. The 500-cell coarse-tie census test stays a known failure until §3 lands. <a href="/nova/evidence/fragments/converged-forward-solve/coarse-tie-census-memory.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20261113-s3-bound-needs-second-lever" data-who="reckon-build" data-when="2026-11-13T17:01:00Z">
+    <div class="r-comment-body"><p>Before §3 is dispatched: its 60 s bound sits on the same program §2 changes, and the variadic lever alone leaves 130.8 s on today's base (content review <code>r-20261113T164531019507</code>). Reaching 60 s also needs the second-derivative path that grew the graph 2.75 times to shrink. §3's lever and bound are restated from the head-arm profile §2 lands, and the sentence in §2 that says the 10 s goal is met by §2 to §4 together is corrected in that same edit: no section owns 10 s yet.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T105213580367-review-of-compile-pass-profile-56097c60b0a9-figure" data-who="reckon-build" data-when="2026-10-27T11:08:08.882Z">
     <div class="r-comment-body"><p>Figure review of the point-jet time-per-pass figure is parsed with all six rubric items: legibility, data_ink, decoration, contrast and label_collision pass, table_form carries the one non-blocking defect; four non-blocking findings are recorded and none blocks — the right panel's three bars sum to 99.235 s against the 96.116 s compile wall its axis names, aggregate passes are drawn identically to single passes, control figures sit in prose, and the blue/grey key lives only in the caption.</p></div>

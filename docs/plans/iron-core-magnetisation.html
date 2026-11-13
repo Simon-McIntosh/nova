@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="80">
+<meta name="plan-version" content="81">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -760,6 +760,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261112T202854132114-icm-galerkin-cleanup" data-who="reckon-build" data-when="2026-11-13T01:09:10Z">
     <div class="r-comment-body"><p>§4 Galerkin interaction: the filament flux and section quadrature now call their owners, the volume-tested route has its own named entry point, the reciprocity test measures the pre-symmetrisation defect at 1.01e-15 against 1e-12, and one shared mutant harness replaces two copies (2 carriers before, 1 at head); suite 43 passed at base and 48 at head, zero added failures</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261113T025141470877-review-of-icm-west-picard-control-44acc5d2587c" data-who="reckon-build" data-when="2026-11-13T03:20:10.506Z">
+    <div class="r-comment-body"><p>independent review of r-20261113T015201821537-icm-west-picard-control at base 2389b4bf9 head 44acc5d25 — the frozen-permeability Picard control is implemented as the plan defines it, converges in 12 iterations to 7.78e-11 against Newton&#x27;s 4, and the plan&#x27;s expected negative control is honestly recorded as refuted; scores goal 18, evidence 18, scope 20, durability 13, fit 17, reuse 16, six non-blocking findings</p></div>
 </div>
 </section>
 </main>

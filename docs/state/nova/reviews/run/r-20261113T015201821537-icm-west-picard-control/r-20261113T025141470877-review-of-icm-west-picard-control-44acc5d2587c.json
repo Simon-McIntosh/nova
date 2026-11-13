@@ -1,0 +1,95 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "2389b4bf991f26b03fb50cd4b4d6d063c8d2f223",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-13T03:20:10.506Z",
+  "dispatched_at": "2026-11-13T03:03:00Z",
+  "findings": [
+    {
+      "file": "scripts/west_picard_control/measure.py",
+      "line": "54",
+      "severity": "non-blocking",
+      "text": "non-blocking: PAIR_RECEIPT is an absolute path into another crew run's directory, and those directories are prunable, so a reader who re-runs the script after that run is cleaned up gets a bare read_text failure with no fallback and no way to reconstruct the recorded Newton history the control is compared against."
+    },
+    {
+      "file": "scripts/west_picard_control/measure.py",
+      "line": "216",
+      "severity": "non-blocking",
+      "text": "non-blocking: analytic_shielding re-implements the exact closed-shell formula already present inline at tests/test_magnetisation.py:180, so the two copies can drift and a future shielding receipt cannot say which one its numbers came from."
+    },
+    {
+      "file": "scripts/west_picard_control/measure.py",
+      "line": "629",
+      "severity": "non-blocking",
+      "text": "non-blocking: `assert Path(iron.__file__).read_bytes() == source_bytes` compares two reads of the same file taken in one run, so it can only fail on a mid-run mutation and cannot falsify any regression in the measurement it sits beside; it is a provenance check, not a guard, and must not be counted as one."
+    },
+    {
+      "file": "scripts/west_picard_control/measure.py",
+      "line": "325",
+      "severity": "non-blocking",
+      "text": "non-blocking: the hardcoded 'P100' device assertion makes the measurement unreproducible on the H200 lane or on CPU without editing the script, so the recipe cannot be re-run wherever the machine changes."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-west-picard-control.html",
+      "line": "63",
+      "severity": "non-blocking",
+      "text": "non-blocking: the only pointer to the 40 KB receipt is inside the crew run directory rather than a persistent GPFS evidence path, so the rows the fragment's tables were built from survive only until that directory is cleaned."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T015201821537-icm-west-picard-control/manifest.md",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "non-blocking: orientation_base_sha names 2389b4bf991f26b0907c0f8d2d6a2c7a0b9e5d21, which `git cat-file -t` reports as an object the repository does not contain; the base the diff was taken from is 2389b4bf991f26b03fb50cd4b4d6d063c8d2f223."
+    }
+  ],
+  "head_log_revision": "44acc5d2587c6b83c30a59e2b994368792971b3d",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against base 2389b4bf9: afb429834 adds the measurement and both positive controls, f2df2ded0 relaxes the Newton reproduction bound to the measured roundoff spread and says so, 22e66e61a records the verdict and adds the explanatory centroid-sampled arm, 44acc5d25 lands the fragment and figure.",
+    "done_when": "the done_when asks for per-iteration residual, max |M| and max delta mu_r over at least 50 available iterations, a positive control, and a figure with a fragment; measure.py records 13 rows (converged at 12 of 50 permitted), both shells converge (1 and 2 steps), figure.py renders and saves through save_checked, and titan-picard.log ends EXIT=0.",
+    "goal": "the goal is the frozen-permeability Picard control on WEST 62751 at 0.08 m beside Newton; measure.py:65 `iterate` holds c(|B|) at the incoming iterate and solves (I - diag(c) G) M = c B_ext exactly from M = 0 at full drive, matching the plan's definition, and it converges in 12 iterations so the plan's expected failure is refuted and recorded as such.",
+    "manifest": "read; status complete, four commits, gate command and log path recorded, and the plan clause is declared unmet rather than massaged into a pass, with numbers that reconcile against the log's PICARD and SUMMARY lines.",
+    "write_paths": "declared scripts/west_picard_control, the fragment and the figure directory; git diff --stat 2389b4bf9..44acc5d25 changes exactly five files, every one inside that fence and none of them product code."
+  },
+  "justifications": {
+    "durability": "measure.py:588-593 reddens if `iterate` regresses (the linear shell must take one step and the two roots agree to 1e-8) but no test file exists, so the guard fires only on a titan re-run against a receipt in a prunable run directory.",
+    "evidence": "titan-picard.log ends with a bare EXIT=0 carrying SUMMARY negative_control_met=false and the 12-iteration history, and the figure's own render line reads FIGURE_TEXT_LAYOUT_PASS artists=27; the receipt it points at lives only in the crew run directory.",
+    "fit": "measure.py:325 gates on 'P100' in the device kind, so the recipe refuses to run on any other lane even though the repo runs these measurements on the H200 lane too.",
+    "goal_fidelity": "scripts/west_picard_control/measure.py:65-107 implements the plan's definition verbatim and measure.py:498-511 records the root difference against Newton, but the run stops at the converged iterate 12 rather than carrying the brief's 'at least 50 iterations' through.",
+    "reuse": "the mesh, law, external field and spectrum come from scripts/west_iron_galerkin_pair/measure.py and the operator from nova/biot/magnetisation.py, but measure.py:216 re-expresses the exact shielding formula already inline at tests/test_magnetisation.py:180.",
+    "scope_discipline": "git diff --stat lists five files, all under scripts/west_picard_control, the fragment and docs/figures/iron-core-magnetisation/icm-west-picard-control, with no product or test change."
+  },
+  "notes": {
+    "figure_inspection": "the committed SVG was rasterised (convert -density 140) and inspected: three residual histories on one log axis, frameless legend above the panel, despined and gridless, no clipped or overlapping text, slide canvas 31.11x16 cm.",
+    "suite_pair": "the reviewed node's declared scope contains no test file, so its promotion measures no suite pair; manifest.md carries no baseline_suite or after_suite block, hence added_failure_count 0 and added_failure_ids [] are derived from an unarmed pair rather than from a passing run."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is the frozen-permeability Picard control on WEST 62751 at 0.08 m with the Newton comparison; scripts/west_picard_control/measure.py:65 `iterate` holds c(|B|) at the incoming iterate and solves (I - diag(c) G) M = c B_ext exactly, from M = 0 at full drive, and records all three clauses of the brief.\nVERDICT done_when: the done_when asks for per-iteration residual, max |M| and max delta mu_r over at least 50 available iterations, a positive control, and a figure fragment; measure.py records 13 rows (converged at 12 of the 50 permitted), both shells converge in 1 and 2 steps, and figure.py plus the fragment land both, with the gate log ending EXIT=0.\nVERDICT write_paths: the declared paths are scripts/west_picard_control, the fragment and the figure directory; `git diff --stat 2389b4bf9..44acc5d25` changes exactly five files, every one inside that fence, and no product code.\nVERDICT manifest: read; it records status complete, the four commits, the gate command and its log path, and states the plan clause is unmet rather than satisfied, with the measured numbers matching the log's PICARD/SUMMARY lines.\nVERDICT diff: read commit by commit against base 2389b4bf9; afb429834 adds the measurement, f2df2ded0 relaxes the Newton reproduction bound to the measured roundoff spread, 22e66e61a records the verdict and adds the centroid-sampled arm, 44acc5d25 lands the fragment and figure.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/west_picard_control/measure.py:65-107 implements the plan's definition verbatim and measure.py:498-511 records the root difference against Newton, but the run stops at the converged iterate 12 rather than carrying the brief's \"at least 50 iterations\" through.\nSCORE evidence: 18\nJUSTIFICATION evidence: titan-picard.log ends with a bare EXIT=0 carrying SUMMARY negative_control_met=false and the 12-iteration history, and the figure's own render line reads FIGURE_TEXT_LAYOUT_PASS artists=27; the receipt it all points at lives only in the crew run directory.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --stat 2389b4bf991f26b03fb50cd4b4d6d063c8d2f223 44acc5d2587c6b83c30a59e2b994368792971b3d` lists five files, all under scripts/west_picard_control, the fragment and docs/figures/iron-core-magnetisation/icm-west-picard-control, with no product or test change.\nSCORE durability: 13\nJUSTIFICATION durability: measure.py:588-593 reddens if `iterate` regresses (the linear shell must take one step and the two roots must agree to 1e-8) but no test file exists, so the guard fires only on a titan re-run against a receipt held in a prunable run directory.\nSCORE fit: 17\nJUSTIFICATION fit: measure.py:325 gates on \"P100\" in the device kind, so the recipe refuses to run on any other lane even though the surrounding repo runs these measurements on the H200 lane as well.\nSCORE reuse: 16\nJUSTIFICATION reuse: the mesh, law, external field and spectrum come from scripts/west_iron_galerkin_pair/measure.py and the operator from nova/biot/magnetisation.py, but measure.py:216 re-expresses the exact shielding formula already written inline at tests/test_magnetisation.py:180 instead of sharing one owner.\nFINDING scripts/west_picard_control/measure.py:54 non-blocking: PAIR_RECEIPT is an absolute path into another crew run's directory, and those directories are prunable, so a reader who re-runs the script after that run is cleaned up gets a bare read_text failure with no fallback and no way to reconstruct the recorded Newton history the control is compared against.\nFINDING scripts/west_picard_control/measure.py:216 non-blocking: analytic_shielding re-implements the exact closed-shell formula already present inline at tests/test_magnetisation.py:180, so the two copies can drift and the review of a future shielding receipt cannot tell which one the numbers came from.\nFINDING scripts/west_picard_control/measure.py:629 non-blocking: `assert Path(iron.__file__).read_bytes() == source_bytes` compares two reads of the same file taken in one run, so it can only fail on a mid-run mutation and cannot falsify any regression in the measurement it sits beside; it is a provenance check, not a guard, and must not be counted as one.\nFINDING scripts/west_picard_control/measure.py:325 non-blocking: the hardcoded P100 assertion makes the measurement unreproducible on the H200 lane or on CPU. \nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-west-picard-control.html:63 non-blocking: the only pointer to the 40 KB receipt is inside the crew run directory rather than a persistent GPFS evidence path, so the rows the fragment's tables were built from outlive the run only until that directory is cleaned.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T015201821537-icm-west-picard-control/manifest.md:4 non-blocking: orientation_base_sha names 2389b4bf991f26b0907c0f8d2d6a2c7a0b9e5d21, which `git cat-file -t` reports as an object the repository does not contain; the base the diff was taken from is 2389b4bf991f26b03fb50cd4b4d6d063c8d2f223.",
+  "review_run_id": "r-20261113T025141470877-review-of-icm-west-picard-control-44acc5d2587c",
+  "reviewed_base_sha": "2389b4bf991f26b03fb50cd4b4d6d063c8d2f223",
+  "reviewed_head_sha": "44acc5d2587c6b83c30a59e2b994368792971b3d",
+  "reviewed_run_id": "r-20261113T015201821537-icm-west-picard-control",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261113T025141470877-review-of-icm-west-picard-control-44acc5d2587c"
+  },
+  "reviewer_run_id": "r-20261113T025141470877-review-of-icm-west-picard-control-44acc5d2587c",
+  "scores": {
+    "durability": 13,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T03:29:19.419674+00:00",
+  "total": 102
+}

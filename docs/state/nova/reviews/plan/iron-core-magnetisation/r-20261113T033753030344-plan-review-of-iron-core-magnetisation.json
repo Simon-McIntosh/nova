@@ -92,6 +92,16 @@
       "finding": "reasoning-2",
       "reason": "Section 3 has landed, so its helper names describe code that exists; section 7 is not being built in this round, and its formula is the definition of the derivative it gates against finite differences, which the section 7 brief will treat as the endpoint when it is dispatched.",
       "when": "2026-11-13T05:41:00.945301+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "20031998c61ee83f7f96a9bd065960dd2b04eb9c",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Removed iron-core-magnetisation#s6 from s10's plan-section-depends-on; section 6b now waits only on section 5, whose shell shielding factor it consumes.",
+      "reason": "",
+      "when": "2026-11-13T05:41:40.708805+00:00"
     }
   ],
   "responses": {
@@ -124,6 +134,15 @@
       "by": "",
       "reason": "Clause (3), the iron read, has landed (icm-iron-read) and both script readers call StaticMachineDescription.read_iron_core; splitting a landed clause into its own section now changes no work, and the section closes on the remaining solve evidence.",
       "when": "2026-11-13T05:40:24.941270+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "20031998c61ee83f7f96a9bd065960dd2b04eb9c",
+      "commit_basis": "edit",
+      "note": "Removed iron-core-magnetisation#s6 from s10's plan-section-depends-on; section 6b now waits only on section 5, whose shell shielding factor it consumes.",
+      "reason": "",
+      "when": "2026-11-13T05:41:40.708805+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261113T033753030344-plan-review-of-iron-core-magnetisation.json",

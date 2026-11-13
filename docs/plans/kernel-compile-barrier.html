@@ -24,7 +24,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="42">
+<meta name="plan-version" content="43">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -82,7 +82,7 @@
       <button class="r-opt" data-value="ten-seconds-in-s2">ten-seconds-in-s2</button>
       <button class="r-opt" data-value="sixty-seconds-in-s2">sixty-seconds-in-s2</button>
       </p>
-    <p class="r-dec-rat">&lt;p&gt;§2 must at least halve the instruction count after the splitter and cut the point jet&#x27;s H200 cold compile by at least the 51.3 s those two passes take, to 45 s or less. §3 and §4 keep the 60 s bound that §0 declares. 10 s remains the lead&#x27;s goal for the point jet&#x27;s cold compile, but no section&#x27;s done-when owns it yet: the clauses here reach 45 s and 60 s. A section that owns 10 s will be written once §2 to §4 land and a profile of the bounded program shows what remains.&lt;/p&gt;</p>
+    <p class="r-dec-rat">&lt;p&gt;Superseded for §2 on 2026-11-13 by decision variadic-share-on-production-base: on today&#x27;s larger base §2 carries the two passes&#x27; share (130.8 s or less), not 45 s. The rest stands as ruled on 2026-10-27, on the 95.1 s base of that day: §2 must at least halve the instruction count after the splitter and cut the point jet&#x27;s H200 cold compile by at least the seconds those two passes take. §3 and §4 keep the 60 s bound that §0 declares. 10 s remains the lead&#x27;s goal for the point jet&#x27;s cold compile, but no section&#x27;s done-when owns it yet. A section that owns 10 s will be written once §2 to §4 land and a profile of the bounded program shows what remains.&lt;/p&gt;</p>
     </div>
 <div class="r-dec" data-key="tangent-bound-retired" data-choice="retire-as-done-when" data-by="lead" data-when="2026-10-27" data-sections="s2">
     <p class="r-dec-q">Retire the three-primals bound on an exact tangent</p>
@@ -150,6 +150,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20261113-lead-bound-lever-share" data-who="reckon-build" data-when="2026-11-13T14:10:00Z">
     <div class="r-comment-body"><p><strong>Lead ruling, 2026-11-13: §2 carries the lever's share, not 45 s.</strong> Content review <code>r-20261113T131546715221</code> found the 45 s bound unreachable by §2's lever on today's base: the two variadic passes hold 220.7 s of 351.4 s, so removing both leaves 130.8 s. The lead chose that §2 passes when the instruction count after the splitter halves and the cold compile falls by at least the two passes' base seconds, to 130.8 s or less. §3 still holds the same program to 60 s, so the overall bound is unchanged. This supersedes the 45 s figure of decision <code>compile-target-shared</code> for §2. The ruling is still to be entered as decision <code>variadic-share-on-production-base</code>, which done-when (2) cites.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20261113-lever-share-decision-entered" data-who="reckon-build" data-when="2026-11-13T16:40:00Z">
+    <div class="r-comment-body"><p>Correction to the lead-ruling comment above: decision <code>variadic-share-on-production-base</code> is entered and locked (2026-11-13), and decision <code>compile-target-shared</code> now carries a superseded note for its 45 s figure in §2. The per-pass table for both arms of §2's gate is delivered in <code>docs/evidence/fragments/kernel-compile-barrier/variadic-split.html</code>, which the node's dispatch names as a write path.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261020-coarse-tie-run-phase" data-who="reckon-build" data-when="2026-10-20T07:03:00Z">
     <div class="r-comment-body"><p>From crew run <code>r-20261019T223150157038-coarse-tie-census-memory</code>, landed as evidence at merge <code>19a02ca16</code> (failed, correct refusal): a second provisioning job (sirius 1290676, 450G, 5 h) reproduced the cold compile at 7,013 s and about 378 GB, then held that memory for a further ~11,000 s in the 533-batch node loop without publishing the operand. So the jets build's cost is not only its compile: the batch loop after it also outlasts a five-hour wall at 2,132 nodes. §3's done-when (1) bounds the compile; the node that builds §3 should also report the loop's wall per batch, so a bounded compile is not followed by an unbounded run. The 500-cell coarse-tie census test stays a known failure until §3 lands. <a href="/nova/evidence/fragments/converged-forward-solve/coarse-tie-census-memory.html">evidence</a></p></div>

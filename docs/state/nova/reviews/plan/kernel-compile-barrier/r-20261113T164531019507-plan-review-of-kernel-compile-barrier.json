@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T16:50:59.122Z",
+  "dispatched_at": "2026-11-13T16:46:09Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261113T164531019507-plan-review-of-kernel-compile-barrier/plan.html:155",
+      "id": "anchors_resolve-1",
+      "reason": "the sentence must record the path the dispatch assigns and the table still owed there, or the plan records evidence it does not have.",
+      "text": "the comment says \"The per-pass table for both arms of \u00a72's gate is delivered in docs/evidence/fragments/kernel-compile-barrier/variadic-split.html\", but that file does not exist at HEAD, in the working tree or in any commit, and \u00a72 is still `implementable` with `data-attempts=\"0\"`, so a future deliverable is recorded in the past tense as done \u2014 the one record that was meant to answer the missing-path finding now itself fails to resolve, and a coordinator reading it will stop asking for the table",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261113T164531019507-plan-review-of-kernel-compile-barrier/plan.html:85",
+      "id": "reasoning-1",
+      "reason": "without a second lever or a restated \u00a73 bound the node dispatched to \u00a73 is gated on a number its mechanism cannot deliver, which is the same failure the lead already had to correct for \u00a72.",
+      "text": "the superseded note states \"\u00a73 and \u00a74 keep the 60 s bound that \u00a70 declares\", and decision variadic-share-on-production-base (line 113) asserts \"the overall bound is unchanged and only \u00a72's intermediate gate moves\", while the plan's own numbers put today's base at 351.4 s of which the two variadic passes hold 220.7 s, leaving 130.8 s after the named lever is applied in full \u2014 so \u00a73, which bounds the same program at 60 s with that same lever and names no stronger one, holds a target its own attribution says the mechanism cannot reach",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261113T164531019507-plan-review-of-kernel-compile-barrier/plan.html:59",
+      "id": "reasoning-2",
+      "reason": "the cross-reference either needs the \u00a72 clause restated or the decision's claim reworded, and as written the gap the earlier review found is recorded as closed when the decision says it is open.",
+      "text": "\u00a72 done-when (2) says \"The plan's 10 s goal is met by \u00a72, \u00a73 and \u00a74 together, not by \u00a72 alone (decision compile-target-shared)\", but the decision it cites now reads \"no section's done-when owns it yet. A section that owns 10 s will be written once \u00a72 to \u00a74 land\" \u2014 the citation asserts an outcome the cited decision denies, so a reader cannot tell whether landing \u00a72 to \u00a74 closes the 10 s goal",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "7a6477a97d5cb07d301e0ce9feafca59d3286932",
+  "plan_fingerprint": "253a88acacd67f668fcc6b51a13580726feaaaae0304a0e4acb14af8dc690512",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 43,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T164531019507-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "d66e785616a25fb05088080c976c1363017afaca",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the new comment states the per-pass table \"is delivered in\" docs/evidence/fragments/kernel-compile-barrier/variadic-split.html, and no such file exists at HEAD or anywhere in history.",
+    "done_when": "pass \u2014 \u00a72's gate measures against a base arm taken in the same job (402,141 instructions and 351.4 s at 7bd1d912c), so the clause can fail on the unfixed program; \u00a73's base arm and \u00a74's removal of the strict xfail are likewise checkable.",
+    "evidence_paths": "pass \u2014 the census ledger is docs/research/compile-cost-evidence.html and the per-pass table is named under docs/evidence/fragments/kernel-compile-barrier/, both durable and committed, never a scratchpad.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a symbol or comment in the changed text; the data-id values are record identifiers, not prose.",
+    "reasoning": "a finding \u2014 the changed text keeps \u00a73 on 60 s for the same program while the plan's own attribution puts the named lever's floor at 130.8 s, and \u00a72 still cites compile-target-shared as establishing a 10 s goal that decision now says no section owns.",
+    "single_goal": "pass \u2014 \u00a72 owns the variadic restructure, \u00a73 the bounded jets build and \u00a74 the topology read's compile clause; each closes on one verdict.",
+    "wiring": "pass \u2014 s2, s3 and s4 each carry data-links to the \u00a75 attribution they must take their mechanism from, the plan-block names converged-forward-solve, and every decision's data-sections points at the sections it binds."
+  },
+  "section_digests": {
+    "_document": "19c46cca46cf251b2f56d75e5620c8069d6b72a6623a979673bb4a8e4258367e",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "f40e10a1ed91695160ba95bca2369f1dc7c9608fba2d12c8cb31d54dd6e5eb48",
+    "s3": "ab68c20ce5d3e9242532f0e5cb72a8baf8b9ce57666cac7db68cee8904360fa1",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T16:51:49.516429+00:00",
+  "total": null
+}

@@ -978,6 +978,46 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "f4954eb7745b3d06acd1346e2f4c3148299d1b49",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261113T121929181901-review-of-graph-growth-history-9613239ffe22",
+    "scratch_bytes": 0,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261113T121929181901-review-of-graph-growth-history-9613239ffe22",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261113T121929181901-review-of-graph-growth-history-9613239ffe22"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/review-of-graph-growth-history-9613239ffe22",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/_trash/r-20261113T121929181901-review-of-graph-growth-history-9613239ffe22-20261113T125505192293Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

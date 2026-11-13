@@ -64,9 +64,22 @@
       "finding": "reasoning-1",
       "reason": "The cited spectrum [-0.1247,1.1237], the spurious roots and the 0.195 fold were measured on the centroid-sampled (collocated) operator, which is exactly what this section forbids; the Galerkin operator the section mandates measured [4.9e-5,0.99994] on WEST and A/B starts agree to 2.55e-9 (icm-galerkin-interaction fragment), so the uniqueness argument and clause (2) hold on the operator in production.",
       "when": "2026-11-13T05:38:33.381738+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The 2.45x/2.43x and the 0.74/1.17/0.64 orders are collocation numbers; the Galerkin operator the clause gates measured minimum per-probe reductions 2.628 at mu_r 100 and 2.929 at mu_r 1000 (icm-galerkin-interaction fragment, shell refinement table), so the 2.5x floor is met with margin and stays as ruled by the lead.",
+      "when": "2026-11-13T05:39:12.910684+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The 2.45x/2.43x and the 0.74/1.17/0.64 orders are collocation numbers; the Galerkin operator the clause gates measured minimum per-probe reductions 2.628 at mu_r 100 and 2.929 at mu_r 1000 (icm-galerkin-interaction fragment, shell refinement table), so the 2.5x floor is met with margin and stays as ruled by the lead.",
+      "when": "2026-11-13T05:39:12.910684+00:00"
+    },
     "reasoning-1": {
       "action": "declined",
       "by": "",

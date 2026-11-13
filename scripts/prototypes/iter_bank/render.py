@@ -2,6 +2,7 @@
 
 import argparse
 from pathlib import Path
+import re
 import xml.etree.ElementTree as ET
 
 import matplotlib
@@ -37,6 +38,15 @@ def checked_save(figure, output):
                 )
     figure.savefig(output, format="svg")
     tree = ET.parse(output)
+    # Subpixel path precision keeps dense vector meshes small without rasterizing.
+    for element in tree.iter():
+        if "d" in element.attrib:
+            element.set(
+                "d",
+                re.sub(
+                    r"-?\d+\.\d+", lambda m: f"{float(m[0]):.3f}", element.attrib["d"]
+                ),
+            )
     tree.getroot().set("width", "31.1cm")
     tree.getroot().set("height", "16cm")
     tree.write(output, encoding="utf-8", xml_declaration=True)

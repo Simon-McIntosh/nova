@@ -220,3 +220,13 @@ def test_trial_and_converged_fresh_residuals_match_base(physical, width):
         if label == "converged":
             assert norm <= 1e-10
         print("FRESH_RESIDUAL", label, norm, flush=True)
+
+
+def test_identical_timing_programs_are_refused():
+    from scripts.prototypes.h200_levers.run import refuse_inert
+
+    reference = dict(rows=[dict(lowered_sha256="known-present-program")])
+    different = dict(rows=[dict(lowered_sha256="different-program")])
+    refuse_inert(reference, different)
+    with pytest.raises(ValueError, match="inert lever"):
+        refuse_inert(reference, reference)

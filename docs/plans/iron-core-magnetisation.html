@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="89">
+<meta name="plan-version" content="90">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -782,7 +782,10 @@
     <div class="r-comment-body"><p>WEST 62751 solved on the Galerkin iron operator at 0.08 m (1695 cells, 4 exact Newton corrections) and 0.04 m (6632 cells, 5 corrections) from M = 0 at full drive; probes at +1/+2/+4 m read 242.651/200.369/96.326 and 242.645/174.105/79.769 µT, so the mesh-pair error bar is 0.006/26.3/16.6 µT (0.003/13.1/17.2 % of the coarse value), the +1 m probe and the table-versus-flat-215 change (9.4/9.1/8.9 % of the air-core field) are mesh-robust, and the +2/+4 m probes are not.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-11-13T12:15:00Z">
-    <div class="r-comment-body"><p>§4 landed. (1) Law exact at every table point with a 0.343 % saturation rise and both mutants failing; Galerkin G/&mu;<sub>0</sub> spectrum [4.9e-5, 0.99994] on WEST with the centroid mutant failing; shell refinement at least 2.63&times;/2.93&times; at &mu;<sub>r</sub> 100/1000 under every ceiling; sphere bound 7.08e-6. (2) WEST 62751 converges from M = 0 in 4/5 Newton corrections at 0.08/0.04 m with &mu;<sub>r</sub> 215 to 1683; two starts agree to 2.55e-9; Picard needs 12 iterations on the Galerkin operator and cycles on the centroid operator. Quote the +1 m far field (242.6 &micro;T against 7024 &micro;T air-core); +2/+4 m carry 13 to 17 % mesh error, which §5 must close. (3) One iron reader in nova/imas/machine.py. Merged at 7a4b9182a (operator), 9483fffd5 (cleanup), b278e3d54 (Picard), ddca80d58 (mesh pair); receipts on GPFS under west-62751/.</p></div>
+    <div class="r-comment-body"><p>§4 landed. (1) Law exact at every table point with a 0.343 % saturation rise and both mutants failing; Galerkin G/μ<sub>0</sub> spectrum [4.9e-5, 0.99994] on WEST with the centroid mutant failing; shell refinement at least 2.63×/2.93× at μ<sub>r</sub> 100/1000 under every ceiling; sphere bound 7.08e-6. (2) WEST 62751 converges from M = 0 in 4/5 Newton corrections at 0.08/0.04 m with μ<sub>r</sub> 215 to 1683; two starts agree to 2.55e-9; Picard needs 12 iterations on the Galerkin operator and cycles on the centroid operator. Quote the +1 m far field (242.6 µT against 7024 µT air-core); +2/+4 m carry 13 to 17 % mesh error, which §5 must close. (3) One iron reader in nova/imas/machine.py. Merged at 7a4b9182a (operator), 9483fffd5 (cleanup), b278e3d54 (Picard), ddca80d58 (mesh pair); receipts on GPFS under west-62751/.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261113T195542683111-review-of-icm-graded-refinement-4bd1ccd452f1" data-who="reckon-build" data-when="2026-11-13T20:08:26.747Z">
+    <div class="r-comment-body"><p>review stored at review-records/r-20261113T121328652501-icm-graded-refinement.json and its .at-4bd1ccd452f15242d6c515d6e62bef0e2ea953fc.json companion; verdict is 1 blocking and 5 non-blocking findings across 6 dimensions.</p></div>
 </div>
 </section>
 </main>

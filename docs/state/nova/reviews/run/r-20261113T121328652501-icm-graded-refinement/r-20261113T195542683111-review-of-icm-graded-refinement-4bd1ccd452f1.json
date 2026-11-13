@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "f4954eb7745b3d06acd1346e2f4c3148299d1b49",
+  "call_sites": [],
+  "completed_at": "2026-11-13T20:08:26.747Z",
+  "dispatched_at": "2026-11-13T20:00:12Z",
+  "findings": [
+    {
+      "file": "tests/test_magnetisation.py",
+      "line": "373",
+      "severity": "blocking",
+      "text": "blocking: test_graded_shell_reaches_half_percent_where_its_doubled_arm_misses carries @pytest.mark.timeout(3600) but must build two meshes whose measured cold assemblies alone are 3659.8 s at 13410 cells and 566.4 s at 4017 cells plus 236.6 s and 25.5 s of solve (cpu/slurm-1314341.log on 98dci4-clu-2008), so it cannot pass inside its own timeout; the node's only recorded CPU-lane run of it, suite/slow-test.log at revision 04633d6a (identical to the head for this file), ends 'Failed: Timeout (>3600.0s)', and the two later runs (tests/slow-test.log, tests2/slow-test.log) die on P100 out-of-memory, so the assertion that carries the done-when's 0.5 per cent clause has never been observed to pass while the manifest states it ran at the head."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-graded-refinement.html",
+      "line": "27",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment states the graded spacing law as fine * (coarse / fine) ** (d / coarse), but nova/biot/magnetisation.py:96 implements fine * growth ** (distance / fine) with growth fixed at 2.0 (the receipt's grading block records growth 2.0), so a reader re-deriving the pinned grading from the prose gets different cells."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-graded-refinement.html",
+      "line": "194",
+      "severity": "non-blocking",
+      "text": "non-blocking: the Receipts list names control/ for the mutants while the negative-control paragraph at line 175 and the manifest point at control2/under-resolved.log and control2/perturbed-uniform.log, and both directories exist, so the list points at the stale combined record rather than the per-mutant transcripts it describes."
+    },
+    {
+      "file": "nova/biot/magnetisation.py",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "non-blocking: the module docstring still says only solve_magnetisation and its result are public, but CellSizeField is now required in that signature (line 498), graded_cell_size is how a caller builds one (line 68), and galerkin_spectrum (line 242) is used by the measurement script; __all__ at line 28 was left unchanged, so the stated public surface and the usable one disagree."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-graded-refinement.html",
+      "line": "114",
+      "severity": "non-blocking",
+      "text": "non-blocking: the decisive graded arms, including the pinned 13410-cell arm that carries the accuracy result, ran on the CPU lane rather than the titan lane the brief mandated, so done-when clause (3)'s 'walls on titan (Tesla P100)' is satisfied only by the uniform arms and the graded walls are CPU walls; the fragment states the device limit and the reason, so the deviation is recorded rather than hidden."
+    },
+    {
+      "file": "scripts/iron_graded_refinement/measure.py",
+      "line": "225",
+      "severity": "non-blocking",
+      "text": "non-blocking: west_inputs re-derives the WEST region, material table, probes and air field that scripts/west_iron_galerkin_pair/measure.py:341-361 builds inline; the owner exposes those lines only inside main(), so this is the second copy of that setup, and importing it would have required editing a file outside the node's fence."
+    }
+  ],
+  "head_log_revision": "4bd1ccd452f15242d6c515d6e62bef0e2ea953fc",
+  "item_verdicts": {
+    "call_sites": "no runtime call site outside scripts and tests reaches the new argument: grep over nova/, scripts/ and apps/ finds solve_magnetisation called only from scripts/*/measure.py recipes and tests, and no nova/ module imports magnetisation except the prototype scripts.",
+    "diff": "read commit by commit against f4954eb77; the production change is 177 lines in nova/biot/magnetisation.py (CellSizeField, graded_cell_size, _axis, graded _mesh branches, galerkin_spectrum, a widened cell_size annotation), 147 lines of tests, 14 launcher/figure scripts and one fragment plus one SVG, all inside the fence.",
+    "done_when": "the done_when asks for a graded mesh with the uniform default unchanged, a 0.5 per cent shell result with an under-resolved arm that misses it, WEST at two levels with the far-field change recorded, and a fragment plus figure; the gate ran all four arms green (suite-fast2/gate.json) but deselects the slow test, whose recorded runs all fail, and the WEST clause is recorded as a miss (3.47, 5.21, 7.16 per cent), which the done-when permits.",
+    "goal": "the node's goal is to measure graded refinement of the piecewise-constant Galerkin route on the mu_r 1000 shell and WEST 62751; nova/biot/magnetisation.py:43-135 adds the graded cell-size field and the receipts under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/graded-refinement/ record both geometries.",
+    "manifest": "read; status complete, 26 commits from ee2125553 to 4bd1ccd45, baseline_suite 40 passed and after_suite 44 passed with EXIT=0 (suite-fast2), negative_control_log control2/under-resolved.log, and a tests line claiming the slow accuracy contract ran at the head, which no receipt on disk supports.",
+    "write_paths": "the node's fence was nova/biot/magnetisation.py, tests/test_magnetisation.py, scripts/iron_graded_refinement, docs/evidence/fragments/iron-core-magnetisation/icm-graded-refinement.html and docs/figures/iron-core-magnetisation/icm-graded-refinement; git diff --name-only f4954eb77..4bd1ccd45 touches exactly those and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:293 pins the uniform default against digests I recomputed from the base revision (f4954eb77) and got exactly 46/0a354c79... and 228/aa787e37..., and control2/perturbed-uniform.log shows it reddens, but the accuracy guard at tests/test_magnetisation.py:373 cannot complete inside its declared 3600 s timeout against the measured 3897 s single-arm wall in cpu/slurm-1314341.log.",
+    "evidence": "suite-fast2/gate-base.log reads 53 passed and gate-head.log 57 passed with EXIT=0, but both arms carry -m 'not slow', so the accuracy assertion is deselected; the only CPU-lane run of test_graded_shell_reaches_half_percent_where_its_doubled_arm_misses (suite/slow-test.log, rev 04633d6a) ends 'Failed: Timeout (>3600.0s)' and no log records it passing at the head.",
+    "fit": "the change uses a frozen dataclass and typed field returns in the module's own idiom (nova/biot/magnetisation.py:39-66), but its docstring at line 3 still says only solve_magnetisation and its result are public while CellSizeField is now part of the signature.",
+    "goal_fidelity": "nova/biot/magnetisation.py:43-135 adds a CellSizeField and graded_cell_size and threads it through solve_magnetisation at line 498, and the receipts measure the shell and both WEST levels, but the decisive graded arms ran on the CPU lane rather than the titan lane the brief names (icm-graded-refinement.html:114) and the accuracy test that pins the result cannot pass as written (tests/test_magnetisation.py:373).",
+    "reuse": "scripts/iron_graded_refinement/measure.py:38 imports SOURCE, machine_source, source_field and save from scripts/west_iron_galerkin_pair/measure.py and figure.py:26 imports save_checked and the canvas from scripts/edge_sheet/figure.py; the WEST input assembly at measure.py:225-270 repeats the owner's inline setup at scripts/west_iron_galerkin_pair/measure.py:341-361, and no owner search over nova/ found a rectilinear grading mechanism to extend.",
+    "scope_discipline": "git diff --name-only f4954eb77..4bd1ccd45 lists only nova/biot/magnetisation.py, tests/test_magnetisation.py, scripts/iron_graded_refinement/*, the evidence fragment and its one SVG, every one inside the five declared write paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261113T195542683111-review-of-icm-graded-refinement-4bd1ccd452f1",
+  "reviewed_base_sha": "f4954eb7745b3d06acd1346e2f4c3148299d1b49",
+  "reviewed_head_sha": "4bd1ccd452f15242d6c515d6e62bef0e2ea953fc",
+  "reviewed_run_id": "r-20261113T121328652501-icm-graded-refinement",
+  "reviewer_run_id": "r-20261113T195542683111-review-of-icm-graded-refinement-4bd1ccd452f1",
+  "scores": {
+    "durability": 8,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 17,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T20:10:08.764290+00:00",
+  "total": 84,
+  "verdicts": {
+    "diff": "26 commits, 17 files, 2224 insertions and 16 deletions, all within the fence; the production change is the graded mesh plus a spectrum helper, the rest launchers, tests, fragment and figure.",
+    "done_when": "suite-fast2/gate.json records four green arms but all carry -m 'not slow', so the 0.5 per cent assertion is deselected; the only CPU-lane run of it (suite/slow-test.log) timed out at 3600 s.",
+    "goal": "nova/biot/magnetisation.py:43-135 implements the graded field and solve_magnetisation accepts it at line 498; the shell and both WEST levels are measured, though the graded arms ran on the CPU lane, not titan.",
+    "manifest": "read; it reports the gate green and the slow contract run, but the latter is contradicted by every slow-test log under the receipt root.",
+    "write_paths": "git diff --name-only f4954eb77..4bd1ccd45 is confined to the five declared paths."
+  }
+}

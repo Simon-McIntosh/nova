@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="85">
+<meta name="plan-version" content="86">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -770,7 +770,10 @@
     <div class="r-comment-body"><p>figure review of r-20261113T015201821537-icm-west-picard-control at head 44acc5d25: the residual figure is legible and clean on all six rubric items (contrast, no decoration, no label collision, content bbox x16-1322/y28-685 inside 1400x721), with one non-blocking finding — the centroid-sampled series and the 1e-10 tolerance rule share the grey #929292</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261113T015201821537-icm-west-picard-control" data-who="reckon-build" data-when="2026-11-13T07:04:30Z">
-    <div class="r-comment-body"><p>recorded the frozen-permeability Picard control on WEST 62751 at 0.08 m — it converges on the Galerkin operator in 12 iterations to 7.78e-11 against Newton&#x27;s 4, so the plan&#x27;s expected negative control is refuted on the operator the solve uses; the same iteration on the centroid-sampled operator of the same mesh stalls in a period-four cycle without converging, which is where the expectation came from; [fragment](/nova/evidence/fragments/iron-core-magnetisation/icm-west-picard-control.html), [figure](/nova/figures/iron-core-magnetisation/icm-west-picard-control/west-62751-picard-residual.svg)</p></div>
+    <div class="r-comment-body"><p>recorded the frozen-permeability Picard control on WEST 62751 at 0.08 m — it converges on the Galerkin operator in 12 iterations to 7.78e-11 against Newton's 4, so the plan's expected negative control is refuted on the operator the solve uses; the same iteration on the centroid-sampled operator of the same mesh stalls in a period-four cycle without converging, which is where the expectation came from; [fragment](/nova/evidence/fragments/iron-core-magnetisation/icm-west-picard-control.html), [figure](/nova/figures/iron-core-magnetisation/icm-west-picard-control/west-62751-picard-residual.svg)</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261113T025447883324-icm-west-forward-run" data-who="reckon-build" data-when="2026-11-13T08:36:51Z">
+    <div class="r-comment-body"><p>Conservative native NICE j_tor projection passed all15 Ip checks (maximum relative error9.1971464355e-4, no rescaling); H200 third attempt1313386 FAILED in282s with EXIT=1 on direct-sampling topology qualification. Terminal slices0/15, material calls0; GIF/comparisons unmet. Fragment records three counted numerical failures; node blocked, no fourth attempt.</p></div>
 </div>
 </section>
 </main>

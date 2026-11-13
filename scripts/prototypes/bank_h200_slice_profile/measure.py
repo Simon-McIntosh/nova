@@ -184,6 +184,8 @@ def main():
             names = {f["function"].split(".<locals>")[0] for f in item["stack"]}
             if "predict_seed" in names:
                 return "predictor"
+            if "carried_decision_changed" in names:
+                return "carried read: incidence guard"
             if "step_jacobian" in names:
                 return "assembly"
             if "step_residual" in names:

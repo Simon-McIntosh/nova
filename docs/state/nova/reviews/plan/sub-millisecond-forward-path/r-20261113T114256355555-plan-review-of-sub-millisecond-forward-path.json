@@ -61,6 +61,16 @@
       "note": "Clause (c) now requires at least 90% of at least 20 flattop slices converged to a 1e-10 fresh residual, each failure named; a negative control for (a) drops one PF coil and requires the analytic-map check to fail.",
       "reason": "",
       "when": "2026-11-13T13:19:18.467360+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "e8ae082495ee632bfb9e16539233cba2e9842f2d",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "Section 6 now names GPFS paths (run directory or ~/.cache/nova-iter-bank/) for compilation logs, receipts, the memory record and the width probe.",
+      "reason": "",
+      "when": "2026-11-13T13:19:31.975298+00:00"
     }
   ],
   "responses": {
@@ -72,6 +82,15 @@
       "note": "Clause (c) now requires at least 90% of at least 20 flattop slices converged to a 1e-10 fresh residual, each failure named; a negative control for (a) drops one PF coil and requires the analytic-map check to fail.",
       "reason": "",
       "when": "2026-11-13T13:19:18.467360+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "e8ae082495ee632bfb9e16539233cba2e9842f2d",
+      "commit_basis": "edit",
+      "note": "Section 6 now names GPFS paths (run directory or ~/.cache/nova-iter-bank/) for compilation logs, receipts, the memory record and the width probe.",
+      "reason": "",
+      "when": "2026-11-13T13:19:31.975298+00:00"
     },
     "reasoning-1": {
       "action": "acted",

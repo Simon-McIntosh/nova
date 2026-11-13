@@ -84,6 +84,13 @@
     <p>The three graded rows without a spectrum predate the volume-weighted
     spectrum and are recorded as measured; their accuracy and walls are
     unaffected, since the spectrum is read after the solve.</p>
+    <p>The grading the two pinned arms used is fine <code>0.002</code>, coarse
+    <code>0.0048</code> and 20 cells across a thin part; the doubled arm scales
+    both spacings by two. Those are the defaults the script imports from the
+    test module, and the launch command passes no overriding flag, so the
+    stamped revision plus the recorded command reproduce the grading exactly.
+    The row-level <code>grading</code> record was added after these runs, so it
+    is absent from this receipt and present in any later one.</p>
 
     <h3 id="icm-graded-refinement-finding">What the two families say together</h3>
     <p>Grading does not buy accuracy per cell here. At about four thousand cells

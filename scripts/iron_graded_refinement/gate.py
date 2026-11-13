@@ -44,6 +44,43 @@ SUITE = [
 ]
 
 
+def prepare(tree: Path, revision: str, source: Path) -> None:
+    """Give an extracted tree an index naming the revision's tracked files.
+
+    The artifact test enumerates candidates with ``git grep``, which needs a
+    repository. The tree is not one, so it gets a local index built from the
+    source checkout's object store: the object directories are borrowed through
+    ``objects/info/alternates`` so nothing is cross-revision-wrong, and
+    ``read-tree`` records exactly the paths and blobs the revision commits.
+    """
+
+    def run(*arguments: str) -> None:
+        subprocess.run(
+            ["git", "-C", str(tree), *arguments], check=True, capture_output=True
+        )
+
+    objects = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(source),
+            "rev-parse",
+            "--path-format=absolute",
+            "--git-path",
+            "objects",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    if not (tree / ".git").exists():
+        run("init", "--quiet")
+        alternates = tree / ".git" / "objects" / "info" / "alternates"
+        alternates.parent.mkdir(parents=True, exist_ok=True)
+        alternates.write_text(objects + "\n")
+    run("read-tree", revision)
+
+
 def environment(tree: Path) -> dict:
     scratch = os.environ.get("TMPDIR", "/tmp")
     return dict(
@@ -95,8 +132,11 @@ def main() -> int:
     parser.add_argument("--base-revision", required=True)
     parser.add_argument("--head-revision", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--source", type=Path, required=True)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
+    prepare(args.base_tree, args.base_revision, args.source)
+    prepare(args.head_tree, args.head_revision, args.source)
     record = {}
     for name, tree, revision, arguments in (
         ("gate-base", args.base_tree, args.base_revision, GATE),

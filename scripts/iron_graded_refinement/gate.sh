@@ -23,7 +23,7 @@ cd "$scratch/head" || exit 4
     scripts/iron_graded_refinement/gate.py \
     --base-tree "$scratch/base" --head-tree "$scratch/head" \
     --base-revision "$base_revision" --head-revision "$head_revision" \
-    --output "$out"
+    --source "$source_tree" --output "$out"
 result=$?
 rm -rf "$scratch"
 trap - EXIT

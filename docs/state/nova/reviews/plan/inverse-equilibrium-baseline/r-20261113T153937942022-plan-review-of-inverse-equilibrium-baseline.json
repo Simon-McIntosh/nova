@@ -75,9 +75,28 @@
       "note": "Section s0 already states the distinction: the profile, harmonic and moment reconstructions are reduced models that never run through the forward solve request and receipt (verified: profile.py runs its own Picard over Green operators and imports nothing from solve_request). The s1 node brief directs reuse of whitened_solve, Magnetics and SliceMeasurement and forbids wrapping ReconstructProfile; their retirement stays the lead decision reduced-reconstructions.",
       "reason": "",
       "when": "2026-11-13T16:22:27.122422+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "f76409cb49761d8a5fd70ba145551823087f42a6",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "The s1 node brief names virtual_flux_loops and virtual_poloidal_probes as the owners of the synthetic rows and Magnetics/SliceMeasurement as the row order, and forbids a second sensor synthesiser. The plan names no module by rule, so the map is carried in the brief.",
+      "reason": "",
+      "when": "2026-11-13T16:22:40.977152+00:00"
     }
   ],
   "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "f76409cb49761d8a5fd70ba145551823087f42a6",
+      "commit_basis": "edit",
+      "note": "The s1 node brief names virtual_flux_loops and virtual_poloidal_probes as the owners of the synthetic rows and Magnetics/SliceMeasurement as the row order, and forbids a second sensor synthesiser. The plan names no module by rule, so the map is carried in the brief.",
+      "reason": "",
+      "when": "2026-11-13T16:22:40.977152+00:00"
+    },
     "reuse_search-1": {
       "action": "acted",
       "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",

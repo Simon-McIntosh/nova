@@ -435,9 +435,6 @@ def main():
             )
             save(OUT / "measurement.json", record)
             for label, scale in (("graded-fine", 1.0), ("graded-half", 0.5)):
-                if finished("west", label):
-                    print(f"SKIP west {label}: receipt already converged", flush=True)
-                    continue
                 field = iron.graded_cell_size(
                     inputs["surfaces"]["radial"],
                     inputs["surfaces"]["vertical"],
@@ -445,6 +442,26 @@ def main():
                     args.west_coarse * scale,
                     cells_across=args.cells_across,
                 )
+                if "west-mesh" in arms:
+                    # The card admits a dense factor of at most 13.65 GB, so the
+                    # mesh is sized and reported before the solve that would
+                    # exhaust it.
+                    started = time.monotonic()
+                    mesh = iron._mesh(inputs["region"], field)
+                    row = dict(
+                        mesh=label,
+                        unknowns=3 * int(len(mesh.centroids)),
+                        factor_gb=8.0 * (3 * len(mesh.centroids)) ** 2 / 1e9,
+                        mesh_seconds=time.monotonic() - started,
+                        **mesh_fields(mesh, inputs["region"]),
+                    )
+                    record.setdefault("west_mesh", {})[label] = row
+                    save(OUT / "measurement.json", record)
+                    print("MESH " + json.dumps(row), flush=True)
+                    continue
+                if finished("west", label):
+                    print(f"SKIP west {label}: receipt already converged", flush=True)
+                    continue
                 (OUT / "west" / label).mkdir(parents=True, exist_ok=True)
                 west_arm(
                     label,

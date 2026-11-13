@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="73">
+<meta name="plan-version" content="74">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -331,10 +331,12 @@
       on the analytic meshes, and a centroid-sampling mutant fails that test; the closed-shell
       errors at &mu;<sub>r</sub> 100 and 1000 fall at least 2.5&times; from 40 to 20&nbsp;mm, with the 20&nbsp;mm
       errors within the collocated values plus 0.5 percentage points, and the sphere interior
-      stays within its derived discretisation bound; (2) WEST 62751 converges from M = 0 at
+      error lies within its derived discretisation bound while that bound itself is at most
+      1e-5; (2) WEST 62751 converges from M = 0 at
       0.08 and 0.04&nbsp;m in at most ten Newton iterations, or by a drive ramp of at most ten per
       step, with every &mu;<sub>r</sub> inside the table; starts from different initial states reach
-      one root; and a frozen-permeability Picard run on the same case is recorded as failing to
+      one root; and a frozen-permeability Picard run on the same case, with the same continuation
+      (direct from M = 0, or the same drive ramp), is recorded as failing to
       converge (the negative control for choosing Newton); (3) the iron read extends
       <code>nova/imas/machine.py</code> and both script readers
       (<code>scripts/prototypes/iron_magnetisation/west.py</code>,

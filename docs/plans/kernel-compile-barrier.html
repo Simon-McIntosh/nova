@@ -24,7 +24,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="41">
+<meta name="plan-version" content="42">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -101,6 +101,16 @@
       <button class="r-opt" data-value="relax">Relax the identity tolerance or the compile clause</button>
       </p>
     <p class="r-dec-rat">A fixed-capacity scan tangent of harmonic_moments compiled in 1.43 s and agreed with jax.jvp of the base to 1.04e-10, where the exact tangent took 54.1 s. The Hessian only steers Newton and the implicit null tangent, so 1e-9 sits far below every solve tolerance. Relaxing either bound is forbidden without the lead.</p>
+    </div>
+<div class="r-dec" data-key="variadic-share-on-production-base" data-choice="lever-share-in-s2" data-by="lead" data-when="2026-11-13T15:41:36+00:00" data-sections="s2,s3">
+    <p class="r-dec-q">Which cold-compile bound does §2 carry on the larger base?</p>
+    <p class="r-dec-ctx">The production row program compiles cold in 351.4 s on the H200 at 7bd1d912c, and the two variadic passes hold 220.7 s of it. The 45 s of compile-target-shared was derived on a 95.1 s base; removing both passes entirely would leave 130.8 s here.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="lever-share-in-s2">lever-share-in-s2</button>
+      <button class="r-opt" data-value="keep-45-s-in-s2">keep-45-s-in-s2</button>
+      <button class="r-opt" data-value="sixty-seconds-in-s2">sixty-seconds-in-s2</button>
+      </p>
+    <p class="r-dec-rat">§2 passes when the instruction count after the splitter halves and the cold compile falls by at least the two passes&#x27; base seconds, to 130.8 s or less. §3 still holds the same program to 60 s on the H200, so the overall bound is unchanged and only §2&#x27;s intermediate gate moves. This supersedes the 45 s figure of compile-target-shared for §2.</p>
     </div>
 </section>
 

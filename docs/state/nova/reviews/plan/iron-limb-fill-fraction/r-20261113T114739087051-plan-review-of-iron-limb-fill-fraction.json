@@ -51,9 +51,28 @@
       "note": "Removed the imas-efit followup whose prompt dispatched this plan's section 4; the hand-off is recorded as an open question naming imas-efit as owner, so no nova node is dispatched for it.",
       "reason": "",
       "when": "2026-11-13T15:43:36.479082+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "04bf1f44083737d213d588ff15728187486dff7e",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 2 clause 2 now requires the in-vessel iron field within 10 % rms of the converged reference, twice the prototype's worst reading, and at most one third of the section smear's error on the same reference, so the gate is not already failed by the plan's own table and carries a relative measure that survives the reference moving.",
+      "reason": "",
+      "when": "2026-11-13T15:44:05.052373+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "04bf1f44083737d213d588ff15728187486dff7e",
+      "commit_basis": "edit",
+      "note": "Section 2 clause 2 now requires the in-vessel iron field within 10 % rms of the converged reference, twice the prototype's worst reading, and at most one third of the section smear's error on the same reference, so the gate is not already failed by the plan's own table and carries a relative measure that survives the reference moving.",
+      "reason": "",
+      "when": "2026-11-13T15:44:05.052373+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "1a120e31-d8a6-4944-87b2-145a639763ba",

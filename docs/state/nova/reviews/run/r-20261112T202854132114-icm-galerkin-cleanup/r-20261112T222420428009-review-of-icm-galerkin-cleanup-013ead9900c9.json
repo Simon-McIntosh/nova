@@ -10,6 +10,13 @@
     }
   },
   "dispatched_at": "2026-11-12T22:35:12Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "answered by the repair round: one shared mutant harness (scripts/west_iron_galerkin/mutant.py, 03aa5258d) replaces both copies, guarded by duplication.py",
+      "recorded_at": "2026-11-13T00:24:35.699190+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/west_iron_galerkin/negative_asymmetry.py",

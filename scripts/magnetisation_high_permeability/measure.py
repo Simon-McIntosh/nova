@@ -173,6 +173,7 @@ def main():
     )
     print("INSTRUMENT", json.dumps(record), flush=True)
     native_mesh, native_interaction = iron._mesh, iron._interaction
+    native_galerkin = iron.galerkin_cell_interaction
     cache = {}
 
     def cached_interaction(cells, points, plan):
@@ -187,7 +188,20 @@ def main():
             )
         return cache[key]
 
+    def cached_galerkin(polygons, *, plan):
+        key = tuple(p.tobytes() for p in polygons)
+        if key not in cache:
+            started = perf_counter()
+            cache[key] = native_galerkin(polygons, plan=plan)
+            print(
+                f"GALERKIN cells={len(polygons)} "
+                f"seconds={perf_counter() - started:.6f}",
+                flush=True,
+            )
+        return cache[key]
+
     iron._interaction = cached_interaction
+    iron.galerkin_cell_interaction = cached_galerkin
     outer = shapely.Point(0, 0).buffer(1, 512).intersection(shapely.box(0, -1, 1, 1))
     inner = shapely.Point(0, 0).buffer(0.9, 512).intersection(shapely.box(0, -1, 1, 1))
     region = outer.difference(inner)

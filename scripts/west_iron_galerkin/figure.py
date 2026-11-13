@@ -21,6 +21,7 @@ from scripts.edge_sheet.figure import (  # noqa: E402
 
 GALERKIN = "#7b4fb3"
 COLLOCATION = "#929292"
+BOUND = "#4d4d4d"
 
 
 def render(run):
@@ -38,8 +39,10 @@ def render(run):
     for axis in axes:
         trace_axes(axis, DEFAULT_INK.variant(label_fontsize=16))
     for name, color, dash, width, layer in [
-        ("collocation-saved", COLLOCATION, "--", 2.6, 2),
         ("galerkin-saved", GALERKIN, "-", 3.0, 4),
+        # Drawn last and thinner so the nearly coincident prior series stays
+        # readable on top of the subject rather than hidden beneath it.
+        ("collocation-saved", COLLOCATION, "--", 1.8, 5),
     ]:
         values = np.load(run / (name + "-eigenvalues.npy"))
         axes[0].plot(
@@ -52,9 +55,7 @@ def render(run):
             label="collocation" if name.startswith("collocation") else "Galerkin",
         )
     for limit in (0, 1):
-        axes[0].axhline(
-            limit, color=COLLOCATION, linewidth=1.2, linestyle=":", zorder=1
-        )
+        axes[0].axhline(limit, color=BOUND, linewidth=1.0, linestyle=":", zorder=1)
     axes[0].set_xlabel("sorted eigenvalue fraction")
     axes[0].set_ylabel("eigenvalue of volume-weighted G / μ₀")
     axes[0].set_xlim(0, 1)
@@ -62,8 +63,8 @@ def render(run):
     axes[0].set_xticks([0, 0.25, 0.5, 0.75, 1])
     axes[0].set_yticks([0, 0.25, 0.5, 0.75, 1])
     for rows, color, dash, key, width, layer in [
-        (prior["steps"], COLLOCATION, "--", "max_M_A_per_m", 2.6, 2),
         (record["ramp"], GALERKIN, "-", "maximum_M_A_per_m", 3.0, 4),
+        (prior["steps"], COLLOCATION, "--", "max_M_A_per_m", 1.8, 5),
     ]:
         axes[1].plot(
             [row["drive"] for row in rows],

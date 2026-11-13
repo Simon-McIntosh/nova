@@ -25,7 +25,7 @@
   <title>Iron Limb Fill Fraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -189,23 +189,25 @@
     <h2 id="s2">§2 — Fill fraction and cross-field factor in the material solve</h2>
 <section data-reckon="section" data-id="s2" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      <code>nova.biot.magnetisation.solve_magnetisation</code> accepts a per-cell toroidal
-      fill fraction and a per-cell, per-component cross-field factor, and returns the
-      toroidal-mean magnetisation together with the permeability of the iron itself.
+      The production axisymmetric iron solve carries a toroidal fill fraction and a
+      cross-field factor for each cell, and reports the toroidal-mean magnetisation
+      together with the permeability of the iron itself.
     </p>
     <p>
       Done when (1) with the fill fraction omitted the solution, residual history and field
       of every existing test in <code>tests/test_magnetisation.py</code> are unchanged to
       1e-12 relative, and a test with f = 1 passed explicitly returns the same state; (2) on
       the control circuit at &mu;<sub>r</sub> = 50 and 200 the in-vessel iron field is within
-      5&nbsp;% of the §1 reference in rms, with the cross-field factor chosen by the
-      cross-field decision below, while the solid outline with f = 1 exceeds 100&nbsp;% on
+      10&nbsp;% of the §1 reference in rms (twice the prototype's worst reading) and at
+      most one third of the section smear's error on that reference, with the cross-field
+      factor chosen by the cross-field decision below, while the solid outline with f = 1 exceeds 100&nbsp;% on
       the same measure, the control that the fill fraction and not the outline carries the
       result; the midplane and above-arm ratios of the table in §0 are reported for the
       same runs at two cell sizes; (3) the nonlinear WEST 62751 solve on the true outline
       converges to 1e-8 in at most ten Newton corrections at 0.08 and 0.04&nbsp;m. Heavy
-      gates run as one job on <code>titan</code>, the lane the Galerkin interaction was
-      measured on.
+      gates run as one job on the H200 (<code>betelgeuse</code> under its reservation),
+      falling back to <code>titan</code> only when a real submission stays pending, and
+      the device is recorded beside every reported value.
     </p>
 
     <h2 id="s3">§3 — The true outline as machine description</h2>
@@ -213,8 +215,7 @@
     <p>
       The flat outline, the fill fraction and the cross-field factor are properties of the
       machine, so they are read once beside the iron segments and not rebuilt in each
-      script. The reader lives with the existing iron read in
-      <code>nova/imas/machine.py</code>.
+      script. One read of the machine description serves every consumer.
     </p>
     <p>
       Done when (1) the WEST read returns limb and arm regions on the true outline with a
@@ -272,6 +273,9 @@
 <div class="r-q" data-id="limb-section-drawing" data-section="s3" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="" data-resolved-by="">
     <p class="r-q-body">Is there a drawing of the WEST (Tore Supra) arms and return limbs that confirms the 0.8 by 1.2 m section, which is at present derived from the stored taper?</p>
     </div>
+<div class="r-q" data-id="imas-efit-hand-off" data-section="s4" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body">imas-efit reads the tapered outlines directly into its boundary-current iron model. Its coordinator owns the equivalent change there: the flat outline with a position-dependent effective permeability. Who takes the hand-off once §1 has confirmed the table and figures of §0?</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -281,10 +285,11 @@
     <div class="r-fu-body"><p>The prototype reference is 11 % short of converged in column flux; every later tolerance waits on it.</p></div>
     <pre class="r-fu-prompt">/reckon-build iron-limb-fill-fraction §1</pre>
     </article>
-<article class="r-fu" data-id="f-ilf-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-13" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ilf-002" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-13" data-recommends-skill="" data-resolved-at="2026-11-13T15:47:00+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Hand the flat-outline finding to imas-efit</h4>
     <div class="r-fu-body"><p>imas-efit reads the tapered outlines directly into its boundary-current iron model. Its coordinator owns the equivalent change there: the flat outline with a position-dependent effective permeability. Send the §0 table and figures once §1 has confirmed them.</p></div>
     <pre class="r-fu-prompt">/reckon-build iron-limb-fill-fraction §4</pre>
+    <p class="r-fu-outcome">Withdrawn as a nova followup: the change belongs to imas-efit and no nova section performs it. Recorded as the open question imas-efit-hand-off.</p>
     </article>
 </section>
   </main>

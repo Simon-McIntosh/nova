@@ -39,15 +39,114 @@ class _Mesh:
     areas: np.ndarray
 
 
-def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
+@dataclass(frozen=True)
+class CellSizeField:
+    """Local cell spacing along each rectilinear axis, in metres.
+
+    Each callable maps a coordinate to the spacing of the interval starting
+    there. The grid is the product of the two axis coordinate arrays, so a
+    part that is thin along either axis is resolved by that axis's spacing.
+    """
+
+    radial: Callable[[float], float]
+    vertical: Callable[[float], float]
+
+    def spacing(self, radial: float, vertical: float) -> float:
+        """Return the smaller local spacing, the scale of one cell's cross-section."""
+        return min(float(self.radial(radial)), float(self.vertical(vertical)))
+
+    def scaled(self, factor: float) -> CellSizeField:
+        """Return the same grading with every spacing multiplied by ``factor``."""
+        if not np.isfinite(factor) or factor <= 0:
+            raise ValueError("cell-size scale must be finite and positive")
+        return CellSizeField(
+            lambda radial: factor * float(self.radial(radial)),
+            lambda vertical: factor * float(self.vertical(vertical)),
+        )
+
+
+def graded_cell_size(
+    radial_surfaces,
+    vertical_surfaces,
+    fine: float,
+    coarse: float,
+    *,
+    growth: float = 2.0,
+    cells_across: float = 20.0,
+) -> CellSizeField:
+    """Return a spacing field that is fine at named surfaces and coarse between.
+
+    ``radial_surfaces`` and ``vertical_surfaces`` name the coordinates of the
+    iron's faces along each axis. Spacing at a surface is ``fine`` and grows
+    geometrically with distance from the nearest surface at rate ``growth``,
+    capped at ``coarse``. Between two bracketing surfaces the spacing is also
+    capped at the feature width divided by ``cells_across``: a thin part is
+    never coarsened through its thickness, only along its length.
+    """
+
+    def spacing(surfaces):
+        coordinates = np.unique(np.asarray(surfaces, dtype=np.float64))
+        if coordinates.size == 0:
+            raise ValueError("a graded axis needs at least one surface coordinate")
+        if not np.all(np.isfinite(coordinates)):
+            raise ValueError("surface coordinates must be finite")
+
+        def value(at):
+            distance = float(np.min(np.abs(coordinates - at)))
+            graded = fine * growth ** min(distance / fine, 60.0)
+            below = coordinates[coordinates < at]
+            above = coordinates[coordinates > at]
+            if below.size and above.size:
+                width = float(above[0] - below[-1])
+                return min(coarse, graded, max(width, fine) / cells_across)
+            return min(coarse, graded)
+
+        return value
+
+    if not np.isfinite(fine) or fine <= 0 or not 0 < fine <= coarse:
+        raise ValueError("graded spacing needs 0 < fine <= coarse")
+    if not np.isfinite(growth) or growth <= 1:
+        raise ValueError("grading growth must be finite and greater than one")
+    if not np.isfinite(cells_across) or cells_across < 1:
+        raise ValueError("cells_across must be at least one")
+    return CellSizeField(spacing(radial_surfaces), spacing(vertical_surfaces))
+
+
+def _axis(start: float, stop: float, spacing: Callable[[float], float]) -> np.ndarray:
+    """Return axis coordinates from ``start`` to ``stop`` at local spacing."""
+    if stop <= start:
+        return np.asarray([start])
+    nodes = [start]
+    step = float(spacing(start))
+    while nodes[-1] < stop:
+        step = float(spacing(nodes[-1]))
+        if not np.isfinite(step) or step <= 0:
+            raise ValueError("cell-size field must be finite and positive")
+        if nodes[-1] + step >= stop:
+            break
+        nodes.append(nodes[-1] + step)
+    # Distribute the final interval evenly so the grid does not end in a
+    # roundoff-thin cell that the sliver rule would then have to merge.
+    remaining = stop - nodes[-1]
+    count = max(1, int(np.ceil(remaining / step)))
+    # ``linspace`` pins its first and last nodes exactly, so the axis reaches
+    # the region bound without a roundoff-sized interval at the end.
+    nodes.extend(np.linspace(nodes[-1], stop, count + 1)[1:].tolist())
+    return np.asarray(nodes)
+
+
+def _mesh(region, size: float | CellSizeField, sliver: float = 0.15) -> _Mesh:
     """Clip a square grid and merge small pieces along their longest boundary.
 
-    The cell union preserves the authored material to floating-point roundoff.
-    A hole inside one grid square is triangulated before merging. A disconnected
-    sliver that cannot acquire a full edge neighbour is refused rather than
-    passed to a near-singular collocation calculation.
+    ``size`` is a uniform cell size or a :class:`CellSizeField` grading the
+    spacing along each axis. The cell union preserves the authored material to
+    floating-point roundoff. A hole inside one grid square is triangulated
+    before merging. A disconnected sliver that cannot acquire a full edge
+    neighbour is refused rather than passed to a near-singular collocation
+    calculation. Every sliver threshold is measured against the local spacing,
+    so it means the same thing on a graded mesh as on a uniform one.
     """
-    if not np.isfinite(size) or size <= 0:
+    if not isinstance(size, CellSizeField) and (not np.isfinite(size) or size <= 0):
         raise ValueError("cell_size must be finite and positive")
     if (
         not isinstance(region, shapely.Polygon | shapely.MultiPolygon)
@@ -57,9 +156,14 @@ def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
     ):
         raise ValueError("iron must be a valid nonempty polygon at nonnegative radius")
     r0, z0, r1, z1 = region.bounds
-    # Adjacent squares must use identical endpoints to share exact edges.
-    radial = np.r_[np.arange(r0, r1, size), r1]
-    vertical = np.r_[np.arange(z0, z1, size), z1]
+    field = size if isinstance(size, CellSizeField) else None
+    if field is None:
+        # Adjacent squares must use identical endpoints to share exact edges.
+        radial = np.r_[np.arange(r0, r1, size), r1]
+        vertical = np.r_[np.arange(z0, z1, size), z1]
+    else:
+        radial = _axis(r0, r1, field.radial)
+        vertical = _axis(z0, z1, field.vertical)
     pieces = []
     for r, right in zip(radial[:-1], radial[1:], strict=True):
         for z, top in zip(vertical[:-1], vertical[1:], strict=True):
@@ -74,10 +178,22 @@ def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
                         )
                     else:
                         pieces.append(piece)
-    floor = sliver * size**2
+
+    def local_spacing(piece):
+        if field is None:
+            return size
+        centre = piece.centroid
+        return field.spacing(centre.x, centre.y)
+
+    def floor_of(piece):
+        if field is None:
+            return sliver * size**2
+        centre = piece.centroid
+        return sliver * float(field.radial(centre.x)) * float(field.vertical(centre.y))
+
     for k in sorted(range(len(pieces)), key=lambda k: pieces[k].area):
         piece = pieces[k]
-        if piece is None or piece.area >= floor:
+        if piece is None or piece.area >= floor_of(piece):
             continue
         neighbours = [
             (piece.boundary.intersection(other.boundary).length, j)
@@ -101,11 +217,13 @@ def _mesh(region, size: float, sliver: float = 0.15) -> _Mesh:
         piece = shapely.remove_repeated_points(piece, tolerance=duplicate_tolerance)
         centre = piece.centroid
         if (
-            piece.area < floor * (1 - 1e-12)
+            piece.area < floor_of(piece) * (1 - 1e-12)
             or not piece.contains(centre)
-            or centre.distance(piece.boundary) < 0.01 * size
+            or centre.distance(piece.boundary) < 0.01 * local_spacing(piece)
         ):
-            raise ValueError("unresolved iron sliver; reduce cell_size")
+            raise ValueError(
+                "unresolved iron sliver; refine the cell-size field or reduce cell_size"
+            )
         polygons.append(np.asarray(piece.exterior.coords)[:-1])
         centres.append(centre.coords[0])
         areas.append(piece.area)
@@ -352,7 +470,7 @@ def solve_magnetisation(
     b_field,
     permeability_relative,
     *,
-    cell_size: float,
+    cell_size: float | CellSizeField,
     tolerance: float = 1e-8,
     max_iterations: int = 60,
     tile_plan: TilePlan = _PLAN,
@@ -360,7 +478,9 @@ def solve_magnetisation(
 ) -> MagnetisationSolution:
     """Mesh iron and solve M = c(|B|) B for B = B_external + G M.
 
-    ``region`` is a shapely poloidal Polygon or MultiPolygon [m]. The callback
+    ``region`` is a shapely poloidal Polygon or MultiPolygon [m]. ``cell_size``
+    is a uniform spacing [m] or a :class:`CellSizeField` grading the spacing
+    along each axis. The callback
     receives (points, 2) volume-quadrature coordinates and returns (B_R, B_Z) [T] in the
     same shape. The table contains B [T] starting at zero and secant relative
     permeability. Its implied H [A/m] must increase strictly. The law is

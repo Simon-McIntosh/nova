@@ -35,8 +35,11 @@ def run_file(tree, revision, file, output, *, mutation=False):
         f"PYTHONPATH=. JAX_PLATFORMS=cpu {PYTHON} -m pytest "
         f"-p no:cacheprovider -q {target}"
     )
+    temporary = tree.parent / "temporary"
+    temporary.mkdir(exist_ok=True)
     environment = dict(
         os.environ,
+        TMPDIR=str(temporary),
         PYTHONPATH=".",
         JAX_PLATFORMS="cpu",
         OPENBLAS_NUM_THREADS="1",
@@ -114,6 +117,7 @@ def main():
     parser.add_argument("--head")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--focused", action="store_true")
+    parser.add_argument("--skip-control", action="store_true")
     parser.add_argument("--reproduce", action="store_true")
     args = parser.parse_args()
     if args.reproduce:
@@ -167,14 +171,15 @@ def main():
                 head, args.head, file, args.output / (name + ".log")
             )
             (args.output / "receipts.json").write_text(json.dumps(receipts, indent=2))
-        name = "closure-mutant"
-        receipts[name] = run_file(
-            head,
-            args.head,
-            "test_bank_traced_inputs.py",
-            args.output / (name + ".log"),
-            mutation=True,
-        )
+        if not args.skip_control:
+            name = "closure-mutant"
+            receipts[name] = run_file(
+                head,
+                args.head,
+                "test_bank_traced_inputs.py",
+                args.output / (name + ".log"),
+                mutation=True,
+            )
         (args.output / "receipts.json").write_text(json.dumps(receipts, indent=2))
     print(json.dumps(receipts, indent=2), flush=True)
 

@@ -14,6 +14,13 @@
       "repository_path": "docs/figures/iron-core-magnetisation/icm-west-picard-control/west-62751-picard-residual.svg"
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Non-blocking: the centroid series and the 1e-10 limit share the neutral grey but differ in dash and legend entry; the series is the negative control, set against the subject, so grey is its correct role.",
+      "recorded_at": "2026-11-13T05:54:26.105517+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/west_picard_control/figure.py",

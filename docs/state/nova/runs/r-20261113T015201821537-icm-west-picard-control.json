@@ -502,6 +502,45 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "fc4a81385b213ec705d83211b383abf093b50343",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261113T015201821537-icm-west-picard-control",
+    "scratch_bytes": 1604,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261113T015201821537-icm-west-picard-control",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 1604,
+        "path": "/tmp/reckon-crew-scratch/r-20261113T015201821537-icm-west-picard-control"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-west-picard-control",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "full",

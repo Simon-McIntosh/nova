@@ -268,33 +268,74 @@ def curve(table, name):
     return SampledFluxFunction(table["coordinate"], table[name])
 
 
+COORDINATES = np.linspace(0.94, 1.0, 241)
+PROFILE_LABELS = (
+    ("p_prime", "p' [MPa Wb$^{-1}$]", 1e-6),
+    ("ff_prime", "FF' [T$^2$ m$^2$ Wb$^{-1}$]", 1.0),
+)
+
+
+def profile_curves(tables):
+    """Evaluate both arms, and the extraction knots, over the window drawn."""
+
+    curves = {}
+    for frame in SHOTS:
+        record = tables["rows"][str(frame)]
+        for name, _, scale in PROFILE_LABELS:
+            knots = np.asarray(record["edge_table"]["coordinate"])
+            values = np.asarray(record["edge_table"][name]) * scale
+            drawn = knots >= COORDINATES[0]
+            curves[frame, name] = dict(
+                base=np.asarray(curve(record["base_table"], name)(COORDINATES)) * scale,
+                edge=np.asarray(curve(record["edge_table"], name)(COORDINATES)) * scale,
+                knots=knots[drawn],
+                values=values[drawn],
+            )
+    return curves
+
+
+def column_limits(curves):
+    """One vertical scale per quantity, shared by every frame drawn on it.
+
+    The frames are read against each other, so a scale that follows each
+    panel's own autoscale is the wrong instrument: the same number reads as
+    different values in two panels, and a panel whose labels are suppressed
+    then carries no magnitude at all. The two columns keep separate scales
+    because p' and FF' are different quantities in different units.
+    """
+
+    limits = {}
+    for name, _, _ in PROFILE_LABELS:
+        entries = (curves[frame, name] for frame in SHOTS)
+        values = np.concatenate(
+            [np.concatenate([entry["base"], entry["edge"]]) for entry in entries]
+        )
+        low, high = float(values.min()), float(values.max())
+        margin = 0.06 * (high - low)
+        limits[name] = (low - margin, high + margin)
+    return limits
+
+
 def edge_profiles(tables, output, previews):
     """Draw both arms against the extraction they prescribe, near the edge."""
 
     figure, grid = plt.subplots(3, 2, figsize=CANVAS, dpi=100, sharex=True)
-    coordinates = np.linspace(0.94, 1.0, 241)
-    labels = (
-        ("p_prime", "p' [MPa Wb$^{-1}$]", 1e-6),
-        ("ff_prime", "FF' [T$^2$ m$^2$ Wb$^{-1}$]", 1.0),
-    )
+    curves = profile_curves(tables)
+    limits = column_limits(curves)
     notes = []
     for row_index, frame in enumerate(SHOTS):
-        record = tables["rows"][str(frame)]
-        for column, (name, ylabel, scale) in enumerate(labels):
+        for column, (name, ylabel, _) in enumerate(PROFILE_LABELS):
             ax = grid[row_index][column]
             for side in ("top", "right"):
                 ax.spines[side].set_visible(False)
-            base = np.asarray(curve(record["base_table"], name)(coordinates)) * scale
-            edge = np.asarray(curve(record["edge_table"], name)(coordinates)) * scale
-            knots = np.asarray(record["edge_table"]["coordinate"])
-            values = np.asarray(record["edge_table"][name]) * scale
-            drawn = knots >= coordinates[0]
-            knots, values = knots[drawn], values[drawn]
-            ax.plot(coordinates, base, color="#929292", lw=3.0, ls="--", zorder=2)
-            ax.plot(coordinates, edge, color=SOLVED, lw=3.0, zorder=4)
+            entry = curves[frame, name]
             ax.plot(
-                knots,
-                values,
+                COORDINATES, entry["base"], color="#929292", lw=3.0, ls="--", zorder=2
+            )
+            ax.plot(COORDINATES, entry["edge"], color=SOLVED, lw=3.0, zorder=4)
+            ax.plot(
+                entry["knots"],
+                entry["values"],
                 ls="none",
                 marker="o",
                 ms=7,
@@ -303,17 +344,16 @@ def edge_profiles(tables, output, previews):
                 mew=1.6,
                 zorder=5,
             )
+            ax.set_ylim(*limits[name])
             ax.yaxis.set_major_locator(MaxNLocator(4))
             ax.set_xticks((0.95, 1.00))
-            if column:
-                ax.tick_params(labelleft=False)
-            else:
+            if not column:
                 ax.set_ylabel(SHOT_LABELS[frame], fontsize=16, labelpad=8)
             if not row_index:
                 ax.set_title(ylabel, fontsize=16, pad=10)
             if row_index == len(SHOTS) - 1:
                 ax.set_xlabel("normalised flux ψ$_N$")
-            ax.set_xlim(coordinates[0], coordinates[-1])
+            ax.set_xlim(COORDINATES[0], COORDINATES[-1])
     handles = [
         Line2D([], [], color="#929292", ls="--", lw=3.0, label="base tables"),
         Line2D([], [], color=SOLVED, lw=3.0, label="EFIT edge tables"),

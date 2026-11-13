@@ -50,9 +50,28 @@
       "finding": "wiring-2",
       "reason": "The store keeps a followup's prompt line on the resolved record and offers no verb to delete a followup; the record is resolved with an outcome naming the foreign owner, and resolved followups are excluded from pending work and from every handoff.",
       "when": "2026-11-13T16:21:25.527925+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "4fd38a3dfa8d575b13eee92698254c3d69bcb72b",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The cross-field decision now says that the plain fill fraction read 0.31 to 0.34 in the prototype against the 0.10 bound of the material-solve section, so choosing no cross-field factor requires re-deriving that section's criterion first.",
+      "reason": "",
+      "when": "2026-11-13T16:21:42.770668+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "4fd38a3dfa8d575b13eee92698254c3d69bcb72b",
+      "commit_basis": "edit",
+      "note": "The cross-field decision now says that the plain fill fraction read 0.31 to 0.34 in the prototype against the 0.10 bound of the material-solve section, so choosing no cross-field factor requires re-deriving that section's criterion first.",
+      "reason": "",
+      "when": "2026-11-13T16:21:42.770668+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "1a120e31-d8a6-4944-87b2-145a639763ba",

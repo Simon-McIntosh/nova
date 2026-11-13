@@ -13,7 +13,7 @@
   <meta name="plan-effort" content="L">
   <meta name="plan-sprint" content="S24">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="nova-3d-native">
+  <meta name="plan-depends-on" content="">
   <meta name="plan-blocks" content="">
   <title>MAST Non-axisymmetric Physics | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -28,9 +28,9 @@
 <meta name="plan-effort-hours" content="16.0">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;deferred&quot;,&quot;s6&quot;:&quot;deferred&quot;,&quot;s7&quot;:&quot;deferred&quot;}">
 <meta name="plan-commits" content="9eb100e5,c173d399,3bd2bec7,85666bc5,57893849,98c3d014,64a1622c,0928eb68,0d13bcc7,6bdfd7a7,cbfb1ff2,191ef560,2643be6f,61912a61,7c6f085f,87d24724,1227e204,d95f9296,2806d665,641a8b33,47c46cb8,07260595,c3cc4e04,ee164d5b,87d034b6,609b5fb0,9424ff40,867869dc,3cd9ca55,5a0727c1,75b9344e,de19c025,55df62b0,e934bb9b,3079d546,912d8961">
-<meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="44">
-<meta name="plan-modified" content="2026-10-08">
+<meta name="plan-version" content="45">
+<meta name="plan-modified" content="2026-11-13">
+<meta name="plan-standalone" content="The MAST 3D physics line waits on no open nova plan and no open nova plan consumes its four deferred sections; it is parked until the lead reopens it.">
 </head>
 <body>
   <main class="plan-doc">
@@ -160,45 +160,6 @@ Done when
 <div class="r-comment" data-section="followups" data-id="c-20261001-currency" data-who="s21-nova coordinator" data-when="2026-10-01T23:59:00+02:00">
     <div class="r-comment-body">Currency audit 2026-10-01 (docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md): status active with no impl line agrees with the code; the remaining scope is real. The next critical node is f-mnap-vacuum-refinement steps 1 and 2 (the evidence manifest and the nominal model, starting with passive R/L identification); that followup already carries a done-when, so no new followup is added.</div>
 </div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T025624938982-review-of-mast-saddle-voltage-reach" data-who="reckon-build" data-when="2026-10-08T03:32:42.302Z">
-    <div class="r-comment-body"><p>review-of-mast-saddle-voltage-reach complete — the review of r-20261008T015056150935-mast-saddle-voltage-reach (base f2bac518e, head 9eb100e5e) is stored, parsed and scored 6 dimensions (total 81, verdict fail) with a blocking finding that the node's m_10..m_12 "unreachable" verdict is a zero-padding false negative on sad_out_m010/m011/m012 (true count 36/36, not 33/36).</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-20261008-saddle-reach-landed" data-who="reckon-build" data-when="2026-10-08T04:20:00Z">
-    <div class="r-comment-body">node (a) landed: uncorrected saddle voltage reachable for 36/36 loops via level-1 XMB, on 26 of 86 cohort shots (20 loops on 3 shots). Section open — node (c), the per-loop traversal sign, is next, and must move the light-census admission predicate into mast_vacuum_cohort.py and add a key-width test. Evidence: saddle-voltage-reach.</div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T015056150935-mast-saddle-voltage-reach" data-who="reckon-build" data-when="2026-10-08T03:55:03.831Z">
-    <div class="r-comment-body"><p>node mast-saddle-voltage-reach complete at c173d3991; verdict reachable — uncorrected saddle voltage reachable for 36/36 loops via level1 xmb/sad_out on the 26 xmb-bearing vacuum-cohort shots, no fit and no sign promoted.</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T035623473263-review-of-mast-saddle-voltage-reach" data-who="reckon-build" data-when="2026-10-08T04:19:33.229Z">
-    <div class="r-comment-body"><p>review-of-mast-saddle-voltage-reach complete — stored a parsed six-dimension review of r-20261008T015056150935-mast-saddle-voltage-reach at head c173d3991 (base f2bac518e), total 87 verdict fail, all three prior-review findings repaired and verified, two follow-on findings (owner-duplication in the benchmark's cohort reuse; no regression guard), no blocking.</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-20261008-saddle-cohort-owner-landed" data-who="reckon-build" data-when="2026-10-08T05:05:00Z">
-    <div class="r-comment-body">review follow-ons from node (a) landed (mast-saddle-cohort-owner): the light vacuum-cohort census now lives in nova/imas/mast_vacuum_cohort.py on its own constants, and tests/test_mast_saddle_voltage_reach.py guards per-family raw-key resolution (5 tests, zero added failures; review 107). Section open — node (b), admission into the harmonic constraint set with the saddle-removed and geometry-permuted controls, is next.</div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T042003577585-mast-saddle-cohort-owner" data-who="reckon-build" data-when="2026-10-08T04:43:38.060Z">
-    <div class="r-comment-body"><p>Moved the saddle reach benchmark's vacuum-cohort admission into nova/imas/mast_vacuum_cohort.py as light_census()/LightCensus on the module's own EXCITATION_CURRENT, PLASMA_FREE_CURRENT and a single MINIMUM_PROBES constant; the benchmark now declares none of those and no predicate, and tests/test_mast_saddle_voltage_reach.py adds 5 tests — head 121 passed/2 failed against base 116 passed/2 failed, the same two pre-existing failures, so zero failures added.</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T044457167062-review-of-mast-saddle-cohort-owner" data-who="reckon-build" data-when="2026-10-08T05:04:59.835Z">
-    <div class="r-comment-body"><p>review of r-20261008T042003577585-mast-saddle-cohort-owner stored (base e2cffb94c353041dbbb39e6d25daa348f52708ac, head 191ef560420791fc94edc3d1e0b864ba64d56434), parsed and scored on all 6 dimensions total 107 verdict pass with zero added failures; the prior reuse finding is repaired — the benchmark's vacuum-cohort admission now runs through nova/imas/mast_vacuum_cohort.light_census extending the owner, and no constant or predicate is re-declared.</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-20261008-saddle-admission-landed" data-who="reckon-build" data-when="2026-10-08T06:50:00Z">
-    <div class="r-comment-body">node (b) landed as a refused attribution: on the 3 usable xmb shots the geometry-permuted control matches the real gain (87.9 vs 87.3 %); the io_magnetics reader is repaired for DD 4.1.1. Section open — the 23 shots without voltage units are being calibrated (mast-saddle-voltage-units), after which the admission re-runs. Evidence: saddle-admission.</div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T055143084501-mast-saddle-admission" data-who="reckon-build" data-when="2026-10-08T06:30:20Z">
-    <div class="r-comment-body"><p>Reader repaired and full saddle contours admitted with binary traversal nuisance. Limited 2-fit/1-held-out comparison on 36 loops: real squared-residual gain 87.3168%, geometry-permuted gain 87.8757%, removed gain 0%; attribution refused, 23 shots lack raw voltage units, no sign promoted. [Residual figure and receipt](/nova/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-admission.html#mast-saddle-admission-residuals).</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T063126267152-review-of-mast-saddle-admission" data-who="reckon-build" data-when="2026-10-08T06:53:35.428Z">
-    <div class="r-comment-body"><p>Review of r-20261008T055143084501-mast-saddle-admission stored as a parsed six-dimension record (goal_fidelity 16, evidence 18, scope_discipline 19, durability 17, fit 17, reuse 18; total 105, verdict pass, zero added failures) with two follow-on findings and no blocking finding; the node's saddle-loop admission is a correct refusal of attribution (permuted-geometry control gain 87.88% does not fall below the real gain 87.32%).</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-20261008-saddle-deferred" data-who="reckon-build" data-when="2026-10-08T07:10:00Z">
-    <div class="r-comment-body">§5 deferred on data: 23 of 26 xmb-bearing vacuum shots carry arbitrary voltage units and an in-situ gain fails the 2 % validation on all 36 loops, so attribution, sign and the tail width owed to mast-misfit-toroidal-harmonics cannot be measured from this archive. Reopen trigger: a calibration source for the older XMB saddle acquisition. Landed under §5: reach (36/36), the cohort owner, the repaired magnetics reader and the admission machinery. Evidence: saddle-voltage-units.</div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T063157699792-mast-saddle-voltage-units" data-who="reckon-build" data-when="2026-10-08T06:49:22Z">
-    <div class="r-comment-body"><p>[Raw saddle voltage unit receipt](/nova/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-voltage-units.html#mast-saddle-voltage-units-receipt): all 23 target shots remain unit/gain unknown (368 available signals with empty units and Arb labels); 108 known-unit signals on 3 controls found, 0/36 loops validate at 2%; 16 synthetic tests pass, mutated gain/threshold control fails 3; no sign promoted or admission fit rerun.</p></div>
-</div>
-<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T065732376638-review-of-mast-saddle-voltage-units" data-who="reckon-build" data-when="2026-10-08T07:08:01.663Z">
-    <div class="r-comment-body"><p>Independent review of the saddle raw-voltage unit audit (r-20261008T063157699792-mast-saddle-voltage-units, base 1d34f09c, head 9424ff40) stored as a parsed six-dimension record scoring goal_fidelity 16, evidence 18, scope_discipline 19, durability 16, fit 17, reuse 16 (total 102, verdict pass, zero added failures); the node's negative unit/gain verdict is correct — 23 target shots stay unknown, 0/36 loops validate against the three known-unit controls, no sign promoted and no admission fit rerun — with two follow-on findings and no blocking finding.</p></div>
-</div>
 <div class="r-comment" data-section="s4" data-id="c-20261008-passive-spectrum-landed" data-who="reckon-build" data-when="2026-10-08T04:35:00Z">
     <div class="r-comment-body">node 1 landed: 1 of 15 grouped passive directions identifiable above the floor with drive scales free (400/400 shots scored). Section open — the held-out fit of that one direction, with the drive-permutation control, is next; it must propagate through nova/circuit/propagate.py and read geometry without the retiring registry. Evidence: passive-spectrum.</div>
 </div>
@@ -243,6 +204,45 @@ Done when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261008T073745534805-review-of-mast-coil-case-vessel-path" data-who="reckon-build" data-when="2026-10-08T07:54:52.999Z">
     <div class="r-comment-body"><p>Independent review of r-20261008T071820178182-mast-coil-case-vessel-path stored: 6 dimensions scored 0..20 (goal_fidelity 19, evidence 19, scope_discipline 20, durability 16, fit 19, reuse 19; total 112), reviewed_base_sha 36b0753f33745495524c8fab08b57d730061b531, reviewed_head_sha 912d8961564ec8697578a5ed520efeb19b0471b6, added_failure_count 0. Three follow-ons: blunt false-loading control, ephemeral receipt log paths naming the pre-head arm revision, and an inherited geometry count.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T025624938982-review-of-mast-saddle-voltage-reach" data-who="reckon-build" data-when="2026-10-08T03:32:42.302Z">
+    <div class="r-comment-body"><p>review-of-mast-saddle-voltage-reach complete — the review of r-20261008T015056150935-mast-saddle-voltage-reach (base f2bac518e, head 9eb100e5e) is stored, parsed and scored 6 dimensions (total 81, verdict fail) with a blocking finding that the node's m_10..m_12 "unreachable" verdict is a zero-padding false negative on sad_out_m010/m011/m012 (true count 36/36, not 33/36).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261008-saddle-reach-landed" data-who="reckon-build" data-when="2026-10-08T04:20:00Z">
+    <div class="r-comment-body">node (a) landed: uncorrected saddle voltage reachable for 36/36 loops via level-1 XMB, on 26 of 86 cohort shots (20 loops on 3 shots). Section open — node (c), the per-loop traversal sign, is next, and must move the light-census admission predicate into mast_vacuum_cohort.py and add a key-width test. Evidence: saddle-voltage-reach.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T015056150935-mast-saddle-voltage-reach" data-who="reckon-build" data-when="2026-10-08T03:55:03.831Z">
+    <div class="r-comment-body"><p>node mast-saddle-voltage-reach complete at c173d3991; verdict reachable — uncorrected saddle voltage reachable for 36/36 loops via level1 xmb/sad_out on the 26 xmb-bearing vacuum-cohort shots, no fit and no sign promoted.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T035623473263-review-of-mast-saddle-voltage-reach" data-who="reckon-build" data-when="2026-10-08T04:19:33.229Z">
+    <div class="r-comment-body"><p>review-of-mast-saddle-voltage-reach complete — stored a parsed six-dimension review of r-20261008T015056150935-mast-saddle-voltage-reach at head c173d3991 (base f2bac518e), total 87 verdict fail, all three prior-review findings repaired and verified, two follow-on findings (owner-duplication in the benchmark's cohort reuse; no regression guard), no blocking.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261008-saddle-cohort-owner-landed" data-who="reckon-build" data-when="2026-10-08T05:05:00Z">
+    <div class="r-comment-body">review follow-ons from node (a) landed (mast-saddle-cohort-owner): the light vacuum-cohort census now lives in nova/imas/mast_vacuum_cohort.py on its own constants, and tests/test_mast_saddle_voltage_reach.py guards per-family raw-key resolution (5 tests, zero added failures; review 107). Section open — node (b), admission into the harmonic constraint set with the saddle-removed and geometry-permuted controls, is next.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T042003577585-mast-saddle-cohort-owner" data-who="reckon-build" data-when="2026-10-08T04:43:38.060Z">
+    <div class="r-comment-body"><p>Moved the saddle reach benchmark's vacuum-cohort admission into nova/imas/mast_vacuum_cohort.py as light_census()/LightCensus on the module's own EXCITATION_CURRENT, PLASMA_FREE_CURRENT and a single MINIMUM_PROBES constant; the benchmark now declares none of those and no predicate, and tests/test_mast_saddle_voltage_reach.py adds 5 tests — head 121 passed/2 failed against base 116 passed/2 failed, the same two pre-existing failures, so zero failures added.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T044457167062-review-of-mast-saddle-cohort-owner" data-who="reckon-build" data-when="2026-10-08T05:04:59.835Z">
+    <div class="r-comment-body"><p>review of r-20261008T042003577585-mast-saddle-cohort-owner stored (base e2cffb94c353041dbbb39e6d25daa348f52708ac, head 191ef560420791fc94edc3d1e0b864ba64d56434), parsed and scored on all 6 dimensions total 107 verdict pass with zero added failures; the prior reuse finding is repaired — the benchmark's vacuum-cohort admission now runs through nova/imas/mast_vacuum_cohort.light_census extending the owner, and no constant or predicate is re-declared.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261008-saddle-admission-landed" data-who="reckon-build" data-when="2026-10-08T06:50:00Z">
+    <div class="r-comment-body">node (b) landed as a refused attribution: on the 3 usable xmb shots the geometry-permuted control matches the real gain (87.9 vs 87.3 %); the io_magnetics reader is repaired for DD 4.1.1. Section open — the 23 shots without voltage units are being calibrated (mast-saddle-voltage-units), after which the admission re-runs. Evidence: saddle-admission.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T055143084501-mast-saddle-admission" data-who="reckon-build" data-when="2026-10-08T06:30:20Z">
+    <div class="r-comment-body"><p>Reader repaired and full saddle contours admitted with binary traversal nuisance. Limited 2-fit/1-held-out comparison on 36 loops: real squared-residual gain 87.3168%, geometry-permuted gain 87.8757%, removed gain 0%; attribution refused, 23 shots lack raw voltage units, no sign promoted. [Residual figure and receipt](/nova/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-admission.html#mast-saddle-admission-residuals).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T063126267152-review-of-mast-saddle-admission" data-who="reckon-build" data-when="2026-10-08T06:53:35.428Z">
+    <div class="r-comment-body"><p>Review of r-20261008T055143084501-mast-saddle-admission stored as a parsed six-dimension record (goal_fidelity 16, evidence 18, scope_discipline 19, durability 17, fit 17, reuse 18; total 105, verdict pass, zero added failures) with two follow-on findings and no blocking finding; the node's saddle-loop admission is a correct refusal of attribution (permuted-geometry control gain 87.88% does not fall below the real gain 87.32%).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261008-saddle-deferred" data-who="reckon-build" data-when="2026-10-08T07:10:00Z">
+    <div class="r-comment-body">§5 deferred on data: 23 of 26 xmb-bearing vacuum shots carry arbitrary voltage units and an in-situ gain fails the 2 % validation on all 36 loops, so attribution, sign and the tail width owed to mast-misfit-toroidal-harmonics cannot be measured from this archive. Reopen trigger: a calibration source for the older XMB saddle acquisition. Landed under §5: reach (36/36), the cohort owner, the repaired magnetics reader and the admission machinery. Evidence: saddle-voltage-units.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T063157699792-mast-saddle-voltage-units" data-who="reckon-build" data-when="2026-10-08T06:49:22Z">
+    <div class="r-comment-body"><p>[Raw saddle voltage unit receipt](/nova/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-voltage-units.html#mast-saddle-voltage-units-receipt): all 23 target shots remain unit/gain unknown (368 available signals with empty units and Arb labels); 108 known-unit signals on 3 controls found, 0/36 loops validate at 2%; 16 synthetic tests pass, mutated gain/threshold control fails 3; no sign promoted or admission fit rerun.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T065732376638-review-of-mast-saddle-voltage-units" data-who="reckon-build" data-when="2026-10-08T07:08:01.663Z">
+    <div class="r-comment-body"><p>Independent review of the saddle raw-voltage unit audit (r-20261008T063157699792-mast-saddle-voltage-units, base 1d34f09c, head 9424ff40) stored as a parsed six-dimension record scoring goal_fidelity 16, evidence 18, scope_discipline 19, durability 16, fit 17, reuse 16 (total 102, verdict pass, zero added failures); the node's negative unit/gain verdict is correct — 23 target shots stay unknown, 0/36 loops validate against the three known-unit controls, no sign promoted and no admission fit rerun — with two follow-on findings and no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20261008-tf-average-landed" data-who="reckon-build" data-when="2026-10-08T06:15:00Z">
     <div class="r-comment-body">node 1 landed as a negative result: no independent R*Bphi measurement exists in the store (577 shots with feed current, 564 reconstruction-only products, 0 independent comparisons at 2 %). Section open — the next §6 node needs an independent observable: toroidal-probe orientation resolved from coil pulses, or a sourced turn count. Evidence: tf-average.</div>

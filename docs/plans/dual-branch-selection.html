@@ -19,16 +19,16 @@
   <meta name="plan-capability-risk" content="elevated">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-sprint" content="S23">
-  <meta name="plan-depends-on" content="dual-basin-solve,topology-preserving-continuation">
+  <meta name="plan-depends-on" content="">
   <meta name="plan-blocks" content="mast-catalog-gpu-solve">
   <title>Dual-Branch Selection | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="15">
 <meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8,a9ea090c">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,benchmarks/fork_arming_economics.py,benchmarks/two_branch_batch_cost.py,nova/equilibrium/branch_selection.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/figures/dual-branch-selection/fork-arming-economics.json,docs/figures/dual-branch-selection/two-branch-batch-cost.json,docs/evidence/archive/dual-branch-selection-landed.html">
 <meta name="plan-impl" content="0.7">
+<meta name="plan-version" content="16">
+<meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
   <main class="plan-doc">
@@ -545,6 +545,19 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="fork-arming" data-choice="superseded-by-measurement: single pinned solve + post-hoc classification" data-by="sprint-review" data-when="2026-08-26T08:51:14+00:00">
+    <p class="r-dec-q">Does the catalog fork both branches on every slice (simple, uniform
+        shapes, twice the solve cost on 1,341,435 slices) or arm the fork from the class margin
+        (near-tangency slices only, single pinned solve elsewhere)? The reference implementation
+        measured always-fork as over-deployed, but its arming trigger is not portable. Answer after
+        the armed fraction is measured on real catalog frames and the two-branch batch cost is
+        measured on the accelerator lane — never from either number alone.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="always-fork">always-fork</button>
+      <button class="r-opt" data-value="margin-armed">margin-armed</button>
+      </p>
+    <p class="r-dec-rat">Closed as SUPERSEDED rather than answered from its two recorded options (always-fork vs margin-armed fork): the class-coreachability measurement (2026-08-25, a9ea090c) found no frame admitting qualified roots of two classes, so the fork solves for a root that is not present and the arming policy is moot - the plan&#x27;s own s4 prose (commit 157e6465) records this verdict. The catalog route is one pinned solve per slice with the class recovered post-hoc from flood-filled connectivity, saving 15.9377 H200-hours per catalog pass. The margin-remeasure artifact that would have fed the original decision was retired 2026-08-25. Recorded by the 2026-08-26 sprint review syncing structured state with the plan&#x27;s landed prose; reopen via the dissent flow if a two-root frame is ever observed.</p>
+    </div>
 <div class="r-dec" data-key="selection-observable" data-choice="both-explicit-roles" data-by="Simon McIntosh" data-when="2026-10-01T20:42:03+00:00">
     <p class="r-dec-q">Which observable carries branch selection: the smooth softmax weight
         p_diverted, the exact signed class_margin, or both with explicit roles (smooth weight for
@@ -558,19 +571,6 @@
       <button class="r-opt chosen" data-value="both-explicit-roles">both-explicit-roles</button>
       </p>
     <p class="r-dec-rat">Lead decision 2026-10-01, from the traced-selection receipt this decision asked for: 53/53 exact-class agreement, both 257-point rails continuous (max adjacent step 3.5255e-4), and p_diverted against sigmoid(class_margin/0.01) agreeing to 2.2e-16. Each observable does one job: the smooth weight carries selection and gradients, and the exact signed margin carries reporting and gates. A gate reading only the smooth weight judges a softened quantity. Using only the exact margin leaves no gradient through branch selection. Accepted cost: two observables must stay consistent, which the receipt&#x27;s agreement check enforces. The margin&#x27;s definition moves to signed webers under contour-tree-topology-authority; the roles are unchanged by that.</p>
-    </div>
-<div class="r-dec" data-key="fork-arming" data-choice="superseded-by-measurement: single pinned solve + post-hoc classification" data-by="sprint-review" data-when="2026-08-26T08:51:14+00:00">
-    <p class="r-dec-q">Does the catalog fork both branches on every slice (simple, uniform
-        shapes, twice the solve cost on 1,341,435 slices) or arm the fork from the class margin
-        (near-tangency slices only, single pinned solve elsewhere)? The reference implementation
-        measured always-fork as over-deployed, but its arming trigger is not portable. Answer after
-        the armed fraction is measured on real catalog frames and the two-branch batch cost is
-        measured on the accelerator lane — never from either number alone.</p>
-    <p class="r-dec-opts">
-      <button class="r-opt" data-value="always-fork">always-fork</button>
-      <button class="r-opt" data-value="margin-armed">margin-armed</button>
-      </p>
-    <p class="r-dec-rat">Closed as SUPERSEDED rather than answered from its two recorded options (always-fork vs margin-armed fork): the class-coreachability measurement (2026-08-25, a9ea090c) found no frame admitting qualified roots of two classes, so the fork solves for a root that is not present and the arming policy is moot - the plan&#x27;s own s4 prose (commit 157e6465) records this verdict. The catalog route is one pinned solve per slice with the class recovered post-hoc from flood-filled connectivity, saving 15.9377 H200-hours per catalog pass. The margin-remeasure artifact that would have fed the original decision was retired 2026-08-25. Recorded by the 2026-08-26 sprint review syncing structured state with the plan&#x27;s landed prose; reopen via the dissent flow if a two-root frame is ever observed.</p>
     </div>
 <div class="r-dec" data-key="unqualified-branch-semantics" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">What does the published label carry when the diverted arm never
@@ -615,12 +615,6 @@
 <div class="r-comment" data-section="_top" data-id="c-20260826T085114500127" data-who="sprint-review" data-when="2026-08-26">
     <div class="r-comment-body"><p><strong>Decision-state sync (2026-08-26 review):</strong> the open question and fork-arming are now closed against their landed measurements. Two decisions remain genuinely open for the lead: <code>selection-observable</code> - the traced receipt this decision asked for exists (53/53 exact class agreement, both 257-point rails continuous at max adjacent step 3.5255e-4, p_diverted vs sigmoid(class_margin/0.01) max disagreement 2.2e-16) and s5 prose argues both-explicit-roles, recorded for the lead to lock; and <code>unqualified-branch-semantics</code> - its stated precondition is SATISFIED (discrete-operator-analytic-error s4 reported: a diverted attractor exists, stalling at ~5e-3 rather than absent), but the stall treatment moved to efit-baseline-demonstration s4 / profile-owned-solve-domain, so locking degrade-with-recorded-stall today would encode a stall S16 may remove. Lock it with that caveat stated, or re-gate it explicitly on the S16 outcome - it no longer waits on the plan it names. Remaining execution after the locks: f-dbs-001 islands 1 and 3 (cold_seed_portfolio is still a host method at nova/equilibrium/forward.py, consumed from nova/transport/coupled_window.py), ~3.6h.</p></div>
 </div>
-<div class="r-comment" data-section="s6" data-id="c-run-r-20260825T084655542502-fork-arming-fraction" data-who="catalog-census" data-when="2026-08-25T08:54:07Z">
-    <div class="r-comment-body"><p>Pricing framework banked and arithmetic verified. Four finite absolute margins span 0.00339536 to 0.0197108, median 0.00606505; two of six are non-finite and fall back conservatively to fork. Always-fork arms 6/6 at 2.000x the single-branch denominator; thresholds 0.0025, 0.005, 0.01 and 0.02 arm 2/6, 4/6, 5/6 and 6/6 at 1.333x, 1.667x, 1.833x and 2.000x. Solve cost is an explicit parameter at 1.0 solve-second per pinned branch, not a measurement, and 372.62 slices/s is recorded as the derived one-hour requirement rather than throughput. CRITICAL LIMIT the node stated itself: the cohort is the six frozen MAST references, not catalog frames, so with four finite margins it carries no representativeness or confidence claim and cannot support the policy decision. The decision also needs the accelerator two-branch batch cost, which is out of scope here.</p></div>
-</div>
-<div class="r-comment" data-section="s6" data-id="c-run-r-20260825T085631015497-two-branch-batch-cost" data-who="h200-matrix" data-when="2026-08-25T10:00:17Z">
-    <div class="r-comment-body"><p>Measured on one reserved H200 NVL at float64, SLURM 1254620, 6m54s, exit 0, with 600/600 single and 600/600 dual timed solves converged and zero non-convergences. Width 16 read-inclusive: 42.7719 ms/slice single against 52.1766 dual, ratio 1.2198 with cohort range 1.2181-1.2200; width 4 gives 1.3255. So FORKING DOES NOT DOUBLE COST - batching amortises it to about 22 percent, against the 2.0 the sibling pricing framework assumed, which recomputes the armed multiples to 1.0733 at 2/6, 1.1466 at 4/6, 1.1832 at 5/6 and 1.2198 for always-fork. The labelled extrapolation is 15.94 h single against 19.44 h dual for 1,341,435 slices on one H200. It also confirmed my suspicion about the exact-zero residual: that state was an EMPTY IDENTITY with zero plasma current and volume and non-finite axis, boundary and span, and the conditioned path was collapsing toward the same empty configuration rather than converging to a different root - current 86.6 to 38.8 kA, volume 2.48 to 1.17 m3 - so all such states were excluded from timing. Honest caveats retained: no shared-operator fusion claim, since no bank carries two nondegenerate qualified roots; and a preflight inversion worth following up, where the LIMITED lane converged 1/4 and 1/16 at 1e-4 to 5e-4 and 0/4 and 0/16 at 5e-4 to 1e-3 while DIVERTED stayed 4/4 and 16/16.</p></div>
-</div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260825T084506969055-mast-margin-operand-attribution" data-who="margin-remeasure" data-when="2026-08-25T09:35:51Z">
     <div class="r-comment-body"><p>Production repair plus the attribution, and the attribution REFUTES the leading hypothesis. ForwardTopologyState is registered as a lossless PyTree with the nine landmarks and the evaluated class_margin as array leaves and the Callable excluded and reconstructed, and ForwardFluxOperator.connectivity_grid_axes is now the public radius/height/shape contract with both benchmark callers migrated and zero executable callers of the removed private attributes remaining. The previously failing production test test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap passes, and a new test_forward_topology_state_is_a_vmap_output_pytree gates the registration. SCIENCE: the connectivity-reachability hypothesis does NOT hold on MAST. All four absent-margin terminals carry connectivity SUPPORT, while three finite-margin terminals lack reachability. The named cause is wall_extremum_rejected_by_private_flux_shadow: finite pre-shadow wall operands, 0.3310275619269073 and 0.3310454781725451 on 21978/35 and 0.30190002257031606 and 0.3000846561326388 on 22086/43, are discarded by the private-flux shadow and become positive infinity. All-terminal counts are 9 with connectivity support, 3 not reachable, 0 no-candidate, 0 nonfinite-operand. Gate discipline was exemplary: a non-banked diagnostic pass enumerated all 252 changed leaves with magnitudes before any classification, and the final regeneration reproduced 381 float fields and 258 semantic fields with ZERO differences while preserving 644 of 644 banked leaves and adding 12 diagnostic subtrees.</p></div>
 </div>
@@ -632,6 +626,12 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260825T104524221366-traced-selector-state" data-who="selection-proto" data-when="2026-08-25T10:55:22Z">
     <div class="r-comment-body"><p>The traced path lives in nova/equilibrium/branch_selection.py, its canonical home, with no parallel module - the host selector now DELEGATES its transition semantics to the array core rather than duplicating them, and the host SelectionReceipt remains the provenance egress. All 14 existing semantic-oracle cases pass unchanged, 18 total in the file. The traced property is PROVEN rather than asserted: the test inspects jax.make_jaxpr for a scan primitive and runs jit(vmap(...)) over 3 independent batches by 4 time steps. Degrade-path accounting landed as §5 required and confirms the concern - that cohort records 2 degrade-path firings against 1 genuinely two-qualified selection. Design roles held: p_diverted alone carries the smooth blend and has nonzero gradients, class_margin stays a separate exact comparator, and non-finite margins are explicitly UNCLASSIFIED rather than defaulted, which is the honest handling of the four absent operands. It made no continuity claim at saddle-operand emergence, as fenced, and introduced no private operator attribute access.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20260825T084655542502-fork-arming-fraction" data-who="catalog-census" data-when="2026-08-25T08:54:07Z">
+    <div class="r-comment-body"><p>Pricing framework banked and arithmetic verified. Four finite absolute margins span 0.00339536 to 0.0197108, median 0.00606505; two of six are non-finite and fall back conservatively to fork. Always-fork arms 6/6 at 2.000x the single-branch denominator; thresholds 0.0025, 0.005, 0.01 and 0.02 arm 2/6, 4/6, 5/6 and 6/6 at 1.333x, 1.667x, 1.833x and 2.000x. Solve cost is an explicit parameter at 1.0 solve-second per pinned branch, not a measurement, and 372.62 slices/s is recorded as the derived one-hour requirement rather than throughput. CRITICAL LIMIT the node stated itself: the cohort is the six frozen MAST references, not catalog frames, so with four finite margins it carries no representativeness or confidence claim and cannot support the policy decision. The decision also needs the accelerator two-branch batch cost, which is out of scope here.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20260825T085631015497-two-branch-batch-cost" data-who="h200-matrix" data-when="2026-08-25T10:00:17Z">
+    <div class="r-comment-body"><p>Measured on one reserved H200 NVL at float64, SLURM 1254620, 6m54s, exit 0, with 600/600 single and 600/600 dual timed solves converged and zero non-convergences. Width 16 read-inclusive: 42.7719 ms/slice single against 52.1766 dual, ratio 1.2198 with cohort range 1.2181-1.2200; width 4 gives 1.3255. So FORKING DOES NOT DOUBLE COST - batching amortises it to about 22 percent, against the 2.0 the sibling pricing framework assumed, which recomputes the armed multiples to 1.0733 at 2/6, 1.1466 at 4/6, 1.1832 at 5/6 and 1.2198 for always-fork. The labelled extrapolation is 15.94 h single against 19.44 h dual for 1,341,435 slices on one H200. It also confirmed my suspicion about the exact-zero residual: that state was an EMPTY IDENTITY with zero plasma current and volume and non-finite axis, boundary and span, and the conditioned path was collapsing toward the same empty configuration rather than converging to a different root - current 86.6 to 38.8 kA, volume 2.48 to 1.17 m3 - so all such states were excluded from timing. Honest caveats retained: no shared-operator fusion claim, since no bank carries two nondegenerate qualified roots; and a preflight inversion worth following up, where the LIMITED lane converged 1/4 and 1/16 at 1e-4 to 5e-4 and 0/4 and 0/16 at 5e-4 to 1e-3 while DIVERTED stayed 4/4 and 16/16.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

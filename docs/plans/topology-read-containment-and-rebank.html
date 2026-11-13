@@ -16,7 +16,7 @@
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint" content="S26">
+  <meta name="plan-sprint" content="S23">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="topology,equilibrium,mast,solovev,h200">
   <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
@@ -24,10 +24,9 @@
   <title>Topology read containment and rebank | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
-<meta name="plan-modified" content="2026-10-24">
+<meta name="plan-version" content="14">
+<meta name="plan-modified" content="2026-11-13">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-impl" content="0.14">
 </head>
 <body>
   <main class="plan-doc">
@@ -157,8 +156,8 @@
   <section data-reckon="gates" id="gates" class="r-gates">
 <h2><span class="sec">§</span> Evidence gates</h2>
 <div class="r-gate" data-id="g-trcr-rebank-after-rung-a" data-section="s2" data-gated-sections="s2,s5" data-status="open" data-verdict="">
-    <h4 class="r-gate-measure">The twelve-row MAST bank and the sixteen-row certificate are regenerated only after cut-cell-current-attribution section 6 (rung A, the signed-flux clip of the profile support) has landed, because that rung changes the physics of every forward solve and a bank regenerated before it would be stale on landing; the H200 reservation must also admit a nova job (a two-core probe with srun --test-only must not answer configuration not available).</h4>
-    <p class="r-gate-required-evidence">The cut-cell-current-attribution landed record anchor for section 6 with the amplitude-within-one-percent gate on the 110-cell rows, and a scheduler probe showing a nova job can start on gpu_0003_grpA.</p>
+    <h4 class="r-gate-measure">The twelve-row MAST bank and the sixteen-row certificate are regenerated only after converged-forward-solve section 3 (the current booking, which took over the clipped profile support from the superseded cut-cell-current-attribution section 6) has landed, because the booking changes the physics of every forward solve and a bank regenerated before it would be stale on landing.</h4>
+    <p class="r-gate-required-evidence">converged-forward-solve#s3</p>
     </div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

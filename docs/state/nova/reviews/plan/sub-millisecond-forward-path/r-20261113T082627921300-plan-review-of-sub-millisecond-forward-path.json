@@ -33,7 +33,49 @@
   "plan_slug": "sub-millisecond-forward-path",
   "plan_version": 306,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "d9ffc92d373eed2bc3612653ed114a4c8f6ed5ca",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 5 now states the rule for a family of more than two arms: the default moves to the fastest arm only when it beats the current default by the margin; otherwise the default stands as unresolved.",
+      "reason": "",
+      "when": "2026-11-13T11:35:05.867237+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "d9ffc92d373eed2bc3612653ed114a4c8f6ed5ca",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The lever row for live saddle candidates and the diverted wall skip now reads landed, with their CPU results; both fragments are on main.",
+      "reason": "",
+      "when": "2026-11-13T11:35:44.177984+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "d9ffc92d373eed2bc3612653ed114a4c8f6ed5ca",
+      "commit_basis": "edit",
+      "note": "The lever row for live saddle candidates and the diverted wall skip now reads landed, with their CPU results; both fragments are on main.",
+      "reason": "",
+      "when": "2026-11-13T11:35:44.177984+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "d9ffc92d373eed2bc3612653ed114a4c8f6ed5ca",
+      "commit_basis": "edit",
+      "note": "Section 5 now states the rule for a family of more than two arms: the default moves to the fastest arm only when it beats the current default by the margin; otherwise the default stands as unresolved.",
+      "reason": "",
+      "when": "2026-11-13T11:35:05.867237+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261113T082627921300-plan-review-of-sub-millisecond-forward-path.json",
   "review_run_id": "r-20261113T082627921300-plan-review-of-sub-millisecond-forward-path",
   "reviewed_blob_sha": "eb6f4f133444c6b568484d85156a2db7ddc392ce",
   "rubric": "content",

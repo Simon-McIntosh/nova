@@ -119,3 +119,22 @@ def test_reentrant_wall_mesh_keeps_all_clipped_fragments():
     vessel = Polygon(wall)
     assert abs(unary_union(cells).area - vessel.area) < 1e-10
     assert all(p.difference(vessel).area < 1e-12 for p in cells)
+
+
+@pytest.mark.parametrize("sample", range(3))
+def test_dina_coil_jets_match_analytic_map(sample):
+    """Qualify the driven response independently of plasma derivative compilation."""
+    directory = os.environ.get("NOVA_ITER_BANK_COIL_RECEIPT")
+    if directory is None:
+        pytest.skip("set NOVA_ITER_BANK_COIL_RECEIPT to the coil comparison directory")
+    directory = Path(directory)
+    receipt = json.loads((directory / "receipt.json").read_text())
+    assert receipt["kind"] == "coil-only"
+    state = receipt["accuracy"][sample]
+    with np.load(
+        directory / f"coil-accuracy-{state['index']}.npz", allow_pickle=False
+    ) as arrays:
+        actual = arrays[
+            "dropped" if os.environ.get("NOVA_ITER_BANK_DROP_COIL") else "actual"
+        ]
+        assert_accuracy(actual, arrays["expected"])

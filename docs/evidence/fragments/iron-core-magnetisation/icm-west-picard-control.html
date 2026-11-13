@@ -1,0 +1,65 @@
+<section id="icm-west-picard-control-state">
+<h3>Frozen-permeability Picard converges on WEST 62751, in 12 iterations against Newton's 4, so the plan's negative control is refuted on the operator the solve uses</h3>
+<p>The plan asks for a frozen-permeability Picard run on WEST 62751, started from M = 0 at full drive with the continuation the Newton run used, recorded as failing to converge, as the negative control for choosing Newton. Run exactly that way on the Galerkin operator that landed in <code>nova/biot/magnetisation.py</code>, the iteration converges: the solver-normalised residual falls from 0.9977 to 7.78e-11 in twelve iterations, below the 1e-10 tolerance the Newton run used, at a steady 0.276 per iteration once the first two corrections have passed. Newton reaches 5.84e-14 in four. The recorded Newton history reproduced on the same operator, mesh and tolerance to a maximum relative 5.96e-05, which is the roundoff floor of a repeat run rather than a change of operator.</p>
+<p>The negative control this node was dispatched to record is therefore not available as stated. What follows records the iteration, its limit, two analytic positive controls that show the iteration is implemented and not merely tolerant, and one further arm that explains where the plan's expectation came from.</p>
+
+<h4 id="icm-west-picard-control-iteration">The iteration</h4>
+<p>At each step the secant coefficient <code>c(|B|) = M/B</code> is evaluated at the current iterate's field and held fixed; the next iterate solves <code>(I - diag(c) G) M = c B_ext</code> exactly by dense LU, so no inner truncation is charged to the method. There is no damping, and the start is a demagnetised state at full drive, which is the first of the two continuations the plan permits. The residual is the production <code>F(M) = M - c(|B|) B</code> with <code>B = B_ext + G M</code>. The table records it in both normalisations: <code>||F|| / max(||M||, ||B_ext||/&mu;<sub>0</sub>)</code>, which is what the Newton tolerance is applied to, and <code>||F|| / ||M||</code>, which is the control's own definition and is undefined at the demagnetised seed.</p>
+<table id="icm-west-picard-control-iterations"><thead><tr><th>iteration</th><th>||F|| / max(||M||, ||B||/&mu;<sub>0</sub>)</th><th>||F|| / ||M||</th><th>max |M| [A/m]</th><th>max &Delta;&mu;<sub>r</sub></th><th>&mu;<sub>r</sub> min</th><th>&mu;<sub>r</sub> max</th></tr></thead><tbody>
+<tr><td>0</td><td>9.977263e-01</td><td>&mdash;</td><td>0.0</td><td>&mdash;</td><td>216.31105</td><td>658.33674</td></tr>
+<tr><td>1</td><td>1.858428e-03</td><td>1.8584e-03</td><td>697060.3</td><td>1242</td><td>216.26329</td><td>1638.77078</td></tr>
+<tr><td>2</td><td>7.384752e-05</td><td>7.3848e-05</td><td>659969.5</td><td>255.5</td><td>215.33753</td><td>1589.09949</td></tr>
+<tr><td>3</td><td>1.404674e-05</td><td>1.4047e-05</td><td>672469.0</td><td>62.94</td><td>215.54512</td><td>1606.80838</td></tr>
+<tr><td>4</td><td>3.234935e-06</td><td>3.2349e-06</td><td>678436.2</td><td>18.11</td><td>215.54900</td><td>1614.84989</td></tr>
+<tr><td>5</td><td>7.832212e-07</td><td>7.8322e-07</td><td>679702.1</td><td>5.104</td><td>215.55339</td><td>1616.51368</td></tr>
+<tr><td>6</td><td>1.965878e-07</td><td>1.9659e-07</td><td>679975.4</td><td>1.425</td><td>215.55442</td><td>1616.87075</td></tr>
+<tr><td>7</td><td>5.084569e-08</td><td>5.0846e-08</td><td>680035.5</td><td>0.3959</td><td>215.55462</td><td>1616.94917</td></tr>
+<tr><td>8</td><td>1.347561e-08</td><td>1.3476e-08</td><td>680048.9</td><td>0.1097</td><td>215.55465</td><td>1616.96667</td></tr>
+<tr><td>9</td><td>3.641164e-09</td><td>3.6412e-09</td><td>680052.0</td><td>0.03038</td><td>215.55466</td><td>1616.97064</td></tr>
+<tr><td>10</td><td>9.989138e-10</td><td>9.9891e-10</td><td>680052.7</td><td>0.008408</td><td>215.55466</td><td>1616.97155</td></tr>
+<tr><td>11</td><td>2.773612e-10</td><td>2.7736e-10</td><td>680052.8</td><td>0.002326</td><td>215.55466</td><td>1616.97176</td></tr>
+<tr><td>12</td><td>7.777020e-11</td><td>7.7770e-11</td><td>680052.9</td><td>0.0006436</td><td>215.55466</td><td>1616.97181</td></tr>
+</tbody></table>
+<p>The residual ratio per iteration settles at 0.251, 0.259, 0.265, 0.270, 0.274, 0.278, 0.280 over the last seven steps, so the iteration is neither oscillating nor stagnating: it is contracting geometrically and reaches the tolerance. The magnetisation moves by 2.4 per cent in total (697060 to 680053 A/m at the maximum) while the largest per-cell change in relative permeability falls from 1241.8 to 6.4e-04, which is the shape of a converging fixed-point iteration rather than a stalled one.</p>
+
+<h4 id="icm-west-picard-control-verdict">The verdict, and what the two states agree to</h4>
+<p>The Picard limit is a root of the same equation Newton solved. Its permeability range is 215.55466 to 1616.97181 against Newton's 215.55466 to 1616.97182, and its largest cell magnetisation is 680052.864 A/m against Newton's 680052.876 A/m. The states differ by 1.57e-07 relative at the largest cell, which is far above both residuals: the residual map is flat along the direction that carries that difference, so a residual below 1e-10 does not pin the state below 1e-07 there. Both methods satisfy the tolerance they were held to and both are roots of the discrete problem; the states are not identical.</p>
+<table id="icm-west-picard-control-compare"><thead><tr><th>quantity</th><th>Newton</th><th>frozen-permeability Picard</th></tr></thead><tbody>
+<tr><td>corrections or iterations</td><td>4</td><td>12</td></tr>
+<tr><td>final ||F|| / max(||M||, ||B||/&mu;<sub>0</sub>)</td><td>5.837e-14</td><td>7.777e-11</td></tr>
+<tr><td>residual ratio per iteration at the end</td><td>&mdash; (cubic)</td><td>0.276</td></tr>
+<tr><td>converged &mu;<sub>r</sub> range</td><td>215.55466 to 1616.97182</td><td>215.55466 to 1616.97181</td></tr>
+<tr><td>max |M| [A/m]</td><td>680052.876</td><td>680052.864</td></tr>
+<tr><td>maximum state difference between the two</td><td colspan="2">1.57e-07 relative</td></tr>
+<tr><td>wall [s]</td><td>76.31</td><td>3.48 (0.29 per iteration)</td></tr>
+</tbody></table>
+<p>The wall times are not a like-for-like cost comparison and are not offered as one: the Newton figure includes the one-time compilation of the differentiated Jacobian program, and the recorded pair receipt gives 146.94 s for the same solve on the same mesh, so the Newton wall is dominated by compilation rather than by its four corrections. What the iteration counts do say is that Newton needs a third of the corrections, which is the ordinary reason the production path differentiates the law.</p>
+
+<figure>
+  <img src="/nova/figures/iron-core-magnetisation/icm-west-picard-control/west-62751-picard-residual.svg" alt="Residual against iteration for Newton, for frozen-permeability Picard on the Galerkin operator, and for Picard on the centroid-sampled operator, on WEST 62751 at 0.08 m.">
+  <figcaption>Residual against iteration on WEST 62751 at 0.08 m (1695 cells), all three from M = 0 at full drive. Newton drops to 5.8e-14 in four corrections. Frozen-permeability Picard on the Galerkin operator falls geometrically at 0.276 per iteration and crosses the 1e-10 tolerance at iteration 12. The same iteration on the centroid-sampled operator of the same mesh stalls in a period-four cycle between 4.3e-4 and 2.4e-3 and never crosses the line in fifty iterations.</figcaption>
+</figure>
+
+<h4 id="icm-west-picard-control-controls">Positive controls: the same iteration where it must converge</h4>
+<p>Both controls use the analytic shell of the magnetisation tests (inner radius 0.9 m, outer 1.0 m, 228 cells at 0.04 m) and the same <code>iterate</code> routine as the WEST run. The linear law is a constant <code>&mu;<sub>r</sub> = 10</code>, for which the frozen coefficient is exact and the iteration must terminate in one solve. The second law rises from 10 to 12 over one tesla, so the coefficient changes between iterates and the iteration must take more than one step while still converging.</p>
+<table id="icm-west-picard-control-positive"><thead><tr><th>control</th><th>iterations</th><th>final residual</th><th>state difference from Newton</th><th>shielding at +2 m against the exact shell</th></tr></thead><tbody>
+<tr><td>shell, &mu;<sub>r</sub> = 10 constant</td><td>1</td><td>2.74e-16</td><td>5.22e-15</td><td>1.48584 (exact 1.48780, error 0.144 %)</td></tr>
+<tr><td>shell, &mu;<sub>r</sub> 10 &rarr; 12 over 1 T</td><td>2</td><td>2.71e-16</td><td>1.73e-15</td><td>1.48584</td></tr>
+</tbody></table>
+<p>The linear control converges in exactly one solve and reproduces the analytic shielding of the shell: (9&mu;<sub>r</sub> + 2)/(9&mu;<sub>r</sub>) = 1.4878 at &mu;<sub>r</sub> = 10, which the discrete shell meets to 0.144 per cent, the same value the operator's own review recorded for this shell on this mesh. Its state matches the production Newton solve to 5.2e-15. A Picard convergence on WEST is therefore a property of that problem and not a harness that reports success whatever it is given: the same code produces a limit cycle on the next arm.</p>
+
+<h4 id="icm-west-picard-control-collocated">Why the plan expected failure: the same iteration on the centroid-sampled operator</h4>
+<p>The expectation was formed against the centroid-sampled interaction, which the plan excludes by name because its spectrum of G/&mu;<sub>0</sub> leaves [0, 1] on the mesh then in use and its roots are not unique. Running the same frozen-permeability iteration on that operator, built on this same 1695-cell mesh and driven by centroid samples of the same prescribed field, it does not converge: fifty iterations end on a period-four cycle whose residual repeats 2.3826e-3, 6.1514e-04, 5.5366e-04, 4.2584e-04 and whose largest cell magnetisation swings between 696499 and 1530887 A/m, a factor of 2.2.</p>
+<p>The spectrum alone does not explain it, and that is worth recording rather than smoothing over. On this mesh the centroid-sampled operator's volume-weighted spectrum lies inside [0, 1] (minimum 1.90e-04, maximum 0.99976), so the criterion the plan states is satisfied here. What it does not satisfy is symmetry: its volume-weighted asymmetry defect is 2.71e-02, where the Galerkin operator's is 1.78e-17. A non-symmetric operator's spectrum need not be real, so modes whose complex eigenvalues sit near the unit circle produce a cycle rather than a contraction, and the cycle observed has the fixed amplitude such a pair would give. The Galerkin repair made the operator symmetric in the volume inner product, and with it the frozen-coefficient iteration contracts. This arm is a different discretisation of the same case and is recorded as the explanation for the plan's expectation, not as the negative control the plan requires.</p>
+
+<h4 id="icm-west-picard-control-disposition">Disposition</h4>
+<p>Measured on the operator the solve uses, clause (2) of this section's done-when is not met: the control that was to fail does not fail.</p>
+<table id="icm-west-picard-control-provenance"><thead><tr><th>item</th><th>value</th></tr></thead><tbody>
+<tr><td>executed script</td><td><code>scripts/west_picard_control/measure.py</code>, git blob 061e66056bdc3cd65dc7469ce5bcf6f9bd372fce</td></tr>
+<tr><td>revision</td><td>22e66e61a7743f4dfeba452572678d41abb30a09</td></tr>
+<tr><td>material operator</td><td><code>nova/biot/magnetisation.py</code> at that revision, unmodified</td></tr>
+<tr><td>mesh and machine</td><td>WEST 62751 iron, 0.08 m, 1695 cells, DD 4.1.0, CEA table, 14.40 s operator build</td></tr>
+<tr><td>device</td><td>Tesla P100-PCIE-16GB, JAX x64 asserted</td></tr>
+<tr><td>full receipt</td><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T015201821537-icm-west-picard-control/picard-control/measurement.json</code> (40 KB: every Picard and centroid-sampled row, both controls, both residual histories)</td></tr>
+</tbody></table>
+</section>

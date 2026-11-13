@@ -32,6 +32,7 @@ from scripts.edge_sheet.figure import (  # noqa: E402
 
 PICARD = "#2e8b57"
 NEWTON = "#1a1a1a"
+COLLOCATED = "#929292"
 LIMIT = "#929292"
 
 
@@ -43,18 +44,31 @@ def render(run: Path, destination: Path):
     tolerance = float(record["newton_tolerance"])
     picard_history = np.asarray(picard["residual_history"])
     newton_history = np.asarray(newton["residual_history"])
+    collocated = record["collocated_operator"]
+    collocated_history = np.asarray(collocated["residual_history"])
     plt.style.use("data-ink")
     plt.rcParams["svg.fonttype"] = "none"
     fig = plt.figure(figsize=(WIDTH_INCHES, HEIGHT_INCHES), dpi=100)
     axis = fig.add_axes([0.085, 0.13, 0.80, 0.70])
     trace_axes(axis, DEFAULT_INK.variant(label_fontsize=16))
     axis.semilogy(
+        np.arange(collocated_history.size),
+        collocated_history,
+        color=COLLOCATED,
+        linewidth=2.4,
+        zorder=4,
+        label=(
+            f"Picard on the centroid-sampled operator, "
+            f"{collocated['iterations']} iterations, {collocated['verdict']['mode']}"
+        ),
+    )
+    axis.semilogy(
         np.arange(picard_history.size),
         picard_history,
         color=PICARD,
         linewidth=3.0,
         zorder=5,
-        label=f"Picard, {picard['iterations']} iterations",
+        label=f"Picard on the Galerkin operator, {picard['iterations']} iterations",
     )
     axis.semilogy(
         np.arange(newton_history.size),
@@ -81,9 +95,21 @@ def render(run: Path, destination: Path):
         zorder=7,
     )
     axis.set_yscale("log")
-    floor = 10 ** np.floor(np.log10(min(picard_history.min(), tolerance)))
+    floor = 10 ** np.floor(
+        np.log10(
+            min(
+                picard_history.min(),
+                collocated_history.min(),
+                newton_history.min(),
+                tolerance,
+            )
+        )
+    )
     axis.set_ylim(floor, 2.0)
-    axis.set_xlim(-1, picard_history.size + 1)
+    axis.set_yticks(10.0 ** np.arange(np.log10(floor), 1.0))
+    longest = max(picard_history.size, collocated_history.size, newton_history.size)
+    axis.set_xlim(-1, longest + 1)
+    axis.set_xticks(np.arange(0, longest + 1, 10))
     axis.set_xlabel("iteration")
     axis.set_ylabel("||F(M)|| / max(||M||, ||B||/µ0)")
     handles, labels = axis.get_legend_handles_labels()

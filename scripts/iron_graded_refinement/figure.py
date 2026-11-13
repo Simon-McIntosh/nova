@@ -33,29 +33,42 @@ LIMIT = "#929292"
 TARGET = 0.5
 
 
-def collect(record: dict) -> dict:
-    """Group the shell arms by mesh family, ordered by cell count."""
+def collect(records) -> dict:
+    """Group the shell arms by mesh family, ordered by cell count.
+
+    One mesh is measured on the lane that can hold the factor, so the uniform
+    and graded families arrive in separate receipts; each point enters once even
+    when two receipts carry it.
+    """
     series = {"uniform": [], "graded": []}
-    for section in ("shell", "sweep"):
-        for label, row in record.get(section, {}).items():
-            if not row.get("converged") or "relative_error" not in row:
-                continue
-            kind = "uniform" if label.startswith("uniform") else "graded"
-            series[kind].append(
-                dict(
-                    label=label,
-                    cells=int(row["cells"]),
-                    error=np.asarray(row["relative_error"], dtype=float) * 100,
+    seen = set()
+    for record in records:
+        for section in ("shell", "sweep"):
+            for label, row in record.get(section, {}).items():
+                if not row.get("converged") or "relative_error" not in row:
+                    continue
+                kind = "uniform" if label.startswith("uniform") else "graded"
+                cells = int(row["cells"])
+                if (kind, cells) in seen:
+                    continue
+                seen.add((kind, cells))
+                series[kind].append(
+                    dict(
+                        label=label,
+                        cells=cells,
+                        error=np.asarray(row["relative_error"], dtype=float) * 100,
+                    )
                 )
-            )
     for rows in series.values():
         rows.sort(key=lambda row: row["cells"])
     return series
 
 
-def render(run, destination: Path, png: Path | None = None):
-    record = json.loads(Path(Path(run) / "measurement.json").read_text())
-    series = collect(record)
+def render(runs, destination: Path, png: Path | None = None):
+    records = [
+        json.loads((Path(run) / "measurement.json").read_text()) for run in runs
+    ]
+    series = collect(records)
     assert series["uniform"] and series["graded"], series.keys()
     plt.style.use("data-ink")
     plt.rcParams["svg.fonttype"] = "none"
@@ -134,7 +147,7 @@ def render(run, destination: Path, png: Path | None = None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--run", type=Path, required=True)
+    parser.add_argument("--run", type=Path, required=True, nargs="+")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--png", type=Path, default=None)
     args = parser.parse_args()

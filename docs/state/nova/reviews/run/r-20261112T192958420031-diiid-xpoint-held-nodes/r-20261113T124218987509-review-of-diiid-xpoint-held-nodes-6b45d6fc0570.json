@@ -20,6 +20,11 @@
       "kind": "exempted",
       "reason": "the finite-difference ordering assertion still fails a zero tangent; the floor was lowered because the physical-image solve legitimately shrinks the moment tangent",
       "recorded_at": "2026-11-13T13:11:06.408525+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the shadow mask is a state function, so membership moves with the solved state; the membership rule is unchanged and the fragment discloses the per-row counts",
+      "recorded_at": "2026-11-13T13:11:14.607984+00:00"
     }
   },
   "findings": [

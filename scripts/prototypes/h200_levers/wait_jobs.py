@@ -1,6 +1,8 @@
 """Read sacct for every named allocation and wait until all are terminal."""
 
 import argparse
+import json
+from pathlib import Path
 import subprocess
 
 TERMINAL = {
@@ -20,11 +22,17 @@ TERMINAL = {
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("jobs", help="Comma-separated allocation ids")
+    parser.add_argument("--inventory", type=Path)
     args = parser.parse_args()
     wanted = args.jobs.split(",")
+    if args.inventory and args.inventory.exists():
+        wanted += [
+            item["job_id"] for item in json.loads(args.inventory.read_text())["jobs"]
+        ]
+    wanted = list(dict.fromkeys(wanted))
     assert wanted and all(job.isdigit() for job in wanted)
     result = subprocess.run(
-        ["sacct", "-n", "-X", "-j", args.jobs, "-o", "JobIDRaw,State%30", "-P"],
+        ["sacct", "-n", "-X", "-j", ",".join(wanted), "-o", "JobIDRaw,State%30", "-P"],
         text=True,
         capture_output=True,
         check=True,

@@ -53,9 +53,22 @@
       "note": "The ceiling denominator is stated as the warm forward solve wall per slice at the same shape and batch width, measured in the same job.",
       "reason": "",
       "when": "2026-11-13T09:07:55.308957+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "The docs server resolves /nova/<slug> to the plan; sibling nova plans cite each other this way and the first round passed the same link.",
+      "when": "2026-11-13T09:08:24.425746+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The docs server resolves /nova/<slug> to the plan; sibling nova plans cite each other this way and the first round passed the same link.",
+      "when": "2026-11-13T09:08:24.425746+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "",

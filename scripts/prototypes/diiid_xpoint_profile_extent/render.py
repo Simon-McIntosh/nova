@@ -35,6 +35,7 @@ from scripts.prototypes.diiid_xpoint_offset.style import (  # noqa: E402
 )
 
 LEVELS = np.array([-0.02, 0.0, 0.02, 0.2, 0.6, 1.0, 1.6, 2.0])
+ZOOM_HALF_WIDTH_M = 0.05
 SHOTS = (137, 146, 179)
 ARMS = ("base", "edge")
 NAMES = {"base": "base tables", "edge": "EFIT edge tables"}
@@ -70,8 +71,8 @@ def xpoint_panels(root, frame, branch, output, previews):
     )
     centre = (points.min(axis=0) + points.max(axis=0)) / 2
     zoom = dict(
-        radius=(centre[0] - 0.20, centre[0] + 0.20),
-        height=(centre[1] - 0.20, centre[1] + 0.20),
+        radius=(centre[0] - ZOOM_HALF_WIDTH_M, centre[0] + ZOOM_HALF_WIDTH_M),
+        height=(centre[1] - ZOOM_HALF_WIDTH_M, centre[1] + ZOOM_HALF_WIDTH_M),
     )
     figure = plt.figure(figsize=CANVAS, dpi=100)
     axes = [
@@ -115,7 +116,7 @@ def xpoint_panels(root, frame, branch, output, previews):
             ):
                 interpolant = field(data["radius"], data["height"], data[key])
                 values = interpolant(radius, height) - float(interpolant.ev(*xpoint))
-                for contours, width in ((LEVELS, 1.2), ([0.0], 3.0)):
+                for contours, width in ((LEVELS[LEVELS != 0.0], 1.2), ([0.0], 3.0)):
                     drawn = draw_flux_contours(
                         ax,
                         radius,
@@ -183,19 +184,22 @@ def xpoint_panels(root, frame, branch, output, previews):
         Line2D([], [], color=SOLVED, lw=3, label="solved"),
         Line2D([], [], color=REFERENCE, lw=2.6, ls="--", label="EFIT"),
         Line2D([], [], color=WALL, lw=1.5, label="wall"),
-        Line2D(
-            [],
-            [],
-            color=SOLVED,
-            marker="o",
-            mfc="none",
-            ls="none",
-            label="shadow nodes",
-        ),
     ]
+    if any(summary["shadow_rz_m"] for _, _, _, summary in pair):
+        handles.append(
+            Line2D(
+                [],
+                [],
+                color=SOLVED,
+                marker="o",
+                mfc="none",
+                ls="none",
+                label="shadow nodes",
+            )
+        )
     figure.legend(
         handles=handles,
-        ncol=4,
+        ncol=len(handles),
         loc="upper center",
         frameon=False,
         bbox_to_anchor=(0.5, 0.99),

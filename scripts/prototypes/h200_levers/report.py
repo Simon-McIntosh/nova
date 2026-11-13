@@ -48,7 +48,6 @@ def main():
     compile_table = []
     mismatches = set()
     max_spread = 0.0
-    residual = 0.0
     for comparison in comparisons:
         for arm in arms(comparison):
             records = arm["records"]
@@ -84,9 +83,6 @@ def main():
                 spread = arm["spreads"][row["name"]]
                 assert spread <= 0.05
                 max_spread = max(max_spread, spread)
-                residual = max(
-                    residual, *row.get("residual", [0]), *other.get("residual", [0])
-                )
                 table.append(
                     identity
                     + [
@@ -193,9 +189,6 @@ def main():
     for left, right in zip(
         headline["records"][0]["rows"], headline["records"][1]["rows"], strict=True
     ):
-        residual = max(
-            residual, *left.get("residual", [0]), *right.get("residual", [0])
-        )
         if "compile_seconds" in left:
             compile_table.append(
                 [
@@ -210,6 +203,19 @@ def main():
                 ]
             )
     residual = audit["max_solved_residual"]
+    errors = json.loads((run / "precision-audit.json").read_text())
+    position_error = max(
+        value
+        for entry in errors
+        for key, value in entry["errors"].items()
+        if key.endswith(("-axis", "-saddle"))
+    )
+    flux_error = max(
+        value
+        for entry in errors
+        for key, value in entry["errors"].items()
+        if key.endswith("-boundary")
+    )
     text = f"""<section id="h200-levers-measurements">
 <h2>H200 speed-lever verdicts</h2>
 <p>The seven original jobs ({jobs}) completed. Canonical-input repair jobs
@@ -222,8 +228,11 @@ Earlier disagreeing pairs are excluded, never averaged.</p>
 mismatches. Position differences use the analytic plasma minor radius
 ({audit["minor_radius"]:.6g} m) and the locked 5e-4 position and 1e-4 flux-span
 budgets; these qualify the lever changes against the historical reference,
-whose analytic qualification is inherited. Every solved residual is at most
-{residual:.6g}. Receipts assert x64 on NVIDIA H200 NVL. Compilation/cache-load
+whose analytic qualification is inherited. Maximum paired position error is
+{position_error:.6g} of the minor radius and boundary-flux error is {flux_error:.6g}
+of the span. Recorded terminal residuals are at most {residual:.6g}; all solved
+lanes are certified at 1e-10. Receipts assert x64 on NVIDIA H200 NVL.
+Compilation/cache-load
 and synchronized warm execution walls are reported separately.</p>
 <p>The historical carried branch returns a frozen reading and is retained for
 attribution only. The carried-decision verdict compares the historical full

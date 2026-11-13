@@ -302,7 +302,8 @@ def main():
     print(
         f"SUMMARY {len(verified)} paired process receipts inside precision budget; "
         f"{result['comparisons']} comparisons; "
-        "no input mismatches; inert controls passed"
+        "no input mismatches; inert controls passed; "
+        f"max residual {maximum_residual:.12g}"
     )
 
 

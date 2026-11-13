@@ -1,0 +1,67 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Neither arm of the suite pair exists for this run: manifest.md:21-22 record baseline_suite and after_suite as prose ('not run, and nothing it covers changed'), not the JSON pair the contract asks for, and the change set touches no nova/ module and no test file, so no repository test can reach it. The substitute the run records is the base arm's reproduction of four independently banked lower-X distances (summary.json control, max difference 5.8e-9 m), which is the independent source the shared rule asks for. Reading no failure out of an arm that never ran, added_failure_count is 0 with no ids rather than a measured zero.",
+  "call_sites": [],
+  "completed_at": "2026-11-13T18:14:34.320Z",
+  "dimensions_reviewed": {
+    "done_when": "Per-row residual, converged, in-plasma extrema, lower-X distance from EFIT and share closed; a record with paired lower-X zooms for 137D and 146L and an edge-profile figure, every PNG inspected.",
+    "goal": "How much of the remaining DIII-D lower-X offset is the prescribed profile extent, measured by re-solving four rows with EFIT's own 0.95-1.0 knots; no product change either way.",
+    "write_paths": [
+      "scripts/prototypes/diiid_xpoint_profile_extent/",
+      "docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html",
+      "docs/figures/diiid-xpoint-profile-extent/"
+    ]
+  },
+  "dispatched_at": "2026-11-13T18:05:27Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-diiid-xpoint-profile-extent-986142032fcc",
+      "recorded_at": "2026-11-13T18:31:35.644656+00:00"
+    }
+  },
+  "findings": [
+    "blocking: docs/figures/diiid-xpoint-profile-extent/edge-profiles.svg (produced by scripts/prototypes/diiid_xpoint_profile_extent/render.py:307-310) leaves all three FF' panels with no y tick labels while each left panel autoscales independently, and the fragment caption at diiid-xpoint-profile-extent.html:40 states 'the p' panels share one scale while the FF' panels do not' when the p' panels in fact carry three different tick sets (137D 0.000/-0.008/-0.016/-0.024, 146L 0.00/-0.01/-0.02/-0.03, 179L 0.000/-0.015/-0.030). A reader is told the p' panels are comparable when they are not, and cannot read the FF' scale at all; the repository rule that such a figure is regenerated rather than captioned around applies.",
+    "non-blocking: docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html:20-24 quotes p'(1) and FF'(1) from profile-difference.json, which does not reconcile with the tables the solves were actually handed: arm-tables.json/cohort source-inputs.json give frame 179 edge p'(1) = -37354.45465245573 while the fragment's table reads -37353.1, and FF'(1) 0.024698 against the receipt's 0.024692528. The integral and removed-share columns are unaffected, but the table is cited as the prescribed content and should quote the receipt.",
+    "non-blocking: scripts/prototypes/diiid_xpoint_profile_extent/summarize.py:110-119 sums closed_m over every row including the 146L edge state whose topology is lost (support 50 cells), producing total_share_closed = -3.0037 in summary.json. The fragment correctly withholds that row's share ('state lost'), so the machine artefact and the record disagree about whether the row is usable and any later reader of summary.json's TOTAL line inherits a meaningless -300.4 percent.",
+    "non-blocking: manifest.md:12 changed_paths omits scripts/prototypes/diiid_xpoint_profile_extent/verify.py, which is the script its own tests field at line 15 describes as gate (1), and manifest.md:13 retry_failures says 'both 137 folders moved aside' while three *.incomplete-44ef folders exist; one of them, cohort/base/frame-137-diverted.incomplete-44ef, carries a complete receipt whose lower-X distance matches the retained run exactly (0.023601647567733246 m), so a round-tripped row reads as discarded work.",
+    "non-blocking: scripts/prototypes/diiid_xpoint_profile_extent/tables.py:73-95 re-derives the axis-flux, boundary-flux and normalised-flux block already owned by benchmarks/diiid_forward_gs_match.py:1109-1132 (_label_state). It cannot call that owner because it needs an explicit surface set, but the copy means a change to the benchmark's gauge convention would silently desync the arm tables from the solve that uses the owner.",
+    "non-blocking: docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html:4 leads with a 60.1 percent closure that is measured on the 137D edge solve in ACTIVE_SET_STEP_REFUSED (residual 4.61e-4, summary.json rows.137D.edge.converged false); the reader reaches that qualification only in the next sentence, so the headline of the record is a non-converged result presented at headline weight."
+  ],
+  "justifications": {
+    "durability": "verify.py:70-88 fails on a dropped arm (proven red at gate-verify-negative.log) and summarize.py:98-104 fails on a drifted base arm, but nothing under tests/ covers the change and the control's 5.0e-4 m tolerance is five orders looser than the 5.8e-9 m actually achieved.",
+    "evidence": "gate-verify.log records PASS 8 rows, 4 arm pairs with EXIT=0 and gate-verify-negative.log records FAIL and EXIT=1 under the arm-drop mutation, and summary.json control reproduces all four banked distances to 5.8e-9 m against a 5.0e-4 m threshold at summarize.py:98.",
+    "fit": "render.py:26-42 draws through nova.media.poloidal.draw_flux_contours, draw_nulls and draw_wall and the shared diiid_xpoint_offset/style.py save(), whose _check_text_artists refuses clipped or colliding labels, but render.py:307-310 suppresses the whole right column's y tick labels while each panel autoscales independently.",
+    "goal_fidelity": "docs/figures/../diiid-xpoint-profile-extent.html:4-6 gives the per-row answer and states that no product change follows, but its first sentence leads with 60.1 percent from the non-converged 137D edge solve (summary.json rows.137D.edge.converged false) and names the convergence only two sentences later.",
+    "reuse": "arms.py:41-81 wraps the benchmark's own benchmarks/diiid_forward_gs_match.py:1099 _label_state and the extraction owner nova/equilibrium/map_extraction.py:extract_flux_functions rather than forking either, but tables.py:73-95 re-derives that same axis/boundary normalisation block inline.",
+    "scope_discipline": "git diff --name-only 3d98ff61 98614203 contains zero paths outside scripts/prototypes/diiid_xpoint_profile_extent/, the fragment and docs/figures/diiid-xpoint-profile-extent/, and the prescription change is proposed at diiid-xpoint-profile-extent.html:127-131 rather than made."
+  },
+  "notes": "Read: the source brief, its manifest, the eleven-commit diff, the three gate logs, summary.json, profile-difference.json, arm-tables.json, the eight row receipts and source-inputs.json, the committed fragment, render.py/tables.py/arms.py/measure.py/batch.py/verify.py/summarize.py, the shared style module's checked save(), and the three PNG previews. Not re-derived: the eight GPU solves and the banked cohort. No file in the reviewed worktree was modified.",
+  "project": "nova",
+  "review_run_id": "r-20261113T180409038945-review-of-diiid-xpoint-profile-extent-986142032fcc",
+  "reviewed_base_sha": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+  "reviewed_head_sha": "986142032fccfd796ca0304e1d2280124014c1c2",
+  "reviewed_run_id": "r-20261113T154327963022-diiid-xpoint-profile-extent",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T19:11:09.794086+00:00",
+  "total": 103,
+  "verdicts": {
+    "call_sites": "VERDICT call_sites: no production call site exists; git grep for diiid_xpoint_profile_extent across scripts/, nova/, tests/ and pyproject.toml returns no importer outside the package itself, and the one runtime surface the change rebinds is benchmarks/diiid_forward_gs_match.py:_label_state, monkeypatched by arms.py:79 inside the prototype's own solve subprocess.",
+    "diff": "VERDICT diff: read commit by commit against 3d98ff615c7beeea56357e68ff87c7596b57dc27; eleven commits add nine prototype scripts, one evidence fragment and three SVG figures with two zoom-window receipts, 16790 insertions and no edit under nova/ or tests/, so nothing the repository ships changes.",
+    "done_when": "VERDICT done_when: the done-when asks for per-row numbers plus paired 137D/146L zooms and edge profiles with every PNG inspected; summarize.py:63-120 computes the per-row quantities and summary.json:1 records them, render.py:118-168 draws both zooms and render.py:271-355 the edge profiles, and three PNG previews under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T154327963022-diiid-xpoint-profile-extent/figures/previews/ exist and were inspected by this review.",
+    "goal": "VERDICT goal: the node's goal is a per-row measurement of how much of the lower-X offset the prescribed profile cap supplies; docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html reports residual, converged, termination, extrema, lower-X distance and share closed for all eight arm rows, and states the prescription candidate with its preconditions without applying it.",
+    "manifest": "VERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T154327963022-diiid-xpoint-profile-extent/manifest.md; it names the eleven commits, the two gate commands and their logs, the eight-solve cohort, the base-arm reproduction control and the three non-convergent edge rows, but its changed_paths omits scripts/prototypes/diiid_xpoint_profile_extent/verify.py and its retry_failures undercounts the folders moved aside.",
+    "write_paths": "VERDICT write_paths: the fenced scope is scripts/prototypes/diiid_xpoint_profile_extent/, the fragment and docs/figures/diiid-xpoint-profile-extent/; git diff --name-only 3d98ff61 98614203 returns exactly 15 paths and 0 of them fall outside those three."
+  },
+  "verified_ancestry": "git cat-file both revisions; both are commits; the reviewed head is NOT an ancestor of this reviewer's base 2ee95cfae, so the range was read from the objects rather than from a merged tree"
+}

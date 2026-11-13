@@ -1,0 +1,89 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "canvas_px": [
+    1399,
+    720
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-13T18:11:03Z",
+  "drawing_script": "scripts/prototypes/diiid_xpoint_profile_extent/render.py",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-diiid-xpoint-profile-extent-986142032fcc",
+      "recorded_at": "2026-11-13T18:31:36.942466+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_xpoint_profile_extent/render.py",
+      "id": "fd726942013",
+      "line": 309,
+      "severity": "blocking",
+      "summary": "Every FF' panel in the rendered edge-profiles figure is drawn without a single y tick label, so no FF' value can be read off the figure. The panels are built by plt.subplots(3, 2, sharex=True) at render.py:274 - x only - and line 309 then runs ax.tick_params(labelleft=False) for column 1 unconditionally, so each of the three FF' panels keeps its own independent y scale (MaxNLocator(4) at line 308 picks a different one per row) and none of those scales is printed. Measured on the delivered PNG: each FF' left spine carries four tick marks and exactly 0 dark pixels in the 50 px band to their left, against 202-242 dark pixels beside each p' tick, and the FF' tick spacing is 38.0 px where the p' spacing is 31.7 px on the same row - so the FF' scale is not the p' scale and cannot be inferred from the labels that are shown. Half of the figure's data (the FF' arm comparison, which is one of the two profiles the section is about) is unreadable in magnitude for all three frames."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html",
+      "id": "f39bd2a45a4",
+      "line": 26,
+      "severity": "non-blocking",
+      "summary": "The edge-profiles caption tells the reader that 'the p' panels share one scale while the FF' panels do not', but the rendered p' panels do not share a scale either: their tick spacing and step differ row by row (32.0 px per 0.008 on 137D, 31.3 px per 0.010 on 146L, 42.5 px per 0.015 on 179L), and the lowest tick sits 18.5, 20.5 and 28.5 px above its panel's bottom spine respectively, so the three panels have three different y limits. The panels are individually labelled with their values, so each is readable; the defect is that the caption invites a direct cross-frame comparison of p' magnitude that the scales do not support."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_profile_extent/render.py",
+      "id": "f3ea18f3765",
+      "line": 157,
+      "severity": "non-blocking",
+      "summary": "The magnetic-axis markers are drawn in all four panels of both frame figures through draw_nulls(magnetic_axis=...) with style axis_marker '^' for the solved arm and 'v' for EFIT (render.py:157), but the legend built at render.py:208-241 keys only 'solved', 'EFIT', 'wall', 'solved null' and 'EFIT null'. A reader therefore meets a filled blue triangle and a hollow black triangle in every panel with nothing in the figure saying they are the two arms' magnetic axes, and in the 146L EFIT-edge panel the hollow triangle sits on a contour far from the plasma centre where it reads as a stray mark rather than as the displaced axis the fragment describes."
+    },
+    {
+      "file": "docs/figures/diiid-xpoint-profile-extent/frame-137-diverted-lower-xpoint.svg",
+      "id": "f3c7bd8c22d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "An isolated blue contour fragment is drawn in the lower-left corner of the base-arm zoom panel and belongs to neither separatrix: measured on the rendered PNG it is a separate 8x2 px connected component at x 364-371, y 526-527, while the separatrix it should belong to is the component spanning x 364-671, y 220-527. The same shape appears as a disconnected arc at the lower left of the 146L base zoom. It is a clipped flux level with no visible relation to the topology the panel exists to show, so it reads as debris in a panel where every other stroke is meaningful."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261113T180932015460-review-of-diiid-xpoint-profile-extent-986142032fcc-figure",
+  "reviewed_base_sha": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+  "reviewed_head_sha": "986142032fccfd796ca0304e1d2280124014c1c2",
+  "reviewed_images": {
+    "image-0.png": "docs/figures/diiid-xpoint-profile-extent/edge-profiles.svg",
+    "image-1.png": "docs/figures/diiid-xpoint-profile-extent/frame-137-diverted-lower-xpoint.svg",
+    "image-2.png": "docs/figures/diiid-xpoint-profile-extent/frame-146-limited-lower-xpoint.svg"
+  },
+  "reviewed_run_id": "r-20261113T154327963022-diiid-xpoint-profile-extent",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "edge-profiles.svg": [
+      "RUBRIC legibility: defect - the three p' panels are readable at a glance (four tick labels each, 0.000/-0.008/-0.016/-0.024 on 137D, 0.00/-0.01/-0.02/-0.03 on 146L, 0.000/-0.015/-0.030 on 179L), but no FF' panel carries a single y tick label: measured on the rendered PNG, each FF' left spine shows four tick marks and exactly 0 dark pixels in the 50 px label band beside them, against 202-242 dark pixels beside each p' tick. The two columns are not sharey (tick spacing 31.7 px against 38.0 px on 146L), so the FF' values cannot be inferred from the p' labels; the reader sees the shape of FF' and no value.",
+      "RUBRIC data_ink: passes - the two arms are 3.0 pt strokes and the extraction knots are 7 px open circles; nothing else carries weight.",
+      "RUBRIC decoration: passes - white ground, no gridline, no fill, no gradient anywhere on the canvas.",
+      "RUBRIC contrast: passes - text renders at about 11.3:1 against white (mean text pixel 58,58,58); the solved arm is 4.6:1 and the base arm is a mid grey that separates from it by colour, dash and zorder.",
+      "RUBRIC table_form: passes - p' and FF' against normalised flux are curves; nothing here is naturally a table.",
+      "RUBRIC label_collision: passes - zero non-white pixels in the outer 1 px frame of the canvas, so no artist is clipped; the row labels (137D/146L/179L), the tick numerals, the two panel titles and the three-entry legend occupy disjoint space."
+    ],
+    "frame-137-diverted-lower-xpoint.svg": [
+      "RUBRIC legibility: passes - both pairs read at a glance: the whole-vessel panel shows the two arms' separatrix stacks against the wall, and the 10 cm zoom resolves the two X-point crossings, the solved null (blue x) sitting up and to the left of EFIT's hollow square, which is the vertical offset the fragment reports as 2.36 cm on the base arm.",
+      "RUBRIC data_ink: passes - the solved arm is solid blue, the EFIT arm dashed dark grey, and the wall a thin light grey; the zero level is the only heavier line and it is the one the reader is asked to compare.",
+      "RUBRIC decoration: passes - axes off, no gridline, no fill, no shading band; the reference geometry is an unfilled outline.",
+      "RUBRIC contrast: passes - text is about 12.8:1 on white (mean text pixel 48,50,55); the solved blue is 4.6:1 and the EFIT dashed is near-black.",
+      "RUBRIC table_form: passes - two spatial panels per arm, not a picture of a table.",
+      "RUBRIC label_collision: passes with a defect - no clipped text (zero ink in the outer 1 px frame) and the residual/converged notes sit clear below their panels, but at the plasma centre the hollow EFIT-axis triangle is drawn underneath the filled solved-axis triangle and is largely hidden by it."
+    ],
+    "frame-146-limited-lower-xpoint.svg": [
+      "RUBRIC legibility: passes with a note - the base pair reads cleanly. In the edge pair the zoom panel carries no solved null because that state's null lies 42.9 cm above the window, exactly as the fragment's caption states; the whole-vessel edge panel shows the non-converged field sweeping past the wall with contours that cross one another, which is the state the residual 0.0233 / converged 0 note and the 50-cell support describe, not a drawing fault.",
+      "RUBRIC data_ink: passes - the arms carry the weight; the crossing blue contours of the non-converged edge state are that state's own field.",
+      "RUBRIC decoration: passes - axes off, no gridline, no fill, no shading.",
+      "RUBRIC contrast: passes - text about 12.7:1 on white (mean text pixel 50,51,52); solved blue 4.6:1 against the EFIT near-black dashes.",
+      "RUBRIC table_form: passes - spatial panels, not a table.",
+      "RUBRIC label_collision: passes - no clipped text and no overlap between the panel notes and the drawn geometry; the axis triangles sit on contours but collide with nothing written."
+    ]
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T18:20:32.163888+00:00",
+  "total": null
+}

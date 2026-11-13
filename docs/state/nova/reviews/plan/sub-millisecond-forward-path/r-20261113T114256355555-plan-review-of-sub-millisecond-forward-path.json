@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T11:57:37.391Z",
+  "dispatched_at": "2026-11-13T11:47:22Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:24",
+      "id": "wiring-1",
+      "reason": "without the s4 wait and the s6 depends-on entry, node (c) is dispatchable onto a fast route that has not met \u00a74, and a worker will either build on an unmet base or discover the gap after dispatching.",
+      "text": "\u00a76 appears in neither `plan-section-depends-on` nor any other relationship as a waiting section, yet node (c) runs \"the fast route\", which is \u00a74's deliverable and is still `implementable`; \u00a76 itself quotes that route at 5.78 ms per slice at width 64 (:124), against \u00a74's own 1 ms per slice gate (:110), so the section it builds on has not passed its measure",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:124",
+      "id": "reasoning-1",
+      "reason": "as written the comparison has no governing reference or tolerance, so a worker either fails every slice against a borrowed oracle budget or invents its own DINA tolerance and records it as the plan's.",
+      "text": "the done-when holds every converged slice \"inside the locked precision budget against DINA\", but decision `precision-budget` states the budget (axis and X-point within 5e-4 of minor radius, boundary flux 1e-4 of span, solved residual \u22641e-10) as a measure against the analytic oracle, and decision `fast-route-equation` explicitly drops same-state parity with another discretisation and judges each route against the oracle; DINA's stored equilibrium is a second code, not an oracle, and \"solved residual at most 1e-10 against DINA\" measures nothing",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:124",
+      "id": "done_when-1",
+      "reason": "a done-when whose cited defect passes it cannot certify the scenario, and a control aimed only at the compile counter means the accuracy clauses can report a comparison that never had the chance to fail.",
+      "text": "clause (c) requires unconverged slices only to be \"counted\", so a rerun that converges on none of the 20 flattop slices \u2014 exactly the failure \u00a76 cites as its motivation \u2014 satisfies the clause provided the count is reported, and the section's single negative control (\"capture one slice's coil currents as a closure constant \u2026 must then recompile\") exercises only clause (b)'s compilation counter, leaving (a)'s accuracy and (c)'s DINA comparison with no control",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:124",
+      "id": "evidence_paths-1",
+      "reason": "the section's headline evidence (zero new compilations on a current/profile change, and the memory per bucket) is unreproducible if it lands only in a routine directory that is removed when the job ends.",
+      "text": "\u00a76 requires a compilation-log count, per-slice receipts, bank memory per shape bucket and the largest fitting batch width as deliverables, but names no durable path for any of them, where \u00a75 (:120) states GPFS paths after the same gap was found there; a worker following \u00a76 can leave the compilation log and the memory record on node `/tmp`",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "",
+  "plan_fingerprint": "a8abb9ea3804e02fda882502c5e289249fbf18a71b92ebb75fa249b54a91c34a",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 310,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T114256355555-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "c3587c69d222b8824f1a01b6b41ab05e67627c23",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `support_read.SupportOperands` resolves (`nova/equilibrium/support_read.py:45`), the cited pulse `/work/imas/shared/imasdb/ITER/3/105027/1` exists and carries `pf_active.h5` and `wall.h5`, the run `r-20261113T022334301162-dina3420-scenario` exists under the crew runs directory, and \u00a75's newly declared-landed levers have their fragments on disk (`booking-scalar-tile.html`, `read-live-candidates.html`, `read-diverted-wall-skip.html`).",
+    "done_when": "a finding \u2014 \u00a76 clause (c) (:124) passes with zero converged slices (unconverged slices are only \"counted\", with no ceiling), and the section's single negative control covers only the traced-input clause (b).",
+    "evidence_paths": "a finding \u2014 \u00a76 names no durable path for its compilation log, per-slice receipts or the bank's memory record; the only durable artefact it names is a \"committed\" GIF.",
+    "naming": "pass \u2014 \u00a76's names are fragment and concept identifiers (`bank-carried-decision`, `precision-budget`), not plan labels or ticket numbers, and no changelog prose was introduced.",
+    "reasoning": "a finding \u2014 \u00a76 holds the DINA scenario \"inside the locked precision budget \u2026 against DINA\" (:124), where decision `precision-budget` defines that budget against the analytic oracle and decision `fast-route-equation` drops parity with any other discretisation.",
+    "single_goal": "pass \u2014 \u00a76 declares three nodes (a), (b), (c) each holding one deliverable, and \u00a75 holds one goal, the per-lever H200 measurement.",
+    "wiring": "a finding \u2014 `plan-section-depends-on` (:24) carries no `s6` entry at all, and \u00a76's `data-links` (:123) name only `#s1` and `#s5`, while node (c) runs the fast route that \u00a74 delivers and quotes its measured state (\u00a76 :124) ahead of \u00a74's own gate."
+  },
+  "section_digests": {
+    "_document": "7c04d976a904c7818b8132edfa63c4c9920d51bb5de540921c8404f16f58d9a3",
+    "s0": "02c484da982db49df058949810d449b2e95a1a134ec03272e31dda4df5bed6d2",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "5aa72ecf3d63060b466bd064d76dc02fa5439343113fd1657038c73094f830b2",
+    "s4": "91bd28dc1cffb091dd5b8e3154b8052ae494fc161f98b81c4aa3d7fc4b7d4fca",
+    "s5": "93a5e678cdf44d386b06e74db9abd0f022782fcfa12a51ed6c8332d5636661cd",
+    "s6": "92f55bea149dc1eb2490fd6b7566727cc9b0b4c241322db7db773d9ca6635bc5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T13:17:13.329815+00:00",
+  "total": null
+}

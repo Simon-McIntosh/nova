@@ -1,0 +1,86 @@
+<section data-reckon="fragment" id="bank-traced-inputs-landing"
+ data-plan="sub-millisecond-forward-path" data-node="bank-traced-inputs">
+<h2>Traced coil currents, flux-function tables and centroid targets</h2>
+<p>The bank retains the fixed external field in <code>exterior</code> and each
+coil's unit-current response in <code>coil_exterior</code>, with shape
+(nodes, coils, six jet entries). Both are padded to the node bucket. A traced
+<code>coil_count</code> masks unused columns. The content store persists the
+responses and count alongside the existing bank arrays.</p>
+<p><code>driven_operands</code> contracts each lane's current vector into one
+effective exterior before entering the existing solver. The nodal contraction,
+stationary-point row window, Bell read, residual and Jacobian all use that same
+exterior. The row-window lookup scatters nodal jets into occupied cache slots;
+unpopulated slots cannot overwrite a live node. Calls without currents or a
+pin retain the existing batched solver path.</p>
+<table id="bank-traced-inputs-interface"><thead><tr><th>Input</th><th>Layout</th>
+<th>Bank interface</th></tr></thead><tbody>
+<tr><td>Coil currents</td><td>(lanes, coils), traced</td>
+<td><code>solve_batch(..., coil_currents=currents)</code></td></tr>
+<tr><td>Pressure and diamagnetic gradients</td><td>two arrays of (lanes, 33), traced</td>
+<td><code>profile=lambda lane: current.TabulatedProfile(p_prime[lane], ff_prime[lane])</code></td></tr>
+<tr><td>Centroid target</td><td>scalar or one height per lane, traced</td>
+<td><code>vertical_pin=VerticalPositionPin(target_height, source_scale=1e-3)</code></td></tr>
+</tbody></table>
+<p>The 33 knots span normalized flux 0 to 1 uniformly. Cubic Hermite interpolation
+uses centred interior slopes and one-sided endpoint slopes; the endpoint value
+is held outside the knot interval. Interior-knot first derivatives are continuous.
+A difference-form polynomial reproduces a constant table exactly. The profile
+uses the existing SI toroidal-current-density convention. Its analytic
+normalized-flux derivative is selected by both booking tangent entry points and
+the bank Jacobian, including per-lane profile callbacks. Existing constant-gradient
+certificate profiles remain accepted.</p>
+<p>The pin follows <code>VerticalPositionPin</code>: its source is the existing
+uniform radial-field jet, or the declared coil direction. Its dimensionless
+amplitude is converted by <code>source_scale</code>. Current-centroid height is
+<code>sum(z_cell * I_cell + local_vertical_moment) / sum(I_cell)</code>, so cell-local
+moments are translated before summation. The height row is scaled by
+<code>row_scale</code>. An outer scalar Newton correction eliminates this row
+through the existing moment Jacobian and the analytic external-field booking
+tangent, including moving saddle geometry. Every corrected field is solved and
+read afresh before acceptance, with at most eight outer corrections. The receipt
+returns <code>pin_amplitude</code> and <code>pin_error</code>; an unsatisfied pin
+cannot report convergence. A changed pin field invalidates the carried factor.</p>
+<h3 id="bank-traced-inputs-reproduction">Reproductions and controls</h3>
+<p>At dispatch base <code>5f8e4a269cafc9a00c7320fb6a72d8cbfc95a249</code>, the interface
+probe records <code>REPRODUCTION TypeError got an unexpected keyword argument
+'coil_currents'</code>. The first focused implementation gate exposed a zero-budget
+driver defect: <code>IndexError: index is out of bounds for axis 1 with size 0</code>
+in <code>test_pin_holds_independent_lane_centroids</code>. A capped solve now retains
+its empty update-history array without indexing it; a separate regression verifies
+zero updates, unchanged moments and non-convergence.</p>
+<p>The closure control captures a slice's currents in a newly jitted step closure.
+Changing currents produces a compilation-log entry beginning
+<code>Compiling jit(&lt;lambda&gt;)</code> and fails
+<code>test_slice_inputs_cause_zero_new_compilations</code>: the first focused
+control records <code>assert 1 == 0</code>, <code>1 failed, 5 deselected</code>,
+and <code>EXIT=1</code>. The ordinary focused arm passed that compilation check.
+The logger also has to observe the cold compilation before its zero-change count
+is accepted.</p>
+<h3 id="bank-traced-inputs-measurement">Paired CPU evidence</h3>
+<p>Rigel job <code>1314536</code> uses seven CPUs and 96 GiB and runs each file in a
+fresh interpreter from git-archive trees. Base is the dispatch revision above;
+implementation head is <code>b8caeae4a9820e80f822b6d51fc7a59e9a04ba56</code>.
+Every file log records its revision, imported module, resolved working directory,
+literal command and terminal exit status. The new test file is absent from the
+base tree and is run at the head only.</p>
+<table id="bank-traced-inputs-paired-tests"><thead><tr><th>File</th><th>Base passed</th>
+<th>Head passed</th><th>Added failures</th></tr></thead><tbody>
+<tr><td>test_support_read</td><td>13; 2 skipped</td><td>13; 2 skipped</td><td>0</td></tr>
+<tr><td>test_bank_drive_continuation</td><td>10</td><td>10</td><td>0</td></tr>
+<tr><td>test_bank_lane_drive</td><td>11</td><td>11</td><td>0</td></tr>
+<tr><td>test_bank_traced_inputs</td><td>absent</td><td>pending pin check</td><td>pending</td></tr>
+</tbody></table>
+<p id="bank-traced-inputs-pin-measure">The new file checks the 550-cell certificate's
+nodal jets and booking moments at 1e-12 relative tolerance, constant-table source
+parity, coil padding/storage/count masking, interpolation derivatives, compilation
+reuse, coil propagation into the read/residual/Jacobian, zero-update refusal and
+independent centroid targets. The centroid test uses the actual read and booking on
+a 50-cell limited bank with analytic exterior and zero plasma-response rows; the
+scenario node measures coupled ITER convergence and H200 throughput.</p>
+<p>Durable logs and receipts are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T165201745905-bank-traced-inputs/</code>:
+<code>focused/</code> retains the first failure and closure control;
+<code>paired-final/</code> retains the paired files and repeated closure control.
+The manifest's final-head arm records the promotion replay after this fragment is
+committed. That replay uses <code>delivery-head/head-test_bank_traced_inputs.log</code>.</p>
+</section>

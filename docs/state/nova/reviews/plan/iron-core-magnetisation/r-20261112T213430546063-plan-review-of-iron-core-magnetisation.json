@@ -33,7 +33,30 @@
   "plan_slug": "iron-core-magnetisation",
   "plan_version": 70,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "6524e2321c3a16cb2a3b0e1729a5bfea52aea0a7",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Clause (1) now states both halves of the sphere acceptance: the derived interior bound must itself stay at or below 1e-5, and the observed interior error must lie within it.",
+      "reason": "",
+      "when": "2026-11-13T00:27:17.330622+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "6524e2321c3a16cb2a3b0e1729a5bfea52aea0a7",
+      "commit_basis": "edit",
+      "note": "Clause (1) now states both halves of the sphere acceptance: the derived interior bound must itself stay at or below 1e-5, and the observed interior error must lie within it.",
+      "reason": "",
+      "when": "2026-11-13T00:27:17.330622+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261112T213430546063-plan-review-of-iron-core-magnetisation.json",
   "review_run_id": "r-20261112T213430546063-plan-review-of-iron-core-magnetisation",
   "reviewed_blob_sha": "b624d4cb7cf330303d48e53968e784aa7fa9c90b",
   "rubric": "content",

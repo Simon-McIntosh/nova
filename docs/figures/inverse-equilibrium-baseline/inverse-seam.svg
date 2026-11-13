@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 340" width="940" height="340" font-family="system-ui, sans-serif" font-size="14" fill="#1c1c1e">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1c1c1e"/>
+    </marker>
+  </defs>
+
+  <!-- three estimators on the left, one scoring path on the right -->
+  <text x="20" y="40">measured magnetics,</text>
+  <text x="20" y="58">coil currents, wall</text>
+
+  <rect x="210" y="22" width="230" height="50" fill="none" stroke="#2f6fb5" stroke-width="1.6"/>
+  <text x="325" y="43" text-anchor="middle" font-weight="600">inverse class</text>
+  <text x="325" y="62" text-anchor="middle" font-size="13">fits profile coefficients</text>
+
+  <rect x="210" y="132" width="230" height="50" fill="none" stroke="#1c1c1e" stroke-width="1"/>
+  <text x="325" y="153" text-anchor="middle" font-weight="600">forward solve</text>
+  <text x="325" y="172" text-anchor="middle" font-size="13">request in, receipt out</text>
+
+  <line x1="160" y1="46" x2="206" y2="46" stroke="#1c1c1e" stroke-width="1" marker-end="url(#a)"/>
+  <line x1="300" y1="74" x2="300" y2="128" stroke="#1c1c1e" stroke-width="1" marker-end="url(#a)"/>
+  <line x1="350" y1="130" x2="350" y2="76" stroke="#1c1c1e" stroke-width="1" marker-end="url(#a)"/>
+  <text x="290" y="106" text-anchor="end" font-size="13">p′, FF′, currents</text>
+  <text x="360" y="106" font-size="13">flux map, sensor rows</text>
+
+  <text x="210" y="204" font-size="13">takes sources only: no measurement enters</text>
+
+  <text x="20" y="278">same inputs</text>
+  <rect x="210" y="254" width="230" height="40" fill="none" stroke="#1c1c1e" stroke-width="1"/>
+  <text x="325" y="279" text-anchor="middle" font-weight="600">imas-efit</text>
+  <line x1="120" y1="274" x2="206" y2="274" stroke="#1c1c1e" stroke-width="1" marker-end="url(#a)"/>
+
+  <rect x="210" y="300" width="230" height="34" fill="none" stroke="#1c1c1e" stroke-width="1" stroke-dasharray="5 4"/>
+  <text x="325" y="322" text-anchor="middle">a new estimator</text>
+
+  <rect x="640" y="132" width="270" height="50" fill="none" stroke="#1c1c1e" stroke-width="1"/>
+  <text x="775" y="153" text-anchor="middle" font-weight="600">one comparator, one case set</text>
+  <text x="775" y="172" text-anchor="middle" font-size="13">bands in physical units, one table</text>
+
+  <path d="M440,46 H600 V140 H636" fill="none" stroke="#2f6fb5" stroke-width="1.6" marker-end="url(#a)"/>
+  <path d="M440,274 H600 V172 H636" fill="none" stroke="#1c1c1e" stroke-width="1" marker-end="url(#a)"/>
+  <path d="M440,317 H620 V178" fill="none" stroke="#1c1c1e" stroke-width="1" stroke-dasharray="5 4"/>
+  <text x="452" y="38" font-size="13" fill="#2f6fb5">reconstructed state, fit receipt</text>
+  <text x="452" y="266" font-size="13">reconstructed state</text>
+</svg>

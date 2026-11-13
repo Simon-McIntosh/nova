@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="inverse-equilibrium-baseline">
+  <meta name="plan-title" content="Inverse Equilibrium Baseline — a least-squares reconstruction over the forward solve, scored beside EFIT">
+  <meta name="plan-summary" content="One inverse class fits flux-function coefficients to magnetics through the forward solve, as a development baseline scored beside imas-efit on shared cases.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="25.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-sprint" content="S25">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="equilibrium,efit,grad-shafranov,convergence">
+  <meta name="plan-after" content="converged-forward-solve">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;inverse-equilibrium-baseline#s1&quot;],&quot;s3&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s4&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s5&quot;:[&quot;inverse-equilibrium-baseline#s3&quot;]}">
+  <title>Inverse Equilibrium Baseline | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s0">Why this plan exists</h2>
+    <p>Nova's north star is unchanged: nova is the exact forward operator, estimation lives across a typed
+    seam in imas-ambix, and a public forward solve that accepts a measurement array is a test failure. The
+    lead ruled on 2026-11-13 that an inverse class is nevertheless worth carrying in nova as a development
+    instrument, for three uses:</p>
+    <ul>
+      <li><strong>Comparison with EFIT.</strong> imas-efit has no forward mode: every solve fits p′ and FF′
+      to the magnetics. A like-for-like comparison therefore needs nova to answer the same question from the
+      same inputs, so that a disagreement can be split into a fit difference and a forward difference.</li>
+      <li><strong>A baseline for new approaches.</strong> A new estimator, in imas-ambix or elsewhere, is
+      judged against the plain least-squares answer on the same cases, never against a description of
+      it.</li>
+      <li><strong>A debugging instrument for the forward solve.</strong> A fit that closes on data while its
+      own forward re-solve does not reproduce it locates a forward defect that profile freedom was
+      hiding.</li>
+    </ul>
+    <p>The tree already holds several partial inverses, none of which runs through the forward solve's
+    request and receipt: three magnetics-driven reconstructions on reduced models (harmonic, moment and
+    profile; the assembled chain failed 10 of 12 EFIT parity metrics with no converged fraction on MAST, see
+    <a href="/nova/spine-efit-parity">spine-efit-parity</a>), the pulse-design inverse that solves coil
+    currents for shape targets, and the shape-steering inverse of the playable solve. This plan delivers one
+    inverse class with one contract, and decides what happens to the three reconstructions.</p>
+    <figure>
+      <img src="/nova/figures/inverse-equilibrium-baseline/inverse-seam.svg" alt="The inverse class wraps the forward solve; imas-efit and any new estimator are scored by one comparator on one case set">
+      <figcaption>The inverse class sits outside the forward solve and calls it with sources only. Its
+      output, imas-efit's output on the same inputs, and any new estimator's output are scored by one
+      comparator on one case set.</figcaption>
+    </figure>
+    <p><strong>The boundary this plan keeps.</strong> The forward solve's public request gains no
+    measurement field. The inverse class is plain weighted least squares with a declared regulariser; priors,
+    noise models, filtering and uncertainty propagation beyond the least-squares covariance remain imas-ambix
+    work. The class reads convention-clean inputs and carries no facility-specific convention module.</p>
+    <p>Its record is <code>docs/evidence/archive/inverse-equilibrium-baseline-landed.html</code>.</p>
+
+    <h3>Section contract</h3>
+    <table>
+      <thead><tr><th>Section</th><th>Hours</th><th>Reasoning</th><th>Risk</th><th>Waits on</th></tr></thead>
+      <tbody>
+        <tr><td>§1 Known-answer recovery</td><td>8</td><td>deep</td><td>moderate</td><td>—</td></tr>
+        <tr><td>§2 The same inputs as EFIT</td><td>7</td><td>deep</td><td>elevated</td><td>§1</td></tr>
+        <tr><td>§3 One scoreboard for every estimator</td><td>4</td><td>standard</td><td>low</td><td>§2</td></tr>
+        <tr><td>§4 Cost on the H200</td><td>3</td><td>standard</td><td>moderate</td><td>§2</td></tr>
+        <tr><td>§5 The reduced-model reconstructions</td><td>3</td><td>standard</td><td>moderate</td><td>§3 and a decision</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s1">§1 — Known-answer recovery</h2>
+    <section data-reckon="section" data-id="s1" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>The inverse class is first judged where the answer is known. A converged forward state with
+    prescribed p′, FF′ and conductor currents supplies synthetic flux-loop, field-probe and plasma-current
+    rows through nova's own synthetic-diagnostic responses; the class is handed those rows, the conductor
+    currents and the wall, and must return the state that produced them. Three states are used: one analytic
+    Solov'ev certificate row, one MAST state and one ITER state, each with a fitted basis that contains the
+    generating profiles.</p>
+    <p><strong>Done when.</strong> (1) With noise-free rows, on all three states, the recovered flux map
+    agrees with the generating state within 1e-6 of the axis-to-boundary flux span in the sup norm over the
+    plasma, the whitened data residual is at or below 1e-8, and a forward solve of the recovered
+    coefficients with no data reproduces the recovered flux map within the forward solve's own tolerance.
+    (2) The fit receipt records, per case, the iteration count, the singular values of the linearised
+    response and every coefficient the data did not determine; the class is callable only outside the
+    forward solve's public request, and the existing test that a forward solve accepts no measurement array
+    still passes. (3) Negative control: the same fit with one flux-loop row's geometry displaced by 5 cm
+    fails clause (1) on the flux map and reports that row as the largest whitened residual.</p>
+
+    <h2 id="s2">§2 — The same inputs as EFIT</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="7.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>The comparison the lead asked for: the inverse class and imas-efit answer the same question from the
+    same inputs. The case set is read from imas-efit's own committed cases through IMAS, at the data
+    dictionary version each was written in: one MAST slice, one TCV slice and one ITER scenario slice, none
+    with an iron core. For each case the class fits the same number of profile coefficients imas-efit fitted,
+    with the conductor currents treated as the locked decision <code>fitted-unknowns</code> directs, and
+    the vertical position held as the locked decision <code>vertical-freedom</code> directs.</p>
+    <p><strong>Done when.</strong> (1) On every case the class converges and its reconstructed state is
+    compared with imas-efit's stored equilibrium in physical units: magnetic axis within 0.20 m, plasma
+    current within 1.5 %, boundary and axis flux within 5 % of the axis-to-boundary flux span, q95 within
+    2.0, and the mean distance between the two closed boundaries reported in millimetres; the whitened
+    residual per sensor is tabulated beside imas-efit's own for the same rows. (2) Each disagreement is
+    split into a fit part and a forward part by one further run per case: imas-efit's fitted p′ and FF′ are
+    solved forward by nova with no data, and the table reports nova-forward against imas-efit and
+    nova-inverse against nova-forward separately. (3) Negative control: the comparison rerun with one
+    poloidal-field coil current scaled by 1.05 leaves at least one band on every case. The evidence record
+    carries, per case, line-contour flux panels of the nova state beside the imas-efit state on shared
+    levels, with both null sets and the wall, under the repository plotting rules.</p>
+
+    <h2 id="s3">§3 — One scoreboard for every estimator</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>The baseline is only useful if a new approach can be put beside it without re-deriving the
+    comparison. The §2 case set and bands become a scoreboard that accepts any reconstructed state supplied
+    as an IMAS equilibrium, whichever code produced it, and scores it with the same comparator and the same
+    reference-free checks (axis inside the wall, axis inside its own boundary, boundary area at least half
+    its bounding box).</p>
+    <p><strong>Done when.</strong> (1) One published table holds a row per case and a column group per
+    estimator for imas-efit and the nova inverse class, generated from stored states by one command whose
+    receipt names each state's digest. (2) A third estimator's states, supplied as IMAS equilibria, add a
+    column group with no change to the scoring code; this is demonstrated with a deliberately perturbed copy
+    of the nova states, which the table must rank worse than the unperturbed column on every case.
+    (3) The reference-free checks run and are reported for every column, including when the reference
+    comparison passes.</p>
+
+    <h2 id="s4">§4 — Cost on the H200</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>A baseline that cannot be run over a pulse is of little use for development. The cost of one
+    reconstruction is measured where the forward solve's cost is decided, on the H200.</p>
+    <p><strong>Done when.</strong> (1) The record reports, for the §2 MAST case at batch widths 1, 16 and
+    64, the warm wall per slice, the forward solves per reconstruction and the cold compile wall, measured
+    in one H200 job with the persistent compilation cache contract printed. (2) The warm wall per slice at
+    width 16 is at or below ten times the warm forward solve at the same shape and width, or the record
+    names the step that exceeds it. (3) imas-efit's recorded per-slice wall for the same case is quoted
+    beside it with its hardware.</p>
+
+    <h2 id="s5">§5 — The reduced-model reconstructions</h2>
+    <section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="deferred" data-links=""></section>
+    <p>Deferred until the decision <code>reduced-reconstructions</code> is locked on the §3 table. If the
+    lead rules that the inverse class supersedes them, the harmonic, moment and profile reconstructions and
+    their parity chain leave the tree and every consumer moves onto the class or is deleted with them; if
+    they stay, each is entered on the §3 scoreboard as its own column so its standing is measured rather
+    than assumed.</p>
+    <p><strong>Done when.</strong> The decision is locked and either (a) no import of the three
+    reconstructions remains under <code>nova</code>, <code>tests</code>, <code>scripts</code> or
+    <code>benchmarks</code> and the fast test lane adds no failure against its base, or (b) the §3 table
+    carries one column group per retained reconstruction.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="inverse-in-nova" data-choice="development-instrument" data-by="lead" data-when="2026-11-13">
+        <p class="r-dec-q">Does nova carry an inverse class at all, given the north star?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="development-instrument">yes, as a development and comparison instrument outside the forward solve</button>
+          <button class="r-opt" data-value="none">no, every inverse lives in imas-ambix</button>
+        </p>
+        <p class="r-dec-rat">Lead 2026-11-13: nova is not an inverse code and the strategy stands, but an inverse class is useful for development, for comparison with EFIT and as a baseline when developing new approaches. The forward solve's public request gains no measurement field.</p>
+      </div>
+      <div class="r-dec" data-key="fitted-unknowns" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">What does the class fit on the EFIT comparison cases?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="profiles-only">profile coefficients only, with measured conductor currents prescribed</button>
+          <button class="r-opt" data-value="profiles-and-currents">profile coefficients and conductor currents, the currents weighted by their measurement uncertainty</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="vertical-freedom" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How is the vertical position of an elongated plasma held during a fit?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="data-determined-centroid">the current centroid is a fitted quantity determined by the magnetics, with its residual reported</button>
+          <button class="r-opt" data-value="rigid-shift-like-efit">a rigid vertical shift freedom, as imas-efit's fit carries</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="reduced-reconstructions" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Once the scoreboard exists, do the harmonic, moment and profile reconstructions stay?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="supersede">the inverse class supersedes them and they leave the tree</button>
+          <button class="r-opt" data-value="keep-scored">they stay, each scored as its own column</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-ieb-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="reckon-create" data-written-at="2026-11-13" data-recommends-skill="/reckon-build inverse-equilibrium-baseline §1" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Recover a known state from its own synthetic magnetics (§1)</h4>
+        <div class="r-fu-body"><p>The plan owes its design review before the first implementation node; §2 waits on the two open fit decisions.</p></div>
+        <pre class="r-fu-prompt">/reckon-build inverse-equilibrium-baseline §1</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

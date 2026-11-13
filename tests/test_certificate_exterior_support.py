@@ -136,23 +136,21 @@ def _arm_measurement(cells: int, arm: str) -> dict[str, object]:
     exterior_closure = np.asarray(exterior + reference_image - np.asarray(analytic))[
         :grid
     ]
-    # The map leaves residual-shadow cells unevaluated, so both booked terms
-    # are zeroed there before the decomposition is required to reconstruct it.
+    # The full physical map includes the extension at residual-shadow nodes.
     shadow = np.asarray(
         jax.jit(lambda state: operator.residual_shadow_mask(state, BRANCH))(analytic)
     )[:grid]
-    booking_delta = np.where(shadow, 0.0, booking_delta)
-    exterior_closure = np.where(shadow, 0.0, exterior_closure)
     result = {
         "cells": cells,
         "realised_cells": len(machine.node),
         "arm": arm,
         "span_wb": span,
         "map_relative_sup": float(np.max(np.abs(delta)) / span),
-        "booking_image_relative_sup": float(np.max(np.abs(booking_delta)) / span),
-        "exterior_closure_relative_sup": float(
-            np.max(np.abs(exterior_closure)) / span
+        "unshadowed_map_relative_sup": float(
+            np.max(np.abs(np.where(shadow, 0.0, delta))) / span
         ),
+        "booking_image_relative_sup": float(np.max(np.abs(booking_delta)) / span),
+        "exterior_closure_relative_sup": float(np.max(np.abs(exterior_closure)) / span),
         "decomposition_relative_sup": float(
             np.max(np.abs(booking_delta + exterior_closure - delta)) / span
         ),
@@ -178,5 +176,7 @@ def test_legacy_arm_reproduces_positive_control() -> None:
     """The named legacy exterior keeps the certified 550-cell map error."""
     measured = _arm_measurement(550, "legacy")
     print("SUPPORT_ARM_ROW " + json.dumps(measured, default=str))
-    delta = abs(measured["map_relative_sup"] / POSITIVE_CONTROL_MAP_SUP - 1.0)
+    delta = abs(
+        measured["unshadowed_map_relative_sup"] / POSITIVE_CONTROL_MAP_SUP - 1.0
+    )
     assert delta <= 1.0e-9, (measured, delta)

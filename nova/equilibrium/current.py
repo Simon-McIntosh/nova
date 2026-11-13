@@ -45,7 +45,7 @@ class Quadrature:
     changing fragment ownership. No polygon-count limit is imposed here.
     ``cut_batch_width`` controls the conic tile of ``book_tangent_channels``
     only and defaults to 32. ``scalar_cut_batch_width`` overrides the conic
-    tile for ``book`` and ``book_tangent``; None keeps their 32-cell default.
+    tile for ``book`` and ``book_tangent``; None keeps their 128-cell default.
     Normal-form buckets use eight cells independently of the conic tile.
     """
 
@@ -69,7 +69,7 @@ class Booking(NamedTuple):
     valid: jax.Array
 
 
-_SCALAR_CUT_BATCH_WIDTH = 32
+_SCALAR_CUT_BATCH_WIDTH = 128
 _NORMAL_CUT_BATCH_WIDTH = 8
 
 

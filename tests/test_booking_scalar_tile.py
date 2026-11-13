@@ -117,9 +117,9 @@ def test_all_booked_moments_match_independent_population(physical, count, width)
     print("POPULATION", count, "RAW", float(actual.raw_current), flush=True)
 
 
-def test_scalar_tile_ships_narrow_and_normal_tile_is_independent():
-    assert current._SCALAR_CUT_BATCH_WIDTH == 32
-    assert current._scalar_cut_width(current.Quadrature()) == 32
+def test_scalar_tile_default_and_normal_tile_are_independent():
+    assert current._SCALAR_CUT_BATCH_WIDTH == 128
+    assert current._scalar_cut_width(current.Quadrature()) == 128
     assert current._NORMAL_CUT_BATCH_WIDTH == 8
 
 

@@ -1,0 +1,566 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "2389b4bf991f26b03fb50cd4b4d6d063c8d2f223",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T015201821537-icm-west-picard-control/brief.md",
+    "sha256": "aab0fe974d10598e196f40d26dd18a19d66b3f41227a1aed2507335ac0d1b3d1"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 8217758,
+      "input_tokens_cumulative": 8217758,
+      "output_tokens": 29525,
+      "output_tokens_cumulative": 29525,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1328,
+    "files": 5,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 292,
+        "name": "main",
+        "path": "scripts/west_picard_control/measure.py"
+      },
+      "window_line": 466
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "_population",
+        "path": "tests/test_booking_scalar_tile.py"
+      },
+      "run_function": {
+        "line": 292,
+        "name": "main",
+        "path": "scripts/west_picard_control/measure.py"
+      },
+      "window_line": 466
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 292,
+        "name": "main",
+        "path": "scripts/west_picard_control/measure.py"
+      },
+      "window_line": 466
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 292,
+        "name": "main",
+        "path": "scripts/west_picard_control/measure.py"
+      },
+      "window_line": 466
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_native_and_torax_rungs_share_the_typed_call_and_receipt",
+        "path": "tests/test_forward_transport.py"
+      },
+      "run_function": {
+        "line": 292,
+        "name": "main",
+        "path": "scripts/west_picard_control/measure.py"
+      },
+      "window_line": 466
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 292,
+        "name": "main",
+        "path": "scripts/west_picard_control/measure.py"
+      },
+      "window_line": 466
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 292,
+        "name": "main",
+        "path": "scripts/west_picard_control/measure.py"
+      },
+      "window_line": 466
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 292,
+        "name": "main",
+        "path": "scripts/west_picard_control/measure.py"
+      },
+      "window_line": 466
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 292,
+        "name": "main",
+        "path": "scripts/west_picard_control/measure.py"
+      },
+      "window_line": 466
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 292,
+        "name": "main",
+        "path": "scripts/west_picard_control/measure.py"
+      },
+      "window_line": 466
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "afb429834174e7d92ac0df71e6a292ffbcef9f87",
+    "f2df2ded044205e147c9a5f57dc6b75e757eb691",
+    "22e66e61a7743f4dfeba452572678d41abb30a09",
+    "44acc5d2587c6b83c30a59e2b994368792971b3d",
+    "fc4a81385b213ec705d83211b383abf093b50343"
+  ],
+  "completed_at": "2026-11-13T07:04:30Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-13T01:56:41Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -m 'not slow' tests/test_magnetisation.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T015201821537-icm-west-picard-control/suite-arm-head-fast.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.3774703557312253,
+    "plan": "iron-core-magnetisation",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-13T03:52:11.610430+00:00",
+    "horizon_seconds": 7200,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-13T01:52:11Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 11,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 6,
+    "headroom": 8,
+    "mean_context": 133333,
+    "observed_at": "2026-11-13T01:52:00Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 11,
+      "aggregate_tokens_per_second": 453.289,
+      "detail": "",
+      "mean_tokens_per_second": 90.658,
+      "observed_at": "2026-11-13T01:52:00Z",
+      "runs": 5.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-13T07:04:30Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T015201821537-icm-west-picard-control/manifest.md",
+  "member": "disposable-r-20261113T015201821537-icm-west-picard-control",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "icm-west-picard-control",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/dev/shm/39486-fleet-1291586/claude-39486/-home-ITER-mcintos-Code-nova/5b10be66-c69b-456f-9a85-3840909f1723/scratchpad/icm-west-picard-control.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T015201821537-icm-west-picard-control/brief.md",
+    "brief_sha256": "aab0fe974d10598e196f40d26dd18a19d66b3f41227a1aed2507335ac0d1b3d1",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 373,
+          "cached_input_tokens": 725629,
+          "input_tokens": 726004,
+          "output_tokens": 141,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 726145,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "5b10be66-c69b-456f-9a85-3840909f1723",
+      "session_id": "5b10be66-c69b-456f-9a85-3840909f1723"
+    },
+    "done_when": "Picard from M=0 at full drive run at least 50 iterations with per-iteration residual, max M and max mu_r change and a stated failure mode; the same Picard converges on a linear mu_r=10 analytic case; inspected residual-history figure beside the Newton history and a verdict fragment",
+    "estimated_hours": null,
+    "goal": "record the frozen-permeability Picard negative control on WEST 62751 at 0.08 m on the Galerkin operator",
+    "id": "icm-west-picard-control",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-13T01:52:11Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 11,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 6,
+      "headroom": 8,
+      "mean_context": 133333,
+      "observed_at": "2026-11-13T01:52:00Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 11,
+        "aggregate_tokens_per_second": 453.289,
+        "detail": "",
+        "mean_tokens_per_second": 90.658,
+        "observed_at": "2026-11-13T01:52:00Z",
+        "runs": 5.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T015201821537-icm-west-picard-control/manifest.md",
+    "negative_control": "none: this node is itself the negative control of section 4; its positive control is the converging linear analytic case",
+    "over_fence_reason": "titan job builds the Galerkin interaction and runs Picard plus a positive control",
+    "peer_scopes": {
+      "bank-h200-slice-profile": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-h200-slice-profile.html",
+        "docs/figures/sub-millisecond-forward-path/bank-h200-slice-profile",
+        "scripts/prototypes/bank_h200_slice_profile"
+      ],
+      "bank-pulse-parallel": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-pulse-parallel.html",
+        "docs/figures/sub-millisecond-forward-path/bank-pulse-parallel",
+        "scripts/prototypes/bank_pulse_parallel"
+      ],
+      "diiid-xpoint-held-nodes": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-held-nodes.html",
+        "docs/figures/diiid-xpoint-held-nodes",
+        "nova/equilibrium/fixed_point.py",
+        "nova/equilibrium/forward_operator.py",
+        "nova/equilibrium/topology.py",
+        "scripts/prototypes/diiid_xpoint_held_nodes",
+        "tests/test_boundary_flux_derivative.py",
+        "tests/test_shadow_follows_image.py",
+        "tests/test_xpoint_attribution_image_read.py"
+      ],
+      "h200-levers": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/h200-levers.html",
+        "docs/figures/sub-millisecond-forward-path/h200-levers",
+        "nova/equilibrium/current.py",
+        "nova/equilibrium/drive_continuation.py",
+        "nova/equilibrium/support_read.py",
+        "nova/equilibrium/topology.py",
+        "scripts/prototypes/h200_levers"
+      ],
+      "icm-west-62751-galerkin-pair": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html",
+        "docs/figures/iron-core-magnetisation/icm-west-62751-galerkin-pair",
+        "scripts/west_iron_galerkin_pair"
+      ]
+    },
+    "plan": "iron-core-magnetisation",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "2h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "scripts/west_picard_control",
+      "docs/evidence/fragments/iron-core-magnetisation/icm-west-picard-control.html",
+      "docs/figures/iron-core-magnetisation/icm-west-picard-control"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1345251.0,
+  "outcome": "",
+  "outside_scope_paths": [
+    "tests/test_magnetisation.py",
+    "suite-arm-base-full.log",
+    "suite-arm-head-full.log"
+  ],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "icm-west-picard-control",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-13T01:55:10.126209+00:00",
+    "score": 0.8125,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:capability",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.537,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 694.033,
+      "context-estimate": 37.303,
+      "records": 414.919,
+      "verdict-inputs": 1116.111
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.3774703557312253,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "fc4a81385b213ec705d83211b383abf093b50343",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "review_waiver": {
+    "reason": "fc4a81385 is an 8-line repair of a script and its fragment that applies findings 0 and 3 of the stored review of 44acc5d25 (folded into this node): receipt paths moved to GPFS and the P100 assertion replaced by a recorded device. The coordinator audited it: no crew run path remains, GPFS copies match their sources by sha256, and the focused gate passed at the new head (40 passed)."
+  },
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261113T015201821537-icm-west-picard-control",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+  "session_harness": "claude",
+  "session_id": "4e0191b7-a360-4d8d-bf8f-2209f7ef8ffe",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 21523764,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 4847.851,
+    "generated_tokens": 113398,
+    "generation_seconds": 404.948,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 57.6,
+    "machine_seconds": 4442.903,
+    "peak_input_tokens": 132503,
+    "tokens_per_second": 280.03,
+    "wall_tokens_per_second": 23.39
+  },
+  "time_budget": "2h",
+  "tool_steps": 101.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 18469,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-13T07:04:40Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-13T05:43:10Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261113T015201821537-icm-west-picard-control",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 18797,
+    "worker_pid": 3731617
+  },
+  "worker_seconds": 7707,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

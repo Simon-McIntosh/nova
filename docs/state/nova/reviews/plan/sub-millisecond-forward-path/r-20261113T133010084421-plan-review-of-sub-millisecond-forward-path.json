@@ -1,0 +1,172 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T13:40:30.425Z",
+  "dispatched_at": "2026-11-13T13:31:25Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:124",
+      "id": "wiring-1",
+      "reason": "whichever way the sentence is wrong, a node dispatcher reading the plan needs the dependency declared as a wait on s2/s3, or the stale declarations corrected; as written node (c) is queued against inputs the plan itself records as not done.",
+      "text": "\u00a76 states \"Node (c) runs on the bank route that \u00a72 and \u00a73 have already landed\", yet `plan-section-declarations` (:23) marks both s2 and s3 `implementable`, main carries no fast-route `SolveRoute` value (\u00a74 is the section that opens the seam), and `plan-section-depends-on` (:24) has no s6 entry \u2014 the plan both overstates what is landed and fails to record the wait its own text declares",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:124",
+      "id": "reasoning-1",
+      "reason": "a worker in (a) cannot tell whether it owes an operator check at 1e-10 relative or a solved-state budget check against the analytic oracle; the two ask for different evidence and only one is written as a done-when clause.",
+      "text": "the paragraph says \"The locked precision budget applies to the bank's map against the analytic kernels in (a), and to the fast route's terminal residual\", but `precision-budget` locks axis and X-point to 5e-4 of minor radius and boundary flux to 1e-4 of span on a solved state, while clause (a) gates only operator reproduction \"within 1e-10 relative\", which is neither of the budget's three quantities",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:124",
+      "id": "reasoning-2",
+      "reason": "the reuse map belongs to the node brief, and the vertical pin is a modelling choice that changes the equation being solved, foreclosing an alternative constraint; the endpoint should be stated as the centroid matching DINA's height within a tolerance, leaving the constraint mechanism to the node.",
+      "text": "the section prescribes the implementation it says the node should deliver: reuse of \"the existing bank builder and content store\", inputs entering \"as traced arguments\", profiles \"on a fixed number of knots per slice\", and \"a weak vertical pin holds the current centroid at DINA's height\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:124",
+      "id": "done_when-1",
+      "reason": "a control such as running the same accounting over the known-stalled general-route state (slice 13's record is residual 2.3e-3, non-converged) would be rejected as a named failure; without it a run reporting \"at least 90% converged\" is an unqualified absence claim.",
+      "text": "node (c) declares no negative control: the section's two declared controls cover (a)'s analytic map and (b)'s recompilation, so nothing demonstrates that the per-slice convergence accounting can report a failure at all",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:124",
+      "id": "reasoning-3",
+      "reason": "the compile-dominated diagnosis and the \"fixture only\" premise are supported by the sampled compiler wall, so the remedy (bank plus traced inputs) is unchanged; only the citation is missing.",
+      "text": "the opening paragraph's measurements carry no record path, and the cited run does not support the per-slice program count: its own receipts show one slice (index 13) at 399.175 s compile and 1333.867 s solve-only with residual 2.3e-3 and non-converged, its 20-slice sample timed out at 120 s per request with final stacks in backend compilation, and neither \"133 programs\" nor the fast route's 39.9 ms / 5.78 ms figures appear in the run or anywhere else in the repository",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "e8ae082495ee632bfb9e16539233cba2e9842f2d",
+  "plan_fingerprint": "e716b625e19698226c64d93a6e63aec53c4c696b15600edd4959429fe431a02b",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 312,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 6 now says node (c) runs on solve_batch and advance_drive as they stand on main, not through a production SolveRoute (which section 4 opens), and that it consumes the landed code of sections 2 and 3 rather than their closing measures, so no section wait is declared.",
+      "reason": "",
+      "when": "2026-11-13T15:43:22.287020+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 6 now states that precision-budget is a solved-state measure against the analytic oracle and is not claimed for DINA slices; it gates operator fidelity within 1e-10 and the terminal fresh residual, and reports DINA differences.",
+      "reason": "",
+      "when": "2026-11-13T15:43:44.162657+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "these are interface constraints, not free implementation choices: traced inputs are what keep a slice-to-slice change from recompiling (the lead ruling that Newton updates take state, operands and factor as runtime variables), reuse of the existing bank builder and content store is section 1 design, and the weak centroid pin is the lead direction for forward solves of elongated states",
+      "when": "2026-11-13T15:44:22.441444+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Added a negative control for node (c): one flattop slice with coil currents scaled by ten must be reported failed with its stage and residual, lowering the converged fraction.",
+      "reason": "",
+      "when": "2026-11-13T15:44:54.146310+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+      "commit_basis": "edit",
+      "finding": "reasoning-3",
+      "note": "The opening paragraph now gives the record paths: the DINA run directory receipts (h200/summary.json, flattop-h200/compiles-*.json, profile-live-*.json), and the bank-h200-slice-profile run and fragment for the 39.9 and 5.78 ms figures; the 133 count is stated as compile events per fresh-process slice.",
+      "reason": "",
+      "when": "2026-11-13T15:45:19.168155+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+      "commit_basis": "edit",
+      "note": "Added a negative control for node (c): one flattop slice with coil currents scaled by ten must be reported failed with its stage and residual, lowering the converged fraction.",
+      "reason": "",
+      "when": "2026-11-13T15:44:54.146310+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+      "commit_basis": "edit",
+      "note": "Section 6 now states that precision-budget is a solved-state measure against the analytic oracle and is not claimed for DINA slices; it gates operator fidelity within 1e-10 and the terminal fresh residual, and reports DINA differences.",
+      "reason": "",
+      "when": "2026-11-13T15:43:44.162657+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "these are interface constraints, not free implementation choices: traced inputs are what keep a slice-to-slice change from recompiling (the lead ruling that Newton updates take state, operands and factor as runtime variables), reuse of the existing bank builder and content store is section 1 design, and the weak centroid pin is the lead direction for forward solves of elongated states",
+      "when": "2026-11-13T15:44:22.441444+00:00"
+    },
+    "reasoning-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+      "commit_basis": "edit",
+      "note": "The opening paragraph now gives the record paths: the DINA run directory receipts (h200/summary.json, flattop-h200/compiles-*.json, profile-live-*.json), and the bank-h200-slice-profile run and fragment for the 39.9 and 5.78 ms figures; the 133 count is stated as compile events per fresh-process slice.",
+      "reason": "",
+      "when": "2026-11-13T15:45:19.168155+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+      "commit_basis": "edit",
+      "note": "Section 6 now says node (c) runs on solve_batch and advance_drive as they stand on main, not through a production SolveRoute (which section 4 opens), and that it consumes the landed code of sections 2 and 3 rather than their closing measures, so no section wait is declared.",
+      "reason": "",
+      "when": "2026-11-13T15:43:22.287020+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-sub-millisecond-forward-path.v312.json",
+  "review_run_id": "r-20261113T133010084421-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "34104368623b049eaf362a936193adbb3fcf2ba1",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited run `r-20261113T022334301162-dina3420-scenario` resolves under `~/.config/reckon/crew/runs/`, `/work/imas/shared/imasdb/ITER/3/105027/1` exists, and decisions `fast-route-equation`, `precision-budget` and `read-bound-per-slice` each resolve in the decisions block.",
+    "done_when": "a finding \u2014 nodes (a) and (b) each declare a negative control and node (c), the section's actual scenario gate, declares none.",
+    "evidence_paths": "pass \u2014 compilation logs, per-slice receipts, the bank memory record and the batch-width probe are placed on GPFS (the node's run directory or `~/.cache/nova-iter-bank/`), and the GIF is committed.",
+    "naming": "pass \u2014 the new text carries no plan labels, stage names or ticket numbers into code; the run id and DD version are artifact/version references, not symbol names.",
+    "reasoning": "a finding \u2014 the section says decision `precision-budget` governs node (a), but clause (a) gates a different quantity from the three the budget locks, so the node's actual gate is ambiguous.",
+    "single_goal": "pass \u2014 the section names three sub-nodes (a, b, c) with one deliverable each and one done-when clause mapping to each; (c) explicitly waits on both inputs.",
+    "wiring": "a finding \u2014 \u00a76 says node (c) runs on \"the bank route that \u00a72 and \u00a73 have already landed\", but both sections are declared `implementable`, and `plan-section-depends-on` (:24) carries no s6 entry, so the wait that sentence describes is not recorded anywhere."
+  },
+  "section_digests": {
+    "_document": "7c04d976a904c7818b8132edfa63c4c9920d51bb5de540921c8404f16f58d9a3",
+    "s0": "02c484da982db49df058949810d449b2e95a1a134ec03272e31dda4df5bed6d2",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "5aa72ecf3d63060b466bd064d76dc02fa5439343113fd1657038c73094f830b2",
+    "s4": "91bd28dc1cffb091dd5b8e3154b8052ae494fc161f98b81c4aa3d7fc4b7d4fca",
+    "s5": "93a5e678cdf44d386b06e74db9abd0f022782fcfa12a51ed6c8332d5636661cd",
+    "s6": "a32f740a8e4351bb9f7255ed77b8933db656e2e6785acfa0b553a11c1ac2add1"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T15:35:10.548372+00:00",
+  "total": null
+}

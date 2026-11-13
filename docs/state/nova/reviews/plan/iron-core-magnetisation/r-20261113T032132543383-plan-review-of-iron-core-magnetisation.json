@@ -17,7 +17,30 @@
   "plan_slug": "iron-core-magnetisation",
   "plan_version": 80,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "d1e3b60281dd118b132f0ba2aa4324f04fe80f0b",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "The receipt sentence now names docs/evidence/fragments/iron-core-magnetisation/icm-west-picard-control.html as the record of the Picard iteration-count comparison and the centroid-operator failure.",
+      "reason": "",
+      "when": "2026-11-13T03:33:24.854401+00:00"
+    }
+  ],
+  "responses": {
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "d1e3b60281dd118b132f0ba2aa4324f04fe80f0b",
+      "commit_basis": "edit",
+      "note": "The receipt sentence now names docs/evidence/fragments/iron-core-magnetisation/icm-west-picard-control.html as the record of the Picard iteration-count comparison and the centroid-operator failure.",
+      "reason": "",
+      "when": "2026-11-13T03:33:24.854401+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261113T032132543383-plan-review-of-iron-core-magnetisation.json",
   "review_run_id": "r-20261113T032132543383-plan-review-of-iron-core-magnetisation",
   "reviewed_blob_sha": "366ff1f38db4193726b71bd04c5234ed9663c1d1",
   "rubric": "content",

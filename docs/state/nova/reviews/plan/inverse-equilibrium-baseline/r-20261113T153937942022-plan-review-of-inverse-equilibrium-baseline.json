@@ -85,6 +85,16 @@
       "note": "The s1 node brief names virtual_flux_loops and virtual_poloidal_probes as the owners of the synthetic rows and Magnetics/SliceMeasurement as the row order, and forbids a second sensor synthesiser. The plan names no module by rule, so the map is carried in the brief.",
       "reason": "",
       "when": "2026-11-13T16:22:40.977152+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "f76409cb49761d8a5fd70ba145551823087f42a6",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "Section s0 gives the reason a new entry point is needed: no existing fit calls the public forward solve. The s1 brief requires every forward evaluation to be a ForwardSolveRequest through ForwardProfile.solve and forbids a wrapper over ReconstructProfile.solve.",
+      "reason": "",
+      "when": "2026-11-13T16:22:57.444915+00:00"
     }
   ],
   "responses": {
@@ -105,6 +115,15 @@
       "note": "Section s0 already states the distinction: the profile, harmonic and moment reconstructions are reduced models that never run through the forward solve request and receipt (verified: profile.py runs its own Picard over Green operators and imports nothing from solve_request). The s1 node brief directs reuse of whitened_solve, Magnetics and SliceMeasurement and forbids wrapping ReconstructProfile; their retirement stays the lead decision reduced-reconstructions.",
       "reason": "",
       "when": "2026-11-13T16:22:27.122422+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "f76409cb49761d8a5fd70ba145551823087f42a6",
+      "commit_basis": "edit",
+      "note": "Section s0 gives the reason a new entry point is needed: no existing fit calls the public forward solve. The s1 brief requires every forward evaluation to be a ForwardSolveRequest through ForwardProfile.solve and forbids a wrapper over ReconstructProfile.solve.",
+      "reason": "",
+      "when": "2026-11-13T16:22:57.444915+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261113T153937942022-plan-review-of-inverse-equilibrium-baseline.json",

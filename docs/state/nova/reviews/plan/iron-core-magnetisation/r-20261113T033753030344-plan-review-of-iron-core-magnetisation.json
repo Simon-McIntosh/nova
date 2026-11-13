@@ -1,0 +1,91 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T03:47:42.563Z",
+  "dispatched_at": "2026-11-13T03:39:47Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:304",
+      "id": "reasoning-1",
+      "reason": "the section's stated reason for the operator it mandates is false on its own evidence, and a node dispatched to \u00a74 would be gated on a single-root property the plan has already measured to fail.",
+      "text": "\u00a74 asserts the Galerkin route makes \"the symmetric spectrum of G/mu0\" lie in [0,1] so the discrete problem \"has a single root\", and done-when (2) at line 341 gates on \"starts from different initial states reach one root\"; the plan's own \u00a74 comments record the opposite of both on the production operator \u2014 area-weighted sym G/mu0 extrema [-0.1247, 1.1237] (comments at lines 722 and 734, runs icm-west-root-branch and icm-magnetisation-smoothness), \"a collocation artefact ... admit spurious roots\", and \"a fold near drive 0.195\" \u2014 so the uniqueness argument that justifies Galerkin averaging over centroid sampling is unsupported at the mesh the section actually uses, and the gate at line 341 cannot be met",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:334",
+      "id": "done_when-1",
+      "reason": "a threshold above the ratio the plan's own cited evidence supports makes \u00a74 uncloseable at 2.5x, and a worker facing 2.45x must either under-report or reinterpret the clause, so the number needs either derivation from the plan's evidence or removal.",
+      "text": "\u00a74 done-when (1) requires the closed-shell errors at mu_r 100 and 1000 to \"fall at least 2.5x from 40 to 20 mm\", but the plan's own \u00a71 table for the same quantity at the same two cell sizes gives 1.2%/0.49% = 2.45x at mu_r 100 and 6.8%/2.8% = 2.43x at mu_r 1000, and the landed solve records orders of 0.74/1.17/0.64 at mu_r 100 (comment at line 677), whose implied ratios of 1.6x to 2.3x per refinement are further below the floor",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:380",
+      "id": "evidence_paths-1",
+      "reason": "without a named durable path a later reader cannot open the record a section's verdict rests on, and each of the four nodes invents its own location, so the plan decides where its own evidence lives only if it says so.",
+      "text": "\u00a75 done-when (3) requires the candidate comparison table to be \"in the plan's evidence record\", a location that names no path, while \u00a74 and \u00a76b each name a concrete fragment under docs/evidence/fragments/iron-core-magnetisation/; \u00a77's Jacobian agreement, \u00a78's phi-resolved midplane |B| and \u00a79's probe residuals name no receipt location at all",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:347",
+      "id": "single_goal-1",
+      "reason": "a section holding a refactor and a numerical solve cannot be reviewed or closed on one verdict, and its promotion gate proves neither half, so the read belongs in its own section with its own done-when.",
+      "text": "\u00a74's done-when (3) requires the iron read to extend nova/imas/machine.py and to move two script readers onto it \"with no third iron reader in the tree\", a machine-description refactor across three callers that shares no code, no gate and no verdict with clauses (1) and (2), the material law, the operator spectrum and the WEST Newton solve; the work in fact landed as a separate node (run icm-iron-read, 2026-11-10) from the solve nodes",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:459",
+      "id": "reasoning-2",
+      "reason": "a formula and a private-helper placement written into the plan are guesses a worker must test against the code, and the reuse map belongs in the node brief composed from this review, so each wrong guess costs a review round rather than saving one.",
+      "text": "\u00a77 prescribes the implementation rather than the endpoint, naming the formula to code (\"dM = -(dF/dM)^-1 dF/dB_ext dB_ext\"), which factor to reuse, and that the block comes from implicit differentiation; \u00a73 does the same at line 238 by requiring the new tile beside the private helpers \"_fill_tile\", \"_fill_moment_tile\" and \"_fill_arc_tile\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iron-core-magnetisation.html:404",
+      "id": "wiring-1",
+      "reason": "the spurious edge to \u00a76 delays a cross-code comparison behind an unlanded forward-solve seam for no stated reason, and the declared graph is what the queue and the roadmap order by, so the wrong edge is a real ordering cost even though it is cheap to correct.",
+      "text": "the section with data-id \"s10\" (\u00a76b, the imas-efit closed-shell control) declares `depends-on: [\"iron-core-magnetisation#s5\", \"iron-core-magnetisation#s6\"]`, yet its own text states \"it lands separately from the \u00a76 seam\" and every clause of its done-when consumes only nova's shell shielding factor (which \u00a75 provides) and the imas-efit run it makes itself",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "20031998c61ee83f7f96a9bd065960dd2b04eb9c",
+  "plan_fingerprint": "7cadc6f7b04f1540b383ba30baac70a7084369e27ad5baf067e16031c8491298",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 82,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T033753030344-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "4601c517461bbc6002092506e84257a0b06563da",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited path resolves (all four figures under docs/figures/, docs/research/compile-cost-evidence.html, both \u00a74 evidence fragments, nova/biot/{sheet,polygonanalytic,completeelliptic,incompleteelliptic,zeta,tiledassembly,magnetisation,toroidalaverage,greens}.py, nova/imas/machine.py, nova/equilibrium/{solve_request,reduced_newton}.py and its AGENTS.md, all four scripts/prototypes paths, the GPFS prototype receipt directory, plan-after kernel-compile-barrier, forward-solve-api#s1 declared done, and every imas-efit path including configuration/machines/WEST/iron.xml, whose body does carry only id 1 at relativePermeability 215), and every named symbol exists at the line the plan implies.",
+    "done_when": "a finding \u2014 \u00a74's clause (1) requires the symmetric spectrum of G/mu0 inside [0,1] on WEST and clause (2) requires different seeds to reach one root, and \u00a75's clause (3) locates its table in an unnamed \"plan's evidence record\".",
+    "evidence_paths": "a finding \u2014 \u00a75 done-when (3) sends its comparison table to \"the plan's evidence record\", which names no path; \u00a77, \u00a78 and \u00a79 likewise name no receipt location at all.",
+    "naming": "pass \u2014 the symbols the plan names (sheet_flux, sheet_field, galerkin_cell_interaction) name mechanisms, no plan-label, stage or ticket identifier reaches a symbol, and the defect paragraph in \u00a71 states mechanisms rather than citing a tracker entry.",
+    "reasoning": "a finding \u2014 \u00a74's justification for the Galerkin operator and its single-root gate are contradicted by the plan's own recorded measurements, and \u00a77 states a formula to implement rather than an endpoint.",
+    "single_goal": "a finding \u2014 \u00a74 carries two independent deliverables, the machine-description iron read and the Galerkin material solve.",
+    "wiring": "a finding \u2014 the \u00a76b section declares `depends-on: iron-core-magnetisation#s6` although its own text says it lands separately from the \u00a76 seam and none of its done-when clauses consumes anything \u00a76 produces."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "bf0049ee8c924773ea67dcbe093fb860584392de2ea9a0789d0fabc79578a462",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "9d9575a3a830059f2eefb6ac953213be0aa858329aaeec3fae422fb48313a0d3",
+    "s5": "18d64dc99773bd89740bde91084ec424e8873aa08afed9991b5bbc40f3395b4a",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "8a8c2cb93f6c3ed1ebbb2171af1a254a72689f0630f9b086c8890ac486595e6e",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T05:34:41.270312+00:00",
+  "total": null
+}

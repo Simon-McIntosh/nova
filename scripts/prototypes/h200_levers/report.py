@@ -35,6 +35,23 @@ def arms(comparison):
     return comparison.get("tiles") or [comparison["off"], comparison["on"]]
 
 
+def profile_step(comparison):
+    """Name physical profile increments only for continuation cases."""
+    if comparison["name"] == "factor-carry":
+        return f"{comparison['step']:g}"
+    if comparison["name"] == "lane-drive":
+        return "1e-5" if comparison["width"] == 1 else "1e-5 / 1e-3"
+    return "—"
+
+
+def population(comparison):
+    """Identify the one-lane limited counterpart of the mixed wall batch."""
+    value = comparison.get("population", "diverted")
+    if value == "mixed" and comparison["width"] == 1:
+        return "limited"
+    return value
+
+
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("run", type=Path)
@@ -65,8 +82,8 @@ def main():
                 identity = [
                     comparison["name"],
                     str(comparison["width"]),
-                    str(comparison.get("step", "")),
-                    comparison.get("population", ""),
+                    profile_step(comparison),
+                    population(comparison),
                     str(arm["arm"]),
                     row["name"],
                 ]
@@ -174,8 +191,8 @@ def main():
                 [
                     name,
                     str(width),
-                    str(comparison.get("step", "")),
-                    comparison.get("population", ""),
+                    profile_step(comparison),
+                    population(comparison),
                     stage,
                     ", ".join(f"{x:.6f}" for x in a),
                     ", ".join(f"{x:.6f}" for x in b),
@@ -250,14 +267,17 @@ wall skip stay enabled. Normal-form tiles remain eight cells.</p>
 Inside that margin the incumbent stays. Scalar rows compare 32 with 128; 64 is
 included in the complete execution table. Width-16 full-read 128 versus 64 is
 inside 3%, but 128 beats the incumbent 32 beyond the margin at both widths and
-has the smallest measured wall. Each process is retained separately.</p>
+has the smallest measured wall. Each process is retained separately.
+The width-16 lane-drive batch alternates 1e-5 and 1e-3 profile steps; its
+width-1 case uses 1e-5. The width-1 counterpart of the mixed wall batch is
+a single limited lane. A dash marks cases with no profile continuation.</p>
 """
     text += render_table(
         "verdicts",
         [
             "Lever",
             "Width",
-            "Drive step",
+            "Profile step",
             "Population",
             "Stage",
             "Off / tile 32 [ms], P1,P2",
@@ -285,7 +305,7 @@ is tabled separately. This headline was measured on revision
 <code>{headline["records"][0]["revision"]}</code>, before changing the scalar
 default; it is the recorded main-arm wall, not a post-change projection.</p>
 """
-    headers = ["Lever", "Width", "Drive step", "Population", "Arm", "Stage"]
+    headers = ["Lever", "Width", "Profile step", "Population", "Arm", "Stage"]
     text += render_table(
         "execute-walls", headers + ["Process 1 [ms]", "Process 2 [ms]", "Spread"], table
     )

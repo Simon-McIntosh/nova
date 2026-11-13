@@ -85,6 +85,13 @@
       "finding": "single_goal-1",
       "reason": "Clause (3), the iron read, has landed (icm-iron-read) and both script readers call StaticMachineDescription.read_iron_core; splitting a landed clause into its own section now changes no work, and the section closes on the remaining solve evidence.",
       "when": "2026-11-13T05:40:24.941270+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "Section 3 has landed, so its helper names describe code that exists; section 7 is not being built in this round, and its formula is the definition of the derivative it gates against finite differences, which the section 7 brief will treat as the endpoint when it is dispatched.",
+      "when": "2026-11-13T05:41:00.945301+00:00"
     }
   ],
   "responses": {
@@ -105,6 +112,12 @@
       "by": "",
       "reason": "The cited spectrum [-0.1247,1.1237], the spurious roots and the 0.195 fold were measured on the centroid-sampled (collocated) operator, which is exactly what this section forbids; the Galerkin operator the section mandates measured [4.9e-5,0.99994] on WEST and A/B starts agree to 2.55e-9 (icm-galerkin-interaction fragment), so the uniqueness argument and clause (2) hold on the operator in production.",
       "when": "2026-11-13T05:38:33.381738+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "Section 3 has landed, so its helper names describe code that exists; section 7 is not being built in this round, and its formula is the definition of the derivative it gates against finite differences, which the section 7 brief will treat as the endpoint when it is dispatched.",
+      "when": "2026-11-13T05:41:00.945301+00:00"
     },
     "single_goal-1": {
       "action": "declined",

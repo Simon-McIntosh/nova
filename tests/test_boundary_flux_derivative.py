@@ -132,29 +132,39 @@ def test_boundary_flux_jvp_matches_the_admitted_boundary_motion(
 
 
 def test_forward_terminal_boundary_flux_matches_boundary_motion_difference():
-    """The terminal derivative includes motion of an admitted wall contact."""
+    """Check the full forward chain inside wall segments 0→1 and 60→0."""
     source = machine.__wrapped__()
     profile, _seed, _vacuum = source
     flux = jnp.asarray(converged.__wrapped__(source).flux)
+    wall = np.asarray(profile.operator._fixed_design_topology.wall.coordinate)
 
-    def boundary_value(field):
+    def boundary_read(field):
         _current, _integrals, _masks, topology, _amplitude = profile._integral_state(
             field
         )
-        return topology.boundary_flux
+        return jnp.r_[topology.boundary, topology.boundary_flux]
 
-    _current, _integrals, _masks, terminal, _amplitude = profile._integral_state(flux)
-    topology = profile.operator._fixed_design_topology
-    boundary_is_xpoint = jnp.array_equal(terminal.boundary, terminal.x_point)
-    difference_value = _selected_boundary_value(
-        topology, flux, terminal, boundary_is_xpoint
-    )
+    def assert_inside_segment(point, segment):
+        start, end = wall[list(segment)]
+        edge = end - start
+        fraction = np.dot(np.asarray(point) - start, edge) / np.dot(edge, edge)
+        assert 0.0 < fraction < 1.0
+        np.testing.assert_allclose(point, start + fraction * edge, rtol=0, atol=1e-12)
+
+    # The terminal contact is at vertex 0, where adjacent segment slopes differ.
+    # Keep each centre and both perturbed contacts inside the same open segment.
+    np.testing.assert_allclose(boundary_read(flux)[:2], wall[0], rtol=0, atol=1e-10)
     values = np.random.default_rng(11).standard_normal(flux.shape)
     direction = jnp.asarray(values / np.max(np.abs(values)), dtype=flux.dtype)
-    _value, tangent = jax.jvp(boundary_value, (flux,), (direction,))
-    central = (
-        difference_value(flux + STEP * direction)
-        - difference_value(flux - STEP * direction)
-    ) / (2.0 * STEP)
-    error = abs(float(tangent - central)) / max(abs(float(tangent)), 1.0)
-    assert error < BOUNDARY_TOLERANCE
+    for offset, segment in ((-1e-4, (0, 1)), (1e-4, (60, 0))):
+        centre = flux + offset * direction
+        value, tangent = jax.jvp(boundary_read, (centre,), (direction,))
+        assert_inside_segment(value[:2], segment)
+        for step in (1e-6, 5e-7):
+            plus = boundary_read(centre + step * direction)
+            minus = boundary_read(centre - step * direction)
+            assert_inside_segment(plus[:2], segment)
+            assert_inside_segment(minus[:2], segment)
+            central = (plus[2] - minus[2]) / (2.0 * step)
+            error = abs(float(tangent[2] - central)) / max(abs(float(tangent[2])), 1.0)
+            assert error < BOUNDARY_TOLERANCE

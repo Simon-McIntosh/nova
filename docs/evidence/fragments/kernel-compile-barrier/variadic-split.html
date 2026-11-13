@@ -1,0 +1,18 @@
+<article id="variadic-split">
+  <h2>Shared production moment programs</h2>
+  <p><strong>Acceptance is pending.</strong> The candidate shares the shifted kernel evaluations and directional derivatives in fixed-size maps, and returns the production value and gradient alongside its Hessian. The lowered production program is 55.2% smaller. No candidate H200 compile, instruction-count or numerical-identity result has completed yet.</p>
+  <p>The source bindings are <code>_packed_moments_height_tangent</code> in <code>nova/biot/polygonanalytic.py</code> and <code>_source_jets</code> in <code>nova/equilibrium/fixed_points.py</code>. The two Richardson steps, corner threshold, kernel primal and acceptance tolerances are retained. The prototype point-function copy is untouched.</p>
+  <table id="variadic-split-lowering">
+    <thead><tr><th>Production program at 132 cells</th><th>StableHLO bytes</th></tr></thead>
+    <tbody>
+      <tr><td>Base, <code>00ec05512bb40668a9c5e618a1287428cbff0f8d</code></td><td>13,596,543</td></tr>
+      <tr><td>Shared height samples</td><td>10,426,965</td></tr>
+      <tr><td>Shared height samples and derivative directions</td><td>7,865,754</td></tr>
+      <tr><td>Also reuse the production value and gradient</td><td>6,090,184</td></tr>
+    </tbody>
+  </table>
+  <p>The lowering instrument is <code>scripts/prototypes/compile_pass_profile/lowered_size.py</code>. The matching receipts are <code>lowered-base.json</code>, <code>lowered-shift-loop.json</code>, <code>lowered-both-loops.json</code> and <code>lowered-shared-primal.json</code> under <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/variadic-split/</code>. Lowered size selects a candidate; it does not establish the cold-compile gate.</p>
+  <p id="variadic-split-refusal">The receipt checks were exercised on the published unreduced H200 receipt used as both arms. Both checks failed: 402,141 post-splitter instructions cannot satisfy a halving, and 351.439 s cannot satisfy the 130.765 s wall limit. This validates that the checks refuse an unchanged program; it is not the declared source-mutation control, which is queued separately. The log is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T165600620184-variadic-split/guard-control.log</code>.</p>
+  <p id="variadic-split-gates">The armed base fixed-point suite passed 19 tests. The broader base-then-head importer suite is running on sirius. Paired cold H200 profiling, the 10,000-point identities, the finite-difference Hessian cases and the restored-base mutation control are pending. Their per-pass table, instruction counts, identity maxima, suite delta and pass-time figure remain owed.</p>
+  <p>An extra CPU Hessian probe was stopped before completing its first case at approximately 24 GB RSS, near the worker allocation's ceiling. That interrupted probe supplies no passing Hessian evidence; the separately provisioned gates remain authoritative.</p>
+</article>

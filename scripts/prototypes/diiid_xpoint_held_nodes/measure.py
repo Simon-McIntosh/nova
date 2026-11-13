@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 import sys
 
+from provenance import load_trace
+
 ROOT = Path(__file__).resolve().parents[3]
 spec = importlib.util.spec_from_file_location(
     "core_measure", ROOT / "scripts/prototypes/diiid_core_hold/measure.py"
@@ -14,6 +16,7 @@ spec = importlib.util.spec_from_file_location(
 core = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = core
 spec.loader.exec_module(core)
+core.load_trace = load_trace
 install_core_analysis = core.install_analysis
 
 

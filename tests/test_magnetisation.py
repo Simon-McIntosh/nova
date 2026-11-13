@@ -240,7 +240,7 @@ def test_closed_shell_refines_toward_exact_shielding(mu, capsys):
 # The graded shell arm: spacing at the shell faces, the coarse limit away from
 # them, and the cells the 0.1 m wall keeps across its thickness.
 GRADED_FINE = 0.002
-GRADED_COARSE = 0.004
+GRADED_COARSE = 0.0048
 GRADED_CELLS_ACROSS = 20.0
 
 

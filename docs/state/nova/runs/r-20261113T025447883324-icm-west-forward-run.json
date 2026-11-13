@@ -393,6 +393,51 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "6efeaf39e8ff6fb41e9250dd2288b1c525b29a07",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_withheld": "run retained for recovery",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "unintegrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "6efeaf39e8ff6fb41e9250dd2288b1c525b29a07",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/c042a637-16e6-44bd-9cd2-b340a6f891dc/icm-west-forward-run",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-11-13T08:36:51Z",
+            "session_id": "01a1d2da-0d63-71a1-8d36-f794bb2af1b1",
+            "session_source": "pointer",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/c042a637-16e6-44bd-9cd2-b340a6f891dc/icm-west-forward-run"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a1d2da-0d63-71a1-8d36-f794bb2af1b1"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": {
     "reason": "any next attempt needs iron-core section 7 product work on the forward route and will be a fresh node; this session holds no state that node needs, and its findings are committed in the worktree at 6efeaf39e",
     "session_id": "01a1d2da-0d63-71a1-8d36-f794bb2af1b1",

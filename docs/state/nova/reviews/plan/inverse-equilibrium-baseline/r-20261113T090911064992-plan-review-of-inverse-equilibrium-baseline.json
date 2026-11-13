@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T09:14:23.941Z",
+  "dispatched_at": "2026-11-13T09:10:20Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261113T090911064992-plan-review-of-inverse-equilibrium-baseline/plan.html:145",
+      "id": "done_when-1",
+      "reason": "clause (2) admits a passing run anywhere at or below ten times the forward solve, so for most passing bases the control cannot exceed the ceiling and the section's only falsifier never fires, which is the same constructed-outcome defect \u00a72's clause (3) was repaired for.",
+      "text": "the negative control is \"the same measurement with the reconstruction's convergence exit disabled and its iteration cap doubled\", and that scaling only reaches the ceiling when the unmodified run already sits near it \u2014 with convergence exit disabled the control's wall is roughly (doubled cap / iterations used) times the base wall, so a base run measured at, say, 3\u00d7 the forward solve rises to about 6\u00d7 and stays under the 10\u00d7 ceiling",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261113T090911064992-plan-review-of-inverse-equilibrium-baseline/plan.html:136",
+      "id": "wiring-1",
+      "reason": "a dispatch that honours the declaration will measure a cost the decision then changes, and the section either needs the deferred declaration \u00a72 itself was given or a dependency scoped to the case-set work that does not turn on those decisions, so the author must choose which.",
+      "text": "\u00a74 carries `data-status=\"implementable\"` while its declared upstream \u00a72 is `deferred` pending the `fitted-unknowns` and `vertical-freedom` decisions, and those decisions configure the very quantity \u00a74 measures: what is fitted changes the unknown count and the iteration count, so the per-slice wall and the ratio to the forward solve are measured for a configuration the plan has not yet fixed",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "4b08241a313b619374fb9c9afef68574efd72865",
+  "plan_fingerprint": "44e021f37ed2ef9a2472de6f93a11ee45ea94920c04c758890482f660c01f713",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 0,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T090911064992-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "c4f2360d7b0d52e4cd8df272f07b8c22413d2601",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a74's only internal reference, the \"\u00a72 MAST case\", resolves to section s2; the plan's cited figure `docs/figures/inverse-equilibrium-baseline/inverse-seam.svg` and the `spine-efit-parity` plan both exist; the archive record it names is the deliverable, not a citation.",
+    "done_when": "a finding \u2014 \u00a74 clause (2)'s negative control (snapshot line 145) doubles an iteration cap, which does not by construction exceed a ceiling the section itself admits a passing run may sit at up to ten times.",
+    "evidence_paths": "pass \u2014 the section's record is the plan's archive record at `docs/evidence/archive/inverse-equilibrium-baseline-landed.html`, a durable repository path, and nothing in \u00a74 sends a gate log to a scratch or node-local directory.",
+    "naming": "pass \u2014 \u00a74 introduces no symbol, file or comment carrying a plan label, stage name, ticket number or version tag, and its prose states mechanism rather than changelog.",
+    "reasoning": "pass \u2014 \u00a74 claims no root cause, its endpoint (a per-width cost record and a ratio against a same-job forward-solve wall) is obtainable on the H200 and its measure can fail, and it prescribes no code path, step sequence or function to call.",
+    "single_goal": "pass \u2014 \u00a74 names one deliverable, the cost record for one reconstruction on the H200.",
+    "wiring": "a finding \u2014 \u00a74 is declared `implementable` (snapshot line 136, meta line 23) while the upstream it declares, \u00a72, is `deferred` and its cost subject is configured by the two unlocked decisions."
+  },
+  "section_digests": {
+    "_document": "03d842cedab18491de7d859344a13fee67c7576dea741a8662961307f751a354",
+    "s0": "ce8b4a7532f5a4ae7630c17e33c25d4b43d3ff9136fbf6678937a5e49554f6f9",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "2c09fab3f58e2aca8b81b4d0c9d32788d14128e1c902740e390020bbf9050a7d",
+    "s3": "f2597f15368fe76687b5bef31340848a0cfa34433ac506d06d29ef7656a6a697",
+    "s4": "034f18db2597be21a2fe036292c50d3df59eb634a65aeb769feae25a5ecfd5af",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T09:15:33.245364+00:00",
+  "total": null
+}

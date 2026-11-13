@@ -43,6 +43,16 @@
       "note": "Section 6 now cites the slice-profile run H200 receipts under its run directory, which resolve today; the fragment lands with that run, whose code review and figure redraw are in flight.",
       "reason": "",
       "when": "2026-11-13T16:37:10.167995+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1686476e9a88b1259549c285ae48656ee772e803",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Negative control (c) now seeds one slice from a displaced state with an update budget of zero, which cannot reach the 1e-10 residual, so the accounting must report it failed.",
+      "reason": "",
+      "when": "2026-11-13T16:37:52.080614+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "Section 6 now cites the slice-profile run H200 receipts under its run directory, which resolve today; the fragment lands with that run, whose code review and figure redraw are in flight.",
       "reason": "",
       "when": "2026-11-13T16:37:10.167995+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1686476e9a88b1259549c285ae48656ee772e803",
+      "commit_basis": "edit",
+      "note": "Negative control (c) now seeds one slice from a displaced state with an update budget of zero, which cannot reach the 1e-10 residual, so the accounting must report it failed.",
+      "reason": "",
+      "when": "2026-11-13T16:37:52.080614+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261113T162124319621-plan-review-of-sub-millisecond-forward-path.json",

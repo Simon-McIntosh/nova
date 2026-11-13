@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T09:05:57.830Z",
+  "dispatched_at": "2026-11-13T09:01:15Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/inverse-equilibrium-baseline.html:142",
+      "id": "done_when-1",
+      "reason": "without a constructed failure the node's gate cannot show that its timing instrument distinguishes a passing fit from a slow one, which is the whole measure \u00a74 exists to deliver.",
+      "text": "\u00a74 clause (2) fails on a comparison of a measured wall against a measured reference, but the section declares no negative control: nothing in it requires a known-slow run to exceed the ceiling, and nothing pins the cache state of the reference forward solve, so a harness that measures the cached reference warm against a reconstruction that excludes its own compile can report a ratio at or below ten whatever the implementation does",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/inverse-equilibrium-baseline.html:142",
+      "id": "reasoning-1",
+      "reason": "the section's only pass/fail clause cannot be evaluated until its denominator is fixed as per-slice or total, and whichever the author picks changes the measured verdict for an unchanged implementation.",
+      "text": "\u00a74 clause (2) compares a per-slice wall against \"the warm forward solve at the same shape and width\", and that denominator's units are not stated: a batched width-16 forward solve has a total wall and a per-slice wall, and the two readings make the ceiling 160 forward-solve slices or 10 respectively, a factor of the batch width apart; clause (1) meanwhile requires the record to report the forward solves per reconstruction, the very count the ceiling is arithmetic over, so the node measures a number and then has no defined threshold to read it against",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/inverse-equilibrium-baseline.html:51",
+      "id": "anchors_resolve-1",
+      "reason": "the cited evidence exists and supports the claim, so only the href needs the missing `plans/` segment and no semantic content of the plan changes.",
+      "text": "s0 supports its premise (\"failed 10 of 12 EFIT parity metrics\", which the cited plan's own recorded verdict does confirm as \"ten of twelve registered metrics\") with a link whose path is wrong, and a reader following it reaches no document, which is the one way a correct citation still fails",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "c14e7b1d01b84e4d365f43c46d702eed06998396",
+  "plan_fingerprint": "f970654b4870d1c6ca36e11dc4016e83a398f396414fdcbb4660d2d11696aa15",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 0,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T085949050481-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "2d039cc1ab4bc248b9ab5199a26d44353df677bb",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the s0 citation `<a href=\"/nova/spine-efit-parity\">` does not resolve, because the document it names lives at `docs/plans/spine-efit-parity.html` and the nova mount serves `docs/` at `/nova/`, so the href resolves to `/nova/spine-efit-parity.html` rather than the existing `/nova/plans/spine-efit-parity.html`.",
+    "done_when": "a finding \u2014 \u00a74 states a hard ceiling but no clause constructs a measurement that must exceed it, so nothing shows the timing harness can detect a violation; the hardening of clause (2) makes the ceiling falsifiable in principle without showing the instrument that reads it is falsifiable.",
+    "evidence_paths": "pass \u2014 the record the plan names is `docs/evidence/archive/inverse-equilibrium-baseline-landed.html`, in-repo and durable, and \u00a74's measurements are written there rather than to a session path.",
+    "naming": "pass \u2014 \u00a74 and the declarations meta carry no plan labels, stage names, ticket numbers or version tags into symbols, and the only identifiers present (`H200`, `MAST`, `IMAS`, `efit`) are domain names; the sprint value sits in the plan's own metadata where plan state belongs.",
+    "reasoning": "a finding \u2014 \u00a74's clause (2) divides a per-slice wall by \"the warm forward solve at the same shape and width\", whose units are undefined: read as the batch's total wall the ceiling is 160 forward-solve slices at width 16, read as that solve's per-slice wall it is 10, so the node cannot know whether its own reported forward-solves-per-reconstruction fits under a ceiling the plan leaves a factor of the batch width wide.",
+    "single_goal": "pass \u2014 \u00a74 delivers one quantity, the cost of one reconstruction, reported across three batch widths.",
+    "wiring": "pass \u2014 the demotion of `s2` to `deferred` is carried consistently through all four surfaces that name it (the `plan-section-declarations` meta, the s2 section record's `data-status`, the body's \"Deferred until the decisions ... are locked\" paragraph, and the contract table's \"\u00a71 and two decisions\"), and the two decisions it waits on now carry `data-sections=\"s2\"`, so the earlier declaration that a deferred section was implementable is resolved."
+  },
+  "section_digests": {
+    "_document": "03d842cedab18491de7d859344a13fee67c7576dea741a8662961307f751a354",
+    "s0": "ce8b4a7532f5a4ae7630c17e33c25d4b43d3ff9136fbf6678937a5e49554f6f9",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "2c09fab3f58e2aca8b81b4d0c9d32788d14128e1c902740e390020bbf9050a7d",
+    "s3": "f2597f15368fe76687b5bef31340848a0cfa34433ac506d06d29ef7656a6a697",
+    "s4": "44f948e76d3be3d8fb04023335cabe51725a3a19bc6dacf75008875d9127ca71",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T09:06:32.881210+00:00",
+  "total": null
+}

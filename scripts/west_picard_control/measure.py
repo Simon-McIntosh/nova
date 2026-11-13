@@ -44,9 +44,10 @@ from nova.imas.machine import StaticMachineDescription  # noqa: E402
 from scripts.west_iron_galerkin_pair.measure import (  # noqa: E402
     SOURCE,
     SOURCE_SHA256,
-    machine_source,
+    machine_source,  # noqa: E402
     save,
     source_field,
+    spectrum,
 )
 from tests.test_magnetisation import loop, shell  # noqa: E402
 
@@ -135,7 +136,15 @@ def iterate(gram, external, law, tolerance, max_iterations, initial=None):
         # Frozen coefficient: one exact solve of (I - diag(c) G) M = c B_ext.
         lifted = np.tile(coefficient, 2)
         matrix = identity - lifted[:, None] * gram_array
-        state = np.linalg.solve(matrix, lifted * prescribed)
+        try:
+            candidate = np.linalg.solve(matrix, lifted * prescribed)
+        except np.linalg.LinAlgError:
+            termination = "singular-system"
+            break
+        if not np.all(np.isfinite(candidate)):
+            termination = "non-finite-iterate"
+            break
+        state = candidate
     return rows, termination, state, permeability
 
 
@@ -149,6 +158,19 @@ def classify(rows, tolerance):
     """
     relative = np.asarray([row["relative"] for row in rows])
     final = float(relative[-1])
+    if len(rows) < 2:
+        return dict(
+            mode="converged" if final <= tolerance else "diverging",
+            final_relative=final,
+            best_relative=None,
+            residual_growth_per_iteration=None,
+            iterations_to_tolerance=None,
+            sign_changes_in_residual=0,
+            maximum_magnetisation_seed=float(rows[0]["maximum_magnetisation_A_per_m"]),
+            maximum_magnetisation_first_correction=None,
+            maximum_magnetisation_last=float(rows[0]["maximum_magnetisation_A_per_m"]),
+            late_magnetisation_relative_span=0.0,
+        )
     magnetisation = np.asarray([row["maximum_magnetisation_A_per_m"] for row in rows])
     window = min(20, len(relative) - 1)
     tail = relative[-max(window, 2) :]
@@ -453,13 +475,90 @@ def main():
         ),
         flush=True,
     )
-    if record["picard"]["converged"]:
-        raise SystemExit("the negative control converged")
+    picard_root = state.reshape(2, -1).T
+    root_difference = float(
+        np.linalg.norm(picard_root - newton.magnetisation, axis=1).max()
+        / np.linalg.norm(newton.magnetisation, axis=1).max()
+    )
+    record["picard"].update(
+        root_difference_over_newton=root_difference,
+        seconds_per_iteration=(
+            picard_seconds / (len(rows) - 1) if len(rows) > 1 else None
+        ),
+    )
+    np.save(out / "picard-state.npy", picard_root)
     np.save(
         out / "picard-maximum-M.npy",
         np.asarray([row["maximum_magnetisation_A_per_m"] for row in rows]),
     )
-    np.save(out / "picard-state.npy", state.reshape(2, -1).T)
+    print(
+        "PICARD_ROOT " + json.dumps(dict(root_difference_over_newton=root_difference)),
+        flush=True,
+    )
+    assert root_difference < 1e-6, root_difference
+    save(out / "measurement.json", record)
+
+    # The plan's expectation was formed against a centroid-sampled operator,
+    # whose spectrum leaves [0, 1]. The same iteration on that operator is
+    # recorded here so the record carries the mechanism rather than a verdict
+    # on the plan's premise alone. It is a different discretisation of the same
+    # case, not the case itself.
+    collocated = iron._interaction(cells, cells.centroids, iron._PLAN)
+    record["collocated_operator"] = dict(
+        cells=int(len(cells.centroids)),
+        spectrum=spectrum(collocated, cells),
+        external="centroid samples of the same prescribed field",
+    )
+    save(out / "measurement.json", record)
+    started = time.monotonic()
+    rows_c, termination_c, _, _ = iterate(
+        collocated,
+        np.asarray(external(cells.centroids)),
+        law,
+        NEWTON_TOLERANCE,
+        PICARD_ITERATIONS,
+    )
+    record["collocated_operator"].update(
+        termination=termination_c,
+        iterations=len(rows_c) - 1,
+        converged=termination_c == "converged",
+        residual_history=[row["relative"] for row in rows_c],
+        rows=rows_c,
+        verdict=classify(rows_c, NEWTON_TOLERANCE),
+        seconds=time.monotonic() - started,
+    )
+    save(out / "measurement.json", record)
+    print(
+        "COLLOCATED "
+        + json.dumps(
+            dict(
+                termination=termination_c,
+                iterations=len(rows_c) - 1,
+                verdict=record["collocated_operator"]["verdict"],
+            )
+        ),
+        flush=True,
+    )
+    del collocated
+
+    record["negative_control"] = dict(
+        required_by_plan=(
+            "the frozen-permeability Picard run is recorded as failing to converge"
+        ),
+        picard_converged_on_galerkin=record["picard"]["converged"],
+        picard_iterations=record["picard"]["iterations"],
+        newton_iterations=record["newton"]["iterations"],
+        met=not record["picard"]["converged"],
+        statement=(
+            "The frozen-permeability Picard iteration converged on the Galerkin "
+            "operator, so the plan's expectation that it fails to converge is "
+            "not reproduced on the operator the solve uses."
+            if record["picard"]["converged"]
+            else "The frozen-permeability Picard iteration failed to converge as "
+            "the plan expects."
+        ),
+    )
+    save(out / "measurement.json", record)
 
     record["positive_controls"].append(
         control(
@@ -504,6 +603,21 @@ def main():
                 picard_iterations=record["picard"]["iterations"],
                 picard_mode=verdict["mode"],
                 picard_final_relative=verdict["final_relative"],
+                picard_root_difference_over_newton=record["picard"][
+                    "root_difference_over_newton"
+                ],
+                negative_control_met=record["negative_control"]["met"],
+                collocated_operator=dict(
+                    termination=record["collocated_operator"]["termination"],
+                    iterations=record["collocated_operator"]["iterations"],
+                    mode=record["collocated_operator"]["verdict"]["mode"],
+                    spectrum_minimum=record["collocated_operator"]["spectrum"][
+                        "minimum"
+                    ],
+                    spectrum_maximum=record["collocated_operator"]["spectrum"][
+                        "maximum"
+                    ],
+                ),
                 positive_controls=[
                     (entry["label"], entry["iterations"], entry["termination"])
                     for entry in record["positive_controls"]

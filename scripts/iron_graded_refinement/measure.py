@@ -54,11 +54,9 @@ SHELL_SURFACES = dict(radial=[0.9, 1.0], vertical=[-1.0, 1.0])
 # spacing may coarsen away from a surface, and how many cells a thin feature
 # keeps across its thickness.
 SHELL_SWEEP = (
-    ("fine-2mm-coarse-20mm-across-20", 0.002, 0.02, 20.0),
-    ("fine-2mm-coarse-40mm-across-20", 0.002, 0.04, 20.0),
-    ("fine-4mm-coarse-20mm-across-10", 0.004, 0.02, 10.0),
-    ("fine-4mm-coarse-40mm-across-10", 0.004, 0.04, 10.0),
-    ("fine-1mm-coarse-20mm-across-20", 0.001, 0.02, 20.0),
+    ("fine-2mm-coarse-6mm-across-20", 0.002, 0.006, 20.0),
+    ("fine-2mm-coarse-8mm-across-20", 0.002, 0.008, 20.0),
+    ("fine-2mm-coarse-10mm-across-20", 0.002, 0.01, 20.0),
 )
 
 

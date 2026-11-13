@@ -53,6 +53,40 @@ def test_diverted_boundary_tangent_is_finite_without_wall_contact(terminal_fixtu
     assert bool(jnp.isfinite(tangent))
 
 
+def _selected_boundary_value(topology, flux, state):
+    """Follow the selected wall bracket, or hold a stationary saddle."""
+    point = jax.lax.stop_gradient(state.boundary)
+
+    def surface_for(field):
+        grid_flux, _wall_flux = topology.split_flux_map(field)
+        values = grid_flux.reshape(
+            (topology.connectivity_radius.size, topology.connectivity_height.size)
+        ).T
+        return fit_tensor_spline(
+            topology.connectivity_radius, topology.connectivity_height, values
+        )
+
+    def contacts(surface):
+        wall_flux = surface(
+            topology.wall.coordinate[:, 0], topology.wall.coordinate[:, 1]
+        )
+        return topology._wall_anchor_candidates(wall_flux)[0][:, :2]
+
+    contact_index = None
+    if not bool(state.boundary_is_xpoint):
+        positions = contacts(surface_for(flux))
+        contact_index = int(jnp.argmin(jnp.sum((positions - point) ** 2, axis=1)))
+        np.testing.assert_allclose(positions[contact_index], point, rtol=0, atol=1e-12)
+
+    def value(field):
+        surface = surface_for(field)
+        position = point if contact_index is None else contacts(surface)[contact_index]
+        return surface(position[0], position[1])
+
+    np.testing.assert_allclose(value(flux), state.boundary_flux, rtol=0, atol=1e-12)
+    return value
+
+
 @pytest.mark.parametrize(
     "topology_class", (TopologyClass.DIVERTED, TopologyClass.LIMITED)
 )
@@ -68,24 +102,11 @@ def test_boundary_flux_jvp_matches_the_admitted_boundary_motion(
         ).state.boundary_flux
 
     state = topology.read_qualification(flux, -1.0, inside, topology_class).state
-    point = jax.lax.stop_gradient(state.boundary)
-
-    def fixed_point_value(field):
-        grid_flux, _wall_flux = topology.split_flux_map(field)
-        values = grid_flux.reshape(
-            (topology.connectivity_radius.size, topology.connectivity_height.size)
-        ).T
-        surface = fit_tensor_spline(
-            topology.connectivity_radius, topology.connectivity_height, values
-        )
-        return surface(point[0], point[1])
+    difference_value = _selected_boundary_value(topology, flux, state)
 
     def smooth_control(value):
         return value**3 - 0.4 * value + jnp.exp(0.3 * value)
 
-    difference_value = (
-        fixed_point_value if bool(state.boundary_is_xpoint) else boundary_value
-    )
     assert np.isfinite(float(boundary_value(flux)))
     for direction in _directions(flux.shape):
         _value, tangent = jax.jvp(boundary_value, (flux,), (direction,))
@@ -121,22 +142,8 @@ def test_forward_terminal_boundary_flux_matches_boundary_motion_difference():
         return topology.boundary_flux
 
     _current, _integrals, _masks, terminal, _amplitude = profile._integral_state(flux)
-    point = jax.lax.stop_gradient(terminal.boundary)
     topology = profile.operator._fixed_design_topology
-
-    def fixed_point_value(field):
-        grid_flux, _wall_flux = topology.split_flux_map(field)
-        values = grid_flux.reshape(
-            (topology.connectivity_radius.size, topology.connectivity_height.size)
-        ).T
-        surface = fit_tensor_spline(
-            topology.connectivity_radius, topology.connectivity_height, values
-        )
-        return surface(point[0], point[1])
-
-    difference_value = (
-        fixed_point_value if bool(terminal.boundary_is_xpoint) else boundary_value
-    )
+    difference_value = _selected_boundary_value(topology, flux, terminal)
     values = np.random.default_rng(11).standard_normal(flux.shape)
     direction = jnp.asarray(values / np.max(np.abs(values)), dtype=flux.dtype)
     _value, tangent = jax.jvp(boundary_value, (flux,), (direction,))

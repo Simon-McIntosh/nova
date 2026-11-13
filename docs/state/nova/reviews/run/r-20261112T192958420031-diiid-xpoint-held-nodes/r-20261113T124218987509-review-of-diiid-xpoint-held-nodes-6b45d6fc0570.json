@@ -15,6 +15,13 @@
   ],
   "completed_at": "",
   "dispatched_at": "2026-11-13T12:44:10Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the finite-difference ordering assertion still fails a zero tangent; the floor was lowered because the physical-image solve legitimately shrinks the moment tangent",
+      "recorded_at": "2026-11-13T13:11:06.408525+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_equilibrium_forward_solve.py",

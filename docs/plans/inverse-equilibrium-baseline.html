@@ -139,9 +139,11 @@
     <p><strong>Done when.</strong> (1) The record reports, for the §2 MAST case at batch widths 1, 16 and
     64, the warm wall per slice, the forward solves per reconstruction and the cold compile wall, measured
     in one H200 job with the persistent compilation cache contract printed. (2) The warm wall per slice at
-    width 16 is at or below ten times the warm forward solve at the same shape and width. A larger figure
-    fails this clause: the record then names the step responsible with its share of the wall, and the
-    section stays open. (3) imas-efit's recorded per-slice wall for the same case is quoted
+    width 16 is at or below ten times the warm forward solve's wall per slice at the same shape and batch
+    width, both measured in that job with compile excluded. A larger figure fails this clause: the record
+    then names the step responsible with its share of the wall, and the section stays open. Negative
+    control: the same measurement with the reconstruction's convergence exit disabled and its iteration
+    cap doubled exceeds the ceiling. (3) imas-efit's recorded per-slice wall for the same case is quoted
     beside it with its hardware.</p>
 
     <h2 id="s5">§5 — The reduced-model reconstructions</h2>

@@ -15,6 +15,11 @@
       "kind": "exempted",
       "reason": "answered by the repair round: one shared mutant harness (scripts/west_iron_galerkin/mutant.py, 03aa5258d) replaces both copies, guarded by duplication.py",
       "recorded_at": "2026-11-13T00:24:35.699190+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "parity.log carries a real PARITY line (gram 0.0, uniform 2.4e-15, smooth 1.8e-15 on the 3447-cell WEST mesh) from the successful rerun; only its header misnames the crashed first arm log; the numbers stand",
+      "recorded_at": "2026-11-13T00:25:00.067965+00:00"
     }
   },
   "findings": [

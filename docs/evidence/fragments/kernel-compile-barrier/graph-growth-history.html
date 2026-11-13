@@ -1,0 +1,85 @@
+<section id="graph-growth-history">
+<h3>Two commits tripled the point jet's lowered graph</h3>
+<p>The published per-pass profile of <code>point_jet</code> at size 4 recorded <code>3,043,945</code> bytes of StableHLO at revision <code>56097c60b</code> (2026-10-27). At <code>7bd1d912c</code> (2026-11-13) the same program in the same harness records <code>10,315,092</code> bytes, a factor of <code>3.39</code> on the graph. To find where that happened, one job on <code>rigel</code> (<code>1313738</code>) exported every commit on main that touches the point jet's source between the two revisions, traced and lowered both programs against each tree in a fresh process with the compilation cache disabled, and recorded the graph sizes. Tracing and lowering cost about fifteen seconds per program, so the whole history was measured without a single compile.</p>
+
+<p id="graph-growth-history-controls">Two control rows hold the instrument. <code>point_jet</code> at <code>56097c60b</code> lowers to <code>3,043,948</code> bytes against the published <code>3,043,945</code>, and at <code>7bd1d912c</code> to <code>10,315,095</code> against the published <code>10,315,092</code>; both agree to three bytes on a graph of millions, so the CPU lowering measures the same graph the H200 profile compiled.</p>
+
+<p id="graph-growth-history-result">The growth is not gradual and it is not one step. Over 45 commits the lowered graph is flat except at two of them, and those two account for all of it: <code>da28fc4e5</code> (2026-10-29) multiplies it by <code>×2.524</code>, and <code>cb42f656f</code> (2026-11-06) by a further <code>×1.345</code>, together <code>×3.39</code>, which is where the point jet's <code>3,043,948</code> bytes become <code>10,315,095</code>. The production point batch at size 132 follows the same two commits by <code>×2.137</code> and <code>×1.291</code>, <code>×2.75</code> in total, so the lever is shared between the two programs rather than specific to the point jet's size. Two later commits move the graph by less than one per cent — <code>fcd86472c</code> adds <code>0.2%</code> and <code>0f01394c4</code> removes <code>0.33%</code> — and are not steps by the ten per cent threshold this record uses.</p>
+
+<h4><code>da28fc4e5</code> — Merge moment-field-hessian: a regular Hessian of the polygon moment field at corner heights</h4>
+<p>StableHLO grows ×2.524 for the point jet and ×2.137 for the production point batch. Its diff changes these functions in modules the point jet imports and evaluates:</p>
+<ul>
+<li><code>packed_analytic_moments</code> — the module gains the regular-Hessian path the point jet reaches through <code>BiotMomentCoupling.value_gradient</code>: the nested <code>evaluate</code> and <code>difference</code> closures that take the corner-height second derivative of the moment field, 115 added lines</li>
+<li><code>packed_analytic_greens</code> — one changed line on the neighbouring kernel entry point</li>
+</ul>
+
+<h4><code>cb42f656f</code> — fix(biot): repair the polygon analytic tangents near edges and vertices</h4>
+<p>StableHLO grows ×1.345 for the point jet and ×1.291 for the production point batch. Its diff changes these functions in modules the point jet imports and evaluates:</p>
+<ul>
+<li><code>_Vertex.against_root</code>, <code>_Vertex.root</code> — take a <code>stable</code> keyword that routes the near-corner terms through the weighted residual</li>
+<li><code>_Vertex._first_residual</code>, <code>_Vertex._second_residual</code> — take a <code>weight</code> argument, the graded quadrature the weighted residual integrates over</li>
+<li><code>_Edge.second</code> — carries <code>stable</code> into the edge second-residual path</li>
+<li><code>_vertex_against_root_tangent</code>, <code>_edge_flux_line_moments_tangent</code>, <code>_horizontal_flux_line_moments_tangent</code>, <code>_second_residual_tangent</code>, <code>_arsinh_terms_tangent</code> — the tangent counterparts move onto the same weighted form, which is what the point jet's <code>jacfwd</code> differentiates through</li>
+<li><code>_EdgeReductionTangent</code> — its reduction carries the weighted terms</li>
+</ul>
+
+<p id="graph-growth-history-consequence">Both commits are correctness work in <code>nova/biot/polygonanalytic.py</code>: the first gives the analytic polygon moment field a regular Hessian at corner heights, where a Richardson-combined height tangent was being differentiated a second time, and the second takes the near-corner terms through a stable weighted residual so the full-domain tangent identities hold. Neither is a regression to revert — the first commit's own body records the cold compile rising from <code>94.6 s</code> to <code>305.6 s</code> and the lead accepting that as a cost paid once per machine shape. What this record adds is the attribution: the compile barrier is the shape of the analytic second-derivative path, not any single arithmetic term, and the two commits that define it are the place to look for a cheaper formulation.</p>
+
+<table id="graph-growth-history-table">
+<thead><tr><th>Commit</th><th>Date</th><th>Subject</th><th>point jet, 4 [bytes]</th><th>ratio</th><th>production batch, 132 [bytes]</th><th>ratio</th></tr></thead>
+<tbody>
+<tr><td><code>56097c60b</code></td><td>2026-10-27</td><td>docs(figures): keep only the served SVG for the pass profile</td><td>3,043,948</td><td>—</td><td>4,935,529</td><td>—</td></tr>
+<tr><td><code>7a0859bc7</code></td><td>2026-10-28</td><td>Merge cocos17-internals: the contour Grad-Shafranov factor from the convention owner</td><td>3,043,948</td><td>×1.000</td><td>4,935,529</td><td>×1.000</td></tr>
+<tr class="step"><td><code>da28fc4e5</code></td><td>2026-10-29</td><td>Merge moment-field-hessian: a regular Hessian of the polygon moment field at corner heights</td><td>7,682,157</td><td>×2.524</td><td>10,548,397</td><td>×2.137</td></tr>
+<tr><td><code>62c7ed2c7</code></td><td>2026-10-29</td><td>Merge bank-newton-step: the bank-backed dense Newton step, unconverged</td><td>7,682,157</td><td>×1.000</td><td>10,548,397</td><td>×1.000</td></tr>
+<tr><td><code>8b6628142</code></td><td>2026-10-29</td><td>Merge tracked-read-h200: the read measured on the H200 against an analytic reference</td><td>7,682,157</td><td>×1.000</td><td>10,548,397</td><td>×1.000</td></tr>
+<tr><td><code>41e4d9ab0</code></td><td>2026-11-02</td><td>merge: fuse the bank Newton step into few programs</td><td>7,682,157</td><td>×1.000</td><td>10,548,397</td><td>×1.000</td></tr>
+<tr class="step"><td><code>cb42f656f</code></td><td>2026-11-06</td><td>fix(biot): repair the polygon analytic tangents near edges and vertices</td><td>10,329,152</td><td>×1.345</td><td>13,614,077</td><td>×1.291</td></tr>
+<tr><td><code>4773f53a9</code></td><td>2026-11-06</td><td>merge(bank-wall-events): evaluate every wall edge of the wall-event search in one batched program</td><td>10,329,152</td><td>×1.000</td><td>13,614,077</td><td>×1.000</td></tr>
+<tr><td><code>1d30edfc5</code></td><td>2026-11-06</td><td>merge(bank-candidate-loop): evaluate the read candidate inspection over all slots in one batched program</td><td>10,329,152</td><td>×1.000</td><td>13,614,077</td><td>×1.000</td></tr>
+<tr><td><code>d102ff6f1</code></td><td>2026-11-06</td><td>land(r-20261106T133240496670-bank-candidate-compact): merge the reviewed head onto the primary branch</td><td>10,329,152</td><td>×1.000</td><td>13,614,077</td><td>×1.000</td></tr>
+<tr><td><code>a228828fe</code></td><td>2026-11-06</td><td>land(r-20261106T144026633550-bank-compact-followups): merge the reviewed head onto the primary branch</td><td>10,329,152</td><td>×1.000</td><td>13,614,077</td><td>×1.000</td></tr>
+<tr><td><code>9101941b6</code></td><td>2026-11-06</td><td>merge(bank-saddle-derivatives): saddle curvature from the bank contraction, not rounded jets</td><td>10,329,152</td><td>×1.000</td><td>13,614,077</td><td>×1.000</td></tr>
+<tr><td><code>c75543c13</code></td><td>2026-11-07</td><td>merge(bank-saddle-guards): guard the bank-contraction saddle wiring and own its contraction in pairedfloat</td><td>10,329,152</td><td>×1.000</td><td>13,614,077</td><td>×1.000</td></tr>
+<tr><td><code>590c627a8</code></td><td>2026-11-07</td><td>merge(icm-sheet-flux): conic sheet flux, flat and vertical at 1e-10, sloped near standoffs pending</td><td>10,329,152</td><td>×1.000</td><td>13,614,077</td><td>×1.000</td></tr>
+<tr><td><code>cc0511add</code></td><td>2026-11-07</td><td>merge(icm-sheet-sloped): sloped conic sheets hold 1e-10 at the near standoffs</td><td>10,329,152</td><td>×1.000</td><td>13,614,077</td><td>×1.000</td></tr>
+<tr><td><code>8bce1eb9a</code></td><td>2026-11-07</td><td>merge(icm-sheet-field): conic sheet field B_R and B_Z at 1e-10</td><td>10,329,152</td><td>×1.000</td><td>13,614,077</td><td>×1.000</td></tr>
+<tr><td><code>ce028a3a5</code></td><td>2026-11-07</td><td>merge(icm-sheet-field): state the gradient kernel pole coefficient exactly</td><td>10,329,152</td><td>×1.000</td><td>13,614,077</td><td>×1.000</td></tr>
+<tr><td><code>fcd86472c</code></td><td>2026-11-07</td><td>merge: consolidate the weighted graded residual into one owner</td><td>10,349,309</td><td>×1.002</td><td>13,637,451</td><td>×1.002</td></tr>
+<tr><td><code>36dcacf06</code></td><td>2026-11-07</td><td>merge(icm-closed-flux): closed-form sloped sheet flux by the Part V pole reduction</td><td>10,349,309</td><td>×1.000</td><td>13,637,451</td><td>×1.000</td></tr>
+<tr><td><code>f1205f3ba</code></td><td>2026-11-07</td><td>merge(icm-closed-field): sloped conic sheet field by the Part II closed form</td><td>10,349,309</td><td>×1.000</td><td>13,637,451</td><td>×1.000</td></tr>
+<tr><td><code>5916d3f6e</code></td><td>2026-11-07</td><td>merge(icm-pancake-form): flat conic sheet by Snow's pancake form</td><td>10,349,309</td><td>×1.000</td><td>13,637,451</td><td>×1.000</td></tr>
+<tr><td><code>afbfcea1c</code></td><td>2026-11-07</td><td>merge(icm-sheet-tidy): one route flag, the zeta owner, a jitted closed route</td><td>10,349,309</td><td>×1.000</td><td>13,637,451</td><td>×1.000</td></tr>
+<tr><td><code>0f01394c4</code></td><td>2026-11-08</td><td>merge: take the graded map Jacobian as cosh(stretch)</td><td>10,315,095</td><td>×0.997</td><td>13,596,543</td><td>×0.997</td></tr>
+<tr><td><code>9d79e719a</code></td><td>2026-11-08</td><td>Merge branch 'main' of github.com:Simon-McIntosh/nova</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>8cf00ae11</code></td><td>2026-11-08</td><td>merge(icm-sheet-tile): the edge-sheet tile and the cell interaction matrix</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>800965cb8</code></td><td>2026-11-08</td><td>merge(icm-sheet-tile-measure): close the sheet-tile agreement on the WEST mesh</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>1a7b95a74</code></td><td>2026-11-08</td><td>merge(icm-sheet-tile-one-route): one owner for the edge-sheet closed form</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>d36efc676</code></td><td>2026-11-09</td><td>merge(icm-sheet-cancellation-free): analytic series for the sheet endpoint brackets</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>65a45c395</code></td><td>2026-11-09</td><td>merge(icm-sheet-tail-entries): close the WEST sheet-tile CPU agreement at 1e-13</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>ed5ed6a6b</code></td><td>2026-11-10</td><td>Merge finite sheet limits at the symmetry axis</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>69544dae9</code></td><td>2026-11-11</td><td>Merge the sheet operand repair for small-radius sources</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>c381a8997</code></td><td>2026-11-11</td><td>Merge the production iron magnetisation solve</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>9edcf6f40</code></td><td>2026-11-11</td><td>land(r-20261109T044945756828-bank-carried-decision): merge the reviewed head onto the primary branch</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>8e9fd161c</code></td><td>2026-11-11</td><td>Merge the split-interval B-H fit for rising initial permeability</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>00a862081</code></td><td>2026-11-11</td><td>land(r-20261111T131359627137-read-tie-break): finish a landing interrupted after its promotion</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>f6c1bf151</code></td><td>2026-11-11</td><td>Merge the shared-endpoint iron mesher</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>970804c58</code></td><td>2026-11-11</td><td>land(r-20261111T161525525046-read-diverted-wall-skip): merge the reviewed head onto the primary branch</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>6abcdfe84</code></td><td>2026-11-11</td><td>Merge the mu0 saturation tail of the B-H law</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>1cea9347e</code></td><td>2026-11-11</td><td>land(r-20261111T160843090347-read-live-candidates): merge the reviewed head onto the primary branch</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>d5c2d34ec</code></td><td>2026-11-12</td><td>Merge the regularised Newton step for the magnetisation solve</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>d37a5b583</code></td><td>2026-11-12</td><td>merge: keep the B-H table exact and cap the saturation-tail rise at 1 %</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>7a4b9182a</code></td><td>2026-11-12</td><td>merge: energy-consistent (Galerkin) iron interaction</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>9483fffd5</code></td><td>2026-11-13</td><td>merge: Galerkin interaction reuses its owners and tests reciprocity it can fail</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>7bd1d912c</code></td><td>2026-11-13</td><td>release(r-20261113T084816904571-review-of-h200-levers-16a90eb5bcb1): record workspace outcome</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+<tr><td><code>c85cb0591</code></td><td>2026-11-13</td><td>fix(review): commit an answer on a committed review record</td><td>10,315,095</td><td>×1.000</td><td>13,596,543</td><td>×1.000</td></tr>
+</tbody>
+</table>
+
+<figure id="graph-growth-history-figure">
+<img src="/nova/figures/kernel-compile-barrier/graph-growth-history/lowered-graph-bytes.svg" alt="StableHLO bytes against commit order for the point jet at size 4 and the production point batch at 132">
+<figcaption>StableHLO bytes after lowering against commit order, oldest first, for <code>point_jet</code> at size 4 (top) and <code>production_point_batch</code> at 132 (bottom). Dotted lines mark the two commits at which either program's graph moves by more than ten per cent, labelled with that program's factor. The series is flat between them, so the whole growth is carried by <code>da28fc4e5</code> and <code>cb42f656f</code>.</figcaption>
+</figure>
+
+<p id="graph-growth-history-receipt">Receipts for every commit and both programs, one per row, are under <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/graph-growth-history/receipts/</code>; the commit list, the job log and the summary the table is built from sit beside them. The measuring script is <code>scripts/prototypes/compile_pass_profile/lowered_size.py</code>, which reuses the profile harness's program construction and lowering steps and stops before the compile.</p>
+</section>

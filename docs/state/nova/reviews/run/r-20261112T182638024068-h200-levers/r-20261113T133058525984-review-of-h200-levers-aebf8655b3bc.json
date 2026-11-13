@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 7,
+  "call_sites": [
+    "nova/equilibrium/current.py:492",
+    "nova/equilibrium/current.py:636",
+    "nova/equilibrium/support_read.py:532",
+    "nova/equilibrium/support_read.py:654",
+    "nova/equilibrium/support_read.py:678",
+    "nova/equilibrium/support_read.py:682",
+    "nova/equilibrium/support_read.py:1241"
+  ],
+  "completed_at": "2026-11-13T13:56:35.847Z",
+  "dispatched_at": "2026-11-13T13:39:17Z",
+  "findings": [
+    {
+      "file": "tests/test_book_primal_buckets.py",
+      "line": 34,
+      "severity": "non-blocking",
+      "text": "the repaired file is the only file the commit changes, yet the gate's baseline_suite and after_suite commands both run tests/test_booking_scalar_tile.py, so no recorded run collects this file's other two tests at lines 210 and 264 at the reviewed head, while those tests compare production booking against reference_book's independently hardcoded batch_width of 32; the file's whole-file behaviour at the 128 default is therefore unrecorded."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified the runtime consumers of the constant the guard pins: current.book and current.book_tangent resolve the tile at nova/equilibrium/current.py:492 and :636, reached from nova/equilibrium/support_read.py:532, :654, :678, :682 and :1241.",
+    "diff": "read aebf8655b against 16a90eb5 commit by commit; it rewrites two comment lines and the asserted literal from 32 to 128 in one test and touches no production code.",
+    "done_when": "the clause 'each lever's default on main matches its measured verdict' is what this commit repairs; the manifest records the reproduced failure at base (review-repair/reproduction.log FAILED, EXIT=1), the pass at head (review-repair/repaired.log 1 passed, EXIT=0), the reversed-commit control (review-repair/reversed.log 1 failed, EXIT=1) and base/head suites of 54 and 55 passed (review-suite/baseline-suite.log, review-suite/after-suite.log).",
+    "goal": "the node goal is to time every landed speed lever on the H200 and set each default from its measured verdict; the gained commit is test-only and writes the recorded 128-cell scalar tile into tests/test_book_primal_buckets.py:37, whose value nova/equilibrium/current.py:72 sets.",
+    "manifest": "read; it records status complete, 31 commits, the repair at aebf8655b3bccd424074bcff32d2266e09900f06, sirius job 1313561 with baseline 54 passed and head 55 passed, focused guard 1 passed and reversed guard 1 failed, and every log it cites carries those numbers and EXIT lines.",
+    "write_paths": "the manifest declares nine paths including tests/test_book_primal_buckets.py, and the sole gained commit changes only that file, so every changed path is inside the declared scope."
+  },
+  "justifications": {
+    "durability": "tests/test_book_primal_buckets.py:37 compares a literal 128 against the module constant, and review-repair/reversed.log shows the same guard failing with EXIT=1 when the answering commit is reversed.",
+    "evidence": "the manifest's baseline_suite and after_suite both run tests/test_booking_scalar_tile.py, so the only recorded head-state execution of the changed file is the single focused node in review-repair/repaired.log:1.",
+    "fit": "tests/test_book_primal_buckets.py:35-36 states mechanism only and agrees with nova/equilibrium/current.py:47-48 on the 128 conic default and the independent eight-cell normal tile.",
+    "goal_fidelity": "tests/test_book_primal_buckets.py:37 asserts current._SCALAR_CUT_BATCH_WIDTH == 128, the value the recorded H200 verdict set at nova/equilibrium/current.py:72.",
+    "reuse": "the commit adds no definition, so no capability is forked and nothing needed extending.",
+    "scope_discipline": "the single gained commit aebf8655b changes exactly tests/test_book_primal_buckets.py, three insertions and three deletions, and that path is declared."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to time every landed speed lever on the H200 and set each default from its measured verdict; the gained commit is test-only and writes the recorded 128-cell scalar tile into tests/test_book_primal_buckets.py:37, whose value nova/equilibrium/current.py:72 sets.\nVERDICT done_when: the clause \"each lever's default on main matches its measured verdict\" is what this commit repairs; the manifest records the reproduced failure at base (review-repair/reproduction.log FAILED, EXIT=1), the pass at head (review-repair/repaired.log 1 passed, EXIT=0), the reversed-commit control (review-repair/reversed.log 1 failed, EXIT=1) and base/head suites of 54 and 55 passed (review-suite/baseline-suite.log, review-suite/after-suite.log).\nVERDICT write_paths: the manifest declares nine paths including tests/test_book_primal_buckets.py, and the sole gained commit changes only that file, so every changed path is inside the declared scope.\nVERDICT manifest: read; it records status complete, 31 commits, the repair at aebf8655b3bccd424074bcff32d2266e09900f06, sirius job 1313561 with baseline 54 passed and head 55 passed, focused guard 1 passed and reversed guard 1 failed, and every log it cites carries those numbers and EXIT lines.\nVERDICT diff: read aebf8655b against 16a90eb5 commit by commit; it rewrites two comment lines and the asserted literal 32 to 128 in the primal bucket guard and touches no production code.\nCALL_SITES: nova/equilibrium/current.py:492, nova/equilibrium/current.py:636, nova/equilibrium/support_read.py:532, nova/equilibrium/support_read.py:654, nova/equilibrium/support_read.py:678, nova/equilibrium/support_read.py:682, nova/equilibrium/support_read.py:1241\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/test_book_primal_buckets.py:37 asserts current._SCALAR_CUT_BATCH_WIDTH == 128, the value the recorded H200 verdict set at nova/equilibrium/current.py:72.\nSCORE evidence: 15\nJUSTIFICATION evidence: the manifest's baseline_suite and after_suite both run tests/test_booking_scalar_tile.py, so the only recorded head-state execution of the changed file is the single focused node in review-repair/repaired.log:1.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single gained commit aebf8655b changes exactly tests/test_book_primal_buckets.py, three insertions and three deletions, and that path is declared.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_book_primal_buckets.py:37 compares a literal 128 against the module constant, and review-repair/reversed.log shows the same guard failing with EXIT=1 when the answering commit is reversed.\nSCORE fit: 19\nJUSTIFICATION fit: tests/test_book_primal_buckets.py:35-36 states mechanism only and agrees with nova/equilibrium/current.py:47-48 on the 128 conic default and the independent eight-cell normal tile.\nSCORE reuse: 20\nJUSTIFICATION reuse: the commit adds no definition, so no capability is forked and nothing needed extending.\nFINDING tests/test_book_primal_buckets.py:34 non-blocking: the repaired file is the only file the commit changes, yet the gate's baseline_suite and after_suite commands both run tests/test_booking_scalar_tile.py, so no recorded run collects this file's other two tests at lines 210 and 264 at the reviewed head, while those tests compare production booking against reference_book's independently hardcoded batch_width of 32; the file's whole-file behaviour at the 128 default is therefore unrecorded.\n",
+  "review_run_id": "r-20261113T133058525984-review-of-h200-levers-aebf8655b3bc",
+  "reviewed_base_sha": "16a90eb5bcb11a7e39237c92ac77759ab4e7b734",
+  "reviewed_head_sha": "aebf8655b3bccd424074bcff32d2266e09900f06",
+  "reviewed_run_id": "r-20261112T182638024068-h200-levers",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T14:00:53.661805+00:00",
+  "total": 109
+}

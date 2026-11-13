@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_judgement": "the caption is substantive, not a restatement of the figure: it names the read population per panel, the factor-carry median, the per-slice headline panel and the rule that no disagreeing pair is plotted, so no caption finding is recorded.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-13T13:25:58Z",
+  "figure_reviewed": {
+    "artifact": "docs/figures/sub-millisecond-forward-path/h200-levers/arm-walls.svg",
+    "caption_source": "docs/evidence/fragments/sub-millisecond-forward-path/h200-levers.html",
+    "drawing_script": "scripts/prototypes/h200_levers/report.py",
+    "method": "judged only the attached rendered PNG; no SVG was opened, read, searched or shown",
+    "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T132017022443-review-of-h200-levers-aebf8655b3bc-figure/image-0.png",
+    "rendered_size_px": [
+      1399,
+      720
+    ]
+  },
+  "findings": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/h200-levers/arm-walls.svg",
+      "id": "f3cd62db54a",
+      "line": 401,
+      "severity": "non-blocking",
+      "summary": "The seven lever panels mark their two x positions only 'off' and 'on' and carry no x-axis label naming what is switched (report.py:401 writes the bare receipt arm names as ticks), so the figure alone does not say what an on-arm is for factor carry, lane drive or wall skip; the caption explains the read panels but does not name the toggle for those three, and a reader must go to the tables to decode the axis. It does not stop a reader reading any plotted value."
+    },
+    {
+      "file": "scripts/prototypes/h200_levers/report.py",
+      "id": "fd16de848f2",
+      "line": 392,
+      "severity": "non-blocking",
+      "summary": "Each plotted point is one selected fresh process per arm and no spread, range or error indication is drawn; the caption discloses that no disagreeing pair contributes a point, but the figure therefore cannot show how much of a panel's difference sits inside the process spread, which is the margin the lever verdicts are adjudicated against. The wall comparison itself remains readable."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass: axis and tick labels are near-black on white, and the grey width-1 and blue width-16 series both clear white with margin, so no label or mark is washed out.",
+    "data_ink": "pass: the wall values are carried by two data series of markers and lines drawn at 2.6 pt and 3 pt, and nothing else competes for weight; no band, fill or reference line is drawn that the caption does not use.",
+    "decoration": "pass: white ground, no gridlines, no gradient or background fill, top and right spines hidden, and the single legend is frameless and sits in clear space above the panels.",
+    "label_collision": "pass: no label is clipped or overlapping; the ink bounding box is x 22-1379, y 16-681 inside a 1399x720 canvas, leaving at least 19 px clear on every edge, and no axis label, tick label or legend entry overlaps another or the plotted marks.",
+    "legibility": "pass: eight panels read at a glance at 1399x720; every y-axis label, tick label, x category and the Stream slice label is fully drawn and readable, and the four-panel-wide grid keeps the 13 pt labels clear of the plot area.",
+    "table_form": "pass: eight small multiples plot per-lever wall against arm, a relationship the reader compares within a panel across two widths; the numeric tables the reader needs for exact values are carried separately in the evidence fragment, so the image is not standing in for a table."
+  },
+  "notes": "read-only review: no file was edited, created, moved, deleted, redrawn, relabelled or reformatted. The figure review runs no suite, so added_failure_count is 0 with an empty id list.",
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: pass \u2014 eight panels read at a glance at 1399x720; every y-axis label, tick label, x category and the Stream slice label is fully drawn and readable.\nRUBRIC data_ink: pass \u2014 the wall values are carried by two data series of markers and lines and nothing else competes for weight; no band, fill or reference line is drawn that the caption does not use.\nRUBRIC decoration: pass \u2014 white ground, no gridlines, no gradient or background fill, top and right spines hidden, and one frameless legend sits in clear space above the panels.\nRUBRIC contrast: pass \u2014 axis and tick labels are near-black on white and both series colours clear white with margin, so no label or mark is washed out.\nRUBRIC table_form: pass \u2014 eight small multiples plot per-lever wall against arm, a comparison the reader makes within a panel, and the exact values are carried by the evidence fragment's tables.\nRUBRIC label_collision: pass \u2014 no label is clipped or overlapping; ink spans x 22-1379, y 16-681 inside a 1399x720 canvas, at least 19 px clear on every edge, and no label overlaps another or the plotted marks.\nFINDING docs/figures/sub-millisecond-forward-path/h200-levers/arm-walls.svg:401 non-blocking: the lever panels mark their two x positions only 'off' and 'on' with no x-axis label naming the toggle, so factor carry, lane drive and wall skip cannot be decoded from the figure alone.\nFINDING scripts/prototypes/h200_levers/report.py:392 non-blocking: one selected process per arm is plotted with no spread or error indication, so the figure does not show how much of a difference sits inside the measurement spread the verdicts use.",
+  "review_run_id": "r-20261113T132017022443-review-of-h200-levers-aebf8655b3bc-figure",
+  "reviewed_base_sha": "12bc22e03a16c201766d975f46c23facf3916daf",
+  "reviewed_head_sha": "aebf8655b3bccd424074bcff32d2266e09900f06",
+  "reviewed_run_id": "r-20261112T182638024068-h200-levers",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T13:40:43.467985+00:00",
+  "total": null
+}

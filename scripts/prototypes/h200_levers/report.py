@@ -320,6 +320,9 @@ while input provenance is unresolved.</p></section>"""
     output = (
         root / "docs/figures/sub-millisecond-forward-path/h200-levers/arm-walls.svg"
     )
+    for axis in axes.flat:
+        lower, upper = axis.get_ylim()
+        axis.set_yticks([tick for tick in axis.get_yticks() if lower <= tick <= upper])
     save_checked(fig, output)
     fig.savefig(run / "arm-walls.png", dpi=100)
     print(

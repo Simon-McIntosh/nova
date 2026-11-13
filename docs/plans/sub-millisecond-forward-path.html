@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="306">
+<meta name="plan-version" content="307">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -1005,6 +1005,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261113T013133775560-bank-pulse-parallel" data-who="reckon-build" data-when="2026-11-13T02:02:05Z">
     <div class="r-comment-body"><p>Prototype and numerical/refusal controls committed; CPU sequential and anchor pulses certify 2/2 at step 1e-5; paired H200 throughput and inspected SVG remain pending.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261113T084816904571-review-of-h200-levers-16a90eb5bcb1" data-who="reckon-build" data-when="2026-11-13T09:33:39.902Z">
+    <div class="r-comment-body"><p>Reviewed r-20261112T182638024068-h200-levers at head 16a90eb5bcb11a7e39237c92ac77759ab4e7b734 from base 12bc22e03a16c201766d975f46c23facf3916daf: six scores goal_fidelity 16, evidence 16, scope_discipline 18, durability 12, fit 15, reuse 13, zero added failures from the recorded base/head suite pair, one blocking finding (tests/test_book_primal_buckets.py:37 still asserts the scalar tile default is 32, which the landed change sets to 128) and four non-blocking findings; record parsed at both declared paths.</p></div>
 </div>
 </section>
 </main>

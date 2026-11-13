@@ -1,0 +1,80 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:532",
+    "nova/equilibrium/support_read.py:654",
+    "nova/equilibrium/support_read.py:678",
+    "nova/equilibrium/support_read.py:682",
+    "nova/equilibrium/support_read.py:1241"
+  ],
+  "completed_at": "2026-11-13T09:33:39.902Z",
+  "dispatched_at": "2026-11-13T09:20:10Z",
+  "findings": [
+    {
+      "file": "tests/test_book_primal_buckets.py",
+      "line": 37,
+      "severity": "blocking",
+      "text": "test_scalar_cut_tile_keeps_wide_batches asserts current._SCALAR_CUT_BATCH_WIDTH == 32 while the landed head sets it to 128 at nova/equilibrium/current.py:72, so this test fails deterministically at head; the node's gate ran only tests/test_booking_scalar_tile.py, and a default change to a module must retarget that file's own guard and its lines 35-36 rationale in the same change."
+    },
+    {
+      "file": "scripts/prototypes/bank_booking_primal_buckets/cpu_contract.py",
+      "line": 83,
+      "severity": "non-blocking",
+      "text": "the narrow-tile negative control locates its mutation by the literal '_SCALAR_CUT_BATCH_WIDTH = 32' and asserts source.count(target) == 1; after the landed change the literal is absent, so the control now aborts instead of producing its 16-vs-32 comparison, breaking a prototype control outside this node's scope."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-primal-buckets.html",
+      "line": 56,
+      "severity": "non-blocking",
+      "text": "the fragment states 'The fixed scalar cut tile is now _SCALAR_CUT_BATCH_WIDTH = 32' and 'Keeping the scalar width at 32 preserves the measured conic propagation structure'; both sentences are false at head and the record now contradicts the landed default."
+    },
+    {
+      "file": "scripts/prototypes/h200_levers/report.py",
+      "line": 170,
+      "severity": "non-blocking",
+      "text": "the arm change is computed from the first process of each arm only (a[0], b[0]); no verdict flips on the landed numbers, but the arm wall the plan names is the median warm wall, so the adjudication reads one of the two retained processes rather than the median it states."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/h200-levers/arm-walls.svg",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the inspected artifact is SVG_SHA256=903f9e45 recorded in figure-inspection-final.log, which is the blob at 82bab502d; the committed blob at head is d1d09633, so the provenance record does not name the figure that landed, though the diff between the two is matplotlib element ids and the generator date only."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "nova/equilibrium/support_read.py:532, nova/equilibrium/support_read.py:654, nova/equilibrium/support_read.py:678, nova/equilibrium/support_read.py:682, nova/equilibrium/support_read.py:1241 reach current.book and current.book_tangent, which resolve the tile through nova/equilibrium/current.py:492 and :636.",
+    "diff": "read all 29 commits against 12bc22e0; they change one production constant (nova/equilibrium/current.py:72), rename and retarget one guard in tests/test_booking_scalar_tile.py:120, and add the scripts/prototypes/h200_levers harness, the evidence fragment and the SVG.",
+    "done_when": "\u00a75's three clauses rest on the certified audit (18 comparisons, 81 paired receipts, max residual 8.89883722266e-11) recorded with EXIT=0 in audit-certified.log and the base/head pair in delivery-suite/baseline-suite.log and delivery-suite/after-suite.log, but the suite the manifest names never collects tests/test_book_primal_buckets.py, which the default change breaks.",
+    "goal": "the goal is to time every landed speed lever on the H200 and set each default from its measured verdict; the fragment tables all seven lever families at widths 1 and 16 and only the scalar tile default changes, at nova/equilibrium/current.py:72.",
+    "manifest": "read; it records status complete, 29 commits, base and after suites of 54 and 55 passed with zero failures, the certified audit at 273fa13aa and the deliberate negative control at EXIT=1.",
+    "write_paths": "the declared paths are scripts/prototypes/h200_levers, docs/evidence/fragments/sub-millisecond-forward-path/h200-levers.html, docs/figures/sub-millisecond-forward-path/h200-levers, nova/equilibrium/current.py, nova/equilibrium/support_read.py, nova/equilibrium/topology.py, nova/equilibrium/drive_continuation.py and tests/test_booking_scalar_tile.py; every changed path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_booking_scalar_tile.py:121 asserts the new default against a literal and :231 asserts refuse_inert raises on identical programs, the latter verified by the EXIT=1 negative control; the change nonetheless leaves tests/test_book_primal_buckets.py:37 asserting the old value 32.",
+    "evidence": "audit-certified.log records 'SUMMARY 81 paired process receipts inside precision budget; 18 comparisons; no input mismatches; max residual 8.89883722266e-11' with EXIT=0, and the receipt measurement-scalar/scalar-tile-32-16-1e-05-pair1-1.json carries the tabled 29.135708 ms median for the incumbent arm.",
+    "fit": "the added scripts/prototypes/h200_levers modules follow the repository's one-prototype-directory-per-measurement idiom and carry no plan, stage or ticket identifiers, but tests/test_book_primal_buckets.py:35 keeps a comment whose stated rationale the change overturns.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/h200-levers.html tables all seven lever families at widths 1 and 16 and sets only the scalar default, at nova/equilibrium/current.py:72, leaving the other defaults matching their measured verdicts.",
+    "reuse": "measure.py:55-58 and :219 import the existing machine, gradient, stream and jacobian helpers, but the scalar wall path re-implements the timing that scripts/prototypes/booking_scalar_tile/measure.py already owns without extending it.",
+    "scope_discipline": "every path in the 29-commit diff against 12bc22e0 is inside the declared write paths, from scripts/prototypes/h200_levers to docs/evidence/fragments/sub-millisecond-forward-path/h200-levers.html and tests/test_booking_scalar_tile.py."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to time every landed speed lever on the H200 and set each default from its measured verdict; docs/evidence/fragments/sub-millisecond-forward-path/h200-levers.html tables all seven lever families at widths 1 and 16 and only the scalar tile default changes, at nova/equilibrium/current.py:72.\nVERDICT done_when: \u00a75's three clauses rest on the certified audit (18 comparisons, 81 paired receipts, max residual 8.89883722266e-11) recorded with EXIT=0 in audit-certified.log and on the base/head suite pair in delivery-suite/baseline-suite.log and delivery-suite/after-suite.log, but the suite the manifest names never collects tests/test_book_primal_buckets.py, which the default change breaks.\nVERDICT write_paths: the declared paths are scripts/prototypes/h200_levers, docs/evidence/fragments/sub-millisecond-forward-path/h200-levers.html, docs/figures/sub-millisecond-forward-path/h200-levers, nova/equilibrium/current.py, nova/equilibrium/support_read.py, nova/equilibrium/topology.py, nova/equilibrium/drive_continuation.py and tests/test_booking_scalar_tile.py.\nVERDICT manifest: read; it records status complete, 29 commits, base and after suites of 54 and 55 passed with zero failures, the certified audit at 273fa13aa and the deliberate negative control at EXIT=1.\nVERDICT diff: read all 29 commits against 12bc22e0; they change one production constant (nova/equilibrium/current.py:72), retarget one guard in tests/test_booking_scalar_tile.py:120, and add the scripts/prototypes/h200_levers harness, the evidence fragment and the SVG.\nCALL_SITES: nova/equilibrium/support_read.py:532, nova/equilibrium/support_read.py:654, nova/equilibrium/support_read.py:678, nova/equilibrium/support_read.py:682, nova/equilibrium/support_read.py:1241\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/h200-levers.html tables all seven lever families and changes only the scalar default at nova/equilibrium/current.py:72.\nSCORE evidence: 16\nJUSTIFICATION evidence: audit-certified.log reads 'SUMMARY 81 paired process receipts inside precision budget; 18 comparisons; no input mismatches; max residual 8.89883722266e-11' at EXIT=0 and measurement-scalar/scalar-tile-32-16-1e-05-pair1-1.json carries the tabled 29.135708 ms median.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in the 29-commit diff against 12bc22e0 is inside the declared write paths.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_booking_scalar_tile.py:121 and :231 are independent guards with a recorded negative control, but tests/test_book_primal_buckets.py:37 still asserts the old default and fails at head.\nSCORE fit: 15\nJUSTIFICATION fit: scripts/prototypes/h200_levers follows the repository's per-prototype harness idiom and carries no plan identifiers, though tests/test_book_primal_buckets.py:35 keeps a rationale the change overturns.\nSCORE reuse: 13\nJUSTIFICATION reuse: scripts/prototypes/h200_levers/measure.py:55 reuses the existing machine and stream helpers but re-implements the scalar wall timing owned by scripts/prototypes/booking_scalar_tile/measure.py.\nFINDING tests/test_book_primal_buckets.py:37 blocking: test_scalar_cut_tile_keeps_wide_batches asserts current._SCALAR_CUT_BATCH_WIDTH == 32 while nova/equilibrium/current.py sets 128 at head, so the test fails deterministically and the node's gate never collected it.\nFINDING scripts/prototypes/bank_booking_primal_buckets/cpu_contract.py:83 non-blocking: the narrow-tile control locates its mutation by the literal '_SCALAR_CUT_BATCH_WIDTH = 32' and asserts its presence, so it now aborts instead of producing its comparison.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-booking-primal-buckets.html:56 non-blocking: the record still states the scalar cut tile is 32 and that keeping 32 preserves the propagation structure, both false at head.\nFINDING scripts/prototypes/h200_levers/report.py:170 non-blocking: the arm change is computed from the first process of each arm only rather than the median warm wall the plan names; no verdict flips on the landed numbers.\nFINDING docs/figures/sub-millisecond-forward-path/h200-levers/arm-walls.svg:1 non-blocking: the inspected SHA 903f9e45 is the blob at 82bab502d, not the committed d1d09633, so the inspection record names a figure other than the one that landed.",
+  "review_run_id": "r-20261113T084816904571-review-of-h200-levers-16a90eb5bcb1",
+  "reviewed_base_sha": "12bc22e03a16c201766d975f46c23facf3916daf",
+  "reviewed_head_sha": "16a90eb5bcb11a7e39237c92ac77759ab4e7b734",
+  "reviewed_run_id": "r-20261112T182638024068-h200-levers",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 13,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T09:38:11.496677+00:00",
+  "total": 90
+}

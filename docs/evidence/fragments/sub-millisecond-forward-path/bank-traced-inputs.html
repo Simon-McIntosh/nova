@@ -68,7 +68,7 @@ base tree and is run at the head only.</p>
 <tr><td>test_support_read</td><td>13; 2 skipped</td><td>13; 2 skipped</td><td>0</td></tr>
 <tr><td>test_bank_drive_continuation</td><td>10</td><td>10</td><td>0</td></tr>
 <tr><td>test_bank_lane_drive</td><td>11</td><td>11</td><td>0</td></tr>
-<tr><td>test_bank_traced_inputs</td><td>absent</td><td>pending pin check</td><td>pending</td></tr>
+<tr><td>test_bank_traced_inputs</td><td>absent</td><td>6 passed, 1 failed</td><td>1 new-file failure</td></tr>
 </tbody></table>
 <p id="bank-traced-inputs-pin-measure">The new file checks the 550-cell certificate's
 nodal jets and booking moments at 1e-12 relative tolerance, constant-table source
@@ -77,10 +77,22 @@ reuse, coil propagation into the read/residual/Jacobian, zero-update refusal and
 independent centroid targets. The centroid test uses the actual read and booking on
 a 50-cell limited bank with analytic exterior and zero plasma-response rows; the
 scenario node measures coupled ITER convergence and H200 throughput.</p>
+<p id="bank-traced-inputs-pin-timeout">The pin result remains unverified. The head
+file ends <code>1 failed, 6 passed in 764.74s (0:12:44)</code> and
+<code>EXIT=1</code>. The failing test is
+<code>test_pin_holds_independent_lane_centroids</code>, with
+<code>Failed: Timeout (&gt;300.0s) from pytest-timeout</code>. Its compilation log
+records 221.029 s tracing, 17.496 s converting to MLIR and 241.881 s compiling
+the full program. No centroid-height or full-solve zero-recompilation receipt
+was returned. This is the second counted failure of this gate, after the
+zero-update-history defect above, so the worker stopped under its retry contract.
+The next attempt needs an explicit cold-compile budget for this test, or a smaller
+pin graph, before the pin's numerical clause can be accepted.</p>
 <p>Durable logs and receipts are under
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T165201745905-bank-traced-inputs/</code>:
 <code>focused/</code> retains the first failure and closure control;
 <code>paired-final/</code> retains the paired files and repeated closure control.
-The manifest's final-head arm records the promotion replay after this fragment is
-committed. That replay uses <code>delivery-head/head-test_bank_traced_inputs.log</code>.</p>
+The final-head replay was not started because the pin gate did not pass. The
+fragment and harness commits after the measured implementation head change no
+product source or tests.</p>
 </section>

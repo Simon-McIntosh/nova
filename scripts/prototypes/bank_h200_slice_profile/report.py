@@ -102,6 +102,10 @@ def attributed(record, directory, program):
             label = "full geometry"
         else:
             label = "other and fused"
+        # The carried-only capture asserts no rebuild before recording; a
+        # full-source alias there is shared continuous support, not a full read.
+        if program == "carried" and label == "full geometry":
+            label = "carried geometry"
         totals[label] += row["device_ms"]
         if label == "carried geometry":
             if "carried_decision_changed" in names or "incidence guard" in row["group"]:

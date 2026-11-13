@@ -44,7 +44,13 @@ from scripts.west_iron_galerkin_pair.measure import (  # noqa: E402
     save,
     source_field,
 )
-from tests.test_magnetisation import loop, shell  # noqa: E402
+from tests.test_magnetisation import (  # noqa: E402
+    GRADED_CELLS_ACROSS,
+    GRADED_COARSE,
+    GRADED_FINE,
+    loop,
+    shell,
+)
 
 SHELL_MU = 1000.0
 SHELL_PROBES = np.array([[2.0, 0.0], [0.0, 2.0], [3.0, 1.0]])
@@ -148,10 +154,7 @@ def shell_arm(label, size, update):
     cells = iron._mesh(region, size)
     row = dict(mesh=label, **mesh_fields(cells, region))
     row["assemble_seconds"] = cold_assembly(cells)
-    spectrum = np.linalg.eigvalsh(
-        np.asarray(iron._galerkin_interaction(cells)) / iron._MU0
-    )
-    row.update(spectrum_min=float(spectrum[0]), spectrum_max=float(spectrum[-1]))
+    row["spectrum"] = iron.galerkin_spectrum(cells, iron._galerkin_interaction(cells))
     update(row)
     started = time.monotonic()
     result = iron.solve_magnetisation(
@@ -285,9 +288,9 @@ def west_inputs():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--fine", type=float, default=0.002)
-    parser.add_argument("--coarse", type=float, default=0.004)
-    parser.add_argument("--cells-across", type=float, default=20.0)
+    parser.add_argument("--fine", type=float, default=GRADED_FINE)
+    parser.add_argument("--coarse", type=float, default=GRADED_COARSE)
+    parser.add_argument("--cells-across", type=float, default=GRADED_CELLS_ACROSS)
     parser.add_argument("--west-fine", type=float, default=0.008)
     parser.add_argument("--west-coarse", type=float, default=0.08)
     parser.add_argument("--arms", default="shell,graded,west")

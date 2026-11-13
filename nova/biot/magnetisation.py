@@ -239,6 +239,31 @@ def _galerkin_interaction(cells, plan=_PLAN):
     )
 
 
+def galerkin_spectrum(cells, gram):
+    """Return the symmetric spectrum of the volume-weighted Galerkin operator.
+
+    ``gram`` is the cell interaction returned by :func:`_galerkin_interaction`,
+    which is not symmetric on its own: the axisymmetric volume measure
+    ``2*pi*r`` enters the energy form, so the operator carrying the spectrum is
+    ``V**(1/2) G V**(-1/2) / mu0`` with ``V`` the repeated cell volume. Reading
+    ``eigvalsh`` off ``G`` alone reads one triangle of an unsymmetric matrix and
+    reports a range the projection does not have.
+    """
+    volume = np.tile(2 * np.pi * cells.areas * cells.centroids[:, 0], 2)
+    root = np.sqrt(volume)
+    weighted = np.asarray(gram) / _MU0 * root[:, None] / root[None, :]
+    energy = volume[:, None] * np.asarray(gram)
+    eigenvalues = np.linalg.eigvalsh((weighted + weighted.T) / 2)
+    return dict(
+        cells=int(len(cells.centroids)),
+        volume_symmetry=float(
+            np.linalg.norm(energy - energy.T) / np.linalg.norm(energy)
+        ),
+        minimum=float(eigenvalues[0]),
+        maximum=float(eigenvalues[-1]),
+    )
+
+
 def _interaction(cells, points, plan):
     """Return the sheet response of the meshed iron at (R, Z) targets."""
     # B/M is invariant under a common dilation of source and target coordinates.

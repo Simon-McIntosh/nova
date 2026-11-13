@@ -77,6 +77,34 @@ def shell():
     )
 
 
+def two_radius_region():
+    """Two concentric guards, so the interaction spans more than one radius."""
+    outer = (
+        shapely.Point(0, 0)
+        .buffer(1.0, 128)
+        .difference(shapely.Point(0, 0).buffer(0.9, 128))
+    )
+    inner = (
+        shapely.Point(0, 0)
+        .buffer(0.6, 128)
+        .difference(shapely.Point(0, 0).buffer(0.55, 128))
+    )
+    return outer.union(inner).intersection(shapely.box(0, -1.2, 1.2, 1.2))
+
+
+def test_galerkin_spectrum_is_the_volume_weighted_symmetric_range():
+    cells = iron._mesh(two_radius_region(), 0.05)
+    gram = iron._galerkin_interaction(cells)
+    spectrum = iron.galerkin_spectrum(cells, gram)
+    assert spectrum["volume_symmetry"] < 1e-12
+    assert spectrum["minimum"] > -1e-12
+    assert spectrum["maximum"] <= 1.0
+    # G is unsymmetric because the 2*pi*r volume measure lives in the energy
+    # form, so eigvalsh reads one triangle and reports a fold it does not have.
+    raw = np.linalg.eigvalsh(np.asarray(gram) / iron._MU0)
+    assert raw[0] < -0.05 < 1.0 < raw[-1]
+
+
 def uniform(points, strength=0.01):
     return np.tile([0.0, strength], (len(points), 1))
 

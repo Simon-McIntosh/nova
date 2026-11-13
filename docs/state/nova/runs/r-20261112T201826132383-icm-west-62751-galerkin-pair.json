@@ -1201,6 +1201,55 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "96113e6079651d177d01011b86950b6a72351bba",
+  "release": {
+    "arms_kept": [
+      {
+        "path": "/home/ITER/mcintos/.cache/nova-icm-pair",
+        "reason": "outside the node-local temp root /tmp"
+      },
+      {
+        "path": "/home/ITER/mcintos/.cache/nova-icm-pair/base-tree",
+        "reason": "outside the node-local temp root /tmp"
+      }
+    ],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261112T201826132383-icm-west-62751-galerkin-pair",
+    "scratch_bytes": 4928528,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261112T201826132383-icm-west-62751-galerkin-pair",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 4928528,
+        "path": "/tmp/reckon-crew-scratch/r-20261112T201826132383-icm-west-62751-galerkin-pair"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-west-62751-galerkin-pair",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/_trash/r-20261112T201826132383-icm-west-62751-galerkin-pair-20261113T120658647577Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

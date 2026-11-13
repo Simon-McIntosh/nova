@@ -27,19 +27,20 @@ BANKED_BASE_DISTANCE_M = {
 
 def read(root, arm, case):
     folder = root / arm / f"frame-{case[0]}-{case[1]}"
-    shadow = json.loads((folder / "shadow-image.json").read_text())
     receipt = json.loads((folder / "receipt.json").read_text())
+    census = json.loads((folder / "core-analysis.json").read_text())
     topology = receipt["terminal_topology"]
     return {
-        "residual": float(shadow["residual"]),
-        "converged": bool(shadow["converged"]),
-        "reason": shadow["termination_reason"],
-        "maxima_count": int(shadow["maxima_count"]),
-        "shadow_node_count": int(shadow["shadow_node_count"]),
+        "residual": float(receipt["residual"]),
+        "converged": bool(receipt["converged"]),
+        "reason": int(receipt["terminal_reason"]),
+        "maxima_count": int(census["maxima_count"]),
+        "minima_count": int(census["minima_count"]),
+        "shadow_node_count": int(receipt["shadow_count"]),
         "support_cells": int(topology["support"]),
-        "lower_x_distance_m": float(shadow["lower_x_distance_m"]),
-        "lower_x_rz_m": shadow["lower_x_rz_m"],
-        "efit_x_rz_m": shadow["efit_x_rz_m"],
+        "lower_x_distance_m": float(topology["lower_saddle_distance_m"]),
+        "lower_x_rz_m": topology["lower_saddle_rz_m"],
+        "efit_x_rz_m": receipt["efit_x_point_rz_m"],
         "arm": json.loads((folder / "arm.json").read_text())["arm"],
     }
 
@@ -49,12 +50,29 @@ def main():
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    report = {"rows": {}, "control": {}}
+    report = {"rows": {}, "control": {}, "missing": []}
     for case in CASES:
+        name = case[2]
+        if not all(
+            (args.input / arm / f"frame-{case[0]}-{case[1]}" / "receipt.json").is_file()
+            for arm in ("base", "edge")
+        ):
+            report["missing"].append(name)
+            print(f"{name} MISSING a receipt")
+            continue
         base = read(args.input, "base", case)
         edge = read(args.input, "edge", case)
-        name = case[2]
         closed = base["lower_x_distance_m"] - edge["lower_x_distance_m"]
+        components = {}
+        for axis, index in (("radius", 0), ("height", 1)):
+            start = base["lower_x_rz_m"][index] - base["efit_x_rz_m"][index]
+            end = edge["lower_x_rz_m"][index] - edge["efit_x_rz_m"][index]
+            components[axis] = {
+                "base_m": start,
+                "edge_m": end,
+                "closed_m": start - end,
+                "share_closed": (start - end) / start if start else None,
+            }
         report["rows"][name] = {
             "base": base,
             "edge": edge,
@@ -63,6 +81,7 @@ def main():
             "edge_over_base_distance": (
                 edge["lower_x_distance_m"] / base["lower_x_distance_m"]
             ),
+            "components": components,
         }
         banked = BANKED_BASE_DISTANCE_M[name]
         report["control"][name] = {
@@ -75,7 +94,11 @@ def main():
         print(
             f"{name} base {base['lower_x_distance_m']:.5f} m "
             f"(banked {banked:.5f}) -> edge {edge['lower_x_distance_m']:.5f} m; "
-            f"closed {100 * closed:.2f} cm ({fraction:.1f}%)"
+            f"closed {100 * closed:.2f} cm ({fraction:.1f}%); "
+            f"R {100 * components['radius']['base_m']:.4f}->"
+            f"{100 * components['radius']['edge_m']:.4f} cm, Z "
+            f"{100 * components['height']['base_m']:.4f}->"
+            f"{100 * components['height']['edge_m']:.4f} cm"
         )
     report["all_bases_reproduced"] = all(
         item["reproduced"] for item in report["control"].values()

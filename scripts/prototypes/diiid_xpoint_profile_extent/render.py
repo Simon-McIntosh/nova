@@ -49,12 +49,36 @@ SHOT_LABELS = {137: "137D", 146: "146L", 179: "179L"}
 
 
 def read(root, arm, frame, branch):
+    """Read one row's terminal field, census and paired null positions.
+
+    The solve receipt and the census carry everything the panels draw. An
+    imaging receipt is used when a row has one, and otherwise the panel simply
+    carries no shadow-node markers.
+    """
+
     folder = root / arm / f"frame-{frame}-{branch}"
+    receipt = json.loads((folder / "receipt.json").read_text())
+    image = folder / "shadow-image.json"
+    summary = dict(
+        lower_x_rz_m=receipt["terminal_topology"]["lower_saddle_rz_m"],
+        efit_x_rz_m=receipt["efit_x_point_rz_m"],
+        residual=receipt["residual"],
+        converged=receipt["converged"],
+        shadow_rz_m=[],
+    )
+    if image.is_file():
+        measured = json.loads(image.read_text())
+        summary.update(
+            lower_x_rz_m=measured["lower_x_rz_m"],
+            residual=measured["residual"],
+            converged=measured["converged"],
+            shadow_rz_m=measured["shadow_rz_m"],
+        )
     return (
         dict(np.load(folder / "terminal.npz")),
-        json.loads((folder / "receipt.json").read_text()),
+        receipt,
         json.loads((folder / "core-analysis.json").read_text()),
-        json.loads((folder / "shadow-image.json").read_text()),
+        summary,
     )
 
 
@@ -254,12 +278,12 @@ def edge_profiles(tables, output, previews):
                 knots,
                 values,
                 ls="none",
-                marker="P",
-                ms=9,
-                mfc="none",
+                marker="o",
+                ms=7,
+                mfc="white",
                 mec=REFERENCE,
                 mew=1.6,
-                zorder=3,
+                zorder=5,
             )
             ax.yaxis.set_major_locator(MaxNLocator(4))
             ax.set_xticks((0.95, 1.00))
@@ -279,10 +303,10 @@ def edge_profiles(tables, output, previews):
             [],
             [],
             color=REFERENCE,
-            marker="P",
-            mfc="none",
+            marker="o",
+            mfc="white",
             ls="none",
-            label="EFIT map extraction",
+            label="EFIT map extraction knots",
         ),
     ]
     figure.legend(

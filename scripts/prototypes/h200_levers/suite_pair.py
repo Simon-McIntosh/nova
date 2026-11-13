@@ -6,7 +6,6 @@ import json
 import os
 from pathlib import Path
 import re
-import shlex
 import subprocess
 import tarfile
 import tempfile
@@ -97,7 +96,9 @@ def main():
                     check=True,
                 )
                 result = subprocess.run(
-                    shlex.split(command.split(" ", 2)[2]),
+                    command,
+                    shell=True,
+                    executable="/bin/bash",
                     cwd=tree,
                     env=env,
                     stdout=output,

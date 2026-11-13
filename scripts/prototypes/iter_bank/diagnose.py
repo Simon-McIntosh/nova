@@ -31,6 +31,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--bank", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--conditioning-only", action="store_true")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     assert jax.config.jax_enable_x64
@@ -81,6 +82,29 @@ def main():
         moment = sampled_moments(geometry, state[2])
         coil_moment = np.zeros((len(polygons), 3))
         coil_moment[:, 0] = turns * state[3][owners]
+        np.savez(
+            args.output / f"state-{state[0]}.npz",
+            moments=moment,
+            coil_currents=state[3],
+            points=points,
+        )
+        if args.conditioning_only:
+            rows = np.asarray(bank.rows)[: len(points)]
+            signed = np.einsum("ncmq,cm->nq", rows, moment)
+            absolute = np.einsum("ncmq,cm->nq", np.abs(rows), np.abs(moment))
+            item = dict(
+                index=state[0],
+                normwise_condition=(
+                    np.linalg.norm(absolute, axis=0) / np.linalg.norm(signed, axis=0)
+                ).tolist(),
+                row_maximum=np.max(np.abs(rows), axis=(0, 1, 2)).tolist(),
+            )
+            emit("CONDITIONING", **item)
+            records.append(item)
+            (args.output / "conditioning.json").write_text(
+                json.dumps(records, indent=2)
+            )
+            continue
         expected = direct_map(points, plasma, moment, coils, coil_moment)
         plasma_actual = np.asarray(
             support_read.nodal_jets(bank, tuple(jnp.asarray(moment.T)))

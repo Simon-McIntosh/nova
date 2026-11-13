@@ -37,14 +37,11 @@ from nova.imas.machine import StaticMachineDescription  # noqa: E402
 
 SOURCE = Path("/home/ITER/mcintos/.cache/nova-west-stray/hex/west-62751-hex.pkl")
 SOURCE_SHA256 = "228e9c7a277e6d16f180cae4566eaadbb4e8df13ae2b49e78a33c53bd5918533"
-REFERENCE = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/"
-    "r-20261111T130417404611-icm-west-62751-solve/measurement-pair/inputs.json"
+EVIDENCE = Path(
+    "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/mesh-pair"
 )
-PRIOR_ROOTS = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/"
-    "r-20261112T162338749893-icm-galerkin-interaction/measurement.json"
-)
+REFERENCE = EVIDENCE / "inputs/west-62751-solve-inputs.json"
+PRIOR_ROOTS = EVIDENCE / "inputs/galerkin-interaction-measurement.json"
 DISTANCES = np.array([1.0, 2.0, 4.0])
 MU0 = 4e-7 * np.pi
 
@@ -277,6 +274,38 @@ def measure_size(region, external, table_b, table_mu, size, air, probes, out):
     return row
 
 
+def code_provenance():
+    """Return the revision and the blob hash of the code this run executes.
+
+    A receipt that names only the tree HEAD can describe code that never ran:
+    the measured script is a working-tree file, and an edit between the last
+    commit and the launch is invisible in HEAD. So the tree must be clean, and
+    the blob of this file must be the blob that HEAD commits.
+    """
+    root = Path(__file__).resolve().parents[2]
+    script = Path(__file__).resolve()
+
+    def git(*arguments):
+        return subprocess.check_output(
+            ["git", "-C", str(root), *arguments], text=True
+        ).strip()
+
+    dirty = git("status", "--porcelain", "--untracked-files=no")
+    if dirty:
+        raise SystemExit(
+            "refusing to measure a dirty tree; commit these paths first:\n" + dirty
+        )
+    revision = git("rev-parse", "HEAD")
+    blob = git("hash-object", "--", str(script))
+    committed = git("rev-parse", f"{revision}:{script.relative_to(root)}")
+    if blob != committed:
+        raise SystemExit(
+            f"refusing to measure {script} at blob {blob}: revision {revision} "
+            f"commits blob {committed}"
+        )
+    return revision, blob
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
@@ -284,14 +313,11 @@ def main():
     args = parser.parse_args()
     out = args.output
     out.mkdir(parents=True, exist_ok=True)
-    revision = subprocess.check_output(
-        ["git", "-C", str(Path(__file__).resolve().parents[2]), "rev-parse", "HEAD"],
-        text=True,
-    ).strip()
+    revision, blob = code_provenance()
     source_bytes = Path(iron.__file__).read_bytes()
     print(
-        f"# revision: {revision} tree: {Path.cwd().resolve()} command: "
-        + shlex.join([sys.executable, *sys.argv]),
+        f"# revision: {revision} measure_py_blob: {blob} tree: {Path.cwd().resolve()} "
+        "command: " + shlex.join([sys.executable, *sys.argv]),
         flush=True,
     )
     print(
@@ -346,6 +372,7 @@ def main():
     roots = {name: prior["far_field"][name]["magnitude_T"] for name in ("A", "B")}
     record = dict(
         revision=revision,
+        measure_py_blob=blob,
         source_sha256=hashlib.sha256(source_bytes).hexdigest(),
         module=iron.__file__,
         cwd=str(Path.cwd().resolve()),

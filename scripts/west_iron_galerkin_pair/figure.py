@@ -161,12 +161,7 @@ def render(run: Path, destination: Path):
     trace.text(
         0.02,
         0.96,
-        "fine − coarse: "
-        + ", ".join(
-            f"{value:+.2f}" if abs(value) < 0.5 else f"{value:+.1f}"
-            for value in difference
-        )
-        + " µT",
+        "fine − coarse: " + ", ".join(f"{value:+.2g}" for value in difference) + " µT",
         transform=trace.transAxes,
         fontsize=14,
         color=DIFFERENCE,
@@ -210,7 +205,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--destination",
         type=Path,
-        default=Path("docs/figures/iron-core-magnetisation/icm-west-62751-galerkin-pair"),
+        default=Path(
+            "docs/figures/iron-core-magnetisation/icm-west-62751-galerkin-pair"
+        ),
     )
     arguments = parser.parse_args()
     render(arguments.run, arguments.destination)

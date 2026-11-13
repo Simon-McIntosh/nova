@@ -35,9 +35,16 @@ def tasks():
 
 
 def completed(folder):
+    """A row counts as landed only when its measure and its image read both wrote a
+    receipt, because the image read is the last step and a row cancelled inside it
+    leaves a terminal array that looks finished but has no imaged state."""
+
     log = folder / "row.log"
-    if not (folder / "receipt.json").is_file() or not log.is_file():
+    if not log.is_file():
         return False
+    for name in ("receipt.json", "core-analysis.json", "shadow-image.json"):
+        if not (folder / name).is_file():
+            return False
     return log.read_text().endswith("EXIT=0\n")
 
 

@@ -43,6 +43,13 @@
       "note": "A correcting comment states the per-pass table does not exist yet and is owed by node variadic-split at the path its dispatch assigns.",
       "reason": "",
       "when": "2026-11-13T16:53:25.154701+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "finding": "reasoning-1",
+      "reason": "The jets section is not in this wave. A comment on it records that its 60 s bound needs the second-derivative path to shrink as well as the variadic lever, and that its lever and bound are restated from the head-arm profile the variadic section lands, before it is dispatched.",
+      "when": "2026-11-13T16:53:44.785089+00:00"
     }
   ],
   "responses": {
@@ -54,6 +61,12 @@
       "note": "A correcting comment states the per-pass table does not exist yet and is owed by node variadic-split at the path its dispatch assigns.",
       "reason": "",
       "when": "2026-11-13T16:53:25.154701+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "reason": "The jets section is not in this wave. A comment on it records that its 60 s bound needs the second-derivative path to shrink as well as the variadic lever, and that its lever and bound are restated from the head-arm profile the variadic section lands, before it is dispatched.",
+      "when": "2026-11-13T16:53:44.785089+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261113T164531019507-plan-review-of-kernel-compile-barrier.json",

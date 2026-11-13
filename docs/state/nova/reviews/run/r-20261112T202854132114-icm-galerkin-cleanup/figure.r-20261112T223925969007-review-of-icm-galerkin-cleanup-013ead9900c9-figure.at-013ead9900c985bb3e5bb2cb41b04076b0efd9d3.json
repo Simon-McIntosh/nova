@@ -1,0 +1,40 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-12T23:04:34.283Z",
+  "dispatched_at": "2026-11-12T22:51:47Z",
+  "figures": [
+    {
+      "file": "docs/figures/iron-core-magnetisation/icm-galerkin-interaction/spectrum-ramp.svg",
+      "rendered": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T223925969007-review-of-icm-galerkin-cleanup-013ead9900c9-figure/image-0.png"
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-interaction.html",
+      "id": "f75699cca37",
+      "line": 19,
+      "severity": "non-blocking",
+      "summary": "The caption's final sentence is production provenance rather than a reading of the figure: it states the 14 x 7.2 in canvas and 16 cm height, that all 28 text artists pass the layout check, and that the producer inspected the rendered PNG with no collision or clipping. A reader of the evidence page gets build diagnostics where it expects an explanation of the two panels, and the claim duplicates what the layout check already guarantees."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: pass \u2014 both panels read at a glance at 1400x721 and when downscaled to a 900 px served column; axis labels and every tick are complete and unclipped, and the dashed collocation series is now followable where it coincides with the Galerkin curve (302 of 405 columns, 75%, carry a grey pixel on the purple curve in the coincident band).\nRUBRIC data_ink: pass \u2014 two curves per panel plus the two dotted 0/1 bound rules; no gradient, fill, shading or marker clutter.\nRUBRIC decoration: pass \u2014 white background, no gridlines, despined; the dotted 0 and 1 rules are stated data bounds.\nRUBRIC contrast: pass \u2014 all text near-black on white; purple #7b4fb3 and grey #929292 each clear 3:1 against white, and the #4d4d4d bound rules stay legible without competing.\nRUBRIC table_form: pass \u2014 continuous relationships are plotted; the per-step numbers are in the fragment's table.\nRUBRIC label_collision: pass \u2014 no clipped text, no overlapping text artists, and no label over plotted data.\nFINDING (non-blocking) docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-interaction.html:19 - the caption closes with build provenance (canvas size, 28 text artists passing the layout check, producer inspection) rather than a reading of the figure, giving the evidence page diagnostics where it expects explanation.",
+  "review_run_id": "r-20261112T223925969007-review-of-icm-galerkin-cleanup-013ead9900c9-figure",
+  "reviewed_base_sha": "26c4fe159bc71f1d3b7b3315f806102d2c507091",
+  "reviewed_head_sha": "013ead9900c985bb3e5bb2cb41b04076b0efd9d3",
+  "reviewed_run_id": "r-20261112T202854132114-icm-galerkin-cleanup",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass \u2014 every text artist on the canvas is near-black on white and the legend labels are black; the purple series (#7b4fb3) and the grey prior series (#929292) each clear 3:1 against white, and the bound rules at #4d4d4d are legible without competing with either.",
+    "data_ink": "pass \u2014 the marks are two curves per panel plus the two dotted 0/1 bound rules in the left panel; there is no gradient, fill, shading, marker clutter or unexplained series.",
+    "decoration": "pass \u2014 white background, no gridlines, no band or theme fill, top and right spines absent; the dotted 0 and 1 rules are stated data bounds, not decoration.",
+    "label_collision": "pass \u2014 no text is clipped at a canvas edge, no two text artists overlap, and no label sits on plotted data; the 1.00 x tick of the left panel is the nearest approach to the panel edge and still clears it.",
+    "legibility": "pass \u2014 both panels read at a glance at the rendered 1400x721 size and when downscaled to a 900 px served column: the axis labels 'eigenvalue of volume-weighted G / \u03bc\u2080', 'sorted eigenvalue fraction', 'maximum |M| [MA/m]' and 'drive fraction' are complete and unclipped, every tick label is legible, and the frameless two-entry legend sits above both panels clear of the data. The dashed collocation series is now drawn over the Galerkin curve rather than beneath it, and 302 of 405 columns (75%) in the band where the two spectra coincide carry a grey pixel on the purple curve, so the prior series is followable across the middle of the panel instead of appearing only at the two ends.",
+    "table_form": "pass \u2014 both panels plot continuous relationships (sorted eigenvalue against fraction, maximum |M| against drive); the per-step numbers live in the evidence fragment's table, not in the picture."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T00:25:19.280842+00:00",
+  "total": null
+}

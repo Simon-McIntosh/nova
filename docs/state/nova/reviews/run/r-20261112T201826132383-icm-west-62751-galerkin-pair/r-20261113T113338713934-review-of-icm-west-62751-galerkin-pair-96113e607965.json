@@ -17,6 +17,11 @@
       "kind": "exempted",
       "reason": "Deferred to the scripts-cleanup node, which owns the WEST script and fragment repairs: the mesh-pair caption must state the colour scale's true span, 1.52 to 1692.4, or the figure must normalise from 215.1; the numbers the section verdict rests on are unaffected.",
       "recorded_at": "2026-11-13T12:07:38.247887+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Deferred to the scripts-cleanup node: assert that the fine arm is the smaller cell size in figure.py.",
+      "recorded_at": "2026-11-13T12:07:55.862950+00:00"
     }
   },
   "findings": [

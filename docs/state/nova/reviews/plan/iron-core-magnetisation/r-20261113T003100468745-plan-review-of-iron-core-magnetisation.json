@@ -25,7 +25,30 @@
   "plan_slug": "iron-core-magnetisation",
   "plan_version": 74,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "37faa0e80e75616d60badec424999642806a9110",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Clause (1) now names the per-probe collocated 20 mm references and their ceilings (mu_r 1000: 2.7/3.0/2.0 % -> 3.2/3.5/2.5 %; mu_r 100: the per-probe collocation values recorded in icm-galerkin-interaction.html, each plus 0.5 points), probe by probe, not as a worst case.",
+      "reason": "",
+      "when": "2026-11-13T00:53:20.033919+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "37faa0e80e75616d60badec424999642806a9110",
+      "commit_basis": "edit",
+      "note": "Clause (1) now names the per-probe collocated 20 mm references and their ceilings (mu_r 1000: 2.7/3.0/2.0 % -> 3.2/3.5/2.5 %; mu_r 100: the per-probe collocation values recorded in icm-galerkin-interaction.html, each plus 0.5 points), probe by probe, not as a worst case.",
+      "reason": "",
+      "when": "2026-11-13T00:53:20.033919+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261113T003100468745-plan-review-of-iron-core-magnetisation.json",
   "review_run_id": "r-20261113T003100468745-plan-review-of-iron-core-magnetisation",
   "reviewed_blob_sha": "2ad77cc4e33ea9310a876e18890a0b13756927b0",
   "rubric": "content",

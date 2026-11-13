@@ -136,10 +136,33 @@
       </thead>
       <tbody>
         <tr><td>graded 16 mm / 80 mm</td><td>5864</td><td>681.0</td><td>962.0</td><td>234.327</td><td>177.586</td><td>81.772</td><td>5 corrections</td></tr>
+        <tr><td>graded 8 mm / 40 mm</td><td>11708</td><td>2292.3</td><td>3126.3</td><td>242.455</td><td>168.340</td><td>75.920</td><td>5 corrections</td></tr>
       </tbody>
     </table>
     <p>Both levels converge from a demagnetised state at full drive with exact
-    Newton steps, and both spectra lie inside [0, 1].</p>
+    Newton steps, both land inside the CEA table's own permeability range
+    (215.48 → 1692.29 and 215.64 → 1692.18), and no cell is driven past the
+    tabulated end.</p>
+    <h4 id="icm-graded-refinement-west-change">The far-field change when the spacing is halved</h4>
+    <table>
+      <thead>
+        <tr><th>probe</th><th>16 mm level [µT]</th><th>8 mm level [µT]</th><th>fine − coarse [µT]</th><th>of the coarse value [%]</th><th>clause</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>+1 m</td><td>234.327197</td><td>242.454626</td><td>+8.127429</td><td>+3.468</td><td>misses 1 %</td></tr>
+        <tr><td>+2 m</td><td>177.585819</td><td>168.339521</td><td>−9.246298</td><td>−5.207</td><td>misses 1 %</td></tr>
+        <tr><td>+4 m</td><td>81.772255</td><td>75.920213</td><td>−5.852042</td><td>−7.157</td><td>misses 1 %</td></tr>
+      </tbody>
+    </table>
+    <p>The clause asked for a change under one per cent at +1, +2 and +4 m
+    between two graded levels, or a record of by how much it misses. It misses
+    at all three probes: 3.47, 5.21 and 7.16 per cent, growing outward. The
+    change is one-directional rather than scatter — the near probe rises and
+    the far probes fall, and the finer level sits closer to the near probe's
+    previously recorded 242.64 µT — so this is the discretisation error of the
+    coarser level showing itself, not a solution branch difference. Halving the
+    spacing from 16 mm to 8 mm is not enough to settle the far probes on this
+    geometry; it moves them by several per cent.</p>
 
     <h2 id="icm-graded-refinement-control">Negative control and gate</h2>
     <p>The under-resolved arm is the same grading doubled everywhere through the

@@ -27,18 +27,20 @@ BANKED_BASE_DISTANCE_M = {
 
 def read(root, arm, case):
     folder = root / arm / f"frame-{case[0]}-{case[1]}"
-    receipt = json.loads((folder / "receipt.json").read_text())
     shadow = json.loads((folder / "shadow-image.json").read_text())
+    receipt = json.loads((folder / "receipt.json").read_text())
+    topology = receipt["terminal_topology"]
     return {
-        "residual": float(receipt["residual"]),
-        "converged": bool(receipt["converged"]),
-        "reason": receipt.get("terminal_reason", shadow.get("termination_reason")),
+        "residual": float(shadow["residual"]),
+        "converged": bool(shadow["converged"]),
+        "reason": shadow["termination_reason"],
         "maxima_count": int(shadow["maxima_count"]),
+        "shadow_node_count": int(shadow["shadow_node_count"]),
+        "support_cells": int(topology["support"]),
         "lower_x_distance_m": float(shadow["lower_x_distance_m"]),
         "lower_x_rz_m": shadow["lower_x_rz_m"],
         "efit_x_rz_m": shadow["efit_x_rz_m"],
-        "support_cells": int(receipt.get("support_cells", 0)),
-        "arms": json.loads((folder / "arm.json").read_text())["arm"],
+        "arm": json.loads((folder / "arm.json").read_text())["arm"],
     }
 
 

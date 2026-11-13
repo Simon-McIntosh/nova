@@ -13,6 +13,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib.ticker import MaxNLocator
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -225,7 +226,7 @@ def edge_profiles(tables, output, previews):
     """Draw both arms against the extraction they prescribe, near the edge."""
 
     figure, grid = plt.subplots(3, 2, figsize=CANVAS, dpi=100, sharex=True)
-    coordinates = np.linspace(0.88, 1.0, 241)
+    coordinates = np.linspace(0.94, 1.0, 241)
     labels = (
         ("p_prime", "p' [MPa Wb$^{-1}$]", 1e-6),
         ("ff_prime", "FF' [T$^2$ m$^2$ Wb$^{-1}$]", 1.0),
@@ -233,16 +234,6 @@ def edge_profiles(tables, output, previews):
     notes = []
     for row_index, frame in enumerate(SHOTS):
         record = tables["rows"][str(frame)]
-        notes.append(
-            figure.text(
-                0.012,
-                0.79 - 0.30 * row_index,
-                f"{SHOT_LABELS[frame]}",
-                ha="left",
-                va="center",
-                fontsize=14,
-            )
-        )
         for column, (name, ylabel, scale) in enumerate(labels):
             ax = grid[row_index][column]
             for side in ("top", "right"):
@@ -251,7 +242,9 @@ def edge_profiles(tables, output, previews):
             edge = np.asarray(curve(record["edge_table"], name)(coordinates)) * scale
             knots = np.asarray(record["edge_table"]["coordinate"])
             values = np.asarray(record["edge_table"][name]) * scale
-            ax.plot(coordinates, base, color="#929292", lw=2.6, ls="--", zorder=2)
+            drawn = knots >= coordinates[0]
+            knots, values = knots[drawn], values[drawn]
+            ax.plot(coordinates, base, color="#929292", lw=3.0, ls="--", zorder=2)
             ax.plot(coordinates, edge, color=SOLVED, lw=3.0, zorder=4)
             ax.plot(
                 knots,
@@ -264,12 +257,19 @@ def edge_profiles(tables, output, previews):
                 mew=1.6,
                 zorder=3,
             )
-            ax.set_ylabel(ylabel)
+            ax.yaxis.set_major_locator(MaxNLocator(4))
+            ax.set_xticks((0.95, 1.00))
+            if column:
+                ax.tick_params(labelleft=False)
+            else:
+                ax.set_ylabel(SHOT_LABELS[frame], fontsize=16, labelpad=8)
+            if not row_index:
+                ax.set_title(ylabel, fontsize=16, pad=10)
             if row_index == len(SHOTS) - 1:
                 ax.set_xlabel("normalised flux ψ$_N$")
             ax.set_xlim(coordinates[0], coordinates[-1])
     handles = [
-        Line2D([], [], color="#929292", ls="--", lw=2.6, label="base tables"),
+        Line2D([], [], color="#929292", ls="--", lw=3.0, label="base tables"),
         Line2D([], [], color=SOLVED, lw=3.0, label="EFIT edge tables"),
         Line2D(
             [],
@@ -289,7 +289,7 @@ def edge_profiles(tables, output, previews):
         bbox_to_anchor=(0.5, 0.99),
     )
     figure.subplots_adjust(
-        left=0.11, right=0.985, top=0.88, bottom=0.10, hspace=0.16, wspace=0.22
+        left=0.092, right=0.955, top=0.82, bottom=0.12, hspace=0.62, wspace=0.24
     )
     name = "edge-profiles"
     save(

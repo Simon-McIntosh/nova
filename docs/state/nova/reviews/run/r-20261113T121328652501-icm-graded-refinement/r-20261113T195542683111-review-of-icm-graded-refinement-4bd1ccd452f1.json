@@ -6,6 +6,13 @@
   "base_log_revision": "f4954eb7745b3d06acd1346e2f4c3148299d1b49",
   "call_sites": [],
   "completed_at": "2026-11-13T20:08:26.747Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-icm-graded-refinement-4bd1ccd452f1",
+      "recorded_at": "2026-11-13T22:04:21.994296+00:00"
+    }
+  },
   "dispatched_at": "2026-11-13T20:00:12Z",
   "finding_dispositions": {
     "0": {

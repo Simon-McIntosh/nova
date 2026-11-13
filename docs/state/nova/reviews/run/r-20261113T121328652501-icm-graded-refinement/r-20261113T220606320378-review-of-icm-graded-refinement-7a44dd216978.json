@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "4bd1ccd452f15242d6c515d6e62bef0e2ea953fc",
+  "call_sites": [
+    "scripts/west_iron_galerkin_pair/measure.py",
+    "scripts/west_root_branch/measure.py",
+    "scripts/west_iron_solve/measure.py",
+    "scripts/magnetisation_high_permeability/measure.py"
+  ],
+  "completed_at": "2026-11-13T22:11:36.724Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-13T22:07:07Z",
+  "finding_dispositions": {},
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-graded-refinement.html",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment says 'A doubling per fine cell means the cap is reached one coarse length in ten at the pinned grading (2 mm fine, 4.8 mm coarse)', which is 0.48 mm and is less than one fine cell, so the spacing cannot be capped there; nova/biot/magnetisation.py:105 implements fine * growth ** (distance / fine) with growth 2.0, which reaches 4.8 mm at 2.53 mm from a surface (0.53 of a coarse length) continuously, and at 6 mm (1.25 coarse lengths) in _axis's discrete nodes, so the stated transition length is wrong by about five times."
+    },
+    {
+      "file": "scripts/iron_graded_refinement/rigel_suite_arm.sh",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "non-blocking: the reverted arm restores the whole of tests/test_magnetisation.py from 9bba4b917^ rather than reverting the timeout bound textually, so the control isolates one change only while that commit's parent happens to differ from the head by the bound alone (verified: the two files differ at line 373 only); the next edit to tests/test_magnetisation.py silently makes this control revert that edit too, while line 63's log header still reads 'timeout bound back to 3600 s'."
+    },
+    {
+      "file": "scripts/iron_graded_refinement/rigel_suite_arm.sh",
+      "line": "45",
+      "severity": "non-blocking",
+      "text": "non-blocking: the extract-and-run block (dirty-tree refusal, git archive extract, module probe, stamped log header, pytest invocation, EXIT line) is a near-verbatim copy of scripts/iron_graded_refinement/rigel_tests.sh:26-51 and of tests.sh:17-40; the new arm adds the reverted case and per-job isolation but forks the mechanism instead of gaining an arm argument in the owner."
+    }
+  ],
+  "head_log_revision": "7a44dd2169789b248d046b1a651b04ad12bae5a1",
+  "item_verdicts": {
+    "call_sites": "no nova/ or apps/ module calls the changed surface; git grep at 7a44dd216 finds solve_magnetisation, graded_cell_size and galerkin_spectrum reached only from scripts/*/measure.py recipes (scripts/west_iron_galerkin_pair/measure.py, scripts/west_root_branch/measure.py, scripts/west_iron_solve/measure.py, scripts/magnetisation_high_permeability/measure.py) and from tests/test_magnetisation.py, and the slice changes only a timeout bound, a docstring, __all__ and a launcher, so no runtime behaviour moves.",
+    "diff": "read commit by commit over 4bd1ccd45..7a44dd216: 9bba4b917 raises the graded arm's timeout bound from 3600 to 7200 s with a comment giving the measured 3660+237 and 566+26 s, 785856dce rewrites the module docstring and __all__ to the four helpers, 1a64ee784 corrects the fragment's spacing law and its control/ -> control2/ path, and 7a44dd216 adds scripts/iron_graded_refinement/rigel_suite_arm.sh, four files and 103 insertions in total.",
+    "done_when": "the done_when's clause (1) requires the graded shell to reach 0.5 per cent at every probe with a doubled arm missing it, both asserted in tests; the arms now assert exactly that and the head arm records it passing (repair/after-suite.log: 53 passed, graded shell 0.3260/0.3974/0.2915 per cent at 13410 cells and 0.776/1.052/0.713 per cent at 4017 cells), where the prior review found the assertion deselected or timing out, so the measure is asserted by the gate rather than merely claimed.",
+    "goal": "the node's goal is to measure graded refinement of the piecewise-constant Galerkin route on the mu_r 1000 shell and WEST 62751; the slice repairs the three blocking-and-repair findings that review raised, and each landed change does what its commit subject states, with the accuracy arm nova/biot/magnetisation.py's graded field feeds now observed green.",
+    "manifest": "read; it records baseline_suite 48 passed and after_suite 53 passed both EXIT=0 (jobs 1314704 and 1314705) and a reverted control at 1 failed, 52 passed, EXIT=1 (job 1314706), and every one of those three logs exists under repair/ with the header, the summary and the bare EXIT= line the manifest cites.",
+    "write_paths": "the node's fence was nova/biot/magnetisation.py, tests/test_magnetisation.py, scripts/iron_graded_refinement and docs/evidence/fragments/iron-core-magnetisation/icm-graded-refinement.html; git diff --name-only 4bd1ccd45..7a44dd216 lists exactly those four paths and nothing else."
+  },
+  "justifications": {
+    "durability": "the slice adds no assertion and instead makes an existing one executable: tests/test_magnetisation.py:374's 7200 s bound is what lets the 4488 s accuracy arm run to its assertion, which repair/after-suite.log shows passing, while repair/reverted-suite.log shows the 3600 s bound ending in 'Failed: Timeout (>3600.0s)' rather than in an assertion failure, so the bound is demonstrated load-bearing but no automated test reddens if it is narrowed again.",
+    "evidence": "the gate is recorded rather than claimed: repair/after-suite.log ends '53 passed ... EXIT=0' with the graded arm's own per-probe errors at lines 34 and 36, repair/baseline-suite.log ends 48 passed EXIT=0, and repair/reverted-suite.log ends 1 failed, 52 passed, EXIT=1, so the prior blocking finding is answered by a receipt, with the residue that the fragment's new transition-length sentence at line 29 is arithmetically wrong.",
+    "fit": "the docstring and __all__ correction at nova/biot/magnetisation.py:1-16 follows the module's own stated-surface idiom and the launcher at scripts/iron_graded_refinement/rigel_suite_arm.sh:1-14 follows the sibling rigel_tests.sh/rigel_gate.sh shape (SBATCH header, dirty-tree refusal, stamped log, bare EXIT line), with the script's missing trailing newline and its hardcoded commit sha at line 49 the only departures.",
+    "goal_fidelity": "every commit in the range answers a finding the previous review recorded, and the artefact each one touches is the one the finding named: the bound at tests/test_magnetisation.py:374, the public surface at nova/biot/magnetisation.py:3-36, and the spacing law and control path at docs/evidence/fragments/iron-core-magnetisation/icm-graded-refinement.html:27 and :197.",
+    "reuse": "the Python side adds no definition and only publishes existing ones through __all__ at nova/biot/magnetisation.py:31-37, but the one new artefact, scripts/iron_graded_refinement/rigel_suite_arm.sh:45-60, re-implements the extract-and-run block its sibling scripts/iron_graded_refinement/rigel_tests.sh:26-51 already owns instead of extending it with the reverted arm.",
+    "scope_discipline": "git diff --name-only 4bd1ccd45..7a44dd216 touches only the four declared write paths, and the launcher genuinely fits the fence's scripts/iron_graded_refinement directory rather than being an out-of-scope addition to a shared file."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261113T220606320378-review-of-icm-graded-refinement-7a44dd216978",
+  "reviewed_base_sha": "4bd1ccd452f15242d6c515d6e62bef0e2ea953fc",
+  "reviewed_head_sha": "7a44dd2169789b248d046b1a651b04ad12bae5a1",
+  "reviewed_run_id": "r-20261113T121328652501-icm-graded-refinement",
+  "reviewer_run_id": "r-20261113T220606320378-review-of-icm-graded-refinement-7a44dd216978",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T22:13:09.476265+00:00",
+  "total": 96,
+  "verdicts": {
+    "call_sites": "no package-level caller exists; the changed surface is reached only from scripts/*/measure.py recipes, which the docstring-only change leaves unaffected.",
+    "diff": "four commits, four files, 103 insertions and 8 deletions over 4bd1ccd45..7a44dd216, all repairs the previous review named.",
+    "done_when": "clause (1)'s accuracy assertion is now asserted by a recorded green head arm and by a control that reddens when the bound is restored.",
+    "goal": "the graded-refinement node's repairs are in place and its central accuracy arm is observed to pass at the head revision.",
+    "manifest": "read and reconciled against the three suite logs on disk, which agree with its recorded counts and exit statuses.",
+    "write_paths": "every path the range touches lies inside the node's four declared write paths."
+  }
+}

@@ -172,8 +172,10 @@
     <code>under-resolved</code> exit 1 with the 0.5 per cent assertion message,
     <code>perturbed-uniform</code> exit 1 on the digest comparison. Verdict
     <code>control holds</code>, recorded in
-    <code>control/negative_control.json</code> and
-    <code>control/negative_control.log</code>.</p>
+    <code>control2/negative_control.json</code>, with each mutant's own
+    transcript in <code>control2/under-resolved.log</code> and
+    <code>control2/perturbed-uniform.log</code>, each ending
+    <code>EXIT=1</code>.</p>
     <p>The gate runs the three files the brief names with the slow marker
     excluded, one arm per revision, each in its own exported tree with an index
     over the source checkout's object store. Base

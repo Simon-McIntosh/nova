@@ -30,7 +30,10 @@ def compile_profiles():
         attribution = json.loads((directory / "attribution.json").read_text())
         assert profile["revision"] == attribution["revision"]
         assert profile["compile_seconds"] == attribution["compile_seconds"]
-        profiles.append(summarise(attribution))
+        summary = summarise(attribution)
+        # Display rounding must not loosen the derived wall budget.
+        summary["table"] = attribution["table"]
+        profiles.append(summary)
     return profiles
 
 

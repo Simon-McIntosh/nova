@@ -11,6 +11,13 @@
   ],
   "completed_at": "2026-11-13T09:33:39.902Z",
   "dispatched_at": "2026-11-13T09:20:10Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-h200-levers-16a90eb5bcb1",
+      "recorded_at": "2026-11-13T10:15:07.288453+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_book_primal_buckets.py",

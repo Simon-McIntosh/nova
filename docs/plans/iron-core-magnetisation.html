@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="75">
+<meta name="plan-version" content="77">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -301,7 +301,9 @@
       rises by at most 1&nbsp;% of M<sub>n</sub>, then hold M constant with dH/dB = 1/&mu;<sub>0</sub>. Build
       the interaction G by Galerkin cell averaging: the 2&pi;r-volume-weighted average of each source
       field over each target cell, so that G is symmetric in the volume inner product, its symmetric
-      spectrum lies in [0,&nbsp;1] and the Newton matrix is monotone. Do not sample at centroids,
+      spectrum lies in [0,&nbsp;1], and the demagnetising operator is positive semidefinite; with the
+      monotone law the discrete problem is then the stationary point of a convex energy and has a
+      single root. Do not sample at centroids,
       which admits spurious roots and folds. Average the external field the same way, and judge
       accuracy by refinement rather than at a fixed mesh. Solve
       F(M) = M &minus; c(|B|)B = 0 with B = B<sub>ext</sub> + G&nbsp;M by Newton on the
@@ -330,7 +332,9 @@
       volume inner product with the symmetric spectrum of G/&mu;<sub>0</sub> inside [0,&nbsp;1] on WEST and
       on the analytic meshes, and a centroid-sampling mutant fails that test; the closed-shell
       errors at &mu;<sub>r</sub> 100 and 1000 fall at least 2.5&times; from 40 to 20&nbsp;mm, with the 20&nbsp;mm
-      errors within the collocated values plus 0.5 percentage points, and the sphere interior
+      error at each probe at most its collocated 20&nbsp;mm value plus 0.5 percentage points, probe
+      by probe (&mu;<sub>r</sub> 100: 0.447/0.517/0.349&nbsp;%, ceilings 0.947/1.017/0.849&nbsp;%;
+      &mu;<sub>r</sub> 1000: 2.7/3.0/2.0&nbsp;%, ceilings 3.2/3.5/2.5&nbsp;%), and the sphere interior
       error lies within its derived discretisation bound while that bound itself is at most
       1e-5; (2) WEST 62751 converges from M = 0 at
       0.08 and 0.04&nbsp;m in at most ten Newton iterations, or by a drive ramp of at most ten per

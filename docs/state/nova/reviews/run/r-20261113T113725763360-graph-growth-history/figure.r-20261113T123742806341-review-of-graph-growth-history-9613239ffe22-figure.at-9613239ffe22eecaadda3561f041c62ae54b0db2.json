@@ -1,0 +1,53 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-13T13:07:13.311Z",
+  "dispatched_at": "2026-11-13T12:46:11Z",
+  "findings": [
+    {
+      "file": "docs/figures/kernel-compile-barrier/graph-growth-history/lowered-graph-bytes.svg",
+      "id": "f2daf161597",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Only one of the two step commits the figure exists to point at is named on its axis: tick labels sit at commit indices 0, 2, 4, 15, 21, 41 and 44, so da28fc4e5 (index 2) is labelled under the first dotted guide while cb42f656f (index 6) has no label under the second. A reader can identify the first step from the image alone but must go to the caption or the table to identify the second."
+    },
+    {
+      "file": "docs/figures/kernel-compile-barrier/graph-growth-history/lowered-graph-bytes.svg",
+      "id": "f2daf161597",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two green \u00d7-factor annotations are drawn in the series green (#2e8b57), which measures ~4.2:1 against white, just below the 4.5:1 body-text contrast threshold; they remain legible but read noticeably weaker than the black axis text beside them. The blue \u00d7-factor labels at the same size measure ~5.3:1 and are unaffected."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: passes \u2014 two stacked panels share one commit axis; both coloured series, their plateau steps, the two dotted step guides, the four \u00d7-factor labels and the figure-level legend read at a glance in the delivered 1400x720 PNG; the type is small (tick digits ~9 px, axis label ~10 px) but legible at the delivered size.\nRUBRIC data_ink: passes \u2014 the two coloured line series with their point markers carry the visual weight; the only other ink is the spines, three black text labels and two grey dotted step guides.\nRUBRIC decoration: passes \u2014 white background, no gridlines, no fills, no gradients; each panel keeps only its left and bottom spines.\nRUBRIC contrast: passes \u2014 axis, tick and legend text is pure black on white; blue \u00d7-factor labels #3366cc (~5.3:1) and green ones #2e8b57 (~4.2:1), both legible.\nRUBRIC table_form: passes \u2014 a two-series step-vs-commit-order chart; the per-commit numbers live in the fragment's table.\nRUBRIC label_collision: passes \u2014 no text touches the canvas edge (margins 10-18 px) and no label overlaps another or the data.\nFINDING docs/figures/kernel-compile-barrier/graph-growth-history/lowered-graph-bytes.svg:null non-blocking: the second step commit cb42f656f has no x-axis tick label although the first, da28fc4e5, does.\nFINDING docs/figures/kernel-compile-barrier/graph-growth-history/lowered-graph-bytes.svg:null non-blocking: the green \u00d7-factor annotations measure ~4.2:1 against white, below the 4.5:1 body-text threshold.\n",
+  "review_run_id": "r-20261113T123742806341-review-of-graph-growth-history-9613239ffe22-figure",
+  "reviewed_base_sha": "c85cb059165979d7a3e28cf150f970644f85168c",
+  "reviewed_figures": [
+    {
+      "caption_note": "the figcaption names both programs, both step guides and both step commits, so it explains the figure rather than repeating its title",
+      "caption_path": "docs/evidence/fragments/kernel-compile-barrier/graph-growth-history.html",
+      "figure_path": "docs/figures/kernel-compile-barrier/graph-growth-history/lowered-graph-bytes.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T123742806341-review-of-graph-growth-history-9613239ffe22-figure/image-0.png",
+      "rendered_size_px": [
+        1400,
+        720
+      ]
+    }
+  ],
+  "reviewed_head_sha": "9613239ffe22eecaadda3561f041c62ae54b0db2",
+  "reviewed_run_id": "r-20261113T113725763360-graph-growth-history",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "passes \u2014 axis, tick, x-axis and legend text is pure black on white; the blue \u00d7-factor labels measure #3366cc (~5.3:1) and the two green ones #2e8b57 (~4.2:1) against white, both legible at their size",
+    "data_ink": "passes \u2014 the two coloured line series with their point markers carry the visual weight; the only other ink is the spines that carry a scale, three black text labels and two grey dotted guides marking the measured step commits",
+    "decoration": "passes \u2014 plain white background, no gridlines, no filled contours, no gradients or background fill; each panel keeps only the left and bottom spines",
+    "label_collision": "passes \u2014 no text touches the canvas edge (the outermost row and column carry no ink; margins are 10-18 px) and no label overlaps another or the data: the three left-hand x tick labels are separated by ~12 px, the rotated y-axis label clears its tick labels, and the \u00d7-factor labels sit above the lines they annotate",
+    "legibility": "passes \u2014 two stacked panels share one commit axis; both coloured series, their plateau steps, the two dotted step guides, the four \u00d7-factor labels and the figure-level legend read at a glance in the delivered 1400x720 PNG; the type is small (tick digits ~9 px, axis label ~10 px) but legible at the delivered size",
+    "table_form": "passes \u2014 the image shows each program's bytes against commit order, two flat plateaus and two jumps; the per-commit numbers live in the fragment's 45-row table, so the picture is not a table drawn as a picture"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T13:07:15.761612+00:00",
+  "total": null
+}

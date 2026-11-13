@@ -20,7 +20,7 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,efit,grad-shafranov,convergence">
   <meta name="plan-after" content="converged-forward-solve">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;deferred&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;inverse-equilibrium-baseline#s1&quot;],&quot;s3&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s4&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s5&quot;:[&quot;inverse-equilibrium-baseline#s3&quot;]}">
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -118,7 +118,8 @@
     levels, with both null sets and the wall, under the repository plotting rules.</p>
 
     <h2 id="s3">§3 — One scoreboard for every estimator</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="deferred" data-links=""></section>
+    <p>Deferred with §2, whose case set and configured fit it scores.</p>
     <p>The baseline is only useful if a new approach can be put beside it without re-deriving the
     comparison. The §2 case set and bands become a scoreboard that accepts any reconstructed state supplied
     as an IMAS equilibrium, whichever code produced it, and scores it with the same comparator and the same
@@ -133,7 +134,8 @@
     comparison passes.</p>
 
     <h2 id="s4">§4 — Cost on the H200</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="deferred" data-links=""></section>
+    <p>Deferred with §2: the fit decisions set the unknown count, and so the cost measured here.</p>
     <p>A baseline that cannot be run over a pulse is of little use for development. The cost of one
     reconstruction is measured where the forward solve's cost is decided, on the H200.</p>
     <p><strong>Done when.</strong> (1) The record reports, for the §2 MAST case at batch widths 1, 16 and
@@ -142,8 +144,8 @@
     width 16 is at or below ten times the warm forward solve's wall per slice at the same shape and batch
     width, both measured in that job with compile excluded. A larger figure fails this clause: the record
     then names the step responsible with its share of the wall, and the section stays open. Negative
-    control: the same measurement with the reconstruction's convergence exit disabled and its iteration
-    cap doubled exceeds the ceiling. (3) imas-efit's recorded per-slice wall for the same case is quoted
+    control: the same measurement with the reconstruction forced to at least eleven forward solves per
+    reconstruction exceeds the ceiling. (3) imas-efit's recorded per-slice wall for the same case is quoted
     beside it with its hardware.</p>
 
     <h2 id="s5">§5 — The reduced-model reconstructions</h2>

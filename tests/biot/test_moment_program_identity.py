@@ -63,3 +63,78 @@ def test_packed_moment_primal_and_tangent_identity():
         f"tangent_max_relative={maximum:.17g}"
     )
     assert maximum <= 1e-9
+
+
+@pytest.mark.skipif(
+    jax.default_backend() != "gpu", reason="large identity gate requires a GPU"
+)
+def test_production_source_rows_preserve_jet_identity():
+    import ast
+    from pathlib import Path
+    import subprocess
+    from types import SimpleNamespace
+
+    from nova.equilibrium import fixed_points
+    from tests.biot.test_kernel_compile_cost import BASE_REVISION
+
+    root = Path(__file__).resolve().parents[2]
+    source = subprocess.check_output(
+        [
+            "git",
+            "-C",
+            str(root),
+            "show",
+            f"{BASE_REVISION}:nova/equilibrium/fixed_points.py",
+        ],
+        text=True,
+    )
+    node = next(
+        node
+        for node in ast.parse(source).body
+        if isinstance(node, ast.FunctionDef) and node.name == "_source_jets"
+    )
+    edge, weight, norm, centre, reflection, partner, _ = _geometry()
+    coupling = SimpleNamespace(
+        edge=edge,
+        weight=weight,
+        norm=norm,
+        centre=centre.T,
+        reflection_axis=reflection,
+        reflection_partner=partner,
+        inverse_second_moment=jnp.eye(2)[None],
+    )
+    points = _points()
+    maximum = 0.0
+    with _baseline_kernel() as baseline:
+        namespace = {
+            "jax": jax,
+            "jnp": jnp,
+            "packed_analytic_moments": baseline.packed_analytic_moments,
+        }
+        exec(
+            compile(
+                ast.Module(body=[node], type_ignores=[]),
+                "<reference-source-jets>",
+                "exec",
+            ),
+            namespace,
+        )
+        before = jax.jit(
+            jax.vmap(lambda point: namespace["_source_jets"](point, coupling))
+        )
+        after = jax.jit(
+            jax.vmap(lambda point: fixed_points._source_jets(point, coupling))
+        )
+        for chunk in np.split(points, 100):
+            expected = np.asarray(before(jnp.asarray(chunk)))
+            actual = np.asarray(after(jnp.asarray(chunk)))
+            assert np.all(np.isfinite(expected))
+            assert actual[..., :3].tobytes() == expected[..., :3].tobytes()
+            maximum = max(
+                maximum, float(relative_error(actual[..., 3:], expected[..., 3:]).max())
+            )
+    print(
+        f"IDENTITY production points={len(points)} "
+        f"value_gradient_bit_identical=True hessian_max_relative={maximum:.17g}"
+    )
+    assert maximum <= 1e-9

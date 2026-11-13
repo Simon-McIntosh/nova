@@ -25,6 +25,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import tempfile
 
 PYTHON = "/home/ITER/mcintos/Code/nova/.venv/bin/python"
 ACCURACY = (
@@ -109,8 +110,7 @@ def main() -> int:
     parser.add_argument("--revision", default=None)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
-    scratch = args.output / "mutants"
-    scratch.mkdir(exist_ok=True)
+    scratch = Path(tempfile.mkdtemp(dir=os.environ.get("TMPDIR", "/tmp")))
     log = args.output / "negative_control.log"
     record = dict(revision=args.revision, mutants={})
     with log.open("w") as stream:

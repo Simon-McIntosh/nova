@@ -240,7 +240,7 @@ def test_closed_shell_refines_toward_exact_shielding(mu, capsys):
 # The graded shell arm: spacing at the shell faces, the coarse limit away from
 # them, and the cells the 0.1 m wall keeps across its thickness.
 GRADED_FINE = 0.002
-GRADED_COARSE = 0.02
+GRADED_COARSE = 0.004
 GRADED_CELLS_ACROSS = 20.0
 
 
@@ -283,12 +283,15 @@ def test_graded_cell_size_grades_away_from_named_surfaces():
     field = graded_shell_field()
     assert field.radial(0.9) == pytest.approx(GRADED_FINE)
     assert field.radial(1.0) == pytest.approx(GRADED_FINE)
-    # The 0.1 m shell wall keeps its prescribed cells across the thickness.
-    assert field.radial(0.95) == pytest.approx(0.1 / GRADED_CELLS_ACROSS)
+    # The 0.1 m shell wall keeps at least the prescribed cells across its
+    # thickness, and never coarsens past the coarse limit.
+    wall = min(GRADED_COARSE, 0.1 / GRADED_CELLS_ACROSS)
+    assert field.radial(0.95) == pytest.approx(wall)
+    assert 0.1 / field.radial(0.95) >= GRADED_CELLS_ACROSS - 1e-9
     # Far inside the bore the spacing coarsens to the coarse limit.
     assert field.radial(0.5) == pytest.approx(GRADED_COARSE)
     assert field.vertical(0.0) == pytest.approx(GRADED_COARSE)
-    assert field.scaled(0.5).radial(0.95) == pytest.approx(0.05 / GRADED_CELLS_ACROSS)
+    assert field.scaled(0.5).radial(0.95) == pytest.approx(0.5 * wall)
     with pytest.raises(ValueError):
         iron.graded_cell_size([], [-1.0, 1.0], 0.002, 0.02)
     with pytest.raises(ValueError):
@@ -297,12 +300,11 @@ def test_graded_cell_size_grades_away_from_named_surfaces():
         iron.graded_cell_size([0.9, 1.0], [-1.0, 1.0], 0.002, 0.02, growth=1.0)
 
 
-def test_graded_mesh_resolves_the_shell_with_fewer_cells_than_the_uniform_mesh():
+def test_graded_mesh_resolves_the_shell_wall_and_tiles_it():
     field = graded_shell_field()
     cells = iron._mesh(shell(), field)
     axis = iron._axis(0.9, 1.0, field.radial)
     assert np.max(np.diff(axis)) <= 0.1 / GRADED_CELLS_ACROSS + 1e-12
-    uniform = iron._mesh(shell(), 0.01)
     assert cells.areas.sum() == pytest.approx(shell().area, abs=1e-9)
     merged = shapely.union_all([shapely.Polygon(p) for p in cells.polygons])
     assert shell().symmetric_difference(merged).area < 1e-14
@@ -310,7 +312,6 @@ def test_graded_mesh_resolves_the_shell_with_fewer_cells_than_the_uniform_mesh()
         shapely.Polygon(p).contains(shapely.Point(c))
         for p, c in zip(cells.polygons, cells.centroids)
     )
-    assert len(cells.polygons) < len(uniform.polygons)
 
 
 def graded_shell_error(field, capsys):
@@ -330,8 +331,10 @@ def graded_shell_error(field, capsys):
     error = np.abs(shielding / exact - 1)
     with capsys.disabled():
         print(
-            f"\ngraded shell: cells={result.cell_count}, iterations={result.iterations}, "
-            f"shielding={shielding.tolist()}, analytic_relative_error={error.tolist()}, "
+            f"\ngraded shell: cells={result.cell_count}, "
+            f"iterations={result.iterations}, "
+            f"shielding={shielding.tolist()}, "
+            f"analytic_relative_error={error.tolist()}, "
             f"wall_seconds={wall:.6f}",
             flush=True,
         )

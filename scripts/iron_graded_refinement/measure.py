@@ -48,7 +48,7 @@ from tests.test_magnetisation import loop, shell  # noqa: E402
 
 SHELL_MU = 1000.0
 SHELL_PROBES = np.array([[2.0, 0.0], [0.0, 2.0], [3.0, 1.0]])
-SHELL_UNIFORM = (0.04, 0.02, 0.01)
+SHELL_UNIFORM = (0.04, 0.02, 0.01, 0.004)
 SHELL_SURFACES = dict(radial=[0.9, 1.0], vertical=[-1.0, 1.0])
 # Candidate gradings measured while choosing the arm the tests pin: how far the
 # spacing may coarsen away from a surface, and how many cells a thin feature
@@ -286,8 +286,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--fine", type=float, default=0.002)
-    parser.add_argument("--coarse", type=float, default=0.04)
+    parser.add_argument("--coarse", type=float, default=0.004)
     parser.add_argument("--cells-across", type=float, default=20.0)
+    parser.add_argument("--west-fine", type=float, default=0.008)
+    parser.add_argument("--west-coarse", type=float, default=0.08)
     parser.add_argument("--arms", default="shell,west")
     parser.add_argument("--revision", default=None)
     parser.add_argument("--blob", default=None)
@@ -304,11 +306,18 @@ def main():
         device=jax.devices()[0].device_kind,
         command=shlex.join([sys.executable, *sys.argv]),
         grading=dict(
-            fine=args.fine,
-            coarse=args.coarse,
+            shell=dict(
+                fine=args.fine,
+                coarse=args.coarse,
+                cells_across=args.cells_across,
+                surfaces=SHELL_SURFACES,
+            ),
+            west=dict(
+                fine=args.west_fine,
+                coarse=args.west_coarse,
+                cells_across=args.cells_across,
+            ),
             growth=2.0,
-            cells_across=args.cells_across,
-            shell_surfaces=SHELL_SURFACES,
         ),
         shell={},
         sweep={},
@@ -353,11 +362,9 @@ def main():
                 shell_arm(
                     label, size, lambda row, label=label: shell_update(row, label)
                 )
-            for label, scale in (
-                ("graded-double", 2.0),
-                ("graded-fine", 1.0),
-                ("graded-half", 0.5),
-            ):
+            # The pinned grading and its deliberately under-resolved doubling:
+            # the pair the accuracy test asserts on.
+            for label, scale in (("graded-double", 2.0), ("graded-fine", 1.0)):
                 field = iron.graded_cell_size(
                     SHELL_SURFACES["radial"],
                     SHELL_SURFACES["vertical"],
@@ -406,8 +413,8 @@ def main():
                 field = iron.graded_cell_size(
                     inputs["surfaces"]["radial"],
                     inputs["surfaces"]["vertical"],
-                    args.fine * scale,
-                    args.coarse * scale,
+                    args.west_fine * scale,
+                    args.west_coarse * scale,
                     cells_across=args.cells_across,
                 )
                 (OUT / "west" / label).mkdir(parents=True, exist_ok=True)

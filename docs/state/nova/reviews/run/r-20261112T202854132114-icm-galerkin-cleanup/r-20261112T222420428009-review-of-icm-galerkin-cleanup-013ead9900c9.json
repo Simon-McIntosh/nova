@@ -25,6 +25,16 @@
       "kind": "exempted",
       "reason": "the 0.199 difference is a synthetic stress probe with a filament on the mesh boundary that neither quadrature resolves; smooth and uniform external averages agree to 2e-15 and no WEST coil or plasma source lies within a cell, so the WEST solve is unaffected",
       "recorded_at": "2026-11-13T00:25:28.384808+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the WEST-mesh asymmetry sweep is a measurement, not a guard; the asserted cases (sphere, shell) are the suite controls and the WEST mesh was measured at order 4; a WEST order sweep can join section 5 accuracy work",
+      "recorded_at": "2026-11-13T00:25:59.832905+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "manifest path text corrupted by a captured shell redirect; the delivered files are correct on main (merge audited against git diff --stat)",
+      "recorded_at": "2026-11-13T00:26:10.021722+00:00"
     }
   },
   "findings": [

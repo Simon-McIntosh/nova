@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T16:32:29.650Z",
+  "dispatched_at": "2026-11-13T16:22:36Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:124",
+      "id": "anchors_resolve-1",
+      "reason": "a later reader cannot open the provenance of the section's motivating throughput figures, and the section points the worker at a record that does not exist.",
+      "text": "\u00a76 gives `docs/evidence/fragments/sub-millisecond-forward-path/bank-h200-slice-profile.html` as the fragment holding the 39.9 ms width-1 and 5.78 ms width-64 measurements, but the file does not resolve: it is absent from `docs/evidence/fragments/sub-millisecond-forward-path/` (76 fragments there, none matching), absent from the main checkout's working tree, and `git merge-base --is-ancestor 5f868e16a origin/main` returns non-zero, so the commit that wrote it never landed on main, while the sibling `booking-scalar-tile.html` from the same plan does resolve",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:124",
+      "id": "done_when-1",
+      "reason": "a control whose failure mode is assumed rather than forced can pass by doing nothing, leaving the node's only demonstration that its accounting can report a failed slice unproven; a deterministic forced failure (an exhausted update budget or an impossible terminal target) is what makes the guard fire.",
+      "text": "negative control (c) says a slice \"with coil currents scaled by ten \u2026 cannot converge within its update budget\", but nothing in the section establishes that premise: the cited records show one general-route slice at residual 2.3e-3 and the fixture bank runs, neither of which says a tenfold current scaling must fail, and a scaled-current Grad-Shafranov problem remains well posed, so the control may converge and the per-slice accounting would then never be shown to report a failure at all",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:124",
+      "id": "reasoning-1",
+      "reason": "the endpoint it is making \u2014 that node (c) uses the landed bank route and not \u00a74's production `SolveRoute` \u2014 is statically expressible without naming either function, and the named pair is a guess the coordinator's node brief is the place to test and to carry.",
+      "text": "the paragraph \"Node (c) runs on `support_read.solve_batch` and `drive_continuation.advance_drive` as they stand on main\" names two functions to call, which is a reuse map and not an endpoint; the rubric holds that a section naming a function to call is prescribing implementation, and this sentence is what ties the plan to one code path rather than to a stated outcome",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+  "plan_fingerprint": "c8616db24d93aaabd5121a5e0b4fbc26934ccdd93dd6327bcebcb699bf753ac1",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 316,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T162124319621-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "717a69015924390b018be457e21ef5787849df97",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the section cites `docs/evidence/fragments/sub-millisecond-forward-path/bank-h200-slice-profile.html` as the record for the 39.9 ms / 5.78 ms figures, and that file exists neither in the working tree nor anywhere in the history of `origin/main`.",
+    "done_when": "a finding \u2014 negative control (c) rests on an unverified physical outcome (\"coil currents scaled by ten \u2026 so it cannot converge\") that the plan's own records do not establish, so the control can fail to demonstrate anything.",
+    "evidence_paths": "pass \u2014 compilation logs, per-slice receipts, the bank memory record and the batch-width probe are directed to the run directory or `~/.cache/nova-iter-bank/` GPFS paths rather than node `/tmp`, and the motivating measurements cite the run directory `r-20261113T022334301162-dina3420-scenario`, which exists with `h200/summary.json`, 20 `flattop-h200/compiles-*.json` and 20 `flattop-h200/profile-live-*.json`.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach source; `\u00a76`, run identifiers and `h200/` receipt names are artifact identifiers, not symbol names.",
+    "reasoning": "a finding \u2014 the section's closing paragraph names two concrete functions, `support_read.solve_batch` and `drive_continuation.advance_drive`, as what node (c) runs on, which is the node brief's reuse map stated as plan text.",
+    "single_goal": "pass \u2014 the section names three nodes (a) the ITER bank, (b) traced coil currents and flux functions, (c) the DINA scenario, each with one deliverable and its own done-when clause.",
+    "wiring": "pass \u2014 \u00a76 declares data-links to `s1` and `s5`, both resolve in the snapshot (`id=\"s1\"`, `id=\"s5\"`), and the section now states in its own text that it declares no wait on \u00a72, \u00a73 or \u00a74 because it consumes landed code and does not consume \u00a74's throughput measure."
+  },
+  "section_digests": {
+    "_document": "7c04d976a904c7818b8132edfa63c4c9920d51bb5de540921c8404f16f58d9a3",
+    "s0": "02c484da982db49df058949810d449b2e95a1a134ec03272e31dda4df5bed6d2",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "5aa72ecf3d63060b466bd064d76dc02fa5439343113fd1657038c73094f830b2",
+    "s4": "91bd28dc1cffb091dd5b8e3154b8052ae494fc161f98b81c4aa3d7fc4b7d4fca",
+    "s5": "93a5e678cdf44d386b06e74db9abd0f022782fcfa12a51ed6c8332d5636661cd",
+    "s6": "1a84c8c4268633ead96d46ee796caa20f76616ccfe1ef11814e0426c74f9928e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T16:31:59.966644+00:00",
+  "total": null
+}

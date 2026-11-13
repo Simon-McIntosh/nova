@@ -37,14 +37,11 @@ from nova.imas.machine import StaticMachineDescription  # noqa: E402
 
 SOURCE = Path("/home/ITER/mcintos/.cache/nova-west-stray/hex/west-62751-hex.pkl")
 SOURCE_SHA256 = "228e9c7a277e6d16f180cae4566eaadbb4e8df13ae2b49e78a33c53bd5918533"
-REFERENCE = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/"
-    "r-20261111T130417404611-icm-west-62751-solve/measurement-pair/inputs.json"
+EVIDENCE = Path(
+    "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/mesh-pair"
 )
-PRIOR_ROOTS = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/"
-    "r-20261112T162338749893-icm-galerkin-interaction/measurement.json"
-)
+REFERENCE = EVIDENCE / "inputs/west-62751-solve-inputs.json"
+PRIOR_ROOTS = EVIDENCE / "inputs/galerkin-interaction-measurement.json"
 DISTANCES = np.array([1.0, 2.0, 4.0])
 MU0 = 4e-7 * np.pi
 

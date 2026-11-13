@@ -57,7 +57,24 @@
   "plan_slug": "iron-core-magnetisation",
   "plan_version": 82,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "The cited spectrum [-0.1247,1.1237], the spurious roots and the 0.195 fold were measured on the centroid-sampled (collocated) operator, which is exactly what this section forbids; the Galerkin operator the section mandates measured [4.9e-5,0.99994] on WEST and A/B starts agree to 2.55e-9 (icm-galerkin-interaction fragment), so the uniqueness argument and clause (2) hold on the operator in production.",
+      "when": "2026-11-13T05:38:33.381738+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The cited spectrum [-0.1247,1.1237], the spurious roots and the 0.195 fold were measured on the centroid-sampled (collocated) operator, which is exactly what this section forbids; the Galerkin operator the section mandates measured [4.9e-5,0.99994] on WEST and A/B starts agree to 2.55e-9 (icm-galerkin-interaction fragment), so the uniqueness argument and clause (2) hold on the operator in production.",
+      "when": "2026-11-13T05:38:33.381738+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261113T033753030344-plan-review-of-iron-core-magnetisation.json",
   "review_run_id": "r-20261113T033753030344-plan-review-of-iron-core-magnetisation",
   "reviewed_blob_sha": "4601c517461bbc6002092506e84257a0b06563da",
   "rubric": "content",

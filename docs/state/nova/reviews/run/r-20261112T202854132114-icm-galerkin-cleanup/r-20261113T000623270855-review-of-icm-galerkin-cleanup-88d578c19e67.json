@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-13T00:26:41.220Z",
   "dispatched_at": "2026-11-13T00:15:29Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "script-only duplication (git-archive extraction in mutant.py and suite.py); product reuse is closed (greens, section_nodes); folded into the scripts cleanup with the WEST source-recipe copy",
+      "recorded_at": "2026-11-13T00:43:03.240081+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/west_iron_galerkin/mutant.py",

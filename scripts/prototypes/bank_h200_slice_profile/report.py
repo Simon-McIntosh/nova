@@ -1,6 +1,7 @@
 """Audit completed profile receipts and render their per-slice stage costs."""
 
 import argparse
+import ast
 from collections import defaultdict
 from html import escape
 import json
@@ -13,6 +14,24 @@ def attributed(record, directory, program):
     """Resolve deduplicated symbols through their executed enclosing branch."""
     from scripts.prototypes.bank_solve_trace.provenance import metadata
 
+    source = Path(__file__).resolve().parents[3] / "nova/equilibrium/support_read.py"
+    module = ast.parse(source.read_text())
+    read = next(
+        n
+        for n in module.body
+        if isinstance(n, ast.FunctionDef) and n.name == "read_batch"
+    )
+    carry = next(
+        n for n in read.body if isinstance(n, ast.FunctionDef) and n.name == "carry"
+    )
+    terminal = carry.body[-1]
+    assert isinstance(terminal, ast.Return) and isinstance(terminal.value, ast.Call)
+    assert terminal.value.func.attr == "cond"
+    assert terminal.value.args[1].body.func.id == "full_verdict"
+    assert (
+        isinstance(terminal.value.args[2].body, ast.Name)
+        and terminal.value.args[2].body.id == "carried"
+    )
     width = record["width"]
     profile = record["programs"][program]["profile"]
     instructions = metadata(directory / program / f"solve-{width}-0.hlo.pb")
@@ -34,6 +53,14 @@ def attributed(record, directory, program):
                 break
             for frame in reversed(item["stack"]):
                 function = frame["function"]
+                # The false certificate branch returns existing values; its
+                # executed inner kernels can only belong to the full verdict.
+                if (
+                    function == "read_batch.<locals>.carry"
+                    and frame["line"] == terminal.lineno
+                ):
+                    branch = "full"
+                    break
                 if (
                     "read_batch.<locals>.full_verdict" in function
                     or "read_batch.<locals>.whole_mesh" in function
@@ -249,6 +276,8 @@ def main():
             else r["stages_ms"][name] / r["width"]
             for r in audited
         ]
+        if name == "predictor":
+            values = [1000 * v for v in values]
         ax.plot(widths, values, "o-", color="#1f5d92", linewidth=3.0, zorder=3)
         ax.set_xscale("log", base=2)
         ax.set_xticks(widths, [str(w) for w in widths], fontsize=11)
@@ -260,7 +289,10 @@ def main():
             "transfers and fills": "transfer / fills",
             "other and fused": "other / fused",
         }.get(name, name)
-        ax.set_ylabel(short + "\n[ms/slice]", fontsize=13)
+        ax.set_ylabel(
+            short + ("\n[µs/slice]" if name == "predictor" else "\n[ms/slice]"),
+            fontsize=13,
+        )
         ax.set_ylim(0, max(values) * 1.15 if max(values) else 1)
         ax.set_yticks([v for v in ax.get_yticks() if 0 <= v <= ax.get_ylim()[1]])
         ax.set_xlabel("batch width", fontsize=13)

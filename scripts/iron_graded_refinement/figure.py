@@ -110,7 +110,8 @@ def render(run, destination: Path, png: Path | None = None):
         ticker.FixedLocator([value for value in ladder if low <= value <= high])
     )
     axis.xaxis.set_minor_locator(ticker.NullLocator())
-    top = float(np.ceil(max(row["error"].max() for kind in series for row in series[kind]) * 1.1))
+    worst_error = max(row["error"].max() for kind in series for row in series[kind])
+    top = float(np.ceil(worst_error * 1.1))
     axis.set_ylim(0, top)
     step = 2.0 if top <= 12 else 5.0
     axis.yaxis.set_major_locator(ticker.FixedLocator(np.arange(0.0, top + step, step)))

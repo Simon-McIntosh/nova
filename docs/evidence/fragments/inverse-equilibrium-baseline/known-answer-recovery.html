@@ -1,0 +1,65 @@
+<section id="known-answer-recovery-record">
+  <h2>Known-answer recovery: implementation checkpoint, scientific gate unmeasured</h2>
+  <p>The fitting class and its single receipt are committed at
+    <code>40fdde05441b227ac41c560dad5e94c6688771bc</code>. Every coefficient
+    evaluation issues a typed <code>ForwardSolveRequest</code> through
+    <code>ForwardProfile.solve</code>. The class uses the existing virtual
+    flux-loop and poloidal-probe kernels through a caller-supplied magnetic
+    source adapter. No measurement field was added to the forward request.</p>
+  <p>The receipt carries coefficients, their names, the terminal forward receipt,
+    iteration and forward-evaluation counts, per-row whitened residuals, the
+    column-normalised response spectrum, covariance and undetermined coefficient
+    directions. The shared whitened solver now reports those directions and
+    handles an unregularised rank-deficient response. On the base revision,
+    three identical rows with two identical columns and zero ridge reproduce
+    <code>LinAlgError: Singular matrix</code>.</p>
+  <p>Seven focused unit tests passed in <strong>4.63 s</strong>. These are
+    algebraic orchestration and diagnostic tests, including an explicit
+    unqualified-forward refusal. They do not establish recovery on a physical
+    equilibrium. The existing forward boundary registry includes the new
+    module and both public symbols; the full boundary file has not been run.</p>
+
+  <table id="known-answer-recovery-results">
+    <thead><tr><th>Case</th><th>Plasma flux sup error / span</th>
+      <th>Whitened residual sup</th><th>Forward re-solve agreement</th>
+      <th>Fit iterations</th><th>Spectrum</th><th>Undetermined coefficients</th></tr></thead>
+    <tbody>
+      <tr><td>Solov'ev</td><td colspan="6">Unmeasured: the generating-state
+        probe returned from its public forward call but its recorder failed
+        before persisting qualification or residual values.</td></tr>
+      <tr><td>MAST</td><td colspan="6">Not run: the generating-state
+        prerequisite has not been established.</td></tr>
+      <tr><td>ITER</td><td colspan="6">Not run: the generating-state
+        prerequisite has not been established.</td></tr>
+      <tr><td>Flux-loop geometry displaced by 5 cm</td><td colspan="6">Not run:
+        no recovered physical state is available for the declared mutation.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="known-answer-recovery-probe-record">Probe record and stop condition</h3>
+  <p>The probes ran as separate <code>all_debug</code> jobs, each with eight
+    CPUs, 64 GB and a 59-minute ceiling. No heavy solve ran on the fleet node.
+    The first probe failed during a 110-cell carrier build before producing a
+    forward receipt. A second probe was cancelled after its script was found
+    to lack the main guard required by the fixture builder's spawn path.</p>
+  <p>The guarded conventional 300-cell probe built a 342-cell carrier and
+    entered the public solve. Its job ended after <strong>7 min 46 s</strong>
+    with <code>EXIT=1</code>: the probe recorder read the nonexistent
+    <code>FixedPointResult.iterations</code> attribute. This is an instrument
+    failure after the forward call, not evidence that the solver failed or
+    succeeded. No generating convergence value can be reported.</p>
+  <p>The two counted prerequisite-command failures trigger the worker's stop
+    rule. The cancelled recursive helper is separately attributed to probe
+    scaffolding. Neither the required baseline/after batch nor the declared
+    mutation run was started. No terminal-state figure was drawn because no
+    physical receipt and state were persisted.</p>
+  <p>The run manifest and diagnostic logs reside in
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/</code>.
+    The node is blocked and must not be promoted as scientifically complete.</p>
+  <p><strong>Next action:</strong> resume with a bounded prerequisite probe
+    that persists the forward receipt and arrays immediately after the public
+    call, before reading optional telemetry. Use the documented promotion
+    counts or residual history instead of an invented iteration field. Only a
+    qualified generating receipt permits the three physical recovery cases,
+    their poloidal panels, the displaced-loop mutation and both suite arms.</p>
+</section>

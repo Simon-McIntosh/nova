@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T21:43:06.178Z",
+  "dispatched_at": "2026-11-12T21:36:13Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261112T213430546063-plan-review-of-iron-core-magnetisation/plan.html:333",
+      "id": "done_when-1",
+      "reason": "a maintainer of the bound controls both sides of an inequality with no absolute ceiling, so restoring \"and the derived bound below 1e-5\" is what makes the clause a measure.",
+      "text": "the clause \"the sphere interior stays within its derived discretisation bound\" omits the ceiling on the bound itself, while the landed acceptance this text compresses asserts both that the derived bound stays below 1e-5 and that the observed error is within it; a bound derived by the same implementer from the same two operators can be inflated until any observed error sits under it, so as written the clause cannot fail",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261112T213430546063-plan-review-of-iron-core-magnetisation/plan.html:334",
+      "id": "done_when-2",
+      "reason": "an unmatched continuation turns the negative control into a comparison of two different algorithms' continuations, and the node would record a failure that does not isolate \"choosing Newton\".",
+      "text": "clause (2) now lets the Newton run satisfy convergence \"or by a drive ramp of at most ten per step\" while the frozen-permeability Picard negative control on \"the same case\" is given no continuation, so a Picard failure is attributable to its missing ramp rather than to the method the control is supposed to reject",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261112T213430546063-plan-review-of-iron-core-magnetisation/plan.html:324",
+      "id": "reasoning-1",
+      "reason": "keeping the \u00a74-extends-\u00a73 dependency statement in the plan and moving the symbol and file into the \u00a74 node brief preserves the wiring fix this sentence was answering while leaving the plan stating only the endpoint.",
+      "text": "the added sentence names the function to create and the module to create it in (<code>galerkin_cell_interaction</code> beside <code>cell_interaction</code> in nova/biot/tiledassembly.py), and <code>cell_interaction</code> appears nowhere else in the plan, so the reuse map is in plan text where the render pass has to check it against the code rather than in the node brief",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "85fcb0d14f3d89f467c4e2db4188958cfa7b5478",
+  "plan_fingerprint": "9b0410964490528a81624dd71b1e60092552a52e879f0f40d5017770dfb05e77",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 70,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261112T213430546063-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "b624d4cb7cf330303d48e53968e784aa7fa9c90b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 nova/biot/tiledassembly.py:578 cell_interaction and nova/biot/tiledassembly.py:716 galerkin_cell_interaction both exist, as do nova/biot/magnetisation.py, nova/imas/machine.py, nova/equilibrium/reduced_newton.py, nova/equilibrium/AGENTS.md and both script readers; the cited receipt is a to-be-written artifact under an existing directory.",
+    "done_when": "a finding \u2014 plan.html:333 keeps only half the landed sphere acceptance, \"the sphere interior stays within its derived discretisation bound\" without the 1e-5 envelope that makes the bound able to fail.",
+    "evidence_paths": "pass \u2014 the changed text names docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html with large files under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/, a durable path in an existing fragment directory, and clause (1)'s law, operator and analytic evidence is test-borne in the tree.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers appear in the section text or in the symbols it names, and the receipt filename follows the existing evidence-fragment convention.",
+    "reasoning": "a finding \u2014 the added sentence prescribes the implementation, naming the function to add and the module to add it in.",
+    "single_goal": "pass \u2014 the read half of done-when (3) has landed (nova/imas/machine.py:631 read_iron_core, and both named script readers call it at scripts/prototypes/iron_magnetisation/west.py:30 and scripts/west_stray_field/solve.py:72), so \u00a74's remaining deliverable is one goal, the WEST 62751 solve on the Galerkin operator with its receipt.",
+    "wiring": "pass \u2014 \u00a74 declares depends-on s2 and s3 (plan.html:24), both exist and are declared done, and the added sentence states correctly that \u00a74 extends the \u00a73 tile program with a Galerkin cell-average assembly rather than a separate program; s5 depends on s4."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "bf0049ee8c924773ea67dcbe093fb860584392de2ea9a0789d0fabc79578a462",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "bce5290b43a2d898845f25bbf402f45e398a6d178f4565143f7010af84c41401",
+    "s5": "18d64dc99773bd89740bde91084ec424e8873aa08afed9991b5bbc40f3395b4a",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "8a8c2cb93f6c3ed1ebbb2171af1a254a72689f0630f9b086c8890ac486595e6e",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T00:25:35.756967+00:00",
+  "total": null
+}

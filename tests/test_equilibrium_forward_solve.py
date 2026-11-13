@@ -894,11 +894,13 @@ def test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap(
 def test_the_moment_map_is_differentiable_against_finite_differences(
     converged, machine
 ):
-    """Small central-difference steps converge to the moment Jacobian.
+    """One-sided steps on wall segment 0→1 converge to its moment Jacobian.
 
-    The 1e-3 Wb interval crosses a local selection change and must remain
-    outside the 1e-2 derivative tolerance. The 3e-5 Wb and 1e-5 Wb steps stay
-    local, enter that tolerance in sequence, and decrease the normalised error.
+    The converged contact is wall vertex zero. Central differences cross
+    segments 60→0 and 0→1, whose moment derivatives differ. Backward steps
+    stay on segment 0→1, the branch selected by automatic differentiation.
+    The coarse step remains outside the derivative tolerance; smaller steps
+    enter it in sequence and decrease the normalised error.
     """
     profile, _seed, _vacuum = machine
     targets = MomentTargets(
@@ -916,13 +918,24 @@ def test_the_moment_map_is_differentiable_against_finite_differences(
     direction = jnp.asarray(rng.standard_normal(converged.flux.shape))
     direction = direction / jnp.max(jnp.abs(direction))
     analytic = jacobian @ direction
-    assert float(jnp.max(jnp.abs(analytic))) > 1.0
+    assert np.all(np.isfinite(np.asarray(analytic)))
+    assert float(jnp.max(jnp.abs(analytic))) > 0.0
+    wall = np.asarray(profile.operator.wall.coordinate)
+    _masks, contact = profile.operator.read(converged.flux)
+    np.testing.assert_allclose(contact.boundary, wall[0], rtol=0, atol=1e-10)
+    segment = wall[1] - wall[0]
     errors = []
     for step in MOMENT_JACOBIAN_STEPS:
+        minus = converged.flux - step * direction
+        _minus_masks, minus_contact = profile.operator.read(minus)
+        offset = np.asarray(minus_contact.boundary) - wall[0]
+        fraction = float(offset @ segment / (segment @ segment))
+        assert 0.0 < fraction < 1.0
+        np.testing.assert_allclose(offset, fraction * segment, rtol=0, atol=1e-10)
         numeric = (
-            profile.moment_residual(converged.flux + step * direction, targets)
-            - profile.moment_residual(converged.flux - step * direction, targets)
-        ) / (2.0 * step)
+            profile.moment_residual(converged.flux, targets)
+            - profile.moment_residual(minus, targets)
+        ) / step
         errors.append(
             float(jnp.max(jnp.abs(numeric - analytic)))
             / float(jnp.max(jnp.abs(analytic)))

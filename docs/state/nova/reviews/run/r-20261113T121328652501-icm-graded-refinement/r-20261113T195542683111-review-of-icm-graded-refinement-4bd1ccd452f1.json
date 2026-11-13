@@ -7,6 +7,13 @@
   "call_sites": [],
   "completed_at": "2026-11-13T20:08:26.747Z",
   "dispatched_at": "2026-11-13T20:00:12Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-icm-graded-refinement-4bd1ccd452f1",
+      "recorded_at": "2026-11-13T22:04:09.443363+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_magnetisation.py",

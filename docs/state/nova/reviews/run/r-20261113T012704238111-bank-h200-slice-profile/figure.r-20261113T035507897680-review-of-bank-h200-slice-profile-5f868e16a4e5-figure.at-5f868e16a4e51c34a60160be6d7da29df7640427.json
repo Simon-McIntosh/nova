@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-13T04:13:55.555Z",
+  "dispatched_at": "2026-11-13T04:00:04Z",
+  "figure": {
+    "canvas_px": [
+      1400,
+      1041
+    ],
+    "drawing_script": "scripts/prototypes/bank_h200_slice_profile/report.py",
+    "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T035507897680-review-of-bank-h200-slice-profile-5f868e16a4e5-figure/image-0.png",
+    "repository_path": "docs/figures/sub-millisecond-forward-path/bank-h200-slice-profile/per-slice-stages.svg"
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_h200_slice_profile/report.py",
+      "id": "fb6bfef16d1",
+      "line": 300,
+      "severity": "blocking",
+      "summary": "The panel copied from the fragment's own stage table: at width 64 the four smallest stage costs are visually indistinguishable from zero. Four of the twelve panels place their width-64 marker on the x-axis spine, and at native resolution the marker is drawn over the axis line. The plotted value is 0.3828 ms/slice in host gaps, 0.0212 in transfer/fills, 0.1040 in other/fused and about 0.0001 in predictor, against axis heights of 30.58, 1.34, 2.89 and 5.4, so they sit at 1.3%, 1.6%, 3.6% and 0.002% of the panel height while the marker measures about 13 px across a roughly 149 px axis (about 9% of its height). The cause is 'ax.set_ylim(0, max(values) * 1.15 ...)', which fixes every panel's floor at zero and its ceiling at 1.15 times the maximum. The figures exist to report per-slice cost against width at the widest measured width, and that width is where the 5.78x gap to the 1 ms target is set, so the four smallest stages - exactly the ones a ranked saving list has to judge - are the four a reader cannot see."
+    },
+    {
+      "file": "scripts/prototypes/bank_h200_slice_profile/report.py",
+      "id": "f39537af4ec",
+      "line": 296,
+      "severity": "non-blocking",
+      "summary": "The first panel reports native end-to-end wall (39.880 ms per slice at width 1) and the other eleven report profiled exclusive device stages, which sum to 56.063 ms on the same profiled run, yet all twelve are drawn in the same blue solid line and filled marker. The caption states the difference in prose, but the picture gives no cue for it, so a reader scanning the grid naturally adds the eleven stage panels and expects the first, and gets 141% of it at width 1 and 89% at width 64. The fragment is explicit that stage costs must not be summed and presented as the unprofiled latency, so the boundary between the two measurement bases is load-bearing; a visibly different style on the native panel, such as the near-black dashed line the plot rules reserve for a distinct basis, would carry it without the caption."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-h200-slice-profile/per-slice-stages.svg",
+      "id": "ffe1ed63537",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The predictor panel's y axis is labelled in microseconds per slice while the other eleven are in milliseconds per slice, so the cheapest stage in the whole split (4.7 us at width 1, about four orders below the 39.88 ms whole slice) is drawn at the same visual height as a panel reporting 40 ms. The plan's plot rule is that panels comparing one quantity share one prefix, and these twelve panels compare one quantity. The caption does disclose 'Predictor uses u/slice; other panels use ms/slice', which is why this is recorded rather than blocking, but the disclosure is prose where a shared prefix in ms/slice would be self-evident and would not cost the reader a unit change mid-grid."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/bank-h200-slice-profile/per-slice-stages.svg",
+      "id": "ffe1ed63537",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Y tick label formatting differs across the grid: three panels (carried geometry, transfer/fills, update residual) carry one decimal place and nine carry none, so a reader comparing adjacent panels sees 0.5 steps beside 1 steps. Each choice is defensible for its own scale, but the difference is visible between panels that are meant to be read as one set and no rule in the figure states why the format changes."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261113T035507897680-review-of-bank-h200-slice-profile-5f868e16a4e5-figure",
+  "reviewed_base_sha": "a732ede0a545a4c6524cfd3ccfb1fbc6aa125642",
+  "reviewed_head_sha": "5f868e16a4e51c34a60160be6d7da29df7640427",
+  "reviewed_run_id": "r-20261113T012704238111-bank-h200-slice-profile",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass - sampled from the render, the series measures rgb(31,93,146) at 5.17:1 against white, the axis labels rgb(72,72,72) at 10.63:1, the tick labels rgb(82,81,78) at 9.18:1 and the axis lines rgb(125,124,122) at 4.46:1, so every text and line element clears 4.5:1 and none sits on a coloured background.",
+    "data_ink": "pass - the visual weight is one 3 pt blue line and three filled markers per panel, with no fills, gradients, error bands or annotation furniture; the white area around them is empty canvas rather than decoration.",
+    "decoration": "pass - no gridline, no background fill, no shading band; the top and right spines are absent and only the bottom and left axes carry a scale, and the tick marks are short and outside the plot.",
+    "label_collision": "pass - no label is clipped or overlapping: the content bounding box of the whole canvas is x 13-1373 and y 30-985 in a 1400x1041 image, leaving at least 13 px of white on every edge, and the rotated panel labels occupy the gutters between columns with clear space on both sides at native resolution.",
+    "legibility": "defect - the twelve panels, their axis labels and their tick labels are each readable at a glance on the 1400x1041 canvas, and the steep fall from batch width 1 to 64 with a knee at 16 is immediate; but in four of the twelve panels the width-64 point is drawn on the zero baseline and its marker straddles the x-axis spine, so the terminal value reads as zero rather than as the 0.0001 to 0.383 ms per slice it is (blocking finding below).",
+    "table_form": "pass - the image is twelve small multiples of one two-variable relationship (per-slice cost against batch width) whose message is the shape of the decay and the position of the knee at width 16, which a table of thirty-six numbers would state but not show; the exact values, which no plotted scale can carry here, are already a table in the fragment."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T16:34:59.134957+00:00",
+  "total": null
+}

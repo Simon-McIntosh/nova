@@ -43,6 +43,23 @@
       "note": "Clause (1) now states both halves of the sphere acceptance: the derived interior bound must itself stay at or below 1e-5, and the observed interior error must lie within it.",
       "reason": "",
       "when": "2026-11-13T00:27:17.330622+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "6524e2321c3a16cb2a3b0e1729a5bfea52aea0a7",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Clause (2) now requires the frozen-permeability Picard control to run on the same case with the same continuation as Newton (direct from M = 0, or the same drive ramp), so its failure is attributable to the method.",
+      "reason": "",
+      "when": "2026-11-13T00:27:58.160948+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "The sentence describes code already on main (galerkin_cell_interaction landed with icm-galerkin-interaction), not an instruction to build it; naming the landed entry point tells the next reader where the section-3 extension lives.",
+      "when": "2026-11-13T00:28:25.331052+00:00"
     }
   ],
   "responses": {
@@ -54,6 +71,21 @@
       "note": "Clause (1) now states both halves of the sphere acceptance: the derived interior bound must itself stay at or below 1e-5, and the observed interior error must lie within it.",
       "reason": "",
       "when": "2026-11-13T00:27:17.330622+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "6524e2321c3a16cb2a3b0e1729a5bfea52aea0a7",
+      "commit_basis": "edit",
+      "note": "Clause (2) now requires the frozen-permeability Picard control to run on the same case with the same continuation as Newton (direct from M = 0, or the same drive ramp), so its failure is attributable to the method.",
+      "reason": "",
+      "when": "2026-11-13T00:27:58.160948+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The sentence describes code already on main (galerkin_cell_interaction landed with icm-galerkin-interaction), not an instruction to build it; naming the landed entry point tells the next reader where the section-3 extension lives.",
+      "when": "2026-11-13T00:28:25.331052+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261112T213430546063-plan-review-of-iron-core-magnetisation.json",

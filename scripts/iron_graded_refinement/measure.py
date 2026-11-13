@@ -402,6 +402,11 @@ def main():
                     label, field, lambda row, label=label: shell_update(row, label)
                 )
                 record["shell"][label]["grading_scale"] = scale
+                record["shell"][label]["grading"] = dict(
+                    fine=args.fine * scale,
+                    coarse=args.coarse * scale,
+                    cells_across=args.cells_across,
+                )
                 save(OUT / "measurement.json", record)
         if "sweep" in arms:
             for label, fine, coarse, across in SHELL_SWEEP:
@@ -473,6 +478,11 @@ def main():
                     inputs,
                 )
                 record["west"][label]["grading_scale"] = scale
+                record["west"][label]["grading"] = dict(
+                    fine=args.west_fine * scale,
+                    coarse=args.west_coarse * scale,
+                    cells_across=args.cells_across,
+                )
                 save(OUT / "measurement.json", record)
     finally:
         iron._galerkin_interaction = production

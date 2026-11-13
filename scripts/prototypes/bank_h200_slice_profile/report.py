@@ -378,7 +378,7 @@ def main():
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(False)
     fig.subplots_adjust(
-        left=0.09, right=0.98, bottom=0.08, top=0.91, hspace=0.70, wspace=0.60
+        left=0.12, right=0.98, bottom=0.08, top=0.91, hspace=0.70, wspace=0.60
     )
     fig.legend(
         handles=[

@@ -20,7 +20,7 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,efit,grad-shafranov,convergence">
   <meta name="plan-after" content="converged-forward-solve">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;deferred&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;inverse-equilibrium-baseline#s1&quot;],&quot;s3&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s4&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s5&quot;:[&quot;inverse-equilibrium-baseline#s3&quot;]}">
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -68,7 +68,7 @@
       <thead><tr><th>Section</th><th>Hours</th><th>Reasoning</th><th>Risk</th><th>Waits on</th></tr></thead>
       <tbody>
         <tr><td>§1 Known-answer recovery</td><td>8</td><td>deep</td><td>moderate</td><td>—</td></tr>
-        <tr><td>§2 The same inputs as EFIT</td><td>7</td><td>deep</td><td>elevated</td><td>§1</td></tr>
+        <tr><td>§2 The same inputs as EFIT</td><td>7</td><td>deep</td><td>elevated</td><td>§1 and two decisions</td></tr>
         <tr><td>§3 One scoreboard for every estimator</td><td>4</td><td>standard</td><td>low</td><td>§2</td></tr>
         <tr><td>§4 Cost on the H200</td><td>3</td><td>standard</td><td>moderate</td><td>§2</td></tr>
         <tr><td>§5 The reduced-model reconstructions</td><td>3</td><td>standard</td><td>moderate</td><td>§3 and a decision</td></tr>
@@ -94,7 +94,10 @@
     fails clause (1) on the flux map and reports that row as the largest whitened residual.</p>
 
     <h2 id="s2">§2 — The same inputs as EFIT</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="7.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="7.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="deferred" data-links=""></section>
+    <p>Deferred until the decisions <code>fitted-unknowns</code> and <code>vertical-freedom</code> are
+    locked: they fix what is fitted, and the bands below are only meaningful against a fit of the same
+    configuration.</p>
     <p>The comparison the lead asked for: the inverse class and imas-efit answer the same question from the
     same inputs. The case set is read from imas-efit's own committed cases through IMAS, at the data
     dictionary version each was written in: one MAST slice, one TCV slice and one ITER scenario slice, none
@@ -108,8 +111,9 @@
     residual per sensor is tabulated beside imas-efit's own for the same rows. (2) Each disagreement is
     split into a fit part and a forward part by one further run per case: imas-efit's fitted p′ and FF′ are
     solved forward by nova with no data, and the table reports nova-forward against imas-efit and
-    nova-inverse against nova-forward separately. (3) Negative control: the comparison rerun with one
-    poloidal-field coil current scaled by 1.05 leaves at least one band on every case. The evidence record
+    nova-inverse against nova-forward separately. (3) Negative control, constructed to
+    fire under either option of <code>fitted-unknowns</code>: the fit rerun with every magnetics row and the
+    measured plasma current scaled by 1.10 leaves the 1.5 % plasma-current band on every case. The evidence record
     carries, per case, line-contour flux panels of the nova state beside the imas-efit state on shared
     levels, with both null sets and the wall, under the repository plotting rules.</p>
 
@@ -135,8 +139,9 @@
     <p><strong>Done when.</strong> (1) The record reports, for the §2 MAST case at batch widths 1, 16 and
     64, the warm wall per slice, the forward solves per reconstruction and the cold compile wall, measured
     in one H200 job with the persistent compilation cache contract printed. (2) The warm wall per slice at
-    width 16 is at or below ten times the warm forward solve at the same shape and width, or the record
-    names the step that exceeds it. (3) imas-efit's recorded per-slice wall for the same case is quoted
+    width 16 is at or below ten times the warm forward solve at the same shape and width. A larger figure
+    fails this clause: the record then names the step responsible with its share of the wall, and the
+    section stays open. (3) imas-efit's recorded per-slice wall for the same case is quoted
     beside it with its hardware.</p>
 
     <h2 id="s5">§5 — The reduced-model reconstructions</h2>

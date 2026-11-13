@@ -1,106 +1,101 @@
 <section id="h200-levers-measurements">
-<h2>H200 walls: scalar default selected, booking repair queued</h2>
-<p>Current checkpoint: the scalar conic default and its test now use 128.
-Canonical carried-decision and live-candidate repairs have completed. Booking
-repair job <code>1313091</code> is queued after a successful CPU dry-run with
-width-specific historical fixtures. The tables below retain the earlier
-observations until the final canonical-input inventory audit succeeds.</p>
-<p>Seven H200 jobs (1312389, 1312390, 1312391, 1312392, 1312393, 1312394, 1312395) completed successfully. Selected fresh-process pairs
-agree within 4.915%. Every original completed receipt, including both
-carried-decision widths and booking-off width 1, remains unchanged. Disagreeing
-earlier pairs are excluded rather than averaged. CPU smoke data contain one
-measured warm sample per arm; the driver now says so explicitly.</p>
-<p>The inventory audit refuses unequal input fingerprints for
-booking, carried-decisions, live-candidates. These timing observations remain
-provisional. Their seed moments were rebuilt through revision-specific booking
-code. The committed repair exports the historical fixture and requires its main
-arm to reproduce the retained input fingerprint exactly. Completed historical
-arms are retained; only unresolved main arms need another measurement.</p>
-<p>The expanded audit checked 80 paired process geometry records against the
-analytic plasma minor radius and the locked 5e-4 position and 1e-4 flux-span
-limits. These are paired differences, not a new independent analytic oracle
-qualification. Solved residuals are at most 8.11013e-11. All seven jobs use
-x64 on NVIDIA H200 NVL. Compile/cache-load wall is separate from execution.</p>
-<p>The historical carried branch returns a frozen reading. Its wall is
-attribution only. Carried decisions compare the historical full read with the
-current refreshed carried read. The negative control admits distinct program
-fingerprints and then refuses identical programs and executed-work counts with
-<code>ValueError: inert lever: identical lowered programs and execution counts</code>
-and <code>EXIT=1</code>. Each measured pair also records its own program or
-executed-work distinction; a synthetic refusal does not replace that check.</p>
-<table id="h200-levers-verdicts"><thead><tr>
-<th>Lever</th>
-<th>Measured implication</th>
-<th>Default decision</th></tr></thead><tbody>
-<tr>
-<td>Carried decisions</td>
-<td>Width 16: 30.101346 to 9.301983 ms, first processes</td>
-<td>Provisional on; input provenance unresolved</td></tr>
-<tr>
-<td>Booking cost</td>
-<td>Width 1 assembly: 7.586610 to 6.017247 ms; width 16 difference inside 3%</td>
-<td>Provisional retain on; input provenance unresolved</td></tr>
-<tr>
-<td>Factor carry</td>
-<td>Flattop and ramp slower at both widths</td>
-<td>Retain off; explicit reuse_factor opt-in remains</td></tr>
-<tr>
-<td>Scalar tile</td>
-<td>128 beats 32 at both widths; width-16 full 29.135708 to 27.803048 ms and carried
-17.774370 to 16.525416 ms</td>
-<td>128 selected beyond the margin; default and explicit assertions now use 128</td></tr>
-<tr>
-<td>Per-lane drive</td>
-<td>Width 1: 173.763677 to 226.640278 ms; width 16: 805.932002 to 997.578302 ms</td>
-<td>Retain shared scalar route; independent lanes remain an explicit array-input
-choice</td></tr>
-<tr>
-<td>Live candidates</td>
-<td>Width-16 carried 10.423839 to 9.310935 ms</td>
-<td>Provisional retain on; input provenance unresolved</td></tr>
-<tr>
-<td>Diverted wall skip</td>
-<td>Width-16 all-diverted carried 8.440215 to 7.178316 ms; mixed 8.400809 to 8.397005
-ms</td>
-<td>Retain guarded skip; mixed difference unresolved inside 3%</td></tr>
+<h2>H200 speed-lever verdicts</h2>
+<p>The seven original jobs (1312389, 1312390, 1312391, 1312392, 1312393, 1312394, 1312395) completed. Canonical-input repair jobs
+1312981, 1312984, 1313091 complete the paired comparisons. Every original completed receipt,
+including carried-decision widths 1 and 16 and booking-off width 1, is retained
+unchanged. The selected fresh-process pairs agree within 4.915%.
+Earlier disagreeing pairs are excluded, never averaged.</p>
+<p>The inventory audit passes 18 paired comparisons and
+81 geometry checks with no input fingerprint
+mismatches. Position differences use the analytic plasma minor radius
+(0.544 m) and the locked 5e-4 position and 1e-4 flux-span
+budgets; these qualify the lever changes against the historical reference,
+whose analytic qualification is inherited. Maximum paired position error is
+8.26377e-14 of the minor radius and boundary-flux error is 1.23158e-14
+of the span. Recorded terminal residuals are at most 8.89884e-11; all solved
+lanes are certified at 1e-10. Receipts assert x64 on NVIDIA H200 NVL.
+Compilation/cache-load
+and synchronized warm execution walls are reported separately.</p>
+<p>The historical carried branch returns a frozen reading and is retained for
+attribution only. The carried-decision verdict compares the historical full
+read with the current refreshed carried read. An identical-program arm pair is
+refused. Every accepted pair has different lowered programs or executed-work
+counts. The negative control admits distinct fingerprints and then refuses
+identical programs; the added test also checks the refusal, and its deliberate
+bypass is measured separately in the paired CPU suite job.</p>
+<p>The scalar conic default changes from 32 to 128 cells. Factor carry remains
+off by default. Shared scalar continuation remains the scalar-input default;
+independent per-lane continuation is selected explicitly by array inputs.
+Carried decisions, booking tiling, live candidates and the all-diverted carried
+wall skip stay enabled. Normal-form tiles remain eight cells.</p>
+<p>Each decision below uses the larger of 3% and the larger process spread.
+Inside that margin the incumbent stays. Scalar rows compare 32 with 128; 64 is
+included in the complete execution table. Width-16 full-read 128 versus 64 is
+inside 3%, but 128 beats the incumbent 32 beyond the margin at both widths and
+has the smallest measured wall. Each process is retained separately.</p>
+<table id="h200-levers-verdicts"><thead><tr><th>Lever</th><th>Width</th><th>Drive step</th><th>Population</th><th>Stage</th><th>Off / tile 32 [ms], P1,P2</th><th>On / tile 128 [ms], P1,P2</th><th>On change</th><th>Margin</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td>diverted</td><td>full-to-carried</td><td>6.832168, 6.512109</td><td>3.186917, 3.057048</td><td>-53.354%</td><td>4.915%</td><td>on: faster beyond margin</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td>diverted</td><td>full-to-carried</td><td>30.101346, 30.093079</td><td>9.411952, 9.337770</td><td>-68.732%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>assembly</td><td>7.586610, 7.446166</td><td>6.217487, 6.060906</td><td>-18.047%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>update</td><td>15.279071, 15.294110</td><td>13.793331, 13.757700</td><td>-9.724%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>assembly</td><td>28.362328, 27.790429</td><td>27.768090, 27.749352</td><td>-2.095%</td><td>3.000%</td><td>retain incumbent: difference unresolved</td></tr>
+<tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>update</td><td>48.013283, 48.088046</td><td>48.144810, 48.018256</td><td>+0.274%</td><td>3.000%</td><td>retain incumbent: difference unresolved</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>warm-slices</td><td>40.012285, 40.201752</td><td>69.336390, 69.254600</td><td>+73.288%</td><td>3.000%</td><td>off; factor carry remains opt-in</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>warm-slices</td><td>123.279639, 123.218765</td><td>507.349240, 507.322559</td><td>+311.543%</td><td>3.000%</td><td>off; factor carry remains opt-in</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>warm-slices</td><td>82.792549, 82.424549</td><td>212.017546, 211.889524</td><td>+156.083%</td><td>3.000%</td><td>off; factor carry remains opt-in</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>warm-slices</td><td>269.625258, 269.467008</td><td>1809.288069, 1811.640245</td><td>+571.038%</td><td>3.000%</td><td>off; factor carry remains opt-in</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td></td><td></td><td>full</td><td>9.808468, 9.810278</td><td>8.445671, 8.284869</td><td>-13.894%</td><td>3.000%</td><td>128: fastest measured tile; change default from 32</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td></td><td></td><td>carried</td><td>6.380612, 6.412249</td><td>4.710596, 4.753752</td><td>-26.173%</td><td>3.000%</td><td>128: fastest measured tile; change default from 32</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td></td><td></td><td>full</td><td>29.135708, 29.198540</td><td>27.803048, 27.770150</td><td>-4.574%</td><td>3.000%</td><td>128: fastest measured tile; change default from 32</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td></td><td></td><td>carried</td><td>17.774370, 17.746024</td><td>16.525416, 16.318068</td><td>-7.027%</td><td>3.000%</td><td>128: fastest measured tile; change default from 32</td></tr>
+<tr><td>lane-drive</td><td>1</td><td>1e-05</td><td>diverted</td><td>mixed-drive</td><td>173.763677, 174.215199</td><td>226.640278, 229.883481</td><td>+30.430%</td><td>3.000%</td><td>shared scalar default; independent arrays remain opt-in</td></tr>
+<tr><td>lane-drive</td><td>16</td><td>1e-05</td><td>diverted</td><td>mixed-drive</td><td>805.932002, 807.819286</td><td>997.578302, 993.040627</td><td>+23.779%</td><td>3.000%</td><td>shared scalar default; independent arrays remain opt-in</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>full</td><td>6.708164, 6.953167</td><td>6.791629, 6.935364</td><td>+1.244%</td><td>3.652%</td><td>retain incumbent: difference unresolved</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>carried</td><td>3.463432, 3.477322</td><td>3.137155, 3.076116</td><td>-9.421%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>full</td><td>30.143091, 29.811233</td><td>20.841217, 21.122292</td><td>-30.859%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>carried</td><td>10.423839, 10.446362</td><td>9.285096, 9.199895</td><td>-10.924%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>1e-05</td><td>diverted</td><td>full</td><td>6.424686, 6.447136</td><td>6.431496, 6.533504</td><td>+0.106%</td><td>3.000%</td><td>attribution only: skip is in carried branch</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>1e-05</td><td>diverted</td><td>carried</td><td>3.228899, 3.244188</td><td>2.888622, 2.893830</td><td>-10.538%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>1e-05</td><td>diverted</td><td>full</td><td>27.853798, 27.705722</td><td>18.917657, 18.864637</td><td>-32.082%</td><td>3.000%</td><td>attribution only: skip is in carried branch</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>1e-05</td><td>diverted</td><td>carried</td><td>8.440215, 8.399384</td><td>7.178316, 7.205501</td><td>-14.951%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>1e-05</td><td>mixed</td><td>full</td><td>6.223032, 6.366797</td><td>6.504139, 6.716659</td><td>+4.517%</td><td>3.267%</td><td>attribution only: skip is in carried branch</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>1e-05</td><td>mixed</td><td>carried</td><td>3.074899, 3.049588</td><td>3.149852, 3.130550</td><td>+2.438%</td><td>3.000%</td><td>retain incumbent: difference unresolved</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>1e-05</td><td>mixed</td><td>full</td><td>28.138099, 27.842918</td><td>18.937685, 18.953713</td><td>-32.697%</td><td>3.000%</td><td>attribution only: skip is in carried branch</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>1e-05</td><td>mixed</td><td>carried</td><td>8.400809, 8.340696</td><td>8.397005, 8.430857</td><td>-0.045%</td><td>3.000%</td><td>retain incumbent: difference unresolved</td></tr>
 </tbody></table>
-<p>Each verdict uses the larger of 3% and the larger arm process spread.
-Inside that margin the incumbent stays. The scalar default now uses 128;
-paired CPU verification is running. Completion still requires the canonical
-booking repair, final inventory audit, and final-head sirius suite record.</p>
 <figure id="h200-levers-walls-figure">
-<img
- src="/nova/figures/sub-millisecond-forward-path/h200-levers/arm-walls.svg"
-alt="Per-lever H200 walls for widths one and sixteen, with a secant flattop trace."/>
-<figcaption>First selected process in each arm; second-process walls appear in
-the tables. Stars identify input-provenance refusals. Read panels show carried
-reads, except the decision-free reference uses its full read. Booking shows
-assembly; factor carry shows the median across warm flattop slices 2–7 within
-one process; wall skip shows the all-diverted batch. The final panel is per-slice
-width-16 wall, including prediction. Other panels are whole-batch walls.
-Line colours consistently identify batch width. No disagreeing process pair
-contributes to a plotted point.</figcaption></figure>
-<p>Width-16 flattop with the secant predictor: warm per-slice medians over slices
-2–7 are 7.700821 and 7.710159 ms in the two fresh processes.
-The 1 ms target is not met. Slice 1, before a two-slice secant history is
-available, is shown separately below.</p>
+<img src="/nova/figures/sub-millisecond-forward-path/h200-levers/arm-walls.svg"
+alt="Per-lever H200 walls at widths one and sixteen and a secant flattop trace."/>
+<figcaption>First selected process per arm; the tables include both processes.
+Read panels show carried reads, except the decision-free reference uses its
+full read. Booking shows assembly; factor carry shows the median across warm
+flattop slices 2–7 within one process; wall skip shows the all-diverted batch.
+The final panel shows per-slice width-16 wall, including prediction; other
+panels show whole-batch walls. Colours consistently identify batch width.
+No disagreeing process pair contributes to a plotted point.</figcaption></figure>
+<p>The width-16 secant flattop stream has warm per-slice medians over slices
+2–7 of 7.700821 and 7.710159 ms in the two fresh processes.
+The 1 ms target is not met. Slice 1 precedes the two-slice secant history and
+is tabled separately. This headline was measured on revision
+<code>7e89937d536725553392a05af636f7b468eb1c03</code>, before changing the scalar
+default; it is the recorded main-arm wall, not a post-change projection.</p>
 <table id="h200-levers-execute-walls"><thead><tr><th>Lever</th><th>Width</th><th>Drive step</th><th>Population</th><th>Arm</th><th>Stage</th><th>Process 1 [ms]</th><th>Process 2 [ms]</th><th>Spread</th></tr></thead><tbody>
-<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td></td><td>off</td><td>full</td><td>6.832168</td><td>6.512109</td><td>4.915%</td></tr>
-<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td></td><td>off</td><td>carried</td><td>1.940487</td><td>1.958208</td><td>0.913%</td></tr>
-<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td></td><td>on</td><td>full</td><td>6.858742</td><td>6.880885</td><td>0.323%</td></tr>
-<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td></td><td>on</td><td>carried</td><td>3.059946</td><td>3.167046</td><td>3.500%</td></tr>
-<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td></td><td>off</td><td>full</td><td>30.101346</td><td>30.093079</td><td>0.027%</td></tr>
-<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td></td><td>off</td><td>carried</td><td>3.766643</td><td>3.766259</td><td>0.010%</td></tr>
-<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td></td><td>on</td><td>full</td><td>20.872401</td><td>21.020811</td><td>0.711%</td></tr>
-<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td></td><td>on</td><td>carried</td><td>9.301983</td><td>9.237671</td><td>0.696%</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>full</td><td>6.832168</td><td>6.512109</td><td>4.915%</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>carried</td><td>1.940487</td><td>1.958208</td><td>0.913%</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>6.728325</td><td>6.918063</td><td>2.820%</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>carried</td><td>3.186917</td><td>3.057048</td><td>4.248%</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>full</td><td>30.101346</td><td>30.093079</td><td>0.027%</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>carried</td><td>3.766643</td><td>3.766259</td><td>0.010%</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>21.064021</td><td>21.024175</td><td>0.190%</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>carried</td><td>9.411952</td><td>9.337770</td><td>0.794%</td></tr>
 <tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>assembly</td><td>7.586610</td><td>7.446166</td><td>1.886%</td></tr>
 <tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>update</td><td>15.279071</td><td>15.294110</td><td>0.098%</td></tr>
-<tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>assembly</td><td>6.017247</td><td>6.001076</td><td>0.269%</td></tr>
-<tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>update</td><td>13.803864</td><td>13.735667</td><td>0.496%</td></tr>
+<tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>assembly</td><td>6.217487</td><td>6.060906</td><td>2.583%</td></tr>
+<tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>update</td><td>13.793331</td><td>13.757700</td><td>0.259%</td></tr>
 <tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>assembly</td><td>28.362328</td><td>27.790429</td><td>2.058%</td></tr>
 <tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>update</td><td>48.013283</td><td>48.088046</td><td>0.156%</td></tr>
-<tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>assembly</td><td>27.728731</td><td>27.869508</td><td>0.508%</td></tr>
-<tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>update</td><td>47.996767</td><td>47.942227</td><td>0.114%</td></tr>
+<tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>assembly</td><td>27.768090</td><td>27.749352</td><td>0.068%</td></tr>
+<tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>update</td><td>48.144810</td><td>48.018256</td><td>0.264%</td></tr>
 <tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-1</td><td>61.140196</td><td>61.071327</td><td>0.113%</td></tr>
 <tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-2</td><td>40.425429</td><td>40.365737</td><td>0.148%</td></tr>
 <tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-3</td><td>40.018341</td><td>40.163441</td><td>0.363%</td></tr>
@@ -175,12 +170,12 @@ available, is shown separately below.</p>
 <tr><td>lane-drive</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>mixed-drive</td><td>997.578302</td><td>993.040627</td><td>0.457%</td></tr>
 <tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>full</td><td>6.708164</td><td>6.953167</td><td>3.652%</td></tr>
 <tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>carried</td><td>3.463432</td><td>3.477322</td><td>0.401%</td></tr>
-<tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>6.906223</td><td>6.960079</td><td>0.780%</td></tr>
-<tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>carried</td><td>3.109617</td><td>3.128439</td><td>0.605%</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>6.791629</td><td>6.935364</td><td>2.116%</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>carried</td><td>3.137155</td><td>3.076116</td><td>1.984%</td></tr>
 <tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>full</td><td>30.143091</td><td>29.811233</td><td>1.113%</td></tr>
 <tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>carried</td><td>10.423839</td><td>10.446362</td><td>0.216%</td></tr>
-<tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>20.803848</td><td>20.752728</td><td>0.246%</td></tr>
-<tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>carried</td><td>9.310935</td><td>9.287143</td><td>0.256%</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>20.841217</td><td>21.122292</td><td>1.349%</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>carried</td><td>9.285096</td><td>9.199895</td><td>0.926%</td></tr>
 <tr><td>wall-skip</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>full</td><td>6.424686</td><td>6.447136</td><td>0.349%</td></tr>
 <tr><td>wall-skip</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>carried</td><td>3.228899</td><td>3.244188</td><td>0.473%</td></tr>
 <tr><td>wall-skip</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>6.431496</td><td>6.533504</td><td>1.586%</td></tr>
@@ -199,22 +194,22 @@ available, is shown separately below.</p>
 <tr><td>wall-skip</td><td>16</td><td>1e-05</td><td>mixed</td><td>on</td><td>carried</td><td>8.397005</td><td>8.430857</td><td>0.403%</td></tr>
 </tbody></table>
 <table id="h200-levers-compile-walls"><thead><tr><th>Lever</th><th>Width</th><th>Drive step</th><th>Population</th><th>Arm</th><th>Stage</th><th>Process 1 compile/load [s]</th><th>Process 2 compile/load [s]</th></tr></thead><tbody>
-<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td></td><td>off</td><td>full</td><td>0.087398</td><td>0.087246</td></tr>
-<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td></td><td>off</td><td>carried</td><td>5.640779</td><td>5.712846</td></tr>
-<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td></td><td>on</td><td>full</td><td>0.091832</td><td>0.091536</td></tr>
-<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td></td><td>on</td><td>carried</td><td>14.384178</td><td>14.407404</td></tr>
-<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td></td><td>off</td><td>full</td><td>0.088507</td><td>0.088643</td></tr>
-<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td></td><td>off</td><td>carried</td><td>5.427391</td><td>5.378308</td></tr>
-<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td></td><td>on</td><td>full</td><td>0.092736</td><td>0.092345</td></tr>
-<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td></td><td>on</td><td>carried</td><td>13.174718</td><td>13.011182</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>full</td><td>0.087398</td><td>0.087246</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>carried</td><td>5.640779</td><td>5.712846</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>0.089253</td><td>0.089340</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>carried</td><td>14.744885</td><td>14.536093</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>full</td><td>0.088507</td><td>0.088643</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>carried</td><td>5.427391</td><td>5.378308</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>0.095574</td><td>0.092149</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>carried</td><td>13.291567</td><td>13.311094</td></tr>
 <tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>assembly</td><td>3.723689</td><td>3.748520</td></tr>
 <tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>update</td><td>4.946139</td><td>5.054231</td></tr>
-<tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>assembly</td><td>4.032258</td><td>4.008252</td></tr>
-<tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>update</td><td>5.091640</td><td>4.991358</td></tr>
+<tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>assembly</td><td>4.055925</td><td>4.140606</td></tr>
+<tr><td>booking</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>update</td><td>5.084135</td><td>5.104166</td></tr>
 <tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>assembly</td><td>3.548401</td><td>3.735332</td></tr>
 <tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>update</td><td>5.201976</td><td>5.060003</td></tr>
-<tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>assembly</td><td>4.090457</td><td>3.951256</td></tr>
-<tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>update</td><td>4.989908</td><td>4.966779</td></tr>
+<tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>assembly</td><td>4.035747</td><td>4.010832</td></tr>
+<tr><td>booking</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>update</td><td>5.027903</td><td>4.986495</td></tr>
 <tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>solve-fresh</td><td>40.246276</td><td>40.698141</td></tr>
 <tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>secant</td><td>0.067758</td><td>0.064543</td></tr>
 <tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>solve-fresh</td><td>41.523913</td><td>41.565125</td></tr>
@@ -253,12 +248,12 @@ available, is shown separately below.</p>
 <tr><td>lane-drive</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>mixed-drive</td><td>39.019634</td><td>39.026948</td></tr>
 <tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>full</td><td>0.088308</td><td>0.087902</td></tr>
 <tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>carried</td><td>12.567981</td><td>12.553955</td></tr>
-<tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>0.092131</td><td>0.092481</td></tr>
-<tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>carried</td><td>14.478619</td><td>14.699628</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>0.094973</td><td>0.092535</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>carried</td><td>14.551423</td><td>14.531771</td></tr>
 <tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>full</td><td>0.088139</td><td>0.087987</td></tr>
 <tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>carried</td><td>11.954644</td><td>11.991397</td></tr>
-<tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>0.093097</td><td>0.093020</td></tr>
-<tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>carried</td><td>13.095260</td><td>13.005413</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>0.093474</td><td>0.095210</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>carried</td><td>13.208336</td><td>13.207601</td></tr>
 <tr><td>wall-skip</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>full</td><td>0.085616</td><td>0.085896</td></tr>
 <tr><td>wall-skip</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>carried</td><td>12.209558</td><td>12.165561</td></tr>
 <tr><td>wall-skip</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>full</td><td>0.089162</td><td>0.089747</td></tr>
@@ -275,6 +270,8 @@ available, is shown separately below.</p>
 <tr><td>wall-skip</td><td>16</td><td>1e-05</td><td>mixed</td><td>off</td><td>carried</td><td>11.602162</td><td>11.714744</td></tr>
 <tr><td>wall-skip</td><td>16</td><td>1e-05</td><td>mixed</td><td>on</td><td>full</td><td>0.092615</td><td>0.093359</td></tr>
 <tr><td>wall-skip</td><td>16</td><td>1e-05</td><td>mixed</td><td>on</td><td>carried</td><td>12.594679</td><td>12.698195</td></tr>
+<tr><td>secant-headline</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>solve-fresh</td><td>38.959112</td><td>38.958632</td></tr>
+<tr><td>secant-headline</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>secant</td><td>0.063372</td><td>0.053507</td></tr>
 </tbody></table>
 <table id="h200-levers-headline"><thead><tr><th>Slice</th><th>Process 1 [ms/slice]</th><th>Process 2 [ms/slice]</th></tr></thead><tbody>
 <tr><td>slice-1</td><td>12.274875</td><td>12.273685</td></tr>
@@ -289,5 +286,5 @@ available, is shown separately below.</p>
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T182638024068-h200-levers</code>. Inventory: <code>measurement-jobs.json</code>;
 preserved original hashes: <code>retained-receipts.json</code>;
 audit diagnostics: <code>precision-audit.json</code> and
-<code>input-provenance-errors.json</code>. The audit exits nonzero
-while input provenance is unresolved.</p></section>
+<code>input-provenance-errors.json</code>. The successful inventory audit is
+recorded in <code>audit-summary.json</code>.</p></section>

@@ -56,10 +56,10 @@ def test_diverted_boundary_tangent_is_finite_without_wall_contact(terminal_fixtu
 @pytest.mark.parametrize(
     "topology_class", (TopologyClass.DIVERTED, TopologyClass.LIMITED)
 )
-def test_boundary_flux_jvp_holds_the_admitted_point_fixed(
+def test_boundary_flux_jvp_matches_the_admitted_boundary_motion(
     terminal_fixture, topology_class
 ):
-    """The published boundary value differentiates at its selected point."""
+    """Wall contacts move with the field; stationary saddles need no position term."""
     topology, flux, inside = terminal_fixture
 
     def boundary_value(field):
@@ -83,12 +83,15 @@ def test_boundary_flux_jvp_holds_the_admitted_point_fixed(
     def smooth_control(value):
         return value**3 - 0.4 * value + jnp.exp(0.3 * value)
 
+    difference_value = (
+        fixed_point_value if bool(state.boundary_is_xpoint) else boundary_value
+    )
     assert np.isfinite(float(boundary_value(flux)))
     for direction in _directions(flux.shape):
         _value, tangent = jax.jvp(boundary_value, (flux,), (direction,))
         central = (
-            fixed_point_value(flux + STEP * direction)
-            - fixed_point_value(flux - STEP * direction)
+            difference_value(flux + STEP * direction)
+            - difference_value(flux - STEP * direction)
         ) / (2.0 * STEP)
         error = abs(float(tangent - central)) / max(abs(float(tangent)), 1.0)
         assert error < BOUNDARY_TOLERANCE
@@ -105,8 +108,8 @@ def test_boundary_flux_jvp_holds_the_admitted_point_fixed(
         assert abs(float(control_tangent - control_central)) < CONTROL_TOLERANCE
 
 
-def test_forward_terminal_boundary_flux_matches_held_point_difference():
-    """The full moment-map fixture keeps the terminal boundary derivative local."""
+def test_forward_terminal_boundary_flux_matches_boundary_motion_difference():
+    """The terminal derivative includes motion of an admitted wall contact."""
     source = machine.__wrapped__()
     profile, _seed, _vacuum = source
     flux = jnp.asarray(converged.__wrapped__(source).flux)
@@ -131,12 +134,15 @@ def test_forward_terminal_boundary_flux_matches_held_point_difference():
         )
         return surface(point[0], point[1])
 
+    difference_value = (
+        fixed_point_value if bool(terminal.boundary_is_xpoint) else boundary_value
+    )
     values = np.random.default_rng(11).standard_normal(flux.shape)
     direction = jnp.asarray(values / np.max(np.abs(values)), dtype=flux.dtype)
     _value, tangent = jax.jvp(boundary_value, (flux,), (direction,))
     central = (
-        fixed_point_value(flux + STEP * direction)
-        - fixed_point_value(flux - STEP * direction)
+        difference_value(flux + STEP * direction)
+        - difference_value(flux - STEP * direction)
     ) / (2.0 * STEP)
     error = abs(float(tangent - central)) / max(abs(float(tangent)), 1.0)
     assert error < BOUNDARY_TOLERANCE

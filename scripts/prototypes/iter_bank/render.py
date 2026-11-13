@@ -44,7 +44,7 @@ def checked_save(figure, output):
             element.set(
                 "d",
                 re.sub(
-                    r"-?\d+\.\d+", lambda m: f"{float(m[0]):.3f}", element.attrib["d"]
+                    r"-?\d+\.\d+", lambda m: f"{float(m[0]):.2f}", element.attrib["d"]
                 ),
             )
     tree.getroot().set("width", "31.1cm")

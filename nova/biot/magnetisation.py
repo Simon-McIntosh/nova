@@ -1,8 +1,11 @@
 """Anhysteretic axisymmetric iron, represented by magnetised polygon cells.
 
-Only :func:`solve_magnetisation` and its result are public. Geometry, the B-H
-interpolant and the sheet-tile response stay inside this module. Fields and
-magnetisations use component order (radial, vertical), in tesla and A/m.
+Public: :func:`solve_magnetisation` and its result, :class:`CellSizeField` and
+:func:`graded_cell_size` for grading the spacing through a thin part, and
+:func:`galerkin_spectrum` for the spectrum of the volume-weighted interaction
+the solve inverts. Geometry, the B-H interpolant and the sheet-tile response
+stay inside this module. Fields and magnetisations use component order
+(radial, vertical), in tesla and A/m.
 """
 
 from __future__ import annotations
@@ -25,7 +28,13 @@ from nova.biot.tiledassembly import (
 )
 from nova.jax.config import configure_dtypes
 
-__all__ = ["MagnetisationSolution", "solve_magnetisation"]
+__all__ = [
+    "CellSizeField",
+    "MagnetisationSolution",
+    "galerkin_spectrum",
+    "graded_cell_size",
+    "solve_magnetisation",
+]
 
 _MU0 = 4e-7 * np.pi
 _PLAN = TilePlan(64, 256, 256, 16, 48)

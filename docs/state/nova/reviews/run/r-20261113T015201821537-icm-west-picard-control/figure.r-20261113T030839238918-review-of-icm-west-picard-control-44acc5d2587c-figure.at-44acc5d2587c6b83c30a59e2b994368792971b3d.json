@@ -1,0 +1,46 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-13T03:32:43.071Z",
+  "dispatched_at": "2026-11-13T03:21:40Z",
+  "figures": [
+    {
+      "canvas_px": [
+        1400,
+        721
+      ],
+      "drawing_script": "scripts/west_picard_control/figure.py",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T030839238918-review-of-icm-west-picard-control-44acc5d2587c-figure/image-0.png",
+      "repository_path": "docs/figures/iron-core-magnetisation/icm-west-picard-control/west-62751-picard-residual.svg"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/west_picard_control/figure.py",
+      "id": "f10d3a55707",
+      "line": 36,
+      "severity": "non-blocking",
+      "summary": "Collocated data series and the tolerance threshold share one colour: COLLOCATED is #929292 (line 35) and LIMIT is #929292 (line 36), so the oscillating centroid-sampled curve and the dotted 1e-10 tolerance rule are drawn in the same grey. The legend and the dash pattern still separate them, and the reader can decode both, but a colour that names a measured series in this figure also names a threshold, which is the one place the figure's colour vocabulary is ambiguous. A distinct neutral for the rule, or the near-black dashed style the repository uses for design and reference lines, would remove the ambiguity."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261113T030839238918-review-of-icm-west-picard-control-44acc5d2587c-figure",
+  "reviewed_base_sha": "2389b4bf991f26b03fb50cd4b4d6d063c8d2f223",
+  "reviewed_head_sha": "44acc5d2587c6b83c30a59e2b994368792971b3d",
+  "reviewed_run_id": "r-20261113T015201821537-icm-west-picard-control",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/iron-core-magnetisation/icm-west-picard-control/west-62751-picard-residual.svg": {
+      "contrast": "pass - axis, tick and legend text renders at #0b0b0b, about 19:1 on white. The green series is #2e8b57 and the grey series and tolerance rule are #929292, measured at exactly 146 on white, 3.1:1, which meets the mark floor. No text sits on a coloured ground.",
+      "data_ink": "pass - the plotted ink is three polylines, five round Newton markers, one hollow convergence marker and one dotted tolerance rule. No gridline, no fill and no shaded band compete with them.",
+      "decoration": "pass - no gradient, no background fill and no decorative styling. Top and right spines are absent, leaving only the left and bottom axes that carry scales.",
+      "label_collision": "pass - the three-column figure legend sits in clear white space across the top, its first row clear of the second, and the axes top is well below it. Non-white content occupies x 16-1322 and y 28-685 of the 1400x721 canvas, so no text is clipped at any edge, and no tick label, axis label or legend entry touches another or the data.",
+      "legibility": "pass - one log-y panel on a 1400x721 canvas: the Newton correction history falls from 1e0 to about 5.8e-14 in four marked corrections, the green Galerkin Picard curve falls geometrically to 7.8e-11 at iteration 12 where a hollow green circle marks its end, and the grey centroid-sampled Picard curve oscillates between roughly 4e-4 and 2e-3 across 50 iterations. Ticks are labelled 10^0 down to 10^-14 and 0 to 50 every ten, both axes name their quantity, and the residual axis states its normalisation '||F(M)|| / max(||M||, ||B||/mu0)'. The reader can read the comparison at a glance.",
+      "table_form": "pass - three residual trajectories against iteration, whose crossing of a tolerance and geometric versus oscillating decay are properties of the curve shape; a table of iteration counts and final residuals would not show the oscillation the figure exists to show."
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T05:47:34.691634+00:00",
+  "total": null
+}

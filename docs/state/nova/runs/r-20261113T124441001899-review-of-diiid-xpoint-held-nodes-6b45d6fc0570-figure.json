@@ -308,6 +308,46 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "f4954eb7745b3d06acd1346e2f4c3148299d1b49",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261113T124441001899-review-of-diiid-xpoint-held-nodes-6b45d6fc0570-figure",
+    "scratch_bytes": 0,
+    "scratch_host": "98dci4-clu-2001.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261113T124441001899-review-of-diiid-xpoint-held-nodes-6b45d6fc0570-figure",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261113T124441001899-review-of-diiid-xpoint-held-nodes-6b45d6fc0570-figure"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/review-of-diiid-xpoint-held-nodes-6b45d6fc0570-figure",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/_trash/r-20261113T124441001899-review-of-diiid-xpoint-held-nodes-6b45d6fc0570-figure-20261113T131057880051Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

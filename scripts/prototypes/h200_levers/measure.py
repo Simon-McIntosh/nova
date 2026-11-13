@@ -82,6 +82,9 @@ def main():
     if parts is not None:
         bank, cache, roots, convention, policy, profile, rule, moments, _ = parts
     if args.fixture_seed:
+        receipt["fixture_seed_sha256"] = hashlib.sha256(
+            args.fixture_seed.read_bytes()
+        ).hexdigest()
         with np.load(args.fixture_seed, allow_pickle=False) as frozen:
             moments = tuple(jnp.asarray(frozen[f"m{i}"]) for i in range(3))
             roots = jnp.asarray(frozen["roots"])
@@ -116,6 +119,7 @@ def main():
         previous = jnp.broadcast_to(roots, seeds.shape)
     receipt["bank_sha256"] = array_hash(jax.tree.leaves((bank, cache)))
     receipt["input_sha256"] = array_hash((*state, seeds, previous))
+    initial_moments_sha256 = array_hash(state)
     receipt["instrument_sha256"] = hashlib.sha256(
         Path(__file__).read_bytes()
     ).hexdigest()
@@ -215,6 +219,8 @@ def main():
         from scripts.prototypes.bank_step_booking_batch.measure import inputs, jacobians
 
         state, support, booked = inputs(width, parts)
+        receipt["timed_moments_sha256"] = array_hash(state)
+        assert receipt["timed_moments_sha256"] == initial_moments_sha256
         matrix = timed(
             "assembly",
             lambda b, m, s, p: jacobians(

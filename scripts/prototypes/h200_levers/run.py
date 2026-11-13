@@ -59,6 +59,7 @@ def main():
     parser.add_argument("--revision")
     parser.add_argument("--reuse-run", type=Path)
     parser.add_argument("--fixture-source", type=Path)
+    parser.add_argument("--fixture-inventory", type=Path)
     parser.add_argument("--smoke", action="store_true")
     args = parser.parse_args()
     root, output = args.root.resolve(), args.output.resolve()
@@ -73,6 +74,9 @@ def main():
         json.loads(args.fixture_source.read_text()) if args.fixture_source else None
     )
     fixture_seed = None
+    fixture_inventory = (
+        json.loads(args.fixture_inventory.read_text()) if args.fixture_inventory else {}
+    )
     print("REVISION", head, "JOB", os.environ.get("SLURM_JOB_ID"), flush=True)
     env = dict(
         os.environ,
@@ -212,8 +216,9 @@ def main():
                 "--population",
                 population,
             ]
-            if fixture_seed and kind != "fixture":
-                command += ["--fixture-seed", str(fixture_seed)]
+            selected_seed = fixture_inventory.get(str(width), fixture_seed)
+            if selected_seed and kind != "fixture":
+                command += ["--fixture-seed", str(selected_seed)]
             if args.smoke:
                 command += ["--smoke"]
             if driver:

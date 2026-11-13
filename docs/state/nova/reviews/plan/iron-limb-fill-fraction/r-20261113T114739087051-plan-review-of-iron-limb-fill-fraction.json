@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T12:00:12.145Z",
+  "dispatched_at": "2026-11-13T11:51:53Z",
+  "findings": [
+    {
+      "anchor": "iron-limb-fill-fraction.html:287",
+      "id": "wiring-1",
+      "reason": "a dispatched node would consume a slot redoing already-specified evidence while the imas-efit consequence the plan records as out of scope silently does not happen.",
+      "text": "the followup `f-ilf-002` (\"Hand the flat-outline finding to imas-efit\") carries the prompt `/reckon-build iron-limb-fill-fraction \u00a74`, which dispatches this plan's WEST 62751 evidence section rather than any imas-efit work, so following the plan's own instruction re-runs \u00a74 and never performs the handoff the followup exists for",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "iron-limb-fill-fraction.html:200",
+      "id": "reasoning-1",
+      "reason": "as written the node's primary acceptance measure is contradicted by the plan's own numbers, so either the tolerance or the measure must be re-derived against the converged reference before dispatch.",
+      "text": "\u00a72 requires the control-circuit in-vessel iron field within 5 % rms of the \u00a71 reference at mu_r = 50 and 200, but the \u00a70 table the plan cites shows the cross-field stand-in at 0.051 error-over-iron-rms at mu_r = 200, i.e. 5.096 %, so at one of the two required permeabilities the plan's own evidence already fails the gate it sets, and the reference \u00a71 will re-converge can move that reading in either direction with no stated margin",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "iron-limb-fill-fraction.html:192",
+      "id": "reasoning-2",
+      "reason": "the plan's text is what a brief is composed from, so an interface guessed in the plan is a guess the reviewer would have to test against the code, and a wrong one costs a whole review round.",
+      "text": "\u00a72 states that `nova.biot.magnetisation.solve_magnetisation` \"accepts a per-cell toroidal fill fraction and a per-cell, per-component cross-field factor\", and \u00a73 states the flat-outline \"reader lives with the existing iron read in `nova/imas/machine.py`\"; both name the function to extend and the module to extend it in, which is the node brief's job, and \u00a70 additionally fixes the material rule as a formula (B_iron = B_mean + mu0 (1\u2212f)(1\u2212N) M_iron)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "iron-limb-fill-fraction.html:207",
+      "id": "reasoning-3",
+      "reason": "the plan names the fallback rung as its lane for the gate that carries its tolerances, and the 0.04 m nonlinear WEST solve in clause (3) is exactly the shape whose device memory a 16 GB P100 may not hold, so the rung order has to be stated before a node is dispatched at all.",
+      "text": "\u00a72 fixes \"one job on `titan`, the lane the Galerkin interaction was measured on\" for gates that carry the plan's tolerances, while the repository's binding compute hierarchy makes the H200 the first rung for every GPU-shaped gate and states that titan numbers must never carry a headline; the plan neither submits to the H200 first nor records the device beside the result",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "",
+  "plan_fingerprint": "c21a15a86ff41d980e21f58557f3d40623e7fa5905553fa98f4d52f25cd38e9b",
+  "plan_slug": "iron-limb-fill-fraction",
+  "plan_version": 1,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T114739087051-plan-review-of-iron-limb-fill-fraction",
+  "reviewed_blob_sha": "919a43955052d9a5e808c479108bcbbe60059a31",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited file, commit and evidence path resolves as listed above, and the two extensionless in-page anchors (`#reference`, `#west-62751`) are section anchors in the record the same sections create.",
+    "done_when": "pass \u2014 each section names a measure that can fail: \u00a71 breaks sixfold symmetry with one limb removed, \u00a72 requires the solid outline with f = 1 to exceed 100 % on the same measure, \u00a73 requires a stored outline that violates thickness-times-radius to be refused by name, and \u00a74 negates its own conclusion when a model difference is smaller than its mesh-pair difference.",
+    "evidence_paths": "pass \u2014 receipts land under `/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/{reference,west-62751}/` and the record under `docs/evidence/archive/iron-limb-fill-fraction-landed.html`; nothing is written to a session scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach any name or comment; the section headings are prose and the followup ids are record data.",
+    "reasoning": "a finding \u2014 the \u00a72 tolerance of 5 % is already at 5.096 % in the plan's own \u00a70 table at mu_r = 200, \u00a72 states the interface to extend (`solve_magnetisation` and the two per-cell arguments it must accept) while \u00a73 names the module the reader must live in, and \u00a72 routes a tolerance-bearing GPU measurement to titan first rather than the H200 rung the repository's binding compute hierarchy puts first.",
+    "single_goal": "pass \u2014 \u00a71 delivers the converged reference, \u00a72 the material solve on the true outline, \u00a73 the machine-description read, \u00a74 the WEST 62751 evidence; each closes on one verdict, and no node exceeds the three-clause limit.",
+    "wiring": "a finding \u2014 the followed-up `f-ilf-002` (imas-efit handoff) carries the prompt `/reckon-build iron-limb-fill-fraction \u00a74`, so the declared relationship points at this plan's WEST evidence node instead of the imas-efit handoff it describes; the \u00a7-dependency map itself (`s2\u2190s1`, `s3\u2190s2`, `s4\u2190s2,s3`) is correct and no needed dependency is missing."
+  },
+  "section_digests": {
+    "_document": "eefb76cc50abe650711e7959d6e05e0b1c2dd6edda6a337d7ef8603aae68c43a",
+    "s0": "67cee07572cf713ac6882d5e8e99f0f16c34343cda664452861df354100bd295",
+    "s1": "e48e22264625d301a03c2465befa19e826c3b4b92491fdfc62b6094bb88dad69",
+    "s2": "48a7aa2badf91b25558366e130b74e2becc542a661228f4c61fee0550129bb4f",
+    "s3": "8158f25b010df3dc9d5e34e0a58279f53b03ec48321cfa04876d5183398c7b93",
+    "s4": "1891ed7f15b2f37f0901f06dfc51aafb5c24c6a0a110975e20eb644b084cd08c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T15:42:10.891058+00:00",
+  "total": null
+}

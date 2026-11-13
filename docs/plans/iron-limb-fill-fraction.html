@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="iron-limb-fill-fraction">
+  <meta name="plan-title" content="Iron Limb Fill Fraction — discrete limbs on their true outline in the axisymmetric iron solve">
+  <meta name="plan-summary" content="Carry six discrete iron limbs on their flat outline with a per-cell toroidal fill fraction and cross-field factor, judged against a 3D six-limb reference">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="9.5">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-sprint" content="S24">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="biot,iron-core,machine-description,efit">
+  <meta name="plan-after" content="iron-core-magnetisation">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;iron-limb-fill-fraction#s1&quot;],&quot;s3&quot;:[&quot;iron-limb-fill-fraction#s2&quot;],&quot;s4&quot;:[&quot;iron-limb-fill-fraction#s2&quot;,&quot;iron-limb-fill-fraction#s3&quot;]}">
+  <title>Iron Limb Fill Fraction | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-11-13">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">nova.biot &middot; machine description &middot; WEST first</p>
+      <h1>Iron limb fill fraction</h1>
+      <p class="lead">
+        The WEST machine description stores the six discrete iron arms as one axisymmetric
+        slab that thins as 1/R. That keeps the iron section per radian right and makes the
+        poloidal outline wrong: the real arms are flat and 1.2&nbsp;m thick. This plan keeps
+        the true outline and thins the iron per circumference through a per-cell toroidal
+        fill fraction instead, with a cross-field factor for the limb's own poles, and
+        proves the choice against a 3D solve of six discrete limbs.
+      </p>
+    </header>
+
+    <h2 id="s0">Why this plan exists</h2>
+    <p>
+      The stored WEST <code>iron_core</code> outline tapers each horizontal arm as
+      t(R) = 0.9169/R and gives the return limb a radial depth of 0.1875&nbsp;m. Both follow
+      one rule: thickness times radius is constant, so the section per radian equals that of
+      six arms of 0.960&nbsp;m&sup2;. The limb-geometry decision of
+      <code>iron-core-magnetisation</code> records the real section as 0.800&nbsp;m wide by
+      1.200&nbsp;m, constant along each arm and limb. The stored outline therefore has the
+      right reluctance and the wrong shape: the flare on the top and bottom faces does not
+      exist, and the real limb is six times deeper than the stored one.
+    </p>
+    <p>
+      Three axisymmetric stand-ins were prototyped on nova's production mesh, interaction and
+      B-H fit (<code>scripts/prototypes/iron_limb_fill/</code>, commit 62a05040b):
+    </p>
+    <table>
+      <thead>
+        <tr><th>Stand-in</th><th>Outline</th><th>Material rule for the toroidal mean</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Section smear (stored)</td><td>Tapered as 1/R</td><td>Full iron everywhere</td></tr>
+        <tr><td>Fill fraction</td><td>True, flat</td><td>Mean magnetisation is f times the iron's; iron and the gaps beside it share H in both poloidal directions</td></tr>
+        <tr><td>Fill fraction, cross-field</td><td>True, flat</td><td>As above along the limb axis; across it the limb's own poles oppose the field with demagnetising factor N</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Here f(R) is the toroidal fraction of the circumference occupied by iron: 1 where the
+      six arms are contiguous at the hub and about 0.764/R outboard. With N the
+      demagnetising factor of the limb section for a field across the limb in the poloidal
+      plane, the iron sees B<sub>iron</sub> = B<sub>mean</sub> +
+      &mu;<sub>0</sub>&thinsp;(1&minus;f)(1&minus;N)&thinsp;M<sub>iron</sub> per component, with
+      N = 0 along the limb axis. Setting f = 1 recovers the present residual exactly. The
+      prototype used N = 0.4, the elliptic-section estimate for a 0.8 by 1.2&nbsp;m bar.
+    </p>
+    <figure>
+      <img src="/nova/figures/iron-limb-fill/west-62751-permeability.svg"
+           alt="Converged iron relative permeability for WEST 62751 on the stored tapered outline and on the true flat outline with two material rules">
+      <figcaption>
+        WEST 62751 at 38.440&nbsp;s, 0.08&nbsp;m cells, converged iron relative permeability.
+        Left: the stored outline, whose arms taper as 1/R. Centre and right: the true flat
+        outline with the fill fraction, without and with the cross-field factor. All three
+        converge in four to six Newton corrections. The bright bands on the inner faces of
+        the right panel sit where the cross-field factor switches on at the stored 2&nbsp;mm
+        gaps between limb and arm; whether they are physical is open (gap decision below).
+      </figcaption>
+    </figure>
+    <p>
+      The reference is a 3D solve of a WEST-like circuit with six discrete limbs: a round
+      column, a hexagonal hub, six arms and six limbs of 0.8 by 1.2&nbsp;m, linear iron,
+      uniformly magnetised bricks, driven by the central solenoid, three symmetric coil
+      pairs and a plasma ring. Its toroidal mean is what an axisymmetric model has to
+      reproduce. At the finest meshes (0.05&nbsp;m cells against 0.1&nbsp;m bricks):
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Stand-in</th>
+          <th>&mu;<sub>r</sub></th>
+          <th>Column flux / reference</th>
+          <th>In-vessel iron field error / iron field rms</th>
+          <th>Midplane field behind the limbs / reference</th>
+          <th>Field 0.3 to 1.4&nbsp;m above the arms / reference</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Section smear</td><td>50</td><td>1.058</td><td>0.347</td><td>0.86 to 0.88</td><td>0.86 to 0.98</td></tr>
+        <tr><td>Section smear</td><td>200</td><td>1.122</td><td>0.332</td><td>0.84 to 0.86</td><td>0.88 to 1.05</td></tr>
+        <tr><td>Fill fraction</td><td>50</td><td>1.057</td><td>0.339</td><td>1.15 to 1.17</td><td>0.99 to 1.04</td></tr>
+        <tr><td>Fill fraction</td><td>200</td><td>1.118</td><td>0.311</td><td>1.25 to 1.27</td><td>0.96 to 1.03</td></tr>
+        <tr><td>Fill fraction, cross-field</td><td>50</td><td>1.046</td><td>0.032</td><td>0.99 to 1.10</td><td>0.90 to 0.94</td></tr>
+        <tr><td>Fill fraction, cross-field</td><td>200</td><td>1.107</td><td>0.051</td><td>1.09 to 1.21</td><td>0.92 to 0.96</td></tr>
+        <tr><td>Solid outline, f = 1 (control)</td><td>50</td><td>1.365</td><td>3.11</td><td>0.38 to 0.40</td><td>0.31 to 0.45</td></tr>
+      </tbody>
+    </table>
+    <p>
+      All three stand-ins carry the same core flux to within 2&nbsp;% of each other; they
+      differ in the shape of the field. Only the cross-field rule reproduces the in-vessel
+      iron field, where its error is a tenth of the others'. Behind the limbs the smear,
+      a closed shell of full iron, shields too much, and the plain fill fraction, which
+      treats a 0.8&nbsp;m bar as fine laminations, shields too little. The numbers are in
+      <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/comparison.json</code>.
+    </p>
+    <figure>
+      <img src="/nova/figures/iron-limb-fill/control-stray-ratio.svg"
+           alt="Ratio of each stand-in's midplane field to the toroidal mean of the six-limb reference, behind the limbs, at relative permeability 50 and 200">
+      <figcaption>
+        Linear control circuit: total poloidal field on the midplane behind the limbs,
+        each stand-in divided by the toroidal mean of the six-limb reference. The limbs end
+        at 6.0&nbsp;m. The dotted line is agreement.
+      </figcaption>
+    </figure>
+    <p>
+      Two limits bound what the prototype proves. The reference is not converged: its
+      column flux rose from 12.7 to 13.5&nbsp;Wb between 0.133 and 0.1&nbsp;m bricks at
+      &mu;<sub>r</sub> = 200 and still sits 11&nbsp;% under the axisymmetric values, so the
+      3 to 5&nbsp;% in-vessel figure is a reading on an unfinished reference. And N = 0.4 is
+      an estimate, not a fit. On the real WEST 62751 case the choice matters: against the
+      stored outline the cross-field rule moves the in-vessel iron field by 0.65&nbsp;mT rms
+      (0.89&nbsp;mT at most, on a 21&nbsp;mT contribution), halves the field above the arms
+      and changes the column flux from &minus;0.44 to &minus;0.18&nbsp;Wb.
+    </p>
+    <figure>
+      <img src="/nova/figures/iron-limb-fill/west-62751-stray-lines.svg"
+           alt="Poloidal field magnitude for WEST 62751 on the midplane beyond the limbs and on a line above the upper arms, without iron and with each stand-in">
+      <figcaption>
+        WEST 62751 at 38.440&nbsp;s: poloidal field on the midplane beyond the limbs and on
+        a line 0.6&nbsp;m above the upper arms (Z = 4.2&nbsp;m), without iron and with each
+        stand-in.
+      </figcaption>
+    </figure>
+    <p>
+      imas-efit reads the same tapered outlines into its boundary-current iron model and so
+      inherits the flare. The equivalent there is the flat outline with a position-dependent
+      effective permeability, which its internal-current terms already admit. That work
+      belongs to imas-efit and is recorded as a followup, not a section of this plan.
+    </p>
+
+    <h2 id="s1">§1 — A converged six-limb reference</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      Every tolerance below is judged against the toroidal mean of a 3D six-limb solve, so
+      that solve has to be trustworthy first. The control circuit, its drive and its probes
+      are those of the prototype case
+      (<code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/case.json</code>):
+      sixteen in-vessel points, five midplane points behind the limbs and seven points above
+      the arms and beside the limb corner.
+    </p>
+    <p>
+      Done when (1) at &mu;<sub>r</sub> = 50 and 200 the reference's column flux, its
+      in-vessel toroidal-mean iron field and its toroidal-mean field at every outside probe
+      each change by less than 2&nbsp;% between its two finest resolutions; (2) the same 3D
+      method applied to a fully axisymmetric version of the circuit (the limbs replaced by
+      the complete annulus) agrees with nova's axisymmetric solve of that annulus within
+      2&nbsp;% on the same three quantities, and a version with one limb removed is shown to
+      break the sixfold symmetry of the resolved field, the control that the method sees
+      discrete limbs at all; (3) the receipt under
+      <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/reference/</code>
+      holds the per-resolution values and the toroidally resolved field at each outside
+      probe, cited from
+      <code>docs/evidence/archive/iron-limb-fill-fraction-landed.html#reference</code>. The
+      measurement is one job on <code>rigel</code>.
+    </p>
+
+    <h2 id="s2">§2 — Fill fraction and cross-field factor in the material solve</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>
+      <code>nova.biot.magnetisation.solve_magnetisation</code> accepts a per-cell toroidal
+      fill fraction and a per-cell, per-component cross-field factor, and returns the
+      toroidal-mean magnetisation together with the permeability of the iron itself.
+    </p>
+    <p>
+      Done when (1) with the fill fraction omitted the solution, residual history and field
+      of every existing test in <code>tests/test_magnetisation.py</code> are unchanged to
+      1e-12 relative, and a test with f = 1 passed explicitly returns the same state; (2) on
+      the control circuit at &mu;<sub>r</sub> = 50 and 200 the in-vessel iron field is within
+      5&nbsp;% of the §1 reference in rms, with the cross-field factor chosen by the
+      cross-field decision below, while the solid outline with f = 1 exceeds 100&nbsp;% on
+      the same measure, the control that the fill fraction and not the outline carries the
+      result; the midplane and above-arm ratios of the table in §0 are reported for the
+      same runs at two cell sizes; (3) the nonlinear WEST 62751 solve on the true outline
+      converges to 1e-8 in at most ten Newton corrections at 0.08 and 0.04&nbsp;m. Heavy
+      gates run as one job on <code>titan</code>, the lane the Galerkin interaction was
+      measured on.
+    </p>
+
+    <h2 id="s3">§3 — The true outline as machine description</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      The flat outline, the fill fraction and the cross-field factor are properties of the
+      machine, so they are read once beside the iron segments and not rebuilt in each
+      script. The reader lives with the existing iron read in
+      <code>nova/imas/machine.py</code>.
+    </p>
+    <p>
+      Done when (1) the WEST read returns limb and arm regions on the true outline with a
+      fill fraction per region, and the integral of fill fraction times radius across each
+      arm and limb section reproduces the stored outline's section per radian to 1e-3
+      relative; (2) the limb dimensions it uses are the ones recorded in the limb-geometry
+      decision of <code>iron-core-magnetisation</code>, and a stored outline that does not
+      obey thickness times radius constant to 1&nbsp;% is refused by name rather than
+      converted; (3) the script readers of the WEST iron call this read, with no second
+      construction of the flat outline in the tree.
+    </p>
+
+    <h2 id="s4">§4 — WEST 62751 on the true outline</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>
+      The evidence that the change matters on a real pulse, at the mesh pair the stored
+      outline was measured on.
+    </p>
+    <p>
+      Done when (1) the field at the in-vessel ring, behind the limbs and above the arms is
+      reported for the stored outline and for the true outline at 0.08 and 0.04&nbsp;m, with
+      the mesh-pair difference beside each model difference, and a model difference smaller
+      than its mesh-pair difference is reported as not resolved; (2) the figures
+      <code>docs/figures/iron-limb-fill/west-62751-permeability.svg</code> and
+      <code>west-62751-stray-lines.svg</code> are redrawn from the production solve and
+      checked as rendered; (3) the record is
+      <code>docs/evidence/archive/iron-limb-fill-fraction-landed.html#west-62751</code>,
+      with arrays under
+      <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/west-62751/</code>.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="cross-field-factor" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Where does the cross-field factor N come from?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="section-geometry">Computed from the limb section alone</button>
+      <button class="r-opt" data-value="fitted-to-reference">Fitted once to the §1 reference</button>
+      <button class="r-opt" data-value="none">No cross-field factor (plain fill fraction)</button>
+      </p>
+    <p class="r-dec-rat">The prototype&#x27;s N = 0.4 is the elliptic-section estimate. Decide after §1: a geometric value transfers to another machine without a 3D solve; a fitted one is tied to this circuit.</p>
+    </div>
+<div class="r-dec" data-key="limb-arm-gaps" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Are the 2 mm gaps between the stored limb top (Z = 2.4003 m) and arm underside (Z = 2.4024 m) real air gaps?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="real">Real gaps: keep them</button>
+      <button class="r-opt" data-value="artefact">Artefact of the stored segments: close them on the true outline</button>
+      </p>
+    <p class="r-dec-rat">At a relative permeability near 1000 a 2 mm gap has the reluctance of about 2 m of iron, so the answer moves the column flux. The prototype kept the gaps in every model.</p>
+    </div>
+</section>
+
+    <section data-reckon="questions" id="questions" class="r-questions">
+<h2><span class="sec">§</span> Open questions</h2>
+<div class="r-q" data-id="limb-section-drawing" data-section="s3" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body">Is there a drawing of the WEST (Tore Supra) arms and return limbs that confirms the 0.8 by 1.2 m section, which is at present derived from the stored taper?</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ilf-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-13" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the converged six-limb reference</h4>
+    <div class="r-fu-body"><p>The prototype reference is 11 % short of converged in column flux; every later tolerance waits on it.</p></div>
+    <pre class="r-fu-prompt">/reckon-build iron-limb-fill-fraction §1</pre>
+    </article>
+<article class="r-fu" data-id="f-ilf-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-13" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Hand the flat-outline finding to imas-efit</h4>
+    <div class="r-fu-body"><p>imas-efit reads the tapered outlines directly into its boundary-current iron model. Its coordinator owns the equivalent change there: the flat outline with a position-dependent effective permeability. Send the §0 table and figures once §1 has confirmed them.</p></div>
+    <pre class="r-fu-prompt">/reckon-build iron-limb-fill-fraction §4</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

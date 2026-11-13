@@ -43,9 +43,28 @@
       "note": "Section 2 is declared deferred and its section record says it waits on the fitted-unknowns and vertical-freedom decisions, which are scoped to that section.",
       "reason": "",
       "when": "2026-11-13T08:58:13.060997+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "84f8b618b9fab40bc78fdf55a6e3460df5d83e72",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The section 2 negative control is replaced by one constructed to fire under either decision option: every magnetics row and the measured plasma current scaled by 1.10, which must leave the 1.5 percent plasma-current band on every case.",
+      "reason": "",
+      "when": "2026-11-13T08:58:33.969916+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "84f8b618b9fab40bc78fdf55a6e3460df5d83e72",
+      "commit_basis": "edit",
+      "note": "The section 2 negative control is replaced by one constructed to fire under either decision option: every magnetics row and the measured plasma current scaled by 1.10, which must leave the 1.5 percent plasma-current band on every case.",
+      "reason": "",
+      "when": "2026-11-13T08:58:33.969916+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",

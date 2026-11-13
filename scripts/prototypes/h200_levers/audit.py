@@ -63,9 +63,13 @@ def main():
     import numpy as np
 
     run = args.run.resolve()
+    (run / "audit-summary.json").write_text(json.dumps(dict(completed=False)))
     from nova.jax.config import configure_dtypes
 
     configure_dtypes()
+    import jax
+
+    assert jax.config.jax_enable_x64 is True
     from tests.equilibrium.test_topology_read import _analytic_inputs
 
     oracle, *_ = _analytic_inputs("diverted")
@@ -96,7 +100,13 @@ def main():
             for row in output.splitlines()
             if len(fields := row.split("|")) >= 3
         }
-        assert all(observed.get(job) == ["COMPLETED", "0:0"] for job in jobs), observed
+        for item in items:
+            if item.get("superseded_by"):
+                assert item["superseded_by"] in jobs
+                assert item["failure_attribution"].startswith("scaffolding:")
+                assert observed.get(item["job_id"]) == ["FAILED", "1:0"]
+            else:
+                assert observed.get(item["job_id"]) == ["COMPLETED", "0:0"], observed
         retained = json.loads((run / "retained-receipts.json").read_text())
         import hashlib
 
@@ -108,8 +118,13 @@ def main():
         for item in items:
             directory = Path(item["output"])
             value = json.loads((directory / "summary.json").read_text())
-            assert value["completed"] and not value["smoke"]
-            assert (directory / "job.log").read_text().splitlines()[-1] == "EXIT=0"
+            assert not value["smoke"]
+            if item.get("superseded_by"):
+                assert not value["completed"]
+                assert (directory / "job.log").read_text().splitlines()[-1] == "EXIT=1"
+            else:
+                assert value["completed"]
+                assert (directory / "job.log").read_text().splitlines()[-1] == "EXIT=0"
             summaries.append(value)
     else:
         value = json.loads((run / "summary.json").read_text())
@@ -155,6 +170,12 @@ def main():
     for comparison in summary["comparisons"]:
         arms = comparison.get("tiles") or [comparison["off"], comparison["on"]]
         references = arms[0]["records"]
+        assert len(references) == 2
+        assert not comparison.get("refusal")
+        for candidate_arm in arms[1:]:
+            assert not candidate_arm.get("refusal")
+            for left, right in zip(references, candidate_arm["records"], strict=True):
+                refuse_inert(left, right)
         for arm in arms:
             assert all(spread <= 0.05 for spread in arm["spreads"].values())
             for index, candidate in enumerate(arm["records"]):
@@ -227,6 +248,24 @@ def main():
                     errors=errors,
                 )
             )
+    for value in summaries:
+        if "headline" not in value:
+            continue
+        headline = value["headline"]
+        assert len(headline["records"]) == 2
+        assert all(x <= 0.05 for x in headline["spreads"].values())
+        left, right = headline["records"]
+        assert left["input_sha256"] == right["input_sha256"]
+        with (
+            np.load(
+                receipts[json.dumps(left, sort_keys=True)].with_suffix(".npz")
+            ) as a,
+            np.load(
+                receipts[json.dumps(right, sort_keys=True)].with_suffix(".npz")
+            ) as b,
+        ):
+            errors = precision(a, b, radius)
+        verified.append(dict(name="secant-headline", width=16, errors=errors))
     (run / "precision-audit.json").write_text(json.dumps(verified, indent=2))
     (run / "input-provenance-errors.json").write_text(
         json.dumps(provenance_errors, indent=2)
@@ -239,7 +278,22 @@ def main():
         "paired input fingerprints differ",
         provenance_errors,
     )
-    print(f"SUMMARY {len(verified)} paired process receipts inside precision budget")
+    result = dict(
+        completed=True,
+        paired_geometry_records=len(verified),
+        input_mismatches=len(provenance_errors),
+        minor_radius=radius,
+        comparisons=len(summary["comparisons"]),
+        selected_arms=sum(
+            len(c.get("tiles") or [c["off"], c["on"]]) for c in summary["comparisons"]
+        ),
+    )
+    (run / "audit-summary.json").write_text(json.dumps(result, indent=2))
+    print(
+        f"SUMMARY {len(verified)} paired process receipts inside precision budget; "
+        f"{result['comparisons']} comparisons; "
+        "no input mismatches; inert controls passed"
+    )
 
 
 if __name__ == "__main__":

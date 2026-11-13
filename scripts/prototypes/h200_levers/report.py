@@ -42,6 +42,8 @@ def main():
     args = parser.parse_args()
     run, root = args.run.resolve(), args.root.resolve()
     comparisons, headline, inventory = load(run)
+    audit = json.loads((run / "audit-summary.json").read_text())
+    assert audit["completed"] and audit["input_mismatches"] == 0
     table = []
     compile_table = []
     mismatches = set()
@@ -116,89 +118,162 @@ def main():
             + "\n</tbody></table>\n"
         )
 
+    assert not mismatches
+    verdicts = []
+    for comparison in comparisons:
+        name, width = comparison["name"], comparison["width"]
+        options = arms(comparison)
+        left, right = options[0], options[-1]
+        stages = (
+            ["full-to-carried"]
+            if name == "carried-decisions"
+            else ["warm-slices"]
+            if name == "factor-carry"
+            else list(left["metrics"])
+        )
+        for stage in stages:
+
+            def values(arm, baseline):
+                if stage == "warm-slices":
+                    return [
+                        statistics.median(
+                            v
+                            for k, v in metrics.items()
+                            if k.startswith("slice-") and k != "slice-1"
+                        )
+                        for metrics in (arm["metrics"], arm["second_metrics"])
+                    ]
+                key = (
+                    ("full" if baseline else "carried")
+                    if stage == "full-to-carried"
+                    else stage
+                )
+                return [arm["metrics"][key], arm["second_metrics"][key]]
+
+            a, b = values(left, True), values(right, False)
+            spread = max(abs(a[0] - a[1]) / min(a), abs(b[0] - b[1]) / min(b))
+            assert spread <= 0.05
+            margin = max(0.03, spread)
+            change = 100 * (b[0] / a[0] - 1)
+            if b[0] > a[0] * (1 + margin):
+                verdict = "off: on is slower beyond margin"
+            elif a[0] > b[0] * (1 + margin):
+                verdict = "on: faster beyond margin"
+            else:
+                verdict = "retain incumbent: difference unresolved"
+            if name == "scalar-tile":
+                assert a[0] > b[0] * (1 + margin)
+                verdict = "128: fastest measured tile; change default from 32"
+            elif name == "lane-drive":
+                assert b[0] > a[0] * (1 + margin)
+                verdict = "shared scalar default; independent arrays remain opt-in"
+            elif name == "wall-skip" and stage == "full":
+                verdict = "attribution only: skip is in carried branch"
+            elif name == "factor-carry":
+                assert b[0] > a[0] * (1 + margin)
+                verdict = "off; factor carry remains opt-in"
+            elif name in ("booking", "live-candidates", "wall-skip"):
+                assert not verdict.startswith("off:")
+            verdicts.append(
+                [
+                    name,
+                    str(width),
+                    str(comparison.get("step", "")),
+                    comparison.get("population", ""),
+                    stage,
+                    ", ".join(f"{x:.6f}" for x in a),
+                    ", ".join(f"{x:.6f}" for x in b),
+                    f"{change:+.3f}%",
+                    f"{100 * margin:.3f}%",
+                    verdict,
+                ]
+            )
+    repairs = json.loads((run / "repair-jobs.json").read_text())["jobs"]
+    repair_ids = ", ".join(x["job_id"] for x in repairs if not x.get("superseded_by"))
+    for left, right in zip(
+        headline["records"][0]["rows"], headline["records"][1]["rows"], strict=True
+    ):
+        residual = max(
+            residual, *left.get("residual", [0]), *right.get("residual", [0])
+        )
+        if "compile_seconds" in left:
+            compile_table.append(
+                [
+                    "secant-headline",
+                    "16",
+                    "1e-05",
+                    "diverted",
+                    "off",
+                    left["name"],
+                    f"{left['compile_seconds']:.6f}",
+                    f"{right['compile_seconds']:.6f}",
+                ]
+            )
     text = f"""<section id="h200-levers-measurements">
-<h2>H200 walls and unresolved default decisions</h2>
-<p>Seven H200 jobs ({jobs}) completed successfully. Selected fresh-process pairs
-agree within {100 * max_spread:.3f}%. Every original completed receipt, including both
-carried-decision widths and booking-off width 1, remains unchanged. Disagreeing
-earlier pairs are excluded rather than averaged. CPU smoke data contain one
-measured warm sample per arm; the driver now says so explicitly.</p>
-<p>The inventory audit refuses unequal input fingerprints for
-{html.escape(", ".join(sorted(mismatches)))}. These timing observations remain
-provisional. Their seed moments were rebuilt through revision-specific booking
-code. The committed repair exports the historical fixture and requires its main
-arm to reproduce the retained input fingerprint exactly. Completed historical
-arms are retained; only unresolved main arms need another measurement.</p>
-<p>The expanded audit checked 80 paired process geometry records against the
-analytic plasma minor radius and the locked 5e-4 position and 1e-4 flux-span
-limits. These are paired differences, not a new independent analytic oracle
-qualification. Solved residuals are at most {residual:.6g}. All seven jobs use
-x64 on NVIDIA H200 NVL. Compile/cache-load wall is separate from execution.</p>
-<p>The historical carried branch returns a frozen reading. Its wall is
-attribution only. Carried decisions compare the historical full read with the
-current refreshed carried read. The negative control admits distinct program
-fingerprints and then refuses identical programs and executed-work counts with
-<code>ValueError: inert lever: identical lowered programs and execution counts</code>
-and <code>EXIT=1</code>. Each measured pair also records its own program or
-executed-work distinction; a synthetic refusal does not replace that check.</p>
-<table id="h200-levers-verdicts"><thead><tr>
-<th>Lever</th>
-<th>Measured implication</th>
-<th>Default decision</th></tr></thead><tbody>
-<tr>
-<td>Carried decisions</td>
-<td>Width 16: 30.101346 to 9.301983 ms, first processes</td>
-<td>Provisional on; input provenance unresolved</td></tr>
-<tr>
-<td>Booking cost</td>
-<td>Width 1 assembly: 7.586610 to 6.017247 ms; width 16 difference inside 3%</td>
-<td>Provisional retain on; input provenance unresolved</td></tr>
-<tr>
-<td>Factor carry</td>
-<td>Flattop and ramp slower at both widths</td>
-<td>Retain off; explicit reuse_factor opt-in remains</td></tr>
-<tr>
-<td>Scalar tile</td>
-<td>128 beats 32 at both widths; width-16 full 29.135708 to 27.803048 ms and carried
-17.774370 to 16.525416 ms</td>
-<td>128 recommended beyond 3% margin; default remains 32 pending permission to update
-its pinned test</td></tr>
-<tr>
-<td>Per-lane drive</td>
-<td>Width 1: 173.763677 to 226.640278 ms; width 16: 805.932002 to 997.578302 ms</td>
-<td>Retain shared scalar route; independent lanes remain an explicit array-input
-choice</td></tr>
-<tr>
-<td>Live candidates</td>
-<td>Width-16 carried 10.423839 to 9.310935 ms</td>
-<td>Provisional retain on; input provenance unresolved</td></tr>
-<tr>
-<td>Diverted wall skip</td>
-<td>Width-16 all-diverted carried 8.440215 to 7.178316 ms; mixed 8.400809 to 8.397005
-ms</td>
-<td>Retain guarded skip; mixed difference unresolved inside 3%</td></tr>
-</tbody></table>
-<p>Each verdict uses the larger of 3% and the larger arm process spread.
-Inside that margin the incumbent stays. No product default has changed yet,
-and no paired product suite is claimed. Completion still requires resolving
-the refused input comparisons and changing the scalar default with its parity
-test and the required sirius base/head suite pair.</p>
-<figure id="h200-levers-walls-figure">
-<img
- src="/nova/figures/sub-millisecond-forward-path/h200-levers/arm-walls.svg"
-alt="Per-lever H200 walls for widths one and sixteen, with a secant flattop trace."/>
-<figcaption>First selected process in each arm; second-process walls appear in
-the tables. Stars identify input-provenance refusals. Read panels show carried
-reads, except the decision-free reference uses its full read. Booking shows
-assembly; factor carry shows the median across warm flattop slices 2–7 within
-one process; wall skip shows the all-diverted batch. The final panel is per-slice
-width-16 wall, including prediction. Other panels are whole-batch walls.
-Line colours consistently identify batch width. No disagreeing process pair
-contributes to a plotted point.</figcaption></figure>
-<p>Width-16 flattop with the secant predictor: warm per-slice medians over slices
-2–7 are {warm[0]:.6f} and {warm[1]:.6f} ms in the two fresh processes.
-The 1 ms target is not met. Slice 1, before a two-slice secant history is
-available, is shown separately below.</p>
+<h2>H200 speed-lever verdicts</h2>
+<p>The seven original jobs ({jobs}) completed. Canonical-input repair jobs
+{repair_ids} complete the paired comparisons. Every original completed receipt,
+including carried-decision widths 1 and 16 and booking-off width 1, is retained
+unchanged. The selected fresh-process pairs agree within {100 * max_spread:.3f}%.
+Earlier disagreeing pairs are excluded, never averaged.</p>
+<p>The inventory audit passes {audit["comparisons"]} paired comparisons and
+{audit["paired_geometry_records"]} geometry checks with no input fingerprint
+mismatches. Position differences use the analytic plasma minor radius
+({audit["minor_radius"]:.6g} m) and the locked 5e-4 position and 1e-4 flux-span
+budgets; these qualify the lever changes against the historical reference,
+whose analytic qualification is inherited. Every solved residual is at most
+{residual:.6g}. Receipts assert x64 on NVIDIA H200 NVL. Compilation/cache-load
+and synchronized warm execution walls are reported separately.</p>
+<p>The historical carried branch returns a frozen reading and is retained for
+attribution only. The carried-decision verdict compares the historical full
+read with the current refreshed carried read. An identical-program arm pair is
+refused. Every accepted pair has different lowered programs or executed-work
+counts. The negative control admits distinct fingerprints and then refuses
+identical programs; the added test also checks the refusal, and its deliberate
+bypass is measured separately in the paired CPU suite job.</p>
+<p>The scalar conic default changes from 32 to 128 cells. Factor carry remains
+off by default. Shared scalar continuation remains the scalar-input default;
+independent per-lane continuation is selected explicitly by array inputs.
+Carried decisions, booking tiling, live candidates and the all-diverted carried
+wall skip stay enabled. Normal-form tiles remain eight cells.</p>
+<p>Each decision below uses the larger of 3% and the larger process spread.
+Inside that margin the incumbent stays. Scalar rows compare 32 with 128; 64 is
+included in the complete execution table. Width-16 full-read 128 versus 64 is
+inside 3%, but 128 beats the incumbent 32 beyond the margin at both widths and
+has the smallest measured wall. Each process is retained separately.</p>
+"""
+    text += render_table(
+        "verdicts",
+        [
+            "Lever",
+            "Width",
+            "Drive step",
+            "Population",
+            "Stage",
+            "Off / tile 32 [ms], P1,P2",
+            "On / tile 128 [ms], P1,P2",
+            "On change",
+            "Margin",
+            "Verdict",
+        ],
+        verdicts,
+    )
+    text += f"""<figure id="h200-levers-walls-figure">
+<img src="/nova/figures/sub-millisecond-forward-path/h200-levers/arm-walls.svg"
+alt="Per-lever H200 walls at widths one and sixteen and a secant flattop trace."/>
+<figcaption>First selected process per arm; the tables include both processes.
+Read panels show carried reads, except the decision-free reference uses its
+full read. Booking shows assembly; factor carry shows the median across warm
+flattop slices 2–7 within one process; wall skip shows the all-diverted batch.
+The final panel shows per-slice width-16 wall, including prediction; other
+panels show whole-batch walls. Colours consistently identify batch width.
+No disagreeing process pair contributes to a plotted point.</figcaption></figure>
+<p>The width-16 secant flattop stream has warm per-slice medians over slices
+2–7 of {warm[0]:.6f} and {warm[1]:.6f} ms in the two fresh processes.
+The 1 ms target is not met. Slice 1 precedes the two-slice secant history and
+is tabled separately. This headline was measured on revision
+<code>{headline["records"][0]["revision"]}</code>, before changing the scalar
+default; it is the recorded main-arm wall, not a post-change projection.</p>
 """
     headers = ["Lever", "Width", "Drive step", "Population", "Arm", "Stage"]
     text += render_table(
@@ -230,8 +305,8 @@ available, is shown separately below.</p>
 <code>{run}</code>. Inventory: <code>measurement-jobs.json</code>;
 preserved original hashes: <code>retained-receipts.json</code>;
 audit diagnostics: <code>precision-audit.json</code> and
-<code>input-provenance-errors.json</code>. The audit exits nonzero
-while input provenance is unresolved.</p></section>"""
+<code>input-provenance-errors.json</code>. The successful inventory audit is
+recorded in <code>audit-summary.json</code>.</p></section>"""
     fragment = (
         root / "docs/evidence/fragments/sub-millisecond-forward-path/h200-levers.html"
     )
@@ -247,12 +322,12 @@ while input provenance is unresolved.</p></section>"""
         left=0.08, right=0.985, bottom=0.12, top=0.89, wspace=0.57, hspace=0.65
     )
     names = [
-        ("carried-decisions", "Carried decisions*", "carried"),
-        ("booking", "Booking*", "assembly"),
+        ("carried-decisions", "Carried decisions", "carried"),
+        ("booking", "Booking", "assembly"),
         ("factor-carry", "Factor carry", None),
         ("scalar-tile", "Scalar tile", "carried"),
         ("lane-drive", "Lane drive", "mixed-drive"),
-        ("live-candidates", "Live candidates*", "carried"),
+        ("live-candidates", "Live candidates", "carried"),
         ("wall-skip", "Wall skip", "carried"),
     ]
     for ax, (name, label, stage) in zip(axes.flat, names):
@@ -294,7 +369,7 @@ while input provenance is unresolved.</p></section>"""
                 zorder=3 if width == 16 else 2,
             )
             ax.set_xticks(range(len(values)), labels)
-        ax.set_ylabel(label + "\nBatch wall [ms]", fontsize=11)
+        ax.set_ylabel(label + "\nBatch wall [ms]", fontsize=13)
         ax.tick_params(labelsize=11)
         ax.yaxis.set_major_locator(MaxNLocator(3))
         ax.spines[["top", "right"]].set_visible(False)
@@ -310,8 +385,8 @@ while input provenance is unresolved.</p></section>"""
         ylabel="Secant flattop\nWall [ms/slice]",
         xticks=[1, 4, 7],
     )
-    ax.xaxis.label.set_fontsize(11)
-    ax.yaxis.label.set_fontsize(11)
+    ax.xaxis.label.set_fontsize(13)
+    ax.yaxis.label.set_fontsize(13)
     ax.tick_params(labelsize=11)
     ax.spines[["top", "right"]].set_visible(False)
     ax.yaxis.set_major_locator(MaxNLocator(3))
@@ -333,7 +408,7 @@ while input provenance is unresolved.</p></section>"""
     print(
         f"SUMMARY {len(table)} selected execution rows; "
         f"warm per-slice {warm[0]:.6f}, {warm[1]:.6f} ms; "
-        f"unresolved input families {len(mismatches)}"
+        "all verdicts adjudicated; scalar default 128"
     )
 
 

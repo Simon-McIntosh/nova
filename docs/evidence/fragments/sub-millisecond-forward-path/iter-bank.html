@@ -1,0 +1,33 @@
+<article id="iter-bank-record">
+<h3 id="iter-bank-title">ITER operator bank: geometry prepared; H200 measurement queued</h3>
+<p>The operator container now stores <code>coil_exterior[nodes, coils, 6]</code>, the unit-current response of each driven coil with signed winding turns included, and its traced scalar <code>coil_count</code>. The response is padded to the node bucket and survives content-store publication and reload. The fixed <code>exterior</code> remains separate. The bank measurement is queued as SLURM job <code>1314486</code>; build, load, analytic fidelity and device-capacity results are not yet available. This record does not claim those gates passed.</p>
+<h4 id="iter-bank-source">Native scenario geometry and sampled states</h4>
+<p>The source is <code>/work/imas/shared/imasdb/ITER/3/105027/1</code>, read through imas-python at DD <code>3.38.1</code>. The written DD was verified for equilibrium, wall, active coils and passive coils. The scenario supplies all PF and CS geometry, so no machine-description fallback was needed. There are 12 driven coils and 14 conductor sections: CS1 has two sections and VS3 has two opposed sections. VS3 is retained with the PF and CS coils because its current changes per slice. The analytic comparison covers the modeled plasma and these active coils; the fixed exterior is zero in this bank measurement.</p>
+<table><thead><tr><th>Quantity</th><th>Prepared value</th></tr></thead><tbody>
+<tr><td>Plasma cells</td><td>558 (target approximately 550)</td></tr>
+<tr><td>Median stencil pitch</td><td>239.650 mm</td></tr>
+<tr><td>Limiter points</td><td>56, one native unit</td></tr>
+<tr><td>Cell area sum / limiter enclosed area</td><td>28.000097405000005 / 28.000097405000012 m²</td></tr>
+<tr><td>Coil order</td><td>CS3U, CS2U, CS1, CS2L, CS3L, PF1, PF2, PF3, PF4, PF5, PF6, VS3</td></tr>
+<tr><td>Element turns</td><td>Six CS sections at +554; PF1–PF6 at +248.6, +115.2, +185.9, +169.9, +216.8, +459.4; VS3 at +1 and −1</td></tr>
+</tbody></table>
+<p>The fixture-only mesh helper reproduced <code>AssertionError: carrier cell has disconnected vessel intersection</code> at an ITER divertor corner. The ITER preparer retains every connected fragment as its own source cell with the generator’s sampling stencil. A reentrant-wall test proves the clipped cells preserve the full enclosed area and remain inside the limiter. Geometry construction still uses <code>TopologyGeometry.from_cells</code>, and bank rows still use the existing <code>build_jet_matrix</code>.</p>
+<figure id="iter-bank-geometry"><img src="/nova/figures/sub-millisecond-forward-path/iter-bank/iter-mesh.svg" alt="ITER coil sections and limiter with a 558-cell wall-clipped plasma mesh, plus an enlarged mesh view"><figcaption>Native DINA geometry: the complete coil layout at left and an enlarged limiter view at right. All clipped cell components are retained around the reentrant divertor wall. Nova media painters draw the unfilled coil sections, native wall and cell outlines with equal aspect and axes off. The 14 × 7.2 inch SVG was inspected through its 1400-pixel PNG rendering; its three legend labels pass the canvas and overlap checks.</figcaption></figure>
+<table><thead><tr><th>Slice index</th><th>Time [s]</th><th>Stored Ip [MA]</th><th>Integrated sampled Ip [MA]</th><th>Analytic jet comparison</th></tr></thead><tbody>
+<tr><td>220</td><td>52.789304</td><td>−5.007544</td><td>−5.007360</td><td>Awaiting H200</td></tr>
+<tr><td>333</td><td>80.907326</td><td>−5.057992</td><td>−5.057767</td><td>Awaiting H200</td></tr>
+<tr><td>336</td><td>81.653822</td><td>−5.009289</td><td>−5.009361</td><td>Awaiting H200</td></tr>
+</tbody></table>
+<p>Samples use index-based equilibrium access and the homogeneous IDS time base. Plasma moments integrate the stored toroidal current-density map over cells clipped by the slice boundary, with four-point Gauss rules in each triangle coordinate. Coil currents are interpolated on their declared time bases. This samples DINA states for operator tests; it does not certify a DINA equilibrium reproduction.</p>
+<h4 id="iter-bank-measures">Build, load, fidelity and capacity</h4>
+<table><thead><tr><th>Measure</th><th>Required evidence</th><th>Current state</th></tr></thead><tbody>
+<tr><td>Build / publication</td><td>H200 wall times and content-store digest</td><td>Queued; not measured</td></tr>
+<tr><td>Load</td><td>Device-ready wall, at most a few seconds</td><td>Queued; not measured</td></tr>
+<tr><td>Nodal jet fidelity</td><td>Relative norm error ≤1e−10 for each of six jet entries at all three states</td><td>Queued; not measured</td></tr>
+<tr><td>Missing-coil control</td><td>Remove PF1 response and fail the same analytic-map test</td><td>Queued; not measured</td></tr>
+<tr><td>Bucket memory / width</td><td>Dense operand bytes, device bytes, successful width and first refused width</td><td>Queued; not measured</td></tr>
+</tbody></table>
+<p>The width probe measures a shared bank plus live per-lane moments, coil currents and nodal jets. It does not measure Newton factorization or solve workspace. Persistent compilation uses <code>NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm</code>.</p>
+<h4 id="iter-bank-recovery">Durable inputs and recovery</h4>
+<p>The preparation receipt, geometry arrays, build launcher and full logs are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T165038806629-iter-bank/</code>: <code>prepared/source.json</code>, <code>prepared/geometry.npz</code>, <code>prepare-fragments.log</code>, <code>render-compact.log</code> and <code>h200-job.sh</code>. The pending job will write <code>h200/receipt.json</code>, <code>h200/store/</code>, and one analytic comparison archive per sampled state. Five focused tests passed; three receipt-dependent tests remain skipped until those arrays exist. No node test file exists at the dispatch base, so its resolved baseline test list is empty.</p>
+</article>

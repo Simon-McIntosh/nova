@@ -20,6 +20,7 @@ def main():
     parser.add_argument("output", type=Path)
     parser.add_argument("revision")
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument("--inputs", type=Path)
     args = parser.parse_args()
     args.output.mkdir(exist_ok=True)
     env = dict(
@@ -36,9 +37,7 @@ def main():
     )
     for key in ("UV_NO_SYNC", "UV_RUN_RECURSION_DEPTH", "XLA_FLAGS"):
         env.pop(key, None)
-    common = Path(
-        "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T182638024068-h200-levers/h200-levers-corrected/common-streams.npz"
-    )
+    common = (args.inputs or args.output.parent / "inputs/common-streams.npz").resolve()
     assert common.is_file()
     summary = dict(
         instrument_revision=args.revision, arms=[], complete=False, smoke=args.smoke

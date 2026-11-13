@@ -4,17 +4,43 @@ import argparse
 import ast
 from collections import defaultdict
 from html import escape
+import hashlib
+from functools import lru_cache
 import json
 import math
 from pathlib import Path
 from statistics import mean
+import subprocess
+
+
+@lru_cache(None)
+def revision_source(revision):
+    root = Path(__file__).resolve().parents[3]
+    return subprocess.check_output(
+        ["git", "-C", str(root), "show", revision + ":nova/equilibrium/support_read.py"]
+    )
+
+
+def measured_source(record):
+    """Require the receipt's retained module to match its measured revision."""
+    source = Path(record["module"])
+    actual = source.read_bytes()
+    digest = hashlib.sha256(actual).hexdigest()
+    if digest != record["module_sha256"] or actual != revision_source(
+        record["revision"]
+    ):
+        raise ValueError("measured module differs from receipt revision or digest")
+    inputs = Path(record["inputs_path"])
+    if hashlib.sha256(inputs.read_bytes()).hexdigest() != record["inputs_sha256"]:
+        raise ValueError("retained measurement input differs from receipt digest")
+    return source
 
 
 def attributed(record, directory, program):
     """Resolve deduplicated symbols through their executed enclosing branch."""
     from scripts.prototypes.bank_solve_trace.provenance import metadata
 
-    source = Path(__file__).resolve().parents[3] / "nova/equilibrium/support_read.py"
+    source = measured_source(record)
     module = ast.parse(source.read_text())
     read = next(
         n
@@ -25,16 +51,31 @@ def attributed(record, directory, program):
         n for n in read.body if isinstance(n, ast.FunctionDef) and n.name == "carry"
     )
     terminal = carry.body[-1]
-    assert isinstance(terminal, ast.Return) and isinstance(terminal.value, ast.Call)
-    assert terminal.value.func.attr == "cond"
-    assert terminal.value.args[1].body.func.id == "full_verdict"
-    assert (
-        isinstance(terminal.value.args[2].body, ast.Name)
-        and terminal.value.args[2].body.id == "carried"
-    )
+    terminal_line = None
+    if (
+        isinstance(terminal, ast.Return)
+        and isinstance(terminal.value, ast.Call)
+        and isinstance(terminal.value.func, ast.Attribute)
+        and terminal.value.func.attr == "cond"
+    ):
+        assert terminal.value.args[1].body.func.id == "full_verdict"
+        assert (
+            isinstance(terminal.value.args[2].body, ast.Name)
+            and terminal.value.args[2].body.id == "carried"
+        )
+        terminal_line = terminal.lineno
     width = record["width"]
     profile = record["programs"][program]["profile"]
     instructions = metadata(directory / program / f"solve-{width}-0.hlo.pb")
+    compiled_modules = {
+        frame["file"]
+        for item in instructions.values()
+        for frame in item["stack"]
+        if frame["file"].endswith("/nova/equilibrium/support_read.py")
+    }
+    original = record.get("module_original", record["module"])
+    if compiled_modules != {original}:
+        raise ValueError("compiled module paths differ from receipt module identity")
     ledger = json.loads((directory / program / f"kernels-{width}.json").read_text())
     totals = defaultdict(float)
     mechanisms = defaultdict(float)
@@ -57,7 +98,7 @@ def attributed(record, directory, program):
                 # executed inner kernels can only belong to the full verdict.
                 if (
                     function == "read_batch.<locals>.carry"
-                    and frame["line"] == terminal.lineno
+                    and frame["line"] == terminal_line
                 ):
                     branch = "full"
                     break
@@ -169,6 +210,7 @@ def main():
             continue
         record = json.loads(Path(arm["receipt"]).read_text())
         record["receipt_directory"] = str(Path(arm["receipt"]).parent)
+        measured_source(record)
         assert record["complete"] and arm["exit_status"] == 0
         assert record["profiler_control"]["h2d_bytes"] == 2097152
         assert record["profiler_control"]["kernels"] > 0
@@ -223,12 +265,20 @@ def main():
             },
         )
     (args.run / "audited.json").write_text(
-        json.dumps(dict(widths=audited, carried=paired), indent=2)
+        json.dumps(
+            dict(
+                widths=audited,
+                carried=paired,
+                concurrency_units="independent pulses or ensemble members",
+                single_pulse_latency_ms=audited[0]["batch_ms"],
+            ),
+            indent=2,
+        )
     )
     headers = [
-        "Width",
+        "Concurrent pulses / members",
         "Batch wall [ms]",
-        "Per slice [ms]",
+        "Throughput cost [ms/slice]",
         "Kernels",
         "Fresh residual",
     ]
@@ -261,6 +311,8 @@ def main():
         + "</tbody></table>"
     )
     import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+    from matplotlib.ticker import FixedLocator, FormatStrFormatter, NullLocator
     from scripts.prototypes.bank_solve_profile.plot import save_checked
 
     plt.style.use("data-ink")
@@ -280,30 +332,79 @@ def main():
             else r["stages_ms"][name] / r["width"]
             for r in audited
         ]
-        if name == "predictor":
-            values = [1000 * v for v in values]
-        ax.plot(widths, values, "o-", color="#1f5d92", linewidth=3.0, zorder=3)
+        native = name == "whole slice"
+        ax.plot(
+            widths,
+            values,
+            "s--" if native else "o-",
+            color="#1f5d92",
+            linewidth=3.0,
+            zorder=3,
+        )
+        assert min(values) > 0
+        lower, upper = min(values) / 1.7, max(values) * 1.7
+        ax.set_yscale("log")
+        ax.set_ylim(lower, upper)
+        ticks = [min(values), (min(values) * max(values)) ** 0.5, max(values)]
+        ax.yaxis.set_major_locator(FixedLocator(ticks))
+        ax.yaxis.set_minor_locator(NullLocator())
+        ax.yaxis.set_major_formatter(FormatStrFormatter("%.5f"))
+        margin = (math.log10(min(values)) - math.log10(lower)) / (
+            math.log10(upper) - math.log10(lower)
+        )
+        assert margin >= 0.07, "smallest marker is too close to the axis"
+        print(
+            "PANEL_VISIBLE",
+            name,
+            "minimum_ms_per_slice",
+            min(values),
+            "axis_fraction",
+            margin,
+            flush=True,
+        )
         ax.set_xscale("log", base=2)
         ax.set_xticks(widths, [str(w) for w in widths], fontsize=11)
         ax.tick_params(labelsize=11)
         short = {
+            "whole slice": "native throughput cost",
             "block GMRES and scaling": "GMRES / scaling",
             "tracking and qualification": "tracking",
             "host scheduling gaps": "host gaps",
             "transfers and fills": "transfer / fills",
             "other and fused": "other / fused",
         }.get(name, name)
-        ax.set_ylabel(
-            short + ("\n[µs/slice]" if name == "predictor" else "\n[ms/slice]"),
-            fontsize=13,
-        )
-        ax.set_ylim(0, max(values) * 1.15 if max(values) else 1)
-        ax.set_yticks([v for v in ax.get_yticks() if 0 <= v <= ax.get_ylim()[1]])
-        ax.set_xlabel("batch width", fontsize=13)
+        ax.set_ylabel(short + "\n[ms/slice]", fontsize=13)
+        ax.set_xlabel("concurrent pulses / members", fontsize=11)
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(False)
     fig.subplots_adjust(
-        left=0.07, right=0.98, bottom=0.10, top=0.97, hspace=0.70, wspace=0.45
+        left=0.09, right=0.98, bottom=0.08, top=0.91, hspace=0.70, wspace=0.60
+    )
+    fig.legend(
+        handles=[
+            Line2D(
+                [],
+                [],
+                color="#1f5d92",
+                marker="s",
+                linestyle="--",
+                linewidth=3,
+                label="native end-to-end throughput cost",
+            ),
+            Line2D(
+                [],
+                [],
+                color="#1f5d92",
+                marker="o",
+                linestyle="-",
+                linewidth=3,
+                label="profiled exclusive stage cost",
+            ),
+        ],
+        loc="upper center",
+        ncol=2,
+        frameon=False,
+        fontsize=11,
     )
     save_checked(fig, args.figure)
     import xml.etree.ElementTree as ET

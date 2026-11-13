@@ -45,6 +45,8 @@ def main():
         instrument_revision=args.instrument,
         instrument_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         module=sr.__file__,
+        module_sha256=hashlib.sha256(Path(sr.__file__).read_bytes()).hexdigest(),
+        inputs_path=str(args.inputs.resolve()),
         cwd=str(Path.cwd().resolve()),
         width=args.width,
         device=jax.devices()[0].device_kind,

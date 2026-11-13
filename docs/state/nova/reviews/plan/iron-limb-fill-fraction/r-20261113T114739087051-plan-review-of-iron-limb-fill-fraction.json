@@ -41,7 +41,30 @@
   "plan_slug": "iron-limb-fill-fraction",
   "plan_version": 1,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "04bf1f44083737d213d588ff15728187486dff7e",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Removed the imas-efit followup whose prompt dispatched this plan's section 4; the hand-off is recorded as an open question naming imas-efit as owner, so no nova node is dispatched for it.",
+      "reason": "",
+      "when": "2026-11-13T15:43:36.479082+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "04bf1f44083737d213d588ff15728187486dff7e",
+      "commit_basis": "edit",
+      "note": "Removed the imas-efit followup whose prompt dispatched this plan's section 4; the hand-off is recorded as an open question naming imas-efit as owner, so no nova node is dispatched for it.",
+      "reason": "",
+      "when": "2026-11-13T15:43:36.479082+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-limb-fill-fraction/r-20261113T114739087051-plan-review-of-iron-limb-fill-fraction.json",
   "review_run_id": "r-20261113T114739087051-plan-review-of-iron-limb-fill-fraction",
   "reviewed_blob_sha": "919a43955052d9a5e808c479108bcbbe60059a31",
   "rubric": "content",

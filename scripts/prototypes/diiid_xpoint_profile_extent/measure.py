@@ -47,6 +47,11 @@ def main():
         {**arms.describe(args.arm), "revision": args.revision},
     )
     print("PROFILE_ARM " + json.dumps(arms.describe(args.arm)), flush=True)
+    # The held cohort installs its extra image read in a block that only runs
+    # when its module is the process entry point, and that block never executes
+    # when the module is loaded as a library. Install it here, so a row writes
+    # the image receipt the batch driver's retention check requires.
+    held_measure.core.install_analysis = held_measure.install_analysis
     sys.argv = [
         sys.argv[0],
         "--tree",

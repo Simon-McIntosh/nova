@@ -86,14 +86,11 @@ def xpoint_panels(root, frame, branch, output, previews):
     """Draw the full field and the lower-X zoom for both arms."""
 
     pair = [read(root, arm, frame, branch) for arm in ARMS]
-    points = np.array(
-        [
-            point
-            for _, _, _, summary in pair
-            for point in (summary["lower_x_rz_m"], summary["efit_x_rz_m"])
-        ]
-    )
-    centre = (points.min(axis=0) + points.max(axis=0)) / 2
+    # Anchor the window on EFIT's own null so both arms are read at the same
+    # place. Centring it on the two arms' nulls instead makes the box grow with
+    # their disagreement, which on a state that has lost its topology is the
+    # whole vessel and not a zoom.
+    centre = np.mean([summary["efit_x_rz_m"] for _, _, _, summary in pair], axis=0)
     zoom = dict(
         radius=(centre[0] - ZOOM_HALF_WIDTH_M, centre[0] + ZOOM_HALF_WIDTH_M),
         height=(centre[1] - ZOOM_HALF_WIDTH_M, centre[1] + ZOOM_HALF_WIDTH_M),
@@ -125,7 +122,7 @@ def xpoint_panels(root, frame, branch, output, previews):
                     data["reference_axis"],
                     REFERENCE,
                     "--",
-                    "P",
+                    "s",
                     "reference_census",
                 ),
                 (
@@ -159,6 +156,7 @@ def xpoint_panels(root, frame, branch, output, previews):
                     xpoint_color=color,
                     axis_marker="^" if key == "flux" else "v",
                     xpoint_marker=marker,
+                    xpoint_markersize=8.0,
                     zorder_markers=12,
                 )
                 other = [
@@ -208,6 +206,25 @@ def xpoint_panels(root, frame, branch, output, previews):
         Line2D([], [], color=SOLVED, lw=3, label="solved"),
         Line2D([], [], color=REFERENCE, lw=2.6, ls="--", label="EFIT"),
         Line2D([], [], color=WALL, lw=1.5, label="wall"),
+        Line2D(
+            [],
+            [],
+            color=SOLVED,
+            marker="X",
+            markersize=8,
+            ls="none",
+            label="solved null",
+        ),
+        Line2D(
+            [],
+            [],
+            color=REFERENCE,
+            marker="s",
+            markersize=8,
+            markerfacecolor="none",
+            ls="none",
+            label="EFIT null",
+        ),
     ]
     if any(summary["shadow_rz_m"] for _, _, _, summary in pair):
         handles.append(
@@ -227,6 +244,7 @@ def xpoint_panels(root, frame, branch, output, previews):
         loc="upper center",
         frameon=False,
         bbox_to_anchor=(0.5, 0.99),
+        columnspacing=1.6,
     )
     name = f"frame-{frame}-{branch}-lower-xpoint"
     save(figure, axes, notes, output / (name + ".svg"), previews / (name + ".png"))

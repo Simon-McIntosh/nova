@@ -123,8 +123,15 @@ def main() -> int:
                 shutil.rmtree(tree)
             shutil.copytree(args.head_tree, tree, symlinks=True)
             mutate(tree, spec)
-            record["mutants"][name] = run(name, tree, spec, stream)
+            # One log per mutant, so each names a single run and ends with the
+            # exit status of that run rather than of the pair.
+            with (args.output / f"{name}.log").open("w") as own:
+                own.write(f"# revision: {args.revision}\n")
+                own.write(f"# head tree: {args.head_tree}\n")
+                record["mutants"][name] = run(name, tree, spec, own)
             row = record["mutants"][name]
+            stream.write(f"{name}: {row['file']} mutated, EXIT={row['exit']}\n")
+            stream.flush()
             print(f"{name}: EXIT={row['exit']} marker={row['marker']}", flush=True)
         broken = [
             name

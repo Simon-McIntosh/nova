@@ -112,6 +112,20 @@
       "finding": "duplicate_owner-2",
       "reason": "Section s3 is deferred and not built in this wave. The finding is accepted as a constraint on its brief (generalise score_with_efit_referee and parity_tolerances over a supplied IMAS state, read cases through nova.imas.dataset.Ids) and is carried from this stored review when s3 is dispatched; the plan states endpoints and names no module.",
       "when": "2026-11-13T16:23:29.672425+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "finding": "duplicate_owner-3",
+      "reason": "Section s4 is deferred and not built in this wave. The finding is accepted as a constraint on its brief (a benchmark row on the existing H200 lane with its cache guard, not a new measurement path) and is carried from this stored review when s4 is dispatched.",
+      "when": "2026-11-13T16:23:43.488803+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "finding": "interface_budget-1",
+      "reason": "The added class is the lead's locked decision inverse-in-nova (2026-11-13). What it retires is the lead's open decision reduced-reconstructions, which section s5 takes on the measured scoreboard rather than by assumption; s1 adds one class and one receipt type and the brief forbids further surface.",
+      "when": "2026-11-13T16:23:49.813191+00:00"
     }
   ],
   "responses": {
@@ -138,6 +152,18 @@
       "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
       "reason": "Section s3 is deferred and not built in this wave. The finding is accepted as a constraint on its brief (generalise score_with_efit_referee and parity_tolerances over a supplied IMAS state, read cases through nova.imas.dataset.Ids) and is carried from this stored review when s3 is dispatched; the plan states endpoints and names no module.",
       "when": "2026-11-13T16:23:29.672425+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "reason": "Section s4 is deferred and not built in this wave. The finding is accepted as a constraint on its brief (a benchmark row on the existing H200 lane with its cache guard, not a new measurement path) and is carried from this stored review when s4 is dispatched.",
+      "when": "2026-11-13T16:23:43.488803+00:00"
+    },
+    "interface_budget-1": {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "reason": "The added class is the lead's locked decision inverse-in-nova (2026-11-13). What it retires is the lead's open decision reduced-reconstructions, which section s5 takes on the measured scoreboard rather than by assumption; s1 adds one class and one receipt type and the brief forbids further surface.",
+      "when": "2026-11-13T16:23:49.813191+00:00"
     },
     "reuse_search-1": {
       "action": "acted",

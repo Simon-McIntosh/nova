@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="biot,iron-core,machine-description,jax,efit">
   <meta name="plan-after" content="kernel-compile-barrier">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;,&quot;iron-core-magnetisation#s3&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;,&quot;iron-core-magnetisation#s5&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s1&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;iron-core-magnetisation#s8&quot;,&quot;iron-core-magnetisation#s10&quot;],&quot;s10&quot;:[&quot;iron-core-magnetisation#s5&quot;]}">
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="88">
+<meta name="plan-version" content="89">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -283,7 +283,7 @@
     </p>
 
     <h2 id="s4">§4 — Iron frame and the material solve</h2>
-<section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       Read the iron from the machine description: each <code>iron_core</code> segment's
       outline, its material and its B-H table. The read extends the machine-description owner,
@@ -780,6 +780,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261112T201826132383-icm-west-62751-galerkin-pair" data-who="reckon-build" data-when="2026-11-13T10:37:53Z">
     <div class="r-comment-body"><p>WEST 62751 solved on the Galerkin iron operator at 0.08 m (1695 cells, 4 exact Newton corrections) and 0.04 m (6632 cells, 5 corrections) from M = 0 at full drive; probes at +1/+2/+4 m read 242.651/200.369/96.326 and 242.645/174.105/79.769 µT, so the mesh-pair error bar is 0.006/26.3/16.6 µT (0.003/13.1/17.2 % of the coarse value), the +1 m probe and the table-versus-flat-215 change (9.4/9.1/8.9 % of the air-core field) are mesh-robust, and the +2/+4 m probes are not.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-11-13T12:15:00Z">
+    <div class="r-comment-body"><p>§4 landed. (1) Law exact at every table point with a 0.343 % saturation rise and both mutants failing; Galerkin G/&mu;<sub>0</sub> spectrum [4.9e-5, 0.99994] on WEST with the centroid mutant failing; shell refinement at least 2.63&times;/2.93&times; at &mu;<sub>r</sub> 100/1000 under every ceiling; sphere bound 7.08e-6. (2) WEST 62751 converges from M = 0 in 4/5 Newton corrections at 0.08/0.04 m with &mu;<sub>r</sub> 215 to 1683; two starts agree to 2.55e-9; Picard needs 12 iterations on the Galerkin operator and cycles on the centroid operator. Quote the +1 m far field (242.6 &micro;T against 7024 &micro;T air-core); +2/+4 m carry 13 to 17 % mesh error, which §5 must close. (3) One iron reader in nova/imas/machine.py. Merged at 7a4b9182a (operator), 9483fffd5 (cleanup), b278e3d54 (Picard), ddca80d58 (mesh pair); receipts on GPFS under west-62751/.</p></div>
 </div>
 </section>
 </main>

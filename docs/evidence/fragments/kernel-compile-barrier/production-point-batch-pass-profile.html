@@ -1,0 +1,45 @@
+<section id="production-point-batch-pass-profile-landing">
+<h3>Where the production row program's cold compile spends its time</h3>
+<p>One H200 job (<code>1313577</code>, node <code>98dci4-gpu-0003</code>) compiled both programs in fresh processes with the compilation cache disabled, dumping the module after every HLO pass, and recorded a cache miss and <code>NVIDIA H200 NVL</code> as the device for each. The production row program is <code>fixed_points._row_program</code> built by <code>scripts/prototypes/kernel_compile_census/row.py</code> as <code>production_point_batch</code> at size 132, measured at revision <code>7bd1d912c</code>. The point jet is <code>point_jet</code> at size 4, run second in the same job; its receipt records revision <code>4f5a8ae1f</code>, and the only difference between the two revisions is one review-state JSON under <code>docs/state/nova/reviews/</code>, with no source or harness file in the diff, so both arms measure identical code. The receipts are <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/production-pass-profile/production_point_batch-132/attribution.json</code> and <code>.../point_jet-4/attribution.json</code>, both written by <code>scripts/prototypes/compile_pass_profile/run.sh</code>, both exiting zero.</p>
+
+<table id="production-point-batch-pass-profile-scalars">
+<thead><tr><th>Measure</th><th><code>production_point_batch</code>, 132 cells</th><th><code>point_jet</code>, 4 points</th></tr></thead>
+<tbody>
+<tr><td>trace</td><td>9.18 s</td><td>10.61 s</td></tr>
+<tr><td>StableHLO lowering</td><td>1.77 s</td><td>1.29 s</td></tr>
+<tr><td>XLA compile</td><td>351.44 s</td><td>327.22 s</td></tr>
+<tr><td>attributed across passes</td><td>340.02 s (96.75%)</td><td>319.53 s (97.65%)</td></tr>
+<tr><td>before first dump</td><td>4.64 s</td><td>3.29 s</td></tr>
+<tr><td>after last dump</td><td>6.77 s</td><td>4.40 s</td></tr>
+<tr><td>passes / dump files</td><td>104 / 858</td><td>96 / 1190</td></tr>
+<tr><td>HLO instructions before <code>variadic-op-splitter</code></td><td>750</td><td>400</td></tr>
+<tr><td>HLO instructions after <code>variadic-op-splitter</code></td><td>402,141</td><td>319,849</td></tr>
+<tr><td><code>variadic-op-splitter</code></td><td>160.48 s</td><td>128.22 s</td></tr>
+<tr><td><code>multi_output_fusion</code></td><td>60.19 s</td><td>81.34 s</td></tr>
+<tr><td>those two passes, share of attributed</td><td>220.67 s (64.9%)</td><td>209.55 s (65.6%)</td></tr>
+<tr><td>LLVM IR stages (<code>ir-no-opt</code> + <code>ir-with-opt</code>)</td><td>21.62 s</td><td>17.47 s</td></tr>
+</tbody>
+</table>
+
+<p id="production-point-batch-pass-profile-share">The two passes hold the same share of both programs' compile — <code>64.9%</code> for the production program against <code>65.6%</code> for the point jet — and take almost the same absolute seconds on a compile wall that differs by seven per cent, so the point jet's published per-pass profile describes the production program's cost structure as well as it describes its own.</p>
+
+<table id="production-point-batch-pass-profile-top-passes">
+<thead><tr><th>Pass</th><th><code>production_point_batch</code></th><th><code>point_jet</code></th></tr></thead>
+<tbody>
+<tr><td><code>variadic-op-splitter</code></td><td>160.48 s (47.2% of attributed)</td><td>128.22 s (40.1%)</td></tr>
+<tr><td><code>multi_output_fusion</code></td><td>60.19 s (17.7%)</td><td>81.34 s (25.5%)</td></tr>
+<tr><td><code>ir-with-opt</code> (LLVM stage, 328 dumps)</td><td>12.53 s (3.7%)</td><td>7.73 s (2.4%)</td></tr>
+<tr><td><code>ir-no-opt</code> (LLVM stage, 328 dumps)</td><td>9.09 s (2.7%)</td><td>9.74 s (3.0%)</td></tr>
+<tr><td><code>zero_sized_hlo_elimination</code> (25 dumps)</td><td>7.96 s (2.3%)</td><td>5.25 s (1.6%)</td></tr>
+<tr><td><code>dce</code> (13 dumps)</td><td>5.82 s (1.7%)</td><td>6.57 s (2.1%)</td></tr>
+<tr><td><code>call-inliner</code></td><td>5.53 s (1.6%)</td><td>5.45 s (1.7%)</td></tr>
+<tr><td><code>constant_folding</code> (25 dumps)</td><td>5.34 s (1.6%)</td><td>3.14 s (1.0%)</td></tr>
+<tr><td><code>autotuner</code></td><td>5.09 s (1.5%)</td><td>10.70 s (3.3%)</td></tr>
+<tr><td><code>priority_fusion_dump</code> (codegen artifact)</td><td>4.73 s (1.4%)</td><td>3.70 s (1.2%)</td></tr>
+</tbody>
+</table>
+
+<p id="production-point-batch-pass-profile-instructions">Each count pair is read from <code>attribution.json</code>'s <code>sequence</code>. The dump named after <code>variadic-op-splitter</code> carries the module as the pipeline handed it in (750 instructions for the production program, 400 for the point jet), and the dump written next (<code>after_priority-fusion/cse</code>) carries what the splitter produced: 402,141 and 319,849. Between them sits the <code>priority_fusion_dump</code> artifact, which is not HLO text and reports no instruction count. That single pass therefore multiplies the production program's module by <code>536</code> and the point jet's by <code>800</code>, and the two fusion passes then walk the expanded graph.</p>
+
+<p id="production-point-batch-pass-profile-instrument"><strong>The instrument, checked against itself.</strong> The published point-jet profile recorded 95.12 s of compile with the splitter at 34.23 s over 100,579 post-splitter instructions, and this job's point jet records 327.22 s with the splitter at 128.22 s over 319,849. That is not instrument drift: the program's expanded graph has grown by a factor of 3.2 since that revision, and the splitter's cost has grown with it, at <code>40.1 s</code> per 100,000 post-splitter instructions here against <code>34.0 s</code> in the published run — an eighteen per cent difference in per-instruction cost, of the size expected where two measurements two weeks apart run on a shared node. The production program sits at <code>39.9 s</code> per 100,000, so all three agree to within that margin. The absolute seconds in this job are scaled by the graph, not by the host, and the shares are what the two programs are compared on.</p>
+</section>

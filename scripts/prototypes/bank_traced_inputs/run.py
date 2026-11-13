@@ -41,12 +41,14 @@ def run_file(tree, revision, file, output, *, mutation=False):
         JAX_PLATFORMS="cpu",
         OPENBLAS_NUM_THREADS="1",
         OMP_NUM_THREADS="7",
+        PYTEST_ADDOPTS="-rP",
     )
     if mutation:
         environment["NOVA_CAPTURE_SLICE_CURRENTS"] = "1"
         command = "NOVA_CAPTURE_SLICE_CURRENTS=1 " + command
     with output.open("w") as log:
         log.write(f"# revision: {revision} tree: {tree}\n# command: {command}\n")
+        log.write("# output: PYTEST_ADDOPTS=-rP\n")
         log.flush()
         subprocess.run(
             [

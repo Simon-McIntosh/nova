@@ -260,7 +260,31 @@ def test_coils_reach_read_residual_and_jacobian(small):
     np.testing.assert_allclose(matrix, jnp.eye(matrix.shape[0]), rtol=1e-12, atol=1e-12)
 
 
-def test_pin_holds_independent_lane_centroids(small):
+def test_zero_update_budget_reports_unsolved_state(small):
+    operands, cache, roots, convention, policy, quadrature, state, reading = small
+    result = jax.jit(
+        lambda op, win: bank.solve_batch(
+            op,
+            win,
+            tuple(value[None] for value in state),
+            roots[None],
+            roots[None],
+            convention,
+            policy,
+            _table(),
+            None,
+            quadrature,
+            max_steps=0,
+        )
+    )(operands, cache)
+    assert not np.any(result.converged)
+    np.testing.assert_array_equal(result.steps, [0])
+    assert result.update_path.shape == (1, 0)
+    for value, original in zip(result.moments, state, strict=True):
+        np.testing.assert_array_equal(value[0], original)
+
+
+def test_pin_holds_independent_lane_centroids(small, caplog):
     operands, cache, roots, convention, policy, quadrature, state, reading = small
     source = _table()
     target = jnp.asarray([0.005, -0.008], dtype=jnp.float64)
@@ -289,10 +313,34 @@ def test_pin_holds_independent_lane_centroids(small):
 
     pressure = jnp.stack((source.p_prime, source.p_prime * 1.1))
     ff = jnp.stack((source.ff_prime, source.ff_prime))
-    result = program(
-        operands, cache, moments, jnp.asarray([[0.0], [0.2]]), pressure, ff, target
-    )
-    jax.block_until_ready(result)
+    currents = jnp.asarray([[0.0], [0.2]])
+    next_currents = jnp.asarray([[0.1], [-0.1]])
+    next_pressure = pressure * 1.02
+    next_target = target + 0.001
+    caplog.set_level(logging.WARNING, logger="jax")
+    with jax.log_compiles(True):
+        result = program(operands, cache, moments, currents, pressure, ff, target)
+        jax.block_until_ready(result)
+        cold = [
+            record.message
+            for record in caplog.records
+            if "Compiling jit(program)" in record.message
+        ]
+        assert cold, "compile log must see the full solve's cold program"
+        caplog.clear()
+        following = program(
+            operands, cache, moments, next_currents, next_pressure, ff, next_target
+        )
+        jax.block_until_ready(following)
+        added = [
+            record.message
+            for record in caplog.records
+            if "Compiling jit(program)" in record.message
+        ]
+    print("SOLVE_COMPILATIONS cold", len(cold), "changed", len(added))
+    assert not added
+    assert np.all(following.converged)
+    np.testing.assert_allclose(following.pin_error, 0, rtol=0, atol=1e-8)
     height = jax.vmap(lambda *values: bank._centroid_height(operands.geometry, values))(
         *result.moments
     )

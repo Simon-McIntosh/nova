@@ -603,6 +603,7 @@ def book_tangent(
     the stationary-point envelope rule. Normal-form sector geometry is held by
     the same tracked read that owns the sector selection.
     """
+    density_gradient = getattr(profile, "density_gradient", density_gradient)
     coefficients = jnp.einsum("nij,nj->ni", geometry.fit_inverse, psi)
     coefficient_tangent = jnp.einsum("nij,nj->ni", geometry.fit_inverse, psi_tangent)
     span = read.boundary_flux - read.axis_flux
@@ -753,6 +754,7 @@ def book_tangent_channels(
     boundary_channels,
 ):
     """Evaluate every local booking channel over shared cell polygons."""
+    density_gradient = getattr(profile, "density_gradient", density_gradient)
     cells, samples = psi.shape
     channels = psi_tangent.shape[0]
     if psi_tangent.shape != (channels, cells, samples):

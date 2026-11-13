@@ -57,6 +57,11 @@ class SupportOperands:
     ``bucket`` is static and enters the compile key; ``active_nodes`` is a
     traced leaf, because two geometries in one bucket need not carry the same
     active count and a differing static value would recompile.
+
+    ``coil_exterior`` optionally holds unit-current jets with shape
+    (bucket nodes, coils, six entries), with zero-padded node tails.
+    ``coil_count`` is a traced scalar masking unused coil columns. Runtime
+    currents are contracted into ``exterior`` at the solve/read seam.
     """
 
     geometry: topology.TopologyGeometry
@@ -1863,6 +1868,11 @@ def solve_batch(
     ``profile`` is either one shared profile or a callable taking a traced
     lane index and returning that lane's profile. The callable is evaluated
     inside the lane map for both residuals and Newton booking derivatives.
+    ``coil_currents`` has shape (lanes, coils). Its values and a tabulated
+    profile's 33-knot arrays are traced inputs. Driven lanes bind an effective
+    exterior and refresh their row-window jets before entering the existing
+    solver. ``vertical_pin`` accepts VerticalPositionPin with scalar or
+    per-lane targets; the returned amplitude is its normalized source unknown.
     """
     if coil_currents is not None or vertical_pin is not None:
         return _solve_driven_batch(
@@ -2184,7 +2194,9 @@ def solve_batch(
             freezes + start_freeze.astype(jnp.int32),
             unfreezes + (changed | drift).astype(jnp.int32),
             residual_path.at[:, slot + 1].set(next_norm),
-            update_path.at[:, slot].set(jnp.where(active, update_norm, 0.0)),
+            update_path.at[:, slot].set(jnp.where(active, update_norm, 0.0))
+            if max_steps
+            else update_path,
         )
 
     final = jax.lax.while_loop(keep_going, advance, initial)
@@ -2328,14 +2340,17 @@ def _solve_pinned_lane(
             },
         )
 
-    initial = run(moments, previous, initial_amplitude, 0)
+    initial = run(moments, previous, initial_amplitude, options["max_steps"])
     initial = jax.tree.map(lambda value: value[0], initial)
-    initial_error = _centroid_height(operands.geometry, moments) - pin.target_height
+    initial_error = (
+        _centroid_height(operands.geometry, initial.moments) - pin.target_height
+    )
     initial = initial._replace(
         pin_amplitude=initial_amplitude,
         pin_error=initial_error,
         converged=initial.converged
         & (~jnp.asarray(pin.active) | (jnp.abs(initial_error) <= pin.tolerance)),
+        factor_valid=jnp.asarray(False),
     )
 
     def advance(carried):
@@ -2422,9 +2437,17 @@ def _solve_pinned_lane(
         )
 
     final = jax.lax.while_loop(
-        lambda carried: (carried[0] < 8) & ~carried[4].converged,
+        lambda carried: (
+            (carried[0] < 8) & ~carried[4].converged & (options["max_steps"] > 0)
+        ),
         advance,
-        (jnp.asarray(0), moments, previous, initial_amplitude, initial),
+        (
+            jnp.asarray(0),
+            initial.moments,
+            initial.support.stationary.position,
+            initial_amplitude,
+            initial,
+        ),
     )
     return final[4]
 
@@ -2535,6 +2558,8 @@ def solve(
     **kwargs,
 ) -> SolveResult:
     """Converge one seed using the same staged driver as independent lanes."""
+    if kwargs.get("coil_currents") is not None:
+        kwargs["coil_currents"] = jnp.asarray(kwargs["coil_currents"])[None]
     batched = solve_batch(
         operands,
         cache,

@@ -209,6 +209,7 @@ def main():
                     f"{right['compile_seconds']:.6f}",
                 ]
             )
+    residual = audit["max_solved_residual"]
     text = f"""<section id="h200-levers-measurements">
 <h2>H200 speed-lever verdicts</h2>
 <p>The seven original jobs ({jobs}) completed. Canonical-input repair jobs

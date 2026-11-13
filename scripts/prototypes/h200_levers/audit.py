@@ -154,6 +154,7 @@ def main():
         comparisons=list(selected_comparisons.values()),
     )
     receipts = {}
+    maximum_residual = 0.0
     for arm in summary["arms"]:
         assert arm["exit_status"] == 0
         assert Path(arm["log"]).read_text().splitlines()[-1] == "EXIT=0"
@@ -161,9 +162,16 @@ def main():
         value = json.loads(path.read_text())
         assert value["complete"] and value["x64"] and not value.get("smoke", False)
         assert value["device"] == "NVIDIA H200 NVL"
-        for row in value["rows"]:
-            if "residual" in row:
-                assert max(row["residual"]) <= 1e-10
+        terminal_residuals = [
+            row["residual"] for row in value["rows"] if "residual" in row
+        ]
+        if value.get("subsolves"):
+            terminal_residuals.append(value["subsolves"][-1]["residual"])
+        for residuals in terminal_residuals:
+            assert len(residuals) == value["width"]
+            assert np.all(np.isfinite(residuals))
+            maximum_residual = max(maximum_residual, *residuals)
+            assert max(residuals) <= 1e-10
         receipts[json.dumps(value, sort_keys=True)] = path
     verified = []
     provenance_errors = []
@@ -278,10 +286,12 @@ def main():
         "paired input fingerprints differ",
         provenance_errors,
     )
+    assert 0 < maximum_residual <= 1e-10
     result = dict(
         completed=True,
         paired_geometry_records=len(verified),
         input_mismatches=len(provenance_errors),
+        max_solved_residual=maximum_residual,
         minor_radius=radius,
         comparisons=len(summary["comparisons"]),
         selected_arms=sum(

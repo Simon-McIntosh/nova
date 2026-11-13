@@ -1,0 +1,51 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T03:29:06.135Z",
+  "dispatched_at": "2026-11-13T03:23:12Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261113T032132543383-plan-review-of-iron-core-magnetisation/plan.html:351",
+      "id": "evidence_paths-1",
+      "reason": "the changed clause moved the section's negative control onto the Picard comparison, so the receipt inventory must name that record (or name the fragment that holds it) or the plan's own evidence requirement no longer covers the control it declares.",
+      "text": "the section's receipt sentence enumerates what the receipt states as \"the mesh pair, the iteration record, the converged permeability range and the far field with its mesh-pair error bar\", which covers none of the two Picard results clause (2) now requires at plan.html:342-346; the named receipt `docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html` contains no mention of Picard at all, and the landed Picard control sits in a different fragment (`icm-west-picard-control.html`), so a worker can satisfy the receipt sentence and the control's evidence lands outside the record the plan names",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "369cd14b944993318e65442f4bb8feab2650c09f",
+  "plan_fingerprint": "70c9a49c69c4c36964f8a5b7ad6cb20ce3e471107147f2e6812913d2fd6438e5",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 80,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T032132543383-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "366ff1f38db4193726b71bd04c5234ed9663c1d1",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every path s4 cites resolves at this revision (`nova/imas/machine.py`, `scripts/prototypes/iron_magnetisation/west.py`, `scripts/west_stray_field/solve.py`, `nova/biot/magnetisation.py`, `nova/equilibrium/AGENTS.md`, `nova/equilibrium/reduced_newton.py`, `nova/biot/tiledassembly.py`, `docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html`), and the plan-internal \u00a73 reference resolves to the `s3` heading at plan.html:230.",
+    "done_when": "pass \u2014 clause (2) as changed retains a falsifiable negative control (the same frozen-permeability Picard iteration on the centroid-sampled operator of the same mesh must be recorded failing to converge), and that control is genuinely able to fail: the landed control fragment records the Galerkin arm converging in 12 iterations and the centroid arm stalling in a period-four cycle between 4.3e-4 and 2.4e-3 over fifty iterations, so the arm the plan now asserts has already been observed on both sides.",
+    "evidence_paths": "a finding \u2014 clause (2) now requires two Picard records (the iteration-count comparison and the centroid arm's failure) but the receipt sentence that closes the section still enumerates only the mesh pair, the iteration record, the converged permeability range and the far field, so the control the changed clause rests on has no named durable location.",
+    "naming": "pass \u2014 the changed text names no plan label, stage name, ticket number or changelog prose; `galerkin_cell_interaction` and `cell_interaction` are landed symbols named by what they compute.",
+    "reasoning": "pass \u2014 the stated root cause of the wording change matches its cited evidence: the frozen-permeability Picard run on the Galerkin operator converges (12 iterations) against Newton's 4 corrections, so \"Newton needs fewer corrections\" is the relation the landed measurement shows, and the swapped negative control is the arm that actually fails (the centroid-sampled operator's period-four stall). The endpoint remains obtainable and checkable, and the changed clause prescribes no code path, step sequence or formula.",
+    "single_goal": "pass \u2014 the section's remaining deliverable is the magnetisation solve on the Galerkin operator; the iron-read half of clause (3) landed (review commented 2026-11-10, all three callers on the machine-description reader) and this change does not add a second deliverable to it.",
+    "wiring": "pass \u2014 s4's declared depends-on (s2, s3) both resolve to sections declared `done`, and the Galerkin assembly it says it extends (`galerkin_cell_interaction` beside `cell_interaction` in `nova/biot/tiledassembly.py`) is present at this revision, so the extension it names is a real target rather than a forward reference."
+  },
+  "section_digests": {
+    "_document": "7da5d789e6f657174ac99baf59767da19a02ed969c800b189b9834ae3e2c6480",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "bf0049ee8c924773ea67dcbe093fb860584392de2ea9a0789d0fabc79578a462",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "7d1b8251442a63695a20b1c496a30311c7a4036eb7240b4344fc545629b9816e",
+    "s5": "18d64dc99773bd89740bde91084ec424e8873aa08afed9991b5bbc40f3395b4a",
+    "s6": "d831ed01e016b37a1ff96848f8bdf5a08d9b59e7b2c4dd257862e93bd67c1671",
+    "s7": "8a8c2cb93f6c3ed1ebbb2171af1a254a72689f0630f9b086c8890ac486595e6e",
+    "s8": "5ea0fc1c2d314dc40b1a2ccec754462e0e849b96affbc02f8b406a4acce59a69",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T03:31:01.834868+00:00",
+  "total": null
+}

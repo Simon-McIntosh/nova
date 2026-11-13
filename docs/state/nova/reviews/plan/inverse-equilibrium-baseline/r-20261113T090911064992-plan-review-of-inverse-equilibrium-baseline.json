@@ -25,7 +25,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 0,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "4b08241a313b619374fb9c9afef68574efd72865",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Sections 3 and 4 are declared deferred with section 2, since both consume its configured fit.",
+      "reason": "",
+      "when": "2026-11-13T09:16:53.165042+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "4b08241a313b619374fb9c9afef68574efd72865",
+      "commit_basis": "edit",
+      "note": "Sections 3 and 4 are declared deferred with section 2, since both consume its configured fit.",
+      "reason": "",
+      "when": "2026-11-13T09:16:53.165042+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261113T090911064992-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261113T090911064992-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "c4f2360d7b0d52e4cd8df272f07b8c22413d2601",
   "rubric": "content",

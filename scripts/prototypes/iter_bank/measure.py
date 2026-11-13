@@ -287,9 +287,11 @@ def capacity(bank):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--prepare-only", action="store_true")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
-    assert jax.default_backend() == "gpu"
+    if not args.prepare_only:
+        assert jax.default_backend() == "gpu"
     cache = configure_persistent_compilation_cache(
         default_persistent_compilation_cache_root()
     )
@@ -341,6 +343,8 @@ def main():
     )
     (args.output / "source.json").write_text(json.dumps(source, indent=2))
     emit("SOURCE", **source)
+    if args.prepare_only:
+        return
     started = time.perf_counter()
     row_receipt = {}
     rows, exterior, nodes, sample_index, _ = build_jet_matrix(

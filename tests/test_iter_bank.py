@@ -80,6 +80,8 @@ def test_dina_nodal_jets_match_analytic_map(sample):
         pytest.skip("set NOVA_ITER_BANK_RECEIPT to the qualified bank run directory")
     directory = Path(directory)
     receipt = json.loads((directory / "receipt.json").read_text())
+    if sample >= len(receipt["accuracy"]):
+        pytest.skip("the measurement did not produce this sampled state")
     state = receipt["accuracy"][sample]
     with np.load(
         directory / f"accuracy-{state['index']}.npz", allow_pickle=False

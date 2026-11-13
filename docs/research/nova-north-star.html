@@ -4,14 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"  content="nova">
-  <meta name="reckon-type"   content="research">
-  <meta name="plan-slug"     content="nova-north-star">
-  <meta name="plan-title"    content="Nova North Star — The Exact Forward Operator">
-  <meta name="plan-summary"  content="Nova's durable direction: the deterministic, differentiable forward-physics operator that produces every response and fits with none of them — validated by EFIT parity, rehearsed at the Sophelio challenge, aimed at ITER first plasma">
-  <meta name="plan-informs"  content="flux-function-forward-equilibrium,flux-function-forward-transport,diiid-forward-onboarding,mast-catalog-gpu-solve,forward-profile-validator-set,plasma-edge-current-representation">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="nova-north-star">
+  <meta name="plan-title" content="Nova North Star — The Exact Forward Operator">
+  <meta name="plan-summary" content="Nova&#x27;s durable direction: the deterministic, differentiable forward-physics operator that produces every response and fits with none of them — validated by EFIT parity, rehearsed at the Sophelio challenge, aimed at ITER first plasma">
+  <meta name="plan-informs" content="flux-function-forward-equilibrium,flux-function-forward-transport,diiid-forward-onboarding,mast-catalog-gpu-solve,forward-profile-validator-set,plasma-edge-current-representation">
   <title>Nova North Star | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
   <main class="plan-doc">
@@ -33,7 +35,12 @@
       <li><strong>Produce, don't use.</strong> Nova builds every response kernel — the
       magnetics design matrix, chord→ψ_N sampling, Δ* extraction, moment operators — exactly
       as precisely as if it fitted with them, and never fits with them. A measurement array
-      accepted by a public forward solve is a test failure.</li>
+      accepted by a public forward solve is a test failure. One instrument sits beside this
+      rule without changing it (lead, 2026-11-13): a least-squares inverse class outside the
+      forward solve, kept for development, for a like-for-like comparison with EFIT and as the
+      baseline a new estimator is judged against
+      (<a href="/nova/inverse-equilibrium-baseline">inverse-equilibrium-baseline</a>). It calls
+      the forward solve with sources only, and estimation proper stays in imas-ambix.</li>
       <li><strong>Receipts, not rails.</strong> Conservation ledgers, convergence receipts,
       conditioning receipts and provenance travel with every result. A solve that cannot
       converge raises; it never returns a silently degraded state, and it never accepts a

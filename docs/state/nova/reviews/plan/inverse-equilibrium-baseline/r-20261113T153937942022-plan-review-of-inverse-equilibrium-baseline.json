@@ -1,0 +1,92 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T15:43:54.447Z",
+  "dispatched_at": "2026-11-13T15:40:20Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/profile.py:583",
+      "id": "reuse_search-1",
+      "reason": "\u00a71 is written as a new inverse class when the fit, the whitening and the covariance already exist behind ReconstructProfile, so the plan should say what the new class does that extending that module cannot, and \u00a75's retirement decision should not be deferred past it.",
+      "text": "\u00a71's endpoint (fit flux-function coefficients to synthetic magnetics rows, re-solve forward, repeat until the recovered flux map matches the generating state) is what `ReconstructProfile.least_squares` already does: `_least_squares_coefficients` refits the profile ladder at every Picard sweep and `sweep_map` (profile.py:658) maps flux through `source_to_grid`/`plasma_to_grid`, with `solve`/`solve_batch` (profile.py:683, profile.py:702) as the public entry points and `tests/test_equilibrium_profile.py::test_least_squares_recovers_profile_and_measured_current` proving the recovery property. The census of the same capability is wider than one file: nova/equilibrium/harmonic.py:465 (`fit`), nova/equilibrium/moment.py:583 (`fit`) and nova/calibrate/inversion.py (`identifiability`, line 164) each already fit a basis to external magnetics with a reported spectrum, and nova/equilibrium/measurement.py:92 (`whitened_solve`) already returns coefficients and covariance under row whitening, column normalisation, an optional graded `penalty` and an optional `anchor` row \u2014 every ingredient \u00a71 asks for",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/observation_kernels.py:265",
+      "id": "duplicate_owner-1",
+      "reason": "the node brief must extend the observation kernels rather than write a second sensor synthesiser, and stating that in the plan removes a whole construction the node would otherwise repeat.",
+      "text": "\u00a71's synthetic flux-loop, field-probe and current rows are named as new machinery (\"nova's own synthetic-diagnostic responses\"), but `virtual_flux_loops` (observation_kernels.py:265) and `virtual_poloidal_probes` (observation_kernels.py:300) already synthesise exactly those two row families from a converged state onto declared sensor geometry, each with a numerical-error receipt, and nova/equilibrium/measurement.py:21 (`Magnetics`) plus measurement.py:49 (`SliceMeasurement`) already own the row order that makes synthetic and measured rows interchangeable",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/mast_efit_referee.py:372",
+      "id": "duplicate_owner-2",
+      "reason": "\u00a73 should be scoped to generalising the existing referee comparator over an arbitrary supplied state, not to building a second comparator beside it.",
+      "text": "\u00a73's scoreboard (one comparator, per-case tolerance bands, a table over estimators, reference-free checks) duplicates the comparator that already scores a reconstruction against EFIT bands on the same MAST case set: `score_with_efit_referee` (mast_efit_referee.py:372) scores an already-completed chain result, `run_refereed_parity_chain` (mast_efit_referee.py:398) owns the reference-after-reconstruction ordering, and `nova/imas/parity_tolerances.py` owns `scorecard_verdicts` and the `ScorecardField` vocabulary. The same census includes \u00a72's \"read imas-efit's committed cases through IMAS at the DD version each was written in\", whose reader owner is nova/imas/dataset.py (`Ids`) with the per-dataset `dd_version` rule; the only genuinely new capability in \u00a73 is a column group for an arbitrary state supplied as an IMAS equilibrium,",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/h200_test_lane/run.sh",
+      "id": "duplicate_owner-3",
+      "reason": "\u00a74 should be stated as a benchmark row added to the existing lane rather than as a new measurement path, which is also what makes clause (2)'s ratio comparable to the forward solve's wall measured the same way.",
+      "text": "\u00a74's cost measurement (warm wall per slice at widths 1/16/64, forward solves per reconstruction, cold compile wall, the persistent compilation cache contract printed) duplicates the H200 lane's own receipt machinery: `scripts/h200_test_lane/run.sh` prints the cache contract and one row per program with hit/miss and rejects a run that misses the budget via `scripts/h200_test_lane/cache_guard.py`, while `benchmarks/` (reached through the `benchmark` console script declared at pyproject.toml:140) already hosts the per-shape wall benchmarks",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/profile.py:583",
+      "id": "thin_wrapper-1",
+      "reason": "without that justification the node builds a parallel path that drifts from the tested one, and the honest change is more likely an extension of ReconstructProfile with the known-answer receipt added to it.",
+      "text": "the design brief \u00a71 would hand a node is \"one inverse class with one contract\" that calls the forward solve with sources and wraps a fit, but the code it would wrap (`ReconstructProfile.solve` over `_least_squares_coefficients`, and `whitened_solve` for the ridge/anchor/covariance frame) already carries the behaviour, and the plan nowhere says why that module cannot be extended or why a parallel entry point is needed,",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/profile.py:164",
+      "id": "deep_module-1",
+      "reason": "naming the receipt as the one interface all three sections read is what turns three wrappers into one module, and the plan currently allows a node to build each layer separately.",
+      "text": "the design spreads one capability across three independent layers a caller must wire together: a new fit class (\u00a71), a new scoreboard command over stored states (\u00a73), and a new cost harness (\u00a74), where the parity chain already hides reconstruction order, scoring and receipts behind one entry point (`nova/imas/mast_parity_chain.py:601`, `run_parity_chain`) whose result type the referee then scores. The plan's own \u00a71 clause (2) asks the fit receipt to carry iteration count, singular values and undetermined coefficients \u2014 the interfaces that would make the module deep \u2014 but that receipt is described per section rather than as the module's single output,",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/__init__.py:1",
+      "id": "interface_budget-1",
+      "reason": "at a zero budget a section that adds surface must state what it retires or why nothing can be, and \u00a71 has an existing fitting path it could merge with rather than leave beside.",
+      "text": "the supplied budget is public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 for the week. \u00a71 adds a public inverse class, \u00a73 adds \"one command\" that generates the published table, and \u00a74 adds a measurement path, and none of the three sections names anything it retires or merges \u2014 \u00a75 is the only section that contemplates a retirement and it defers that to an unlocked decision (`reduced-reconstructions`); with the fit itself duplicating `nova/equilibrium/profile.py:583`, the retirement \u00a71 should be accounting for is available and is not named,",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "f76409cb49761d8a5fd70ba145551823087f42a6",
+  "plan_fingerprint": "4bd6c6eac14990cb47bf9da6619f4c8ec57478ac159f48b3af624dd96374793d",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 0,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T153937942022-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "06683895da6dfa4ff51bda09cc6a259f819d3bcf",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the design is spread as one new class plus a separate scoreboard command (\u00a73) plus a separate cost harness (\u00a74) over the same parity chain, rather than one module that hides the fit, the receipt and the scoring.",
+    "duplicate_owner": "a finding \u2014 \u00a71 duplicates profile.py:583, \u00a73 duplicates the EFIT referee comparator at nova/imas/mast_efit_referee.py:372, and \u00a74 duplicates the H200 lane receipt at scripts/h200_test_lane/run.sh.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a71 adds a class, \u00a73 adds a command and \u00a74 adds a harness, and none of the three names what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 nova/equilibrium/profile.py:583 already performs a magnetics-driven least-squares fit of flux-function coefficients through the forward source map, and nova/equilibrium/measurement.py:92 already owns the whitened solve the new class would need.",
+    "thin_wrapper": "a finding \u2014 \u00a71's class adds a thin layer over ReconstructProfile.solve and whitened_solve without saying why neither can be extended."
+  },
+  "section_digests": {
+    "_document": "03d842cedab18491de7d859344a13fee67c7576dea741a8662961307f751a354",
+    "s0": "ce8b4a7532f5a4ae7630c17e33c25d4b43d3ff9136fbf6678937a5e49554f6f9",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "2c09fab3f58e2aca8b81b4d0c9d32788d14128e1c902740e390020bbf9050a7d",
+    "s3": "3d92bd905d8296df89dcd6d997520badf2d302d7700d1c19545e47e7a2b481e3",
+    "s4": "4f0e0060718751c8f821d69a8df4d486f30b599b961be89cf6ee57ef6c5b8e52",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T16:20:04.543085+00:00",
+  "total": null
+}

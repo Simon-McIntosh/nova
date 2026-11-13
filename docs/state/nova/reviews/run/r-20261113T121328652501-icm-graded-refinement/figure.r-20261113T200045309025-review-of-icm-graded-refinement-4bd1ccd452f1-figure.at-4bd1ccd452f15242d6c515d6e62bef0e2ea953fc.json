@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-13T20:16:49.166Z",
+  "dispatched_at": "2026-11-13T20:06:19Z",
+  "figures_reviewed": [
+    "docs/figures/iron-core-magnetisation/icm-graded-refinement/shell-error-vs-cells.svg"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/iron-core-magnetisation/icm-graded-refinement/shell-error-vs-cells.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The last uniform-mesh point is centred about 2.5 px above the dotted 0.5 % limit and its marker is about 11 px across, so the marker straddles the limit line and paints over it where they meet (at x 1185-1193 the limit's dots are covered by the marker). In the rendered PNG the uniform family therefore appears to stop ON the target rather than above it, which is exactly the distinction the caption draws in words ('the uniform curve stops at 8630 cells and 0.548 per cent, above the target') and the one the figure's argument rests on: the margin is 0.048 percentage points on a 0-12 % axis, below the resolution of a 7 pt marker. The reader can still see the graded family continue below the limit, so nothing is hidden, but the 'above, not reaching' result is carried by the caption alone."
+    },
+    {
+      "file": "docs/figures/iron-core-magnetisation/icm-graded-refinement/shell-error-vs-cells.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The x axis draws six major tick marks (200, 500, 1000, 2000, 5000, 10000 cells) but labels only the two decades, 10^3 and 10^4; the ticks at 200, 500, 2000 and 5000 carry no labels in the render. The coarse-end points, 230 to 500 cells, sit between the two unlabelled left ticks, so the cell count at the end of the plot where the under-resolution argument sits cannot be read off the axis without knowing the log ladder, and a reader must infer the decade spacing from two labels at the right of centre. The y axis, where the 0.5 % comparison is made, is fully labelled, so the defect is confined to the cost axis."
+    }
+  ],
+  "project": "nova",
+  "rendered_artifact": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T200045309025-review-of-icm-graded-refinement-4bd1ccd452f1-figure/image-0.png",
+  "review_run_id": "r-20261113T200045309025-review-of-icm-graded-refinement-4bd1ccd452f1-figure",
+  "reviewed_base_sha": "f4954eb7745b3d06acd1346e2f4c3148299d1b49",
+  "reviewed_head_sha": "4bd1ccd452f15242d6c515d6e62bef0e2ea953fc",
+  "reviewed_run_id": "r-20261113T121328652501-icm-graded-refinement",
+  "reviewer_run_id": "r-20261113T200045309025-review-of-icm-graded-refinement-4bd1ccd452f1-figure",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass \u2014 every label is near-black (#1a1a1a, 17:1 on white); the one grey element of text, the '0.5 % target' annotation at #929292 (3.1:1), is legible at a glance although it is the faintest text on the figure.",
+    "data_ink": "pass \u2014 the ink is four thin traces with their markers, one dotted limit line and one short annotation; no fill, grid, shading or border competes with the curves, and the top and right spines are off.",
+    "decoration": "pass \u2014 white background, no gradient, no background fill and no styled theme; the only non-data line is the labelled 0.5 % target limit, whose extent is the data it states.",
+    "label_collision": "pass \u2014 no ink touches the canvas edge (ink spans x 9-1389, y 17-693 in a 1400x720 canvas); the legend sits in clear space above the plotting area and does not meet the traces; the only in-plot label, '0.5 % target', stands alone at the left with no data or tick label within about 350 px.",
+    "legibility": "pass \u2014 rendered at 1400x720 with 14 pt text, the rotated y label, seven y tick labels, both x decade labels, the four-entry framed-off legend and all four traces are readable at a glance without magnifying.",
+    "table_form": "pass \u2014 the content is a two-family convergence comparison against a stated threshold; where each family crosses 0.5 % and that both families lie on one curve are relationships a table of the same numbers could not show."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T20:17:30.711365+00:00",
+  "total": null,
+  "verdicts": {
+    "caption": "The figcaption at docs/evidence/fragments/iron-core-magnetisation/icm-graded-refinement.html:187 does not repeat the title: it names which trace is which, says the thick trace is the worst probe and that the thin ones are the best, identifies the dotted line, and states the two families' endpoints and the single-curve result.",
+    "figure_read": "The rendered PNG was opened and judged directly (1400x720, RGBA); no SVG source was read. Marker and limit positions were measured on the rendered pixels and the plotted values agree with the caption: the uniform family ends at 8630 cells and 0.548 % and the graded family crosses below 0.5 % at its last point, so figure and caption do not disagree.",
+    "findings_block": "no blocking finding: no label is clipped, none overlaps another label or the data, all text is legible, and no data is withheld from the reader."
+  }
+}

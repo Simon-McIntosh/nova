@@ -33,7 +33,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 0,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "84f8b618b9fab40bc78fdf55a6e3460df5d83e72",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 2 is declared deferred and its section record says it waits on the fitted-unknowns and vertical-freedom decisions, which are scoped to that section.",
+      "reason": "",
+      "when": "2026-11-13T08:58:13.060997+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "84f8b618b9fab40bc78fdf55a6e3460df5d83e72",
+      "commit_basis": "edit",
+      "note": "Section 2 is declared deferred and its section record says it waits on the fitted-unknowns and vertical-freedom decisions, which are scoped to that section.",
+      "reason": "",
+      "when": "2026-11-13T08:58:13.060997+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261113T082730306755-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261113T082730306755-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "9934cef95b383ff3ed5a59481d31cca9ebeb80f1",
   "rubric": "content",

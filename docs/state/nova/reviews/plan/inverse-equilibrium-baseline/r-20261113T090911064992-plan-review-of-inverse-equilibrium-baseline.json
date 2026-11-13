@@ -35,9 +35,28 @@
       "note": "Sections 3 and 4 are declared deferred with section 2, since both consume its configured fit.",
       "reason": "",
       "when": "2026-11-13T09:16:53.165042+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "4b08241a313b619374fb9c9afef68574efd72865",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The timing control is constructed on the count the ceiling is arithmetic over: a run forced to at least eleven forward solves per reconstruction must exceed ten times the forward solve wall.",
+      "reason": "",
+      "when": "2026-11-13T09:17:13.527217+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "4b08241a313b619374fb9c9afef68574efd72865",
+      "commit_basis": "edit",
+      "note": "The timing control is constructed on the count the ceiling is arithmetic over: a run forced to at least eleven forward solves per reconstruction must exceed ten times the forward solve wall.",
+      "reason": "",
+      "when": "2026-11-13T09:17:13.527217+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",

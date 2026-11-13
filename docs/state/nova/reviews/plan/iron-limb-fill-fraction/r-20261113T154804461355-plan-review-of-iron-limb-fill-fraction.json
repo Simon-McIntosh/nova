@@ -1,0 +1,61 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T15:55:09.153Z",
+  "dispatched_at": "2026-11-13T15:48:52Z",
+  "findings": [
+    {
+      "anchor": "plan.html:276",
+      "id": "wiring-1",
+      "reason": "the attribute is metadata about where the question lives and whose work it gates; pointing it at s4 re-creates the mis-association and would send \u00a74's reader (or a coordinator listing questions per section) after imas-efit's change.",
+      "text": "the new open question `imas-efit-hand-off` is declared against `data-section=\"s4\"`, but its own body says the hand-off waits on \u00a71 (\"once \u00a71 has confirmed the table and figures of \u00a70\") and its subject is imas-efit's boundary-current model, which no nova section performs; a \u00a74 owner reading the questions attached to its section sees a hand-off it does not own, which is exactly the association the previous review round had removed",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:291",
+      "id": "wiring-2",
+      "reason": "the prior review's remedy (\"removed the imas-efit followup whose prompt dispatched this plan's section 4\") is not what the file shows \u2014 the followup survived, was resolved, and kept the prompt \u2014 so the misleading dispatch text is still in the plan and would change it to delete the prompt line.",
+      "text": "`f-ilf-002` is marked `data-status=\"resolved\"` and its outcome says \"the change belongs to imas-efit and no nova section performs it\", yet the article still carries the prompt `/reckon-build iron-limb-fill-fraction \u00a74`, so the record contradicts itself and a reader who copies the visible prompt dispatches this plan's WEST 62751 section for a change no nova section performs",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:257",
+      "id": "reasoning-1",
+      "reason": "a lead or coordinator closing the decision on the rationale as written can pick an option that then blocks \u00a72 with no path forward, so the plan must either drop the option or state that \u00a72's criterion is what excludes it.",
+      "text": "the `cross-field-factor` decision offers \"No cross-field factor (plain fill fraction)\" as a live option, but \u00a72 clause 2 requires the in-vessel iron field within 10 % of the \u00a71 reference and at most one third of the section smear's error, while the plan's own table (\u00a70) and `comparison.json` read the plain fill fraction at 0.339 (\u03bcr = 50) and 0.311 (\u03bcr = 200) against a bound of 0.10 and roughly 0.11 \u2014 so choosing the offered option makes \u00a72's gate unsatisfiable, and the plan presents the decision as open after \u00a71 without saying that one of its three answers is already excluded by the section that consumes it",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "4fd38a3dfa8d575b13eee92698254c3d69bcb72b",
+  "plan_fingerprint": "03db5ebf9aa5d880e9aa3a58b00ac3bba7bb4c5571f8f7ab28b7d7aa199fd434",
+  "plan_slug": "iron-limb-fill-fraction",
+  "plan_version": 3,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T154804461355-plan-review-of-iron-limb-fill-fraction",
+  "reviewed_blob_sha": "cac938cfae444de51c798f6d4cfce008d430e5bd",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `tests/test_magnetisation.py`, `scripts/prototypes/iron_limb_fill/` (commit `62a05040b`), all three `docs/figures/iron-limb-fill/*.svg`, `comparison.json`, `case.json` and the `limb-geometry` decision in `iron-core-magnetisation` all resolve; the archive record and `reference/` directory are this plan's own forward deliverables, not dangling pointers.",
+    "done_when": "pass \u2014 \u00a72 clause 2 names the solid-outline `f = 1` control that must exceed 100 %, and the receipt reads 3.113 (\u03bcr 50) and 2.873 (\u03bcr 200), so the control is one that fires; clauses (1) and (3) are invariance and convergence measures that can fail.",
+    "evidence_paths": "pass \u2014 \u00a71 names `/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/reference/`, \u00a74 names `docs/evidence/archive/iron-limb-fill-fraction-landed.html#west-62751` with arrays under GPFS, and \u00a70's receipt `comparison.json` resolves; no section sends evidence to a scratchpad or node-local temp.",
+    "naming": "pass \u2014 \u00a72 now states the capability without naming a function or module, and no plan label, ticket number or version tag reaches a symbol or a path.",
+    "reasoning": "a finding \u2014 \u00a72's acceptance criterion and the cross-field decision disagree: the decision offers \"no cross-field factor\" as a live option while \u00a72 requires an accuracy the plan's own table shows that option misses by roughly 10\u00d7.",
+    "single_goal": "pass \u2014 \u00a72 delivers one capability (fill fraction and cross-field factor in the material solve); its three clauses are measures of that one deliverable, and every other section names one record or read.",
+    "wiring": "a finding \u2014 the new open question `imas-efit-hand-off` declares `data-section=\"s4\"`, but the hand-off waits on \u00a71 and belongs to imas-efit, not to this plan's WEST 62751 section."
+  },
+  "section_digests": {
+    "_document": "04aff5905dae8695cacfe34af0fcfd36de47d09a0e7d334a8d1f0a53d2de1642",
+    "s0": "67cee07572cf713ac6882d5e8e99f0f16c34343cda664452861df354100bd295",
+    "s1": "e48e22264625d301a03c2465befa19e826c3b4b92491fdfc62b6094bb88dad69",
+    "s2": "844171896115e212887c9e01fea5cd99b5a26ff6d336cb85ebb0aae689989738",
+    "s3": "8b41520dbb08ef198c948d8eb843edb151fe116cec844f6d379c3b134c7066bb",
+    "s4": "1891ed7f15b2f37f0901f06dfc51aafb5c24c6a0a110975e20eb644b084cd08c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T16:20:04.470552+00:00",
+  "total": null
+}

@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/west_iron_galerkin_pair/figure.py:38",
+    "scripts/west_iron_galerkin_pair/figure.py:33",
+    "scripts/west_iron_galerkin_pair/run.sh:18",
+    "docs/plans/iron-core-magnetisation.html"
+  ],
+  "completed_at": "2026-11-13T11:56:47.789Z",
+  "dispatched_at": "2026-11-13T11:38:16Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html",
+      "line": "50",
+      "severity": "non-blocking",
+      "text": "non-blocking: the figcaption says the colour scale spans \"the CEA table's own range, 215.1 to 1692.4\", but figure.py:99 normalises from table_mu_relative's true minimum 1.5214, so the scale runs 1.52 to 1692.43 and the 87 per cent of the viridis range below 215 is empty, which compresses every converged cell into the dark end of the colour bar as the rendered PNG shows."
+    },
+    {
+      "file": "scripts/west_iron_galerkin_pair/figure.py",
+      "line": "83",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fine arm is taken as the last entry of a descending sort with no assertion that it is the smaller cell size, and no test exercises figure.py, so the inverted-pairing defect repaired in 211a595ca could return silently with both suite arms still green."
+    },
+    {
+      "file": "scripts/west_iron_galerkin_pair/measure.py",
+      "line": "62",
+      "severity": "non-blocking",
+      "text": "non-blocking: source_field reproduces the coil-quadrature and plasma-current builder of scripts/west_iron_solve/measure.py:37 line for line instead of extending a shared owner, so a third copy of the recipe now has to be corrected in three places when the prototype operands change."
+    },
+    {
+      "file": "scripts/west_iron_galerkin_pair/measure.py",
+      "line": "363",
+      "severity": "non-blocking",
+      "text": "non-blocking: the air-field reproduction the fragment calls one of \"two independent controls\" asserts an exact-zero difference against a reference produced by this same recipe on the same operands, so it establishes determinism rather than independence; the poloidal |B| comparison at measure.py:368 is the only control independent of the rebuild."
+    },
+    {
+      "file": "scripts/west_iron_galerkin_pair/measure.py",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "non-blocking: the docstring names \"the plan's probes\", a reference to a document outside the code, so the script cannot be read without the plan; figure.py:5 repeats it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against a7dac4ab5 across seven commits (8e5baf8c8, 211a595ca, 686b9d3b0, 14b9a40a0, 125bc3d99, ba5101786, 96113e607); it adds measure.py, figure.py, run.sh, the fragment and the SVG, every commit carries a body, and none carries an AI trailer.",
+    "done_when": "the brief's three clauses are each answered in the fragment (per-mesh cells, clearance, area/h^2, per-iteration residual, iteration count and minimum symmetric eigenvalue at lines 12-26 and 28-38; probes, pair difference, CEA-versus-flat-215 change, mu_r range and volume fractions at lines 47-58; the two-panel figure at line 50), and every value I spot-checked agrees with /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/mesh-pair/measurement.json, whose sha256 b1b178c3 matches the digest the fragment quotes.",
+    "goal": "the node goal is the WEST 62751 stray-field discretisation error bar on the Galerkin operator, read as a mesh pair; docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html:8-9 states the pair separation as that error bar and both meshes converge from M = 0 at full drive, so the stated deliverable is what landed.",
+    "manifest": "read; it records baseline_suite and after_suite both at 48 passed, 8 deselected, EXIT=0, citing base-suite.log and head-suite.log, and both logs carry a revision header line and a bare EXIT=0 last line, so added_failure_count is 0 with no added failure ids.",
+    "write_paths": "read the manifest's three declared paths (scripts/west_iron_galerkin_pair, the fragment, the figure directory); all five files in the diff lie inside them and nothing outside was touched."
+  },
+  "justifications": {
+    "durability": "no test reaches any added file, proven by running nova.database.filepath.worktree_path_candidates at this head and finding neither scripts/west_iron_galerkin_pair/measure.py nor the fragment among the 2206 candidates, so scripts/west_iron_galerkin_pair/figure.py:83 orders the mesh arms implicitly with nothing that reddens if the inverted pairing returns.",
+    "evidence": "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/mesh-pair/measurement.json reconciles with every fragment value I checked and its digest is quoted in the fragment, but the transcription audit lives at /home/ITER/mcintos/.cache/nova-icm-pair/review_repair_gate.sh outside the repository and the suite pair the manifest ran reaches no line of the diff.",
+    "fit": "scripts/west_iron_galerkin_pair/figure.py:33-37 reuses the shared save_checked layout check and the nova.media painters, but scripts/west_iron_galerkin_pair/measure.py:4 and figure.py:5 both write \"the plan's probes\", a plan reference in source.",
+    "goal_fidelity": "docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html:12-24 reports both meshes converged with every quantity done_when names, and scripts/west_iron_galerkin_pair/measure.py:167 reaches them through the production solve_magnetisation rather than a bespoke solver.",
+    "reuse": "scripts/west_iron_galerkin_pair/measure.py:62-98 re-implements the WEST filament source builder that scripts/west_iron_solve/measure.py:37 already owns and scripts/west_iron_galerkin_pair/measure.py:105 re-states the spectrum at scripts/west_iron_galerkin/measure.py:37, while figure.py extends the shared figure module rather than forking it.",
+    "scope_discipline": "git diff a7dac4ab5 96113e607 --name-only lists five paths, each inside one of the three declared write paths, and the manifest's changed_paths names the same five."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is the WEST 62751 stray-field discretisation error bar on the Galerkin operator, read as a mesh pair; docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html:8-9 states the pair separation as that error bar and both meshes converge from M = 0 at full drive, so the stated deliverable is what landed.\nVERDICT done_when: the brief's three clauses are each answered in the fragment (per-mesh cells, clearance, area/h^2, per-iteration residual, iteration count and minimum symmetric eigenvalue at lines 12-26 and 28-38; probes, pair difference, CEA-versus-flat-215 change, mu_r range and volume fractions at lines 47-58; the two-panel figure at line 50), and every value I spot-checked agrees with /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/mesh-pair/measurement.json, whose sha256 b1b178c3 matches the digest the fragment quotes.\nVERDICT write_paths: read the manifest's three declared paths (scripts/west_iron_galerkin_pair, the fragment, the figure directory); all five files in the diff lie inside them and nothing outside was touched.\nVERDICT manifest: read; it records baseline_suite and after_suite both at 48 passed, 8 deselected, EXIT=0, citing base-suite.log and head-suite.log, and both logs carry a revision header line and a bare EXIT=0 last line, so added_failure_count is 0 with no added failure ids.\nVERDICT diff: read commit by commit against a7dac4ab5 across seven commits (8e5baf8c8, 211a595ca, 686b9d3b0, 14b9a40a0, 125bc3d99, ba5101786, 96113e607); it adds measure.py, figure.py, run.sh, the fragment and the SVG, every commit carries a body, and none carries an AI trailer.\nCALL_SITES: scripts/west_iron_galerkin_pair/figure.py:38, scripts/west_iron_galerkin_pair/figure.py:33, scripts/west_iron_galerkin_pair/run.sh:18, docs/plans/iron-core-magnetisation.html\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html:12-24 reports both meshes converged with every quantity done_when names, and scripts/west_iron_galerkin_pair/measure.py:167 reaches them through the production solve_magnetisation rather than a bespoke solver.\nSCORE evidence: 15\nJUSTIFICATION evidence: /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/mesh-pair/measurement.json reconciles with every fragment value I checked and its digest is quoted in the fragment, but the transcription audit lives at /home/ITER/mcintos/.cache/nova-icm-pair/review_repair_gate.sh outside the repository and the suite pair the manifest ran reaches no line of the diff.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff a7dac4ab5 96113e607 --name-only lists five paths, each inside one of the three declared write paths, and the manifest's changed_paths names the same five.\nSCORE durability: 6\nJUSTIFICATION durability: no test reaches any added file, proven by running nova.database.filepath.worktree_path_candidates at this head and finding neither scripts/west_iron_galerkin_pair/measure.py nor the fragment among the 2206 candidates, so scripts/west_iron_galerkin_pair/figure.py:83 orders the mesh arms implicitly with nothing that reddens if the inverted pairing returns.\nSCORE fit: 14\nJUSTIFICATION fit: scripts/west_iron_galerkin_pair/figure.py:33-37 reuses the shared save_checked layout check and the nova.media painters, but scripts/west_iron_galerkin_pair/measure.py:4 and figure.py:5 both write \"the plan's probes\", a plan reference in source.\nSCORE reuse: 10\nJUSTIFICATION reuse: scripts/west_iron_galerkin_pair/measure.py:62-98 re-implements the WEST filament source builder that scripts/west_iron_solve/measure.py:37 already owns and scripts/west_iron_galerkin_pair/measure.py:105 re-states the spectrum at scripts/west_iron_galerkin/measure.py:37, while figure.py extends the shared figure module rather than forking it.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html:50 non-blocking: the figcaption says the colour scale spans \"the CEA table's own range, 215.1 to 1692.4\", but figure.py:99 normalises from table_mu_relative's true minimum 1.5214, so the scale runs 1.52 to 1692.43 and the 87 per cent of the viridis range below 215 is empty, which compresses every converged cell into the dark end of the colour bar as the rendered PNG shows.\nFINDING scripts/west_iron_galerkin_pair/figure.py:83 non-blocking: the fine arm is taken as the last entry of a descending sort with no assertion that it is the smaller cell size, and no test exercises figure.py, so the inverted-pairing defect repaired in 211a595ca could return silently with both suite arms still green.\nFINDING scripts/west_iron_galerkin_pair/measure.py:62 non-blocking: source_field reproduces the coil-quadrature and plasma-current builder of scripts/west_iron_solve/measure.py:37 line for line instead of extending a shared owner, so a third copy of the recipe now has to be corrected in three places when the prototype operands change.\nFINDING scripts/west_iron_galerkin_pair/measure.py:363 non-blocking: the air-field reproduction the fragment calls one of \"two independent controls\" asserts an exact-zero difference against a reference produced by this same recipe on the same operands, so it establishes determinism rather than independence; the poloidal |B| comparison at measure.py:368 is the only control independent of the rebuild.\nFINDING scripts/west_iron_galerkin_pair/measure.py:4 non-blocking: the docstring names \"the plan's probes\", a reference to a document outside the code, so the script cannot be read without the plan; figure.py:5 repeats it.",
+  "review_run_id": "r-20261113T113338713934-review-of-icm-west-62751-galerkin-pair-96113e607965",
+  "reviewed_base_sha": "a7dac4ab557e56bcd9e634c349b036c0e8979519",
+  "reviewed_head_sha": "96113e6079651d177d01011b86950b6a72351bba",
+  "reviewed_run_id": "r-20261112T201826132383-icm-west-62751-galerkin-pair",
+  "reviewer_run_id": "r-20261113T113338713934-review-of-icm-west-62751-galerkin-pair-96113e607965",
+  "scores": {
+    "durability": 6,
+    "evidence": 15,
+    "fit": 14,
+    "goal_fidelity": 17,
+    "reuse": 10,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T12:02:17.393592+00:00",
+  "total": 82
+}

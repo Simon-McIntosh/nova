@@ -78,6 +78,13 @@
       "finding": "evidence_paths-1",
       "reason": "Every crew node writes its landing record to docs/evidence/fragments/iron-core-magnetisation/<node-id>.html by the build contract, and promotion lands that path on the section, so 'the plan's evidence record' for sections 5, 7, 8 and 9 resolves to the node's fragment; the node briefs name the path when those sections are dispatched.",
       "when": "2026-11-13T05:39:49.472283+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "Clause (3), the iron read, has landed (icm-iron-read) and both script readers call StaticMachineDescription.read_iron_core; splitting a landed clause into its own section now changes no work, and the section closes on the remaining solve evidence.",
+      "when": "2026-11-13T05:40:24.941270+00:00"
     }
   ],
   "responses": {
@@ -98,6 +105,12 @@
       "by": "",
       "reason": "The cited spectrum [-0.1247,1.1237], the spurious roots and the 0.195 fold were measured on the centroid-sampled (collocated) operator, which is exactly what this section forbids; the Galerkin operator the section mandates measured [4.9e-5,0.99994] on WEST and A/B starts agree to 2.55e-9 (icm-galerkin-interaction fragment), so the uniqueness argument and clause (2) hold on the operator in production.",
       "when": "2026-11-13T05:38:33.381738+00:00"
+    },
+    "single_goal-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Clause (3), the iron read, has landed (icm-iron-read) and both script readers call StaticMachineDescription.read_iron_core; splitting a landed clause into its own section now changes no work, and the section closes on the remaining solve evidence.",
+      "when": "2026-11-13T05:40:24.941270+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261113T033753030344-plan-review-of-iron-core-magnetisation.json",

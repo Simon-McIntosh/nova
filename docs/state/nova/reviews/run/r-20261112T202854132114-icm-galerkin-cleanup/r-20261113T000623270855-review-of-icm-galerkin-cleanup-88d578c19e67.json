@@ -13,6 +13,11 @@
       "kind": "exempted",
       "reason": "fragment sentence overstates the factoring; corrected with the scripts cleanup that removes the remaining extraction copy",
       "recorded_at": "2026-11-13T00:43:24.772150+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the duplication guard becomes a test in the scripts cleanup",
+      "recorded_at": "2026-11-13T00:43:43.291064+00:00"
     }
   },
   "findings": [

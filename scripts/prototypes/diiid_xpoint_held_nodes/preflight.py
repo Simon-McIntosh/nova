@@ -124,7 +124,9 @@ def main():
             row, machine.physical, bench.POLOIDAL_CONDUCTORS, time
         )
         target = float(bench._target_current(row, time))
-        assert np.isfinite(currents).all() and np.isfinite(target) and target != 0
+        assert set(currents) == set(bench.POLOIDAL_CONDUCTORS)
+        assert np.isfinite(list(currents.values())).all()
+        assert np.isfinite(target) and target != 0
         assert np.isfinite(wall).all() and len(wall) > 3
         record.update(
             input=str(match.path),

@@ -29,7 +29,6 @@ from nova.equilibrium import support_read, topology
 from nova.imas.machine import CrossSection, ImasGeometryReader
 from scripts.prototypes.iter_bank.inspect import DD, SOURCE
 from scripts.prototypes.read_route.jets import _source_jets, build_jet_matrix
-from tests.equilibrium.test_topology_read import _realised_hex_geometry
 
 assert jax.config.jax_enable_x64 is True
 
@@ -126,6 +125,72 @@ def read_scenario():
         names,
         states,
     )
+
+
+def build_geometry(wall, target=550):
+    """Clip a hexagonal carrier, retaining every disconnected wall fragment.
+
+    A reentrant divertor wall can cut one generator into multiple components.
+    Each component is an independent source cell with the generator's stencil.
+    """
+    vessel = Polygon(wall)
+    origin = np.asarray(vessel.centroid.coords[0])
+    bounds = np.asarray(vessel.bounds)
+
+    def generate(radius):
+        lower = np.floor((bounds[:2] - origin) / (1.5 * radius)).astype(int) - 3
+        upper = np.ceil((bounds[2:] - origin) / (1.5 * radius)).astype(int) + 3
+        angle = np.arange(6) * np.pi / 3
+        offset = radius * np.column_stack((np.cos(angle), np.sin(angle)))
+        cells, sampling = [], []
+        for radial in range(lower[0], upper[0] + 1):
+            for vertical in range(2 * lower[1], 2 * upper[1] + 1):
+                centre = origin + radius * np.asarray(
+                    (
+                        1.5 * (radial + 0.137),
+                        np.sqrt(3) * (vertical + 0.5 * (radial % 2) + 0.219),
+                    )
+                )
+                stencil = centre + offset
+                clipped = Polygon(stencil).intersection(vessel)
+                if clipped.is_empty:
+                    continue
+                parts = (clipped,) if clipped.geom_type == "Polygon" else clipped.geoms
+                for part in parts:
+                    if part.geom_type != "Polygon" or part.area < 1e-14 * radius**2:
+                        continue
+                    points = np.asarray(part.exterior.coords[:-1])
+                    cells.append(points if part.exterior.is_ccw else points[::-1])
+                    sampling.append(stencil)
+        return cells, sampling
+
+    estimate = np.sqrt(vessel.area / target / (3 * np.sqrt(3) / 2))
+    low, high = 0.5 * estimate, 2 * estimate
+    best = None
+    for _ in range(40):
+        radius = 0.5 * (low + high)
+        cells, sampling = generate(radius)
+        distance = abs(len(cells) - target)
+        if best is None or distance < best[0]:
+            best = distance, cells, sampling
+        if distance == 0:
+            break
+        if len(cells) > target:
+            low = radius
+        else:
+            high = radius
+    _, cells, sampling = best
+    geometry = topology.TopologyGeometry.from_cells(
+        tuple(cells), np.asarray(sampling), (wall,)
+    )
+    emit(
+        "MESH",
+        cells=len(cells),
+        target=target,
+        area_m2=float(np.sum(np.asarray(geometry.full_area))),
+        wall_area_m2=vessel.area,
+    )
+    return geometry
 
 
 def sampled_moments(geometry, slice_):
@@ -302,7 +367,7 @@ def main():
         x64=True,
     )
     wall, polygons, turns, owners, names, states = read_scenario()
-    geometry = _realised_hex_geometry(wall[0], 550)
+    geometry = build_geometry(wall[0], 550)
     plasma_polygons = tuple(
         np.asarray(geometry.vertices[i, :n])
         for i, n in enumerate(np.asarray(geometry.vertex_count))

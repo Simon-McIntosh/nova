@@ -16,7 +16,7 @@ import numpy as np
 import pytest
 
 from nova.equilibrium import support_read
-from scripts.prototypes.iter_bank.measure import assert_accuracy
+from scripts.prototypes.iter_bank.measure import assert_accuracy, build_geometry
 
 
 def bank(monkeypatch, coil_exterior=None):
@@ -89,3 +89,33 @@ def test_dina_nodal_jets_match_analytic_map(sample):
         ]
         errors = assert_accuracy(actual, arrays["expected"])
     np.testing.assert_allclose(errors, state["relative_errors"], rtol=1e-12, atol=1e-16)
+
+
+def test_reentrant_wall_mesh_keeps_all_clipped_fragments():
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+
+    wall = np.array(
+        [
+            [2.0, 0.0],
+            [4.0, 0.0],
+            [4.0, 2.0],
+            [3.2, 2.0],
+            [3.2, 0.3],
+            [2.8, 0.3],
+            [2.8, 2.0],
+            [2.0, 2.0],
+        ]
+    )
+    geometry = build_geometry(wall, target=40)
+    cells = [
+        Polygon(p[:n])
+        for p, n in zip(
+            np.asarray(geometry.vertices),
+            np.asarray(geometry.vertex_count),
+            strict=True,
+        )
+    ]
+    vessel = Polygon(wall)
+    assert abs(unary_union(cells).area - vessel.area) < 1e-10
+    assert all(p.difference(vessel).area < 1e-12 for p in cells)

@@ -9,23 +9,83 @@ from pathlib import Path
 from statistics import mean
 
 
-def stages(record):
-    profile = record["programs"]["solve"]["profile"]
+def attributed(record, directory, program):
+    """Resolve deduplicated symbols through their executed enclosing branch."""
+    from scripts.prototypes.bank_solve_trace.provenance import metadata
+
+    width = record["width"]
+    profile = record["programs"][program]["profile"]
+    instructions = metadata(directory / program / f"solve-{width}-0.hlo.pb")
+    ledger = json.loads((directory / program / f"kernels-{width}.json").read_text())
     totals = defaultdict(float)
-    for name, row in profile["groups"].items():
-        if name.startswith("carried read:"):
-            label = "carried geometry"
-        elif name.startswith("full read:"):
-            label = "full geometry"
-        elif name in ("assembly", "block GMRES and scaling"):
-            label = name
-        elif name in ("update residual", "read residual"):
-            label = name
-        elif name in ("read census", "read qualification"):
+    mechanisms = defaultdict(float)
+    for row in ledger:
+        candidates = [instructions[n] for n in row["candidates"]]
+        contexts = [instructions[n] for n in row["enclosing"]]
+        frames = [f for item in candidates for f in item["stack"]]
+        names = {f["function"].split(".<locals>")[0] for f in frames}
+        context_names = {f["function"] for item in contexts for f in item["stack"]}
+        carried_context = any(
+            "read_batch.<locals>.carry" in n or "refresh_at_stationary_points" in n
+            for n in context_names
+        )
+        if names & {
+            "step_jacobian",
+            "_normal_geometry_booking_tangent",
+            "_local_booking_sensitivities",
+        } or row["group"] in ("assembly", "step_jacobian"):
+            label = "assembly"
+        elif "step_residual" in names or row["group"] in (
+            "update residual",
+            "read residual",
+        ):
+            label = (
+                "update residual"
+                if "newton_step" in names or row["group"] == "update residual"
+                else "read residual"
+            )
+        elif "newton_step" in names or row["group"] == "block GMRES and scaling":
+            label = "block GMRES and scaling"
+        elif "stationary_stencil" in names or row["group"] == "read census":
             label = "tracking and qualification"
+        elif carried_context or row["group"].startswith("carried read:"):
+            label = "carried geometry"
+        elif row["group"].startswith("full read:"):
+            label = "full geometry"
         else:
             label = "other and fused"
         totals[label] += row["device_ms"]
+        if label == "carried geometry":
+            if "carried_decision_changed" in names or "incidence guard" in row["group"]:
+                mechanism = "incidence guard"
+            elif names & {
+                "_fragments_at_level",
+                "quadratic_cell_fragments",
+                "_positive_vertical_intervals",
+                "_vertical_polygon_interval",
+            }:
+                mechanism = "fragment areas and edge intervals"
+            elif names & {"_curvature_derivatives", "saddle_normal_form"}:
+                mechanism = "curvature and normal form"
+            elif names & {"nodal_jets", "field_from_jets", "sampled_coefficient"}:
+                mechanism = "field coefficients"
+            else:
+                mechanism = "refresh qualification and shared operations"
+            mechanisms[mechanism] += row["device_ms"]
+        row["audited_group"] = label
+    assert sum(row["launches"] for row in ledger) == profile["kernel_launches"]
+    kernel_ms = sum(row["device_ms"] for row in ledger)
+    assert abs(sum(totals.values()) - kernel_ms) < 1e-7
+    (directory / program / "audited-kernels.json").write_text(
+        json.dumps(ledger, indent=2)
+    )
+    return dict(totals), dict(mechanisms)
+
+
+def stages(record, directory):
+    profile = record["programs"]["solve"]["profile"]
+    classified, _ = attributed(record, directory, "solve")
+    totals = defaultdict(float, classified)
     totals["host gaps and transfers"] = (
         profile["gap_ms"]
         - profile["overlap_ms"]
@@ -50,6 +110,7 @@ def main():
         if arm["process"] == 0 or arm["exit_status"] == 77:
             continue
         record = json.loads(Path(arm["receipt"]).read_text())
+        record["receipt_directory"] = str(Path(arm["receipt"]).parent)
         assert record["complete"] and arm["exit_status"] == 0
         assert record["profiler_control"]["h2d_bytes"] == 2097152
         assert record["profiler_control"]["kernels"] > 0
@@ -66,7 +127,7 @@ def main():
         assert len(records) == 2
         walls = [r["end_to_end_ms"] for r in records]
         assert abs(walls[0] - walls[1]) / min(walls) <= 0.05
-        profiles = [stages(r) for r in records]
+        profiles = [stages(r, Path(r["receipt_directory"])) for r in records]
         names = sorted(set().union(*profiles))
         audited.append(
             dict(
@@ -89,18 +150,18 @@ def main():
         assert len(records) == 2
         values = [r["programs"]["carried"]["median_ms"] for r in records]
         assert abs(values[0] - values[1]) / min(values) <= 0.05
+        attributed_rows = [
+            attributed(r, Path(r["receipt_directory"]), "carried") for r in records
+        ]
         paired[label] = dict(
             wall_ms=mean(values),
             groups={
-                name: mean(
-                    r["programs"]["carried"]["profile"]["groups"]
-                    .get(name, {})
-                    .get("device_ms", 0)
-                    for r in records
-                )
-                for name in set().union(
-                    *(r["programs"]["carried"]["profile"]["groups"] for r in records)
-                )
+                name: mean(groups.get(name, 0) for groups, _ in attributed_rows)
+                for name in set().union(*(g for g, _ in attributed_rows))
+            },
+            mechanisms={
+                name: mean(groups.get(name, 0) for _, groups in attributed_rows)
+                for name in set().union(*(g for _, g in attributed_rows))
             },
         )
     (args.run / "audited.json").write_text(
@@ -165,7 +226,15 @@ def main():
         ax.set_xscale("log", base=2)
         ax.set_xticks(widths, [str(w) for w in widths], fontsize=11)
         ax.tick_params(labelsize=11)
-        ax.set_ylabel(name + " [ms/slice]", fontsize=13)
+        short = {
+            "block GMRES and scaling": "GMRES / scaling",
+            "tracking and qualification": "tracking",
+            "host gaps and transfers": "host / transfers",
+            "other and fused": "other / fused",
+        }.get(name, name)
+        ax.set_ylabel(short + "\n[ms/slice]", fontsize=13)
+        ax.set_ylim(0, max(values) * 1.15 if max(values) else 1)
+        ax.set_yticks([v for v in ax.get_yticks() if 0 <= v <= ax.get_ylim()[1]])
         ax.set_xlabel("batch width", fontsize=13)
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(False)

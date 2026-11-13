@@ -24,11 +24,24 @@ def attributed(record, directory, program):
         contexts = [instructions[n] for n in row["enclosing"]]
         frames = [f for item in candidates for f in item["stack"]]
         names = {f["function"].split(".<locals>")[0] for f in frames}
-        context_names = {f["function"] for item in contexts for f in item["stack"]}
-        carried_context = any(
-            "read_batch.<locals>.carry" in n or "refresh_at_stationary_points" in n
-            for n in context_names
-        )
+        branch = None
+        for item in reversed(contexts):
+            for frame in reversed(item["stack"]):
+                function = frame["function"]
+                if (
+                    "read_batch.<locals>.full_verdict" in function
+                    or "read_batch.<locals>.whole_mesh" in function
+                ):
+                    branch = "full"
+                    break
+                if (
+                    "read_batch.<locals>.carry" in function
+                    or "refresh_at_stationary_points" in function
+                ):
+                    branch = "carried"
+                    break
+            if branch is not None:
+                break
         if names & {
             "step_jacobian",
             "_normal_geometry_booking_tangent",
@@ -48,9 +61,11 @@ def attributed(record, directory, program):
             label = "block GMRES and scaling"
         elif "stationary_stencil" in names or row["group"] == "read census":
             label = "tracking and qualification"
-        elif carried_context or row["group"].startswith("carried read:"):
+        elif branch == "carried" or (
+            branch is None and row["group"].startswith("carried read:")
+        ):
             label = "carried geometry"
-        elif row["group"].startswith("full read:"):
+        elif branch == "full" or row["group"].startswith("full read:"):
             label = "full geometry"
         else:
             label = "other and fused"
@@ -86,13 +101,15 @@ def stages(record, directory):
     profile = record["programs"]["solve"]["profile"]
     classified, _ = attributed(record, directory, "solve")
     totals = defaultdict(float, classified)
-    totals["host gaps and transfers"] = (
-        profile["gap_ms"]
-        - profile["overlap_ms"]
-        + sum(v["device_ms"] for v in profile["copies"].values())
+    prediction = record["programs"]["predictor"]["profile"]
+    totals["host scheduling gaps"] = sum(
+        p["gap_ms"] - p["overlap_ms"] for p in (profile, prediction)
     )
-    totals["predictor"] = record["programs"]["predictor"]["profile"]["profiled_ms"]
-    expected = profile["profiled_ms"] + totals["predictor"]
+    totals["transfers and fills"] = sum(
+        v["device_ms"] for p in (profile, prediction) for v in p["copies"].values()
+    )
+    totals["predictor"] = sum(v["device_ms"] for v in prediction["groups"].values())
+    expected = profile["profiled_ms"] + prediction["profiled_ms"]
     assert abs(sum(totals.values()) / expected - 1) <= 0.10
     return dict(totals)
 
@@ -229,7 +246,8 @@ def main():
         short = {
             "block GMRES and scaling": "GMRES / scaling",
             "tracking and qualification": "tracking",
-            "host gaps and transfers": "host / transfers",
+            "host scheduling gaps": "host gaps",
+            "transfers and fills": "transfer / fills",
             "other and fused": "other / fused",
         }.get(name, name)
         ax.set_ylabel(short + "\n[ms/slice]", fontsize=13)

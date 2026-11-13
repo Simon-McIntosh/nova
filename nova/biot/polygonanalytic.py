@@ -3107,7 +3107,6 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
     def evaluate(*arguments):
         return _packed_analytic_moments_primal(jnp, *arguments, nodes=nodes)
 
-    value, ordinary = jax.jvp(evaluate, primals, tangents)
     target_z = primals[1]
     edge = primals[2]
     nearest = jnp.minimum(
@@ -3115,17 +3114,26 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
         jnp.min(jnp.abs(edge[:, 3] - target_z), axis=0),
     )
     near_corner = nearest <= 1e-7
-    without_height = (*tangents[:1], jnp.zeros_like(target_z), *tangents[2:])
-    _, other = jax.jvp(evaluate, primals, without_height)
 
-    def difference(step):
-        shift = jnp.asarray(step, dtype=target_z.dtype)
-        upper = evaluate(primals[0], target_z + shift, *primals[2:])
-        lower = evaluate(primals[0], target_z - shift, *primals[2:])
-        return tuple((a - b) / (2.0 * shift) for a, b in zip(upper, lower, strict=True))
+    def directional(include_height):
+        direction = (
+            *tangents[:1],
+            jnp.where(include_height, tangents[1], jnp.zeros_like(target_z)),
+            *tangents[2:],
+        )
+        return jax.jvp(evaluate, primals, direction)
 
-    coarse = difference(1e-5)
-    fine = difference(5e-6)
+    values, derivatives = jax.lax.map(directional, jnp.asarray((True, False)))
+    value = tuple(row[0] for row in values)
+    ordinary = tuple(row[0] for row in derivatives)
+    other = tuple(row[1] for row in derivatives)
+
+    shifts = jnp.asarray((1e-5, -1e-5, 5e-6, -5e-6), dtype=target_z.dtype)
+    shifted = jax.lax.map(
+        lambda shift: evaluate(primals[0], target_z + shift, *primals[2:]), shifts
+    )
+    coarse = tuple((row[0] - row[1]) / (2.0 * shifts[0]) for row in shifted)
+    fine = tuple((row[2] - row[3]) / (2.0 * shifts[2]) for row in shifted)
     stable = tuple((4.0 * a - b) / 3.0 for a, b in zip(fine, coarse, strict=True))
     result = tuple(
         jnp.where(

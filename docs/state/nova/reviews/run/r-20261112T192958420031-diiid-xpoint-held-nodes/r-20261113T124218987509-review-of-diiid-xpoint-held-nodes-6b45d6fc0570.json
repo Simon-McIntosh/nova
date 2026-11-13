@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 7,
+  "call_sites": [
+    "nova/equilibrium/forward.py:2120",
+    "nova/equilibrium/forward.py:2157",
+    "nova/equilibrium/forward.py:2179",
+    "nova/equilibrium/forward.py:2295",
+    "nova/equilibrium/forward.py:2321",
+    "nova/equilibrium/forward_operator.py:2997",
+    "nova/equilibrium/topology.py:1418"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-13T12:44:10Z",
+  "findings": [
+    {
+      "file": "tests/test_equilibrium_forward_solve.py",
+      "id": "fe7d712e724",
+      "line": "921",
+      "severity": "non-blocking",
+      "text": "non-blocking: the non-degeneracy floor on the analytic moment tangent was lowered from greater-than-1.0 to greater-than-0.0, so a collapse of the Jacobian toward zero no longer trips this line; the finite-difference ordering assertion at :943 still fails on a zero tangent because it normalises by max|analytic|."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-held-nodes.html",
+      "id": "f6f5fc2db14",
+      "line": "7",
+      "severity": "non-blocking",
+      "text": "non-blocking: the done_when clause that the change does not change which nodes are shadowed is not met literally, since measured head membership differs from base (137D 6 to 7, 146D 9 to 8, MAST 49 to 46) because the mask is a state function; the fragment discloses the counts and the membership rule is untouched, but no gate asserts the clause as written."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 7 production call site(s)",
+    "diff": "read commit by commit across the 18 commits from e635bdda1d2b075b777965c08bf399656a0aa8be to 6b45d6fc0570ba57c98f9073850cea4f32cbadbe; the product change is 6 lines in fixed_point.py, 39 in forward_operator.py and 8 in topology.py, the rest being two new test files, three expectation-only existing-test changes, the cohort scripts, the evidence fragment and two SVG figures.",
+    "done_when": "the done_when's measures are the added toy-map tests plus a five-row cohort; continued-cohort-audit.json records accepted=true with checks all_converged, one_maximum, lower_x_137_about_24mm and converged_179 true (137D 6.033174581 to 2.360164757 cm, maximum shadow-image error 7.886526987e-10 Wb below the 1e-8 solver tolerance), and accepted-suite-assembly.json records added_count 0.",
+    "goal": "the node's goal is that residual-shadow nodes take the operator's physical image instead of holding the request seed; nova/equilibrium/forward_operator.py:4135 adds _physical_flux_image, and nova/equilibrium/fixed_point.py:3030, :3250 and :3857 assign that image onto shadow nodes in Picard, Anderson and Newton warm-up, while _exclude_shadow_residual still zeroes the public residual at those nodes.",
+    "manifest": "read; status complete, it records per-file CPU receipts (head: boundary 4 passed, certificate 4 passed, shadow-follows-image 7 passed, attribution 2 passed, forward-solve raw SIGABRT -6 accepted by explicit coordinator decision) and states the accepted paired compiler abort with zero added failure ids.",
+    "write_paths": "the declared paths as updated after the coordinator grants cover the two product modules, nova/equilibrium/topology.py, the five test files, the prototype scripts, the fragment and the figures directory; every path in the diff e635bdda1..6b45d6fc0 lies inside that set."
+  },
+  "justifications": {
+    "durability": "negative/negative-control.log shows the seed-hold mutation reddens 4 of 5 tests that pass at the head, and tests/test_boundary_flux_derivative.py:160 keeps each finite-difference step inside one named wall segment.",
+    "evidence": "continued-cohort-audit.json records the five-row two-arm cohort with accepted=true and checks all_converged, one_maximum, shadow_image_below_1nWb and lower_x_137_about_24mm true, and accepted-suite-assembly.json records added_count 0.",
+    "fit": "nova/equilibrium/forward_operator.py:4135 delegates to nova/equilibrium/gs.apply rather than reimplementing the map, and the comment at nova/equilibrium/topology.py:1342 states the mechanism without a plan or ticket reference.",
+    "goal_fidelity": "nova/equilibrium/fixed_point.py:3030 images shadow nodes during Picard and the same assignment appears for Anderson at :3250 and Newton warm-up at :3857, matching the stated deliverable.",
+    "reuse": "searching nova/equilibrium for an existing all-node image found the owners gs.apply and _exclude_shadow_residual, and the new method wraps gs.apply with an empty exclusion rather than duplicating it.",
+    "scope_discipline": "git diff e635bdda1..6b45d6fc0 lists only the declared paths, including the coordinator-approved nova/equilibrium/topology.py:1342 wall-contact derivative and the three expectation-only test edits."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is that residual-shadow nodes take the operator's physical image instead of holding the request seed; nova/equilibrium/forward_operator.py:4135 adds _physical_flux_image, and nova/equilibrium/fixed_point.py:3030, :3250 and :3857 assign that image onto shadow nodes in Picard, Anderson and Newton warm-up, while _exclude_shadow_residual still zeroes the public residual at those nodes.\nVERDICT done_when: the done_when's measures are the added toy-map tests plus a five-row cohort; continued-cohort-audit.json records accepted=true with checks all_converged, one_maximum, lower_x_137_about_24mm and converged_179 true (137D 6.033174581 to 2.360164757 cm, maximum shadow-image error 7.886526987e-10 Wb below the 1e-8 solver tolerance), and accepted-suite-assembly.json records added_count 0.\nVERDICT write_paths: the declared paths as updated after the coordinator grants cover the two product modules, nova/equilibrium/topology.py, the five test files, the prototype scripts, the fragment and the figures directory; every path in the diff e635bdda1..6b45d6fc0 lies inside that set.\nVERDICT manifest: read; status complete, it records per-file CPU receipts (head: boundary 4 passed, certificate 4 passed, shadow-follows-image 7 passed, attribution 2 passed, forward-solve raw SIGABRT -6 accepted by explicit coordinator decision) and states the accepted paired compiler abort with zero added failure ids.\nVERDICT diff: read commit by commit across the 18 commits from e635bdda1d2b075b777965c08bf399656a0aa8be to 6b45d6fc0570ba57c98f9073850cea4f32cbadbe; the product change is 6 lines in fixed_point.py, 39 in forward_operator.py and 8 in topology.py, the rest being two new test files, three expectation-only existing-test changes, the cohort scripts, the evidence fragment and two SVG figures.\nCALL_SITES: nova/equilibrium/forward.py:2120, nova/equilibrium/forward.py:2157, nova/equilibrium/forward.py:2179, nova/equilibrium/forward.py:2295, nova/equilibrium/forward.py:2321, nova/equilibrium/forward_operator.py:2997, nova/equilibrium/topology.py:1418\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/fixed_point.py:3030 images shadow nodes during Picard and the same assignment appears for Anderson at :3250 and Newton warm-up at :3857, matching the stated deliverable.\nSCORE evidence: 19\nJUSTIFICATION evidence: continued-cohort-audit.json records the five-row two-arm cohort with accepted=true and checks all_converged, one_maximum, shadow_image_below_1nWb and lower_x_137_about_24mm true, and accepted-suite-assembly.json records added_count 0.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff e635bdda1..6b45d6fc0 lists only the declared paths, including the coordinator-approved nova/equilibrium/topology.py:1342 wall-contact derivative and the three expectation-only test edits.\nSCORE durability: 18\nJUSTIFICATION durability: negative/negative-control.log shows the seed-hold mutation reddens 4 of 5 tests that pass at the head, and tests/test_boundary_flux_derivative.py:160 keeps each finite-difference step inside one named wall segment.\nSCORE fit: 19\nJUSTIFICATION fit: nova/equilibrium/forward_operator.py:4135 delegates to nova/equilibrium/gs.apply rather than reimplementing the map, and the comment at nova/equilibrium/topology.py:1342 states the mechanism without a plan or ticket reference.\nSCORE reuse: 20\nJUSTIFICATION reuse: searching nova/equilibrium for an existing all-node image found the owners gs.apply and _exclude_shadow_residual, and the new method wraps gs.apply with an empty exclusion rather than duplicating it.\nFINDING tests/test_equilibrium_forward_solve.py:921 non-blocking: the non-degeneracy floor on the analytic moment tangent was lowered from greater-than-1.0 to greater-than-0.0, so a collapse of the Jacobian toward zero no longer trips this line; the finite-difference ordering assertion at :943 still fails on a zero tangent because it normalises by max|analytic|.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-held-nodes.html:7 non-blocking: the done_when clause that the change does not change which nodes are shadowed is not met literally, since measured head membership differs from base (137D 6 to 7, 146D 9 to 8, MAST 49 to 46) because the mask is a state function; the fragment discloses the counts and the membership rule is untouched, but no gate asserts the clause as written.",
+  "review_run_id": "r-20261113T124218987509-review-of-diiid-xpoint-held-nodes-6b45d6fc0570",
+  "reviewed_base_sha": "e635bdda1d2b075b777965c08bf399656a0aa8be",
+  "reviewed_head_sha": "6b45d6fc0570ba57c98f9073850cea4f32cbadbe",
+  "reviewed_run_id": "r-20261112T192958420031-diiid-xpoint-held-nodes",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T13:05:33.606003+00:00",
+  "total": 113
+}

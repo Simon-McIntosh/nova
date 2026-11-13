@@ -1,0 +1,52 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-13T13:01:46.676Z",
+  "dispatched_at": "2026-11-13T12:46:11Z",
+  "findings": [],
+  "project": "nova",
+  "review_run_id": "r-20261113T124441001899-review-of-diiid-xpoint-held-nodes-6b45d6fc0570-figure",
+  "reviewed_base_sha": "e635bdda1d2b075b777965c08bf399656a0aa8be",
+  "reviewed_commits": [
+    "6b45d6fc0570ba57c98f9073850cea4f32cbadbe"
+  ],
+  "reviewed_figures": [
+    {
+      "drawing_script": "scripts/prototypes/diiid_xpoint_held_nodes/render.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T192958420031-diiid-xpoint-held-nodes/figure-previews-6b45d6fc0/frame-137-lower-xpoint.png",
+      "pixels": "1714x882",
+      "rendered_from": "docs/figures/diiid-xpoint-held-nodes/frame-137-lower-xpoint.svg"
+    },
+    {
+      "drawing_script": "scripts/prototypes/diiid_xpoint_held_nodes/render.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T192958420031-diiid-xpoint-held-nodes/figure-previews-6b45d6fc0/frame-146-lower-xpoint.png",
+      "pixels": "1714x882",
+      "rendered_from": "docs/figures/diiid-xpoint-held-nodes/frame-146-lower-xpoint.svg"
+    }
+  ],
+  "reviewed_head_sha": "6b45d6fc0570ba57c98f9073850cea4f32cbadbe",
+  "reviewed_run_id": "r-20261112T192958420031-diiid-xpoint-held-nodes",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/diiid-xpoint-held-nodes/frame-137-lower-xpoint.svg": {
+      "contrast": "pass - the caption and legend type renders near-black (minimum luminance 10 of 255, about 19:1 on white) and the solved series is #3366cc, about 5.4:1 on white; the dashed EFIT series is near-black so it separates from the blue without colour alone, and the grey wall recedes as furniture.",
+      "data_ink": "pass - the data are contours drawn at 1.2 pt on seven shared levels with the zero level at 3.0 pt, plus 9 pt open circles at the five residual-shadow nodes of each arm and small X markers at the solved saddle; there is no fill anywhere, and the two caption lines and the legend are the only non-data ink.",
+      "decoration": "pass - the background is white across all four panels, axes are off with no spines or gridlines, and the only non-data strokes are the style-mandated mid-grey wall outline and the frame's grey limbs.",
+      "label_collision": "pass - the outer three pixel frame of the canvas is entirely white (zero non-white border pixels), so no artist is clipped; the figure legend, the 'base' and 'head' labels, and the residual and gap lines occupy separate rows with clear vertical separation, and no text lies over the contour field.",
+      "legibility": "pass - the 1714x882 canvas holds four panels: a full poloidal view and a lower-X zoom for each of base and head, at a shared scale, with one four-entry legend above them, and residual, convergence and the lower X gap printed beneath each arm at 14 pt. The subject reads at a glance: the base zoom shows the solved separatrix visibly displaced from the dashed EFIT one (gap 6.033 cm) while the head zoom shows them nearly coincident (2.360 cm), the same contrast the full panels carry.",
+      "table_form": "pass - the image is two spatial poloidal maps with zooms; the numbers it carries are annotations below the panels; nothing here is naturally a table."
+    },
+    "docs/figures/diiid-xpoint-held-nodes/frame-146-lower-xpoint.svg": {
+      "contrast": "pass - text is near-black (minimum luminance 10 of 255) and the solved series #3366cc measures about 5.4:1 on white; the dashed EFIT contours are near-black and remain distinguishable from the blue solved contours.",
+      "data_ink": "pass - contours at 1.2 pt on the shared levels with the zero level heavier, open circles at the residual-shadow nodes and small saddle markers; contours, markers and wall carry the ink and nothing is filled or shaded.",
+      "decoration": "pass - white background, axes off, no gridlines, no gradient or background fill; the only non-data strokes are the mid-grey wall and grey frame limbs.",
+      "label_collision": "pass - the outer three pixel frame of the canvas is entirely white (zero non-white border pixels) so no label or marker is clipped by the canvas, and the legend, arm labels and two caption lines are on separate rows with no overlap over the panel content.",
+      "legibility": "pass - the same four-panel layout at 1714x882, shared levels and one legend, with residual, convergence and lower X gap printed under each arm. The base zoom shows the solved and EFIT separatrices separated (2.856 cm) and the head zoom shows them still separated (2.960 cm), so the two arms can be compared directly and the near-unchanged gap is visible rather than only printed.",
+      "table_form": "pass - a spatial poloidal comparison; the residual and gap values are annotations below the panels rather than a depicted table."
+    }
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T12:58:41Z",
+  "total": null
+}

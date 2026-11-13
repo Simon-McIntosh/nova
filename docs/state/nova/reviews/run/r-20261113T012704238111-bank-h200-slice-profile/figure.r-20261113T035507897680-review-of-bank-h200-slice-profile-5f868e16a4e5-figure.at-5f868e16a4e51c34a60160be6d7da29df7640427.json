@@ -12,6 +12,13 @@
     "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T035507897680-review-of-bank-h200-slice-profile-5f868e16a4e5-figure/image-0.png",
     "repository_path": "docs/figures/sub-millisecond-forward-path/bank-h200-slice-profile/per-slice-stages.svg"
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-h200-slice-profile",
+      "recorded_at": "2026-11-13T17:16:18.138718+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_h200_slice_profile/report.py",

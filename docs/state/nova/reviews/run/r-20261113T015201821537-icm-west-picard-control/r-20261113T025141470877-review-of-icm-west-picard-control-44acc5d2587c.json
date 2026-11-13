@@ -19,6 +19,11 @@
       "reason": "The closed-shell formula copy is script duplication; it joins the deferred scripts-cleanup node, which extracts the shared shell and WEST helpers into one module.",
       "recorded_at": "2026-11-13T05:53:04.076810+00:00"
     },
+    "2": {
+      "kind": "exempted",
+      "reason": "Agreed it is a provenance check, not a guard; the fragment claims it only as the blob stamp of what ran, and no gate counts it.",
+      "recorded_at": "2026-11-13T05:53:47.480249+00:00"
+    },
     "3": {
       "kind": "folded",
       "node": "icm-west-picard-control",

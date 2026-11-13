@@ -48,7 +48,7 @@ from tests.test_magnetisation import loop, shell  # noqa: E402
 
 SHELL_MU = 1000.0
 SHELL_PROBES = np.array([[2.0, 0.0], [0.0, 2.0], [3.0, 1.0]])
-SHELL_UNIFORM = (0.04, 0.02, 0.01, 0.004)
+SHELL_UNIFORM = (0.04, 0.02, 0.01, 0.008, 0.006)
 SHELL_SURFACES = dict(radial=[0.9, 1.0], vertical=[-1.0, 1.0])
 # Candidate gradings measured while choosing the arm the tests pin: how far the
 # spacing may coarsen away from a surface, and how many cells a thin feature
@@ -290,7 +290,7 @@ def main():
     parser.add_argument("--cells-across", type=float, default=20.0)
     parser.add_argument("--west-fine", type=float, default=0.008)
     parser.add_argument("--west-coarse", type=float, default=0.08)
-    parser.add_argument("--arms", default="shell,west")
+    parser.add_argument("--arms", default="shell,graded,west")
     parser.add_argument("--revision", default=None)
     parser.add_argument("--blob", default=None)
     args = parser.parse_args()
@@ -380,6 +380,7 @@ def main():
                 shell_arm(
                     label, size, lambda row, label=label: shell_update(row, label)
                 )
+        if "graded" in arms:
             # The pinned grading and its deliberately under-resolved doubling:
             # the pair the accuracy test asserts on.
             for label, scale in (("graded-double", 2.0), ("graded-fine", 1.0)):

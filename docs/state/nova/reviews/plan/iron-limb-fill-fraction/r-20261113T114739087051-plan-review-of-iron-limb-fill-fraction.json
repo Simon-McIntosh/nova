@@ -71,6 +71,16 @@
       "note": "Sections 2 and 3 now state the capability delivered (the production axisymmetric iron solve carries a fill fraction and cross-field factor; the true outline is read once with the machine description) without naming the function or module to extend. The material relation in section 0 stays: it is the relation the plan exists to state, and section 2 judges it by its accuracy against the reference, not by how it is coded.",
       "reason": "",
       "when": "2026-11-13T15:44:32.255194+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "04bf1f44083737d213d588ff15728187486dff7e",
+      "commit_basis": "edit",
+      "finding": "reasoning-3",
+      "note": "Section 2 now sends its heavy gates to the H200 first (betelgeuse under the reservation), falling back to titan only when a real submission stays pending, and requires the device to be recorded beside every reported value.",
+      "reason": "",
+      "when": "2026-11-13T15:44:55.253154+00:00"
     }
   ],
   "responses": {
@@ -91,6 +101,15 @@
       "note": "Sections 2 and 3 now state the capability delivered (the production axisymmetric iron solve carries a fill fraction and cross-field factor; the true outline is read once with the machine description) without naming the function or module to extend. The material relation in section 0 stays: it is the relation the plan exists to state, and section 2 judges it by its accuracy against the reference, not by how it is coded.",
       "reason": "",
       "when": "2026-11-13T15:44:32.255194+00:00"
+    },
+    "reasoning-3": {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "04bf1f44083737d213d588ff15728187486dff7e",
+      "commit_basis": "edit",
+      "note": "Section 2 now sends its heavy gates to the H200 first (betelgeuse under the reservation), falling back to titan only when a real submission stays pending, and requires the device to be recorded beside every reported value.",
+      "reason": "",
+      "when": "2026-11-13T15:44:55.253154+00:00"
     },
     "wiring-1": {
       "action": "acted",

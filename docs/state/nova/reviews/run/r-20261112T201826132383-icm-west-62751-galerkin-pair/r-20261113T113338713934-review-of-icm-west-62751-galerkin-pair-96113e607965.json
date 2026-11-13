@@ -22,6 +22,11 @@
       "kind": "exempted",
       "reason": "Deferred to the scripts-cleanup node: assert that the fine arm is the smaller cell size in figure.py.",
       "recorded_at": "2026-11-13T12:07:55.862950+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "Deferred to the scripts-cleanup node, which extracts the WEST source recipe (coil quadrature and plasma currents) into one shared owner.",
+      "recorded_at": "2026-11-13T12:08:15.061092+00:00"
     }
   },
   "findings": [

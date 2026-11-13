@@ -20,6 +20,11 @@
       "kind": "exempted",
       "reason": "parity.log carries a real PARITY line (gram 0.0, uniform 2.4e-15, smooth 1.8e-15 on the 3447-cell WEST mesh) from the successful rerun; only its header misnames the crashed first arm log; the numbers stand",
       "recorded_at": "2026-11-13T00:25:00.067965+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the 0.199 difference is a synthetic stress probe with a filament on the mesh boundary that neither quadrature resolves; smooth and uniform external averages agree to 2e-15 and no WEST coil or plasma source lies within a cell, so the WEST solve is unaffected",
+      "recorded_at": "2026-11-13T00:25:28.384808+00:00"
     }
   },
   "findings": [

@@ -25,7 +25,7 @@
   <title>Iron Limb Fill Fraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -122,7 +122,10 @@
       differ in the shape of the field. Only the cross-field rule reproduces the in-vessel
       iron field, where its error is a tenth of the others'. Behind the limbs the smear,
       a closed shell of full iron, shields too much, and the plain fill fraction, which
-      treats a 0.8&nbsp;m bar as fine laminations, shields too little. The numbers are in
+      treats a 0.8&nbsp;m bar as fine laminations, shields too little. The plain fill
+      fraction's 0.31 to 0.34 in-vessel reading lies outside the 0.10 bound §2 sets, so
+      answering the cross-field decision with no cross-field factor would first require
+      that bound to be re-derived. The numbers are in
       <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/comparison.json</code>.
     </p>
     <figure>
@@ -273,8 +276,11 @@
 <div class="r-q" data-id="limb-section-drawing" data-section="s3" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="" data-resolved-by="">
     <p class="r-q-body">Is there a drawing of the WEST (Tore Supra) arms and return limbs that confirms the 0.8 by 1.2 m section, which is at present derived from the stored taper?</p>
     </div>
-<div class="r-q" data-id="imas-efit-hand-off" data-section="s4" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="" data-resolved-by="">
+<div class="r-q" data-id="imas-efit-hand-off" data-section="s4" data-status="resolved" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="2026-11-13T16:22:37+00:00" data-resolved-by="reckon-edit">
     <p class="r-q-body">imas-efit reads the tapered outlines directly into its boundary-current iron model. Its coordinator owns the equivalent change there: the flat outline with a position-dependent effective permeability. Who takes the hand-off once §1 has confirmed the table and figures of §0?</p>
+    </div>
+<div class="r-q" data-id="imas-efit-owner" data-section="s0" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body">imas-efit reads the tapered outlines directly into its boundary-current iron model, and its coordinator owns the equivalent change there. Who in imas-efit takes the flat-outline finding once the six-limb reference has confirmed it?</p>
     </div>
 </section>
 

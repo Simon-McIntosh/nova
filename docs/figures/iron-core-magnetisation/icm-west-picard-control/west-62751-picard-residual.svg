@@ -1,0 +1,451 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ns0:svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:ns0="http://www.w3.org/2000/svg" xmlns:ns2="http://creativecommons.org/ns#" xmlns:ns4="http://www.w3.org/1999/xlink" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" width="31.111111cm" height="16cm" viewBox="0 0 1008 518.4" version="1.1">
+ <ns0:metadata>
+  <rdf:RDF>
+   <ns2:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+    <dc:date>2026-11-13T03:37:10.756517</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <ns2:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </ns2:Agent>
+    </dc:creator>
+   </ns2:Work>
+  </rdf:RDF>
+ </ns0:metadata>
+ <ns0:defs>
+  <ns0:style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</ns0:style>
+ </ns0:defs>
+ <ns0:g id="figure_1">
+  <ns0:g id="patch_1">
+   <ns0:path d="M 0 518.4  L 1008 518.4  L 1008 0  L 0 0  z " style="fill: #ffffff" />
+  </ns0:g>
+  <ns0:g id="axes_1">
+   <ns0:g id="patch_2">
+    <ns0:path d="M 85.68 451.008  L 892.08 451.008  L 892.08 88.128  L 85.68 88.128  z " style="fill: #ffffff" />
+   </ns0:g>
+   <ns0:g id="line2d_1">
+    <ns0:path d="M 85.68 349.510416  L 892.08 349.510416  " clip-path="url(#pde6a5002aa)" style="fill: none; stroke-dasharray: 1.2,2.4; stroke-dashoffset: 0; stroke: #929292; stroke-width: 1.2" />
+   </ns0:g>
+   <ns0:g id="matplotlib.axis_1">
+    <ns0:g id="xtick_1">
+     <ns0:g id="line2d_2">
+      <ns0:defs>
+       <ns0:path id="m4237e2c448" d="M 0 0  L 0 6  " style="stroke: #52514e; stroke-width: 1.2" />
+      </ns0:defs>
+      <ns0:g>
+       <ns0:use ns4:href="#m4237e2c448" x="100.895094" y="451.008" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_1">
+      <ns0:text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #52514e" x="100.895094" y="472.66425" transform="rotate(-0 100.895094 472.66425)">0</ns0:text>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="xtick_2">
+     <ns0:g id="line2d_3">
+      <ns0:g>
+       <ns0:use ns4:href="#m4237e2c448" x="253.046038" y="451.008" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_2">
+      <ns0:text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #52514e" x="253.046038" y="472.66425" transform="rotate(-0 253.046038 472.66425)">10</ns0:text>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="xtick_3">
+     <ns0:g id="line2d_4">
+      <ns0:g>
+       <ns0:use ns4:href="#m4237e2c448" x="405.196981" y="451.008" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_3">
+      <ns0:text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #52514e" x="405.196981" y="472.66425" transform="rotate(-0 405.196981 472.66425)">20</ns0:text>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="xtick_4">
+     <ns0:g id="line2d_5">
+      <ns0:g>
+       <ns0:use ns4:href="#m4237e2c448" x="557.347925" y="451.008" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_4">
+      <ns0:text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #52514e" x="557.347925" y="472.66425" transform="rotate(-0 557.347925 472.66425)">30</ns0:text>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="xtick_5">
+     <ns0:g id="line2d_6">
+      <ns0:g>
+       <ns0:use ns4:href="#m4237e2c448" x="709.498868" y="451.008" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_5">
+      <ns0:text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #52514e" x="709.498868" y="472.66425" transform="rotate(-0 709.498868 472.66425)">40</ns0:text>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="xtick_6">
+     <ns0:g id="line2d_7">
+      <ns0:g>
+       <ns0:use ns4:href="#m4237e2c448" x="861.649811" y="451.008" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_6">
+      <ns0:text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #52514e" x="861.649811" y="472.66425" transform="rotate(-0 861.649811 472.66425)">50</ns0:text>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="text_7">
+     <ns0:text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #0b0b0b" x="488.88" y="492.6655" transform="rotate(-0 488.88 492.6655)">iteration</ns0:text>
+    </ns0:g>
+   </ns0:g>
+   <ns0:g id="matplotlib.axis_2">
+    <ns0:g id="ytick_1">
+     <ns0:g id="line2d_8">
+      <ns0:defs>
+       <ns0:path id="m3a3055d274" d="M 0 0  L -6 0  " style="stroke: #52514e; stroke-width: 1.2" />
+      </ns0:defs>
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="451.008" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_8">
+      
+      <ns0:g style="fill: #52514e" transform="translate(31.54 458.448)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.221688" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.221688" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="37.022656" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">4</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_2">
+     <ns0:g id="line2d_9">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="425.633604" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_9">
+      
+      <ns0:g style="fill: #52514e" transform="translate(31.54 433.153604)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="37.022656" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">3</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_3">
+     <ns0:g id="line2d_10">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="400.259208" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_10">
+      
+      <ns0:g style="fill: #52514e" transform="translate(31.54 407.779208)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="37.022656" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">2</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_4">
+     <ns0:g id="line2d_11">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="374.884812" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_11">
+      
+      <ns0:g style="fill: #52514e" transform="translate(31.54 382.324812)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.221688" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.221688" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="37.022656" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_5">
+     <ns0:g id="line2d_12">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="349.510416" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_12">
+      
+      <ns0:g style="fill: #52514e" transform="translate(31.54 357.030416)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="37.022656" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_6">
+     <ns0:g id="line2d_13">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="324.136019" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_13">
+      
+      <ns0:g style="fill: #52514e" transform="translate(38.58 331.656019)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">9</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_7">
+     <ns0:g id="line2d_14">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="298.761623" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_14">
+      
+      <ns0:g style="fill: #52514e" transform="translate(38.58 306.281623)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">8</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_8">
+     <ns0:g id="line2d_15">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="273.387227" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_15">
+      
+      <ns0:g style="fill: #52514e" transform="translate(38.58 280.827227)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.221688" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.221688" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">7</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_9">
+     <ns0:g id="line2d_16">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="248.012831" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_16">
+      
+      <ns0:g style="fill: #52514e" transform="translate(38.58 255.532831)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">6</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_10">
+     <ns0:g id="line2d_17">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="222.638435" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_17">
+      
+      <ns0:g style="fill: #52514e" transform="translate(38.58 230.078435)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.221688" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.221688" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">5</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_11">
+     <ns0:g id="line2d_18">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="197.264039" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_18">
+      
+      <ns0:g style="fill: #52514e" transform="translate(38.58 204.704039)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.221688" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.221688" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">4</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_12">
+     <ns0:g id="line2d_19">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="171.889643" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_19">
+      
+      <ns0:g style="fill: #52514e" transform="translate(38.58 179.409643)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">3</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_13">
+     <ns0:g id="line2d_20">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="146.515247" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_20">
+      
+      <ns0:g style="fill: #52514e" transform="translate(38.58 154.035247)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">2</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_14">
+     <ns0:g id="line2d_21">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="121.14085" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_21">
+      
+      <ns0:g style="fill: #52514e" transform="translate(38.58 128.58085)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.221688" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.221688" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">−</ns0:tspan>
+        <ns0:tspan x="29.896875" y="-6.829688" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="ytick_15">
+     <ns0:g id="line2d_22">
+      <ns0:g>
+       <ns0:use ns4:href="#m3a3055d274" x="85.68" y="95.766454" style="fill: #52514e; stroke: #52514e; stroke-width: 1.2" />
+      </ns0:g>
+     </ns0:g>
+     <ns0:g id="text_22">
+      
+      <ns0:g style="fill: #52514e" transform="translate(48.02 103.286454)">
+       <ns0:text>
+        <ns0:tspan x="0" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">1</ns0:tspan>
+        <ns0:tspan x="10.179688" y="-0.0795" style="font-size: 16px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+        <ns0:tspan x="20.5125" y="-6.6875" style="font-size: 11.2px; font-family: 'DejaVu Sans'; fill: #52514e">0</ns0:tspan>
+       </ns0:text>
+      </ns0:g>
+     </ns0:g>
+    </ns0:g>
+    <ns0:g id="text_23">
+     <ns0:text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #0b0b0b" x="23.69625" y="269.568" transform="rotate(-90 23.69625 269.568)">||F(M)|| / max(||M||, ||B||/µ0)</ns0:text>
+    </ns0:g>
+   </ns0:g>
+   <ns0:g id="patch_3">
+    <ns0:path d="M 85.68 451.008  L 85.68 88.128  " style="fill: none; stroke: #52514e; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square" />
+   </ns0:g>
+   <ns0:g id="patch_4">
+    <ns0:path d="M 85.68 451.008  L 892.08 451.008  " style="fill: none; stroke: #52514e; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square" />
+   </ns0:g>
+   <ns0:g id="line2d_23">
+    <ns0:path d="M 100.895094 95.791513  L 116.110189 165.56574  L 131.325283 191.429224  L 146.540377 171.928519  L 161.755472 179.08153  L 176.970566 163.992911  L 192.18566 177.626075  L 207.400755 175.150681  L 222.615849 179.952827  L 237.830943 162.48925  L 253.046038 177.29179  L 268.261132 178.121724  L 283.476226 181.170279  L 298.691321 162.30008  L 313.906415 177.23885  L 329.121509 178.449085  L 344.336604 181.317619  L 359.551698 162.326524  L 374.766792 177.245514  L 389.981887 178.395614  L 405.196981 181.293095  L 420.412075 162.321135  L 435.62717 177.244157  L 450.842264 178.406446  L 466.057358 181.298055  L 481.272453 162.322205  L 496.487547 177.244426  L 511.702642 178.404292  L 526.917736 181.297069  L 542.13283 162.321992  L 557.347925 177.244373  L 572.563019 178.404722  L 587.778113 181.297266  L 602.993208 162.322034  L 618.208302 177.244383  L 633.423396 178.404637  L 648.638491 181.297226  L 663.853585 162.322026  L 679.068679 177.244381  L 694.283774 178.404654  L 709.498868 181.297234  L 724.713962 162.322028  L 739.929057 177.244382  L 755.144151 178.40465  L 770.359245 181.297233  L 785.57434 162.322027  L 800.789434 177.244381  L 816.004528 178.404651  L 831.219623 181.297233  L 846.434717 162.322027  L 861.649811 177.244381  " clip-path="url(#pde6a5002aa)" style="fill: none; stroke: #929292; stroke-width: 2.4; stroke-linecap: square" />
+   </ns0:g>
+   <ns0:g id="line2d_24">
+    <ns0:path d="M 100.895094 95.79154  L 116.110189 165.060233  L 131.325283 200.604935  L 146.540377 218.893792  L 161.755472 235.075299  L 176.970566 250.705449  L 192.18566 265.938405  L 207.400755 280.840852  L 222.615849 295.474413  L 237.830943 309.894888  L 253.046038 324.147996  L 268.261132 338.268399  L 283.476226 352.280964  " clip-path="url(#pde6a5002aa)" style="fill: none; stroke: #2e8b57; stroke-width: 3; stroke-linecap: square" />
+   </ns0:g>
+   <ns0:g id="line2d_25">
+    <ns0:path d="M 100.895094 95.79154  L 116.110189 169.539751  L 131.325283 219.789334  L 146.540377 294.599329  L 161.755472 431.566083  " clip-path="url(#pde6a5002aa)" style="fill: none; stroke-dasharray: 15.6,5.2; stroke-dashoffset: 0; stroke: #1a1a1a; stroke-width: 2.6" />
+    <ns0:defs>
+     <ns0:path id="m3ee93e9973" d="M 0 3  C 0.795609 3 1.55874 2.683901 2.12132 2.12132  C 2.683901 1.55874 3 0.795609 3 0  C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132  C 1.55874 -2.683901 0.795609 -3 0 -3  C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132  C -2.683901 -1.55874 -3 -0.795609 -3 0  C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132  C -1.55874 2.683901 -0.795609 3 0 3  z " style="stroke: #000000; stroke-opacity: 0" />
+    </ns0:defs>
+    <ns0:g clip-path="url(#pde6a5002aa)">
+     <ns0:use ns4:href="#m3ee93e9973" x="100.895094" y="95.79154" style="fill: #1a1a1a; stroke: #000000; stroke-opacity: 0" />
+     <ns0:use ns4:href="#m3ee93e9973" x="116.110189" y="169.539751" style="fill: #1a1a1a; stroke: #000000; stroke-opacity: 0" />
+     <ns0:use ns4:href="#m3ee93e9973" x="131.325283" y="219.789334" style="fill: #1a1a1a; stroke: #000000; stroke-opacity: 0" />
+     <ns0:use ns4:href="#m3ee93e9973" x="146.540377" y="294.599329" style="fill: #1a1a1a; stroke: #000000; stroke-opacity: 0" />
+     <ns0:use ns4:href="#m3ee93e9973" x="161.755472" y="431.566083" style="fill: #1a1a1a; stroke: #000000; stroke-opacity: 0" />
+    </ns0:g>
+   </ns0:g>
+   <ns0:g id="line2d_26">
+    <ns0:path d="M 283.476226 352.280964  " clip-path="url(#pde6a5002aa)" style="fill: none; stroke: #1f77b4; stroke-width: 2.6; stroke-linecap: square" />
+    <ns0:defs>
+     <ns0:path id="m8e0e467edd" d="M 0 3.5  C 0.928211 3.5 1.81853 3.131218 2.474874 2.474874  C 3.131218 1.81853 3.5 0.928211 3.5 0  C 3.5 -0.928211 3.131218 -1.81853 2.474874 -2.474874  C 1.81853 -3.131218 0.928211 -3.5 0 -3.5  C -0.928211 -3.5 -1.81853 -3.131218 -2.474874 -2.474874  C -3.131218 -1.81853 -3.5 -0.928211 -3.5 0  C -3.5 0.928211 -3.131218 1.81853 -2.474874 2.474874  C -1.81853 3.131218 -0.928211 3.5 0 3.5  z " style="stroke: #2e8b57; stroke-width: 2" />
+    </ns0:defs>
+    <ns0:g clip-path="url(#pde6a5002aa)">
+     <ns0:use ns4:href="#m8e0e467edd" x="283.476226" y="352.280964" style="fill-opacity: 0; stroke: #2e8b57; stroke-width: 2" />
+    </ns0:g>
+   </ns0:g>
+  </ns0:g>
+  <ns0:g id="legend_1">
+   <ns0:g id="line2d_27">
+    <ns0:path d="M 54.627344 26.113812  L 68.627344 26.113812  L 82.627344 26.113812  " style="fill: none; stroke: #929292; stroke-width: 2.4; stroke-linecap: square" />
+   </ns0:g>
+   <ns0:g id="text_24">
+    <ns0:text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #0b0b0b" x="93.827344" y="31.013812" transform="rotate(-0 93.827344 31.013812)">Picard on the centroid-sampled operator, 50 iterations, oscillating</ns0:text>
+   </ns0:g>
+   <ns0:g id="line2d_28">
+    <ns0:path d="M 54.627344 47.114906  L 68.627344 47.114906  L 82.627344 47.114906  " style="fill: none; stroke: #2e8b57; stroke-width: 3; stroke-linecap: square" />
+   </ns0:g>
+   <ns0:g id="text_25">
+    <ns0:text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #0b0b0b" x="93.827344" y="52.014906" transform="rotate(-0 93.827344 52.014906)">Picard on the Galerkin operator, 12 iterations</ns0:text>
+   </ns0:g>
+   <ns0:g id="line2d_29">
+    <ns0:path d="M 582.694219 26.113812  L 596.694219 26.113812  L 610.694219 26.113812  " style="fill: none; stroke-dasharray: 15.6,5.2; stroke-dashoffset: 0; stroke: #1a1a1a; stroke-width: 2.6" />
+    <ns0:g>
+     <ns0:use ns4:href="#m3ee93e9973" x="596.694219" y="26.113812" style="fill: #1a1a1a; stroke: #000000; stroke-opacity: 0" />
+    </ns0:g>
+   </ns0:g>
+   <ns0:g id="text_26">
+    <ns0:text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #0b0b0b" x="621.894219" y="31.013812" transform="rotate(-0 621.894219 31.013812)">Newton, 4 corrections</ns0:text>
+   </ns0:g>
+   <ns0:g id="line2d_30">
+    <ns0:path d="M 803.257656 26.113812  L 817.257656 26.113812  L 831.257656 26.113812  " style="fill: none; stroke-dasharray: 1.2,2.4; stroke-dashoffset: 0; stroke: #929292; stroke-width: 1.2" />
+   </ns0:g>
+   <ns0:g id="text_27">
+    <ns0:text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #0b0b0b" x="842.457656" y="31.013812" transform="rotate(-0 842.457656 31.013812)">tolerance 1e-10</ns0:text>
+   </ns0:g>
+  </ns0:g>
+ </ns0:g>
+ <ns0:defs>
+  <ns0:clipPath id="pde6a5002aa">
+   <ns0:rect x="85.68" y="88.128" width="806.4" height="362.88" />
+  </ns0:clipPath>
+ </ns0:defs>
+</ns0:svg>

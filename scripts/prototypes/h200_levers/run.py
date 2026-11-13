@@ -58,6 +58,7 @@ def main():
     )
     parser.add_argument("--revision")
     parser.add_argument("--reuse-run", type=Path)
+    parser.add_argument("--fixture-source", type=Path)
     parser.add_argument("--smoke", action="store_true")
     args = parser.parse_args()
     root, output = args.root.resolve(), args.output.resolve()
@@ -68,6 +69,10 @@ def main():
         ).strip()
     )
     output.mkdir(exist_ok=True)
+    fixture_source = (
+        json.loads(args.fixture_source.read_text()) if args.fixture_source else None
+    )
+    fixture_seed = None
     print("REVISION", head, "JOB", os.environ.get("SLURM_JOB_ID"), flush=True)
     env = dict(
         os.environ,
@@ -83,6 +88,10 @@ def main():
         JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS="1",
         JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES="0",
     )
+    if args.fixture_source:
+        env["JAX_COMPILATION_CACHE_DIR"] = str(
+            args.fixture_source.parent / "compilation-cache"
+        )
     for key in ("UV_NO_SYNC", "UV_RUN_RECURSION_DEPTH", "XLA_FLAGS"):
         env.pop(key, None)
     summary = dict(
@@ -157,7 +166,7 @@ def main():
             population="diverted",
         ):
             receipt = output / (label + ".json")
-            if args.reuse_run and not args.smoke:
+            if args.reuse_run and not args.smoke and not fixture_source:
                 prior = args.reuse_run / (label + ".json")
                 prior_log = args.reuse_run / (label + ".log")
                 if prior.is_file() and prior_log.is_file():
@@ -203,6 +212,8 @@ def main():
                 "--population",
                 population,
             ]
+            if fixture_seed and kind != "fixture":
+                command += ["--fixture-seed", str(fixture_seed)]
             if args.smoke:
                 command += ["--smoke"]
             if driver:
@@ -237,6 +248,13 @@ def main():
             record = json.loads(receipt.read_text())
             assert record["complete"]
             return record
+
+        if fixture_source:
+            tree, revision = trees[args.measurement]
+            execute("canonical-fixture", tree, revision, "fixture", "common", 16)
+            fixture_seed = output / "canonical-fixture.npz"
+            summary["supersedes"] = str(args.fixture_source)
+            save()
 
         if not args.reuse_run:
             execute("common-inputs", main_tree, head, "inputs", "common", 16)
@@ -338,16 +356,33 @@ def main():
                 if args.smoke
                 else (1, 16)
             ):
-                off = arm(
-                    name,
-                    off_tree,
-                    kind,
-                    "off",
-                    width,
-                    step,
-                    drivers[0] if drivers else None,
-                    population,
-                )
+                if fixture_source and not args.smoke:
+                    original = next(
+                        c
+                        for c in fixture_source["comparisons"]
+                        if c["name"] == name and c["width"] == width
+                    )
+                    off = original["off"]
+                    for record in off["records"]:
+                        source_arm = next(
+                            a
+                            for a in fixture_source["arms"]
+                            if a["exit_status"] == 0
+                            and json.loads(Path(a["receipt"]).read_text()) == record
+                        )
+                        summary["arms"].append(dict(source_arm, retained=True))
+                    save()
+                else:
+                    off = arm(
+                        name,
+                        off_tree,
+                        kind,
+                        "off",
+                        width,
+                        step,
+                        drivers[0] if drivers else None,
+                        population,
+                    )
                 on = arm(
                     name,
                     "main",
@@ -358,6 +393,11 @@ def main():
                     drivers[1] if drivers else None,
                     population,
                 )
+                if fixture_source:
+                    assert all(
+                        a["input_sha256"] == b["input_sha256"]
+                        for a, b in zip(off["records"], on["records"], strict=True)
+                    ), "canonical fixture failed to reproduce the retained input"
                 entry = dict(
                     name=name,
                     width=width,

@@ -18,7 +18,16 @@ def main():
     parser.add_argument("--revision", required=True)
     parser.add_argument(
         "--kind",
-        choices=["inputs", "read", "wall", "booking", "scalar", "stream", "lane"],
+        choices=[
+            "inputs",
+            "read",
+            "wall",
+            "booking",
+            "scalar",
+            "stream",
+            "lane",
+            "fixture",
+        ],
         required=True,
     )
     parser.add_argument("--width", type=int, choices=[1, 16], required=True)
@@ -26,6 +35,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--inputs", type=Path, required=True)
     parser.add_argument("--driver", type=Path)
+    parser.add_argument("--fixture-seed", type=Path)
     parser.add_argument("--step", type=float, default=1e-5)
     parser.add_argument("--backend", choices=["gpu", "cpu"], default="gpu")
     parser.add_argument("--smoke", action="store_true")
@@ -71,6 +81,11 @@ def main():
     parts = None if args.kind == "wall" else machine("diverted")
     if parts is not None:
         bank, cache, roots, convention, policy, profile, rule, moments, _ = parts
+    if args.fixture_seed:
+        with np.load(args.fixture_seed, allow_pickle=False) as frozen:
+            moments = tuple(jnp.asarray(frozen[f"m{i}"]) for i in range(3))
+            roots = jnp.asarray(frozen["roots"])
+        parts = (*parts[:2], roots, *parts[3:7], moments, parts[9])
     if args.kind == "scalar":
         rule = replace(rule, scalar_cut_batch_width=int(args.arm))
     from tests.equilibrium.test_topology_read import _analytic_inputs
@@ -105,6 +120,16 @@ def main():
         Path(__file__).read_bytes()
     ).hexdigest()
     arrays = {}
+    if args.kind == "fixture":
+        np.savez(
+            args.output.with_suffix(".npz"),
+            **{f"m{i}": np.asarray(x) for i, x in enumerate(moments)},
+            roots=np.asarray(roots),
+        )
+        receipt["complete"] = True
+        args.output.write_text(json.dumps(receipt, indent=2))
+        print("SUMMARY canonical fixture exported", flush=True)
+        return
 
     def persist():
         args.output.write_text(json.dumps(receipt, indent=2))

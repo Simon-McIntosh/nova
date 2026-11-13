@@ -1,5 +1,10 @@
 <section id="h200-levers-measurements">
-<h2>H200 walls and unresolved default decisions</h2>
+<h2>H200 walls: scalar default selected, booking repair queued</h2>
+<p>Current checkpoint: the scalar conic default and its test now use 128.
+Canonical carried-decision and live-candidate repairs have completed. Booking
+repair job <code>1313091</code> is queued after a successful CPU dry-run with
+width-specific historical fixtures. The tables below retain the earlier
+observations until the final canonical-input inventory audit succeeds.</p>
 <p>Seven H200 jobs (1312389, 1312390, 1312391, 1312392, 1312393, 1312394, 1312395) completed successfully. Selected fresh-process pairs
 agree within 4.915%. Every original completed receipt, including both
 carried-decision widths and booking-off width 1, remains unchanged. Disagreeing
@@ -43,8 +48,7 @@ executed-work distinction; a synthetic refusal does not replace that check.</p>
 <td>Scalar tile</td>
 <td>128 beats 32 at both widths; width-16 full 29.135708 to 27.803048 ms and carried
 17.774370 to 16.525416 ms</td>
-<td>128 recommended beyond 3% margin; default remains 32 pending permission to update
-its pinned test</td></tr>
+<td>128 selected beyond the margin; default and explicit assertions now use 128</td></tr>
 <tr>
 <td>Per-lane drive</td>
 <td>Width 1: 173.763677 to 226.640278 ms; width 16: 805.932002 to 997.578302 ms</td>
@@ -61,10 +65,9 @@ ms</td>
 <td>Retain guarded skip; mixed difference unresolved inside 3%</td></tr>
 </tbody></table>
 <p>Each verdict uses the larger of 3% and the larger arm process spread.
-Inside that margin the incumbent stays. No product default has changed yet,
-and no paired product suite is claimed. Completion still requires resolving
-the refused input comparisons and changing the scalar default with its parity
-test and the required sirius base/head suite pair.</p>
+Inside that margin the incumbent stays. The scalar default now uses 128;
+paired CPU verification is running. Completion still requires the canonical
+booking repair, final inventory audit, and final-head sirius suite record.</p>
 <figure id="h200-levers-walls-figure">
 <img
  src="/nova/figures/sub-millisecond-forward-path/h200-levers/arm-walls.svg"

@@ -71,6 +71,9 @@ def main():
     measurements = args.measurements or args.run / "h200"
     summary = json.loads((measurements / "summary.json").read_text())
     assert summary["complete"]
+    audit = json.loads((measurements / "audit.json").read_text())
+    assert audit["complete"] and audit["revision"] == summary["revision"]
+    assert audit["receipt_count"] == 36
     records = {}
     for arm in summary["arms"]:
         path = Path(arm["log"]).parent / "receipt.json"
@@ -173,13 +176,32 @@ def main():
         "saddle populations run in separate device loops; uncertain cut geometry "
         "is always recomputed. Stationary roots and curvature are still evaluated "
         "at the current state.</p>",
-        "<p>The unchanged-state reproduction executed 50 conic decompositions for "
-        "50 cells. The selective test executes zero; changing one cut cell executes "
+        "<p>The base reproduction recorded "
+        "<code>valid=True rebuilt=False recomputed_cells=50 total_cells=50</code> "
+        "for an unchanged carried state. Its log is "
+        f"<code>{escape(str(args.run / 'reproduce.log'))}</code>. "
+        "The selective test executes zero; changing one cut cell executes "
         "one; the boundary-motion fixture executes 39 of 50. All compare with "
         "forced full refresh at the existing tolerances. The stale-mask mutation "
         "deliberately reuses changing cut cells and must fail the head-passing "
         "tests.</p>",
     ]
+    maximum_spread = max(
+        value for row in summary["comparisons"] for value in row["spread"].values()
+    )
+    maxima = audit["maxima"]
+    body.append(
+        "<p>One paired H200 job completed all 36 fresh processes. The largest "
+        f"measured-process spread is {maximum_spread:.3%}, below the 5% bound. "
+        f"The worst fresh residual is {maxima['fresh_residual']:.6g} "
+        "(budget 1e-10); maximum axis and saddle position errors are "
+        f"{maxima['axis']:.6g} and {maxima['saddle']:.6g} of the minor radius "
+        "(budget 5e-4), and boundary error is "
+        f"{maxima['boundary']:.6g} of the flux span (budget 1e-4). "
+        "The profiler's positive control observes a 2 MiB transfer and a "
+        "kernel in every process. The independent receipt audit is "
+        f"<code>{escape(str(measurements / 'audit.json'))}</code>.</p>"
+    )
     for kind, title in (
         ("read", "Carried read"),
         ("slice", "Forward slice with secant prediction"),
@@ -188,7 +210,8 @@ def main():
         body.append(
             "<table><thead><tr><th>Width</th><th>Refresh</th>"
             "<th>Process 1 [ms/batch]</th><th>Process 2 [ms/batch]</th>"
-            "<th>Mean [ms/slice]</th><th>Spread</th></tr></thead><tbody>"
+            "<th>Mean [ms/slice]</th><th>Spread</th>"
+            "<th>Optimized operations</th></tr></thead><tbody>"
         )
         for width in (1, 16, 64):
             for arm in ("off", "on"):
@@ -204,11 +227,22 @@ def main():
                 a, b = wall(1), wall(2)
                 spread = abs(a - b) / min(a, b)
                 assert spread <= 0.05
+                program = "carried" if kind == "read" else "solve"
+                operations = records[kind, width, arm, 1]["programs"][program][
+                    "optimized_operations"
+                ]
+                assert (
+                    operations
+                    == records[kind, width, arm, 2]["programs"][program][
+                        "optimized_operations"
+                    ]
+                )
                 body.append(
                     f"<tr><td>{width}</td>"
                     f"<td>{'full' if arm == 'off' else 'selective'}</td>"
                     f"<td>{a:.4f}</td><td>{b:.4f}</td>"
-                    f"<td>{(a + b) / 2 / width:.4f}</td><td>{spread:.2%}</td></tr>"
+                    f"<td>{(a + b) / 2 / width:.4f}</td><td>{spread:.3%}</td>"
+                    f"<td>{operations}</td></tr>"
                 )
         body.append("</tbody></table>")
         for row in summary["comparisons"]:

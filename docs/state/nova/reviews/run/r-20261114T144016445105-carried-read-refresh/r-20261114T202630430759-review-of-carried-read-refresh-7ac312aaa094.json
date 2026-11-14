@@ -1,0 +1,57 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms: after_suite at 489d9497bd3505dfab796e2836ba6dcf2472717b records 7 passed and failure_ids [], its baseline_suite is explicitly unarmed (the scoped test file is absent at 975f3e98, log default-gate/baseline.log reads BASELINE_UNARMED), so the delta is empty. Corroborated independently by per-file/audit.json, whose baseline and after arms both read 89 passed / 3 failed / 2 skipped over eight completed files and whose added_head_failures list is empty; the three shared failures are recorded in the reviewed manifest's outside_scope. Two files terminate -9 in both arms under four scheduler OOM kills, so this is a delta of zero, not a fully passing suite.",
+  "call_sites": [
+    "nova/equilibrium/support_read.py:_rebuilt_reading"
+  ],
+  "completed_at": "2026-11-14T20:53:11.283Z",
+  "dispatched_at": "2026-11-14T20:28:38Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": 3617,
+      "severity": "non-blocking",
+      "text": "The reuse mask certifies a reused cell from its signed coefficients alone (`same_conic = jnp.all(signed == prior, axis=1)`) and never compares geometry.vertices, geometry.vertex_count, geometry.centre or geometry.pitch against the geometry the carried decision was built from, so a carried step whose mesh re-meshes while a cell's coefficients coincide returns the previous step's fragment areas and edge intervals; uniformly negative cells skip the interval comparison entirely (same_uniform clears only on exact edge-slot agreement when the cell is inside). Reuse is off by default so no production path reaches this today, but the opt-in the node exposes at topology.py:3638 is unsound for any caller whose geometry moves between steps."
+    },
+    {
+      "file": "tests/test_carried_read_refresh.py",
+      "line": 108,
+      "severity": "non-blocking",
+      "text": "`assert int(result[-1]) == int(jnp.sum(decision.normal_form_cells))` compares the recomputed count against the same represented population the function receives, so a mask that reuses nothing raises the count to exactly sum(normal_form_cells) and the assertion still holds; the regression the test name claims to catch (represented cells not refreshed) leaves it green, and only over-reuse reddens it. The unchanged-read test at line 39 closes the other direction for the fixture, so the durability score does not rest on this line."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_carried_read_refresh.py:39 fails with a nonzero count if the reuse mask stops certifying unchanged cells, and the recorded stale-mask run reddens four tests at the head source in default-gate/negative.log.",
+    "evidence": "default-gate/after.log reads 7 passed in 112.10s and default-gate/negative.log reads 4 failed, 3 passed, both at the pinned revisions the manifest names, and h200-resumed/audit.json carries 36 receipts with distinct optimized operation counts per arm.",
+    "fit": "nova/equilibrium/topology.py:3597 follows the padding and vmap idiom of the owner beside it at topology.py:3083, and no added name carries a plan, version or ticket label.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:445 ships reuse=False, so the lever is inert by default and the 5.27 ms the brief named is unchanged; the measurement and the plan's lever-off rule are what the node delivered.",
+    "reuse": "nova/equilibrium/topology.py:3591 recomputes the per-edge roots that quadratic_cell_fragments already derives at topology.py:1966 rather than extracting a shared helper, while the prototypes reuse refuse_inert from scripts/prototypes/h200_levers/run.py and measure.main from bank_h200_slice_profile instead of forking either.",
+    "scope_discipline": "scripts/prototypes/carried_read_refresh/gate.py and tests/test_carried_read_refresh.py are the only new files and both sit inside the declared write paths; the diff touches nothing else."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261114T202630430759-review-of-carried-read-refresh-7ac312aaa094",
+  "reviewed_base_sha": "975f3e98cfa2b2976d2bbe1b94ead37f8623b529",
+  "reviewed_head_sha": "7ac312aaa0941e79609faa38db1810dc43500470",
+  "reviewed_run_id": "r-20261114T144016445105-carried-read-refresh",
+  "rubric": "text",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T20:59:15.634905+00:00",
+  "total": 104,
+  "verdicts": {
+    "diff": "read commit by commit across twelve commits; three carry product or test change (8566505f3, 1ce2c8683, 489d9497b); the rest are the measurement driver, the report and the evidence fragment.",
+    "done_when": "the measure is the brief contract plus the H200 read and per-slice walls at widths 1/16/64; tests/test_carried_read_refresh.py:39 asserts zero cells recomputed, :76 asserts exactly one for a changed cut cell, :94 asserts 39 of 50 under boundary motion, and default-gate/negative.log records 4 failed, 3 passed with EXIT=1.",
+    "goal": "the node goal is to refresh only the carried fragments that changed in one compiled program and to time the lever on the H200; nova/equilibrium/topology.py:3643 wires the selective path and nova/equilibrium/support_read.py:445 lands the measured verdict as the default.",
+    "manifest": "read; it records 7 passed in 112.10s at 489d9497b in default-gate/after.log, an explicitly unarmed base arm, a per-file delta of zero added head failures, and a 36-receipt audit.",
+    "write_paths": "the manifest declares the two source files, the scoped test, scripts/prototypes/carried_read_refresh and the fragment and figure directories; every path in git diff --stat 975f3e98 7ac312aa is inside that set."
+  }
+}

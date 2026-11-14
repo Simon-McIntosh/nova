@@ -2362,13 +2362,11 @@ def _solve_pinned_lane(
     pin,
     options,
 ):
-    """Hold centroid height with the declared radial-field source.
+    """Solve moments and the centroid source in one bordered Newton loop.
 
-    An outer scalar Newton correction eliminates the bordered centroid row
-    through the existing moment Jacobian. No per-column autodiff is used.
-    ``source_scale`` converts the dimensionless unknown to tesla (or to the
-    declared coil direction); ``row_scale`` scales the height equation.
-    Each correction is followed by the bank's own fresh-residual solve.
+    The moment Jacobian eliminates the centroid row using two right-hand
+    sides. A shared evaluator owns the full fresh read and booking at both
+    initialization and every damped trial; no inner equilibrium solve is staged.
     """
     from nova.equilibrium.constraint import uniform_radial_field_jet
 
@@ -2394,146 +2392,165 @@ def _solve_pinned_lane(
         bank = replace(operands, exterior=operands.exterior + amplitude * basis)
         return bank, _driven_cache(bank, cache)
 
-    def run(state, warm, amplitude, budget):
+    tolerance = options["tolerance"]
+    # Preserve the combined update budget of the scalar and moment corrections.
+    budget = 8 * options["max_steps"]
+    dtype = moments[0].dtype
+
+    @jax.jit
+    def evaluate(state, amplitude, warm):
         bank, window = at(amplitude)
-        return solve_batch(
+        support = read(
             bank,
             window,
-            tuple(value[None] for value in state),
-            seeds[None],
-            warm[None],
+            state,
+            seeds,
+            warm,
             convention,
             policy,
+            axis_sign,
+            iterations=options["iterations"],
+        )
+        residual = step_residual(bank, state, state, support, profile, quadrature)
+        norm = jnp.max(jnp.abs(jnp.concatenate(residual.residual)))
+        error = _centroid_height(operands.geometry, state) - pin.target_height
+        merit = jnp.maximum(
+            norm / tolerance,
+            jnp.where(pin.active, jnp.abs(error) / pin.tolerance, 0.0),
+        )
+        return support, residual.booked, residual.residual, norm, error, merit
+
+    fresh = evaluate(moments, initial_amplitude, previous)
+    size = 3 * moments[0].size
+    empty_factor = NewtonFactor(
+        jnp.zeros((size, size), dtype),
+        jnp.ones(size, dtype),
+        jnp.ones(size, dtype),
+        jnp.zeros((size, 3), dtype),
+        jnp.zeros(size, jnp.int32),
+    )
+    initial = (
+        moments,
+        initial_amplitude,
+        fresh,
+        jnp.int32(0),
+        jnp.int32(1),
+        jnp.full((budget + 1,), jnp.nan, dtype).at[0].set(fresh[3]),
+        jnp.full((budget,), jnp.nan, dtype),
+    )
+
+    def accepted(fresh):
+        return fresh[0].valid & jnp.isfinite(fresh[5]) & (fresh[5] <= 1.0)
+
+    def advance(carried):
+        state, amplitude, fresh, count, reads, residual_path, update_path = carried
+        support, booked, residual, norm, error, merit = fresh
+        bank, _ = at(amplitude)
+        matrix = step_jacobian(
+            bank,
+            state,
+            support,
             profile,
             gradient,
             quadrature,
-            axis_sign,
-            **{
-                **options,
-                "max_steps": budget,
-                "factor_cache": None,
-                "reuse_factor": False,
-            },
+            booked,
+            fresh_geometry=True,
         )
-
-    # Only the read and residual initialise the loop. Its single body owns
-    # every full solve, including the first, so no solver graph is duplicated.
-    initial = run(moments, previous, initial_amplitude, 0)
-    initial = jax.tree.map(lambda value: value[0], initial)
-    initial_error = (
-        _centroid_height(operands.geometry, initial.moments) - pin.target_height
-    )
-    initial = initial._replace(
-        pin_amplitude=initial_amplitude,
-        pin_error=initial_error,
-        converged=initial.converged
-        & (~jnp.asarray(pin.active) | (jnp.abs(initial_error) <= pin.tolerance)),
-        factor_valid=jnp.asarray(False),
-        residual_path=jnp.full(
-            (options["max_steps"] + 1,), jnp.nan, dtype=moments[0].dtype
+        source = _external_booking_tangent(
+            bank,
+            state,
+            support,
+            profile,
+            gradient,
+            quadrature,
+            basis,
+            booked,
         )
-        .at[0]
-        .set(initial.residual),
-        update_path=jnp.full((options["max_steps"],), jnp.nan, dtype=moments[0].dtype),
-    )
-
-    def advance(carried):
-        count, state, warm, amplitude, prior = carried
-        result = run(state, warm, amplitude, options["max_steps"])
-        result = jax.tree.map(lambda value: value[0], result)
-        error = _centroid_height(operands.geometry, result.moments) - pin.target_height
-        result = result._replace(
-            converged=result.converged
-            & (~jnp.asarray(pin.active) | (jnp.abs(error) <= pin.tolerance)),
-            steps=prior.steps + result.steps,
-            refactors=prior.refactors + result.refactors,
-            reads=prior.reads + result.reads,
-            pin_amplitude=amplitude,
-            pin_error=error,
-            factor_valid=jnp.asarray(False),
+        balanced, row_scale, column_scale = _equilibrate(matrix, state, booked)
+        right = jnp.stack((-jnp.concatenate(residual), source), axis=-1)
+        directions = column_scale[:, None] * jnp.linalg.solve(
+            balanced, right / row_scale[:, None]
         )
-
-        def correction(_):
-            bank, _window = at(amplitude)
-            booked = step_residual(
-                bank,
-                result.moments,
-                result.moments,
-                result.support,
-                profile,
-                quadrature,
-            ).booked
-            matrix = step_jacobian(
-                bank,
-                result.moments,
-                result.support,
-                profile,
-                gradient,
-                quadrature,
-                booked,
-                fresh_geometry=True,
+        free, response = directions[:, 0], directions[:, 1]
+        total = jnp.sum(state[0])
+        height = error + pin.target_height
+        row = (
+            jnp.concatenate(
+                (
+                    (operands.geometry.centre[:, 1] - height) / total,
+                    jnp.zeros_like(state[0]),
+                    jnp.ones_like(state[0]) / total,
+                )
             )
-            column = _external_booking_tangent(
-                bank,
-                result.moments,
-                result.support,
-                profile,
-                gradient,
-                quadrature,
-                basis,
-                booked,
-            )
-            response = jnp.linalg.solve(matrix, column)
-            total = jnp.sum(result.moments[0])
-            height = error + pin.target_height
-            row = (
+            / pin.row_scale
+        )
+        rate = row @ response
+        delta = jnp.where(
+            pin.active,
+            (-error / pin.row_scale - row @ free) / jnp.where(pin.active, rate, 1.0),
+            0.0,
+        )
+        update = tuple(jnp.split(free + delta * response, 3))
+
+        def trial(candidate):
+            result = evaluate(candidate[0], candidate[1], support.stationary.position)
+            return result[5], result[0].valid, result
+
+        search = _damped_scale(
+            trial,
+            (state, amplitude),
+            (update, delta),
+            merit,
+            fresh,
+            max_steps=8,
+            tolerance=1.0,
+            keep_incumbent=False,
+        )
+        next_state, next_amplitude = search.state
+        update_norm = jnp.max(
+            jnp.abs(
                 jnp.concatenate(
-                    (
-                        (operands.geometry.centre[:, 1] - height) / total,
-                        jnp.zeros_like(result.moments[0]),
-                        jnp.ones_like(result.moments[0]) / total,
-                    )
-                )
-                / pin.row_scale
-            )
-            rate = row @ response
-            delta = -(error / pin.row_scale) / rate
-            prediction = tuple(
-                value + delta * change
-                for value, change in zip(
-                    result.moments, jnp.split(response, 3), strict=True
+                    tuple(a - b for a, b in zip(next_state, state, strict=True))
                 )
             )
-            return prediction, amplitude + delta
-
-        state, next_amplitude = jax.lax.cond(
-            result.converged | (count >= 7),
-            lambda _: (result.moments, amplitude),
-            correction,
-            None,
         )
         return (
-            count + 1,
-            state,
-            result.support.stationary.position,
+            next_state,
             next_amplitude,
-            result,
+            search.auxiliary,
+            count + 1,
+            reads + search.evaluations,
+            residual_path.at[count + 1].set(search.auxiliary[3]),
+            update_path.at[count].set(update_norm),
         )
 
-    final = jax.lax.while_loop(
-        lambda carried: (
-            (carried[0] < 8) & ~carried[4].converged & (options["max_steps"] > 0)
-        ),
-        advance,
-        (
-            jnp.asarray(0),
-            initial.moments,
-            initial.support.stationary.position,
-            initial_amplitude,
+    final = (
+        initial
+        if budget == 0
+        else jax.lax.while_loop(
+            lambda carried: (carried[3] < budget) & ~accepted(carried[2]),
+            advance,
             initial,
-        ),
+        )
     )
-    return final[4]
+    state, amplitude, fresh, count, reads, residual_path, update_path = final
+    return SolveResult(
+        state,
+        fresh[0],
+        fresh[3],
+        accepted(fresh),
+        count,
+        count,
+        reads,
+        jnp.int32(0),
+        jnp.int32(0),
+        residual_path,
+        update_path,
+        empty_factor,
+        jnp.asarray(False),
+        amplitude,
+        fresh[4],
+    )
 
 
 def _solve_driven_batch(

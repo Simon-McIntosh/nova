@@ -110,10 +110,10 @@ def reproduce():
     raise AssertionError("base already accepts traced coil inputs")
 
 
-def run_graph(tree, revision, output):
+def run_graph(tree, revision, output, script="trace_graph.py"):
     command = [
         PYTHON,
-        str(Path(__file__).with_name("trace_graph.py")),
+        str(Path(__file__).with_name(script)),
         "--revision",
         revision,
         "--output",
@@ -150,6 +150,7 @@ def main():
     parser.add_argument("--head")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--focused", action="store_true")
+    parser.add_argument("--numerics-only", action="store_true")
     parser.add_argument("--skip-control", action="store_true")
     parser.add_argument("--graph-base")
     parser.add_argument("--graph-head", action="store_true")
@@ -173,7 +174,7 @@ def main():
         prefix="bank-inputs-", dir=os.environ["TMPDIR"]
     ) as scratch:
         root = Path(scratch)
-        if not args.focused:
+        if not args.focused and not args.numerics_only:
             base = root / "base"
             archive(args.source, args.base, base)
             with (args.output / "reproduction.log").open("w") as log:
@@ -195,6 +196,10 @@ def main():
                 )
         head = root / "head"
         archive(args.source, args.head, head)
+        if args.numerics_only:
+            run_graph(head, args.head, args.output / "graph-after.log")
+            run_graph(head, args.head, args.output / "numerics.log", "numerics.py")
+            return
         if args.graph_base:
             graph_base = root / "graph-base"
             archive(args.source, args.graph_base, graph_base)

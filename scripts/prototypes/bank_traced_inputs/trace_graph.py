@@ -122,7 +122,7 @@ def main():
     result.update(inventory(graph))
     args.output.write_text(json.dumps(result, indent=2))
     print(json.dumps(result, sort_keys=True), flush=True)
-    assert counts["newton_step"] > 0 and counts["step_jacobian"] > 0
+    assert counts["step_jacobian"] > 0
 
 
 if __name__ == "__main__":

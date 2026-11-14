@@ -363,8 +363,8 @@ def test_pin_holds_independent_lane_centroids(small, caplog, monkeypatch):
             or "MLIR module conversion jit(program)" in event
         ):
             print("PIN_PROGRAM_WALL", event)
-    assert 0 < construction["newton_step"] <= 1
-    assert 0 < construction["step_jacobian"] <= 2
+    assert construction["newton_step"] == 0
+    assert construction["step_jacobian"] == 1
     assert construction["_booking_jacobian"] == 1
     assert not added
     assert np.all(following.converged)

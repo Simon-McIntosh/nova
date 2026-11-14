@@ -294,7 +294,7 @@ def graded_shell_field(scale=1.0):
 
 
 def test_uniform_cell_size_reproduces_the_recorded_grid():
-    # Digests recorded from the uniform grid before the spacing field existed,
+    # These digests pin every polygon, centroid and area of the uniform grid,
     # so any perturbation of the default mesh changes them.
     recorded = {
         0.1: (46, "0a354c798c78a034dfdb0a729c1778689309dd36a9811bfd510a551386c313be"),

@@ -1,5 +1,5 @@
 <article id="ilf-six-limb-reference-checkpoint">
-  <h3>Six-limb surface reference: mesh convergence established, calibration pending</h3>
+  <h3>Six-limb surface reference: sphere repaired, annulus calibration unresolved</h3>
   <p>The surface formulation constrains the net charge of each closed body.
     The circuit's odd mirror images enforce the same constraint by parity.
     Analytically integrated double-layer solid angles fix the exact row sum;
@@ -46,9 +46,31 @@
     and cube-demagnetisation test fails with EXIT=1 after verifying that the
     mutated scratch module is the one imported. The current node suite has
     fourteen passing tests.</p>
-  <p>Acceptance awaits the full-annulus comparison with Nova and the
-    missing-limb symmetry control. They are running in the same rigel job
-    as the current reference measurement, job 1314904.</p>
+  <table>
+    <caption>Full annulus against Nova, both at 0.075 m maximum mesh scale.
+      The surface solve has 48,966 unknowns; Nova has 4,224 cells.
+      Relative differences use the surface result as denominator.</caption>
+    <thead><tr><th>μᵣ</th><th>Nova flux [Wb]</th><th>Surface flux [Wb]</th>
+      <th>Flux difference</th><th>In-vessel difference</th><th>Largest outside difference</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>5.47009885</td><td>5.56387902</td><td>1.6855%</td><td>0.8732%</td><td>1.8997%</td></tr>
+      <tr><td>200</td><td>19.83921843</td><td>21.09070207</td><td>5.9338%</td><td>2.9262%</td><td>8.5361%</td></tr>
+    </tbody>
+  </table>
+  <p>The annulus agrees within 2% at μᵣ = 50 and fails at μᵣ = 200.
+    Nova's own 0.1 to 0.075 m pair changes by up to 1.6083% and 6.8845%,
+    respectively. This leaves the source of the high-permeability comparison
+    error unresolved. The annulus was measured on seven surface meshes;
+    the six-limb circuit on five and Nova on four.</p>
+  <p>The single rigel batch, job 1314904, reached its 85-minute limit after
+    completing both permeabilities on the finest annulus. It was assembling
+    the missing-limb control when stopped; no symmetry verdict was produced.
+    A requested wall-time extension was refused by the scheduler. The receipt
+    consequently has no terminal acceptance flag, and the node is blocked.
+    All 24 completed surface charge files exist, and their mean probe fields
+    are finite and nonzero. Across those rows the largest independent
+    toroidal-mean rule change is 4.43 × 10⁻¹⁰ and the largest slab-integral
+    rule change is 0.02747%.</p>
   <p>Per-resolution values, charges and toroidally resolved probe fields:
     <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/reference/surface-qualified-20261114/summary.json</code>.
     Sphere values and orders are in the run's <code>sphere-qualified.json</code>;

@@ -132,7 +132,9 @@
   </table>
   <p>On the Tesla P100, the 40 mm assembly takes 810.445 s; the solve including
   assembly takes 816.413 s, and the total including exterior field evaluation
-  takes 831.398 s. This is a cold end-to-end measurement, including compilation.
+  takes 831.398 s. These are fresh-process elapsed times, including any
+  compilation required by the persistent-cache state; compile and execution
+  are not separately timed.
   One Newton correction gives a relative material residual of 1.37316e-15.</p>
   <p>The constant comparison is the observed graded 13,410-cell result:
   0.397396 % worst-probe error, with two unknowns per cell. It is an observed
@@ -215,7 +217,7 @@
   <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/</code>,
   in <code>adaptive-fast/</code>, <code>suites/</code> and
   <code>adaptive-head-suites/</code>. This record measures the closed-shell candidate;
-  it neither runs WEST nor records the formulation decision.</p>
+  it neither measures WEST nor records the formulation decision.</p>
 </main>
 </body>
 </html>

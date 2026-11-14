@@ -176,3 +176,46 @@
     three recoveries and the displaced-loop check. Repairs to the forward or
     topology implementation require their own write scope.</p>
 </section>
+<section id="known-answer-recovery-solovev-recovery">
+  <h2>Analytic known-state recovery</h2>
+  <p>The inverse class now recovers the qualified moderate-rotation-conventional-static
+    generating state through public forward requests. The two fitted amplitudes multiply
+    the generating pressure-gradient and diamagnetic-gradient shapes; their starting
+    values are perturbed by −2% and +2%. The signal set contains 24 vacuum-subtracted
+    flux loops, 24 poloidal probes and one plasma-current row. The data and fit use
+    the existing virtual-diagnostic factories on the same authored plasma sections.
+    Both maps retain the generating exterior supply and its flux gauge.</p>
+  <table>
+    <thead><tr><th>Case</th><th>Plasma flux sup / span</th><th>Whitened residual sup</th>
+      <th>Forward re-solve relative sup</th><th>Fit iterations</th><th>Response singular values</th>
+      <th>Undetermined coefficients</th></tr></thead>
+    <tbody><tr><td>Solov’ev</td><td>6.972930892849655e-12</td><td>3.638822541848749e-12</td>
+      <td>6.842768001085781e-13</td><td>3 (20 public evaluations)</td>
+      <td>1.4002074134604718, 0.1985426888362674</td><td>none</td></tr>
+      <tr><td>MAST</td><td colspan="6">Smooth prescribed-profile generation and recovery pending.</td></tr>
+      <tr><td>ITER</td><td colspan="6">Smooth prescribed-profile generation and recovery pending.</td></tr>
+      <tr><td>Loop displaced 5 cm</td><td colspan="6">Running; no acceptance claim yet.</td></tr>
+    </tbody>
+  </table>
+  <p>All three positive Solov’ev inequalities pass: 1e-6 flux-span fraction,
+    1e-8 whitened residual, and the declared 1e-12 forward solve tolerance for
+    the independent solve with recovered coefficients and no measurements.</p>
+  <figure>
+    <img src="/nova/figures/inverse-equilibrium-baseline/known-answer-recovery/solovev.svg"
+      alt="Generating and recovered Solovev poloidal flux contours on shared levels" />
+    <figcaption>Generating state (grey) and recovered state (blue), on the same
+      twelve physical flux levels. The first wall is black. Both magnetic-axis
+      sets are drawn on each panel; their triangles coincide at this scale, and
+      neither state admits an X-point. The generating residual is
+      2.5945296862777358e-15, converged=true and qualified=true. The recovered
+      forward residual is 3.819363908995574e-13, converged=true and qualified=true. The independent re-solve agrees to
+      6.842768001085781e-13 relative sup norm. Text bounds and overlap checks
+      passed; the same-canvas PNG was visually inspected before committing.</figcaption>
+  </figure>
+  <p>The full generating, recovered and independent forward receipts and
+    <code>solovev-recovery.json</code> are durable beneath
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/solovev-recovery/</code>.
+    The ongoing run is logged in <code>solovev-recovery.log</code> in that run's
+    parent directory. This checkpoint records the completed positive test;
+    the displaced-loop check and the complete suite arms remain pending.</p>
+</section>

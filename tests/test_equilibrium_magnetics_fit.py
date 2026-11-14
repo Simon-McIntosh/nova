@@ -422,7 +422,7 @@ class _PlasmaDiagnosticSource:
         factory.solve = solve
 
     def __call__(self, receipt):
-        self.biot.sALoc["Ic"] = np.asarray(receipt.terminal_state.cell_current)
+        self.biot.sloc["Ic"] = np.asarray(receipt.terminal_state.cell_current)
         return self.biot
 
 
@@ -444,11 +444,22 @@ def physical_cases(tmp_path_factory):
         if name in cases:
             return cases[name]
         profile, request, coordinate, wall, sections = _physical_problem(name)
-        try:
-            generated = profile.solve(request)
-        except Exception as error:
-            _persist_forward_failure(error, output, name)
-            raise
+        recorded = os.environ.get("NOVA_MAGNETICS_FIT_GENERATING_RECEIPTS")
+        recorded_path = (
+            Path(recorded) / f"{name}-generating-receipt.pkl" if recorded else None
+        )
+        if recorded_path is not None and recorded_path.exists():
+            import pickle
+
+            with recorded_path.open("rb") as stream:
+                generated = pickle.load(stream)
+            print(f"GENERATING_RECEIPT {recorded_path}", flush=True)
+        else:
+            try:
+                generated = profile.solve(request)
+            except Exception as error:
+                _persist_forward_failure(error, output, name)
+                raise
         _persist_forward(generated, output / f"{name}-generating.pkl")
         residual = float(generated.terminal_state.fixed_point.residual)
         print(

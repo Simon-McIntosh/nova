@@ -81,25 +81,24 @@ def coil_rows(root, case, frame):
     applied = json.loads((root / "base" / case / "current-inputs.json").read_text())
     fit_path = root / "fits" / case / f"conductor-fit-{frame}.json"
     names = applied["names"]
+    fit = json.loads(fit_path.read_text()) if fit_path.is_file() else None
     measured = applied["measured_a_turn"]
-    relative = [abs(item) for item in applied["relative_correction"]]
+    equivalent = (
+        fit["equivalent_error_a_turn"] if fit is not None else [0.0] * len(names)
+    )
     rows = []
-    for name, current, share in zip(names, measured, relative):
+    for name, current, value in zip(names, measured, equivalent):
+        share = 0.0 if current == 0.0 else abs(value / current)
         rows.append(
             {
                 "name": name,
                 "measured_ka_turn": 1e-3 * current,
+                "equivalent_error_ka_turn": 1e-3 * value,
                 "relative_correction": share,
                 "implausible": share > THRESHOLD,
             }
         )
-    if fit_path.is_file():
-        fit = json.loads(fit_path.read_text())
-        equivalent = fit["equivalent_error_a_turn"]
-        for row, value in zip(rows, equivalent):
-            row["equivalent_error_ka_turn"] = 1e-3 * value
-        return rows, fit
-    return rows, None
+    return rows, fit
 
 
 def main():

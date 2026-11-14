@@ -23,6 +23,11 @@
       "kind": "exempted",
       "reason": "the same-function re-classification check is weak but the width verdicts rest on the raw receipts and logs, which the review read directly",
       "recorded_at": "2026-11-14T22:36:00.874700+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "repaired in this run's own repair round: the arm loop now imports the slice-profile driver's helpers (commits through f2cdfd4af), with both drivers' smoke checks passing",
+      "recorded_at": "2026-11-14T22:36:07.515790+00:00"
     }
   },
   "findings": [

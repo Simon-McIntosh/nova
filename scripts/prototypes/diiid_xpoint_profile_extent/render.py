@@ -23,6 +23,7 @@ from nova.media.poloidal import (  # noqa: E402
     draw_flux_contours,
     draw_nulls,
     draw_wall,
+    inside_wall_units,
 )
 from nova.equilibrium.solve_request import SampledFluxFunction  # noqa: E402
 from scripts.prototypes.diiid_xpoint_attribution.attribute import field  # noqa: E402
@@ -82,6 +83,63 @@ def read(root, arm, frame, branch):
     )
 
 
+def windowed_levels(
+    ax,
+    radius,
+    height,
+    values,
+    levels,
+    color,
+    linestyle,
+    linewidth,
+    wall,
+    zorder,
+):
+    """Draw contour levels over a small window without unreadable fragments.
+
+    A window a few centimetres across cuts every structure that crosses it. A
+    level that dips into a corner enters and leaves through the edges having
+    enclosed nothing and passed near nothing the panel is about, and clipped to
+    the window it reads as a stray mark rather than as flux. So a path is drawn
+    when it carries the level the panel's null is drawn at -- the separatrix
+    through that null, which leaves the window by design -- or when it closes on
+    itself, which is a flux surface the window wholly contains. An open path at
+    any other level is dropped.
+    """
+
+    grid_r, grid_z = np.meshgrid(radius, height)
+    inside = inside_wall_units(
+        np.column_stack((grid_r.ravel(), grid_z.ravel())), wall
+    ).reshape(values.shape)
+    blanked = np.where(inside, values, np.nan)
+    probe = plt.figure()
+    try:
+        drawn = probe.add_subplot(111).contour(
+            radius, height, blanked, levels=sorted(float(level) for level in levels)
+        )
+        segments = [
+            (float(level), np.asarray(segment))
+            for level, per_level in zip(drawn.levels, drawn.allsegs, strict=True)
+            for segment in per_level
+        ]
+    finally:
+        plt.close(probe)
+    for level, segment in segments:
+        if segment.size == 0:
+            continue
+        if level != 0.0 and not np.allclose(segment[0], segment[-1]):
+            continue
+        (line,) = ax.plot(
+            segment[:, 0],
+            segment[:, 1],
+            color=color,
+            linewidth=linewidth,
+            zorder=zorder,
+            solid_capstyle="butt",
+        )
+        line.set_linestyle(linestyle)
+
+
 def xpoint_panels(root, frame, branch, output, previews):
     """Draw the full field and the lower-X zoom for both arms."""
 
@@ -138,6 +196,20 @@ def xpoint_panels(root, frame, branch, output, previews):
                 interpolant = field(data["radius"], data["height"], data[key])
                 values = interpolant(radius, height) - float(interpolant.ev(*xpoint))
                 for contours, width in ((LEVELS[LEVELS != 0.0], 1.2), ([0.0], 3.0)):
+                    if index:
+                        windowed_levels(
+                            ax,
+                            radius,
+                            height,
+                            values.T,
+                            contours,
+                            color,
+                            dash,
+                            width,
+                            data["limiter"],
+                            3 if key == "flux" else 2,
+                        )
+                        continue
                     drawn = draw_flux_contours(
                         ax,
                         radius,
@@ -224,6 +296,25 @@ def xpoint_panels(root, frame, branch, output, previews):
             markerfacecolor="none",
             ls="none",
             label="EFIT null",
+        ),
+        Line2D(
+            [],
+            [],
+            color=SOLVED,
+            marker="^",
+            markersize=8,
+            ls="none",
+            label="solved axis",
+        ),
+        Line2D(
+            [],
+            [],
+            color=REFERENCE,
+            marker="v",
+            markersize=8,
+            markerfacecolor="none",
+            ls="none",
+            label="EFIT axis",
         ),
     ]
     if any(summary["shadow_rz_m"] for _, _, _, summary in pair):

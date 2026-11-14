@@ -9,10 +9,10 @@
 </head>
 <body><main>
   <h1 id="icm-linear-assembly-cost-state">Affine magnetisation assembly cost</h1>
-  <p>Blocked partial delivery after two counted paired-tile test failures.
-  The delivered operator has been retained for a full-matrix comparison.
-  The fixed-shape scheduling repair is committed, but its numerical gate,
-  after-change cost and completed 10 mm solve remain unfulfilled.
+  <p>Resumed after adjudication of the cancellation-sensitive diagnostic.
+  The first batched 40 mm operator passes the full-shell accuracy bar and
+  takes 399.624 s against 901.041 s before batching. Further cost work and
+  the completed 10 mm solve remain in progress.
   This record does not select a formulation or measure WEST.</p>
 
   <h2 id="icm-linear-assembly-cost-before">What the delivered assembly spends</h2>
@@ -52,8 +52,10 @@
   reciprocal entries written in vectorised blocks. The integration rules,
   near/far criteria and triangle incidence are preserved.</p>
   <p>The constant interaction functions are unchanged. The affine entry points
-  are exported in <code>tiledassembly.__all__</code>. The shell-cell numerical pin passes, but the added paired/Cartesian
-  tile comparison remains red; no speedup or full-operator equivalence is claimed.</p>
+  are exported in <code>tiledassembly.__all__</code>. The shell-cell pin passes. The first complete coarse-shell comparison
+  also passes: 6.00192482353315e-15 relative Frobenius difference and
+  2.0299154721388616e-14 maximum-entry difference divided by the reference's
+  maximum entry. Both are below 1e-12.</p>
 
   <h2 id="icm-linear-assembly-cost-provenance">Reference provenance refusal</h2>
   <p>The revision defect reproduced before repair: the reference program wrote
@@ -107,6 +109,25 @@
   <code>1e-12</code> requirement and the active quadrature-weight mutant.
   The alternative is to make paired evaluation reproduce the Cartesian
   arithmetic before repeating the check. These are proposals, not outcomes.</p>
+  <h2 id="icm-linear-assembly-cost-ruling">Cancellation scale and resumed work</h2>
+  <p>The coordinator adjudicated the per-net-triangle diagnostic: the guard
+  now bounds the discrepancy by 1e-12 times the sum of the absolute edge
+  contributions, while retaining the unchanged full-shell 1e-12 bar in both
+  norms. Its focused repeat passed: <code>1 passed, 62 deselected in 7.41s</code>.
+  The measured errors over that contribution sum are
+  <code>3.3396646162763453e-15</code> for all rows and
+  <code>1.0016473419842563e-15</code> for flux-only evaluation.</p>
+  <table><thead><tr><th>Route</th><th>Spacing [mm]</th><th>Assembly [s]</th>
+  <th>Compile [s]</th><th>Execute [s]</th><th>Polygon launches</th></tr></thead><tbody>
+  <tr><td>Delivered</td><td>40</td><td>901.041073</td><td>7.346338</td><td>544.571334</td><td>693544</td></tr>
+  <tr><td>Delivered</td><td>20</td><td>1780.271290</td><td>0</td><td>1041.915724</td><td>1224093</td></tr>
+  <tr><td>Batched dot contractions</td><td>40</td><td>399.623631</td><td>7.903288</td><td>289.372027</td><td>49469</td></tr>
+  </tbody></table>
+  <p>The 20 mm delivered arm introduces no new evaluator program: the six
+  fixed shapes compiled at 40 mm serve it unchanged. The 40 mm batching gain
+  is 2.25472 times, with 14.0198 times fewer polygon launches. The next cost
+  measurement compares the dot contraction with a fused weighted angular sum
+  in affine flux-only tiles; the quadrature nodes and weights are unchanged.</p>
   <p>The required 10 mm assembly bound of 900 s, completed solve, dipole and
   finite-loop errors, 20-to-10 order, largest-mesh per-pair projections, final
   figure point and exact-delivered-head suite are all still missing. The

@@ -1,0 +1,84 @@
+<section id="fused-booking-assembly-landing">
+<h2>Fusion saves 3.94% at width one; batch throughput differences remain unresolved</h2>
+<p>The Newton correction evaluates primal moments beside local derivative
+channels on the same conic rings and quadrature points. The scalar conic tile
+remains 128 cells by default; normal-form cells retain their independent
+eight-cell buckets. Global current normalization follows the cell reduction.
+Factor-reuse corrections retain their booking-only path.</p>
+<table><thead><tr><th>Independent pulses</th>
+<th>Separate process walls [ms/batch]</th><th>Fused process walls [ms/batch]</th>
+<th>Native cost [ms/slice]</th><th>Booking + assembly device [ms/batch]</th>
+<th>Wall change</th><th>Decision margin</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>1</td><td>33.9360 / 33.9612</td><td>32.6185 / 32.6024</td><td>33.9486 → 32.6104</td><td>8.2553 → 7.4340</td><td>-3.94%</td><td>3.00%</td><td>faster</td></tr><tr><td>16</td><td>117.7212 / 117.9787</td><td>115.6072 / 115.5729</td><td>7.3656 → 7.2244</td><td>50.4548 → 49.2473</td><td>-1.92%</td><td>3.00%</td><td>unresolved</td></tr><tr><td>64</td><td>375.6151 / 375.4267</td><td>372.0421 / 371.8855</td><td>5.8675 → 5.8119</td><td>187.9304 → 186.1271</td><td>-0.95%</td><td>3.00%</td><td>unresolved</td></tr>
+</tbody></table>
+<p>The fresh-factor Newton path keeps fusion enabled. Width one clears the
+3% decision margin; widths 16 and 64 stay inside it, so their nominal reductions
+are recorded as unresolved. At width 64 the native saving is 0.0556 ms/slice
+and the profiled booking-plus-assembly saving is 0.0282 device ms/slice. The
+anticipated 2.83 ms/slice saving is not realized by this fusion.</p>
+<p>The <a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-h200-slice-profile.html">landed slice profile</a>
+recorded 39.880, 7.685 and 5.782 ms/slice at widths 1, 16 and 64. The paired
+control here measures 33.949, 7.366 and 5.868 ms/slice; decisions use this
+job's paired control, preserving the original profile as context rather than
+attributing differences between jobs to the fusion.</p>
+<p>The paired H200 job uses base <code>975f3e98cfa2b2976d2bbe1b94ead37f8623b529</code>
+and fused revision <code>8e2ba6f57c7f33ec1248c398ff6765f4ce4705ff</code>.
+Each arm has a warming process and two fresh measured processes; every selected
+pair agrees within 5%. The decision margin is the larger of 3% and either
+process spread. Compiles are excluded from synchronized warm walls and
+retained separately in each receipt. The common input SHA256 is
+<code>52f8d4fb9e60dbdbe1530e8b64a171d3bb6470fb5cf73a1ddcf760895d09a0e9</code>.</p>
+<h3 id="fused-booking-assembly-compilation">Compilation and process agreement</h3>
+<table><thead><tr><th>Independent pulses</th><th>Separate compile [s, process 1 / 2]</th><th>Fused compile [s, process 1 / 2]</th><th>Separate / fused native-wall spread</th></tr></thead><tbody><tr><td>1</td><td>39.798 / 39.903</td><td>38.890 / 38.839</td><td>0.0741% / 0.0495%</td></tr><tr><td>16</td><td>37.949 / 38.028</td><td>37.183 / 37.059</td><td>0.2187% / 0.0297%</td></tr><tr><td>64</td><td>38.603 / 38.363</td><td>37.919 / 37.880</td><td>0.0502% / 0.0421%</td></tr></tbody></table>
+<p>Compile wall includes lowering and executable construction and is reported
+separately from every warm execution sample. Both measured processes use the
+same per-job persistent compilation-cache directory following the warming
+process. Each native timing is the median of eleven synchronized samples;
+this table gives each arm's two-process agreement independently.</p>
+<figure id="fused-booking-assembly-figure"><img src="/nova/figures/sub-millisecond-forward-path/fused-booking-assembly/booking-assembly.svg"
+alt="Separate and fused booking arms across independent pulse widths,
+showing native throughput and device booking plus assembly cost.">
+<figcaption>Each point is the mean of two fresh-process medians. The left panel
+is unprofiled secant-predicted flattop throughput; the right panel sums the
+profiled assembly, read-residual booking and update-residual booking kernels.
+Profiled device costs are not substituted for native wall savings. Width one
+is causal single-pulse latency; widths 16 and 64 advance independent pulses
+and do not batch sequential TORAX-coupled slices.</figcaption></figure>
+<p>All selected lanes pass the independent fresh residual (at most 1e-10),
+axis and X-point (at most 5e-4 of minor radius), and boundary-flux (at most
+1e-4 of flux span) budgets. The existing slice profiler supplies the solve,
+predictor, precision oracle and raw device capture; its retained source-aware
+report audits kernel attribution and closes device stages against profiled
+walls. Before each capture, the profiler detects the known-present
+2097152-byte transfer and matrix kernel. Metadata-free lowered program digests
+differ between arms, and feeding the identical on-program receipt to the
+comparison guard is refused.</p>
+<p>Receipts, exact measured product sources, compile walls, per-kernel ledgers,
+profiler controls, program digests and negative-control logs are retained at
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144116292081-fused-booking-assembly/h200</code>. The figure passes the shared text-boundary and
+collision checker; the producer inspects its rendered SVG before delivery.
+Correctness and missing-moment mutation results are recorded in the worker
+manifest.</p>
+<h3 id="fused-booking-assembly-correctness">Correctness and negative controls</h3>
+<p>At the measured fused revision, the final CPU delivery arm passes 20 tests
+in 266.39 s. They compare every booked moment and local channel at the booking
+tolerance, the assembled matrix and Newton update, partial conic tiles, invalid
+reads and underresolved quadrature. Instrumented tracing observes
+<code>DUPLICATE_CONIC_CONSTRUCTIONS separate=2</code> and
+<code>FUSED_CONIC_CONSTRUCTIONS fused=1</code> in both physical fixtures.</p>
+<p>Zeroing the fused radial-moment channel causes all eight parity cases to
+fail, with 12 deselected, in 178.40 s. The original booking test files pass
+61 tests at the base in 506.66 s and at <code>a6fd16012e491f51406833882696b33175fe29d6</code>
+in 480.21 s; the latter precedes the explicit fused input-refusal guard, whose
+new regression is included in the 20-test delivery arm. An earlier combined
+head process aborted inside JAX compilation of an existing scalar-tile test
+with <code>EXIT=-11</code>. Its log and incomplete receipt remain preserved,
+and it remains a counted failure; the successful fresh processes do not erase
+that event.</p>
+<p>The job used one reserved H200 for 39 min 38 s, or 0.661 GPU-hours, against
+its requested 2.5-hour allocation limit. All requested arms completed, so the
+remaining allocation time was unused. Every selected arm agrees across its
+fresh processes within 0.219%. The maximum independent fresh residual is
+4.014e-11; axis, X-point and boundary-flux errors are at most 5.232e-5,
+2.201e-5 and 5.250e-5 of their respective reference scales.</p>
+</section>

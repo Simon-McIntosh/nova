@@ -13,7 +13,12 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import (
+    FixedLocator,
+    LogFormatterMathtext,
+    MaxNLocator,
+    NullLocator,
+)
 import numpy as np
 
 from nova.media.ink import DEFAULT_INK, poloidal_axes
@@ -30,6 +35,35 @@ from scripts.prototypes.diiid_xpoint_offset.style import (
 ROWS = ((137, "diverted"), (146, "diverted"), (146, "limited"), (179, "limited"))
 LEVELS = np.array([-0.02, 0.0, 0.02, 0.2, 0.6, 1.0, 1.6, 2.0])
 REFUSED = "#bf3446"
+
+
+def linear_scale(ax, dimension, values, integer=False):
+    values = np.asarray(values)
+    low, high = float(values.min()), float(values.max())
+    padding = max(0.05 * (high - low), 1.0 if integer else 0.01)
+    limits = (low - padding, high + padding)
+    axis = getattr(ax, dimension + "axis")
+    getattr(ax, "set_" + dimension + "lim")(*limits)
+    ticks = MaxNLocator(4, integer=integer).tick_values(*limits)
+    axis.set_major_locator(
+        FixedLocator(ticks[(ticks >= limits[0]) & (ticks <= limits[1])])
+    )
+    axis.set_minor_locator(NullLocator())
+    ax.ticklabel_format(axis=dimension, style="plain", useOffset=False)
+
+
+def log_scale(ax, dimension, values):
+    positive = np.asarray(values)
+    positive = positive[np.isfinite(positive) & (positive > 0)]
+    low = int(np.floor(np.log10(positive.min())))
+    high = max(low + 1, int(np.ceil(np.log10(positive.max()))))
+    stride = max(1, int(np.ceil((high - low) / 4)))
+    powers = np.unique(np.r_[np.arange(low, high + 1, stride), high])
+    axis = getattr(ax, dimension + "axis")
+    getattr(ax, "set_" + dimension + "lim")(10.0**low, 10.0**high)
+    axis.set_major_locator(FixedLocator(10.0**powers))
+    axis.set_major_formatter(LogFormatterMathtext())
+    axis.set_minor_locator(NullLocator())
 
 
 def save(figure, axes, notes, output, preview):
@@ -314,6 +348,7 @@ def traces(root, output, previews):
         frozen = [trip["inner"]["residual"] for trip in spatial["trips"]]
         axes[0, column].semilogy(trips, frozen, color=WALL, lw=2.6, ls="--", zorder=2)
         axes[0, column].semilogy(trips, residuals, color=SOLVED, lw=3, marker=".")
+        log_scale(axes[0, column], "y", np.r_[residuals, frozen])
         incoming = [trip["initial"]["support"] for trip in spatial["trips"]]
         support = [trip["returned"]["support"] for trip in spatial["trips"]]
         axes[1, column].plot(trips, incoming, color=WALL, lw=2.6, ls="--")
@@ -330,9 +365,14 @@ def traces(root, output, previews):
             mew=1.5,
             zorder=5,
         )
+        linear_scale(
+            axes[1, column], "y", incoming + support + [receipt["support"]], True
+        )
         for ax in axes[:, column]:
             ax.spines[["top", "right"]].set_visible(False)
-            ax.xaxis.set_major_locator(MaxNLocator(4, integer=True))
+            ax.set_xlim(0.7, len(trips) + 0.3)
+            ax.xaxis.set_major_locator(FixedLocator(trips))
+            ax.xaxis.set_minor_locator(NullLocator())
             ax.grid(False)
         axes[1, column].set_xlabel("inner solve")
         if column == 0:
@@ -403,6 +443,8 @@ def limited_trajectories(root, output, previews):
             strict=True,
         ):
             ax.plot(np.arange(len(stages)), values, color=SOLVED, lw=3)
+            linear_scale(ax, "x", np.arange(len(stages)), True)
+            linear_scale(ax, "y", values, label == "support cells")
             ax.set_ylabel(label)
             ax.spines[["top", "right"]].set_visible(False)
             ax.grid(False)
@@ -432,11 +474,13 @@ def source_changes(root, output, previews):
         _, _, spatial, _ = load(root, frame, branch)
         sweep = spatial["directional_discriminator"]
         factors = np.asarray([row["factor"] for row in sweep])
+        all_values = []
         for key, color, dash in (
             ("current_delta_l2_a", SOLVED, "-"),
             ("tangent_remainder_l2_a", WALL, "--"),
         ):
             values = np.asarray([row[key] for row in sweep]) / 1000
+            all_values.extend(values.tolist())
             positive = values > 0
             ax.loglog(
                 factors[positive],
@@ -446,6 +490,8 @@ def source_changes(root, output, previews):
                 lw=3 if key == "current_delta_l2_a" else 2.6,
                 marker=".",
             )
+        log_scale(ax, "x", factors)
+        log_scale(ax, "y", all_values)
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(False)
         ax.set_xlabel("fraction of proposed step")

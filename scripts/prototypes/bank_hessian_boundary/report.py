@@ -65,7 +65,13 @@ def main():
         choices = dict(lower=final[:, 0], upper=final[:, 1], average=final.mean(axis=1))
         finite = ~np.any(logarithmic[:, :, state], axis=(1, 2))
         row["logarithmic_corner_nodes"] = int((~finite & active_corner).sum())
-        smooth = ~active_corner
+        smooth = np.array(
+            [
+                r["full_field"]
+                or not np.any(archives[state]["moments"][r["source_cells"]])
+                for r in records
+            ]
+        )
         limit = (
             1000 * values[:, -1, :, state]
             - 110 * values[:, -2, :, state]

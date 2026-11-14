@@ -40,9 +40,11 @@
       elliptic/filament-flux owner and graded Duffy treatment of coincident
       and endpoint-adjacent edges.</td></tr>
       <tr><td>edge–volume and volume–volume energy</td><td>
-      The existing <code>tile_evaluator(kernel="quadrature")</code> supplies
-      polygon-section flux for a uniform toroidal volume current, using
-      16 angular panels with 192 Gauss nodes per panel. A constrained triangulation
+      The existing polygon angular kernel <code>_traced_psi_gradient</code>
+      supplies section flux for a uniform toroidal volume current. Flux-only
+      tracing omits its field derivatives. Sixteen angular panels use 192
+      Gauss nodes for a target within four source-triangle diameters, and
+      48 nodes for smooth distant pairs. A constrained triangulation
       preserves each authored polygon and holds the packed graph at three
       edges. Area weights convert per-ampere responses to per-current-density
       responses.</td></tr>
@@ -59,7 +61,7 @@
   space. Edge-pair energy uses order 24 for singular and near pairs and order
   8 for distant pairs; continuous polygon potential uses order 12 along the
   boundary and order 6 over the cell area. Polygon evaluation is tiled at
-  32 × 32 pairs; its angular rule integrates over the source section before
+  32 × 32 pairs, with near pairs evaluated in blocks of 64; its angular rule integrates over the source section before
   quadrature, so it does not sample a spatial filament singularity.</p>
   <p>The initial closed-polygon executable failed to finish the first shell
   assembly in about two hours on the P100; a separate 16-pair exact-kernel
@@ -68,7 +70,9 @@
   control in seconds. Against the closed owner on a 10 mm triangular section,
   its 128-node rule agrees to 1.74e-11 relative in flux at the four control
   points. The selected 192-node rule is additionally pinned by a closed-owner
-  parity test including an interior point, exterior point and the axis.</p>
+  parity test including an interior point, exterior point and the axis. The
+  final evaluator also separates nearby and distant pairs and traces only
+  flux for energy, avoiding unused field-gradient work in every volume pair.</p>
 
   <h3 id="icm-linear-magnetisation-energy">The Gram matrix and the material law</h3>
   <p>The local Gram is

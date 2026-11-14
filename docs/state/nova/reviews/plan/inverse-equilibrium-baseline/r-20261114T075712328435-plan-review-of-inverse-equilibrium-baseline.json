@@ -33,7 +33,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 2,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "cad85cc55e0b1246c549906130287e856436a4de",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 2 now names imas-efit's committed MAST-U 45272 slice, chosen by the lead on 2026-11-14, and section 4 measures the MAST-U case.",
+      "reason": "",
+      "when": "2026-11-14T09:46:05.971672+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "cad85cc55e0b1246c549906130287e856436a4de",
+      "commit_basis": "edit",
+      "note": "Section 2 now names imas-efit's committed MAST-U 45272 slice, chosen by the lead on 2026-11-14, and section 4 measures the MAST-U case.",
+      "reason": "",
+      "when": "2026-11-14T09:46:05.971672+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261114T075712328435-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261114T075712328435-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "b95814f29ba2cbbf8db374a994aa9c69c1b7a84c",
   "rubric": "content",

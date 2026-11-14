@@ -1,0 +1,591 @@
+"""Runtime coil and flux-function inputs on the operator-bank route."""
+
+# ruff: noqa: E402
+from nova.jax.config import configure_dtypes
+
+configure_dtypes()
+
+from dataclasses import replace
+import logging
+import os
+
+import jax
+import jax.numpy as jnp
+import numpy as np
+import pytest
+
+from nova.equilibrium import current, fixed_points, support_read as bank
+from nova.equilibrium.constraint import VerticalPositionPin, uniform_radial_field_jet
+
+assert jax.config.jax_enable_x64 is True
+
+
+def _table(pressure=-1.0, diamagnetic=0.0):
+    return current.TabulatedProfile(
+        jnp.full(current.PROFILE_KNOT_COUNT, pressure, dtype=jnp.float64),
+        jnp.full(current.PROFILE_KNOT_COUNT, diamagnetic, dtype=jnp.float64),
+    )
+
+
+@pytest.fixture(scope="module")
+def small():
+    from tests.test_support_read import _case
+
+    operands, _, roots, _, _, _, _ = _case("limited")
+    cells = len(operands.geometry.centre)
+    rows = jnp.zeros((len(operands.nodes), cells, 3, 6), dtype=jnp.float64)
+    coils = uniform_radial_field_jet(operands.nodes)[:, None] * 1e-3
+    operands = replace(
+        operands, rows=rows, coil_exterior=coils, coil_count=jnp.asarray(1, jnp.int32)
+    )
+    cache = fixed_points.RowCache(
+        operands.mesh,
+        operands.nodes,
+        jnp.arange(len(operands.nodes)),
+        rows,
+        operands.exterior,
+    )
+    from nova.equilibrium import topology
+    from nova.equilibrium.solve_request import TopologyPolicy
+
+    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    policy = TopologyPolicy()
+    quadrature = current.Quadrature(sigma=convention.sigma, segments=8)
+    state = tuple(jnp.zeros(cells, dtype=jnp.float64) for _ in range(3))
+    read = jax.jit(
+        lambda op, window, state: bank.read(
+            op, window, state, roots, roots, convention, policy
+        )
+    )(operands, cache, state)
+    assert bool(read.valid)
+    return operands, cache, roots, convention, policy, quadrature, state, read
+
+
+def test_certificate_fixture_unchanged_and_constant_table_reproduces_profile():
+    from scripts.prototypes.bank_newton_step.measure import machine
+
+    operands, _, _, _, _, profile, quadrature, moments, _ = machine("diverted")
+    assert moments[0].size == 550
+    plain = bank.nodal_jets(operands, moments)
+    expected = operands.exterior + jnp.einsum(
+        "ncmq,cm->nq", operands.rows, jnp.stack(moments, axis=-1)
+    )
+    np.testing.assert_allclose(plain, expected, rtol=1e-12, atol=0)
+    supplied = replace(
+        operands, coil_exterior=jnp.zeros((len(plain), 2, 6)), coil_count=jnp.asarray(2)
+    )
+    np.testing.assert_allclose(
+        bank.nodal_jets(supplied, moments, jnp.ones(2)), plain, rtol=1e-12, atol=0
+    )
+    knots = jnp.linspace(0.0, 1.0, current.PROFILE_KNOT_COUNT)
+    tabulated = current.TabulatedProfile(
+        profile.p_prime(knots), profile.ff_prime(knots)
+    )
+    radius = jnp.linspace(1.0, 5.0, 99)
+    normalized = jnp.linspace(0.0, 1.0, 99)
+    np.testing.assert_allclose(
+        tabulated.current_density(radius, normalized),
+        profile.current_density(radius, normalized),
+        rtol=1e-12,
+        atol=0,
+    )
+    # Both profiles book the same field on the same connected support.
+    from nova.equilibrium import topology
+
+    _, analytic, _, axis, saddle = __import__(
+        "tests.equilibrium.test_topology_read", fromlist=["_analytic_inputs"]
+    )._analytic_inputs("diverted")
+    from nova.equilibrium.solve_request import TopologyPolicy
+
+    reading = jax.jit(topology.read)(
+        analytic,
+        operands.geometry,
+        topology.TopologyConvention.from_cocos(17, 1.0),
+        TopologyPolicy(normal_form_radius=0.054806712567833996),
+    )
+    psi = plain[operands.sample_index, 0]
+    evaluate = jax.jit(
+        lambda source: current.book(psi, reading, operands.geometry, source, quadrature)
+    )
+    constant = current.book(psi, reading, operands.geometry, profile, quadrature)
+    table = evaluate(tabulated)
+    assert bool(constant.valid) and bool(table.valid)
+    for actual, reference in zip(table[:3], constant[:3], strict=True):
+        np.testing.assert_allclose(actual, reference, rtol=1e-12, atol=1e-14)
+    print("CERTIFICATE cells 550 relative tolerance 1e-12 knots 33 cubic Hermite")
+
+
+def test_coil_bank_padding_storage_and_count(small, tmp_path):
+    operands, cache, roots, convention, policy, quadrature, state, read = small
+    padded = bank.SupportOperands.from_rows(
+        operands.geometry,
+        operands.rows,
+        operands.exterior,
+        operands.nodes,
+        operands.sample_index,
+        bucket=len(operands.nodes),
+        coil_exterior=operands.coil_exterior,
+    )
+    assert padded.coil_exterior.shape == (padded.bucket, 1, 6)
+    assert int(padded.coil_count) == 1
+    assert not np.any(np.asarray(padded.coil_exterior)[len(operands.nodes) :])
+    digest = bank.write_bank(padded, tmp_path)
+    restored = bank.read_bank(tmp_path, digest, padded.geometry, padded.mesh)
+    np.testing.assert_array_equal(restored.coil_exterior, padded.coil_exterior)
+    np.testing.assert_array_equal(restored.coil_count, padded.coil_count)
+    masked = replace(restored, coil_count=jnp.asarray(0, jnp.int32))
+    np.testing.assert_array_equal(
+        bank.nodal_jets(masked, state, jnp.ones(1)), bank.nodal_jets(masked, state)
+    )
+    with pytest.raises(ValueError, match="every bank coil"):
+        bank.nodal_jets(restored, state, jnp.zeros(2))
+
+
+def test_tabulated_derivative_matches_autodiff_at_and_between_knots():
+    knots = jnp.linspace(0.0, 1.0, current.PROFILE_KNOT_COUNT)
+    profile = current.TabulatedProfile(knots**2 - 1.0, 1e-6 * (1 - knots**3))
+    points = jnp.concatenate((knots[1:-1], knots[:-1] + 0.37 / 32))
+    radius = jnp.full_like(points, 2.4)
+    automatic = jax.vmap(jax.grad(lambda r, x: profile.current_density(r, x), 1))(
+        radius, points
+    )
+    np.testing.assert_allclose(
+        profile.density_gradient(radius, points), automatic, rtol=1e-12, atol=1e-12
+    )
+    assert float(jnp.max(jnp.abs(automatic))) > 1.0
+    with pytest.raises(ValueError, match="33 knots"):
+        current.TabulatedProfile(jnp.ones(8), jnp.ones(8))
+
+
+def _traced_booking(
+    operands, moments, support, pressure, diamagnetic, currents, quadrature
+):
+    return bank.step_residual(
+        operands,
+        moments,
+        moments,
+        support,
+        current.TabulatedProfile(pressure, diamagnetic),
+        quadrature,
+        coil_currents=currents,
+    ).booked
+
+
+def test_slice_inputs_cause_zero_new_compilations(small, caplog):
+    operands, cache, roots, convention, policy, quadrature, state, read = small
+    caplog.set_level(logging.WARNING, logger="jax")
+    program = jax.jit(_traced_booking)
+    source = _table()
+    currents = jnp.asarray([0.0])
+    next_currents = jnp.asarray([0.01])
+    next_pressure = source.p_prime * 1.01
+    captured = os.environ.get("NOVA_CAPTURE_SLICE_CURRENTS") == "1"
+
+    def apply(values, pressure):
+        if captured:
+            # A distinct closure per slice bakes its currents into the program.
+            program_for_slice = jax.jit(
+                lambda op, st, rd, pp, ff, quad: _traced_booking(
+                    op, st, rd, pp, ff, values, quad
+                )
+            )
+            return program_for_slice(
+                operands, state, read, pressure, source.ff_prime, quadrature
+            )
+        return program(
+            operands, state, read, pressure, source.ff_prime, values, quadrature
+        )
+
+    with jax.log_compiles(True):
+        first = apply(currents, source.p_prime)
+        jax.block_until_ready(first)
+        warm = [
+            record.message
+            for record in caplog.records
+            if "Compiling jit(" in record.message
+        ]
+        assert warm, "compile-log instrument must see the cold program"
+        caplog.clear()
+        second = apply(next_currents, next_pressure)
+        jax.block_until_ready(second)
+        added = [
+            record.message
+            for record in caplog.records
+            if "Compiling jit(" in record.message
+        ]
+    assert bool(first.valid) and bool(second.valid)
+    assert not np.array_equal(
+        np.asarray(first.cell_current), np.asarray(second.cell_current)
+    )
+    print(
+        "SLICE_COMPILATIONS cold",
+        len(warm),
+        "changed",
+        len(added),
+        "captured",
+        captured,
+    )
+    for message in added:
+        print("COMPILE_LOG", message)
+    assert len(added) == 0
+
+
+@pytest.fixture(scope="module")
+def multiple_coils(small):
+    operands, *rest = small
+    radius = operands.nodes[:, 0]
+    first = uniform_radial_field_jet(operands.nodes) * 1e-3
+    second = jnp.zeros_like(first)
+    second = second.at[:, 0].set(2e-3 * radius**2)
+    second = second.at[:, 1].set(4e-3 * radius)
+    second = second.at[:, 3].set(4e-3)
+    columns = jnp.stack((first, second, jnp.zeros_like(first)), axis=1)
+    assert not np.array_equal(columns[:, 0], columns[:, 1])
+    assert np.count_nonzero(np.asarray(columns[:, 2])) == 0
+    return replace(
+        operands, coil_exterior=columns, coil_count=jnp.asarray(2, jnp.int32)
+    ), *rest
+
+
+def test_distinct_coil_columns_match_independent_residual(multiple_coils):
+    operands, _, _, _, _, quadrature, state, reading = multiple_coils
+    amps = jnp.asarray([0.17, -0.29, 83.0], dtype=jnp.float64)
+    knots = jnp.linspace(0.0, 1.0, current.PROFILE_KNOT_COUNT)
+    profile = current.TabulatedProfile(-1.0 - knots**2, 1e-6 * knots)
+    # The oracle adds the two named columns explicitly and excludes padding.
+    expected_jets = (
+        np.asarray(operands.exterior)
+        + np.asarray(operands.coil_exterior[:, 0]) * float(amps[0])
+        + np.asarray(operands.coil_exterior[:, 1]) * float(amps[1])
+    )
+    plasma = np.einsum(
+        "ncmq,cm->nq", np.asarray(operands.rows), np.stack(state, axis=-1)
+    )
+    expected_psi = jnp.asarray(
+        (expected_jets + plasma)[np.asarray(operands.sample_index), 0]
+    )
+    booked = jax.jit(current.book)(
+        expected_psi, reading.reading, operands.geometry, profile, quadrature
+    )
+    assert bool(booked.valid)
+    expected = tuple(
+        np.asarray(value - prediction)
+        for value, prediction in zip(state, booked[:3], strict=True)
+    )
+
+    @jax.jit
+    def program(op, currents):
+        return bank.step_residual(
+            op, state, state, reading, profile, quadrature, coil_currents=currents
+        ).residual
+
+    actual = program(operands, amps)
+    jax.block_until_ready(actual)
+    errors = [
+        float(np.max(np.abs(value - reference)))
+        for value, reference in zip(actual, expected, strict=True)
+    ]
+    print(
+        "DISTINCT_COILS maximum residual errors",
+        errors,
+        "live",
+        int(operands.coil_count),
+        "dead current",
+        float(amps[2]),
+    )
+    for value, reference in zip(actual, expected, strict=True):
+        np.testing.assert_allclose(value, reference, rtol=1e-12, atol=1e-13)
+    swapped = program(operands, amps[jnp.asarray([1, 0, 2])])
+    dropped = program(replace(operands, coil_count=jnp.asarray(1, jnp.int32)), amps)
+    for label, wrong in (("swapped order", swapped), ("dropped live column", dropped)):
+        gap = max(
+            float(np.max(np.abs(value - reference)))
+            for value, reference in zip(wrong, expected, strict=True)
+        )
+        print("COIL_CONTROL", label, "residual gap", gap)
+        assert gap > 1e-5
+        with pytest.raises(AssertionError):
+            for value, reference in zip(wrong, expected, strict=True):
+                np.testing.assert_allclose(value, reference, rtol=1e-12, atol=1e-13)
+
+
+@pytest.mark.parametrize("endpoint", ["scalar", "channels"])
+def test_variable_profile_gradient_routes_into_booking_tangents(small, endpoint):
+    operands, _, _, _, _, quadrature, state, support = small
+    knots = jnp.linspace(0.0, 1.0, current.PROFILE_KNOT_COUNT)
+    profile = current.TabulatedProfile(-1.0 - 0.4 * knots**2, 1e-6 * knots**3)
+    psi = bank.nodal_jets(operands, state)[operands.sample_index, 0]
+    span = support.reading.boundary_flux - support.reading.axis_flux
+    rate = jnp.full_like(psi, 0.13 * span)
+
+    @jax.jit
+    def evaluate(psi, rate, reading, geometry, source, quad):
+        booked = current.book(psi, reading, geometry, source, quad)
+        _, reference = jax.jvp(
+            lambda x: current.book(x, reading, geometry, source, quad)[:3],
+            (psi,),
+            (rate,),
+        )
+
+        def fallback(r, x):
+            return jnp.zeros_like(x)
+
+        class WithoutGradient:
+            current_density = staticmethod(source.current_density)
+
+        def tangent(profile):
+            if endpoint == "scalar":
+                return current.book_tangent(
+                    psi,
+                    rate,
+                    reading,
+                    jnp.zeros_like(reading.field_coefficients),
+                    0.0,
+                    0.0,
+                    geometry,
+                    profile,
+                    fallback,
+                    quad,
+                    booked,
+                )
+            values = current.book_tangent_channels(
+                psi,
+                rate[None],
+                reading,
+                jnp.zeros_like(reading.field_coefficients)[None],
+                jnp.zeros(1),
+                jnp.zeros(1),
+                geometry,
+                profile,
+                fallback,
+                quad,
+                booked,
+                jnp.arange(1, dtype=jnp.int32),
+            )
+            return tuple(values[:, component, 0] for component in range(3))
+
+        return tangent(source), tangent(WithoutGradient()), reference
+
+    actual, constant_fallback, reference = evaluate(
+        psi, rate, support.reading, operands.geometry, profile, quadrature
+    )
+    jax.block_until_ready(actual)
+    variation = np.ptp(
+        np.asarray(profile.density_gradient(jnp.full_like(knots, 2.4), knots))
+    )
+    signal = max(float(np.max(np.abs(value))) for value in reference)
+    fallback_gap = max(
+        float(np.max(np.abs(a - b)))
+        for a, b in zip(actual, constant_fallback, strict=True)
+    )
+    print(
+        "GRADIENT_ROUTE",
+        endpoint,
+        "gradient variation",
+        variation,
+        "reference signal",
+        signal,
+        "fallback gap",
+        fallback_gap,
+    )
+    assert variation > 1.0 and signal > 1e-3 and fallback_gap > 1e-3
+    for value, expected in zip(actual, reference, strict=True):
+        np.testing.assert_allclose(value, expected, rtol=1e-9, atol=1e-10)
+    with pytest.raises(AssertionError):
+        for value, expected in zip(constant_fallback, reference, strict=True):
+            np.testing.assert_allclose(value, expected, rtol=1e-9, atol=1e-10)
+
+
+def _weighted_centroid_z(geometry, moments):
+    currents, _, local_vertical = (np.asarray(value) for value in moments)
+    # Each cell's current acts at its own centre of current, including its
+    # intra-cell first moment. This is an independent NumPy reduction.
+    local_z = np.divide(
+        local_vertical, currents, out=np.zeros_like(currents), where=currents != 0
+    )
+    cell_z = np.asarray(geometry.centre)[:, 1] + local_z
+    return np.sum(currents * cell_z, axis=-1) / np.sum(currents, axis=-1)
+
+
+def test_coils_reach_read_residual_and_jacobian(small):
+    operands, cache, roots, convention, policy, quadrature, state, reading = small
+    source = _table()
+    currents = jnp.asarray([0.4])
+    effective = bank.driven_operands(operands, currents)
+    window = bank._driven_cache(effective, cache)
+    actual = jax.jit(
+        lambda op, win, amps: bank.read(
+            op, win, state, roots, roots, convention, policy, coil_currents=amps
+        )
+    )(operands, cache, currents)
+    expected = jax.jit(
+        lambda op, win: bank.read(op, win, state, roots, roots, convention, policy)
+    )(effective, window)
+    np.testing.assert_allclose(actual.reading.axis, expected.reading.axis, rtol=1e-12)
+    assert np.linalg.norm(np.asarray(actual.reading.axis - reading.reading.axis)) > 1e-5
+    direct = bank.step_residual(effective, state, state, actual, source, quadrature)
+    traced = bank.step_residual(
+        operands, state, state, actual, source, quadrature, coil_currents=currents
+    )
+    for value, reference in zip(traced.residual, direct.residual, strict=True):
+        np.testing.assert_allclose(value, reference, rtol=1e-12, atol=0)
+    matrix = jax.jit(
+        lambda op, amps: bank.step_jacobian(
+            op, state, actual, source, None, quadrature, coil_currents=amps
+        )
+    )(operands, currents)
+    np.testing.assert_allclose(matrix, jnp.eye(matrix.shape[0]), rtol=1e-12, atol=1e-12)
+
+
+def test_zero_update_budget_reports_unsolved_state(small):
+    operands, cache, roots, convention, policy, quadrature, state, reading = small
+    result = jax.jit(
+        lambda op, win: bank.solve_batch(
+            op,
+            win,
+            tuple(value[None] for value in state),
+            roots[None],
+            roots[None],
+            convention,
+            policy,
+            _table(),
+            None,
+            quadrature,
+            max_steps=0,
+        )
+    )(operands, cache)
+    assert not np.any(result.converged)
+    np.testing.assert_array_equal(result.steps, [0])
+    assert result.update_path.shape == (1, 0)
+    for value, original in zip(result.moments, state, strict=True):
+        np.testing.assert_array_equal(value[0], original)
+
+
+def test_pin_holds_independent_lane_centroids(small, caplog, monkeypatch):
+    operands, cache, roots, convention, policy, quadrature, state, reading = small
+    source = _table()
+    target = jnp.asarray([0.005, -0.008], dtype=jnp.float64)
+    pin = VerticalPositionPin(target, source_scale=1e-3, tolerance=1e-8)
+    seed_current = (
+        operands.geometry.full_area
+        * (1.0 + 0.2 * operands.geometry.centre[:, 1])
+        * 1000.0
+    )
+    seed = (seed_current, jnp.zeros_like(seed_current), seed_current * 0.01)
+    moments = tuple(jnp.broadcast_to(value, (2, value.size)) for value in seed)
+    initial_height = _weighted_centroid_z(operands.geometry, moments)
+    assert np.all(np.abs(initial_height - np.asarray(target)) > 1e-3)
+    assert np.all(np.sum(np.asarray(moments[0]), axis=-1) > 0)
+    print("PIN_NONZERO_SEED height", initial_height, "target", np.asarray(target))
+    seeds = jnp.broadcast_to(roots, (2, *roots.shape))
+    bank._tabulated_jacobian.clear_cache()
+    construction = dict.fromkeys(
+        ("newton_step", "step_jacobian", "_booking_jacobian"), 0
+    )
+
+    def count_calls(name):
+        original = getattr(bank, name)
+
+        def counted(*args, **kwargs):
+            construction[name] += 1
+            return original(*args, **kwargs)
+
+        monkeypatch.setattr(bank, name, counted)
+
+    for name in construction:
+        count_calls(name)
+
+    @jax.jit
+    def program(bank_operands, window, state, amps, pressure, ff, target):
+        return bank.solve_batch(
+            bank_operands,
+            window,
+            state,
+            seeds,
+            seeds,
+            convention,
+            policy,
+            lambda lane: current.TabulatedProfile(pressure[lane], ff[lane]),
+            None,
+            quadrature,
+            max_steps=4,
+            freeze_active_set=False,
+            coil_currents=amps,
+            vertical_pin=replace(pin, target_height=target),
+        )
+
+    pressure = jnp.stack((source.p_prime, source.p_prime * 1.1))
+    ff = jnp.stack((source.ff_prime, source.ff_prime))
+    currents = jnp.asarray([[0.0], [0.2]])
+    next_currents = jnp.asarray([[0.1], [-0.1]])
+    next_pressure = pressure * 1.02
+    next_target = target + 0.001
+    caplog.set_level(logging.WARNING, logger="jax")
+    with jax.log_compiles(True):
+        result = program(operands, cache, moments, currents, pressure, ff, target)
+        jax.block_until_ready(result)
+        cold = [
+            record.message
+            for record in caplog.records
+            if "Compiling jit(program)" in record.message
+        ]
+        assert cold, "compile log must see the full solve's cold program"
+        cold_events = [record.message for record in caplog.records]
+        caplog.clear()
+        following = program(
+            operands, cache, moments, next_currents, next_pressure, ff, next_target
+        )
+        jax.block_until_ready(following)
+        added = [
+            record.message
+            for record in caplog.records
+            if "Compiling jit(program)" in record.message
+        ]
+    print("SOLVE_COMPILATIONS cold", len(cold), "changed", len(added))
+    print("PIN_GRAPH_CONSTRUCTION", construction)
+    for event in cold_events:
+        if (
+            "Finished tracing program for jit" in event
+            or "Finished XLA compilation of jit(program)" in event
+            or "MLIR module conversion jit(program)" in event
+        ):
+            print("PIN_PROGRAM_WALL", event)
+    assert construction["newton_step"] == 0
+    assert construction["step_jacobian"] == 1
+    assert construction["_booking_jacobian"] == 1
+    assert not added
+    assert np.all(following.converged)
+    np.testing.assert_allclose(following.pin_error, 0, rtol=0, atol=1e-8)
+    height = _weighted_centroid_z(operands.geometry, result.moments)
+    following_height = _weighted_centroid_z(operands.geometry, following.moments)
+    np.testing.assert_allclose(following_height, next_target, rtol=0, atol=1e-8)
+    cell_centre_only = np.sum(
+        np.asarray(result.moments[0]) * np.asarray(operands.geometry.centre)[:, 1],
+        axis=-1,
+    ) / np.sum(np.asarray(result.moments[0]), axis=-1)
+    centre_only_gap = np.abs(cell_centre_only - np.asarray(target))
+    print(
+        "PIN_INDEPENDENT changed height",
+        following_height,
+        "cell-centre-only gap",
+        centre_only_gap,
+    )
+    assert np.all(centre_only_gap > 1e-8)
+    print(
+        "PIN target",
+        np.asarray(target),
+        "actual",
+        np.asarray(height),
+        "error",
+        np.asarray(result.pin_error),
+        "amplitude",
+        np.asarray(result.pin_amplitude),
+        "residual",
+        np.asarray(result.residual),
+        "converged",
+        np.asarray(result.converged),
+    )
+    assert np.all(result.converged)
+    np.testing.assert_allclose(height, target, rtol=0, atol=1e-8)
+    assert np.max(np.abs(np.asarray(result.residual))) <= 1e-10
+    assert np.all(np.abs(np.asarray(result.pin_amplitude)) > 0)

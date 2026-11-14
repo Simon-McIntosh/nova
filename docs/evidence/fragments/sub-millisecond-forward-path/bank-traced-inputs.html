@@ -1,0 +1,337 @@
+<section data-reckon="fragment" id="bank-traced-inputs-landing"
+ data-plan="sub-millisecond-forward-path" data-node="bank-traced-inputs">
+<h2>Traced coil currents, flux-function tables and centroid targets</h2>
+<p>The bank retains the fixed external field in <code>exterior</code> and each
+coil's unit-current response in <code>coil_exterior</code>, with shape
+(nodes, coils, six jet entries). Both are padded to the node bucket. A traced
+<code>coil_count</code> masks unused columns. The content store persists the
+responses and count alongside the existing bank arrays.</p>
+<p><code>driven_operands</code> contracts each lane's current vector into one
+effective exterior before entering the existing solver. The nodal contraction,
+stationary-point row window, Bell read, residual and Jacobian all use that same
+exterior. The row-window lookup scatters nodal jets into occupied cache slots;
+unpopulated slots cannot overwrite a live node. Calls without currents or a
+pin retain the existing batched solver path.</p>
+<table id="bank-traced-inputs-interface"><thead><tr><th>Input</th><th>Layout</th>
+<th>Bank interface</th></tr></thead><tbody>
+<tr><td>Coil currents</td><td>(lanes, coils), traced</td>
+<td><code>solve_batch(..., coil_currents=currents)</code></td></tr>
+<tr><td>Pressure and diamagnetic gradients</td><td>two arrays of (lanes, 33), traced</td>
+<td><code>profile=lambda lane: current.TabulatedProfile(p_prime[lane], ff_prime[lane])</code></td></tr>
+<tr><td>Centroid target</td><td>scalar or one height per lane, traced</td>
+<td><code>vertical_pin=VerticalPositionPin(target_height, source_scale=1e-3)</code></td></tr>
+</tbody></table>
+<p>The 33 knots span normalized flux 0 to 1 uniformly. Cubic Hermite interpolation
+uses centred interior slopes and one-sided endpoint slopes; the endpoint value
+is held outside the knot interval. Interior-knot first derivatives are continuous.
+A difference-form polynomial reproduces a constant table exactly. The profile
+uses the existing SI toroidal-current-density convention. Its analytic
+normalized-flux derivative is selected by both booking tangent entry points and
+the bank Jacobian, including per-lane profile callbacks. Existing constant-gradient
+certificate profiles remain accepted.</p>
+<p>The pin follows <code>VerticalPositionPin</code>: its source is the existing
+uniform radial-field jet, or the declared coil direction. Its dimensionless
+amplitude is converted by <code>source_scale</code>. Current-centroid height is
+<code>sum(z_cell * I_cell + local_vertical_moment) / sum(I_cell)</code>, so cell-local
+moments are translated before summation. The height row is scaled by
+<code>row_scale</code>. One bordered Newton loop updates the moments and source
+amplitude together. Two right-hand sides of the equilibrated moment Jacobian
+eliminate the centroid row, using the analytic external-field booking tangent,
+including moving saddle geometry. One shared evaluator performs a full fresh
+read and booking for initialization and each damped trial. Acceptance requires
+both the moment residual and centroid tolerance; the combined update cap is
+eight times the supplied moment-step budget. The receipt
+returns <code>pin_amplitude</code> and <code>pin_error</code>; an unsatisfied pin
+cannot report convergence. A changed pin field invalidates the carried factor.</p>
+<h3 id="bank-traced-inputs-reproduction">Reproductions and controls</h3>
+<p>At dispatch base <code>5f8e4a269cafc9a00c7320fb6a72d8cbfc95a249</code>, the interface
+probe records <code>REPRODUCTION TypeError got an unexpected keyword argument
+'coil_currents'</code>. The first focused implementation gate exposed a zero-budget
+driver defect: <code>IndexError: index is out of bounds for axis 1 with size 0</code>
+in <code>test_pin_holds_independent_lane_centroids</code>. A capped solve now retains
+its empty update-history array without indexing it; a separate regression verifies
+zero updates, unchanged moments and non-convergence.</p>
+<p>The closure control captures a slice's currents in a newly jitted step closure.
+Changing currents produces a compilation-log entry beginning
+<code>Compiling jit(&lt;lambda&gt;)</code> and fails
+<code>test_slice_inputs_cause_zero_new_compilations</code>: the first focused
+control records <code>assert 1 == 0</code>, <code>1 failed, 5 deselected</code>,
+and <code>EXIT=1</code>. The ordinary focused arm passed that compilation check.
+The logger also has to observe the cold compilation before its zero-change count
+is accepted.</p>
+<h3 id="bank-traced-inputs-measurement">Initial paired CPU evidence</h3>
+<p>Rigel job <code>1314536</code> uses seven CPUs and 96 GiB and runs each file in a
+fresh interpreter from git-archive trees. Base is the dispatch revision above;
+implementation head is <code>b8caeae4a9820e80f822b6d51fc7a59e9a04ba56</code>.
+Every file log records its revision, imported module, resolved working directory,
+literal command and terminal exit status. The new test file is absent from the
+base tree and is run at the head only.</p>
+<table id="bank-traced-inputs-paired-tests"><thead><tr><th>File</th><th>Base passed</th>
+<th>Head passed</th><th>Added failures</th></tr></thead><tbody>
+<tr><td>test_support_read</td><td>13; 2 skipped</td><td>13; 2 skipped</td><td>0</td></tr>
+<tr><td>test_bank_drive_continuation</td><td>10</td><td>10</td><td>0</td></tr>
+<tr><td>test_bank_lane_drive</td><td>11</td><td>11</td><td>0</td></tr>
+<tr><td>test_bank_traced_inputs</td><td>absent</td><td>6 passed, 1 failed</td><td>1 new-file failure</td></tr>
+</tbody></table>
+<p id="bank-traced-inputs-pin-measure">The new file checks the 550-cell certificate's
+nodal jets and booking moments at 1e-12 relative tolerance, constant-table source
+parity, coil padding/storage/count masking, interpolation derivatives, compilation
+reuse, coil propagation into the read/residual/Jacobian, zero-update refusal and
+independent centroid targets. The centroid test uses the actual read and booking on
+a 50-cell limited bank with analytic exterior and zero plasma-response rows; the
+scenario node measures coupled ITER convergence and H200 throughput.</p>
+<p id="bank-traced-inputs-pin-timeout">The pre-repair pin result was unverified. The head
+file ends <code>1 failed, 6 passed in 764.74s (0:12:44)</code> and
+<code>EXIT=1</code>. The failing test is
+<code>test_pin_holds_independent_lane_centroids</code>, with
+<code>Failed: Timeout (&gt;300.0s) from pytest-timeout</code>. Its compilation log
+records 221.029 s tracing, 17.496 s converting to MLIR and 241.881 s compiling
+the full program. No centroid-height or full-solve zero-recompilation receipt
+was returned. This is the second counted failure of this gate, after the
+zero-update-history defect above, so the worker stopped under its retry contract.
+The lead selected a smaller pin graph while retaining the normal timeout; the resumed measurements below supersede this stopping point.</p>
+<p>Durable logs and receipts are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T165201745905-bank-traced-inputs/</code>:
+<code>focused/</code> retains the first failure and closure control;
+<code>paired-final/</code> retains the paired files and repeated closure control.
+In that attempt, the final-head replay was not started because the pin gate did not pass. The
+fragment and harness commits after the measured implementation head change no
+product source or tests.</p>
+<h3 id="bank-traced-inputs-graph-repair">Single solver construction inside the pin loop</h3>
+<p>The lead resumed the worker on 2026-11-14 to repair graph construction while
+retaining the normal 300 s test limit. The pre-repair product and test files at
+<code>5391ff27c10fc2ecd16c9e307ca1d58bd1ae41ec</code> are identical to the measured
+implementation head above. Its full-program wall remains the recorded
+221.029 s trace and 241.881 s compile.</p>
+<p>The expensive duplication is structural: pin initialization invokes the full
+solver, and the pin loop constructs another full solver. Each solver constructs
+both fresh and carried-factor correction branches even when the pin's policy
+fixes factor reuse off. The outer iterations already use <code>lax.while_loop</code>,
+lanes use <code>vmap</code>, and profile knots are evaluated as arrays.</p>
+<p>The repair makes a zero-update solve return its read and residual before
+constructing Newton branches. The pin uses that cheap initialization and keeps
+one full solver construction inside its loop body. A static fresh-factor policy
+constructs only the fresh correction. This changes graph construction while
+retaining the moment equation, fresh-read acceptance, source convention and pin
+tolerances. The test counts construction sites, retains cold trace/compile log
+events before clearing the logger, and verifies the subsequent slice reuses the
+full program. The runner uses <code>-rfP</code> to preserve failing test ids.</p>
+<p>The first graph inventory helper completed tracing but recursed on the
+<code>Jaxpr.jaxpr</code> self-alias in its visitor. That helper defect was repaired
+and a multiplication/addition positive control now runs before each full inventory.
+The successful inventories are under <code>graph-checked/</code> and
+<code>shared-jacobian/</code> in the run directory. A fresh process inventories each
+product graph, and every test file runs in its own fresh process. The measurement
+script was committed before submission.</p>
+<h3 id="bank-traced-inputs-graph-measures">Earlier graph reductions and timeout refusals</h3>
+<p>Rigel job <code>1314830</code> measured both graph inventories on one node:
+pre-repair <code>5391ff27c10fc2ecd16c9e307ca1d58bd1ae41ec</code> traced in 208.326 s;
+first repair <code>21856d999b8549d7b1976d053405dce3efbebb22</code> traced in 117.127 s.
+The later stable tabulated-Jacobian boundary at
+<code>5cfc0bbae7c7452e3666abf0cd34e20aa8b005af</code> was measured by job
+<code>1314883</code>. It shares one array-owned Jacobian body between the moment
+and pin callers, with all numeric values retained as arguments.</p>
+<table id="bank-traced-inputs-graph-counts"><thead><tr><th>Construction measure</th>
+<th>Pre-repair</th><th>Loop repair</th><th>Shared Jacobian</th></tr></thead><tbody>
+<tr><td>Newton-step sites</td><td>4</td><td>1</td><td>1</td></tr>
+<tr><td>Jacobian caller sites</td><td>5</td><td>2</td><td>2; one shared body</td></tr>
+<tr><td>Booking tangent-channel sites</td><td>5</td><td>2</td><td>1</td></tr>
+<tr><td>Staged operations</td><td>389,708</td><td>222,262</td><td>222,415</td></tr>
+<tr><td>Graph inventory trace [s]</td><td>208.326</td><td>117.127</td><td>114.611</td></tr>
+</tbody></table>
+<table id="bank-traced-inputs-cold-walls"><thead><tr><th>Full pin test stage</th>
+<th>Pre-repair [s]</th><th>Loop repair [s]</th><th>Shared Jacobian [s]</th></tr></thead><tbody>
+<tr><td>Trace</td><td>221.029</td><td>120.525</td><td>115.674</td></tr>
+<tr><td>MLIR conversion</td><td>17.496</td><td>10.943</td><td>10.556</td></tr>
+<tr><td>XLA compilation</td><td>241.881</td><td>167.234</td><td>168.943</td></tr>
+<tr><td>Normal 300 s test limit</td><td>timeout</td><td>timeout</td><td>timeout</td></tr>
+</tbody></table>
+<p>The historical pre-repair full-test wall comes from the earlier allocation;
+the common-node inventory comparison provides the direct tracing comparison.
+The staged graph is about 43% smaller. Sharing the Jacobian body changes Python
+construction count but does not materially reduce the remaining staged operation
+count or compile wall.</p>
+<p>The latest paired files use fresh interpreters on one seven-CPU Rigel job with
+<code>JAX_PLATFORMS=cpu</code>, the shared interpreter and <code>-rfP</code>.
+All three existing files pass at base and head: 13 passed and 2 skipped for
+<code>test_support_read</code>, 10 passed for <code>test_bank_drive_continuation</code>,
+and 11 passed for <code>test_bank_lane_drive</code>, with zero added failures.
+The new file ends <code>1 failed, 6 passed in 480.97s (0:08:00)</code> and
+<code>EXIT=1</code>. The failing id is
+<code>tests/test_bank_traced_inputs.py::test_pin_holds_independent_lane_centroids</code>.</p>
+<p>The second attempt timed out at <code>jax.block_until_ready(result)</code>.
+Its exception representation includes first-slice pin errors
+<code>[6.85215773e-16, -8.50014503e-17]</code>, but the acceptance assertions and
+second-slice full-program reuse check were not reached. Those clauses were unverified at that stopping point. Both attempts retained the 300 s limit and all numerical tolerances.
+Two counted product-gate failures exhausted the restarted retry allowance, so no
+third implementation attempt was made and no final-head replay was started.</p>
+<p>Detailed logs and graph JSON for those two attempts remain under
+<code>graph-checked/</code> and <code>shared-jacobian/</code> in the run directory.
+The coordinator then renewed the retry allowance and required the flat solve
+and a standalone numerical probe before another product gate.</p>
+<h3 id="bank-traced-inputs-flat-loop">One bordered loop and one fresh evaluator</h3>
+<p>Implementation <code>6316c7016e038d9d5f20a7ee835738d1fbdba19d</code>
+removes the inner equilibrium solve. Its bordered update solves
+<code>A dm - c dα = -R</code> and
+<code>centroid_row dm = -centroid_numerator / (current_scale * row_scale)</code>
+together. The numerator <code>sum((z_cell - target) I_cell + local_vertical_moment)</code>
+is linear in the moments and remains defined at a cold zero-current state,
+with the same physical source and tolerances. The shared fresh evaluator
+eliminates repeated construction of initialization, trial and terminal reads;
+every retained trial already carries a full read. An equilibrated dense solve
+applies the two right-hand sides. A pin solve returns no reusable moment factor.</p>
+<table id="bank-traced-inputs-flat-graph"><thead><tr><th>Measure</th>
+<th>Shared-Jacobian predecessor</th><th>Flat bordered loop</th></tr></thead><tbody>
+<tr><td>Staged operations</td><td>222,415</td><td>67,230</td></tr>
+<tr><td>Unique jaxprs</td><td>3,961</td><td>1,151</td></tr>
+<tr><td>Graph inventory trace [s]</td><td>114.611</td><td>23.504</td></tr>
+<tr><td>Booking construction sites</td><td>7</td><td>1</td></tr>
+<tr><td>Jacobian callers / bodies</td><td>2 / 1</td><td>1 / 1</td></tr>
+</tbody></table>
+<p>Rigel job <code>1314928</code> runs the committed graph inventory and then
+<code>numerics.py</code> in fresh processes, without pytest. The latter records
+the cold compilation and both slices' centroid displacements and fresh residuals,
+and counts new compilations after changing currents, profile tables and targets.
+Receipts live under <code>flat-pin-probe/</code> in the run directory.</p>
+<p>The first standalone flat-loop probe (<code>6316c7016</code>) traced in
+22.926 s and compiled in 44.182 s, but failed its convergence assertion:
+the cold fixture has zero plasma current, so dividing the centroid row by that
+current produced NaNs, zero amplitude movement, and 32 exhausted updates.
+Its numerical log ends <code>AssertionError</code> and <code>EXIT=1</code>;
+<code>flat-pin-probe/numerics.json</code> retains both failed slice receipts.
+The second slice added zero compilations, but numerical acceptance failed.</p>
+<p>The numerator-row correction at
+<code>cc2260a3cb6b5a6c58be689d63e3e551e425cbf4</code> preserves this graph reduction:
+67,241 staged operations, 1,151 unique jaxprs, one booking and one Jacobian
+construction, inventory trace 23.684 s. Rigel job <code>1314939</code> then ran
+the same plain numerical probe successfully, with no pytest timeout involved.</p>
+<table id="bank-traced-inputs-flat-walls"><thead><tr><th>Cold program stage</th>
+<th>Flat loop [s]</th><th>Numerator row [s]</th></tr></thead><tbody>
+<tr><td>Trace</td><td>22.926</td><td>22.810</td></tr>
+<tr><td>MLIR conversion</td><td>4.397</td><td>4.480</td></tr>
+<tr><td>XLA compile</td><td>44.182</td><td>43.416</td></tr>
+<tr><td>Trace + compile</td><td>67.108</td><td>66.226</td></tr>
+</tbody></table>
+<table id="bank-traced-inputs-plain-numerics"><thead><tr><th>Slice</th>
+<th>Targets [m]</th><th>Maximum displacement [m]</th>
+<th>Maximum fresh residual</th><th>Updates per lane</th></tr></thead><tbody>
+<tr><td>First</td><td>0.005, -0.008</td><td>9.37e-17</td><td>1.013e-12</td><td>2</td></tr>
+<tr><td>Changed currents, tables and targets</td><td>0.006, -0.007</td>
+<td>2.02e-16</td><td>2.541e-11</td><td>2</td></tr>
+</tbody></table>
+<p>Both slices' two lanes report convergence. The physical height tolerance stays
+1e-8 m and the fresh residual tolerance stays 1e-10. The compilation log sees
+one cold program and zero changed-slice compilations. The first call takes
+74.042 s including tracing, conversion, compilation and execution; the second
+call takes 2.722 s. <code>flat-pin-cold-start/numerics.log</code> ends
+<code>EXIT=0</code>, and its JSON records the full per-lane results and imported
+module path. These plain-script results precede the next product-gate attempt.</p>
+<h3 id="bank-traced-inputs-normal-limit-pass">Normal-limit paired gate passed</h3>
+<p>Rigel job <code>1314952</code> ran the three existing files at dispatch base
+<code>5f8e4a269cafc9a00c7320fb6a72d8cbfc95a249</code> and head
+<code>55720c301fc257ca5dee3880deeb6298435bf0ca</code>, and the new file at head.
+Each file used a fresh shared-environment interpreter, an archived arm tree,
+<code>JAX_PLATFORMS=cpu</code> and <code>-rfP</code>, in one allocation with
+seven CPUs and 96 GiB. The normal per-test timeout remains 300 s.</p>
+<table id="bank-traced-inputs-passing-pair"><thead><tr><th>File</th>
+<th>Base</th><th>Head</th><th>Added failures</th></tr></thead><tbody>
+<tr><td>test_support_read</td><td>13 passed, 2 skipped</td><td>13 passed, 2 skipped</td><td>0</td></tr>
+<tr><td>test_bank_drive_continuation</td><td>10 passed</td><td>10 passed</td><td>0</td></tr>
+<tr><td>test_bank_lane_drive</td><td>11 passed</td><td>11 passed</td><td>0</td></tr>
+<tr><td>test_bank_traced_inputs</td><td>absent</td><td>7 passed</td><td>0</td></tr>
+</tbody></table>
+<p>The new file ends <code>7 passed in 252.32s (0:04:12)</code> and
+<code>EXIT=0</code>. Its full pin program traces in 22.192 s, converts to MLIR
+in 4.309 s and compiles in 43.870 s: trace plus compile 66.062 s, compared
+with the historical 462.910 s. It constructs one Jacobian body and no nested
+moment solver. Both first-slice lanes converge, with fresh residuals
+<code>[1.01252340e-12, 2.13162821e-13]</code>. The changed-slice convergence and
+pin assertions also pass. Its compilation receipt reads
+<code>SOLVE_COMPILATIONS cold 1 changed 0</code>.</p>
+<p>The same job applies the declared closure-constant mutation. Its log records
+<code>SLICE_COMPILATIONS cold 1 changed 1 captured True</code>,
+<code>FAILED tests/test_bank_traced_inputs.py::test_slice_inputs_cause_zero_new_compilations</code>,
+<code>1 failed, 6 deselected</code> and terminal <code>EXIT=1</code>.
+The positive head has no failing test ids. This observes the guarded recompilation
+and the test's refusal, rather than inferring protection from a passing suite.</p>
+<p>All gate commands, imported module paths, working directories, terminal statuses
+and failure ids are durable under <code>flat-pin-paired/</code> in the run directory.
+A second paired run at the fragment's final commit is recorded separately under
+<code>flat-pin-delivery/</code>; its authoritative completion and exact revision
+are in the manifest and that directory's receipts. Product and test content is
+unchanged by this evidence-only commit.</p>
+<h3 id="bank-traced-inputs-independent-oracles">Independent residual, derivative and centroid checks</h3>
+<p>The review at <code>7ce819dfc048648540ca6ee6acbbca0008482c70</code>
+requested stronger independent tests for the ITER coil seam. The added tests
+and measurement controls change no product source. The fixture now has two
+live coil columns with different response jets and a zero-padded dead column.
+The residual oracle adds each live column times its current explicitly, adds
+the plasma image separately, and books that independently assembled flux;
+it never calls <code>driven_operands</code>. The dead column receives a nonzero
+current of 83 to exercise the padding convention.</p>
+<p>Each booking tangent entry point is tested on a profile whose density
+gradient varies across flux. Its reference differentiates the primal booking
+with <code>jax.jvp</code>, which does not call the profile's analytic derivative.
+A wrapper exposing only current density forces the deliberately wrong constant
+zero-gradient fallback. The scalar and channel responses must match primal
+differentiation and differ from that fallback. Disposable archived source
+mutations remove each routing assignment separately and run the corresponding
+test, as well as swapping coil order and shifting the live-coil count mask.</p>
+<p>The pin test starts with nonzero cell currents and local vertical moments.
+Its initial centroid is 0.70709251 m, separated from the targets 0.005 and
+-0.008 m. The independent NumPy measurement finds each cell's centre of current
+as <code>Z_cell + local_vertical_moment / cell_current</code>, then directly
+current-weights those positions. It never calls
+<code>support_read._centroid_height</code> and checks both slices at 1e-8 m.
+It also verifies that using geometric cell centres alone misses the target,
+so omission of local first moments cannot pass.</p>
+<table id="bank-traced-inputs-independent-first"><thead><tr><th>Independent check</th>
+<th>Observed signal</th></tr></thead><tbody>
+<tr><td>Manual two-coil residual oracle</td><td>Maximum current-moment error 7.11e-15</td></tr>
+<tr><td>Swapped live-coil order</td><td>Residual mismatch 0.0605136</td></tr>
+<tr><td>Dropped live-coil column</td><td>Residual mismatch 0.0222079</td></tr>
+<tr><td>Variable scalar profile gradient</td><td>Gradient range 5.63275; tangent signal and fallback gap 2.01311</td></tr>
+<tr><td>Geometric-centre-only centroid</td><td>Target misses 0.00155759 and 0.00111690 m</td></tr>
+</tbody></table>
+<p>The first seven-CPU Rigel run (<code>1315071</code>, test commit
+<code>6866e56fa80e46bc60a81def64828594c6d48858</code>) ended
+<code>1 failed, 9 passed in 276.24s</code>. The new channel test supplied a
+Boolean mask to an API expecting integer channel indices and reproduced
+<code>NonConcreteBooleanIndexError: Array boolean indices must be concrete; got bool[1]</code>.
+The correction at <code>68c0f8154b8c4fab106939300da8b244bb9bff7b</code>
+changes only that test argument to integer indices. The channels mutation from
+the first run is not an admitted refusal because that head failed the same id;
+the corrected controls must fail an id that the corrected positive head passes.
+All first-run receipts remain under <code>independent-paired/</code>.</p>
+<h3 id="bank-traced-inputs-independent-pass">Independent checks and mutation refusals passed</h3>
+<p>Rigel job <code>1315097</code> ran the corrected test head
+<code>68c0f8154b8c4fab106939300da8b244bb9bff7b</code> against the dispatch base,
+with seven CPUs, fresh interpreters per file, CPU x64, the shared interpreter,
+archived arm trees, <code>-rfP</code> and the unchanged 300 s per-test bound.
+The new file ends <code>10 passed in 291.20s (0:04:51)</code> and
+<code>EXIT=0</code>. Both scalar and channel tangent tests report a varying
+gradient range of 5.63275, a primal-derivative signal of 2.01311 and a
+constant-fallback gap of 2.01311. The independent nonzero-seed centroid checks
+pass on both slices at 1e-8 m, and the full solve records zero new compilations.</p>
+<table id="bank-traced-inputs-independent-controls"><thead><tr><th>Archived mutation</th>
+<th>Failing test</th><th>Receipt</th></tr></thead><tbody>
+<tr><td>Swap the two live current entries</td><td>distinct_coil_columns_match_independent_residual</td><td>EXIT=1</td></tr>
+<tr><td>Shift the live mask to columns 1 and 2</td><td>distinct_coil_columns_match_independent_residual</td><td>EXIT=1</td></tr>
+<tr><td>Remove scalar density-gradient routing</td><td>variable_profile_gradient_routes_into_booking_tangents[scalar]</td><td>Fallback gap 0; EXIT=1</td></tr>
+<tr><td>Remove channel density-gradient routing</td><td>variable_profile_gradient_routes_into_booking_tangents[channels]</td><td>Fallback gap 0; EXIT=1</td></tr>
+<tr><td>Capture slice currents in a closure</td><td>slice_inputs_cause_zero_new_compilations</td><td>1 new compilation; EXIT=1</td></tr>
+</tbody></table>
+<p>Every mutation names at least one failing id that the positive corrected head
+passes. Both existing suite arms pass unchanged: 13 passed and 2 skipped in
+<code>test_support_read</code>, 10 passed in
+<code>test_bank_drive_continuation</code>, and 11 passed in
+<code>test_bank_lane_drive</code>; added failures are zero. The committed runner
+applies each mutation only in its disposable archive, verifies the altered
+content, restores the original content and keeps each subprocess log and receipt
+under <code>independent-corrected/</code>.</p>
+<p>The evidence-only final commit changes no product or test content. Its paired
+suite replay is recorded under <code>independent-delivery/</code>, with exact
+revision and completion in the manifest and receipts. The source-mutation and
+closure logs above remain the admitted controls for that identical product and
+test content. No product defect or product-source repair was needed.</p>
+</section>

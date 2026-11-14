@@ -14,6 +14,7 @@ import jax.numpy as jnp
 from jax.experimental import xla_metadata
 
 from nova.equilibrium import topology
+from nova.equilibrium.convention import toroidal_current_density
 from nova.equilibrium.clip_quadrature import (
     ClippedCurrentMoments,
     _quadrature_from_arrays,
@@ -23,6 +24,71 @@ from nova.equilibrium.clip_quadrature import (
     moving_polygon_current_moment_tangents,
 )
 from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
+
+
+PROFILE_KNOT_COUNT = 33
+
+
+def _tabulated_value(values, normalized, *, derivative=False):
+    """Uniform cubic Hermite interpolation with continuous first derivatives.
+
+    Endpoint slopes are one-sided; interior slopes are centred. Outside the
+    unit interval the endpoint value is held constant, with zero derivative.
+    """
+    intervals = PROFILE_KNOT_COUNT - 1
+    coordinate = jnp.clip(normalized, 0.0, 1.0) * intervals
+    index = jnp.minimum(jnp.floor(coordinate).astype(jnp.int32), intervals - 1)
+    fraction = coordinate - index
+    slope = jnp.concatenate(
+        (
+            values[1:2] - values[:1],
+            (values[2:] - values[:-2]) / 2,
+            values[-1:] - values[-2:-1],
+        )
+    )
+    left, right = values[index], values[index + 1]
+    a, b = slope[index], slope[index + 1]
+    # Difference form preserves a constant table exactly.
+    difference = right - left
+    quadratic = 3 * difference - 2 * a - b
+    cubic = a + b - 2 * difference
+    if derivative:
+        result = intervals * (a + fraction * (2 * quadratic + 3 * fraction * cubic))
+        return jnp.where((normalized >= 0) & (normalized <= 1), result, 0.0)
+    return left + fraction * (a + fraction * (quadratic + fraction * cubic))
+
+
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class TabulatedProfile:
+    """SI p-prime and FF-prime at 33 equally spaced normalized-flux knots.
+
+    Tables are runtime leaves. Cubic Hermite evaluation and its analytic
+    first derivative share the same coefficients for booking and tangents.
+    """
+
+    p_prime: jax.Array
+    ff_prime: jax.Array
+
+    def __post_init__(self):
+        if self.p_prime.shape != (PROFILE_KNOT_COUNT,) or self.ff_prime.shape != (
+            PROFILE_KNOT_COUNT,
+        ):
+            raise ValueError("flux-function tables must each contain 33 knots")
+
+    def current_density(self, radius, normalized):
+        return toroidal_current_density(
+            radius,
+            _tabulated_value(self.p_prime, normalized),
+            _tabulated_value(self.ff_prime, normalized),
+        )
+
+    def density_gradient(self, radius, normalized):
+        return toroidal_current_density(
+            radius,
+            _tabulated_value(self.p_prime, normalized, derivative=True),
+            _tabulated_value(self.ff_prime, normalized, derivative=True),
+        )
 
 
 class FragmentSupport(NamedTuple):
@@ -537,6 +603,7 @@ def book_tangent(
     the stationary-point envelope rule. Normal-form sector geometry is held by
     the same tracked read that owns the sector selection.
     """
+    density_gradient = getattr(profile, "density_gradient", density_gradient)
     coefficients = jnp.einsum("nij,nj->ni", geometry.fit_inverse, psi)
     coefficient_tangent = jnp.einsum("nij,nj->ni", geometry.fit_inverse, psi_tangent)
     span = read.boundary_flux - read.axis_flux
@@ -687,6 +754,7 @@ def book_tangent_channels(
     boundary_channels,
 ):
     """Evaluate every local booking channel over shared cell polygons."""
+    density_gradient = getattr(profile, "density_gradient", density_gradient)
     cells, samples = psi.shape
     channels = psi_tangent.shape[0]
     if psi_tangent.shape != (channels, cells, samples):

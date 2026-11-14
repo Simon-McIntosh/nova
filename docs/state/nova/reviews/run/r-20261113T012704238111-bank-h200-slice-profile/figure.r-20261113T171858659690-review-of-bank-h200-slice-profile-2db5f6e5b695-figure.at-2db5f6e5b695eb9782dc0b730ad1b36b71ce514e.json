@@ -22,6 +22,11 @@
       "kind": "exempted",
       "reason": "non-blocking: the ranking the fragment rests on is stated in its ranked table, not read off the panel heights; independent log scales were chosen so the small stages the earlier blocking finding flagged stay visible",
       "recorded_at": "2026-11-14T07:46:12.784705+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "shared ms/slice prefix across panels comparing one quantity, as the plot rule requires; the reviewer records the conflict was resolved that way deliberately and the values are legible",
+      "recorded_at": "2026-11-14T07:46:24.189679+00:00"
     }
   },
   "findings": [

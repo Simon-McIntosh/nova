@@ -315,3 +315,51 @@ def test_sphere_receipt_reuse_refuses_a_different_solver():
 
     with pytest.raises(ValueError, match="solver digest differs"):
         validate_sphere_receipt(dict(passed=True, solver_sha256="different"))
+
+
+def test_mesh_ladder_requires_each_probe_change_to_shrink():
+    from scripts.iron_limb_reference.ladder import convergence_verdict
+
+    levels = []
+    for size in (0.18, 0.13, 0.1, 0.075):
+        rows = [
+            dict(
+                mu=mu,
+                column_flux_Wb=100 + size**2,
+                iron_average_T=[[1 + size**2, 0], [2 + size**2, 0], [3 + size**2, 0]],
+                air_T=[[0, 0], [0, 0], [0, 0]],
+            )
+            for mu in (50.0, 200.0)
+        ]
+        levels.append(dict(size_m=size, rows=rows))
+    assert convergence_verdict(levels, 1)["passed"]
+    levels[-1]["rows"][0]["iron_average_T"][2][0] = 3.04
+    result = convergence_verdict(levels, 1)
+    assert not result["passed"]
+    failing = result["rows"][0]["measures"]["outside_1"]
+    assert not failing["shrinking"]
+    assert failing["final_under_two_percent"]
+    assert result["rows"][1]["passed"]
+
+
+def test_mesh_ladder_refuses_insufficient_refinement_ratio():
+    from scripts.iron_limb_reference.ladder import convergence_verdict
+
+    levels = [
+        dict(
+            size_m=size,
+            rows=[
+                dict(
+                    mu=mu,
+                    column_flux_Wb=100 + size**2,
+                    iron_average_T=[[1 + size**2, 0], [2 + size**2, 0]],
+                    air_T=[[0, 0], [0, 0]],
+                )
+                for mu in (50.0, 200.0)
+            ],
+        )
+        for size in (0.18, 0.14, 0.1, 0.075)
+    ]
+    result = convergence_verdict(levels, 1)
+    assert not result["spacing_passed"]
+    assert not result["passed"]

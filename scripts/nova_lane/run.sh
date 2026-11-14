@@ -36,8 +36,9 @@ usage: scripts/nova_lane/run.sh --log PATH [options] [--] TARGET [TARGET_ARGS...
   --log PATH        absolute log path (required; refuses to overwrite)
   --mode MODE       pytest (default) | script | python-c
   --rungs LIST      comma-separated rung preference (default h200,titan,cpu)
-  --cores N         --cpus-per-task value (default 4 on h200 and titan, 7 on cpu)
-  --mem SIZE        --mem value (default 64G; --mem=0 is refused)
+  --cores N         --cpus-per-task value (default 4 on h200, 2 on titan, 7 on cpu)
+  --mem SIZE        --mem value (default 24G on titan, 64G elsewhere; --mem=0 is
+                    refused)
   --time DURATION   --time value (default 01:00:00)
   --env KEY=VALUE   export KEY=VALUE in the payload (repeatable)
   --pythonpath DIR  append DIR to the payload PYTHONPATH (repeatable)
@@ -61,15 +62,33 @@ rung_platforms() {
 }
 
 # A GPU rung is bound by its device, so it asks for fewer cores than the CPU
-# rungs, whose work is spread over every core it can get.
+# rungs, whose work is spread over every core it can get.  The P100 node
+# (titan) carries 20 cores over 8 cards, so it runs out of cores before cards:
+# a job holding 4 cores there puts at most 4 cards to work and leaves the rest
+# idle.  Two cores per card is what keeps all 8 usable, so titan asks for 2.
 rung_cores() {
   if [[ -n "${cores}" ]]; then
     printf '%s\n' "${cores}"
     return 0
   fi
   case "$1" in
-    h200 | titan) printf '4\n' ;;
+    h200) printf '4\n' ;;
+    titan) printf '2\n' ;;
     cpu) printf '7\n' ;;
+    *) return 1 ;;
+  esac
+}
+
+# Memory follows the same per-card budget: the P100 node has 250G over 8
+# cards, so 24G per card is the default there and 64G elsewhere.
+rung_mem() {
+  if [[ -n "${mem}" ]]; then
+    printf '%s\n' "${mem}"
+    return 0
+  fi
+  case "$1" in
+    titan) printf '24G\n' ;;
+    h200 | cpu) printf '64G\n' ;;
     *) return 1 ;;
   esac
 }
@@ -247,7 +266,7 @@ target=''
 mode=pytest
 rungs="${DEFAULT_RUNGS}"
 cores=''
-mem=64G
+mem=''
 wall=01:00:00
 foreground=false
 dry_run=false
@@ -326,9 +345,10 @@ if [[ "${dry_run}" == true ]]; then
   do
     platforms="$(rung_platforms "${r}")"
     rung_core_count="$(rung_cores "${r}")" || die "unknown rung: ${r}"
+    rung_mem_size="$(rung_mem "${r}")" || die "unknown rung: ${r}"
     mapfile -t rung_flags < <(rung_sbatch_flags "${r}")
     printf 'RUNG=%s JAX_PLATFORMS=%s SUBMIT_COMMAND=' "${r}" "${platforms}"
-    submit=(sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task="${rung_core_count}" --mem="${mem}" --time="${wall}" --chdir="${repository_root}" --export=ALL --output="${resolved_log}" --error="${resolved_log}" "${rung_flags[@]}" "${script_path}" --payload -- "${target}" "${payload_target_args[@]}")
+    submit=(sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task="${rung_core_count}" --mem="${rung_mem_size}" --time="${wall}" --chdir="${repository_root}" --export=ALL --output="${resolved_log}" --error="${resolved_log}" "${rung_flags[@]}" "${script_path}" --payload -- "${target}" "${payload_target_args[@]}")
     printf '%q ' "${submit[@]}"
     printf '\n'
     printf 'PAYLOAD_PRELUDE=%s\n' "${prelude}"
@@ -399,8 +419,9 @@ wait_for_job() {
 for r in "${rung_array[@]}"; do
   export NOVA_LANE_RUNG="${r}"
   rung_core_count="$(rung_cores "${r}")" || die "unknown rung: ${r}"
+  rung_mem_size="$(rung_mem "${r}")" || die "unknown rung: ${r}"
   mapfile -t rung_flags < <(rung_sbatch_flags "${r}")
-  submit=(sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task="${rung_core_count}" --mem="${mem}" --time="${wall}" --chdir="${repository_root}" --export=ALL --output="${resolved_log}" --error="${resolved_log}" "${rung_flags[@]}" "${script_path}" --payload -- "${target}" "${payload_target_args[@]}")
+  submit=(sbatch --parsable --job-name=nova-lane --nodes=1 --ntasks=1 --cpus-per-task="${rung_core_count}" --mem="${rung_mem_size}" --time="${wall}" --chdir="${repository_root}" --export=ALL --output="${resolved_log}" --error="${resolved_log}" "${rung_flags[@]}" "${script_path}" --payload -- "${target}" "${payload_target_args[@]}")
   if ! out="$("${submit[@]}")"; then
     die "sbatch submission failed for rung ${r}"
   fi

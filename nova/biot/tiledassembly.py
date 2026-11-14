@@ -298,7 +298,9 @@ def _device_blocks(plan: TilePlan, devices: int) -> tuple[np.ndarray, np.ndarray
     )
 
 
-def _traced_psi_gradient(jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm):
+def _traced_psi_gradient(
+    jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm, *, fused=False
+):
     """Return ``(psi, dpsi_dr, dpsi_dz)`` per ampere, traced instead of executed.
 
     A transcription of :func:`nova.biot.polygon._psi_gradient` -- the same
@@ -307,6 +309,12 @@ def _traced_psi_gradient(jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm
     than mutated. The edge and limit loops are over STATIC bounds, so a trace
     unrolls them and the compiled kernel holds no control flow at all.
     """
+
+    def integrate(values):
+        if fused:
+            return jnp.sum(values * w_cos, axis=-1)
+        return values @ w_cos
+
     a_hat = da_dr = da_dz = jnp.zeros(r.shape[0], dtype=r.dtype)
     rc = r * cosp
     s = r * sinp
@@ -370,9 +378,9 @@ def _traced_psi_gradient(jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm
                 - r * sin2p * (at3 + 0.5 * r * dat3_dr)
             )
             scale = -s_lim * edge_weight
-            a_hat = a_hat + scale * (g @ w_cos)
-            da_dr = da_dr + scale * (dg_dr @ w_cos)
-            da_dz = da_dz + scale * (dg_dz @ w_cos)
+            a_hat = a_hat + scale * integrate(g)
+            da_dr = da_dr + scale * integrate(dg_dr)
+            da_dz = da_dz + scale * integrate(dg_dz)
     radius = r[:, 0]
     return (
         norm * radius * a_hat,
@@ -1340,6 +1348,7 @@ def _warm_evaluator(
             jnp.take(weight, columns, axis=1),
             *nodes,
             jnp.take(norm, columns),
+            fused=flux_only and pairwise,
         )
         if flux_only:
             return psi[None]

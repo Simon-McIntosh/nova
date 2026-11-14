@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-11-14T19:31:49.215Z",
   "dispatched_at": "2026-11-14T19:09:45Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking check-strength or citation detail on a delivered figure that meets its numeric done-when (3.49:1 contrast, all 14 sections labelled); the ITER bank figure is redrawn when section 7 re-certifies the bank",
+      "recorded_at": "2026-11-14T21:09:04.393686+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/iter_bank/render.py",

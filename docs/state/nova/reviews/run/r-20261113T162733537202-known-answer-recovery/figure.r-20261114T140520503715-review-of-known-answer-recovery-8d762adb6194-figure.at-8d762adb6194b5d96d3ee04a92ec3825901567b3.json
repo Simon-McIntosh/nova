@@ -1,0 +1,115 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_judgement": "all four captions are substantive rather than restatements of the panel titles: they name the machine and shot, the shared level array, the grey/blue series mapping, the residual and convergence values, and the mechanical text-bound check, so no caption finding is recorded.",
+  "completed_at": "2026-11-14T14:23:59.581Z",
+  "dispatched_at": "2026-11-14T14:05:45Z",
+  "figures": [
+    {
+      "artifact": "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/iter.svg",
+      "caption_source": "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+      "drawing_script": "tests/test_equilibrium_magnetics_fit.py",
+      "identification": "The attachment order is not recorded, so each PNG was identified from its rendered content. image-0 draws a vessel unlike the one shared by image-1 and image-3 (scale-normalised wall overlap IoU 0.08), a single closed D-contour with divertor legs below the chamber, which is the wall tests/test_equilibrium_forward_reference.py takes for the ITER reference case from the equilibrium limiter unit[0].outline; it is the remaining generating/recovered pair, so it is iter.svg: the only other generating/recovered figure the run commits.",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T140520503715-review-of-known-answer-recovery-8d762adb6194-figure/image-0.png",
+      "rendered_size_px": [
+        1399,
+        720
+      ]
+    },
+    {
+      "artifact": "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast.svg",
+      "caption_source": "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+      "drawing_script": "tests/test_equilibrium_magnetics_fit.py",
+      "identification": "image-1 draws the same vessel outline as image-3 (scale-normalised overlap of the two wall tracings gives IoU 0.81, against 0.08 for image-0's wall), and the committed mast-generating-refusal.svg is drawn by the run's render_failure.py from _physical_problem('mast'), whose wall is profile.operator.wall.coordinate; the shared vessel is therefore the MAST 22086/43 first wall and image-1 is the MAST generating/recovered pair.",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T140520503715-review-of-known-answer-recovery-8d762adb6194-figure/image-1.png",
+      "rendered_size_px": [
+        1399,
+        720
+      ]
+    },
+    {
+      "artifact": "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/solovev.svg",
+      "caption_source": "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+      "drawing_script": "tests/test_equilibrium_magnetics_fit.py",
+      "identification": "image-2 is the analytic Solov'ev panel pair: an elliptic first wall with concentric closed contours and a single axis marker in each panel and no X-point, exactly the state the caption describes.",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T140520503715-review-of-known-answer-recovery-8d762adb6194-figure/image-2.png",
+      "rendered_size_px": [
+        1399,
+        720
+      ]
+    },
+    {
+      "artifact": "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast-generating-refusal.svg",
+      "caption_source": "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+      "drawing_script": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/render_failure.py",
+      "identification": "image-3 is the only attachment carrying the 'stored starting field' / 'rejected terminal field' titles and the legend 'starting field and its nulls' / 'terminal field; no admitted axis', and it draws the MAST vessel shared with mast.svg.",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T140520503715-review-of-known-answer-recovery-8d762adb6194-figure/image-3.png",
+      "rendered_size_px": [
+        1399,
+        720
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "id": "f32923def65",
+      "line": 830,
+      "severity": "non-blocking",
+      "summary": "In each generating/recovered pair (image-0 iter.svg, image-1 mast.svg, image-2 solovev.svg) the loop draws the generating null markers first and the recovered markers second at the same coordinates, with the recovered style at the default size on top, so the rendered left-hand panel shows the recovered (blue) marker as its dominant null with the grey generating marker surviving only as a thin rim (measured as a single-pixel grey outline around the blue triangle in image-0 and image-1). The legend assigns blue to the recovered series, so a reader looking at the generating panel alone sees a recovered-coloured null on the generating state; the caption explains that both sets are drawn and coincide, and nothing is misread as data, but the 'both null sets' encoding is much weaker than the caption claims and the rim may vanish where the page serves the 1400 px canvas into a narrower column."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast-generating-refusal.svg",
+      "id": "f62f5feb162",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The right-hand panel draws the starting field's grey axis triangle and X marker inside the rejected terminal field's blue contour ring, and the blue terminal field carries no marker of its own by design. A reader who skims the panel sees a grey axis marker sitting in the terminal field's ring and can take it for the terminal field's axis, which is exactly the panel's subject; the caption does say the grey markers in both panels belong to the starting field, but the image alone does not distinguish those two readings."
+    }
+  ],
+  "item_verdicts": {
+    "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/iter.svg": {
+      "contrast": "pass: all text is near-black on white; the blue (#1f5fd0 family) and grey (#929292) contour series both separate clearly from the ground, and neither the titles nor the legend is washed out.",
+      "data_ink": "pass: the visual weight is carried by the contour lines, the black first wall and the two null markers; there is no fill, band, gradient or reference line anywhere in the image.",
+      "decoration": "pass: white ground, axes switched off entirely (no spines, ticks, tick labels or gridlines), and a frameless two-entry legend on the top margin.",
+      "label_collision": "pass: ink spans x 229-1170 and y 17-651 inside 1399x720, so at least 69 px of clear margin stands on every edge; no title, legend entry or marker is clipped, and the titles at y 88-105 and the legend at y 17-40 are well separated from each other and from the plotted contours.",
+      "legibility": "pass: two 14 in panels on one 1399x720 canvas; the closed D-shaped first wall, twelve thin flux contours and both null markers read at a glance, with 16 pt panel titles and one 14 pt legend in clear space above the panels.",
+      "table_form": "pass: the image compares two poloidal flux fields spatially, a relationship that cannot be read from a table; the per-case numbers live in the evidence fragment's table instead."
+    },
+    "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast-generating-refusal.svg": {
+      "contrast": "pass: black titles and legend entries on white; the grey contour series is the faintest element and still reads, and the blue series is unambiguous.",
+      "data_ink": "pass: contour lines, the black vessel and the grey null markers are the only ink in the plot area; no fill, shading or band is used to weight either field.",
+      "decoration": "pass: white ground, axes off, and a frameless two-entry legend whose entries are as thick as the plotted lines.",
+      "label_collision": "pass: ink spans x 233-1171 and y 17-659 inside 1399x720; the two panel titles are fully drawn and separated from the legend above them, and no label lies over the contour field.",
+      "legibility": "pass: the grey stored starting field and the blue rejected terminal field read at a glance, and the panel titles state which state each panel shows. The terminal field's contours are dense (fourteen shared levels of a field that is not an equilibrium) but individual lines stay separate: measured at three rows across the blue band, line widths are 2-4 px with clear white gaps between them, so no region collapses into a solid block.",
+      "table_form": "pass: the figure shows where the two fields sit relative to the same vessel, which is a spatial relation; the residual and convergence facts are stated numerically in the caption."
+    },
+    "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast.svg": {
+      "contrast": "pass: near-black text on white reads cleanly, and the grey generating contours stay visible against the ground without outshouting the blue recovered contours.",
+      "data_ink": "pass: contours, wall and four null markers carry the weight; no fill, gradient, band or gridline appears.",
+      "decoration": "pass: white ground, axes off, one frameless legend above the panels, nothing decorative.",
+      "label_collision": "pass: ink spans x 234-1169 and y 17-652 in 1399x720; no label is clipped or overlapping, and the two panel titles sit clear of the legend and of the plotted field.",
+      "legibility": "pass: the MAST 22086/43 vessel with its stepped inboard and divertor structure, twelve shared contour levels and both null markers are legible at a glance in both panels.",
+      "table_form": "pass: a two-panel spatial comparison of the generating and recovered fields, not a depiction of tabular values."
+    },
+    "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/solovev.svg": {
+      "contrast": "pass: near-black titles and legend text on white, with both contour colours clear of the background.",
+      "data_ink": "pass: only the contour lines, the black wall and the axis markers are drawn; no fill or decorative element competes.",
+      "decoration": "pass: white ground, axes fully off, frameless legend on the top margin.",
+      "label_collision": "pass: ink spans x 210-1189 and y 17-651 in 1399x720; titles, legend and markers are separated and nothing is clipped at any edge.",
+      "legibility": "pass: the elliptic first wall and the concentric Solov'ev contours read immediately in both panels, and the single axis marker is visible in each.",
+      "table_form": "pass: the analytic ellipse pair is a spatial field comparison; exact residuals belong in the evidence table, not in the image."
+    }
+  },
+  "notes": "Read-only figure review: no file was edited, created, moved, deleted, redrawn, relabelled or reformatted. Only the four attached rendered PNGs were opened; no SVG was opened, read, listed, searched, rendered or shown, and no other image was viewed. Attachment-to-artifact identification was derived from the rendered pixels themselves (wall identity between image-1 and image-3 (scale-normalised wall tracing IoU 0.81, against 0.08 for the other machine), matching the MAST wall that the run's own render_failure.py draws from the MAST fixture). The figure review runs no suite, so added_failure_count is 0 with an empty id list. Neither finding blocks: every label is fully drawn and no reader is stopped from reading any figure.",
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: pass \u2014 image-0 (docs/figures/inverse-equilibrium-baseline/known-answer-recovery/iter.svg): two panels, closed D-shaped wall, twelve flux contours and both null markers read at a glance, with 16 pt titles and a 14 pt legend in clear space.\nRUBRIC data_ink: pass \u2014 image-0 (iter.svg): contour lines, black first wall and null markers carry the weight; no fill, band, gradient or reference line.\nRUBRIC decoration: pass \u2014 image-0 (iter.svg): white ground, axes off, frameless legend on the top margin, no decorative styling.\nRUBRIC contrast: pass \u2014 image-0 (iter.svg): near-black text on white; blue and grey contour series both clear the background.\nRUBRIC table_form: pass \u2014 image-0 (iter.svg): a spatial comparison of two poloidal flux fields, not tabular information.\nRUBRIC label_collision: pass \u2014 image-0 (iter.svg): ink spans x 229-1170, y 17-651 in 1399x720, at least 69 px clear on every edge; no clipped or overlapping label.\nRUBRIC legibility: pass \u2014 image-1 (docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast.svg): the MAST vessel with its stepped structure, twelve shared levels and both null sets read at a glance in both panels.\nRUBRIC data_ink: pass \u2014 image-1 (mast.svg): contours, wall and null markers only; no fill, gradient, band or gridline.\nRUBRIC decoration: pass \u2014 image-1 (mast.svg): white ground, axes off, one frameless legend above the panels.\nRUBRIC contrast: pass \u2014 image-1 (mast.svg): near-black text on white; the grey generating series stays visible without outshouting the blue recovered series.\nRUBRIC table_form: pass \u2014 image-1 (mast.svg): two-panel spatial comparison of generating and recovered fields.\nRUBRIC label_collision: pass \u2014 image-1 (mast.svg): ink spans x 234-1169, y 17-652 in 1399x720; titles clear of the legend and of the plotted field, nothing clipped.\nRUBRIC legibility: pass \u2014 image-2 (docs/figures/inverse-equilibrium-baseline/known-answer-recovery/solovev.svg): elliptic wall and concentric Solov'ev contours read immediately in both panels with the axis marker visible in each.\nRUBRIC data_ink: pass \u2014 image-2 (solovev.svg): contour lines, black wall and axis markers only; nothing decorative competes.\nRUBRIC decoration: pass \u2014 image-2 (solovev.svg): white ground, axes fully off, frameless legend on the top margin.\nRUBRIC contrast: pass \u2014 image-2 (solovev.svg): near-black text on white and both contour colours clear of the ground.\nRUBRIC table_form: pass \u2014 image-2 (solovev.svg): analytic ellipse pair is a spatial field comparison, not a table.\nRUBRIC label_collision: pass \u2014 image-2 (solovev.svg): ink spans x 210-1189, y 17-651 in 1399x720; nothing clipped and no label overlaps another or the data.\nRUBRIC legibility: pass \u2014 image-3 (docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast-generating-refusal.svg): both states read at a glance and the dense blue band of fourteen shared levels keeps 2-4 px lines with white gaps between them, so no region collapses into a solid block.\nRUBRIC data_ink: pass \u2014 image-3 (mast-generating-refusal.svg): contour lines, black vessel and grey null markers are the only ink in the plot area.\nRUBRIC decoration: pass \u2014 image-3 (mast-generating-refusal.svg): white ground, axes off, frameless legend whose entries are as thick as the lines.\nRUBRIC contrast: pass \u2014 image-3 (mast-generating-refusal.svg): black titles and legend on white; the grey series is the faintest element and still reads, and the blue series is unambiguous.\nRUBRIC table_form: pass \u2014 image-3 (mast-generating-refusal.svg): where the two fields sit relative to one vessel is a spatial relation; the residual and convergence facts live in the caption.\nRUBRIC label_collision: pass \u2014 image-3 (mast-generating-refusal.svg): ink spans x 233-1171, y 17-659 in 1399x720; both titles fully drawn and clear of the legend, and no label lies over the contour field.\nFINDING tests/test_equilibrium_magnetics_fit.py:830 non-blocking: in each generating/recovered pair (iter.svg, mast.svg, solovev.svg) the recovered null markers are drawn over the coincident generating markers, so the generating panel shows a blue (recovered-coloured) marker with the grey set surviving only as a one-pixel rim, while the legend assigns blue to the recovered series; the caption explains the coincidence, but the 'both null sets' encoding is weak and the rim may vanish at the served width.\nFINDING docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast-generating-refusal.svg non-blocking: the rejected-terminal panel carries the starting field's grey axis and X markers inside its blue contour ring and no marker of its own, so a skimming reader can take the grey triangle for the terminal field's axis, which is exactly what the panel exists to refute; only the caption disambiguates.",
+  "review_run_id": "r-20261114T140520503715-review-of-known-answer-recovery-8d762adb6194-figure",
+  "reviewed_base_sha": "87cf7ec68f6922173c471aa0bc742f07cc2256f3",
+  "reviewed_head_sha": "8d762adb6194b5d96d3ee04a92ec3825901567b3",
+  "reviewed_run_id": "r-20261113T162733537202-known-answer-recovery",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T14:33:57.484359+00:00",
+  "total": null
+}

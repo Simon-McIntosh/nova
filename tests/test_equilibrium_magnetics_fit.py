@@ -644,7 +644,7 @@ def physical_cases(tmp_path_factory):
         basis = np.zeros((raw.size, 2))
         basis[:pressure, 0] = raw[:pressure]
         basis[pressure:, 1] = raw[pressure:]
-        perturbation = 2e-4 if name == "mast" else 0.02
+        perturbation = 0.02 if name == "solovev" else 2e-4
         initial_source = replace(
             request.source_profile,
             core=replace(
@@ -660,7 +660,7 @@ def physical_cases(tmp_path_factory):
             ),
         )
         initial = replace(request, source_profile=initial_source)
-        if name == "mast":
+        if name != "solovev":
             from nova.equilibrium.solve_request import ExplicitSolveSeed
 
             initial = replace(

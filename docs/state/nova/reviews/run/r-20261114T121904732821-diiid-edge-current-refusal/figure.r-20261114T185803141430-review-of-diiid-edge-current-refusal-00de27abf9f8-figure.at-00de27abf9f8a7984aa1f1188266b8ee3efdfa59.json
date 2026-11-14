@@ -51,6 +51,13 @@
   ],
   "completed_at": "2026-11-14T19:37:43.931Z",
   "dispatched_at": "2026-11-14T18:58:40Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "a singular-plural slip in one footer of the converged control panel; the count is legible and correct",
+      "recorded_at": "2026-11-14T19:46:57.163244+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "folded",

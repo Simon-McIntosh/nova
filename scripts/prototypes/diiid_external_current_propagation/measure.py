@@ -235,9 +235,10 @@ def main():
     print("REVISION=" + args.revision, flush=True)
     print(
         "COMPILATION_CACHE_ROOT="
-        + os.environ.get("NOVA_COMPILATION_CACHE_ROOT", "<unset>"),
+        + os.environ.get("NOVA_FORWARD_COMPILATION_CACHE_ROOT", "<unset>"),
         flush=True,
     )
+    print("PLATFORMS=" + ",".join(str(device) for device in jax.devices()), flush=True)
     records = {}
 
     def run(name, built, row_used, external_pre):

@@ -349,13 +349,20 @@ def traces(root, output, previews):
         trips = np.arange(1, len(residuals) + 1)
         frozen = [trip["inner"]["residual"] for trip in spatial["trips"]]
         axes[0, column].semilogy(trips, frozen, color=WALL, lw=2.6, ls="--", zorder=2)
-        axes[0, column].semilogy(trips, residuals, color=SOLVED, lw=3, marker=".")
+        axes[0, column].semilogy(
+            trips, residuals, color=SOLVED, lw=3, marker=".", zorder=3
+        )
         log_scale(axes[0, column], "y", np.r_[residuals, frozen])
         incoming = [trip["initial"]["support"] for trip in spatial["trips"]]
         support = [trip["returned"]["support"] for trip in spatial["trips"]]
         axes[1, column].plot(trips, incoming, color=WALL, lw=2.6, ls="--")
         axes[1, column].plot(
-            np.arange(1, len(support) + 1), support, color=SOLVED, lw=3, marker="."
+            np.arange(1, len(support) + 1),
+            support,
+            color=SOLVED,
+            lw=3,
+            marker=".",
+            zorder=3,
         )
         axes[1, column].plot(
             trips[-1],
@@ -491,6 +498,7 @@ def source_changes(root, output, previews):
                 ls=dash,
                 lw=3 if key == "current_delta_l2_a" else 2.6,
                 marker=".",
+                zorder=3 if key == "current_delta_l2_a" else 2,
             )
         log_scale(ax, "x", factors, margin=0.5)
         log_scale(ax, "y", all_values)

@@ -29,7 +29,7 @@ def archive(source, revision, destination):
     payload.unlink()
 
 
-def run_file(tree, revision, file, output, *, mutation=False):
+def run_file(tree, revision, file, output, *, mutation=False, selection=None):
     target = "tests/" + file
     command = (
         f"PYTHONPATH=. JAX_PLATFORMS=cpu {PYTHON} -m pytest "
@@ -49,6 +49,8 @@ def run_file(tree, revision, file, output, *, mutation=False):
     if mutation:
         environment["NOVA_CAPTURE_SLICE_CURRENTS"] = "1"
         command = "NOVA_CAPTURE_SLICE_CURRENTS=1 " + command
+    if selection:
+        command += " -k " + repr(selection) + " -s"
     with output.open("w") as log:
         log.write(f"# revision: {revision} tree: {tree}\n# command: {command}\n")
         log.write("# output: PYTEST_ADDOPTS=-rfP\n")
@@ -69,6 +71,8 @@ def run_file(tree, revision, file, output, *, mutation=False):
             check=True,
         )
         args = [PYTHON, "-m", "pytest", "-p", "no:cacheprovider", "-q", target]
+        if selection:
+            args.extend(["-k", selection, "-s"])
         if mutation:
             args.extend(["-k", "slice_inputs_cause_zero_new_compilations", "-s"])
             command += " -k slice_inputs_cause_zero_new_compilations -s"
@@ -143,6 +147,86 @@ def run_graph(tree, revision, output, script="trace_graph.py"):
         raise RuntimeError(f"graph construction measurement failed: {output}")
 
 
+def independence_controls(tree, revision, output, receipts):
+    """Run declared source mutations only in the disposable archived tree."""
+    bank_path = tree / "nova/equilibrium/support_read.py"
+    current_path = tree / "nova/equilibrium/current.py"
+    routing = (
+        '    density_gradient = getattr(profile, "density_gradient", density_gradient)'
+    )
+    bank_source = bank_path.read_text()
+    current_source = current_path.read_text()
+    controls = [
+        (
+            "swapped-coils",
+            bank_path,
+            bank_source.replace(
+                "jnp.where(live, coil_currents, 0.0)",
+                "jnp.where(live, coil_currents.at[0].set(coil_currents[1])"
+                ".at[1].set(coil_currents[0]), 0.0)",
+            ),
+            "distinct_coil_columns_match_independent_residual",
+        ),
+        (
+            "shifted-coil-mask",
+            bank_path,
+            bank_source.replace(
+                "else (jnp.arange(coil_currents.size) < count)",
+                "else ((jnp.arange(coil_currents.size) > 0) & "
+                "(jnp.arange(coil_currents.size) <= count))",
+            ),
+            "distinct_coil_columns_match_independent_residual",
+        ),
+    ]
+    for endpoint, start_name, end_name in (
+        ("scalar", "def book_tangent(", "def book_tangent_channels("),
+        ("channels", "def book_tangent_channels(", None),
+    ):
+        start = current_source.index(start_name)
+        end = (
+            len(current_source)
+            if end_name is None
+            else current_source.index(end_name, start)
+        )
+        segment = current_source[start:end]
+        assert segment.count(routing) == 1
+        altered = (
+            current_source[:start]
+            + segment.replace(
+                routing, "    # Use only the supplied fallback derivative."
+            )
+            + current_source[end:]
+        )
+        controls.append(
+            (
+                "missing-" + endpoint + "-gradient",
+                current_path,
+                altered,
+                "variable_profile_gradient_routes_into_booking_tangents and "
+                + endpoint,
+            )
+        )
+    for name, path, altered, selection in controls:
+        original = path.read_text()
+        assert altered != original
+        try:
+            path.write_text(altered)
+            assert path.read_text() == altered
+            receipt = run_file(
+                tree,
+                revision,
+                "test_bank_traced_inputs.py",
+                output / (name + ".log"),
+                selection=selection,
+            )
+            receipts[name] = receipt
+            (output / "receipts.json").write_text(json.dumps(receipts, indent=2))
+            assert receipt["exit_status"] != 0 and receipt["failure_ids"], name
+        finally:
+            path.write_text(original)
+        assert path.read_text() == original
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path)
@@ -152,6 +236,7 @@ def main():
     parser.add_argument("--focused", action="store_true")
     parser.add_argument("--numerics-only", action="store_true")
     parser.add_argument("--skip-control", action="store_true")
+    parser.add_argument("--independence-controls", action="store_true")
     parser.add_argument("--graph-base")
     parser.add_argument("--graph-head", action="store_true")
     parser.add_argument("--reproduce", action="store_true")
@@ -226,6 +311,8 @@ def main():
                 args.output / (name + ".log"),
                 mutation=True,
             )
+        if args.independence_controls:
+            independence_controls(head, args.head, args.output, receipts)
         (args.output / "receipts.json").write_text(json.dumps(receipts, indent=2))
     print(json.dumps(receipts, indent=2), flush=True)
 

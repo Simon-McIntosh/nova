@@ -1,4 +1,4 @@
-"""Run production evidence, both CPU suite arms and the residual mutation in one job."""
+"""Run each material measurement in one allocation on its declared device lane."""
 
 import argparse
 import json
@@ -66,6 +66,9 @@ def main():
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--base", required=True)
+    parser.add_argument(
+        "--mode", choices=("production", "suites", "all"), default="production"
+    )
     args = parser.parse_args()
     tree = Path.cwd().resolve()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
@@ -83,19 +86,32 @@ def main():
     record = dict(
         base_revision=args.base, head_revision=revision, job_id=env.get("SLURM_JOB_ID")
     )
-    receipt = args.run_dir / "gate-receipt.json"
+    receipt = args.run_dir / f"{args.mode}-gate-receipt.json"
 
     def save():
         receipt.write_text(json.dumps(record, indent=2) + "\n")
 
     save()
-    # Numerical measurement precedes CPU suites so a failed material criterion
-    # is visible before either long compatibility arm starts.
-    command = f"{python} -m scripts.iron_limb_production.measure --output {args.output}"
-    record["production"] = execute(
-        command, tree, env, args.run_dir / "production.log", revision
-    )
-    save()
+    if args.mode in ("production", "all"):
+        command = (
+            f"{python} -m scripts.iron_limb_production.measure --output {args.output}"
+        )
+        record["production"] = execute(
+            command, tree, env, args.run_dir / "production.log", revision
+        )
+        save()
+        command = f"{python} scripts/iron_limb_production/negative_control.py"
+        record["negative_control"] = execute(
+            command, tree, env, args.run_dir / "negative-control.log", revision
+        )
+        record["passed"] = record["production"]["exit_status"] == 0
+        record["passed"] &= record["negative_control"]["exit_status"] != 0 and bool(
+            record["negative_control"]["failure_ids"]
+        )
+        save()
+        if args.mode == "production":
+            print(f"GATE passed={record['passed']}", flush=True)
+            raise SystemExit(0 if record["passed"] else 1)
     with tempfile.TemporaryDirectory(
         prefix="iron-material-", dir=env["TMPDIR"]
     ) as scratch:
@@ -145,18 +161,11 @@ def main():
             suite, tree, cpu, args.run_dir / "after-suite.log", revision
         )
         save()
-    command = f"{python} scripts/iron_limb_production/negative_control.py"
-    record["negative_control"] = execute(
-        command, tree, env, args.run_dir / "negative-control.log", revision
-    )
-    save()
-    passed = record["production"]["exit_status"] == 0
-    passed &= all(
+    passed = all(
         record[arm]["exit_status"] == 0 for arm in ("baseline_suite", "after_suite")
     )
-    passed &= record["negative_control"]["exit_status"] != 0 and bool(
-        record["negative_control"]["failure_ids"]
-    )
+    if args.mode == "all":
+        passed &= record["passed"]
     record["passed"] = passed
     save()
     print(f"GATE passed={passed}", flush=True)

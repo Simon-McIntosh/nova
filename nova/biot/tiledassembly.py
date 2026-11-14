@@ -2024,6 +2024,33 @@ def _polygon_current_geometry(polygons):
     return edge, weight, norm, incidence
 
 
+@functools.lru_cache(maxsize=4)
+def _polygon_current_evaluator(flux_only, nodes):
+    """Compile only requested polygon rows at one fixed angular rule."""
+    import jax
+    import jax.numpy as jnp
+
+    configure_production_compilation_cache()
+    phi, weights = _phi_rule(16, nodes)
+    angular = tuple(
+        map(
+            jnp.asarray,
+            (np.cos(phi), np.sin(phi), np.sin(2 * phi), weights * np.cos(phi)),
+        )
+    )
+
+    @jax.jit
+    def evaluate(r, z, edge, weight, norm):
+        psi, dr, dz = _traced_psi_gradient(
+            jnp, r[:, None], z[:, None], edge[..., None], weight, *angular, norm
+        )
+        if flux_only:
+            return psi[None]
+        return jnp.stack((psi, -dz / (2 * jnp.pi * r), dr / (2 * jnp.pi * r)))
+
+    return evaluate
+
+
 def _polygon_current_response(polygons, points, plan, *, packed=None, flux_only=False):
     """Evaluate uniform volume currents through the polygon quadrature owner.
 
@@ -2038,22 +2065,37 @@ def _polygon_current_response(polygons, points, plan, *, packed=None, flux_only=
     from nova.biot.polygonanalytic import _packed_axis_vertical_field, _packed_topology
 
     tile = TilePlan(32, 32, 16, 16, 192)
-    evaluator = tile_evaluator(tile, batched=True, kernel="quadrature", edge_count=3)
+    centres = np.mean(edge[:, :2], axis=0).T
+    diameters = np.max(
+        np.hypot(edge[:, 2] - edge[:, 0], edge[:, 3] - edge[:, 1]), axis=0
+    )
     components = 1 if flux_only else 3
     result = np.zeros((components, len(points), len(polygons)))
     for target, source in tile.tiles(len(points), len(norm)):
         rows = np.arange(target.start, target.stop)
         columns = np.arange(source.start, source.stop)
+        rr = np.repeat(rows, len(columns))
+        cc = np.tile(columns, len(rows))
         axis = points[rows, 0] == 0
-        value = np.array(
-            evaluator(
-                np.where(axis, 1.0, points[rows, 0]),
-                points[rows, 1],
-                edge[:, :, columns],
-                weight[:, columns],
-                norm[columns],
-            )
-        )[:components]
+        near = np.linalg.norm(points[rr] - centres[cc], axis=1) < 4 * diameters[cc]
+        value = np.empty((components, len(rr)))
+        for selected, order, block in ((near, 192, 64), (~near, 48, 1024)):
+            indices = np.flatnonzero(selected)
+            evaluator = _polygon_current_evaluator(flux_only, order)
+            for begin in range(0, len(indices), block):
+                chosen = indices[begin : begin + block]
+                padded = np.pad(chosen, (0, block - len(chosen)), mode="edge")
+                r, c = rr[padded], cc[padded]
+                value[:, chosen] = np.asarray(
+                    evaluator(
+                        np.where(points[r, 0] == 0, 1.0, points[r, 0]),
+                        points[r, 1],
+                        edge[:, :, c],
+                        weight[:, c],
+                        norm[c],
+                    )
+                )[:, : len(chosen)]
+        value = value.reshape(components, len(rows), len(columns))
         if np.any(axis):
             value[:, axis] = 0.0
             if not flux_only:

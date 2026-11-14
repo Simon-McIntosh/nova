@@ -79,6 +79,23 @@ def audit(folder):
             if distances["incoming"] < 1e-12
             else None
         )
+        selection_basis = "next input or terminal matches the saved endpoint"
+        returned_residual = float(
+            np.max(np.abs(arrays["mapped"] - arrays["state"]))
+            / np.maximum(np.max(np.abs(arrays["mapped"])), 1e-30)
+        )
+        returned_shadow = np.load(folder / f"returned-read-{index}.npz")["shadow"]
+        if (
+            selection is None
+            and np.array_equal(arrays["state"][:size] * scale, data["state"])
+            and np.array_equal(returned_shadow, diagnostics["frozen_shadow"][:size])
+            and abs(returned_residual - receipt["residual_history"][index]) < 1e-14
+        ):
+            selection = "returned"
+            selection_basis = (
+                "returned state equals terminal, unchanged shadow makes its saved "
+                "map live, and its residual equals the reported outer residual"
+            )
         shadow_transition = {}
         if selection is not None:
             selected = np.load(folder / f"{selection}-read-{index}.npz")["shadow"]
@@ -88,6 +105,7 @@ def audit(folder):
             reported = receipt["changed_mask_entries"][index]
             shadow_transition = dict(
                 selected_endpoint=selection,
+                selection_basis=selection_basis,
                 frozen_shadow_count=int(frozen.sum()),
                 selected_shadow_count=int(selected.sum()),
                 changed_entries=measured,

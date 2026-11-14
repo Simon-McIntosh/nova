@@ -1,0 +1,49 @@
+<section id="carried-read-refresh-result">
+<h2>Selective carried fragment refresh: correctness checks pass; H200 verdict pending</h2>
+<p>The carried read now reuses a previous fragment only when its signed conic
+coefficients are unchanged, or a conservative polynomial bound proves that its
+whole support remains full or empty and its edge-interval slots agree. Saddle
+fragments are reused only when their entire normal form agrees. Changed conic
+and saddle populations run in separate compact device loops. The stationary
+roots and saddle curvature are still evaluated from the current field;
+unchanged ownership alone never freezes moving geometry.</p>
+<p>The support-read owner explicitly selects this path. Direct calls to
+<code>topology.refresh_at_stationary_points</code> retain full refresh by
+default; <code>reuse=False</code> is the reference arm. The implementation is
+local and has no H200 performance verdict yet.</p>
+<table>
+<thead><tr><th>Correctness case</th><th>Live cells refreshed</th><th>Check</th></tr></thead>
+<tbody>
+<tr><td>Unchanged state</td><td>0 of 50</td><td>matches full refresh</td></tr>
+<tr><td>One changed cut cell</td><td>1 of 50</td><td>changed area observed; matches full refresh</td></tr>
+<tr><td>Boundary shift</td><td>39 of 50</td><td>matches full refresh</td></tr>
+<tr><td>Moving saddle</td><td>represented saddle cells only</td><td>matches full refresh</td></tr>
+<tr><td>Mixed unchanged and moving lanes</td><td>each lane retains its own count</td><td>matches full refresh</td></tr>
+</tbody>
+</table>
+<p>The counter advances inside executed buckets and counts their live cells,
+excluding padded slots. The initial reproduction at
+<code>975f3e98cfa2b2976d2bbe1b94ead37f8623b529</code> used a runtime callback and
+observed <code>valid=True rebuilt=False recomputed_cells=50 total_cells=50</code>
+for an unchanged carried read. At source revision
+<code>1ce2c868367a39a91b1c9bb799137728909e8846</code>, the exact scoped gate reports
+<code>7 passed in 99.16s</code> and <code>EXIT=0</code>. This includes the explicit
+support-read selection and an inert-program refusal check.</p>
+<p>The broader base/head carried-read comparisons and deliberate stale-reuse
+mutation are still running. The H200 paired job is queued. The required
+widths 1, 16 and 64, two agreeing fresh processes per arm, 3%-or-spread decision,
+and inspected SVG remain outstanding. No speedup is claimed from CPU results.
+Width denotes independent pulses; slices within a TORAX-coupled pulse remain
+sequential.</p>
+<p>Durable logs and receipts are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144016445105-carried-read-refresh</code>:
+<code>reproduce.log</code>, <code>initial-gate.log</code>,
+<code>cpu-current/after.log</code>, and <code>cpu-current/receipts.json</code>.
+The paired measurement reuses the committed bank slice-profile instrument and
+its common input, SHA256
+<code>52f8d4fb9e60dbdbe1530e8b64a171d3bb6470fb5cf73a1ddcf760895d09a0e9</code>.
+The implementation and measurement commits are
+<code>8566505f36f23da6502bd55c6899073f2af3d648</code>,
+<code>303ed069a05d8115f6c67f161e6ea4edc62d5789</code>, and
+<code>1ce2c868367a39a91b1c9bb799137728909e8846</code>.</p>
+</section>

@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T08:03:29.112Z",
+  "dispatched_at": "2026-11-14T07:57:47Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261114T075712328435-plan-review-of-inverse-equilibrium-baseline/plan.html:106",
+      "id": "reasoning-1",
+      "reason": "a worker dispatched on \u00a72 must either silently substitute nova's own MAST shot (for which imas-efit holds no stored equilibrium to compare against) or stall, and the machine choice changes the vessel, coil set and q95/boundary expectations the bands are read against.",
+      "text": "\u00a72 states the case set is \"read from imas-efit's own committed cases through IMAS: one MAST slice, one TCV slice and one ITER scenario slice\", but imas-efit's committed manifest (tests/data-manifest.json, 32 datasets) carries MAST-U (mastu 45272, mastu_v3-42-0) and no MAST case at all, so the MAST slice the comparison is anchored on does not exist in the cited source; \u00a74 clause (1) then measures \"the \u00a72 MAST case\", so the defect propagates into the cost record",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261114T075712328435-plan-review-of-inverse-equilibrium-baseline/plan.html:192",
+      "id": "reasoning-2",
+      "reason": "without either a reported vertical-residual row or a declared confound, an axis or boundary disagreement in \u00a72 cannot be attributed to the inverse class rather than to the freedom asymmetry the plan just chose, which is the whole quantity the section delivers.",
+      "text": "the locked decision vertical-freedom selects \"data-determined-centroid\" and states imas-efit \"carries a rigid vertical shift freedom\" (confirmed in imas-efit at src/EFIT/efitparams.f90:63, fit_dz_algorithm), so \u00a72 now compares a fit with no vertical freedom against one with it while \u00a72's stated purpose is that \"a disagreement is not confounded by a different [unknown set]\" \u2014 the same argument the fitted-unknowns decision makes for fitting conductor currents \u2014 and clause (1)'s 0.20 m axis band and boundary-distance measure absorb that offset with no declared allowance",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261114T075712328435-plan-review-of-inverse-equilibrium-baseline/plan.html:206",
+      "id": "reasoning-3",
+      "reason": "the followup is the record a coordinator reads to decide whether \u00a72 can be dispatched, and it still reports \u00a72 blocked on decisions the plan now shows locked.",
+      "text": "the followup f-ieb-001 body still reads \"\u00a72 waits on the two open fit decisions\" although both were locked on 2026-11-14 (fitted-unknowns to profiles-and-currents, vertical-freedom to data-determined-centroid) and \u00a72 is declared implementable in the same document",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "3cb33a9c35f0de59218009d86ef57d6fcf59b0ea",
+  "plan_fingerprint": "6a222ad25d112c1b997387e8049cad0795e5718d2d8345d0d0f4b39da4ed0cd4",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 2,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261114T075712328435-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "b95814f29ba2cbbf8db374a994aa9c69c1b7a84c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the figure docs/figures/inverse-equilibrium-baseline/inverse-seam.svg exists, the extensionless href /nova/spine-efit-parity resolves to docs/plans/spine-efit-parity.html under the docs surface's <path>.html rule, and the premise that href supports (\"failed 10 of 12 EFIT parity metrics\") is confirmed by that plan's recorded verdict \"FAIL on ten of twelve registered metrics\" with converged_fraction at zero.",
+    "done_when": "pass \u2014 \u00a72's negative control is constructed rather than assumed (all magnetics rows and the measured plasma current scaled by 1.10 must leave the 1.5 % plasma-current band on every case), \u00a73's third-estimator clause is a constructed control (a perturbed copy must rank worse on every case), and \u00a74's is the count-based control the last round negotiated (eleven forward solves per reconstruction must exceed the ten-times ceiling); each can fail.",
+    "evidence_paths": "pass \u2014 the plan record is docs/evidence/archive/inverse-equilibrium-baseline-landed.html (the house archive convention, matching docs/evidence/archive/spine-efit-parity-landed.html), and no section names a session scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach any symbol or section text, and no changelog prose (\"used to\", \"before this fix\") appears in the changed units.",
+    "reasoning": "a finding \u2014 \u00a72 draws its case set from \"imas-efit's own committed cases\" but names a MAST slice that source does not carry (it carries MAST-U), and \u00a72's locked vertical-freedom decision puts an unknown set asymmetry against imas-efit into the band comparison the plan exists to make like-for-like.",
+    "single_goal": "pass \u2014 \u00a72 delivers one comparison table, \u00a73 one scoreboard, \u00a74 one cost record; the split into fit and forward parts in \u00a72 clause (2) is a decomposition of that one table, not a second deliverable.",
+    "wiring": "pass \u2014 depends-on (s2\u2190s1, s3\u2190s2, s4\u2190s2, s5\u2190s3) matches the section contract table's \"Waits on\" column, and the section declarations now agree with the section records (\u00a71\u2013\u00a74 implementable, \u00a75 deferred); the three decisions carry data-sections pointing at s2/s5 as appropriate, and the previously-raised \u00a72/\u00a74 status contradiction is resolved by the 2026-11-14 lock."
+  },
+  "section_digests": {
+    "_document": "c6c6aa089a9d737755926df022ec646c6eb5ba0fb28a0c91f4809b8a5e61508a",
+    "s0": "57b2e9e2f3010f18ee32b61a28f0473cd8ca9692e9e2a7eed5aa3d1776fdd77f",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "c288a72a1fd70b8ec4629f1b42e7b190e0dc3ad15ea8b3150426a1b21a476adc",
+    "s3": "aabab320c034e5a6720e0b3877958935e6c3b63577de3674cd6e87f6120889ba",
+    "s4": "37bff4f9ebfcc0deaf2ed6fbf81968e9a675599bc4d70566d49220de536f0791",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T09:43:54.861691+00:00",
+  "total": null
+}

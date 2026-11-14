@@ -27,7 +27,7 @@ def main():
     data = dict(np.load(ROOT / "diagnosis/accuracy-220.npz"))
     point = jnp.array(data["points"][0])
     moments = jnp.array(data["moments"])
-    source = jax.jit(_source_jets)
+    source = _source_jets
     jets = np.asarray(source(point, coupling))
     total = np.einsum("cmq,cm->q", jets, moments)
     result = dict(node=0, fresh_bank=total.tolist())
@@ -36,7 +36,7 @@ def main():
     saved = gradedresidual._fixed_nodes
     try:
         gradedresidual._fixed_nodes = lambda value, xp: value
-        moving = jax.jit(lambda p, c: _source_jets(p, c))
+        moving = _source_jets
         altered = np.asarray(moving(point, coupling))
     finally:
         gradedresidual._fixed_nodes = saved

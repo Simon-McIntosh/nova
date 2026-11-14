@@ -9,6 +9,7 @@ from the differential field equation and the closed-form rectangle gradient.
 
 # ruff: noqa: E402
 import json
+import argparse
 
 from nova.jax.config import configure_dtypes
 
@@ -65,7 +66,11 @@ def boundary(point, digits):
         inside = mp.mpf("5.5") < r < mp.mpf("6.5") and abs(z) < mp.mpf("0.6")
         forcing = -2 * mp.pi * mu * r * density if inside else mp.mpf(0)
         rr = forcing + dr / r - zz
-        return np.array([dr, dz, rr, rz, zz], dtype=np.longdouble)
+        values = [dr, dz, rr, rz, zz]
+        decimal = [mp.nstr(value, digits - 5) for value in values]
+        name = f"cell-independent-{float(r):.12g}-{float(z):.12g}-{digits}.json"
+        (ROOT / name).write_text(json.dumps(decimal))
+        return np.array(decimal, dtype=np.longdouble)
 
 
 def source_gradient(point, coupling):
@@ -87,20 +92,74 @@ def source_gradient(point, coupling):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--aligned", action="store_true")
+    parser.add_argument("--independent", action="store_true")
+    args = parser.parse_args()
     assert jax.config.jax_enable_x64
     polygon = np.array([[5.5, -0.6], [6.5, -0.6], [6.5, 0.6], [5.5, 0.6]])
     coupling = BiotMomentCoupling.from_polygons((polygon,))
     ref = reference()
     packed = ref.coupling((polygon,))
     moments = np.array([[240000.0, 0.0, 0.0]])
-    point_jet = jax.jit(_source_jets)
-    ordinary = jax.jit(jax.jacfwd(source_gradient))
-    output = []
-    for point in (np.array([6.15, 0.17]), np.array([7.2, 0.33])):
+    point_jet = _source_jets
+    ordinary = jax.jacfwd(source_gradient)
+    prior = (
+        json.loads((ROOT / "cell.json").read_text())
+        if (ROOT / "cell.json").exists()
+        else []
+    )
+    points = (
+        [np.array([6.5 + 1e-12, 1.3]), np.array([6.5001, 1.3])]
+        if args.aligned
+        else [np.array([6.15, 0.17]), np.array([7.2, 0.33])]
+    )
+    if args.independent:
+        points = [np.array(row["point"]) for row in prior]
+    output = prior if args.aligned or args.independent else []
+    for point in points:
         truth = boundary(point, 35)
         refined = boundary(point, 50)
+        (ROOT / "cell-independent.json").write_text(
+            json.dumps(
+                dict(
+                    point=point.tolist(),
+                    independent=refined.tolist(),
+                    precision_change=np.abs(truth - refined).tolist(),
+                ),
+                default=float,
+            )
+        )
+        print("CELL_INDEPENDENT", point.tolist(), refined.tolist(), flush=True)
+        precision_bound = np.maximum(
+            abs(truth - refined), 4 * np.finfo(np.longdouble).eps * abs(refined)
+        )
+        precision_control = float(
+            np.linalg.norm(
+                (refined * np.longdouble("1.000000000001") - refined) / refined
+            )
+        )
+        assert precision_control > 1e-13
+        if args.independent:
+            item = next(row for row in output if row["point"] == point.tolist())
+            item.update(
+                independent=refined.tolist(),
+                precision_bound=precision_bound.tolist(),
+                precision_control_relative=precision_control,
+            )
+            (ROOT / "cell.json").write_text(json.dumps(output, indent=2, default=float))
+            continue
         bank = np.asarray(point_jet(jnp.array(point), coupling))[0, 0] * moments[0, 0]
-        direct = coupling.evaluate(jnp.array(point), tuple(jnp.array(moments).T))
+        print("CELL_BANK", bank.tolist(), flush=True)
+        runtime_moments = tuple(jnp.array(moments).T)
+
+        def direct_gradient(p):
+            return BiotMomentCoupling.value_gradient.__wrapped__(
+                coupling, p, runtime_moments
+            )[1]
+
+        direct_gradient_value = np.asarray(direct_gradient(jnp.array(point)))
+        direct_hessian = np.asarray(jax.jacfwd(direct_gradient)(jnp.array(point)))
         gradient = ref.gradient(point[None], packed, moments)[0]
         derivatives = []
         for axis in range(2):
@@ -119,7 +178,7 @@ def main():
         saved = gradedresidual._fixed_nodes
         try:
             gradedresidual._fixed_nodes = lambda value, xp: value
-            unfrozen = jax.jit(jax.jacfwd(lambda p: source_gradient(p, coupling)))
+            unfrozen = jax.jacfwd(lambda p: source_gradient(p, coupling))
             moving_nodes = np.asarray(unfrozen(jnp.array(point)))[0] * moments[0, 0]
         finally:
             gradedresidual._fixed_nodes = saved
@@ -127,11 +186,13 @@ def main():
             point=point.tolist(),
             independent=refined.tolist(),
             precision_change=np.abs(truth - refined).tolist(),
+            precision_bound=precision_bound.tolist(),
+            precision_control_relative=precision_control,
             bank=bank[1:].tolist(),
             direct=np.r_[
-                np.asarray(direct.gradient),
-                np.asarray(direct.hessian)[0],
-                np.asarray(direct.hessian)[1, 1],
+                direct_gradient_value,
+                direct_hessian[0],
+                direct_hessian[1, 1],
             ].tolist(),
             reference=np.r_[gradient, hessian[0], hessian[1, 1]].tolist(),
             ordinary=baseline.tolist(),

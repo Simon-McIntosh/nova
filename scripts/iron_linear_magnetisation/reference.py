@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 
@@ -18,6 +17,7 @@ from scripts.iron_linear_magnetisation.controls import (  # noqa: E402
     SHELL_PROBES,
     exact_shielding,
     loop,
+    require_clean_script,
 )
 
 
@@ -93,12 +93,7 @@ def main():
     parser.add_argument("--blob", required=True)
     args = parser.parse_args()
     assert jax.config.jax_enable_x64
-    data = Path(__file__).read_bytes()
-    blob = hashlib.sha1(
-        b"blob %d\0" % len(data) + data, usedforsecurity=False
-    ).hexdigest()
-    if blob != args.blob:
-        raise SystemExit("executed reference script differs from its committed blob")
+    blob = require_clean_script(__file__, args.blob)
     vacuum, shielded = exterior_reference(10)
     owner = loop(SHELL_PROBES)
     np.testing.assert_allclose(vacuum, owner, rtol=2e-13, atol=1e-25)

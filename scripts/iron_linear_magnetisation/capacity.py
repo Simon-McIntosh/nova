@@ -1,7 +1,6 @@
 """Compile affine Newton shapes without allocating or executing dense factors."""
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -12,6 +11,7 @@ configure_dtypes()
 import jax  # noqa: E402
 import numpy as np  # noqa: E402
 from nova.biot.magnetisation import _fit_law, _linear_factor  # noqa: E402
+from scripts.iron_linear_magnetisation.controls import require_clean_script  # noqa: E402
 
 
 def main():
@@ -23,12 +23,7 @@ def main():
     args = parser.parse_args()
     assert jax.config.jax_enable_x64
     jax.config.update("jax_enable_compilation_cache", False)
-    data = Path(__file__).read_bytes()
-    blob = hashlib.sha1(
-        b"blob %d\0" % len(data) + data, usedforsecurity=False
-    ).hexdigest()
-    if blob != args.blob:
-        raise SystemExit("executed capacity script differs from its committed blob")
+    blob = require_clean_script(__file__, args.blob)
     memory = subprocess.check_output(
         ["nvidia-smi", "--query-gpu=memory.total", "--format=csv,noheader,nounits"],
         text=True,

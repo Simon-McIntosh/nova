@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -18,6 +19,16 @@ completed = extent.completed
 extent.completed = lambda folder: (
     completed(folder) and (folder / "spatial.json").is_file()
 )
+spawn = extent.subprocess.Popen
+
+
+def launch(*args, **kwargs):
+    """Preserve the allocated GPU identity in the reused row environment."""
+    kwargs["env"]["NOVA_LANE_RUNG"] = os.environ["NOVA_LANE_RUNG"]
+    return spawn(*args, **kwargs)
+
+
+extent.subprocess.Popen = launch
 
 if __name__ == "__main__":
     extent.main()

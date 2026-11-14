@@ -228,8 +228,7 @@ def _physical_problem(name):
     assert jax.config.jax_enable_x64 is True
     from nova.equilibrium.forward import ForwardProfile
     from nova.equilibrium.forward_operator import ForwardFluxOperator
-    from nova.equilibrium.solve_request import ExplicitSolveSeed
-    from nova.equilibrium.source import project_domain_profile
+    from nova.equilibrium.solve_request import ColdSeedPortfolio
 
     if name == "solovev":
         from benchmarks import solovev_certificate as lane
@@ -285,7 +284,7 @@ def _physical_problem(name):
         ]
         sections = tuple(point + corners for point in coordinate)
         prescribed = old.prescribed_current_field.current
-        nodes = np.linspace(0.0, 1.0, 65)
+        plasma_current = float(case["reference"]["plasma_current_a"])
     else:
         from tests import test_equilibrium_forward_reference as lane
 
@@ -301,16 +300,45 @@ def _physical_problem(name):
             machine.cell_polygons,
         )
         prescribed = None
-        nodes = case.psi_norm
-    projection = project_domain_profile(
-        profile.source.core, nodes, order=6, maximum_order=6
+        plasma_current = float(case.plasma_current)
+    _, stored_topology = profile.operator.read(seed)
+    centroid = tuple(np.asarray(stored_topology.axis, dtype=float))
+    sign = -np.sign(plasma_current)
+    source = ForwardSource(
+        core=DomainProfile(
+            p_prime=PolynomialFluxFunction(
+                jnp.asarray([1.0, -1.0]), sign * 3.0e5 / centroid[0] ** 2
+            ),
+            ff_prime=PolynomialFluxFunction(jnp.asarray([1.0, -1.0]), sign * 0.25),
+        ),
+        boundary_pressure=profile.source.boundary_pressure,
+        boundary_field_function=profile.source.boundary_field_function,
     )
-    source = replace(profile.source, core=projection.core())
+    profile = ForwardProfile(replace(profile.operator, source=source), profile.lattice)
+    estimated_current = float(np.sum(profile.operator.cell_current(seed)))
+    amplitude = plasma_current / estimated_current
+    assert np.isfinite(amplitude) and amplitude > 0.0
+    source = replace(
+        source,
+        core=replace(
+            source.core,
+            p_prime=replace(
+                source.core.p_prime,
+                normalisation=source.core.p_prime.normalisation * amplitude,
+            ),
+            ff_prime=replace(
+                source.core.ff_prime,
+                normalisation=source.core.ff_prime.normalisation * amplitude,
+            ),
+        ),
+    )
     profile = ForwardProfile(replace(profile.operator, source=source), profile.lattice)
     request = ForwardSolveRequest.from_defaults(
         carrier_identity=f"{name}-cached-polynomial-source",
         source_profile=source,
-        seed_policy=ExplicitSolveSeed(seed),
+        seed_policy=ColdSeedPortfolio(
+            plasma_current, centroid, requested_class="limited"
+        ),
         prescribed_current=prescribed,
         vertical_pin="omit",
         policy_overrides=dict(kernel_tolerance=1e-12, qualification_tolerance=1e-12),
@@ -448,19 +476,95 @@ def physical_cases(tmp_path_factory):
         recorded_path = (
             Path(recorded) / f"{name}-generating-receipt.pkl" if recorded else None
         )
+        if recorded and (Path(recorded) / f"{name}-unqualified.json").exists():
+            raise RuntimeError(
+                f"{name}: all three recorded prescribed profiles failed qualification"
+            )
         if recorded_path is not None and recorded_path.exists():
             import pickle
 
             with recorded_path.open("rb") as stream:
                 generated = pickle.load(stream)
+            request_path = Path(recorded) / f"{name}-generating-request.pkl"
+            if request_path.exists():
+                with request_path.open("rb") as stream:
+                    request = pickle.load(stream)
             print(f"GENERATING_RECEIPT {recorded_path}", flush=True)
         else:
-            try:
-                generated = profile.solve(request)
-            except Exception as error:
-                _persist_forward_failure(error, output, name)
-                raise
+            import json
+
+            attempts = (1.0,) if name == "solovev" else (1.0, 0.7, 1.3)
+            original = request
+            qualified = False
+            for attempt, factor in enumerate(attempts, 1):
+                label = f"{name}-profile-{attempt}"
+                source = original.source_profile
+                source = replace(
+                    source,
+                    core=replace(
+                        source.core,
+                        p_prime=replace(
+                            source.core.p_prime,
+                            coefficients=source.core.p_prime.coefficients * factor,
+                        ),
+                        ff_prime=replace(
+                            source.core.ff_prime,
+                            coefficients=source.core.ff_prime.coefficients * factor,
+                        ),
+                    ),
+                )
+                request = replace(original, source_profile=source)
+                inputs = dict(
+                    pressure_coefficients=np.asarray(
+                        source.core.p_prime.coefficients
+                    ).tolist(),
+                    pressure_normalisation=float(source.core.p_prime.normalisation),
+                    diamagnetic_coefficients=np.asarray(
+                        source.core.ff_prime.coefficients
+                    ).tolist(),
+                    diamagnetic_normalisation=float(source.core.ff_prime.normalisation),
+                    seed=request.seed_policy.provenance().to_dict(),
+                )
+                (output / f"{label}-inputs.json").write_text(
+                    json.dumps(inputs, indent=2)
+                )
+                try:
+                    generated = profile.solve(request)
+                except Exception as error:
+                    _persist_forward_failure(error, output, label)
+                    continue
+                _persist_forward(generated, output / f"{label}-receipt.pkl")
+                summary = dict(
+                    case=name,
+                    attempt=attempt,
+                    qualified=bool(generated.qualified),
+                    converged=bool(generated.terminal_state.fixed_point.converged),
+                    residual=float(generated.terminal_state.fixed_point.residual),
+                    termination_reason=int(generated.termination_reason),
+                    trips=int(
+                        np.count_nonzero(
+                            np.isfinite(np.asarray(generated.residual_history))
+                        )
+                    ),
+                )
+                (output / f"{label}-receipt.json").write_text(
+                    json.dumps(summary, indent=2)
+                )
+                print("PRESCRIBED_GENERATING " + json.dumps(summary), flush=True)
+                if summary["qualified"] and summary["converged"]:
+                    qualified = True
+                    break
+            if not qualified:
+                (output / f"{name}-unqualified.json").write_text(
+                    json.dumps(dict(case=name, attempts=len(attempts), qualified=False))
+                )
+                raise RuntimeError(
+                    f"{name}: no qualified prescribed profile "
+                    f"in {len(attempts)} attempts"
+                )
         _persist_forward(generated, output / f"{name}-generating.pkl")
+        _persist_forward(generated, output / f"{name}-generating-receipt.pkl")
+        _persist_forward(request, output / f"{name}-generating-request.pkl")
         residual = float(generated.terminal_state.fixed_point.residual)
         print(
             f"GENERATING {name} qualified={bool(generated.qualified)} "
@@ -473,6 +577,8 @@ def physical_cases(tmp_path_factory):
             request.policy.qualification_tolerance,
         )
         assert bool(generated.terminal_state.fixed_point.converged), (name, residual)
+        if os.environ.get("NOVA_MAGNETICS_FIT_GENERATE_ONLY") == "1":
+            return dict(profile=profile, request=request, generated=generated)
         index = np.linspace(0, len(wall) - 1, 24, dtype=int)
         point = np.asarray(wall)[index]
         sensors = Magnetics(
@@ -519,6 +625,7 @@ def physical_cases(tmp_path_factory):
         )
         initial = replace(request, source_profile=initial_source)
         cases[name] = dict(
+            name=name,
             profile=profile,
             request=request,
             initial=initial,
@@ -552,6 +659,8 @@ def _recover_physical(case, displacement=0.0):
         case["measurement"],
         plasma_current_scale=abs(case["measurement"].plasma_current),
     )
+    label = "displaced-fit.pkl" if displacement else "fit.pkl"
+    _persist_forward(fitted, case["output"] / f"{case['name']}-{label}")
     expected = case["generated"].terminal_state
     terminal = fitted.forward.terminal_state
     count = len(case["coordinate"])
@@ -707,6 +816,11 @@ def test_known_state_recovery(name, physical_cases):
         singular_values=fitted.singular_values.tolist(),
         undetermined_coefficients=list(fitted.undetermined_coefficients),
         forward_evaluations=fitted.forward_evaluations,
+        coefficients=fitted.coefficients.tolist(),
+        coefficient_names=list(fitted.coefficient_names),
+        terminal_residual=float(fitted.forward.terminal_state.fixed_point.residual),
+        terminal_converged=bool(fitted.forward.terminal_state.fixed_point.converged),
+        forward_tolerance=case["request"].policy.kernel_tolerance,
     )
     (case["output"] / f"{name}-recovery.json").write_text(json.dumps(summary, indent=2))
     print("RECOVERY " + json.dumps(summary), flush=True)

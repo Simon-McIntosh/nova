@@ -1182,7 +1182,7 @@ def test_reference_stamp_refuses_wrong_revision_and_dirty_tree(tmp_path):
         require_clean_script(script, blob, revision)
 
 
-def test_linear_shell_operator_pin():
+def test_linear_shell_operator_pin(tmp_path):
     """The affine integration rule preserves its delivered shell-cell operator."""
     import json
     from pathlib import Path
@@ -1207,9 +1207,17 @@ def test_linear_shell_operator_pin():
         else tuple(cells.polygons[index] for index in control["selected_cells"])
     )
     actual, _ = iron.linear_galerkin_cell_interaction(polygons, plan=iron._PLAN)
-    expected = (
-        np.load(full_reference) if full_reference else np.array(control["operator"])
-    )
+    if full_reference:
+        expected = np.load(full_reference)
+    else:
+        from scripts.iron_linear_magnetisation.kernel_cost import load_owner
+
+        reference = load_owner(
+            control["revision"], "compact_reference_owner", directory=tmp_path
+        )
+        expected, _ = reference.linear_galerkin_cell_interaction(
+            polygons, plan=iron._PLAN
+        )
     assert np.isfinite(actual).all()
     difference = actual - expected
     relative = np.linalg.norm(difference) / np.linalg.norm(expected)

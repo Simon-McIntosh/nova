@@ -18,12 +18,14 @@ from nova.biot import tiledassembly as tiled  # noqa: E402
 from scripts.iron_linear_magnetisation.controls import require_clean_script  # noqa: E402
 
 
-def load_owner(revision, name):
+def load_owner(revision, name, *, directory=None):
     """Load a committed owner snapshot beside the job's extracted tree."""
     source = subprocess.check_output(
         ["git", "show", revision + ":nova/biot/tiledassembly.py"]
     )
-    path = Path(os.environ["TMPDIR"]) / (name + ".py")
+    path = Path(os.environ["TMPDIR"] if directory is None else directory) / (
+        name + ".py"
+    )
     path.write_bytes(source)
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)

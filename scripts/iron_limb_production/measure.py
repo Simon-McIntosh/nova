@@ -110,6 +110,22 @@ def write(path, record):
     path.write_text(json.dumps(record, indent=2, allow_nan=False) + "\n")
 
 
+def outside_probe_groups(probes):
+    """Separate outside probes by their physical position in the control circuit."""
+    points = np.asarray(probes)
+    outside = np.arange(len(points)) >= 16
+    midplane = points[:, 1] == 0
+    groups = dict(
+        midplane=np.flatnonzero(outside & midplane & (points[:, 0] > LIMB_R[1])),
+        inner_midplane=np.flatnonzero(outside & midplane & (points[:, 0] < LIMB_R[0])),
+        above_arm=np.flatnonzero(outside & (points[:, 1] > ARM_Z[1])),
+        corner=np.flatnonzero(outside & ~midplane & (points[:, 1] <= ARM_Z[1])),
+    )
+    assert [len(v) for v in groups.values()] == [5, 1, 5, 1]
+    assert sorted(np.concatenate(list(groups.values()))) == list(range(16, len(points)))
+    return {name: indices.tolist() for name, indices in groups.items()}
+
+
 def measure_control(record, output):
     case, references = reference_inputs()
     probes = np.asarray(case["probes"])
@@ -120,6 +136,7 @@ def measure_control(record, output):
         (EVIDENCE / "case.json").read_bytes()
     ).hexdigest()
     record["control"] = []
+    groups = record["probe_groups"] = outside_probe_groups(probes)
     fitted_factor = None
     for size in (0.05, 0.1):
         # Flat-outline arms share one assembly; the smear is solved last.
@@ -192,8 +209,10 @@ def measure_control(record, output):
                         residual_history=result.residual_history,
                         vessel_relative_rms=error,
                         iron_T=field.tolist(),
-                        midplane_ratios=ratios[16:21].tolist(),
-                        above_arm_ratios=ratios[21:].tolist(),
+                        **{
+                            f"{name}_ratios": ratios[indices].tolist()
+                            for name, indices in groups.items()
+                        },
                         seconds=perf_counter() - started,
                     )
                     record["control"].append(row)

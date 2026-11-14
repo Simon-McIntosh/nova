@@ -12,10 +12,12 @@ from scripts.prototypes.carried_read_refresh.run import compare
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("run", type=Path)
+    parser.add_argument("--measurements", type=Path)
     parser.add_argument("--figure", type=Path, required=True)
     parser.add_argument("--fragment", type=Path, required=True)
     args = parser.parse_args()
-    summary = json.loads((args.run / "h200/summary.json").read_text())
+    measurements = args.measurements or args.run / "h200"
+    summary = json.loads((measurements / "summary.json").read_text())
     assert summary["complete"]
     records = {}
     for arm in summary["arms"]:
@@ -171,9 +173,9 @@ def main():
         "The unchanged slice-profile instrument supplies compile and execute "
         "walls separately, full fresh certificates and the analytic precision "
         "checks. All 36 receipts and logs are retained under "
-        f"<code>{escape(str(args.run / 'h200'))}</code>. Off/on optimized operation "
+        f"<code>{escape(str(measurements))}</code>. Off/on optimized operation "
         "counts differ, and comparing an arm with itself is refused as an inert "
-        "lever. The common input SHA256 matches the original slice profile: "
+        f"lever. Common input <code>{escape(str(inputs))}</code> has SHA256 "
         "<code>52f8d4fb9e60dbdbe1530e8b64a171d3bb6470fb5cf73a1ddcf760895d09a0e9"
         "</code>.</p>"
     )

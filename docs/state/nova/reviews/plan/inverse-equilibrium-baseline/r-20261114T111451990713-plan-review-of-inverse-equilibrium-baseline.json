@@ -33,7 +33,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 6,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "90f7a8ef666c051c81f1bafffd1401c907f90dfa",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 2 clause 1 now bands the magnitude of q95 within 2.0 and reports the sign each state stores beside it.",
+      "reason": "",
+      "when": "2026-11-14T11:50:34.713850+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "90f7a8ef666c051c81f1bafffd1401c907f90dfa",
+      "commit_basis": "edit",
+      "note": "Section 2 clause 1 now bands the magnitude of q95 within 2.0 and reports the sign each state stores beside it.",
+      "reason": "",
+      "when": "2026-11-14T11:50:34.713850+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261114T111451990713-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261114T111451990713-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "ba46b394fa2d5da1302ccbc4988fa51649891f51",
   "rubric": "content",

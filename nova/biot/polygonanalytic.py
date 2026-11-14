@@ -2857,6 +2857,7 @@ def _packed_analytic_moments_primal(
     reflection_partner,
     *,
     nodes: int = _NODES,
+    negative_field_scale=None,
 ):
     """Return all nine exact section rows from one static packed reduction.
 
@@ -3022,7 +3023,9 @@ def _packed_analytic_moments_primal(
     sign = xp.sign(signed)
     uniform_radial = norm / (4.0 * np.pi) * sign * field_contour[1]
     uniform_vertical = norm / (4.0 * np.pi) * field_contour[2]
-    radial_central = -norm / (4.0 * np.pi) * sign * boundary_vertical[1]
+    if negative_field_scale is None:
+        negative_field_scale = -norm / (4.0 * np.pi)
+    radial_central = negative_field_scale * sign * boundary_vertical[1]
     vertical_central = (
         sign
         * (-scale * boundary_vertical[2] - uniform_flux)
@@ -3104,10 +3107,17 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
     only the affected field derivative uses two centred differences.
     """
 
-    def evaluate(*arguments):
-        return _packed_analytic_moments_primal(jnp, *arguments, nodes=nodes)
+    scale, d_scale = jax.jvp(
+        lambda value: -value / (4.0 * np.pi), (primals[4],), (tangents[4],)
+    )
+    primals = (*primals, scale)
+    tangents = (*tangents, d_scale)
 
-    value, ordinary = jax.jvp(evaluate, primals, tangents)
+    def evaluate(*arguments):
+        return _packed_analytic_moments_primal(
+            jnp, *arguments[:9], nodes=nodes, negative_field_scale=arguments[9]
+        )
+
     target_z = primals[1]
     edge = primals[2]
     nearest = jnp.minimum(
@@ -3115,8 +3125,24 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
         jnp.min(jnp.abs(edge[:, 3] - target_z), axis=0),
     )
     near_corner = nearest <= 1e-7
-    without_height = (*tangents[:1], jnp.zeros_like(target_z), *tangents[2:])
-    _, other = jax.jvp(evaluate, primals, without_height)
+
+    def directional(include_height):
+        direction = (
+            *tangents[:1],
+            jnp.where(include_height, tangents[1], jnp.zeros_like(target_z)),
+            *tangents[2:],
+        )
+        return jax.jvp(evaluate, primals, direction)
+
+    def ordered_direction(carry, include_height):
+        return carry, directional(include_height)
+
+    _, (values, derivatives) = jax.lax.scan(
+        ordered_direction, None, jnp.asarray((True, False)), unroll=2
+    )
+    value = tuple(row[0] for row in values)
+    ordinary = tuple(row[0] for row in derivatives)
+    other = tuple(row[1] for row in derivatives)
 
     shifts = jnp.asarray((1e-5, -1e-5, 5e-6, -5e-6), dtype=target_z.dtype)
     shifted = jax.lax.map(

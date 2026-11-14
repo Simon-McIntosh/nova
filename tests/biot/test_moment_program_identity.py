@@ -25,14 +25,52 @@ def _byte_differences(actual, expected, points, *, report):
         for index in np.argwhere(different)[:3]:
             key = tuple(index)
             observed, reference = float(actual[key]), float(expected[key])
+            offset = int(np.ravel_multi_index(key, actual.shape)) * actual.itemsize
+
+            def ordered(bits):
+                bits = int(bits)
+                return (~bits & ((1 << 64) - 1)) if bits >> 63 else bits | (1 << 63)
+
+            distance = abs(
+                ordered(actual.view(np.uint64)[key])
+                - ordered(expected.view(np.uint64)[key])
+            )
             print(
                 f"BYTE_DIFFERENCE point={points[index[0]].tolist()} "
-                f"component={index[1:].tolist()} actual={observed:.17g} "
+                f"component={index[1:].tolist()} byte_offset={offset} "
+                f"ulp_distance={distance} actual={observed:.17g} "
                 f"reference={reference:.17g} actual_hex={observed.hex()} "
                 f"reference_hex={reference.hex()} "
                 f"zero_sign_only={observed == reference == 0.0}"
             )
     return int(np.count_nonzero(different))
+
+
+def test_byte_diagnostics_distinguish_rounding_and_signed_zero(capsys):
+    points = np.asarray(((6.19, -5.71), (5.0, 0.0)))
+    expected = np.zeros((2, 9, 1), dtype=np.float64)
+    expected[0, 4, 0] = float.fromhex("-0x1.899fdf4452628p-36")
+    actual = expected.copy()
+    actual[0, 4, 0] = np.nextafter(expected[0, 4, 0], -np.inf)
+    actual[1, 0, 0] = -0.0
+    assert _byte_differences(actual, expected, points, report=True) == 2
+    rounding, signed_zero = capsys.readouterr().out.splitlines()
+    assert "point=[6.19, -5.71] component=[4, 0] byte_offset=32" in rounding
+    assert "ulp_distance=1" in rounding
+    assert "zero_sign_only=False" in rounding
+    assert "reference_hex=-0x1.899fdf4452628p-36" in rounding
+    assert "component=[0, 0] byte_offset=72" in signed_zero
+    assert "zero_sign_only=True" in signed_zero
+
+
+def test_byte_diagnostics_count_a_larger_departure_without_reporting(capsys):
+    expected = np.asarray([[[1.0], [2.0]]])
+    actual = expected.copy()
+    actual[0, 1, 0] += 1e-6
+    points = np.asarray(((5.0, 0.0),))
+    assert _byte_differences(actual, expected, points, report=False) == 1
+    assert capsys.readouterr().out == ""
+    assert _byte_differences(expected, expected, points, report=True) == 0
 
 
 @pytest.mark.skipif(

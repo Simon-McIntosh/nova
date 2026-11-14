@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-11-14T08:56:28.597Z",
   "dispatched_at": "2026-11-14T08:36:03Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-xpoint-profile-extent",
+      "recorded_at": "2026-11-14T09:01:51.516970+00:00"
+    }
+  },
   "findings": [
     "non-blocking: docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html:11 states the p'(1)/FF'(1) columns are the last knot 'exactly as the solve received them', read from arm-tables.json, 'which is a copy of each row's own recorded source-inputs.json'. It is not a copy: comparing arm-tables.json with cohort/{base,edge}/frame-*/source-inputs.json on all four rows and both quantities shows every value differs in the sixth significant figure, e.g. 179 edge p'(1) is -37353.06104594593 in arm-tables.json and -37354.45465245573 in the receipt the solve recorded, with max |difference| of 0.5 to 2.7 Pa/Wb across the cohort (~5e-5 relative). verify.py prints the receipt's own value in gate-verify.log ('edge frame-179-limited p_prime ... value=-37354.454652') while the record's table prints -37353.1, so the previous round's finding about this column is not resolved, only re-cited to a different non-receipt source. The difference moves no integral and no conclusion, but the caption's provenance claim is false and a reader who checks it finds the record wrong at the precision it prints.",
     "non-blocking: docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html:47 states that the three non-convergent rows 'carry no share anywhere in this record', while the same file at line 84 quotes '85, 46 and 94 percent' of the vertical offset for 137D, 146D and 179L, and summary.json stores a share_closed for every row including 146L at -7.36. The 85 and 94 percent are qualified in the same sentence as coming from non-converged states, so the numbers are readable, but the absolute claim at line 47 is falsified by the record that makes it; it should be narrowed to the headline, the total and the side decomposition, or line 84 should drop the two non-converged percentages.",

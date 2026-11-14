@@ -2413,7 +2413,13 @@ def _solve_pinned_lane(
         )
         residual = step_residual(bank, state, state, support, profile, quadrature)
         norm = jnp.max(jnp.abs(jnp.concatenate(residual.residual)))
-        error = _centroid_height(operands.geometry, state) - pin.target_height
+        total = jnp.sum(state[0])
+        numerator = jnp.sum(
+            (operands.geometry.centre[:, 1] - pin.target_height) * state[0] + state[2]
+        )
+        error = jnp.where(
+            total != 0, numerator / jnp.where(total != 0, total, 1.0), jnp.inf
+        )
         merit = jnp.maximum(
             norm / tolerance,
             jnp.where(pin.active, jnp.abs(error) / pin.tolerance, 0.0),
@@ -2472,22 +2478,23 @@ def _solve_pinned_lane(
             balanced, right / row_scale[:, None]
         )
         free, response = directions[:, 0], directions[:, 1]
-        total = jnp.sum(state[0])
-        height = error + pin.target_height
-        row = (
-            jnp.concatenate(
-                (
-                    (operands.geometry.centre[:, 1] - height) / total,
-                    jnp.zeros_like(state[0]),
-                    jnp.ones_like(state[0]) / total,
-                )
-            )
-            / pin.row_scale
+        # The centroid numerator is linear in the moments and remains defined
+        # for a cold zero-current state. Normalize by the booked current there.
+        total_scale = jnp.maximum(
+            jnp.maximum(jnp.abs(jnp.sum(state[0])), jnp.abs(jnp.sum(booked[0]))), 1e-12
         )
+        row = jnp.concatenate(
+            (
+                operands.geometry.centre[:, 1] - pin.target_height,
+                jnp.zeros_like(state[0]),
+                jnp.ones_like(state[0]),
+            )
+        ) / (total_scale * pin.row_scale)
+        mismatch = row @ jnp.concatenate(state)
         rate = row @ response
         delta = jnp.where(
             pin.active,
-            (-error / pin.row_scale - row @ free) / jnp.where(pin.active, rate, 1.0),
+            (-mismatch - row @ free) / jnp.where(pin.active, rate, 1.0),
             0.0,
         )
         update = tuple(jnp.split(free + delta * response, 3))

@@ -64,6 +64,7 @@ def main():
     figure.subplots_adjust(left=0.09, right=0.98, bottom=0.15, top=0.82, wspace=0.12)
     grey, failed = "#929292", DEFAULT_INK.separatrix_color
     all_values = []
+    bank_within_budget = 0
     for ax, row in zip(axes, receipt["states"], strict=True):
         for name, marker in (("reference", "o"), ("bank", "x")):
             values = (
@@ -84,6 +85,7 @@ def main():
                     zorder=2,
                 )
             else:
+                bank_within_budget += int(np.sum(values <= 1e-8))
                 ax.scatter(
                     arrays["points"][:, 0],
                     values,
@@ -121,10 +123,23 @@ def main():
         ),
         Line2D([], [], color=grey, linestyle=":", linewidth=1.2, label="trace budget"),
     ]
+    if bank_within_budget:
+        handles.insert(
+            2,
+            Line2D(
+                [],
+                [],
+                marker="x",
+                color=grey,
+                linestyle="none",
+                label="bank within budget",
+            ),
+        )
+    print("FIGURE_BANK_WITHIN_BUDGET", bank_within_budget, flush=True)
     figure.legend(
         handles=handles,
         loc="upper center",
-        ncol=3,
+        ncol=len(handles),
         frameon=False,
         bbox_to_anchor=(0.54, 0.98),
     )

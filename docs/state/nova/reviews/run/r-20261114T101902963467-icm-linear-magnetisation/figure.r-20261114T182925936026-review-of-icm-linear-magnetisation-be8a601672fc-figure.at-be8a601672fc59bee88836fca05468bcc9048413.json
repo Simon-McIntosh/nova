@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-14T19:19:30.330Z",
+  "dispatched_at": "2026-11-14T18:45:05Z",
+  "figures_reviewed": [
+    {
+      "caption_anchor": "docs/evidence/fragments/iron-core-magnetisation/icm-linear-magnetisation.html:228",
+      "path": "docs/figures/iron-core-magnetisation/icm-linear-magnetisation/error-against-unknowns.svg",
+      "rendered": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T182925936026-review-of-icm-linear-magnetisation-be8a601672fc-figure/image-0.png"
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/iron-core-magnetisation/icm-linear-magnetisation/error-against-unknowns.svg",
+      "id": "fab513c48e3",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The legend orders the two constant families on either side of the linear entry (constant uniform, linear, constant graded, 0.5 % target), so a reader comparing the two constant bases scans past an unrelated entry between them; grouping the two constant handles together would read better. Placing the handles is a cosmetic ordering choice, not a mislabelling: each entry's text and swatch match the series it names."
+    },
+    {
+      "file": "docs/figures/iron-core-magnetisation/icm-linear-magnetisation/error-against-unknowns.svg",
+      "id": "fab513c48e3",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The last uniform-constant marker (0.546 %) renders with only about a three-pixel gap above the dotted 0.5 % rule, under one marker radius, so at a glance the point reads as sitting on the limit even though it is correctly on the failing side of it. The marker does not overlap the rule and both are legible, so nothing is hidden; a reader has to be told the gap is real in the caption's own terms."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261114T182925936026-review-of-icm-linear-magnetisation-be8a601672fc-figure",
+  "reviewed_base_sha": "60d418bb85426142f3ca0a5f7a45afc4232b3255",
+  "reviewed_head_sha": "be8a601672fc59bee88836fca05468bcc9048413",
+  "reviewed_run_id": "r-20261114T101902963467-icm-linear-magnetisation",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T19:42:02.688963+00:00",
+  "total": null,
+  "verdicts": [
+    {
+      "item": "legibility",
+      "text": "Readable at a glance: log x and log y axes carry every major tick labelled (x 500, 1000, 2000, 5000, 10000, 20000; y 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10), the linear basis sits two decades below the constant families so the separation is the first thing seen, and each series is distinguishable by colour, marker and dash as its legend entry states."
+    },
+    {
+      "item": "decoration",
+      "text": "No gradient, background fill, gridline, shading band or styled frame; the figure is white with only the four declared elements drawn."
+    },
+    {
+      "item": "contrast",
+      "text": "All text clears its background by a wide margin: series text #0b0b0b and tick text #52514e on white give 19:1 and 7.8:1, the blue linear trace #2e6fb7 gives 5.1:1 and the grey 0.5 % rule #929292 gives 3.1:1, so no line is lighter than the 3:1 floor the brief sets."
+    },
+    {
+      "item": "data_ink",
+      "text": "The data carry the visual weight: five uniform-constant marks, two linear diamonds and two graded-constant squares over one dotted target rule, with the wide empty band between 0.1 % and 1 % an honest consequence of the measured values rather than decoration."
+    },
+    {
+      "item": "table_form",
+      "text": "The image plots a continuous error-against-unknown-count relationship, which is what it is for; the tabular content the caption defers to (finite-loop orders, arms and devices) is correctly kept out of the picture."
+    },
+    {
+      "item": "label_collision",
+      "text": "No label is clipped or overlapping: ink stays inside the canvas with margins of 33 px left, 34 px right, 24 px top and 29 px bottom, the four-entry legend sits in clear space above the axes, and no text artist touches another or the data."
+    }
+  ]
+}

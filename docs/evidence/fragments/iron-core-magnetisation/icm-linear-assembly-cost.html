@@ -9,9 +9,10 @@
 </head>
 <body><main>
   <h1 id="icm-linear-assembly-cost-state">Affine magnetisation assembly cost</h1>
-  <p>Measurement in progress. The delivered operator has been retained for a
-  full-matrix comparison. The fixed-shape scheduling repair is committed;
-  its numerical gates, after-change cost and completed 10 mm solve are pending.
+  <p>Blocked partial delivery after two counted paired-tile test failures.
+  The delivered operator has been retained for a full-matrix comparison.
+  The fixed-shape scheduling repair is committed, but its numerical gate,
+  after-change cost and completed 10 mm solve remain unfulfilled.
   This record does not select a formulation or measure WEST.</p>
 
   <h2 id="icm-linear-assembly-cost-before">What the delivered assembly spends</h2>
@@ -51,8 +52,8 @@
   reciprocal entries written in vectorised blocks. The integration rules,
   near/far criteria and triangle incidence are preserved.</p>
   <p>The constant interaction functions are unchanged. The affine entry points
-  are exported in <code>tiledassembly.__all__</code>. Numerical validation of
-  the scheduling change is pending; no speedup is claimed yet.</p>
+  are exported in <code>tiledassembly.__all__</code>. The shell-cell numerical pin passes, but the added paired/Cartesian
+  tile comparison remains red; no speedup or full-operator equivalence is claimed.</p>
 
   <h2 id="icm-linear-assembly-cost-provenance">Reference provenance refusal</h2>
   <p>The revision defect reproduced before repair: the reference program wrote
@@ -71,5 +72,45 @@
   incomplete after its recorded approximately 6590 s duration was found to
   exceed that partition's one-hour limit. Its replacement runs on rigel.
   No complete-suite result is claimed from the cancelled arm.</p>
+  <h2 id="icm-linear-assembly-cost-stop">Counted failures and retained control</h2>
+  <p>The first head fast gate at
+  <code>362f1e500e8e16f440c0d715a9c2e2df2650c317</code> finished with
+  <code>1 failed, 66 passed, 9 deselected in 269.78s</code>, <code>EXIT=1</code>.
+  The sole failure is
+  <code>tests/test_magnetisation.py::test_paired_polygon_tiles_reuse_one_shape_and_preserve_cartesian_rows</code>.
+  Its flux-only result was compared with a three-output Cartesian trace;
+  the maximum relative discrepancy was <code>9.11897259e-12</code>.</p>
+  <p>The correction at <code>a47d8f547</code> matched output selection and
+  retained the test's <code>1e-13</code> tolerance. A focused repeat also failed:
+  <code>1 failed, 62 deselected in 7.85s</code>. It reported two vertical-field
+  entries differing by at most <code>2.22028511e-19</code> absolute and
+  <code>5.80494233e-13</code> relative. The node's two-failure stop rule now
+  applies. No tolerance was widened and no third repair was attempted.
+  The full-operator requirement remains <code>1e-12</code>; this failed
+  per-triangle comparison is a stricter, newly added diagnostic.</p>
+  <p>The shell-cell pin passed in the head fast gate. Perturbing one affine
+  quadrature weight by ten percent made it fail at
+  <code>0.00015580038218152245</code> relative:
+  <code>1 failed, 62 deselected in 9.95s</code>, <code>EXIT=1</code>.
+  The red log is <code>fast-gate/negative-control.log</code> in this run's
+  directory. The compact pin covers three selected 40 mm shell cells; the
+  separate complete 1368 × 1368 operator comparison remains pending.</p>
+  <h2 id="icm-linear-assembly-cost-remaining">Recovery state</h2>
+  <p>At the stop, four bounded external scheduler jobs remain recoverable from
+  their named receipts and logs: baseline 20 mm profiling (1316078, titan),
+  after-change 40/20/10 mm profiling plus complete coarse-operator comparison
+  (1316100, queued for titan), both fixed-tile polygon routes (1316106, queued
+  for titan), and the unfiltered baseline suite (1316108, rigel).</p>
+  <p>The coordinator must adjudicate the paired-tile diagnostic before another
+  repair. A cancellation-aware error scale based on the existing polygon
+  owner's end terms is one candidate, while retaining the full shell operator's
+  <code>1e-12</code> requirement and the active quadrature-weight mutant.
+  The alternative is to make paired evaluation reproduce the Cartesian
+  arithmetic before repeating the check. These are proposals, not outcomes.</p>
+  <p>The required 10 mm assembly bound of 900 s, completed solve, dipole and
+  finite-loop errors, 20-to-10 order, largest-mesh per-pair projections, final
+  figure point and exact-delivered-head suite are all still missing. The
+  figure producer was checked and its existing-point PNG inspected, but that
+  preflight is not published as the requested completed refinement figure.</p>
 </main></body>
 </html>

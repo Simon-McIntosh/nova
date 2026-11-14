@@ -1,0 +1,24 @@
+<article id="ordered-sharing">
+<h2>Ordered sharing investigation</h2>
+<p>Work begins at <code>40523b1a42a448125b98780ff01fd63e54cc5875</code>, whose product source is the identity-clean height-sample form. The live section was read at version 45. No numerical bound is changed.</p>
+<section id="ordered-sharing-lowering">
+<h3>CPU lowering trials</h3>
+<p>These are exploratory source overlays of the production <code>fixed_points._row_program</code> at 132 cells, measured in job 1315030 and job 1315038. They measure lowering only; no identity or cold-compile acceptance follows from a smaller module. Source snapshots and the literal commands are retained in this run's directory. The prototype point function is untouched.</p>
+<table><thead><tr><th>Form</th><th>StableHLO bytes</th></tr></thead><tbody>
+<tr><td>Mapped direction arrays</td><td>7,870,988</td></tr>
+<tr><td>Batched direction arrays</td><td>8,430,714</td></tr>
+<tr><td>Batched directions with separate primal</td><td>9,964,576</td></tr>
+<tr><td>Mapped directions with separate primal</td><td>9,379,809</td></tr>
+<tr><td>Linearized direction map</td><td>11,498,658</td></tr>
+<tr><td>Linearized direction batch</td><td>9,880,208</td></tr>
+<tr><td>Packed linearization residuals</td><td>14,392,378</td></tr>
+<tr><td>Batched height mask</td><td>8,757,870</td></tr>
+</tbody></table>
+<p>Receipts: <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/ordered-sharing/lower-candidates.json</code> and <code>lower-additional.json</code> beside it. Both jobs completed with exit 0. Reduced identity measurements are still running.</p>
+</section>
+<section id="ordered-sharing-scale">
+<h3>A reproducible constant-folding departure</h3>
+<p>A scalar CPU probe using the identity geometry gives <code>norm = -2.2621729278774393e-05</code>. Direct division <code>-norm / (4π)</code> is <code>0x1.e33b6dca45d11p-20</code>; reciprocal multiplication <code>norm * (-1 / (4π))</code> is <code>0x1.e33b6dca45d12p-20</code>. Compiling the direct expression times 3.4 gives <code>0x1.9abf50858824ep-18</code>, while putting that expression inside a two-element map gives <code>0x1.9abf50858824fp-18</code>. This is a last-bit difference, not a sign of zero. The lowered loop takes the constant norm as a loop operand, so the divide reaches XLA inside the loop body rather than in the outer constant expression.</p>
+<p>This is a located mechanism consistent with the packed radial-central row's reported one-ULP failure, not yet proof that it is the only departure in the full program. The probe is retained as <code>factor_probe.py</code> in the run directory. The next trial hoists that exact division, including its JVP, before sharing directions; full intermediate and identity measurements remain required.</p>
+</section>
+</article>

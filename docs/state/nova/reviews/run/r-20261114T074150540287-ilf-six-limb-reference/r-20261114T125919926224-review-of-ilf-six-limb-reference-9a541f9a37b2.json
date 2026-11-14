@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "f42582f57ba48bb5cd1a4e93756cacb744d81b54",
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_note": "no production module imports scripts.iron_limb_reference; the package is reached only by its own test file and by its SLURM entry points (measure.py, controls.py main).",
+  "completed_at": "2026-11-14T13:13:46.062Z",
+  "dispatched_at": "2026-11-14T13:01:55Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-limb-fill-fraction/ilf-six-limb-reference.html",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment states 'The 3D reference meets its convergence clause' while the six-limb table beside it shows only the 0.18 to 0.13 m pair; the cited receipt's reference_differences records four steps whose flux changes are 0.43%, 1.41%, 9.00% and 1.05%, so the change does not shrink at every step as plan section 1 clause 1 requires, and a reader of the fragment cannot see the 9% step. The coordinator's resume-2 ruling accepted the reference on the last pair, so the sentence follows a ruling rather than the clause; the intermediate steps should be shown beside it."
+    },
+    {
+      "file": "tests/test_iron_limb_reference.py",
+      "line": "22",
+      "severity": "non-blocking",
+      "text": "non-blocking: the declared negative control (negative-control-neutral.log) flips the charge sign in scripts/prototypes/iron_limb_fill/bricks.py, the independent comparator, so it shows that the dipole assertion fires but records no evidence that a defect in the landed solver reddens a test; the solver-side guard at tests/test_iron_limb_reference.py:38-62 is never exercised by a mutation, so its sensitivity rests on reading rather than measurement."
+    }
+  ],
+  "head_log_revision": "9a541f9a37b2dff0b3fc74180e4cd8a9a5532517",
+  "item_aggregate": "5 of 5 checklist items reported",
+  "item_verdicts": {
+    "diff": "read commit by commit against f42582f5; the thirteen commits add the surface solver, the filament drive, the sphere benchmark, the measurement driver, the two controls, the stored-comparison tabulator, the test file and the landing fragment, 2,024 inserted lines in all-new files inside the fence.",
+    "done_when": "the plan's done_when wants three or more resolutions, the change shrinking at every step and under 2% on the last; the receipt /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/reference/surface-qualified-20261114/summary.json records five resolutions but its reference_differences flux steps are 0.43%, 1.41%, 9.00% and 1.05%, so the shrink-every-step half is not met while the 2%-last-step half is, and the sphere trend (<1%, order 2) and the sixfold control are asserted at tests/test_iron_limb_reference.py:87-92 and scripts/iron_limb_reference/controls.py:287-302.",
+    "goal": "the node's goal is a converged 3D six-limb reference for the WEST-like control circuit; scripts/iron_limb_reference/surface.py:281-329 solves the single-layer boundary equation and scripts/iron_limb_reference/measure.py:351-395 drives the reference to five resolutions whose finest-pair changes are 1.05%/1.21% flux, 0.22%/0.24% vessel and 0.30%/0.33% outside, so the reference is delivered.",
+    "manifest": "read; status complete, thirteen commits f42582f5..9a541f9a, tests names the single-file pytest gate, test_logs names stored-final-head-suite.log (19 passed, EXIT=0), baseline_suite is an empty_scope arm with 0 failures and after_suite is 9a541f9a with 19 tests and 0 failures.",
+    "write_paths": "the declared fence was scripts/iron_limb_reference, tests/test_iron_limb_reference.py, and the ilf-six-limb-reference fragment under docs/evidence/fragments/iron-limb-fill-fraction; git diff --stat f42582f5..9a541f9a lists exactly those eight files and nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/test_iron_limb_reference.py:38-62 compares the landed triangle field against the independent brick kernel to atol 2e-14 and :134-162 shows the body-charge deflation firing on a deliberately injected monopole, so both redden on a real regression; the declared control mutates the comparator rather than the solver.",
+    "evidence": "tests/test_iron_limb_reference.py:83-92 asserts the sphere trend and the receipt logs 19 passed EXIT=0 at 9a541f9a, but the annulus acceptance the done_when names is a table recomputed by scripts/iron_limb_reference/comparison.py (stored-comparison-final.log) rather than a suite assertion, and the clause it measures is reported unmet at mu 200.",
+    "fit": "scripts/iron_limb_reference/surface.py:1-11 states the mechanism in the prototype idiom (numpy and numba kernels, module docstrings) and every added symbol names its capability - Panels, SurfaceModel, circuit_panels, richardson, comparison_rows - with no plan or ticket identifier in any name.",
+    "goal_fidelity": "scripts/iron_limb_reference/surface.py:281-329 solves the charge equation and measure.py:351-395 drives the reference to five resolutions whose finest-pair changes are 1.05%/1.21%, so the reference is delivered; the plan's shrink-every-step and 2%-annulus clauses are unmet and carried as stated caveats under a coordinator ruling.",
+    "reuse": "scripts/iron_limb_reference/drive.py:6 reuses nova.biot.greens.greens_psi and measure.py:258-263 reuses the prototype axisymmetric Model instead of forking it; a search of nova/biot for a single-layer or solid-angle kernel found no owner (polygonanalytic.py is the axisymmetric full-turn Biot-Savart owner, nova/biot/magnetisation.py:1-5 the axisymmetric volume-cell owner), so the 3D surface method extends rather than duplicates, though it is a second iron-magnetisation solver beside that owner.",
+    "scope_discipline": "every path in git diff --stat f42582f5..9a541f9a is under scripts/iron_limb_reference/, tests/test_iron_limb_reference.py or the ilf-six-limb-reference fragment, each inside the declared fence."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is a converged 3D six-limb reference for the WEST-like control circuit; scripts/iron_limb_reference/surface.py:281-329 solves the single-layer boundary equation and scripts/iron_limb_reference/measure.py:351-395 drives the reference to five resolutions whose finest-pair changes are 1.05%/1.21% flux, 0.22%/0.24% vessel and 0.30%/0.33% outside, so the reference is delivered.\nVERDICT done_when: the plan's done_when wants three or more resolutions, the change shrinking at every step and under 2% on the last; the receipt /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/reference/surface-qualified-20261114/summary.json records five resolutions but its reference_differences flux steps are 0.43%, 1.41%, 9.00% and 1.05%, so the shrink-every-step half is not met while the 2%-last-step half is, and the sphere trend (<1%, order 2) and the sixfold control are asserted at tests/test_iron_limb_reference.py:87-92 and scripts/iron_limb_reference/controls.py:287-302.\nVERDICT write_paths: the declared fence was scripts/iron_limb_reference, tests/test_iron_limb_reference.py, and the ilf-six-limb-reference fragment under docs/evidence/fragments/iron-limb-fill-fraction; git diff --stat f42582f5..9a541f9a lists exactly those eight files and nothing outside them.\nVERDICT manifest: read; status complete, thirteen commits f42582f5..9a541f9a, tests names the single-file pytest gate, test_logs names stored-final-head-suite.log (19 passed, EXIT=0), baseline_suite is an empty_scope arm with 0 failures and after_suite is 9a541f9a with 19 tests and 0 failures.\nVERDICT diff: read commit by commit against f42582f5; the thirteen commits add the surface solver, the filament drive, the sphere benchmark, the measurement driver, the two controls, the stored-comparison tabulator, the test file and the landing fragment, 2,024 inserted lines in all-new files inside the fence.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: scripts/iron_limb_reference/surface.py:281-329 solves the charge equation and measure.py:351-395 drives the reference to five resolutions whose finest-pair changes are 1.05%/1.21%, so the reference is delivered; the plan's shrink-every-step and 2%-annulus clauses are unmet and carried as stated caveats under a coordinator ruling.\nSCORE evidence: 15\nJUSTIFICATION evidence: tests/test_iron_limb_reference.py:83-92 asserts the sphere trend and the receipt logs 19 passed EXIT=0 at 9a541f9a, but the annulus acceptance the done_when names is a table recomputed by scripts/iron_limb_reference/comparison.py (stored-comparison-final.log) rather than a suite assertion, and the clause it measures is reported unmet at mu 200.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff --stat f42582f5..9a541f9a is under scripts/iron_limb_reference/, tests/test_iron_limb_reference.py or the ilf-six-limb-reference fragment, each inside the declared fence.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_iron_limb_reference.py:38-62 compares the landed triangle field against the independent brick kernel to atol 2e-14 and :134-162 shows the body-charge deflation firing on a deliberately injected monopole, so both redden on a real regression; the declared control mutates the comparator rather than the solver.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/iron_limb_reference/surface.py:1-11 states the mechanism in the prototype idiom (numpy and numba kernels, module docstrings) and every added symbol names its capability - Panels, SurfaceModel, circuit_panels, richardson, comparison_rows - with no plan or ticket identifier in any name.\nSCORE reuse: 17\nJUSTIFICATION reuse: scripts/iron_limb_reference/drive.py:6 reuses nova.biot.greens.greens_psi and measure.py:258-263 reuses the prototype axisymmetric Model instead of forking it; a search of nova/biot for a single-layer or solid-angle kernel found no owner (polygonanalytic.py is the axisymmetric full-turn Biot-Savart owner, nova/biot/magnetisation.py:1-5 the axisymmetric volume-cell owner), so the 3D surface method extends rather than duplicates, though it is a second iron-magnetisation solver beside that owner.\nFINDING docs/evidence/fragments/iron-limb-fill-fraction/ilf-six-limb-reference.html:49 non-blocking: the fragment states 'The 3D reference meets its convergence clause' while the six-limb table beside it shows only the 0.18 to 0.13 m pair; the cited receipt's reference_differences records four steps whose flux changes are 0.43%, 1.41%, 9.00% and 1.05%, so the change does not shrink at every step as plan section 1 clause 1 requires, and a reader of the fragment cannot see the 9% step. The coordinator's resume-2 ruling accepted the reference on the last pair, so the sentence follows a ruling rather than the clause; the intermediate steps should be shown beside it.\nFINDING tests/test_iron_limb_reference.py:22 non-blocking: the declared negative control (negative-control-neutral.log) flips the charge sign in scripts/prototypes/iron_limb_fill/bricks.py, the independent comparator, so it shows that the dipole assertion fires but records no evidence that a defect in the landed solver reddens a test; the solver-side guard at tests/test_iron_limb_reference.py:38-62 is never exercised by a mutation, so its sensitivity rests on reading rather than measurement.\n",
+  "review_run_id": "r-20261114T125919926224-review-of-ilf-six-limb-reference-9a541f9a37b2",
+  "reviewed_base_sha": "f42582f57ba48bb5cd1a4e93756cacb744d81b54",
+  "reviewed_head_sha": "9a541f9a37b2dff0b3fc74180e4cd8a9a5532517",
+  "reviewed_run_id": "r-20261114T074150540287-ilf-six-limb-reference",
+  "reviewer": "review-of-ilf-six-limb-reference-9a541f9a37b2",
+  "reviewer_run_id": "r-20261114T125919926224-review-of-ilf-six-limb-reference-9a541f9a37b2",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T13:33:21.667229+00:00",
+  "total": 103
+}

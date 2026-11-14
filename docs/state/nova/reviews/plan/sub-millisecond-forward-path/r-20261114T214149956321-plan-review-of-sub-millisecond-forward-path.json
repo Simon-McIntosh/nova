@@ -33,7 +33,30 @@
   "plan_slug": "sub-millisecond-forward-path",
   "plan_version": 349,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "9190ce1219f0a69655729fdb3b4abe7dc572b593",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "Section 7 now names ~/.cache/nova-polygon-tangent-repair/ and ~/.cache/nova-iter-bank/ (or the run directory) for node (a) trace records and edge-term rows and node (b) re-certification receipts.",
+      "reason": "",
+      "when": "2026-11-14T23:52:46.586607+00:00"
+    }
+  ],
+  "responses": {
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "9190ce1219f0a69655729fdb3b4abe7dc572b593",
+      "commit_basis": "edit",
+      "note": "Section 7 now names ~/.cache/nova-polygon-tangent-repair/ and ~/.cache/nova-iter-bank/ (or the run directory) for node (a) trace records and edge-term rows and node (b) re-certification receipts.",
+      "reason": "",
+      "when": "2026-11-14T23:52:46.586607+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261114T214149956321-plan-review-of-sub-millisecond-forward-path.json",
   "review_run_id": "r-20261114T214149956321-plan-review-of-sub-millisecond-forward-path",
   "reviewed_blob_sha": "556ed0667d4cb0f81c6ed1c524bdfee8b19e1c27",
   "rubric": "content",

@@ -1,0 +1,743 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "5a30fe0d46e6d04e09ae971fb6b545f138fd6ce0",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T145610212417-review-of-known-answer-recovery-8d762adb6194/brief.md",
+    "sha256": "9e3385975d5c0e8357c063d7adc021867ae07e1af6159acfdfff87078580052f"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 3489792,
+      "cached_input_tokens_cumulative": 3489792,
+      "input_tokens": 3636155,
+      "input_tokens_cumulative": 3636155,
+      "output_tokens": 17084,
+      "output_tokens_cumulative": 17084,
+      "reasoning_output_tokens": 4275,
+      "reasoning_output_tokens_cumulative": 4275
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-11-14T15:06:39Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-14T14:56:54Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "",
+    "reason": "brief-names-no-plan",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.6610226160055408,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-17T16:04:07Z, which is after this node's 3600s horizon ending 2026-11-14T15:56:12.420114+00:00",
+    "horizon_ends_at": "2026-11-14T15:56:12.420114+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-11-14T14:56:11Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-17T16:04:07Z",
+    "resets_at": "2026-11-19T16:24:40Z",
+    "seconds_until_reset": 437308,
+    "state": "quiet",
+    "utilisation_pct": 46.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-14T14:56:11Z",
+    "read_at": "2026-11-14T14:56:12Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 46.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-14T15:06:39Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-14T15:06:39Z",
+        "resets_at": 1795105480,
+        "used_percent": 48.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T145610212417-review-of-known-answer-recovery-8d762adb6194/manifest.md",
+  "member": "disposable-r-20261114T145610212417-review-of-known-answer-recovery-8d762adb6194",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-known-answer-recovery-8d762adb6194",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T145610212417-review-of-known-answer-recovery-8d762adb6194/brief.md",
+    "brief_sha256": "9e3385975d5c0e8357c063d7adc021867ae07e1af6159acfdfff87078580052f",
+    "capability": null,
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1522,
+          "cached_input_tokens": 448737,
+          "input_tokens": 450261,
+          "output_tokens": 1260,
+          "reasoning_output_tokens": 148,
+          "total_tokens": 451521,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "session_id": "d2b31d35-d43f-471c-8494-93ef30b1d4b5"
+    },
+    "done_when": "the review for r-20261113T162733537202-known-answer-recovery stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261113T162733537202-known-answer-recovery, and never in the worktree; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261113T162733537202-known-answer-recovery",
+    "id": "review-of-known-answer-recovery-8d762adb6194",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-14T14:56:11Z",
+      "read_at": "2026-11-14T14:56:12Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 46.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T145610212417-review-of-known-answer-recovery-8d762adb6194/manifest.md",
+    "negative_control": "",
+    "over_fence_reason": "",
+    "peer_scopes": {},
+    "plan": "",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/review-records/r-20261113T162733537202-known-answer-recovery.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/review-records/r-20261113T162733537202-known-answer-recovery.at-8d762adb6194b5d96d3ee04a92ec3825901567b3.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "code review delivered on codex: total 108 of 120, one blocking finding on the synthetic rows omitting conductor fields",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 1.6609281796961826,
+      "derived": 0.3046489343642527,
+      "drain_hours": 168.0,
+      "effective_limit": 0.3046489343642527,
+      "elapsed_fraction": 0.27695357669477516,
+      "elapsed_hours": 46.528200884722224,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-11-14T14:56:21+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.54,
+      "remaining_windows": null,
+      "resets_at": "2026-11-19T16:24:40Z",
+      "state": "observed",
+      "utilisation": 0.46,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.440128,
+      "decided_by": "window",
+      "margin": 0.18487199999999998,
+      "name": "review-of-known-answer-recovery-8d762adb6194",
+      "score": 0.625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.46
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.523185,
+        "observed_at": "2026-11-14T14:56:21+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-19T16:24:40Z",
+        "state": "observed",
+        "utilisation": 0.46,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "review-of-known-answer-recovery-8d762adb6194",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-14T14:56:21.523185+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "refuse",
+    "answering_model": null,
+    "backend": null,
+    "comment": "Lead directive 2026-11-14: review this run on codex; the local lane left its review in starting for 33 minutes",
+    "confidence": null,
+    "decision_source": "refused",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 86.456785,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 2.6672,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.661046992989812,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 5.0614601413773155,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 0.30462714308234123,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-19T16:24:40+00:00",
+        "stale": false,
+        "suits": "The lane's frontier model, strongest and slowest, about five times sol's token price. Suits deep or open-ended design, elevated or critical risk, and nodes that already failed on another model.",
+        "utilisation_pct": 46.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 86.456785,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 2.6672,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.661046992989812,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 5.0614601413773155,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 0.30462714308234123,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-19T16:24:40+00:00",
+        "stale": false,
+        "suits": "The lane's fast, affordable model, about a twentieth of sol's token price. Suits well-defined, less difficult work: reviews, exact-spec implementation, tests and documentation.",
+        "utilisation_pct": 46.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 86.456785,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 2.6672,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.661046992989812,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 5.0614601413773155,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6.1-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 33,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 0.30462714308234123,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-19T16:24:40+00:00",
+        "stale": false,
+        "suits": "The lane default, the current-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 46.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex-anchored",
+        "budget_age_s": 86.456785,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 2.6672,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.661046992989812,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 5.0614601413773155,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6.1-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 0.30462714308234123,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-19T16:24:40+00:00",
+        "stale": false,
+        "suits": "The lane default, the current-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 46.0,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": "no-eligible-candidates; default-backend-ineligible",
+    "family": null,
+    "jev_latency_ms": 0.0,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 280.327,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "questions": {},
+    "rendered_state": "{\"node\":{\"role\":\"review\",\"spec_level\":\"exact\",\"capability\":null,\"goal\":\"attach an independent review to run r-20261113T162733537202-known-answer-recovery\",\"done_when\":\"the review for r-20261113T162733537202-known-answer-recovery stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261113T162733537202-known-answer-recovery, and never in the worktree; the turn ends once that record is stored and the manifest reads complete\",\"urgency\":{\"due\":null,\"seconds_to_due\":null,\"reason\":null},\"estimated_context\":50392,\"estimated_hours\":null,\"estimated_hours_source\":null,\"attempts\":0,\"write_path_count\":2,\"negative_control_declared\":false,\"serving_lanes\":[],\"serving_lane_count\":0,\"hold_waits_for\":null,\"lift_preference\":null},\"orchestrator_comment\":\"Lead directive 2026-11-14: review this run on codex; the local lane left its review in starting for 33 minutes\",\"candidates\":{},\"return_times\":{},\"lanes\":{},\"local_lane\":{\"admission\":\"unavailable\",\"expected_wait_s\":3811.5,\"expected_wait_profile_age_s\":81278.213211,\"running\":15,\"waiting\":0,\"queue_position\":1,\"headroom\":-88,\"worker_slots\":0,\"tokens_per_second\":22.977,\"read_at\":\"2026-11-14T14:56:10.058036+00:00\"}}",
+    "rendered_token_estimate": 375,
+    "stage_ms": {
+      "budget-snapshot": 274.994,
+      "context-estimate": 18.752,
+      "records": 224.783,
+      "verdict-inputs": 322.445
+    },
+    "template_digest": "5ea6c8844f959f84293c0d2c90c1db0de4375d09e641cca7be7c360603b00202",
+    "usage": {}
+  },
+  "plan": null,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "5a30fe0d46e6d04e09ae971fb6b545f138fd6ce0",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261114T145610212417-review-of-known-answer-recovery-8d762adb6194",
+    "reviewed_base_sha": "87cf7ec68f6922173c471aa0bc742f07cc2256f3",
+    "reviewed_head_sha": "8d762adb6194b5d96d3ee04a92ec3825901567b3",
+    "scores": {
+      "durability": 16,
+      "evidence": 15,
+      "fit": 20,
+      "goal_fidelity": 17,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 108
+  },
+  "review_tier": "none",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261114T145610212417-review-of-known-answer-recovery-8d762adb6194",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+  "session_harness": "codex",
+  "session_id": "01a1da90-060a-7413-835b-1fcd8580fa1a",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 3489792,
+    "cumulative_input_tokens": 7125947,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 21359
+  },
+  "time_budget": "60m",
+  "tool_steps": 72.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": false,
+    "source": "coordinator",
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 10800,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 2135,
+        "exit_record": {
+          "attempt": 4,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-14T14:21:29Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-14T14:20:42Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 1510045,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/codex-home/cache"
+            },
+            {
+              "bytes": 32753627,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261113T162733537202-known-answer-recovery",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 1763,
+          "worker_pid": 129515
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-14T14:21:29Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 2090,
+        "log_fresh": false,
+        "manifest_commits": [
+          "40fdde05441b227ac41c560dad5e94c6688771bc",
+          "9607543b1d565062256c9d945985bc43675ec8d6",
+          "9d954fe1139cfde6f6e648984eebe5293bacd0f0",
+          "84ca3cf57b21b128fc0d5284265dcf9a1429ccee",
+          "04b366d880cd4d7448958b6007065cb16e8795cd",
+          "963922bd73b12e658d167d25fb17156a4c5df532",
+          "2054f5c7865093df53e464757baf64fb1a1a5126",
+          "94f1b307c94bf05ecd28543a4ecbc09320a8e83f",
+          "c592ffa6717980ae3275d1b8b153197548b710b4",
+          "9301bf1be78a5eba6c6458d7f54e2485911635a1",
+          "f79ea77719151c99561bde1828649a2dca2fae6e",
+          "c0a9500654c0dff8c798f74a7d510522624ed86b",
+          "3bfc4dc810ac826e7c273d62fb4323ba5d97dd02",
+          "8949ea237e0bf6f3cc84c36f87300406b8f9df9f",
+          "f2d23f27e1ff7466018073a9357fbf8aabf44830",
+          "19663de3e56cbf966b1d3d3bcf8405b8a5163e2c",
+          "9a4fc2dbc6fdeada9882ad97b90e8678e336f833",
+          "8d762adb6194b5d96d3ee04a92ec3825901567b3"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "e618c30e84d71d9ac45d593216593b853642a1c04c50b79f630f572053dce29b",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/review-brief.md --plan inverse-equilibrium-baseline --section '§1' --role review --spec-level exact --node review-of-known-answer-recovery-8d762adb6194 --goal 'attach an independent review to run r-20261113T162733537202-known-answer-recovery' --done-when 'the review for r-20261113T162733537202-known-answer-recovery stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261113T162733537202-known-answer-recovery, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/review-records/r-20261113T162733537202-known-answer-recovery.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/review-records/r-20261113T162733537202-known-answer-recovery.at-8d762adb6194b5d96d3ee04a92ec3825901567b3.json --time-budget 3h --session d2b31d35-d43f-471c-8494-93ef30b1d4b5 --allow-unreconciled-runs --local",
+        "node": "known-answer-recovery",
+        "phase": "complete",
+        "plan": "inverse-equilibrium-baseline",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261113T162733537202-known-answer-recovery",
+        "session": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+        "stored_phase": "complete",
+        "stuck": false,
+        "stuck_reason": null,
+        "terminal_age_seconds": 2097,
+        "terminal_at": "2026-11-14T14:21:18Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/known-answer-recovery"
+      }
+    ]
+  },
+  "wall_seconds": 585,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-14T15:06:42Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-14T14:57:00Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 74960163,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T145610212417-review-of-known-answer-recovery-8d762adb6194/codex-home/cache"
+      },
+      {
+        "bytes": 32753627,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T145610212417-review-of-known-answer-recovery-8d762adb6194/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261114T145610212417-review-of-known-answer-recovery-8d762adb6194",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 176,
+    "worker_pid": 404845
+  },
+  "worker_seconds": 585,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

@@ -1,0 +1,293 @@
+<section id="h200-levers-measurements">
+<h2>H200 speed-lever verdicts</h2>
+<p>The seven original jobs (1312389, 1312390, 1312391, 1312392, 1312393, 1312394, 1312395) completed. Canonical-input repair jobs
+1312981, 1312984, 1313091 complete the paired comparisons. Every original completed receipt,
+including carried-decision widths 1 and 16 and booking-off width 1, is retained
+unchanged. The selected fresh-process pairs agree within 4.915%.
+Earlier disagreeing pairs are excluded, never averaged.</p>
+<p>The inventory audit passes 18 paired comparisons and
+81 geometry checks with no input fingerprint
+mismatches. Position differences use the analytic plasma minor radius
+(0.544 m) and the locked 5e-4 position and 1e-4 flux-span
+budgets; these qualify the lever changes against the historical reference,
+whose analytic qualification is inherited. Maximum paired position error is
+8.26377e-14 of the minor radius and boundary-flux error is 1.23158e-14
+of the span. Recorded terminal residuals are at most 8.89884e-11; all solved
+lanes are certified at 1e-10. Receipts assert x64 on NVIDIA H200 NVL.
+Compilation/cache-load
+and synchronized warm execution walls are reported separately.</p>
+<p>The historical carried branch returns a frozen reading and is retained for
+attribution only. The carried-decision verdict compares the historical full
+read with the current refreshed carried read. An identical-program arm pair is
+refused. Every accepted pair has different lowered programs or executed-work
+counts. The negative control admits distinct fingerprints and then refuses
+identical programs; the added test also checks the refusal, and its deliberate
+bypass is measured separately in the paired CPU suite job.</p>
+<p>The scalar conic default changes from 32 to 128 cells. Factor carry remains
+off by default. Shared scalar continuation remains the scalar-input default;
+independent per-lane continuation is selected explicitly by array inputs.
+Carried decisions, booking tiling, live candidates and the all-diverted carried
+wall skip stay enabled. Normal-form tiles remain eight cells.</p>
+<p>Each decision below uses the larger of 3% and the larger process spread.
+Inside that margin the incumbent stays. Scalar rows compare 32 with 128; 64 is
+included in the complete execution table. Width-16 full-read 128 versus 64 is
+inside 3%, but 128 beats the incumbent 32 beyond the margin at both widths and
+has the smallest measured wall. Each process is retained separately.
+The width-16 lane-drive batch alternates 1e-5 and 1e-3 profile steps; its
+width-1 case uses 1e-5. The width-1 counterpart of the mixed wall batch is
+a single limited lane. A dash marks cases with no profile continuation.</p>
+<table id="h200-levers-verdicts"><thead><tr><th>Lever</th><th>Width</th><th>Profile step</th><th>Population</th><th>Stage</th><th>Off / tile 32 [ms], P1,P2</th><th>On / tile 128 [ms], P1,P2</th><th>On change</th><th>Margin</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>carried-decisions</td><td>1</td><td>—</td><td>diverted</td><td>full-to-carried</td><td>6.832168, 6.512109</td><td>3.186917, 3.057048</td><td>-53.354%</td><td>4.915%</td><td>on: faster beyond margin</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>—</td><td>diverted</td><td>full-to-carried</td><td>30.101346, 30.093079</td><td>9.411952, 9.337770</td><td>-68.732%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>booking</td><td>1</td><td>—</td><td>diverted</td><td>assembly</td><td>7.586610, 7.446166</td><td>6.217487, 6.060906</td><td>-18.047%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>booking</td><td>1</td><td>—</td><td>diverted</td><td>update</td><td>15.279071, 15.294110</td><td>13.793331, 13.757700</td><td>-9.724%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>booking</td><td>16</td><td>—</td><td>diverted</td><td>assembly</td><td>28.362328, 27.790429</td><td>27.768090, 27.749352</td><td>-2.095%</td><td>3.000%</td><td>retain incumbent: difference unresolved</td></tr>
+<tr><td>booking</td><td>16</td><td>—</td><td>diverted</td><td>update</td><td>48.013283, 48.088046</td><td>48.144810, 48.018256</td><td>+0.274%</td><td>3.000%</td><td>retain incumbent: difference unresolved</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>warm-slices</td><td>40.012285, 40.201752</td><td>69.336390, 69.254600</td><td>+73.288%</td><td>3.000%</td><td>off; factor carry remains opt-in</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>warm-slices</td><td>123.279639, 123.218765</td><td>507.349240, 507.322559</td><td>+311.543%</td><td>3.000%</td><td>off; factor carry remains opt-in</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>warm-slices</td><td>82.792549, 82.424549</td><td>212.017546, 211.889524</td><td>+156.083%</td><td>3.000%</td><td>off; factor carry remains opt-in</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>warm-slices</td><td>269.625258, 269.467008</td><td>1809.288069, 1811.640245</td><td>+571.038%</td><td>3.000%</td><td>off; factor carry remains opt-in</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>full</td><td>9.808468, 9.810278</td><td>8.445671, 8.284869</td><td>-13.894%</td><td>3.000%</td><td>128: fastest measured tile; change default from 32</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>carried</td><td>6.380612, 6.412249</td><td>4.710596, 4.753752</td><td>-26.173%</td><td>3.000%</td><td>128: fastest measured tile; change default from 32</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>full</td><td>29.135708, 29.198540</td><td>27.803048, 27.770150</td><td>-4.574%</td><td>3.000%</td><td>128: fastest measured tile; change default from 32</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>carried</td><td>17.774370, 17.746024</td><td>16.525416, 16.318068</td><td>-7.027%</td><td>3.000%</td><td>128: fastest measured tile; change default from 32</td></tr>
+<tr><td>lane-drive</td><td>1</td><td>1e-5</td><td>diverted</td><td>mixed-drive</td><td>173.763677, 174.215199</td><td>226.640278, 229.883481</td><td>+30.430%</td><td>3.000%</td><td>shared scalar default; independent arrays remain opt-in</td></tr>
+<tr><td>lane-drive</td><td>16</td><td>1e-5 / 1e-3</td><td>diverted</td><td>mixed-drive</td><td>805.932002, 807.819286</td><td>997.578302, 993.040627</td><td>+23.779%</td><td>3.000%</td><td>shared scalar default; independent arrays remain opt-in</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>—</td><td>diverted</td><td>full</td><td>6.708164, 6.953167</td><td>6.791629, 6.935364</td><td>+1.244%</td><td>3.652%</td><td>retain incumbent: difference unresolved</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>—</td><td>diverted</td><td>carried</td><td>3.463432, 3.477322</td><td>3.137155, 3.076116</td><td>-9.421%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>—</td><td>diverted</td><td>full</td><td>30.143091, 29.811233</td><td>20.841217, 21.122292</td><td>-30.859%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>—</td><td>diverted</td><td>carried</td><td>10.423839, 10.446362</td><td>9.285096, 9.199895</td><td>-10.924%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>diverted</td><td>full</td><td>6.424686, 6.447136</td><td>6.431496, 6.533504</td><td>+0.106%</td><td>3.000%</td><td>attribution only: skip is in carried branch</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>diverted</td><td>carried</td><td>3.228899, 3.244188</td><td>2.888622, 2.893830</td><td>-10.538%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>diverted</td><td>full</td><td>27.853798, 27.705722</td><td>18.917657, 18.864637</td><td>-32.082%</td><td>3.000%</td><td>attribution only: skip is in carried branch</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>diverted</td><td>carried</td><td>8.440215, 8.399384</td><td>7.178316, 7.205501</td><td>-14.951%</td><td>3.000%</td><td>on: faster beyond margin</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>limited</td><td>full</td><td>6.223032, 6.366797</td><td>6.504139, 6.716659</td><td>+4.517%</td><td>3.267%</td><td>attribution only: skip is in carried branch</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>limited</td><td>carried</td><td>3.074899, 3.049588</td><td>3.149852, 3.130550</td><td>+2.438%</td><td>3.000%</td><td>retain incumbent: difference unresolved</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>mixed</td><td>full</td><td>28.138099, 27.842918</td><td>18.937685, 18.953713</td><td>-32.697%</td><td>3.000%</td><td>attribution only: skip is in carried branch</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>mixed</td><td>carried</td><td>8.400809, 8.340696</td><td>8.397005, 8.430857</td><td>-0.045%</td><td>3.000%</td><td>retain incumbent: difference unresolved</td></tr>
+</tbody></table>
+<figure id="h200-levers-walls-figure">
+<img src="/nova/figures/sub-millisecond-forward-path/h200-levers/arm-walls.svg"
+alt="Per-lever H200 walls at widths one and sixteen and a secant flattop trace."/>
+<figcaption>First selected process per arm; the tables include both processes.
+Read panels show carried reads, except the decision-free reference uses its
+full read. Booking shows assembly; factor carry shows the median across warm
+flattop slices 2–7 within one process; wall skip shows the all-diverted batch.
+The final panel shows per-slice width-16 wall, including prediction; other
+panels show whole-batch walls. Colours consistently identify batch width.
+No disagreeing process pair contributes to a plotted point.</figcaption></figure>
+<p>The width-16 secant flattop stream has warm per-slice medians over slices
+2–7 of 7.700821 and 7.710159 ms in the two fresh processes.
+The 1 ms target is not met. Slice 1 precedes the two-slice secant history and
+is tabled separately. This headline was measured on revision
+<code>7e89937d536725553392a05af636f7b468eb1c03</code>, before changing the scalar
+default; it is the recorded main-arm wall, not a post-change projection.</p>
+<table id="h200-levers-execute-walls"><thead><tr><th>Lever</th><th>Width</th><th>Profile step</th><th>Population</th><th>Arm</th><th>Stage</th><th>Process 1 [ms]</th><th>Process 2 [ms]</th><th>Spread</th></tr></thead><tbody>
+<tr><td>carried-decisions</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>full</td><td>6.832168</td><td>6.512109</td><td>4.915%</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>carried</td><td>1.940487</td><td>1.958208</td><td>0.913%</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>full</td><td>6.728325</td><td>6.918063</td><td>2.820%</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>carried</td><td>3.186917</td><td>3.057048</td><td>4.248%</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>full</td><td>30.101346</td><td>30.093079</td><td>0.027%</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>carried</td><td>3.766643</td><td>3.766259</td><td>0.010%</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>full</td><td>21.064021</td><td>21.024175</td><td>0.190%</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>carried</td><td>9.411952</td><td>9.337770</td><td>0.794%</td></tr>
+<tr><td>booking</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>assembly</td><td>7.586610</td><td>7.446166</td><td>1.886%</td></tr>
+<tr><td>booking</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>update</td><td>15.279071</td><td>15.294110</td><td>0.098%</td></tr>
+<tr><td>booking</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>assembly</td><td>6.217487</td><td>6.060906</td><td>2.583%</td></tr>
+<tr><td>booking</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>update</td><td>13.793331</td><td>13.757700</td><td>0.259%</td></tr>
+<tr><td>booking</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>assembly</td><td>28.362328</td><td>27.790429</td><td>2.058%</td></tr>
+<tr><td>booking</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>update</td><td>48.013283</td><td>48.088046</td><td>0.156%</td></tr>
+<tr><td>booking</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>assembly</td><td>27.768090</td><td>27.749352</td><td>0.068%</td></tr>
+<tr><td>booking</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>update</td><td>48.144810</td><td>48.018256</td><td>0.264%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-1</td><td>61.140196</td><td>61.071327</td><td>0.113%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-2</td><td>40.425429</td><td>40.365737</td><td>0.148%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-3</td><td>40.018341</td><td>40.163441</td><td>0.363%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-4</td><td>39.955659</td><td>40.291304</td><td>0.840%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-5</td><td>39.987778</td><td>40.240064</td><td>0.631%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-6</td><td>40.075088</td><td>39.751336</td><td>0.814%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-7</td><td>40.006230</td><td>40.095877</td><td>0.224%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-1</td><td>71.497787</td><td>71.565036</td><td>0.094%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-2</td><td>53.245654</td><td>52.983968</td><td>0.494%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-3</td><td>52.845895</td><td>52.633492</td><td>0.404%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-4</td><td>69.582554</td><td>69.344107</td><td>0.344%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-5</td><td>69.221631</td><td>69.165094</td><td>0.082%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-6</td><td>69.451150</td><td>69.542274</td><td>0.131%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-7</td><td>69.626637</td><td>69.735924</td><td>0.157%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-1</td><td>195.736572</td><td>196.168475</td><td>0.221%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-2</td><td>123.436963</td><td>123.379104</td><td>0.047%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-3</td><td>123.185381</td><td>123.205971</td><td>0.017%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-4</td><td>123.080030</td><td>123.231558</td><td>0.123%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-5</td><td>123.147994</td><td>123.126602</td><td>0.017%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-6</td><td>123.373896</td><td>123.307066</td><td>0.054%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>slice-7</td><td>123.461073</td><td>123.150457</td><td>0.252%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-1</td><td>430.668600</td><td>428.984424</td><td>0.393%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-2</td><td>355.267847</td><td>356.873022</td><td>0.452%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-3</td><td>355.056148</td><td>356.243195</td><td>0.334%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-4</td><td>508.651979</td><td>507.148538</td><td>0.296%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-5</td><td>507.373417</td><td>509.185927</td><td>0.357%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-6</td><td>507.358363</td><td>507.496580</td><td>0.027%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>slice-7</td><td>507.340116</td><td>508.944808</td><td>0.316%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-1</td><td>87.429326</td><td>87.033477</td><td>0.455%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-2</td><td>82.809750</td><td>82.764963</td><td>0.054%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-3</td><td>83.030146</td><td>82.323279</td><td>0.859%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-4</td><td>82.775349</td><td>82.535995</td><td>0.290%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-5</td><td>82.883360</td><td>82.525820</td><td>0.433%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-6</td><td>81.356339</td><td>81.062764</td><td>0.362%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-7</td><td>81.270296</td><td>81.140999</td><td>0.159%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-1</td><td>98.077055</td><td>97.891290</td><td>0.190%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-2</td><td>187.238596</td><td>187.022917</td><td>0.115%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-3</td><td>236.796496</td><td>236.756131</td><td>0.017%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-4</td><td>287.556792</td><td>288.266344</td><td>0.247%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-5</td><td>338.787902</td><td>338.024322</td><td>0.226%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-6</td><td>108.887941</td><td>108.561147</td><td>0.301%</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-7</td><td>135.228885</td><td>135.048751</td><td>0.133%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-1</td><td>286.509598</td><td>286.286490</td><td>0.078%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-2</td><td>270.117251</td><td>269.334689</td><td>0.291%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-3</td><td>269.726293</td><td>269.599328</td><td>0.047%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-4</td><td>269.524222</td><td>269.786343</td><td>0.097%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-5</td><td>270.364488</td><td>269.606180</td><td>0.281%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-6</td><td>265.803669</td><td>265.298313</td><td>0.190%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>off</td><td>slice-7</td><td>265.867757</td><td>265.541550</td><td>0.123%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-1</td><td>523.103464</td><td>522.749394</td><td>0.068%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-2</td><td>1579.000844</td><td>1582.119575</td><td>0.198%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-3</td><td>2039.575294</td><td>2041.160915</td><td>0.078%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-4</td><td>2496.015811</td><td>2497.080620</td><td>0.043%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-5</td><td>2956.330936</td><td>2951.346241</td><td>0.169%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-6</td><td>716.345314</td><td>719.094438</td><td>0.384%</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>on</td><td>slice-7</td><td>1098.255308</td><td>1097.218595</td><td>0.094%</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>32</td><td>full</td><td>9.808468</td><td>9.810278</td><td>0.018%</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>32</td><td>carried</td><td>6.380612</td><td>6.412249</td><td>0.496%</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>64</td><td>full</td><td>8.936489</td><td>8.906821</td><td>0.333%</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>64</td><td>carried</td><td>5.388098</td><td>5.428052</td><td>0.742%</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>128</td><td>full</td><td>8.445671</td><td>8.284869</td><td>1.941%</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>128</td><td>carried</td><td>4.710596</td><td>4.753752</td><td>0.916%</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>32</td><td>full</td><td>29.135708</td><td>29.198540</td><td>0.216%</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>32</td><td>carried</td><td>17.774370</td><td>17.746024</td><td>0.160%</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>64</td><td>full</td><td>28.361309</td><td>28.357500</td><td>0.013%</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>64</td><td>carried</td><td>17.018642</td><td>17.034249</td><td>0.092%</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>128</td><td>full</td><td>27.803048</td><td>27.770150</td><td>0.118%</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>128</td><td>carried</td><td>16.525416</td><td>16.318068</td><td>1.271%</td></tr>
+<tr><td>lane-drive</td><td>1</td><td>1e-5</td><td>diverted</td><td>off</td><td>mixed-drive</td><td>173.763677</td><td>174.215199</td><td>0.260%</td></tr>
+<tr><td>lane-drive</td><td>1</td><td>1e-5</td><td>diverted</td><td>on</td><td>mixed-drive</td><td>226.640278</td><td>229.883481</td><td>1.431%</td></tr>
+<tr><td>lane-drive</td><td>16</td><td>1e-5 / 1e-3</td><td>diverted</td><td>off</td><td>mixed-drive</td><td>805.932002</td><td>807.819286</td><td>0.234%</td></tr>
+<tr><td>lane-drive</td><td>16</td><td>1e-5 / 1e-3</td><td>diverted</td><td>on</td><td>mixed-drive</td><td>997.578302</td><td>993.040627</td><td>0.457%</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>full</td><td>6.708164</td><td>6.953167</td><td>3.652%</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>carried</td><td>3.463432</td><td>3.477322</td><td>0.401%</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>full</td><td>6.791629</td><td>6.935364</td><td>2.116%</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>carried</td><td>3.137155</td><td>3.076116</td><td>1.984%</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>full</td><td>30.143091</td><td>29.811233</td><td>1.113%</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>carried</td><td>10.423839</td><td>10.446362</td><td>0.216%</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>full</td><td>20.841217</td><td>21.122292</td><td>1.349%</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>carried</td><td>9.285096</td><td>9.199895</td><td>0.926%</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>full</td><td>6.424686</td><td>6.447136</td><td>0.349%</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>carried</td><td>3.228899</td><td>3.244188</td><td>0.473%</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>full</td><td>6.431496</td><td>6.533504</td><td>1.586%</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>carried</td><td>2.888622</td><td>2.893830</td><td>0.180%</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>full</td><td>27.853798</td><td>27.705722</td><td>0.534%</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>carried</td><td>8.440215</td><td>8.399384</td><td>0.486%</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>full</td><td>18.917657</td><td>18.864637</td><td>0.281%</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>carried</td><td>7.178316</td><td>7.205501</td><td>0.379%</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>limited</td><td>off</td><td>full</td><td>6.223032</td><td>6.366797</td><td>2.310%</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>limited</td><td>off</td><td>carried</td><td>3.074899</td><td>3.049588</td><td>0.830%</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>limited</td><td>on</td><td>full</td><td>6.504139</td><td>6.716659</td><td>3.267%</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>limited</td><td>on</td><td>carried</td><td>3.149852</td><td>3.130550</td><td>0.617%</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>mixed</td><td>off</td><td>full</td><td>28.138099</td><td>27.842918</td><td>1.060%</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>mixed</td><td>off</td><td>carried</td><td>8.400809</td><td>8.340696</td><td>0.721%</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>mixed</td><td>on</td><td>full</td><td>18.937685</td><td>18.953713</td><td>0.085%</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>mixed</td><td>on</td><td>carried</td><td>8.397005</td><td>8.430857</td><td>0.403%</td></tr>
+</tbody></table>
+<table id="h200-levers-compile-walls"><thead><tr><th>Lever</th><th>Width</th><th>Profile step</th><th>Population</th><th>Arm</th><th>Stage</th><th>Process 1 compile/load [s]</th><th>Process 2 compile/load [s]</th></tr></thead><tbody>
+<tr><td>carried-decisions</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>full</td><td>0.087398</td><td>0.087246</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>carried</td><td>5.640779</td><td>5.712846</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>full</td><td>0.089253</td><td>0.089340</td></tr>
+<tr><td>carried-decisions</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>carried</td><td>14.744885</td><td>14.536093</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>full</td><td>0.088507</td><td>0.088643</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>carried</td><td>5.427391</td><td>5.378308</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>full</td><td>0.095574</td><td>0.092149</td></tr>
+<tr><td>carried-decisions</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>carried</td><td>13.291567</td><td>13.311094</td></tr>
+<tr><td>booking</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>assembly</td><td>3.723689</td><td>3.748520</td></tr>
+<tr><td>booking</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>update</td><td>4.946139</td><td>5.054231</td></tr>
+<tr><td>booking</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>assembly</td><td>4.055925</td><td>4.140606</td></tr>
+<tr><td>booking</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>update</td><td>5.084135</td><td>5.104166</td></tr>
+<tr><td>booking</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>assembly</td><td>3.548401</td><td>3.735332</td></tr>
+<tr><td>booking</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>update</td><td>5.201976</td><td>5.060003</td></tr>
+<tr><td>booking</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>assembly</td><td>4.035747</td><td>4.010832</td></tr>
+<tr><td>booking</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>update</td><td>5.027903</td><td>4.986495</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>solve-fresh</td><td>40.246276</td><td>40.698141</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>off</td><td>secant</td><td>0.067758</td><td>0.064543</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>solve-fresh</td><td>41.523913</td><td>41.565125</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>secant</td><td>0.051705</td><td>0.052281</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>1e-05</td><td>diverted</td><td>on</td><td>solve-factor</td><td>66.124167</td><td>66.484119</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>solve-fresh</td><td>38.408893</td><td>38.853248</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>secant</td><td>0.049101</td><td>0.053031</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>solve-fresh</td><td>39.401307</td><td>39.504520</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>secant</td><td>0.059521</td><td>0.050805</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>1e-05</td><td>diverted</td><td>on</td><td>solve-factor</td><td>63.129021</td><td>63.432868</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>off</td><td>solve-fresh</td><td>40.799855</td><td>40.692948</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>off</td><td>secant</td><td>0.048513</td><td>0.050034</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>on</td><td>solve-fresh</td><td>41.300752</td><td>41.511507</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>on</td><td>secant</td><td>0.050553</td><td>0.051011</td></tr>
+<tr><td>factor-carry</td><td>1</td><td>0.001</td><td>diverted</td><td>on</td><td>solve-factor</td><td>66.134752</td><td>66.425996</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>off</td><td>solve-fresh</td><td>38.742208</td><td>38.679799</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>off</td><td>secant</td><td>0.050530</td><td>0.050682</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>on</td><td>solve-fresh</td><td>39.429712</td><td>39.443653</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>on</td><td>secant</td><td>0.051586</td><td>0.050823</td></tr>
+<tr><td>factor-carry</td><td>16</td><td>0.001</td><td>diverted</td><td>on</td><td>solve-factor</td><td>63.283714</td><td>63.844903</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>32</td><td>full</td><td>7.202999</td><td>7.213212</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>32</td><td>carried</td><td>16.612829</td><td>16.626732</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>64</td><td>full</td><td>7.198711</td><td>7.158414</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>64</td><td>carried</td><td>16.499453</td><td>16.719189</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>128</td><td>full</td><td>7.100649</td><td>7.197540</td></tr>
+<tr><td>scalar-tile</td><td>1</td><td>—</td><td>diverted</td><td>128</td><td>carried</td><td>16.308055</td><td>16.492106</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>32</td><td>full</td><td>6.619750</td><td>6.525564</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>32</td><td>carried</td><td>15.255265</td><td>15.232498</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>64</td><td>full</td><td>6.599613</td><td>6.505850</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>64</td><td>carried</td><td>15.349179</td><td>15.254048</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>128</td><td>full</td><td>6.612875</td><td>6.610085</td></tr>
+<tr><td>scalar-tile</td><td>16</td><td>—</td><td>diverted</td><td>128</td><td>carried</td><td>15.420165</td><td>15.421615</td></tr>
+<tr><td>lane-drive</td><td>1</td><td>1e-5</td><td>diverted</td><td>off</td><td>mixed-drive</td><td>41.077819</td><td>42.798354</td></tr>
+<tr><td>lane-drive</td><td>1</td><td>1e-5</td><td>diverted</td><td>on</td><td>mixed-drive</td><td>40.648887</td><td>41.010238</td></tr>
+<tr><td>lane-drive</td><td>16</td><td>1e-5 / 1e-3</td><td>diverted</td><td>off</td><td>mixed-drive</td><td>38.761127</td><td>38.887506</td></tr>
+<tr><td>lane-drive</td><td>16</td><td>1e-5 / 1e-3</td><td>diverted</td><td>on</td><td>mixed-drive</td><td>39.019634</td><td>39.026948</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>full</td><td>0.088308</td><td>0.087902</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>carried</td><td>12.567981</td><td>12.553955</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>full</td><td>0.094973</td><td>0.092535</td></tr>
+<tr><td>live-candidates</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>carried</td><td>14.551423</td><td>14.531771</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>full</td><td>0.088139</td><td>0.087987</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>carried</td><td>11.954644</td><td>11.991397</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>full</td><td>0.093474</td><td>0.095210</td></tr>
+<tr><td>live-candidates</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>carried</td><td>13.208336</td><td>13.207601</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>full</td><td>0.085616</td><td>0.085896</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>diverted</td><td>off</td><td>carried</td><td>12.209558</td><td>12.165561</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>full</td><td>0.089162</td><td>0.089747</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>diverted</td><td>on</td><td>carried</td><td>13.799656</td><td>13.930432</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>full</td><td>0.089070</td><td>0.089868</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>diverted</td><td>off</td><td>carried</td><td>11.613300</td><td>11.607003</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>full</td><td>0.093101</td><td>0.092210</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>diverted</td><td>on</td><td>carried</td><td>12.521874</td><td>12.553401</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>limited</td><td>off</td><td>full</td><td>0.085673</td><td>0.085458</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>limited</td><td>off</td><td>carried</td><td>11.987665</td><td>12.250074</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>limited</td><td>on</td><td>full</td><td>0.089320</td><td>0.089897</td></tr>
+<tr><td>wall-skip</td><td>1</td><td>—</td><td>limited</td><td>on</td><td>carried</td><td>13.770349</td><td>13.850423</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>mixed</td><td>off</td><td>full</td><td>0.089342</td><td>0.089334</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>mixed</td><td>off</td><td>carried</td><td>11.602162</td><td>11.714744</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>mixed</td><td>on</td><td>full</td><td>0.092615</td><td>0.093359</td></tr>
+<tr><td>wall-skip</td><td>16</td><td>—</td><td>mixed</td><td>on</td><td>carried</td><td>12.594679</td><td>12.698195</td></tr>
+<tr><td>secant-headline</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>solve-fresh</td><td>38.959112</td><td>38.958632</td></tr>
+<tr><td>secant-headline</td><td>16</td><td>1e-05</td><td>diverted</td><td>off</td><td>secant</td><td>0.063372</td><td>0.053507</td></tr>
+</tbody></table>
+<table id="h200-levers-headline"><thead><tr><th>Slice</th><th>Process 1 [ms/slice]</th><th>Process 2 [ms/slice]</th></tr></thead><tbody>
+<tr><td>slice-1</td><td>12.274875</td><td>12.273685</td></tr>
+<tr><td>slice-2</td><td>7.749505</td><td>7.745486</td></tr>
+<tr><td>slice-3</td><td>7.685566</td><td>7.689959</td></tr>
+<tr><td>slice-4</td><td>7.696857</td><td>7.720998</td></tr>
+<tr><td>slice-5</td><td>7.699423</td><td>7.694177</td></tr>
+<tr><td>slice-6</td><td>7.703091</td><td>7.721094</td></tr>
+<tr><td>slice-7</td><td>7.702218</td><td>7.699319</td></tr>
+</tbody></table>
+<p>Durable inputs, receipts, lowered fingerprints and logs:
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T182638024068-h200-levers</code>. Inventory: <code>measurement-jobs.json</code>;
+preserved original hashes: <code>retained-receipts.json</code>;
+audit diagnostics: <code>precision-audit.json</code> and
+<code>input-provenance-errors.json</code>. The successful inventory audit is
+recorded in <code>audit-summary.json</code>.</p></section>

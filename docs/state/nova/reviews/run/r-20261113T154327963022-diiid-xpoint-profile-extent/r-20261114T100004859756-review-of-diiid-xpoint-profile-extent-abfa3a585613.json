@@ -13,6 +13,13 @@
   ],
   "completed_at": "2026-11-14T10:31:29.595Z",
   "dispatched_at": "2026-11-14T10:03:20Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the record already excludes 179L from every total and states only 146D converged; its 224-cell support is disclosed, so the per-row vertical share is read as a non-converged state",
+      "recorded_at": "2026-11-14T10:32:54.140105+00:00"
+    }
+  },
   "findings": [
     "non-blocking: docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html:50 places 179L among the frames whose edge state remains a plasma whose vertical offset fell, and :84 quotes a 94 percent vertical share for it, while the cohort records its support at 224 cells against the base arm's 309, below the 0.9 SUPPORT_RETENTION at scripts/prototypes/diiid_xpoint_profile_extent/summarize.py:41 that the record uses to declare a state to have lost its plasma; the row is excluded from the total and the sentence does disclose that only 146D converged, so this does not hold the node.",
     "non-blocking: scripts/prototypes/diiid_xpoint_profile_extent/summarize.py:115 still computes each row's component share_closed unconditionally, so summary.json carries a component share for every uncounted row while the row-level share_closed is null, and the record quotes two of those numbers at docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html:50; a reader of summary.json still sees a share beside counted:false and must read not_counted_reason to know not to use it.",

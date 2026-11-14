@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_basis": "the reviewed run's manifest declares no baseline_suite and no after_suite (it is a diagnostics prototype with no test file in its write scope); its gate is publish.sh, whose log render.log ends EXIT=0 with no failing test ids",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-14T18:01:18.274Z",
+  "dispatched_at": "2026-11-14T17:42:21Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_edge_current_refusal/verify.py",
+      "line": "41",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert matched[0][\"trips\"] == len(spatial[\"trips\"]) compares the SPATIAL_SUMMARY line, which analyze.py:294 emits from the same summary dict later written to spatial.json, against that dict, so it cannot fail on any solver regression - it detects a truncated log only, and reading that then makes the per-trip evidence read as covered"
+    },
+    {
+      "file": "scripts/prototypes/diiid_edge_current_refusal/verify.py",
+      "line": "87",
+      "severity": "non-blocking",
+      "text": "non-blocking: premise_reproduced (and all_premises_reproduced at verify.py:112) is computed, printed and stored but never asserted, so a cohort whose rows stopped returning ACTIVE_SET_STEP_REFUSED/ACTIVE_SET_CYCLE_DETECTED would still publish with EXIT=0 - the done-when's central claim is recorded, not enforced"
+    },
+    {
+      "file": "scripts/prototypes/diiid_edge_current_refusal/audit.py",
+      "line": "113",
+      "severity": "non-blocking",
+      "text": "non-blocking: matches_reported is stored per trip and never asserted, and audit.py:100 skips a trip whose endpoint it cannot bind (selection None leaves shadow_transition empty without failing), so the record's claim of fifteen reconciled mask counts is checked only by reading the JSON; all fifteen do match today"
+    },
+    {
+      "file": "scripts/prototypes/diiid_edge_current_refusal/render.py",
+      "line": "76",
+      "severity": "non-blocking",
+      "text": "non-blocking: render.py:76-81 rewrite the SVG width and height in centimetres after checked_save has already written width=31.1cm height=16cm (scripts/prototypes/diiid_xpoint_offset/style.py:35-37), so the unit-sizing rule now has a second owner that can drift"
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site reaches the change",
+    "diff": "read commit by commit across 29 commits: scripts/prototypes/diiid_edge_current_refusal adds four instrumentation modules (measure.py subclassing the profile-extent Capture, analyze.py, audit.py, jumps.py), the inactive-field counterfactual (control.py, reference.sh), render.py and the launcher scripts, and the final commits add the nine SVGs and the evidence fragment, everything inside the declared scopes.",
+    "done_when": "the three done-when clauses are each measured by the gate: analyze.py records per trip the residual, connected and shadow population with the (R,Z) of entering and leaving cells, every executed Newton iteration's InnerIterationDecision and KrylovActionQualification with its Levenberg damping, and the boundary flux and enclosed current before and after; jumps.py predicts the source jump independently; render.py draws the record's nine figures; publish.sh returns EXIT=0 in render.log and verify.py reports all_premises_reproduced=True with the 146D control converged.",
+    "goal": "the goal is to name the mechanism by which EFIT's finite boundary p' and FF' refuse the forward solve on 137D and 179L and lose 146L's plasma; docs/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal.html adjudicates candidates (a)/(b)/(c) in its 'Mechanism adjudication' table and attributes 137D and 179L to a pointwise source-cutoff jump reproduced to sub-milliamp agreement (1.875371 kA measured against 137D's independent 1.875365 kA stencil prediction) and 146L primarily to the inactive UniformRadialFieldUnknown compensator entering regularized recovery, with no file under nova/ changed.",
+    "manifest": "read: the reviewed run's manifest records status complete, 29 commits and 24 changed paths, the publish.sh gate with render.log ending EXIT=0, both negative controls, the preserved EXIT=1 tails, and the nine inspected previews listed in figure-inspections.md.",
+    "write_paths": "the review brief declares three scopes - scripts/prototypes/diiid_edge_current_refusal, docs/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal.html and docs/figures/diiid-edge-current-refusal - and all 24 paths in diff 0843b7d..330dbf38 sit inside them, with no nova/ and no tests/ change."
+  },
+  "justifications": {
+    "durability": "verify.py:67 and verify.py:40-41 redden under the two stated mutations (receipt-negative-control.log and completion-negative-control.log both EXIT=1), but the checks run against frozen cohort receipts, verify.py:41 compares a value against the same dict the value came from, and verify.py:86-88 plus audit.py:113 store their verdicts without asserting them.",
+    "evidence": "publish.sh chains verify.py, jumps.py, audit.py and render.py over the four cohort rows and render.log ends EXIT=0 with each command line recorded, yet verify.py:87 and audit.py:113 only record two of the record's headline claims rather than refusing on them.",
+    "fit": "render.py:9-33 imports nova.media.ink, nova.media.poloidal and the sibling style module and keeps axes off with line contours at shared levels, matching the idiom of scripts/prototypes/diiid_xpoint_offset/style.py:17-43, and no added line carries a plan, sprint or ticket identifier.",
+    "goal_fidelity": "the fragment's 'Recommended product changes' section proposes and does not make the two repairs, and the diff under review touches no path outside scripts/prototypes/diiid_edge_current_refusal/, the evidence fragment and docs/figures/diiid-edge-current-refusal/.",
+    "reuse": "batch.py:10-20 loads the profile-extent batch driver and pairs its own subclasses with it in batch.py:11-23, measure.py:11-20 subclasses the extent observer's Capture and render.py:32 imports the sibling checked save, but render.py:71-82 repeat the SVG centimetre sizing that scripts/prototypes/diiid_xpoint_offset/style.py:35-37 already writes.",
+    "scope_discipline": "git diff --stat 0843b7d12..330dbf38c lists only the prototype directory, the evidence fragment and nine figures, with no nova/ or tests/ path anywhere in the change."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to name the mechanism by which EFIT's finite boundary p' and FF' refuse the forward solve on 137D and 179L and lose 146L's plasma; docs/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal.html adjudicates candidates (a)/(b)/(c) in its 'Mechanism adjudication' table and attributes 137D and 179L to a pointwise source-cutoff jump reproduced to sub-milliamp agreement (1.875371 kA measured against 137D's independent 1.875365 kA stencil prediction) and 146L primarily to the inactive UniformRadialFieldUnknown compensator entering regularized recovery, with no file under nova/ changed.\nVERDICT done_when: the three done-when clauses are each measured by the gate: analyze.py records per trip the residual, connected and shadow population with the (R,Z) of entering and leaving cells, every executed Newton iteration's InnerIterationDecision and KrylovActionQualification with its Levenberg damping, and the boundary flux and enclosed current before and after; jumps.py predicts the source jump independently; render.py draws the record's nine figures; publish.sh returns EXIT=0 in render.log and verify.py reports all_premises_reproduced=True with the 146D control converged.\nVERDICT write_paths: the review brief declares three scopes - scripts/prototypes/diiid_edge_current_refusal, docs/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal.html and docs/figures/diiid-edge-current-refusal - and all 24 paths in diff 0843b7d..330dbf38 sit inside them, with no nova/ and no tests/ change.\nVERDICT manifest: read: the reviewed run's manifest records status complete, 29 commits and 24 changed paths, the publish.sh gate with render.log ending EXIT=0, both negative controls, the preserved EXIT=1 tails, and the nine inspected previews listed in figure-inspections.md.\nVERDICT diff: read commit by commit across 29 commits: scripts/prototypes/diiid_edge_current_refusal adds four instrumentation modules (measure.py subclassing the profile-extent Capture, analyze.py, audit.py, jumps.py), the inactive-field counterfactual (control.py, reference.sh), render.py and the launcher scripts, and the final commits add the nine SVGs and the evidence fragment, everything inside the declared scopes.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the fragment's 'Recommended product changes' section proposes and does not make the two repairs, and the diff under review touches no path outside scripts/prototypes/diiid_edge_current_refusal/, the evidence fragment and docs/figures/diiid-edge-current-refusal/.\nSCORE evidence: 16\nJUSTIFICATION evidence: publish.sh chains verify.py, jumps.py, audit.py and render.py over the four cohort rows and render.log ends EXIT=0 with each command line recorded, yet verify.py:87 and audit.py:113 only record two of the record's headline claims rather than refusing on them.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 0843b7d12..330dbf38c lists only the prototype directory, the evidence fragment and nine figures, with no nova/ or tests/ path anywhere in the change.\nSCORE durability: 13\nJUSTIFICATION durability: verify.py:67 and verify.py:40-41 redden under the two stated mutations (receipt-negative-control.log and completion-negative-control.log both EXIT=1), but the checks run against frozen cohort receipts, verify.py:41 compares a value against the same dict the value came from, and verify.py:86-88 plus audit.py:113 store their verdicts without asserting them.\nSCORE fit: 19\nJUSTIFICATION fit: render.py:9-33 imports nova.media.ink, nova.media.poloidal and the sibling style module and keeps axes off with line contours at shared levels, matching the idiom of scripts/prototypes/diiid_xpoint_offset/style.py:17-43, and no added line carries a plan, sprint or ticket identifier.\nSCORE reuse: 17\nJUSTIFICATION reuse: batch.py:10-20 loads the profile-extent batch driver and pairs its own subclasses with it in batch.py:11-23, measure.py:11-20 subclasses the extent observer's Capture and render.py:32 imports the sibling checked save, but render.py:71-82 repeat the SVG centimetre sizing that scripts/prototypes/diiid_xpoint_offset/style.py:35-37 already writes.\nFINDING scripts/prototypes/diiid_edge_current_refusal/verify.py:41 non-blocking: assert matched[0][\"trips\"] == len(spatial[\"trips\"]) compares the SPATIAL_SUMMARY line, which analyze.py:294 emits from the same summary dict later written to spatial.json, against that dict, so it cannot fail on any solver regression - it detects a truncated log only, and reading that then makes the per-trip evidence read as covered\nFINDING scripts/prototypes/diiid_edge_current_refusal/verify.py:87 non-blocking: premise_reproduced (and all_premises_reproduced at verify.py:112) is computed, printed and stored but never asserted, so a cohort whose rows stopped returning ACTIVE_SET_STEP_REFUSED/ACTIVE_SET_CYCLE_DETECTED would still publish with EXIT=0 - the done-when's central claim is recorded, not enforced\nFINDING scripts/prototypes/diiid_edge_current_refusal/audit.py:113 non-blocking: matches_reported is stored per trip and never asserted, and audit.py:100 skips a trip whose endpoint it cannot bind (selection None leaves shadow_transition empty without failing), so the record's claim of fifteen reconciled mask counts is checked only by reading the JSON; all fifteen do match today\nFINDING scripts/prototypes/diiid_edge_current_refusal/render.py:76 non-blocking: render.py:76-81 rewrite the SVG width and height in centimetres after checked_save has already written width=31.1cm height=16cm (scripts/prototypes/diiid_xpoint_offset/style.py:35-37), so the unit-sizing rule now has a second owner that can drift\n",
+  "review_run_id": "r-20261114T154518014550-review-of-diiid-edge-current-refusal-330dbf38c756",
+  "reviewed_base_sha": "0843b7d12cc7a029315ee53ae27568ee364edcc6",
+  "reviewed_head_sha": "330dbf38c756dc38ecd6cad467718354e0aa803c",
+  "reviewed_run_id": "r-20261114T121904732821-diiid-edge-current-refusal",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261114T154518014550-review-of-diiid-edge-current-refusal-330dbf38c756"
+  },
+  "reviewer_run_id": "r-20261114T154518014550-review-of-diiid-edge-current-refusal-330dbf38c756",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T18:01:34.248222+00:00",
+  "total": 103
+}

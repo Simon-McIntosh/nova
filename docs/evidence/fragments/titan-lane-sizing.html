@@ -34,10 +34,9 @@ RUNG=h200  JAX_PLATFORMS=cuda,cpu  --cpus-per-task=4 --mem=64G --time=01:00:00 .
 RUNG=titan JAX_PLATFORMS=cuda,cpu  --cpus-per-task=2 --mem=24G --time=01:00:00 ... --partition=titan --gres=gpu:1
 RUNG=cpu   JAX_PLATFORMS=cpu       --cpus-per-task=7 --mem=64G --time=01:00:00 ... --partition=all_debug</pre>
 
-  <p>The full lines, including the payload argv, are in
-  <code>dryrun_all.log</code> beside this record in the run directory. Eight cards at two
-  cores each is sixteen cores, inside the node's twenty, so eight concurrent jobs fit where
-  five did before.</p>
+  <p>The full lines, including the payload argv, are in <code>dryrun_all.log</code> in the
+  run directory named by this record's manifest. Eight cards at two cores each is sixteen
+  cores, inside the node's twenty, so eight concurrent jobs fit where four did before.</p>
 
   <h3>Test arms</h3>
   <p>Both arms run <code>tests/test_nova_lane_launcher.py</code> in a fresh process with

@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -103,9 +103,12 @@
     its residual reported. The bands below are read against a fit of that configuration.</p>
     <p>The comparison the lead asked for: the inverse class and imas-efit answer the same question from the
     same inputs. The case set is read from imas-efit's own committed cases through IMAS, at the data
-    dictionary version each was written in: one slice of the MAST-U 45272 magnetics-only reference
-    (imas-efit's EPM case, with monomial p′ and FF′; its EPQ case adds MSE and a spline basis and is not
-    used), one TCV slice and one ITER scenario slice, none with an iron core. imas-efit carries no MAST case, and the lead chose its MAST-U case on
+    dictionary version each was written in: one slice of imas-efit's own magnetics-only
+    reconstruction of MAST-U 45272 (its stored regression baseline, with monomial p′ and FF′, written at
+    data dictionary 4.1.0, which carries a closed boundary outline on every slice), one TCV slice and one
+    ITER scenario slice, none with an iron core. The comparator on every case is a state imas-efit itself
+    produced; the CCFE references for the same pulse are another code's output, carry no boundary outline
+    and a different flux sign, and are not used. imas-efit carries no MAST case, and the lead chose its MAST-U case on
     2026-11-14 so that a stored imas-efit equilibrium exists for every case. For each case the class fits the same number of profile coefficients imas-efit fitted,
     with the conductor currents treated as the locked decision <code>fitted-unknowns</code> directs, and
     the vertical position held as the locked decision <code>vertical-freedom</code> directs.</p>

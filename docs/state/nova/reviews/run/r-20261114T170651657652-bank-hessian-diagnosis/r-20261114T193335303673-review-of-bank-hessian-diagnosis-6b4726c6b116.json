@@ -9,6 +9,13 @@
   ],
   "completed_at": "2026-11-14T20:10:03.534Z",
   "dispatched_at": "2026-11-14T19:48:29Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "measurement-only prototype; the verdict rests on the route trace residuals and the independent rectangle, which these reporting and cache findings do not touch, and the section 7 repair re-measures at the same nodes with its own gate",
+      "recorded_at": "2026-11-14T21:08:30.722436+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_hessian_diagnosis/report.py",

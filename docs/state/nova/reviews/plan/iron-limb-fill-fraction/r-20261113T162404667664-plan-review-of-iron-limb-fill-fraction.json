@@ -70,6 +70,13 @@
       "finding": "thin_wrapper-1",
       "reason": "Reuse map for the node brief: the material-solve brief will name the production loop and the module default tile plan as the carrier of both arms; the plan states the endpoint and the worker settles the method.",
       "when": "2026-11-14T07:39:42.012328+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "finding": "duplicate_owner-1",
+      "reason": "Reuse map for the node brief: the machine-description brief will cite the twelve call sites and require the read to return the region with its fill fraction, which is what makes clause three of that section measurable.",
+      "when": "2026-11-14T07:39:53.645109+00:00"
     }
   ],
   "responses": {
@@ -78,6 +85,12 @@
       "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
       "reason": "Reuse map for the node brief: the machine-description brief will require one derivation of fill fraction and cross-field factor from the limb section and axis, with the prototype's two definitions retired; the done-when integral then has one input.",
       "when": "2026-11-14T07:39:36.291317+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "reason": "Reuse map for the node brief: the machine-description brief will cite the twelve call sites and require the read to return the region with its fill fraction, which is what makes clause three of that section measurable.",
+      "when": "2026-11-14T07:39:53.645109+00:00"
     },
     "reuse_search-1": {
       "action": "declined",

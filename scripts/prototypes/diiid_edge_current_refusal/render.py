@@ -82,6 +82,15 @@ def panel(root, frame, branch, output, previews, name=None):
     )
     last_inner = len(spatial["trips"]) - 1
     folder = case_folder(root, frame, branch)
+    audit = json.loads((folder / "iterate-audit.json").read_text())
+    shadow_changed = points(
+        [
+            trip["shadow_transition"].get(key, [])
+            for trip in audit["trips"]
+            for key in ("entering_rz_m", "leaving_rz_m")
+        ]
+    )
+    mask_changed = points([changed, shadow_changed])
     cutoff = json.loads((folder / "cutoff-jumps.json").read_text())[
         "smallest_crossing_pair"
     ]
@@ -96,7 +105,7 @@ def panel(root, frame, branch, output, previews, name=None):
     figure, axes = plt.subplots(1, 2, figsize=CANVAS, dpi=100)
     figure.subplots_adjust(left=0.03, right=0.97, top=0.81, bottom=0.14, wspace=0.2)
     for ax, marks, color, marker in zip(
-        axes, (changed, refused), (WALL, REFUSED), ("s", "o"), strict=True
+        axes, (mask_changed, refused), (WALL, REFUSED), ("s", "o"), strict=True
     ):
         poloidal_axes(ax)
         radius, height = np.linspace(0.9, 2.4, 111), np.linspace(-1.45, 1.35, 151)
@@ -200,7 +209,7 @@ def panel(root, frame, branch, output, previews, name=None):
             marker="s",
             mfc="none",
             ls="none",
-            label="support changed",
+            label="mask change",
         ),
         Line2D(
             [],
@@ -245,7 +254,10 @@ def panel(root, frame, branch, output, previews, name=None):
     )
     notes = [
         figure.text(
-            0.26, 0.08, f"{len(changed)} cells change across inner solves", ha="center"
+            0.26,
+            0.08,
+            f"{len(changed)} support cells; {len(shadow_changed)} shadow nodes change",
+            ha="center",
         ),
         figure.text(
             0.74,
@@ -265,6 +277,7 @@ def panel(root, frame, branch, output, previews, name=None):
         converged=receipt["converged"],
         levels_wb=LEVELS.tolist(),
         source_cutoff_cells=len(cutoff_points),
+        changed_shadow_nodes=len(shadow_changed),
     )
 
 

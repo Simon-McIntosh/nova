@@ -72,6 +72,30 @@ def audit(folder):
             name: float(np.max(np.abs(value[:size] * scale - target)))
             for name, value in candidates.items()
         }
+        selection = (
+            "returned"
+            if distances["returned"] < 1e-12
+            else "initial"
+            if distances["incoming"] < 1e-12
+            else None
+        )
+        shadow_transition = {}
+        if selection is not None:
+            selected = np.load(folder / f"{selection}-read-{index}.npz")["shadow"]
+            frozen = diagnostics["frozen_shadow"][:size]
+            entering, leaving = selected & ~frozen, frozen & ~selected
+            measured = int(np.sum(entering | leaving))
+            reported = receipt["changed_mask_entries"][index]
+            shadow_transition = dict(
+                selected_endpoint=selection,
+                frozen_shadow_count=int(frozen.sum()),
+                selected_shadow_count=int(selected.sum()),
+                changed_entries=measured,
+                reported_changed_entries=reported,
+                matches_reported=measured == reported,
+                entering_rz_m=coordinates[entering].tolist(),
+                leaving_rz_m=coordinates[leaving].tolist(),
+            )
         result["trips"].append(
             dict(
                 index=index,
@@ -79,6 +103,7 @@ def audit(folder):
                 returned_unknown_t=float(arrays["state"][size]),
                 next_state_matching=[k for k, v in distances.items() if v < 1e-12],
                 next_state_distances_wb=distances,
+                shadow_transition=shadow_transition,
                 initial_boundary_current=boundary_current(
                     f"initial-read-{index}", trip["initial"]
                 ),

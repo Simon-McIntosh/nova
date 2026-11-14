@@ -77,7 +77,7 @@ reuse, coil propagation into the read/residual/Jacobian, zero-update refusal and
 independent centroid targets. The centroid test uses the actual read and booking on
 a 50-cell limited bank with analytic exterior and zero plasma-response rows; the
 scenario node measures coupled ITER convergence and H200 throughput.</p>
-<p id="bank-traced-inputs-pin-timeout">The pin result remains unverified. The head
+<p id="bank-traced-inputs-pin-timeout">The pre-repair pin result was unverified. The head
 file ends <code>1 failed, 6 passed in 764.74s (0:12:44)</code> and
 <code>EXIT=1</code>. The failing test is
 <code>test_pin_holds_independent_lane_centroids</code>, with
@@ -86,8 +86,7 @@ records 221.029 s tracing, 17.496 s converting to MLIR and 241.881 s compiling
 the full program. No centroid-height or full-solve zero-recompilation receipt
 was returned. This is the second counted failure of this gate, after the
 zero-update-history defect above, so the worker stopped under its retry contract.
-The next attempt needs an explicit cold-compile budget for this test, or a smaller
-pin graph, before the pin's numerical clause can be accepted.</p>
+The lead selected a smaller pin graph while retaining the normal timeout; the resumed measurements below supersede this stopping point.</p>
 <p>Durable logs and receipts are under
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T165201745905-bank-traced-inputs/</code>:
 <code>focused/</code> retains the first failure and closure control;
@@ -114,10 +113,60 @@ retaining the moment equation, fresh-read acceptance, source convention and pin
 tolerances. The test counts construction sites, retains cold trace/compile log
 events before clearing the logger, and verifies the subsequent slice reuses the
 full program. The runner uses <code>-rfP</code> to preserve failing test ids.</p>
-<p>Graph inventories and numerical gates are running in one seven-CPU Rigel job,
-<code>1314812</code>, at repaired head
-<code>912e95fb4522d414e2685167a0841768412106e3</code>. Receipts are under
-<code>graph-repair/</code> in the run directory. A fresh process inventories each
+<p>The first graph inventory helper completed tracing but recursed on the
+<code>Jaxpr.jaxpr</code> self-alias in its visitor. That helper defect was repaired
+and a multiplication/addition positive control now runs before each full inventory.
+The successful inventories are under <code>graph-checked/</code> and
+<code>shared-jacobian/</code> in the run directory. A fresh process inventories each
 product graph, and every test file runs in its own fresh process. The measurement
 script was committed before submission.</p>
+<h3 id="bank-traced-inputs-graph-measures">Measured graph reductions and remaining refusal</h3>
+<p>Rigel job <code>1314830</code> measured both graph inventories on one node:
+pre-repair <code>5391ff27c10fc2ecd16c9e307ca1d58bd1ae41ec</code> traced in 208.326 s;
+first repair <code>21856d999b8549d7b1976d053405dce3efbebb22</code> traced in 117.127 s.
+The later stable tabulated-Jacobian boundary at
+<code>5cfc0bbae7c7452e3666abf0cd34e20aa8b005af</code> was measured by job
+<code>1314883</code>. It shares one array-owned Jacobian body between the moment
+and pin callers, with all numeric values retained as arguments.</p>
+<table id="bank-traced-inputs-graph-counts"><thead><tr><th>Construction measure</th>
+<th>Pre-repair</th><th>Loop repair</th><th>Shared Jacobian</th></tr></thead><tbody>
+<tr><td>Newton-step sites</td><td>4</td><td>1</td><td>1</td></tr>
+<tr><td>Jacobian caller sites</td><td>5</td><td>2</td><td>2; one shared body</td></tr>
+<tr><td>Booking tangent-channel sites</td><td>5</td><td>2</td><td>1</td></tr>
+<tr><td>Staged operations</td><td>389,708</td><td>222,262</td><td>222,415</td></tr>
+<tr><td>Graph inventory trace [s]</td><td>208.326</td><td>117.127</td><td>114.611</td></tr>
+</tbody></table>
+<table id="bank-traced-inputs-cold-walls"><thead><tr><th>Full pin test stage</th>
+<th>Pre-repair [s]</th><th>Loop repair [s]</th><th>Shared Jacobian [s]</th></tr></thead><tbody>
+<tr><td>Trace</td><td>221.029</td><td>120.525</td><td>115.674</td></tr>
+<tr><td>MLIR conversion</td><td>17.496</td><td>10.943</td><td>10.556</td></tr>
+<tr><td>XLA compilation</td><td>241.881</td><td>167.234</td><td>168.943</td></tr>
+<tr><td>Normal 300 s test limit</td><td>timeout</td><td>timeout</td><td>timeout</td></tr>
+</tbody></table>
+<p>The historical pre-repair full-test wall comes from the earlier allocation;
+the common-node inventory comparison provides the direct tracing comparison.
+The staged graph is about 43% smaller. Sharing the Jacobian body changes Python
+construction count but does not materially reduce the remaining staged operation
+count or compile wall.</p>
+<p>The latest paired files use fresh interpreters on one seven-CPU Rigel job with
+<code>JAX_PLATFORMS=cpu</code>, the shared interpreter and <code>-rfP</code>.
+All three existing files pass at base and head: 13 passed and 2 skipped for
+<code>test_support_read</code>, 10 passed for <code>test_bank_drive_continuation</code>,
+and 11 passed for <code>test_bank_lane_drive</code>, with zero added failures.
+The new file ends <code>1 failed, 6 passed in 480.97s (0:08:00)</code> and
+<code>EXIT=1</code>. The failing id is
+<code>tests/test_bank_traced_inputs.py::test_pin_holds_independent_lane_centroids</code>.</p>
+<p>The second attempt timed out at <code>jax.block_until_ready(result)</code>.
+Its exception representation includes first-slice pin errors
+<code>[6.85215773e-16, -8.50014503e-17]</code>, but the acceptance assertions and
+second-slice full-program reuse check were not reached. Those clauses remain
+unverified. Both attempts retained the 300 s limit and all numerical tolerances.
+Two counted product-gate failures exhausted the restarted retry allowance, so no
+third implementation attempt was made and no final-head replay was started.</p>
+<p>The next graph repair can remove the real read/residual used only to initialise
+the pin loop's carry, retaining the actual first solve in the loop body and the
+zero-budget read path; alternatively the centroid row can be folded into the
+moment Newton loop. Either needs a new explicit retry instruction and fresh
+normal-limit numerical verification. Detailed logs and graph JSON are under
+<code>graph-checked/</code> and <code>shared-jacobian/</code> in the run directory.</p>
 </section>

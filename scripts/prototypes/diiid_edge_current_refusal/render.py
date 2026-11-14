@@ -56,6 +56,11 @@ def panel(root, frame, branch, output, previews):
         ]
     )
     last_inner = len(spatial["trips"]) - 1
+    folder = root / "edge" / f"frame-{frame}-{branch}"
+    cutoff = json.loads((folder / "cutoff-jumps.json").read_text())[
+        "smallest_crossing_pair"
+    ]
+    cutoff_points = np.asarray(cutoff["crossing_rz_m"]) if cutoff else np.empty((0, 2))
     refused = points(
         [
             proposal["comparisons"][0]["changed_rz_m"]
@@ -149,6 +154,10 @@ def panel(root, frame, branch, output, previews):
                 mew=1.3,
                 zorder=14,
             )
+        if ax is axes[1] and len(cutoff_points):
+            ax.plot(
+                *cutoff_points.T, ls="none", marker="*", ms=13, color=REFUSED, zorder=15
+            )
         ax.set_xlim(0.9, 2.4)
         ax.set_ylim(-1.45, 1.35)
     handles = [
@@ -194,6 +203,9 @@ def panel(root, frame, branch, output, previews):
             label="EFIT null",
         ),
     ]
+    handles.append(
+        Line2D([], [], color=REFUSED, marker="*", ls="none", label="source cutoff")
+    )
     figure.legend(
         handles=handles,
         loc="upper center",
@@ -223,6 +235,7 @@ def panel(root, frame, branch, output, previews):
         residual=receipt["residual"],
         converged=receipt["converged"],
         levels_wb=LEVELS.tolist(),
+        source_cutoff_cells=len(cutoff_points),
     )
 
 
@@ -263,6 +276,64 @@ def traces(root, output, previews):
     plt.close(figure)
 
 
+def source_changes(root, output, previews):
+    """Compare current increments with the actually computed tangent remainder."""
+    figure, axes = plt.subplots(2, 2, figsize=CANVAS, dpi=100)
+    figure.subplots_adjust(
+        left=0.09, right=0.98, top=0.84, bottom=0.11, hspace=0.7, wspace=0.25
+    )
+    notes = []
+    for index, (frame, branch) in enumerate(ROWS):
+        ax = axes.ravel()[index]
+        _, _, spatial, _ = load(root, frame, branch)
+        sweep = spatial["directional_discriminator"]
+        factors = np.asarray([row["factor"] for row in sweep])
+        for key, color, dash in (
+            ("current_delta_l2_a", SOLVED, "-"),
+            ("tangent_remainder_l2_a", WALL, "--"),
+        ):
+            values = np.asarray([row[key] for row in sweep]) / 1000
+            positive = values > 0
+            ax.loglog(
+                factors[positive],
+                values[positive],
+                color=color,
+                ls=dash,
+                lw=3 if key == "current_delta_l2_a" else 2.6,
+                marker=".",
+            )
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.grid(False)
+        ax.set_xlabel("fraction of proposed step")
+        ax.set_ylabel("current increment [kA]")
+        notes.append(
+            figure.text(
+                0.30 if index % 2 == 0 else 0.77,
+                0.88 if index < 2 else 0.44,
+                f"{frame} {branch}",
+                ha="center",
+            )
+        )
+    figure.legend(
+        handles=[
+            Line2D([], [], color=SOLVED, lw=3, label="measured increment"),
+            Line2D([], [], color=WALL, lw=2.6, ls="--", label="tangent remainder"),
+        ],
+        ncol=2,
+        loc="upper center",
+        frameon=False,
+        bbox_to_anchor=(0.5, 1.0),
+    )
+    save(
+        figure,
+        list(axes.ravel()),
+        notes,
+        output / "source-cutoff-traces.svg",
+        previews / "source-cutoff-traces.png",
+    )
+    plt.close(figure)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True)
@@ -276,6 +347,7 @@ def main():
         for frame, branch in ROWS
     ]
     traces(args.input, args.output, args.previews)
+    source_changes(args.input, args.output, args.previews)
     (args.previews / "render-receipt.json").write_text(
         json.dumps(rows, indent=2) + "\n"
     )

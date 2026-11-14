@@ -15,6 +15,11 @@
   "completed_at": "",
   "dispatched_at": "2026-11-14T12:19:35Z",
   "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the guard harness is a prototype negative control for a measured diagnosis record; marker_visibility.check already refuses a circle count that differs from the refused-cell count at render time, and the diagnosis verdict does not rest on this harness case",
+      "recorded_at": "2026-11-14T23:55:17.626246+00:00"
+    },
     "1": {
       "kind": "exempted",
       "reason": "the guard harness is a prototype negative control for a measured diagnosis record; the figure check already refuses a missing circle through marker_visibility at render time, and the diagnosis verdict does not rest on this case",

@@ -1465,7 +1465,7 @@ class _Edge:
         plane_residual = self._second_residual(vertex)
         plane_derivative = product(gamma, self.edge_slope)
 
-        def against_second_arsinh(weight):
+        def against_second_arsinh(weight, direct):
             series = across_the_range(weight)
             primitive = _oscillatory_primitive(series)
             core = sine_squared_times(primitive)
@@ -1478,20 +1478,35 @@ class _Edge:
 
             return xp.where(
                 _edge_residual_band(self),
-                self._second_residual(vertex, weight=weight),
+                direct,
                 reduced,
             )
 
         weights = _flux_line_weights(
             self, vertex, expansion_r, target_z_minus_expansion_z
         )
+        residual_weights = tuple(product(outer, residual[0]) for _, residual in weights)
+        residuals = self._second_residual(
+            vertex, weight=_stack_range_weights(residual_weights, vertex.one, xp)
+        )
+        root_weights = tuple(product(outer, root[0]) for root, _ in weights)
+        roots = _weighted_root(
+            vertex, _stack_range_weights(root_weights, vertex.one, xp)
+        )
+        near = _corner_remainder_band(vertex.radius, vertex.level, vertex.offset, xp)
 
-        def full_turn(root_weight, arsinh_weight):
-            return 4.0 * a * vertex.against_root(
-                product(outer, root_weight), stable=True
-            ) + 4.0 * against_second_arsinh(product(outer, arsinh_weight))
+        def full_turn(index, root_weight, arsinh_weight):
+            root = xp.where(near, roots[index], vertex.against_root(root_weight))
+            return 4.0 * a * root + 4.0 * against_second_arsinh(
+                arsinh_weight, residuals[index]
+            )
 
-        return tuple(full_turn(root[0], residual[0]) for root, residual in weights)
+        return tuple(
+            full_turn(index, root, residual)
+            for index, (root, residual) in enumerate(
+                zip(root_weights, residual_weights, strict=True)
+            )
+        )
 
     def flux_and_moment_terms(
         self,
@@ -3870,6 +3885,24 @@ def _edge_total(*terms):
 def _edge_scaled(term, factor):
     factor = _EdgeScalar.lift(factor)
     return _scaled_tangent(term[0], term[1], factor.value, factor.tangent)
+
+
+def _stack_range_weights(terms, one, xp):
+    """Give moment weights a leading channel axis over shared quadrature nodes."""
+    count = max(len(term[0]) for term in terms)
+    zero = xp.zeros_like(one)
+
+    def stack(values):
+        return xp.stack([xp.broadcast_to(value, one.shape) for value in values])
+
+    return (
+        [
+            stack([term[0][order] if order < len(term[0]) else zero for term in terms])
+            for order in range(count)
+        ],
+        stack([term[1] for term in terms]),
+        stack([term[2] for term in terms]),
+    )
 
 
 def _second_residual_tangent(

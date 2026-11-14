@@ -222,14 +222,21 @@ def xpoint_panels(root, frame, branch, output, previews):
                         zorder=3 if key == "flux" else 2,
                     )
                     drawn.set_linestyle(dash)
+                # EFIT's reference markers are drawn larger and above the
+                # solved ones. Where the two nulls coincide — which on the 137D
+                # panels they very nearly do — equal-size marks at one zorder
+                # leave only the solved triangle visible, and the paired panels
+                # then read as a single null rather than two that agree.
+                reference = key == "label"
                 style = replace(
                     DEFAULT_INK,
                     axis_color=color,
                     xpoint_color=color,
-                    axis_marker="^" if key == "flux" else "v",
+                    axis_marker="v" if reference else "^",
+                    axis_markersize=9.0 if reference else 6.5,
                     xpoint_marker=marker,
-                    xpoint_markersize=8.0,
-                    zorder_markers=12,
+                    xpoint_markersize=13.0 if reference else 7.5,
+                    zorder_markers=13 if reference else 12,
                 )
                 other = [
                     point["rz_m"]

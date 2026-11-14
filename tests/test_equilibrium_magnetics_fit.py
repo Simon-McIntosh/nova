@@ -164,6 +164,21 @@ def test_coefficient_updates_issue_only_typed_source_requests(linear_fit):
     )
 
 
+def test_known_conductor_subtraction_changes_the_target(linear_fit):
+    fitter, measurement, truth, _ = linear_fit
+    vacuum = np.array([0.7, -0.4, 1.1, 0.2])
+    total = replace(
+        measurement,
+        measured=measurement.measured + vacuum,
+        vacuum=vacuum,
+    )
+    np.testing.assert_allclose(total.signature, measurement.measured, atol=2e-15)
+    fitted = fitter.fit(total, plasma_current_scale=1.0)
+    assert fitted.converged
+    np.testing.assert_allclose(fitted.coefficients, truth, atol=1e-11)
+    assert np.max(np.abs(fitted.whitened_residuals)) <= 1e-8
+
+
 def test_masked_missing_rows_cannot_poison_the_fit(linear_fit):
     fitter, measurement, truth, _ = linear_fit
     missing = measurement.measured.copy()

@@ -19,7 +19,7 @@ trap 'rm -rfv "$scratch"' EXIT
 mkdir -p "$scratch/tree"
 git -C "$source_tree" archive "$revision" | tar -x -C "$scratch/tree"
 export TMPDIR="$scratch" PYTHONPATH="$scratch/tree" MPLCONFIGDIR="$scratch/matplotlib"
-export JAX_PLATFORMS=cuda OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
+export JAX_PLATFORMS=${JAX_PLATFORMS:-cuda} OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 /home/ITER/mcintos/Code/nova/.venv/bin/python - "$source_tree" "$scratch/tree" "$revision" <<'PY'
 from pathlib import Path

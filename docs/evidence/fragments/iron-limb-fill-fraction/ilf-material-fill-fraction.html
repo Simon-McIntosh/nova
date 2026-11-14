@@ -1,0 +1,34 @@
+<article id="ilf-material-fill-fraction-material">
+  <h3>Per-cell toroidal material rule in the production solve</h3>
+  <p>The production Newton residual accepts a toroidal iron fill fraction and
+    a demagnetising factor per radial and vertical component. The state and
+    evaluated iron contribution remain toroidal means; the result also exposes
+    the iron magnetisation and evaluates secant permeability at the iron's
+    internal field. Unit fill retains the solid-iron residual and its operands.</p>
+  <p>The starting tree reproduced
+    <code>TypeError: solve_magnetisation() got an unexpected keyword argument 'fill_fraction'</code>.
+    The focused constitutive, explicit-unit-fill and invalid-input checks now
+    report <strong>10 passed, 55 deselected in 35.23s</strong>. Invalid material
+    values are refused before interaction assembly. This is implementation
+    evidence; the numerical acceptance criteria are still unmeasured.</p>
+  <p>The geometry comparator uses N = 0.8/(0.8 + 1.2) = 0.4. The fitted
+    comparator uses one factor fitted jointly to both reference permeabilities
+    at 0.05 m and retained across both comparison meshes. Plain fill, solid
+    outline and section smear are reported independently. The stored WEST
+    gaps remain present; neither open material/geometry decision is locked.</p>
+  <p>Re-comparing the stored prototype with the accepted 0.075 m surface
+    reference gives the following warning, rather than a production verdict.</p>
+  <table>
+    <caption>Historical prototype in-vessel vector rms error divided by the
+      accepted reference iron-field rms.</caption>
+    <thead><tr><th>Cells [m]</th><th>μᵣ = 50</th><th>μᵣ = 200</th></tr></thead>
+    <tbody>
+      <tr><td>0.1</td><td>8.1409%</td><td>24.2313%</td></tr>
+      <tr><td>0.05</td><td>5.6731%</td><td>12.5972%</td></tr>
+    </tbody>
+  </table>
+  <p>The historical μᵣ = 200 value exceeds the required 10%; no tolerance is
+    widened. The fresh production comparison, WEST convergence pair, complete
+    base/head CPU suite arms and zero-gain residual mutation are queued in one
+    H200 job. Their pending status supplies no passing numerical evidence.</p>
+</article>

@@ -67,6 +67,7 @@ def sphere_convergence():
     return sphere_study(output=os.environ.get("NOVA_IRON_SPHERE_RECEIPT"))
 
 
+@pytest.mark.slow
 @pytest.mark.timeout(1800)
 @pytest.mark.parametrize("permeability", [50.0, 200.0])
 def test_sphere_permeability_converges(sphere_convergence, permeability):

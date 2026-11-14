@@ -1,0 +1,64 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed node's suite fence is unarmed: its manifest carries empty baseline_suite and after_suite blocks and its evidence states no node test is in scope at base 975f3e9 or at its head, so no suite pair exists and no failure can be derived from it.",
+  "call_sites": [],
+  "call_sites_note": "No module outside scripts/prototypes/bank_width_probe imports the added modules; a search over scripts/ and nova/ for 'bank_width_probe' returns only the node's own files.",
+  "completed_at": "2026-11-14T21:29:42.104Z",
+  "dispatched_at": "2026-11-14T20:50:54Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_width_probe/report.py",
+      "line": 49,
+      "severity": "non-blocking",
+      "summary": "the re-classification assertion compares classify_outcome's output to arm['outcome'], which run.py:175 set by calling that same function on the same receipt and log, so the two sides move together and a classification regression leaves it true."
+    },
+    {
+      "file": "scripts/prototypes/bank_width_probe/run.py",
+      "line": 50,
+      "severity": "non-blocking",
+      "summary": "the archive-and-execute arm loop duplicates the capability owned by scripts/prototypes/bank_h200_slice_profile/run.py:60-140 instead of extending that owner, so receipt-retention or gate-log changes must be made twice."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html",
+      "line": 13,
+      "severity": "non-blocking",
+      "summary": "the width-79 refusal rests on one process (h200-runtime/default-width-79-process-0) while its admitted neighbour was measured twice, and the row omits the one-probe qualifier used for 72 and 76, so the exact boundary is stated more firmly than the measurements support."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read the six commits against 975f3e9; they add run.py, report.py, job.sh and report_job.sh under scripts/prototypes/bank_width_probe plus the evidence fragment and width-boundary.svg, and change nothing else.",
+    "done_when": "the done-when asks the fragment to state the largest admitted width and its throughput with one SVG of bytes and wall against width; the fragment's width table states both and docs/figures/sub-millisecond-forward-path/bank-width-probe/width-boundary.svg carries compiled GB and ms/slice against width, with h200-runtime/report-checked.log recording EXIT=0.",
+    "goal": "the node goal is to measure the largest batch width the bank route admits on one H200 and its per-slice throughput there; docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html:2-3 states 78 default-allocator pulses at 5.783966 ms/slice (172.892 slices/s), matching h200-runtime/audited.json.",
+    "manifest": "read manifest.md; it records status complete, the six commits, the width-78 boundary with 0.0456% process spread, 13 arm receipts, report-checked.log EXIT=0 with unchanged numerical receipts, and empty suite arms because the suite fence is unarmed.",
+    "write_paths": "the node declared scripts/prototypes/bank_width_probe, the bank-width-probe.html fragment and the bank-width-probe figures directory; all six changed paths in the diff lie inside those three grants."
+  },
+  "justifications": {
+    "durability": "no test exists: the guards are one-shot asserts in run.py:227-247 and report.py:103-107 that only fire when the report is rerun by hand, and the suite is unarmed for this node.",
+    "evidence": "h200-runtime/report-checked.log ends EXIT=0 after report.py:36-107 re-derive every row from the default-width-78-process-1 and -2 receipts; only the width-79 refusal row rests on a single probe.",
+    "fit": "run.py and report.py follow the sibling prototype idiom of scripts/prototypes/bank_h200_slice_profile/run.py and introduce no name the naming rules forbid.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html:2 states width 78 and 5.783966 ms/slice, matching h200-runtime/audited.json's largest_admitted_width and per_slice_ms.",
+    "reuse": "the timing driver scripts/prototypes/bank_h200_slice_profile/measure.py and h200_levers.run.refuse_inert are reused, but run.py:50-215 repeats the archive-and-execute arm loop owned by scripts/prototypes/bank_h200_slice_profile/run.py:60-140.",
+    "scope_discipline": "git diff --stat 975f3e9..69aacfb lists only the four scripts/prototypes/bank_width_probe files, the evidence fragment and width-boundary.svg, all inside the declared grants."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to measure the largest batch width the bank route admits on one H200 and its per-slice throughput there; docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html:2-3 states 78 default-allocator pulses at 5.783966 ms/slice (172.892 slices/s), matching h200-runtime/audited.json.\nVERDICT done_when: the done-when asks the fragment to state the largest admitted width and its throughput with one SVG of bytes and wall against width; the fragment's width table states both and docs/figures/sub-millisecond-forward-path/bank-width-probe/width-boundary.svg carries compiled GB and ms/slice against width, with h200-runtime/report-checked.log recording EXIT=0.\nVERDICT write_paths: the node declared scripts/prototypes/bank_width_probe, the bank-width-probe.html fragment and the bank-width-probe figures directory; all six changed paths in the diff lie inside those three grants.\nVERDICT manifest: read manifest.md; it records status complete, the six commits, the width-78 boundary with 0.0456% process spread, 13 arm receipts, report-checked.log EXIT=0 with unchanged numerical receipts, and empty suite arms because the suite fence is unarmed.\nVERDICT diff: read the six commits against 975f3e9; they add run.py, report.py, job.sh and report_job.sh under scripts/prototypes/bank_width_probe plus the evidence fragment and width-boundary.svg, and change nothing else.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html:2 states width 78 and 5.783966 ms/slice, matching h200-runtime/audited.json's largest_admitted_width and per_slice_ms.\nSCORE evidence: 19\nJUSTIFICATION evidence: h200-runtime/report-checked.log ends EXIT=0 after report.py:36-107 re-derive every row from the default-width-78-process-1 and -2 receipts; only the width-79 refusal row rests on a single probe.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 975f3e9..69aacfb lists only the four scripts/prototypes/bank_width_probe files, the evidence fragment and width-boundary.svg, all inside the declared grants.\nSCORE durability: 8\nJUSTIFICATION durability: no test exists: the guards are one-shot asserts in run.py:227-247 and report.py:103-107 that only fire when the report is rerun by hand, and the suite is unarmed for this node.\nSCORE fit: 18\nJUSTIFICATION fit: run.py and report.py follow the sibling prototype idiom of scripts/prototypes/bank_h200_slice_profile/run.py and introduce no name the naming rules forbid.\nSCORE reuse: 5\nJUSTIFICATION reuse: the timing driver scripts/prototypes/bank_h200_slice_profile/measure.py and h200_levers.run.refuse_inert are reused, but run.py:50-215 repeats the archive-and-execute arm loop owned by scripts/prototypes/bank_h200_slice_profile/run.py:60-140.\nFINDING scripts/prototypes/bank_width_probe/report.py:49 non-blocking: the re-classification assertion compares classify_outcome's output to arm['outcome'], which run.py:175 set by calling that same function on the same receipt and log, so the two sides move together and a classification regression leaves it true.\nFINDING scripts/prototypes/bank_width_probe/run.py:50 non-blocking: the archive-and-execute arm loop duplicates the capability owned by scripts/prototypes/bank_h200_slice_profile/run.py:60-140 instead of extending that owner, so receipt-retention or gate-log changes must be made twice.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html:13 non-blocking: the width-79 refusal rests on one process (h200-runtime/default-width-79-process-0) while its admitted neighbour was measured twice, and the row omits the one-probe qualifier used for 72 and 76, so the exact boundary is stated more firmly than the measurements support.\n",
+  "review_run_id": "r-20261114T204716760888-review-of-bank-width-probe-69aacfb324c5",
+  "reviewed_base_sha": "975f3e98cfa2b2976d2bbe1b94ead37f8623b529",
+  "reviewed_head_sha": "69aacfb324c5abda0afce26133f3287894be09b8",
+  "reviewed_run_id": "r-20261114T144332616609-bank-width-probe",
+  "rubric": "text",
+  "scores": {
+    "durability": 8,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T21:45:03.866227+00:00",
+  "total": 90
+}

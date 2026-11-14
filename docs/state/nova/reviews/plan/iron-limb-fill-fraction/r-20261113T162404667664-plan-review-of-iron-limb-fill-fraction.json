@@ -49,7 +49,24 @@
   "plan_slug": "iron-limb-fill-fraction",
   "plan_version": 5,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "finding": "reuse_search-1",
+      "reason": "Reuse map for the node brief, not plan text: the material-solve brief will require the rule to land in the production residual and operand tuple, with the prototype's second solver retired; the done-when already measures the production solve.",
+      "when": "2026-11-14T07:39:23.243013+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "reason": "Reuse map for the node brief, not plan text: the material-solve brief will require the rule to land in the production residual and operand tuple, with the prototype's second solver retired; the done-when already measures the production solve.",
+      "when": "2026-11-14T07:39:23.243013+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-limb-fill-fraction/r-20261113T162404667664-plan-review-of-iron-limb-fill-fraction.json",
   "review_run_id": "r-20261113T162404667664-plan-review-of-iron-limb-fill-fraction",
   "reviewed_blob_sha": "e3c046a6c59cfde24686b82ab506bf7ca36a6db5",
   "rubric": "design",

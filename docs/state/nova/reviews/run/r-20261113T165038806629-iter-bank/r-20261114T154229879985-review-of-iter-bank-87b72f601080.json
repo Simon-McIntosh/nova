@@ -16,6 +16,13 @@
   ],
   "completed_at": "2026-11-14T16:13:48.210Z",
   "dispatched_at": "2026-11-14T15:43:03Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "iter-bank-live-gate",
+      "recorded_at": "2026-11-14T16:48:53.563300+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_iter_bank.py",

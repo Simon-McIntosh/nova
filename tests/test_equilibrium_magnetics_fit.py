@@ -644,21 +644,28 @@ def physical_cases(tmp_path_factory):
         basis = np.zeros((raw.size, 2))
         basis[:pressure, 0] = raw[:pressure]
         basis[pressure:, 1] = raw[pressure:]
+        perturbation = 2e-4 if name == "mast" else 0.02
         initial_source = replace(
             request.source_profile,
             core=replace(
                 request.source_profile.core,
                 p_prime=replace(
                     request.source_profile.core.p_prime,
-                    coefficients=jnp.asarray(raw[:pressure] * 0.98),
+                    coefficients=jnp.asarray(raw[:pressure] * (1.0 - perturbation)),
                 ),
                 ff_prime=replace(
                     request.source_profile.core.ff_prime,
-                    coefficients=jnp.asarray(raw[pressure:] * 1.02),
+                    coefficients=jnp.asarray(raw[pressure:] * (1.0 + perturbation)),
                 ),
             ),
         )
         initial = replace(request, source_profile=initial_source)
+        if name == "mast":
+            from nova.equilibrium.solve_request import ExplicitSolveSeed
+
+            initial = replace(
+                initial, seed_policy=ExplicitSolveSeed(generated.terminal_state.flux)
+            )
         cases[name] = dict(
             name=name,
             profile=profile,
@@ -682,6 +689,33 @@ def _recover_physical(case, displacement=0.0):
     import json
 
     sensors = case["sensors"]
+    label = f"{case['name']}-" + ("displaced-fit" if displacement else "fit")
+    initial_record = {}
+
+    def magnetic_source(receipt):
+        if not initial_record:
+            _persist_forward(receipt, case["output"] / f"{label}-initial.pkl")
+            expected = case["generated"].terminal_state
+            count = len(case["coordinate"])
+            core = np.asarray(expected.domains.core)
+            error = float(
+                np.max(
+                    np.abs(
+                        np.asarray(
+                            receipt.terminal_state.flux[:count] - expected.flux[:count]
+                        )
+                    )[core]
+                )
+                / abs(float(expected.topology.flux_span))
+            )
+            initial_record["flux_sup_fraction"] = error
+            (case["output"] / f"{label}-initial.json").write_text(
+                json.dumps(initial_record, indent=2)
+            )
+            print("INITIAL_RECOVERY " + json.dumps(initial_record), flush=True)
+            assert error > 1e-6, initial_record
+        return case["source"](receipt)
+
     if displacement:
         radius = sensors.r.copy()
         radius[0] += displacement
@@ -690,13 +724,12 @@ def _recover_physical(case, displacement=0.0):
         case["profile"],
         case["initial"],
         sensors,
-        case["source"],
+        magnetic_source,
         coefficient_basis=case["basis"],
     ).fit(
         case["measurement"],
         plasma_current_scale=abs(case["measurement"].plasma_current),
     )
-    label = f"{case['name']}-" + ("displaced-fit" if displacement else "fit")
     forward_path = case["output"] / f"{label}-forward.pkl"
     _persist_forward(fitted.forward, forward_path)
     core = fitted.source_profile.core

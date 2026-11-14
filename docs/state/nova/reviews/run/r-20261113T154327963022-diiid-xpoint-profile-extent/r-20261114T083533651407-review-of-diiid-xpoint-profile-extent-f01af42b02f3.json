@@ -5,6 +5,11 @@
   "call_sites": [],
   "completed_at": "2026-11-14T08:56:28.597Z",
   "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "diiid-xpoint-profile-extent",
+      "recorded_at": "2026-11-14T09:02:27.727360+00:00"
+    },
     "reuse": {
       "kind": "folded",
       "node": "diiid-xpoint-profile-extent",

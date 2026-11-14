@@ -17,6 +17,11 @@
       "kind": "exempted",
       "reason": "non-blocking presentation refinement; the fragment table carries every measured per-slice value at full precision and the figure is a companion to it",
       "recorded_at": "2026-11-14T07:45:59.770923+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "non-blocking: the ranking the fragment rests on is stated in its ranked table, not read off the panel heights; independent log scales were chosen so the small stages the earlier blocking finding flagged stay visible",
+      "recorded_at": "2026-11-14T07:46:12.784705+00:00"
     }
   },
   "findings": [

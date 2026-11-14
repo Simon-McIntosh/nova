@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T10:03:20.312Z",
+  "dispatched_at": "2026-11-14T09:47:11Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261114T094637817754-plan-review-of-inverse-equilibrium-baseline/plan.html:106",
+      "id": "reasoning-1",
+      "reason": "the comparison is the section's whole deliverable, and naming the reference variant (EPM, magnetics-only, monomial basis) is what makes its bands measurable rather than dependent on which of two stored equilibria the worker opened.",
+      "text": "\u00a72 names \"the MAST-U 45272 slice\" and requires the class to fit \"the same number of profile coefficients imas-efit fitted\", but imas-efit's manifest carries two references at that pulse \u2014 `mastu_epm_45272` (magnetics only, monomial pp'/ff', 238 slices) and `mastu_epq_45272` (magnetics + MSE, spline pp'/ff', 183 slices) \u2014 and both entries state that \"cross-comparison ... is not valid\" because EPQ's spline basis and MSE constraints produce systematically different internal profiles; the monomial-basis requirement in the same paragraph is satisfiable only against EPM, so a worker choosing EPQ produces a comparison imas-efit itself declares invalid and cannot honour \"the same number of profile coefficients\" at all",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261114T094637817754-plan-review-of-inverse-equilibrium-baseline/plan.html:121",
+      "id": "done_when-1",
+      "reason": "a negative control that can fail to fire leaves the node's gate red on a sound fit, and the repair is one phrase in the clause rather than a re-derivation.",
+      "text": "\u00a72 clause (3) constructs its control by scaling \"every magnetics row and the measured plasma current\" by 1.10, but under the locked `fitted-unknowns` choice the measured conductor currents are themselves fitted data weighted by their measurement uncertainty, and they are left unscaled, so the control hands the fit two mutually inconsistent data families (magnetics demanding 1.10\u00d7, coil measurements demanding 1.00\u00d7) and the fitted plasma current lands wherever the weighting arbitrates \u2014 the clause then asserts on \"every case\" an outcome it has not constructed; scaling the measured conductor currents and their uncertainties by the same 1.10 makes the control a physically self-consistent 1.10\u00d7 state whose failure is arithmetic",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "cad85cc55e0b1246c549906130287e856436a4de",
+  "plan_fingerprint": "35ffa9a22afc86ed6861bc40e81820fdb4539b749a33d375d73b75107693d4f4",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 4,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261114T094637817754-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "4831fbc9147110eb27c7204cbea1c6f22bd44cb5",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 both decision keys referenced by s2 (`fitted-unknowns`, `vertical-freedom`) and s4's `\u00a72` reference resolve in the snapshot, the cited case set resolves against imas-efit's committed manifest (mastu 45272, tcv, iter 135013 all present and `enabled`), and the cited iron-core exclusion is confirmed (iter-dd4-1-0, mastu-dd4-1-0 and every tcv machine description carry no `iron_core`).",
+    "done_when": "a finding \u2014 \u00a72 clause (3) scales the magnetics rows and the measured plasma current but not the measured conductor currents, which the locked decision makes fitted data, so the control's firing is an assumed outcome rather than a constructed one.",
+    "evidence_paths": "pass \u2014 the plan names its record at `docs/evidence/archive/inverse-equilibrium-baseline-landed.html`; s2 and s4 state no session scratchpad or node-local path, and s4's H200 job records into that evidence record.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers appear in s2 or s4 beyond the plan's own section numbering, and neither carries changelog prose.",
+    "reasoning": "a finding \u2014 s2 pins the MAST-U pulse but not which imas-efit reference at that pulse, and imas-efit's committed data holds two mutually non-comparable ones (EPM magnetics-only/monomial and EPQ magnetics+MSE/spline).",
+    "single_goal": "pass \u2014 s2 delivers one comparison table and s4 delivers one cost record; the flux panels in s2 are the presentation of that same comparison, not a second deliverable.",
+    "wiring": "pass \u2014 s2's `depends-on` names s1 and both fit decisions (`fitted-unknowns`, `vertical-freedom`) carry `data-sections=\"s2\"` and are locked with a non-empty `data-choice`, so the section's declared `implementable` status no longer rests on an open decision."
+  },
+  "section_digests": {
+    "_document": "c6c6aa089a9d737755926df022ec646c6eb5ba0fb28a0c91f4809b8a5e61508a",
+    "s0": "57b2e9e2f3010f18ee32b61a28f0473cd8ca9692e9e2a7eed5aa3d1776fdd77f",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "4cea6cc1c40897f02a7f9b64a9aa66b8dfea9664a6cebd5364e1ede21f2705d1",
+    "s3": "aabab320c034e5a6720e0b3877958935e6c3b63577de3674cd6e87f6120889ba",
+    "s4": "a8f5721b1827357df497c97788c8bc9c5bb1266579ca0d04f61045c915138730",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T10:06:02.552912+00:00",
+  "total": null
+}

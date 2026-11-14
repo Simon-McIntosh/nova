@@ -6,21 +6,106 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 from dataclasses import replace
-import json
-import os
-from pathlib import Path
 
 import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
 
-from nova.equilibrium import support_read
+from nova.equilibrium import support_read, topology
 from scripts.prototypes.iter_bank.measure import (
     PLASMA_JET_TOLERANCE,
+    ZeroField,
     assert_accuracy,
     build_geometry,
+    pack,
 )
+from scripts.prototypes.read_route.jets import _source_jets, build_jet_matrix
+
+
+@jax.jit
+def analytic_jets(points, coupling, moments):
+    """Evaluate the direct kernels without using the bank's response rows."""
+    return pack(
+        jax.vmap(coupling.evaluate, in_axes=(0, None))(points, tuple(moments.T))
+    )
+
+
+@pytest.fixture(scope="module")
+def iter_bank():
+    """Build one ITER plasma cell with two native driven-coil sections.
+
+    Coordinates and signed turns come from DINA 105027/1, DD 3.38.1:
+    pf_active PF1 and CS3U, and the wall-clipped carrier cell nearest
+    (6.2, 0) m built by scripts/prototypes/iter_bank/measure.py. The cell
+    boundary is the sub-mesh wall. Only input geometry is embedded; all
+    operator rows and reference jets are evaluated during the test run.
+    """
+    assert jax.config.jax_enable_x64 is True
+    cell = np.array(
+        [
+            [6.336119448749177, -0.11632048214432768],
+            [6.261779593268597, 0.012439924575365918],
+            [6.113099882307435, 0.012439924575365932],
+            [6.038760026826854, -0.1163204821443277],
+            [6.113099882307435, -0.24508088886402132],
+            [6.261779593268597, -0.24508088886402132],
+        ],
+        dtype=np.float64,
+    )
+    coils = (
+        np.array(
+            [
+                [4.4226, 7.08165],
+                [4.4226, 8.06575],
+                [3.4636, 8.06575],
+                [3.4636, 7.08165],
+            ],
+            dtype=np.float64,
+        ),
+        np.array(
+            [
+                [2.057, 4.4175],
+                [2.057, 6.5105],
+                [1.3170000000000002, 6.5105],
+                [1.3170000000000002, 4.4175],
+            ],
+            dtype=np.float64,
+        ),
+    )
+    turns = np.array([248.6, 554.0], dtype=np.float64)
+    geometry = topology.TopologyGeometry.from_cells((cell,), cell[None], (cell,))
+    plasma = topology.BiotMomentCoupling.from_polygons((cell,))
+    conductors = topology.BiotMomentCoupling.from_polygons(coils)
+    rows, exterior, nodes, indices, _ = build_jet_matrix(
+        plasma, geometry, ZeroField(), (jnp.zeros(1),) * 3, persist=False
+    )
+    coil_rows = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))(nodes, conductors)
+    operands = support_read.SupportOperands.from_rows(
+        geometry,
+        rows,
+        exterior,
+        nodes,
+        indices,
+        bucket=64,
+        coil_exterior=coil_rows[:, :, 0, :] * turns[None, :, None],
+    )
+    return operands, plasma, conductors, turns
+
+
+@pytest.fixture(params=range(3))
+def iter_state(request):
+    """Three sampled DINA coil drives and independent nonzero plasma moments."""
+    currents = (
+        (-16500.40721212742, 3328.9667992184472),
+        (-16431.81795701071, 4715.148567535232),
+        (-15841.299036467031, 5546.237210862071),
+    )
+    moments = ((12000.0, 40.0, -90.0), (25000.0, -60.0, 80.0), (-14000.0, 70.0, 50.0))
+    return (
+        jnp.asarray(currents[request.param], dtype=jnp.float64),
+        jnp.asarray([moments[request.param]], dtype=jnp.float64),
+    )
 
 
 def bank(monkeypatch, coil_exterior=None):
@@ -100,25 +185,21 @@ def test_map_check_refuses_nonfinite_and_missing_coils():
         assert_accuracy(expected, np.zeros_like(expected))
 
 
-@pytest.mark.parametrize("sample", range(3))
-def test_dina_nodal_jets_match_analytic_map(sample):
-    """Qualify recorded direct-kernel samples; the mutation removes PF1."""
-    directory = os.environ.get("NOVA_ITER_BANK_RECEIPT")
-    if directory is None:
-        pytest.skip("set NOVA_ITER_BANK_RECEIPT to the qualified bank run directory")
-    directory = Path(directory)
-    receipt = json.loads((directory / "receipt.json").read_text())
-    if sample >= len(receipt["accuracy"]):
-        pytest.skip("the measurement did not produce this sampled state")
-    state = receipt["accuracy"][sample]
-    with np.load(
-        directory / f"accuracy-{state['index']}.npz", allow_pickle=False
-    ) as arrays:
-        actual = arrays[
-            "dropped" if os.environ.get("NOVA_ITER_BANK_DROP_COIL") else "actual"
-        ]
-        errors = assert_accuracy(actual, arrays["expected"], PLASMA_JET_TOLERANCE)
-    np.testing.assert_allclose(errors, state["relative_errors"], rtol=1e-12, atol=1e-16)
+def test_iter_nodal_jets_match_analytic_map(iter_bank, iter_state):
+    """Check the live plasma contraction alone and with runtime coil currents."""
+    operands, plasma, conductors, turns = iter_bank
+    currents, moments = iter_state
+    active = int(operands.active_nodes)
+    for drive in (jnp.zeros_like(currents), currents):
+        coil_moments = jnp.zeros((len(turns), 3)).at[:, 0].set(turns * drive)
+        points = operands.nodes[:active]
+        expected = analytic_jets(points, plasma, moments) + analytic_jets(
+            points, conductors, coil_moments
+        )
+        actual = support_read.nodal_jets(operands, tuple(moments.T), drive)
+        errors = assert_accuracy(actual[:active], expected, PLASMA_JET_TOLERANCE)
+        np.testing.assert_array_equal(actual[active:], 0.0)
+        print("plasma" if not bool(jnp.any(drive)) else "total", errors)
 
 
 def test_reentrant_wall_mesh_keeps_all_clipped_fragments():
@@ -151,20 +232,15 @@ def test_reentrant_wall_mesh_keeps_all_clipped_fragments():
     assert all(p.difference(vessel).area < 1e-12 for p in cells)
 
 
-@pytest.mark.parametrize("sample", range(3))
-def test_dina_coil_jets_match_analytic_map(sample):
-    """Qualify the driven response independently of plasma derivative compilation."""
-    directory = os.environ.get("NOVA_ITER_BANK_COIL_RECEIPT")
-    if directory is None:
-        pytest.skip("set NOVA_ITER_BANK_COIL_RECEIPT to the coil comparison directory")
-    directory = Path(directory)
-    receipt = json.loads((directory / "receipt.json").read_text())
-    assert receipt["kind"] == "coil-only"
-    state = receipt["accuracy"][sample]
-    with np.load(
-        directory / f"coil-accuracy-{state['index']}.npz", allow_pickle=False
-    ) as arrays:
-        actual = arrays[
-            "dropped" if os.environ.get("NOVA_ITER_BANK_DROP_COIL") else "actual"
-        ]
-        assert_accuracy(actual, arrays["expected"])
+def test_iter_coil_jets_match_analytic_map(iter_bank, iter_state):
+    """Qualify every driven jet entry against the direct analytic kernels."""
+    operands, plasma, conductors, turns = iter_bank
+    currents, moments = iter_state
+    moments = jnp.zeros_like(moments)
+    active = int(operands.active_nodes)
+    coil_moments = jnp.zeros((len(turns), 3)).at[:, 0].set(turns * currents)
+    expected = analytic_jets(operands.nodes[:active], conductors, coil_moments)
+    actual = support_read.nodal_jets(operands, tuple(moments.T), currents)
+    errors = assert_accuracy(actual[:active], expected)
+    np.testing.assert_array_equal(actual[active:], 0.0)
+    print("coil", errors)

@@ -1,0 +1,302 @@
+{
+  "added_failure_basis": "a figure review runs no suite; the reviewed run declares no baseline_suite and no after_suite, and its gate (publish.sh, render.log) ends EXIT=0",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachments": [
+    {
+      "attachment": "image-0.png",
+      "file": "docs/figures/diiid-edge-current-refusal/frame-137-diverted.svg",
+      "identity_basis": "panel footer '2 support cells' / '5 cells change in terminal refused proposals' matches render-receipt.json case frame-137-diverted (changed_cells 2, terminal_refused_cells 5)"
+    },
+    {
+      "attachment": "image-1.png",
+      "file": "docs/figures/diiid-edge-current-refusal/frame-146-diverted.svg",
+      "identity_basis": "footer '2 support cells' / '0 cells change' matches case frame-146-diverted (2, 0), the converged control"
+    },
+    {
+      "attachment": "image-2.png",
+      "file": "docs/figures/diiid-edge-current-refusal/frame-146-limited.svg",
+      "identity_basis": "footer '347 support cells' / '9 cells change' matches case frame-146-limited (347, 9)"
+    },
+    {
+      "attachment": "image-3.png",
+      "file": "docs/figures/diiid-edge-current-refusal/frame-179-limited.svg",
+      "identity_basis": "footer '23 support cells' / '43 cells change' matches case frame-179-limited (23, 43)"
+    },
+    {
+      "attachment": "image-4.png",
+      "file": "docs/figures/diiid-edge-current-refusal/inactive-field-reference.svg",
+      "identity_basis": "byte-identical to image-2 (composition unchanged: 347 support cells, 9 refused cells), consistent with the run's own figure-inspections record that inactive-field-reference.png and frame-146-limited.png share one SHA"
+    },
+    {
+      "attachment": "image-5.png",
+      "file": "docs/figures/diiid-edge-current-refusal/inactive-field-suppressed.svg",
+      "identity_basis": "footer '94 support cells' / '96 cells change' matches case inactive-field-suppressed (94, 96)"
+    },
+    {
+      "attachment": "image-6.png",
+      "file": "docs/figures/diiid-edge-current-refusal/limited-trajectories.svg",
+      "identity_basis": "two columns titled '146 limited' and '179 limited', rows axis Z / support cells / inactive field"
+    },
+    {
+      "attachment": "image-7.png",
+      "file": "docs/figures/diiid-edge-current-refusal/source-cutoff-traces.svg",
+      "identity_basis": "four panels titled 137 diverted / 146 diverted / 146 limited / 179 limited, log current increment against fraction of proposed step"
+    },
+    {
+      "attachment": "image-8.png",
+      "file": "docs/figures/diiid-edge-current-refusal/trip-traces.svg",
+      "identity_basis": "two rows (live residual, support cells) by four framed columns titled 137 diverted / 146 diverted / 146 limited / 179 limited"
+    }
+  ],
+  "completed_at": "2026-11-14T18:08:37.276Z",
+  "dispatched_at": "2026-11-14T17:43:55Z",
+  "findings": [
+    {
+      "disposition": "folded",
+      "disposition_note": "the repair belongs with the figure producer scripts/prototypes/diiid_edge_current_refusal/render.py, where the star is plotted after the refused marks at a higher zorder",
+      "file": "docs/figures/diiid-edge-current-refusal/frame-137-diverted.svg",
+      "id": "f8a24caf465",
+      "line": 249,
+      "severity": "blocking",
+      "summary": "The source-cutoff star is drawn at zorder 15 directly over one of the refused-proposal circles, which is drawn at zorder 14 with a smaller marker, so the right panel shows four circles while its own footer reports '5 cells change in terminal refused proposals'. The star's single crossing cell (R, Z) = (1.212, 0.800) m is exactly one of the five refused cells (cutoff-jumps.json smallest_crossing_pair.crossing_rz_m equals a spatial.json terminal refused changed_rz_m to floating-point identity). Measured from the PNG, four of the five refused coordinates map to visible circles at (974, 320), (1124, 320), (1041, 519) and (974, 434) px, and the fifth maps to the star's centre at (989, 264) px within 1 px. A reader reconciling the reported count with the picture sees four marks and cannot tell that a fifth refused cell exists."
+    },
+    {
+      "disposition": "folded",
+      "disposition_note": "same repair point, render.py",
+      "file": "docs/figures/diiid-edge-current-refusal/frame-146-limited.svg",
+      "id": "f247292965a",
+      "line": 249,
+      "severity": "blocking",
+      "summary": "Same defect in this row: the single source-cutoff crossing cell coincides exactly with one of the nine refused cells (checked cell by cell against spatial.json), so the right panel shows eight countable circles against a footer reporting nine refused cells."
+    },
+    {
+      "disposition": "folded",
+      "disposition_note": "same repair point, render.py",
+      "file": "docs/figures/diiid-edge-current-refusal/frame-179-limited.svg",
+      "id": "ff63be72aa4",
+      "line": 249,
+      "severity": "blocking",
+      "summary": "Same defect in this row: the source-cutoff cell coincides exactly with one of the 43 refused cells, so one of the 43 refused marks is drawn as a star instead of a circle and the countable marks do not reconcile with the footer."
+    },
+    {
+      "disposition": "folded",
+      "disposition_note": "render.py legend handles at lines 255-264 and 286-293",
+      "file": "scripts/prototypes/diiid_edge_current_refusal/render.py",
+      "id": "fdacacc8a1d",
+      "line": 264,
+      "severity": "non-blocking",
+      "summary": "The legend gives 'mask change' and 'EFIT null' the same hollow-square glyph and differs only in colour, so the key cannot teach a shape distinction. Measured in the rendered PNG, the mask-change swatch at (415, 47) and the EFIT-null swatch at (976, 22) are both plain 14x14 hollow squares; in the plot the two marks also share the square marker and differ only by size and grey/near-black. On the dense panels a reader must infer which hollow squares are changed support cells and which are solution nulls from position and colour alone."
+    },
+    {
+      "disposition": "folded",
+      "disposition_note": "render.py marks: lines 238-246",
+      "file": "scripts/prototypes/diiid_edge_current_refusal/render.py",
+      "id": "f881ac489b3",
+      "line": 242,
+      "severity": "non-blocking",
+      "summary": "The mask-change marks are drawn at ms=4 with a 0.8 pt edge at zorder 1, under the contours and the wall. In frame-146-limited the 347 cells pack into a grey lattice that is the heaviest ink in the panel, while the flux topology the panel exists to show is a set of thin lines beneath it; the mark that encodes the count outweighs the mark that encodes the physics."
+    },
+    {
+      "disposition": "folded",
+      "disposition_note": "render.py panel layout: lines 157-158",
+      "file": "scripts/prototypes/diiid_edge_current_refusal/render.py",
+      "id": "fb1b96b912b",
+      "line": 157,
+      "severity": "non-blocking",
+      "summary": "Both poloidal panels are 14 in wide with equal-aspect limits of R 0.75-2.65 m against Z -1.7-1.7 m, so each panel fills about 270 px of the 1400 px canvas and more than half the figure is white margin; the contour topology is drawn at roughly a third of the width the canvas offers, which is a legibility loss on the page the figure is read on."
+    },
+    {
+      "disposition": "folded",
+      "disposition_note": "render.py legend line 264 and footer lines 308-315",
+      "file": "scripts/prototypes/diiid_edge_current_refusal/render.py",
+      "id": "f1b6dcc43f2",
+      "line": 311,
+      "severity": "non-blocking",
+      "summary": "The footer counts the grey square as 'support cells' ('2 support cells; 0 shadow nodes change') while the legend names the same mark 'mask change', so a reader cannot tell whether the footer's count refers to the grey squares or to something that is not drawn. The two names for one mark appear within the same figure."
+    },
+    {
+      "disposition": "folded",
+      "disposition_note": "the repair is the same mark-density decision in render.py",
+      "file": "docs/figures/diiid-edge-current-refusal/inactive-field-suppressed.svg",
+      "id": "f39594b0927",
+      "line": 242,
+      "severity": "non-blocking",
+      "summary": "96 refused-proposal circles at ms=6 overlap one another into a continuous red band across the inboard half of the right panel, and the flux contours beneath that band cannot be traced through it. The band is denser than the 43-circle chain in frame-179-limited and is the dominant mark in a figure whose purpose is to show the retained footprint."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_note": "the identity is the recorded result of the paired reference arm, not a rendering defect, and the caption in the evidence fragment is the right place for it",
+      "file": "docs/figures/diiid-edge-current-refusal/inactive-field-reference.svg",
+      "id": "f33e88c378b",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "This attachment is byte-identical to the frame-146-limited attachment, so the nine-figure evidence set contains one picture under two names. The duplication is the reference arm deliberately reproducing the unmodified 146L row and the run's own figure-inspections record notes the shared SHA; a reader browsing the figures index has only the caption to tell them it is not a second measurement."
+    },
+    {
+      "disposition": "folded",
+      "disposition_note": "linear_scale tick selection at render.py:451-457",
+      "file": "docs/figures/diiid-edge-current-refusal/limited-trajectories.svg",
+      "id": "f0728725a1d",
+      "line": 456,
+      "severity": "non-blocking",
+      "summary": "In the 146-limited inactive-field panel the highest labelled tick is 24 mT while the largest spikes rise above it, so the biggest excursion has no labelled value and must be interpolated against an unlabelled stretch of the vertical axis."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_note": "a shared key for two rows of the same colours is the conventional form here, and splitting it would duplicate a legend across four columns",
+      "file": "docs/figures/diiid-edge-current-refusal/trip-traces.svg",
+      "id": "fc21559efb9",
+      "line": 404,
+      "severity": "non-blocking",
+      "summary": "The legend joins two rows into one entry ('live residual / returned support', 'frozen residual / incoming support') and both rows use the same blue, so the reader has to infer from the row titles which half of each label applies above and which below. Nothing is unreadable, but the key requires a decoding step the panels do not make explicit."
+    }
+  ],
+  "method": "each figure judged from its rendered PNG only (the nine attachments image-0.png..image-8.png); no SVG and no other image was opened",
+  "project": "nova",
+  "raw_text": "See rubric_lines and findings; this record was assembled from the rendered PNGs only.",
+  "read_only": true,
+  "review_run_id": "r-20261114T162917048228-review-of-diiid-edge-current-refusal-330dbf38c756-figure",
+  "reviewed_base_sha": "0843b7d12cc7a029315ee53ae27568ee364edcc6",
+  "reviewed_head_sha": "330dbf38c756dc38ecd6cad467718354e0aa803c",
+  "reviewed_run_id": "r-20261114T121904732821-diiid-edge-current-refusal",
+  "reviewer_run_id": "r-20261114T162917048228-review-of-diiid-edge-current-refusal-330dbf38c756-figure",
+  "rubric": "figure",
+  "rubric_lines": [
+    "frame-137-diverted.svg legibility: pass - contours, wall, both null sets and the red marks read at a glance",
+    "frame-137-diverted.svg data_ink: defect - two panels fill about 270 px each of a 1400 px canvas, so over half the figure is white margin and the flux topology is drawn at a third of the width available",
+    "frame-137-diverted.svg decoration: pass - no gradient, background fill, grid or decorative styling",
+    "frame-137-diverted.svg contrast: pass - near-black text on white, red marks clear of field and wall",
+    "frame-137-diverted.svg table_form: pass - a terminal poloidal state is spatial, not tabular",
+    "frame-137-diverted.svg label_collision: pass - no text clipped, overlapping, or over the data",
+    "frame-146-diverted.svg legibility: pass - the converged control reads clearly with the contour families nearly coincident",
+    "frame-146-diverted.svg data_ink: pass - data carries the weight; the control's empty right panel is the point",
+    "frame-146-diverted.svg decoration: pass - no gradient, fill, grid or decorative styling",
+    "frame-146-diverted.svg contrast: pass - near-black text on white throughout",
+    "frame-146-diverted.svg table_form: pass - a terminal poloidal state is spatial",
+    "frame-146-diverted.svg label_collision: pass - no text clipped, overlapping, or over the data",
+    "frame-146-limited.svg legibility: pass - solved contour separable from EFIT over the lattice and the 9 refused circles countable",
+    "frame-146-limited.svg data_ink: defect - 347 4-pt grey mask-change squares pack into a lattice heavier than the contours the panel exists to show",
+    "frame-146-limited.svg decoration: pass - no gradient, fill, grid or decorative styling",
+    "frame-146-limited.svg contrast: pass - text and marks read against white over the grey lattice",
+    "frame-146-limited.svg table_form: pass - a terminal poloidal state is spatial",
+    "frame-146-limited.svg label_collision: pass - no text clipped, overlapping, or over the data",
+    "frame-179-limited.svg legibility: pass - solved boundary visibly outboard of EFIT, 43 refused circles trace the inboard edge",
+    "frame-179-limited.svg data_ink: pass - contour pair and mark chain carry the visual weight",
+    "frame-179-limited.svg decoration: pass - no gradient, fill, grid or decorative styling",
+    "frame-179-limited.svg contrast: pass - near-black text on white, red marks legible over field and contours",
+    "frame-179-limited.svg table_form: pass - a terminal poloidal state is spatial",
+    "frame-179-limited.svg label_collision: pass - no text clipped, overlapping, or over the data",
+    "inactive-field-reference.svg legibility: pass - retained upper-cap collapse visible with both null sets and the wall",
+    "inactive-field-reference.svg data_ink: defect - the same 347-cell grey lattice dominates the left panel ahead of the retained-footprint contours",
+    "inactive-field-reference.svg decoration: pass - no gradient, fill, grid or decorative styling",
+    "inactive-field-reference.svg contrast: pass - near-black text on white throughout",
+    "inactive-field-reference.svg table_form: pass - a terminal poloidal state is spatial",
+    "inactive-field-reference.svg label_collision: pass - no text clipped, overlapping, or over the data",
+    "inactive-field-suppressed.svg legibility: defect - 96 refused circles overlap into a red band across the inboard half and the contours beneath it cannot be traced",
+    "inactive-field-suppressed.svg data_ink: defect - the refused band rather than the retained footprint is the dominant mark",
+    "inactive-field-suppressed.svg decoration: pass - no gradient, fill, grid or decorative styling",
+    "inactive-field-suppressed.svg contrast: pass - text and marks read against white",
+    "inactive-field-suppressed.svg table_form: pass - the reference/suppressed pair is a spatial comparison",
+    "inactive-field-suppressed.svg label_collision: pass - no text clipped, overlapping, or over the data",
+    "limited-trajectories.svg legibility: pass - three labelled quantities per column, both columns titled, limits show drift, support loss and field excursions",
+    "limited-trajectories.svg data_ink: pass - three thin traces carry the data, no fills or extraneous series",
+    "limited-trajectories.svg decoration: pass - no gridlines, no background fill, top and right spines removed",
+    "limited-trajectories.svg contrast: pass - black axis text on white, blue traces well clear of the background",
+    "limited-trajectories.svg table_form: pass - trajectories of 76 and 170 states are read as shape",
+    "limited-trajectories.svg label_collision: pass - no text clipped or overlapping, no label over a trace",
+    "source-cutoff-traces.svg legibility: pass - four log panels with decade labels, measured curve drawn over the dashed remainder so both read",
+    "source-cutoff-traces.svg data_ink: pass - two series per panel, nothing competing",
+    "source-cutoff-traces.svg decoration: pass - no gridlines, no shading, top and right spines removed",
+    "source-cutoff-traces.svg contrast: pass - black text on white, two series separated by colour and dash",
+    "source-cutoff-traces.svg table_form: pass - an eight-decade scaling law is read as slope",
+    "source-cutoff-traces.svg label_collision: pass - panel titles clear of the traces, no tick collision",
+    "trip-traces.svg legibility: pass - framed column titles, residual above support cells, terminal-support marker discernible",
+    "trip-traces.svg data_ink: pass - two series per panel, the live series drawn over the frozen one",
+    "trip-traces.svg decoration: pass - no gridlines, top and right spines removed",
+    "trip-traces.svg contrast: pass - black text on white, blue and grey series clear of the background",
+    "trip-traces.svg table_form: pass - residuals across inner solves are read as shape",
+    "trip-traces.svg label_collision: pass - no text clipped or overlapping"
+  ],
+  "rubric_verdicts": {
+    "frame-137-diverted.svg": {
+      "contrast": "pass - all text is near-black on white and the red marks clear both the white field and the light grey wall",
+      "data_ink": "defect - the two panels fill only about 270 px each of a 1400 px canvas (equal-aspect R 0.75-2.65 m against Z -1.7-1.7 m in a two-panel row), so more than half the figure is white margin and the flux topology is drawn at about a third of the width available",
+      "decoration": "pass - no gradient, background fill, grid or shading; data layers, wall, marks and one frameless legend only",
+      "label_collision": "pass - no text is clipped or overlapping and no label sits on the data",
+      "legibility": "pass - solved (blue) and EFIT (dashed black) contours, the grey wall, both null sets and the red refused marks read at a glance; the panels are small on the canvas but nothing is unreadable",
+      "note": "the marker collision visible in this figure is mark-on-mark, not text: see the blocking finding",
+      "table_form": "pass - a terminal poloidal state is spatial; no table would carry it"
+    },
+    "frame-146-diverted.svg": {
+      "contrast": "pass - near-black text on white throughout",
+      "data_ink": "pass - the data carry the weight; the right panel of the control carries no refused or cutoff marks, which is exactly what the control is for",
+      "decoration": "pass - no gradient, fill, grid or decorative styling",
+      "label_collision": "pass - no text clipped, overlapping, or over the data",
+      "legibility": "pass - the converged control reads clearly, with the solved and EFIT families nearly coincident and the small mask-change set labelled",
+      "table_form": "pass - a terminal poloidal state is spatial"
+    },
+    "frame-146-limited.svg": {
+      "contrast": "pass - text and marks read against white; the grey lattice sits under the contours without washing them out",
+      "data_ink": "defect - the 347 mask-change squares are drawn at 4 pt in flat grey and pack into a lattice that is the heaviest ink in the left panel, heavier than the contours that panel exists to show",
+      "decoration": "pass - no gradient, background fill, grid or decorative styling; the lattice is data, not ornament",
+      "label_collision": "pass - no text clipped, overlapping, or over the data",
+      "legibility": "pass - the solved contour is separable from EFIT over the changed-cell lattice and the 9 refused circles are countable on the inboard edge",
+      "table_form": "pass - a terminal poloidal state is spatial"
+    },
+    "frame-179-limited.svg": {
+      "contrast": "pass - near-black text on white; red marks read over both the white field and the contours",
+      "data_ink": "pass - the contour pair and the mark chain carry the visual weight",
+      "decoration": "pass - no gradient, fill, grid or decorative styling",
+      "label_collision": "pass - no text clipped, overlapping, or over the data",
+      "legibility": "pass - the solved boundary is visibly outboard of EFIT and the 43 refused circles trace the inboard edge countably",
+      "table_form": "pass - a terminal poloidal state is spatial"
+    },
+    "inactive-field-reference.svg": {
+      "contrast": "pass - near-black text on white throughout",
+      "data_ink": "defect - the same 347-cell grey lattice dominates the left panel ahead of the flux contours",
+      "decoration": "pass - no gradient, fill, grid or decorative styling",
+      "label_collision": "pass - no text clipped, overlapping, or over the data",
+      "legibility": "pass - the retained upper-cap collapse is visible with both null sets and the wall, as in frame-146-limited",
+      "note": "this attachment is byte-identical to the frame-146-limited attachment (image-4 and image-2 hash the same), so one picture appears under two names in the figure set",
+      "table_form": "pass - a terminal poloidal state is spatial"
+    },
+    "inactive-field-suppressed.svg": {
+      "contrast": "pass - text and marks read against white",
+      "data_ink": "defect - the refused band, not the retained footprint the pair exists to show, is the dominant mark in the figure",
+      "decoration": "pass - no gradient, background fill, grid or decorative styling",
+      "label_collision": "pass - no text clipped, overlapping, or over the data",
+      "legibility": "defect - 96 refused-proposal circles at 6 pt overlap into a continuous red band across the inboard half of the right panel, and the flux contours beneath that band cannot be traced through it",
+      "table_form": "pass - a terminal poloidal state is spatial; the reference/suppressed pair is a spatial comparison"
+    },
+    "limited-trajectories.svg": {
+      "contrast": "pass - black axis text on white; the single blue hue is well clear of the background",
+      "data_ink": "pass - three thin blue traces carry the data; no fills or extraneous series",
+      "decoration": "pass - no gridlines, no background fill, top and right spines removed",
+      "label_collision": "pass - no text clipped or overlapping, and no label sits on a trace",
+      "legibility": "pass - three stacked quantities per column with labelled axes, both columns titled, and axis limits that showed the drift, the shrinking support and the field excursions",
+      "table_form": "pass - trajectories of 76 and 170 states are read as shape and progress; a table would not show the excursion structure"
+    },
+    "source-cutoff-traces.svg": {
+      "contrast": "pass - black text on white; the two series separate by colour and dash; the grey dashed remains legible",
+      "data_ink": "pass - two series per panel, no third element competing for attention",
+      "decoration": "pass - no gridlines, no shading, top and right spines removed",
+      "label_collision": "pass - panel titles sit clear of the traces and no tick label collides",
+      "legibility": "pass - four panels on log axes with mathtext decade labels; the measured curve is drawn over the grey dashed tangent remainder, so both read where they coincide",
+      "table_form": "pass - a scaling law across eight decades is read as slope, not as a table"
+    },
+    "trip-traces.svg": {
+      "contrast": "pass - black text on white; blue and grey series both clear of the background",
+      "data_ink": "pass - two series per panel, the live series drawn over the frozen one so it reads along its whole length",
+      "decoration": "pass - no gridlines, top and right spines removed",
+      "label_collision": "pass - no text clipped or overlapping, and the y-axis labels sit left of the tick labels",
+      "legibility": "pass - four columns with framed titles, residual on log axes above support cells, and the terminal-support marker discernible at the last inner solve",
+      "table_form": "pass - six inner solves across four frames are read as shape; a table of residuals would be harder to read"
+    }
+  },
+  "status": "parsed",
+  "summary": "All nine attached PNGs were opened and judged. Four of the nine pass every rubric item without a defect worth recording. One blocking defect recurs in three poloidal panels: the source-cutoff star is plotted over a refused-proposal circle at exactly the same cell, so the panel shows one fewer refused mark than its own footer reports. The remaining findings are non-blocking: a legend that gives two different marks the same square, a changed-cell lattice that outweighs the contours, a two-panel layout that leaves more than half the canvas blank, a footer and legend that name one mark differently, an overlapping refused band in the suppressed panel, an unlabelled peak above the highest tick in the 146-limited field panel, a joined legend key in the trip traces, and one attachment that is byte-identical to another.",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T18:46:57.093648+00:00",
+  "total": null
+}

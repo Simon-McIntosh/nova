@@ -41,7 +41,30 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 69,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "s5 now records that node (c) is answered by the existing owners nova_cocos and corpus_flux_to_nova_total, and the section is declared done; no new translation owner is chosen.",
+      "reason": "",
+      "when": "2026-11-14T18:54:31.509911+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "note": "s5 now records that node (c) is answered by the existing owners nova_cocos and corpus_flux_to_nova_total, and the section is declared done; no new translation owner is chosen.",
+      "reason": "",
+      "when": "2026-11-14T18:54:31.509911+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261114T182108890783-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261114T182108890783-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "5786832fcd443d092475c920b9a4893ad5dfa923",
   "rubric": "design",

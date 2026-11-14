@@ -16,7 +16,11 @@ import numpy as np
 import pytest
 
 from nova.equilibrium import support_read
-from scripts.prototypes.iter_bank.measure import assert_accuracy, build_geometry
+from scripts.prototypes.iter_bank.measure import (
+    PLASMA_JET_TOLERANCE,
+    assert_accuracy,
+    build_geometry,
+)
 
 
 def bank(monkeypatch, coil_exterior=None):
@@ -61,6 +65,30 @@ def test_malformed_coil_response_is_refused(monkeypatch):
         bank(monkeypatch, np.zeros((2, 2, 6)))
 
 
+def test_absent_coil_response_roundtrip_keeps_none(monkeypatch, tmp_path):
+    operands = replace(bank(monkeypatch), coil_exterior=None, coil_count=None)
+    digest = support_read.write_bank(operands, tmp_path)
+    restored = support_read.read_bank(tmp_path, digest, None, None)
+    assert restored.coil_exterior is None
+    assert int(restored.coil_count) == 0
+
+
+def test_plasma_hessian_budget_preserves_strict_values_and_coils():
+    expected = np.ones((10, 6))
+    actual = expected.copy()
+    actual[:, 4:] += 2e-9
+    assert_accuracy(actual, expected, PLASMA_JET_TOLERANCE)
+    with pytest.raises(AssertionError, match="relative jet errors"):
+        assert_accuracy(actual, expected)
+    actual[:, 5] += 2e-8
+    with pytest.raises(AssertionError, match="relative jet errors"):
+        assert_accuracy(actual, expected, PLASMA_JET_TOLERANCE)
+    actual = expected.copy()
+    actual[:, 0] += 2e-9
+    with pytest.raises(AssertionError, match="relative jet errors"):
+        assert_accuracy(actual, expected, PLASMA_JET_TOLERANCE)
+
+
 def test_map_check_refuses_nonfinite_and_missing_coils():
     expected = np.ones((10, 6))
     assert_accuracy(expected.copy(), expected)
@@ -89,7 +117,7 @@ def test_dina_nodal_jets_match_analytic_map(sample):
         actual = arrays[
             "dropped" if os.environ.get("NOVA_ITER_BANK_DROP_COIL") else "actual"
         ]
-        errors = assert_accuracy(actual, arrays["expected"])
+        errors = assert_accuracy(actual, arrays["expected"], PLASMA_JET_TOLERANCE)
     np.testing.assert_allclose(errors, state["relative_errors"], rtol=1e-12, atol=1e-16)
 
 

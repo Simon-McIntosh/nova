@@ -2693,12 +2693,6 @@ def _bank_payload(operands: SupportOperands) -> bytes:
         buffer,
         rows=np.asarray(operands.rows),
         exterior=np.asarray(operands.exterior),
-        coil_exterior=np.asarray(operands.coil_exterior)
-        if operands.coil_exterior is not None
-        else np.zeros((len(operands.nodes), 0, 6), dtype=operands.exterior.dtype),
-        coil_count=np.asarray(
-            0 if operands.coil_count is None else operands.coil_count
-        ),
         nodes=np.asarray(operands.nodes),
         sample_index=np.asarray(operands.sample_index),
         bucket=np.asarray(-1 if operands.bucket is None else operands.bucket),

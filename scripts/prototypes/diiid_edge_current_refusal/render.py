@@ -124,17 +124,21 @@ def panel(root, frame, branch, output, previews):
                 xpoint_markersize=12 if reference else 8,
                 zorder_markers=13 if reference else 12,
             )
+            admitted = reference or spatial["terminal"]["boundary_class"] == "diverted"
             other = [
                 point["rz_m"]
                 for point in census[owner]["points"]
                 if point["kind"] == "saddle"
-                and np.linalg.norm(np.asarray(point["rz_m"]) - null) > 1e-5
+                and (
+                    not admitted
+                    or np.linalg.norm(np.asarray(point["rz_m"]) - null) > 1e-5
+                )
             ]
             start = len(ax.lines)
             draw_nulls(
                 ax,
                 magnetic_axis=axis,
-                x_points=np.asarray([null]),
+                x_points=np.asarray([null]) if admitted else None,
                 other_x_points=np.asarray(other),
                 style=style,
                 contain=data["limiter"],

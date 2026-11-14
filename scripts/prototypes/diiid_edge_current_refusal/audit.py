@@ -34,6 +34,26 @@ def audit(folder):
         trips=[],
         stages=[],
     )
+
+    def boundary_current(stem, physical):
+        read = np.load(folder / f"{stem}.npz")
+        current, connected = read["current"], read["connected"]
+        np.testing.assert_allclose(
+            current.sum(), physical["unscaled_enclosed_current_a"], rtol=2e-14
+        )
+        raw = float(current[connected].sum())
+        amplitude = physical["current_amplitude"]
+        return dict(
+            raw_inside_connected_a=raw,
+            normalized_inside_connected_a=raw * amplitude,
+            normalized_outside_connected_a=float(current[~connected].sum()) * amplitude,
+            normalized_total_a=float(current.sum()) * amplitude,
+            definition="sum of cell currents whose centres belong to connected support",
+        )
+
+    result["terminal_boundary_current"] = boundary_current(
+        "terminal-read", spatial["terminal"]
+    )
     for index, trip in enumerate(spatial["trips"]):
         arrays = dict(np.load(folder / f"inner-{index}.npz"))
         diagnostics = np.load(folder / f"diagnostics-{index}.npz")
@@ -59,6 +79,12 @@ def audit(folder):
                 returned_unknown_t=float(arrays["state"][size]),
                 next_state_matching=[k for k, v in distances.items() if v < 1e-12],
                 next_state_distances_wb=distances,
+                initial_boundary_current=boundary_current(
+                    f"initial-read-{index}", trip["initial"]
+                ),
+                returned_boundary_current=boundary_current(
+                    f"returned-read-{index}", trip["returned"]
+                ),
             )
         )
     for stage in spatial.get("stages", []):

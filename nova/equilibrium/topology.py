@@ -2784,7 +2784,6 @@ class TopologyRead(NamedTuple):
     cell_fragments: CellFragments | None = None
     saddle_fragments: SaddleFragments | None = None
     fragment_geometry: tuple | None = None
-    fragment_rebuilt: jax.Array | None = None
 
 
 def _inside_cells(geometry, point):
@@ -3155,7 +3154,6 @@ def _fragments_at_level(
     arguments = (local_vertices, geometry.vertex_count, signed)
     if cached is None:
         changed = jnp.ones(len(coefficient), dtype=bool)
-        normal_changed = changed
         fragments = jax.vmap(quadratic)(*arguments)
         saddle = jax.vmap(normal)(geometry.vertices, geometry.vertex_count)
     else:
@@ -3183,6 +3181,16 @@ def _fragments_at_level(
             cached.saddle_fragments,
             normal_changed,
         )
+    # Inactive normal-form cells have no saddle geometry. Canonical empty
+    # records keep a carried receipt independent of its previous support.
+    saddle = jax.tree.map(
+        lambda value: jnp.where(
+            represented.reshape((represented.size,) + (1,) * (value.ndim - 1)),
+            value,
+            jnp.zeros_like(value),
+        ),
+        saddle,
+    )
     area = fragments.area * geometry.pitch[:, None] ** 2
     intervals = fragments.edge_interval
     sectors = jnp.nonzero(form.positive, size=2, fill_value=0)[0]
@@ -3206,7 +3214,6 @@ def _fragments_at_level(
             *result,
             saddle,
             (*keys, jnp.asarray(policy.edge_tolerance)),
-            changed | normal_changed,
         )
     return result
 
@@ -3811,7 +3818,6 @@ def refresh_at_stationary_points(
         _,
         saddle,
         keys,
-        rebuilt,
     ) = _fragments_at_level(
         geometry,
         coefficient,
@@ -3863,7 +3869,6 @@ def refresh_at_stationary_points(
         cell_fragments=fragments,
         saddle_fragments=saddle,
         fragment_geometry=keys,
-        fragment_rebuilt=rebuilt,
     )
 
 

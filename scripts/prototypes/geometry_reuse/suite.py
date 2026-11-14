@@ -84,6 +84,7 @@ def main():
                 stream.flush()
                 env = dict(
                     os.environ,
+                    TMPDIR=str(tree),
                     PYTHONPATH=str(tree),
                     JAX_PLATFORMS="cpu",
                     OMP_NUM_THREADS="4",

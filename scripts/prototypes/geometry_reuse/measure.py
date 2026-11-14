@@ -24,6 +24,7 @@ def program():
         "    assert jax.config.jax_enable_x64 is True",
         "    from nova.equilibrium import topology\n"
         "    if args.arm == 'off':\n"
+        "        topology._fragment_coefficients = lambda _v, values: values\n"
         "        original_fragments = topology._fragments_at_level\n"
         "        def uncached(geometry, coefficient, sigma, level, form, "
         "represented, policy, cached=None, *, return_cache=False):\n"
@@ -75,9 +76,6 @@ def program():
     )
     substitute(
         "            previous_state, state, amplitude, seeds = (",
-        '            record.setdefault("slice_geometry", []).append(dict(\n'
-        "                slice=index, rebuilt_cells=np.asarray("
-        "result.support.reading.fragment_rebuilt).sum(axis=-1).tolist()))\n"
         "            support = result.support\n"
         "            save()\n"
         "            previous_state, state, amplitude, seeds = (",

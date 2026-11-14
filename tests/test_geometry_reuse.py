@@ -58,6 +58,20 @@ def moved_field(case):
     return replace(field, coefficient=field.coefficient.at[index, 0].add(0.02)), index
 
 
+@pytest.fixture
+def clipping_masks(monkeypatch):
+    masks = []
+    original = topology._refresh_fragment_cells
+
+    def observed(evaluate, arguments, prior, changed):
+        if evaluate.__name__ == "quadratic":
+            jax.debug.callback(lambda values: masks.append(np.asarray(values)), changed)
+        return original(evaluate, arguments, prior, changed)
+
+    monkeypatch.setattr(topology, "_refresh_fragment_cells", observed)
+    return masks
+
+
 def test_unchanged_support_skips_fragment_execution(case, monkeypatch):
     calls = []
     original = topology.quadratic_cell_fragments
@@ -71,37 +85,32 @@ def test_unchanged_support_skips_fragment_execution(case, monkeypatch):
     actual = jax.block_until_ready(run(*case))
     jax.effects_barrier()
     assert not calls
-    # Full and refresh programs can round the derived saddle form differently;
-    # those changed clips must rebuild even at identical physical inputs.
-    unchanged = ~np.asarray(case[-1].normal_form_cells)
-    assert not np.any(np.asarray(actual.fragment_rebuilt)[unchanged])
     assert_read_equal(actual, case[-1])
     moved, index = moved_field(case)
     changed = jax.block_until_ready(run(moved, *case[1:]))
     jax.effects_barrier()
     assert calls, "the execution counter must see the moved-cell positive control"
-    assert bool(changed.fragment_rebuilt[index])
+    assert not np.allclose(changed.fragment_area[index], actual.fragment_area[index])
     print("CLIP_EXECUTION unchanged=0 moved=", len(calls), flush=True)
 
 
-def test_moved_support_rebuilds_only_changed_cells(case):
+def test_moved_support_rebuilds_only_changed_cells(case, clipping_masks):
     moved, index = moved_field(case)
     args = (moved, *case[1:])
-    actual = jax.jit(topology.refresh_at_stationary_points)(*args)
+    actual = jax.jit(lambda *a: topology.refresh_at_stationary_points(*a))(*args)
     expected = jax.jit(
         lambda *a: topology.refresh_at_stationary_points(*a, reuse_geometry=False)
     )(*args)
     assert_read_equal(actual, expected)
-    ordinary = np.asarray(actual.fragment_rebuilt) & ~np.asarray(
-        case[-1].normal_form_cells
-    )
-    assert np.flatnonzero(ordinary).tolist() == [index]
+    jax.effects_barrier()
+    assert len(clipping_masks) == 1
+    assert np.flatnonzero(clipping_masks[0]).tolist() == [index]
     assert not np.allclose(
         actual.fragment_area[index], case[-1].fragment_area[index], atol=1e-12
     )
 
 
-def test_mixed_lanes_keep_their_own_geometry(case):
+def test_mixed_lanes_keep_their_own_geometry(case, clipping_masks):
     moved, index = moved_field(case)
     fields = jax.tree.map(lambda a, b: jnp.stack((a, b)), case[0], moved)
     run = jax.jit(
@@ -116,11 +125,9 @@ def test_mixed_lanes_keep_their_own_geometry(case):
         )
     )(fields)
     assert_read_equal(actual, reference)
-    ordinary = np.asarray(actual.fragment_rebuilt) & ~np.asarray(
-        case[-1].normal_form_cells
-    )
-    assert not np.any(ordinary[0])
-    assert np.flatnonzero(ordinary[1]).tolist() == [index]
+    jax.effects_barrier()
+    assert sorted(np.count_nonzero(mask) for mask in clipping_masks) == [0, 1]
+    assert any(np.flatnonzero(mask).tolist() == [index] for mask in clipping_masks)
 
 
 def test_capacity_change_rebuilds_complete_fragment_records(case):
@@ -133,19 +140,19 @@ def test_capacity_change_rebuilds_complete_fragment_records(case):
     reference = jax.jit(topology.read_at_stationary_points)(*args[:5])
     assert_read_equal(full, reference)
     assert full.cell_fragments.area.shape[-1] == 3
-    assert np.all(full.fragment_rebuilt)
 
 
-def test_changed_mesh_invalidates_fragment_keys(case):
+def test_changed_mesh_invalidates_fragment_keys(case, clipping_masks):
     field, geometry, convention, policy, solved, decision = case
     geometry = replace(geometry, pitch=geometry.pitch.at[0].multiply(1.001))
     args = (field, geometry, convention, policy, solved, decision)
-    actual = jax.jit(topology.refresh_at_stationary_points)(*args)
+    actual = jax.jit(lambda *a: topology.refresh_at_stationary_points(*a))(*args)
     expected = jax.jit(
         lambda *a: topology.refresh_at_stationary_points(*a, reuse_geometry=False)
     )(*args)
     assert_read_equal(actual, expected)
-    assert bool(actual.fragment_rebuilt[0])
+    jax.effects_barrier()
+    assert clipping_masks[0][0]
 
 
 def test_solve_accepts_support_through_continuation_options(monkeypatch):

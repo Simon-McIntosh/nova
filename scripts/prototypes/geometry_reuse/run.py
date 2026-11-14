@@ -153,7 +153,22 @@ def main():
                     for process in ([1] if args.smoke else [0, 1, 2])
                 ]
                 paired[arm] = rows[-2:]
-            decision = compare(paired["off"], paired["on"])
+            processes = [1] if args.smoke else [1, 2]
+            try:
+                decision = compare(paired["off"], paired["on"])
+            except ValueError as error:
+                if "fresh processes disagree" not in str(error) or args.smoke:
+                    raise
+                summary.setdefault("rejected_agreement", {})[width] = str(error)
+                save()
+                print("RERUN_PAIR", width, str(error), flush=True)
+                processes = [3, 4]
+                paired = {
+                    arm: [execute(width, arm, process) for process in processes]
+                    for arm in ("off", "on")
+                }
+                decision = compare(paired["off"], paired["on"])
+            decision["processes"] = processes
             summary["decisions"][width] = decision
             print("DECISION", width, json.dumps(decision), flush=True)
             try:

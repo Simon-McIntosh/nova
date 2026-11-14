@@ -25,7 +25,24 @@
   "plan_slug": "kernel-compile-barrier",
   "plan_version": 48,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "done_when-1",
+      "reason": "the file set is stated explicitly and governs what the worker runs, so only the count and the historical 21-minute wall are stale; no threshold, arm or control moves.",
+      "when": "2026-11-14T18:23:25.247757+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the file set is stated explicitly and governs what the worker runs, so only the count and the historical 21-minute wall are stale; no threshold, arm or control moves.",
+      "when": "2026-11-14T18:23:25.247757+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261114T170240084446-plan-review-of-kernel-compile-barrier.json",
   "review_run_id": "r-20261114T170240084446-plan-review-of-kernel-compile-barrier",
   "reviewed_blob_sha": "1b39d0b7db1a7627f92c629e4ac4bcf4b3914e41",
   "rubric": "content",

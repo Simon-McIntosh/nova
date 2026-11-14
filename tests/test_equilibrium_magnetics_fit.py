@@ -564,7 +564,8 @@ def physical_cases(tmp_path_factory):
                 )
         _persist_forward(generated, output / f"{name}-generating.pkl")
         _persist_forward(generated, output / f"{name}-generating-receipt.pkl")
-        _persist_forward(request, output / f"{name}-generating-request.pkl")
+        if name != "solovev":
+            _persist_forward(request, output / f"{name}-generating-request.pkl")
         residual = float(generated.terminal_state.fixed_point.residual)
         print(
             f"GENERATING {name} qualified={bool(generated.qualified)} "
@@ -644,6 +645,8 @@ def physical_cases(tmp_path_factory):
 
 
 def _recover_physical(case, displacement=0.0):
+    import json
+
     sensors = case["sensors"]
     if displacement:
         radius = sensors.r.copy()
@@ -659,8 +662,35 @@ def _recover_physical(case, displacement=0.0):
         case["measurement"],
         plasma_current_scale=abs(case["measurement"].plasma_current),
     )
-    label = "displaced-fit.pkl" if displacement else "fit.pkl"
-    _persist_forward(fitted, case["output"] / f"{case['name']}-{label}")
+    label = f"{case['name']}-" + ("displaced-fit" if displacement else "fit")
+    forward_path = case["output"] / f"{label}-forward.pkl"
+    _persist_forward(fitted.forward, forward_path)
+    core = fitted.source_profile.core
+    record = dict(
+        coefficients=fitted.coefficients.tolist(),
+        coefficient_names=list(fitted.coefficient_names),
+        forward_receipt=str(forward_path),
+        iterations=fitted.iterations,
+        singular_values=fitted.singular_values.tolist(),
+        undetermined_coefficients=list(fitted.undetermined_coefficients),
+        null_directions=fitted.null_directions.tolist(),
+        whitened_residuals=fitted.whitened_residuals.tolist(),
+        covariance=fitted.covariance.tolist(),
+        converged=fitted.converged,
+        forward_evaluations=fitted.forward_evaluations,
+        source_profile=dict(
+            carrier=case["request"].carrier_identity,
+            pressure_coefficients=np.asarray(core.p_prime.coefficients).tolist(),
+            pressure_normalisation=float(core.p_prime.normalisation),
+            diamagnetic_coefficients=np.asarray(core.ff_prime.coefficients).tolist(),
+            diamagnetic_normalisation=float(core.ff_prime.normalisation),
+            boundary_pressure=float(fitted.source_profile.boundary_pressure),
+            boundary_field_function=float(
+                fitted.source_profile.boundary_field_function
+            ),
+        ),
+    )
+    (case["output"] / f"{label}.json").write_text(json.dumps(record, indent=2))
     expected = case["generated"].terminal_state
     terminal = fitted.forward.terminal_state
     count = len(case["coordinate"])

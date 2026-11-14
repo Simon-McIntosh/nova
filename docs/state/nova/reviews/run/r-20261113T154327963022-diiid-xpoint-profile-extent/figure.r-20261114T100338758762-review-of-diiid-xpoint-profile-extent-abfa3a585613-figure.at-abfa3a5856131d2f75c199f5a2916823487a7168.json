@@ -8,6 +8,13 @@
   "completed_at": "2026-11-14T10:32:12.095Z",
   "dispatched_at": "2026-11-14T10:04:30Z",
   "drawing_script": "scripts/prototypes/diiid_xpoint_profile_extent/render.py",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "cosmetic: the boundary knot is half-clipped at the right axis limit but the value reads off the curve and the marker is keyed; no datum is withheld",
+      "recorded_at": "2026-11-14T10:34:06.379952+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": {

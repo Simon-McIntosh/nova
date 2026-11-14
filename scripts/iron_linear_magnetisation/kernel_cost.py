@@ -63,7 +63,7 @@ def main():
         (192, 2048),
     ):
         values = []
-        for label, owner in (("dot", reference), ("fused", tiled)):
+        for label, owner in (("reference", reference), ("head", tiled)):
             evaluator = owner.tile_evaluator(
                 owner.TilePlan(256, 256, block, 16, nodes),
                 batched=True,

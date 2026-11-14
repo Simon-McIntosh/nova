@@ -298,9 +298,7 @@ def _device_blocks(plan: TilePlan, devices: int) -> tuple[np.ndarray, np.ndarray
     )
 
 
-def _traced_psi_gradient(
-    jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm, *, fused=False
-):
+def _traced_psi_gradient(jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm):
     """Return ``(psi, dpsi_dr, dpsi_dz)`` per ampere, traced instead of executed.
 
     A transcription of :func:`nova.biot.polygon._psi_gradient` -- the same
@@ -309,11 +307,6 @@ def _traced_psi_gradient(
     than mutated. The edge and limit loops are over STATIC bounds, so a trace
     unrolls them and the compiled kernel holds no control flow at all.
     """
-
-    def integrate(values):
-        if fused:
-            return jnp.sum(values * w_cos, axis=-1)
-        return values @ w_cos
 
     a_hat = da_dr = da_dz = jnp.zeros(r.shape[0], dtype=r.dtype)
     rc = r * cosp
@@ -378,9 +371,9 @@ def _traced_psi_gradient(
                 - r * sin2p * (at3 + 0.5 * r * dat3_dr)
             )
             scale = -s_lim * edge_weight
-            a_hat = a_hat + scale * integrate(g)
-            da_dr = da_dr + scale * integrate(dg_dr)
-            da_dz = da_dz + scale * integrate(dg_dz)
+            a_hat = a_hat + scale * (g @ w_cos)
+            da_dr = da_dr + scale * (dg_dr @ w_cos)
+            da_dz = da_dz + scale * (dg_dz @ w_cos)
     radius = r[:, 0]
     return (
         norm * radius * a_hat,
@@ -1303,6 +1296,7 @@ def forget_evaluators() -> None:
     _warm_evaluator.cache_clear()
     _warm_arc_evaluator.cache_clear()
     _warm_sheet_evaluator.cache_clear()
+    _polygon_current_evaluator.cache_clear()
 
 
 @functools.lru_cache(maxsize=_WARM_EVALUATORS)
@@ -1348,7 +1342,6 @@ def _warm_evaluator(
             jnp.take(weight, columns, axis=1),
             *nodes,
             jnp.take(norm, columns),
-            fused=flux_only and pairwise,
         )
         if flux_only:
             return psi[None]
@@ -2104,6 +2097,7 @@ def _polygon_current_geometry(polygons):
     return edge, weight, norm, incidence
 
 
+@functools.lru_cache(maxsize=8)
 def _polygon_current_evaluator(flux_only, nodes, kernel="quadrature"):
     """Reuse the polygon tile owner for one fixed block of selected pairs."""
     block = 2048 if nodes == 192 else 8192

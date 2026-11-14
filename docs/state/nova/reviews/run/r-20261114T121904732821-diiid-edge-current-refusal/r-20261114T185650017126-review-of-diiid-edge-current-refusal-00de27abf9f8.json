@@ -45,8 +45,8 @@
     },
     "5": {
       "kind": "exempted",
-      "reason": "the rewrite writes the same 31.1 cm by 16 cm declaration in a prototype renderer no other driver imports; the drift risk is confined to this record",
-      "recorded_at": "2026-11-14T19:43:37.064859+00:00"
+      "reason": "same 31.1 cm by 16 cm declaration in a prototype renderer no other driver imports",
+      "recorded_at": "2026-11-14T19:46:30.107028+00:00"
     }
   },
   "findings": [

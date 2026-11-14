@@ -154,3 +154,27 @@ def test_identical_programs_refused():
     refuse_inert(original, changed)
     with pytest.raises(ValueError, match="inert lever"):
         refuse_inert(original, original)
+
+
+def test_newton_step_matches_separate_booking(physical):
+    bank, state, support = physical
+    profile = SmoothDensity()
+    rule = current.Quadrature(segments=8, target_current=3.7)
+
+    def correction(b, m, s, p, q):
+        return support_read.newton_step(b, m, s, p, p.density_gradient, q)
+
+    def separate_booking(b, m, s, p, gradient, q):
+        return separate(b, m, s, p, q)
+
+    with patch.object(support_read, "book_and_local_sensitivities", separate_booking):
+        expected = jax.jit(correction)(bank, state, support, profile, rule)
+    actual = jax.jit(lambda *args: correction(*args))(
+        bank, state, support, profile, rule
+    )
+    for a, e in zip(actual.update, expected.update, strict=True):
+        np.testing.assert_allclose(a, e, rtol=1e-12, atol=1e-14)
+    np.testing.assert_allclose(
+        actual.factor.matrix, expected.factor.matrix, rtol=1e-14, atol=1e-14
+    )
+    assert bool(actual.converged) and bool(expected.converged)

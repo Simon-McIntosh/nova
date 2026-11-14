@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Neither suite arm exists for this run: the node's write scope holds no test file, so the fence reports the arm unarmed. added_failure_count is 0 with no ids as an unmeasured value, not a measured zero. The substitute is the base arm's reproduction of four independently banked lower-X distances (summary.json control reproduced on all four rows against the 5.0e-4 m threshold at scripts/prototypes/diiid_xpoint_profile_extent/summarize.py:105) plus the checkers and their red controls named under the durability justification.",
+  "call_sites": [
+    "scripts/prototypes/diiid_xpoint_profile_extent/job.sh",
+    "scripts/prototypes/diiid_xpoint_profile_extent/batch.py",
+    "scripts/prototypes/diiid_xpoint_profile_extent/measure.py",
+    "scripts/prototypes/diiid_xpoint_profile_extent/tables.py",
+    "scripts/prototypes/diiid_xpoint_profile_extent/smoke.py",
+    "scripts/prototypes/diiid_xpoint_profile_extent/render.py",
+    "scripts/prototypes/diiid_xpoint_profile_extent/summarize.py"
+  ],
+  "completed_at": "2026-11-14T10:31:29.595Z",
+  "dispatched_at": "2026-11-14T10:03:20Z",
+  "findings": [
+    "non-blocking: docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html:50 places 179L among the frames whose edge state remains a plasma whose vertical offset fell, and :84 quotes a 94 percent vertical share for it, while the cohort records its support at 224 cells against the base arm's 309, below the 0.9 SUPPORT_RETENTION at scripts/prototypes/diiid_xpoint_profile_extent/summarize.py:41 that the record uses to declare a state to have lost its plasma; the row is excluded from the total and the sentence does disclose that only 146D converged, so this does not hold the node.",
+    "non-blocking: scripts/prototypes/diiid_xpoint_profile_extent/summarize.py:115 still computes each row's component share_closed unconditionally, so summary.json carries a component share for every uncounted row while the row-level share_closed is null, and the record quotes two of those numbers at docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html:50; a reader of summary.json still sees a share beside counted:false and must read not_counted_reason to know not to use it.",
+    "non-blocking: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T154327963022-diiid-xpoint-profile-extent/manifest.md:36 carries seven comma-separated paths under negative_control_log where the delivery can hold one bare path, and the manifest names goal_fidelity, evidence, scope_discipline and fit rubrics but no durability or reuse line."
+  ],
+  "justifications": {
+    "durability": "scripts/prototypes/diiid_xpoint_profile_extent/check_profile_table.py:66 compares the fragment's printed digit against source-inputs.json, two independent sources, and reddens on the pre-repair fragment (gate-profile-table-negative.log EXIT=1), and scripts/prototypes/diiid_xpoint_profile_extent/check_axis_markers.py:70-76 fails when the reference marker's zorder or size is not greater, which the drawing code of 452b8a74b is (gate-axis-markers.log:13-19 EXIT=1); no assertion covers the x-point marker overlap, which the same fix also changes.",
+    "evidence": "Every headline number reconciles with a receipt, e.g. the 146D edge residual 7.34e-10 and distance 1.577 cm at docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html:39-40, and this review re-ran scripts/prototypes/diiid_xpoint_profile_extent/check_profile_table.py over the committed fragment and the cohort (PASS 3 rows, EXIT=0) while gate-summarize.log records the reconciled total at EXIT=0.",
+    "fit": "scripts/prototypes/diiid_xpoint_profile_extent/render.py:21-30 draws through nova.media.poloidal and the shared diiid_xpoint_offset/style.py save, and the added names (scripts/prototypes/diiid_xpoint_profile_extent/summarize.py:47 termination_name, :63 readable, scripts/prototypes/diiid_xpoint_profile_extent/render.py:86 windowed_levels) state mechanisms with no plan, sprint or ticket label.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html:3-5 answers the brief's per-row report on all four rows and states the three non-convergent rows as a finding in its own right rather than as a caveat on a share, which is what the brief asks for.",
+    "reuse": "The prior forks are closed: scripts/prototypes/diiid_xpoint_profile_extent/summarize.py:18 imports FixedPointTerminationReason from nova/equilibrium/fixed_point.py:339, scripts/prototypes/diiid_xpoint_profile_extent/render.py:21-27 calls nova.media.poloidal.draw_nulls, and arms.py extends the benchmark's own _label_state; a search of those owners plus nova.equilibrium.map_extraction and the sibling diiid_xpoint_* prototypes found no duplicated capability.",
+    "scope_discipline": "git diff --name-only 3d98ff615..abfa3a585 lists 18 paths, all under the three declared write paths, and nothing under nova/ is touched, so the measurement proposes a prescription candidate without changing product code as the brief demands."
+  },
+  "notes": "Read: the source brief and manifest, the diff 3d98ff615..abfa3a585 commit by commit, the fragment at head and at pre-repair, scripts/prototypes/diiid_xpoint_profile_extent/summarize.py, scripts/prototypes/diiid_xpoint_profile_extent/render.py, tables.py, arms.py, measure.py, verify.py, scripts/prototypes/diiid_xpoint_profile_extent/check_profile_table.py, scripts/prototypes/diiid_xpoint_profile_extent/check_axis_markers.py and check_edge_profiles.py at head, all twelve gate and control logs, summary.json, and nova/equilibrium/fixed_point.py:338-353. Re-ran one gate independently: scripts/prototypes/diiid_xpoint_profile_extent/check_profile_table.py over the committed fragment and the cohort, PASS 3 rows EXIT=0. Not re-derived: the eight H200 solves, read through summary.json. The reviewed worktree was not modified.",
+  "project": "nova",
+  "review_run_id": "r-20261114T100004859756-review-of-diiid-xpoint-profile-extent-abfa3a585613",
+  "reviewed_base_sha": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+  "reviewed_head_sha": "abfa3a5856131d2f75c199f5a2916823487a7168",
+  "reviewed_run_id": "r-20261113T154327963022-diiid-xpoint-profile-extent",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T10:31:33.139200+00:00",
+  "total": 110,
+  "verdicts": {
+    "diff": "VERDICT diff: read the range 3d98ff615c7beeea56357e68ff87c7596b57dc27..abfa3a5856131d2f75c199f5a2916823487a7168 commit by commit; it adds twelve prototype scripts, the fragment and three SVGs plus two zoom-window receipts over 18 files, and the repair commits since f01af42b0 each do what their subject states: the enum import, the nonzero exits, the receipt-sourced table digits with its checker, the null row share, the marker ordering and the record text.",
+    "done_when": "VERDICT done_when: the done-when asks for that per-row report plus paired 137D and 146L lower-X zooms under docs/figures/diiid-xpoint-profile-extent/ with both null sets, the wall, axis off, the frame and the zoom window in the caption, and an edge-profile plot of both arms; all are in the diff and asserted by scripts/prototypes/diiid_xpoint_profile_extent/summarize.py (TOTAL 1.38 of 2.96 cm over 146D, gate-summarize.log EXIT=0), verify.py (PASS 8 rows, 4 arm pairs, gate-verify.log EXIT=0) and check_edge_profiles.py (PASS 6 panels, gate-figure.log EXIT=0).",
+    "goal": "VERDICT goal: the node's goal is to measure how much of the remaining DIII-D lower-X offset the prescribed profile extent supplies on 137D, 146D, 146L and 179L, and the landed record does that: docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html:3 leads on the converged 146D result (2.960 to 1.577 cm, 46.7 percent) and :5 states the non-convergence of the other three as a result in its own right, with residual, converged, termination, in-plasma extrema, support, lower-X distance and share closed tabulated per row at :36-46.",
+    "manifest": "VERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T154327963022-diiid-xpoint-profile-extent/manifest.md; its commits list ends abfa3a585 and its tests and test_logs lines name each gate and log, each log carrying its own EXIT line, but negative_control_log at :36 holds seven comma-separated paths where one bare path is wanted, and no rubric.durability or rubric.reuse line is present.",
+    "write_paths": "VERDICT write_paths: the fenced scope is scripts/prototypes/diiid_xpoint_profile_extent/, the fragment and docs/figures/diiid-xpoint-profile-extent/; git diff --stat over 3d98ff615..abfa3a585 names exactly 18 files and every one lies inside those paths, with no edit under nova/ or tests/."
+  },
+  "verified_ancestry": "git cat-file -t returns commit for both 3d98ff615c7beeea56357e68ff87c7596b57dc27 and abfa3a5856131d2f75c199f5a2916823487a7168; the base is an ancestor of this reviewer's HEAD af4b7b5be, the reviewed head is not, so the range was read from the shared object store with git show rather than from a merged tree."
+}

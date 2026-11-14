@@ -5,6 +5,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import shlex
 import subprocess
 import tarfile
@@ -109,10 +110,14 @@ def main():
                 command=literal,
                 exit_status=result.returncode,
                 log_path=str(log),
-                completed=True,
+                completed=False,
                 failure_ids=[],
             )
             lines = log.read_text().splitlines()
+            receipt["completed"] = any(
+                re.search(r"\b\d+ (?:passed|failed|skipped|errors?).*\bin \d", line)
+                for line in lines[-4:]
+            )
             receipt["failure_ids"] = [
                 line.split(" - ")[0].removeprefix("FAILED ")
                 for line in lines

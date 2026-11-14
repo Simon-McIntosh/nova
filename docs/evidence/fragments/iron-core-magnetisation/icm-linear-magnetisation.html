@@ -13,9 +13,11 @@
 <main class="plan-doc">
   <h2 id="icm-linear-magnetisation-result">Piecewise-linear magnetisation on the closed shell</h2>
   <!-- measured-result -->
-  <p>The affine basis passes its small-mesh energy and material-projection checks.
-  The full-resolution μ<sub>r</sub> = 1000 shell measurements are running; no
-  accuracy or cost verdict is asserted until their receipts complete.</p>
+  <p>The 40 mm linear shell reaches <strong>0.0625439 % worst-probe error at
+  1,368 unknowns</strong>, below the 0.5 % target. The observed constant-basis
+  graded target crossing uses 26,820 unknowns, so this measured coarse linear
+  point uses 19.6 times fewer. The 20 and 10 mm arms remain in progress; the
+  refinement orders are not yet asserted.</p>
   <!-- measured-result-end -->
 
   <h3 id="icm-linear-magnetisation-route">Bound-current route and existing kernel owners</h3>
@@ -124,7 +126,18 @@
   spherical-dipole reference <code>S = 61.101838</code> as the constant-basis
   study. The finite loop is retained so both bases measure the same control.</p>
   <!-- measured-table -->
-  <p>The linear 40, 20 and 10 mm receipts are pending.</p>
+  <table>
+    <thead><tr><th>spacing [mm]</th><th>cells</th><th>unknowns</th><th>error at (2, 0) [%]</th><th>error at (0, 2) [%]</th><th>error at (3, 1) [%]</th><th>worst error [%]</th></tr></thead>
+    <tbody><tr><td>40</td><td>228</td><td>1,368</td><td>0.0216019</td><td>0.0625439</td><td>0.000239244</td><td>0.0625439</td></tr></tbody>
+  </table>
+  <p>On the Tesla P100, the 40 mm assembly takes 810.445 s; the solve including
+  assembly takes 816.413 s, and the total including exterior field evaluation
+  takes 831.398 s. This is a cold end-to-end measurement, including compilation.
+  One Newton correction gives a relative material residual of 1.37316e-15.</p>
+  <p>The constant comparison is the observed graded 13,410-cell result:
+  0.397396 % worst-probe error, with two unknowns per cell. It is an observed
+  target crossing, not a claim about the minimal constant-basis mesh. Linear
+  refinement and its successive-halving orders remain pending.</p>
   <!-- measured-table-end -->
   <p>The fresh constant 40 mm arm reproduces the previous P100 shielding
   vector bit for bit: <code>[57.05106693488571, 54.619292861196286,
@@ -135,7 +148,16 @@
 
   <h3 id="icm-linear-magnetisation-figure">Error against unknown count</h3>
   <!-- measured-figure -->
-  <p>The error-versus-unknowns figure is generated after the receipts complete.</p>
+  <figure>
+    <img src="/nova/figures/iron-core-magnetisation/icm-linear-magnetisation/error-against-unknowns.svg" alt="Measured worst-probe shielding error against unknowns for uniform constant, graded constant and linear magnetisation.">
+    <figcaption>The μr = 1000 shell at the three stated probes. Circles show
+    the previous uniform constant-basis P100 measurements; open squares show
+    the graded constant-basis CPU measurements. The blue diamond is the
+    completed linear 40 mm P100 arm; the 20 and 10 mm arms are pending. Counts
+    use two unknowns per constant cell and six per linear cell. The dotted grey
+    line is 0.5 %. The save check validates every text boundary and text overlap;
+    the SVG was rendered to PNG and visually inspected before committing.</figcaption>
+  </figure>
   <!-- measured-figure-end -->
 
   <h3 id="icm-linear-magnetisation-verification">Verification and provenance</h3>
@@ -147,8 +169,10 @@
   <code>63 passed, 9 deselected</code>. Both end in <code>EXIT=0</code>.
   This includes the existing grid-digest and constant-spectrum tests.</p>
   <!-- measured-suites -->
-  <p>The complete unfiltered baseline and optimized-head suite arms are running
-  on <code>rigel</code>; their completed JSON receipts belong in the manifest.</p>
+  <p>The complete unfiltered baseline is durable: <code>53 passed</code> in
+  6590.65 s at the assigned base, <code>EXIT=0</code>. The final-operator head
+  suite remains in progress on <code>rigel</code>; its completed receipt will
+  replace the superseded head arm in the manifest.</p>
   <!-- measured-suites-end -->
   <p>The P100 shell run uses a clean archived tree at
   <code>bb00950f7a0078e73a49641e7f24cb2dc19771e2</code> and verifies the executed

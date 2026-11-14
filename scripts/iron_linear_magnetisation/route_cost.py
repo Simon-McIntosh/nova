@@ -2,6 +2,8 @@
 
 import argparse
 import json
+import subprocess
+import sys
 from pathlib import Path
 import time
 
@@ -19,8 +21,32 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--blob", required=True)
-    parser.add_argument("--kernel", choices=["quadrature", "closed"], required=True)
+    parser.add_argument(
+        "--kernel", choices=["quadrature", "closed", "both"], required=True
+    )
     args = parser.parse_args()
+    if args.kernel == "both":
+        for kernel in ("quadrature", "closed"):
+            command = [
+                sys.executable,
+                __file__,
+                "--output",
+                str(args.output.with_name(kernel + "-route.json")),
+                "--revision",
+                args.revision,
+                "--blob",
+                args.blob,
+                "--kernel",
+                kernel,
+            ]
+            try:
+                subprocess.run(command, check=True, timeout=1200)
+            except subprocess.TimeoutExpired:
+                partial = args.output.with_name(kernel + "-route.json")
+                row = json.loads(partial.read_text())
+                row.update(compile_timeout_seconds=1200, completed=False)
+                partial.write_text(json.dumps(row, indent=2) + "\n")
+        return
     blob = require_clean_script(__file__, args.blob, args.revision)
     assert jax.config.jax_enable_x64
     jax.config.update("jax_enable_compilation_cache", False)

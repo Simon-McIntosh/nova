@@ -47,7 +47,7 @@ def execute(command, cwd, env, log, revision):
         " passed" in line or " failed" in line
         for line in text.splitlines()
         if " in " in line
-    )
+    ) or any(line.startswith("SUMMARY passed=") for line in text.splitlines())
     return dict(
         revision=revision,
         command=command,

@@ -14,6 +14,7 @@ serves any state of the same layout.
 
 import json
 from dataclasses import dataclass, field, replace
+from functools import partial
 from typing import NamedTuple
 
 import jax
@@ -1349,6 +1350,61 @@ def step_jacobian(
     truncated geometry cannot supply an accepted Newton correction.
     """
     operands = driven_operands(operands, coil_currents)
+    if isinstance(profile, current.TabulatedProfile):
+        return _tabulated_jacobian(
+            operands,
+            moments,
+            support,
+            profile,
+            quadrature,
+            booked,
+            fresh_geometry=fresh_geometry,
+        )
+    return _booking_jacobian(
+        operands,
+        moments,
+        support,
+        profile,
+        density_gradient,
+        quadrature,
+        booked,
+        fresh_geometry=fresh_geometry,
+    )
+
+
+@partial(jax.jit, static_argnames=("fresh_geometry",))
+def _tabulated_jacobian(
+    operands, moments, support, profile, quadrature, booked, *, fresh_geometry
+):
+    """Share one traced Jacobian body across moment and pin corrections.
+
+    All numerical values, including both profile tables, remain operands.
+    The evaluation rule and geometry-refresh policy define the program.
+    """
+    return _booking_jacobian(
+        operands,
+        moments,
+        support,
+        profile,
+        None,
+        quadrature,
+        booked,
+        fresh_geometry=fresh_geometry,
+    )
+
+
+def _booking_jacobian(
+    operands,
+    moments,
+    support,
+    profile,
+    density_gradient,
+    quadrature,
+    booked,
+    *,
+    fresh_geometry,
+):
+    """Compose the bank rows with the local booking channels."""
     density_gradient = getattr(profile, "density_gradient", density_gradient)
     if booked is None:
         psi = nodal_jets(operands, moments)[operands.sample_index, 0]

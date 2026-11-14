@@ -291,7 +291,10 @@ def test_pin_holds_independent_lane_centroids(small, caplog, monkeypatch):
     pin = VerticalPositionPin(target, source_scale=1e-3, tolerance=1e-8)
     moments = tuple(jnp.broadcast_to(value, (2, value.size)) for value in state)
     seeds = jnp.broadcast_to(roots, (2, *roots.shape))
-    construction = dict.fromkeys(("newton_step", "step_jacobian"), 0)
+    bank._tabulated_jacobian.clear_cache()
+    construction = dict.fromkeys(
+        ("newton_step", "step_jacobian", "_booking_jacobian"), 0
+    )
 
     def count_calls(name):
         original = getattr(bank, name)
@@ -362,6 +365,7 @@ def test_pin_holds_independent_lane_centroids(small, caplog, monkeypatch):
             print("PIN_PROGRAM_WALL", event)
     assert 0 < construction["newton_step"] <= 1
     assert 0 < construction["step_jacobian"] <= 2
+    assert construction["_booking_jacobian"] == 1
     assert not added
     assert np.all(following.converged)
     np.testing.assert_allclose(following.pin_error, 0, rtol=0, atol=1e-8)

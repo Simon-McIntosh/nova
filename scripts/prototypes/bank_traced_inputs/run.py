@@ -152,6 +152,7 @@ def main():
     parser.add_argument("--focused", action="store_true")
     parser.add_argument("--skip-control", action="store_true")
     parser.add_argument("--graph-base")
+    parser.add_argument("--graph-head", action="store_true")
     parser.add_argument("--reproduce", action="store_true")
     args = parser.parse_args()
     if args.reproduce:
@@ -198,6 +199,7 @@ def main():
             graph_base = root / "graph-base"
             archive(args.source, args.graph_base, graph_base)
             run_graph(graph_base, args.graph_base, args.output / "graph-before.log")
+        if args.graph_base or args.graph_head:
             run_graph(head, args.head, args.output / "graph-after.log")
         files = (
             ("test_bank_traced_inputs.py",)

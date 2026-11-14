@@ -81,6 +81,8 @@ def main():
 
     for name in ("solve_batch", "read_batch", "newton_step", "step_jacobian"):
         instrument(bank, name)
+    if hasattr(bank, "_booking_jacobian"):
+        instrument(bank, "_booking_jacobian")
     for name in ("book", "book_tangent_channels"):
         instrument(current, name)
 

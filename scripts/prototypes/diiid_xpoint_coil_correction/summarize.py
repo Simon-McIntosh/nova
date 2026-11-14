@@ -13,6 +13,11 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import conductor_correction  # noqa: E402
 
 ROWS = ((137, "diverted"), (146, "diverted"), (146, "limited"), (179, "limited"))
 ARMS = ("base", "corrected")
@@ -84,18 +89,20 @@ def coil_rows(root, case, frame):
     fit = json.loads(fit_path.read_text()) if fit_path.is_file() else None
     measured = applied["measured_a_turn"]
     equivalent = (
-        fit["equivalent_error_a_turn"] if fit is not None else [0.0] * len(names)
+        [float(item) for item in fit["equivalent_error_a_turn"]]
+        if fit is not None
+        else [0.0] * len(names)
     )
+    fractions = conductor_correction.relative_correction(measured, equivalent)
     rows = []
-    for name, current, value in zip(names, measured, equivalent):
-        share = 0.0 if current == 0.0 else abs(value / current)
+    for name, current, value, share in zip(names, measured, equivalent, fractions):
         rows.append(
             {
                 "name": name,
                 "measured_ka_turn": 1e-3 * current,
                 "equivalent_error_ka_turn": 1e-3 * value,
-                "relative_correction": share,
-                "implausible": share > THRESHOLD,
+                "relative_correction": abs(share),
+                "implausible": abs(share) > THRESHOLD,
             }
         )
     return rows, fit

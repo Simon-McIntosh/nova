@@ -1,4 +1,12 @@
-"""Run the measured-current cohort inside one GPU allocation."""
+"""Run the measured-current cohort inside one GPU allocation.
+
+The cohort, its case naming and its landing predicate belong to the
+profile-extent runner and are imported from it rather than restated. What this
+driver adds is the arm sequence that runner does not have: a measured arm per
+row, a conductor fit over that arm's saved basis, and then the same row again
+with the fitted error removed from its currents. Every completed row is
+persisted as it lands, so an expiry loses one row and not the run.
+"""
 
 from __future__ import annotations
 
@@ -11,23 +19,14 @@ import subprocess
 import sys
 import time
 
+from scripts.prototypes.diiid_xpoint_profile_extent.batch import (
+    ROWS,
+    case_name,
+    completed,
+)
+
 ROOT = Path(__file__).resolve().parents[3]
 HERE = Path(__file__).resolve().parent
-ROWS = ((137, "diverted"), (146, "diverted"), (146, "limited"), (179, "limited"))
-RECEIPTS = ("receipt.json", "core-analysis.json", "shadow-image.json")
-
-
-def case_name(frame, branch):
-    return f"frame-{frame}-{branch}"
-
-
-def landed(folder):
-    log = folder / "row.log"
-    if not log.is_file():
-        return False
-    if any(not (folder / name).is_file() for name in RECEIPTS):
-        return False
-    return log.read_text().endswith("EXIT=0\n")
 
 
 def measure_command(args, frame, branch, folder, correction=None):
@@ -52,7 +51,7 @@ def measure_command(args, frame, branch, folder, correction=None):
     return command
 
 
-def environment(args, card, slots):
+def environment(args, card):
     value = dict(os.environ)
     parts = value.get("CUDA_VISIBLE_DEVICES", "0,1,2,3").split(",") or ["0"]
     value["CUDA_VISIBLE_DEVICES"] = parts[card % len(parts)]
@@ -78,7 +77,7 @@ def run_all(args, pending, results):
             stream.flush()
             card = len(running) % max(args.slots, 1)
             process = subprocess.Popen(
-                command, cwd=args.tree, env=environment(args, card, args.slots)
+                command, cwd=args.tree, env=environment(args, card)
             )
             running[process] = (name, folder, stream)
             print("STARTED", name, flush=True)
@@ -120,7 +119,7 @@ def main():
     for frame, branch in ROWS:
         name = case_name(frame, branch)
         folder = args.output / "base" / name
-        if not landed(folder):
+        if not completed(folder):
             basis.append(
                 (f"basis:{name}", measure_command(args, frame, branch, folder), folder)
             )
@@ -152,7 +151,7 @@ def main():
             status = subprocess.run(
                 command,
                 cwd=args.tree,
-                env=environment(args, 0, 1),
+                env=environment(args, 0),
                 stdout=stream,
                 stderr=subprocess.STDOUT,
             ).returncode
@@ -162,7 +161,7 @@ def main():
     for frame, branch in ROWS:
         name = case_name(frame, branch)
         folder = args.output / "corrected" / name
-        if not landed(folder):
+        if not completed(folder):
             correction = args.output / "fits" / name / f"correction-{frame}.json"
             corrected.append(
                 (

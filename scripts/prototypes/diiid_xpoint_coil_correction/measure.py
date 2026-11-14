@@ -14,6 +14,7 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(ROOT / "scripts/prototypes/diiid_xpoint_held_nodes"))
 
 SPEC = importlib.util.spec_from_file_location(
@@ -24,6 +25,8 @@ sys.modules[SPEC.name] = held_measure
 SPEC.loader.exec_module(held_measure)
 
 from benchmarks import diiid_forward_gs_match as bench  # noqa: E402
+
+import conductor_correction  # noqa: E402
 
 
 def install(correction, output):
@@ -40,8 +43,8 @@ def install(correction, output):
 
     def applied(row, description, names, time_ms):
         measured = original(row, description, names, time_ms)
-        delta = [correction.get(name, 0.0) for name in names]
-        currents = [float(item) - item_delta for item, item_delta in zip(measured, delta)]
+        error = conductor_correction.equivalent_error(names, correction)
+        currents = conductor_correction.applied_currents(names, measured, correction)
         output.mkdir(parents=True, exist_ok=True)
         (output / "current-inputs.json").write_text(
             json.dumps(
@@ -49,12 +52,11 @@ def install(correction, output):
                     "time_ms": float(time_ms),
                     "names": list(names),
                     "measured_a_turn": [float(item) for item in measured],
-                    "correction_a_turn": [float(item) for item in delta],
+                    "correction_a_turn": error,
                     "applied_a_turn": currents,
-                    "relative_correction": [
-                        0.0 if item == 0 else item_delta / item
-                        for item, item_delta in zip(measured, delta)
-                    ],
+                    "relative_correction": (
+                        conductor_correction.relative_correction(measured, error)
+                    ),
                 },
                 indent=2,
             )
@@ -81,9 +83,7 @@ def main():
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     assert Path(bench.__file__).resolve().is_relative_to(ROOT), bench.__file__
-    correction = (
-        json.loads(args.correction.read_text()) if args.correction else {}
-    )
+    correction = json.loads(args.correction.read_text()) if args.correction else {}
     install(correction, args.output)
     held_measure.core.install_analysis = held_measure.install_analysis
     sys.argv = [

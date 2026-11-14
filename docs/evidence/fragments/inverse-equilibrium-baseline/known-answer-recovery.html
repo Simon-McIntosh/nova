@@ -194,7 +194,7 @@
       <td>1.4002074134604718, 0.1985426888362674</td><td>none</td></tr>
       <tr><td>MAST</td><td colspan="6">Smooth prescribed-profile generation and recovery pending.</td></tr>
       <tr><td>ITER</td><td colspan="6">Smooth prescribed-profile generation and recovery pending.</td></tr>
-      <tr><td>Loop displaced 5 cm</td><td colspan="6">Running; no acceptance claim yet.</td></tr>
+      <tr><td>Loop row 0 displaced 5 cm (H200)</td><td>0.006010064918571351</td><td>0.026684685706950432; largest row = 0</td><td colspan="4">Map clause fails as required; normal-recovery mutation arm running.</td></tr>
     </tbody>
   </table>
   <p>All three positive Solov’ev inequalities pass: 1e-6 flux-span fraction,
@@ -218,4 +218,26 @@
     The ongoing run is logged in <code>solovev-recovery.log</code> in that run's
     parent directory. This checkpoint records the completed positive test;
     the displaced-loop check and the complete suite arms remain pending.</p>
+</section>
+
+<section id="known-answer-recovery-displaced-loop-control">
+  <h2>Displaced-loop control</h2>
+  <p>The H200 correctness run passed both Solov’ev tests:
+    <code>2 passed in 1625.01s (0:27:05)</code>. Its ordinary recovery has
+    flux sup/span 6.9813806898190645e-12, whitened residual sup
+    3.627846521160517e-12 and independent re-solve relative sup
+    6.838139738494272e-13; it takes three iterations, with singular values
+    [1.4002074134387876, 0.19854268898919383] and no undetermined coefficient.
+    With the first loop displaced radially by 0.05 m, the same class returns
+    flux sup/span 0.006010064918571351 and whitened residual sup
+    0.026684685706950432. That first loop is the largest residual row.
+    The control therefore detects both the map failure and its offending row.</p>
+  <p>The CPU file exceeded ten minutes while constructing its diagnostic
+    tables, so the required reserved-H200 launcher was submitted for real.
+    This run explicitly permits cold compilation and is used for correctness;
+    its reported time is not a warm execution measurement. Receipts and metrics
+    are in <code>solovev-h200/</code>, and the complete launcher log is
+    <code>solovev-h200.log</code>, beneath the run directory named above.
+    A separate displaced-geometry arm of the ordinary recovery test is running
+    to preserve the required failing-test admission log.</p>
 </section>

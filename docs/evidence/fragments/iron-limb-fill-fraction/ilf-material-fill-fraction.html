@@ -1,34 +1,52 @@
 <article id="ilf-material-fill-fraction-material">
-  <h3>Per-cell toroidal material rule in the production solve</h3>
-  <p>The production Newton residual accepts a toroidal iron fill fraction and
-    a demagnetising factor per radial and vertical component. The state and
-    evaluated iron contribution remain toroidal means; the result also exposes
-    the iron magnetisation and evaluates secant permeability at the iron's
-    internal field. Unit fill retains the solid-iron residual and its operands.</p>
-  <p>The starting tree reproduced
-    <code>TypeError: solve_magnetisation() got an unexpected keyword argument 'fill_fraction'</code>.
-    The focused constitutive, explicit-unit-fill and invalid-input checks now
-    report <strong>10 passed, 55 deselected in 35.23s</strong>. Invalid material
-    values are refused before interaction assembly. This is implementation
-    evidence; the numerical acceptance criteria are still unmeasured.</p>
-  <p>The geometry comparator uses N = 0.8/(0.8 + 1.2) = 0.4. The fitted
-    comparator uses one factor fitted jointly to both reference permeabilities
-    at 0.05 m and retained across both comparison meshes. Plain fill, solid
-    outline and section smear are reported independently. The stored WEST
-    gaps remain present; neither open material/geometry decision is locked.</p>
-  <p>Re-comparing the stored prototype with the accepted 0.075 m surface
-    reference gives the following warning, rather than a production verdict.</p>
-  <table>
-    <caption>Historical prototype in-vessel vector rms error divided by the
-      accepted reference iron-field rms.</caption>
-    <thead><tr><th>Cells [m]</th><th>μᵣ = 50</th><th>μᵣ = 200</th></tr></thead>
-    <tbody>
-      <tr><td>0.1</td><td>8.1409%</td><td>24.2313%</td></tr>
-      <tr><td>0.05</td><td>5.6731%</td><td>12.5972%</td></tr>
-    </tbody>
-  </table>
-  <p>The historical μᵣ = 200 value exceeds the required 10%; no tolerance is
-    widened. The fresh production comparison, WEST convergence pair, complete
-    base/head CPU suite arms and zero-gain residual mutation are queued in one
-    H200 job. Their pending status supplies no passing numerical evidence.</p>
+<h3>Material inputs work; the required physical conditions remain unmet</h3>
+<p>The production residual carries a per-cell toroidal fill fraction and a radial/vertical demagnetising factor. Magnetisation and evaluated iron fields are toroidal means; the result separately exposes iron magnetisation and evaluates permeability at the internal iron field. Unit fill retains the solid-iron operand path.</p>
+<p>The starting tree reproduced <code>TypeError: solve_magnetisation() got an unexpected keyword argument 'fill_fraction'</code>. The focused constitutive, explicit-unit-fill and invalid-input gate reports <strong>10 passed, 55 deselected in 35.23s</strong>. Invalid fill and factor values were also directly refused before assembly. Complete CPU base/head compatibility results remain pending.</p>
+<p>All physical measurements below ran on <strong>NVIDIA H200 NVL</strong> at product revision <code>b81f57e6dbdc5c513c62179c1c181fd932479e14</code>. Subsequent changes correct probe grouping and receipt parsing; product source and test bytes remain identical to that revision. The raw numerical receipt is retained, including its failing verdict.</p>
+<p>The geometry value is N = 0.8/(0.8 + 1.2) = 0.4. One joint fit to both permeabilities at 0.05 m gives N = 0.758557333741 and is reused at both meshes. Neither the material-factor decision nor the stored-gap decision is locked.</p>
+<table><caption>Cell size 0.10 m. In-vessel vector rms error divided by the accepted reference iron-field rms, in percent.</caption><thead><tr><th>Material rule</th><th>μᵣ = 50</th><th>μᵣ = 200</th></tr></thead><tbody>
+<tr><td>Section geometry</td><td>8.140889%</td><td>24.231314%</td></tr>
+<tr><td>Joint fitted factor</td><td>4.798736%</td><td>19.877729%</td></tr>
+<tr><td>Plain fill</td><td>43.399148%</td><td>52.687610%</td></tr>
+<tr><td>Section smear</td><td>36.680442%</td><td>24.217537%</td></tr>
+<tr><td>Solid outline</td><td>316.012459%</td><td>310.743543%</td></tr>
+</tbody></table>
+<table><caption>Cell size 0.05 m. In-vessel vector rms error divided by the accepted reference iron-field rms, in percent.</caption><thead><tr><th>Material rule</th><th>μᵣ = 50</th><th>μᵣ = 200</th></tr></thead><tbody>
+<tr><td>Section geometry</td><td>5.673123%</td><td>12.597190%</td></tr>
+<tr><td>Joint fitted factor</td><td>5.009737%</td><td>8.424013%</td></tr>
+<tr><td>Plain fill</td><td>41.136969%</td><td>43.050154%</td></tr>
+<tr><td>Section smear</td><td>41.844363%</td><td>45.032789%</td></tr>
+<tr><td>Solid outline</td><td>317.794045%</td><td>315.115459%</td></tr>
+</tbody></table>
+<p><strong>The geometry rule fails the required 10% bound at μᵣ = 200.</strong> At 0.05 m its error is 12.597190%; geometry/smear error ratios are 0.135577 and 0.279734, both below one third. At 0.1 m the μᵣ = 200 ratio is 1.000569, also failing the reduction condition. The solid-outline controls exceed 100% on both meshes and at both permeabilities. No bound is widened. The joint fit passes 10% on the fine mesh but reaches 19.877729% at μᵣ = 200 on the coarse mesh.</p>
+<table><caption>Total-field magnitude ratios to the accepted toroidal-mean reference. Midplane probes are R = 6.3, 6.5, 7, 8 and 10 m. Above-arm probes lie 0.3–1.4 m above the arms and use case indices 22–26. The inner-midplane point (4.5, 0) m and corner point (7, 3) m are reported separately. Ranges are minima and maxima of the five named probes.</caption><thead><tr><th>Rule</th><th>Cells [m]</th><th>μᵣ</th><th>Midplane</th><th>Above arms</th><th>Inner midplane</th><th>Corner</th></tr></thead><tbody>
+<tr><td>Section geometry</td><td>0.05</td><td>50</td><td>0.9632–1.0756</td><td>0.8783–0.9194</td><td>0.9721</td><td>1.1877</td></tr>
+<tr><td>Section geometry</td><td>0.05</td><td>200</td><td>1.0051–1.1340</td><td>0.8429–0.9179</td><td>0.9687</td><td>1.2768</td></tr>
+<tr><td>Joint fitted factor</td><td>0.05</td><td>50</td><td>0.9465–1.0650</td><td>0.8490–0.8953</td><td>0.9589</td><td>1.1823</td></tr>
+<tr><td>Joint fitted factor</td><td>0.05</td><td>200</td><td>0.9973–1.1288</td><td>0.8329–0.9031</td><td>0.9597</td><td>1.2744</td></tr>
+<tr><td>Plain fill</td><td>0.05</td><td>50</td><td>1.1196–1.1439</td><td>0.9485–1.0066</td><td>1.0599</td><td>1.1997</td></tr>
+<tr><td>Plain fill</td><td>0.05</td><td>200</td><td>1.1476–1.1911</td><td>0.9130–0.9728</td><td>1.0619</td><td>1.2808</td></tr>
+<tr><td>Section smear</td><td>0.05</td><td>50</td><td>0.8355–0.8538</td><td>0.8405–0.9425</td><td>0.9631</td><td>0.7997</td></tr>
+<tr><td>Section smear</td><td>0.05</td><td>200</td><td>0.7884–0.7939</td><td>0.8210–0.9323</td><td>1.0270</td><td>0.7574</td></tr>
+<tr><td>Solid outline</td><td>0.05</td><td>50</td><td>0.3691–0.3861</td><td>0.3093–0.4276</td><td>1.6272</td><td>0.4140</td></tr>
+<tr><td>Solid outline</td><td>0.05</td><td>200</td><td>0.2674–0.2872</td><td>0.2419–0.3759</td><td>1.7350</td><td>0.3080</td></tr>
+<tr><td>Section geometry</td><td>0.10</td><td>50</td><td>0.9560–1.0681</td><td>0.8707–0.9132</td><td>0.9831</td><td>1.1813</td></tr>
+<tr><td>Section geometry</td><td>0.10</td><td>200</td><td>0.9707–1.0985</td><td>0.8059–0.8994</td><td>1.0174</td><td>1.2422</td></tr>
+<tr><td>Joint fitted factor</td><td>0.10</td><td>50</td><td>0.9397–1.0581</td><td>0.8427–0.8897</td><td>0.9697</td><td>1.1764</td></tr>
+<tr><td>Joint fitted factor</td><td>0.10</td><td>200</td><td>0.9638–1.0942</td><td>0.7962–0.8857</td><td>1.0090</td><td>1.2405</td></tr>
+<tr><td>Plain fill</td><td>0.10</td><td>50</td><td>1.1095–1.1348</td><td>0.9350–0.9975</td><td>1.0700</td><td>1.1916</td></tr>
+<tr><td>Plain fill</td><td>0.10</td><td>200</td><td>1.0991–1.1473</td><td>0.8630–0.9378</td><td>1.1004</td><td>1.2413</td></tr>
+<tr><td>Section smear</td><td>0.10</td><td>50</td><td>0.8378–0.8444</td><td>0.8482–0.9442</td><td>0.9822</td><td>0.8060</td></tr>
+<tr><td>Section smear</td><td>0.10</td><td>200</td><td>0.7675–0.8242</td><td>0.8606–1.0024</td><td>1.0726</td><td>0.7948</td></tr>
+<tr><td>Solid outline</td><td>0.10</td><td>50</td><td>0.3639–0.3848</td><td>0.3165–0.4209</td><td>1.6323</td><td>0.4167</td></tr>
+<tr><td>Solid outline</td><td>0.10</td><td>200</td><td>0.2520–0.2825</td><td>0.2595–0.3485</td><td>1.7460</td><td>0.3132</td></tr>
+</tbody></table>
+<table><caption>WEST 62751, true outline with stored gaps and geometry-derived factor. Required terminal residual is at most 10⁻⁸ in at most ten accepted corrections.</caption><thead><tr><th>Cells [m]</th><th>Cell count</th><th>Corrections</th><th>Terminal residual</th><th>Converged</th></tr></thead><tbody>
+<tr><td>0.08</td><td>3870</td><td>6</td><td>1.16129834475e-10</td><td>true</td></tr>
+<tr><td>0.04</td><td>15232</td><td>10</td><td>9.59235608015e-07</td><td>false</td></tr>
+</tbody></table>
+<p><strong>The 0.04 m WEST solve fails the convergence condition.</strong> It reaches 9.59235608015 × 10⁻⁷ after ten corrections. Its residual decreases throughout, but neither the tolerance nor correction budget is relaxed.</p>
+<p>The declared zero-gain mutation fails both in-vessel reference tests: errors are 2.605863828 and 3.47801168622 at μᵣ = 50 and 200; the runner reports <code>2 failed, 63 deselected, 1 warning in 74.09s</code>. Comparison against the readable head arm remains pending until the CPU suite completes.</p>
+<p>The external receipt directory is <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/production/material-20261114</code>. The raw field and state receipt is <code>summary.json</code>; <code>control-grouped.json</code> preserves the same solved fields while separating all four outside-probe groups. Its source digest is <code>85ec4869a5d6d966e278e239673bb38137c623e030c3b3991179cb03d863ba16</code>. The raw emission grouped the inner-midplane and corner values under an over-broad above-arm key; the corrected grouping is proven by the case coordinates and preserved alongside the raw record. Per-cell WEST states are <code>west-0.08.npz</code> and <code>west-0.04.npz</code>.</p>
+<p>Run receipts and complete logs are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T103234029961-ilf-material-fill-fraction</code>. <code>production.log</code> ends with <code>SUMMARY passed=False control_passed=False west_passed=False</code> and <code>EXIT=1</code>. The numerical run completed; its physical verdict failed. The as-delivered gate receipt is retained beside the corrected completion metadata. Both CPU suite arms are still running on Sirius; no compatibility pass is claimed yet.</p>
 </article>

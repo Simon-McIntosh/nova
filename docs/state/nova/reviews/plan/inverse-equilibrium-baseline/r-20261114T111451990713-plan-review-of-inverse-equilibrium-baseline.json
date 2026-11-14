@@ -43,6 +43,13 @@
       "note": "Section 2 clause 1 now bands the magnitude of q95 within 2.0 and reports the sign each state stores beside it.",
       "reason": "",
       "when": "2026-11-14T11:50:34.713850+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "finding": "reasoning-2",
+      "reason": "Both states are free-boundary solutions driven by the same conductor currents, so their poloidal flux is absolute, not defined up to a datum: the change in the reference between slices is the solenoid flux swing, not drift. Comparing absolute axis and boundary flux, scaled by the span, is the intended and stronger test; aligning a datum would hide a real offset in the vacuum field.",
+      "when": "2026-11-14T11:50:47.308647+00:00"
     }
   ],
   "responses": {
@@ -54,6 +61,12 @@
       "note": "Section 2 clause 1 now bands the magnitude of q95 within 2.0 and reports the sign each state stores beside it.",
       "reason": "",
       "when": "2026-11-14T11:50:34.713850+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "reason": "Both states are free-boundary solutions driven by the same conductor currents, so their poloidal flux is absolute, not defined up to a datum: the change in the reference between slices is the solenoid flux swing, not drift. Comparing absolute axis and boundary flux, scaled by the span, is the intended and stronger test; aligning a datum would hide a real offset in the vacuum field.",
+      "when": "2026-11-14T11:50:47.308647+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261114T111451990713-plan-review-of-inverse-equilibrium-baseline.json",

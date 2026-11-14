@@ -25,8 +25,8 @@
   <title>Iron Limb Fill Fraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="5">
-<meta name="plan-modified" content="2026-11-13">
+<meta name="plan-version" content="6">
+<meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
   <main class="plan-doc">
@@ -176,7 +176,7 @@
     <p>
       Done when (1) at &mu;<sub>r</sub> = 50 and 200 the reference's column flux, its
       in-vessel toroidal-mean iron field and its toroidal-mean field at every outside probe
-      each change by less than 2&nbsp;% between its two finest resolutions; (2) the same 3D
+      are computed on at least three resolutions, each at least 1.3 times finer than the one before, the change shrinks at every step, and each quantity changes by less than 2&nbsp;% over the last step; (2) the same 3D
       method applied to a fully axisymmetric version of the circuit (the limbs replaced by
       the complete annulus) agrees with nova's axisymmetric solve of that annulus within
       2&nbsp;% on the same three quantities, and a version with one limb removed is shown to
@@ -203,14 +203,14 @@
       the control circuit at &mu;<sub>r</sub> = 50 and 200 the in-vessel iron field is within
       10&nbsp;% of the §1 reference in rms (twice the prototype's worst reading) and at
       most one third of the section smear's error on that reference, with the cross-field
-      factor chosen by the cross-field decision below, while the solid outline with f = 1 exceeds 100&nbsp;% on
+      factor computed from the limb section alone, while the value fitted to the §1 reference and the plain fill fraction are reported beside it, the table the cross-field decision below is locked from, and the solid outline with f = 1 exceeds 100&nbsp;% on
       the same measure, the control that the fill fraction and not the outline carries the
       result; the midplane and above-arm ratios of the table in §0 are reported for the
       same runs at two cell sizes; (3) the nonlinear WEST 62751 solve on the true outline
       converges to 1e-8 in at most ten Newton corrections at 0.08 and 0.04&nbsp;m. Heavy
       gates run as one job on the H200 (<code>betelgeuse</code> under its reservation),
       falling back to <code>titan</code> only when a real submission stays pending, and
-      the device is recorded beside every reported value.
+      the device is recorded beside every reported value in the receipt under <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/production/</code>.
     </p>
 
     <h2 id="s3">§3 — The true outline as machine description</h2>
@@ -223,7 +223,7 @@
     <p>
       Done when (1) the WEST read returns limb and arm regions on the true outline with a
       fill fraction per region, and the integral of fill fraction times radius across each
-      arm and limb section reproduces the stored outline's section per radian to 1e-3
+      arm and limb section reproduces the stored outline's section per radian to 1e-3, written to <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/machine/</code>, with the stored 2&nbsp;mm limb to arm gaps kept as stored under one named input that the gap decision below sets
       relative; (2) the limb dimensions it uses are the ones recorded in the limb-geometry
       decision of <code>iron-core-magnetisation</code>, and a stored outline that does not
       obey thickness times radius constant to 1&nbsp;% is refused by name rather than

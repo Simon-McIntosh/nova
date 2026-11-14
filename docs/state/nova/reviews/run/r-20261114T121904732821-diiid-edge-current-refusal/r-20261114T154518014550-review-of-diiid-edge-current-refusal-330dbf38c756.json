@@ -7,6 +7,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-11-14T18:01:18.274Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "durability scored on prototype verifier asserts of a diagnosis record that changes no product; the claims are re-measured by the finite-edge and inactive-compensator reruns on their own gates",
+      "recorded_at": "2026-11-14T18:49:54.446527+00:00"
+    }
+  },
   "dispatched_at": "2026-11-14T17:42:21Z",
   "finding_dispositions": {
     "0": {

@@ -12,7 +12,7 @@ if [ -n "$(git -C "$source_tree" status --porcelain --untracked-files=no)" ]; th
     echo 'refusing to measure a dirty tree'
     exit 2
 fi
-script=scripts/iron_linear_magnetisation/assembly_cost.py
+script=${IRON_MEASUREMENT_SCRIPT:-scripts/iron_linear_magnetisation/assembly_cost.py}
 blob=$(git -C "$source_tree" rev-parse "$revision:$script")
 scratch=$(mktemp -d "$TMPDIR/iron-cost-${SLURM_JOB_ID:-$$}-XXXX")
 trap 'rm -rfv "$scratch"' EXIT

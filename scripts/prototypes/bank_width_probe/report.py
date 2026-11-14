@@ -121,56 +121,53 @@ def main():
     from matplotlib.lines import Line2D
     from scripts.prototypes.bank_solve_profile.plot import save_checked
 
+    from matplotlib.ticker import FixedLocator
+
     plt.style.use("data-ink")
-    fig, axes = plt.subplots(1, 2, figsize=(14, 7.2), dpi=100)
+    fig, axes = plt.subplots(1, 3, figsize=(14, 7.2), dpi=100)
     defaults = [rows[k] for k in sorted(rows) if k[0] == "default"]
     admitted = [r for r in defaults if r["admitted"]]
-    denied = [r for r in defaults if not r["admitted"]]
     asynchronous = rows["async", 96]
-    blue, red, grey = "#1f5d92", "#b63636", "#929292"
-    memory, wall = axes
-    memory.plot(
-        [r["width"] for r in defaults],
-        [r["working_bytes"] / 1e9 for r in defaults],
-        color=grey,
-        linewidth=2.6,
-        zorder=1,
-    )
-    for data, marker, colour in ((admitted, "o", blue), (denied, "x", red)):
-        memory.scatter(
-            [r["width"] for r in data],
-            [r["working_bytes"] / 1e9 for r in data],
-            marker=marker,
-            color=colour,
-            s=55,
-            zorder=3,
-        )
-    memory.scatter(
+    blue, red = "#1f5d92", "#b63636"
+    overview, boundary, wall = axes
+    for ax, data in (
+        (overview, [r for r in defaults if r["width"] in (64, 96, 256)]),
+        (boundary, [r for r in defaults if 64 < r["width"] < 96]),
+    ):
+        for row in data:
+            ax.scatter(
+                row["width"],
+                row["working_bytes"] / 1e9,
+                marker="o" if row["admitted"] else "x",
+                color=blue if row["admitted"] else red,
+                s=55,
+                zorder=3,
+            )
+        ax.set(xlabel="Independent pulses", ylabel="Compiled working memory [GB]")
+    overview.scatter(
         [96],
         [asynchronous["working_bytes"] / 1e9],
         marker="D",
         facecolors="none",
         edgecolors="#222222",
-        s=130,
+        s=150,
         linewidths=1.8,
         zorder=4,
     )
     limit = rows["default", largest]["limit_bytes"] / 1e9
     for value, label in ((limit, "allocator limit"), (0.9 * limit, "90% ceiling")):
-        memory.axhline(value, color="#555555", linestyle=":", linewidth=1.2)
-        memory.text(
-            170,
-            value + (3 if value == limit else -5),
+        overview.axhline(value, color="#555555", linestyle=":", linewidth=1.2)
+        overview.text(
+            140,
+            value + (4 if value == limit else -9),
             label,
             fontsize=12,
             color="#555555",
         )
-    memory.set(
-        xlabel="Independent pulses",
-        ylabel="Compiled working memory [GB]",
-        xlim=(56, 264),
-    )
-    memory.set_xticks([64, 96, 128, 160, 192, 224, 256])
+    overview.set(xlim=(48, 272), ylim=(50, 205))
+    overview.set_xticks([64, 128, 192, 256])
+    boundary.set(xlim=(70, 82), ylim=(72, 84))
+    boundary.set_xticks([72, 76, 79, 82])
     wall.plot(
         [r["width"] for r in admitted],
         [r["per_slice_ms"] for r in admitted],
@@ -186,16 +183,33 @@ def main():
             marker="D",
             facecolors="none",
             edgecolors="#222222",
-            s=130,
+            s=150,
             linewidths=1.8,
             zorder=4,
         )
-    wall.set(xlabel="Independent pulses", ylabel="Warm throughput cost [ms/slice]")
-    wall.margins(x=0.1, y=0.3)
+    wall.set(
+        xlabel="Independent pulses",
+        ylabel="Warm throughput cost [ms/slice]",
+        xlim=(60, 100),
+    )
+    wall.set_xticks([64, 72, 80, 88, 96])
+    wall.margins(y=0.3)
     for ax in axes:
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(False)
-    fig.subplots_adjust(left=0.09, right=0.98, bottom=0.15, top=0.81, wspace=0.35)
+        # A fixed locator emits only ticks within the displayed interval.
+        for axis in (ax.xaxis, ax.yaxis):
+            lower, upper = axis.get_view_interval()
+            axis.set_major_locator(
+                FixedLocator(
+                    [
+                        tick
+                        for tick in axis.get_majorticklocs()
+                        if lower <= tick <= upper
+                    ]
+                )
+            )
+    fig.subplots_adjust(left=0.065, right=0.98, bottom=0.15, top=0.81, wspace=0.55)
     fig.legend(
         handles=[
             Line2D(

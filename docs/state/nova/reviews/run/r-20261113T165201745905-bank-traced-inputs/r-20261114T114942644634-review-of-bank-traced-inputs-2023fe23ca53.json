@@ -1,0 +1,92 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: independent-delivery/base-test_support_read.log at 5f8e4a26 ends '13 passed, 2 skipped' with EXIT=0; head-test_support_read.log at 2023fe23c ends the same with EXIT=0; base/head test_bank_drive_continuation.log end '10 passed' both arms and test_bank_lane_drive.log '11 passed' both arms, all EXIT=0 and none carrying a FAILED line; head-test_bank_traced_inputs.log at 2023fe23c ends '10 passed in 294.95s' with EXIT=0. No after arm adds a failing id.",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:2671",
+    "nova/equilibrium/drive_continuation.py:206",
+    "scripts/prototypes/bank_lane_drive/measure.py:100",
+    "scripts/prototypes/bank_newton_step/measure.py:163",
+    "scripts/prototypes/bank_drive_barrier/measure.py:133"
+  ],
+  "completed_at": "2026-11-14T12:07:20.482Z",
+  "dispatched_at": "2026-11-14T11:50:15Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/current.py",
+      "line": "63",
+      "severity": "non-blocking",
+      "text": "non-blocking: TabulatedProfile restates the flux-function profile interface (current_density plus its gradient) that DomainProfile already owns at nova/equilibrium/source.py:338, which ContinuedDomainProfile and RotatingDomainProfile extend by subclassing; a tree-registered tabulated callable passed through DomainProfile would have given the scenario node (c) pressure, field-function and rotation primitives for free, whereas this second interface will need its own."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "line": "2320",
+      "severity": "non-blocking",
+      "text": "non-blocking: _centroid_height restates the moment-weighted centroid reduction already owned by CurrentCentroidConstraint.booked_height at nova/equilibrium/constraint.py:1093, adding a cell-centre term instead of extending it, so the repository now holds two formulas for the same named quantity and they will drift when either moves."
+    },
+    {
+      "file": "tests/test_bank_traced_inputs.py",
+      "line": "437",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_coils_reach_read_residual_and_jacobian asserts the Jacobian equals the identity, which the fixture's zero rows make true whatever the coil contraction does, so a regression dropping driven_operands from step_jacobian (support_read.py:1352) would leave this assertion green even though the test's name claims coils reach the Jacobian; the coil-dependent residual is covered independently, the Jacobian is not."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "line": "506",
+      "severity": "non-blocking",
+      "text": "non-blocking: the certificate retry inside the driven read_batch branch drops the caller's jets and tracking arguments when it re-runs the batch, so a driven batch that supplies jets or tracking and certifies would silently recompute them instead of reusing the caller's values."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "line": "2026",
+      "severity": "non-blocking",
+      "text": "non-blocking: the max_steps == 0 early return (and the matching update_path guard at :2274) changes shared solver behaviour for a zero budget, work the node goal does not imply and which only the scenario node's zero-budget negative control needs; it is recorded rather than blocking because it is inside the fenced file and its own test covers it."
+    },
+    {
+      "file": "nova/equilibrium/current.py",
+      "line": "77",
+      "severity": "non-blocking",
+      "text": "non-blocking: the ValueError message spells the knot count as the literal '33' while PROFILE_KNOT_COUNT holds it, so the message will misreport the contract if the constant changes."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all eighteen commits from base 5f8e4a269cafc9a00c7320fb6a72d8cbfc95a249 to head 2023fe23ca53afcf743c4c30e60c45ffd27206de (2178 insertions, later commits touch only tests and the fragment); the product change is the coil contraction, the Hermite profile tables, the bordered pin loop and the fresh-factor staging in support_read.py and current.py.",
+    "done_when": "read the three done-when clauses; tests/test_bank_traced_inputs.py carries the 1e-12 certificate parity and constant-table reproduction, the zero-recompile count at :174 and the 1e-8 centroid tolerance at :464, the closure control at independent-corrected/closure-mutant.log is red at EXIT=1, and independent-delivery/receipts.json records all seven suite arms at EXIT=0 with no failure ids.",
+    "goal": "read the node goal from the reviewed run's brief and tested it against the head tree: nova/equilibrium/support_read.py:175 driven_operands, nova/equilibrium/current.py:63 TabulatedProfile and support_read.py:2350 _solve_pinned_lane deliver per-lane traced coil currents, 33-knot tabulated p' and FF' and a weak centroid pin on the bank route.",
+    "manifest": "read; it reports status complete at 2023fe23ca53afcf743c4c30e60c45ffd27206de, names the literal pytest command, lists seven arm logs plus five control logs with their EXIT lines, and records the closure control and the paired-arm receipts.",
+    "write_paths": "read the manifest's declared paths and the diff of 5f8e4a269cafc9a00c7320fb6a72d8cbfc95a249..2023fe23ca53afcf743c4c30e60c45ffd27206de; the seven changed files all lie inside them, and docs/figures/sub-millisecond-forward-path/bank-traced-inputs was left unused as the earlier review exempted."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_traced_inputs.py:250 compares the traced residual against an explicitly assembled NumPy oracle that never calls driven_operands, i.e. the defect it guards, and the source mutations in independent-corrected/{swapped-coils,shifted-coil-mask,missing-scalar-gradient,missing-channels-gradient}.log each redden it; the step_jacobian assertion at :437 does not, because the fixture's zero rows make the matrix the identity whatever the coil contraction does.",
+    "evidence": "The four mandated tests exist and pass at the final head (10 passed in 294.95s, EXIT=0, independent-delivery/head-test_bank_traced_inputs.log), the closure control ends '1 failed, 9 deselected' with SLICE_COMPILATIONS cold 1 changed 1 and EXIT=1 (independent-corrected/closure-mutant.log), and the three pre-existing files match base to head (13 passed 2 skipped / 10 / 11 both arms, all EXIT=0); the two test_support_read arms reporting the identical wall of 95.86 s is implausible for two fresh processes, though their MODULE= and CWD= lines and log mtimes confirm separate trees and separate runs.",
+    "fit": "Names are mechanism-based and free of plan labels (driven_operands, TabulatedProfile, _solve_pinned_lane, _centroid_height), the module docstrings state the interpolation and the bordered-row convention, and the style follows the surrounding NamedTuple/dataclass idiom; only current.py:77 restates the knot count as a literal.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:175 driven_operands contracts coil_exterior with a traced per-lane current vector and is applied at every field-forming site (nodal_jets:217, read:344, read_batch:485, read_and_book:672, step_residual:752, step_jacobian_vector:788, step_jacobian:1352), nova/equilibrium/current.py:63 TabulatedProfile carries 33 differentiable Hermite knots, and support_read.py:2350 _solve_pinned_lane borders the Newton loop with the existing VerticalPositionPin, all reachable from solve_batch at 1882.",
+    "reuse": "The change extends the owners it should for pinning and booking (constraint.VerticalPositionPin at support_read.py:2350, convention.toroidal_current_density at current.py:80, current.book_tangent at support_read.py:791), but current.py:63 TabulatedProfile restates the p'/FF' profile interface owned by source.DomainProfile (nova/equilibrium/source.py:338, extended by ContinuedDomainProfile and RotatingDomainProfile) and support_read.py:2320 _centroid_height restates the moment-weighted centroid of constraint.py:1093 with a cell-centre term.",
+    "scope_discipline": "Every path in git diff 5f8e4a26..2023fe23c is inside the manifest's declared write paths (current.py, support_read.py, tests/test_bank_traced_inputs.py, scripts/prototypes/bank_traced_inputs/*, the evidence fragment), but support_read.py:2026 adds a max_steps == 0 early return and 2274 a matching update_path guard that the node goal does not imply and that only the scene-setting zero-budget test at tests/test_bank_traced_inputs.py:440 exercises."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the node goal from the reviewed run's brief and tested it against the head tree; nova/equilibrium/support_read.py:175 driven_operands contracts coil_exterior with a traced per-lane current vector at every field-forming site, nova/equilibrium/current.py:63 TabulatedProfile carries 33 differentiable Hermite knots, and support_read.py:2350 _solve_pinned_lane borders the Newton loop with the existing VerticalPositionPin, all reachable from solve_batch.\nVERDICT done_when: read the three done-when clauses; tests/test_bank_traced_inputs.py carries the 1e-12 certificate parity, the 1e-12 constant-table reproduction, the zero-recompile count at :174 and the 1e-8 tolerance at :464, independent-corrected/closure-mutant.log ends '1 failed, 9 deselected' with SLICE_COMPILATIONS cold 1 changed 1 and EXIT=1, and independent-delivery/receipts.json records all seven suite arms at EXIT=0 with no failure ids.\nVERDICT write_paths: read the manifest's declared paths and the diff of 5f8e4a269cafc9a00c7320fb6a72d8cbfc95a249..2023fe23ca53afcf743c4c30e60c45ffd27206de; the seven changed files (current.py, support_read.py, the test file, three scripts/prototypes/bank_traced_inputs modules and the fragment) all lie inside them.\nVERDICT manifest: read; it reports status complete at 2023fe23ca53afcf743c4c30e60c45ffd27206de with the literal pytest command, seven arm logs and five control logs with EXIT lines, and the closure and paired-arm receipts.\nVERDICT diff: read all eighteen commits from base 5f8e4a269cafc9a00c7320fb6a72d8cbfc95a249 to head 2023fe23ca53afcf743c4c30e60c45ffd27206de; the product change is the coil contraction, the 33-knot Hermite profile tables, the shared tabulated booking Jacobian, the bordered centroid pin and a static fresh-factor branch, and the last three commits touch only tests and the fragment.\nCALL_SITES: nova/equilibrium/support_read.py:2671, nova/equilibrium/drive_continuation.py:206, scripts/prototypes/bank_lane_drive/measure.py:100, scripts/prototypes/bank_newton_step/measure.py:163, scripts/prototypes/bank_drive_barrier/measure.py:133\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:175 driven_operands and support_read.py:2350 _solve_pinned_lane deliver the traced coil currents, tabulated profiles and weak centroid pin from solve_batch:1882 with no change to a bank that carries no coil_exterior.\nSCORE evidence: 17\nJUSTIFICATION evidence: independent-delivery/head-test_bank_traced_inputs.log ends '10 passed in 294.95s' with EXIT=0 and independent-corrected/closure-mutant.log shows the captured-current program compiling twice and failing, though the two test_support_read arms report an identical 95.86 s wall.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every changed path is inside the declared write paths, but nova/equilibrium/support_read.py:2026 adds a zero-budget early return the node goal does not imply.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_bank_traced_inputs.py:250 compares against an independent NumPy coil oracle and the archived source mutations redden it, while the identity assertion at :437 cannot redden on a lost coil contraction in step_jacobian.\nSCORE fit: 17\nJUSTIFICATION fit: the additions follow the surrounding dataclass and NamedTuple idiom of nova/equilibrium/support_read.py with mechanism-based names, and only current.py:77 restates the knot count as a hard-coded literal.\nSCORE reuse: 10\nJUSTIFICATION reuse: nova/equilibrium/current.py:63 TabulatedProfile and support_read.py:2320 _centroid_height restate capabilities owned at nova/equilibrium/source.py:338 and nova/equilibrium/constraint.py:1093 rather than extending them, while the pin and booking additions do extend VerticalPositionPin and book_tangent.\nFINDING nova/equilibrium/current.py:63 non-blocking: TabulatedProfile restates the profile interface owned by DomainProfile at nova/equilibrium/source.py:338 instead of supplying a tabulated callable through it, so the scenario node needs a second profile path.\nFINDING nova/equilibrium/support_read.py:2320 non-blocking: _centroid_height restates CurrentCentroidConstraint.booked_height at nova/equilibrium/constraint.py:1093 with an added cell-centre term, leaving two formulas for one named quantity.\nFINDING tests/test_bank_traced_inputs.py:437 non-blocking: the Jacobian identity assertion is insensitive to the coil contraction, so a regression dropping driven_operands from step_jacobian would leave it green.\nFINDING nova/equilibrium/support_read.py:506 non-blocking: the driven read_batch certificate retry drops the caller's jets and tracking arguments.\nFINDING nova/equilibrium/support_read.py:2026 non-blocking: the max_steps == 0 early return changes shared solver behaviour outside the node goal.\nFINDING nova/equilibrium/current.py:77 non-blocking: the knot-count literal in the ValueError will not follow PROFILE_KNOT_COUNT.\n",
+  "review_node": "review-of-bank-traced-inputs-2023fe23ca53",
+  "review_run_id": "r-20261114T114942644634-review-of-bank-traced-inputs-2023fe23ca53",
+  "reviewed_base_sha": "5f8e4a269cafc9a00c7320fb6a72d8cbfc95a249",
+  "reviewed_head_sha": "2023fe23ca53afcf743c4c30e60c45ffd27206de",
+  "reviewed_run_id": "r-20261113T165201745905-bank-traced-inputs",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261114T114942644634-review-of-bank-traced-inputs-2023fe23ca53"
+  },
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 10,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T12:08:35.984460+00:00",
+  "total": 94
+}

@@ -137,9 +137,13 @@
   8 mm call exceeds physical memory. The raw accounting and device binding
   are retained in <code>capacity.json</code>.</p>
   <!-- measured-capacity-status -->
-  <p>The finer 8 mm arm is running on <code>rigel</code> CPU with 16 cores and
-  <code>--mem=110G</code>. Its walls will be reported as CPU measurements when
-  the receipt completes.</p>
+  <p>The finer 8 mm arm was attempted on <code>rigel</code> CPU with 16 cores
+  and <code>--mem=110G</code>. It was stopped after 51 min 30 s because two
+  assembly snapshots advanced from edge 32 to edge 192 in about 14 minutes,
+  against roughly 14,000 edges before the volume term. That rate cannot
+  complete within this worker's time limit. Its incomplete receipt is retained
+  under <code>cpu/linear-0.008.json</code>; it supplies no error or completed
+  solve time. Completing this optional finer arm requires a longer CPU job.</p>
   <!-- measured-capacity-status-end -->
 
   <h3 id="icm-linear-magnetisation-shell">The full-resolution μr = 1000 shell</h3>

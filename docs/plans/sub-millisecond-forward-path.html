@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="351">
+<meta name="plan-version" content="352">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -1065,6 +1065,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261114T212522578413-review-of-bank-width-probe-69aacfb324c5-figure" data-who="reckon-build" data-when="2026-11-14T21:54:23.802Z">
     <div class="r-comment-body"><p>Figure review of r-20261114T144332616609-bank-width-probe at head 69aacfb3: all six rubric items pass on the rendered PNG, three non-blocking findings and no blocking defect, records at both declared paths.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261114T144016445105-carried-read-refresh" data-who="reckon-build" data-when="2026-11-14T19:34:56Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/carried-read-refresh.html#carried-read-refresh-result — selective refresh cuts isolated carried-read wall by 14.54%/46.60%/56.85% at widths 1/16/64, but complete-slice width 1 regresses 10.68% beyond 3%; widths 16/64 are unresolved. Full refresh remains default at 489d9497b. All 36 H200 receipts agree within 5%, all precision lanes pass; 7 scoped passes and 4 stale-mask failures; CPU delta adds no failures. Inspected paired-walls.svg and final fragment committed at 7ac312aaa0941e79609faa38db1810dc43500470.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048" data-who="reckon-build" data-when="2026-11-14T10:26:14.839Z">
     <div class="r-comment-body"><p>two review records under review-records/ of run r-20261113T165201745905-bank-traced-inputs, one plain and one pinned at the reviewed head; this node's suite fence is unarmed so no pytest gate exists for it and none ran.</p></div>

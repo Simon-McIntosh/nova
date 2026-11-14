@@ -687,7 +687,8 @@ def solve_magnetisation(
     if initial_magnetisation is not None:
         initial = np.asarray(initial_magnetisation, dtype=np.float64)
         if initial.shape != external.shape or not np.all(np.isfinite(initial)):
-            raise ValueError("initial_magnetisation must be finite (cells, 2)")
+            expected_shape = "(cells, 6)" if basis == "linear" else "(cells, 2)"
+            raise ValueError(f"initial_magnetisation must be finite {expected_shape}")
         state = jnp.asarray(
             initial.reshape(-1, 2, 3).transpose(1, 0, 2).reshape(-1)
             if basis == "linear"

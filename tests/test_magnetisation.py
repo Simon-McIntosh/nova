@@ -1087,6 +1087,16 @@ def test_linear_material_projects_the_local_law_at_volume_nodes(monkeypatch):
     np.testing.assert_allclose(result.linear_coefficients[:, 0].T, expected, rtol=2e-13)
     np.testing.assert_allclose(result.magnetisation[0], expected[0], rtol=2e-13)
     assert np.linalg.norm(expected[1:]) > 1000
+    with pytest.raises(ValueError, match=r"finite \(cells, 6\)"):
+        iron.solve_magnetisation(
+            region,
+            external,
+            law_b,
+            law_mu,
+            cell_size=1.0,
+            basis="linear",
+            initial_magnetisation=np.zeros((1, 2)),
+        )
 
 
 def test_linear_field_constant_mode_matches_closed_sheet_field():

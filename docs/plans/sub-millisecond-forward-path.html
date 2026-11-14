@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="333">
+<meta name="plan-version" content="335">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -125,6 +125,10 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="bank-plasma-hessian-budget" data-choice="1e-8 relative to the direct-kernel route; land the bank, run the DINA scenario, and diagnose the independent-reference disagreement in parallel" data-by="lead" data-when="2026-11-14">
+    <p class="r-dec-q">bank-plasma-hessian-budget</p>
+    <p class="r-dec-rat">The bank and direct-kernel Hessians agree to about 2e-9; the coil-field budget stays 1e-10 and value and first-derivative rows are unchanged. Second derivatives feed null finding, not the 1e-10 fresh residual. The cell-corner reading of the order-one error against the independent Richardson estimate was refuted by bank-hessian-boundary (64 interior nodes at least 8 mm from any source edge: 0.56-0.62 in psi_RZ, 0.25-0.32 in psi_ZZ, normalised by the total field). The bank adds no error over the direct route, so it lands; bank-hessian-diagnosis settles which side is wrong with reference-free checks, and a convicted route gets a kernel repair and bank re-certification as new nodes.</p>
+    </div>
 <div class="r-dec" data-key="both-routes-viable" data-choice="both-viable" data-by="lead" data-when="2026-10-28" data-sections="s4">
     <p class="r-dec-q">Both forward routes stay viable</p>
     <p class="r-dec-ctx">&lt;p&gt;The fast path is added beside the present route, not in place of it. The request seam today admits one numerical route.&lt;/p&gt;</p>

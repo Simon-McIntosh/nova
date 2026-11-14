@@ -241,3 +241,42 @@
     A separate displaced-geometry arm of the ordinary recovery test is running
     to preserve the required failing-test admission log.</p>
 </section>
+<section id="known-answer-recovery-mutation-and-smooth-mast">
+  <h2>Mutation refusal and a qualified smooth MAST source</h2>
+  <p>The ordinary Solov’ev recovery test was run with the first loop radius
+    displaced by 0.05 m. It failed the intended map assertion:
+    <code>assert 0.006010064918571351 &lt;= 1e-06</code>, naming
+    <code>tests/test_equilibrium_magnetics_fit.py::test_known_state_recovery[solovev]</code>.
+    Its largest whitened residual remains row 0, 0.026684685706950432.
+    The runner reports <code>1 failed in 937.28s (0:15:37)</code>;
+    <code>negative-control.log</code> preserves the complete output and EXIT=1.
+    The earlier request-recorder failure is retained separately and is not
+    used as mutation evidence.</p>
+  <p>The first prescribed MAST profile qualifies through the public forward
+    solve on the cached 1,089-cell carrier with all 101 prescribed circuits.
+    Both families have shape (1 − ψ<sub>N</sub>), with pressure normalisation
+    −120956.66856560702 Pa/Wb and diamagnetic normalisation
+    −0.08260299186083768. The limited production seed uses 933034.875 A
+    about the admitted stored axis (0.9052605679418458,
+    0.003452472527914593) m. The receipt reports residual
+    5.751224516667312e-16, converged=true, qualified=true, termination=CONVERGED,
+    and 16 finite residual-history entries. Its receipt and request were
+    persisted before deriving these metrics. No other MAST prescribed profile
+    was needed. MAST inverse recovery is now running independently.</p>
+  <p>The ITER cached carrier initially triggered the existing constructor
+    refusal, <code>direct sample target rows must match the moment sampling nodes</code>.
+    An explicit coordinate check finds all 1,652 currently required sample
+    points among its 1,665 cached response rows, with maximum distance
+    1.8073121439532109e-15 m and 1,652 unique selected rows. The fixture
+    consumer aligns those existing rows with the geometry owner's grouping;
+    no interaction matrix is regenerated and the forward guard is unchanged.
+    The recovery fixture explicitly verifies the unaligned carrier's refusal
+    before constructing the aligned carrier. This assembly issue occurred
+    before any ITER prescribed-profile attempt.</p>
+  <p>Evidence beneath the run directory: <code>negative-control.log</code>,
+    <code>smooth-generators/mast-profile-1-inputs.json</code>,
+    <code>smooth-generators/mast-profile-1-receipt.json</code>,
+    <code>smooth-generators/mast-generating-receipt.pkl</code>,
+    <code>smooth-generators.log</code>, <code>inspect-iter-carrier.log</code>,
+    and <code>iter-generators.log</code>.</p>
+</section>

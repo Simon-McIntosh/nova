@@ -292,6 +292,40 @@ def _physical_problem(name):
         if isinstance(case, str):
             raise RuntimeError(case)
         machine = lane.cached_machine(case, -500, passive=True)
+        sample_nodes = machine.moment_geometry.sample_node_coordinates
+        if len(machine.sample_coordinates) != len(sample_nodes):
+            from scipy.spatial import cKDTree
+
+            with pytest.raises(ValueError, match="direct sample target rows"):
+                lane.forward_profile(case, machine)
+            distance, rows = cKDTree(machine.sample_coordinates).query(sample_nodes)
+            roundoff = (
+                128.0
+                * np.finfo(float).eps
+                * max(float(np.max(np.abs(sample_nodes))), 1.0)
+            )
+            assert np.max(distance) <= roundoff
+            assert len(np.unique(rows)) == len(sample_nodes)
+            print(
+                f"CACHED_SAMPLE_ALIGNMENT guard_refused=True "
+                f"cached_rows={len(machine.sample_coordinates)} "
+                f"required_rows={len(sample_nodes)} "
+                f"max_coordinate_distance={np.max(distance):.17g}",
+                flush=True,
+            )
+            machine = replace(
+                machine,
+                sample_coordinates=np.asarray(sample_nodes),
+                **{
+                    field: np.asarray(getattr(machine, field))[rows]
+                    for field in (
+                        "source_to_sample",
+                        "plasma_to_sample",
+                        "plasma_to_sample_r",
+                        "plasma_to_sample_z",
+                    )
+                },
+            )
         profile = lane.forward_profile(case, machine)
         seed = lane.seed_flux(case, machine)
         coordinate, wall, sections = (

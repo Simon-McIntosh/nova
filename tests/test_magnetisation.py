@@ -1097,6 +1097,17 @@ def test_linear_field_constant_mode_matches_closed_sheet_field():
     np.testing.assert_allclose(response[:, [0, 3]], constant, rtol=1e-12, atol=1e-20)
 
 
+def test_linear_volume_current_matches_closed_polygon_field():
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+    from nova.biot.tiledassembly import _polygon_current_response
+
+    polygon = np.array([[1.0, 0.0], [1.01, 0.0], [1.0, 0.01]])
+    points = np.array([[1.001, 0.002], [1.005, 0.003], [2.0, 0.2], [0.0, 2.0]])
+    expected = np.array(polygon_analytic_greens(*points.T, polygon)) * 0.00005
+    response = _polygon_current_response((polygon,), points, iron._PLAN)[:, :, 0]
+    np.testing.assert_allclose(response, expected, rtol=2e-8, atol=1e-20)
+
+
 def test_linear_local_tangent_matches_differentiating_the_projected_law():
     cells = iron._mesh(shapely.box(1, 0, 2, 1), 1.0)
     geometry = iron.linear_magnetisation_geometry(cells.polygons)

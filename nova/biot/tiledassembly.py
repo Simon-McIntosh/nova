@@ -2024,59 +2024,45 @@ def _polygon_current_geometry(polygons):
     return edge, weight, norm, incidence
 
 
-@functools.lru_cache(maxsize=2)
-def _polygon_current_evaluator(flux_only):
-    """Compile the existing closed polygon kernel, retaining only needed rows."""
-    import jax
-    import jax.numpy as jnp
-
-    configure_production_compilation_cache()
-
-    @jax.jit
-    def evaluate(r, z, edge, weight, norm):
-        response = packed_analytic_greens(jnp, r, z, edge, weight, norm)
-        return jnp.stack(response[:1] if flux_only else response)
-
-    return evaluate
-
-
 def _polygon_current_response(polygons, points, plan, *, packed=None, flux_only=False):
-    """Evaluate uniform volume currents through the closed polygon owner.
+    """Evaluate uniform volume currents through the polygon quadrature owner.
 
     Triangle decomposition holds the traced graph at three edges even for
     curved polygon boundaries with many authored vertices. Responses are per
     unit current density, so triangle areas multiply the per-ampere kernel.
+    The angular rule integrates the section analytically before quadrature;
+    it never samples the spatial filament singularity. Exact axis fields use
+    the closed owner's finite axis reduction instead of a flux derivative.
     """
     edge, weight, norm, incidence = packed or _polygon_current_geometry(polygons)
-    tile = TilePlan(32, 32, plan.block, 16, 48)
-    import jax
+    from nova.biot.polygonanalytic import _packed_axis_vertical_field, _packed_topology
 
-    # Tiny CPU operators cannot amortise tracing the full closed polygon graph.
-    # Evaluate that same packed owner directly; device and larger builds trace it.
-    if len(polygons) <= 32 and jax.default_backend() == "cpu":
-
-        def evaluator(r, z, source_edge, source_weight, source_norm):
-            response = packed_analytic_greens(
-                np, r, z, source_edge, source_weight, source_norm
-            )
-            return np.stack(response[:1] if flux_only else response)
-    else:
-        evaluator = _polygon_current_evaluator(flux_only)
+    tile = TilePlan(32, 32, 16, 16, 192)
+    evaluator = tile_evaluator(tile, batched=True, kernel="quadrature", edge_count=3)
     components = 1 if flux_only else 3
     result = np.zeros((components, len(points), len(polygons)))
     for target, source in tile.tiles(len(points), len(norm)):
         rows = np.arange(target.start, target.stop)
         columns = np.arange(source.start, source.stop)
-        rr = np.repeat(rows, len(columns))
-        cc = np.tile(columns, len(rows))
-        number = len(rr)
-        rr = np.pad(rr, (0, 1024 - number), mode="edge")
-        cc = np.pad(cc, (0, 1024 - number), mode="edge")
-        value = np.asarray(
+        axis = points[rows, 0] == 0
+        value = np.array(
             evaluator(
-                points[rr, 0], points[rr, 1], edge[:, :, cc], weight[:, cc], norm[cc]
+                np.where(axis, 1.0, points[rows, 0]),
+                points[rows, 1],
+                edge[:, :, columns],
+                weight[:, columns],
+                norm[columns],
             )
-        )[:, :number].reshape(components, len(rows), len(columns))
+        )[:components]
+        if np.any(axis):
+            value[:, axis] = 0.0
+            if not flux_only:
+                ar = np.repeat(rows[axis], len(columns))
+                ac = np.tile(columns, int(axis.sum()))
+                _, present, _, _ = _packed_topology(np, weight[:, ac])
+                value[2, axis] = _packed_axis_vertical_field(
+                    np, points[ar, 1], edge[:, :, ac], present, norm[ac]
+                ).reshape(int(axis.sum()), len(columns))
         for component in range(components):
             result[component, target] += value[component] @ incidence[source]
     return result
@@ -2102,7 +2088,7 @@ def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 2
     boundary_order = max(6, order // 2)
     nodes, weights = np.polynomial.legendre.leggauss(boundary_order)
     parameter, weights = (nodes + 1) / 2, weights / 2
-    # Integrate each affine boundary test against exact uniform polygon flux.
+    # Integrate each affine boundary test against uniform polygon flux.
     edge_volume = np.empty((2 * len(atoms), len(polygons)))
     for begin in range(0, len(atoms), 16):
         selected = atoms[begin : begin + 16]
@@ -2151,7 +2137,7 @@ def linear_cell_interaction(polygons, points, *, plan: TilePlan, order: int = 24
 
     Only the zero-mean affine edge remainder uses ring quadrature; the constant
     sheet uses the existing exact sheet tile. The curl contribution uses the
-    exact uniform polygon section kernel.
+    uniform polygon section kernel.
     """
     from nova.biot.greens import traced_filament_greens
     import jax

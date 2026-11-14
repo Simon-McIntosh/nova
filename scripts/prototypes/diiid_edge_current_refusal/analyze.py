@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import hashlib
+from pathlib import Path
 
 import jax
 import jax.numpy as jnp
@@ -30,12 +32,20 @@ def analyze(capture):
     scale = float(system.flux_scale)
     flux_size = data["state"].size
     coordinates = np.asarray(operator.grid.coordinate)
+    node_coordinates = np.vstack((coordinates, np.asarray(operator.wall.coordinate)))
+    assert node_coordinates.shape[0] == flux_size
     core = operator.source.core
+    target = float(
+        json.loads((output / "core-analysis.json").read_text())["target_current_a"]
+    )
 
     @jax.jit
     def read(state):
-        _, topology, connected, admitted = operator._fixed_design_read(state)
+        masks, topology, connected, admitted = operator._fixed_design_read(state)
         moments = operator.cell_current_moments(state)
+        amplitude = operator.current_normalisation_amplitude(
+            target, jnp.sum(moments.cell_current)
+        )
         return (
             connected,
             admitted,
@@ -46,6 +56,8 @@ def analyze(capture):
             topology.boundary_is_xpoint,
             moments.cell_current,
             operator.residual_shadow_mask(state),
+            amplitude,
+            masks.profile_participation,
         )
 
     def reading(state, stem):
@@ -60,12 +72,18 @@ def analyze(capture):
             diverted,
             current,
             shadow,
+            amplitude,
+            participation,
         ) = values
         connected, current, shadow = (
             np.asarray(x).ravel() for x in (connected, current, shadow)
         )
         np.savez_compressed(
-            output / f"{stem}.npz", connected=connected, current=current, shadow=shadow
+            output / f"{stem}.npz",
+            connected=connected,
+            current=current,
+            shadow=shadow,
+            participation=participation,
         )
         return (
             dict(
@@ -77,8 +95,11 @@ def analyze(capture):
                 boundary_flux_wb=float(boundary_flux),
                 boundary_class="diverted" if diverted else "limited",
                 unscaled_enclosed_current_a=float(current.sum()),
+                current_amplitude=float(amplitude),
+                enclosed_current_a=float(amplitude * current.sum()),
                 current_cell_count=int(current.size),
                 shadow_count=int(shadow.sum()),
+                source_cells=int(np.asarray(participation).sum()),
             ),
             connected,
             current,
@@ -108,8 +129,9 @@ def analyze(capture):
         state_units="captured augmented flux / flux_scale; spatial reads in Wb",
         current_units=(
             "unscaled integral of prescribed profiles; "
-            "solve amplitude is an independent augmented unknown"
+            "normalised current uses the production amplitude eliminated in each map"
         ),
+        analysis_source_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     )
     changed_union = np.zeros(len(coordinates), bool)
     for index, inner in enumerate(capture.inner):
@@ -124,6 +146,8 @@ def analyze(capture):
             returned_state, f"returned-read-{index}"
         )
         entering, leaving = after & ~before, before & ~after
+        shadow_entering = returned_shadow & ~initial_shadow
+        shadow_leaving = initial_shadow & ~returned_shadow
         changed_union |= entering | leaving
         active = diagnostics["inner_iteration_accepted"] >= 0
         iterations = []
@@ -154,6 +178,8 @@ def analyze(capture):
                 entering_rz_m=coordinates[entering].tolist(),
                 leaving_rz_m=coordinates[leaving].tolist(),
                 live_shadow_changes=int(np.sum(initial_shadow != returned_shadow)),
+                shadow_entering_rz_m=node_coordinates[shadow_entering].tolist(),
+                shadow_leaving_rz_m=node_coordinates[shadow_leaving].tolist(),
                 frozen_shadow_count=int(np.sum(diagnostics["frozen_shadow"])),
                 iterations=iterations,
             )
@@ -193,6 +219,7 @@ def analyze(capture):
     np.savez_compressed(
         output / "spatial-marks.npz",
         coordinates=coordinates,
+        node_coordinates=node_coordinates,
         changed=changed_union,
         refused=refused_union,
         edge_density=edge_density,

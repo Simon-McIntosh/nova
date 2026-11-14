@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "canvas_px": [
+    1714,
+    882
+  ],
+  "completed_at": "2026-11-14T10:32:12.095Z",
+  "dispatched_at": "2026-11-14T10:04:30Z",
+  "drawing_script": "scripts/prototypes/diiid_xpoint_profile_extent/render.py",
+  "findings": [
+    {
+      "disposition": {
+        "kind": "folded",
+        "node": "diiid-xpoint-profile-extent",
+        "reason": "a one-line change to the x-limit margin, or clip_on=False on the knot marker, in scripts/prototypes/diiid_xpoint_profile_extent/render.py"
+      },
+      "file": "scripts/prototypes/diiid_xpoint_profile_extent/render.py",
+      "id": "f1e73089d2b",
+      "line": 454,
+      "severity": "non-blocking",
+      "summary": "On all six panels of edge-profiles.png the EFIT extraction knot at psi_N = 1.00 renders as a half circle. set_xlim(COORDINATES[0], COORDINATES[-1]) at render.py:454 puts the knot marker's centre exactly on the axes' right edge, and the axes patch clips its outward half, so the last data point of every curve - the boundary value the figure exists to report - appears as a stray '(' or ')' glyph rather than the keyed open circle. The curve and the value at psi_N = 1.00 are still readable off the line and the marker type is keyed in the legend, so no datum is withheld, but the artifact sits at the figure's most-read x value and reads as a drawing fault. Fold by giving the x-limit a small margin or setting clip_on=False on the knot markers."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261114T100338758762-review-of-diiid-xpoint-profile-extent-abfa3a585613-figure",
+  "reviewed_base_sha": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+  "reviewed_head_sha": "abfa3a5856131d2f75c199f5a2916823487a7168",
+  "reviewed_images": {
+    "edge-profiles.png": "docs/figures/diiid-xpoint-profile-extent/edge-profiles.svg",
+    "frame-137-diverted-lower-xpoint.png": "docs/figures/diiid-xpoint-profile-extent/frame-137-diverted-lower-xpoint.svg",
+    "frame-146-limited-lower-xpoint.png": "docs/figures/diiid-xpoint-profile-extent/frame-146-limited-lower-xpoint.svg"
+  },
+  "reviewed_run_id": "r-20261113T154327963022-diiid-xpoint-profile-extent",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "edge-profiles.svg": [
+      "RUBRIC legibility: passes with a defect - six panels (137D/146L/179L by p'/FF') print one shared y scale per column, ticks 0.000/-0.015/-0.030 on the p' column and 0.02/0.00/-0.02/-0.04 on the FF' column, so a row can be read against another in magnitude; the one element a reader cannot read as drawn is the extraction knot at psi_N = 1.00, which renders as a half circle clipped by the axes edge on all six panels (finding 1).",
+      "RUBRIC data_ink: passes - the two arms carry the weight at 3.0 pt, the extraction knots are 7 px open circles sitting on the blue curve, and no ink is spent on anything the figure does not ask a question about.",
+      "RUBRIC decoration: passes - white ground, no gridline, no fill, no gradient, no shading; top and right spines are removed on every panel.",
+      "RUBRIC contrast: passes - measured on the rendered PNG, the x tick and axis labels render at 11.1:1 on white (mean text pixel 60,60,59) and the rotated row labels at 7.7:1 (mean 84,83,81, diluted by antialiased edges around the glyphs); the solved arm is 5.2:1 and the grey base arm 3.1:1, at the graphical-object threshold.",
+      "RUBRIC table_form: passes - two profile quantities against normalised flux are curves; nothing here is naturally a table.",
+      "RUBRIC label_collision: passes with the marker clip recorded in finding 1 - zero ink lies in the outer 1 px frame of the 1714x882 canvas, so no text artist is clipped, and the row labels, the two column titles, the three-entry legend and the x tick labels occupy disjoint space. The half circle at the right of each curve is a clipped data marker, not a clipped label."
+    ],
+    "frame-137-diverted-lower-xpoint.svg": [
+      "RUBRIC legibility: passes - both pairs read: each arm shows the whole vessel and a 10 cm lower-X zoom beside it, the base pair from residual 1.14e-12 and converged 1, the edge pair from residual 0.000461 and converged 0, and the two notes under the panels identify each pair. The previous round's axis-marker defect is resolved at this head: the EFIT markers are now drawn larger, hollow and above the solved ones, so in both whole-vessel panels the hollow inverted triangle reads as a complete 13 px outline with the filled blue triangle inside it, and in both zoom panels the hollow square reads around its solved cross.",
+      "RUBRIC data_ink: passes - solved solid blue, EFIT dashed near-black, wall a thin grey; the zero level is the one heavier stroke and it is the level the reader is asked to compare.",
+      "RUBRIC decoration: passes - axes off on every panel, no gridline, no fill and no shading band; the reference geometry is an unfilled outline.",
+      "RUBRIC contrast: passes - text is 12.9:1 on white (mean text pixel 50,50,50), the solved blue 5.2:1, and the EFIT dashes read at near-black; the wall outline is grey at 3.1:1, which is enough for a reference outline.",
+      "RUBRIC table_form: passes - two spatial panels per arm, not a picture of a table.",
+      "RUBRIC label_collision: passes - zero ink in the outer 1 px frame of the canvas, the two note rows sit clear below the panels, and no marker overlaps a text artist. The one overlap is the two axis markers, which is the datum (the two axes coincide to about 0.5 cm) and now reads as two markers rather than one."
+    ],
+    "frame-146-limited-lower-xpoint.svg": [
+      "RUBRIC legibility: passes with a note - the base pair reads cleanly and on the edge pair both axis markers are separated and legible, the hollow triangle about 25 px below and left of the filled one, which is the displaced axis the residual 0.0233 / converged 0 note identifies. The note is the edge zoom panel: it carries EFIT's dashed contours and EFIT's null square but no solved contour and no solved null, because that state's solved null lies outside the 10 cm window. A reader is told the state did not converge by the note under the pair and can read the solved field in the whole-vessel panel beside it, so no comparison is withheld.",
+      "RUBRIC data_ink: passes - the arms carry the weight; the crossing blue contours of the non-converged edge state are that state's own field and not decoration.",
+      "RUBRIC decoration: passes - axes off, no gridline, no fill, no shading.",
+      "RUBRIC contrast: passes - text 12.6:1 on white (mean text pixel 51,51,51), solved blue 5.1:1 against the near-black EFIT dashes.",
+      "RUBRIC table_form: passes - spatial panels, not a table.",
+      "RUBRIC label_collision: passes - zero ink in the outer 1 px frame, no overlap between the notes and the drawn geometry, and both axis triangles and both null markers read cleanly."
+    ]
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T10:32:09.516603+00:00",
+  "total": null
+}

@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-11-14T19:16:35.937Z",
   "dispatched_at": "2026-11-14T18:42:45Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "iter-bank-recertify",
+      "recorded_at": "2026-11-14T21:08:57.495867+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_iter_bank.py",

@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -103,15 +103,19 @@
     its residual reported. The bands below are read against a fit of that configuration.</p>
     <p>The comparison the lead asked for: the inverse class and imas-efit answer the same question from the
     same inputs. The case set is read from imas-efit's own committed cases through IMAS, at the data
-    dictionary version each was written in: one MAST slice, one TCV slice and one ITER scenario slice, none
-    with an iron core. For each case the class fits the same number of profile coefficients imas-efit fitted,
+    dictionary version each was written in: the MAST-U 45272 slice, one TCV slice and one ITER scenario
+    slice, none with an iron core. imas-efit carries no MAST case, and the lead chose its MAST-U case on
+    2026-11-14 so that a stored imas-efit equilibrium exists for every case. For each case the class fits the same number of profile coefficients imas-efit fitted,
     with the conductor currents treated as the locked decision <code>fitted-unknowns</code> directs, and
     the vertical position held as the locked decision <code>vertical-freedom</code> directs.</p>
     <p><strong>Done when.</strong> (1) On every case the class converges and its reconstructed state is
     compared with imas-efit's stored equilibrium in physical units: magnetic axis within 0.20 m, plasma
     current within 1.5 %, boundary and axis flux within 5 % of the axis-to-boundary flux span, q95 within
     2.0, and the mean distance between the two closed boundaries reported in millimetres; the whitened
-    residual per sensor is tabulated beside imas-efit's own for the same rows. (2) Each disagreement is
+    residual per sensor is tabulated beside imas-efit's own for the same rows. imas-efit's fit carries a
+    rigid vertical shift and this fit does not, so the table also reports, per case, the vertical offset
+    between the two current centroids, and the axis and boundary measures both as measured and with that
+    offset removed; the bands are judged on the measured values. (2) Each disagreement is
     split into a fit part and a forward part by one further run per case: imas-efit's fitted p′ and FF′ are
     solved forward by nova with no data, and the table reports nova-forward against imas-efit and
     nova-inverse against nova-forward separately. (3) Negative control, constructed to
@@ -141,7 +145,7 @@
     <p>Waits on §2: the locked fit decisions set the unknown count, and so the cost measured here.</p>
     <p>A baseline that cannot be run over a pulse is of little use for development. The cost of one
     reconstruction is measured where the forward solve's cost is decided, on the H200.</p>
-    <p><strong>Done when.</strong> (1) The record reports, for the §2 MAST case at batch widths 1, 16 and
+    <p><strong>Done when.</strong> (1) The record reports, for the §2 MAST-U case at batch widths 1, 16 and
     64, the warm wall per slice, the forward solves per reconstruction and the cold compile wall, measured
     in one H200 job with the persistent compilation cache contract printed. (2) The warm wall per slice at
     width 16 is at or below ten times the warm forward solve's wall per slice at the same shape and batch
@@ -203,7 +207,7 @@
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-ieb-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="reckon-create" data-written-at="2026-11-13" data-recommends-skill="/reckon-build inverse-equilibrium-baseline §1" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Recover a known state from its own synthetic magnetics (§1)</h4>
-    <div class="r-fu-body"><p>The plan owes its design review before the first implementation node; §2 waits on the two open fit decisions.</p></div>
+    <div class="r-fu-body"><p>The design review is answered and both fit decisions are locked; §2 waits only on §1.</p></div>
     <pre class="r-fu-prompt">/reckon-build inverse-equilibrium-baseline §1</pre>
     </article>
 </section>

@@ -1138,3 +1138,45 @@ def test_linear_local_tangent_matches_differentiating_the_projected_law():
     jacobian = jax.jacfwd(iron._linear_residual)(state, operands)
     direction = iron.jla.lu_solve(iron._linear_factor(state, operands), jnp.ones(6))
     np.testing.assert_allclose(jacobian @ direction, np.ones(6), rtol=2e-14)
+
+
+def test_reference_stamp_refuses_wrong_revision_and_dirty_tree(tmp_path):
+    import hashlib
+    import subprocess
+    from scripts.iron_linear_magnetisation.controls import require_clean_script
+
+    script = tmp_path / "scripts" / "iron_linear_magnetisation" / "reference.py"
+    script.parent.mkdir(parents=True)
+    data = b'"""Reference measurement."""\n'
+    script.write_bytes(data)
+
+    def git(*arguments):
+        return subprocess.check_output(
+            ["git", "-C", str(tmp_path), *arguments], text=True
+        ).strip()
+
+    git("init", "--quiet")
+    git("add", "scripts/iron_linear_magnetisation/reference.py")
+    git(
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.invalid",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "commit",
+        "-qm",
+        "test: record reference\n\nProvide committed bytes for stamp checks.",
+    )
+    revision = git("rev-parse", "HEAD")
+    blob = hashlib.sha1(
+        b"blob %d\0" % len(data) + data, usedforsecurity=False
+    ).hexdigest()
+    assert require_clean_script(script, blob, revision) == blob
+    with pytest.raises(SystemExit, match="executed revision differs"):
+        require_clean_script(script, blob, "unresolvable-revision")
+    with pytest.raises(SystemExit, match="executed script differs"):
+        require_clean_script(script, "invalid-blob", revision)
+    script.write_bytes(data + b"\n")
+    with pytest.raises(SystemExit, match="dirty tree"):
+        require_clean_script(script, blob, revision)

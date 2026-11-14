@@ -6,7 +6,6 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-import subprocess
 import time
 
 from nova.jax.config import configure_dtypes
@@ -16,28 +15,7 @@ import jax  # noqa: E402
 import numpy as np  # noqa: E402
 from nova.biot import magnetisation as iron  # noqa: E402
 from nova.biot import tiledassembly as tiled  # noqa: E402
-from scripts.iron_linear_magnetisation.controls import shell  # noqa: E402
-
-
-def provenance(path, revision, blob):
-    """Require the executed revision and script bytes to match a clean index."""
-    tree = Path(path).resolve().parents[2]
-    actual_revision = subprocess.check_output(
-        ["git", "-C", str(tree), "rev-parse", "HEAD"], text=True
-    ).strip()
-    if actual_revision != revision:
-        raise SystemExit("executed revision differs from its stamp")
-    if subprocess.check_output(
-        ["git", "-C", str(tree), "status", "--porcelain", "--untracked-files=no"],
-        text=True,
-    ):
-        raise SystemExit("refusing to measure a dirty tree")
-    actual_blob = subprocess.check_output(
-        ["git", "-C", str(tree), "hash-object", str(Path(path).resolve())], text=True
-    ).strip()
-    if actual_blob != blob:
-        raise SystemExit("executed script differs from its committed blob")
-    return dict(revision=actual_revision, script_blob=actual_blob)
+from scripts.iron_linear_magnetisation.controls import require_clean_script, shell  # noqa: E402
 
 
 class Evaluators:
@@ -97,7 +75,10 @@ def main():
     parser.add_argument("--blob", required=True)
     parser.add_argument("--sizes", type=float, nargs="+", default=[0.04, 0.02])
     args = parser.parse_args()
-    stamp = provenance(__file__, args.revision, args.blob)
+    stamp = dict(
+        revision=args.revision,
+        script_blob=require_clean_script(__file__, args.blob, args.revision),
+    )
     assert jax.config.jax_enable_x64
     jax.config.update("jax_enable_compilation_cache", False)
     args.output.mkdir(parents=True, exist_ok=True)

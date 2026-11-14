@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_basis": "The reviewed run armed no suite pair: its manifest records baseline_suite and after_suite as empty and its write grant holds no pytest file, so no suite gate ran at either arm and this commit can add no failure id. Its own gate is the script check_evidence_guards.py, which reports EVIDENCE_GUARD_SUMMARY cases=9 failed=0 with EXIT=0 at c981fafe8.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "scripts/prototypes/diiid_edge_current_refusal/publish.sh:13",
+    "scripts/prototypes/diiid_edge_current_refusal/publish.sh:19",
+    "scripts/prototypes/diiid_edge_current_refusal/publish.sh:24",
+    "scripts/prototypes/diiid_edge_current_refusal/render.py:26",
+    "scripts/prototypes/diiid_edge_current_refusal/negative_control.py:36"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-14T12:19:35Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_edge_current_refusal/check_evidence_guards.py",
+      "id": "fe71159543e",
+      "line": "169",
+      "severity": "non-blocking",
+      "text": "the emptied-evidence-and-figure case strips the refused circles from the SVG and rewrites its footer, but captured_proposals raises with 'spatial proposal inventory does not match captured ladders' before marker_visibility.py:70 reads the SVG, so the figure half of the case is never exercised and a figure stripped of its circles while spatial evidence is intact has no negative control here"
+    },
+    {
+      "file": "scripts/prototypes/diiid_edge_current_refusal/verify.py",
+      "id": "f9ed673c5b9",
+      "line": "82",
+      "severity": "non-blocking",
+      "text": "require_premise asserts the terminal reason and convergence flag but not the residual magnitude, so a cohort whose residual drifted from the record's 4.6e-4 / 2.3e-2 / 1.7e-2 still passes while the quantitative premise has moved"
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "publish.sh:13 and :19 run verify.py and audit.py, render.py:26 reaches marker_visibility expected_marks through check() and negative_control.py:36 runs verify.py",
+    "diff": "read c981fafe8 against parent 00de27abf, the head the prior review read: four files, +287/-20, adding captured_proposals, captured_iterations and require_premise, tightening audit.py endpoint binding and adding a nine-case corruption harness",
+    "done_when": "the property measured is that each guard fires; the head gate logs EVIDENCE_GUARD_SUMMARY cases=9 failed=0 EXIT=0 and the reversal at 00de27abf logs cases=9 failed=6 EXIT=1, and my independent re-run at c981fafe8 reproduced the head result",
+    "goal": "the gained commit c981fafe8 makes the diagnosis verifier refuse incomplete or contradictory captured evidence, binding spatial iterations to diagnostics-*.npz and proposals to proposals.json in verify.py:20-92, re-raising in audit.py:100-124 and gating marker_visibility.py:21; the four prior-review durability findings are refused",
+    "manifest": "read; it records the guard command, nine passing cases, the reversal negative control and preserved receipts, with baseline_suite and after_suite empty because no pytest file lies in scope",
+    "write_paths": "the declared grant is scripts/prototypes/diiid_edge_current_refusal/, the evidence fragment and the figures directory; all four diff paths lie inside the first"
+  },
+  "justifications": {
+    "durability": "check_evidence_guards.py:80-169 makes six isolated corruptions red and the reversal makes all six green, so the guards are load-bearing; the emptied case at :169 never reaches the figure check and require_premise at verify.py:82 asserts no residual",
+    "evidence": "reuse-guards-head.log carries a revision-and-command header and a bare EXIT=0 after EVIDENCE_GUARD_SUMMARY cases=9 failed=0, reuse-negative-control.log shows cases=9 failed=6 EXIT=1 with all six corruption cases exiting 0, and my re-run reproduced the head result",
+    "fit": "check_evidence_guards.py:1-49 follows its sibling gate scripts/prototypes/bank_saddle_guards/suite.py:1-40, ruff reports no findings on all four files, and no name carries a plan or ticket label",
+    "goal_fidelity": "verify.py:20-92 binds every reported Newton action and proposal to the captured npz ladders, so the prior review's four record-only checks now refuse rather than pass",
+    "reuse": "searched scripts/prototypes for an existing corruption harness (negative_control*, bank_saddle_guards/suite.py, diiid_core_hold/regressions.py, diiid_xpoint_held_nodes/gates.py) and found only per-prototype bespoke harnesses with no shared owner",
+    "scope_discipline": "every path in the c981fafe8 diff is one of the four files under scripts/prototypes/diiid_edge_current_refusal/, inside the declared write grant"
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the gained commit c981fafe8 makes the diagnosis verifier refuse incomplete or contradictory captured evidence, binding spatial iterations to diagnostics-*.npz and spatial proposals to proposals.json in scripts/prototypes/diiid_edge_current_refusal/verify.py:20-92, re-raising in audit.py:100-124 and gating marker_visibility.py:21; the four prior-review durability findings at verify.py:41, verify.py:87, audit.py:113 and marker_visibility.py:19 are now refused rather than only recorded.\nVERDICT done_when: the measured property is that each guard fires, and the run records it in two arms: the head gate scripts/prototypes/diiid_edge_current_refusal/check_evidence_guards.py over the cohort logs EVIDENCE_GUARD_SUMMARY cases=9 failed=0 with EXIT=0, and the reversal at parent 00de27abf logs cases=9 failed=6 with EXIT=1; I re-ran the head gate myself at c981fafe8 and reproduced cases=9 failed=0 EXIT=0.\nVERDICT write_paths: the source node's declared paths are scripts/prototypes/diiid_edge_current_refusal/, the evidence fragment and the figures directory; all four files in this commit's diff lie inside the first, and nothing outside it changed.\nVERDICT manifest: read; it records the guard command, nine passing cases, the disclosed reversal negative control and the preserved scientific receipts, and leaves baseline_suite and after_suite empty because no pytest file lies in its write grant.\nVERDICT diff: read c981fafe8 against its parent 00de27abf, which is exactly the head the prior review read; it adds +287/-20 across audit.py, check_evidence_guards.py, marker_visibility.py and verify.py, adding captured_proposals, captured_iterations and require_premise, tightening audit.py's endpoint binding and mask-count equality, and adding a nine-case corruption harness.\nCALL_SITES: scripts/prototypes/diiid_edge_current_refusal/publish.sh:13, scripts/prototypes/diiid_edge_current_refusal/publish.sh:19, scripts/prototypes/diiid_edge_current_refusal/render.py:26, scripts/prototypes/diiid_edge_current_refusal/negative_control.py:36\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/prototypes/diiid_edge_current_refusal/verify.py:20-92 now binds every reported Newton action and proposal to the captured npz ladders, so the prior review's four record-only checks at verify.py:41, verify.py:87, audit.py:113 and marker_visibility.py:19 refuse instead of passing.\nSCORE evidence: 18\nJUSTIFICATION evidence: reuse-guards-head.log carries a revision-and-command header and a bare EXIT=0 after EVIDENCE_GUARD_SUMMARY cases=9 failed=0, reuse-negative-control.log shows the same nine cases at cases=9 failed=6 EXIT=1 with the six corruption cases exiting 0, and my independent re-run at c981fafe8 reproduced the head result.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the c981fafe8 diff is one of the four files under scripts/prototypes/diiid_edge_current_refusal/, inside the source node's declared write grant, and no file outside it was touched.\nSCORE durability: 17\nJUSTIFICATION durability: check_evidence_guards.py:80-169 makes six isolated corruptions red, and the reversal at parent 00de27abf turns all six green, so the guards are load-bearing; the emptied-evidence-and-figure case at check_evidence_guards.py:169 never reaches the figure check at check_evidence_guards.py:145-168, and require_premise at verify.py:82 asserts the terminal reason but not the residual magnitude the fragment quotes.\nSCORE fit: 18\nJUSTIFICATION fit: the module docstring, argparse shape and per-case JSON logging of check_evidence_guards.py:1-49 match its sibling gate scripts/prototypes/bank_saddle_scope/suite.py:1-40, ruff reports no findings on all four files, and no name carries a plan or ticket label.\nSCORE reuse: 18\nJUSTIFICATION reuse: I searched scripts/prototypes for an existing corruption harness (negative_control*, bank_saddle_guards/suite.py, diiid_core_hold/regressions.py, diiid_xpoint_held_nodes/gates.py) and found only per-prototype bespoke harnesses with no shared owner, so check_evidence_guards.py forks nothing; the pre-existing marker_visibility glyph fork recorded by the prior review is unchanged here because marker_visibility.py:14 only adds an import.\nFINDING scripts/prototypes/diiid_edge_current_refusal/check_evidence_guards.py:169 non-blocking: the emptied-evidence-and-figure case strips the refused circles from frame-137-diverted.svg and rewrites its footer, but captured_proposals raises at check_evidence_guards.py:169 with \"spatial proposal inventory does not match captured ladders\" before marker_visibility.py:70 reads the SVG, so the figure half of the case is never exercised and the case name and commit message claim a figure refusal the case does not demonstrate; a figure stripped of its circles while spatial evidence is intact is still covered by no negative control in this commit.\nFINDING scripts/prototypes/diiid_edge_current_refusal/verify.py:82 non-blocking: require_premise asserts receipt terminal_reason and converged but not the residual magnitude, so a cohort that still terminated ACTIVE_SET_STEP_REFUSED at a residual far from the fragment's 4.6e-4 / 2.3e-2 / 1.7e-2 passes while the record's quantitative premise has silently moved.\n",
+  "review_run_id": "r-20261114T203306236290-review-of-diiid-edge-current-refusal-c981fafe8cde",
+  "reviewed_base_sha": "00de27abf9f8a7984aa1f1188266b8ee3efdfa59",
+  "reviewed_head_sha": "c981fafe8cde2c0e501c30fe3abd55e3c1459741",
+  "reviewed_run_id": "r-20261114T121904732821-diiid-edge-current-refusal",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261114T203306236290-review-of-diiid-edge-current-refusal-c981fafe8cde"
+  },
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T23:54:22.121598+00:00",
+  "total": 110
+}

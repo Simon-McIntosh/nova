@@ -51,6 +51,20 @@ def analyze(folder):
         )
         gate = (norm <= 1) & arrays["participation"]
         sweep.append((row, arrays, norm, gate))
+    base_binding = None
+    for stage in spatial.get("stages", []):
+        state = np.load(folder / f"{stage['stage']}-{stage['index']}.npz")["state"]
+        if np.array_equal(state, proposal["state"]):
+            arrays = dict(np.load(folder / "discriminator-base.npz"))
+            read = stage["physical"]
+            flux = proposal["state"][:count] * scale
+            norm = (flux - read["axis_flux_wb"]) / (
+                read["boundary_flux_wb"] - read["axis_flux_wb"]
+            )
+            gate = (norm <= 1) & arrays["participation"]
+            sweep.append((dict(factor=0.0, reading=read), arrays, norm, gate))
+            base_binding = dict(stage=stage["stage"], index=stage["index"])
+            break
     pairs = []
     for large, small in zip(sweep[:-1], sweep[1:], strict=True):
         high, high_arrays, high_norm, high_gate = large
@@ -69,6 +83,10 @@ def analyze(folder):
         ) / 24
         predicted = predicted.ravel() * area * high_arrays["participation"]
         measured = high_arrays["current"] - low_arrays["current"]
+        normalized = (
+            high["reading"]["current_amplitude"] * high_arrays["current"]
+            - low["reading"]["current_amplitude"] * low_arrays["current"]
+        )
         affected = np.flatnonzero(predicted)
         pairs.append(
             dict(
@@ -92,13 +110,17 @@ def analyze(folder):
                 predicted_jump_a=float(predicted.sum()),
                 measured_jump_a=float(measured.sum()),
                 measured_l2_a=float(np.linalg.norm(measured)),
+                normalized_vector_jump_l2_a=float(np.linalg.norm(normalized)),
+                normalized_total_jump_a=float(normalized.sum()),
                 prediction_error_l2_a=float(np.linalg.norm(measured - predicted)),
                 affected_rz_m=coordinates[affected].tolist(),
                 predicted_cell_jump_a=predicted[affected].tolist(),
                 measured_cell_jump_a=measured[affected].tolist(),
             )
         )
-    finest, finest_arrays, finest_norm, _ = sweep[-1]
+    finest, finest_arrays, finest_norm, _ = min(
+        (row for row in sweep if row[0]["factor"] > 0), key=lambda row: row[0]["factor"]
+    )
     eligible = np.flatnonzero(finest_arrays["participation"])
     closest = eligible[np.argmin(np.abs(finest_norm[eligible] - 1))]
     result = dict(
@@ -108,6 +130,7 @@ def analyze(folder):
         finest_step_factor=finest["factor"],
         closest_source_sample_rz_m=coordinates[closest].tolist(),
         closest_source_sample_psi_norm=float(finest_norm[closest]),
+        zero_fraction_binding=base_binding,
     )
     (folder / "cutoff-jumps.json").write_text(json.dumps(result, indent=2) + "\n")
     return result

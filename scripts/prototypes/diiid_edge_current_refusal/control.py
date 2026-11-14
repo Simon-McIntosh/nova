@@ -8,6 +8,7 @@ product source is edited and no position target is introduced.
 from __future__ import annotations
 
 import json
+import importlib.util
 from pathlib import Path
 import sys
 
@@ -15,7 +16,13 @@ import jax.numpy as jnp
 
 from nova.equilibrium.constraint import UniformRadialFieldUnknown
 
-from measure import HERE, branch, captures, extent, observed_load
+HERE = Path(__file__).resolve().parent
+SPEC = importlib.util.spec_from_file_location(
+    "edge_current_observer", HERE / "measure.py"
+)
+observer = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = observer
+SPEC.loader.exec_module(observer)
 
 
 if __name__ == "__main__":
@@ -40,10 +47,10 @@ if __name__ == "__main__":
         )
         + "\n"
     )
-    branch.original_load = observed_load
-    extent.main()
-    assert len(captures) == 1
+    observer.branch.original_load = observer.observed_load
+    observer.extent.main()
+    assert len(observer.captures) == 1
     sys.path.insert(0, str(HERE))
     from analyze import analyze
 
-    analyze(captures[0])
+    analyze(observer.captures[0])

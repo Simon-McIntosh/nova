@@ -151,7 +151,6 @@ def main():
             kernel_evaluations_per_cell_pair=sum(p["padded_pairs"] for p in programs)
             / len(cells.polygons) ** 2,
             seconds_per_cell_pair=row["assembly_seconds"] / len(cells.polygons) ** 2,
-            completed=True,
         )
         row["host_seconds"] = (
             row["assembly_seconds"] - row["compile_seconds"] - row["execute_seconds"]
@@ -174,6 +173,7 @@ def main():
         row["operator_sha256"] = hashlib.file_digest(
             target.open("rb"), "sha256"
         ).hexdigest()
+        row["completed"] = True
         save()
         print(json.dumps(row), flush=True)
 

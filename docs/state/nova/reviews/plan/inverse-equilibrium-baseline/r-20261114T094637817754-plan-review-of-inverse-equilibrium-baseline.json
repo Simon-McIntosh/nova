@@ -25,7 +25,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 4,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "af4b7b5be6d8fac0051e8952b21efdbd129e4643",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 2 now names the magnetics-only MAST-U 45272 reference (imas-efit's EPM case, monomial profiles) and states that the EPQ case is not used.",
+      "reason": "",
+      "when": "2026-11-14T10:06:58.078999+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "af4b7b5be6d8fac0051e8952b21efdbd129e4643",
+      "commit_basis": "edit",
+      "note": "Section 2 now names the magnetics-only MAST-U 45272 reference (imas-efit's EPM case, monomial profiles) and states that the EPQ case is not used.",
+      "reason": "",
+      "when": "2026-11-14T10:06:58.078999+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261114T094637817754-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261114T094637817754-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "4831fbc9147110eb27c7204cbea1c6f22bd44cb5",
   "rubric": "content",

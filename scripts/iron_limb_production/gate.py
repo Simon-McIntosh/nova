@@ -13,6 +13,10 @@ import tempfile
 
 def execute(command, cwd, env, log, revision):
     """Capture a command's complete output and its terminal exit code once."""
+    if (cwd / ".git").exists():
+        revision = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=cwd, text=True
+        ).strip()
     probe = subprocess.check_output(
         [
             sys.executable,

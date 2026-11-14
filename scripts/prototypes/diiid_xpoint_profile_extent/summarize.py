@@ -10,6 +10,12 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+
+from nova.equilibrium.fixed_point import FixedPointTerminationReason  # noqa: E402
 
 CASES = (
     (137, "diverted", "137D"),
@@ -23,11 +29,6 @@ BANKED_BASE_DISTANCE_M = {
     "146L": 0.05129600751,
     "179L": 0.01442593043,
 }
-TERMINATION = {
-    1: "CONVERGED",
-    7: "ACTIVE_SET_CYCLE_DETECTED",
-    12: "ACTIVE_SET_STEP_REFUSED",
-}
 # A share is read only off a state that is the same plasma as its base row. A
 # solve that stops short of converged, or that retains a collapsed fraction of
 # the support, has answered a different question: its distance is the separation
@@ -36,11 +37,24 @@ TERMINATION = {
 SUPPORT_RETENTION = 0.9
 
 
+def termination_name(code):
+    """The solver's own name for a termination code.
+
+    The enum lives with the solve that writes it, so a code added or renamed
+    there is picked up here rather than printed as a bare integer.
+    """
+
+    try:
+        return FixedPointTerminationReason(code).name
+    except ValueError:
+        return f"unrecognised termination code {code}"
+
+
 def readable(base, edge):
     """Whether this row's share counts toward the headline, and why not."""
 
     if not edge["converged"]:
-        reason = TERMINATION.get(edge["reason"], edge["reason"])
+        reason = termination_name(edge["reason"])
         return False, (
             f"edge arm did not converge: {reason} at residual {edge['residual']:.2e}"
         )

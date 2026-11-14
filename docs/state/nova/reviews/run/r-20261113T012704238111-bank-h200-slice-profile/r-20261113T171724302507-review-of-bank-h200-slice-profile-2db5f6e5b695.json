@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-11-13T17:28:20.081Z",
   "dispatched_at": "2026-11-13T17:18:00Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "tautological float-order check in a prototype report; stage attribution is verified separately by the HLO-frame rule and the paired carried-read reproduction, so the assertion guards nothing a reader relies on",
+      "recorded_at": "2026-11-14T07:45:37.493932+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_h200_slice_profile/report.py",

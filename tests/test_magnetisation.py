@@ -1034,3 +1034,113 @@ def test_mutual_self_block_converges_with_logarithmic_quadrature():
     )
     assert errors[1] < errors[0]
     assert errors[2] < 2e-8
+
+
+@pytest.mark.parametrize("fill", [1.0, lambda c: np.ones(len(c))])
+def test_explicit_unit_fill_preserves_solid_solution(fill):
+    arguments = (sphere(), uniform, [0, 1, 2], [10, 12, 8])
+    solid = iron.solve_magnetisation(*arguments, cell_size=0.1)
+    explicit = iron.solve_magnetisation(
+        *arguments, cell_size=0.1, fill_fraction=fill, cross_field_factor=0.4
+    )
+    for attribute in ("magnetisation", "permeability_relative", "residual_history"):
+        np.testing.assert_array_equal(
+            getattr(explicit, attribute), getattr(solid, attribute)
+        )
+    probes = np.array([[1.0, 0.2], [0.0, 1.0]])
+    np.testing.assert_array_equal(explicit.field(probes), solid.field(probes))
+
+
+def test_cell_fill_and_cross_field_match_linear_tensor(monkeypatch):
+    """Independent two-cell constitutive solution checks both component orders."""
+    gram = iron._MU0 * np.array(
+        [
+            [0.4, 0.03, 0.01, -0.02],
+            [0.02, 0.5, 0.04, 0.01],
+            [0.01, 0.02, 0.3, 0.04],
+            [-0.01, 0.01, 0.03, 0.6],
+        ]
+    )
+    external = np.array([[0.01, 0.02], [-0.03, 0.04]])
+    fill = np.array([0.2, 0.6])
+    cross = np.array([[0.4, 0.0], [0.0, 0.3]])
+    mu = 50.0
+    # Eliminating the iron's internal field gives a diagonal effective
+    # susceptibility multiplying the toroidal-mean total field.
+    beta = 1 - 1 / mu
+    effective = (fill[:, None] * beta / iron._MU0) / (
+        1 - beta * (1 - fill[:, None]) * (1 - cross)
+    )
+    effective = effective.T.reshape(-1)
+    expected = (
+        np.linalg.solve(
+            np.eye(4) - effective[:, None] * gram, effective * external.T.reshape(-1)
+        )
+        .reshape(2, -1)
+        .T
+    )
+    monkeypatch.setattr(iron, "_galerkin_interaction", lambda *args: gram)
+    monkeypatch.setattr(iron, "_average_external", lambda *args: external)
+    result = iron.solve_magnetisation(
+        shapely.box(1, 0, 2, 2),
+        uniform,
+        [0, 10],
+        [mu, mu],
+        cell_size=1,
+        fill_fraction=lambda c: fill,
+        cross_field_factor=lambda c: cross,
+    )
+    assert result.converged and result.iterations == 1
+    np.testing.assert_allclose(result.magnetisation, expected, rtol=1e-12)
+    np.testing.assert_allclose(
+        result.iron_magnetisation, expected / fill[:, None], rtol=1e-12
+    )
+    np.testing.assert_allclose(result.permeability_relative, mu, rtol=1e-12)
+    np.testing.assert_array_equal(result.fill_fraction, fill)
+    np.testing.assert_array_equal(result.cross_field_factor, cross)
+
+
+@pytest.mark.parametrize(
+    "keyword,value",
+    [
+        ("fill_fraction", 0),
+        ("fill_fraction", 1.01),
+        ("fill_fraction", np.nan),
+        ("fill_fraction", [0.2, 0.3]),
+        ("cross_field_factor", -0.1),
+        ("cross_field_factor", 1.01),
+        ("cross_field_factor", [0.4]),
+    ],
+)
+def test_cell_material_refuses_invalid_values(keyword, value, monkeypatch):
+    def forbidden(*args):
+        raise AssertionError("invalid material reached expensive interaction assembly")
+
+    monkeypatch.setattr(iron, "_galerkin_interaction", forbidden)
+    with pytest.raises(ValueError, match=keyword):
+        iron.solve_magnetisation(
+            shapely.box(1, 0, 2, 1),
+            uniform,
+            [0, 1],
+            [50, 50],
+            cell_size=1,
+            **{keyword: value},
+        )
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(1800)
+@pytest.mark.parametrize("mu", [50.0, 200.0])
+def test_in_vessel_fill_matches_six_limb_reference(mu):
+    """Exercise production residual and field against the accepted surface mean."""
+    from scripts.iron_limb_production.measure import control_result, reference_inputs
+
+    case, references = reference_inputs()
+    result = control_result(case, "geometry", 0.1, mu)
+    reference = np.asarray(references[mu]["iron_average_T"])[:16]
+    measured = result.field(np.asarray(case["probes"])[:16])
+    assert np.isfinite(reference).all() and np.linalg.norm(reference) > 1e-3
+    error = np.linalg.norm(measured - reference) / np.linalg.norm(reference)
+    print(f"six-limb in-vessel mu={mu:g} error={error:.12g}", flush=True)
+    assert result.converged
+    assert error < 0.10

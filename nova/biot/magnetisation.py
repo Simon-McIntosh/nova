@@ -416,14 +416,19 @@ def _coefficient(magnitude, knots, coefficients, end_values):
 
 
 def _residual(state, operands):
-    gram, external, knots, coefficients, ends = operands
+    gram, external, knots, coefficients, ends = operands[:5]
     total = (external + gram @ state).reshape(2, -1)
+    if len(operands) == 7:
+        fill, gain = operands[5:]
+        total = total + _MU0 * gain * state.reshape(2, -1)
     # A safe norm keeps the derivative finite at a demagnetised cell. The
     # coefficient there is exactly the origin value, independently of direction.
     squared = jnp.sum(total**2, axis=0)
     magnitude = jnp.sqrt(jnp.where(squared > 0, squared, 1.0))
     magnitude = jnp.where(squared > 0, magnitude, 0.0)
     coefficient = _coefficient(magnitude, knots, coefficients, ends)
+    if len(operands) == 7:
+        coefficient = fill * coefficient
     return state - (coefficient * total).reshape(-1)
 
 
@@ -448,7 +453,9 @@ def _update(state, operands, factor, scale):
 class MagnetisationSolution:
     """Solved cell magnetisation and its convergence receipt.
 
-    ``magnetisation`` is (cells, 2) [A/m], ``permeability_relative`` is (cells,).
+    ``magnetisation`` is the toroidal mean (cells, 2) [A/m].
+    ``permeability_relative`` is the iron's own secant permeability (cells,),
+    evaluated at its internal field rather than the toroidal-mean field.
     ``residual_history`` is the relative material residual, including the seed;
     ``iterations`` counts accepted corrections. ``regularisation_history``,
     ``reduction_ratios`` and ``step_types`` describe each accepted step beside
@@ -468,6 +475,13 @@ class MagnetisationSolution:
     regularisation_history: tuple[float, ...] = ()
     reduction_ratios: tuple[float, ...] = ()
     step_types: tuple[str, ...] = ()
+    fill_fraction: np.ndarray = field(default_factory=lambda: np.ones(0))
+    cross_field_factor: np.ndarray = field(default_factory=lambda: np.zeros((0, 2)))
+
+    @property
+    def iron_magnetisation(self) -> np.ndarray:
+        """Return the magnetisation within the iron itself [A/m]."""
+        return self.magnetisation / self.fill_fraction[:, None]
 
     @property
     def iterations(self) -> int:
@@ -498,6 +512,22 @@ def _points(points):
     return points
 
 
+def _cell_material(value, cells, name, components=False):
+    """Resolve a scalar, cell array or centroid callback to a material field."""
+    value = value(cells.centroids) if callable(value) else value
+    array = np.asarray(value, dtype=np.float64)
+    shape = (len(cells.centroids), 2) if components else (len(cells.centroids),)
+    if array.ndim == 0:
+        array = np.full(shape, array)
+    if array.shape != shape or not np.isfinite(array).all():
+        raise ValueError(f"{name} must be finite with shape {shape} or a scalar")
+    minimum = array.min()
+    if array.max() > 1 or minimum < 0 or (not components and minimum == 0):
+        interval = "[0, 1]" if components else "(0, 1]"
+        raise ValueError(f"{name} must lie in {interval}")
+    return array.copy()
+
+
 def solve_magnetisation(
     region,
     external_field: Callable[[np.ndarray], np.ndarray],
@@ -509,6 +539,8 @@ def solve_magnetisation(
     max_iterations: int = 60,
     tile_plan: TilePlan = _PLAN,
     initial_magnetisation: np.ndarray | None = None,
+    fill_fraction=1.0,
+    cross_field_factor=0.0,
 ) -> MagnetisationSolution:
     """Mesh iron and solve M = c(|B|) B for B = B_external + G M.
 
@@ -520,6 +552,14 @@ def solve_magnetisation(
     permeability. Its implied H [A/m] must increase strictly. The law is
     single-valued and has no hysteresis or remanence. An optional initial
     magnetisation has shape (cells, 2) [A/m] on this mesh.
+
+    ``fill_fraction`` is the toroidal iron fraction f in (0, 1], supplied as a
+    scalar, a (cells,) array, or a callback of (cells, 2) centroids [m].
+    ``cross_field_factor`` is the demagnetising factor N in [0, 1], a scalar,
+    (cells, 2) array in (R, Z) order, or a centroid callback. Use N = 0 along
+    a limb and its section-derived factor across it. The state is M_mean,
+    with B_iron = B_mean + mu0 (1-f)/f (1-N) M_mean and
+    M_mean = f c(|B_iron|) B_iron. Unit fill uses the solid-iron residual.
 
     Try exact Newton first, then adapt a diagonal regularisation lambda.
     The shifted equation F(M + p) + lambda*p = 0 is an implicit pseudo-time
@@ -539,6 +579,8 @@ def solve_magnetisation(
         raise ValueError("max_iterations must be a nonnegative integer")
     law = _fit_law(b_field, permeability_relative)
     cells = _mesh(region, cell_size)
+    fill = _cell_material(fill_fraction, cells, "fill_fraction")
+    cross = _cell_material(cross_field_factor, cells, "cross_field_factor", True)
     external = _average_external(cells, external_field)
     if external.shape != cells.centroids.shape or not np.all(np.isfinite(external)):
         raise ValueError(
@@ -551,6 +593,9 @@ def solve_magnetisation(
         jnp.asarray(value, dtype=jnp.float64)
         for value in (gram, external.T.reshape(-1), *law)
     )
+    if np.any(fill != 1):
+        gain = ((1 - fill) / fill)[None, :] * (1 - cross.T)
+        operands += (jnp.asarray(fill), jnp.asarray(gain))
     state = jnp.zeros(external.size, dtype=jnp.float64)
     if initial_magnetisation is not None:
         initial = np.asarray(initial_magnetisation, dtype=np.float64)
@@ -598,8 +643,10 @@ def solve_magnetisation(
             termination = "regularisation-refused"
             break
     total = (operands[1] + operands[0] @ state).reshape(2, -1)
+    if len(operands) == 7:
+        total = total + _MU0 * operands[6] * state.reshape(2, -1)
     magnitude = jnp.linalg.norm(total, axis=0)
-    coefficient = _coefficient(magnitude, *operands[2:])
+    coefficient = _coefficient(magnitude, *operands[2:5])
     mu = 1 / (1 - _MU0 * coefficient)
     return MagnetisationSolution(
         np.asarray(state).reshape(2, -1).T,
@@ -613,4 +660,6 @@ def solve_magnetisation(
         tuple(regularisations),
         tuple(ratios),
         tuple(step_types),
+        fill,
+        cross,
     )

@@ -17,6 +17,8 @@ FILES = (
     "tests/test_support_read.py",
     "tests/test_tracked_read.py",
     "tests/test_read_wall_skip.py",
+    "tests/test_read_live_candidates.py",
+    "tests/test_read_tie_break.py",
 )
 
 
@@ -27,6 +29,7 @@ def main():
     parser.add_argument("output", type=Path)
     parser.add_argument("--mutation", action="store_true")
     parser.add_argument("--focused", action="store_true")
+    parser.add_argument("--files", nargs="+")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     record = dict(revision=args.revision, complete=False, files=[])
@@ -65,7 +68,9 @@ def main():
                 source.replace(marker, "    return jnp.zeros_like(changed)\n")
             )
         own = "tests/test_geometry_reuse.py"
-        files = [own] if args.focused or args.mutation else [own, *FILES]
+        files = args.files or (
+            [own] if args.focused or args.mutation else [own, *FILES]
+        )
         for name in files:
             if not (tree / name).exists():
                 record["scoped_suite"] = "unarmed: test file absent at this revision"

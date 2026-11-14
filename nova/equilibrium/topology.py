@@ -2753,7 +2753,12 @@ class TopologyGeometry:
 
 
 class TopologyRead(NamedTuple):
-    """One fixed-shape total-field topology and connected-support receipt."""
+    """One fixed-shape total-field topology and connected-support receipt.
+
+    Cache-enabled reads retain complete conic and saddle fragment records,
+    including strip labels and capacity checks. ``fragment_geometry`` holds
+    their runtime clipping keys; uncached reads leave these three fields empty.
+    """
 
     axis: jax.Array
     axis_flux: jax.Array
@@ -3121,6 +3126,7 @@ def _fragments_at_level(
     cached=None,
     *,
     return_cache=False,
+    cache_geometry=False,
 ):
     """Continuous fragment areas and edge intervals under a fixed cell decision."""
     local_vertices = (geometry.vertices - geometry.centre[:, None, :]) / geometry.pitch[
@@ -3128,7 +3134,8 @@ def _fragments_at_level(
     ]
     signed = sigma * coefficient
     signed = signed.at[:, 0].add(-sigma * level)
-    signed = _fragment_coefficients(local_vertices, signed)
+    if cache_geometry or cached is not None:
+        signed = _fragment_coefficients(local_vertices, signed)
     keys = (
         geometry.vertices,
         geometry.vertex_count,
@@ -3238,6 +3245,7 @@ def _support_at_level(
     cached=None,
     *,
     return_cache=False,
+    cache_geometry=False,
 ):
     owner = _inside_cells(geometry, form.position) & saddle_live
     represented = represented_saddle_cells(
@@ -3254,6 +3262,7 @@ def _support_at_level(
             policy,
             cached,
             return_cache=return_cache,
+            cache_geometry=cache_geometry,
         )
     )
     labels, wall = _connected_fragment_labels(
@@ -3424,7 +3433,7 @@ def read(field, geometry, convention, policy):
 
 
 def read_at_stationary_points(
-    field, geometry, convention, policy, solved, *, cached=None
+    field, geometry, convention, policy, solved, **cache_options
 ):
     """Read the connected support from stationary points solved elsewhere.
 
@@ -3433,7 +3442,14 @@ def read_at_stationary_points(
     them. No contour tree or null census is built: the supplied points are the
     census. ``field`` supplies ``sampled_coefficient(geometry)`` for the own-node
     fit and the point jets the saddle normal form and wall events differentiate.
+    The static option ``cache_geometry=True`` retains fragments on the receipt;
+    passing
+    ``cached`` supplies a prior receipt and enables that mode by default.
     """
+    cached = cache_options.pop("cached", None)
+    cache_geometry = cache_options.pop("cache_geometry", cached is not None)
+    if cache_options:
+        raise TypeError(f"unknown geometry-cache options: {tuple(cache_options)}")
     policy = _read_policy(geometry, policy)
     capacity = policy.null_capacity
     count = solved.position.shape[0]
@@ -3470,7 +3486,7 @@ def read_at_stationary_points(
         jnp.sum(live, dtype=jnp.int32),
         jnp.asarray(True),
         None,
-        **({"cached": cached} if cached is not None else {}),
+        **({"cached": cached, "cache_geometry": True} if cache_geometry else {}),
     )
 
 
@@ -3486,6 +3502,7 @@ def _read_at_nulls(
     census_resolved,
     tree,
     cached=None,
+    cache_geometry=False,
 ):
     """Select the confined support given the live stationary points."""
     sigma = convention.sigma
@@ -3496,6 +3513,9 @@ def _read_at_nulls(
     saddles = live & (eigenvalues[:, 0] < 0.0) & (eigenvalues[:, 1] > 0.0)
     axis_index = jnp.argmax(axes)
     axis, axis_flux = nulls.position[axis_index], nulls.jet.value[axis_index]
+    support_options = (
+        {"cached": cached, "cache_geometry": True} if cache_geometry else {}
+    )
 
     def normal_form(index):
         point = nulls.position[index]
@@ -3519,7 +3539,7 @@ def _read_at_nulls(
             candidate_form,
             True,
             policy,
-            cached,
+            **support_options,
         )
         area, intervals, labels, wall, selected, owner, support_valid, count = support
         owner_index = jnp.argmax(owner)
@@ -3604,7 +3624,7 @@ def _read_at_nulls(
         form,
         saddle_live,
         policy,
-        cached,
+        **support_options,
     )
     area, intervals, labels, wall, selected, owner, support_valid, fragment_count = (
         initial
@@ -3630,8 +3650,7 @@ def _read_at_nulls(
         form,
         diverted,
         policy,
-        cached,
-        return_cache=True,
+        **({**support_options, "return_cache": True} if cache_geometry else {}),
     )
     (
         area,
@@ -3808,17 +3827,7 @@ def refresh_at_stationary_points(
     else:
         boundary, level, wall_stable = lane_contact(None)
     coefficient = field.sampled_coefficient(geometry)
-    (
-        area,
-        intervals,
-        fragment_valid,
-        required,
-        fragments,
-        _,
-        _,
-        saddle,
-        keys,
-    ) = _fragments_at_level(
+    arguments = (
         geometry,
         coefficient,
         sigma,
@@ -3826,9 +3835,24 @@ def refresh_at_stationary_points(
         form,
         decision.normal_form_cells,
         policy,
-        decision if reuse_geometry else None,
-        return_cache=True,
     )
+    geometry_update = {}
+    if decision.cell_fragments is None:
+        area, intervals, fragment_valid, required, *_ = _fragments_at_level(*arguments)
+    else:
+        area, intervals, fragment_valid, required, fragments, _, _, saddle, keys = (
+            _fragments_at_level(
+                *arguments,
+                decision if reuse_geometry else None,
+                return_cache=True,
+                cache_geometry=True,
+            )
+        )
+        geometry_update = dict(
+            cell_fragments=fragments,
+            saddle_fragments=saddle,
+            fragment_geometry=keys,
+        )
     membership = (
         jnp.sum(jnp.where(decision.fragment_selected, area, 0.0), axis=1)
         / geometry.full_area
@@ -3866,9 +3890,7 @@ def refresh_at_stationary_points(
         valid=valid,
         qualified=decision.qualified & valid,
         required_fragments=required,
-        cell_fragments=fragments,
-        saddle_fragments=saddle,
-        fragment_geometry=keys,
+        **geometry_update,
     )
 
 

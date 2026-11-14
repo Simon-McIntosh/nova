@@ -27,9 +27,10 @@ def program():
         "        topology._fragment_coefficients = lambda _v, values: values\n"
         "        original_fragments = topology._fragments_at_level\n"
         "        def uncached(geometry, coefficient, sigma, level, form, "
-        "represented, policy, cached=None, *, return_cache=False):\n"
+        "represented, policy, cached=None, *, return_cache=False, **options):\n"
         "            return original_fragments(geometry, coefficient, sigma, "
-        "level, form, represented, policy, None, return_cache=return_cache)\n"
+        "level, form, represented, policy, None, "
+        "return_cache=return_cache, **options)\n"
         "        topology._fragments_at_level = uncached\n"
         "    assert jax.config.jax_enable_x64 is True",
     )

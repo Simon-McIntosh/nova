@@ -372,6 +372,7 @@ def read(
             policy,
             stencil.solved,
             cached=None if tracking is None else tracking.reading,
+            cache_geometry=True,
         )
 
     if tracking is None:
@@ -444,6 +445,7 @@ def _rebuilt_reading(
             policy,
             stencil.solved,
             cached=cached_geometry,
+            cache_geometry=True,
         )
     return topology.refresh_at_stationary_points(
         field,

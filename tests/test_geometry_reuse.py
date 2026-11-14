@@ -22,7 +22,9 @@ pytestmark = pytest.mark.timeout(1800)
 @pytest.fixture(scope="module")
 def case():
     args = small_case()
-    decision = jax.jit(topology.read_at_stationary_points)(*args)
+    decision = jax.jit(
+        lambda *a: topology.read_at_stationary_points(*a, cache_geometry=True)
+    )(*args)
     jax.block_until_ready(decision)
     assert bool(decision.valid)
     return (*args, decision)
@@ -137,7 +139,9 @@ def test_capacity_change_rebuilds_complete_fragment_records(case):
     # Ownership capacity also changes with a full read; a refresh requires that
     # compatible ownership rather than broadcasting the smaller selection.
     full = jax.jit(topology.read_at_stationary_points)(*args[:5], cached=decision)
-    reference = jax.jit(topology.read_at_stationary_points)(*args[:5])
+    reference = jax.jit(
+        lambda *a: topology.read_at_stationary_points(*a, cache_geometry=True)
+    )(*args[:5])
     assert_read_equal(full, reference)
     assert full.cell_fragments.area.shape[-1] == 3
 
@@ -209,3 +213,42 @@ def test_identical_lowered_programs_are_refused():
         compare(off, off)
     with pytest.raises(ValueError, match="disagree"):
         compare(off, [receipt("reuse", 8.0), receipt("reuse", 9.0)])
+
+
+def test_uniform_sign_certificate_preserves_raw_conic_support():
+    vertices = jnp.asarray([[-1.0, -1.0], [1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]])
+    coefficient = jnp.asarray(
+        [
+            [1.0, 0.1, 0.1, 0.1, 0.1, 0.1],
+            [-1.0, 0.1, 0.1, 0.1, 0.1, 0.1],
+            [0.05, 1.0, 0.0, 0.0, 0.0, 0.0],
+            [-0.1, 0.0, 0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        ],
+        dtype=jnp.float64,
+    )
+    cells = jnp.broadcast_to(vertices, (len(coefficient), *vertices.shape))
+    canonical = jax.jit(topology._fragment_coefficients)(cells, coefficient)
+    np.testing.assert_array_equal(canonical[:2, 0], [1.0, -1.0])
+    np.testing.assert_array_equal(canonical[:2, 1:], 0.0)
+    np.testing.assert_array_equal(canonical[2:], coefficient[2:])
+    evaluate = jax.jit(
+        jax.vmap(lambda c: topology.quadratic_cell_fragments(vertices, 4, c))
+    )
+    actual, expected = evaluate(canonical), evaluate(coefficient)
+    np.testing.assert_allclose(
+        actual.area.sum(axis=-1), expected.area.sum(axis=-1), atol=1e-12, rtol=1e-12
+    )
+    np.testing.assert_array_equal(actual.required, expected.required)
+    np.testing.assert_array_equal(actual.valid, expected.valid)
+    for result in (actual, expected):
+        assert np.all(result.valid)
+
+    def lengths(result):
+        return (result.edge_interval[..., 1] - result.edge_interval[..., 0]).sum(
+            axis=(1, 3)
+        )
+
+    np.testing.assert_allclose(
+        lengths(actual), lengths(expected), atol=1e-12, rtol=1e-12
+    )

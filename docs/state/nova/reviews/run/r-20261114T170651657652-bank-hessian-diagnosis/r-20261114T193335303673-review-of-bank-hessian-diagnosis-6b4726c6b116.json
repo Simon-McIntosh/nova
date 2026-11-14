@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's suite fence was unarmed and its manifest names no baseline_suite or after_suite gate log, so no suite arm exists to derive a delta from; the run's own gates are the reporting arms report-positive.log (EXIT=0) and report-negative.log (EXIT=1), neither of which is a pytest suite",
+  "call_sites": [
+    "nova/equilibrium/topology.py:BiotMomentCoupling.value_gradient",
+    "nova/equilibrium/topology.py:BiotMomentCoupling.evaluate",
+    "scripts/prototypes/read_route/jets.py:_source_jets"
+  ],
+  "completed_at": "2026-11-14T20:10:03.534Z",
+  "dispatched_at": "2026-11-14T19:48:29Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_hessian_diagnosis/report.py",
+      "line": 230,
+      "severity": "non-blocking",
+      "text": "non-blocking: methods names the reference as `total`, so row[\"gradient_relative\"][\"reference\"] (report.py:270), row[\"hessian_relative\"][\"reference\"] (report.py:273) and row[\"plasma_gradient_relative\"][\"reference\"] (report.py:286) subtract the reference from itself and are identically 0.0 in receipt.json and in the manifest's evidence_inputs; a reader sees a measured zero reference error where no measurement was taken"
+    },
+    {
+      "file": "scripts/prototypes/bank_hessian_diagnosis/report.py",
+      "line": 76,
+      "severity": "non-blocking",
+      "text": "non-blocking: coil_reference returns the cached coil-stencils.npz as soon as the file exists, with no digest, revision or input binding checked, so a rerun after any change to the points, the coils or the reference helper silently reuses the earlier stencils and the coil positive control then validates stale numbers"
+    },
+    {
+      "file": "scripts/prototypes/bank_hessian_diagnosis/report.py",
+      "line": 107,
+      "severity": "non-blocking",
+      "text": "non-blocking: the per-batch coil-direct-<first>.npz cache is read back on existence alone (report.py:108), the same unbound-cache hazard as the coil stencil cache, and here it also hides a partial batch if a run died between batches"
+    },
+    {
+      "file": "scripts/prototypes/bank_hessian_diagnosis/measure.py",
+      "line": 55,
+      "severity": "non-blocking",
+      "text": "non-blocking: the same three-step central-difference Richardson extrapolation is written out five times inside this node, at measure.py:55, report.py:124, cell.py:167, projected.py:87 and terms.py:68; no repository owner for it exists so this is not a fork of an existing capability, but one helper in the node would remove four transcription sites the diagnosis depends on being identical"
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to decide whether the bank and direct-kernel plasma Hessians or the independent Richardson reference is wrong at 64 retained nodes of three ITER states and to localise the mechanism to a function; scripts/prototypes/bank_hessian_diagnosis/report.py:230-300 assembles that comparison and report.py:322 names nova/biot/polygonanalytic.py:_packed_moments_height_tangent with the line read from inspect.getsourcelines.\nVERDICT done_when: all three clauses are answered, (i) and (ii) in receipt.json states[].gradient_relative and .trace, (iii) in receipt.json cells, the coil positive control and 1e-6 psi_ZZ negative control in states[].control and .guard_accepted, plus the fragment and one SVG; the gate is /home/ITER/mcintos/Code/nova/.venv/bin/python -m scripts.prototypes.bank_hessian_diagnosis.report with EXIT=0 in report-positive.log and EXIT arms recorded.\nVERDICT write_paths: the manifest declares scripts/prototypes/bank_hessian_diagnosis, the bank-hessian-diagnosis fragment and figure directory, and git diff --stat aadd0dcc..6b4726c lists 11 files all inside those three with no product source.\nVERDICT manifest: read; tests names the report command, five test_logs, negative_control_log=report-negative.log, status complete, and its numbers reconcile with receipt.json.\nVERDICT diff: read commit by commit over 13 commits aadd0dcc..6b4726c, nine new diagnostic scripts plus two shell wrappers, one evidence fragment and one SVG; the last commit 6b4726c touches only the fragment and the figure.\nCALL_SITES: nova/equilibrium/topology.py:BiotMomentCoupling.value_gradient, nova/equilibrium/topology.py:BiotMomentCoupling.evaluate, scripts/prototypes/read_route/jets.py:_source_jets",
+  "review_run_id": "r-20261114T193335303673-review-of-bank-hessian-diagnosis-6b4726c6b116",
+  "reviewed_base_sha": "aadd0dcc408405bc060a30e013cd738deed42e5b",
+  "reviewed_head_sha": "6b4726c6b116f830fccb083a4dcf568027b9c3d2",
+  "reviewed_run_id": "r-20261114T170651657652-bank-hessian-diagnosis",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 14,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T20:39:32.605361+00:00",
+  "total": 96,
+  "verdicts": {
+    "diff": "read commit by commit over the 13 commits aadd0dcc..6b4726c: 2847 insertions across nine new diagnostic scripts plus two shell wrappers, one evidence fragment and one SVG; the last commit 6b4726c touches only the fragment and the figure",
+    "done_when": "all three clauses are answered: (i) and (ii) in receipt.json states[].gradient_relative and .trace, (iii) in receipt.json cells from cell.py, the coil positive control and the 1e-6 relative psi_ZZ negative control in states[].control and .guard_accepted, plus the fragment and one SVG; the gate asserting them is /home/ITER/mcintos/Code/nova/.venv/bin/python -m scripts.prototypes.bank_hessian_diagnosis.report, whose positive arm ends EXIT=0 in report-positive.log and whose mutation arm ends EXIT=1 in report-negative.log",
+    "goal": "the node's goal is to decide whether the bank and direct-kernel plasma Hessians or the independent Richardson reference is wrong at the 64 retained interior nodes of ITER states 220, 333 and 336 and to localise the mechanism to a function; scripts/prototypes/bank_hessian_diagnosis/report.py:230-300 assembles exactly that comparison and report.py:322 names nova/biot/polygonanalytic.py:_packed_moments_height_tangent with the line read from inspect.getsourcelines rather than typed",
+    "manifest": "read; it names tests=/home/ITER/mcintos/Code/nova/.venv/bin/python -m scripts.prototypes.bank_hessian_diagnosis.report, five test_logs, negative_control_log=report-negative.log and status complete, and its numbers reconcile with receipt.json which I opened under /home/ITER/mcintos/.cache/nova-hessian-diagnosis/",
+    "write_paths": "the manifest declares scripts/prototypes/bank_hessian_diagnosis, the bank-hessian-diagnosis fragment and the bank-hessian-diagnosis figure directory; git diff --stat aadd0dcc..6b4726c lists exactly 11 files and every one lies inside those three, with no product source touched"
+  }
+}

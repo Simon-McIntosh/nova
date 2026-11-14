@@ -22,7 +22,7 @@ def main():
         ["git", "-C", str(tree), "rev-parse", "HEAD"], text=True
     ).strip()
     with tempfile.TemporaryDirectory(prefix="edge-receipt-control-") as temporary:
-        root = Path(temporary)
+        root = Path(temporary) / "cohort"
         folder = root / "edge/frame-137-diverted"
         folder.mkdir(parents=True)
         for name in ("row.log", "receipt.json", "spatial.json", "source-inputs.json"):
@@ -53,9 +53,50 @@ def main():
         assert result.returncode == 1
         assert 'assert table["values"][-1] != 0' in output
         print(f"CONTROL: zero boundary profile refused; log={args.log}")
-        print(
-            f"Removing only the four copied receipt files and their directory: {root}"
+        last = root / "edge/frame-179-limited"
+        last.mkdir(parents=True)
+        for name in ("row.log", "spatial.json"):
+            shutil.copy2(args.input / "edge/frame-179-limited" / name, last / name)
+        failed = root / "inactive-field-import-failure"
+        failed.mkdir()
+        shutil.copy2(
+            args.input / "inactive-field-import-failure/control.log",
+            failed / "control.log",
         )
+        terminal = json.loads((last / "spatial.json").read_text())["terminal"]
+        lines = (args.input.parent / "titan-trace.log").read_text().splitlines()
+        kept = [
+            line
+            for line in lines
+            if not (
+                line.startswith("SPATIAL_SUMMARY ")
+                and json.loads(line.removeprefix("SPATIAL_SUMMARY "))["terminal"]
+                == terminal
+            )
+        ]
+        assert len(lines) - len(kept) == 1
+        (root.parent / "titan-trace.log").write_text("\n".join(kept) + "\n")
+        child = (
+            "import json,sys;from pathlib import Path;"
+            f"sys.path.insert(0,{str(Path(__file__).parent)!r});"
+            "from verify import completion;"
+            f"p=Path({str(root)!r});q=p/'edge/frame-179-limited';"
+            "completion(p,q,json.loads((q/'spatial.json').read_text()))"
+        )
+        command = [sys.executable, "-c", child]
+        result = subprocess.run(command, capture_output=True, text=True, check=False)
+        output = result.stdout + result.stderr
+        completion_log = args.log.with_name("completion-negative-control.log")
+        completion_log.write_text(
+            f"# revision: {revision}; tree: {tree}; command: {shlex.join(command)}\n"
+            "# mutation: remove exactly the completed last-row spatial summary\n"
+            + output
+            + f"EXIT={result.returncode}\n"
+        )
+        assert result.returncode == 1
+        assert "assert len(matched) == 1" in output
+        print(f"CONTROL: incomplete failed-tail trace refused; log={completion_log}")
+        print(f"Removing only isolated copied receipts and logs under {temporary}")
     print(f"Removed {temporary}; original receipts preserved")
 
 

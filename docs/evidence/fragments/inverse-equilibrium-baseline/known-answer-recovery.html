@@ -192,7 +192,7 @@
     <tbody><tr><td>Solov’ev</td><td>6.972930892849655e-12</td><td>3.638822541848749e-12</td>
       <td>6.842768001085781e-13</td><td>3 (20 public evaluations)</td>
       <td>1.4002074134604718, 0.1985426888362674</td><td>none</td></tr>
-      <tr><td>MAST</td><td colspan="6">Smooth prescribed-profile generation and recovery pending.</td></tr>
+      <tr><td>MAST</td><td>2.6192848527042244e-12</td><td>1.5767330964925893e-12</td><td>1.548406600641063e-13</td><td>2 (15 public evaluations)</td><td>1.3996747707240698, 0.20226353155851567</td><td>none</td></tr>
       <tr><td>ITER</td><td colspan="6">Smooth prescribed-profile generation and recovery pending.</td></tr>
       <tr><td>Loop row 0 displaced 5 cm (H200)</td><td>0.006010064918571351</td><td>0.026684685706950432; largest row = 0</td><td colspan="4">Map clause fails as required; normal-recovery mutation arm running.</td></tr>
     </tbody>
@@ -279,4 +279,49 @@
     <code>smooth-generators/mast-generating-receipt.pkl</code>,
     <code>smooth-generators.log</code>, <code>inspect-iter-carrier.log</code>,
     and <code>iter-generators.log</code>.</p>
+</section>
+
+<section id="known-answer-recovery-mast-recovery">
+  <h2>MAST known-state recovery</h2>
+  <p>The qualified smooth prescribed MAST state is recovered within all three
+    acceptance limits. The generating profiles and conductor currents are
+    unchanged. Public initial evaluations with a 2% coefficient perturbation
+    were refused: the cold and continuation receipts have residuals
+    0.005723519607016031 and 7.816000733507186e-05, respectively, both
+    converged=false and ACTIVE_SET_STEP_REFUSED. The class refused those
+    unqualified receipts as designed; its guard was not changed.</p>
+  <p>The completed local recovery starts from coefficients perturbed by
+    −0.02% and +0.02%, seeded from the qualified generating state. Its first
+    qualified solved map is 0.00023979826592140666 of the generating flux
+    span away from the answer, so it begins outside the 1e-6 acceptance band.
+    Two fit updates recover amplitudes [1.000000000003756,
+    0.9999999999919689]. The plasma map sup/span is
+    2.6192848527042244e-12, whitened residual sup
+    1.5767330964925893e-12, and independent forward re-solve relative sup
+    1.548406600641063e-13 against its unchanged 1e-12 solve tolerance.
+    That independent solve uses the original cold-seed request with the
+    recovered source and no measurements. The response spectrum is
+    [1.3996747707240698, 0.20226353155851567]; no coefficient is undetermined.
+    The complete fit receipt records every whitened row residual and covariance.
+    The runner reports <code>1 passed in 536.41s (0:08:56)</code>.</p>
+  <figure>
+    <img src="/nova/figures/inverse-equilibrium-baseline/known-answer-recovery/mast.svg"
+      alt="Generating and recovered MAST poloidal flux contours on shared physical levels" />
+    <figcaption>The generating MAST map (grey) and recovered map (blue) use
+      the same twelve physical flux levels and the authored first wall (black).
+      Both null sets are drawn on each panel using the standard triangle/cross
+      vocabulary and coincide at this scale. Generating residual
+      5.751224516667312e-16, converged=true and qualified=true; recovered
+      residual 4.0665546789045466e-14, converged=true and qualified=true.
+      Text bounds and overlap checks passed, and the 1,400-pixel same-canvas
+      PNG was visually inspected before committing.</figcaption>
+  </figure>
+  <p>Evidence beneath the run directory: <code>mast-seed-check/</code> contains
+    both refused initial public receipts; <code>mast-continuation-recovery/</code>
+    contains the qualified initial, fit, terminal and independent forward
+    receipts and machine-readable diagnostics; <code>mast-continuation-recovery.log</code>
+    is the complete H200 correctness log. The current-head whole focused gate
+    is running on Titan/P100 after the real H200 full-file requests could not
+    admit alongside the case run. Device-qualified correctness is reported
+    separately from timing.</p>
 </section>

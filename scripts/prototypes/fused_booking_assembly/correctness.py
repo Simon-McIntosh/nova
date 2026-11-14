@@ -19,6 +19,7 @@ def main():
     parser.add_argument("revision")
     parser.add_argument("output", type=Path)
     parser.add_argument("--baseline", action="store_true")
+    parser.add_argument("--node-only", action="store_true")
     args = parser.parse_args()
     args.output.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(
@@ -55,6 +56,8 @@ def main():
         ]
         if not args.baseline:
             tests.insert(0, "tests/test_fused_booking_assembly.py")
+        if args.node_only:
+            tests = ["tests/test_fused_booking_assembly.py"]
 
         def execute(label, selected):
             command = [
@@ -79,6 +82,21 @@ def main():
                     f"# module: {tree}/nova/equilibrium/current.py\n# cwd: {tree}\n"
                 )
                 stream.flush()
+                subprocess.run(
+                    [
+                        PYTHON,
+                        "-c",
+                        "from pathlib import Path; "
+                        "from nova.equilibrium import current; "
+                        "print('IMPORTED_MODULE', current.__file__, flush=True); "
+                        "print('RESOLVED_CWD', Path.cwd().resolve(), flush=True)",
+                    ],
+                    cwd=tree,
+                    env=env,
+                    stdout=stream,
+                    stderr=subprocess.STDOUT,
+                    check=True,
+                )
                 result = subprocess.run(
                     command, cwd=tree, env=env, stdout=stream, stderr=subprocess.STDOUT
                 )
@@ -102,10 +120,14 @@ def main():
             print("ARM", label, "EXIT", result.returncode, flush=True)
             return result.returncode
 
-        if execute("baseline" if args.baseline else "focused", tests):
+        label = (
+            "baseline" if args.baseline else "after" if args.node_only else "focused"
+        )
+        if execute(label, tests):
             raise SystemExit(1)
         if not args.baseline:
-            execute("after", ["tests/test_fused_booking_assembly.py"])
+            if not args.node_only:
+                execute("after", ["tests/test_fused_booking_assembly.py"])
             path = tree / "nova/equilibrium/current.py"
             source = path.read_text()
             marker = "response = jnp.concatenate((primal[None], response), axis=0)"

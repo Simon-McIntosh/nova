@@ -178,3 +178,64 @@ def test_newton_step_matches_separate_booking(physical):
         actual.factor.matrix, expected.factor.matrix, rtol=1e-14, atol=1e-14
     )
     assert bool(actual.converged) and bool(expected.converged)
+
+
+def test_fused_partial_conic_tile(physical):
+    from tests.test_booking_scalar_tile import _population
+
+    bank, state, support = physical
+    psi = support_read.nodal_jets(bank, state)[bank.sample_index, 0]
+    psi, reading, geometry = _population((bank, support, psi), 137)
+    profile = SmoothDensity()
+    rule = current.Quadrature(segments=8, target_current=3.7)
+    expected = jax.jit(current.book)(psi, reading, geometry, profile, rule)
+    direction = jnp.ones((2, *psi.shape), dtype=psi.dtype)
+    field_rate = jnp.zeros((2, len(psi), 6), dtype=psi.dtype)
+    level_rate = jnp.zeros(2, dtype=psi.dtype)
+
+    def evaluate(value, reading, geometry, profile, rule, booked):
+        return current.book_tangent_channels(
+            value,
+            direction,
+            reading,
+            field_rate,
+            level_rate,
+            level_rate,
+            geometry,
+            profile,
+            profile.density_gradient,
+            rule,
+            booked,
+            jnp.array([0]),
+            fuse_booking=booked is None,
+        )
+
+    separate_channels = jax.jit(evaluate)(
+        psi, reading, geometry, profile, rule, expected
+    )
+    actual, fused_channels = jax.jit(evaluate)(
+        psi, reading, geometry, profile, rule, None
+    )
+    assert bool(actual.valid)
+    for a, e in zip(actual[:3], expected[:3], strict=True):
+        np.testing.assert_allclose(a, e, rtol=1e-14, atol=1e-14)
+    np.testing.assert_allclose(
+        fused_channels, separate_channels, rtol=1e-14, atol=1e-14
+    )
+
+
+def test_fused_invalid_read_refuses_finite_moments(physical):
+    bank, state, support = physical
+    support = support._replace(
+        reading=support.reading._replace(valid=jnp.asarray(False))
+    )
+    profile = SmoothDensity()
+    rule = current.Quadrature(segments=8, target_current=3.7)
+    booked, channels = jax.jit(
+        lambda b, m, s, p, q: support_read.book_and_local_sensitivities(
+            b, m, s, p, p.density_gradient, q
+        )
+    )(bank, state, support, profile, rule)
+    assert not bool(booked.valid)
+    assert all(not np.any(np.isfinite(np.asarray(value))) for value in booked[:3])
+    assert not np.any(np.isfinite(np.asarray(channels)))

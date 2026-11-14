@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -103,8 +103,9 @@
     its residual reported. The bands below are read against a fit of that configuration.</p>
     <p>The comparison the lead asked for: the inverse class and imas-efit answer the same question from the
     same inputs. The case set is read from imas-efit's own committed cases through IMAS, at the data
-    dictionary version each was written in: the MAST-U 45272 slice, one TCV slice and one ITER scenario
-    slice, none with an iron core. imas-efit carries no MAST case, and the lead chose its MAST-U case on
+    dictionary version each was written in: one slice of the MAST-U 45272 magnetics-only reference
+    (imas-efit's EPM case, with monomial p′ and FF′; its EPQ case adds MSE and a spline basis and is not
+    used), one TCV slice and one ITER scenario slice, none with an iron core. imas-efit carries no MAST case, and the lead chose its MAST-U case on
     2026-11-14 so that a stored imas-efit equilibrium exists for every case. For each case the class fits the same number of profile coefficients imas-efit fitted,
     with the conductor currents treated as the locked decision <code>fitted-unknowns</code> directs, and
     the vertical position held as the locked decision <code>vertical-freedom</code> directs.</p>
@@ -119,8 +120,9 @@
     split into a fit part and a forward part by one further run per case: imas-efit's fitted p′ and FF′ are
     solved forward by nova with no data, and the table reports nova-forward against imas-efit and
     nova-inverse against nova-forward separately. (3) Negative control, constructed to
-    fire under either option of <code>fitted-unknowns</code>: the fit rerun with every magnetics row and the
-    measured plasma current scaled by 1.10 leaves the 1.5 % plasma-current band on every case. The evidence record
+    fire under either option of <code>fitted-unknowns</code>: the fit rerun with every magnetics row, the
+    measured plasma current, and the measured conductor currents with their uncertainties all scaled by
+    1.10 leaves the 1.5 % plasma-current band on every case. The evidence record
     carries, per case, line-contour flux panels of the nova state beside the imas-efit state on shared
     levels, with both null sets and the wall, under the repository plotting rules.</p>
 

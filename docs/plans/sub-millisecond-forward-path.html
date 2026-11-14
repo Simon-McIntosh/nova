@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="338">
+<meta name="plan-version" content="339">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -1076,6 +1076,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261113T165038806629-iter-bank" data-who="reckon-build" data-when="2026-11-14T14:58:12Z">
     <div class="r-comment-body"><p>ITER bank qualifies under the authorized 1e-8 plasma Hessian and unchanged 1e-10 flux/gradient/coil budgets at three retained states. H200 build 597.683326 s, H200 reload 0.145668 s, updated-head CPU reload 0.236633 s with eight persisted fields verified. Paired CPU head 61 passed/2 skipped, existing-file base 34 passed/2 skipped, zero added failures; final-head ITER gate 13 passed. Dropped PF1 produces six distinct failing cases. Bucket 2048 uses 165902864 dense bytes; ordered storage probe fits 392071/refuses 392072, excluding solver workspace and a fresh-process maximum claim. Evidence: docs/evidence/fragments/sub-millisecond-forward-path/iter-bank.html#iter-bank-record.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261114T163157219568-review-of-bank-hessian-boundary-cc44a9229f86" data-who="reckon-build" data-when="2026-11-14T19:39:06.695Z">
+    <div class="r-comment-body"><p>Independent review of r-20261114T144425418254-bank-hessian-boundary at 975f3e98cf..cc44a9229f: scores 19/17/20/9/18/17, three non-blocking findings, no added suite failures; the boundary-artefact refutation holds and its declared negative control is arithmetic on the reference rather than on the measured route.</p></div>
 </div>
 </section>
 </main>

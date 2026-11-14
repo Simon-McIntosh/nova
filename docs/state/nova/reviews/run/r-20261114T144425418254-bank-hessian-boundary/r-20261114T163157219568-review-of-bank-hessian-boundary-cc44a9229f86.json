@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-14T19:39:06.695Z",
+  "dispatched_at": "2026-11-14T19:18:08Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_hessian_boundary/report.py",
+      "line": "145",
+      "severity": "non-blocking",
+      "text": "the declared 1e-6 psi_ZZ perturbation control copies the reference array, multiplies the copy by 1.000001 and compares it with that same reference, so its relative error is algebraically 1.000000e-6 and the assertion at :200 fails only if the threshold or relative() breaks; the measured route values are never perturbed, so a regressed psi_ZZ measurement path would still produce the same refusal, and inspect.py:90-96 repeats the same shape."
+    },
+    {
+      "file": "scripts/prototypes/bank_hessian_boundary/gate.sh",
+      "line": "31",
+      "severity": "non-blocking",
+      "text": "the gate runs inspect, limits and both report arms but never invokes document.py, so the evidence fragment that is the done_when deliverable is the one artefact no gate step regenerates or compares against receipt.json, and a later receipt re-run would leave it silently stale."
+    },
+    {
+      "file": "scripts/prototypes/bank_hessian_boundary/limits.py",
+      "line": "23",
+      "severity": "non-blocking",
+      "text": "clearance() restates the point-to-segment distance loop that inspect.py:29-37 already computes for the same polygons, so the two files carry two copies of one geometric primitive that a shared helper would own."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from 975f3e98cf to cc44a9229f; seven commits add 949 lines across inspect.py, limits.py, report.py, corners.py, document.py, gate.sh and the evidence fragment, all additive, with the receipt inputs pinned by SHA256 (report.py:185-190).",
+    "done_when": "the fragment docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-boundary.html:3 states the order-one error is not a source-boundary sampling artefact and cites the numerical receipt at :115; its quoted numbers reconcile with that receipt, but no gate assertion regenerates or checks it.",
+    "goal": "the goal is to measure each retained Hessian route against the independent estimate separately at interior and at source-cell boundary nodes using one-sided limits; scripts/prototypes/bank_hessian_boundary/report.py:60-121 reports per-route interior errors and per-route lower/upper/average boundary errors for states 220, 333 and 336.",
+    "manifest": "read in full; it names the seven commits, the revision-pinned gate command, and the report-positive, report-negative and completion/measure, limits and split logs, all present on disk and ending EXIT=0 except report-negative.log which ends EXIT=1 as declared; it also records the two incomplete measurement attempts rather than presenting them as passing.",
+    "write_paths": "read the manifest's declared paths and each of the seven commits; all seven changed paths (six files under scripts/prototypes/bank_hessian_boundary/ and the evidence fragment) lie inside the declared scope, and nothing outside it changed."
+  },
+  "justifications": {
+    "durability": "no committed test reaches scripts/prototypes/bank_hessian_boundary, and the declared negative control at report.py:143-151 perturbs the reference array and compares it with itself, so no committed check reddens if the measurement path regresses.",
+    "evidence": "docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-boundary.html:3 states the refutation over 64 interior and 92 boundary nodes and cites the receipt, whose recorded interior errors (0.557329 RZ, 0.265106 ZZ at state 220) match the table, though gate.sh:31-33 never regenerates the fragment.",
+    "fit": "the drivers follow the neighbouring prototype idiom and import the owning helpers nova.biot.greens.second_moments and section_centroid (corners.py:12), ruff reports no finding over the six files, and the added identifiers carry no plan or ticket label.",
+    "goal_fidelity": "scripts/prototypes/bank_hessian_boundary/report.py:78-121 emits the interior per-route discrepancy and the boundary lower/upper/average comparison for both routes at all three states, which is the goal's three clauses.",
+    "reuse": "corners.py:12 extends nova.biot.greens rather than forking it and limits.py:18-20 reuses the referenced prototype, but limits.py:23-30 restates the point-to-segment clearance loop that inspect.py:29-37 already carries.",
+    "scope_discipline": "every path in the 975f3e98cf..cc44a9229f diff sits inside the three declared write paths, and no plan, product source or test file is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to measure each retained Hessian route against the independent estimate separately at interior and at source-cell boundary nodes using one-sided limits; scripts/prototypes/bank_hessian_boundary/report.py:60-121 reports per-route interior errors and per-route lower/upper/average boundary errors for states 220, 333 and 336.\nVERDICT done_when: the fragment docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-boundary.html:3 states the order-one error is not a source-boundary sampling artefact and cites the numerical receipt at :115; its quoted numbers reconcile with that receipt, but no gate assertion regenerates or checks it.\nVERDICT write_paths: read the manifest's declared paths and each of the seven commits; all seven changed paths (six files under scripts/prototypes/bank_hessian_boundary/ and the evidence fragment) lie inside the declared scope, and nothing outside it changed.\nVERDICT manifest: read in full; it names the seven commits, the revision-pinned gate command, and the report-positive, report-negative and completion/measure, limits and split logs, all present on disk and ending EXIT=0 except report-negative.log which ends EXIT=1 as declared; it also records the two incomplete measurement attempts rather than presenting them as passing.\nVERDICT diff: read commit by commit from 975f3e98cf to cc44a9229f; seven commits add 949 lines across inspect.py, limits.py, report.py, corners.py, document.py, gate.sh and the evidence fragment, all additive, with the receipt inputs pinned by SHA256 (report.py:185-190).\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/prototypes/bank_hessian_boundary/report.py:78-121 emits the interior per-route discrepancy and the boundary lower/upper/average comparison for both routes at all three states, which is the goal's three clauses.\nSCORE evidence: 17\nJUSTIFICATION evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-boundary.html:3 states the refutation over 64 interior and 92 boundary nodes and cites the receipt, whose recorded interior errors (0.557329 RZ, 0.265106 ZZ at state 220) match the table, though gate.sh:31-33 never regenerates the fragment.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the 975f3e98cf..cc44a9229f diff sits inside the three declared write paths, and no plan, product source or test file is touched.\nSCORE durability: 9\nJUSTIFICATION durability: no committed test reaches scripts/prototypes/bank_hessian_boundary, and the declared negative control at report.py:143-151 perturbs the reference array and compares it with itself, so no committed check reddens if the measurement path regresses.\nSCORE fit: 18\nJUSTIFICATION fit: the drivers follow the neighbouring prototype idiom and import the owning helpers nova.biot.greens.second_moments and section_centroid (corners.py:12), ruff reports no finding over the six files, and the added identifiers carry no plan or ticket label.\nSCORE reuse: 17\nJUSTIFICATION reuse: corners.py:12 extends nova.biot.greens rather than forking it and limits.py:18-20 reuses the referenced prototype, but limits.py:23-30 restates the point-to-segment clearance loop that inspect.py:29-37 already carries.\nFINDING scripts/prototypes/bank_hessian_boundary/report.py:145 non-blocking: the declared 1e-6 psi_ZZ perturbation control copies the reference array, multiplies the copy by 1.000001 and compares it with that same reference, so its relative error is algebraically 1.000000e-6 and the assertion at :200 fails only if the threshold or relative() breaks; the measured route values are never perturbed, so a regressed psi_ZZ measurement path would still produce the same refusal, and inspect.py:90-96 repeats the same shape.\nFINDING scripts/prototypes/bank_hessian_boundary/gate.sh:31 non-blocking: the gate runs inspect, limits and both report arms but never invokes document.py, so the evidence fragment that is the done_when deliverable is the one artefact no gate step regenerates or compares against receipt.json, and a later receipt re-run would leave it silently stale.\nFINDING scripts/prototypes/bank_hessian_boundary/limits.py:23 non-blocking: clearance() restates the point-to-segment distance loop that inspect.py:29-37 already computes for the same polygons, so the two files carry two copies of one geometric primitive that a shared helper would own.\n",
+  "review_run_id": "r-20261114T163157219568-review-of-bank-hessian-boundary-cc44a9229f86",
+  "reviewed_base_sha": "975f3e98cfa2b2976d2bbe1b94ead37f8623b529",
+  "reviewed_head_sha": "cc44a9229f86ba82740296760ba60e4cf06d780b",
+  "reviewed_run_id": "r-20261114T144425418254-bank-hessian-boundary",
+  "scores": {
+    "durability": 9,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T20:35:07.123723+00:00",
+  "total": 100
+}

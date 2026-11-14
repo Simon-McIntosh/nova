@@ -17,6 +17,24 @@ from tests.biot.test_kernel_compile_cost import _baseline_kernel, _geometry, _po
 assert jax.config.jax_enable_x64 is True
 
 
+def _byte_differences(actual, expected, points, *, report):
+    actual, expected = map(np.ascontiguousarray, (actual, expected))
+    assert actual.dtype == expected.dtype == np.float64
+    different = actual.view(np.uint64) != expected.view(np.uint64)
+    if report:
+        for index in np.argwhere(different)[:3]:
+            key = tuple(index)
+            observed, reference = float(actual[key]), float(expected[key])
+            print(
+                f"BYTE_DIFFERENCE point={points[index[0]].tolist()} "
+                f"component={index[1:].tolist()} actual={observed:.17g} "
+                f"reference={reference:.17g} actual_hex={observed.hex()} "
+                f"reference_hex={reference.hex()} "
+                f"zero_sign_only={observed == reference == 0.0}"
+            )
+    return int(np.count_nonzero(different))
+
+
 @pytest.mark.skipif(
     jax.default_backend() != "gpu", reason="large identity gate requires a GPU"
 )
@@ -48,6 +66,7 @@ def test_packed_moment_primal_and_tangent_identity():
 
     points = _points()
     maxima = []
+    different = 0
     with _baseline_kernel() as baseline:
         before, after = program(baseline), program(polygonanalytic)
         for chunk in np.split(points, 100):
@@ -55,13 +74,17 @@ def test_packed_moment_primal_and_tangent_identity():
             actual = jax.tree.map(np.asarray, after(jnp.asarray(chunk)))
             assert np.all(np.isfinite(expected[0]))
             assert np.all(np.isfinite(expected[1]))
-            assert actual[0].tobytes() == expected[0].tobytes()
+            different += _byte_differences(
+                actual[0], expected[0], chunk, report=different == 0
+            )
             maxima.append(float(relative_error(actual[1], expected[1]).max()))
     maximum = max(maxima)
     print(
-        f"IDENTITY packed points={len(points)} primal_bit_identical=True "
+        f"IDENTITY packed points={len(points)} primal_bit_identical={different == 0} "
+        f"different_elements={different} "
         f"tangent_max_relative={maximum:.17g}"
     )
+    assert different == 0
     assert maximum <= 1e-9
 
 
@@ -105,6 +128,8 @@ def test_production_source_rows_preserve_jet_identity():
     )
     points = _points()
     maximum = 0.0
+    different = 0
+    point_scaled = 0.0
     with _baseline_kernel() as baseline:
         namespace = {
             "jax": jax,
@@ -129,12 +154,22 @@ def test_production_source_rows_preserve_jet_identity():
             expected = np.asarray(before(jnp.asarray(chunk)))
             actual = np.asarray(after(jnp.asarray(chunk)))
             assert np.all(np.isfinite(expected))
-            assert actual[..., :3].tobytes() == expected[..., :3].tobytes()
+            different += _byte_differences(
+                actual[..., :3], expected[..., :3], chunk, report=different == 0
+            )
             maximum = max(
                 maximum, float(relative_error(actual[..., 3:], expected[..., 3:]).max())
             )
+            scale = np.max(np.abs(expected[..., 3:]), axis=(1, 2, 3))
+            scaled = np.abs(actual[..., 3:] - expected[..., 3:]) / np.maximum(
+                scale[:, None, None, None], np.finfo(float).tiny
+            )
+            point_scaled = max(point_scaled, float(scaled.max()))
     print(
         f"IDENTITY production points={len(points)} "
-        f"value_gradient_bit_identical=True hessian_max_relative={maximum:.17g}"
+        f"value_gradient_bit_identical={different == 0} different_elements={different} "
+        f"hessian_max_relative={maximum:.17g} "
+        f"hessian_point_scaled_information={point_scaled:.17g}"
     )
+    assert different == 0
     assert maximum <= 1e-9

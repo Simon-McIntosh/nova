@@ -6,6 +6,7 @@ import argparse
 from dataclasses import replace
 import json
 from pathlib import Path
+import re
 
 import matplotlib
 
@@ -23,12 +24,28 @@ from scripts.prototypes.diiid_xpoint_offset.style import (
     REFERENCE,
     SOLVED,
     WALL,
-    save,
+    save as checked_save,
 )
 
 ROWS = ((137, "diverted"), (146, "diverted"), (146, "limited"), (179, "limited"))
 LEVELS = np.array([-0.02, 0.0, 0.02, 0.2, 0.6, 1.0, 1.6, 2.0])
 REFUSED = "#bf3446"
+
+
+def save(figure, axes, notes, output, preview):
+    """Keep the common physical width when a stacked trace needs more height."""
+    checked_save(figure, axes, notes, output, preview)
+    width, height = figure.get_size_inches()
+    text = re.sub(
+        r'(<svg\b[^>]*\bwidth=")[^"]+', r"\g<1>31.1cm", output.read_text(), count=1
+    )
+    text = re.sub(
+        r'(<svg\b[^>]*\bheight=")[^"]+',
+        rf"\g<1>{31.1 * height / width:.5f}cm",
+        text,
+        count=1,
+    )
+    output.write_text(text)
 
 
 def case_folder(root, frame, branch):
@@ -79,7 +96,7 @@ def panel(root, frame, branch, output, previews, name=None):
     figure, axes = plt.subplots(1, 2, figsize=CANVAS, dpi=100)
     figure.subplots_adjust(left=0.03, right=0.97, top=0.81, bottom=0.14, wspace=0.2)
     for ax, marks, color, marker in zip(
-        axes, (changed, refused), (SOLVED, REFUSED), ("s", "o"), strict=True
+        axes, (changed, refused), (WALL, REFUSED), ("s", "o"), strict=True
     ):
         poloidal_axes(ax)
         radius, height = np.linspace(0.9, 2.4, 111), np.linspace(-1.45, 1.35, 151)
@@ -160,11 +177,11 @@ def panel(root, frame, branch, output, previews, name=None):
                 *marks.T,
                 ls="none",
                 marker=marker,
-                ms=6,
+                ms=4 if ax is axes[0] else 6,
                 mfc="none",
                 mec=color,
-                mew=1.3,
-                zorder=14,
+                mew=0.8 if ax is axes[0] else 1.3,
+                zorder=1 if ax is axes[0] else 14,
             )
         if ax is axes[1] and len(cutoff_points):
             ax.plot(
@@ -179,7 +196,7 @@ def panel(root, frame, branch, output, previews, name=None):
         Line2D(
             [],
             [],
-            color=SOLVED,
+            color=WALL,
             marker="s",
             mfc="none",
             ls="none",

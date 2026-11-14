@@ -26,7 +26,7 @@ from nova.equilibrium.solve_request import (
     ForwardSolveReceipt,
     ForwardSolveRequest,
 )
-from nova.equilibrium.source import PolynomialFluxFunction
+from nova.equilibrium.source import ForwardSource, PolynomialFluxFunction
 from nova.jax.config import configure_dtypes
 
 if TYPE_CHECKING:
@@ -40,7 +40,9 @@ __all__ = ["MagneticsFit", "MagneticsFitReceipt"]
 class MagneticsFitReceipt:
     """One terminal fit, with row residuals and data identifiability.
 
-    Coefficients concatenate ascending-power pressure and diamagnetic vectors.
+    Coefficients use the declared fitting basis. The default concatenates
+    ascending-power pressure and diamagnetic vectors; ``source_profile`` always
+    carries the recovered physical functions for an independent forward solve.
     Residuals keep the magnetics row order, with the plasma-current row last;
     excluded rows carry zero. Singular values describe the whitened,
     column-normalised response before regularisation. ``null_directions`` are
@@ -50,6 +52,7 @@ class MagneticsFitReceipt:
 
     coefficients: np.ndarray
     coefficient_names: tuple[str, ...]
+    source_profile: ForwardSource
     forward: ForwardSolveReceipt
     iterations: int
     singular_values: np.ndarray
@@ -71,6 +74,9 @@ class MagneticsFit:
     kernels then read it at ``magnetics`` coordinates. All forward evaluations,
     including finite-difference response columns and line-search trials, use
     the supplied request's public policy and fixed-shape source representation.
+    ``coefficient_basis`` optionally maps fitted coefficients to the concatenated
+    polynomial coefficients. It can declare fixed profile shapes with fitted
+    amplitudes, without introducing an unobserved polynomial direction.
     """
 
     def __init__(
@@ -79,6 +85,8 @@ class MagneticsFit:
         request: ForwardSolveRequest,
         magnetics: Magnetics,
         magnetic_source: Callable[[ForwardSolveReceipt], Biot],
+        *,
+        coefficient_basis: np.ndarray | None = None,
     ) -> None:
         configure_dtypes()
         assert jax.config.jax_enable_x64 is True
@@ -105,8 +113,31 @@ class MagneticsFit:
             )
             for order in range(function.coefficients.size)
         )
+        raw = np.r_[core.p_prime.coefficients, core.ff_prime.coefficients]
+        basis = (
+            np.eye(raw.size)
+            if coefficient_basis is None
+            else np.asarray(coefficient_basis, dtype=np.float64).copy()
+        )
+        if (
+            basis.ndim != 2
+            or basis.shape[0] != raw.size
+            or basis.shape[1] < 1
+            or not np.all(np.isfinite(basis))
+            or np.linalg.matrix_rank(basis) != basis.shape[1]
+        ):
+            raise ValueError("coefficient basis must have finite independent columns")
+        initial = np.linalg.lstsq(basis, raw, rcond=None)[0]
+        if not np.allclose(basis @ initial, raw, rtol=1e-12, atol=1e-12):
+            raise ValueError("the initial source must belong to the coefficient basis")
+        basis.setflags(write=False)
+        self._basis = basis
+        self._initial = initial
+        if coefficient_basis is not None:
+            self._names = tuple(f"basis_{index}" for index in range(basis.shape[1]))
 
     def _source(self, coefficients):
+        coefficients = self._basis @ coefficients
         source = self.request.source_profile
         core = source.core
         split = self._pressure_count
@@ -198,8 +229,7 @@ class MagneticsFit:
             raise ValueError("active measurement rows and scales must be finite")
         target = np.r_[np.where(mask, measured, 0.0), measurement.plasma_current]
         weight = np.r_[measurement.weight, 1.0 / plasma_current_scale]
-        core = self.request.source_profile.core
-        coefficients = np.r_[core.p_prime.coefficients, core.ff_prime.coefficients]
+        coefficients = self._initial.copy()
         forward, values = self._evaluate(coefficients, None)
         evaluations = 1
         iterations = 0
@@ -245,6 +275,7 @@ class MagneticsFit:
         return MagneticsFitReceipt(
             coefficients=coefficients,
             coefficient_names=self._names,
+            source_profile=self._source(coefficients),
             forward=forward,
             iterations=iterations,
             singular_values=spectrum,

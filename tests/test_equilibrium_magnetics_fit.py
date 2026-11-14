@@ -185,3 +185,495 @@ def test_unqualified_forward_state_is_refused_before_sensor_read(linear_fit):
         fitter.fit(measurement, plasma_current_scale=1.0)
     assert isinstance(caught.value.receipt, ForwardSolveReceipt)
     assert not caught.value.receipt.qualified
+
+
+def test_declared_basis_recovers_coefficients_and_a_resolvable_source(linear_fit):
+    fitter, measurement, truth, _ = linear_fit
+    basis = np.column_stack(([0.8, 0.1, 1.2], truth))
+    fitted = MagneticsFit(
+        fitter.profile,
+        fitter.request,
+        fitter.magnetics,
+        fitter.magnetic_source,
+        coefficient_basis=basis,
+    ).fit(measurement, plasma_current_scale=1.0)
+    assert fitted.converged
+    np.testing.assert_allclose(fitted.coefficients, [0.0, 1.0], atol=1e-10)
+    np.testing.assert_allclose(
+        np.r_[
+            fitted.source_profile.core.p_prime.coefficients,
+            fitted.source_profile.core.ff_prime.coefficients,
+        ],
+        truth,
+        atol=1e-10,
+    )
+    assert fitted.singular_values.shape == (2,)
+
+
+def test_dependent_basis_is_refused(linear_fit):
+    fitter, _, _, _ = linear_fit
+    with pytest.raises(ValueError, match="independent columns"):
+        MagneticsFit(
+            fitter.profile,
+            fitter.request,
+            fitter.magnetics,
+            fitter.magnetic_source,
+            coefficient_basis=np.ones((3, 2)),
+        )
+
+
+def _physical_problem(name):
+    """Load fixture-owned machine operands and declare a polynomial source."""
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    from nova.equilibrium.forward import ForwardProfile
+    from nova.equilibrium.forward_operator import ForwardFluxOperator
+    from nova.equilibrium.solve_request import ExplicitSolveSeed
+    from nova.equilibrium.source import project_domain_profile
+
+    if name == "solovev":
+        from benchmarks import solovev_certificate as lane
+        from benchmarks.profile_coefficients_recompile_audit import _scaled_source
+
+        kind = "moderate-rotation-conventional-static"
+        profile, _, request, _ = lane._certificate_compile_problem(kind, -300)
+        carrier, _, exact = lane._case(kind)
+        machine = lane._case_machine(kind, carrier, exact, -300)
+        source = _scaled_source(profile.source, 1.0, 1.0)
+        profile = ForwardProfile(
+            replace(profile.operator, source=source), profile.lattice
+        )
+        request = replace(
+            request, source_profile=source, target_current=None, vertical_pin="omit"
+        )
+        return profile, request, machine.node, machine.wall_node, machine.cell_polygons
+
+    if name == "mast":
+        from benchmarks import coil_edit_latency as cached
+        from benchmarks import efit_forward_parity_slice as lane
+        from benchmarks.mast_response_carrier_warm import DEFAULT_CARRIER
+        from nova.imas.mast_solve_inputs import SHOT_STORE
+
+        response, _ = cached._response_cache(DEFAULT_CARRIER)
+        case, context = lane._mast_case_from_selection(
+            SHOT_STORE,
+            dict(shot=22086, slice_index=43),
+            None,
+        )
+        case, declared, _ = lane._passive_inclusive_case(case, context, response)
+        old = declared.operator
+        operator = ForwardFluxOperator(
+            grid=old.grid,
+            wall=old.wall,
+            source=old.source,
+            external_current=old.external_current,
+            area=old.area,
+            polarity=old.polarity,
+            inside_material=old.inside_material,
+            use_linear_moments=False,
+            prescribed_current_field=old.prescribed_current_field,
+        )
+        profile = ForwardProfile(operator, declared.lattice)
+        seed = jnp.asarray(case["state"])
+        coordinate = np.asarray(profile.lattice.coordinate)
+        wall = np.asarray(profile.operator.wall.coordinate)
+        dr = float(profile.lattice.radial_step)
+        dz = float(profile.lattice.vertical_step)
+        corners = np.array([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]]) * [
+            dr,
+            dz,
+        ]
+        sections = tuple(point + corners for point in coordinate)
+        prescribed = old.prescribed_current_field.current
+        nodes = np.linspace(0.0, 1.0, 65)
+    else:
+        from tests import test_equilibrium_forward_reference as lane
+
+        case = lane.reference_case()
+        if isinstance(case, str):
+            raise RuntimeError(case)
+        machine = lane.cached_machine(case, -500, passive=True)
+        profile = lane.forward_profile(case, machine)
+        seed = lane.seed_flux(case, machine)
+        coordinate, wall, sections = (
+            machine.node,
+            machine.wall_node,
+            machine.cell_polygons,
+        )
+        prescribed = None
+        nodes = case.psi_norm
+    projection = project_domain_profile(
+        profile.source.core, nodes, order=6, maximum_order=6
+    )
+    source = replace(profile.source, core=projection.core())
+    profile = ForwardProfile(replace(profile.operator, source=source), profile.lattice)
+    request = ForwardSolveRequest.from_defaults(
+        carrier_identity=f"{name}-cached-polynomial-source",
+        source_profile=source,
+        seed_policy=ExplicitSolveSeed(seed),
+        prescribed_current=prescribed,
+        vertical_pin="omit",
+        policy_overrides=dict(kernel_tolerance=1e-12, qualification_tolerance=1e-12),
+    )
+    return profile, request, coordinate, wall, sections
+
+
+def _persist_forward(receipt, path):
+    """Persist the complete forward result before deriving any score."""
+    import copyreg
+    import pickle
+    from types import MappingProxyType
+    from nova.equilibrium.forward_operator import ForwardTopologyState
+
+    copyreg.pickle(type(MappingProxyType({})), lambda value: (dict, (dict(value),)))
+    copyreg.pickle(
+        ForwardTopologyState,
+        lambda value: (
+            ForwardTopologyState.tree_unflatten,
+            (None, value.tree_flatten()[0]),
+        ),
+    )
+    pending = path.with_suffix(".pending")
+    with pending.open("wb") as stream:
+        pickle.dump(receipt, stream)
+    pending.replace(path)
+
+
+class _PlasmaDiagnosticSource:
+    """Bind terminal cell currents to fixed authored diagnostic sections."""
+
+    def __init__(self, sections):
+        from nova.frame.coilset import CoilSet
+
+        self.biot = CoilSet(dcoil=-1, field_attrs=["Psi", "Br", "Bz"])
+        for index, section in enumerate(sections):
+            self.biot.coil.insert(
+                np.asarray(section),
+                nturn=1.0,
+                Ic=0.0,
+                name=f"cell_{index}",
+            )
+        for name in ("point", "probe", "poloidal_flux_loop"):
+            factory = getattr(self.biot, name)
+            self._cache_factory(factory)
+
+    @staticmethod
+    def _cache_factory(factory):
+        """Retain factory-owned Green tables while source currents vary."""
+        original = factory.solve
+        tables = {}
+
+        def solve(*args):
+            if args:
+                coordinates = np.asarray(args[0], dtype=np.float64)
+            else:
+                coordinates = np.column_stack(
+                    (factory.target["x"], factory.target["z"])
+                )
+            key = coordinates.shape, coordinates.tobytes()
+            if key not in tables:
+                original(*args)
+                tables[key] = factory.data.copy(deep=True)
+            else:
+                factory.data = tables[key]
+                factory.load_operators()
+
+        factory.solve = solve
+
+    def __call__(self, receipt):
+        self.biot.sALoc["Ic"] = np.asarray(receipt.terminal_state.cell_current)
+        return self.biot
+
+
+@pytest.fixture(scope="module")
+def physical_cases(tmp_path_factory):
+    """Keep each carrier, compiled program and diagnostic table in one process."""
+    import os
+    from pathlib import Path
+
+    output = Path(
+        os.environ.get(
+            "NOVA_MAGNETICS_FIT_EVIDENCE", tmp_path_factory.mktemp("magnetics")
+        )
+    )
+    output.mkdir(parents=True, exist_ok=True)
+    cases = {}
+
+    def get(name):
+        if name in cases:
+            return cases[name]
+        profile, request, coordinate, wall, sections = _physical_problem(name)
+        generated = profile.solve(request)
+        _persist_forward(generated, output / f"{name}-generating.pkl")
+        residual = float(generated.terminal_state.fixed_point.residual)
+        print(
+            f"GENERATING {name} qualified={bool(generated.qualified)} "
+            f"residual={residual:.17g}",
+            flush=True,
+        )
+        assert bool(generated.qualified), (
+            name,
+            residual,
+            request.policy.qualification_tolerance,
+        )
+        assert bool(generated.terminal_state.fixed_point.converged), (name, residual)
+        index = np.linspace(0, len(wall) - 1, 24, dtype=int)
+        point = np.asarray(wall)[index]
+        sensors = Magnetics(
+            r=np.tile(point[:, 0], 2),
+            z=np.tile(point[:, 1], 2),
+            angle=np.r_[np.zeros(24), np.linspace(0.0, 360.0, 24, endpoint=False)],
+            flux_loop=np.r_[np.ones(24, bool), np.zeros(24, bool)],
+        )
+        source = _PlasmaDiagnosticSource(sections)
+        instrument = MagneticsFit(profile, request, sensors, source)
+        raw = np.r_[
+            request.source_profile.core.p_prime.coefficients,
+            request.source_profile.core.ff_prime.coefficients,
+        ]
+        _, rows = instrument._evaluate(raw, generated.terminal_state.flux)
+        scales = np.r_[
+            np.full(24, max(float(np.max(np.abs(rows[:24]))), 1e-12)),
+            np.full(24, max(float(np.max(np.abs(rows[24:48]))), 1e-12)),
+        ]
+        measurement = SliceMeasurement(
+            measured=rows[:-1],
+            vacuum=np.zeros(48),
+            mask=np.ones(48, bool),
+            scale=scales,
+            plasma_current=rows[-1],
+        )
+        pressure = request.source_profile.core.p_prime.coefficients.size
+        basis = np.zeros((raw.size, 2))
+        basis[:pressure, 0] = raw[:pressure]
+        basis[pressure:, 1] = raw[pressure:]
+        initial_source = replace(
+            request.source_profile,
+            core=replace(
+                request.source_profile.core,
+                p_prime=replace(
+                    request.source_profile.core.p_prime,
+                    coefficients=jnp.asarray(raw[:pressure] * 0.98),
+                ),
+                ff_prime=replace(
+                    request.source_profile.core.ff_prime,
+                    coefficients=jnp.asarray(raw[pressure:] * 1.02),
+                ),
+            ),
+        )
+        initial = replace(request, source_profile=initial_source)
+        cases[name] = dict(
+            profile=profile,
+            request=request,
+            initial=initial,
+            generated=generated,
+            coordinate=np.asarray(coordinate),
+            wall=np.asarray(wall),
+            source=source,
+            sensors=sensors,
+            measurement=measurement,
+            basis=basis,
+            output=output,
+        )
+        return cases[name]
+
+    return get
+
+
+def _recover_physical(case, displacement=0.0):
+    sensors = case["sensors"]
+    if displacement:
+        radius = sensors.r.copy()
+        radius[0] += displacement
+        sensors = replace(sensors, r=radius)
+    fitted = MagneticsFit(
+        case["profile"],
+        case["initial"],
+        sensors,
+        case["source"],
+        coefficient_basis=case["basis"],
+    ).fit(
+        case["measurement"],
+        plasma_current_scale=abs(case["measurement"].plasma_current),
+    )
+    expected = case["generated"].terminal_state
+    terminal = fitted.forward.terminal_state
+    count = len(case["coordinate"])
+    core = np.asarray(expected.domains.core)
+    span = abs(float(expected.topology.flux_span))
+    error = float(
+        np.max(np.abs(np.asarray(terminal.flux[:count] - expected.flux[:count]))[core])
+        / span
+    )
+    return fitted, error
+
+
+def _draw_recovery_panels(name, case, fitted):
+    """Save shared-level contour panels through the existing poloidal painters."""
+    import os
+    from pathlib import Path
+    import xml.etree.ElementTree as element_tree
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+    from nova.media import poloidal
+    from nova.media.ink import DEFAULT_INK, poloidal_axes
+
+    directory = os.environ.get("NOVA_MAGNETICS_FIT_FIGURES")
+    if directory is None:
+        return
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    generated = case["generated"].terminal_state
+    recovered = fitted.forward.terminal_state
+    levels = np.sort(
+        np.linspace(
+            float(generated.topology.axis_flux),
+            float(generated.topology.boundary_flux),
+            14,
+        )
+    )[1:-1]
+    grey, blue = "#929292", DEFAULT_INK.flux_color
+    original_style = DEFAULT_INK.variant(
+        axis_color=grey, xpoint_color=grey, axis_markersize=9.0, xpoint_markersize=10.0
+    )
+    recovered_style = DEFAULT_INK.variant(axis_color=blue, xpoint_color=blue)
+    figure, axes = plt.subplots(1, 2, figsize=(14.0, 7.2), dpi=100)
+    figure.subplots_adjust(left=0.03, right=0.97, bottom=0.06, top=0.84, wspace=0.12)
+    coordinate = case["coordinate"]
+    for axis, state, color, label in zip(
+        axes,
+        (generated, recovered),
+        (grey, blue),
+        ("generating", "recovered"),
+        strict=True,
+    ):
+        poloidal_axes(axis)
+        poloidal.draw_scattered_contours(
+            axis,
+            coordinate[:, 0],
+            coordinate[:, 1],
+            np.asarray(state.flux)[: len(coordinate)],
+            levels,
+            case["wall"],
+            color=color,
+            linewidth=1.2,
+        )
+        poloidal.draw_wall(axis, units=case["wall"])
+        for landmarks, style in (
+            (generated.topology, original_style),
+            (recovered.topology, recovered_style),
+        ):
+            diverted = bool(landmarks.diverted)
+            poloidal.draw_nulls(
+                axis,
+                magnetic_axis=np.asarray(landmarks.axis),
+                x_points=np.asarray(landmarks.x_point) if diverted else None,
+                other_x_points=np.asarray(landmarks.x_point) if not diverted else None,
+                contain=case["wall"],
+                style=style,
+            )
+        axis.text(0.5, 1.02, label, ha="center", transform=axis.transAxes, fontsize=16)
+    legend = figure.legend(
+        [Line2D([], [], color=grey, lw=2.6), Line2D([], [], color=blue, lw=3.0)],
+        ["generating", "recovered"],
+        loc="upper center",
+        ncol=2,
+        frameon=False,
+        fontsize=14,
+    )
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    texts = [
+        *figure.texts,
+        *legend.get_texts(),
+        *(text for axis in axes for text in axis.texts),
+    ]
+    boxes = [(text.get_text(), text.get_window_extent(renderer)) for text in texts]
+    for label, box in boxes:
+        if not figure.bbox.contains(box.x0, box.y0) or not figure.bbox.contains(
+            box.x1, box.y1
+        ):
+            raise ValueError(f"figure text outside canvas: {label}")
+    for index, (label, box) in enumerate(boxes):
+        for other, candidate in boxes[index + 1 :]:
+            if box.overlaps(candidate):
+                raise ValueError(f"figure text overlap: {label}, {other}")
+    destination = directory / f"{name}.svg"
+    figure.savefig(destination, format="svg")
+    tree = element_tree.parse(destination)
+    tree.getroot().set("width", "31.1cm")
+    tree.getroot().set("height", "16cm")
+    tree.write(destination, encoding="utf-8", xml_declaration=True)
+    figure.savefig(case["output"] / f"{name}-preview.png", dpi=100)
+    plt.close(figure)
+    print(f"FIGURE {destination} text_bounds=passed text_overlap=passed", flush=True)
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("name", ("solovev", "mast", "iter"))
+def test_known_state_recovery(name, physical_cases):
+    import json
+    import os
+
+    case = physical_cases(name)
+    displacement = (
+        float(os.environ.get("NOVA_MAGNETICS_FIT_DISPLACEMENT", "0"))
+        if name == "solovev"
+        else 0.0
+    )
+    fitted, error = _recover_physical(case, displacement)
+    _persist_forward(fitted.forward, case["output"] / f"{name}-recovered.pkl")
+    resolved = case["profile"].solve(
+        replace(case["request"], source_profile=fitted.source_profile)
+    )
+    _persist_forward(resolved, case["output"] / f"{name}-resolved.pkl")
+    agreement = float(
+        np.max(
+            np.abs(
+                np.asarray(
+                    resolved.terminal_state.flux - fitted.forward.terminal_state.flux
+                )
+            )
+        )
+        / np.max(np.abs(np.asarray(fitted.forward.terminal_state.flux)))
+    )
+    summary = dict(
+        case=name,
+        flux_sup_fraction=error,
+        residual_sup=float(np.max(np.abs(fitted.whitened_residuals))),
+        largest_residual_row=int(np.argmax(np.abs(fitted.whitened_residuals))),
+        resolve_relative_sup=agreement,
+        iterations=fitted.iterations,
+        singular_values=fitted.singular_values.tolist(),
+        undetermined_coefficients=list(fitted.undetermined_coefficients),
+        forward_evaluations=fitted.forward_evaluations,
+    )
+    (case["output"] / f"{name}-recovery.json").write_text(json.dumps(summary, indent=2))
+    print("RECOVERY " + json.dumps(summary), flush=True)
+    _draw_recovery_panels(name, case, fitted)
+    assert error <= 1e-6, summary
+    assert summary["residual_sup"] <= 1e-8, summary
+    assert bool(resolved.qualified), summary
+    assert agreement <= case["request"].policy.kernel_tolerance, summary
+    assert fitted.singular_values.size == 2
+    assert fitted.iterations > 0
+
+
+@pytest.mark.slow
+def test_displaced_flux_loop_is_identified(physical_cases):
+    import json
+
+    case = physical_cases("solovev")
+    fitted, error = _recover_physical(case, 0.05)
+    summary = dict(
+        flux_sup_fraction=error,
+        largest_residual_row=int(np.argmax(np.abs(fitted.whitened_residuals))),
+        residual_sup=float(np.max(np.abs(fitted.whitened_residuals))),
+    )
+    (case["output"] / "displaced-loop.json").write_text(json.dumps(summary, indent=2))
+    print("DISPLACED_LOOP " + json.dumps(summary), flush=True)
+    assert error > 1e-6, summary
+    assert summary["largest_residual_row"] == 0, summary

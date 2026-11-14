@@ -306,6 +306,46 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "02a0145f1bf322385b4f3472fbb5c260e28c58ff",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261114T125919926224-review-of-ilf-six-limb-reference-9a541f9a37b2",
+    "scratch_bytes": 1536222396,
+    "scratch_host": "98dci4-clu-2001.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261114T125919926224-review-of-ilf-six-limb-reference-9a541f9a37b2",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 1536222396,
+        "path": "/tmp/reckon-crew-scratch/r-20261114T125919926224-review-of-ilf-six-limb-reference-9a541f9a37b2"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/1a120e31-d8a6-4944-87b2-145a639763ba/review-of-ilf-six-limb-reference-9a541f9a37b2",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/_trash/r-20261114T125919926224-review-of-ilf-six-limb-reference-9a541f9a37b2-20261114T133336166188Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

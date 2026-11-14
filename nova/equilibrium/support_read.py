@@ -23,6 +23,7 @@ import numpy as np
 
 from nova.database import content_store
 from nova.equilibrium import clip_quadrature, current, fixed_points, topology
+from nova.equilibrium.constraint import CurrentCentroidConstraint
 from nova.equilibrium.solve import _damped_scale
 
 # Node and cell counts a machine's mesh is padded up to, so two geometries of
@@ -513,6 +514,8 @@ def read_batch(
                     policy,
                     axis_sign,
                     iterations=iterations,
+                    jets=jets,
+                    tracking=tracking,
                     coil_currents=coil_currents,
                 ),
                 lambda _: result,
@@ -2317,12 +2320,6 @@ def solve_batch(
     )
 
 
-def _centroid_height(geometry, moments):
-    """Convert cell-local first moments to the physical current centroid."""
-    total = jnp.sum(moments[0])
-    return jnp.sum(geometry.centre[:, 1] * moments[0] + moments[2]) / total
-
-
 def _external_booking_tangent(
     operands, moments, support, profile, gradient, quadrature, jets, booked
 ):
@@ -2370,6 +2367,12 @@ def _solve_pinned_lane(
     """
     from nova.equilibrium.constraint import uniform_radial_field_jet
 
+    centroid = partial(
+        CurrentCentroidConstraint.booked_height,
+        centre_height=operands.geometry.centre[:, 1],
+        target_height=pin.target_height,
+    )
+
     if pin.coil_direction is None:
         basis = uniform_radial_field_jet(operands.nodes) * pin.source_scale
     else:
@@ -2413,13 +2416,8 @@ def _solve_pinned_lane(
         )
         residual = step_residual(bank, state, state, support, profile, quadrature)
         norm = jnp.max(jnp.abs(jnp.concatenate(residual.residual)))
-        total = jnp.sum(state[0])
-        numerator = jnp.sum(
-            (operands.geometry.centre[:, 1] - pin.target_height) * state[0] + state[2]
-        )
-        error = jnp.where(
-            total != 0, numerator / jnp.where(total != 0, total, 1.0), jnp.inf
-        )
+        error = centroid(jnp.stack(state, axis=-1))
+        error = jnp.where(jnp.isfinite(error), error, jnp.inf)
         merit = jnp.maximum(
             norm / tolerance,
             jnp.where(pin.active, jnp.abs(error) / pin.tolerance, 0.0),
@@ -2483,18 +2481,15 @@ def _solve_pinned_lane(
         total_scale = jnp.maximum(
             jnp.maximum(jnp.abs(jnp.sum(state[0])), jnp.abs(jnp.sum(booked[0]))), 1e-12
         )
-        row = jnp.concatenate(
-            (
-                operands.geometry.centre[:, 1] - pin.target_height,
-                jnp.zeros_like(state[0]),
-                jnp.ones_like(state[0]),
-            )
-        ) / (total_scale * pin.row_scale)
-        mismatch = row @ jnp.concatenate(state)
-        rate = row @ response
+        mismatch, free_height, rate = centroid(
+            jnp.stack((jnp.concatenate(state), free, response))
+            .reshape(3, 3, -1)
+            .swapaxes(-1, -2),
+            scale=total_scale * pin.row_scale,
+        )
         delta = jnp.where(
             pin.active,
-            (-mismatch - row @ free) / jnp.where(pin.active, rate, 1.0),
+            (-mismatch - free_height) / jnp.where(pin.active, rate, 1.0),
             0.0,
         )
         update = tuple(jnp.split(free + delta * response, 3))

@@ -1,0 +1,106 @@
+<section data-reckon="fragment" id="bank-traced-cleanup-landing"
+ data-plan="sub-millisecond-forward-path" data-node="bank-traced-cleanup">
+<h2>Shared profile and centroid interfaces</h2>
+<p><code>current.TabulatedProfile</code> now extends <code>source.DomainProfile</code>.
+Its constructor still accepts the two fixed-size Hermite tables; its
+<code>p_prime</code> and <code>ff_prime</code> fields implement the owner's callable
+flux-function contract, with their table values retained as traced leaves in
+<code>jax.tree_util.Partial</code>. The duplicate current-density implementation
+is deleted. Pressure, squared field function, static body force and rotation
+primitives come from the existing owner. The analytic Hermite density derivative
+remains available to both booking tangent routes. Knot-count validation formats
+<code>PROFILE_KNOT_COUNT</code>; a test changes the contract to five knots and
+requires the refusal to name five.</p>
+<p><code>CurrentCentroidConstraint.booked_height</code> accepts cell heights,
+a target offset and an optional fixed current scale. It reduces local or global
+first moments, including batches. The bank pin uses this same reduction for its
+reported height error and for the state, free correction and source-response
+terms of the bordered Newton equation. The fixed scale keeps that equation
+linear even for a zero-current seed. The unused duplicate
+<code>support_read._centroid_height</code> is deleted.</p>
+<p>The driven certificate retry now passes the caller's <code>jets</code> and
+<code>tracking</code> into its second read. The Jacobian already contracted
+the coils correctly, so that production path is unchanged. Its test now uses
+nonzero plasma-response rows and a curved profile, and compares against an
+independently assembled coil field instead of an insensitive identity matrix.</p>
+
+<h3 id="bank-traced-cleanup-reproduction">Reproduction and controls</h3>
+<p>The prior review was read from the archived run's
+<code>review-records/r-20261113T165201745905-bank-traced-inputs.at-2023fe23ca53afcf743c4c30e60c45ffd27206de.json</code>
+under <code>/home/ITER/mcintos/.config/reckon/crew/archive/runs/</code>.
+At base <code>02a0145f1bf322385b4f3472fbb5c260e28c58ff</code>, the corrected retry
+probe observed supplied pairs <code>[3, 11]</code> and <code>[5, 17]</code>,
+followed by the missing-input sentinel <code>[-1, -1]</code> on retry. Its log
+ends <code>1 failed in 38.35s</code>, <code>EXIT=1</code>. The first probe and
+the already-started focused snapshot used integer sentinels against floating
+inputs and failed in the test spy's conditional output types; those helper
+failures are retained and explicitly attributed in the manifest.</p>
+<p>The retry test first observes two ordinary lane reads, then four reads when
+the certificate requests the second pass. It checks both returned arguments.
+The Jacobian test measures a coil-dependent signal of
+<code>0.00027378846504230725</code> before comparing matrices, so an insensitive
+fixture cannot pass. Both tests pass at implementation
+<code>e21a76b08dab2769835554a21311a6a76e911368</code>.</p>
+<table id="bank-traced-cleanup-controls">
+<thead><tr><th>Source mutation</th><th>Failing test</th><th>Observed refusal</th></tr></thead>
+<tbody>
+<tr><td>Remove <code>driven_operands</code> from <code>step_jacobian</code></td>
+<td><code>test_coils_reach_read_residual_and_jacobian</code></td>
+<td>135 of 22,500 matrix entries differ; maximum difference 2.7379e-4;
+1 failed in 95.64s; EXIT=1</td></tr>
+<tr><td>Drop retry <code>jets</code> and <code>tracking</code></td>
+<td><code>test_driven_certificate_retry_preserves_jets_and_tracking</code></td>
+<td>Both lanes return [-1, -1] instead of their supplied pairs;
+1 failed in 38.38s; EXIT=1</td></tr>
+</tbody></table>
+<p>Each mutation runs in a disposable archived tree and fails a test ID that the
+unmutated head passes. The logs are <code>negative-coils.log</code> and
+<code>negative-retry.log</code> in the durable run directory below.</p>
+
+<h3 id="bank-traced-cleanup-paired">Paired CPU evidence</h3>
+<p>Rigel jobs 1315268 and 1315299 ran the base and implementation arms with
+seven CPUs, 96 GiB, CPU x64 and the shared project interpreter. Each test file
+has a fresh process. Every log names its revision, archived tree, imported
+module, resolved working directory, literal command and terminal exit status.
+The armed file uses the prescribed command; the additional files explicitly
+use <code>-rfP</code>, also supplied through <code>PYTEST_ADDOPTS</code> in the
+after and mutation processes. No timeout or numerical tolerance was relaxed.</p>
+<table id="bank-traced-cleanup-suite">
+<thead><tr><th>Test file</th><th>Base</th><th>Implementation</th><th>Added failures</th></tr></thead>
+<tbody>
+<tr><td>test_bank_traced_inputs</td><td>10 passed; 302.48s</td>
+<td>14 passed; 309.43s</td><td>0</td></tr>
+<tr><td>test_bank_drive_continuation</td><td>10 passed</td><td>10 passed</td><td>0</td></tr>
+<tr><td>test_bank_lane_drive</td><td>11 passed</td><td>11 passed</td><td>0</td></tr>
+<tr><td>test_support_read</td><td>13 passed, 2 skipped</td>
+<td>13 passed, 2 skipped</td><td>0</td></tr>
+</tbody></table>
+<p>The independent centroid check begins at 0.70709251 m and targets
+0.005 and -0.008 m. Both lanes converge; the reported maximum pin error is
+1.29818163e-16 m and maximum fresh residual is 1.00897068e-12.
+The independent current-weighted height assertions pass at 1e-8 m for both
+the first and changed slices. Ignoring local first moments misses the target
+by 0.00155759 and 0.00111690 m. Changing currents, profile values and targets
+records <code>SOLVE_COMPILATIONS cold 1 changed 0</code>. The solver constructs
+one Jacobian body and no nested moment solver.</p>
+
+<h3 id="bank-traced-cleanup-diff">Product-line accounting and delivery</h3>
+<table id="bank-traced-cleanup-lines">
+<thead><tr><th>Interface consolidation</th><th>Added</th><th>Deleted</th></tr></thead>
+<tbody>
+<tr><td>current.py</td><td>14</td><td>18</td></tr>
+<tr><td>constraint.py</td><td>14</td><td>4</td></tr>
+<tr><td>support_read.py, centroid only</td><td>16</td><td>23</td></tr>
+<tr><td>Total</td><td>44</td><td>45</td></tr>
+</tbody></table>
+<p>The two interface changes delete one net product line. The independent retry
+repair adds two lines; tests and this fragment are excluded from that accounting.
+The fragment commit changes no product or test content. The final-head replay
+of the armed test file, its exact revision, the paired receipts and the six
+rubric self-checks are recorded in the manifest.</p>
+<p>Durable manifest, runner and logs:
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T124345725457-bank-traced-cleanup/</code>.
+This node does not measure ITER scenario convergence or H200 throughput and
+does not change plan or section state. Integration and the combined-state gate
+remain with the coordinator.</p>
+</section>

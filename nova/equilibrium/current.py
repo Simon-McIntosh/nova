@@ -12,6 +12,7 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jnp
 from jax.experimental import xla_metadata
+from jax.tree_util import Partial
 
 from nova.equilibrium import topology
 from nova.equilibrium.convention import toroidal_current_density
@@ -24,6 +25,7 @@ from nova.equilibrium.clip_quadrature import (
     moving_polygon_current_moment_tangents,
 )
 from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
+from nova.equilibrium.source import DomainProfile
 
 
 PROFILE_KNOT_COUNT = 33
@@ -60,34 +62,28 @@ def _tabulated_value(values, normalized, *, derivative=False):
 
 @jax.tree_util.register_dataclass
 @dataclass(frozen=True)
-class TabulatedProfile:
-    """SI p-prime and FF-prime at 33 equally spaced normalized-flux knots.
+class TabulatedProfile(DomainProfile):
+    """SI flux gradients on equally spaced normalized-flux knots.
 
     Tables are runtime leaves. Cubic Hermite evaluation and its analytic
     first derivative share the same coefficients for booking and tangents.
     """
 
-    p_prime: jax.Array
-    ff_prime: jax.Array
-
     def __post_init__(self):
-        if self.p_prime.shape != (PROFILE_KNOT_COUNT,) or self.ff_prime.shape != (
-            PROFILE_KNOT_COUNT,
-        ):
-            raise ValueError("flux-function tables must each contain 33 knots")
-
-    def current_density(self, radius, normalized):
-        return toroidal_current_density(
-            radius,
-            _tabulated_value(self.p_prime, normalized),
-            _tabulated_value(self.ff_prime, normalized),
-        )
+        for name in ("p_prime", "ff_prime"):
+            values = getattr(self, name)
+            if not isinstance(values, Partial):
+                if values.shape != (PROFILE_KNOT_COUNT,):
+                    raise ValueError(
+                        f"flux-function tables require {PROFILE_KNOT_COUNT} knots each"
+                    )
+                object.__setattr__(self, name, Partial(_tabulated_value, values))
 
     def density_gradient(self, radius, normalized):
         return toroidal_current_density(
             radius,
-            _tabulated_value(self.p_prime, normalized, derivative=True),
-            _tabulated_value(self.ff_prime, normalized, derivative=True),
+            self.p_prime(normalized, derivative=True),
+            self.ff_prime(normalized, derivative=True),
         )
 
 

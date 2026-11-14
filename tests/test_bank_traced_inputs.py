@@ -15,7 +15,12 @@ import numpy as np
 import pytest
 
 from nova.equilibrium import current, fixed_points, support_read as bank
-from nova.equilibrium.constraint import VerticalPositionPin, uniform_radial_field_jet
+from nova.equilibrium.constraint import (
+    CurrentCentroidConstraint,
+    VerticalPositionPin,
+    uniform_radial_field_jet,
+)
+from nova.equilibrium.source import DomainProfile, RotationClosure
 
 assert jax.config.jax_enable_x64 is True
 
@@ -157,6 +162,64 @@ def test_tabulated_derivative_matches_autodiff_at_and_between_knots():
         current.TabulatedProfile(jnp.ones(8), jnp.ones(8))
 
 
+def test_tabulated_profile_uses_domain_primitives():
+    profile = _table(pressure=-2.0, diamagnetic=-0.5)
+    assert isinstance(profile, DomainProfile)
+    coordinate = jnp.asarray([0.0, 0.25, 1.0])
+    radius = jnp.full_like(coordinate, 2.4)
+
+    @jax.jit
+    def primitives(source):
+        return (
+            source.pressure(radius, coordinate, 7.0, 3.0),
+            source.field_function_squared(coordinate, 4.0, 3.0),
+            source.radial_body_force(radius, coordinate, jnp.ones_like(coordinate)),
+        )
+
+    pressure, field_squared, force = primitives(profile)
+    np.testing.assert_allclose(pressure, 7.0 - 6.0 * (1 - coordinate), rtol=1e-12)
+    np.testing.assert_allclose(field_squared, 16.0 - 3.0 * (1 - coordinate), rtol=1e-12)
+    np.testing.assert_array_equal(force, 0.0)
+    assert profile.rotation_closure == RotationClosure.STATIC
+    assert current.TabulatedProfile.current_density is DomainProfile.current_density
+
+
+def test_tabulated_knot_count_error_follows_contract(monkeypatch):
+    monkeypatch.setattr(current, "PROFILE_KNOT_COUNT", 5)
+    with pytest.raises(ValueError, match="5 knots"):
+        current.TabulatedProfile(jnp.ones(8), jnp.ones(8))
+
+
+def test_centroid_owner_reduces_local_and_global_first_moments():
+    moments = jnp.asarray([[2.0, 0.0, 0.4], [3.0, 0.0, -0.3]])
+    heights = jnp.asarray([-0.5, 0.8])
+    expected = np.average(
+        np.asarray(heights + moments[:, 2] / moments[:, 0]), weights=moments[:, 0]
+    )
+    actual = CurrentCentroidConstraint.booked_height(moments, centre_height=heights)
+    global_moments = moments.at[:, 2].add(heights * moments[:, 0])
+    np.testing.assert_allclose(actual, expected, rtol=1e-14)
+    np.testing.assert_allclose(
+        CurrentCentroidConstraint.booked_height(global_moments), expected, rtol=1e-14
+    )
+    residual = CurrentCentroidConstraint.booked_height(
+        jnp.stack((moments, 2 * moments)),
+        centre_height=heights,
+        target_height=0.1,
+        scale=5.0,
+    )
+    np.testing.assert_allclose(
+        residual, np.asarray([1.0, 2.0]) * (expected - 0.1), rtol=1e-14
+    )
+    assert np.isnan(CurrentCentroidConstraint.booked_height(jnp.zeros_like(moments)))
+    assert (
+        CurrentCentroidConstraint.booked_height(jnp.zeros_like(moments), scale=5.0)
+        == 0.0
+    )
+    with pytest.raises(ValueError, match="current, radial and vertical columns"):
+        CurrentCentroidConstraint.booked_height(jnp.zeros((2, 2)))
+
+
 def _traced_booking(
     operands, moments, support, pressure, diamagnetic, currents, quadrature
 ):
@@ -176,9 +239,11 @@ def test_slice_inputs_cause_zero_new_compilations(small, caplog):
     caplog.set_level(logging.WARNING, logger="jax")
     program = jax.jit(_traced_booking)
     source = _table()
+    knots = jnp.linspace(0.0, 1.0, current.PROFILE_KNOT_COUNT)
+    pressure, ff = source.p_prime(knots), source.ff_prime(knots)
     currents = jnp.asarray([0.0])
     next_currents = jnp.asarray([0.01])
-    next_pressure = source.p_prime * 1.01
+    next_pressure = pressure * 1.01
     captured = os.environ.get("NOVA_CAPTURE_SLICE_CURRENTS") == "1"
 
     def apply(values, pressure):
@@ -189,15 +254,11 @@ def test_slice_inputs_cause_zero_new_compilations(small, caplog):
                     op, st, rd, pp, ff, values, quad
                 )
             )
-            return program_for_slice(
-                operands, state, read, pressure, source.ff_prime, quadrature
-            )
-        return program(
-            operands, state, read, pressure, source.ff_prime, values, quadrature
-        )
+            return program_for_slice(operands, state, read, pressure, ff, quadrature)
+        return program(operands, state, read, pressure, ff, values, quadrature)
 
     with jax.log_compiles(True):
-        first = apply(currents, source.p_prime)
+        first = apply(currents, pressure)
         jax.block_until_ready(first)
         warm = [
             record.message
@@ -409,7 +470,14 @@ def _weighted_centroid_z(geometry, moments):
 
 def test_coils_reach_read_residual_and_jacobian(small):
     operands, cache, roots, convention, policy, quadrature, state, reading = small
-    source = _table()
+    # A nonzero plasma response and curved profile make the Jacobian depend
+    # on the coil field through the local normalized-flux derivative.
+    response = uniform_radial_field_jet(operands.nodes) * 1e-3
+    rows = operands.rows.at[:, 0, 0, :].set(response)
+    operands = replace(operands, rows=rows)
+    cache = replace(cache, rows=rows)
+    knots = jnp.linspace(0.0, 1.0, current.PROFILE_KNOT_COUNT)
+    source = current.TabulatedProfile(-1.0 - knots**2, 1e-6 * knots**3)
     currents = jnp.asarray([0.4])
     effective = bank.driven_operands(operands, currents)
     window = bank._driven_cache(effective, cache)
@@ -434,7 +502,68 @@ def test_coils_reach_read_residual_and_jacobian(small):
             op, state, actual, source, None, quadrature, coil_currents=amps
         )
     )(operands, currents)
-    np.testing.assert_allclose(matrix, jnp.eye(matrix.shape[0]), rtol=1e-12, atol=1e-12)
+    # Assemble the coil field independently of the contraction under test.
+    supplied = replace(
+        operands,
+        exterior=operands.exterior + currents[0] * operands.coil_exterior[:, 0],
+    )
+    reference = jax.jit(
+        lambda op: bank.step_jacobian(op, state, actual, source, None, quadrature)
+    )
+    expected_matrix = reference(supplied)
+    missing_coils = reference(operands)
+    signal = float(jnp.max(jnp.abs(expected_matrix - missing_coils)))
+    print("COIL_JACOBIAN contraction signal", signal)
+    assert signal > 1e-7
+    np.testing.assert_allclose(matrix, expected_matrix, rtol=1e-12, atol=1e-12)
+
+
+def test_driven_certificate_retry_preserves_jets_and_tracking(small, monkeypatch):
+    operands, cache, roots, convention, policy, _, state, _ = small
+    moments = tuple(jnp.stack((value, value)) for value in state)
+    seeds = jnp.stack((roots, roots))
+    jets = jnp.asarray([3.0, 5.0])
+    tracking = jnp.asarray([11.0, 17.0])
+    observed = []
+
+    def read(*args, jets=None, tracking=None, **kwargs):
+        supplied = jnp.asarray(
+            [
+                jets if jets is not None else -1.0,
+                tracking if tracking is not None else -1.0,
+            ]
+        )
+        jax.debug.callback(lambda value: observed.append(np.asarray(value)), supplied)
+        return supplied
+
+    monkeypatch.setattr(bank, "read", read)
+
+    @jax.jit
+    def evaluate(certify):
+        return bank.read_batch(
+            operands,
+            cache,
+            moments,
+            seeds,
+            seeds,
+            convention,
+            policy,
+            jets=jets,
+            tracking=tracking,
+            certificate=lambda _: certify,
+            coil_currents=jnp.asarray([[0.2], [0.4]]),
+        )
+
+    ordinary = evaluate(jnp.asarray(False))
+    jax.effects_barrier()
+    assert len(observed) == 2
+    observed.clear()
+    retried = evaluate(jnp.asarray(True))
+    jax.effects_barrier()
+    print("RETRY supplied", np.asarray(ordinary), "returned", np.asarray(retried))
+    np.testing.assert_array_equal(ordinary, np.stack((jets, tracking), axis=-1))
+    np.testing.assert_array_equal(retried, ordinary)
+    assert len(observed) == 4, "the certificate must execute a second read per lane"
 
 
 def test_zero_update_budget_reports_unsolved_state(small):
@@ -514,8 +643,9 @@ def test_pin_holds_independent_lane_centroids(small, caplog, monkeypatch):
             vertical_pin=replace(pin, target_height=target),
         )
 
-    pressure = jnp.stack((source.p_prime, source.p_prime * 1.1))
-    ff = jnp.stack((source.ff_prime, source.ff_prime))
+    knots = jnp.linspace(0.0, 1.0, current.PROFILE_KNOT_COUNT)
+    pressure = jnp.stack((source.p_prime(knots), source.p_prime(knots) * 1.1))
+    ff = jnp.stack((source.ff_prime(knots), source.ff_prime(knots)))
     currents = jnp.asarray([[0.0], [0.2]])
     next_currents = jnp.asarray([[0.1], [-0.1]])
     next_pressure = pressure * 1.02

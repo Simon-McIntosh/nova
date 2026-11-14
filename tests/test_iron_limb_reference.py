@@ -207,3 +207,47 @@ def test_slab_field_integral_preserves_constant_flux():
     expected = np.pi * (0.664**2 - 0.05**2)
     assert flux == pytest.approx(expected, rel=2e-14)
     assert quadrature["relative_change"] < 1e-13
+
+
+def test_richardson_recovers_observed_order_on_unequal_mesh_ratios():
+    from scripts.iron_limb_reference.controls import richardson
+
+    sizes = np.array([0.1, 0.075, 0.05])
+    exact = np.array([1.2, -0.7])
+    values = [exact + np.array([2.0, -3.0]) * h**1.7 for h in sizes]
+    result = richardson(sizes, values)
+    assert result["valid"]
+    assert result["observed_order"] == pytest.approx(1.7, abs=1e-10)
+    np.testing.assert_allclose(result["extrapolated"], exact, atol=1e-12)
+    assert result["uncertainty_absolute"] > 0
+
+
+def test_richardson_refuses_oscillatory_and_nonconvergent_triples():
+    from scripts.iron_limb_reference.controls import richardson
+
+    sizes = [0.1, 0.075, 0.05]
+    oscillatory = richardson(sizes, [1.0, 1.2, 1.1])
+    assert not oscillatory["valid"]
+    assert oscillatory["reason"] == "oscillatory mesh increments"
+    divergent = richardson(sizes, [1.0, 2.0, 5.0])
+    assert not divergent["valid"]
+    assert divergent["reason"] == "no positive observed order"
+
+
+def test_extrapolated_comparison_checks_each_outside_probe():
+    from scripts.iron_limb_reference.controls import compare_extrapolated
+
+    def estimate(value):
+        return dict(valid=True, extrapolated=value, uncertainty_relative=0.01)
+
+    first = dict(
+        mu=200.0,
+        flux=estimate(1.0),
+        vessel=estimate([[1.0, 0.0]]),
+        outside=[estimate([1.0, 0.0]), estimate([1.0, 0.0])],
+    )
+    second = dict(first, outside=[estimate([1.0, 0.0]), estimate([1.0, 0.03])])
+    comparison = compare_extrapolated([first], [second])[0]
+    assert not comparison["passed"]
+    assert comparison["measures"]["outside_0"]["passed"]
+    assert not comparison["measures"]["outside_1"]["passed"]

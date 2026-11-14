@@ -985,6 +985,46 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "68225b5a0eac79e708560e170a56809710e59a73",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261114T094639180840-plan-review-of-inverse-equilibrium-baseline",
+    "scratch_bytes": 0,
+    "scratch_host": "98dci4-clu-2001.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261114T094639180840-plan-review-of-inverse-equilibrium-baseline",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261114T094639180840-plan-review-of-inverse-equilibrium-baseline"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/plan-review-of-inverse-equilibrium-baseline",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/_trash/r-20261114T094639180840-plan-review-of-inverse-equilibrium-baseline-20261114T100619696112Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

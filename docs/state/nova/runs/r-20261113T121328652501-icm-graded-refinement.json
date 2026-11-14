@@ -1,0 +1,592 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "f4954eb7745b3d06acd1346e2f4c3148299d1b49",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T121328652501-icm-graded-refinement/brief.md",
+    "sha256": "325eeb1e2cc77c7c6f09c9dc055acb5767201ed95a5b62f79dc0140f99b987a2"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 1383102,
+      "input_tokens_cumulative": 1383102,
+      "output_tokens": 4582,
+      "output_tokens_cumulative": 4582,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 2323,
+    "files": 19,
+    "removed": 20
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "west",
+        "path": "tests/test_imas_iron_read.py"
+      },
+      "run_function": {
+        "line": 410,
+        "name": "west_iron_region",
+        "path": "tests/test_magnetisation.py"
+      },
+      "window_line": 414
+    },
+    {
+      "existing_function": {
+        "line": 395,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 592,
+        "name": "test_west_cea_last_table_interval_matches_reference",
+        "path": "tests/test_magnetisation.py"
+      },
+      "window_line": 600
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "_dataset_row",
+        "path": "tests/imas/test_diiid_machine_description.py"
+      },
+      "run_function": {
+        "line": 592,
+        "name": "test_west_cea_last_table_interval_matches_reference",
+        "path": "tests/test_magnetisation.py"
+      },
+      "window_line": 601
+    },
+    {
+      "existing_function": {
+        "line": 331,
+        "name": "test_conditioned_elliptic_combinations_match_a_high_precision_arbiter",
+        "path": "tests/test_biotgreens.py"
+      },
+      "run_function": {
+        "line": 592,
+        "name": "test_west_cea_last_table_interval_matches_reference",
+        "path": "tests/test_magnetisation.py"
+      },
+      "window_line": 600
+    },
+    {
+      "existing_function": {
+        "line": 466,
+        "name": "test_hexagonal_target_rule_convergence_against_the_double_integral_arbiter",
+        "path": "tests/test_biotsectionaverage.py"
+      },
+      "run_function": {
+        "line": 592,
+        "name": "test_west_cea_last_table_interval_matches_reference",
+        "path": "tests/test_magnetisation.py"
+      },
+      "window_line": 600
+    },
+    {
+      "existing_function": {
+        "line": 313,
+        "name": "test_short_corner_arc_rejects_a_disconnected_stationary_split",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 808,
+        "name": "test_regularised_newton_crosses_ill_conditioned_material_stall",
+        "path": "tests/test_magnetisation.py"
+      },
+      "window_line": 823
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "ee212555322daa1b929a7b06e0fdc18155882e63",
+    "8fa37600cba2802e4c3552cf098cd1459a1434ea",
+    "44c082596ea3a0c7fcb786a61b2ac4abcf67b9de",
+    "c32506d2a1cfe3d99dc66de2ae0d2f8b69819ef1",
+    "4db94130a0e2468c6a4248f012ce75bd2be6ec2f",
+    "c088174a3732e3ec749fa2925b7f3bd565fbd90b",
+    "f13262fb67635b9a05fc569332ca57f3b0fb7d35",
+    "8419ebbeeecdd9db8b7b560d56f8f54a95fba42c",
+    "e5c424a79695dc2b929f9ec27d9f1067dd7731a8",
+    "a45f0200222d34928835550ee3d22d3be0beb509",
+    "d176f98af23a8321e43ef5be3b24c45452dce6e6",
+    "a4245a251177c944ce2ee147c4f3eb88f554ee3f",
+    "ab17c283fae50526ed619d1c88462d15ea945d55",
+    "cd18945a3b2babe44fdf14e775d64c96fa3ef345",
+    "04633d6a28e9f4ae20135d0aa1b6e41800d9cc5b",
+    "4023fc146631c3c057812b5cad610ce841403a26",
+    "ed26e5aeb358eeb2af8a8f50978484add417599b",
+    "1361ffecdd654177b4dade0eee51a79ed5dc6715",
+    "a19f5a35248b301403c596f4ec313a88fb593564",
+    "2e9b83b640f6ce5874afbdc14c0818c7f56bbebe",
+    "a29aad5f2e405cc570d40f33d0b8e62ab743e91e",
+    "5c480fcca803596d903ad0e91a8eecce02a2ca89",
+    "cc2deafae629e5ea560c0f7421cdf5c351616b71",
+    "8ea058f5c0e1670f06938dbb9c29521b1bffb4ab",
+    "9f09583e50c0e4b0207f3055640f93416d2bb35c",
+    "903fb80d2d87df230e4708ba7f16dd9354883116",
+    "4bd1ccd452f15242d6c515d6e62bef0e2ea953fc",
+    "9bba4b917efdaa6b6c7ab52135d45d27fa08f181",
+    "785856dcea353e21810b55f2b496b5c02797ccaf",
+    "1a64ee784f48ea87ee346102d007dfcdd61ed68a",
+    "7a44dd2169789b248d046b1a651b04ad12bae5a1"
+  ],
+  "completed_at": "2026-11-13T22:03:12Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-13T12:18:02Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_artifacts_carry_no_worktree_paths.py tests/test_imas_iron_read.py tests/test_magnetisation.py -m 'not slow'",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T121328652501-icm-graded-refinement/gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.4841897233201581,
+    "plan": "iron-core-magnetisation",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-13T16:13:36.500585+00:00",
+    "horizon_seconds": 14400,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-13T12:13:36Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 16,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 7,
+    "headroom": 11,
+    "mean_context": 125000,
+    "observed_at": "2026-11-13T12:13:41Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 16,
+      "aggregate_tokens_per_second": 476.073,
+      "detail": "",
+      "mean_tokens_per_second": 72.132,
+      "observed_at": "2026-11-13T12:13:41Z",
+      "runs": 6.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-13T22:03:12Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T121328652501-icm-graded-refinement/manifest.md",
+  "member": "disposable-r-20261113T121328652501-icm-graded-refinement",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_magnetisation.py::test_graded_shell_reaches_half_percent_where_its_doubled_arm_misses"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_magnetisation.py::test_graded_shell_reaches_half_percent_where_its_doubled_arm_misses"
+    ],
+    "control_log_source": "manifest",
+    "control_run_failed": true,
+    "declaration": "the under-resolved arm: the same grading with the cell-size field doubled everywhere through the shell must miss 0.5 % at one probe or more, so the 0.5 % test can fail; a uniform-default mutant that perturbs the uniform grid must fail the bit-for-bit default test",
+    "head_failure_ids": [],
+    "log": "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/graded-refinement/control2/under-resolved.log",
+    "resolved_log": "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/graded-refinement/control2/under-resolved.log",
+    "test_paths": [
+      "tests/test_magnetisation.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "icm-graded-refinement",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/dev/shm/39486-fleet-1291586/claude-39486/-home-ITER-mcintos-Code-nova/5b10be66-c69b-456f-9a85-3840909f1723/scratchpad/brief-graded.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T121328652501-icm-graded-refinement/brief.md",
+    "brief_sha256": "325eeb1e2cc77c7c6f09c9dc055acb5767201ed95a5b62f79dc0140f99b987a2",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 274,
+          "cached_input_tokens": 305216,
+          "input_tokens": 305492,
+          "output_tokens": 821,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 306313,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "5b10be66-c69b-456f-9a85-3840909f1723",
+      "session_id": "5b10be66-c69b-456f-9a85-3840909f1723"
+    },
+    "done_when": "(1) nova/biot/magnetisation.py meshes the iron on a graded rectilinear grid whose spacing shrinks toward the iron surfaces through thin parts, selected by a cell-size field argument, with the uniform grid as the default case unchanged bit for bit (a test asserts the uniform default reproduces the current cells exactly); on the analytic mu_r = 1000 closed shell (tests/test_magnetisation.py shell, three probes) the graded Galerkin solve reaches at most 0.5 % error at every probe, and a deliberately under-resolved arm of the same grading (cell-size field doubled everywhere through the shell) misses 0.5 % at least at one probe, both asserted in tests; (2) WEST 62751 solved with the graded mesh at two refinement levels (the finer with the cell-size field halved) changes the midplane field at +1, +2 and +4 m by less than 1 % between the levels, or the receipt records by how much it misses, from the solve recipe in scripts/west_iron_galerkin_pair/measure.py imported rather than copied; (3) docs/evidence/fragments/iron-core-magnetisation/icm-graded-refinement.html records cell counts, per-probe shell errors, the WEST probe fields at both levels, and the assembly and solve walls on titan (Tesla P100, labelled as P100 walls), with receipts under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/graded-refinement/ and one inspected figure of shell error against cell count for uniform and graded meshes in docs/figures/iron-core-magnetisation/icm-graded-refinement/.",
+    "estimated_hours": null,
+    "goal": "measure graded refinement of the piecewise-constant Galerkin route on the mu_r 1000 shell and on WEST 62751",
+    "id": "icm-graded-refinement",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-13T12:13:36Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 16,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 7,
+      "headroom": 11,
+      "mean_context": 125000,
+      "observed_at": "2026-11-13T12:13:41Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 16,
+        "aggregate_tokens_per_second": 476.073,
+        "detail": "",
+        "mean_tokens_per_second": 72.132,
+        "observed_at": "2026-11-13T12:13:41Z",
+        "runs": 6.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T121328652501-icm-graded-refinement/manifest.md",
+    "negative_control": "the under-resolved arm: the same grading with the cell-size field doubled everywhere through the shell must miss 0.5 % at one probe or more, so the 0.5 % test can fail; a uniform-default mutant that perturbs the uniform grid must fail the bit-for-bit default test",
+    "over_fence_reason": "one titan measurement job over the shell refinement ladder and two WEST graded meshes (the 0.04 m Galerkin solve alone took tens of minutes on titan) plus a separate gate job; the node is one candidate of three and cannot split further without separating the mesh change from the measurement that justifies it",
+    "peer_scopes": {
+      "bank-h200-slice-profile": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-h200-slice-profile.html",
+        "docs/figures/sub-millisecond-forward-path/bank-h200-slice-profile",
+        "scripts/prototypes/bank_h200_slice_profile"
+      ],
+      "diiid-xpoint-held-nodes": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-held-nodes.html",
+        "docs/figures/diiid-xpoint-held-nodes",
+        "nova/equilibrium/fixed_point.py",
+        "nova/equilibrium/forward_operator.py",
+        "nova/equilibrium/topology.py",
+        "scripts/prototypes/diiid_xpoint_held_nodes",
+        "tests/test_boundary_flux_derivative.py",
+        "tests/test_certificate_exterior_support.py",
+        "tests/test_equilibrium_forward_solve.py",
+        "tests/test_shadow_follows_image.py",
+        "tests/test_xpoint_attribution_image_read.py"
+      ],
+      "graph-growth-history": [
+        "docs/evidence/fragments/kernel-compile-barrier/graph-growth-history.html",
+        "docs/figures/kernel-compile-barrier/graph-growth-history",
+        "scripts/prototypes/compile_pass_profile/lowered_size.py"
+      ],
+      "h200-levers": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/h200-levers.html",
+        "docs/figures/sub-millisecond-forward-path/h200-levers",
+        "nova/equilibrium/current.py",
+        "nova/equilibrium/drive_continuation.py",
+        "nova/equilibrium/support_read.py",
+        "nova/equilibrium/topology.py",
+        "scripts/prototypes/h200_levers",
+        "tests/test_book_primal_buckets.py",
+        "tests/test_booking_scalar_tile.py"
+      ]
+    },
+    "plan": "iron-core-magnetisation",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "exact",
+    "time_budget": "4h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "nova/biot/magnetisation.py",
+      "tests/test_magnetisation.py",
+      "scripts/iron_graded_refinement",
+      "docs/evidence/fragments/iron-core-magnetisation/icm-graded-refinement.html",
+      "docs/figures/iron-core-magnetisation/icm-graded-refinement"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 846437.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "icm-graded-refinement",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-13T12:16:42.838205+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout in pick:jev",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.725,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {
+      "budget-snapshot": 1340.753,
+      "context-estimate": 88.043,
+      "records": 502.305,
+      "verdict-inputs": 1070.604
+    }
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.4841897233201581,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "7a44dd2169789b248d046b1a651b04ad12bae5a1",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "4bd1ccd452f15242d6c515d6e62bef0e2ea953fc",
+    "reviewed_head_sha": "7a44dd2169789b248d046b1a651b04ad12bae5a1",
+    "scores": {
+      "durability": 15,
+      "evidence": 16,
+      "fit": 16,
+      "goal_fidelity": 18,
+      "reuse": 12,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 96
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261113T121328652501-icm-graded-refinement",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+  "session_harness": "claude",
+  "session_id": "eb9d5ef6-ba70-4d52-ad2e-e90ecb57262b",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_magnetisation.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": "19c383ec4746cba16d1a99c5dd6dd5b9647a0964899e6070e69510c55720331d",
+      "log_path": "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/graded-refinement/repair/after-suite.log",
+      "revision": "7a44dd2169789b248d046b1a651b04ad12bae5a1"
+    },
+    "baseline_measured_nothing": false,
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_magnetisation.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": "370207c1a3532bee3f9da860608bbcb5beef346c4f59d22eedf2c186270e129b",
+      "log_path": "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/graded-refinement/repair/baseline-suite.log",
+      "revision": "f4954eb7745b3d06acd1346e2f4c3148299d1b49"
+    },
+    "failure_attribution": {},
+    "measured_by": "run",
+    "status": "clean",
+    "suite_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_magnetisation.py",
+    "waiver_reason": null
+  },
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 89565296,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 53.498,
+    "generated_tokens": 365085,
+    "generation_seconds": -77.634,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 85.5,
+    "machine_seconds": 131.132,
+    "peak_input_tokens": 196836,
+    "wall_tokens_per_second": 6824.27
+  },
+  "time_budget": "4h",
+  "tool_steps": 375.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 35110,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-13T22:03:14Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-13T20:11:25Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261113T121328652501-icm-graded-refinement",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 62368,
+    "worker_pid": 3815187
+  },
+  "worker_seconds": 30879,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

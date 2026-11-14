@@ -50,9 +50,22 @@
       "finding": "reasoning-2",
       "reason": "Both states are free-boundary solutions driven by the same conductor currents, so their poloidal flux is absolute, not defined up to a datum: the change in the reference between slices is the solenoid flux swing, not drift. Comparing absolute axis and boundary flux, scaled by the span, is the intended and stronger test; aligning a datum would hide a real offset in the vacuum field.",
       "when": "2026-11-14T11:50:47.308647+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "finding": "anchors_resolve-1",
+      "reason": "Non-changing finding, and three earlier content rounds on this plan verified that the extensionless href /nova/spine-efit-parity resolves to docs/plans/spine-efit-parity.html under the docs surface; the section is landed context and is left as authored.",
+      "when": "2026-11-14T11:50:59.559923+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "reason": "Non-changing finding, and three earlier content rounds on this plan verified that the extensionless href /nova/spine-efit-parity resolves to docs/plans/spine-efit-parity.html under the docs surface; the section is landed context and is left as authored.",
+      "when": "2026-11-14T11:50:59.559923+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",

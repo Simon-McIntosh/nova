@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="325">
+<meta name="plan-version" content="326">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -1038,7 +1038,10 @@
     <div class="r-comment-body"><p>Completed H200 stage profile at widths 1/16/64: 39.880/7.685/5.782 ms/slice throughput across independent pulses or ensemble members; width-1 causal single-pulse latency is 39.880 ms. Width 256 requires 191.108 GB versus 112.586 GB allocator limit. Two fresh processes agree within 0.24%, every lane meets precision, and paired carried reads reproduce 3.394 to 8.917 ms, attributed to support_read._rebuilt_reading and topology.refresh_at_stationary_points adding 5.267 device ms. The scoped fragment and inspected SVG now show all positive stages above the axes, distinguish native/profiler styles, use ms/slice throughout and rank four conditional throughput saving targets. Retained owned input and measured modules are digest/revision/HLO verified; four mismatch mutations are refused. Evidence and figure committed at 2db5f6e5b695eb9782dc0b730ad1b36b71ce514e; 1 ms throughput is not yet achieved.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261113T171858659690-review-of-bank-h200-slice-profile-2db5f6e5b695-figure" data-who="reckon-build" data-when="2026-11-13T17:31:32.266Z">
-    <div class="r-comment-body"><p>figure review of r-20261113T012704238111-bank-h200-slice-profile at head 2db5f6e5: parsed, 6 of 6 rubric items answered, 0 blocking and 3 non-blocking findings; the previous review&#x27;s blocking defect (markers drawn on a zero baseline) is visibly answered by the logarithmic axes, and the findings that remain are that the y ticks are three data-derived values at five decimals with a computed geometric mean in the middle, that twelve independent log ranges make a 2.9x fall and a 47x fall look identical, and that all twelve panels stay in ms/slice so the predictor panel prints 0.00010 to 0.00474.</p></div>
+    <div class="r-comment-body"><p>figure review of r-20261113T012704238111-bank-h200-slice-profile at head 2db5f6e5: parsed, 6 of 6 rubric items answered, 0 blocking and 3 non-blocking findings; the previous review's blocking defect (markers drawn on a zero baseline) is visibly answered by the logarithmic axes, and the findings that remain are that the y ticks are three data-derived values at five decimals with a computed geometric mean in the middle, that twelve independent log ranges make a 2.9x fall and a 47x fall look identical, and that all twelve panels stay in ms/slice so the predictor panel prints 0.00010 to 0.00474.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048" data-who="reckon-build" data-when="2026-11-14T10:26:14.839Z">
+    <div class="r-comment-body"><p>two review records under review-records/ of run r-20261113T165201745905-bank-traced-inputs, one plain and one pinned at the reviewed head; this node&#x27;s suite fence is unarmed so no pytest gate exists for it and none ran.</p></div>
 </div>
 </section>
 </main>

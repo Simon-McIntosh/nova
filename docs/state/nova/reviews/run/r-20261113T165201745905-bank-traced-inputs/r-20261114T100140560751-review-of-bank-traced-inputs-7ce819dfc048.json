@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arm logs on disk: flat-pin-delivery/base-test_support_read.log at 5f8e4a26 ends '13 passed, 2 skipped' with EXIT=0 and no FAILED line, and flat-pin-delivery/head-test_bank_traced_inputs.log at 7ce819df ends '7 passed in 252.96s' with EXIT=0, so the after arm adds no failure id over the base arm; the base and head arms of the three pre-existing files (13 passed 2 skipped, 10 passed, 11 passed) also add none.",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:2109",
+    "scripts/prototypes/bank_newton_step/measure.py:163",
+    "scripts/prototypes/bank_h200_slice_profile/measure.py:243",
+    "scripts/prototypes/bank_drive_barrier/measure.py:92",
+    "scripts/prototypes/support/read_route_rows.py:152"
+  ],
+  "completed_at": "2026-11-14T10:26:14.839Z",
+  "dispatched_at": "2026-11-14T10:03:54Z",
+  "findings": [
+    {
+      "file": "tests/test_bank_traced_inputs.py",
+      "line": "254",
+      "severity": "non-blocking",
+      "text": "non-blocking: the traced residual is checked against bank.step_residual(effective, ...) where effective is produced by the same driven_operands call the traced path makes inside step_residual, so a defect in driven_operands (for example masking the wrong coil column) leaves both sides equally wrong and the assertion true; the only independent guard on the coil path is the axis-shift assertion at line 254."
+    },
+    {
+      "file": "tests/test_bank_traced_inputs.py",
+      "line": "37",
+      "severity": "non-blocking",
+      "text": "non-blocking: every fixture builds coil_exterior with a single coil column (the coils at line 37, the zeros at line 75) and coil_count 1, so the per-coil einsum and the coil_count mask are never exercised with two live coils; a swapped coil order or an off-by-one in the masked column would not be caught."
+    },
+    {
+      "file": "nova/equilibrium/current.py",
+      "line": "606",
+      "severity": "non-blocking",
+      "text": "non-blocking: the density_gradient getattr that routes a tabulated profile's analytic derivative into book_tangent and book_tangent_channels has no test that reddens if it is removed; the derivative test at tests/test_bank_traced_inputs.py:153 exercises TabulatedProfile.density_gradient in isolation, and the pin test would still converge on the constant-gradient fallback."
+    },
+    {
+      "file": "tests/test_bank_traced_inputs.py",
+      "line": "390",
+      "severity": "non-blocking",
+      "text": "non-blocking: the pin assertion measures the landed centroid with support_read.py:2323 _centroid_height, the same helper the solver's centroid row uses at support_read.py:2488, and the solve starts from zero moments where the centroid is undefined, so an error in that formula or a start that leaks the target into the initial state would not redden the 1e-8 tolerance."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-traced-inputs.html",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the evidence record carries no figure, although the declared write paths include docs/figures/sub-millisecond-forward-path/bank-traced-inputs and the repository requires a forward-solve evidence record to show its terminal poloidal flux contour panels with both null sets and the wall; the zero plasma-response fixture limits what the panel would show, and the scenario node renders the coupled state."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read all fourteen commits from base 5f8e4a269cafc9a00c7320fb6a72d8cbfc95a249 to head 7ce819dfc048648540ca6ee6acbbca0008482c70; 1818 insertions across seven files, the product change is the coil contraction, the tabulated profile and the bordered pin loop in support_read.py and current.py.",
+    "done_when": "the done_when names four tests plus a closure negative control; tests/test_bank_traced_inputs.py carries the 1e-12 certificate parity, the constant-table parity, the zero-recompile count and the centroid tolerance, and the manifest and logs record 7 passed at head and the closure arm red at EXIT=1.",
+    "goal": "the goal is traced per-lane coil currents and tabulated p'/FF' with a weak centroid pin on the bank route; nova/equilibrium/support_read.py:175 driven_operands contracts coil_exterior with a per-lane current vector, nova/equilibrium/current.py:63 TabulatedProfile carries the 33-knot tables, and support_read.py:2350 adds the bordered pin, all reachable from solve_batch.",
+    "manifest": "read; it reports status complete at 7ce819dfc048648540ca6ee6acbbca0008482c70, the flat-pin-delivery gate logs with EXIT lines, the closure-mutant log, and the numerics receipt.",
+    "write_paths": "read the manifest's declared paths (support_read.py, current.py, tests/test_bank_traced_inputs.py, scripts/prototypes/bank_traced_inputs, the evidence fragment, docs/figures); every one of the seven files in the diff lies inside them, and nothing else was touched."
+  },
+  "justifications": {
+    "durability": "the closure mutation is a genuine negative control (closure-mutant.log shows assert 1 == 0 at EXIT=1), but tests/test_bank_traced_inputs.py:255 compares the traced residual against the same driven_operands output the traced path produces, and nothing fails if current.py:606 or :757 drops the tabulated density_gradient from the booking tangents.",
+    "evidence": "flat-pin-delivery/head-test_bank_traced_inputs.log ends 7 passed and EXIT=0 with SLICE_COMPILATIONS cold 1 changed 0, and flat-pin-cold-start/numerics.log records changed_compiles 0 with a module path and revision.",
+    "fit": "the added symbols (driven_operands, TabulatedProfile, _centroid_height) name their mechanism and follow the surrounding style of support_read.py:201 and current.py:32, though the getattr fallback idiom at support_read.py:1408 and current.py:606 states a profile protocol implicitly.",
+    "goal_fidelity": "support_read.py:175 driven_operands and :2350 _solve_pinned_lane land the three named inputs, but the pin is only shown holding a centroid it starts undefined at (zero-current start), so its hold-from-displaced behaviour is asserted nowhere.",
+    "reuse": "current.TabulatedProfile reuses convention.toroidal_current_density and the existing clipped_support_current_moments profile seam, and _solve_pinned_lane reuses constraint.VerticalPositionPin; a search for an existing jax-differentiable normalized-flux interpolator (nova/imas/profiles.py is scipy host-side) and for a cell-moment-to-centroid helper found no owner, so _tabulated_value and _centroid_height are first of their capability.",
+    "scope_discipline": "all seven paths in the diff are inside the write paths declared at the manifest's orientation_write_paths, and the only additions outside them are none."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is traced per-lane coil currents and tabulated p'/FF' with a weak centroid pin on the bank route; nova/equilibrium/support_read.py:175 driven_operands contracts coil_exterior with a per-lane current vector, nova/equilibrium/current.py:63 TabulatedProfile carries the 33-knot tables, and support_read.py:2350 adds the bordered pin, all reachable from solve_batch.\nVERDICT done_when: the done_when names four tests plus a closure negative control; tests/test_bank_traced_inputs.py carries the 1e-12 certificate parity, the constant-table parity, the zero-recompile count and the centroid tolerance, and the manifest and logs record 7 passed at head and the closure arm red at EXIT=1.\nVERDICT write_paths: read the manifest's declared paths (support_read.py, current.py, tests/test_bank_traced_inputs.py, scripts/prototypes/bank_traced_inputs, the evidence fragment, docs/figures); every one of the seven files in the diff lies inside them, and nothing else was touched.\nVERDICT manifest: read; it reports status complete at 7ce819dfc048648540ca6ee6acbbca0008482c70, the flat-pin-delivery gate logs with EXIT lines, the closure-mutant log, and the numerics receipt.\nVERDICT diff: read all fourteen commits from base 5f8e4a269cafc9a00c7320fb6a72d8cbfc95a249 to head 7ce819dfc048648540ca6ee6acbbca0008482c70; 1818 insertions across seven files, the product change is the coil contraction, the tabulated profile and the bordered pin loop in support_read.py and current.py.\nCALL_SITES: nova/equilibrium/support_read.py:2109, scripts/prototypes/bank_newton_step/measure.py:163, scripts/prototypes/bank_h200_slice_profile/measure.py:243, scripts/prototypes/bank_drive_barrier/measure.py:92, scripts/prototypes/support/read_route_rows.py:152\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: support_read.py:175 driven_operands and :2350 _solve_pinned_lane land the three named inputs, but the pin is only shown holding a centroid it starts undefined at (zero-current start), so its hold-from-displaced behaviour is asserted nowhere.\nSCORE evidence: 18\nJUSTIFICATION evidence: flat-pin-delivery/head-test_bank_traced_inputs.log ends 7 passed and EXIT=0 with SLICE_COMPILATIONS cold 1 changed 0, and flat-pin-cold-start/numerics.log records changed_compiles 0 with a module path and revision.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all seven paths in the diff are inside the write paths declared at the manifest's orientation_write_paths, and the only additions outside them are none.\nSCORE durability: 16\nJUSTIFICATION durability: the closure mutation is a genuine negative control (closure-mutant.log shows assert 1 == 0 at EXIT=1), but tests/test_bank_traced_inputs.py:255 compares the traced residual against the same driven_operands output the traced path produces, and nothing fails if current.py:606 or :757 drops the tabulated density_gradient from the booking tangents.\nSCORE fit: 16\nJUSTIFICATION fit: the added symbols (driven_operands, TabulatedProfile, _centroid_height) name their mechanism and follow the surrounding style of support_read.py:201 and current.py:32, though the getattr fallback idiom at support_read.py:1408 and current.py:606 states a profile protocol implicitly.\nSCORE reuse: 18\nJUSTIFICATION reuse: current.TabulatedProfile reuses convention.toroidal_current_density and the existing clipped_support_current_moments profile seam, and _solve_pinned_lane reuses constraint.VerticalPositionPin; a search for an existing jax-differentiable normalized-flux interpolator (nova/imas/profiles.py is scipy host-side) and for a cell-moment-to-centroid helper found no owner, so _tabulated_value and _centroid_height are first of their capability.\nFINDING tests/test_bank_traced_inputs.py:254 non-blocking: the traced residual is checked against bank.step_residual(effective, ...) where effective is produced by the same driven_operands call the traced path makes inside step_residual, so a defect in driven_operands (for example masking the wrong coil column) leaves both sides equally wrong and the assertion true; the only independent guard on the coil path is the axis-shift assertion at line 254.\nFINDING tests/test_bank_traced_inputs.py:37 non-blocking: every fixture builds coil_exterior with a single coil column (the coils at line 37, the zeros at line 75) and coil_count 1, so the per-coil einsum and the coil_count mask are never exercised with two live coils; a swapped coil order or an off-by-one in the masked column would not be caught.\nFINDING nova/equilibrium/current.py:606 non-blocking: the density_gradient getattr that routes a tabulated profile's analytic derivative into book_tangent and book_tangent_channels has no test that reddens if it is removed; the derivative test at tests/test_bank_traced_inputs.py:153 exercises TabulatedProfile.density_gradient in isolation, and the pin test would still converge on the constant-gradient fallback.\nFINDING tests/test_bank_traced_inputs.py:390 non-blocking: the pin assertion measures the landed centroid with support_read.py:2323 _centroid_height, the same helper the solver's centroid row uses at support_read.py:2488, and the solve starts from zero moments where the centroid is undefined, so an error in that formula or a start that leaks the target into the initial state would not redden the 1e-8 tolerance.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-traced-inputs.html:1 non-blocking: the evidence record carries no figure, although the declared write paths include docs/figures/sub-millisecond-forward-path/bank-traced-inputs and the repository requires a forward-solve evidence record to show its terminal poloidal flux contour panels with both null sets and the wall; the zero plasma-response fixture limits what the panel would show, and the scenario node renders the coupled state.",
+  "review_node": "review-of-bank-traced-inputs-7ce819dfc048",
+  "review_run_id": "r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048",
+  "reviewed_base_sha": "5f8e4a269cafc9a00c7320fb6a72d8cbfc95a249",
+  "reviewed_head_sha": "7ce819dfc048648540ca6ee6acbbca0008482c70",
+  "reviewed_run_id": "r-20261113T165201745905-bank-traced-inputs",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048"
+  },
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T10:28:33.432920+00:00",
+  "total": 105
+}

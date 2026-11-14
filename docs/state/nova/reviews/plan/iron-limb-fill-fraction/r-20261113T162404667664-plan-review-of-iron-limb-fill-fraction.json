@@ -56,14 +56,40 @@
       "finding": "reuse_search-1",
       "reason": "Reuse map for the node brief, not plan text: the material-solve brief will require the rule to land in the production residual and operand tuple, with the prototype's second solver retired; the done-when already measures the production solve.",
       "when": "2026-11-14T07:39:23.243013+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "finding": "deep_module-1",
+      "reason": "Reuse map for the node brief: the machine-description brief will require one derivation of fill fraction and cross-field factor from the limb section and axis, with the prototype's two definitions retired; the done-when integral then has one input.",
+      "when": "2026-11-14T07:39:36.291317+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "finding": "thin_wrapper-1",
+      "reason": "Reuse map for the node brief: the material-solve brief will name the production loop and the module default tile plan as the carrier of both arms; the plan states the endpoint and the worker settles the method.",
+      "when": "2026-11-14T07:39:42.012328+00:00"
     }
   ],
   "responses": {
+    "deep_module-1": {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "reason": "Reuse map for the node brief: the machine-description brief will require one derivation of fill fraction and cross-field factor from the limb section and axis, with the prototype's two definitions retired; the done-when integral then has one input.",
+      "when": "2026-11-14T07:39:36.291317+00:00"
+    },
     "reuse_search-1": {
       "action": "declined",
       "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
       "reason": "Reuse map for the node brief, not plan text: the material-solve brief will require the rule to land in the production residual and operand tuple, with the prototype's second solver retired; the done-when already measures the production solve.",
       "when": "2026-11-14T07:39:23.243013+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "reason": "Reuse map for the node brief: the material-solve brief will name the production loop and the module default tile plan as the carrier of both arms; the plan states the endpoint and the worker settles the method.",
+      "when": "2026-11-14T07:39:42.012328+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-limb-fill-fraction/r-20261113T162404667664-plan-review-of-iron-limb-fill-fraction.json",

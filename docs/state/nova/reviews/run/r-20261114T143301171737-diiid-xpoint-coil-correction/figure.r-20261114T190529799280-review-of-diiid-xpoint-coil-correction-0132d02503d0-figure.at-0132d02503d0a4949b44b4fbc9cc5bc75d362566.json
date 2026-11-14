@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-14T19:44:09.447Z",
   "dispatched_at": "2026-11-14T19:15:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the zoom scale is stated in the fragment's figcaption beside the figure; the panel follows the poloidal axis-off rule and reads correctly on the page it is published on",
+      "recorded_at": "2026-11-14T20:31:06.773517+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/diiid-xpoint-coil-correction/frame-137-diverted-lower-xpoint.svg",

@@ -256,16 +256,18 @@ class SurfaceModel:
                 self.constraints.append(members)
         if hasattr(external, "normal_average"):
             normal = external.normal_average(panels, order=16)
-            refined = external.normal_average(panels, order=32)
-            error = np.linalg.norm(refined - normal) / np.linalg.norm(refined)
-            if error > 2e-5:
-                normal, refined = refined, external.normal_average(panels, order=64)
+            for order in (32, 64, 128):
+                refined = external.normal_average(panels, order=order)
                 error = np.linalg.norm(refined - normal) / np.linalg.norm(refined)
+                if error <= 2e-5:
+                    break
+                normal = refined
             if error > 2e-5:
                 raise ValueError(f"normal drive quadrature is unresolved: {error=}")
             centroid = np.sum(external(panels.centres) * panels.normals, axis=1)
             external.last_quadrature = dict(
                 relative_change=float(error),
+                gauss_order=order,
                 centroid_relative_difference=float(
                     np.linalg.norm(centroid - refined) / np.linalg.norm(refined)
                 ),

@@ -7,6 +7,13 @@
     "nova/equilibrium/forward.py:ForwardProfile.solve"
   ],
   "completed_at": "2026-11-14T19:23:47.699Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "prototype drivers for a measured null result whose mechanism is being traced separately (diiid-external-current-propagation); durable product checks belong to that trace's proposed repair, not to these drivers",
+      "recorded_at": "2026-11-14T20:30:50.983601+00:00"
+    }
+  },
   "dispatched_at": "2026-11-14T18:45:47Z",
   "finding_dispositions": {
     "0": {

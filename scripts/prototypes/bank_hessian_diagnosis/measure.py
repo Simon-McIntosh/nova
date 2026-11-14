@@ -60,7 +60,13 @@ def stencil(task):
                 p = np.asarray(point, dtype=np.longdouble).copy()
                 p[axis] += sign * step
                 shifted.append(p)
-    values = ref.gradient(np.array(shifted), packed, moments)
+    values = np.concatenate(
+        [
+            ref.gradient(np.array(shifted[first : first + 2]), packed, moments)
+            for first in range(0, len(shifted), 2)
+        ],
+        axis=1,
+    )
     raw = (values[:, 1::2] - values[:, 2::2]).reshape(3, 2, 3, 2)
     raw /= 2 * steps[None, None, :, None]
     fourth = (4 * raw[:, :, 1:] - raw[:, :, :-1]) / 3

@@ -85,7 +85,13 @@ def coil_reference(points, coils, moments):
                     p = np.array(point, dtype=np.longdouble)
                     p[axis] += sign * step
                     shifts.append(p)
-        values = ref.gradient(np.array(shifts), coils, moments)
+        values = np.concatenate(
+            [
+                ref.gradient(np.array(shifts[first : first + 2]), coils, moments)
+                for first in range(0, len(shifts), 2)
+            ],
+            axis=1,
+        )
         raw = (values[:, 1::2] - values[:, 2::2]).reshape(3, 2, 3, 2)
         raw /= 2 * steps[None, None, :, None]
         fourth = (4 * raw[:, :, 1:] - raw[:, :, :-1]) / 3
@@ -227,6 +233,8 @@ def main():
             positive_pass=positive < 1e-8,
             negative_refused=negative > 1e-8,
         )
+        tested = mutated if args.mutate else total
+        row["guard_accepted"] = trace(tested, points, forcing[s])["relative"] < 1e-8
         rows.append(row)
         print("STATE", json.dumps(row, default=float), flush=True)
     output = dict(
@@ -249,7 +257,9 @@ def main():
     assert all(max(row["coil_hessian_relative"]) < 1e-8 for row in rows), (
         "coil positive control fails"
     )
-    assert not args.mutate, "psi_ZZ relative perturbation refused by trace identity"
+    assert all(row["guard_accepted"] for row in rows), (
+        "psi_ZZ relative perturbation refused by trace identity"
+    )
     print(
         "DIAGNOSIS_COMPLETE", len(indices), "interior nodes; three states", flush=True
     )

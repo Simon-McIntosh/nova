@@ -1,6 +1,8 @@
 """Independent field identities and surface boundary-condition checks."""
 
+import json
 import os
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -61,9 +63,17 @@ def test_triangle_surface_integral_matches_brick_inside_and_outside():
 
 
 @pytest.fixture(scope="module")
-def sphere_convergence():
-    from scripts.iron_limb_reference.sphere import sphere_study
+def sphere_convergence(request):
+    from scripts.iron_limb_reference.sphere import sphere_study, validate_sphere_receipt
 
+    reuse = os.environ.get("NOVA_IRON_REUSE_SPHERE_RECEIPT")
+    if reuse:
+        record = validate_sphere_receipt(json.loads(Path(reuse).read_text()))
+        request.config.get_terminal_writer().line(
+            f"SPHERE_RECEIPT_REUSED path={reuse} "
+            f"solver_digest={record['solver_sha256']}"
+        )
+        return record
     return sphere_study(output=os.environ.get("NOVA_IRON_SPHERE_RECEIPT"))
 
 
@@ -251,3 +261,57 @@ def test_extrapolated_comparison_checks_each_outside_probe():
     assert not comparison["passed"]
     assert comparison["measures"]["outside_0"]["passed"]
     assert not comparison["measures"]["outside_1"]["passed"]
+
+
+def test_stored_comparison_uses_vectors_and_declared_denominators():
+    from scripts.iron_limb_reference.comparison import comparison_rows
+
+    def row(flux, vessel, outside):
+        return dict(
+            mu=50.0,
+            column_flux_Wb=flux,
+            iron_average_T=[vessel, outside],
+            air_T=[[0, 0], [0, 4]],
+        )
+
+    receipt = dict(
+        completed=True,
+        surface=[
+            dict(rows=[row(10, [0, 4], [0, 0])]),
+            dict(rows=[row(12, [3, 4], [3, 0])]),
+        ],
+        axisymmetric=[
+            dict(rows=[row(6, [0, 3], [0, -1])]),
+            dict(rows=[row(8, [0, 4], [0, 0])]),
+        ],
+        axisymmetric_extrapolation=[
+            dict(
+                mu=50.0,
+                flux=dict(valid=True, extrapolated=10),
+                vessel=dict(valid=True, extrapolated=[[0, 5]]),
+                outside=[dict(valid=False)],
+            )
+        ],
+    )
+    flux, vessel, outside = comparison_rows(receipt, 1)
+    assert flux["difference_relative"] == pytest.approx(0.2)
+    assert flux["finest_difference_relative"] == pytest.approx(0.5)
+    assert flux["surface_last_step_relative"] == pytest.approx(1 / 6)
+    assert flux["axisymmetric_last_step_relative"] == pytest.approx(0.25)
+    assert flux["axisymmetric_extrapolation_correction_relative"] == pytest.approx(0.2)
+    assert vessel["surface_finest"] == pytest.approx(5)
+    assert vessel["difference_relative"] == pytest.approx(np.sqrt(10) / 5)
+    assert vessel["surface_last_step_relative"] == pytest.approx(0.6)
+    assert outside["comparator"] == "finest"
+    assert outside["axisymmetric_extrapolate"] is None
+    assert outside["surface_finest"] == pytest.approx(5)
+    assert outside["axisymmetric_finest"] == pytest.approx(4)
+    assert outside["difference_relative"] == pytest.approx(0.6)
+    assert outside["axisymmetric_last_step_relative"] == pytest.approx(0.25)
+
+
+def test_sphere_receipt_reuse_refuses_a_different_solver():
+    from scripts.iron_limb_reference.sphere import validate_sphere_receipt
+
+    with pytest.raises(ValueError, match="solver digest differs"):
+        validate_sphere_receipt(dict(passed=True, solver_sha256="different"))

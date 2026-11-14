@@ -107,3 +107,17 @@ def sphere_study(levels=(4, 5, 6), output=None):
     if output is not None:
         Path(output).write_text(json.dumps(record, indent=2) + "\n")
     return record
+
+
+def validate_sphere_receipt(record):
+    """Require a completed benchmark from the identical surface solver."""
+    from scripts.iron_limb_reference import surface
+
+    expected = hashlib.sha256(Path(surface.__file__).read_bytes()).hexdigest()
+    if record.get("solver_sha256") != expected:
+        raise ValueError("sphere receipt solver digest differs")
+    if not record.get("passed") or record.get("levels") != [4, 5, 6]:
+        raise ValueError("sphere receipt lacks the passing three-mesh study")
+    if len(record.get("rows", [])) != 6 or len(record.get("convergence", [])) != 2:
+        raise ValueError("sphere receipt is incomplete")
+    return record

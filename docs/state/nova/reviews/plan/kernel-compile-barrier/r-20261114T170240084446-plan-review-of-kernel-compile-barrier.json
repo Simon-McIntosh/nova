@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T18:13:30.226Z",
+  "dispatched_at": "2026-11-14T18:07:46Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261114T170240084446-plan-review-of-kernel-compile-barrier/plan.html:59",
+      "id": "reasoning-1",
+      "reason": "a worker reads that exclusion as covered-elsewhere and never runs those files base-and-head, so a behavioural regression in the restructured point jet (`_source_jets`/`_row_program` are imported directly by several of them) can land unmeasured; the plan must either widen \u00a74's gate to name them or state plainly that they are ungated, instead of pointing at a gate that does not run them.",
+      "text": "clause (3) says `tests/equilibrium/test_topology_read.py` \"and the read, bank and tracked-read files are \u00a74's gate\", but \u00a74's done-when runs only the whole of `test_topology_read.py` (clause 3 names that file alone, and no other section names the read, bank or tracked-read files), so roughly twenty test files that import `fixed_points` or `polygonanalytic` \u2014 e.g. `tests/test_tracked_read.py`, `tests/test_tracked_read_accuracy.py`, `tests/test_read_tie_break.py`, `tests/test_bank_newton_step.py`, `tests/test_support_read.py`, `tests/test_fixed_points.py` \u2014 are named by no gate in this plan beyond whatever the seventeen files of job 1314800 happen to include, while the sentence tells the reader they are covered",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261114T170240084446-plan-review-of-kernel-compile-barrier/plan.html:59",
+      "id": "done_when-1",
+      "reason": "the file set is stated explicitly and governs what the worker runs, so only the count and the historical 21-minute wall are stale; no threshold, arm or control moves.",
+      "text": "adding `tests/test_moment_field_hessian.py` to the CPU arm makes that arm sixteen files (17 minus the two H200 files, plus the added one), but the paragraph still reads \"The other fifteen files, which took 21 minutes together, run \u2026 as one sirius job on CPU (4 cores, 64 GB, one hour)\"",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "c6ea385c1695f8611107f23c870ce0c218c29314",
+  "plan_fingerprint": "6321cee689c96f2a073e0555b488ac08081fa029ffe7e242d62d13b5f0b14cb2",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 48,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261114T170240084446-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "1b39d0b7db1a7627f92c629e4ac4bcf4b3914e41",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/equilibrium/fixed_points.py:323` `_source_jets` and `:521` `_row_program` both resolve (the latter is an assignment, not a `def`), `scripts/prototypes/compile_pass_profile/profile.py` exists, the census row does import `fixed_points._row_program` (`scripts/prototypes/kernel_compile_census/row.py:111`), `tests/test_moment_field_hessian.py` exists, and both cited evidence fragments resolve.",
+    "done_when": "pass \u2014 clause (3) now fixes a closed, explicit file set with a by-device negative control (no failure id at head that the base arm on that device lacks) and no test deselected; clause (2)'s base-arm thresholds can fail.",
+    "evidence_paths": "pass \u2014 the changed clauses add no evidence path; the per-pass table's path is fixed by the node dispatch and recorded in a comment on the section, as the earlier review accepted.",
+    "naming": "pass \u2014 the section names commits, job ids and file paths as evidence in plan prose and introduces no symbol, file or comment carrying a plan label or ticket number.",
+    "reasoning": "a finding \u2014 clause (3) excludes the remaining `fixed_points`/`polygonanalytic` importers on the strength of a \u00a74 gate that runs only `tests/equilibrium/test_topology_read.py`.",
+    "single_goal": "pass \u2014 \u00a72 carries one deliverable, the point jet's variadic program shrunk in the production program, measured by one base/head job.",
+    "wiring": "pass \u2014 the changed clauses of \u00a72 add no relationship; the section's declared link to \u00a75 and every section it names (\u00a70, \u00a73, \u00a74, \u00a75) exist in the snapshot."
+  },
+  "section_digests": {
+    "_document": "19c46cca46cf251b2f56d75e5620c8069d6b72a6623a979673bb4a8e4258367e",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "cfd1cda614f52377c841538e05906426f091420913419acd50bc3e5c3f4f767d",
+    "s3": "ab68c20ce5d3e9242532f0e5cb72a8baf8b9ce57666cac7db68cee8904360fa1",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T18:22:54.414226+00:00",
+  "total": null
+}

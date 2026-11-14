@@ -12,20 +12,22 @@ export TMPDIR=/tmp
 source_tree=$PWD
 out=$1
 base_revision=$2
+driver=${3:-scripts/iron_graded_refinement/gate.py}
 head_revision=$(git -C "$source_tree" rev-parse HEAD)
 scratch=$(mktemp -d "$TMPDIR/icm-gate-${SLURM_JOB_ID:-$$}-XXXX")
-trap 'rm -rf "$scratch"' EXIT
+trap 'rm -rfv "$scratch"' EXIT
 mkdir -p "$scratch/base" "$scratch/head" "$out"
 git -C "$source_tree" archive "$base_revision" | tar -x -C "$scratch/base"
 git -C "$source_tree" archive "$head_revision" | tar -x -C "$scratch/head"
+export PYTHONPATH="$scratch/head"
 cd "$scratch/head" || exit 4
 /home/ITER/mcintos/Code/nova/.venv/bin/python \
-    scripts/iron_graded_refinement/gate.py \
+    "$driver" \
     --base-tree "$scratch/base" --head-tree "$scratch/head" \
     --base-revision "$base_revision" --head-revision "$head_revision" \
-    --source "$source_tree" --output "$out"
+    --source "$source_tree" --output "$out" "${@:4}"
 result=$?
-rm -rf "$scratch"
+rm -rfv "$scratch"
 trap - EXIT
 echo EXIT=$result
 exit "$result"

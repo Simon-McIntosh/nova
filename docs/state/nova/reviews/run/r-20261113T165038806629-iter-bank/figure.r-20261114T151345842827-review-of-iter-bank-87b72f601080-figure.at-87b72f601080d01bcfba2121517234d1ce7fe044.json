@@ -4,6 +4,13 @@
   "completed_at": "",
   "dispatched_at": "2026-11-14T15:14:29Z",
   "figure_path": "docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh.svg",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "iter-bank-figure-redraw",
+      "recorded_at": "2026-11-14T16:49:12.892605+00:00"
+    }
+  },
   "findings": [
     {
       "disposition": "folded - figure repair on nova:sub-millisecond-forward-path section 6",

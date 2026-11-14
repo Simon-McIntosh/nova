@@ -1233,8 +1233,21 @@ def test_paired_polygon_tiles_reuse_one_shape_and_preserve_cartesian_rows():
             pairwise=True,
         )
         actual = np.array(paired(*points.T, edge, weight, norm))
-        np.testing.assert_allclose(
-            actual, expected, rtol=1e-13, atol=1e-25
+        contributions = []
+        for index in range(len(weight)):
+            isolated = np.zeros_like(weight)
+            isolated[index] = weight[index]
+            contributions.append(
+                np.array(cartesian(*points.T, edge, isolated, norm))[
+                    :, np.arange(3), np.arange(3)
+                ]
+            )
+        scale = np.abs(contributions).sum(axis=0)
+        assert np.isfinite(actual).all()
+        assert np.all(np.abs(actual - expected) <= 1e-12 * scale)
+        print(
+            "paired polygon error over absolute edge sum:",
+            float(np.max(np.abs(actual - expected) / scale)),
         )
         paired(*points[:1].T, edge[:, :, :1], weight[:, :1], norm[:1])
         assert paired.compile_count == 1

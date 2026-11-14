@@ -164,7 +164,16 @@ def main():
             row["operator_relative_difference"] = float(
                 np.linalg.norm(operator - delivered) / np.linalg.norm(delivered)
             )
-            if row["operator_relative_difference"] > 1e-12:
+            row["operator_max_entry_relative_difference"] = float(
+                np.max(np.abs(operator - delivered)) / np.max(np.abs(delivered))
+            )
+            if (
+                max(
+                    row["operator_relative_difference"],
+                    row["operator_max_entry_relative_difference"],
+                )
+                > 1e-12
+            ):
                 save()
                 raise SystemExit("linear operator differs from delivered interaction")
         target = args.output / f"operator-{size:g}.npy"

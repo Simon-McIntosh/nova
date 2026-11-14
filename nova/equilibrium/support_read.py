@@ -366,7 +366,12 @@ def read(
             bank_exterior=operands.exterior,
         )
         return topology.read_at_stationary_points(
-            field, operands.geometry, convention, policy, stencil.solved
+            field,
+            operands.geometry,
+            convention,
+            policy,
+            stencil.solved,
+            cached=None if tracking is None else tracking.reading,
         )
 
     if tracking is None:
@@ -419,6 +424,7 @@ def _rebuilt_reading(
     decision=None,
     *,
     skip_wall=False,
+    cached_geometry=None,
 ):
     """The connected-domain decision of one stencil, fitted over the whole mesh."""
     field_jets = nodal_jets(operands, moments) if jets is None else jets
@@ -432,7 +438,12 @@ def _rebuilt_reading(
     )
     if decision is None:
         return topology.read_at_stationary_points(
-            field, operands.geometry, convention, policy, stencil.solved
+            field,
+            operands.geometry,
+            convention,
+            policy,
+            stencil.solved,
+            cached=cached_geometry,
         )
     return topology.refresh_at_stationary_points(
         field,
@@ -535,7 +546,19 @@ def read_batch(
         )
     )(moments, seeds, previous)
 
-    def whole_mesh():
+    def whole_mesh(cached_geometry=None):
+        if cached_geometry is not None:
+            return jax.vmap(
+                lambda stencil, state, prior: _rebuilt_reading(
+                    operands,
+                    stencil,
+                    state,
+                    convention,
+                    policy,
+                    None,
+                    cached_geometry=prior,
+                )
+            )(stack, moments, cached_geometry)
         if jets is None:
             return jax.vmap(
                 lambda stencil, state: _rebuilt_reading(
@@ -573,12 +596,12 @@ def read_batch(
             tracked.rebuilds + needed.astype(tracked.rebuilds.dtype),
         )
 
-    def full_verdict():
+    def full_verdict(cached_geometry=None):
         return jax.vmap(
             lambda stencil, reading, tracked: _verdict(
                 stencil, reading, jnp.asarray(True), tracked.rebuilds + 1
             )
-        )(stack, whole_mesh(), tracking)
+        )(stack, whole_mesh(cached_geometry), tracking)
 
     def carry(_):
         def refresh(skip_wall):
@@ -625,11 +648,11 @@ def read_batch(
         if certificate is not None:
             changed = changed | certificate(carried)
         return jax.lax.cond(
-            jnp.any(changed), lambda _: full_verdict(), lambda _: carried, None
+            jnp.any(changed), lambda _: full_verdict(reading), lambda _: carried, None
         )
 
     def rebuild(_):
-        return jax.vmap(verdict)(stack, whole_mesh(), tracking)
+        return jax.vmap(verdict)(stack, whole_mesh(tracking.reading), tracking)
 
     return jax.lax.cond(needed, rebuild, carry, None)
 
@@ -1906,6 +1929,7 @@ def solve_batch(
     iterations: int = 12,
     coil_currents=None,
     vertical_pin=None,
+    initial_support=None,
 ) -> SolveResult:
     """Converge independent lanes in one staged loop with a batch refactor branch.
 
@@ -1923,6 +1947,11 @@ def solve_batch(
     factor proposes the first update; a fresh-residual contraction check rejects
     that trial and rebuilds at the incumbent if it fails the contraction limit.
     The returned factor is usable only where ``factor_valid`` is true.
+
+    ``initial_support`` carries the preceding slice's geometry. Its clipping
+    keys are checked against the predicted state on device; changed cells are
+    rebuilt. It can be supplied through drive continuation's ``solve_options``.
+    Connected qualification is still rebuilt before accepting a terminal state.
 
     ``profile`` is either one shared profile or a callable taking a traced
     lane index and returning that lane's profile. The callable is evaluated
@@ -1957,10 +1986,20 @@ def solve_batch(
             contraction_limit=contraction_limit,
             freeze_active_set=freeze_active_set,
             iterations=iterations,
+            initial_support=initial_support,
         )
     lanes, cells = moments[0].shape
     lane_profile = profile if callable(profile) else lambda _: profile
     lane_indices = jnp.arange(lanes)
+
+    def magnitude(state, reading):
+        result = jax.vmap(
+            lambda one, one_read, lane: step_residual(
+                operands, one, one, one_read, lane_profile(lane), quadrature
+            )
+        )(state, reading, lane_indices)
+        return jnp.max(jnp.abs(jnp.concatenate(result.residual, axis=-1)), axis=-1)
+
     support = read_batch(
         operands,
         cache,
@@ -1971,15 +2010,15 @@ def solve_batch(
         policy,
         axis_sign,
         iterations=iterations,
+        **(
+            {
+                "tracking": tracking_of(initial_support),
+                "certificate": lambda reading: magnitude(moments, reading) <= tolerance,
+            }
+            if initial_support is not None
+            else {}
+        ),
     )
-
-    def magnitude(state, reading):
-        result = jax.vmap(
-            lambda one, one_read, lane: step_residual(
-                operands, one, one, one_read, lane_profile(lane), quadrature
-            )
-        )(state, reading, lane_indices)
-        return jnp.max(jnp.abs(jnp.concatenate(result.residual, axis=-1)), axis=-1)
 
     def selection_changed(reading, cut_set, normal_set, fragments):
         cut = (reading.membership > 0) & (reading.membership < 1 - 1e-14)
@@ -2591,6 +2630,10 @@ def _solve_driven_batch(
         if options["factor_cache"] is not None:
             lane_options["factor_cache"] = jax.tree.map(
                 lambda value: value[index][None], options["factor_cache"]
+            )
+        if options.get("initial_support") is not None:
+            lane_options["initial_support"] = jax.tree.map(
+                lambda value: value[index][None], options["initial_support"]
             )
         lane_options["factor_valid"] = jnp.broadcast_to(
             options["factor_valid"], (lanes,)

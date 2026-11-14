@@ -100,8 +100,25 @@ def coil_reference(points, coils, moments):
         )
         return 2 * jnp.pi * point[0] * jnp.stack((rows[6], -rows[3]), axis=-1)
 
-    direct_value = jax.jit(uniform_gradient)
-    direct_derivative = jax.jit(jax.jacfwd(uniform_gradient))
+    direct_value = jax.vmap(uniform_gradient)
+    direct_derivative = jax.vmap(jax.jacfwd(uniform_gradient))
+    unit_gradient, unit_hessian = [], []
+    for first in range(0, len(points), 8):
+        path = ROOT / f"coil-direct-{first}.npz"
+        if path.exists():
+            batch = dict(np.load(path))
+        else:
+            batch_points = jnp.asarray(points[first : first + 8])
+            batch = dict(
+                gradient=np.asarray(direct_value(batch_points)),
+                hessian=np.asarray(direct_derivative(batch_points)),
+            )
+            np.savez(path, **batch)
+        unit_gradient.append(batch["gradient"])
+        unit_hessian.append(batch["hessian"])
+        print("COIL_DIRECT_BATCH", first, flush=True)
+    unit_gradient = np.concatenate(unit_gradient)
+    unit_hessian = np.concatenate(unit_hessian)
     for i, point in enumerate(points):
         shifts = [np.array(point, dtype=np.longdouble)]
         steps = np.array([0.001, 0.0005, 0.00025], dtype=np.longdouble)
@@ -128,14 +145,14 @@ def coil_reference(points, coils, moments):
         direct_gradient.append(
             np.einsum(
                 "cd,sc->sd",
-                np.asarray(direct_value(jnp.asarray(point))),
+                unit_gradient[i],
                 moments[:, :, 0],
             )
         )
         direct_hessian.append(
             np.einsum(
                 "cij,sc->sij",
-                np.asarray(direct_derivative(jnp.asarray(point))),
+                unit_hessian[i],
                 moments[:, :, 0],
             )
         )

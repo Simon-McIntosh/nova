@@ -20,7 +20,8 @@ def main():
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    record = json.loads(args.source.read_text())
+    raw = args.source.read_bytes()
+    record = json.loads(raw)
     assert "control_passed" in record and len(record["control"]) == 20
     case, references = reference_inputs()
     probes = np.asarray(case["probes"])
@@ -28,9 +29,7 @@ def main():
     air = axisymmetric_drive(case["sources"])(probes)
     record["probe_groups"] = groups
     record["source_receipt"] = str(args.source)
-    record["source_receipt_sha256"] = hashlib.sha256(
-        args.source.read_bytes()
-    ).hexdigest()
+    record["source_receipt_sha256"] = hashlib.sha256(raw).hexdigest()
     for row in record["control"]:
         reference = np.asarray(references[row["mu"]]["iron_average_T"])
         field = np.asarray(row["iron_T"])

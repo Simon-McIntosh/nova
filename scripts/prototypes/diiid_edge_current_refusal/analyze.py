@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import os
 from pathlib import Path
 
 import jax
@@ -302,3 +303,17 @@ def analyze(capture):
         ),
         flush=True,
     )
+    if receipt["frame"] == 179 and receipt["branch"] == "limited":
+        # Replace the completed row process to release its GPU allocator before
+        # the counterfactual starts inside the same scheduler allocation.
+        root = Path(__file__).resolve().parents[3]
+        control = output.parents[1] / "inactive-field-suppressed"
+        os.execv(
+            "/usr/bin/bash",
+            [
+                "bash",
+                str(Path(__file__).with_name("control.sh")),
+                str(root),
+                str(control),
+            ],
+        )

@@ -1,353 +1,45 @@
 <section id="known-answer-recovery-record">
-  <h2>Initial implementation checkpoint: scientific gate unmeasured</h2>
-  <p>The fitting class and its single receipt are committed at
-    <code>40fdde05441b227ac41c560dad5e94c6688771bc</code>. Every coefficient
-    evaluation issues a typed <code>ForwardSolveRequest</code> through
-    <code>ForwardProfile.solve</code>. The class uses the existing virtual
-    flux-loop and poloidal-probe kernels through a caller-supplied magnetic
-    source adapter. No measurement field was added to the forward request.</p>
-  <p>The receipt carries coefficients, their names, the terminal forward receipt,
-    iteration and forward-evaluation counts, per-row whitened residuals, the
-    column-normalised response spectrum, covariance and undetermined coefficient
-    directions. The shared whitened solver now reports those directions and
-    handles an unregularised rank-deficient response. On the base revision,
-    three identical rows with two identical columns and zero ridge reproduce
-    <code>LinAlgError: Singular matrix</code>.</p>
-  <p>Seven focused unit tests passed in <strong>4.63 s</strong>. These are
-    algebraic orchestration and diagnostic tests, including an explicit
-    unqualified-forward refusal. They do not establish recovery on a physical
-    equilibrium. The existing forward boundary registry includes the new
-    module and both public symbols; the full boundary file has not been run.</p>
-
-  <table id="known-answer-recovery-results">
-    <thead><tr><th>Case</th><th>Plasma flux sup error / span</th>
-      <th>Whitened residual sup</th><th>Forward re-solve agreement</th>
-      <th>Fit iterations</th><th>Spectrum</th><th>Undetermined coefficients</th></tr></thead>
-    <tbody>
-      <tr><td>Solov'ev</td><td colspan="6">Unmeasured: the generating-state
-        probe returned from its public forward call but its recorder failed
-        before persisting qualification or residual values.</td></tr>
-      <tr><td>MAST</td><td colspan="6">Not run: the generating-state
-        prerequisite has not been established.</td></tr>
-      <tr><td>ITER</td><td colspan="6">Not run: the generating-state
-        prerequisite has not been established.</td></tr>
-      <tr><td>Flux-loop geometry displaced by 5 cm</td><td colspan="6">Not run:
-        no recovered physical state is available for the declared mutation.</td></tr>
-    </tbody>
-  </table>
-
-  <h3 id="known-answer-recovery-probe-record">Probe record and stop condition</h3>
-  <p>The probes ran as separate <code>all_debug</code> jobs, each with eight
-    CPUs, 64 GB and a 59-minute ceiling. No heavy solve ran on the fleet node.
-    The first probe failed during a 110-cell carrier build before producing a
-    forward receipt. A second probe was cancelled after its script was found
-    to lack the main guard required by the fixture builder's spawn path.</p>
-  <p>The guarded conventional 300-cell probe built a 342-cell carrier and
-    entered the public solve. Its job ended after <strong>7 min 46 s</strong>
-    with <code>EXIT=1</code>: the probe recorder read the nonexistent
-    <code>FixedPointResult.iterations</code> attribute. This is an instrument
-    failure after the forward call, not evidence that the solver failed or
-    succeeded. No generating convergence value can be reported.</p>
-  <p>The two counted prerequisite-command failures trigger the worker's stop
-    rule. The cancelled recursive helper is separately attributed to probe
-    scaffolding. Neither the required baseline/after batch nor the declared
-    mutation run was started. No terminal-state figure was drawn because no
-    physical receipt and state were persisted.</p>
-  <p>The run manifest and diagnostic logs reside in
-    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/</code>.
-    The node is blocked and must not be promoted as scientifically complete.</p>
-  <p><strong>Next action:</strong> resume with a bounded prerequisite probe
-    that persists the forward receipt and arrays immediately after the public
-    call, before reading optional telemetry. Use the documented promotion
-    counts or residual history instead of an invented iteration field. Only a
-    qualified generating receipt permits the three physical recovery cases,
-    their poloidal panels, the displaced-loop mutation and both suite arms.</p>
+<h2>Known-state recovery from independent total magnetics</h2>
+<p>The inverse class fits amplitudes of the prescribed pressure-gradient and diamagnetic-gradient shapes through typed public forward requests. Synthetic targets are assembled independently through <code>virtual_flux_loops</code> and <code>virtual_poloidal_probes</code>, using the generating plasma currents and the known exterior. MAST and ITER include the stored conductor geometry, turn counts and prescribed currents. The analytic case uses its own manufactured exterior and imports no stored-machine anchor.</p>
+<p>The fit reads total observations and their geometry-specific known-field prediction through <code>SliceMeasurement.signature</code>. A displaced sensor therefore changes both the plasma observation and the known-field subtraction. The generating profiles belong to the declared fitting basis; the initial qualified maps lie outside the acceptance band.</p>
+<p>Accepted measurement: H200 job <code>1315628</code> at source revision <code>fe46b073b747b37f10e58c69c72a3ef5e070eb99</code>. Runner summary: <code>1 failed, 48 passed in 3167.40s (0:52:47)</code>. The only failing test is the pre-existing <code>tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find</code>. Every physical recovery, known-field check, authority-boundary check and geometry control passes. CPU suite arms are waived by coordinator adjudication and are not used for the node’s verdict.</p>
+<section id="known-answer-recovery-final-gate"><h3>Recovery measures</h3>
+<p>The unchanged map and whitened-residual limits are <code>1.000000e-06</code> of the axis-to-boundary flux span and <code>1.000000e-08</code>. Independent data-free re-solves use each request’s own tolerance, listed below. Spectra describe the whitened, column-normalised linearised response. Complete fit records retain the recovered physical source functions, terminal public forward receipt, covariance, null directions and every whitened row residual.</p>
+<table id="known-answer-recovery-results"><thead><tr><th>Case</th><th>Plasma-map sup / flux span</th><th>Whitened residual sup</th><th>Independent re-solve relative sup</th><th>Fit updates / forward calls</th><th>Response singular values</th><th>Undetermined coordinates</th></tr></thead><tbody>
+<tr><td>Solov’ev</td><td><code>7.229153e-12</code></td><td><code>3.424410e-12</code></td><td><code>2.702635e-15</code><br>tolerance <code>1.000000e-12</code></td><td>3 / 20</td><td><code>1.4002074135026954</code><br><code>0.19854268853848983</code></td><td>[]</td></tr>
+<tr><td>MAST</td><td><code>2.621349e-12</code></td><td><code>1.576733e-12</code></td><td><code>1.545863e-13</code><br>tolerance <code>1.000000e-12</code></td><td>2 / 15</td><td><code>1.3996747707272621</code><br><code>0.20226353153642329</code></td><td>[]</td></tr>
+<tr><td>ITER</td><td><code>1.949959e-14</code></td><td><code>8.309997e-15</code></td><td><code>1.924938e-15</code><br>tolerance <code>1.000000e-12</code></td><td>2 / 15</td><td><code>1.412697543192315</code><br><code>0.06546488721747884</code></td><td>[]</td></tr>
+</tbody></table>
+<table id="known-answer-recovery-coefficients"><thead><tr><th>Case</th><th>Initial qualified map error / span</th><th>Recovered amplitudes: pressure, FF</th></tr></thead><tbody>
+<tr><td>Solov’ev</td><td><code>3.230806e-02</code></td><td><code>1.0000000000043276</code><br><code>0.99999999997116451</code></td></tr>
+<tr><td>MAST</td><td><code>2.397983e-04</code></td><td><code>1.0000000000037588</code><br><code>0.99999999999196587</code></td></tr>
+<tr><td>ITER</td><td><code>3.568016e-04</code></td><td><code>0.99999999999999178</code><br><code>1.0000000000000067</code></td></tr>
+</tbody></table>
 </section>
-
-<section id="known-answer-recovery-resumed-record">
-  <h2>Resumed public-forward check: a qualified analytic state and a MAST refusal</h2>
-  <p>The resumed attempt on 2026-11-14 repaired the probe recorder and continued.
-    The former recorder and multiprocessing errors are scaffolding errors, not
-    solver failures. The 110-cell weak-reactor carrier was neither reused nor
-    repaired. The stopping condition below is a reproduced public-forward
-    numerical failure on the separately selected MAST request.</p>
-  <p>The implementation now accepts a declared linear basis over the polynomial
-    coefficients and returns the recovered <code>source_profile</code> on the
-    same fit receipt, so an independent forward solve needs no fitting object.
-    The physical tests declare the two projected profile shapes as basis
-    functions and fit their amplitudes, starting at 0.98 and 1.02. The generating
-    profiles therefore belong to the fitted basis. Nine focused unit tests
-    passed in <strong>6.41 s</strong>; four physical tests were deselected in
-    that unit-only run.</p>
-  <table id="known-answer-recovery-generating-results">
-    <thead><tr><th>Generating request</th><th>Carrier and source</th>
-      <th>Public-forward outcome</th><th>Residual</th><th>Recorded trips</th></tr></thead>
-    <tbody>
-      <tr><td>Conventional Solov'ev</td><td>342 cells; constant polynomial
-        gradients; absolute source; conventional analytic certificate</td>
-        <td>Qualified and converged</td><td>2.5945296862777358e-15,
-        against 1e-12</td><td>2</td></tr>
-      <tr><td>MAST 22086, slice 43</td><td>1089 grid cells and 37 wall nodes;
-        the persisted 101-circuit response carrier; degree-six projected
-        gradients; absolute source with live free-boundary support</td>
-        <td>NONFINITE_RESIDUAL; converged=false; axis_admitted=false</td>
-        <td>NaN</td><td>1</td></tr>
-      <tr><td>ITER</td><td>The cached-machine fixture is wired into the test</td>
-        <td>Not run after the MAST numerical stopping condition</td>
-        <td>Unmeasured</td><td>Unmeasured</td></tr>
-    </tbody>
-  </table>
-  <p>The analytic public solve took <strong>189.2686875835061 s</strong>. Its
-    complete receipt was saved before deriving the trip count from its finite
-    residual-history entries. The stored receipt is
-    <code>solovev-generating-receipt.pkl</code> in the run directory.</p>
-  <p>The MAST public call raised <code>NoQualifiedAxisError</code> while
-    qualifying its terminal field, before a forward receipt could be returned.
-    Its unchanged request was reproduced in the focused pytest gate, which saved
-    the actual terminal <code>FixedPointResult</code> from the public call's
-    traceback before reporting the residual. Its termination code is
-    <code>3</code>, the owner's <code>NONFINITE_RESIDUAL</code> value. This is
-    evidence about this generating request, not a measurement of inverse
-    recovery accuracy and not a claim about every MAST equilibrium.</p>
-  <figure id="known-answer-recovery-mast-refusal-figure">
-    <img src="/nova/figures/inverse-equilibrium-baseline/known-answer-recovery/mast-generating-refusal.svg"
-      alt="Stored MAST starting-field contours beside the rejected terminal-field contours on the same physical levels">
-    <figcaption>MAST 22086/43: stored starting field in grey and the rejected
-      terminal field in blue, on one shared physical flux-level array, with the
-      same vessel. Grey null markers in both panels belong to the starting
-      field: its admitted axis is at R=0.9052605679418458 m,
-      Z=0.003452472527914593 m. The terminal field has no admitted axis and
-      carries no terminal null marker. Its recorded residual is NaN and its
-      converged flag is false. The starting field's admitted axis is a positive
-      control for the refusal. Text bounds and overlaps passed the mechanical
-      check; the rendered PNG was visually inspected before committing.</figcaption>
-  </figure>
-  <table id="known-answer-recovery-resumed-recovery-results">
-    <thead><tr><th>Case</th><th>Flux-map sup error / span</th>
-      <th>Whitened residual</th><th>Independent re-solve agreement</th>
-      <th>Fit iterations, spectrum and undetermined coefficients</th></tr></thead>
-    <tbody>
-      <tr><td>Solov'ev</td><td colspan="4">Unmeasured: generating state is
-        qualified, but recovery was not started after the MAST prerequisite failed.</td></tr>
-      <tr><td>MAST</td><td colspan="4">Unmeasured: public generating solve
-        refused terminal topology before entering the inverse class.</td></tr>
-      <tr><td>ITER</td><td colspan="4">Not run under the numerical stopping condition.</td></tr>
-      <tr><td>One loop displaced by 5 cm</td><td colspan="4">Test written;
-        the declared mutation run remains unmeasured. The MAST failure log is
-        not substituted for the required geometry-mutation red log.</td></tr>
-    </tbody>
-  </table>
-  <h3 id="known-answer-recovery-resumed-suite-results">One-batch verification</h3>
-  <p>All three commands below ran in one <code>all_debug</code> allocation,
-    job <code>1314823</code>, with eight CPUs and 64 GB. The two requested
-    revision arms ran in source snapshots beneath the job's temporary directory;
-    each log records the actual imported module and working directory. Those
-    snapshots were removed when the job ended; logs remain in the run directory.</p>
-  <table id="known-answer-recovery-suite-results">
-    <thead><tr><th>Measurement</th><th>Revision</th><th>Result</th></tr></thead>
-    <tbody>
-      <tr><td>Baseline arm</td><td><code>87cf7ec68f6922173c471aa0bc742f07cc2256f3</code></td>
-        <td>34 passed, 1 failed in 23.21 s</td></tr>
-      <tr><td>Requested after arm</td><td><code>9607543b1d565062256c9d945985bc43675ec8d6</code></td>
-        <td>41 passed, 1 failed in 24.61 s; zero added failures</td></tr>
-      <tr><td>Focused MAST failure capture</td><td><code>84ca3cf57b21b128fc0d5284265dcf9a1429ccee</code></td>
-        <td>One failure in 129.49 s; stopped on the generating-state refusal</td></tr>
-    </tbody>
-  </table>
-  <p>Both revision arms fail the same pre-existing test,
-    <code>test_the_solve_defaults_to_the_root_find</code>: it expects a literal
-    <code>"newton_krylov"</code> signature default while the declared-defaults
-    seam exposes <code>None</code>. The test was left unchanged. The focused
-    gate names <code>test_known_state_recovery[mast]</code> and the forward
-    boundary file and stops at the reproduced MAST failure; it is not reported
-    as a completed three-state recovery gate.</p>
-  <p><strong>Evidence:</strong> <code>prerequisite-persisted.log</code>,
-    <code>solovev-generating-receipt.json</code>, <code>machine-generators.log</code>,
-    <code>mast-generating-inputs.json</code>, <code>baseline-suite.log</code>,
-    <code>after-suite.log</code>, <code>focused-gate.log</code>,
-    <code>measurement/mast-generating-failure.json</code>,
-    <code>measurement/mast-rejected-history.pkl</code>, and
-    <code>render-failure.log</code>, beneath
-    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/</code>.</p>
-  <p><strong>Disposition:</strong> blocked on qualification of the selected
-    MAST generating request. No tolerance was widened and no reduced model was
-    substituted. The next numerical work is to establish a qualified absolute
-    MAST source state through the public forward seam before resuming the
-    three recoveries and the displaced-loop check. Repairs to the forward or
-    topology implementation require their own write scope.</p>
+<section id="known-answer-recovery-known-fields"><h3>Known-field participation at both sensor geometries</h3>
+<p>These are independent total-row checks, not targets generated by the fitting class. For the stored conductors, the instrument is also evaluated after setting all known-source currents to zero, then restoring them. Every case requires nonzero known-loop and known-probe signals and a nonzero response to the displaced loop geometry. Thus an exact zero subtraction error below is accompanied by a positive instrument response.</p>
+<table id="known-answer-recovery-known-field-results"><thead><tr><th>Case</th><th>Prescribed exterior</th><th>Known flux sup [Wb]</th><th>Known probe sup [T]</th><th>Nominal closure error / scale</th><th>Displaced closure error / scale</th><th>Known-field geometry change / scale</th></tr></thead><tbody>
+<tr><td>Solov’ev</td><td>analytic fixture exterior</td><td><code>4.932886e+00</code></td><td><code>2.400520e-01</code></td><td><code>0.000000e+00</code></td><td><code>0.000000e+00</code></td><td><code>5.374431e-02</code></td></tr>
+<tr><td>MAST</td><td>938 stored sections/conductors</td><td><code>1.447889e+00</code></td><td><code>2.745953e-01</code></td><td><code>2.052275e-16</code></td><td><code>2.052275e-16</code></td><td><code>4.752548e-02</code></td></tr>
+<tr><td>ITER</td><td>117 stored sections/conductors</td><td><code>1.802217e+02</code></td><td><code>9.583545e-01</code></td><td><code>3.181602e-17</code></td><td><code>3.181602e-17</code></td><td><code>1.000844e-02</code></td></tr>
+</tbody></table>
+<p>The closure columns measure total minus known minus plasma, divided by the original plasma-row whitening scales. The displaced geometry moves one flux-loop radius by <code>0.05</code> m. The stored-row scale is retained; conductor strength does not enlarge an acceptance tolerance.</p></section>
+<section id="known-answer-recovery-displaced-loop-control"><h3>Displaced-loop and reversed-commit controls</h3>
+<table id="known-answer-recovery-controls"><thead><tr><th>Control</th><th>Plasma-map error / span</th><th>Whitened residual sup</th><th>Largest residual row</th><th>Result</th></tr></thead><tbody>
+<tr><td>Loop geometry displaced by 0.05 m</td><td><code>1.745462e-02</code></td><td><code>7.750652e-02</code></td><td><code>0</code></td><td>Map exceeds the unchanged <code>1.000000e-06</code> limit; the displaced loop carries the largest residual.</td></tr>
+</tbody></table>
+<p>The separate regression control reverses answering commit <code>fe46b073b747b37f10e58c69c72a3ef5e070eb99</code> in an isolated snapshot while retaining the independent test commits. The runner reports <code>1 failed in 3.17s</code>, exit <code>1</code>, with failing test <code>tests/test_equilibrium_magnetics_fit.py::test_known_conductor_subtraction_changes_the_target</code>. Its assertion <code>assert fitted.converged</code> refuses the omitted known-field subtraction. The patch is then applied forward and the product bytes checked against the committed head. The ordinary check passes in the complete H200 after arm.</p></section>
+<section id="known-answer-recovery-panels"><h3>Generating and recovered flux maps</h3>
+<figure id="known-answer-recovery-solovev-recovery"><img src="/nova/figures/inverse-equilibrium-baseline/known-answer-recovery/solovev.svg" alt="Solov’ev generating and recovered poloidal flux contours on shared physical levels" /><figcaption>Solov’ev: generating flux in grey and recovered flux in blue, on shared physical levels, with the authored wall in black. Both generating and recovered null sets are drawn in their map colours using the standard triangle/cross vocabulary; coincident null markers overlap. Generating public-forward residual <code>2.594530e-15</code>, converged=<code>true</code>, qualified=<code>true</code>; recovered public-forward residual <code>2.378319e-15</code>, converged=<code>true</code>. These are the SVGs rendered by the accepted H200 job. Their same-canvas PNG previews were inspected; labels, shared contours and wall/null markers are clear.</figcaption></figure>
+<figure id="known-answer-recovery-mast-recovery"><img src="/nova/figures/inverse-equilibrium-baseline/known-answer-recovery/mast.svg" alt="MAST generating and recovered poloidal flux contours on shared physical levels" /><figcaption>MAST: generating flux in grey and recovered flux in blue, on shared physical levels, with the authored wall in black. Both generating and recovered null sets are drawn in their map colours using the standard triangle/cross vocabulary; coincident null markers overlap. Generating public-forward residual <code>5.751225e-16</code>, converged=<code>true</code>, qualified=<code>true</code>; recovered public-forward residual <code>4.079827e-14</code>, converged=<code>true</code>. These are the SVGs rendered by the accepted H200 job. Their same-canvas PNG previews were inspected; labels, shared contours and wall/null markers are clear.</figcaption></figure>
+<figure id="known-answer-recovery-iter-recovery"><img src="/nova/figures/inverse-equilibrium-baseline/known-answer-recovery/iter.svg" alt="ITER generating and recovered poloidal flux contours on shared physical levels" /><figcaption>ITER: generating flux in grey and recovered flux in blue, on shared physical levels, with the authored wall in black. Both generating and recovered null sets are drawn in their map colours using the standard triangle/cross vocabulary; coincident null markers overlap. Generating public-forward residual <code>1.696352e-15</code>, converged=<code>true</code>, qualified=<code>true</code>; recovered public-forward residual <code>1.539951e-15</code>, converged=<code>true</code>. These are the SVGs rendered by the accepted H200 job. Their same-canvas PNG previews were inspected; labels, shared contours and wall/null markers are clear.</figcaption></figure>
 </section>
-<section id="known-answer-recovery-solovev-recovery">
-  <h2>Analytic known-state recovery</h2>
-  <p>The inverse class now recovers the qualified moderate-rotation-conventional-static
-    generating state through public forward requests. The two fitted amplitudes multiply
-    the generating pressure-gradient and diamagnetic-gradient shapes; their starting
-    values are perturbed by −2% and +2%. The signal set contains 24 vacuum-subtracted
-    flux loops, 24 poloidal probes and one plasma-current row. The data and fit use
-    the existing virtual-diagnostic factories on the same authored plasma sections.
-    Both maps retain the generating exterior supply and its flux gauge.</p>
-  <table>
-    <thead><tr><th>Case</th><th>Plasma flux sup / span</th><th>Whitened residual sup</th>
-      <th>Forward re-solve relative sup</th><th>Fit iterations</th><th>Response singular values</th>
-      <th>Undetermined coefficients</th></tr></thead>
-    <tbody><tr><td>Solov’ev</td><td>6.972930892849655e-12</td><td>3.638822541848749e-12</td>
-      <td>6.842768001085781e-13</td><td>3 (20 public evaluations)</td>
-      <td>1.4002074134604718, 0.1985426888362674</td><td>none</td></tr>
-      <tr><td>MAST</td><td>2.6192848527042244e-12</td><td>1.5767330964925893e-12</td><td>1.548406600641063e-13</td><td>2 (15 public evaluations)</td><td>1.3996747707240698, 0.20226353155851567</td><td>none</td></tr>
-      <tr><td>ITER</td><td colspan="6">Smooth prescribed-profile generation and recovery pending.</td></tr>
-      <tr><td>Loop row 0 displaced 5 cm (H200)</td><td>0.006010064918571351</td><td>0.026684685706950432; largest row = 0</td><td colspan="4">Map clause fails as required; normal-recovery mutation arm running.</td></tr>
-    </tbody>
-  </table>
-  <p>All three positive Solov’ev inequalities pass: 1e-6 flux-span fraction,
-    1e-8 whitened residual, and the declared 1e-12 forward solve tolerance for
-    the independent solve with recovered coefficients and no measurements.</p>
-  <figure>
-    <img src="/nova/figures/inverse-equilibrium-baseline/known-answer-recovery/solovev.svg"
-      alt="Generating and recovered Solovev poloidal flux contours on shared levels" />
-    <figcaption>Generating state (grey) and recovered state (blue), on the same
-      twelve physical flux levels. The first wall is black. Both magnetic-axis
-      sets are drawn on each panel; their triangles coincide at this scale, and
-      neither state admits an X-point. The generating residual is
-      2.5945296862777358e-15, converged=true and qualified=true. The recovered
-      forward residual is 3.819363908995574e-13, converged=true and qualified=true. The independent re-solve agrees to
-      6.842768001085781e-13 relative sup norm. Text bounds and overlap checks
-      passed; the same-canvas PNG was visually inspected before committing.</figcaption>
-  </figure>
-  <p>The full generating, recovered and independent forward receipts and
-    <code>solovev-recovery.json</code> are durable beneath
-    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/solovev-recovery/</code>.
-    The ongoing run is logged in <code>solovev-recovery.log</code> in that run's
-    parent directory. This checkpoint records the completed positive test;
-    the displaced-loop check and the complete suite arms remain pending.</p>
+<section id="known-answer-recovery-suite-results"><h3>Accepted arms and waived CPU runs</h3>
+<table id="known-answer-recovery-accepted-arms"><thead><tr><th>Arm</th><th>Measured source revision</th><th>Runner summary</th><th>Failure ids</th></tr></thead><tbody>
+<tr><td>H200 repair base</td><td><code>8d762adb6194b5d96d3ee04a92ec3825901567b3</code></td><td><code>1 failed, 47 passed in 2905.91s (0:48:25)</code></td><td><code>tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find</code></td></tr>
+<tr><td>H200 repair after</td><td><code>fe46b073b747b37f10e58c69c72a3ef5e070eb99</code></td><td><code>1 failed, 48 passed in 3167.40s (0:52:47)</code></td><td><code>tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find</code></td></tr>
+</tbody></table>
+<p>Both exact CPU suite arms were attempted and are retained as incomplete: base exit <code>-6</code> and after exit <code>-11</code>, with no pytest short summaries or enumerated failure counts. The coordinator waived these native-compile failures and ruled that this node’s accepted gate is H200-only. They are not relabelled as completed suites, and no native-runtime or forward implementation repair is part of this publication.</p>
+<p>Full-precision provenance and receipt files are below <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery</code>: <code>repair-terminal-receipt.json</code>, <code>repair-h200-measurement/</code>, <code>publication-generating-receipts.json</code>, <code>publication-artifacts.json</code>, <code>repair-focused-h200.log</code>, <code>head-focused-gate.json</code>, <code>repair-negative-control.log</code>. Each case’s recovery, fit, nominal/displaced conductor-subtraction and observation JSON remains available there. The fit JSON points to the terminal public forward receipt. Superseded self-generated-row checkpoints and the unrelated MAST-refusal panel are excluded from this current evidence.</p>
 </section>
-
-<section id="known-answer-recovery-displaced-loop-control">
-  <h2>Displaced-loop control</h2>
-  <p>The H200 correctness run passed both Solov’ev tests:
-    <code>2 passed in 1625.01s (0:27:05)</code>. Its ordinary recovery has
-    flux sup/span 6.9813806898190645e-12, whitened residual sup
-    3.627846521160517e-12 and independent re-solve relative sup
-    6.838139738494272e-13; it takes three iterations, with singular values
-    [1.4002074134387876, 0.19854268898919383] and no undetermined coefficient.
-    With the first loop displaced radially by 0.05 m, the same class returns
-    flux sup/span 0.006010064918571351 and whitened residual sup
-    0.026684685706950432. That first loop is the largest residual row.
-    The control therefore detects both the map failure and its offending row.</p>
-  <p>The CPU file exceeded ten minutes while constructing its diagnostic
-    tables, so the required reserved-H200 launcher was submitted for real.
-    This run explicitly permits cold compilation and is used for correctness;
-    its reported time is not a warm execution measurement. Receipts and metrics
-    are in <code>solovev-h200/</code>, and the complete launcher log is
-    <code>solovev-h200.log</code>, beneath the run directory named above.
-    A separate displaced-geometry arm of the ordinary recovery test is running
-    to preserve the required failing-test admission log.</p>
 </section>
-<section id="known-answer-recovery-mutation-and-smooth-mast">
-  <h2>Mutation refusal and a qualified smooth MAST source</h2>
-  <p>The ordinary Solov’ev recovery test was run with the first loop radius
-    displaced by 0.05 m. It failed the intended map assertion:
-    <code>assert 0.006010064918571351 &lt;= 1e-06</code>, naming
-    <code>tests/test_equilibrium_magnetics_fit.py::test_known_state_recovery[solovev]</code>.
-    Its largest whitened residual remains row 0, 0.026684685706950432.
-    The runner reports <code>1 failed in 937.28s (0:15:37)</code>;
-    <code>negative-control.log</code> preserves the complete output and EXIT=1.
-    The earlier request-recorder failure is retained separately and is not
-    used as mutation evidence.</p>
-  <p>The first prescribed MAST profile qualifies through the public forward
-    solve on the cached 1,089-cell carrier with all 101 prescribed circuits.
-    Both families have shape (1 − ψ<sub>N</sub>), with pressure normalisation
-    −120956.66856560702 Pa/Wb and diamagnetic normalisation
-    −0.08260299186083768. The limited production seed uses 933034.875 A
-    about the admitted stored axis (0.9052605679418458,
-    0.003452472527914593) m. The receipt reports residual
-    5.751224516667312e-16, converged=true, qualified=true, termination=CONVERGED,
-    and 16 finite residual-history entries. Its receipt and request were
-    persisted before deriving these metrics. No other MAST prescribed profile
-    was needed. MAST inverse recovery is now running independently.</p>
-  <p>The ITER cached carrier initially triggered the existing constructor
-    refusal, <code>direct sample target rows must match the moment sampling nodes</code>.
-    An explicit coordinate check finds all 1,652 currently required sample
-    points among its 1,665 cached response rows, with maximum distance
-    1.8073121439532109e-15 m and 1,652 unique selected rows. The fixture
-    consumer aligns those existing rows with the geometry owner's grouping;
-    no interaction matrix is regenerated and the forward guard is unchanged.
-    The recovery fixture explicitly verifies the unaligned carrier's refusal
-    before constructing the aligned carrier. This assembly issue occurred
-    before any ITER prescribed-profile attempt.</p>
-  <p>Evidence beneath the run directory: <code>negative-control.log</code>,
-    <code>smooth-generators/mast-profile-1-inputs.json</code>,
-    <code>smooth-generators/mast-profile-1-receipt.json</code>,
-    <code>smooth-generators/mast-generating-receipt.pkl</code>,
-    <code>smooth-generators.log</code>, <code>inspect-iter-carrier.log</code>,
-    and <code>iter-generators.log</code>.</p>
-</section>
-
-<section id="known-answer-recovery-mast-recovery">
-  <h2>MAST known-state recovery</h2>
-  <p>The qualified smooth prescribed MAST state is recovered within all three
-    acceptance limits. The generating profiles and conductor currents are
-    unchanged. Public initial evaluations with a 2% coefficient perturbation
-    were refused: the cold and continuation receipts have residuals
-    0.005723519607016031 and 7.816000733507186e-05, respectively, both
-    converged=false and ACTIVE_SET_STEP_REFUSED. The class refused those
-    unqualified receipts as designed; its guard was not changed.</p>
-  <p>The completed local recovery starts from coefficients perturbed by
-    −0.02% and +0.02%, seeded from the qualified generating state. Its first
-    qualified solved map is 0.00023979826592140666 of the generating flux
-    span away from the answer, so it begins outside the 1e-6 acceptance band.
-    Two fit updates recover amplitudes [1.000000000003756,
-    0.9999999999919689]. The plasma map sup/span is
-    2.6192848527042244e-12, whitened residual sup
-    1.5767330964925893e-12, and independent forward re-solve relative sup
-    1.548406600641063e-13 against its unchanged 1e-12 solve tolerance.
-    That independent solve uses the original cold-seed request with the
-    recovered source and no measurements. The response spectrum is
-    [1.3996747707240698, 0.20226353155851567]; no coefficient is undetermined.
-    The complete fit receipt records every whitened row residual and covariance.
-    The runner reports <code>1 passed in 536.41s (0:08:56)</code>.</p>
-  <figure>
-    <img src="/nova/figures/inverse-equilibrium-baseline/known-answer-recovery/mast.svg"
-      alt="Generating and recovered MAST poloidal flux contours on shared physical levels" />
-    <figcaption>The generating MAST map (grey) and recovered map (blue) use
-      the same twelve physical flux levels and the authored first wall (black).
-      Both null sets are drawn on each panel using the standard triangle/cross
-      vocabulary and coincide at this scale. Generating residual
-      5.751224516667312e-16, converged=true and qualified=true; recovered
-      residual 4.0665546789045466e-14, converged=true and qualified=true.
-      Text bounds and overlap checks passed, and the 1,400-pixel same-canvas
-      PNG was visually inspected before committing.</figcaption>
-  </figure>
-  <p>Evidence beneath the run directory: <code>mast-seed-check/</code> contains
-    both refused initial public receipts; <code>mast-continuation-recovery/</code>
-    contains the qualified initial, fit, terminal and independent forward
-    receipts and machine-readable diagnostics; <code>mast-continuation-recovery.log</code>
-    is the complete H200 correctness log. The current-head whole focused gate
-    is running on Titan/P100 after the real H200 full-file requests could not
-    admit alongside the case run. Device-qualified correctness is reported
-    separately from timing.</p>
-</section>
-<section id="known-answer-recovery-live-boundary-refusal">
-  <h2>Live measurement-boundary refusal</h2>
-  <p>The public typed-request branch first reaches an explicit dispatch
-    sentinel with no measurement keyword. Adding a measurement array to the
-    same request then produces <code>a ForwardSolveRequest cannot be combined
-    with solve keywords</code>. Constructing the source request with a
-    measurement array produces <code>ForwardSolveRequest.__init__() got an
-    unexpected keyword argument 'measurement'</code>. These are live refusals
-    from the current public API, recorded with the positive dispatch control
-    in <code>boundary-refusal.log</code> beneath the run directory. The first
-    probe omitted its positional request and is preserved separately as
-    scaffolding; it is not used as boundary evidence.</p>
-</section>
-
-<section id="known-answer-recovery-iter-recovery"><h2>ITER recovery from the stored DINA seed</h2><p>Native-seed case assertion outcome: passed. Full-precision measured receipt: <code>{&quot;case&quot;: &quot;iter&quot;, &quot;flux_sup_fraction&quot;: 1.9175368557608253e-14, &quot;residual_sup&quot;: 8.309997460004703e-15, &quot;largest_residual_row&quot;: 2, &quot;resolve_relative_sup&quot;: 3.103963220664058e-15, &quot;iterations&quot;: 2, &quot;singular_values&quot;: [1.4126975431923396, 0.06546488721694084], &quot;undetermined_coefficients&quot;: [], &quot;forward_evaluations&quot;: 15, &quot;coefficients&quot;: [0.9999999999999916, 1.0000000000000067], &quot;coefficient_names&quot;: [&quot;basis_0&quot;, &quot;basis_1&quot;], &quot;terminal_residual&quot;: 1.6843211274921255e-15, &quot;terminal_converged&quot;: true, &quot;forward_tolerance&quot;: 1e-12}</code>. Its local continuation starts outside the acceptance band; the independent re-solve uses the original stored DINA seed and no data. The complete forward and fit records are under <code>native-h200-measurement/</code> in the run directory.</p><figure><img src="/nova/figures/inverse-equilibrium-baseline/known-answer-recovery/iter.svg" alt="Generating and recovered ITER poloidal flux on shared levels" /><figcaption>Generating (grey) and recovered (blue) flux on twelve shared physical levels, both null sets in the standard triangle/cross vocabulary, authored wall in black. Generating residual 1.6963519926885159e-15, qualified=true and converged=true; recovered residual 1.6843211274921255e-15, converged=true. Mechanical bounds/overlap checks passed; the producer inspected the same-canvas PNG before committing.</figcaption></figure></section>
-
-<section id="known-answer-recovery-final-gate"><h2>Terminal current-source verification</h2>
-<p>The complete current-source focused files ran on the reserved H200 after the independent case run released capacity. A preceding P100 fallback arm is retained separately with its device-qualified failures. The H200 run explicitly permits cold compilation and is used for correctness; its wall is not reported as warm execution latency.</p>
-<p>Source revision <code>8949ea237e0bf6f3cc84c36f87300406b8f9df9f</code>. Runner summary: <code>1 failed, 47 passed in 3162.62s (0:52:42)</code>. Failure ids: <code>tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find</code>.</p>
-<table><thead><tr><th>Case</th><th>Plasma map sup / flux span</th><th>Whitened residual sup</th><th>Independent re-solve relative sup</th><th>Fit updates</th><th>Response spectrum</th><th>Undetermined coefficients</th></tr></thead><tbody><tr><td>solovev</td><td>6.9813806898190645e-12</td><td>3.6278465211605169e-12</td><td>6.8381397384942717e-13</td><td>3</td><td>[1.4002074134387876, 0.19854268898919383]</td><td>[]</td></tr><tr><td>mast</td><td>2.6192848527042244e-12</td><td>1.5767330964925893e-12</td><td>1.548406600641063e-13</td><td>2</td><td>[1.3996747707240698, 0.20226353155851567]</td><td>[]</td></tr><tr><td>iter</td><td>1.9175368557608253e-14</td><td>8.3099974600047034e-15</td><td>3.1039632206640578e-15</td><td>2</td><td>[1.4126975431923396, 0.06546488721694084]</td><td>[]</td></tr><tr><td>Loop displaced 5 cm</td><td>0.0060100649185713508</td><td>0.026684685706950432; largest row 0</td><td colspan="4">Required geometry control</td></tr></tbody></table>
-<p>The limits remain 1e-6, 1e-8 and the forward request’s own 1e-12 solve tolerance. Complete fit records retain recovered coefficients and source functions, the terminal public forward receipt, iteration count, response singular values, undetermined directions, every whitened row residual and covariance. The initial qualified map of each case is required to lie outside the acceptance band.</p><h3>ITER prescribed-profile attempts</h3><table><thead><tr><th>Attempt</th><th>Qualified</th><th>Converged</th><th>Residual</th><th>Termination</th><th>Trips</th><th>Receipt</th></tr></thead><tbody><tr><td>1</td><td>True</td><td>True</td><td>1.696351992688516e-15</td><td>1</td><td>16</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/native-h200-measurement/iter-profile-1-receipt.json</td></tr></tbody></table>
-<p>The requested fixed-revision arms ran in the same all_debug batch as the earlier CPU focused arm: baseline 87cf7ec68f6922173c471aa0bc742f07cc2256f3 reports 1 failed/34 passed; historical after 04b366d880cd4d7448958b6007065cb16e8795cd reports 5 failed/43 passed. The latter preserves the adapter and carrier failures before the subsequent focused repairs; it is not relabelled as the final source revision. The older CPU focused process then aborted on LLVM section-memory allocation. Its partial metrics and return code are preserved, and no complete CPU gate is claimed.</p>
-<p>Evidence beneath the run directory: <code>final-focused-gate.log</code>, <code>final-focused-gate.json</code>, <code>native-h200-measurement/</code>, <code>negative-control.log</code>, <code>resumed-baseline-suite.log</code>, <code>resumed-after-suite.log</code> and <code>resumed-focused-gate.log</code>.</p>
-<p>Physical endpoint: <strong>all three recoveries and the geometry control pass</strong>. No forward implementation or numerical acceptance tolerance was changed.</p></section>
-
-<section id="known-answer-recovery-p100-terminal"><h2>Earlier P100 arm retained separately</h2><p>The earlier P100 arm imported revision <code>f79ea77719151c99561bde1828649a2dca2fae6e</code>, before the stored DINA seed correction. Its complete runner summary is <code>4 failed, 44 passed in 7146.27s (1:59:06)</code>, exit 1. MAST recovery passes on this device. Solov’ev recovery and its displaced-loop control raise <code>NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component</code>; ITER reports <code>Timeout (&gt;3500.0s) from pytest-timeout</code> under the older cold-seed setup after its first generating receipt returned unqualified with residual 0.21656406307614245. The fourth failure is the pre-existing root-default assertion. These failures remain device- and revision-qualified; no forward implementation or tolerance was changed in response. The corrected current-source H200 arm above measures all three required recoveries and the geometry control successfully. Full runner receipts: <code>final-focused-titan-receipt.log</code> and <code>final-focused-titan-receipt.json</code> beneath the run directory.</p></section>

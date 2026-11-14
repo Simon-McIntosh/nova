@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-11-14T19:39:06.695Z",
   "dispatched_at": "2026-11-14T19:18:08Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "measurement-only prototype whose verdict is superseded by bank-hessian-diagnosis and section 7; the scripts are not rerun, so control, regeneration and helper-duplication findings change no result",
+      "recorded_at": "2026-11-14T21:08:11.183272+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_hessian_boundary/report.py",

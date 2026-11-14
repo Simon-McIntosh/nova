@@ -231,6 +231,12 @@ def main():
             - old["coils"][s, old_index],
             old["plasma"][s, old_index] + old["coils"][s, old_index],
         ).tolist()
+        np.testing.assert_allclose(
+            row["reproduced_prior_total_hessian"],
+            split["states"][s]["interior"]["bank"],
+            rtol=1e-12,
+            atol=1e-14,
+        )
         row["fresh_vs_prior_plasma_hessian"] = relative(
             plasma[:, 3:5] - old["plasma"][s, old_index], old["plasma"][s, old_index]
         ).tolist()

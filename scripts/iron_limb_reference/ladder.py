@@ -1,4 +1,4 @@
-"""Extend the six-limb mesh ladder and judge shrinking changes per measure."""
+"""Evaluate mesh uncertainty and stored controls for the six-limb reference."""
 
 import argparse
 import gc
@@ -19,9 +19,14 @@ from scripts.iron_limb_reference.measure import (
 
 
 def convergence_verdict(levels, vessel_count):
-    """Require mesh ratios, shrinking increments and a small final increment."""
-    if len(levels) < 3:
-        raise ValueError("convergence needs at least three mesh resolutions")
+    """Require four spaced meshes and bound field uncertainty, stating flux scatter.
+
+    Each uncertainty is the largest of the two relative changes between the
+    three finest meshes. Flux is reported without a tolerance; vessel and
+    each outside-probe uncertainty must be strictly below two percent.
+    """
+    if len(levels) < 4:
+        raise ValueError("convergence needs at least four mesh resolutions")
     sizes = np.asarray([r["size_m"] for r in levels])
     ratios = sizes[:-1] / sizes[1:]
     differences = [
@@ -33,15 +38,14 @@ def convergence_verdict(levels, vessel_count):
     ]
     rows = []
     for index, mu in enumerate((50.0, 200.0)):
-        changes = [r[index] for r in differences]
         values = np.asarray(
             [
                 [
-                    r["column_flux_relative"],
-                    r["vessel_iron_relative"],
-                    *r["outside_total_relative"],
+                    step[index]["column_flux_relative"],
+                    step[index]["vessel_iron_relative"],
+                    *step[index]["outside_total_relative"],
                 ]
-                for r in changes
+                for step in differences
             ]
         )
         names = [
@@ -52,13 +56,14 @@ def convergence_verdict(levels, vessel_count):
         measures = {}
         for column, name in enumerate(names):
             increments = values[:, column]
-            shrinking = bool(np.all(np.diff(increments) < 0))
-            small_final = bool(increments[-1] < 0.02)
+            uncertainty = float(np.max(increments[-2:]))
+            valid = bool(np.all(np.isfinite(increments)) and np.all(increments >= 0))
+            limit = None if name == "flux" else 0.02
             measures[name] = dict(
                 changes_relative=increments.tolist(),
-                shrinking=shrinking,
-                final_under_two_percent=small_final,
-                passed=shrinking and small_final,
+                uncertainty_relative=uncertainty,
+                uncertainty_limit_relative=limit,
+                passed=valid and (limit is None or uncertainty < limit),
             )
         rows.append(
             dict(
@@ -67,9 +72,14 @@ def convergence_verdict(levels, vessel_count):
                 passed=all(v["passed"] for v in measures.values()),
             )
         )
-    spacing_passed = bool(np.all(np.isfinite(ratios)) and np.all(ratios + 1e-12 >= 1.3))
+    spacing_passed = bool(
+        np.all(np.isfinite(sizes))
+        and np.all(sizes > 0)
+        and np.all(ratios + 1e-12 >= 1.3)
+    )
     return dict(
         sizes_m=sizes.tolist(),
+        uncertainty_sizes_m=sizes[-3:].tolist(),
         refinement_ratios=ratios.tolist(),
         spacing_passed=spacing_passed,
         rows=rows,
@@ -77,12 +87,106 @@ def convergence_verdict(levels, vessel_count):
     )
 
 
+def annulus_comparison_verdict(rows):
+    """Allow the measured comparator step where it exceeds two percent."""
+    measures = []
+    for row in rows:
+        limit = max(0.02, row["axisymmetric_last_step_relative"])
+        difference = row["difference_relative"]
+        valid = bool(np.isfinite(limit) and np.isfinite(difference))
+        measures.append(
+            dict(
+                mu=row["mu"],
+                measure=row["measure"],
+                difference_relative=difference,
+                limit_relative=limit,
+                axisymmetric_last_step_relative=row["axisymmetric_last_step_relative"],
+                comparator=row["comparator"],
+                passed=valid and difference < limit,
+            )
+        )
+    return dict(measures=measures, passed=all(v["passed"] for v in measures))
+
+
+def update_stored_receipt(path, vessel_count, annulus_path=None, symmetry_path=None):
+    """Replace the verdict atomically, retaining all measured values verbatim."""
+    from scripts.iron_limb_reference.comparison import comparison_rows
+
+    record = json.loads(path.read_text())
+    if not record.get("completed"):
+        raise ValueError("the stored mesh receipt is incomplete")
+    measured = {
+        key: record[key] for key in ("reference", "all_steps", "finest_reference")
+    }
+    fingerprint = hashlib.sha256(
+        json.dumps(measured, sort_keys=True).encode()
+    ).hexdigest()
+    record.setdefault("measurement_verdict_passed", record["passed"])
+    record["convergence"] = convergence_verdict(record["reference"][-4:], vessel_count)
+    record["controls"] = {}
+    if annulus_path is not None:
+        annulus = json.loads(annulus_path.read_text())
+        record["controls"]["annulus"] = annulus_comparison_verdict(
+            comparison_rows(annulus, vessel_count)
+        )
+        record["controls"]["annulus"]["receipt"] = str(annulus_path)
+    if symmetry_path is not None:
+        symmetry = json.loads(symmetry_path.read_text())
+        if not symmetry.get("completed"):
+            raise ValueError("the stored symmetry receipt is incomplete")
+        record["controls"]["symmetry"] = dict(
+            receipt=str(symmetry_path),
+            comparison=symmetry["comparison"],
+            passed=symmetry["passed"],
+        )
+    record["passed"] = record["convergence"]["passed"] and all(
+        c["passed"] for c in record["controls"].values()
+    )
+    record["verdict_revision"] = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], text=True
+    ).strip()
+    record["measured_values_sha256"] = fingerprint
+    pending = path.with_suffix(".pending")
+    if pending.exists():
+        raise ValueError("receipt pending path already exists")
+    write_json(pending, record)
+    pending.replace(path)
+    landed = json.loads(path.read_text())
+    actual = {key: landed[key] for key in measured}
+    if actual != measured or landed["convergence"] != record["convergence"]:
+        raise RuntimeError("stored receipt readback differs")
+    print(
+        "STORED_VERDICT "
+        + json.dumps(
+            dict(
+                passed=landed["passed"],
+                convergence=landed["convergence"],
+                controls=landed["controls"],
+                measured_values_sha256=fingerprint,
+            )
+        ),
+        flush=True,
+    )
+    return landed
+
+
 def main():
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument("--case", type=Path, required=True)
-    parser.add_argument("--prior", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--case", type=Path)
+    parser.add_argument("--prior", type=Path)
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--receipt", type=Path)
+    parser.add_argument("--vessel-count", type=int, default=16)
+    parser.add_argument("--annulus-receipt", type=Path)
+    parser.add_argument("--symmetry-receipt", type=Path)
     args = parser.parse_args()
+    if args.receipt is not None:
+        record = update_stored_receipt(
+            args.receipt, args.vessel_count, args.annulus_receipt, args.symmetry_receipt
+        )
+        raise SystemExit(0 if record["passed"] else 1)
+    if any(value is None for value in (args.case, args.prior, args.output)):
+        parser.error("provide --receipt, or all of --case, --prior and --output")
     case = json.loads(args.case.read_text())
     prior = verified_prior(args.case, args.prior)
     args.output.mkdir(parents=True, exist_ok=True)

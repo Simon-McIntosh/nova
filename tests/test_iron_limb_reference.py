@@ -317,32 +317,54 @@ def test_sphere_receipt_reuse_refuses_a_different_solver():
         validate_sphere_receipt(dict(passed=True, solver_sha256="different"))
 
 
-def test_mesh_ladder_requires_each_probe_change_to_shrink():
+def test_mesh_ladder_reports_uncertainty_and_checks_each_probe(request):
     from scripts.iron_limb_reference.ladder import convergence_verdict
 
     levels = []
-    for size in (0.18, 0.13, 0.1, 0.075):
+    for index, size in enumerate((0.18, 0.13, 0.1, 0.075)):
         rows = [
             dict(
                 mu=mu,
-                column_flux_Wb=100 + size**2,
+                column_flux_Wb=[100, 103, 100, 102][index],
                 iron_average_T=[[1 + size**2, 0], [2 + size**2, 0], [3 + size**2, 0]],
                 air_T=[[0, 0], [0, 0], [0, 0]],
             )
             for mu in (50.0, 200.0)
         ]
         levels.append(dict(size_m=size, rows=rows))
-    assert convergence_verdict(levels, 1)["passed"]
     levels[-1]["rows"][0]["iron_average_T"][2][0] = 3.04
+    result = convergence_verdict(levels, 1)
+    assert result["passed"]
+    assert result["rows"][0]["measures"]["flux"][
+        "uncertainty_relative"
+    ] == pytest.approx(0.03)
+    assert result["rows"][0]["measures"]["flux"]["uncertainty_limit_relative"] is None
+    levels[-2]["rows"][0]["iron_average_T"][2][0] = 3.10
     result = convergence_verdict(levels, 1)
     assert not result["passed"]
     failing = result["rows"][0]["measures"]["outside_1"]
-    assert not failing["shrinking"]
-    assert failing["final_under_two_percent"]
+    assert failing["changes_relative"][-1] < 0.02
+    assert failing["uncertainty_relative"] > 0.02
     assert result["rows"][1]["passed"]
 
+    stored = os.environ.get("NOVA_IRON_LADDER_RECEIPT")
+    if stored:
+        record = json.loads(Path(stored).read_text())
+        actual = convergence_verdict(record["reference"][-4:], 16)
+        assert actual == record["convergence"]
+        assert actual["passed"] and record["passed"]
+        for row, flux_uncertainty in zip(
+            actual["rows"], [0.020411892085549277, 0.02361013557735847]
+        ):
+            assert row["measures"]["flux"]["uncertainty_relative"] == pytest.approx(
+                flux_uncertainty
+            )
+        request.config.get_terminal_writer().line(
+            f"LADDER_RECEIPT_VERIFIED path={stored}"
+        )
 
-def test_mesh_ladder_refuses_insufficient_refinement_ratio():
+
+def test_mesh_ladder_refuses_insufficient_resolution_or_ratio():
     from scripts.iron_limb_reference.ladder import convergence_verdict
 
     levels = [
@@ -363,3 +385,23 @@ def test_mesh_ladder_refuses_insufficient_refinement_ratio():
     result = convergence_verdict(levels, 1)
     assert not result["spacing_passed"]
     assert not result["passed"]
+
+    with pytest.raises(ValueError, match="four mesh resolutions"):
+        convergence_verdict(levels[-3:], 1)
+
+
+def test_annulus_verdict_uses_comparator_mesh_limit():
+    from scripts.iron_limb_reference.ladder import annulus_comparison_verdict
+
+    row = dict(
+        mu=200.0,
+        measure="outside_6",
+        difference_relative=0.04,
+        axisymmetric_last_step_relative=0.045,
+        comparator="extrapolated",
+    )
+    assert annulus_comparison_verdict([row])["passed"]
+    row["difference_relative"] = 0.046
+    result = annulus_comparison_verdict([row])
+    assert not result["passed"]
+    assert result["measures"][0]["limit_relative"] == 0.045

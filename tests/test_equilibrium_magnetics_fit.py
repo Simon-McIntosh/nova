@@ -339,6 +339,47 @@ def _persist_forward(receipt, path):
     pending.replace(path)
 
 
+def _persist_forward_failure(error, output, name):
+    """Retain the public call's terminal history when receipt qualification raises."""
+    import json
+    import pickle
+    import traceback
+    from nova.equilibrium.fixed_point import FixedPointResult
+
+    frames = list(traceback.walk_tb(error.__traceback__))
+    histories = [
+        frame.f_locals["history"]
+        for frame, _ in frames
+        if isinstance(frame.f_locals.get("history"), FixedPointResult)
+    ]
+    summary = dict(case=name, exception=type(error).__name__, message=str(error))
+    if histories:
+        history = histories[-1]
+        destination = output / f"{name}-rejected-history.pkl"
+        with destination.open("wb") as stream:
+            pickle.dump(history, stream)
+        summary.update(
+            residual=float(history.residual),
+            converged=bool(history.converged),
+            termination_reason=int(history.termination_reason),
+            trips=int(
+                np.count_nonzero(np.isfinite(np.asarray(history.active_set_residuals)))
+            ),
+            history_path=str(destination),
+        )
+    admitted = [
+        frame.f_locals["admitted"]
+        for frame, _ in frames
+        if frame.f_code.co_name == "require_qualified_axis"
+    ]
+    if admitted:
+        summary["axis_admitted"] = bool(admitted[-1])
+    (output / f"{name}-generating-failure.json").write_text(
+        json.dumps(summary, indent=2)
+    )
+    print("GENERATING_FAILURE " + json.dumps(summary), flush=True)
+
+
 class _PlasmaDiagnosticSource:
     """Bind terminal cell currents to fixed authored diagnostic sections."""
 
@@ -403,7 +444,11 @@ def physical_cases(tmp_path_factory):
         if name in cases:
             return cases[name]
         profile, request, coordinate, wall, sections = _physical_problem(name)
-        generated = profile.solve(request)
+        try:
+            generated = profile.solve(request)
+        except Exception as error:
+            _persist_forward_failure(error, output, name)
+            raise
         _persist_forward(generated, output / f"{name}-generating.pkl")
         residual = float(generated.terminal_state.fixed_point.residual)
         print(
@@ -613,6 +658,7 @@ def _draw_recovery_panels(name, case, fitted):
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(3500)
 @pytest.mark.parametrize("name", ("solovev", "mast", "iter"))
 def test_known_state_recovery(name, physical_cases):
     import json
@@ -663,6 +709,7 @@ def test_known_state_recovery(name, physical_cases):
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(3500)
 def test_displaced_flux_loop_is_identified(physical_cases):
     import json
 

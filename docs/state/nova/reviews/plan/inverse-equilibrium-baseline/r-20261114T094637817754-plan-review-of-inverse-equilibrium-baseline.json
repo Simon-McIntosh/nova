@@ -35,9 +35,28 @@
       "note": "Section 2 now names the magnetics-only MAST-U 45272 reference (imas-efit's EPM case, monomial profiles) and states that the EPQ case is not used.",
       "reason": "",
       "when": "2026-11-14T10:06:58.078999+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "af4b7b5be6d8fac0051e8952b21efdbd129e4643",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 2 clause 3 now scales the measured conductor currents and their uncertainties by 1.10 together with the magnetics rows and the measured plasma current, so the control is a self-consistent scaled state.",
+      "reason": "",
+      "when": "2026-11-14T10:07:20.201274+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "af4b7b5be6d8fac0051e8952b21efdbd129e4643",
+      "commit_basis": "edit",
+      "note": "Section 2 clause 3 now scales the measured conductor currents and their uncertainties by 1.10 together with the magnetics rows and the measured plasma current, so the control is a self-consistent scaled state.",
+      "reason": "",
+      "when": "2026-11-14T10:07:20.201274+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",

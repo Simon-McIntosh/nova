@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,efit,grad-shafranov,convergence">
   <meta name="plan-after" content="converged-forward-solve">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;deferred&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;inverse-equilibrium-baseline#s1&quot;],&quot;s3&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s4&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s5&quot;:[&quot;inverse-equilibrium-baseline#s3&quot;]}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;deferred&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;inverse-equilibrium-baseline#s1&quot;],&quot;s3&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s4&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s5&quot;:[&quot;inverse-equilibrium-baseline#s3&quot;],&quot;s6&quot;:[&quot;inverse-equilibrium-baseline#s1&quot;],&quot;s7&quot;:[&quot;inverse-equilibrium-baseline#s6&quot;,&quot;inverse-equilibrium-baseline#s3&quot;]}">
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -172,6 +172,14 @@
     <code>benchmarks</code> and the fast test lane adds no failure against its base, or (b) the §3 table
     carries one column group per retained reconstruction.</p>
 
+    <h2 id="s6">§6 — White sensor noise: is the reported covariance honest?</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>Waits on §1, whose three known states and fit it reuses. It needs no EFIT state.</p><p>§1 recovers a known state from noise-free rows, so nothing yet tests the uncertainty the fit reports. Here each §1 state is fitted many times, each time from rows carrying independent Gaussian noise, and the scatter of the recovered answers is compared with the covariance the fit receipt states. A fit whose covariance is right can be trusted when it says a coefficient is poorly determined; one whose covariance is wrong cannot, however good its best estimate.</p><p>The noise on each sensor is independent of every other sensor and of every other realisation, with a standard deviation of 1% of the root-mean-square signal of that sensor's row family (flux loops, field probes, measured currents), and the fit is given the same standard deviations as its weights.</p><p><strong>Done when.</strong> (1) For each of the three §1 states, over 256 noise realisations, the variance of the recovered coefficients along every principal direction of the receipt covariance is between 0.75 and 1.3 times the variance the receipt states, and the mean reduced chi-square of the whitened residuals is between 0.9 and 1.1. (2) The mean of the recovered coefficients lies within three standard errors of the generating coefficients on every state, and the root-mean-square flux-map error is reported at 0.5, 1 and 2 times the stated noise, growing in proportion to the noise within 20%. (3) Negative control: the same study with the noise drawn at twice the standard deviation the fit is told fails clause (1), with a variance ratio near four. Evidence is one H200 job that runs every realisation of every state, with a table of the variance ratios and one figure per state overlaying the scatter of recovered coefficients on the receipt's covariance ellipse.</p>
+
+    <h2 id="s7">§7 — Drifting sensors: 1/f noise over a pulse, beside EFIT</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="deferred" data-links=""></section>
+<p>Waits on §6, which shows the white-noise behaviour this section is read against, on §3, whose scoreboard holds the bands and the comparator, and on the decisions <code>drift-noise-model</code> and <code>efit-on-synthetic-rows</code>.</p><p>Integrated magnetic sensors drift: their noise is correlated in time, with more power at low frequency (a 1/f spectrum). On one time slice such noise is only an offset on each sensor and cannot be told from white noise of the same size. Its effect appears over a sequence of slices, where the reconstructed axis, boundary and safety factor wander slowly instead of scattering, and averaging over slices no longer removes the error. That is the long-pulse problem, so the case is ITER.</p><p>One stationary ITER state is held fixed for a sequence of slices. Each sensor carries noise with a 1/f spectrum between two stated frequencies, drawn independently per sensor, and a second sequence carries white noise of the same root-mean-square size. The nova fit and imas-efit both reconstruct both sequences from the same rows, written as IMAS magnetics.</p><p><strong>Done when.</strong> (1) Over at least 200 slices, for each code and each noise sequence, the table reports the root-mean-square error and the slice-to-slice correlation (lag one) of the magnetic axis position, the boundary flux and q95, and the error of the mean over 50 consecutive slices beside the single-slice error. (2) The control holds: on the white sequence the lag-one correlation of every reported quantity is within 0.15 of zero for both codes, and on the 1/f sequence it exceeds 0.5; a generator or pipeline that fails this is repaired before any comparison is read. (3) With the noise size swept upward from the §6 level, the record states for each code the size at which the axis position and q95 first leave the §2 bands, and whether the nova receipt's per-slice covariance understates the error of the 50-slice mean, with the ratio. Figures: per code, the axis position against slice index for both sequences on one panel, and one overlaid contour panel of the two codes' states at the slice of largest disagreement.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="fitted-unknowns" data-choice="profiles-and-currents" data-by="lead" data-when="2026-11-14T07:56:07+00:00" data-sections="s2">
@@ -205,6 +213,26 @@
       <button class="r-opt" data-value="rigid-shift-like-efit">a rigid vertical shift freedom, as imas-efit&#x27;s fit carries</button>
       </p>
     <p class="r-dec-rat">Lead 2026-11-14: the current centroid is determined by the magnetics and its residual is reported; no rigid shift freedom is added, so a vertical drift shows as a result and cannot absorb a forward-solve defect.</p>
+    </div>
+<div class="r-dec" data-key="drift-noise-model" data-choice="" data-by="" data-when="" data-sections="s7" data-recommended="parametric-sweep" data-recommended-by="coordinator">
+    <p class="r-dec-q">Where does the 1/f noise model in §7 come from?</p>
+    <p class="r-dec-ctx">§7 needs a noise size and the two frequencies bounding the 1/f range for each sensor family. No such figures are recorded in nova. A swept model claims nothing about the real sensors and finds the size at which each code fails; a specified or measured model ties the result to hardware but needs a source the plan does not hold.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="parametric-sweep">Sweep the size and frequency range; make no claim about real sensors</button>
+      <button class="r-opt" data-value="specified-drift">Use the ITER integrator drift requirement, supplied by the lead</button>
+      <button class="r-opt" data-value="measured-spectrum">Fit the spectrum to pre-pulse signals from an archived machine</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="efit-on-synthetic-rows" data-choice="" data-by="" data-when="" data-sections="s7" data-recommended="efit-session-runs" data-recommended-by="coordinator">
+    <p class="r-dec-q">Who runs imas-efit on nova&#x27;s synthetic noisy rows in §7?</p>
+    <p class="r-dec-ctx">§2 reads equilibria imas-efit already stored. §7 needs imas-efit run on new inputs that nova writes, which no section of this plan does yet. Running it from nova needs imas-efit&#x27;s entry point to accept an ITER magnetics-only case built by nova; handing the rows to the imas-efit session keeps each code with its owner but adds a cross-session dependency.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="nova-runs-efit">The §7 node runs imas-efit through its public entry point</button>
+      <button class="r-opt" data-value="efit-session-runs">nova writes the rows; the imas-efit session runs them and returns states</button>
+      <button class="r-opt" data-value="nova-only">Drop the EFIT column; §7 measures the nova fit alone</button>
+      </p>
+    <p class="r-dec-rat"></p>
     </div>
 </section>
 

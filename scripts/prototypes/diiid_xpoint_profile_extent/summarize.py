@@ -119,7 +119,7 @@ def main():
             "base": base,
             "edge": edge,
             "closed_m": closed,
-            "share_closed": closed / base["lower_x_distance_m"],
+            "share_closed": closed / base["lower_x_distance_m"] if counted else None,
             "counted": counted,
             "not_counted_reason": why,
             "edge_over_base_distance": (

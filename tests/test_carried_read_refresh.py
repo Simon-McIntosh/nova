@@ -130,7 +130,7 @@ def test_identical_programs_refuse_a_timing_claim():
         refuse_inert(record, record)
 
 
-def test_support_read_selects_incremental_refresh(carried_case, monkeypatch):
+def test_support_read_defaults_to_full_refresh(carried_case, monkeypatch):
     from types import SimpleNamespace
 
     from nova.equilibrium import support_read
@@ -155,5 +155,5 @@ def test_support_read_selects_incremental_refresh(carried_case, monkeypatch):
         support.reading,
     )
     jax.block_until_ready(result)
-    assert calls == [True]
+    assert calls == [False]
     assert bool(result.valid)

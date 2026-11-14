@@ -1,0 +1,46 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T13:48:36.275Z",
+  "dispatched_at": "2026-11-14T13:35:13Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:59",
+      "id": "done_when-1",
+      "reason": "a worker can close \u00a72 green with the per-tangent compile ratios never run at head on either device, so the clause asserts a gate that cannot fire, and the plan has since replaced the deselection with a named H200 pytest job for the two slow files at 8fdbd401c, which is precisely that change.",
+      "text": "the reviewed snapshot's clause (3) removes every compile-wall test from the only arm that runs test ids (\"deselected by node id\") and states they \"are judged on the H200 only, by clause (2)'s paired job\", but clause (2)'s job is scripts/prototypes/compile_pass_profile over production_point_batch, which executes no pytest id, so the deselected assertions (test_tangent_compiles_within_bound at tests/biot/test_edge_term_tangents.py:346, test_tangent_compiles_within_three_primals at tests/biot/test_vertex_term_tangents.py:626 and its siblings in test_elliptic_tangent_recurrences.py:469, test_range_tangent_recurrences.py:362, test_vertex_edge_tangent_recurrences.py:473 and test_near_collinear_tangent.py:194) are executed by nothing in the plan while the done-when reports them covered",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "b6e15899063e957c5ba1924ef2305451f3ed31bf",
+  "plan_fingerprint": "abff2bd26fe9e3b6faa7af0071da7deede7903fb9a18b88ee0cdf4fc8205947c",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 46,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261114T132555230106-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "99cb71ece7df415959af28306b8ed5f0e3d17b93",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 I opened each: nova/equilibrium/fixed_points.py:323 is _source_jets, :521 is _row_program, scripts/prototypes/compile_pass_profile exists, /nova/sub-millisecond-forward-path.html exists, commit 00ec05512 resolves and is a descendant of 7bd1d912c, and the two test files clause (3) names exist.",
+    "done_when": "a finding \u2014 clause (3) deselects every compile-wall test from the one job that executes test ids and says clause (2)'s job judges them, and clause (2)'s job runs the pass-profile harness over production_point_batch rather than any test.",
+    "evidence_paths": "pass \u2014 the per-pass table path for this section is fixed by the node dispatch (declined at an earlier review for the same reason), and the base-arm receipt cited by clause (3), sirius job 1314800, is logged on a durable home-cache path rather than a node-local temporary directory.",
+    "naming": "pass \u2014 s2 introduces no symbol, file or comment carrying a plan label, stage name, ticket number or version tag; s2's own revisions are described in comments that live on the plan, not in code.",
+    "reasoning": "pass \u2014 the section's figures reconcile with the evidence it cites (160.48 s + 60.19 s = 220.67 s, which is 62.8% of the 351.44 s wall and 64.9% of the 96.75%-attributed time; 750 to 402,141 instructions; growth factors 2.137 and 1.291 stated as 2.14 and 1.29), the endpoint is checkable and the first attempt reached the instruction half and missed the cold bound by 11.8 s, and the one reasoning finding once raised against this section for prescribing implementation was answered and is not re-raised.",
+    "single_goal": "pass \u2014 s2 carries one deliverable, the shrunk variadic program, and its three clauses all measure that one program.",
+    "wiring": "pass \u2014 s2 declares data-links=\"kernel-compile-barrier#s5\", the done section that supplies its lever, s3 in turn names s2, and both fragments s2 cites (production-point-batch-pass-profile.html, graph-growth-history.html) exist on disk."
+  },
+  "section_digests": {
+    "_document": "19c46cca46cf251b2f56d75e5620c8069d6b72a6623a979673bb4a8e4258367e",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "61a2e63a20552d9d72852604875917459f77f9408bbe512a6ab0310ebc3f7254",
+    "s3": "ab68c20ce5d3e9242532f0e5cb72a8baf8b9ce57666cac7db68cee8904360fa1",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T14:04:25.352418+00:00",
+  "total": null
+}

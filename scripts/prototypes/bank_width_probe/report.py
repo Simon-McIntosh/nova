@@ -10,21 +10,17 @@ import subprocess
 from scripts.prototypes.bank_width_probe.run import classify_outcome
 
 
-def main():
-    parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument("run", type=Path)
-    parser.add_argument("--root", type=Path, required=True)
-    parser.add_argument("--figure", type=Path, required=True)
-    args = parser.parse_args()
-    summary = json.loads((args.run / "summary.json").read_text())
+def audit(directory, root):
+    """Validate receipt provenance, execution outcomes and boundary agreement."""
+    summary = json.loads((directory / "summary.json").read_text())
     assert summary["complete"] and summary["inert_control"].startswith("inert lever:")
     revision = summary["revision"]
-    source = args.run / "measured-source/nova/equilibrium/support_read.py"
+    source = directory / "measured-source/nova/equilibrium/support_read.py"
     assert source.read_bytes() == subprocess.check_output(
         [
             "git",
             "-C",
-            str(args.root),
+            str(root),
             "show",
             revision + ":nova/equilibrium/support_read.py",
         ]
@@ -116,6 +112,19 @@ def main():
             for k in ("axis", "saddle", "boundary")
         },
     )
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser(__doc__)
+    parser.add_argument("run", type=Path)
+    parser.add_argument("--root", type=Path, required=True)
+    parser.add_argument("--figure", type=Path, required=True)
+    args = parser.parse_args()
+    result = audit(args.run, args.root)
+    rows = {(r["allocator"], r["width"]): r for r in result["widths"]}
+    largest = result["largest_admitted_width"]
+    refused = result["first_refused_width"]
     (args.run / "audited.json").write_text(json.dumps(result, indent=2))
     import matplotlib.pyplot as plt
     from matplotlib.lines import Line2D

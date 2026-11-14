@@ -34,6 +34,48 @@ def classify_outcome(exit_status, record, log_text):
     raise RuntimeError(f"unclassified process failure: exit {exit_status}")
 
 
+def measure_widths(execute, summary, save):
+    """Locate the executing boundary and require agreeing fresh repeats."""
+    probes = {}
+    # First establish a positive admission and the known oversized refusal.
+    for width in (64, 96, 256):
+        probes[width] = execute(width, 0)
+    assert probes[64]["admitted"] and not probes[96]["admitted"]
+    assert probes[256]["outcome"] == "compiled-memory-refusal"
+    low, high = 64, 96
+    while high - low > 1:
+        width = (low + high) // 2
+        probes[width] = execute(width, 0)
+        if probes[width]["admitted"]:
+            low = width
+        else:
+            high = width
+    summary.update(largest_admitted_width=low, first_refused_width=high)
+    save()
+    # Repeat the reference and boundary in fresh processes after exploration.
+    for width in sorted({64, low}):
+        measured = [execute(width, p) for p in (1, 2)]
+        assert all(a["admitted"] for a in measured), "boundary did not repeat"
+        walls = [a["batch_ms"] for a in measured]
+        spread = abs(walls[0] - walls[1]) / min(walls)
+        summary.setdefault("agreement", {})[width] = spread
+        save()
+        assert spread <= 0.05, (width, "fresh processes disagree", spread)
+    left = {"rows": [{"lowered_sha256": probes[64]["hlo_sha256"]}]}
+    right = {"rows": [{"lowered_sha256": probes[96]["hlo_sha256"]}]}
+    refuse_inert(left, right)
+    try:
+        refuse_inert(left, left)
+    except ValueError as error:
+        summary["inert_control"] = str(error)
+        print("INERT_REFUSED", error, flush=True)
+    else:
+        raise AssertionError("identical programs escaped the inert-lever refusal")
+    execute(96, 0, allocator="async")
+    summary["complete"] = True
+    save()
+
+
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("root", type=Path)
@@ -220,44 +262,7 @@ def main():
             print("ARM", json.dumps(arm), flush=True)
             return arm
 
-        probes = {}
-        # First establish a positive admission and the known oversized refusal.
-        for width in (64, 96, 256):
-            probes[width] = execute(width, 0)
-        assert probes[64]["admitted"] and not probes[96]["admitted"]
-        assert probes[256]["outcome"] == "compiled-memory-refusal"
-        low, high = 64, 96
-        while high - low > 1:
-            width = (low + high) // 2
-            probes[width] = execute(width, 0)
-            if probes[width]["admitted"]:
-                low = width
-            else:
-                high = width
-        summary.update(largest_admitted_width=low, first_refused_width=high)
-        save()
-        # Repeat the reference and boundary in fresh processes after exploration.
-        for width in sorted({64, low}):
-            measured = [execute(width, p) for p in (1, 2)]
-            assert all(a["admitted"] for a in measured), "boundary did not repeat"
-            walls = [a["batch_ms"] for a in measured]
-            spread = abs(walls[0] - walls[1]) / min(walls)
-            summary.setdefault("agreement", {})[width] = spread
-            save()
-            assert spread <= 0.05, (width, "fresh processes disagree", spread)
-        left = {"rows": [{"lowered_sha256": probes[64]["hlo_sha256"]}]}
-        right = {"rows": [{"lowered_sha256": probes[96]["hlo_sha256"]}]}
-        refuse_inert(left, right)
-        try:
-            refuse_inert(left, left)
-        except ValueError as error:
-            summary["inert_control"] = str(error)
-            print("INERT_REFUSED", error, flush=True)
-        else:
-            raise AssertionError("identical programs escaped the inert-lever refusal")
-        execute(96, 0, allocator="async")
-        summary["complete"] = True
-        save()
+        measure_widths(execute, summary, save)
     print(
         "SUMMARY",
         json.dumps(

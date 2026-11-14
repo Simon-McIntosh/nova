@@ -13,13 +13,14 @@ from scripts.prototypes.bank_hessian_boundary.inspect import (
     load,
     relative,
 )
+from scripts.prototypes.bank_hessian_boundary.corners import coefficients
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mutate", action="store_true")
     args = parser.parse_args()
-    _, archives, ref, _, _, interior = load()
+    polygons, archives, ref, _, _, interior = load()
     split = json.loads((ROOT / "split.json").read_text())
     records = [
         json.loads((ROOT / "nodes" / f"node-{i}.json").read_text())
@@ -33,9 +34,12 @@ def main():
     )
     values = np.array([r["values"] for r in records])
     errors = np.array([r["error"] for r in records])
-    trace = np.array([r["trace"] for r in records])
+    trace = np.array([r["trace"] for r in records], dtype=float)
     forcing = np.array([r["forcing"] for r in records])
     active_corner = np.array([r["corner"] and not r["full_field"] for r in records])
+    assert np.all(np.isfinite(values)) and np.all(np.isfinite(errors))
+    predicted = coefficients(polygons, archives, records)
+    assert np.max(predicted["relative"]) < 5e-4
     increment = np.diff(values, axis=1)
     slope = increment[:, -1]
     # A persistent increment per decade identifies a logarithmic approach;
@@ -50,6 +54,8 @@ def main():
         ).strip(),
         states=[],
         nodes=[],
+        corner_prediction=predicted,
+        retained_corner_revision="3ea364d9bb6703ccc9d084938932bb9661d17a58",
     )
     for state, state_id in enumerate(STATES):
         row = dict(
@@ -59,6 +65,27 @@ def main():
         choices = dict(lower=final[:, 0], upper=final[:, 1], average=final.mean(axis=1))
         finite = ~np.any(logarithmic[:, :, state], axis=(1, 2))
         row["logarithmic_corner_nodes"] = int((~finite & active_corner).sum())
+        smooth = ~active_corner
+        limit = (
+            1000 * values[:, -1, :, state]
+            - 110 * values[:, -2, :, state]
+            + values[:, -3, :, state]
+        ) / 891
+        limit_error = 4 * np.maximum(
+            np.abs(
+                limit - (10 * values[:, -1, :, state] - values[:, -2, :, state]) / 9
+            ),
+            errors[:, -1, :, state],
+        )
+        row["smooth_boundary"] = dict(
+            count=int(smooth.sum()),
+            side_difference=relative(
+                limit[smooth, 1] - limit[smooth, 0], limit[smooth].mean(axis=1)
+            ).tolist(),
+            envelope=relative(
+                limit_error[smooth].max(axis=1), limit[smooth].mean(axis=1)
+            ).tolist(),
+        )
         for name, key in (("bank", "actual"), ("direct", "expected")):
             route = archives[state][key][ref["indices"][~interior], 4:6]
             row["boundary"][name] = {
@@ -80,6 +107,12 @@ def main():
             row["boundary"][name]["within_budget_count"] = int(
                 (per_node.min(axis=-1) <= 1e-8).sum()
             )
+            row["smooth_boundary"][name] = {
+                label: relative(route[smooth] - choice[smooth], choice[smooth]).tolist()
+                for label, choice in dict(
+                    lower=limit[:, 0], upper=limit[:, 1], average=limit.mean(axis=1)
+                ).items()
+            }
         jump = trace[:, :, 1, state] - trace[:, :, 0, state]
         source_jump = forcing[:, :, 1, state] - forcing[:, :, 0, state]
         zz_jump = values[:, :, 1, state, 1] - values[:, :, 0, state, 1]
@@ -121,6 +154,7 @@ def main():
                 logarithmic=logarithmic[i].tolist(),
                 increment_per_decade=slope[i].tolist(),
                 record=str(ROOT / "nodes" / f"node-{record['node']}.json"),
+                revision=record.get("revision") or output["retained_corner_revision"],
             )
         )
     control = json.loads((ROOT / "nodes/node--1.json").read_text())
@@ -132,6 +166,15 @@ def main():
     control_error = float(np.max(np.abs(measured - expected) / np.abs(expected)))
     output["uniform_edge_control"] = dict(
         measured=measured.tolist(), expected=expected.tolist(), relative=control_error
+    )
+    jumps = (
+        np.array(control["values"])[:, 1, :, 1]
+        - np.array(control["values"])[:, 0, :, 1]
+    )
+    limit_jump = (1000 * jumps[-1] - 110 * jumps[-2] + jumps[-3]) / 891
+    output["uniform_edge_control"]["extrapolated_jump"] = limit_jump.tolist()
+    output["uniform_edge_control"]["extrapolated_relative"] = float(
+        np.max(np.abs(limit_jump - expected) / np.abs(expected))
     )
     output["inputs"] = json.loads((ROOT / "retained-inputs.json").read_text())
     for item in output["inputs"]:

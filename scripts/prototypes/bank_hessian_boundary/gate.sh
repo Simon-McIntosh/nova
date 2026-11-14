@@ -3,10 +3,12 @@ set -eu
 repo=$1
 output=$2
 revision=$3
+extra=("${@:4}")
 test "$(git -C "$repo" rev-parse HEAD)" = "$revision"
 export TMPDIR=/tmp JAX_PLATFORMS=cpu OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
 export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
 export PYTHONPATH="$repo"
+export NOVA_HESSIAN_MEASURE_REVISION="$revision"
 scratch=$(mktemp -d "$TMPDIR/hessian-${SLURM_JOB_ID:-$$}-XXXX")
 trap 'rm -rvf "$scratch"' EXIT
 export TMPDIR="$scratch"
@@ -27,7 +29,7 @@ run_one() {
     return "$result"
 }
 run_one split inspect
-run_one limits limits --workers 16
+run_one limits limits --workers 16 "${extra[@]}"
 run_one positive report
 set +e
 run_one negative report --mutate

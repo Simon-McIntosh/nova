@@ -1215,13 +1215,16 @@ def test_paired_polygon_tiles_reuse_one_shape_and_preserve_cartesian_rows():
         [triangle, triangle + [0.1, 0.0], triangle + [0.0, 0.1]], edge_count=3
     )
     points = np.array([[0.8, 0.1], [2.0, 0.2], [1.001, 0.002]])
-    cartesian = tiled.tile_evaluator(
-        tiled.TilePlan(3, 3, 9, 16, 48), batched=True, edge_count=3
-    )
-    expected = np.array(cartesian(*points.T, edge, weight, norm))[
-        :, np.arange(3), np.arange(3)
-    ]
     for flux_only in (False, True):
+        cartesian = tiled.tile_evaluator(
+            tiled.TilePlan(3, 3, 9, 16, 48),
+            batched=True,
+            edge_count=3,
+            flux_only=flux_only,
+        )
+        expected = np.array(cartesian(*points.T, edge, weight, norm))[
+            :, np.arange(3), np.arange(3)
+        ]
         paired = tiled.tile_evaluator(
             tiled.TilePlan(3, 3, 8, 16, 48),
             batched=True,
@@ -1231,7 +1234,7 @@ def test_paired_polygon_tiles_reuse_one_shape_and_preserve_cartesian_rows():
         )
         actual = np.array(paired(*points.T, edge, weight, norm))
         np.testing.assert_allclose(
-            actual, expected[:1] if flux_only else expected, rtol=1e-13, atol=1e-25
+            actual, expected, rtol=1e-13, atol=1e-25
         )
         paired(*points[:1].T, edge[:, :, :1], weight[:, :1], norm[:1])
         assert paired.compile_count == 1

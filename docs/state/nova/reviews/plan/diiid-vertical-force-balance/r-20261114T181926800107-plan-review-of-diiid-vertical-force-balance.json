@@ -71,6 +71,16 @@
       "note": "s5 is declared done and records which of its three parts landed and how the placement question is answered, so no queue built from declarations re-solves the landed prototype.",
       "reason": "",
       "when": "2026-11-14T18:53:53.232728+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The route sentence in s6 is replaced by the behaviour the records must show; the owner and selection mechanism move into the node brief.",
+      "reason": "",
+      "when": "2026-11-14T18:54:04.485669+00:00"
     }
   ],
   "responses": {
@@ -91,6 +101,15 @@
       "note": "s5 is declared done with a landed summary: node (a) closed negative, node (b) landed, and node (c) answered by the existing translation owners, so no undefined completion condition remains.",
       "reason": "",
       "when": "2026-11-14T18:53:45.122300+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "note": "The route sentence in s6 is replaced by the behaviour the records must show; the owner and selection mechanism move into the node brief.",
+      "reason": "",
+      "when": "2026-11-14T18:54:04.485669+00:00"
     },
     "single_goal-1": {
       "action": "acted",

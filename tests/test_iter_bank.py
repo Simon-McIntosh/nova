@@ -23,12 +23,12 @@ from scripts.prototypes.iter_bank.measure import (
 from scripts.prototypes.read_route.jets import _source_jets, build_jet_matrix
 
 
-@jax.jit
 def analytic_jets(points, coupling, moments):
     """Evaluate the direct kernels without using the bank's response rows."""
-    return pack(
-        jax.vmap(coupling.evaluate, in_axes=(0, None))(points, tuple(moments.T))
-    )
+    with jax.disable_jit():
+        return pack(
+            jax.vmap(coupling.evaluate, in_axes=(0, None))(points, tuple(moments.T))
+        )
 
 
 @pytest.fixture(scope="module")
@@ -77,10 +77,13 @@ def iter_bank():
     geometry = topology.TopologyGeometry.from_cells((cell,), cell[None], (cell,))
     plasma = topology.BiotMomentCoupling.from_polygons((cell,))
     conductors = topology.BiotMomentCoupling.from_polygons(coils)
-    rows, exterior, nodes, indices, _ = build_jet_matrix(
-        plasma, geometry, ZeroField(), (jnp.zeros(1),) * 3, persist=False
-    )
-    coil_rows = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))(nodes, conductors)
+    # Eager derivative kernels keep this tiny CPU fixture out of the large
+    # fused compiler program; response rows still come from the live builder.
+    with jax.disable_jit():
+        rows, exterior, nodes, indices, _ = build_jet_matrix(
+            plasma, geometry, ZeroField(), (jnp.zeros(1),) * 3, persist=False
+        )
+        coil_rows = jax.vmap(_source_jets, in_axes=(0, None))(nodes, conductors)
     operands = support_read.SupportOperands.from_rows(
         geometry,
         rows,

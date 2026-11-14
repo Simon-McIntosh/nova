@@ -3,8 +3,10 @@
 # ruff: noqa: E501
 
 import argparse
+from collections import Counter
 import html
 import json
+import re
 from pathlib import Path
 
 import matplotlib
@@ -33,23 +35,21 @@ def main():
     parser.add_argument("--figures", required=True, type=Path)
     parser.add_argument("--fragment", required=True, type=Path)
     parser.add_argument("--preview", required=True, type=Path)
+    parser.add_argument("--observables", required=True, type=Path)
     args = parser.parse_args()
     args.figures.mkdir(parents=True, exist_ok=True)
     args.preview.mkdir(parents=True, exist_ok=True)
     args.fragment.parent.mkdir(parents=True, exist_ok=True)
     selection = json.loads((args.inputs / "selection.json").read_text())
+    field_record = json.loads(args.observables.read_text())
+    assert field_record["complete"]
+    observed = {r["index"]: r for r in field_record["rows"]}
     summary = json.loads((args.results / "summary.json").read_text())
     available = sorted(args.results.glob("width-1-process-*/receipt.json"))
     assert available, "no measurement receipt exists"
     receipt_path = next((p for p in available if "process-1" in str(p)), available[0])
     receipt = json.loads(receipt_path.read_text())
     measured = {r["index"]: r for r in receipt["slices"]}
-    other_path = args.results / "width-16-process-1/receipt.json"
-    ensemble = (
-        {r["index"]: r for r in json.loads(other_path.read_text())["slices"]}
-        if other_path.exists()
-        else {}
-    )
     wall = np.load(args.inputs / "bank/geometry.npz", allow_pickle=False)["wall"]
     style = DEFAULT_INK.variant(
         axis_color=DEFAULT_INK.flux_color,
@@ -61,12 +61,14 @@ def main():
         flux_color="#333333", axis_color="#333333", xpoint_color="#333333"
     )
     frames, figures, rows, inspections = [], [], [], []
+    comparisons, null_rows = [], []
     all_levels = []
     for reference in selection["slices"]:
         index = reference["index"]
         if index not in measured:
             continue
         row = measured[index]
+        field = observed[index]
         source = np.load(args.inputs / f"source-{index}.npz", allow_pickle=False)
         state_path = receipt_path.parent / f"state-{index}.npz"
         if not state_path.exists():
@@ -117,11 +119,12 @@ def main():
             wall=(wall,),
         )
         contour.set_linestyle("dashed")
-        valid_nulls = state["null_valid"]
+        valid_nulls = np.asarray(field["null_valid"])
+        stationary = np.asarray(field["stationary"])
         bank_tally = draw_nulls(
             axes[0],
-            magnetic_axis=state["stationary"][0] if valid_nulls[0] else None,
-            x_points=state["stationary"][1:][valid_nulls[1:]],
+            magnetic_axis=stationary[0] if valid_nulls[0] else None,
+            x_points=stationary[1:][valid_nulls[1:]],
             contain=(wall,),
             style=style,
         )
@@ -201,20 +204,25 @@ def main():
         figures.append(
             f'<figure id="dina-flattop-scenario-slice-{index}"><img src="{url}" alt="Bank and DINA line contours at {reference["time_s"]:.3f} seconds"><figcaption>'
             f"Slice {index}, {reference['time_s']:.6f} s: fresh residual {residual:.9g}, converged {converged}; stage {html.escape(row['failure_stage'][0])}. "
-            f"Bank blue, DINA dashed near-black; each panel marks its own qualified axis and saddle with the triangle/cross vocabulary. "
+            f"Bank blue, DINA dashed near-black; each panel marks its own qualified axis and saddle with the triangle/cross vocabulary. Bank markers re-read the requested-input field on CPU. "
             f"{int(np.count_nonzero(valid_nulls))}/{len(valid_nulls)} bank nulls qualified. Native first wall, equal aspect, shared flux levels "
             f"{levels[0]:.6g} to {levels[-1]:.6g} Wb in {levels[1] - levels[0]:.6g} Wb steps. Raw flux gauges retained without alignment.</figcaption></figure>"
         )
-        broad = ensemble.get(index)
-        axis_error = np.linalg.norm(row["axis_difference_m"][0]) * 1000
-        x_error = np.linalg.norm(row["xpoint_difference_m"][0]) * 1000
-        throughput = f"{broad['slices_per_second']:.4g}" if broad else "unmeasured"
+        axis_error = np.linalg.norm(field["axis_difference_m"]) * 1000
+        x_error = np.linalg.norm(field["xpoint_difference_m"]) * 1000
         rows.append(
             f"<tr><td>{index}</td><td>{reference['time_s']:.6f}</td><td>{row['wall_ms']:.6g}</td>"
-            f"<td>{throughput}</td><td>{residual:.6g}</td><td>{html.escape(row['failure_stage'][0])}</td>"
-            f"<td>{axis_error:.6g}</td><td>{x_error:.6g}</td><td>{row['boundary_flux_difference_wb'][0]:.6g}</td>"
-            f"<td>{row['ip_difference_a'][0] / 1000:.6g}</td><td>{html.escape(str(row['null_iterations'][0]))}</td>"
-            f"<td>{html.escape(str(row['classification_agrees'][0]))}</td><td>{row['all_compilations']}</td></tr>"
+            f"<td>{residual:.6g}</td><td>{html.escape(row['failure_stage'][0])}</td>"
+            f"<td>{row['all_compilations']}</td></tr>"
+        )
+        comparisons.append(
+            f"<tr><td>{index}</td><td>{axis_error:.6g}</td><td>{x_error:.6g}</td>"
+            f"<td>{field['boundary_flux_difference_wb']:.6g}</td>"
+            f"<td>{row['ip_difference_a'][0] / 1000:.6g}</td></tr>"
+        )
+        null_rows.append(
+            f"<tr><td>{index}</td><td>{row['null_iterations'][0]}</td>"
+            f"<td>{field['null_iterations']}</td><td>{field['classification_agrees']}</td></tr>"
         )
     assert frames, (
         "no finite terminal fields to render; reference maps cannot replace them"
@@ -232,7 +240,7 @@ def main():
         f'<article id="dina-flattop-scenario-record"><h3>DINA flattop on the ITER bank route</h3><p>'
         f"{converged}/{len(receipt['slices'])} returned slices meet the independent fresh residual and support checks. "
         f"The required fraction is at least 90%; this record reports the observed state without changing a numerical tolerance. "
-        f"Code revision <code>{receipt['revision']}</code>; {html.escape(receipt['device'])}; width 1 carries slices in time order, width 16 represents sixteen independent copies of the pulse.</p>",
+        f"Code revision <code>{receipt['revision']}</code>; {html.escape(receipt['device'])}; width 1 carries slices in time order. The width-16 attempt represents sixteen independent copies of the pulse and fails before returning its first slice.</p>",
         "<p>The source is DINA 105027/run 1, DD 3.38.1, read through imas-python. "
         "Indices 129–148 are consecutive stored slices at 30.145588–34.873397 s, with |Ip| at least 95% of the pulse peak. "
         "Twelve coil currents and two 33-knot Hermite gradient tables enter as traced arrays. "
@@ -244,14 +252,23 @@ def main():
         "Nova flux is the negative of stored DD3 flux. Boundary-flux differences retain their raw gauges and are diagnostics, not accuracy gates.</p>",
         "<p>Timing uses the synchronized blocking-call pattern of the existing bank slice profiler. The first call includes tracing/compilation, which is logged separately; later calls include the actual continuation overhead. "
         "Eleven same-input replay timings are retained only for converged states. No speed-lever default is changed and no off/on speedup is claimed. "
-        "Warmup and two fresh processes run at each width in one H200 job; their agreement is checked at 5%.</p>",
+        "Warmup and two fresh processes completed at width 1 in one H200 job; the first width-16 process failed and the two measured width-16 processes did not run.</p>",
         f"<pre>{html.escape(json.dumps(summary.get('agreement', {}), indent=2))}</pre>",
-        "<table><thead><tr><th>Slice</th><th>Time [s]</th><th>Width 1 [ms]</th><th>Width 16 [slices/s]</th><th>Fresh residual</th><th>Stage</th><th>Axis difference [mm]</th><th>X-point difference [mm]</th><th>Boundary flux difference [Wb]</th><th>Ip difference [kA]</th><th>Null iterations</th><th>Classifications agree</th><th>Compilations</th></tr></thead><tbody>",
+        "<h4>Per-slice solver calls</h4><table><thead><tr><th>Slice</th><th>Time [s]</th><th>Width 1 [ms]</th><th>Fresh residual</th><th>Stage</th><th>Compilations in measured interval</th></tr></thead><tbody>",
         *rows,
         "</tbody></table>",
-        "<p>All per-lane values, residual paths, compiler messages and terminal nodal fields are retained under "
+        "<h4>Differences from DINA at the requested inputs</h4><table><thead><tr><th>Slice</th><th>Axis distance [mm]</th><th>X-point distance [mm]</th><th>Boundary flux difference [Wb]</th><th>Ip difference [kA]</th></tr></thead><tbody>",
+        *comparisons,
+        "</tbody></table>",
+        "<h4>Stationary-point diagnostics</h4><table><thead><tr><th>Slice</th><th>Terminal H200 iterations [axis, X]</th><th>Requested-field CPU read iterations [axis, X]</th><th>Classes agree with DINA [axis, X]</th></tr></thead><tbody>",
+        *null_rows,
+        "</tbody></table>",
+        "<p>Per-lane terminal values, continuation substeps, compiler messages and terminal nodal fields are retained under "
         f"<code>{html.escape(str(args.results))}</code>. The preparation selection and reference fields are under <code>{html.escape(str(args.inputs))}</code>. "
-        f"The width-1 table and figures use <code>{html.escape(str(receipt_path))}</code>; null classes expected from DINA are an axis minimum and a saddle.</p>",
+        f"The width-1 table and figures use <code>{html.escape(str(receipt_path))}</code>. Each failed terminal result, including a rejected intermediate continuation trial, seeds the next slice; this is not a stream of exclusively converged warm starts. "
+        "At failed continuation slices 131, 134, 136 the saved field is evaluated with the requested currents, while the original terminal nulls belong to intermediate trial currents. "
+        f"Field-consistent comparisons and markers therefore use the separate CPU read <code>{html.escape(str(args.observables))}</code>, which checks the reconstructed field against the saved H200 nodal flux. "
+        "This read changes no moments and supplies no new H200 timing or convergence result. DINA null classes are independently checked using second derivatives of its stored flux spline; they are an axis minimum and a saddle.</p>",
     ]
     control_path = args.results / "width-1-process-0/negative-controls.json"
     if control_path.exists():
@@ -261,8 +278,38 @@ def main():
             f"<p>Captured-current programs compile {control['closure_compilations']} times for two current values. "
             f"The displaced zero-update state has residual {control['residual']}, stage {html.escape(str(control['failure_stage']))}, "
             f"converged {control['converged']}. Adding it changes the fraction {control['normal_fraction']:.6g} to {control['with_failed_fraction']:.6g}. "
-            "If the normal fraction is zero, this control cannot demonstrate a decrease and that requirement remains unmet.</p>",
+            "The zero-update receipt reports zero updates. Its wall fields are placeholders and carry no timing evidence. Each captured-current value creates a new closure/program; this control shows recompilation of those closures, rather than a cache miss on the ordinary runtime-input dispatcher.</p>",
         ]
+    arm_rows = []
+    for arm in summary["arms"]:
+        path = Path(arm["log"]).parent / "receipt.json"
+        item = json.loads(path.read_text())
+        arm_rows.append(
+            f"<tr><td>{arm['width']}</td><td>{arm['process']}</td>"
+            f"<td>{item.get('converged_slices', 'no terminal slice')}</td>"
+            f"<td>{item.get('median_warm_ms', 'unmeasured')}</td>"
+            f"<td>{arm['exit_status']}</td></tr>"
+        )
+    compiler_counts = Counter(
+        re.findall(
+            r"Compiling jit\(([^)]+)\)",
+            (receipt_path.parent / "compilations.log").read_text(),
+        )
+    )
+    assert compiler_counts["solve"] == 1 and compiler_counts["certify"] == 1
+    assert sum(r["all_compilations"] for r in receipt["slices"][1:]) == 20
+    body += [
+        "<h4>Fresh processes and the width limit</h4>",
+        "<table><thead><tr><th>Width</th><th>Process (0 is warmup)</th><th>Converged slices</th><th>Median subsequent solver call [ms]</th><th>Process exit</th></tr></thead><tbody>",
+        *arm_rows,
+        "</tbody></table>",
+        "<p>H200 job 1315698 ended FAILED with exit 1 after 13 min 30 s. The width-16 compiler reports 241.14 GiB after rematerialization, followed by a 216.76 GiB allocation refusal in jit_solve. Width-16 throughput is unmeasured, not zero. No smaller batch is substituted and no second H200 job is submitted.</p>",
+        "<h4>Compilation accounting</h4>",
+        f"<p>The main solve and independent certificate each compile once. The complete measured-process log contains {sum(compiler_counts.values())} dispatcher compilation events: <code>{html.escape(str(dict(compiler_counts)))}</code>. "
+        "Five squeeze compilations occur while exporting the first slice after its in-interval counter was saved, so that first receipt's 2 counts do not cover its entire export. "
+        "After the first slice there are 12 helper compilations at 130 and 8 at 131, then zero at 132–148. The literal zero-after-first requirement is unmet, even though changing currents and profiles never recompiles the solve program.</p>",
+        "<p>The three failed continuation records name a sub-step ceiling, and the fourth failure exhausts 64 updates. All four failed states remain shown and counted. The published figures are the measured incomplete result, not evidence of meeting the 90% requirement.</p>",
+    ]
     body += [
         '<figure id="dina-flattop-scenario-animation"><img src="/nova/figures/sub-millisecond-forward-path/dina-flattop-scenario/flattop.gif" alt="Consecutive terminal bank fields beside native DINA fields"><figcaption>'
         "Every finite returned terminal field in time order; each frame states its fresh residual and convergence flag. Failed fields remain failed in the animation.</figcaption></figure>",

@@ -82,6 +82,28 @@ def column_flux(
     )
 
 
+def checked_column_flux(model, charge, permeability, bore=0.0):
+    """Refine the explicit slab integral independently of the surface mesh."""
+    values, rules = [], []
+    for radial, angular, vertical in [
+        (24, 12, 4),
+        (48, 24, 8),
+        (96, 48, 12),
+        (128, 64, 16),
+    ]:
+        values.append(
+            column_flux(model, charge, permeability, bore, radial, angular, vertical)
+        )
+        rules.append([radial, angular, vertical])
+        if len(values) > 1:
+            error = abs(values[-2] / values[-1] - 1)
+            if error < 0.001:
+                return values[-1], dict(
+                    relative_change=error, rules=rules, flux_Wb=values
+                )
+    raise RuntimeError(f"column flux quadrature is unresolved: {values=}")
+
+
 def metrics_difference(coarse, fine, vessel_count):
     a, b = np.asarray(coarse["iron_average_T"]), np.asarray(fine["iron_average_T"])
     air = np.asarray(fine["air_T"])
@@ -140,12 +162,16 @@ def solve_resolution(case, size, output, annulus=False, bore=0.0, missing=None):
             model, charge, probes, samples, full=missing is not None
         )
         mean = resolved.mean(axis=0)[:, [0, 2]]
-        flux = None if missing is not None else column_flux(model, charge, mu, bore)
+        if missing is None:
+            flux, flux_quadrature = checked_column_flux(model, charge, mu, bore)
+        else:
+            flux, flux_quadrature = None, None
         row = dict(
             mu=mu,
             residual=residual,
             neutrality=model.last_solve,
             column_flux_Wb=flux,
+            column_flux_quadrature=flux_quadrature,
             iron_average_T=mean.tolist(),
             air_T=air.tolist(),
             angle_rad=angle.tolist(),

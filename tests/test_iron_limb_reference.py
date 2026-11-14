@@ -191,3 +191,18 @@ def test_near_filament_panel_drive_matches_area_integral():
     assert average == pytest.approx(independent, rel=2e-8, abs=1e-14)
     centroid = external(panels.centres)[0] @ panels.normals[0]
     assert abs(centroid - average) > 0.05 * abs(average)
+
+
+def test_slab_field_integral_preserves_constant_flux():
+    from types import SimpleNamespace
+
+    from scripts.iron_limb_reference.measure import checked_column_flux
+
+    model = SimpleNamespace(
+        external=lambda p: np.tile([0.0, 0.0, 0.02], (len(p), 1)),
+        iron_field=lambda p, q: np.zeros_like(p),
+    )
+    flux, quadrature = checked_column_flux(model, None, 50.0, bore=0.05)
+    expected = np.pi * (0.664**2 - 0.05**2)
+    assert flux == pytest.approx(expected, rel=2e-14)
+    assert quadrature["relative_change"] < 1e-13

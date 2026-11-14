@@ -12,6 +12,7 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 import jax
+import jax.numpy as jnp
 import numpy as np
 
 from nova.biot.greens import MU0
@@ -75,7 +76,32 @@ def coil_reference(points, coils, moments):
     if target.exists():
         return dict(np.load(target))
     ref = reference()
-    gradient, hessian, bound = [], [], []
+    gradient, hessian, bound, direct_gradient, direct_hessian = [], [], [], [], []
+    from nova.biot.polygonanalytic import _packed_analytic_moments_primal
+
+    device = {k: jnp.asarray(v) for k, v in coils.items()}
+    nearest_height = np.min(
+        abs(coils["edge"][:, (1, 3), None, :] - points[None, None, :, 1, None])
+    )
+    assert nearest_height > 1e-7, "coil sample requires the height tangent branch"
+
+    def uniform_gradient(point):
+        rows = _packed_analytic_moments_primal(
+            jnp,
+            jnp.broadcast_to(point[0], device["norm"].shape),
+            jnp.broadcast_to(point[1], device["norm"].shape),
+            device["edge"],
+            device["weight"],
+            device["norm"],
+            device["centre"].T,
+            device["centre"].T,
+            device["reflection_axis"],
+            device["reflection_partner"],
+        )
+        return 2 * jnp.pi * point[0] * jnp.stack((rows[6], -rows[3]), axis=-1)
+
+    direct_value = jax.jit(uniform_gradient)
+    direct_derivative = jax.jit(jax.jacfwd(uniform_gradient))
     for i, point in enumerate(points):
         shifts = [np.array(point, dtype=np.longdouble)]
         steps = np.array([0.001, 0.0005, 0.00025], dtype=np.longdouble)
@@ -99,11 +125,27 @@ def coil_reference(points, coils, moments):
         gradient.append(values[:, 0])
         hessian.append(sixth.transpose(0, 2, 1))
         bound.append((4 * abs(sixth - fourth[:, :, 1])).transpose(0, 2, 1))
+        direct_gradient.append(
+            np.einsum(
+                "cd,sc->sd",
+                np.asarray(direct_value(jnp.asarray(point))),
+                moments[:, :, 0],
+            )
+        )
+        direct_hessian.append(
+            np.einsum(
+                "cij,sc->sij",
+                np.asarray(direct_derivative(jnp.asarray(point))),
+                moments[:, :, 0],
+            )
+        )
         print("COIL_NODE", i, flush=True)
     result = dict(
         gradient=np.array(gradient).transpose(1, 0, 2),
         hessian=np.array(hessian).transpose(1, 0, 2, 3),
         bound=np.array(bound).transpose(1, 0, 2, 3),
+        direct_gradient=np.array(direct_gradient).transpose(1, 0, 2),
+        direct_hessian=np.array(direct_hessian).transpose(1, 0, 2, 3),
     )
     np.savez(target, **result)
     return result
@@ -181,6 +223,7 @@ def main():
             coil_trace={},
             plasma_trace={},
             hessian_relative={},
+            plasma_gradient_relative={},
         )
         row["reproduced_prior_total_hessian"] = relative(
             methods["bank"][:, 3:5]
@@ -208,10 +251,21 @@ def main():
                 values[:, 2:] - total[:, 2:], total[:, 2:]
             ).tolist()
             row["trace"][name] = trace(values, points, forcing[s])
-            source = values - coil_bank[s, :, 1:] if name != "reference" else plasma
+            direct_coil = jet(
+                coil_ref["direct_gradient"][s], coil_ref["direct_hessian"][s]
+            )
+            coil_method = {
+                "bank": coil_bank[s, :, 1:],
+                "direct": direct_coil,
+                "reference": coil,
+            }[name]
+            source = values - coil_method if name != "reference" else plasma
+            row["plasma_gradient_relative"][name] = relative(
+                source[:, :2] - plasma[:, :2], plasma[:, :2]
+            ).tolist()
             row["plasma_trace"][name] = trace(source, points, forcing[s])
             row["coil_trace"][name] = trace(
-                coil_bank[s, :, 1:] if name != "reference" else coil,
+                coil_method,
                 points,
                 np.zeros(len(points)),
             )
@@ -221,6 +275,12 @@ def main():
         ).tolist()
         row["coil_hessian_relative"] = relative(
             coil_bank[s, :, 3:] - coil[:, 2:], coil[:, 2:]
+        ).tolist()
+        row["direct_coil_gradient_relative"] = relative(
+            direct_coil[:, :2] - coil[:, :2], coil[:, :2]
+        ).tolist()
+        row["direct_coil_hessian_relative"] = relative(
+            direct_coil[:, 2:] - coil[:, 2:], coil[:, 2:]
         ).tolist()
         positive = trace(total, points, forcing[s])["relative"]
         mutated = total.copy()
@@ -247,19 +307,90 @@ def main():
         node_receipts=[str(ROOT / f"node-{i}.npz") for i in indices],
         cells=json.loads((ROOT / "cell.json").read_text()),
     )
+    from nova.biot import polygonanalytic
+    import inspect
+
+    output["localization"] = dict(
+        function="_packed_moments_height_tangent",
+        file="nova/biot/polygonanalytic.py",
+        line=inspect.getsourcelines(polygonanalytic._packed_moments_height_tangent)[1],
+        source_sha256=hashlib.file_digest(
+            Path(polygonanalytic.__file__).open("rb"), "sha256"
+        ).hexdigest(),
+        mechanism=(
+            "ordinary autodiff of contour pole reductions near a source edge's "
+            "extended line; the height-only tangent guard misses this geometry"
+        ),
+        terms=json.loads((ROOT / "terms.json").read_text()),
+        projected=json.loads((ROOT / "projected.json").read_text()),
+        quadrature_map_experiment=json.loads((ROOT / "localize.json").read_text()),
+    )
+    for cell in output["cells"]:
+        truth = np.array(cell["independent"])
+        cell["relative"] = {
+            name: (abs(np.array(cell[name]) - truth) / abs(truth)).tolist()
+            for name in ("bank", "direct", "reference")
+        }
+        assert max(cell["relative"]["reference"]) < 1e-8
+    projected = output["localization"]["projected"]
+    for cell in projected:
+        truth = np.array(cell["independent"])
+        cell["bank_relative"] = (
+            abs(np.array(cell["bank"])[4:6] - truth) / abs(truth)
+        ).tolist()
+        cell["reference_relative"] = (
+            abs(np.array(cell["reference"]) - truth) / abs(truth)
+        ).tolist()
+        assert max(cell["reference_relative"]) < 1e-8
+    assert projected[0]["bank_relative"][0] > 1e-4
+    assert max(projected[1]["bank_relative"]) < 1e-6
+    output["verdict"] = (
+        "The bank and direct-kernel plasma Hessians carry the error; "
+        "the source-gradient Richardson reference is corroborated."
+    )
     path = ROOT / ("mutation.json" if args.mutate else "receipt.json")
     path.write_text(json.dumps(output, indent=2, default=float))
     np.savez(ROOT / "comparison.npz", **arrays)
     assert all(row["control"]["positive_pass"] for row in rows), "source trace fails"
+    assert all(
+        max(row["gradient_relative"][name]) < 1e-10
+        for row in rows
+        for name in ("bank", "direct")
+    ), "source gradients differ"
+    assert all(
+        row["trace"][name]["relative"] > 1e-3
+        for row in rows
+        for name in ("bank", "direct")
+    ), "route trace defect absent"
     assert all(row["control"]["negative_refused"] for row in rows), (
         "trace mutation escaped"
     )
     assert all(max(row["coil_hessian_relative"]) < 1e-8 for row in rows), (
         "coil positive control fails"
     )
+    assert all(max(row["direct_coil_hessian_relative"]) < 1e-8 for row in rows), (
+        "direct coil positive control fails"
+    )
+    assert all(
+        row["coil_trace"][name]["relative"] < 1e-8
+        for row in rows
+        for name in ("bank", "direct", "reference")
+    ), "coil vacuum trace fails"
     assert all(row["guard_accepted"] for row in rows), (
         "psi_ZZ relative perturbation refused by trace identity"
     )
+    summary = [
+        dict(
+            state=row["state"],
+            gradient=row["gradient_relative"],
+            plasma_gradient=row["plasma_gradient_relative"],
+            trace={name: value["relative"] for name, value in row["trace"].items()},
+            hessian=row["hessian_relative"],
+            perturbed_trace=row["control"]["negative"],
+        )
+        for row in rows
+    ]
+    print("DIAGNOSIS_SUMMARY", json.dumps(summary), flush=True)
     print(
         "DIAGNOSIS_COMPLETE", len(indices), "interior nodes; three states", flush=True
     )

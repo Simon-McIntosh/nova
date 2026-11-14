@@ -52,7 +52,7 @@ def linear_scale(ax, dimension, values, integer=False):
     ax.ticklabel_format(axis=dimension, style="plain", useOffset=False)
 
 
-def log_scale(ax, dimension, values):
+def log_scale(ax, dimension, values, margin=0.0):
     positive = np.asarray(values)
     positive = positive[np.isfinite(positive) & (positive > 0)]
     low = int(np.floor(np.log10(positive.min())))
@@ -60,7 +60,9 @@ def log_scale(ax, dimension, values):
     stride = max(1, int(np.ceil((high - low) / 4)))
     powers = np.unique(np.r_[np.arange(low, high + 1, stride), high])
     axis = getattr(ax, dimension + "axis")
-    getattr(ax, "set_" + dimension + "lim")(10.0**low, 10.0**high)
+    getattr(ax, "set_" + dimension + "lim")(
+        10.0 ** (low - margin), 10.0 ** (high + margin)
+    )
     axis.set_major_locator(FixedLocator(10.0**powers))
     axis.set_major_formatter(LogFormatterMathtext())
     axis.set_minor_locator(NullLocator())
@@ -490,7 +492,7 @@ def source_changes(root, output, previews):
                 lw=3 if key == "current_delta_l2_a" else 2.6,
                 marker=".",
             )
-        log_scale(ax, "x", factors)
+        log_scale(ax, "x", factors, margin=0.5)
         log_scale(ax, "y", all_values)
         ax.spines[["top", "right"]].set_visible(False)
         ax.grid(False)

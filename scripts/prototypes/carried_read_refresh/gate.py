@@ -114,12 +114,16 @@ def main():
                     receipts[label] = dict(
                         revision=revision,
                         command=command,
-                        completed=True,
+                        completed=False,
                         exit_status=result.returncode,
                         failure_count=0,
                         failure_ids=[],
                         log_path=str(log),
                         unarmed=True,
+                        reason="No scoped test exists at this revision; no suite ran.",
+                    )
+                    (args.output / "receipts.json").write_text(
+                        json.dumps(receipts, indent=2)
                     )
                     continue
                 suffix = " -rfP" if label.endswith("existing") else ""

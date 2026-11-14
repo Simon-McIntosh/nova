@@ -1,5 +1,5 @@
 <section id="carried-read-refresh-result">
-<h2>Selective carried fragment refresh: correctness checks pass; H200 verdict pending</h2>
+<h2>Selective carried fragment refresh: seven checks pass; timing verdict blocked</h2>
 <p>The carried read now reuses a previous fragment only when its signed conic
 coefficients are unchanged, or a conservative polynomial bound proves that its
 whole support remains full or empty and its edge-interval slots agree. Saddle
@@ -29,8 +29,17 @@ for an unchanged carried read. At source revision
 <code>1ce2c868367a39a91b1c9bb799137728909e8846</code>, the exact scoped gate reports
 <code>7 passed in 99.16s</code> and <code>EXIT=0</code>. This includes the explicit
 support-read selection and an inert-program refusal check.</p>
-<p>The broader base/head carried-read comparisons and deliberate stale-reuse
-mutation are still running. The H200 paired job is queued. The required
+<p>The deliberate stale-reuse mutation sets every reuse-mask entry true. It
+produces <code>4 failed, 3 passed in 76.21s</code> and <code>EXIT=1</code>, failing
+the changed-cut-cell, boundary-motion, saddle-motion and mixed-batch tests that
+the unmutated head passes. The exact scoped gate at
+<code>96ffc8c937ade7340b1c8fbd9a44073435959a26</code> reports
+<code>7 passed in 94.15s</code>. The base revision contains no scoped test file;
+its scoped arm is explicitly unarmed, rather than a zero-test pytest success.</p>
+<p>The broader base/head carried-read comparisons did not reach their summaries;
+the manifest preserves the incomplete results for coordinator disposition.
+The H200 paired job never started and was cancelled when the node stopped.
+GPU allocation time used was zero against its requested 2.5-hour limit. The required
 widths 1, 16 and 64, two agreeing fresh processes per arm, 3%-or-spread decision,
 and inspected SVG remain outstanding. No speedup is claimed from CPU results.
 Width denotes independent pulses; slices within a TORAX-coupled pulse remain
@@ -38,7 +47,8 @@ sequential.</p>
 <p>Durable logs and receipts are under
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144016445105-carried-read-refresh</code>:
 <code>reproduce.log</code>, <code>initial-gate.log</code>,
-<code>cpu-current/after.log</code>, and <code>cpu-current/receipts.json</code>.
+<code>cpu-current/after.log</code>, <code>scoped-current/after.log</code>,
+<code>scoped-current/negative.log</code>, and <code>scoped-current/receipts.json</code>.
 The paired measurement reuses the committed bank slice-profile instrument and
 its common input, SHA256
 <code>52f8d4fb9e60dbdbe1530e8b64a171d3bb6470fb5cf73a1ddcf760895d09a0e9</code>.

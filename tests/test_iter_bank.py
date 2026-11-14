@@ -6,6 +6,7 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 from dataclasses import replace
+from time import perf_counter
 
 import jax
 import jax.numpy as jnp
@@ -20,7 +21,7 @@ from scripts.prototypes.iter_bank.measure import (
     build_geometry,
     pack,
 )
-from scripts.prototypes.read_route.jets import _source_jets, build_jet_matrix
+from scripts.prototypes.read_route.jets import build_jet_matrix
 
 
 def analytic_jets(points, coupling, moments):
@@ -41,6 +42,7 @@ def iter_bank():
     boundary is the sub-mesh wall. Only input geometry is embedded; all
     operator rows and reference jets are evaluated during the test run.
     """
+    started = perf_counter()
     assert jax.config.jax_enable_x64 is True
     cell = np.array(
         [
@@ -75,40 +77,54 @@ def iter_bank():
     )
     turns = np.array([248.6, 554.0], dtype=np.float64)
     geometry = topology.TopologyGeometry.from_cells((cell,), cell[None], (cell,))
-    plasma = topology.BiotMomentCoupling.from_polygons((cell,))
-    conductors = topology.BiotMomentCoupling.from_polygons(coils)
-    # Eager derivative kernels keep this tiny CPU fixture out of the large
-    # fused compiler program; response rows still come from the live builder.
+    sources = topology.BiotMomentCoupling.from_polygons((cell, *coils))
+    # Pack the plasma and conductors together so one kernel pass supplies all
+    # response rows, at one target shape with no second padded point batch.
     with jax.disable_jit():
         rows, exterior, nodes, indices, _ = build_jet_matrix(
-            plasma, geometry, ZeroField(), (jnp.zeros(1),) * 3, persist=False
+            sources,
+            geometry,
+            ZeroField(),
+            (jnp.zeros(3),) * 3,
+            batch=7,
+            persist=False,
         )
-        coil_rows = jax.vmap(_source_jets, in_axes=(0, None))(nodes, conductors)
+    assert len(nodes) == 7
     operands = support_read.SupportOperands.from_rows(
         geometry,
-        rows,
+        rows[:, :1],
         exterior,
         nodes,
         indices,
         bucket=64,
-        coil_exterior=coil_rows[:, :, 0, :] * turns[None, :, None],
+        coil_exterior=rows[:, 1:, 0, :] * turns[None, :, None],
     )
-    return operands, plasma, conductors, turns
-
-
-@pytest.fixture(params=range(3))
-def iter_state(request):
-    """Three sampled DINA coil drives and independent nonzero plasma moments."""
-    currents = (
-        (-16500.40721212742, 3328.9667992184472),
-        (-16431.81795701071, 4715.148567535232),
-        (-15841.299036467031, 5546.237210862071),
+    currents = jnp.array(
+        [
+            [-16500.40721212742, 3328.9667992184472],
+            [-16431.81795701071, 4715.148567535232],
+            [-15841.299036467031, 5546.237210862071],
+        ],
+        dtype=jnp.float64,
     )
-    moments = ((12000.0, 40.0, -90.0), (25000.0, -60.0, 80.0), (-14000.0, 70.0, 50.0))
-    return (
-        jnp.asarray(currents[request.param], dtype=jnp.float64),
-        jnp.asarray([moments[request.param]], dtype=jnp.float64),
+    moments = jnp.array(
+        [[[12000.0, 40.0, -90.0]], [[25000.0, -60.0, 80.0]], [[-14000.0, 70.0, 50.0]]],
+        dtype=jnp.float64,
     )
+    plasma = jnp.pad(moments, ((0, 0), (0, 2), (0, 0)))
+    coils = jnp.zeros_like(plasma).at[:, 1:, 0].set(turns * currents)
+    reference_moments = jnp.stack((plasma, coils, plasma + coils), axis=1)
+    oracle_started = perf_counter()
+    # All three fields and current states share the direct kernel evaluation.
+    # This oracle contracts physical source moments before differentiation;
+    # it neither reads nor contracts the bank's prebuilt response rows.
+    expected = jax.vmap(
+        jax.vmap(analytic_jets, in_axes=(None, None, 0)), in_axes=(None, None, 0)
+    )(nodes, sources, reference_moments)
+    jax.block_until_ready(expected)
+    print("DIRECT_ORACLE_SECONDS", perf_counter() - oracle_started)
+    print("BANK_FIXTURE_SECONDS", perf_counter() - started)
+    return operands, moments, currents, expected
 
 
 def bank(monkeypatch, coil_exterior=None):
@@ -188,19 +204,16 @@ def test_map_check_refuses_nonfinite_and_missing_coils():
         assert_accuracy(expected, np.zeros_like(expected))
 
 
-def test_iter_nodal_jets_match_analytic_map(iter_bank, iter_state):
+@pytest.mark.parametrize("sample", range(3))
+def test_iter_nodal_jets_match_analytic_map(iter_bank, sample):
     """Check the live plasma contraction alone and with runtime coil currents."""
-    operands, plasma, conductors, turns = iter_bank
-    currents, moments = iter_state
+    operands, moments, currents, expected = iter_bank
     active = int(operands.active_nodes)
-    for drive in (jnp.zeros_like(currents), currents):
-        coil_moments = jnp.zeros((len(turns), 3)).at[:, 0].set(turns * drive)
-        points = operands.nodes[:active]
-        expected = analytic_jets(points, plasma, moments) + analytic_jets(
-            points, conductors, coil_moments
+    for field, drive in ((0, jnp.zeros(2)), (2, currents[sample])):
+        actual = support_read.nodal_jets(operands, tuple(moments[sample].T), drive)
+        errors = assert_accuracy(
+            actual[:active], expected[sample, field], PLASMA_JET_TOLERANCE
         )
-        actual = support_read.nodal_jets(operands, tuple(moments.T), drive)
-        errors = assert_accuracy(actual[:active], expected, PLASMA_JET_TOLERANCE)
         np.testing.assert_array_equal(actual[active:], 0.0)
         print("plasma" if not bool(jnp.any(drive)) else "total", errors)
 
@@ -235,15 +248,13 @@ def test_reentrant_wall_mesh_keeps_all_clipped_fragments():
     assert all(p.difference(vessel).area < 1e-12 for p in cells)
 
 
-def test_iter_coil_jets_match_analytic_map(iter_bank, iter_state):
+@pytest.mark.parametrize("sample", range(3))
+def test_iter_coil_jets_match_analytic_map(iter_bank, sample):
     """Qualify every driven jet entry against the direct analytic kernels."""
-    operands, plasma, conductors, turns = iter_bank
-    currents, moments = iter_state
-    moments = jnp.zeros_like(moments)
+    operands, moments, currents, expected = iter_bank
+    moments = jnp.zeros_like(moments[sample])
     active = int(operands.active_nodes)
-    coil_moments = jnp.zeros((len(turns), 3)).at[:, 0].set(turns * currents)
-    expected = analytic_jets(operands.nodes[:active], conductors, coil_moments)
-    actual = support_read.nodal_jets(operands, tuple(moments.T), currents)
-    errors = assert_accuracy(actual[:active], expected)
+    actual = support_read.nodal_jets(operands, tuple(moments.T), currents[sample])
+    errors = assert_accuracy(actual[:active], expected[sample, 1])
     np.testing.assert_array_equal(actual[active:], 0.0)
     print("coil", errors)

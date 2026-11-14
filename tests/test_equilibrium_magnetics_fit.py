@@ -228,7 +228,7 @@ def _physical_problem(name):
     assert jax.config.jax_enable_x64 is True
     from nova.equilibrium.forward import ForwardProfile
     from nova.equilibrium.forward_operator import ForwardFluxOperator
-    from nova.equilibrium.solve_request import ColdSeedPortfolio
+    from nova.equilibrium.solve_request import ColdSeedPortfolio, ExplicitSolveSeed
 
     if name == "solovev":
         from benchmarks import solovev_certificate as lane
@@ -370,8 +370,10 @@ def _physical_problem(name):
     request = ForwardSolveRequest.from_defaults(
         carrier_identity=f"{name}-cached-polynomial-source",
         source_profile=source,
-        seed_policy=ColdSeedPortfolio(
-            plasma_current, centroid, requested_class="limited"
+        seed_policy=(
+            ColdSeedPortfolio(plasma_current, centroid, requested_class="limited")
+            if name == "mast"
+            else ExplicitSolveSeed(seed)
         ),
         prescribed_current=prescribed,
         vertical_pin="omit",

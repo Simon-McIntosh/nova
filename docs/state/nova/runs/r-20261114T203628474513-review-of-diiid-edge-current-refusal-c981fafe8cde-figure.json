@@ -976,6 +976,72 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "no terminal manifest was delivered",
+    "scratch_bytes": 81574,
+    "scratch_host": "98dci4-clu-2001.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261114T203628474513-review-of-diiid-edge-current-refusal-c981fafe8cde-figure",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 81574,
+        "path": "/tmp/reckon-crew-scratch/r-20261114T203628474513-review-of-diiid-edge-current-refusal-c981fafe8cde-figure"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/review-of-diiid-edge-current-refusal-c981fafe8cde-figure",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-11-14T23:55:30.990Z",
+            "session_id": "11f74854-84d5-4126-afea-9a9e36ec8edd",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/review-of-diiid-edge-current-refusal-c981fafe8cde-figure"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 11f74854-84d5-4126-afea-9a9e36ec8edd"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-11-14T23:55:30.990Z",
+      "session_id": "11f74854-84d5-4126-afea-9a9e36ec8edd",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/review-of-diiid-edge-current-refusal-c981fafe8cde-figure"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 11f74854-84d5-4126-afea-9a9e36ec8edd"
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "full",

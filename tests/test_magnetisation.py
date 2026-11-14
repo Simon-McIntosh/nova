@@ -1128,6 +1128,31 @@ def test_cell_material_refuses_invalid_values(keyword, value, monkeypatch):
         )
 
 
+def test_cross_field_gain_keeps_linear_reference():
+    """The local gain is necessary even without any cell interaction assembly."""
+    mu, fill, cross = 50.0, 0.2, 0.4
+    beta = 1 - 1 / mu
+    external = np.array([0.01, 0.02])
+    gain = np.full((2, 1), (1 - fill) / fill * (1 - cross))
+    effective = fill * beta / iron._MU0 / (1 - beta * (1 - fill) * (1 - cross))
+    reference = jnp.asarray(effective * external)
+    operands = tuple(
+        jnp.asarray(value)
+        for value in (
+            np.zeros((2, 2)),
+            external,
+            *iron._fit_law([0, 10], [mu, mu]),
+            np.array([fill]),
+            gain,
+        )
+    )
+    np.testing.assert_allclose(iron._residual(reference, operands), 0, atol=2e-10)
+    without_gain = (*operands[:6], jnp.zeros_like(operands[6]))
+    assert np.linalg.norm(iron._residual(reference, without_gain)) > (
+        0.1 * np.linalg.norm(reference)
+    )
+
+
 @pytest.mark.slow
 @pytest.mark.timeout(1800)
 @pytest.mark.parametrize("mu", [50.0, 200.0])

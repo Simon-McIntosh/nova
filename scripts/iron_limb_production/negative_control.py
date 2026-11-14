@@ -1,4 +1,6 @@
-"""Remove the local iron-field gain and run the in-vessel reference check."""
+"""Remove the local iron-field gain and run a constitutive reference check."""
+
+import argparse
 
 import jax.numpy as jnp
 import pytest
@@ -15,6 +17,9 @@ def no_cross_field_gain(state, operands):
 
 
 iron._residual = no_cross_field_gain
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--fast", action="store_true")
+args = parser.parse_args()
 raise SystemExit(
     pytest.main(
         [
@@ -23,7 +28,9 @@ raise SystemExit(
             "-q",
             "tests/test_magnetisation.py",
             "-k",
-            "in_vessel_fill_matches_six_limb_reference",
+            "cross_field_gain_keeps_linear_reference"
+            if args.fast
+            else "in_vessel_fill_matches_six_limb_reference",
         ]
     )
 )

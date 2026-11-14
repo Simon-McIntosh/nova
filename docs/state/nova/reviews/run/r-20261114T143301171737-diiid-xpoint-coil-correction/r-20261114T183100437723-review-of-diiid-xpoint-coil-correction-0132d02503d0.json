@@ -9,9 +9,9 @@
   "completed_at": "2026-11-14T19:23:47.699Z",
   "dimension_dispositions": {
     "durability": {
-      "kind": "exempted",
-      "reason": "prototype drivers for a measured null result whose mechanism is being traced separately (diiid-external-current-propagation); durable product checks belong to that trace's proposed repair, not to these drivers",
-      "recorded_at": "2026-11-14T20:30:50.983601+00:00"
+      "kind": "folded",
+      "node": "repair-of-diiid-xpoint-coil-correction-0132d02503d0",
+      "recorded_at": "2026-11-14T20:32:16.267034+00:00"
     },
     "reuse": {
       "kind": "exempted",

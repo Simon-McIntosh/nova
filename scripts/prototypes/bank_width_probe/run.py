@@ -2,18 +2,15 @@
 
 import argparse
 import hashlib
-import io
 import json
 import os
 from pathlib import Path
 import re
-import shlex
 import shutil
-import subprocess
-import tarfile
 import tempfile
 
-from scripts.prototypes.h200_levers.run import PYTHON, refuse_inert
+from scripts.prototypes.bank_h200_slice_profile import run as profile
+from scripts.prototypes.h200_levers.run import refuse_inert
 
 
 def classify_outcome(exit_status, record, log_text):
@@ -88,25 +85,11 @@ def main():
     inputs = args.inputs.resolve()
     digest = hashlib.sha256(inputs.read_bytes()).hexdigest()
     assert digest == "52f8d4fb9e60dbdbe1530e8b64a171d3bb6470fb5cf73a1ddcf760895d09a0e9"
-    env = dict(
-        os.environ,
-        JAX_PLATFORMS="cuda,cpu",
-        XLA_PYTHON_CLIENT_PREALLOCATE="false",
-        OMP_NUM_THREADS="4",
-        OPENBLAS_NUM_THREADS="4",
-        NOVA_COMPILATION_CACHE_ROOT="/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
-        JAX_COMPILATION_CACHE_DIR=str(output / "compilation-cache"),
-        JAX_ENABLE_COMPILATION_CACHE="true",
-        JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS="1",
-        JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES="0",
+    env = profile.measurement_environment(output)
+    env["NOVA_COMPILATION_CACHE_ROOT"] = (
+        "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm"
     )
-    for key in (
-        "UV_NO_SYNC",
-        "UV_RUN_RECURSION_DEPTH",
-        "XLA_FLAGS",
-        "TF_GPU_ALLOCATOR",
-    ):
-        env.pop(key, None)
+    env.pop("TF_GPU_ALLOCATOR", None)
     summary = dict(
         revision=args.revision,
         input_sha256=digest,
@@ -131,23 +114,7 @@ def main():
     ) as temporary:
         tree = Path(temporary)
         env.update(TMPDIR=str(tree), PYTHONPATH=str(tree))
-        data = subprocess.check_output(
-            [
-                "git",
-                "-C",
-                str(root),
-                "archive",
-                args.revision,
-                "nova",
-                "scripts",
-                "tests",
-                "benchmarks",
-                "conftest.py",
-                "pyproject.toml",
-            ]
-        )
-        with tarfile.open(fileobj=io.BytesIO(data)) as archive:
-            archive.extractall(tree, filter="data")
+        profile.archive_revision(root, args.revision, tree)
         retained = output / "measured-source"
         for path in (
             "nova/equilibrium/support_read.py",
@@ -167,54 +134,27 @@ def main():
             process_env = env.copy()
             if allocator == "async":
                 process_env["TF_GPU_ALLOCATOR"] = "cuda_malloc_async"
-            command = [
-                PYTHON,
-                str(tree / "scripts/prototypes/bank_h200_slice_profile/measure.py"),
-                "--output",
-                str(destination),
-                "--inputs",
-                str(inputs),
-                "--width",
-                str(width),
-                "--revision",
-                args.revision,
-                "--instrument",
-                args.revision,
-            ]
-            log = destination / "gate.log"
-            with log.open("w") as stream:
-                stream.write(
-                    f"# revision: {args.revision} tree: {tree} "
-                    f"command: PYTHONPATH={tree} "
-                    + (
-                        "TF_GPU_ALLOCATOR=cuda_malloc_async "
-                        if allocator == "async"
-                        else ""
-                    )
-                    + f"{shlex.join(command)}\n"
-                )
-                stream.flush()
-                result = subprocess.run(
-                    command,
-                    cwd=tree,
-                    env=process_env,
-                    stdout=stream,
-                    stderr=subprocess.STDOUT,
-                )
-                stream.write(f"EXIT={result.returncode}\n")
-            arm = dict(
+            arm = profile.execute_arm(
+                tree,
+                tree / "scripts/prototypes/bank_h200_slice_profile/measure.py",
+                destination,
+                inputs=inputs,
+                width=width,
+                revision=args.revision,
+                instrument_revision=args.revision,
+                environment=process_env,
+            )
+            arm.update(
                 width=width,
                 allocator=allocator,
                 allocator_setting=process_env.get("TF_GPU_ALLOCATOR", "unset"),
                 process=process,
-                exit_status=result.returncode,
-                receipt=str(destination / "receipt.json"),
-                log=str(log),
             )
+            log = Path(arm["log"])
             summary["arms"].append(arm)
             save()
             record = json.loads(Path(arm["receipt"]).read_text())
-            outcome = classify_outcome(result.returncode, record, log.read_text())
+            outcome = classify_outcome(arm["exit_status"], record, log.read_text())
             assert record["revision"] == args.revision
             assert record["inputs_sha256"] == digest
             assert record["module"] == summary["measurement_module"]

@@ -14,6 +14,102 @@ PYTHON = "/home/ITER/mcintos/Code/nova/.venv/bin/python"
 HISTORICAL = "8ce11904123bfebd516bc418416a6ec5eeb10117"
 
 
+PROFILE_TREE_PATHS = (
+    "nova",
+    "scripts",
+    "tests",
+    "benchmarks",
+    "conftest.py",
+    "pyproject.toml",
+)
+
+
+def measurement_environment(output, *, smoke=False):
+    """Configure an isolated process without changing the parent environment."""
+    env = dict(
+        os.environ,
+        TMPDIR="/tmp",
+        JAX_PLATFORMS="cpu" if smoke else "cuda,cpu",
+        XLA_PYTHON_CLIENT_PREALLOCATE="false",
+        OMP_NUM_THREADS="4",
+        OPENBLAS_NUM_THREADS="4",
+        JAX_COMPILATION_CACHE_DIR=str(output / "compilation-cache"),
+        JAX_ENABLE_COMPILATION_CACHE="true",
+        JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS="1",
+        JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES="0",
+    )
+    for key in ("UV_NO_SYNC", "UV_RUN_RECURSION_DEPTH", "XLA_FLAGS"):
+        env.pop(key, None)
+    return env
+
+
+def archive_revision(root, revision, tree, paths=PROFILE_TREE_PATHS):
+    """Extract only the requested paths from a pinned revision."""
+    data = subprocess.check_output(
+        ["git", "-C", str(root), "archive", revision, *paths]
+    )
+    with tarfile.open(fileobj=io.BytesIO(data)) as archive:
+        archive.extractall(tree, filter="data")
+
+
+def execute_arm(
+    tree,
+    instrument,
+    destination,
+    *,
+    inputs,
+    width,
+    revision,
+    instrument_revision,
+    environment,
+    smoke=False,
+    read_only=False,
+):
+    """Run one fresh process and retain its exit status and receipt locations.
+
+    The caller owns which exit statuses are valid for its measurement family.
+    """
+    destination.mkdir(exist_ok=True)
+    command = [
+        PYTHON,
+        str(instrument),
+        "--output",
+        str(destination),
+        "--inputs",
+        str(inputs),
+        "--width",
+        str(width),
+        "--revision",
+        revision,
+        "--instrument",
+        instrument_revision,
+    ]
+    if smoke:
+        command += ["--smoke"]
+    if read_only:
+        command += ["--read-only"]
+    env = dict(environment, PYTHONPATH=str(tree))
+    prefix = f"PYTHONPATH={shlex.quote(str(tree))} "
+    if "TF_GPU_ALLOCATOR" in env:
+        prefix += f"TF_GPU_ALLOCATOR={shlex.quote(env['TF_GPU_ALLOCATOR'])} "
+    log = destination / "gate.log"
+    with log.open("w") as stream:
+        stream.write(
+            f"# revision: {revision} tree: {tree} "
+            f"command: {prefix}{shlex.join(command)}\n"
+        )
+        stream.flush()
+        result = subprocess.run(
+            command, cwd=tree, env=env, stdout=stream, stderr=subprocess.STDOUT
+        )
+        stream.write(f"EXIT={result.returncode}\n")
+    return dict(
+        exit_status=result.returncode,
+        receipt=str(destination / "receipt.json"),
+        log=str(log),
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("root", type=Path)
@@ -23,20 +119,7 @@ def main():
     parser.add_argument("--inputs", type=Path)
     args = parser.parse_args()
     args.output.mkdir(exist_ok=True)
-    env = dict(
-        os.environ,
-        TMPDIR="/tmp",
-        JAX_PLATFORMS="cpu" if args.smoke else "cuda,cpu",
-        XLA_PYTHON_CLIENT_PREALLOCATE="false",
-        OMP_NUM_THREADS="4",
-        OPENBLAS_NUM_THREADS="4",
-        JAX_COMPILATION_CACHE_DIR=str(args.output / "compilation-cache"),
-        JAX_ENABLE_COMPILATION_CACHE="true",
-        JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS="1",
-        JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES="0",
-    )
-    for key in ("UV_NO_SYNC", "UV_RUN_RECURSION_DEPTH", "XLA_FLAGS"):
-        env.pop(key, None)
+    env = measurement_environment(args.output, smoke=args.smoke)
     common = (args.inputs or args.output.parent / "inputs/common-streams.npz").resolve()
     assert common.is_file()
     summary = dict(
@@ -56,23 +139,8 @@ def main():
         for label, revision in (("main", args.revision), ("historical", HISTORICAL)):
             tree = scratch / label
             tree.mkdir()
-            paths = (
-                [
-                    "nova",
-                    "scripts",
-                    "tests",
-                    "benchmarks",
-                    "conftest.py",
-                    "pyproject.toml",
-                ]
-                if label == "main"
-                else ["nova"]
-            )
-            data = subprocess.check_output(
-                ["git", "-C", str(args.root), "archive", revision, *paths]
-            )
-            with tarfile.open(fileobj=io.BytesIO(data)) as archive:
-                archive.extractall(tree, filter="data")
+            paths = PROFILE_TREE_PATHS if label == "main" else ("nova",)
+            archive_revision(args.root, revision, tree, paths)
             if label == "historical":
                 for name in ("scripts", "tests", "benchmarks"):
                     (tree / name).symlink_to(
@@ -89,57 +157,33 @@ def main():
                 args.output
                 / f"{label}-{'read' if read_only else 'slice'}-{width}-{process}"
             )
-            destination.mkdir(exist_ok=True)
             revision = args.revision if label == "main" else HISTORICAL
-            command = [
-                PYTHON,
-                str(instrument),
-                "--output",
-                str(destination),
-                "--inputs",
-                str(common),
-                "--width",
-                str(width),
-                "--revision",
-                revision,
-                "--instrument",
-                args.revision,
-            ]
-            if args.smoke:
-                command += ["--smoke"]
-            if read_only:
-                command += ["--read-only"]
-            log = destination / "gate.log"
-            with log.open("w") as stream:
-                stream.write(
-                    f"# revision: {revision} tree: {tree} "
-                    f"command: PYTHONPATH={tree} {shlex.join(command)}\n"
-                )
-                stream.flush()
-                result = subprocess.run(
-                    command,
-                    cwd=tree,
-                    env=dict(env, PYTHONPATH=str(tree)),
-                    stdout=stream,
-                    stderr=subprocess.STDOUT,
-                )
-                stream.write(f"EXIT={result.returncode}\n")
+            arm = execute_arm(
+                tree,
+                instrument,
+                destination,
+                inputs=common,
+                width=width,
+                revision=revision,
+                instrument_revision=args.revision,
+                environment=env,
+                smoke=args.smoke,
+                read_only=read_only,
+            )
             summary["arms"].append(
                 dict(
                     label=label,
                     width=width,
                     process=process,
                     read_only=read_only,
-                    exit_status=result.returncode,
-                    receipt=str(destination / "receipt.json"),
-                    log=str(log),
+                    **arm,
                 )
             )
             save()
-            print("ARM", destination.name, "EXIT", result.returncode, flush=True)
-            if result.returncode not in (0, 77):
-                raise RuntimeError(f"arm failed: {log}")
-            return json.loads((destination / "receipt.json").read_text())
+            print("ARM", destination.name, "EXIT", arm["exit_status"], flush=True)
+            if arm["exit_status"] not in (0, 77):
+                raise RuntimeError(f"arm failed: {arm['log']}")
+            return json.loads(Path(arm["receipt"]).read_text())
 
         for width in [1] if args.smoke else [1, 16, 64, 256, 1024]:
             records = [

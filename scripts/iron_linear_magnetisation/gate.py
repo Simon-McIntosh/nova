@@ -35,6 +35,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--mode", choices=("fast", "suites"), default="fast")
+    parser.add_argument("--arm", choices=("baseline", "after", "both"), default="both")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     record = {}
@@ -42,6 +43,8 @@ def main():
         ("baseline", args.base_tree, args.base_revision),
         ("after", args.head_tree, args.head_revision),
     ):
+        if args.arm != "both" and args.arm != name:
+            continue
         prepare(tree, revision, args.source)
         row = arm(
             name + "-" + args.mode,
@@ -54,7 +57,7 @@ def main():
         (args.output / (args.mode + ".json")).write_text(
             json.dumps(record, indent=2) + "\n"
         )
-    if args.mode == "fast":
+    if args.mode == "fast" and args.arm in {"both", "after"}:
         path = args.head_tree / "nova/biot/tiledassembly.py"
         source = path.read_text()
         original = "blocks.append(basis.T @ (volume_weight[:, None] * basis))"
@@ -80,7 +83,13 @@ def main():
         )
         if row["exit"] == 0 or not record["negative_control"]["failure_ids"]:
             raise SystemExit("Gram negative control did not produce a failing test id")
-    return int(any(record[name]["exit_status"] != 0 for name in ("baseline", "after")))
+    return int(
+        any(
+            record[name]["exit_status"] != 0
+            for name in ("baseline", "after")
+            if name in record
+        )
+    )
 
 
 if __name__ == "__main__":

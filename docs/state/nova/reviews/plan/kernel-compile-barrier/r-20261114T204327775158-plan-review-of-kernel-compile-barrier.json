@@ -61,6 +61,16 @@
       "note": "Clause one now asks, for the negative-control row, for the measured error of the truncated tangent and why truncation does not move it.",
       "reason": "",
       "when": "2026-11-14T23:44:46.929730+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0d542ac0e2c26724c7a9093fed4c5b7f23c40052",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The section now states the range as sixteen non-merge commits plus merges and says any commit in the range is a candidate.",
+      "reason": "",
+      "when": "2026-11-14T23:44:54.533411+00:00"
     }
   ],
   "responses": {
@@ -81,6 +91,15 @@
       "note": "Clause one now asks, for the negative-control row, for the measured error of the truncated tangent and why truncation does not move it.",
       "reason": "",
       "when": "2026-11-14T23:44:46.929730+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0d542ac0e2c26724c7a9093fed4c5b7f23c40052",
+      "commit_basis": "edit",
+      "note": "The section now states the range as sixteen non-merge commits plus merges and says any commit in the range is a candidate.",
+      "reason": "",
+      "when": "2026-11-14T23:44:54.533411+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261114T204327775158-plan-review-of-kernel-compile-barrier.json",

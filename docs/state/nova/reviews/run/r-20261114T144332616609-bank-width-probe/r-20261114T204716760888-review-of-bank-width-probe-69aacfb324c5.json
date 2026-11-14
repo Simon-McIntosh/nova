@@ -18,6 +18,13 @@
     }
   },
   "dispatched_at": "2026-11-14T20:50:54Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the same-function re-classification check is weak but the width verdicts rest on the raw receipts and logs, which the review read directly",
+      "recorded_at": "2026-11-14T22:36:00.874700+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_width_probe/report.py",

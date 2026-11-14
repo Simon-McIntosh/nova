@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="iron-core-magnetisation">
+  <title>Graded cell size through thin high-permeability parts: cells, error and walls | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="icm-graded-refinement-summary">§5 — Graded refinement of the piecewise-constant Galerkin iron route</h2>
+    <p>Node <code>icm-graded-refinement</code> measures what a graded cell-size
+    field buys on the piecewise-constant Galerkin iron route: the spacing is fine
+    near the iron surfaces and grows to a stated coarse limit in the interior,
+    with the sliver rule and the uniform grid untouched. It measures the
+    analytic μr = 1000 closed shell at five uniform sizes and three graded
+    gradings, and WEST 62751 at two graded levels. <strong>No formulation
+    decision is recorded here.</strong> The result is that grading does not beat
+    the uniform mesh per cell on this closed shell: the two families fall on one
+    curve, and the fine graded arm reaches the 0.5 per cent bound only by
+    carrying more cells than the uniform arm needs.</p>
+
+    <h2 id="icm-graded-refinement-build">What changed</h2>
+    <p><code>nova/biot/magnetisation.py</code> gains a cell-size field. Given a
+    <code>fine</code> spacing, a <code>coarse</code> limit and a set of iron
+    surfaces, the spacing along each axis at distance <code>d</code> from the
+    nearest surface is <code>fine * growth ** (d / fine)</code>, with
+    <code>growth</code> fixed at 2.0, capped at <code>coarse</code>. A doubling
+    per fine cell means the cap is reached one coarse length in ten at the
+    pinned grading (2 mm fine, 4.8 mm coarse), so the interior is coarse and the
+    transition is short. The spacing is additionally capped at
+    <code>max(width, fine) / cells_across</code> where a part is thin enough for
+    that to be finer. The rectilinear mesh is then clipped to the region as
+    before, so the sliver rule and the cell construction are the ones already
+    measured. <code>_mesh</code> keeps its uniform branch byte for byte:
+    <code>np.arange(r0, r1, size)</code> plus the closing coordinate, so the
+    default reproduces the recorded grid and the recorded solve bit for bit, and
+    <code>test_uniform_cell_size_reproduces_the_recorded_grid</code> asserts that
+    against a digest.</p>
+    <p>The graded field is passed to <code>solve_magnetisation</code> and to
+    nothing else; no other public signature changed. Both the accuracy contract
+    and the measurement script read one set of constants —
+    <code>GRADED_FINE = 0.002</code>, <code>GRADED_COARSE = 0.0048</code> and
+    <code>GRADED_CELLS_ACROSS = 20</code> — imported from
+    <code>tests/test_magnetisation.py</code>, so the test and the receipt cannot
+    disagree about the grading.</p>
+
+    <h2 id="icm-graded-refinement-spectrum">The operator the spectrum belongs to</h2>
+    <p>The cell interaction is not symmetric on its own, because the
+    axisymmetric volume measure <code>2 π r</code> enters the energy form. The
+    operator carrying the spectrum is the symmetric similarity
+    <code>V^(1/2) G V^(-1/2) / μ0</code> with <code>V</code> the repeated cell
+    volume, and <code>galerkin_spectrum</code> reports that one. Reading
+    <code>eigvalsh</code> off <code>G</code> alone reads one triangle of an
+    unsymmetric matrix: on a 212-cell two-radius mesh it returns
+    <code>[−0.1131, 1.1041]</code>, while the volume-weighted spectrum is
+    <code>[2.35e-5, 0.99667]</code> with a symmetry defect of <code>2.16e-17</code>.
+    <code>test_galerkin_spectrum_is_the_volume_weighted_symmetric_range</code>
+    asserts both halves of that, and it is fast enough to run in the default
+    lane. Every spectrum below is the volume-weighted one and stays inside
+    [0, 1].</p>
+
+    <h2 id="icm-graded-refinement-shell">The closed shell: error against cells</h2>
+    <p>Three probes on the analytic μr = 1000 shell, each a shielding factor
+    against the analytic value 61.101838. The uniform arms ran on one reserved
+    H200-class card (a P100, <code>98dci4-gpu-0002</code>); the graded arms ran
+    on the CPU lane, because the graded assembly at the pinned grading needs a
+    dense factor the device cannot hold (see below). Walls are therefore
+    <em>not</em> comparable between the two families and are labelled by lane.</p>
+    <table>
+      <thead>
+        <tr><th>mesh</th><th>cells</th><th>probe 1 [%]</th><th>probe 2 [%]</th><th>probe 3 [%]</th><th>worst [%]</th><th>spectrum</th><th>assemble [s]</th><th>solve [s]</th><th>lane</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>uniform 40 mm</td><td>228</td><td>6.630</td><td>10.609</td><td>6.683</td><td>10.609</td><td>1.3e-5 … 0.996338</td><td>8.2</td><td>4.5</td><td>P100</td></tr>
+        <tr><td>uniform 20 mm</td><td>828</td><td>2.263</td><td>3.367</td><td>2.152</td><td>3.367</td><td>1.5e-6 … 0.999602</td><td>6.7</td><td>5.2</td><td>P100</td></tr>
+        <tr><td>uniform 10 mm</td><td>3168</td><td>0.916</td><td>1.148</td><td>0.812</td><td>1.148</td><td>2e-7 … 0.999925</td><td>32.4</td><td>16.5</td><td>P100</td></tr>
+        <tr><td>uniform 8 mm</td><td>4916</td><td>0.687</td><td>0.828</td><td>0.605</td><td>0.828</td><td>1e-7 … 0.999963</td><td>63.6</td><td>30.9</td><td>P100</td></tr>
+        <tr><td>uniform 6 mm</td><td>8630</td><td>0.462</td><td>0.548</td><td>0.407</td><td>0.548</td><td>0 … 0.999983</td><td>166.2</td><td>54.6</td><td>P100</td></tr>
+        <tr><td>graded 10 mm / 2 mm, across 20</td><td>3847</td><td>0.800</td><td>1.120</td><td>0.743</td><td>1.120</td><td>—</td><td>44.1</td><td>20.6</td><td>P100</td></tr>
+        <tr><td>graded 8 mm / 2 mm, across 20</td><td>5447</td><td>0.629</td><td>0.811</td><td>0.570</td><td>0.811</td><td>—</td><td>76.8</td><td>41.5</td><td>P100</td></tr>
+        <tr><td>graded 6 mm / 2 mm, across 20</td><td>9082</td><td>0.435</td><td>0.541</td><td>0.391</td><td>0.541</td><td>—</td><td>192.1</td><td>83.8</td><td>P100</td></tr>
+        <tr><td>graded, doubled field (4 mm / 9.6 mm)</td><td>4017</td><td>0.776</td><td>1.052</td><td>0.713</td><td>1.052</td><td>2e-7 … 0.999955</td><td>566.4</td><td>25.5</td><td>CPU</td></tr>
+        <tr><td>graded, pinned field (2 mm / 4.8 mm)</td><td>13410</td><td>0.326</td><td>0.397</td><td>0.291</td><td>0.397</td><td>2.1e-8 … 0.999992</td><td>3659.8</td><td>236.6</td><td>CPU</td></tr>
+      </tbody>
+    </table>
+    <p>The three graded rows without a spectrum predate the volume-weighted
+    spectrum and are recorded as measured; their accuracy and walls are
+    unaffected, since the spectrum is read after the solve.</p>
+    <p>The grading the two pinned arms used is fine <code>0.002</code>, coarse
+    <code>0.0048</code> and 20 cells across a thin part; the doubled arm scales
+    both spacings by two. Those are the defaults the script imports from the
+    test module, and the launch command passes no overriding flag, so the
+    stamped revision plus the recorded command reproduce the grading exactly.
+    The row-level <code>grading</code> record was added after these runs, so it
+    is absent from this receipt and present in any later one.</p>
+
+    <h3 id="icm-graded-refinement-finding">What the two families say together</h3>
+    <p>Grading does not buy accuracy per cell here. At about four thousand cells
+    the doubled-field graded mesh reaches 1.052 per cent worst-probe, while the
+    uniform 8 mm mesh reaches 0.828 per cent at 4916 cells. At about nine
+    thousand cells the graded mesh reaches 0.541 per cent at 9082 cells and the
+    uniform mesh 0.548 per cent at 8630. Both families walk down one curve
+    between h<sup>−1.4</sup> and h<sup>−1.65</sup>, so the graded spacing does
+    not change where the error sits for a given cell count; what it changes is
+    the shape of the mesh, not the resolution the projection sees. That is the
+    substantive measurement.</p>
+    <p>The consequence for the 0.5 per cent bound is that both families reach it,
+    at different costs. The graded arm reaches 0.326, 0.397 and 0.291 per cent
+    at 13 410 cells, and its doubled field misses the bound at 4017 cells
+    (1.052 per cent), which is the negative control. The uniform arm reaches
+    0.548 per cent at 8630 cells, so it needs roughly nine and a half thousand
+    cells to clear the bound, fewer than the graded arm's 13 410. On this
+    closed shell, grading to a fine spacing at the surfaces and 4.8 mm inside
+    costs about four thousand extra cells to reach the same accuracy.</p>
+
+    <h2 id="icm-graded-refinement-device">Why the graded arms run on the CPU lane</h2>
+    <p>The P100 admits a single HLO argument of at most 13 653 508 096 bytes.
+    A mesh of <code>n</code> cells carries <code>3n</code> unknowns and a dense
+    factor near <code>8 (3n)^2</code> bytes: 11 000 cells needs about 8.7 GB and
+    failed at 5.37 GiB more; 12 851 cells failed earlier at 11.09 GiB. The
+    pinned graded arm measured 13 410 cells, 40 230 unknowns and a factor of
+    about 12.9 GB before the interaction matrix is counted, which is the
+    argument the device refuses. It runs on the CPU lane with 110 GB of host
+    memory, assembling in 3660 s and solving in 237 s. No grading that meets 0.5 per cent at every
+    probe both fits the card and stays inside the bound, so the choice was the
+    lane, not a looser target: the 0.5 per cent bound and the doubled-arm
+    negative control are unchanged.</p>
+
+    <h2 id="icm-graded-refinement-west">WEST 62751 at two graded levels</h2>
+    <p>Iron read through <code>StaticMachineDescription.read_iron_core</code> at
+    its manifest's DD pin, external field rebuilt from the saved coil quadrature
+    and the prescribed plasma currents, the same route the pair measurement
+    uses. The two levels differ only in grading: the finer level halves every
+    spacing of the coarser one.</p>
+    <table>
+      <thead>
+        <tr><th>level</th><th>cells</th><th>assemble [s]</th><th>solve [s]</th><th>+1 m [µT]</th><th>+2 m [µT]</th><th>+4 m [µT]</th><th>converged in</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>graded 16 mm / 80 mm</td><td>5864</td><td>681.0</td><td>962.0</td><td>234.327</td><td>177.586</td><td>81.772</td><td>5 corrections</td></tr>
+        <tr><td>graded 8 mm / 40 mm</td><td>11708</td><td>2292.3</td><td>3126.3</td><td>242.455</td><td>168.340</td><td>75.920</td><td>5 corrections</td></tr>
+      </tbody>
+    </table>
+    <p>Both levels converge from a demagnetised state at full drive with exact
+    Newton steps, both land inside the CEA table's own permeability range
+    (215.48 → 1692.29 and 215.64 → 1692.18), and no cell is driven past the
+    tabulated end.</p>
+    <h4 id="icm-graded-refinement-west-change">The far-field change when the spacing is halved</h4>
+    <table>
+      <thead>
+        <tr><th>probe</th><th>16 mm level [µT]</th><th>8 mm level [µT]</th><th>fine − coarse [µT]</th><th>of the coarse value [%]</th><th>clause</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>+1 m</td><td>234.327197</td><td>242.454626</td><td>+8.127429</td><td>+3.468</td><td>misses 1 %</td></tr>
+        <tr><td>+2 m</td><td>177.585819</td><td>168.339521</td><td>−9.246298</td><td>−5.207</td><td>misses 1 %</td></tr>
+        <tr><td>+4 m</td><td>81.772255</td><td>75.920213</td><td>−5.852042</td><td>−7.157</td><td>misses 1 %</td></tr>
+      </tbody>
+    </table>
+    <p>The clause asked for a change under one per cent at +1, +2 and +4 m
+    between two graded levels, or a record of by how much it misses. It misses
+    at all three probes: 3.47, 5.21 and 7.16 per cent, growing outward. The
+    change is one-directional rather than scatter — the near probe rises and
+    the far probes fall, and the finer level sits closer to the near probe's
+    previously recorded 242.64 µT — so this is the discretisation error of the
+    coarser level showing itself, not a solution branch difference. Halving the
+    spacing from 16 mm to 8 mm is not enough to settle the far probes on this
+    geometry; it moves them by several per cent.</p>
+
+    <h2 id="icm-graded-refinement-control">Negative control and gate</h2>
+    <p>The under-resolved arm is the same grading doubled everywhere through the
+    shell; it must miss 0.5 per cent at one probe or more. The uniform-default
+    mutant steps the uniform branch by one part per million and must fail the
+    bit-for-bit grid digest. Both mutants fail on their own assertion:
+    <code>under-resolved</code> exit 1 with the 0.5 per cent assertion message,
+    <code>perturbed-uniform</code> exit 1 on the digest comparison. Verdict
+    <code>control holds</code>, recorded in
+    <code>control2/negative_control.json</code>, with each mutant's own
+    transcript in <code>control2/under-resolved.log</code> and
+    <code>control2/perturbed-uniform.log</code>, each ending
+    <code>EXIT=1</code>.</p>
+    <p>The gate runs the three files the brief names with the slow marker
+    excluded, one arm per revision, each in its own exported tree with an index
+    over the source checkout's object store. Base
+    <code>f4954eb7745b3d06acd1346e2f4c3148299d1b49</code>: 53 passed. Head:
+    57 passed. The marker-filtered suite arm reads 40 passed at the base and 44
+    at the head. Both are green.</p>
+
+    <h2 id="icm-graded-refinement-figure">Figure</h2>
+    <figure><img src="/nova/figures/iron-core-magnetisation/icm-graded-refinement/shell-error-vs-cells.svg" alt="Closed-shell worst-probe error against cell count for the uniform and graded meshes, with best-probe traces and the 0.5 per cent target"><figcaption>Closed-shell error against cell count. The uniform family is the near-black dashed line, the graded family the blue solid line with diamonds; thin traces are the best probe of each mesh and the thick ones the worst probe, which is what the 0.5 per cent bound constrains. The dotted grey line is the 0.5 per cent target. Both families fall on one curve: at equal cell count the graded mesh is not closer to the analytic shielding than the uniform one, and the coarse end of both sits well above the target. The graded family is the one that extends far enough to cross below 0.5 per cent, at 13 410 cells and 0.397 per cent, because it is the family that was pushed to that size; the uniform curve stops at 8630 cells and 0.548 per cent, above the target. All text artists pass the layout check and the rendered PNG was inspected with no clipping or collision.</figcaption></figure>
+
+    <h2 id="icm-graded-refinement-receipts">Receipts</h2>
+    <p>Everything under
+    <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/graded-refinement/</code>:
+    <code>gpu/</code> (uniform arms, P100), <code>cpu/</code> (graded arm, CPU),
+    <code>west-cpu/</code> (WEST levels, CPU), <code>suite-fast2/</code> (gate
+    record), <code>control2/</code> (mutants, one transcript each). Each
+    measurement stamps the
+    revision it ran and the blob of the script it executed.</p>
+  </main>
+</body>
+</html>

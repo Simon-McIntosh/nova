@@ -1967,6 +1967,22 @@ def solve_batch(
         jnp.full((lanes, max_steps + 1), jnp.nan, dtype).at[:, 0].set(norm),
         jnp.full((lanes, max_steps), jnp.nan, dtype),
     )
+    if max_steps == 0:
+        return SolveResult(
+            moments,
+            support,
+            norm,
+            accepted,
+            initial[11],
+            initial[12],
+            initial[13],
+            initial[14],
+            initial[15],
+            initial[16],
+            initial[17],
+            initial[8],
+            jnp.full((lanes,), initial[9], bool),
+        )
 
     def keep_going(carried):
         return jnp.any(~carried[3]) & (jnp.max(carried[11]) < max_steps)
@@ -2071,14 +2087,18 @@ def solve_batch(
                 condition_diagnostics=False,
             )
 
-        correction = jax.lax.cond(
-            rebuild,
-            lambda _: jax.vmap(one_fresh)((state, step_support, lane_indices)),
-            lambda _: jax.lax.map(
-                one_with_factor, (state, step_support, factor, lane_indices)
-            ),
-            None,
-        )
+        if reuse_factor:
+            correction = jax.lax.cond(
+                rebuild,
+                lambda _: jax.vmap(one_fresh)((state, step_support, lane_indices)),
+                lambda _: jax.lax.map(
+                    one_with_factor, (state, step_support, factor, lane_indices)
+                ),
+                None,
+            )
+        else:
+            # A static fresh-factor policy stages no carried-factor branch.
+            correction = jax.vmap(one_fresh)((state, step_support, lane_indices))
 
         def evaluate(trial):
             trial_read = read_batch(
@@ -2340,7 +2360,9 @@ def _solve_pinned_lane(
             },
         )
 
-    initial = run(moments, previous, initial_amplitude, options["max_steps"])
+    # Only the read and residual initialise the loop. Its single body owns
+    # every full solve, including the first, so no solver graph is duplicated.
+    initial = run(moments, previous, initial_amplitude, 0)
     initial = jax.tree.map(lambda value: value[0], initial)
     initial_error = (
         _centroid_height(operands.geometry, initial.moments) - pin.target_height
@@ -2351,6 +2373,12 @@ def _solve_pinned_lane(
         converged=initial.converged
         & (~jnp.asarray(pin.active) | (jnp.abs(initial_error) <= pin.tolerance)),
         factor_valid=jnp.asarray(False),
+        residual_path=jnp.full(
+            (options["max_steps"] + 1,), jnp.nan, dtype=moments[0].dtype
+        )
+        .at[0]
+        .set(initial.residual),
+        update_path=jnp.full((options["max_steps"],), jnp.nan, dtype=moments[0].dtype),
     )
 
     def advance(carried):

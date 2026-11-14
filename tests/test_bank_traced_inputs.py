@@ -284,13 +284,26 @@ def test_zero_update_budget_reports_unsolved_state(small):
         np.testing.assert_array_equal(value[0], original)
 
 
-def test_pin_holds_independent_lane_centroids(small, caplog):
+def test_pin_holds_independent_lane_centroids(small, caplog, monkeypatch):
     operands, cache, roots, convention, policy, quadrature, state, reading = small
     source = _table()
     target = jnp.asarray([0.005, -0.008], dtype=jnp.float64)
     pin = VerticalPositionPin(target, source_scale=1e-3, tolerance=1e-8)
     moments = tuple(jnp.broadcast_to(value, (2, value.size)) for value in state)
     seeds = jnp.broadcast_to(roots, (2, *roots.shape))
+    construction = dict.fromkeys(("newton_step", "step_jacobian"), 0)
+
+    def count_calls(name):
+        original = getattr(bank, name)
+
+        def counted(*args, **kwargs):
+            construction[name] += 1
+            return original(*args, **kwargs)
+
+        monkeypatch.setattr(bank, name, counted)
+
+    for name in construction:
+        count_calls(name)
 
     @jax.jit
     def program(bank_operands, window, state, amps, pressure, ff, target):
@@ -327,6 +340,7 @@ def test_pin_holds_independent_lane_centroids(small, caplog):
             if "Compiling jit(program)" in record.message
         ]
         assert cold, "compile log must see the full solve's cold program"
+        cold_events = [record.message for record in caplog.records]
         caplog.clear()
         following = program(
             operands, cache, moments, next_currents, next_pressure, ff, next_target
@@ -338,6 +352,16 @@ def test_pin_holds_independent_lane_centroids(small, caplog):
             if "Compiling jit(program)" in record.message
         ]
     print("SOLVE_COMPILATIONS cold", len(cold), "changed", len(added))
+    print("PIN_GRAPH_CONSTRUCTION", construction)
+    for event in cold_events:
+        if (
+            "Finished tracing program for jit" in event
+            or "Finished XLA compilation of jit(program)" in event
+            or "MLIR module conversion jit(program)" in event
+        ):
+            print("PIN_PROGRAM_WALL", event)
+    assert 0 < construction["newton_step"] <= 1
+    assert 0 < construction["step_jacobian"] <= 2
     assert not added
     assert np.all(following.converged)
     np.testing.assert_allclose(following.pin_error, 0, rtol=0, atol=1e-8)

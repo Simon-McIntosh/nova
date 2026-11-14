@@ -44,14 +44,14 @@ def run_file(tree, revision, file, output, *, mutation=False):
         JAX_PLATFORMS="cpu",
         OPENBLAS_NUM_THREADS="1",
         OMP_NUM_THREADS="7",
-        PYTEST_ADDOPTS="-rP",
+        PYTEST_ADDOPTS="-rfP",
     )
     if mutation:
         environment["NOVA_CAPTURE_SLICE_CURRENTS"] = "1"
         command = "NOVA_CAPTURE_SLICE_CURRENTS=1 " + command
     with output.open("w") as log:
         log.write(f"# revision: {revision} tree: {tree}\n# command: {command}\n")
-        log.write("# output: PYTEST_ADDOPTS=-rP\n")
+        log.write("# output: PYTEST_ADDOPTS=-rfP\n")
         log.flush()
         subprocess.run(
             [
@@ -110,6 +110,39 @@ def reproduce():
     raise AssertionError("base already accepts traced coil inputs")
 
 
+def run_graph(tree, revision, output):
+    command = [
+        PYTHON,
+        str(Path(__file__).with_name("trace_graph.py")),
+        "--revision",
+        revision,
+        "--output",
+        str(output.with_suffix(".json")),
+    ]
+    with output.open("w") as log:
+        log.write(
+            f"# revision: {revision} tree: {tree}\n# command: {' '.join(command)}\n"
+        )
+        log.flush()
+        result = subprocess.run(
+            command,
+            cwd=tree,
+            env=dict(
+                os.environ,
+                TMPDIR=str(tree.parent),
+                PYTHONPATH=str(tree),
+                JAX_PLATFORMS="cpu",
+                OPENBLAS_NUM_THREADS="1",
+                OMP_NUM_THREADS="7",
+            ),
+            stdout=log,
+            stderr=subprocess.STDOUT,
+        )
+        log.write(f"EXIT={result.returncode}\n")
+    if result.returncode:
+        raise RuntimeError(f"graph construction measurement failed: {output}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path)
@@ -118,6 +151,7 @@ def main():
     parser.add_argument("--output", type=Path)
     parser.add_argument("--focused", action="store_true")
     parser.add_argument("--skip-control", action="store_true")
+    parser.add_argument("--graph-base")
     parser.add_argument("--reproduce", action="store_true")
     args = parser.parse_args()
     if args.reproduce:
@@ -160,6 +194,11 @@ def main():
                 )
         head = root / "head"
         archive(args.source, args.head, head)
+        if args.graph_base:
+            graph_base = root / "graph-base"
+            archive(args.source, args.graph_base, graph_base)
+            run_graph(graph_base, args.graph_base, args.output / "graph-before.log")
+            run_graph(head, args.head, args.output / "graph-after.log")
         files = (
             ("test_bank_traced_inputs.py",)
             if args.focused

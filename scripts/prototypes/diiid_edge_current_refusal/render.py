@@ -73,6 +73,22 @@ def points(entries):
 
 def panel(root, frame, branch, output, previews, name=None):
     data, receipt, spatial, census = load(root, frame, branch)
+    saddles = np.asarray(
+        [
+            point["rz_m"]
+            for owner in ("census", "reference_census")
+            for point in census[owner]["points"]
+            if point["kind"] == "saddle"
+        ]
+    )
+    r_limits = (
+        min(0.75, saddles[:, 0].min() - 0.05),
+        max(2.65, saddles[:, 0].max() + 0.05),
+    )
+    z_limits = (
+        min(-1.7, saddles[:, 1].min() - 0.05),
+        max(1.7, saddles[:, 1].max() + 0.05),
+    )
     changed = points(
         [
             trip[key]
@@ -196,8 +212,8 @@ def panel(root, frame, branch, output, previews, name=None):
             ax.plot(
                 *cutoff_points.T, ls="none", marker="*", ms=13, color=REFUSED, zorder=15
             )
-        ax.set_xlim(0.9, 2.4)
-        ax.set_ylim(-1.45, 1.35)
+        ax.set_xlim(*r_limits)
+        ax.set_ylim(*z_limits)
     handles = [
         Line2D([], [], color=SOLVED, lw=3, label="solved"),
         Line2D([], [], color=REFERENCE, lw=2.6, ls="--", label="EFIT"),
@@ -278,6 +294,9 @@ def panel(root, frame, branch, output, previews, name=None):
         levels_wb=LEVELS.tolist(),
         source_cutoff_cells=len(cutoff_points),
         changed_shadow_nodes=len(shadow_changed),
+        r_limits_m=list(r_limits),
+        z_limits_m=list(z_limits),
+        qualified_saddles=len(saddles),
     )
 
 

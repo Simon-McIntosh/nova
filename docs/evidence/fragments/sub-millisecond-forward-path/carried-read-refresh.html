@@ -1,5 +1,5 @@
 <section id="carried-read-refresh-result">
-<h2>Selective carried fragment refresh: per-file validation running; H200 queued</h2>
+<h2>Selective carried fragment refresh: no added CPU failures; H200 running</h2>
 <p>The carried read now reuses a previous fragment only when its signed conic
 coefficients are unchanged, or a conservative polynomial bound proves that its
 whole support remains full or empty and its edge-interval slots agree. Saddle
@@ -36,28 +36,46 @@ the unmutated head passes. The exact scoped gate at
 <code>15155aedc709a0db964e10f4ed2051d0cafc1a0a</code> reports
 <code>7 passed in 88.03s</code>. The base revision contains no scoped test file;
 its scoped arm is explicitly unarmed, rather than a zero-test pytest success.</p>
-<p>The earlier long-process comparisons did not reach their summaries. The
-authorized continuation runs each compatibility file in its own fresh process,
-with a unique pytest temporary directory and separate log per file and arm.
-One rigel job, <code>1315565</code>, compares the ten read and bank files at
+<p>The scoped receipt at
+<code>9c3fdbb2cea90455fa80bf45cfec8cede3fdd08a</code> reports
+<code>7 passed in 110.75s</code>, <code>EXIT=0</code>, in rigel job
+<code>1315751</code>. Its log records the imported module and extracted tree.
+Product source is unchanged from the measured head below.</p>
+<p>The authorized compatibility comparison ran each file in its own fresh
+process, with <code>-rfP</code>, a unique pytest temporary directory and a
+separate log per file and arm. Rigel job <code>1315565</code> compared ten files at
 base <code>975f3e98cfa2b2976d2bbe1b94ead37f8623b529</code> and source head
-<code>15155aedc709a0db964e10f4ed2051d0cafc1a0a</code>. Crashes present in both
-arms remain explicit; a passing base file that fails or crashes at head is
-an added failure. Its receipts are under <code>per-file/</code> in the run
-directory below.</p>
-<p>The paired H200 driver is requeued as <code>1315564</code>, with receipts
-destined for <code>h200-resumed/</code>. A Priority wait while the cards are
-allocated is normal scheduling, and this job is preserved while waiting.
-GPU allocation time used remains zero against its requested 2.5-hour limit. The required
-widths 1, 16 and 64, two agreeing fresh processes per arm, 3%-or-spread decision,
-and inspected SVG remain outstanding. No speedup is claimed from CPU results.
+<code>15155aedc709a0db964e10f4ed2051d0cafc1a0a</code>. All twenty logs were read;
+their terminal exits, revision headers and failure IDs agree with the receipts.</p>
+<table>
+<thead><tr><th>Files</th><th>Base</th><th>Measured head</th><th>Delta</th></tr></thead>
+<tbody>
+<tr><td>Eight completed files</td><td>89 passed, 3 failed, 2 skipped</td><td>89 passed, 3 failed, 2 skipped</td><td>No added failures</td></tr>
+<tr><td>test_tracked_read_steady_batch.py and test_tracked_read_batch.py</td><td>Both EXIT=-9; no summary</td><td>Both EXIT=-9; no summary</td><td>Both incomplete in both arms</td></tr>
+</tbody>
+</table>
+<p>The three failing test IDs match across arms: the two limited-seed tie cases
+and the one-jet retained-booking geometry case. The comparison driver finished
+its loop and emitted <code>EXIT=0</code>, but SLURM recorded
+<code>OUT_OF_MEMORY</code>, exit <code>0:125</code>, and four OOM kills.
+This establishes no observed added head failures, not a fully passing suite.
+The shared failures and incomplete files are inherited under the coordinator's
+comparison ruling. Per-file receipts, comparisons and a log-hash audit are
+retained under <code>per-file/</code> in the run directory below.</p>
+<p>The paired H200 driver, job <code>1315564</code>, has started on one H200
+under its requested 2.5-hour allocation limit. Receipts are written to
+<code>h200-resumed/</code>. The required widths 1, 16 and 64, two agreeing fresh
+processes per arm, 3%-or-spread decision, and inspected SVG remain outstanding.
+No speedup is claimed from CPU results.
 Width denotes independent pulses; slices within a TORAX-coupled pulse remain
 sequential.</p>
 <p>Durable logs and receipts are under
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144016445105-carried-read-refresh</code>:
 <code>reproduce.log</code>, <code>initial-gate.log</code>,
 <code>cpu-current/after.log</code>, <code>scoped-current/after.log</code>,
-<code>scoped-current/negative.log</code>, and <code>scoped-current/receipts.json</code>.
+<code>scoped-current/negative.log</code>, <code>scoped-current/receipts.json</code>,
+<code>receipt-head/after.log</code>, <code>per-file/receipts.json</code>,
+<code>per-file/comparisons.json</code>, and <code>per-file/audit.json</code>.
 The paired measurement reuses the committed bank slice-profile instrument and
 the retained common input at
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144016445105-carried-read-refresh/inputs/common-streams.npz</code>, SHA256

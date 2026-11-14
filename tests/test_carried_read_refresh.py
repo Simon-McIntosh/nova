@@ -18,10 +18,16 @@ pytestmark = pytest.mark.slow
 
 
 @pytest.fixture(scope="module")
-def fragments():
+def carried_case():
     parts = _case("diverted")
     support, _ = _read(*parts[:6])
     assert bool(support.valid)
+    return parts, support
+
+
+@pytest.fixture(scope="module")
+def fragments(carried_case):
+    parts, support = carried_case
     return parts[0].geometry, parts[3].sigma, parts[4], support.reading
 
 
@@ -122,3 +128,32 @@ def test_identical_programs_refuse_a_timing_claim():
     record = {"rows": [{"lowered_sha256": None, "execution_counts": {"ops": 123}}]}
     with pytest.raises(ValueError, match="inert lever"):
         refuse_inert(record, record)
+
+
+def test_support_read_selects_incremental_refresh(carried_case, monkeypatch):
+    from types import SimpleNamespace
+
+    from nova.equilibrium import support_read
+
+    parts, support = carried_case
+    bank, _, _, convention, policy, moments, _ = parts
+    calls = []
+    original = topology.refresh_at_stationary_points
+
+    def observed(*values, **kwargs):
+        calls.append(kwargs.get("reuse", False))
+        return original(*values, **kwargs)
+
+    monkeypatch.setattr(topology, "refresh_at_stationary_points", observed)
+    result = support_read._rebuilt_reading(
+        bank,
+        SimpleNamespace(solved=support.stationary),
+        moments,
+        convention,
+        policy,
+        None,
+        support.reading,
+    )
+    jax.block_until_ready(result)
+    assert calls == [True]
+    assert bool(result.valid)

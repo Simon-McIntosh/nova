@@ -1,7 +1,6 @@
 """Select fragment refresh while reusing the bank slice profiling instrument."""
 
 import argparse
-from functools import partial
 import json
 from pathlib import Path
 import re
@@ -18,9 +17,13 @@ def main():
     from nova.equilibrium import topology
     from scripts.prototypes.bank_h200_slice_profile import measure
 
-    topology.refresh_at_stationary_points = partial(
-        topology.refresh_at_stationary_points, reuse=args.reuse == "on"
-    )
+    refresh = topology.refresh_at_stationary_points
+
+    def selected_refresh(*values, **kwargs):
+        kwargs["reuse"] = args.reuse == "on"
+        return refresh(*values, **kwargs)
+
+    topology.refresh_at_stationary_points = selected_refresh
     sys.argv = [sys.argv[0], *remaining]
     measure.main()
     output = Path(remaining[remaining.index("--output") + 1])

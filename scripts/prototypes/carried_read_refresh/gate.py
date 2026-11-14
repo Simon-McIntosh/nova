@@ -29,6 +29,10 @@ def main():
     parser.add_argument("output", type=Path)
     parser.add_argument("base")
     parser.add_argument("head")
+    parser.add_argument("--arms", nargs="+", default=["baseline", "after", "negative"])
+    parser.add_argument(
+        "--existing", action=argparse.BooleanOptionalAction, default=True
+    )
     args = parser.parse_args()
     args.output.mkdir(exist_ok=True)
     receipts = {}
@@ -40,6 +44,8 @@ def main():
             ("after", args.head),
             ("negative", args.head),
         ):
+            if arm not in args.arms:
+                continue
             tree = Path(temporary) / arm
             tree.mkdir()
             data = subprocess.check_output(
@@ -84,7 +90,7 @@ def main():
             env.pop("PYTEST_ADDOPTS", None)
             files = [TEST] if (tree / TEST).exists() else []
             groups = {arm: files}
-            if arm != "negative":
+            if arm != "negative" and args.existing:
                 groups[arm + "-existing"] = EXISTING
             for label, files in groups.items():
                 log = args.output / (label + ".log")
@@ -119,8 +125,7 @@ def main():
                 suffix = " -rfP" if label.endswith("existing") else ""
                 command = (
                     f"PYTHONPATH=. JAX_PLATFORMS=cpu {PYTHON} "
-                    f"-m pytest -p no:cacheprovider -q{suffix} "
-                    + " ".join(files)
+                    f"-m pytest -p no:cacheprovider -q{suffix} " + " ".join(files)
                 )
                 with log.open("w") as stream:
                     stream.write(

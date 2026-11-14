@@ -3728,7 +3728,7 @@ def refresh_at_stationary_points(
     decision,
     *,
     skip_wall=False,
-    reuse=True,
+    reuse=False,
 ):
     """Refresh continuous geometry while carrying the connected decision.
 

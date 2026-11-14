@@ -169,3 +169,25 @@ def test_column_flux_clips_the_slab_exactly(spacing):
     ]
     flux = axisymmetric_column_flux(model, state, mu)
     assert flux == pytest.approx(np.pi * (0.664**2 - 0.05**2) * field, rel=2e-14)
+
+
+def test_near_filament_panel_drive_matches_area_integral():
+    from numpy.polynomial.legendre import leggauss
+
+    from scripts.iron_limb_reference.drive import FilamentDrive
+
+    panels = Panels(
+        np.array([[[0.664, -0.05, -0.1], [0.664, 0.05, -0.1], [0.664, 0.05, 0.1]]])
+    )
+    external = FilamentDrive(dict(r=[0.7], z=[0.03], amps=[1.0]))
+    average = external.normal_average(panels, order=64)[0]
+    node, weight = leggauss(48)
+    node, weight = (node + 1) / 2, weight / 2
+    u, v = np.meshgrid(node, node, indexing="ij")
+    a, b, c = panels.vertices[0]
+    points = a + u[..., None] * (b - a) + ((1 - u) * v)[..., None] * (c - a)
+    normal = (external(points.reshape(-1, 3)) @ panels.normals[0]).reshape(u.shape)
+    independent = 2 * np.sum(normal * (1 - u) * weight[:, None] * weight[None])
+    assert average == pytest.approx(independent, rel=2e-8, abs=1e-14)
+    centroid = external(panels.centres)[0] @ panels.normals[0]
+    assert abs(centroid - average) > 0.05 * abs(average)

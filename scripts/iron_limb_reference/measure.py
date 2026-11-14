@@ -29,7 +29,7 @@ from scripts.iron_limb_reference.surface import (  # noqa: E402
     SurfaceModel,
     circuit_panels,
 )
-from scripts.prototypes.iron_limb_fill.bricks import drive  # noqa: E402
+from scripts.iron_limb_reference.drive import FilamentDrive  # noqa: E402
 
 
 def write_json(path, record):
@@ -106,7 +106,7 @@ def solve_resolution(case, size, output, annulus=False, bore=0.0, missing=None):
     label = "annulus" if annulus else "six-limb" if missing is None else "missing-limb"
     tag = f"{label}-{size:g}"
     print(f"BUILD {tag} panels={len(panels.vertices)}", flush=True)
-    external = drive(case["sources"])
+    external = FilamentDrive(case["sources"])
     model = SurfaceModel(panels, external, rotations=6 if missing is None else 1)
     print(f"ASSEMBLED {tag} seconds={time.perf_counter() - started:.2f}", flush=True)
     probes = np.asarray(case["probes"])
@@ -130,6 +130,7 @@ def solve_resolution(case, size, output, annulus=False, bore=0.0, missing=None):
             float(model.conservation_error.min()),
             float(model.conservation_error.max()),
         ],
+        normal_drive_quadrature=external.last_quadrature,
         rows=[],
     )
     for mu in [50.0, 200.0]:

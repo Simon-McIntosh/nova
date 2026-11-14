@@ -254,7 +254,25 @@ class SurfaceModel:
             # on their own area-weighted charge, including separated bodies.
             if not crosses_mirror:
                 self.constraints.append(members)
-        self.rhs = np.sum(external(panels.centres) * panels.normals, axis=1) / MU0
+        if hasattr(external, "normal_average"):
+            normal = external.normal_average(panels, order=16)
+            refined = external.normal_average(panels, order=32)
+            error = np.linalg.norm(refined - normal) / np.linalg.norm(refined)
+            if error > 2e-5:
+                normal, refined = refined, external.normal_average(panels, order=64)
+                error = np.linalg.norm(refined - normal) / np.linalg.norm(refined)
+            if error > 2e-5:
+                raise ValueError(f"normal drive quadrature is unresolved: {error=}")
+            centroid = np.sum(external(panels.centres) * panels.normals, axis=1)
+            external.last_quadrature = dict(
+                relative_change=float(error),
+                centroid_relative_difference=float(
+                    np.linalg.norm(centroid - refined) / np.linalg.norm(refined)
+                ),
+            )
+            self.rhs = refined / MU0
+        else:
+            self.rhs = np.sum(external(panels.centres) * panels.normals, axis=1) / MU0
         if not np.isfinite(self.interaction).all():
             raise ValueError("nonfinite surface interaction")
 

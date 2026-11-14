@@ -53,9 +53,28 @@
       "note": "Added section 7, which owns the polygon tangent repair and the ITER bank re-certification, citing the diagnosis verdict and polygonanalytic._packed_moments_height_tangent; the decision choice now records the repair-first ordering.",
       "reason": "",
       "when": "2026-11-14T21:06:48.691214+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "99862a5a63dd5486d11974fea054ceb285a52053",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The decision rationale and section 7 now cite both runs by run id and fragment path, matching the plan's other citations.",
+      "reason": "",
+      "when": "2026-11-14T21:06:59.633190+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "99862a5a63dd5486d11974fea054ceb285a52053",
+      "commit_basis": "edit",
+      "note": "The decision rationale and section 7 now cite both runs by run id and fragment path, matching the plan's other citations.",
+      "reason": "",
+      "when": "2026-11-14T21:06:59.633190+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",

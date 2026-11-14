@@ -15,6 +15,9 @@ VERIFY=(/home/ITER/mcintos/Code/nova/.venv/bin/python
 JUMPS=(/home/ITER/mcintos/Code/nova/.venv/bin/python
     "$TREE/scripts/prototypes/diiid_edge_current_refusal/jumps.py"
     --input "$RUN/cohort")
+AUDIT=(/home/ITER/mcintos/Code/nova/.venv/bin/python
+    "$TREE/scripts/prototypes/diiid_edge_current_refusal/audit.py"
+    --input "$RUN/cohort")
 RENDER=(/home/ITER/mcintos/Code/nova/.venv/bin/python
     "$TREE/scripts/prototypes/diiid_edge_current_refusal/render.py"
     --input "$RUN/cohort" --output "$TREE/docs/figures/diiid-edge-current-refusal"
@@ -29,6 +32,13 @@ if [ "$RESULT" -eq 0 ]; then
     printf '%q ' "${JUMPS[@]}"
     printf '\n'
     "${JUMPS[@]}"
+    RESULT=$?
+fi
+if [ "$RESULT" -eq 0 ]; then
+    printf '# command: '
+    printf '%q ' "${AUDIT[@]}"
+    printf '\n'
+    "${AUDIT[@]}"
     RESULT=$?
 fi
 if [ "$RESULT" -eq 0 ]; then

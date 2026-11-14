@@ -242,7 +242,7 @@ def panel(root, frame, branch, output, previews):
 def traces(root, output, previews):
     figure, axes = plt.subplots(2, 4, figsize=CANVAS, dpi=100)
     figure.subplots_adjust(
-        left=0.08, right=0.98, top=0.88, bottom=0.13, wspace=0.5, hspace=0.35
+        left=0.08, right=0.98, top=0.80, bottom=0.13, wspace=0.5, hspace=0.35
     )
     notes = []
     for column, (frame, branch) in enumerate(ROWS):
@@ -250,10 +250,24 @@ def traces(root, output, previews):
         residuals = np.asarray(receipt["residual_history"])
         residuals = residuals[np.isfinite(residuals)]
         trips = np.arange(1, len(residuals) + 1)
+        frozen = [trip["inner"]["residual"] for trip in spatial["trips"]]
+        axes[0, column].semilogy(trips, frozen, color=WALL, lw=2.6, ls="--", zorder=2)
         axes[0, column].semilogy(trips, residuals, color=SOLVED, lw=3, marker=".")
+        incoming = [trip["initial"]["support"] for trip in spatial["trips"]]
         support = [trip["returned"]["support"] for trip in spatial["trips"]]
+        axes[1, column].plot(trips, incoming, color=WALL, lw=2.6, ls="--")
         axes[1, column].plot(
             np.arange(1, len(support) + 1), support, color=SOLVED, lw=3, marker="."
+        )
+        axes[1, column].plot(
+            trips[-1],
+            receipt["support"],
+            color=REFERENCE,
+            marker="o",
+            mfc="none",
+            ms=9,
+            mew=1.5,
+            zorder=5,
         )
         for ax in axes[:, column]:
             ax.spines[["top", "right"]].set_visible(False)
@@ -264,14 +278,83 @@ def traces(root, output, previews):
             axes[0, column].set_ylabel("live residual")
             axes[1, column].set_ylabel("support cells")
         notes.append(
-            figure.text(0.17 + column * 0.233, 0.95, f"{frame} {branch}", ha="center")
+            figure.text(0.17 + column * 0.233, 0.86, f"{frame} {branch}", ha="center")
         )
+    figure.legend(
+        handles=[
+            Line2D(
+                [], [], color=SOLVED, lw=3, label="live residual / returned support"
+            ),
+            Line2D(
+                [],
+                [],
+                color=WALL,
+                lw=2.6,
+                ls="--",
+                label="frozen residual / incoming support",
+            ),
+            Line2D(
+                [],
+                [],
+                color=REFERENCE,
+                marker="o",
+                mfc="none",
+                ls="none",
+                label="terminal support",
+            ),
+        ],
+        loc="upper center",
+        ncol=2,
+        frameon=False,
+        bbox_to_anchor=(0.5, 1.0),
+        fontsize=12,
+    )
     save(
         figure,
         list(axes.ravel()),
         notes,
         output / "trip-traces.svg",
         previews / "trip-traces.png",
+    )
+    plt.close(figure)
+
+
+def limited_trajectories(root, output, previews):
+    """Expose axis loss beside the otherwise inactive radial-field unknown."""
+    figure, axes = plt.subplots(3, 2, figsize=(CANVAS[0], 9.4), dpi=100)
+    figure.subplots_adjust(
+        left=0.10, right=0.98, top=0.91, bottom=0.09, hspace=0.36, wspace=0.30
+    )
+    notes = []
+    for column, frame in enumerate((146, 179)):
+        folder = root / "edge" / f"frame-{frame}-limited"
+        audit = json.loads((folder / "iterate-audit.json").read_text())
+        stages = audit["stages"]
+        series = (
+            [row["physical"]["axis_rz_m"][1] for row in stages],
+            [row["physical"]["support"] for row in stages],
+            [1000 * row["inactive_unknown_t"] for row in stages],
+        )
+        for ax, values, label in zip(
+            axes[:, column],
+            series,
+            ("axis Z [m]", "support cells", "radial field [mT]"),
+            strict=True,
+        ):
+            ax.plot(np.arange(len(stages)), values, color=SOLVED, lw=3)
+            ax.set_ylabel(label)
+            ax.spines[["top", "right"]].set_visible(False)
+            ax.grid(False)
+        axes[-1, column].set_xlabel("captured warmup / Newton state")
+        notes.append(
+            figure.text(0.30 + column * 0.47, 0.96, f"{frame} limited", ha="center")
+        )
+    save(
+        figure,
+        list(axes.ravel()),
+        notes,
+        output / "limited-trajectories.svg",
+        previews / "limited-trajectories.png",
     )
     plt.close(figure)
 
@@ -347,6 +430,7 @@ def main():
         for frame, branch in ROWS
     ]
     traces(args.input, args.output, args.previews)
+    limited_trajectories(args.input, args.output, args.previews)
     source_changes(args.input, args.output, args.previews)
     (args.previews / "render-receipt.json").write_text(
         json.dumps(rows, indent=2) + "\n"

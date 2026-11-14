@@ -1,5 +1,7 @@
 """Independent field identities and surface boundary-condition checks."""
 
+import os
+
 import numpy as np
 import pytest
 from scipy.spatial import ConvexHull
@@ -58,37 +60,25 @@ def test_triangle_surface_integral_matches_brick_inside_and_outside():
     np.testing.assert_allclose(response, brick_tensor(points, half), atol=2e-14)
 
 
-def test_sphere_permeability_boundary_condition():
-    # A triangulated sphere supplies a closed boundary independent of the circuit mesh.
-    golden = (1 + np.sqrt(5)) / 2
-    vertices = np.array(
-        [(0, a, b * golden) for a in (-1, 1) for b in (-1, 1)]
-        + [(a, b * golden, 0) for a in (-1, 1) for b in (-1, 1)]
-        + [(b * golden, 0, a) for a in (-1, 1) for b in (-1, 1)]
-    )
-    vertices /= np.linalg.norm(vertices, axis=1)[:, None]
-    triangles = vertices[ConvexHull(vertices).simplices]
-    for _ in range(3):
-        refined = []
-        for a, b, c in triangles:
-            ab, bc, ca = a + b, b + c, c + a
-            ab, bc, ca = (v / np.linalg.norm(v) for v in (ab, bc, ca))
-            refined.extend(([a, ab, ca], [ab, b, bc], [ca, bc, c], [ab, bc, ca]))
-        triangles = np.array(refined)
-    normals = np.cross(
-        triangles[:, 1] - triangles[:, 0], triangles[:, 2] - triangles[:, 0]
-    )
-    reverse = np.sum(normals * triangles.mean(axis=1), axis=1) < 0
-    triangles[reverse] = triangles[reverse, ::-1]
+@pytest.fixture(scope="module")
+def sphere_convergence():
+    from scripts.iron_limb_reference.sphere import sphere_study
 
-    def external(p):
-        return np.tile([0.0, 0.0, MU0], (len(p), 1))
+    return sphere_study(output=os.environ.get("NOVA_IRON_SPHERE_RECEIPT"))
 
-    model = SurfaceModel(Panels(triangles), external, rotations=1, reflect=False)
-    charge, residual = model.solve(50.0)
-    field = model.iron_field(np.zeros((1, 3)), charge)[0] / MU0 + [0.0, 0.0, 1.0]
-    np.testing.assert_allclose(field, [0.0, 0.0, 3 / 52], atol=0.003)
-    assert residual < 1e-9
+
+@pytest.mark.timeout(1800)
+@pytest.mark.parametrize("permeability", [50.0, 200.0])
+def test_sphere_permeability_converges(sphere_convergence, permeability):
+    comparison = next(
+        c for c in sphere_convergence["convergence"] if c["mu"] == permeability
+    )
+    assert len(comparison["errors"]) == 3
+    assert np.all(np.diff(comparison["errors"]) < 0), comparison
+    assert comparison["errors"][-1] < 0.01, comparison
+    for row in sphere_convergence["rows"]:
+        assert max(row["neutrality"]["body_charge_relative"], default=0.0) < 1e-12
+        assert row["solid_angle_error"] < 1e-10
 
 
 @pytest.mark.parametrize("annulus", [False, True])
@@ -128,3 +118,54 @@ def test_open_surface_is_refused_by_solid_angle_identity():
     panels = Panels(np.array([[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]]))
     with pytest.raises(ValueError, match="not closed"):
         SurfaceModel(panels, lambda p: np.ones_like(p), rotations=1, reflect=False)
+
+
+def test_each_body_charge_is_deflated():
+    vertices = np.array(
+        [[1.0, 1.0, 1.0], [-1.0, -1.0, 1.0], [-1.0, 1.0, -1.0], [1.0, -1.0, -1.0]]
+    )
+    triangles = vertices[ConvexHull(vertices).simplices]
+    normals = np.cross(
+        triangles[:, 1] - triangles[:, 0], triangles[:, 2] - triangles[:, 0]
+    )
+    reverse = np.sum(normals * triangles.mean(axis=1), axis=1) < 0
+    triangles[reverse] = triangles[reverse, ::-1]
+    panels = Panels(np.concatenate((triangles, triangles + [5.0, 0.0, 0.0])))
+    model = SurfaceModel(
+        panels,
+        lambda p: np.tile([0.0, 0.0, MU0], (len(p), 1)),
+        rotations=1,
+        reflect=False,
+    )
+    assert len(model.constraints) == 2
+    # Excite the forbidden monopole independently on each closed body.
+    for index, members in enumerate(model.constraints):
+        model.rhs[members] += (index + 1) * 0.25
+    charge, residual = model.solve(200.0)
+    for members in model.constraints:
+        assert abs(np.dot(panels.areas[members], charge[members])) < 1e-11
+    assert residual < 1e-9
+    assert model.last_solve["removed_rhs_relative"] > 0.1
+    np.testing.assert_allclose(
+        panels.areas @ model.interaction, 0.5 * panels.areas, atol=2e-14
+    )
+
+
+@pytest.mark.parametrize("spacing", [0.25, 0.18, 0.11])
+def test_column_flux_clips_the_slab_exactly(spacing):
+    from types import SimpleNamespace
+
+    from scripts.iron_limb_reference.measure import axisymmetric_column_flux
+
+    vertical = np.r_[np.arange(-0.3, 0.5, spacing), 0.5]
+    cells = tuple(
+        np.array([[0.05, low], [0.664, low], [0.664, high], [0.05, high]])
+        for low, high in zip(vertical[:-1], vertical[1:])
+    )
+    model = SimpleNamespace(cells=SimpleNamespace(polygons=cells))
+    mu, field = 200.0, 0.7
+    state = np.r_[
+        np.zeros(len(cells)), np.full(len(cells), field * (mu - 1) / (MU0 * mu))
+    ]
+    flux = axisymmetric_column_flux(model, state, mu)
+    assert flux == pytest.approx(np.pi * (0.664**2 - 0.05**2) * field, rel=2e-14)

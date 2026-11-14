@@ -143,6 +143,7 @@ def solve_resolution(case, size, output, annulus=False, bore=0.0, missing=None):
         row = dict(
             mu=mu,
             residual=residual,
+            neutrality=model.last_solve,
             column_flux_Wb=flux,
             iron_average_T=mean.tolist(),
             air_T=air.tolist(),
@@ -205,6 +206,28 @@ def reproduce_prototype(case_path):
     return result
 
 
+def axisymmetric_column_flux(model, state, permeability, slab=0.2):
+    """Integrate the projected linear field over the exactly clipped slab.
+
+    Each solved magnetisation is a constant cell coefficient. Its linear
+    constitutive flux is integrated with the exact 2*pi*R polygon volume;
+    neither centroid selection nor an assumed integer number of cells enters.
+    """
+    import shapely
+
+    material = shapely.box(0.0, 0.0, COLUMN_RADIUS, slab)
+    weights = []
+    for vertices in model.cells.polygons:
+        clipped = shapely.Polygon(vertices).intersection(material)
+        weights.append(
+            0.0
+            if clipped.is_empty
+            else 2 * np.pi * clipped.area * clipped.centroid.x / slab
+        )
+    vertical = np.asarray(state).reshape(2, -1)[1]
+    return float(np.dot(weights, MU0 * permeability / (permeability - 1) * vertical))
+
+
 def axisymmetric(case, sizes, output):
     from scripts.prototypes.iron_limb_fill.axisymmetric import (
         Model,
@@ -223,7 +246,7 @@ def axisymmetric(case, sizes, output):
             state = model.linear(mu)
             row = dict(
                 mu=mu,
-                column_flux_Wb=model.column_flux(state),
+                column_flux_Wb=axisymmetric_column_flux(model, state, mu),
                 iron_average_T=model.probe(state, probes).tolist(),
                 air_T=external(probes).tolist(),
             )
@@ -236,6 +259,16 @@ def axisymmetric(case, sizes, output):
         write_json(output / "axisymmetric.json", records)
         del model
         jax.clear_caches()
+        if len(records) >= 2:
+            changes = [
+                metrics_difference(a, b, case["vessel_count"])
+                for a, b in zip(records[-2]["rows"], records[-1]["rows"])
+            ]
+            records[-1]["refinement"] = changes
+            write_json(output / "axisymmetric.json", records)
+            print("AXISYMMETRIC_REFINEMENT " + json.dumps(changes), flush=True)
+            if all(c["passed"] for c in changes):
+                break
     return records
 
 
@@ -250,9 +283,20 @@ def main():
         default=[0.5, 0.35, 0.25, 0.18, 0.13, 0.1, 0.075],
     )
     parser.add_argument(
-        "--axisymmetric-sizes", type=float, nargs="+", default=[0.25, 0.18]
+        "--axisymmetric-sizes", type=float, nargs="+", default=[0.18, 0.13, 0.1, 0.075]
     )
+    parser.add_argument("--sphere-receipt", type=Path, required=True)
     args = parser.parse_args()
+    prerequisite = json.loads(args.sphere_receipt.read_text())
+    from scripts.iron_limb_reference import surface
+
+    if (
+        not prerequisite.get("passed")
+        or prerequisite.get("solver_sha256")
+        != hashlib.sha256(Path(surface.__file__).read_bytes()).hexdigest()
+    ):
+        raise RuntimeError("sphere convergence must pass on the same surface solver")
+    print("SPHERE_PREREQUISITE passed at both permeabilities", flush=True)
     assert jax.config.jax_enable_x64 is True
     args.output.mkdir(parents=True, exist_ok=True)
     case_bytes = args.case.read_bytes()

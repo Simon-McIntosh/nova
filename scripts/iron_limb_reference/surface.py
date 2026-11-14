@@ -14,7 +14,9 @@ from dataclasses import dataclass
 
 import numpy as np
 from numba import njit, prange
-from scipy.sparse.linalg import gmres
+from scipy.sparse import coo_matrix
+from scipy.sparse.csgraph import connected_components
+from scipy.sparse.linalg import LinearOperator, gmres
 import shapely
 
 from scripts.prototypes.iron_limb_fill.bricks import (
@@ -32,6 +34,7 @@ class Panels:
     """Oriented triangles and the geometric operands of their exact field."""
 
     vertices: np.ndarray
+    body_ids: np.ndarray | None = None
 
     def __post_init__(self):
         self.vertices = np.ascontiguousarray(self.vertices, dtype=float)
@@ -49,6 +52,25 @@ class Panels:
         self.lengths = np.linalg.norm(self.edges, axis=2)
         self.outward = np.cross(self.edges, self.normals[:, None])
         self.outward /= self.lengths[:, :, None]
+
+        if self.body_ids is None:
+            _, inverse = np.unique(
+                np.round(self.vertices.reshape(-1, 3), decimals=10),
+                axis=0,
+                return_inverse=True,
+            )
+            vertices = inverse.reshape(-1, 3)
+            graph = coo_matrix(
+                (
+                    np.ones(vertices.size),
+                    (vertices.ravel(), np.roll(vertices, -1, axis=1).ravel()),
+                )
+            )
+            _, labels = connected_components(graph, directed=False)
+            self.body_ids = labels[vertices[:, 0]]
+        self.body_ids = np.asarray(self.body_ids, dtype=int)
+        if self.body_ids.shape != self.areas.shape:
+            raise ValueError("one body identity is required per panel")
 
 
 @njit(inline="always")
@@ -96,8 +118,40 @@ def triangle_field(point, vertices, normal, area, lengths, outward):
     )
 
 
+@njit(inline="always")
+def _panel_normal_field(point, vertices, normal, area):
+    ax, ay, az = (
+        vertices[0, 0] - point[0],
+        vertices[0, 1] - point[1],
+        vertices[0, 2] - point[2],
+    )
+    bx, by, bz = (
+        vertices[1, 0] - point[0],
+        vertices[1, 1] - point[1],
+        vertices[1, 2] - point[2],
+    )
+    cx, cy, cz = (
+        vertices[2, 0] - point[0],
+        vertices[2, 1] - point[1],
+        vertices[2, 2] - point[2],
+    )
+    distance = -(ax * normal[0] + ay * normal[1] + az * normal[2])
+    if abs(distance) <= 1e-12:
+        return 0.0
+    ra = np.sqrt(ax * ax + ay * ay + az * az)
+    rb = np.sqrt(bx * bx + by * by + bz * bz)
+    rc = np.sqrt(cx * cx + cy * cy + cz * cz)
+    denominator = (
+        ra * rb * rc
+        + (ax * bx + ay * by + az * bz) * rc
+        + (bx * cx + by * cy + bz * cz) * ra
+        + (cx * ax + cy * ay + cz * az) * rb
+    )
+    return -np.arctan2(-2 * area * distance, denominator) / (2 * np.pi)
+
+
 @njit(parallel=True)
-def _normal_matrix(targets, vertices, source_normals, areas, lengths, outward, signs):
+def _normal_matrix(targets, vertices, source_normals, areas, signs):
     double_layer = np.zeros((targets.shape[1], len(vertices)))
     conservation_error = np.zeros(targets.shape[1])
     for i in prange(targets.shape[1]):
@@ -105,31 +159,24 @@ def _normal_matrix(targets, vertices, source_normals, areas, lengths, outward, s
         for j in range(len(vertices)):
             odd = 0.0
             for k in range(len(signs)):
-                point = targets[k, i]
-                hx, hy, hz = _triangle_components(
-                    point[0],
-                    point[1],
-                    point[2],
-                    vertices[j],
-                    source_normals[j],
-                    areas[j],
-                    lengths[j],
-                    outward[j],
-                )
-                value = (
-                    hx * source_normals[j, 0]
-                    + hy * source_normals[j, 1]
-                    + hz * source_normals[j, 2]
+                value = _panel_normal_field(
+                    targets[k, i], vertices[j], source_normals[j], areas[j]
                 )
                 odd += signs[k] * value
                 even_sum += value
             double_layer[i, j] = odd
         conservation_error[i] = 0.5 + even_sum
-    result = np.ascontiguousarray(double_layer.T)
+        # The flat-panel principal value is zero. The closed-surface identity
+        # fixes its roundoff remainder from the exact sum of solid angles.
+        double_layer[i, i] -= conservation_error[i]
+    # Transpose and area-weight in place: fine sphere meshes need only one
+    # dense matrix, including while the adjoint is formed and solved.
     for i in prange(len(vertices)):
-        for j in range(len(vertices)):
-            result[i, j] *= -areas[j] / areas[i]
-    return result, conservation_error
+        for j in range(i, len(vertices)):
+            direct, reverse = double_layer[i, j], double_layer[j, i]
+            double_layer[i, j] = -reverse * areas[j] / areas[i]
+            double_layer[j, i] = -direct * areas[i] / areas[j]
+    return double_layer, conservation_error
 
 
 @njit(parallel=True)
@@ -186,8 +233,6 @@ class SurfaceModel:
             panels.vertices,
             panels.normals,
             panels.areas,
-            panels.lengths,
-            panels.outward,
             self.signs,
         )
         # Qualocation integrates the target normal exactly and samples the
@@ -198,6 +243,17 @@ class SurfaceModel:
             raise ValueError(
                 "surface is not closed: solid-angle sum violates Gauss' law"
             )
+        self.constraints = []
+        for body in np.unique(panels.body_ids):
+            members = np.flatnonzero(panels.body_ids == body)
+            crosses_mirror = reflect and np.any(
+                np.abs(panels.vertices[members, :, 2]) < 1e-10
+            )
+            # A body that crosses the mirror plane has exactly zero charge
+            # from its odd image pair. Other closed bodies need a constraint
+            # on their own area-weighted charge, including separated bodies.
+            if not crosses_mirror:
+                self.constraints.append(members)
         self.rhs = np.sum(external(panels.centres) * panels.normals, axis=1) / MU0
         if not np.isfinite(self.interaction).all():
             raise ValueError("nonfinite surface interaction")
@@ -206,12 +262,46 @@ class SurfaceModel:
         if not np.isfinite(permeability) or permeability <= 1:
             raise ValueError("relative permeability must be finite and above one")
         diagonal = (permeability + 1) / (2 * (permeability - 1))
-        matrix = -self.interaction.copy()
-        matrix[np.diag_indices_from(matrix)] += diagonal
+
+        def project(value):
+            result = value.copy()
+            for members in self.constraints:
+                weights = self.panels.areas[members]
+                result[members] -= np.dot(weights, result[members]) / weights.sum()
+            return result
+
+        rhs = project(self.rhs)
+
+        def apply(value):
+            neutral = project(value)
+            physical = diagonal * neutral - self.interaction @ neutral
+            return project(physical) + value - neutral
+
+        operator = LinearOperator(self.interaction.shape, matvec=apply, dtype=float)
         charge, info = gmres(
-            matrix, self.rhs, rtol=2e-11, atol=0.0, restart=150, maxiter=30
+            operator, rhs, rtol=2e-11, atol=0.0, restart=150, maxiter=30
         )
-        residual = np.linalg.norm(matrix @ charge - self.rhs) / np.linalg.norm(self.rhs)
+        charge = project(charge)
+        residual = np.linalg.norm(apply(charge) - rhs) / np.linalg.norm(rhs)
+        physical = diagonal * charge - self.interaction @ charge - self.rhs
+        self.last_solve = dict(
+            projected_residual=float(residual),
+            unprojected_residual=float(
+                np.linalg.norm(physical) / np.linalg.norm(self.rhs)
+            ),
+            removed_rhs_relative=float(
+                np.linalg.norm(self.rhs - rhs) / np.linalg.norm(self.rhs)
+            ),
+            body_charge_relative=[
+                float(
+                    abs(np.dot(self.panels.areas[m], charge[m]))
+                    / max(np.dot(self.panels.areas[m], abs(charge[m])), 1e-300)
+                )
+                for m in self.constraints
+            ],
+            neutral_by_image_parity=len(np.unique(self.panels.body_ids))
+            - len(self.constraints),
+        )
         if info or residual > 1e-9:
             raise RuntimeError(
                 f"surface solve did not converge: info={info}, {residual=}"

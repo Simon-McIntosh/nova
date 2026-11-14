@@ -66,12 +66,15 @@
 <p>The complete arrays, captured names, first-departure report and selected radial-Hessian outputs are under <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/ordered-sharing/production-deep/</code>, in <code>base.npz</code>, <code>directions.npz</code>, <code>names.json</code>, <code>located-departures.json</code> and <code>radial-hessian-output.json</code>. The run directory retains <code>production-deep-complete.log</code> and <code>analyse-deep-complete.log</code>.</p>
 </section>
 <section id="ordered-sharing-required-suite"><h3>Required revision-pinned test comparison</h3>
-<p>One all_debug job, 1315320, runs the changed test file in fresh processes against separate immutable exports of each required revision. Each arm prints its imported module path and resolved working directory, reaches the pytest summary, and ends its own log with <code>EXIT=0</code>.</p>
+<p>The base arm ran in all_debug job 1315320; the newly pinned head arm ran in job 1315358. Each runs the changed test file in a fresh process against an immutable export of its required revision. Each arm prints its imported module path and resolved working directory, reaches the pytest summary, and ends its own log with <code>EXIT=0</code>.</p>
 <table><thead><tr><th>Arm</th><th>Revision</th><th>Actual pytest summary</th><th>Failure IDs</th></tr></thead><tbody>
 <tr><td>Base</td><td><code>40523b1a42a448125b98780ff01fd63e54cc5875</code></td><td>2 skipped in 2.72s</td><td>None</td></tr>
-<tr><td>Head</td><td><code>ee441b379ae4382f3edca832b72cffe2f2d66092</code></td><td>2 passed, 2 skipped in 2.80s</td><td>None</td></tr>
+<tr><td>Head</td><td><code>078cb84bbb4fb3a7bd709b14c9d0acb0fb65ed0f</code></td><td>2 passed, 2 skipped in 3.14s</td><td>None</td></tr>
 </tbody></table>
 <p>Both execute <code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/biot/test_moment_program_identity.py</code> from their own exported tree. The two GPU identity tests retain their existing CPU skips in both arms. The two new CPU diagnostic tests pass; no failure is added. This pair validates the diagnostic change, not the rejected numerical overlays. Receipts and logs are under <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/ordered-sharing/required-suite/</code>.</p>
 <p>The runtime source remains the starting height-only form. Recovery of production sharing, the restored-base negative control and any new accepted H200 profile remain unfinished. The numerical rejection now stands independently of the CPU preflight memory barrier.</p>
+</section>
+<section id="ordered-sharing-gpu-continuation"><h3>GPU preflight continuation</h3>
+<p>The coordinator lifted numerical CPU preflight: the unchanged base cannot compile within 192 GiB, and those two OOM jobs are excluded from counted work failures. Every numerical reference/candidate comparison now runs on the same GPU device. The importer suite remains with the preceding node. A restored-base control and a deeper graded-residual trace are submitted; neither unfinished job supplies a numerical verdict here. Product source is unchanged.</p>
 </section>
 </article>

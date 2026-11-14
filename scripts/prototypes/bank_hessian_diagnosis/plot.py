@@ -98,6 +98,7 @@ def main():
         ax.axhline(1e-8, color=grey, linestyle=":", linewidth=1.2, zorder=1)
         ax.set_yscale("log")
         ax.set_xlabel("radius [m]")
+        ax.set_xticks([4, 6, 8])
         ax.text(0.5, 1.04, f"state {row['state']}", ha="center", transform=ax.transAxes)
         ax.spines[["right", "top"]].set_visible(False)
         ax.grid(False)

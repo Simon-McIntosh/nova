@@ -95,4 +95,29 @@ pin graph, before the pin's numerical clause can be accepted.</p>
 The final-head replay was not started because the pin gate did not pass. The
 fragment and harness commits after the measured implementation head change no
 product source or tests.</p>
+<h3 id="bank-traced-inputs-graph-repair">Single solver construction inside the pin loop</h3>
+<p>The lead resumed the worker on 2026-11-14 to repair graph construction while
+retaining the normal 300 s test limit. The pre-repair product and test files at
+<code>5391ff27c10fc2ecd16c9e307ca1d58bd1ae41ec</code> are identical to the measured
+implementation head above. Its full-program wall remains the recorded
+221.029 s trace and 241.881 s compile.</p>
+<p>The expensive duplication is structural: pin initialization invokes the full
+solver, and the pin loop constructs another full solver. Each solver constructs
+both fresh and carried-factor correction branches even when the pin's policy
+fixes factor reuse off. The outer iterations already use <code>lax.while_loop</code>,
+lanes use <code>vmap</code>, and profile knots are evaluated as arrays.</p>
+<p>The repair makes a zero-update solve return its read and residual before
+constructing Newton branches. The pin uses that cheap initialization and keeps
+one full solver construction inside its loop body. A static fresh-factor policy
+constructs only the fresh correction. This changes graph construction while
+retaining the moment equation, fresh-read acceptance, source convention and pin
+tolerances. The test counts construction sites, retains cold trace/compile log
+events before clearing the logger, and verifies the subsequent slice reuses the
+full program. The runner uses <code>-rfP</code> to preserve failing test ids.</p>
+<p>Graph inventories and numerical gates are running in one seven-CPU Rigel job,
+<code>1314812</code>, at repaired head
+<code>912e95fb4522d414e2685167a0841768412106e3</code>. Receipts are under
+<code>graph-repair/</code> in the run directory. A fresh process inventories each
+product graph, and every test file runs in its own fresh process. The measurement
+script was committed before submission.</p>
 </section>

@@ -43,9 +43,28 @@
       "note": "Section 7 now names ~/.cache/nova-polygon-tangent-repair/ and ~/.cache/nova-iter-bank/ (or the run directory) for node (a) trace records and edge-term rows and node (b) re-certification receipts.",
       "reason": "",
       "when": "2026-11-14T23:52:46.586607+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "9190ce1219f0a69655729fdb3b4abe7dc572b593",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Negative control (a) now reverts node (a)'s own change to polygonanalytic.py wherever the repair lands, the tangent rule or the projected-offset denominator.",
+      "reason": "",
+      "when": "2026-11-14T23:52:57.842761+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "9190ce1219f0a69655729fdb3b4abe7dc572b593",
+      "commit_basis": "edit",
+      "note": "Negative control (a) now reverts node (a)'s own change to polygonanalytic.py wherever the repair lands, the tangent rule or the projected-offset denominator.",
+      "reason": "",
+      "when": "2026-11-14T23:52:57.842761+00:00"
+    },
     "evidence_paths-1": {
       "action": "acted",
       "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",

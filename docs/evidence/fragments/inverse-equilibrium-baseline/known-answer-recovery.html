@@ -325,3 +325,16 @@
     admit alongside the case run. Device-qualified correctness is reported
     separately from timing.</p>
 </section>
+<section id="known-answer-recovery-live-boundary-refusal">
+  <h2>Live measurement-boundary refusal</h2>
+  <p>The public typed-request branch first reaches an explicit dispatch
+    sentinel with no measurement keyword. Adding a measurement array to the
+    same request then produces <code>a ForwardSolveRequest cannot be combined
+    with solve keywords</code>. Constructing the source request with a
+    measurement array produces <code>ForwardSolveRequest.__init__() got an
+    unexpected keyword argument 'measurement'</code>. These are live refusals
+    from the current public API, recorded with the positive dispatch control
+    in <code>boundary-refusal.log</code> beneath the run directory. The first
+    probe omitted its positional request and is preserved separately as
+    scaffolding; it is not used as boundary evidence.</p>
+</section>

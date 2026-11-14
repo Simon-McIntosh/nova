@@ -360,7 +360,7 @@ def test_variable_profile_gradient_routes_into_booking_tangents(small, endpoint)
                 fallback,
                 quad,
                 booked,
-                jnp.zeros(1, dtype=bool),
+                jnp.arange(1, dtype=jnp.int32),
             )
             return tuple(values[:, component, 0] for component in range(3))
 

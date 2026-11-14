@@ -1,0 +1,49 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Neither suite arm exists for this run. The node's write scope holds no test file, so no test under tests/ can reach the change, and the fence reports the suite pair unarmed. The substitute the manifest records is the base arm's reproduction of four independently banked lower-X distances (summary.json control: -2.27e-12, -3.97e-12, 5.83e-9, 1.23e-12 m against the 5.0e-4 m threshold at summarize.py:105), which is an independent source rather than a value the test passed in. Reading no failure out of an arm that never ran, added_failure_count is 0 with no ids rather than a measured zero.",
+  "call_sites": [],
+  "completed_at": "2026-11-14T08:56:28.597Z",
+  "dispatched_at": "2026-11-14T08:36:03Z",
+  "findings": [
+    "non-blocking: docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html:11 states the p'(1)/FF'(1) columns are the last knot 'exactly as the solve received them', read from arm-tables.json, 'which is a copy of each row's own recorded source-inputs.json'. It is not a copy: comparing arm-tables.json with cohort/{base,edge}/frame-*/source-inputs.json on all four rows and both quantities shows every value differs in the sixth significant figure, e.g. 179 edge p'(1) is -37353.06104594593 in arm-tables.json and -37354.45465245573 in the receipt the solve recorded, with max |difference| of 0.5 to 2.7 Pa/Wb across the cohort (~5e-5 relative). verify.py prints the receipt's own value in gate-verify.log ('edge frame-179-limited p_prime ... value=-37354.454652') while the record's table prints -37353.1, so the previous round's finding about this column is not resolved, only re-cited to a different non-receipt source. The difference moves no integral and no conclusion, but the caption's provenance claim is false and a reader who checks it finds the record wrong at the precision it prints.",
+    "non-blocking: docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html:47 states that the three non-convergent rows 'carry no share anywhere in this record', while the same file at line 84 quotes '85, 46 and 94 percent' of the vertical offset for 137D, 146D and 179L, and summary.json stores a share_closed for every row including 146L at -7.36. The 85 and 94 percent are qualified in the same sentence as coming from non-converged states, so the numbers are readable, but the absolute claim at line 47 is falsified by the record that makes it; it should be narrowed to the headline, the total and the side decomposition, or line 84 should drop the two non-converged percentages.",
+    "non-blocking: scripts/prototypes/diiid_xpoint_profile_extent/summarize.py:26 duplicates int-to-name mapping the repository already owns as FixedPointTerminationReason in nova/equilibrium/fixed_point.py:339 (thirteen members at lines 341-353), covering only 1, 7 and 12. The dict has already diverged from the owner: a row terminating 8 (ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED, which the record's own caption at diiid-xpoint-profile-extent.html:33 names) would have the bare integer printed as its exclusion reason through the fallback at summarize.py:43. FixedPointTerminationReason(reason).name would extend the owner for all thirteen values.",
+    "non-blocking: scripts/prototypes/diiid_xpoint_profile_extent/summarize.py:75 has no failing path. A missing receipt only prints 'MISSING a receipt' at :88, and the base-arm reproduction control computed at :134 (all_bases_reproduced) is written into summary.json but never consulted before the process exits, so a drifted base arm or a missing row still yields EXIT=0. That matters more than a missing check usually would: the manifest names this reproduction as the substitute for the unarmed suite pair, and a substitute that cannot go red is not a control. verify.py, by contrast, does raise SystemExit(1) on any failure."
+  ],
+  "justifications": {
+    "durability": "check_edge_profiles.py:97 and :107 fail if the FF' column loses its labels or a column autoscales (proven at gate-figure-negative.log), but summarize.py:134 computes all_bases_reproduced and never exits nonzero on it, so the exclusion rule added at summarize.py:39 has no assertion that reddens when it regresses.",
+    "evidence": "gate-verify.log records PASS 8 rows, 4 arm pairs with EXIT=0 and its arm-drop control exits 1, and gate-figure.log records PASS 6 panels with a control that exits 1 against the pre-repair drawing code, but the p'(1)/FF'(1) citation at diiid-xpoint-profile-extent.html:11 does not match the receipt it says it copies.",
+    "fit": "render.py:21-29 draws through nova.media.poloidal (draw_nulls, draw_wall, inside_wall_units) and the shared diiid_xpoint_offset/style.py save, and every added name states a mechanism (windowed_levels, column_limits, readable) rather than a plan step.",
+    "goal_fidelity": "diiid-xpoint-profile-extent.html:3 gives the converged-frame answer in both offset components and :5 states the non-convergence of three rows as a finding, which is what the brief's per-row reporting asks for.",
+    "reuse": "summarize.py:26 re-implements the int-to-name mapping owned by FixedPointTerminationReason at nova/equilibrium/fixed_point.py:339 instead of extending it, which is the capability fork this score records, even though render.py:21-30 does extend the repository's poloidal painters.",
+    "scope_discipline": "git diff --name-only 3d98ff615 f01af42b0 is 16 paths, every one under the three fenced prefixes, and the prescription change is proposed at diiid-xpoint-profile-extent.html:84 rather than made."
+  },
+  "notes": "Read: the source brief, the source manifest, the 19-commit diff against 3d98ff615 commit by commit, the three gate logs and both negative controls, summary.json, arm-tables.json, profile-difference.json, each row's source-inputs.json, the committed fragment, render.py, summarize.py, verify.py, check_edge_profiles.py, arms.py, job.sh, nova/equilibrium/fixed_point.py:339-353 as the termination-reason owner, and the three PNG previews. Not re-derived: the eight GPU solves, which are read from the cohort receipts. No file in the reviewed worktree was modified; the review wrote only its record.",
+  "project": "nova",
+  "review_run_id": "r-20261114T083533651407-review-of-diiid-xpoint-profile-extent-f01af42b02f3",
+  "reviewed_base_sha": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+  "reviewed_head_sha": "f01af42b02f3f38961d1480b5c4474835dcf10e4",
+  "reviewed_run_id": "r-20261113T154327963022-diiid-xpoint-profile-extent",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T08:57:01.561907+00:00",
+  "total": 90,
+  "verdicts": {
+    "call_sites": "VERDICT call_sites: no production call site exists; git grep for diiid_xpoint_profile_extent outside the prototype directory and the fragment returns only previously stored review records under docs/state/nova/, and the prototype's own entry point scripts/prototypes/diiid_xpoint_profile_extent/job.sh is itself part of this diff.",
+    "diff": "VERDICT diff: read commit by commit against 3d98ff615c7beeea56357e68ff87c7596b57dc27; nineteen commits add ten prototype scripts, one evidence fragment and three SVG figures with two zoom-window receipts, 17058 insertions, and the eight repair commits since 986142032 are confined to render.py, summarize.py, check_edge_profiles.py and the fragment, each doing what its subject states.",
+    "done_when": "VERDICT done_when: the done-when asks for that per-row measurement plus paired 137D/146L lower-X zooms and an edge-profile plot under docs/figures/diiid-xpoint-profile-extent/ with every PNG inspected; the gates asserting it are verify.py (PASS 8 rows, 4 arm pairs, gate-verify.log EXIT=0), summarize.py (TOTAL 1.38 of 2.96 cm over 146D, gate-summarize.log EXIT=0) and check_edge_profiles.py (6 panels, at least two printed y labels each, one scale per column, gate-figure.log EXIT=0), and the three PNGs under figure-previews-f01af42b0/ exist and were inspected by this review.",
+    "goal": "VERDICT goal: the node's goal is to measure how much of the remaining DIII-D lower-X offset the prescribed profile extent supplies on 137D, 146D, 146L and 179L; diiid-xpoint-profile-extent.html:3 leads with the converged 146D result (2.960 to 1.577 cm, 46.7 percent) and :5 states the three non-convergent rows as a result rather than as a caveat, with residual, converged, termination, in-plasma extrema, support, lower-X distance from EFIT and share closed reported per row at :36-46 and matching summary.json row for row.",
+    "manifest": "VERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T154327963022-diiid-xpoint-profile-extent/manifest.md; it now lists verify.py in changed_paths and names all three *.incomplete-44ef folders in retry_failures, so the previous round's two manifest defects are repaired, but its claim that no share is read 'in the proposal' is falsified by the fragment's line 84, and its suite substitute is the base-arm reproduction that summarize.py never enforces.",
+    "write_paths": "VERDICT write_paths: the fenced scope is scripts/prototypes/diiid_xpoint_profile_extent/, the fragment and docs/figures/diiid-xpoint-profile-extent/; git diff --name-only 3d98ff615 f01af42b0 returns exactly 16 paths and every one is inside those three, with no edit under nova/ or tests/, and no *.incomplete-44ef folder is tracked."
+  },
+  "verified_ancestry": "git cat-file -t returns commit for both revisions; the reviewed head f01af42b0 is not an ancestor of this reviewer's base 2da973478, so the range was read from the objects rather than from a merged tree."
+}

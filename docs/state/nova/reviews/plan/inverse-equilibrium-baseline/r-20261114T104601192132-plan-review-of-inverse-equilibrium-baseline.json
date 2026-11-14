@@ -35,6 +35,16 @@
       "note": "Section 2 now compares against imas-efit's own magnetics-only regression baseline for MAST-U 45272, which carries a closed boundary outline on 8 of 8 slices (read through imas-python at DD 4.1.0); the CCFE reference with no outline is not used.",
       "reason": "",
       "when": "2026-11-14T11:14:19.449329+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "e0560b5880f991cae47c37315cc86d6da4294cf3",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The comparator is now the state imas-efit itself wrote, whose flux decreases outward at positive plasma current (slice 4: psi_axis 0.401, psi_boundary -0.154, ip 765 kA); the sign-inverted CCFE export is not used, so no canonicalisation of the reference is needed.",
+      "reason": "",
+      "when": "2026-11-14T11:14:35.230103+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "Section 2 now compares against imas-efit's own magnetics-only regression baseline for MAST-U 45272, which carries a closed boundary outline on 8 of 8 slices (read through imas-python at DD 4.1.0); the CCFE reference with no outline is not used.",
       "reason": "",
       "when": "2026-11-14T11:14:19.449329+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "e0560b5880f991cae47c37315cc86d6da4294cf3",
+      "commit_basis": "edit",
+      "note": "The comparator is now the state imas-efit itself wrote, whose flux decreases outward at positive plasma current (slice 4: psi_axis 0.401, psi_boundary -0.154, ip 765 kA); the sign-inverted CCFE export is not used, so no canonicalisation of the reference is needed.",
+      "reason": "",
+      "when": "2026-11-14T11:14:35.230103+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261114T104601192132-plan-review-of-inverse-equilibrium-baseline.json",

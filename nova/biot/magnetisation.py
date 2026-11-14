@@ -263,7 +263,9 @@ def galerkin_spectrum(cells, gram, *, basis="constant"):
     ``2*pi*r`` enters the energy form, so the operator carrying the spectrum is
     ``V**(1/2) G V**(-1/2) / mu0`` with ``V`` the repeated cell volume. Reading
     ``eigvalsh`` off ``G`` alone reads one triangle of an unsymmetric matrix and
-    reports a range the projection does not have.
+    reports a range the projection does not have. For ``basis="linear"``,
+    solve the generalised eigenproblem for the energy against the full local
+    polynomial Gram blocks, including their off-diagonal volume moments.
     """
     if basis == "linear":
         from scipy.linalg import block_diag, eigvalsh
@@ -469,6 +471,7 @@ def _update(state, operands, factor, scale):
 
 
 def _linear_residual(state, operands):
+    """Apply the material law at volume nodes before testing in the affine basis."""
     gram, external, knots, coefficients, ends, basis, project, owners = operands
     total = (external + gram @ state).reshape(2, -1, 3)
     values = jnp.einsum("cqi,qi->cq", total[:, owners], basis)

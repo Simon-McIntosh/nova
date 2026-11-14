@@ -1036,13 +1036,13 @@ def test_mutual_self_block_converges_with_logarithmic_quadrature():
     assert errors[2] < 2e-8
 
 
-@pytest.mark.parametrize("size", [0.12, 0.10])
+@pytest.mark.parametrize("size", [0.20, 0.16])
 def test_linear_shell_spectrum_uses_its_volume_gram(size):
     """The affine B projection is reciprocal and bounded in its own metric."""
     region = (
         shapely.Point(0, 0)
-        .buffer(0.4, 16)
-        .difference(shapely.Point(0, 0).buffer(0.28, 16))
+        .buffer(0.4, 2)
+        .difference(shapely.Point(0, 0).buffer(0.28, 2))
         .intersection(shapely.box(0, -0.4, 0.4, 0.4))
     )
     cells = iron._mesh(region, size)

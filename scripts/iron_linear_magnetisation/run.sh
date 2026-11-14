@@ -26,4 +26,6 @@ export TMPDIR="$scratch" PYTHONPATH="$scratch/tree" MPLCONFIGDIR="$scratch/matpl
 export JAX_PLATFORMS=${JAX_PLATFORMS:-cuda} OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
 cd "$scratch/tree"
 /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
+    --revision "$revision" --blob "$blob" --output "$1" --basis constant --sizes 0.04
+/home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
     --revision "$revision" --blob "$blob" --output "$1" "${@:2}"

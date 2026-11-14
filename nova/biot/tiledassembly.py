@@ -2049,7 +2049,19 @@ def _polygon_current_response(polygons, points, plan, *, packed=None, flux_only=
     """
     edge, weight, norm, incidence = packed or _polygon_current_geometry(polygons)
     tile = TilePlan(32, 32, plan.block, 16, 48)
-    evaluator = _polygon_current_evaluator(flux_only)
+    import jax
+
+    # Tiny CPU operators cannot amortise tracing the full closed polygon graph.
+    # Evaluate that same packed owner directly; device and larger builds trace it.
+    if len(polygons) <= 32 and jax.default_backend() == "cpu":
+
+        def evaluator(r, z, source_edge, source_weight, source_norm):
+            response = packed_analytic_greens(
+                np, r, z, source_edge, source_weight, source_norm
+            )
+            return np.stack(response[:1] if flux_only else response)
+    else:
+        evaluator = _polygon_current_evaluator(flux_only)
     components = 1 if flux_only else 3
     result = np.zeros((components, len(points), len(polygons)))
     for target, source in tile.tiles(len(points), len(norm)):
@@ -2087,7 +2099,8 @@ def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 2
     mutual = _linear_edge_mutual(atoms, plan, order)
     energy = np.asarray((edge @ mutual) @ edge.T)
     del mutual
-    nodes, weights = np.polynomial.legendre.leggauss(order)
+    boundary_order = max(6, order // 2)
+    nodes, weights = np.polynomial.legendre.leggauss(boundary_order)
     parameter, weights = (nodes + 1) / 2, weights / 2
     # Integrate each affine boundary test against exact uniform polygon flux.
     edge_volume = np.empty((2 * len(atoms), len(polygons)))
@@ -2099,12 +2112,12 @@ def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 2
         flux = _polygon_current_response(
             polygons, points.reshape(-1, 2), plan, packed=packed, flux_only=True
         )[0]
-        flux = flux.reshape(len(selected), order, len(polygons))
+        flux = flux.reshape(len(selected), boundary_order, len(polygons))
         moments = np.einsum(
             "eqc,q,qp,e->epc",
             flux,
             weights,
-            np.column_stack((np.ones(order), parameter)),
+            np.column_stack((np.ones(boundary_order), parameter)),
             np.linalg.norm(selected[:, 1] - selected[:, 0], axis=1),
         )
         edge_volume[2 * begin : 2 * (begin + len(selected))] = moments.reshape(
@@ -2113,10 +2126,11 @@ def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 2
     cross = np.asarray((edge @ edge_volume) @ volume.T)
     energy += cross + cross.T
     del cross, edge_volume
-    # The volume potential is continuous, including at interior quadrature nodes.
+    # The continuous volume potential uses the same area rule as the local law;
+    # the logarithmic edge-pair singularities alone need the higher Duffy order.
     volume_mutual = np.empty((len(polygons), len(polygons)))
     for cell, polygon in enumerate(polygons):
-        points, weights = section_nodes(polygon, order)
+        points, weights = section_nodes(polygon, max(6, order // 4))
         flux = _polygon_current_response(
             polygons, points, plan, packed=packed, flux_only=True
         )[0]

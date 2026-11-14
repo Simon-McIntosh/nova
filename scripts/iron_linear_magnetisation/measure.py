@@ -51,6 +51,8 @@ def main():
             cell_size_m=size,
             lane=jax.default_backend(),
             devices=[device.device_kind for device in jax.devices()],
+            module=str(Path(iron.__file__).resolve()),
+            cwd=str(Path.cwd().resolve()),
             x64=bool(jax.config.jax_enable_x64),
             completed=False,
         )
@@ -66,6 +68,23 @@ def main():
         production = iron._galerkin_interaction
 
         def timed(*arguments, **keywords):
+            cells = arguments[0]
+            unknowns = len(cells.polygons) * (6 if args.basis == "linear" else 2)
+            row.update(
+                cells=len(cells.polygons),
+                unknowns=unknowns,
+                dense_factor_bytes=8 * unknowns**2,
+            )
+            save()
+            if (
+                jax.default_backend() == "gpu"
+                and row["dense_factor_bytes"] > 13_653_508_096
+            ):
+                row["requires_cpu"] = True
+                save()
+                raise SystemExit(
+                    "dense factor exceeds the device argument limit; rerun on CPU"
+                )
             assembly_start = time.monotonic()
             result = production(*arguments, **keywords)
             row["assembly_seconds"] = time.monotonic() - assembly_start

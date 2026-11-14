@@ -51,9 +51,28 @@
       "note": "s5 now records that node (c) is answered by the existing owners nova_cocos and corpus_flux_to_nova_total, and the section is declared done; no new translation owner is chosen.",
       "reason": "",
       "when": "2026-11-14T18:54:31.509911+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "finding": "deep_module-1",
+      "note": "The s6 node brief names use_linear_moments set by the four moment coupling blocks in ForwardProfile.from_lattice (forward.py:703-711) and the DIII-D builder that passes none of them, as the selection to extend.",
+      "reason": "",
+      "when": "2026-11-14T18:54:43.269310+00:00"
     }
   ],
   "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "note": "The s6 node brief names use_linear_moments set by the four moment coupling blocks in ForwardProfile.from_lattice (forward.py:703-711) and the DIII-D builder that passes none of them, as the selection to extend.",
+      "reason": "",
+      "when": "2026-11-14T18:54:43.269310+00:00"
+    },
     "reuse_search-1": {
       "action": "acted",
       "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",

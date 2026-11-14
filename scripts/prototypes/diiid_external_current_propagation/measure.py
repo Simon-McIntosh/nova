@@ -135,23 +135,40 @@ def _external_sup(operator, current):
     return float(np.max(np.abs(np.asarray(operator.external(current)))))
 
 
-def _solve(bench, built, complete, row):
-    equilibrium, _termination, _selection, _iterations, _identity, _converged, _ = (
-        bench._solve_registered(
-            built["profile"],
-            built["seed"],
-            row,
-            FRAME,
-            complete,
-            bench._target_current(row, built["time_ms"]),
-        )
+def _solve_detail(bench, built, complete, row):
+    """Return the equilibrium and the termination the route reported."""
+
+    (
+        equilibrium,
+        termination,
+        _selection,
+        _iterations,
+        _identity,
+        converged,
+        _,
+    ) = bench._solve_registered(
+        built["profile"],
+        built["seed"],
+        row,
+        FRAME,
+        complete,
+        bench._target_current(row, built["time_ms"]),
     )
     equilibrium.flux.block_until_ready()
-    return equilibrium
+    return equilibrium, termination, converged
 
 
 def _record(
-    output, name, built, equilibrium, row, complete, external_pre, external_solved
+    output,
+    name,
+    built,
+    equilibrium,
+    row,
+    complete,
+    external_pre,
+    external_solved,
+    termination=None,
+    converged=None,
 ):
     import numpy as np
 
@@ -186,6 +203,8 @@ def _record(
         "arm": name,
         "frame": FRAME,
         "residual": float(equilibrium.fixed_point.residual),
+        "termination": str(termination),
+        "converged": None if converged is None else bool(converged),
         "diverted": bool(topology.diverted),
         "lower_x_rz_m": lower_x.tolist(),
         "efit_lower_x_rz_m": efit_x.tolist(),
@@ -242,7 +261,9 @@ def main():
     records = {}
 
     def run(name, built, row_used, external_pre):
-        equilibrium = _solve(bench, built, built["complete"], row_used)
+        equilibrium, termination, converged = _solve_detail(
+            bench, built, built["complete"], row_used
+        )
         records[name] = _record(
             args.output,
             name,
@@ -252,7 +273,35 @@ def main():
             built["complete"],
             external_pre,
             _external_sup(built["profile"].operator, built["complete"]),
+            termination,
+            converged,
         )
+
+    if "cohort" in arms:
+        # Instrument control: the cohort's own entry point on the same frame.
+        # It must reproduce the banked 137D state; if it does not, the arms
+        # below measure this driver rather than the solve.
+        result, _fields = bench.solve_frame(row, FRAME, PSEUDO_WALL_EXPANSION)
+        records["cohort"] = {
+            "arm": "cohort",
+            "frame": FRAME,
+            "residual": float(result.fixed_point_relative_residual),
+            "termination": str(result.solver_termination),
+            "converged": bool(result.converged),
+            "lower_x_distance_cm": (
+                None
+                if result.metrics.polished_saddle_to_nearest_efit_x_m is None
+                else 100.0 * float(result.metrics.polished_saddle_to_nearest_efit_x_m)
+            ),
+            "axis_rz_m": list(result.display_map.lattice_saddle_rz_m)
+            if result.display_map is not None
+            else None,
+            "note": "cohort entry point; no terminal flux retained by FrameResult",
+        }
+        (args.output / "arm-cohort.json").write_text(
+            json.dumps(records["cohort"], indent=2) + "\n", encoding="utf-8"
+        )
+        print("ARM " + json.dumps(records["cohort"]), flush=True)
 
     if "base" in arms:
         pre = _pre_adapter_external(bench, row, PSEUDO_WALL_EXPANSION)
@@ -296,11 +345,24 @@ def main():
         )
         pre = _external_sup(built["profile"].operator, built["complete"])
         solved = _external_sup(built["profile"].operator, scaled_complete)
-        first = _solve(bench, built, built["complete"], row)
-        records["warm-base"] = _record(
-            args.output, "warm-base", built, first, row, built["complete"], pre, pre
+        first, first_termination, first_converged = _solve_detail(
+            bench, built, built["complete"], row
         )
-        second = _solve(bench, built, scaled_complete, row)
+        records["warm-base"] = _record(
+            args.output,
+            "warm-base",
+            built,
+            first,
+            row,
+            built["complete"],
+            pre,
+            pre,
+            first_termination,
+            first_converged,
+        )
+        second, second_termination, second_converged = _solve_detail(
+            bench, built, scaled_complete, row
+        )
         records["warm-scaled"] = _record(
             args.output,
             "warm-scaled",
@@ -310,6 +372,8 @@ def main():
             scaled_complete,
             pre,
             solved,
+            second_termination,
+            second_converged,
         )
 
     (args.output / "records.json").write_text(

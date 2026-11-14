@@ -25,7 +25,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 5,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "e0560b5880f991cae47c37315cc86d6da4294cf3",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 2 now compares against imas-efit's own magnetics-only regression baseline for MAST-U 45272, which carries a closed boundary outline on 8 of 8 slices (read through imas-python at DD 4.1.0); the CCFE reference with no outline is not used.",
+      "reason": "",
+      "when": "2026-11-14T11:14:19.449329+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "e0560b5880f991cae47c37315cc86d6da4294cf3",
+      "commit_basis": "edit",
+      "note": "Section 2 now compares against imas-efit's own magnetics-only regression baseline for MAST-U 45272, which carries a closed boundary outline on 8 of 8 slices (read through imas-python at DD 4.1.0); the CCFE reference with no outline is not used.",
+      "reason": "",
+      "when": "2026-11-14T11:14:19.449329+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261114T104601192132-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261114T104601192132-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "62d2816b53c30f3c91f8e701dd1978074222120d",
   "rubric": "content",

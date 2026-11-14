@@ -260,7 +260,27 @@ def _physical_problem(name):
         request = replace(
             request, source_profile=source, target_current=None, vertical_pin="omit"
         )
-        return profile, request, machine.node, machine.wall_node, machine.cell_polygons
+        coordinates = np.vstack(
+            (machine.node, machine.wall_node, machine.sample_coordinates)
+        )
+        physical, _, _ = lane.oracle_fixture.cached_fixture_exterior(
+            carrier,
+            exact,
+            machine,
+            profile.operator,
+            lane._exact_state(kind, exact, coordinates),
+        )
+        known = dict(
+            analytic=exact, reference_current=np.asarray(physical.cell_current)
+        )
+        return (
+            profile,
+            request,
+            machine.node,
+            machine.wall_node,
+            machine.cell_polygons,
+            known,
+        )
 
     if name == "mast":
         from benchmarks import coil_edit_latency as cached
@@ -299,6 +319,29 @@ def _physical_problem(name):
         ]
         sections = tuple(point + corners for point in coordinate)
         prescribed = old.prescribed_current_field.current
+        group = context["group"]
+        circuit = np.asarray(group["fcoil_circ"], dtype=int) - 1
+        element = {
+            key: np.asarray(group["fcoil_" + key])
+            for key in ("r", "z", "width", "height", "ang1", "ang2", "turns", "xmult")
+        }
+        known = dict(
+            conductors=tuple(
+                (
+                    (
+                        lane.shaped_section_vertices(
+                            *(
+                                element[key][index]
+                                for key in ("r", "z", "width", "height", "ang1", "ang2")
+                            )
+                        ),
+                    ),
+                    float(element["turns"][index] * element["xmult"][index]),
+                    float(prescribed[circuit[index]]),
+                )
+                for index in range(len(circuit))
+            )
+        )
         plasma_current = float(case["reference"]["plasma_current_a"])
     else:
         from tests import test_equilibrium_forward_reference as lane
@@ -349,6 +392,12 @@ def _physical_problem(name):
             machine.cell_polygons,
         )
         prescribed = None
+        known = dict(
+            conductors=tuple(
+                (item.placement, item.turns, item.current)
+                for item in case.drive(passive=True)
+            )
+        )
         plasma_current = float(case.plasma_current)
     _, stored_topology = profile.operator.read(seed)
     centroid = tuple(np.asarray(stored_topology.axis, dtype=float))
@@ -394,7 +443,7 @@ def _physical_problem(name):
         vertical_pin="omit",
         policy_overrides=dict(kernel_tolerance=1e-12, qualification_tolerance=1e-12),
     )
-    return profile, request, coordinate, wall, sections
+    return profile, request, coordinate, wall, sections, known
 
 
 def _persist_forward(receipt, path):
@@ -505,6 +554,84 @@ class _PlasmaDiagnosticSource:
         return self.biot
 
 
+def _physical_sensor_rows(biot, sensors):
+    """Synthesize row-ordered observations through the diagnostic kernel owners."""
+    from nova.equilibrium.observation_kernels import (
+        virtual_flux_loops,
+        virtual_poloidal_probes,
+    )
+
+    points = np.column_stack((sensors.r, sensors.z))
+    loops = np.asarray(sensors.flux_loop, dtype=bool)
+    rows = np.empty(sensors.number)
+    rows[loops] = virtual_flux_loops(biot, points[loops]).values
+    angle = np.deg2rad(sensors.angle[~loops])
+    direction = np.column_stack((np.cos(angle), np.sin(angle)))
+    rows[~loops] = virtual_poloidal_probes(biot, points[~loops], direction).values
+    return rows
+
+
+def _known_field_reader(known, source):
+    """Bind prescribed currents or the analytic fixture exterior independently."""
+    if "conductors" in known:
+        from nova.frame.coilset import CoilSet
+
+        biot = CoilSet(dcoil=-1, field_attrs=["Psi", "Br", "Bz"])
+        for index, (placement, turns, current) in enumerate(known["conductors"]):
+            biot.coil.insert(*placement, nturn=turns, Ic=current, name=f"known_{index}")
+        for name in ("point", "probe", "poloidal_flux_loop"):
+            _PlasmaDiagnosticSource._cache_factory(getattr(biot, name))
+        assert np.any(np.asarray(biot.sloc["Ic"]) != 0.0)
+
+        def read(sensors):
+            rows = _physical_sensor_rows(biot, sensors)
+            current = np.asarray(biot.sloc["Ic"]).copy()
+            biot.sloc["Ic"] = np.zeros_like(current)
+            try:
+                np.testing.assert_array_equal(_physical_sensor_rows(biot, sensors), 0.0)
+            finally:
+                biot.sloc["Ic"] = current
+            return rows
+    else:
+        from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
+
+        def read(sensors):
+            exact = known["analytic"]
+            radial, vertical = exact.flux_gradient(sensors.r, sensors.z)
+            angle = np.deg2rad(sensors.angle)
+            analytic = np.where(
+                sensors.flux_loop,
+                TOTAL_FLUX_FACTOR * exact.flux(sensors.r, sensors.z),
+                (-vertical * np.cos(angle) + radial * np.sin(angle)) / sensors.r,
+            )
+            source.biot.sloc["Ic"] = known["reference_current"]
+            return analytic - _physical_sensor_rows(source.biot, sensors)
+
+    return read
+
+
+def _total_observations(source, generated, sensors, known_field, scales=None):
+    """Measure total and known fields without calling the inverse evaluator."""
+    plasma = _physical_sensor_rows(source(generated), sensors)
+    vacuum = known_field(sensors)
+    total = plasma + vacuum
+    if scales is None:
+        loops = sensors.flux_loop
+        scales = np.where(
+            loops,
+            max(np.max(np.abs(plasma[loops])), 1e-12),
+            max(np.max(np.abs(plasma[~loops])), 1e-12),
+        )
+    assert np.max(np.abs(vacuum[sensors.flux_loop] / scales[sensors.flux_loop])) > 1e-8
+    assert (
+        np.max(np.abs(vacuum[~sensors.flux_loop] / scales[~sensors.flux_loop])) > 1e-8
+    )
+    np.testing.assert_allclose(
+        (total - vacuum) / scales, plasma / scales, rtol=0, atol=1e-12
+    )
+    return total, vacuum, plasma, scales
+
+
 @pytest.fixture(scope="module")
 def physical_cases(tmp_path_factory):
     """Keep each carrier, compiled program and diagnostic table in one process."""
@@ -520,9 +647,11 @@ def physical_cases(tmp_path_factory):
     cases = {}
 
     def get(name):
+        import json
+
         if name in cases:
             return cases[name]
-        profile, request, coordinate, wall, sections = _physical_problem(name)
+        profile, request, coordinate, wall, sections, known = _physical_problem(name)
         recorded = os.environ.get("NOVA_MAGNETICS_FIT_GENERATING_RECEIPTS")
         recorded_path = (
             Path(recorded) / f"{name}-generating-receipt.pkl" if recorded else None
@@ -640,22 +769,62 @@ def physical_cases(tmp_path_factory):
             flux_loop=np.r_[np.ones(24, bool), np.zeros(24, bool)],
         )
         source = _PlasmaDiagnosticSource(sections)
-        instrument = MagneticsFit(profile, request, sensors, source)
+        known_field = _known_field_reader(known, source)
+        total, vacuum, plasma, scales = _total_observations(
+            source, generated, sensors, known_field
+        )
+        shifted_radius = sensors.r.copy()
+        shifted_radius[0] += 0.05
+        shifted = replace(sensors, r=shifted_radius)
+        shifted_total, shifted_vacuum, shifted_plasma, _ = _total_observations(
+            source, generated, shifted, known_field, scales
+        )
+        geometry_delta = float(np.max(np.abs((shifted_vacuum - vacuum) / scales)))
+        assert geometry_delta > 1e-12, geometry_delta
+        subtraction = dict(
+            case=name,
+            conductor_count=len(known.get("conductors", ())),
+            exterior_kind="stored_conductors"
+            if "conductors" in known
+            else "analytic_fixture",
+            nominal_vacuum=vacuum.tolist(),
+            displaced_vacuum=shifted_vacuum.tolist(),
+            nominal_total=total.tolist(),
+            displaced_total=shifted_total.tolist(),
+            nominal_subtraction_error=float(
+                np.max(np.abs((total - vacuum - plasma) / scales))
+            ),
+            displaced_subtraction_error=float(
+                np.max(
+                    np.abs((shifted_total - shifted_vacuum - shifted_plasma) / scales)
+                )
+            ),
+            conductor_geometry_delta=geometry_delta,
+        )
+        (output / f"{name}-conductor-subtraction.json").write_text(
+            json.dumps(subtraction, indent=2)
+        )
+        print(
+            "CONDUCTOR_SUBTRACTION "
+            + json.dumps(
+                {
+                    key: value
+                    for key, value in subtraction.items()
+                    if not key.endswith(("vacuum", "total"))
+                }
+            ),
+            flush=True,
+        )
         raw = np.r_[
             request.source_profile.core.p_prime.coefficients,
             request.source_profile.core.ff_prime.coefficients,
         ]
-        _, rows = instrument._evaluate(raw, generated.terminal_state.flux)
-        scales = np.r_[
-            np.full(24, max(float(np.max(np.abs(rows[:24]))), 1e-12)),
-            np.full(24, max(float(np.max(np.abs(rows[24:48]))), 1e-12)),
-        ]
         measurement = SliceMeasurement(
-            measured=rows[:-1],
-            vacuum=np.zeros(48),
+            measured=total,
+            vacuum=vacuum,
             mask=np.ones(48, bool),
             scale=scales,
-            plasma_current=rows[-1],
+            plasma_current=float(np.sum(generated.terminal_state.cell_current)),
         )
         pressure = request.source_profile.core.p_prime.coefficients.size
         basis = np.zeros((raw.size, 2))
@@ -692,6 +861,7 @@ def physical_cases(tmp_path_factory):
             coordinate=np.asarray(coordinate),
             wall=np.asarray(wall),
             source=source,
+            known_field=known_field,
             sensors=sensors,
             measurement=measurement,
             basis=basis,
@@ -737,6 +907,42 @@ def _recover_physical(case, displacement=0.0):
         radius = sensors.r.copy()
         radius[0] += displacement
         sensors = replace(sensors, r=radius)
+    total, vacuum, plasma, scales = _total_observations(
+        case["source"],
+        case["generated"],
+        sensors,
+        case["known_field"],
+        case["measurement"].scale,
+    )
+    measurement = replace(case["measurement"], vacuum=vacuum)
+    observation = dict(
+        displacement_m=displacement,
+        conductor_flux_sup=float(np.max(np.abs(vacuum[sensors.flux_loop]))),
+        conductor_probe_sup=float(np.max(np.abs(vacuum[~sensors.flux_loop]))),
+        subtraction_error=float(np.max(np.abs((total - vacuum - plasma) / scales))),
+        geometry=sensors.r.tolist(),
+        total=total.tolist(),
+        vacuum=vacuum.tolist(),
+        plasma=plasma.tolist(),
+    )
+    if displacement:
+        delta = float(np.max(np.abs((vacuum - case["measurement"].vacuum) / scales)))
+        assert delta > 1e-12, delta
+        observation["conductor_geometry_delta"] = delta
+    (case["output"] / f"{label}-observations.json").write_text(
+        json.dumps(observation, indent=2)
+    )
+    print(
+        "TOTAL_OBSERVATIONS "
+        + json.dumps(
+            {
+                k: v
+                for k, v in observation.items()
+                if k not in ("geometry", "total", "vacuum", "plasma")
+            }
+        ),
+        flush=True,
+    )
     fitted = MagneticsFit(
         case["profile"],
         case["initial"],
@@ -744,7 +950,7 @@ def _recover_physical(case, displacement=0.0):
         magnetic_source,
         coefficient_basis=case["basis"],
     ).fit(
-        case["measurement"],
+        measurement,
         plasma_current_scale=abs(case["measurement"].plasma_current),
     )
     forward_path = case["output"] / f"{label}-forward.pkl"

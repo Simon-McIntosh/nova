@@ -1180,3 +1180,28 @@ def test_reference_stamp_refuses_wrong_revision_and_dirty_tree(tmp_path):
     script.write_bytes(data + b"\n")
     with pytest.raises(SystemExit, match="dirty tree"):
         require_clean_script(script, blob, revision)
+
+
+def test_linear_shell_operator_pin():
+    """The affine integration rule preserves its delivered shell-cell operator."""
+    import json
+    from pathlib import Path
+    from scripts.iron_linear_magnetisation.controls import shell
+
+    control = json.loads(
+        (
+            Path(__file__).parents[1]
+            / "scripts"
+            / "iron_linear_magnetisation"
+            / "operator-control.json"
+        ).read_text()
+    )
+    cells = iron._mesh(shell(), 0.04)
+    assert len(cells.polygons) == control["shell_cells"] == 228
+    polygons = tuple(cells.polygons[index] for index in control["selected_cells"])
+    actual, _ = iron.linear_galerkin_cell_interaction(polygons, plan=iron._PLAN)
+    expected = np.array(control["operator"])
+    assert np.isfinite(actual).all()
+    relative = np.linalg.norm(actual - expected) / np.linalg.norm(expected)
+    print("40 mm shell-cell operator relative difference:", relative)
+    assert relative <= 1e-12

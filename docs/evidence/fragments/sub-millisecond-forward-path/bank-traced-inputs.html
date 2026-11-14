@@ -260,4 +260,78 @@ A second paired run at the fragment's final commit is recorded separately under
 <code>flat-pin-delivery/</code>; its authoritative completion and exact revision
 are in the manifest and that directory's receipts. Product and test content is
 unchanged by this evidence-only commit.</p>
+<h3 id="bank-traced-inputs-independent-oracles">Independent residual, derivative and centroid checks</h3>
+<p>The review at <code>7ce819dfc048648540ca6ee6acbbca0008482c70</code>
+requested stronger independent tests for the ITER coil seam. The added tests
+and measurement controls change no product source. The fixture now has two
+live coil columns with different response jets and a zero-padded dead column.
+The residual oracle adds each live column times its current explicitly, adds
+the plasma image separately, and books that independently assembled flux;
+it never calls <code>driven_operands</code>. The dead column receives a nonzero
+current of 83 to exercise the padding convention.</p>
+<p>Each booking tangent entry point is tested on a profile whose density
+gradient varies across flux. Its reference differentiates the primal booking
+with <code>jax.jvp</code>, which does not call the profile's analytic derivative.
+A wrapper exposing only current density forces the deliberately wrong constant
+zero-gradient fallback. The scalar and channel responses must match primal
+differentiation and differ from that fallback. Disposable archived source
+mutations remove each routing assignment separately and run the corresponding
+test, as well as swapping coil order and shifting the live-coil count mask.</p>
+<p>The pin test starts with nonzero cell currents and local vertical moments.
+Its initial centroid is 0.70709251 m, separated from the targets 0.005 and
+-0.008 m. The independent NumPy measurement finds each cell's centre of current
+as <code>Z_cell + local_vertical_moment / cell_current</code>, then directly
+current-weights those positions. It never calls
+<code>support_read._centroid_height</code> and checks both slices at 1e-8 m.
+It also verifies that using geometric cell centres alone misses the target,
+so omission of local first moments cannot pass.</p>
+<table id="bank-traced-inputs-independent-first"><thead><tr><th>Independent check</th>
+<th>Observed signal</th></tr></thead><tbody>
+<tr><td>Manual two-coil residual oracle</td><td>Maximum current-moment error 7.11e-15</td></tr>
+<tr><td>Swapped live-coil order</td><td>Residual mismatch 0.0605136</td></tr>
+<tr><td>Dropped live-coil column</td><td>Residual mismatch 0.0222079</td></tr>
+<tr><td>Variable scalar profile gradient</td><td>Gradient range 5.63275; tangent signal and fallback gap 2.01311</td></tr>
+<tr><td>Geometric-centre-only centroid</td><td>Target misses 0.00155759 and 0.00111690 m</td></tr>
+</tbody></table>
+<p>The first seven-CPU Rigel run (<code>1315071</code>, test commit
+<code>6866e56fa80e46bc60a81def64828594c6d48858</code>) ended
+<code>1 failed, 9 passed in 276.24s</code>. The new channel test supplied a
+Boolean mask to an API expecting integer channel indices and reproduced
+<code>NonConcreteBooleanIndexError: Array boolean indices must be concrete; got bool[1]</code>.
+The correction at <code>68c0f8154b8c4fab106939300da8b244bb9bff7b</code>
+changes only that test argument to integer indices. The channels mutation from
+the first run is not an admitted refusal because that head failed the same id;
+the corrected controls must fail an id that the corrected positive head passes.
+All first-run receipts remain under <code>independent-paired/</code>.</p>
+<h3 id="bank-traced-inputs-independent-pass">Independent checks and mutation refusals passed</h3>
+<p>Rigel job <code>1315097</code> ran the corrected test head
+<code>68c0f8154b8c4fab106939300da8b244bb9bff7b</code> against the dispatch base,
+with seven CPUs, fresh interpreters per file, CPU x64, the shared interpreter,
+archived arm trees, <code>-rfP</code> and the unchanged 300 s per-test bound.
+The new file ends <code>10 passed in 291.20s (0:04:51)</code> and
+<code>EXIT=0</code>. Both scalar and channel tangent tests report a varying
+gradient range of 5.63275, a primal-derivative signal of 2.01311 and a
+constant-fallback gap of 2.01311. The independent nonzero-seed centroid checks
+pass on both slices at 1e-8 m, and the full solve records zero new compilations.</p>
+<table id="bank-traced-inputs-independent-controls"><thead><tr><th>Archived mutation</th>
+<th>Failing test</th><th>Receipt</th></tr></thead><tbody>
+<tr><td>Swap the two live current entries</td><td>distinct_coil_columns_match_independent_residual</td><td>EXIT=1</td></tr>
+<tr><td>Shift the live mask to columns 1 and 2</td><td>distinct_coil_columns_match_independent_residual</td><td>EXIT=1</td></tr>
+<tr><td>Remove scalar density-gradient routing</td><td>variable_profile_gradient_routes_into_booking_tangents[scalar]</td><td>Fallback gap 0; EXIT=1</td></tr>
+<tr><td>Remove channel density-gradient routing</td><td>variable_profile_gradient_routes_into_booking_tangents[channels]</td><td>Fallback gap 0; EXIT=1</td></tr>
+<tr><td>Capture slice currents in a closure</td><td>slice_inputs_cause_zero_new_compilations</td><td>1 new compilation; EXIT=1</td></tr>
+</tbody></table>
+<p>Every mutation names at least one failing id that the positive corrected head
+passes. Both existing suite arms pass unchanged: 13 passed and 2 skipped in
+<code>test_support_read</code>, 10 passed in
+<code>test_bank_drive_continuation</code>, and 11 passed in
+<code>test_bank_lane_drive</code>; added failures are zero. The committed runner
+applies each mutation only in its disposable archive, verifies the altered
+content, restores the original content and keeps each subprocess log and receipt
+under <code>independent-corrected/</code>.</p>
+<p>The evidence-only final commit changes no product or test content. Its paired
+suite replay is recorded under <code>independent-delivery/</code>, with exact
+revision and completion in the manifest and receipts. The source-mutation and
+closure logs above remain the admitted controls for that identical product and
+test content. No product defect or product-source repair was needed.</p>
 </section>

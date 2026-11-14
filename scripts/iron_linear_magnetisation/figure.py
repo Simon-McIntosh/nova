@@ -44,7 +44,7 @@ def main():
             for row in json.loads(args.graded.read_text())["shell"].values()
             if row["converged"]
         ]
-    for path in args.linear.glob("linear-*.json"):
+    for path in args.linear.rglob("linear-*.json"):
         row = json.loads(path.read_text())
         if row.get("completed") and row["converged"]:
             linear.append((row["unknowns"], row["worst_error"] * 100))

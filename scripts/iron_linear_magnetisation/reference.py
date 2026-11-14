@@ -108,7 +108,8 @@ def main():
     reference = np.linalg.norm(owner, axis=1) / np.linalg.norm(shielded, axis=1)
     rows, previous = {}, None
     records = [
-        (path, json.loads(path.read_text())) for path in args.rows.glob("linear-*.json")
+        (path, json.loads(path.read_text()))
+        for path in args.rows.rglob("linear-*.json")
     ]
     for path, row in sorted(
         records, key=lambda pair: pair[1]["cell_size_m"], reverse=True

@@ -23,7 +23,9 @@ trap 'rm -rfv "$scratch"' EXIT
 mkdir -p "$scratch/tree"
 git -C "$source_tree" archive "$revision" | tar -x -C "$scratch/tree"
 export TMPDIR="$scratch" PYTHONPATH="$scratch/tree" MPLCONFIGDIR="$scratch/matplotlib"
-export JAX_PLATFORMS=${JAX_PLATFORMS:-cuda} OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
+export JAX_PLATFORMS=${JAX_PLATFORMS:-cuda}
+export OPENBLAS_NUM_THREADS=${IRON_MEASUREMENT_THREADS:-4}
+export OMP_NUM_THREADS=${IRON_MEASUREMENT_THREADS:-4}
 cd "$scratch/tree"
 /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
     --revision "$revision" --blob "$blob" --output "$1" --basis constant --sizes 0.04

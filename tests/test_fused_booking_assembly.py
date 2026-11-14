@@ -239,3 +239,22 @@ def test_fused_invalid_read_refuses_finite_moments(physical):
     assert not bool(booked.valid)
     assert all(not np.any(np.isfinite(np.asarray(value))) for value in booked[:3])
     assert not np.any(np.isfinite(np.asarray(channels)))
+
+
+def test_fused_booking_refuses_underresolved_quadrature():
+    with pytest.raises(ValueError, match="segments must be at least two"):
+        current.book_tangent_channels(
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            current.Quadrature(segments=1),
+            None,
+            None,
+            fuse_booking=True,
+        )

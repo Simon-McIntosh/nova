@@ -762,6 +762,11 @@ def book_tangent_channels(
     quadrature points and normalized flux are evaluated once per cell visit.
     The returned pair carries the booking and its channel response.
     """
+    if fuse_booking:
+        if quadrature.segments < 2:
+            raise ValueError("quadrature segments must be at least two")
+        if psi.shape != geometry.sample_points.shape[:-1]:
+            raise ValueError("psi must carry flux at every per-cell sample point")
     density_gradient = getattr(profile, "density_gradient", density_gradient)
     cells, samples = psi.shape
     channels = psi_tangent.shape[0]

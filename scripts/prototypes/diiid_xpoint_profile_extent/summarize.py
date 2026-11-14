@@ -114,11 +114,14 @@ def main():
                 "closed_m": start - end,
                 "share_closed": (start - end) / start if start else None,
             }
+        counted, why = readable(base, edge)
         report["rows"][name] = {
             "base": base,
             "edge": edge,
             "closed_m": closed,
             "share_closed": closed / base["lower_x_distance_m"],
+            "counted": counted,
+            "not_counted_reason": why,
             "edge_over_base_distance": (
                 edge["lower_x_distance_m"] / base["lower_x_distance_m"]
             ),
@@ -148,30 +151,65 @@ def main():
     report["all_bases_reproduced"] = all(
         item["reproduced"] for item in report["control"].values()
     )
-    report["headline_rows"] = []
-    report["excluded"] = {}
-    for name, item in report["rows"].items():
-        counted, reason = readable(item["base"], item["edge"])
-        if counted:
-            report["headline_rows"].append(name)
-        else:
-            report["excluded"][name] = reason
-    counted = [report["rows"][name] for name in report["headline_rows"]]
-    report["total_closed_m"] = sum(item["closed_m"] for item in counted)
-    report["total_base_m"] = sum(item["base"]["lower_x_distance_m"] for item in counted)
+    report["headline_rows"] = [
+        name for name, item in report["rows"].items() if item["counted"]
+    ]
+    report["excluded"] = {
+        name: item["not_counted_reason"]
+        for name, item in report["rows"].items()
+        if not item["counted"]
+    }
+    summed = [report["rows"][name] for name in report["headline_rows"]]
+    report["total_closed_m"] = sum(item["closed_m"] for item in summed)
+    report["total_base_m"] = sum(item["base"]["lower_x_distance_m"] for item in summed)
     report["total_share_closed"] = (
-        report["total_closed_m"] / report["total_base_m"] if counted else None
+        report["total_closed_m"] / report["total_base_m"] if summed else None
     )
     args.output.write_text(json.dumps(report, indent=2) + "\n")
     for name, reason in report["excluded"].items():
         print(f"EXCLUDED {name}: {reason}")
+    if summed:
+        print(
+            f"TOTAL {100 * report['total_closed_m']:.2f} of "
+            f"{100 * report['total_base_m']:.2f} cm "
+            f"({100 * report['total_share_closed']:.1f}%) "
+            f"over {', '.join(report['headline_rows'])}"
+        )
+    problems = failures(report)
+    if problems:
+        for problem in problems:
+            print(f"FAIL {problem}")
+        return 1
     print(
-        f"TOTAL {100 * report['total_closed_m']:.2f} of "
-        f"{100 * report['total_base_m']:.2f} cm "
-        f"({100 * report['total_share_closed']:.1f}%) "
-        f"over {', '.join(report['headline_rows'])}"
+        f"PASS {len(report['rows'])} rows reconciled, the base arm reproduces the "
+        f"banked cohort on every row, total over {len(summed)} row"
     )
+    return 0
+
+
+def failures(report):
+    """Reasons this reconciliation is not fit to report.
+
+    The base arm's agreement with the banked cohort is the control standing in
+    for a suite that covers none of these paths, so a drifted base, a missing
+    row, or a total with nothing in it must stop the run rather than be printed
+    beside a total a reader would take as the measurement.
+    """
+
+    problems = [f"no receipt for {name}" for name in report["missing"]]
+    problems += [
+        f"{name} base arm drifted {1000 * item['difference_m']:+.3f} mm from the "
+        f"banked cohort, beyond the 0.5 mm control tolerance"
+        for name, item in report["control"].items()
+        if not item["reproduced"]
+    ]
+    if not report["headline_rows"]:
+        problems.append(
+            "no row counts toward the total: every edge arm failed to converge "
+            "or lost its plasma"
+        )
+    return problems
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="348">
+<meta name="plan-version" content="349">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -1101,6 +1101,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T171241692670-iter-bank-live-gate" data-who="reckon-build" data-when="2026-11-14T18:07:57Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-live-gate.html#iter-bank-live-gate-record — one module-scoped ITER sub-bank with one plasma cell, PF1/CS3U and seven nodes; final CPU head 13 passed/0 skipped versus base 7 passed/6 skipped, zero added failures; from_rows coil-drop mutation fails all six live cases; final shared setup 242.75 s within the unchanged 300 s bound; all_debug route, no H200 fallback.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261114T170651657652-bank-hessian-diagnosis" data-who="reckon-build" data-when="2026-11-14T19:19:56Z">
+    <div class="r-comment-body"><p>[Shared-kernel Hessian diagnosis](/nova/evidence/fragments/sub-millisecond-forward-path/bank-hessian-diagnosis.html#bank-hessian-diagnosis-result): bank/direct trace errors 0.264-0.399 versus reference 5.95e-11-6.25e-11 across 64 nodes at each of three ITER states; gradients agree below 8.65e-13, coil traces below 2.41e-12. Projected-edge tangent conditioning is localised to the shared _packed_moments_height_tangent at polygonanalytic.py:3098; forced curvature mutation is refused with EXIT=1; one inspected trace SVG is published.</p></div>
 </div>
 </section>
 </main>

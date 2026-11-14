@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="336">
+<meta name="plan-version" content="337">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -1045,7 +1045,10 @@
     <div class="r-comment-body"><p>figure review of r-20261113T012704238111-bank-h200-slice-profile at head 2db5f6e5: parsed, 6 of 6 rubric items answered, 0 blocking and 3 non-blocking findings; the previous review's blocking defect (markers drawn on a zero baseline) is visibly answered by the logarithmic axes, and the findings that remain are that the y ticks are three data-derived values at five decimals with a computed geometric mean in the middle, that twelve independent log ranges make a 2.9x fall and a 47x fall look identical, and that all twelve panels stay in ms/slice so the predictor panel prints 0.00010 to 0.00474.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261114T164440333069-review-of-fused-booking-assembly-8871df8029f7" data-who="reckon-build" data-when="2026-11-14T17:37:07.118Z">
-    <div class="r-comment-body"><p>Independent review of run r-20261114T144116292081-fused-booking-assembly at 8871df8029f74e6f2ef62761bd5ba28857a3f4d2 scores 105/120 (goal_fidelity 16, evidence 18, scope_discipline 19, durability 18, fit 15, reuse 19), no blocking findings; three non-blocking findings name positional moment-channel coupling at nova/equilibrium/current.py:570 and nova/equilibrium/support_read.py:1362, and default-on fusion at nova/equilibrium/support_read.py:1763 at widths the evidence records unresolved. Record stored under the reviewed run&#x27;s review-records directory. Findings are [Fused booking evidence](/nova/evidence/fragments/sub-millisecond-forward-path/fused-booking-assembly.html#fused-booking-assembly-landing).</p></div>
+    <div class="r-comment-body"><p>Independent review of run r-20261114T144116292081-fused-booking-assembly at 8871df8029f74e6f2ef62761bd5ba28857a3f4d2 scores 105/120 (goal_fidelity 16, evidence 18, scope_discipline 19, durability 18, fit 15, reuse 19), no blocking findings; three non-blocking findings name positional moment-channel coupling at nova/equilibrium/current.py:570 and nova/equilibrium/support_read.py:1362, and default-on fusion at nova/equilibrium/support_read.py:1763 at widths the evidence records unresolved. Record stored under the reviewed run's review-records directory. Findings are [Fused booking evidence](/nova/evidence/fragments/sub-millisecond-forward-path/fused-booking-assembly.html#fused-booking-assembly-landing).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261114T172421576508-review-of-fused-booking-assembly-8871df8029f7-figure" data-who="reckon-build" data-when="2026-11-14T18:02:17.554Z">
+    <div class="r-comment-body"><p>Figure review of run r-20261114T144116292081-fused-booking-assembly at head 8871df8029f74e6f2ef62761bd5ba28857a3f4d2: the rendered booking-assembly figure passes all six rubric items with no findings — both panels are readable, the fused and separate arms are distinguishable at every plotted width, no ink is clipped and no label collides; the read-only record is stored at the two declared paths.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048" data-who="reckon-build" data-when="2026-11-14T10:26:14.839Z">
     <div class="r-comment-body"><p>two review records under review-records/ of run r-20261113T165201745905-bank-traced-inputs, one plain and one pinned at the reviewed head; this node's suite fence is unarmed so no pytest gate exists for it and none ran.</p></div>

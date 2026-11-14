@@ -34,6 +34,11 @@
       "kind": "folded",
       "node": "bank-traced-inputs",
       "recorded_at": "2026-11-14T10:30:39.599824+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "the fixture has zero plasma response, so a flux panel would show only the vacuum field; the DINA scenario node renders the coupled terminal state with both null sets and the wall",
+      "recorded_at": "2026-11-14T10:30:55.936119+00:00"
     }
   },
   "findings": [

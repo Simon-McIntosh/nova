@@ -46,7 +46,7 @@ def save(record, output):
 
 def memory_plan(record, output):
     """Reserve four dense float64 matrices plus device workspace before assembly."""
-    flat, _, _ = production.linear_regions()
+    flat, smear, _ = production.linear_regions()
     stats = jax.devices()[0].memory_stats()
     limit = stats["bytes_limit"]
     record["memory_limit_bytes"] = limit
@@ -55,25 +55,42 @@ def memory_plan(record, output):
     )
     record["memory_candidates"] = []
     accepted = []
-    for size in (0.035, 0.025, 0.03):
-        cells = iron._mesh(flat, size)
-        count = len(cells.centroids)
-        peak = 4 * (2 * count) ** 2 * 8
-        row = dict(
-            size_m=size, cells=count, dense_peak_bytes=peak, admitted=peak < 0.8 * limit
-        )
+    save(record, output)
+    for size in (0.035, 0.025, 0.03, 0.028, 0.029, 0.032, 0.04):
+        row = dict(size_m=size, admitted=False)
+        try:
+            cells = iron._mesh(flat, size)
+            count = len(cells.centroids)
+            del cells
+            smear_cells = iron._mesh(smear, size)
+            smear_count = len(smear_cells.centroids)
+            del smear_cells
+        except ValueError as error:
+            if "unresolved iron sliver" not in str(error):
+                raise
+            row["reason"] = str(error)
+        else:
+            peak = 4 * (2 * max(count, smear_count)) ** 2 * 8
+            row.update(
+                cells=count,
+                smear_cells=smear_count,
+                dense_peak_bytes=peak,
+                admitted=peak < 0.8 * limit,
+                reason="within memory budget"
+                if peak < 0.8 * limit
+                else "four-matrix working set exceeds 80% device budget",
+            )
         record["memory_candidates"].append(row)
         print("MEMORY " + json.dumps(row), flush=True)
         save(record, output)
         if row["admitted"]:
             accepted.append(size)
-        del cells
         gc.collect()
         if 0.035 in accepted and 0.025 in accepted:
             break
-    sizes = sorted(accepted, reverse=True)
+    sizes = sorted(accepted)[:2]
     assert len(sizes) >= 2, "device does not admit two finer control rungs"
-    record["new_sizes_m"] = [0.035, min(sizes)]
+    record["new_sizes_m"] = sorted(sizes, reverse=True)
     assert record["new_sizes_m"][0] > record["new_sizes_m"][1]
     save(record, output)
     return record["new_sizes_m"]

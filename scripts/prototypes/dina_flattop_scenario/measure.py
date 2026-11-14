@@ -93,9 +93,11 @@ def classify(result, reference, seconds, compiles):
         updates=np.asarray(result.steps),
         reads=np.asarray(result.reads),
         axis_m=np.asarray(reading.axis),
-        xpoint_m=np.asarray(reading.boundary),
+        xpoint_m=np.asarray(stationary.position)[:, 1],
+        boundary_position_m=np.asarray(reading.boundary),
         axis_difference_m=np.asarray(reading.axis) - reference["axis"],
-        xpoint_difference_m=np.asarray(reading.boundary) - reference["xpoints"][0],
+        xpoint_difference_m=np.asarray(stationary.position)[:, 1]
+        - reference["xpoints"][0],
         boundary_flux_wb=np.asarray(reading.boundary_flux),
         boundary_flux_difference_wb=np.asarray(reading.boundary_flux)
         - reference["boundary_flux_wb"],

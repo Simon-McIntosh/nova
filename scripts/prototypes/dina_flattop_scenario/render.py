@@ -124,7 +124,8 @@ def main():
         bank_tally = draw_nulls(
             axes[0],
             magnetic_axis=stationary[0] if valid_nulls[0] else None,
-            x_points=stationary[1:][valid_nulls[1:]],
+            x_points=np.asarray(field["admitted_xpoints"]).reshape(-1, 2),
+            other_x_points=np.asarray(field["other_xpoints"]).reshape(-1, 2),
             contain=(wall,),
             style=style,
         )
@@ -173,7 +174,9 @@ def main():
         figure.legend(
             handles=handles, loc="upper center", ncols=3, fontsize=14, frameon=False
         )
-        figure.text(0.30, 0.80, "Bank", ha="center", fontsize=16)
+        figure.text(
+            0.30, 0.80, f"Bank ({field['boundary_class']})", ha="center", fontsize=16
+        )
         figure.text(0.70, 0.80, "DINA", ha="center", fontsize=16)
         residual = float(row["fresh_residual"][0])
         converged = bool(row["converged"][0])
@@ -204,14 +207,14 @@ def main():
         figures.append(
             f'<figure id="dina-flattop-scenario-slice-{index}"><img src="{url}" alt="Bank and DINA line contours at {reference["time_s"]:.3f} seconds"><figcaption>'
             f"Slice {index}, {reference['time_s']:.6f} s: fresh residual {residual:.9g}, converged {converged}; stage {html.escape(row['failure_stage'][0])}. "
-            f"Bank blue, DINA dashed near-black; each panel marks its own qualified axis and saddle with the triangle/cross vocabulary. Bank markers re-read the requested-input field on CPU. "
+            f"Bank blue, DINA dashed near-black; each panel marks its own qualified axis and saddle with the triangle/cross vocabulary. A hollow cross is qualified but not selected as the plasma boundary. Bank markers re-read the requested-input field on CPU; its boundary class is {field['boundary_class']}. "
             f"{int(np.count_nonzero(valid_nulls))}/{len(valid_nulls)} bank nulls qualified. Native first wall, equal aspect, shared flux levels "
             f"{levels[0]:.6g} to {levels[-1]:.6g} Wb in {levels[1] - levels[0]:.6g} Wb steps. Raw flux gauges retained without alignment.</figcaption></figure>"
         )
         axis_error = np.linalg.norm(field["axis_difference_m"]) * 1000
         x_error = np.linalg.norm(field["xpoint_difference_m"]) * 1000
         rows.append(
-            f"<tr><td>{index}</td><td>{reference['time_s']:.6f}</td><td>{row['wall_ms']:.6g}</td>"
+            f"<tr><td>{index}</td><td>{reference['time_s']:.6f}</td><td>{row['wall_ms'] / 1000:.6g}</td>"
             f"<td>{residual:.6g}</td><td>{html.escape(row['failure_stage'][0])}</td>"
             f"<td>{row['all_compilations']}</td></tr>"
         )
@@ -222,7 +225,7 @@ def main():
         )
         null_rows.append(
             f"<tr><td>{index}</td><td>{row['null_iterations'][0]}</td>"
-            f"<td>{field['null_iterations']}</td><td>{field['classification_agrees']}</td></tr>"
+            f"<td>{field['null_iterations']}</td><td>{field['classification_agrees']}</td><td>{field['boundary_class']}</td></tr>"
         )
     assert frames, (
         "no finite terminal fields to render; reference maps cannot replace them"
@@ -266,13 +269,13 @@ def main():
         "Eleven same-input replay timings are retained only for converged states. No speed-lever default is changed and no off/on speedup is claimed. "
         "Warmup and two fresh processes completed at width 1 in one H200 job; the first width-16 process failed and the two measured width-16 processes did not run.</p>",
         f"<pre>{html.escape(json.dumps(summary.get('agreement', {}), indent=2))}</pre>",
-        "<h4>Per-slice solver calls</h4><table><thead><tr><th>Slice</th><th>Time [s]</th><th>Width 1 [ms]</th><th>Fresh residual</th><th>Stage</th><th>Compilations in measured interval</th></tr></thead><tbody>",
+        "<h4>Per-slice solver calls</h4><table><thead><tr><th>Slice</th><th>Time [s]</th><th>Width 1 [s]</th><th>Fresh residual</th><th>Stage</th><th>Compilations in measured interval</th></tr></thead><tbody>",
         *rows,
         "</tbody></table>",
         "<h4>Differences from DINA at the requested inputs</h4><table><thead><tr><th>Slice</th><th>Axis distance [mm]</th><th>X-point distance [mm]</th><th>Boundary flux difference [Wb]</th><th>Ip difference [kA]</th></tr></thead><tbody>",
         *comparisons,
         "</tbody></table>",
-        "<h4>Stationary-point diagnostics</h4><table><thead><tr><th>Slice</th><th>Terminal H200 iterations [axis, X]</th><th>Requested-field CPU read iterations [axis, X]</th><th>Classes agree with DINA [axis, X]</th></tr></thead><tbody>",
+        "<h4>Stationary-point diagnostics</h4><table><thead><tr><th>Slice</th><th>Terminal H200 iterations [axis, X]</th><th>Requested-field CPU read iterations [axis, X]</th><th>Classes agree with DINA [axis, X]</th><th>Selected boundary class</th></tr></thead><tbody>",
         *null_rows,
         "</tbody></table>",
         "<p>Per-lane terminal values, continuation substeps, compiler messages and terminal nodal fields are retained under "
@@ -280,7 +283,7 @@ def main():
         f"The width-1 table and figures use <code>{html.escape(str(receipt_path))}</code>. Each failed terminal result, including a rejected intermediate continuation trial, seeds the next slice; this is not a stream of exclusively converged warm starts. "
         "At failed continuation slices 131, 134, 136 the saved field is evaluated with the requested currents, while the original terminal nulls belong to intermediate trial currents. "
         f"Field-consistent comparisons and markers therefore use the separate CPU read <code>{html.escape(str(args.observables))}</code>, which checks the reconstructed field against the saved H200 nodal flux. "
-        "This read changes no moments and supplies no new H200 timing or convergence result. DINA null classes are independently checked using second derivatives of its stored flux spline; they are an axis minimum and a saddle.</p>",
+        "This read changes no moments and supplies no new H200 timing or convergence result. The X-point difference uses the tracked saddle, never the selected boundary contact; the original receipt conflated those points at the limited state of slice 134. DINA null classes are independently checked using second derivatives of its stored flux spline; they are an axis minimum and a saddle.</p>",
     ]
     control_path = args.results / "width-1-process-0/negative-controls.json"
     if control_path.exists():
@@ -325,7 +328,7 @@ def main():
     body += [
         '<figure id="dina-flattop-scenario-animation"><img src="/nova/figures/sub-millisecond-forward-path/dina-flattop-scenario/flattop.gif" alt="Consecutive terminal bank fields beside native DINA fields"><figcaption>'
         "Every finite returned terminal field in time order; each frame states its fresh residual and convergence flag. Failed fields remain failed in the animation.</figcaption></figure>",
-        '<figure id="dina-flattop-scenario-contact"><img src="/nova/figures/sub-millisecond-forward-path/dina-flattop-scenario/flattop-frames.png" alt="Six evenly spaced terminal comparisons"><figcaption>'
+        '<figure id="dina-flattop-scenario-contact"><img src="/nova/figures/sub-millisecond-forward-path/dina-flattop-scenario/flattop-frames.png" alt="Pulse endpoints and all four failed terminal comparisons"><figcaption>'
         "The first slice, every failed slice, and the last slice: indices 129, 131, 132, 134, 136 and 148. Full-resolution vector panels below retain the field and null comparisons.</figcaption></figure>",
         *figures,
         "</article>",

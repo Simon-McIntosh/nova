@@ -97,6 +97,14 @@ def main():
         hessian = np.stack((radial, mixed, mixed, vertical), axis=-1).reshape(-1, 2, 2)
         native_classes = classes(hessian)
         actual_classes = classes(np.asarray(stationary.jet.hessian))
+        selected_nulls = np.asarray(support.reading.x_points)[
+            np.asarray(support.reading.x_point_valid)
+        ]
+        saddles = np.asarray(stationary.position)[1:]
+        admitted = np.any(
+            np.linalg.norm(saddles[:, None] - selected_nulls[None], axis=-1) < 1e-10,
+            axis=1,
+        )
         observed = dict(
             index=index,
             stationary=np.asarray(stationary.position),
@@ -107,10 +115,15 @@ def main():
             dina_null_classification=native_classes,
             classification_agrees=actual_classes == native_classes,
             axis_m=np.asarray(support.reading.axis),
-            xpoint_m=np.asarray(support.reading.boundary),
+            xpoint_m=saddles[0],
+            admitted_xpoints=saddles[admitted],
+            other_xpoints=saddles[np.asarray(stationary.valid)[1:] & ~admitted],
+            boundary_position_m=np.asarray(support.reading.boundary),
+            boundary_class=topology.TopologyClass(
+                int(support.reading.boundary_class)
+            ).name.lower(),
             axis_difference_m=np.asarray(support.reading.axis) - reference["axis"],
-            xpoint_difference_m=np.asarray(support.reading.boundary)
-            - reference["xpoints"][0],
+            xpoint_difference_m=saddles[0] - reference["xpoints"][0],
             boundary_flux_difference_wb=float(support.reading.boundary_flux)
             - reference["boundary_flux_wb"],
             maximum_flux_difference_wb=field_difference,

@@ -172,7 +172,10 @@ def main():
             dd=DD,
             slices=records,
             coil_names=names,
-            rule="twenty consecutive stored slices from the established 30 s flattop onset; abs(Ip) >= 95% peak",
+            rule=(
+                "twenty consecutive stored slices from the established "
+                "30 s flattop onset; abs(Ip) >= 95% peak"
+            ),
             bank_digest=json.loads((retained / "build-receipt.json").read_text())[
                 "bank"
             ]["digest"],
@@ -180,7 +183,10 @@ def main():
             bank_sha256=hashlib.sha256(
                 (retained / "geometry.npz").read_bytes()
             ).hexdigest(),
-            flux_convention="Nova total flux is negative of stored DD3 flux; raw gauges retained, no offset fitted",
+            flux_convention=(
+                "Nova total flux is negative of stored DD3 flux; "
+                "raw gauges retained, no offset fitted"
+            ),
         ),
     )
     print("INPUTS_VERIFIED consecutive=20 bank_arrays=8 coils=12", flush=True)

@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T13:20:32.861Z",
+  "dispatched_at": "2026-11-14T13:15:33Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261114T131510429951-plan-review-of-kernel-compile-barrier/plan.html:59",
+      "id": "done_when-1",
+      "reason": "the H200 lane is the only place those assertions could run, and a worker following the clause deselects them and believes the bound is measured, so a regression in per-tangent compile ratio reaches main with the plan asserting it was gated.",
+      "text": "clause (3) deselects \"the tests that assert a compile wall\" and says they are \"judged on the H200 only, by clause (2)'s paired job\", but clause (2)'s job is the compile-pass-profile harness over `production_point_batch` (instruction count after the splitter and one cold wall), which runs no test at all: the assertions being deselected live in six test files (tests/biot/test_edge_term_tangents.py:346, tests/biot/test_vertex_term_tangents.py:626, tests/biot/test_near_collinear_tangent.py:194, tests/biot/test_elliptic_tangent_recurrences.py:469, tests/biot/test_range_tangent_recurrences.py:362, tests/biot/test_vertex_edge_tangent_recurrences.py:473) and none is executed by that harness, so once deselected the six compile-ratio assertions are judged nowhere while the plan reports them as covered",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261114T131510429951-plan-review-of-kernel-compile-barrier/plan.html:59",
+      "id": "done_when-2",
+      "reason": "the base arm is only a control for the exact file set it ran, so a worker resolving the clause literally runs 38 files against unmeasured cost or picks an arbitrary subset, and in either case \"no added failure versus the base arm\" compares against a set that is not the one it ran.",
+      "text": "the clause names its test set as \"the test files that import a module \u00a72 changes\", a set the worker cannot resolve before the change and which the cited base arm did not run as stated: job 1314800's log holds 17 completed file rows, while `grep -rl \"fixed_points\\|polygonanalytic\" tests/` returns 38 files, 21 of them (tests/equilibrium/test_topology_read.py, tests/test_support_read.py, tests/test_moment_field_hessian.py, the bank and tracked-read files among them) absent from the arm",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261114T131510429951-plan-review-of-kernel-compile-barrier/plan.html:59",
+      "id": "reasoning-1",
+      "reason": "without a stated per-test timeout and job sizing, both arms of clause (3) burn 1.5 h a side on three unrelated timeout failures, and the plan's own prior record (c-20261027-edge-tangent-base-failures) holds that the repair for those rows is a timeout sized to the measured compile, not deselection.",
+      "text": "the clause reads the base arm as \"two files ... took 4.9 h of 5.3 h cold-compiling kernel tangents on CPU\" and drops the previous text's requirement of a per-test timeout sized to the measured wall, but the cited job's own edge-file log (suite-base-tests--biot--test_edge_term_tangents.py.log) shows its three slowest rows are `test_tangent_matches_base_jvp[...]` failing by `Failed: Timeout (>1800.0s) from pytest-timeout` \u2014 5,400 s of the file's 11,424 s \u2014 and the rows the clause deselects fail instead on the ratio assertion; the identity rows it keeps are therefore the ones that cost an hour and a half per arm and report as failures for want of a timeout, and the arm is given no job wall or memory",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "b6e15899063e957c5ba1924ef2305451f3ed31bf",
+  "plan_fingerprint": "abff2bd26fe9e3b6faa7af0071da7deede7903fb9a18b88ee0cdf4fc8205947c",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 46,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261114T131510429951-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "99cb71ece7df415959af28306b8ed5f0e3d17b93",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the two fragment hrefs (production-point-batch-pass-profile.html, graph-growth-history.html), /nova/sub-millisecond-forward-path.html, scripts/prototypes/compile_pass_profile, commit 00ec05512 and the fixed_points.py anchors (:323 _source_jets, :521 _row_program, :543 maintain_rows) all resolve at HEAD.",
+    "done_when": "a finding \u2014 clause (3) states the deselected compile-wall tests are \"judged on the H200 only, by clause (2)'s paired job\", but clause (2)'s job runs the compile-pass-profile harness on the production row program and executes none of those tests, so the clause removes them from every arm while claiming they are covered.",
+    "evidence_paths": "pass \u2014 the new clause cites (sirius job 1314800) whose log is on a durable path (~/.cache/nova-kernel-compile-barrier/variadic-split/importers-192g/suite-1314800.log), and the \"deselected ids listed in the evidence\" repeats a placement this plan's earlier review declined on the grounds that the node dispatch fixes the path.",
+    "naming": "pass \u2014 the changed text introduces no plan label, ticket number or version tag into a symbol or comment.",
+    "reasoning": "a finding \u2014 the clause attributes the base arm's 4.9 h to \"cold-compiling kernel tangents\" and drops the per-test timeout the previous text carried, while the log for the job it cites shows three identity rows in the edge file failing only by `pytest-timeout (>1800 s)`.",
+    "single_goal": "pass \u2014 s2 carries one deliverable, the variadic program the point jet hands XLA, measured by one paired compile job; the new clause (3) is its test-delta arm, not a second deliverable.",
+    "wiring": "pass \u2014 s2 declares data-links=\"kernel-compile-barrier#s5\", s5 is `done`, and the decisions clause (2) cites (variadic-share-on-production-base, compile-target-shared) exist with data-sections naming s2."
+  },
+  "section_digests": {
+    "_document": "19c46cca46cf251b2f56d75e5620c8069d6b72a6623a979673bb4a8e4258367e",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "61a2e63a20552d9d72852604875917459f77f9408bbe512a6ab0310ebc3f7254",
+    "s3": "ab68c20ce5d3e9242532f0e5cb72a8baf8b9ce57666cac7db68cee8904360fa1",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T13:32:52.678288+00:00",
+  "total": null
+}

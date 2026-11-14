@@ -658,7 +658,7 @@ def _galerkin_edge_geometry(polygons):
 
 
 @functools.lru_cache(maxsize=16)
-def _mutual_edge_evaluator(order, kind):
+def _mutual_edge_evaluator(order, kind, linear=False):
     """Compile a shared reciprocal quadrature, including logarithmic edge pairs."""
     import jax
     import jax.numpy as jnp
@@ -717,6 +717,33 @@ def _mutual_edge_evaluator(order, kind):
                 target[..., 0], target[..., 1], source[..., 0], source[..., 1], gap
             )
 
+        def weighted(t, u, gap=None):
+            value = pair(t, u, gap)
+            if not linear:
+                return value
+            left = jnp.stack((jnp.ones_like(t), t), axis=-1)
+            right = jnp.stack((jnp.ones_like(u), u), axis=-1)
+            return (
+                value[..., None, None]
+                * left[None, :, :, None]
+                * right[None, :, None, :]
+            )
+
+        if linear:
+            if kind == "self":
+                t, u = x**3, x**3 * (1 - y**3)
+                gap = jnp.sum((b - a) ** 2, axis=-1) * (x**3 * y**3)[None, :] ** 2
+                values = (weighted(t, u, gap) + weighted(u, t, gap)) * (
+                    9 * x**5 * y**2
+                )[None, :, None, None]
+            elif kind == "adjacent":
+                t, u = x**3, x**3 * y
+                values = (weighted(t, u) + weighted(u, t)) * (3 * x**5)[
+                    None, :, None, None
+                ]
+            else:
+                values = weighted(x, y)
+            return jnp.einsum("pqij,q->pij", values, weight)
         if kind == "self":
             # Fold the square about its diagonal; the graded distance resolves log|t-u|.
             t, u = x**3, x**3 * (1 - y**3)
@@ -1844,3 +1871,317 @@ __all__ = [
     "tile_coupling",
     "tile_evaluator",
 ]
+
+
+def linear_magnetisation_geometry(polygons):
+    """Return scaled linear basis, Gram blocks and bound-current incidence.
+
+    Basis order is (component, cell, [constant, radial, vertical]). The two
+    gradients are scaled by the square root of the cell area for conditioning.
+    Edge current density is affine in the edge parameter; volume current is
+    dM_R/dz - dM_Z/dr. All coefficients refer to the authored poloidal geometry.
+    """
+    from scipy.sparse import coo_matrix
+    import shapely
+    from nova.biot.sectionaverage import section_nodes
+
+    bodies = [shapely.Polygon(p) for p in polygons]
+    centres = np.asarray([[p.centroid.x, p.centroid.y] for p in bodies])
+    scale = np.sqrt([p.area for p in bodies])
+    count = len(polygons)
+    atoms, normals = _galerkin_edge_geometry(polygons)
+    rows, columns, values = [], [], []
+    for row, edge, normal in zip(
+        normals.tocoo().row, normals.tocoo().col, normals.tocoo().data, strict=True
+    ):
+        cell = row % count
+        delta = (atoms[edge] - centres[cell]) / scale[cell]
+        density = (
+            np.array(
+                [
+                    [1.0, 0.0],
+                    [delta[0, 0], delta[1, 0] - delta[0, 0]],
+                    [delta[0, 1], delta[1, 1] - delta[0, 1]],
+                ]
+            )
+            * normal
+        )
+        for basis in range(3):
+            for power in range(2):
+                rows.append(3 * row + basis)
+                columns.append(2 * edge + power)
+                values.append(density[basis, power])
+    edge_coefficient = coo_matrix(
+        (values, (rows, columns)), shape=(6 * count, 2 * len(atoms))
+    ).tocsr()
+    volume_coefficient = coo_matrix(
+        (
+            np.r_[1 / scale, -1 / scale],
+            (
+                np.r_[3 * np.arange(count) + 2, 3 * (count + np.arange(count)) + 1],
+                np.tile(np.arange(count), 2),
+            ),
+        ),
+        shape=(6 * count, count),
+    ).tocsr()
+    blocks, points, weights, basis_values, owners = [], [], [], [], []
+    for cell, polygon in enumerate(polygons):
+        point, weight = section_nodes(polygon, 6)
+        basis = np.column_stack(
+            (np.ones(len(point)), (point - centres[cell]) / scale[cell])
+        )
+        volume_weight = 2 * np.pi * point[:, 0] * weight
+        blocks.append(basis.T @ (volume_weight[:, None] * basis))
+        points.append(point)
+        weights.append(volume_weight)
+        basis_values.append(basis)
+        owners.extend([cell] * len(point))
+    return dict(
+        atoms=atoms,
+        edge_coefficient=edge_coefficient,
+        volume_coefficient=volume_coefficient,
+        centres=centres,
+        scale=scale,
+        gram=np.asarray(blocks),
+        points=np.concatenate(points),
+        weights=np.concatenate(weights),
+        basis=np.concatenate(basis_values),
+        owners=np.asarray(owners),
+    )
+
+
+def _linear_edge_mutual(atoms, plan, order):
+    """Return reciprocal affine edge-current mutual flux, with Duffy diagonals."""
+    count = len(atoms)
+    lengths = np.linalg.norm(atoms[:, 1] - atoms[:, 0], axis=1)
+    centres = atoms.mean(axis=1)
+    mutual = np.empty((2 * count, 2 * count))
+    block = max(1, plan.block)
+    for row in range(count):
+        columns = np.arange(row, count)
+        a = np.repeat(atoms[row, 0][None], len(columns), axis=0)
+        b = np.repeat(atoms[row, 1][None], len(columns), axis=0)
+        c, d = atoms[columns, 0].copy(), atoms[columns, 1].copy()
+        same = columns == row
+        adjacent = np.zeros(len(columns), dtype=bool)
+        flip_left = np.zeros(len(columns), dtype=bool)
+        flip_right = np.zeros(len(columns), dtype=bool)
+        for first, second in ((0, 0), (0, 1), (1, 0), (1, 1)):
+            shared = np.all(atoms[row, first] == atoms[columns, second], axis=1) & ~same
+            adjacent |= shared
+            flip_left |= shared & bool(first)
+            flip_right |= shared & bool(second)
+        a[flip_left], b[flip_left] = b[flip_left].copy(), a[flip_left].copy()
+        c[flip_right], d[flip_right] = d[flip_right].copy(), c[flip_right].copy()
+        near = np.linalg.norm(centres[row] - centres[columns], axis=1) < 3 * (
+            lengths[row] + lengths[columns]
+        )
+        for kind, selected, nodes in (
+            ("self", same, order),
+            ("adjacent", adjacent, order),
+            ("regular", near & ~same & ~adjacent, order),
+            ("regular", ~near & ~same & ~adjacent, 8),
+        ):
+            indices = np.flatnonzero(selected)
+            evaluator = _mutual_edge_evaluator(nodes, kind, True)
+            for offset in range(0, len(indices), block):
+                chosen = indices[offset : offset + block]
+                padded = np.pad(chosen, (0, block - len(chosen)), mode="edge")
+                value = np.array(evaluator(a[padded], b[padded], c[padded], d[padded]))[
+                    : len(chosen)
+                ]
+                transform = np.array([[1.0, 1.0], [0.0, -1.0]])
+                value[flip_left[chosen]] = transform.T @ value[flip_left[chosen]]
+                value[flip_right[chosen]] = value[flip_right[chosen]] @ transform
+                value *= (lengths[row] * lengths[columns[chosen]])[:, None, None]
+                for k, column in enumerate(columns[chosen]):
+                    mutual[2 * row : 2 * row + 2, 2 * column : 2 * column + 2] = value[
+                        k
+                    ]
+                    mutual[2 * column : 2 * column + 2, 2 * row : 2 * row + 2] = value[
+                        k
+                    ].T
+    return mutual
+
+
+def _polygon_current_geometry(polygons):
+    """Pack triangle sources once, preserving their cell-current incidence."""
+    from scipy.sparse import coo_matrix
+    import shapely
+
+    triangles, owners, areas = [], [], []
+    for cell, polygon in enumerate(polygons):
+        for triangle in shapely.get_parts(
+            shapely.constrained_delaunay_triangles(shapely.Polygon(polygon))
+        ):
+            triangles.append(np.asarray(triangle.exterior.coords)[:-1])
+            owners.append(cell)
+            areas.append(triangle.area)
+    edge, weight, norm = pad_batch(triangles, edge_count=3)
+    incidence = coo_matrix(
+        (areas, (np.arange(len(owners)), owners)), shape=(len(owners), len(polygons))
+    ).tocsr()
+    return edge, weight, norm, incidence
+
+
+@functools.lru_cache(maxsize=2)
+def _polygon_current_evaluator(flux_only):
+    """Compile the existing closed polygon kernel, retaining only needed rows."""
+    import jax
+    import jax.numpy as jnp
+
+    configure_production_compilation_cache()
+
+    @jax.jit
+    def evaluate(r, z, edge, weight, norm):
+        response = packed_analytic_greens(jnp, r, z, edge, weight, norm)
+        return jnp.stack(response[:1] if flux_only else response)
+
+    return evaluate
+
+
+def _polygon_current_response(polygons, points, plan, *, packed=None, flux_only=False):
+    """Evaluate uniform volume currents through the closed polygon owner.
+
+    Triangle decomposition holds the traced graph at three edges even for
+    curved polygon boundaries with many authored vertices. Responses are per
+    unit current density, so triangle areas multiply the per-ampere kernel.
+    """
+    edge, weight, norm, incidence = packed or _polygon_current_geometry(polygons)
+    tile = TilePlan(32, 32, plan.block, 16, 48)
+    evaluator = _polygon_current_evaluator(flux_only)
+    components = 1 if flux_only else 3
+    result = np.zeros((components, len(points), len(polygons)))
+    for target, source in tile.tiles(len(points), len(norm)):
+        rows = np.arange(target.start, target.stop)
+        columns = np.arange(source.start, source.stop)
+        rr = np.repeat(rows, len(columns))
+        cc = np.tile(columns, len(rows))
+        number = len(rr)
+        rr = np.pad(rr, (0, 1024 - number), mode="edge")
+        cc = np.pad(cc, (0, 1024 - number), mode="edge")
+        value = np.asarray(
+            evaluator(
+                points[rr, 0], points[rr, 1], edge[:, :, cc], weight[:, cc], norm[cc]
+            )
+        )[:, :number].reshape(components, len(rows), len(columns))
+        for component in range(components):
+            result[component, target] += value[component] @ incidence[source]
+    return result
+
+
+def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 24):
+    """Return the linear Galerkin B/M operator and its volume Gram blocks.
+
+    For any affine M, integration by parts gives the same flux pairing as its
+    bound currents: affine boundary sheets plus constant curl M in the volume.
+    The reciprocal current energy is contracted before the local Gram solve.
+    """
+    from nova.biot.sectionaverage import section_nodes
+
+    geometry = linear_magnetisation_geometry(polygons)
+    atoms = geometry["atoms"]
+    packed = _polygon_current_geometry(polygons)
+    edge = geometry["edge_coefficient"]
+    volume = geometry["volume_coefficient"]
+    mutual = _linear_edge_mutual(atoms, plan, order)
+    energy = np.asarray((edge @ mutual) @ edge.T)
+    del mutual
+    nodes, weights = np.polynomial.legendre.leggauss(order)
+    parameter, weights = (nodes + 1) / 2, weights / 2
+    # Integrate each affine boundary test against exact uniform polygon flux.
+    edge_volume = np.empty((2 * len(atoms), len(polygons)))
+    for begin in range(0, len(atoms), 16):
+        selected = atoms[begin : begin + 16]
+        points = selected[:, :1] + parameter[None, :, None] * (
+            selected[:, 1:] - selected[:, :1]
+        )
+        flux = _polygon_current_response(
+            polygons, points.reshape(-1, 2), plan, packed=packed, flux_only=True
+        )[0]
+        flux = flux.reshape(len(selected), order, len(polygons))
+        moments = np.einsum(
+            "eqc,q,qp,e->epc",
+            flux,
+            weights,
+            np.column_stack((np.ones(order), parameter)),
+            np.linalg.norm(selected[:, 1] - selected[:, 0], axis=1),
+        )
+        edge_volume[2 * begin : 2 * (begin + len(selected))] = moments.reshape(
+            -1, len(polygons)
+        )
+    cross = np.asarray((edge @ edge_volume) @ volume.T)
+    energy += cross + cross.T
+    del cross, edge_volume
+    # The volume potential is continuous, including at interior quadrature nodes.
+    volume_mutual = np.empty((len(polygons), len(polygons)))
+    for cell, polygon in enumerate(polygons):
+        points, weights = section_nodes(polygon, order)
+        flux = _polygon_current_response(
+            polygons, points, plan, packed=packed, flux_only=True
+        )[0]
+        volume_mutual[cell] = weights @ flux
+    energy += np.asarray((volume @ volume_mutual) @ volume.T)
+    energy = (energy + energy.T) / 2
+    blocks = geometry["gram"]
+    count = len(polygons)
+    inverse = np.tile(np.linalg.inv(blocks), (2, 1, 1))
+    operator = np.einsum(
+        "cij,cjk->cik", inverse, energy.reshape(2 * count, 3, -1)
+    ).reshape(6 * count, -1)
+    return operator, blocks
+
+
+def linear_cell_interaction(polygons, points, *, plan: TilePlan, order: int = 24):
+    """Evaluate affine M through closed uniform sheets and ring first moments.
+
+    Only the zero-mean affine edge remainder uses ring quadrature; the constant
+    sheet uses the existing exact sheet tile. The curl contribution uses the
+    exact uniform polygon section kernel.
+    """
+    from nova.biot.greens import traced_filament_greens
+    import jax
+    import jax.numpy as jnp
+
+    geometry = linear_magnetisation_geometry(polygons)
+    atoms = geometry["atoms"]
+    edge = geometry["edge_coefficient"]
+    radial, vertical = sheet_edge_field(
+        points[:, 0],
+        points[:, 1],
+        atoms[:, 0, 0],
+        atoms[:, 0, 1],
+        atoms[:, 1, 0],
+        atoms[:, 1, 1],
+        plan=plan,
+    )
+    nodes, weights = np.polynomial.legendre.leggauss(order)
+    parameter, weights = (nodes + 1) / 2, weights / 2
+
+    @jax.jit
+    def moment(target, source):
+        psi, br, bz = traced_filament_greens(
+            jnp,
+            target[:, None, None, 0],
+            target[:, None, None, 1],
+            source[None, :, :, 0],
+            source[None, :, :, 1],
+        )
+        return jnp.stack((br, bz)) @ jnp.asarray(weights * (parameter - 0.5))
+
+    lengths = np.linalg.norm(atoms[:, 1] - atoms[:, 0], axis=1)
+    source = atoms[:, :1] + parameter[None, :, None] * (atoms[:, 1:] - atoms[:, :1])
+    remainder = (
+        np.asarray(moment(jnp.asarray(points), jnp.asarray(source)))
+        * lengths[None, None]
+    )
+    response = []
+    for component, constant in enumerate((radial, vertical)):
+        paired = np.stack(
+            (constant, constant / 2 + remainder[component]), axis=-1
+        ).reshape(len(points), -1)
+        response.append(paired @ edge.T)
+    current = _polygon_current_response(polygons, points, plan)
+    for component in range(2):
+        response[component] += current[component + 1] @ geometry["volume_coefficient"].T
+    return np.concatenate(response)

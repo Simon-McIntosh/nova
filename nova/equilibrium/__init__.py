@@ -204,6 +204,8 @@ if TYPE_CHECKING:
 #: Names loaded from their module on first attribute access, so importing the
 #: package boundary never pulls in the optional jax extra.
 _DEFERRED_EXPORTS: dict[str, str] = {
+    "MagneticsFit": "magnetics_fit",
+    "MagneticsFitReceipt": "magnetics_fit",
     "AdmissibilityCriterion": "branch_selection",
     "BranchAdmissibility": "branch_selection",
     "BranchAvailability": "branch_selection",
@@ -328,6 +330,8 @@ _DEFERRED_EXPORTS: dict[str, str] = {
 }
 
 __all__ = [
+    "MagneticsFit",
+    "MagneticsFitReceipt",
     "AdmissibilityCriterion",
     "BranchAdmissibility",
     "BranchAvailability",

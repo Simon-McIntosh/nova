@@ -1,5 +1,5 @@
 <article id="ilf-six-limb-reference-checkpoint">
-  <h3>Six-limb surface reference: sphere repaired, annulus calibration unresolved</h3>
+  <h3>Six-limb reference accepted; symmetry passes, annulus extrapolation unresolved</h3>
   <p>The surface formulation constrains the net charge of each closed body.
     The circuit's odd mirror images enforce the same constraint by parity.
     Analytically integrated double-layer solid angles fix the exact row sum;
@@ -44,37 +44,112 @@
     quadrature change is 2.58 × 10⁻⁸.</p>
   <p>The declared negative control flips one brick face charge. Its dipole
     and cube-demagnetisation test fails with EXIT=1 after verifying that the
-    mutated scratch module is the one imported. The current node suite has
-    fourteen passing tests.</p>
+    mutated scratch module is the one imported. The final scoped suite receipt
+    is the run log <code>control-final-head-suite.log</code>.</p>
+  <p>The sphere and six-limb reference refinement are accepted. Two separate
+    rigel jobs completed the remaining controls without changing the accepted
+    surface solver. Annulus job 1315043 completed in 1 h 32 min 25 s with
+    EXIT=1; symmetry job 1315045 completed in 16 min 1 s with EXIT=0. Both
+    requested six hours from submission and neither requested an extension.</p>
+  <p>The annulus job verified the case digest and all five owning source files
+    before reusing the 0.1 and 0.075 m measurements. It added the 0.05 m mesh
+    on both sides. Surface unknown counts are 29,966, 48,966 and 103,030;
+    axisymmetric cell counts are 2,352, 4,224 and 9,264. The optional 0.0375 m
+    axisymmetric rung was skipped because elapsed time exceeded one hour
+    before that rung, under the rule declared before submission. Axisymmetric
+    flux uses exact cell–slab overlap volumes; surface flux uses the
+    independently refined slab quadrature.</p>
+  <p>Richardson fits use the three finest meshes and an observed positive
+    order. Oscillatory increments and triples without a positive order are
+    refused. The uncertainty below is the difference between the extrapolate
+    and the finest value, not a confidence interval. Vector field fits share
+    an order from consecutive difference norms and retain the increment
+    alignment in the receipt; they are descriptive where directions differ.</p>
   <table>
-    <caption>Full annulus against Nova, both at 0.075 m maximum mesh scale.
-      The surface solve has 48,966 unknowns; Nova has 4,224 cells.
-      Relative differences use the surface result as denominator.</caption>
-    <thead><tr><th>μᵣ</th><th>Nova flux [Wb]</th><th>Surface flux [Wb]</th>
-      <th>Flux difference</th><th>In-vessel difference</th><th>Largest outside difference</th></tr></thead>
+    <caption>Annulus column flux [Wb]. Surface flux reverses direction at both permeabilities, so neither required flux comparison has an admissible two-sided extrapolation.</caption>
+    <thead><tr><th>μᵣ</th><th>Method</th><th>0.1 m</th><th>0.075 m</th><th>0.05 m</th><th>Extrapolate</th><th>Order</th><th>Correction [Wb]</th></tr></thead>
     <tbody>
-      <tr><td>50</td><td>5.47009885</td><td>5.56387902</td><td>1.6855%</td><td>0.8732%</td><td>1.8997%</td></tr>
-      <tr><td>200</td><td>19.83921843</td><td>21.09070207</td><td>5.9338%</td><td>2.9262%</td><td>8.5361%</td></tr>
+      <tr><td>50</td><td>Nova</td><td>5.40579451</td><td>5.47009885</td><td>5.51240121</td><td>5.54083687</td><td>2.2476</td><td>0.02843566 (0.5132%)</td></tr>
+      <tr><td>200</td><td>Nova</td><td>19.02880210</td><td>19.83921843</td><td>20.36661894</td><td>20.71342359</td><td>2.2802</td><td>0.34680465 (1.6743%)</td></tr>
+      <tr><td>50</td><td>Surface</td><td>5.64449343</td><td>5.56387902</td><td>5.57128678</td><td>Unavailable: oscillatory</td><td>Unavailable</td><td>Unavailable</td></tr>
+      <tr><td>200</td><td>Surface</td><td>21.42626027</td><td>21.09070207</td><td>21.12406735</td><td>Unavailable: oscillatory</td><td>Unavailable</td><td>Unavailable</td></tr>
     </tbody>
   </table>
-  <p>The annulus agrees within 2% at μᵣ = 50 and fails at μᵣ = 200.
-    Nova's own 0.1 to 0.075 m pair changes by up to 1.6083% and 6.8845%,
-    respectively. This leaves the source of the high-permeability comparison
-    error unresolved. The annulus was measured on seven surface meshes;
-    the six-limb circuit on five and Nova on four.</p>
-  <p>The single rigel batch, job 1314904, reached its 85-minute limit after
-    completing both permeabilities on the finest annulus. It was assembling
-    the missing-limb control when stopped; no symmetry verdict was produced.
-    A requested wall-time extension was refused by the scheduler. The receipt
-    consequently has no terminal acceptance flag, and the node is blocked.
-    All 24 completed surface charge files exist, and their mean probe fields
-    are finite and nonzero. Across those rows the largest independent
-    toroidal-mean rule change is 4.43 × 10⁻¹⁰ and the largest slab-integral
-    rule change is 0.02747%.</p>
-  <p>Per-resolution values, charges and toroidally resolved probe fields:
-    <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/reference/surface-qualified-20261114/summary.json</code>.
-    Sphere values and orders are in the run's <code>sphere-qualified.json</code>;
-    numerical gates are in <code>sphere-qualified-suite.log</code> and
-    <code>circuit-qualified.log</code>; the mutation is in
-    <code>negative-control-neutral.log</code>.</p>
+  <table>
+    <caption>In-vessel iron field vector rms [mT]. The displayed extrapolated rms is derived from the extrapolated field vector; the correction is the rms of that vector correction.</caption>
+    <thead><tr><th>μᵣ</th><th>Method</th><th>0.1 m</th><th>0.075 m</th><th>0.05 m</th><th>Extrapolate</th><th>Correction [mT]</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>Nova</td><td>17.488118</td><td>17.519151</td><td>17.550134</td><td>17.556706</td><td>0.014187 (0.0808%)</td></tr>
+      <tr><td>200</td><td>Nova</td><td>18.888748</td><td>18.940611</td><td>19.009733</td><td>19.029926</td><td>0.067030 (0.3522%)</td></tr>
+      <tr><td>50</td><td>Surface</td><td>17.601304</td><td>17.580691</td><td>17.586422</td><td>Unavailable: oscillatory</td><td>Unavailable</td></tr>
+      <tr><td>200</td><td>Surface</td><td>19.107294</td><td>19.084397</td><td>19.090267</td><td>Unavailable: oscillatory</td><td>Unavailable</td></tr>
+    </tbody>
+  </table>
+  <table>
+    <caption>Every outside probe, numbered in case-file order after the sixteen vessel points. Corrections and comparisons are percentages of the extrapolated total field norm; comparisons use the surface denominator. A missing fit prevents an all-probe verdict.</caption>
+    <thead><tr><th>μᵣ</th><th>Probe</th><th>Nova fit</th><th>Nova correction [%]</th><th>Surface fit</th><th>Surface correction [%]</th><th>Difference [%]</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>0</td><td>p=2.566</td><td>0.28297</td><td>p=10.566</td><td>0.00009</td><td>0.3629</td></tr>
+      <tr><td>50</td><td>1</td><td>p=2.679</td><td>0.20834</td><td>p=11.746</td><td>0.00004</td><td>0.3538</td></tr>
+      <tr><td>50</td><td>2</td><td>p=3.193</td><td>0.09115</td><td>p=14.179</td><td>0.00001</td><td>0.3265</td></tr>
+      <tr><td>50</td><td>3</td><td>p=5.501</td><td>0.00826</td><td>p=18.656</td><td>0.00000</td><td>0.2477</td></tr>
+      <tr><td>50</td><td>4</td><td>oscillatory mesh increments</td><td>Unavailable</td><td>oscillatory mesh increments</td><td>Unavailable</td><td>Unavailable</td></tr>
+      <tr><td>50</td><td>5</td><td>p=2.934</td><td>0.05426</td><td>p=3.185</td><td>0.01387</td><td>0.1477</td></tr>
+      <tr><td>50</td><td>6</td><td>p=2.655</td><td>0.47384</td><td>oscillatory mesh increments</td><td>Unavailable</td><td>Unavailable</td></tr>
+      <tr><td>50</td><td>7</td><td>p=1.908</td><td>0.29687</td><td>oscillatory mesh increments</td><td>Unavailable</td><td>Unavailable</td></tr>
+      <tr><td>50</td><td>8</td><td>p=1.281</td><td>1.64625</td><td>oscillatory mesh increments</td><td>Unavailable</td><td>Unavailable</td></tr>
+      <tr><td>50</td><td>9</td><td>p=2.101</td><td>0.19504</td><td>oscillatory mesh increments</td><td>Unavailable</td><td>Unavailable</td></tr>
+      <tr><td>50</td><td>10</td><td>oscillatory mesh increments</td><td>Unavailable</td><td>oscillatory mesh increments</td><td>Unavailable</td><td>Unavailable</td></tr>
+      <tr><td>50</td><td>11</td><td>no positive observed order</td><td>Unavailable</td><td>p=10.025</td><td>0.00013</td><td>Unavailable</td></tr>
+      <tr><td>200</td><td>0</td><td>p=2.411</td><td>1.31532</td><td>p=8.841</td><td>0.00047</td><td>1.6750</td></tr>
+      <tr><td>200</td><td>1</td><td>p=2.509</td><td>1.04917</td><td>p=9.342</td><td>0.00032</td><td>1.6807</td></tr>
+      <tr><td>200</td><td>2</td><td>p=2.855</td><td>0.59708</td><td>p=10.029</td><td>0.00020</td><td>1.6408</td></tr>
+      <tr><td>200</td><td>3</td><td>p=3.795</td><td>0.18599</td><td>p=10.559</td><td>0.00013</td><td>1.4684</td></tr>
+      <tr><td>200</td><td>4</td><td>p=5.319</td><td>0.04214</td><td>p=11.206</td><td>0.00008</td><td>1.2631</td></tr>
+      <tr><td>200</td><td>5</td><td>p=3.467</td><td>0.07893</td><td>p=3.223</td><td>0.01384</td><td>0.3153</td></tr>
+      <tr><td>200</td><td>6</td><td>p=2.427</td><td>2.43395</td><td>oscillatory mesh increments</td><td>Unavailable</td><td>Unavailable</td></tr>
+      <tr><td>200</td><td>7</td><td>p=2.303</td><td>1.13506</td><td>oscillatory mesh increments</td><td>Unavailable</td><td>Unavailable</td></tr>
+      <tr><td>200</td><td>8</td><td>p=1.227</td><td>6.71371</td><td>oscillatory mesh increments</td><td>Unavailable</td><td>Unavailable</td></tr>
+      <tr><td>200</td><td>9</td><td>p=2.524</td><td>0.79226</td><td>oscillatory mesh increments</td><td>Unavailable</td><td>Unavailable</td></tr>
+      <tr><td>200</td><td>10</td><td>p=3.418</td><td>0.23713</td><td>oscillatory mesh increments</td><td>Unavailable</td><td>Unavailable</td></tr>
+      <tr><td>200</td><td>11</td><td>no positive observed order</td><td>Unavailable</td><td>p=9.351</td><td>0.00032</td><td>Unavailable</td></tr>
+    </tbody>
+  </table>
+  <p>Only five of twelve outside-probe comparisons at μᵣ = 50 and six at
+    μᵣ = 200 have admissible fits on both sides. Their largest differences
+    are 0.3629% and 1.6807%, respectively; these are not bounds over all
+    probes. The largest admitted Nova outside correction is 1.6463% and
+    6.7137%, respectively. Surface orders as large as 18.7 are estimates from
+    these triples and do not establish an asymptotic regime.</p>
+  <p>The surface annulus is not in a monotone Richardson regime for flux or
+    vessel field at either permeability. Nova also lacks an admissible fit
+    at outside probes 4, 10 and 11 for μᵣ = 50, and probe 11 for μᵣ = 200.
+    Thus extrapolated agreement within 2% is not established. No order was
+    imposed and no value was tuned to close the comparison.</p>
+  <table>
+    <caption>Sixfold symmetry control on the full unreduced geometry. The defect is the norm of the resolved outside iron-field change after a 60° shift, divided by the outside iron-field norm. Pass requires a defect above max(0.001, ten times symmetric noise).</caption>
+    <thead><tr><th>μᵣ</th><th>Symmetric noise</th><th>Missing-limb defect</th><th>Signal / noise</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>7.876739e-15</td><td>0.732769681</td><td>9.3030e+13</td><td>Pass</td></tr>
+      <tr><td>200</td><td>9.656770e-15</td><td>1.016970354</td><td>1.0531e+14</td><td>Pass</td></tr>
+    </tbody>
+  </table>
+  <p>The missing-limb control passes at both permeabilities. All four
+    resolved field arrays contain 144 toroidal angles, 28 probes and three
+    cylindrical components, with finite nonzero field norms. Every completed
+    annulus method/permeability row likewise has finite, nonzero, nonuniform
+    probe fields. The annulus refusal is a measured convergence limitation;
+    the control batch completed and its receipt has completed=true,
+    passed=false. The node remains blocked only on annulus calibration.</p>
+  <p>Receipts beneath
+    <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/reference/</code>:
+    <code>surface-qualified-20261114/summary.json</code> preserves the accepted
+    reference; <code>annulus-extrapolated-20261114/summary.json</code> contains
+    all mesh values, orders, correction uncertainties and rejected fits;
+    <code>missing-limb-noise-20261114/summary.json</code> contains both full
+    resolved control fields and their comparison. Run logs are
+    <code>annulus-control.log</code>, <code>symmetry-control.log</code>,
+    <code>control-final-head-suite.log</code> and
+    <code>negative-control-neutral.log</code>. Sphere values and orders remain
+    in <code>sphere-qualified.json</code>.</p>
 </article>

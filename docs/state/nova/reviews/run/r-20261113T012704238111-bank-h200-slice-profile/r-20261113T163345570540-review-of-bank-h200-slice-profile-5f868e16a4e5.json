@@ -1,0 +1,80 @@
+{
+  "added_failure_basis": "The reviewed run's manifest carries no readable suite pair: 'baseline_suite:' and 'after_suite:' are both empty, and its write paths hold no test file, so the suite was unarmed and no suite verdict exists to compare. Derived from those two (absent) arms the added-failure set is empty, not zero-measured; no pytest run was substituted for the unarmed pair.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-13T16:48:08.554Z",
+  "dispatched_at": "2026-11-13T16:34:33Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bank-h200-slice-profile",
+      "recorded_at": "2026-11-13T16:54:10.757479+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "bank-h200-slice-profile",
+      "recorded_at": "2026-11-13T16:54:15.351855+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "bank-h200-slice-profile",
+      "recorded_at": "2026-11-13T16:54:17.313544+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_h200_slice_profile/report.py",
+      "line": 300,
+      "severity": "blocking",
+      "summary": "Four of the twelve panels fix their floor at zero through 'ax.set_ylim(0, max(values) * 1.15)' and put their width-64 point on that floor, so the stage costs the ranked list has to judge read as zero on the deliverable figure. Recomputed from h200/audited.json: at width 64 host scheduling gaps are 24.4980/64 = 0.3828 ms on a panel topping at 30.576 ms (1.25% of the axis), transfers and fills 1.3573/64 = 0.0212 ms on a panel topping at 1.344 ms (1.6%), other and fused 6.6553/64 = 0.1040 ms on a panel topping at 2.889 ms (3.6%), and predictor 0.0064/64*1000 = 0.100 us on a panel topping at 5.446 us (1.8%). The numbers in the fragment's table are correct; the figure a reader opens cannot show them. The figure review of this run at the same head records the same defect, so one repair answers both."
+    },
+    {
+      "file": "scripts/prototypes/bank_h200_slice_profile/run.py",
+      "line": 39,
+      "severity": "non-blocking",
+      "summary": "The measurement input is read from an absolute path inside another run's directory (r-20261112T182638024068-h200-levers/h200-levers-corrected/common-streams.npz) and nothing in the repository regenerates it, so the digest the receipts record (52f8d4fb9e60dbdbe1530e8b64a171d3bb6470fb5cf73a1ddcf760895d09a0e9) names bytes that a run-directory prune would destroy. Verified today: the file is present and its digest matches, so the evidence is sound as filed; the exposure is that this node's whole measurement cannot be repeated once that peer run is pruned, and the driver fails at an assert rather than rebuilding the input. Name the generator, commit a small recipe, or copy the input under a durable cache root."
+    },
+    {
+      "disposition": "folded into a later node that re-runs or re-attributes this profile after support_read.py changes",
+      "file": "scripts/prototypes/bank_h200_slice_profile/report.py",
+      "line": 17,
+      "severity": "non-blocking",
+      "summary": "The branch attribution resolves 'Path(__file__).resolve().parents[3] / nova/equilibrium/support_read.py' from the tree that runs the report, not from the revision the traces were captured at, and matches HLO frame line numbers against it. Each receipt already records the measured module path in its 'module' field, and nothing compares the two. Correct for this run because the measured revision 0d9c849 and the reporting tree 279beff carry an identical support_read.py (git diff --stat 0d9c849 5f868e16 -- nova/ is empty), but a later edit above the carry function shifts terminal.lineno, the 'frame[\"line\"] == terminal.lineno' rule never fires, and kernels executed in the terminal full-commit certificate fall through to the carry rule and are charged to carried geometry, inflating the regression the fragment attributes."
+    }
+  ],
+  "justifications": {
+    "durability": "There is no test file in the node's scope, so nothing re-runs the guards: measure.py:13 refuses a closure gap above 10% and measure.py:237 refuses a dominant-stage omission, but report.py:17 binds its HLO line-number attribution to whatever support_read.py the driver's own tree carries rather than to the measured revision.",
+    "evidence": "Every number in the fragment's three tables reconciles exactly against h200/audited.json and the per-arm receipt.json files (for example carried launches 526 to 898 and device activity 2.522 to 7.816 ms are reproduced from historical-read-16-{1,2} and main-read-16-{1,2}), and measure.py:11-13, measure.py:213-241 and report.py:128-171 refuse an incomplete or omitted stage inventory.",
+    "fit": "scripts/prototypes/bank_h200_slice_profile follows the sibling prototypes' measure/report/job naming and their save_checked and plot conventions, and its comments describe mechanism (report.py:44-46 explains the false certificate branch) with no plan or ticket label anywhere in the diff.",
+    "goal_fidelity": "scripts/prototypes/bank_h200_slice_profile/measure.py:1-382 measures the whole slice and its stages, and the fragment's ranked list at bank-h200-slice-profile.html:57-61 names four changes with cost, saving and verification, but the widest admitted width stops at 64 because run.py:145 never probes between 64 and 256.",
+    "reuse": "The instrument imports scripts.prototypes.bank_solve_trace.analyse and overrides its group function rather than copying it, reuses save_checked from bank_solve_profile/plot.py and machine()/scaled_profile() from bank_newton_step and bank_warm_start, and adds only the branch-aware relabelling; the read-versus-update split it re-derives parallels scripts/prototypes/bank_solve_trace_head/report.py:45 invocations, which it does not extend.",
+    "scope_discipline": "git diff --stat a732ede0a545a4c6524cfd3ccfb1fbc6aa125642 5f868e16a4e51c34a60160be6d7da29df7640427 lists six added files totalling 3089 insertions and no modification to nova/equilibrium/support_read.py or any test."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261113T163345570540-review-of-bank-h200-slice-profile-5f868e16a4e5",
+  "review_text": "VERDICT goal: the node profiled one warm flattop slice on the H200 and the fragment at docs/evidence/fragments/sub-millisecond-forward-path/bank-h200-slice-profile.html tables per-slice cost at widths 1/16/64 with the stage split, the ranked saving list and the SVG (the goal is met for the widths that fitted).\nVERDICT done_when: h200/job.log ends EXIT=0 with two agreeing fresh processes per width (0.232%/0.181%/0.169%), the precision budget is asserted in measure.py:370-378 and h200/audited.json, and the carried pair 3.394 to 8.917 ms reconciles to h200/audited.json.\nVERDICT write_paths: the diff a732ede0..5f868e16 contains six added files, all inside the three declared paths, with no product or test change.\nVERDICT manifest: read; it names the H200 job, the widths that fitted, the memory stop, the missed 5.78x gap and conditional saving targets, and states the suite pair is unarmed.\nVERDICT diff: read commit by commit at scripts/prototypes/bank_h200_slice_profile/{measure,run,report}.py and job.sh; measurement code, evidence and figure only.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the fragment's three tables and ranked list answer the goal, but run.py:145 stops measuring at width 64 without probing between 64 and the 256-lane refusal.\nSCORE evidence: 17\nJUSTIFICATION evidence: every fragment number reconciles against h200/audited.json and the per-arm receipt.json, and measure.py:13 refuses a closure gap above 10%.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat a732ede0a545a4c6524cfd3ccfb1fbc6aa125642 5f868e16a4e51c34a60160be6d7da29df7640427 lists only the six declared paths.\nSCORE durability: 12\nJUSTIFICATION durability: no test file lies in scope, so the guards at measure.py:13 and measure.py:237 only run inside a live measurement, and report.py:17 binds line-number attribution to the reporting tree rather than the measured revision.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/bank_h200_slice_profile/report.py:44-46 comments the mechanism, uses the sibling prototypes' names, and carries no plan or ticket label.\nSCORE reuse: 17\nJUSTIFICATION reuse: the instrument imports scripts.prototypes.bank_solve_trace.analyse and overrides its group function instead of copying it, but its read/update kernel split re-derives what scripts/prototypes/bank_solve_trace_head/report.py:45 invocations already does.\nFINDING scripts/prototypes/bank_h200_slice_profile/report.py:300 blocking: width-64 points are drawn on a zero floor in four panels (1.25%, 1.6%, 3.6% and 1.8% of their axes), so the deliverable figure cannot show the cheapest stage costs the ranked list judges.\nFINDING scripts/prototypes/bank_h200_slice_profile/run.py:39 non-blocking: the measurement input is read from another run's directory and nothing in the repository regenerates it, so a prune would leave the receipts' digest naming bytes no recipe can rebuild.\nFINDING scripts/prototypes/bank_h200_slice_profile/report.py:17 non-blocking: branch attribution reads support_read.py from the reporting tree and never compares it with the 'module' path each receipt records, so a later edit would silently charge certificate kernels to carried geometry.",
+  "reviewed_base_sha": "a732ede0a545a4c6524cfd3ccfb1fbc6aa125642",
+  "reviewed_head_sha": "5f868e16a4e51c34a60160be6d7da29df7640427",
+  "reviewed_run_id": "r-20261113T012704238111-bank-h200-slice-profile",
+  "rubric": "text",
+  "scores": {
+    "durability": 12,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T17:15:15.199037+00:00",
+  "total": 100,
+  "verdicts": {
+    "diff": "Read commit by commit: 9610a36ba adds the instrument, 0d9c84930 adds the audit and carried incidence exposure, a64700cb6 records the dry run, 958192c8d/880e3d13c/cacc862e3/7f6c5977c/279beff36 repair kernel attribution in report.py, and 5f868e16a writes the fragment and the SVG; every hunk is measurement code, evidence or figure.",
+    "done_when": "The three clauses are separable in the receipts: clause 1 is h200/job.log EXIT=0 with two agreeing fresh processes per width (h200/summary.json agreement 0.232%/0.181%/0.169%) and every lane inside the precision budget; clause 2 is the paired carried table in the fragment reconciled to h200/audited.json carried.historical 3.394 ms and carried.main 8.917 ms; clause 3 is the fragment, its four-item ranked list and per-slice-stages.svg, committed at 5f868e16.",
+    "goal": "The node's goal is a per-stage H200 profile of one warm flattop slice across batch widths plus an attribution of the carried-read regression and a fragment with a ranked saving list; docs/evidence/fragments/sub-millisecond-forward-path/bank-h200-slice-profile.html delivers all four, at widths 1, 16 and 64 with 2.5x-6.9x higher throughput than the brief's starting figures.",
+    "manifest": "Read in full; it names nine commits, six changed paths, the H200 job command actually submitted at revision 0d9c849, the job id and EXIT=0, the widths that fitted and the one that did not, and it states plainly that the 1 ms target is missed by 5.78x and that its four saving figures are conditional targets rather than measured speedups.",
+    "write_paths": "The declared paths are scripts/prototypes/bank_h200_slice_profile, docs/evidence/fragments/sub-millisecond-forward-path/bank-h200-slice-profile.html and docs/figures/sub-millisecond-forward-path/bank-h200-slice-profile; git diff a732ede0..5f868e16 touches exactly six files, all inside those three, and carries no nova/, tests/ or pyproject.toml change."
+  }
+}

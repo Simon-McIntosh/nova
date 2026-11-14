@@ -25,8 +25,8 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="319">
-<meta name="plan-modified" content="2026-11-13">
+<meta name="plan-version" content="330">
+<meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
   <main class="plan-doc">
@@ -1021,6 +1021,39 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261113T035507897680-review-of-bank-h200-slice-profile-5f868e16a4e5-figure" data-who="reckon-build" data-when="2026-11-13T04:13:55.555Z">
     <div class="r-comment-body"><p>Attached a parsed read-only figure review to r-20261113T012704238111-bank-h200-slice-profile at head 5f868e16a4e5: six rubric items recorded, one blocking finding (host gaps, transfer/fills, other/fused and predictor draw their width-64 point on the zero baseline at 0.002-3.6% of axis height, marker straddling the spine, caused by report.py:300 `set_ylim(0, max*1.15)`) and three non-blocking findings. No file was edited, redrawn or relabelled.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261113T163345570540-review-of-bank-h200-slice-profile-5f868e16a4e5" data-who="reckon-build" data-when="2026-11-13T16:48:08.554Z">
+    <div class="r-comment-body"><p>Independent review of r-20261113T012704238111-bank-h200-slice-profile at base a732ede0a545a4c6524cfd3ccfb1fbc6aa125642 and head 5f868e16a4e51c34a60160be6d7da29df7640427 scores goal_fidelity 16, evidence 17, scope_discipline 20, durability 12, fit 18, reuse 17, added_failure_count 0; one blocking finding (report.py:300 draws the width-64 point on a zero floor in four figure panels) and two non-blocking (run.py:39 pins the measurement input to another run's directory; report.py:17 binds attribution line numbers to the reporting tree rather than the measured revision).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261113T171724302507-review-of-bank-h200-slice-profile-2db5f6e5b695" data-who="reckon-build" data-when="2026-11-13T17:28:20.081Z">
+    <div class="r-comment-body"><p>Reviewed bank-h200-slice-profile at base a732ede0a545a4c6524cfd3ccfb1fbc6aa125642 and head 2db5f6e5b695eb9782dc0b730ad1b36b71ce514e: scores goal_fidelity 17, evidence 18, scope_discipline 20, durability 14, fit 18, reuse 17; zero added failures from the unarmed suite pair; no blocking finding (the prior zero-floor figure finding is repaired and the committed SVG matches the inspected SHA256 d0c1ac24), two non-blocking findings (report.py:175 vacuous ledger-partition assertion; run.py:144 width loop never probes 128 between the 64-lane admit and the 256-lane refusal).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261113T132017022443-review-of-h200-levers-aebf8655b3bc-figure" data-who="reckon-build" data-when="2026-11-13T13:40:38.764Z">
+    <div class="r-comment-body"><p>figure review of r-20261112T182638024068-h200-levers at head aebf8655 is recorded at review-records/r-20261112T182638024068-h200-levers.figure.json with status parsed, all six rubric items answered, and also stored at the head-suffixed path; it reports no blocking finding and two non-blocking findings (unlabelled off/on x categories; single-process points with no spread), and no file under review was modified.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261112T182638024068-h200-levers" data-who="reckon-build" data-when="2026-11-13T17:33:36Z">
+    <div class="r-comment-body"><p>H200 verdicts set scalar conic default 32 -&gt; 128 (width-16 full/carried improvements 4.574%/7.027%); factor carry stays opt-in and compatible defaults are retained. Fragment docs/evidence/fragments/sub-millisecond-forward-path/h200-levers.html tables 112 execution rows and separate compile walls, with one inspected SVG and width-16 secant headline 7.700821/7.710159 ms per slice. All 18 comparisons/81 geometry checks pass; prior focused sirius suites pass 54/55 tests with no added failures. Review repair aligns the primal-bucket default guard and rationale with 128; the named check passes and its answering-commit reversal fails. Whole-file all_debug gate now passes 60 baseline / 61 head tests, including every primal-bucket comparison; reference width 32 retained because parity passes.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261113T012704238111-bank-h200-slice-profile" data-who="reckon-build" data-when="2026-11-13T17:14:21Z">
+    <div class="r-comment-body"><p>Completed H200 stage profile at widths 1/16/64: 39.880/7.685/5.782 ms/slice throughput across independent pulses or ensemble members; width-1 causal single-pulse latency is 39.880 ms. Width 256 requires 191.108 GB versus 112.586 GB allocator limit. Two fresh processes agree within 0.24%, every lane meets precision, and paired carried reads reproduce 3.394 to 8.917 ms, attributed to support_read._rebuilt_reading and topology.refresh_at_stationary_points adding 5.267 device ms. The scoped fragment and inspected SVG now show all positive stages above the axes, distinguish native/profiler styles, use ms/slice throughout and rank four conditional throughput saving targets. Retained owned input and measured modules are digest/revision/HLO verified; four mismatch mutations are refused. Evidence and figure committed at 2db5f6e5b695eb9782dc0b730ad1b36b71ce514e; 1 ms throughput is not yet achieved.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261113T171858659690-review-of-bank-h200-slice-profile-2db5f6e5b695-figure" data-who="reckon-build" data-when="2026-11-13T17:31:32.266Z">
+    <div class="r-comment-body"><p>figure review of r-20261113T012704238111-bank-h200-slice-profile at head 2db5f6e5: parsed, 6 of 6 rubric items answered, 0 blocking and 3 non-blocking findings; the previous review's blocking defect (markers drawn on a zero baseline) is visibly answered by the logarithmic axes, and the findings that remain are that the y ticks are three data-derived values at five decimals with a computed geometric mean in the middle, that twelve independent log ranges make a 2.9x fall and a 47x fall look identical, and that all twelve panels stay in ms/slice so the predictor panel prints 0.00010 to 0.00474.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048" data-who="reckon-build" data-when="2026-11-14T10:26:14.839Z">
+    <div class="r-comment-body"><p>two review records under review-records/ of run r-20261113T165201745905-bank-traced-inputs, one plain and one pinned at the reviewed head; this node's suite fence is unarmed so no pytest gate exists for it and none ran.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261114T114942644634-review-of-bank-traced-inputs-2023fe23ca53" data-who="reckon-build" data-when="2026-11-14T12:07:20.482Z">
+    <div class="r-comment-body"><p>review of r-20261113T165201745905-bank-traced-inputs at head 2023fe23ca53afcf743c4c30e60c45ffd27206de stored as a parsed record scoring goal_fidelity 18, evidence 17, scope_discipline 16, durability 16, fit 17, reuse 10 (total 94) with six non-blocking findings; six checklist verdicts emitted, five production call sites named, added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261113T165201745905-bank-traced-inputs" data-who="reckon-build" data-when="2026-11-14T11:41:52Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/bank-traced-inputs.html#bank-traced-inputs-independent-pass — independent two-live-coil residual oracle max error 7.11e-15; order/mask source mutations fail; both variable-profile tangent routes agree with primal JVP and reject zero-gradient fallback; independently measured centroid from nonzero displaced seed meets 1e-8 m, geometric-centre-only formula misses by &gt;1e-3 m; final-head 10 tests pass and both existing suite arms add 0 failures; all controls fail head-passing ids.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261114T132359810462-review-of-bank-traced-cleanup-14ae5e0ad5a6" data-who="reckon-build" data-when="2026-11-14T13:49:04.736Z">
+    <div class="r-comment-body"><p>Reviewed r-20261114T124345725457-bank-traced-cleanup at 02a0145f1..14ae5e0ad5a6d96e16c655b0f7ed1333b9203c44: parsed record, scores goal_fidelity 19, evidence 18, scope_discipline 19, durability 19, fit 18, reuse 20 (total 113), added_failure_count 0, one non-blocking finding at the evidence fragment's -rfP claim.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261114T124345725457-bank-traced-cleanup" data-who="reckon-build" data-when="2026-11-14T13:15:07Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/bank-traced-cleanup.html#bank-traced-cleanup-landing — Hermite profiles inherit DomainProfile; the pin uses CurrentCentroidConstraint; retry inputs survive. Paired CPU files: 44 baseline / 48 head passed, 2 skips in each, zero added failures; both mutations fail their named tests; interface cleanup +44/-45 product lines.</p></div>
 </div>
 </section>
 </main>

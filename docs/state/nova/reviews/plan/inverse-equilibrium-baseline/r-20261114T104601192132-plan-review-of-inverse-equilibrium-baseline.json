@@ -1,0 +1,96 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T11:05:47.580Z",
+  "dispatched_at": "2026-11-14T10:48:40Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261114T104601192132-plan-review-of-inverse-equilibrium-baseline/plan.html:114",
+      "id": "reasoning-1",
+      "reason": "a node reaching clause (1) must either invent a boundary derivation the plan never authorises or stop, and the boundary figure is one of the \"deliverables the section states\".",
+      "text": "\u00a72 clause (1) requires \"the mean distance between the two closed boundaries reported in millimetres\" against \"imas-efit's stored equilibrium\", but the named reference (imas-efit `mastu_epm_45272`, on disk at `tests/data/imas/MASTU/45272/validation/epm`) has an empty boundary outline in all 238 of its slices, so the imas-efit boundary the distance is measured to does not exist in the stored state.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261114T104601192132-plan-review-of-inverse-equilibrium-baseline/plan.html:112",
+      "id": "reasoning-2",
+      "reason": "without a stated canonicalisation of the reference (or a conformant reference) the section's own bands fail for a reason that is neither a fit nor a forward disagreement, which is exactly the confounding the case set was chosen to avoid.",
+      "text": "\u00a72 clause (1) compares flux and q95 bands against imas-efit's stored state on \"the MAST-U 45272 magnetics-only reference\", but that reference is not convention-clean: measured on slice 0 it reports `psi_axis = -0.0978`, `psi_boundary = -0.0755` (flux increasing outward at `ip = +446 kA`) and `q_95 = -10.45`, which is the COCOS-17-psi-in-a-COS-11-container defect imas-efit's own manifest records for this export, while \u00a72 works in a convention-clean frame; a canonical nova state would be compared against sign-inverted flux and q95 and would miss the 5 %-of-span and q95 \u00b12.0 bands by sign alone.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "af4b7b5be6d8fac0051e8952b21efdbd129e4643",
+  "plan_fingerprint": "d12ae9c14bbba07a224d501c51a91471b5c58f94368d7ad18f1cc20dbdc71ae3",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 5,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "e0560b5880f991cae47c37315cc86d6da4294cf3",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 2 now compares against imas-efit's own magnetics-only regression baseline for MAST-U 45272, which carries a closed boundary outline on 8 of 8 slices (read through imas-python at DD 4.1.0); the CCFE reference with no outline is not used.",
+      "reason": "",
+      "when": "2026-11-14T11:14:19.449329+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "e0560b5880f991cae47c37315cc86d6da4294cf3",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The comparator is now the state imas-efit itself wrote, whose flux decreases outward at positive plasma current (slice 4: psi_axis 0.401, psi_boundary -0.154, ip 765 kA); the sign-inverted CCFE export is not used, so no canonicalisation of the reference is needed.",
+      "reason": "",
+      "when": "2026-11-14T11:14:35.230103+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "e0560b5880f991cae47c37315cc86d6da4294cf3",
+      "commit_basis": "edit",
+      "note": "Section 2 now compares against imas-efit's own magnetics-only regression baseline for MAST-U 45272, which carries a closed boundary outline on 8 of 8 slices (read through imas-python at DD 4.1.0); the CCFE reference with no outline is not used.",
+      "reason": "",
+      "when": "2026-11-14T11:14:19.449329+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "e0560b5880f991cae47c37315cc86d6da4294cf3",
+      "commit_basis": "edit",
+      "note": "The comparator is now the state imas-efit itself wrote, whose flux decreases outward at positive plasma current (slice 4: psi_axis 0.401, psi_boundary -0.154, ip 765 kA); the sign-inverted CCFE export is not used, so no canonicalisation of the reference is needed.",
+      "reason": "",
+      "when": "2026-11-14T11:14:35.230103+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261114T104601192132-plan-review-of-inverse-equilibrium-baseline.json",
+  "review_run_id": "r-20261114T104601192132-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "62d2816b53c30f3c91f8e701dd1978074222120d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the figure `/nova/figures/inverse-equilibrium-baseline/inverse-seam.svg` exists on disk, the decisions `fitted-unknowns` and `vertical-freedom` resolve by key, and the extensionless `/nova/spine-efit-parity` href is the house convention (already declined at round one).",
+    "done_when": "pass \u2014 \u00a72's clause (3) is a constructed control: a state whose magnetics, measured plasma current and measured conductor currents (with their uncertainties) are all scaled together is self-consistent and reconstructs a plasma current 10 % off the reference, which must leave the 1.5 % band on every case.",
+    "evidence_paths": "pass \u2014 \u00a72's record is the plan's archive record under `docs/evidence/archive/`, not a scratchpad.",
+    "naming": "pass \u2014 the changed text carries no plan labels, ticket numbers or version tags.",
+    "reasoning": "a finding \u2014 \u00a72's chosen MAST-U reference is not convention-clean and carries no stored boundary, so two of its clause-(1) measures cannot come from the \"stored equilibrium\" the section compares against.",
+    "single_goal": "pass \u2014 \u00a72 carries one deliverable, the like-for-like inverse-versus-imas-efit comparison; the split-fit clause and the control qualify that one deliverable rather than adding a second deliverable.",
+    "wiring": "pass \u2014 `plan-section-depends-on` resolves (`s2` on `inverse-equilibrium-baseline#s1`; `s3` and `s4` on `s2`), and the two decisions scoped to `s2` (`fitted-unknowns, vertical-freedom`) now carry locked choices, so the section's `implementable` declaration and followup f-ieb-001 (\"\u00a72 waits only on \u00a71\") agree."
+  },
+  "section_digests": {
+    "_document": "c6c6aa089a9d737755926df022ec646c6eb5ba0fb28a0c91f4809b8a5e61508a",
+    "s0": "57b2e9e2f3010f18ee32b61a28f0473cd8ca9692e9e2a7eed5aa3d1776fdd77f",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "0b66a75e84bb69ac18acb0892700f1beffb0c64191e4b7d7af6de5a5ea44be81",
+    "s3": "aabab320c034e5a6720e0b3877958935e6c3b63577de3674cd6e87f6120889ba",
+    "s4": "a8f5721b1827357df497c97788c8bc9c5bb1266579ca0d04f61045c915138730",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T11:13:27.775225+00:00",
+  "total": null
+}

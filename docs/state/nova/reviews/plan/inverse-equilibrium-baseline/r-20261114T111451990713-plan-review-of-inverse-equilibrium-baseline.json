@@ -1,0 +1,111 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T11:30:58.600Z",
+  "dispatched_at": "2026-11-14T11:15:25Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/inverse-equilibrium-baseline.html:117",
+      "id": "reasoning-1",
+      "reason": "the q95 band is unmeasurable as written and would be reported as a fit failure on every case, so the section needs either a sign canonicalisation of the reference or a stated |q95| comparison.",
+      "text": "\u00a72 clause (1) sets \"q95 within 2.0\" against imas-efit's stored state, but the named reference carries `q_95 = -5.79` on its own slices (read through imas-python at DD 4.1.0 from `imas-efit/tests/data/imas/MASTU/45272/regression/magnetics`: slice 0 `q_95=-5.869`, slice 4 `-5.787`, slice 7 `-5.668`, with `ip=+765 kA`), while nova's convention-clean frame defines the q sign as `sign(q) = sigma_Ip * sigma_B0 * sigma_rho_theta_phi` (`nova/scripts/identify_source_cocos.py:29`), so a convention-clean reconstructed q95 of about +5.8 differs from the reference by roughly 11.6 and misses the band by sign alone",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/inverse-equilibrium-baseline.html:117",
+      "id": "reasoning-2",
+      "reason": "without a stated flux-datum alignment (or a span-only comparison) this band fails or passes for a reason unrelated to the fit, which is the confounding the case set was chosen to avoid.",
+      "text": "\u00a72 clause (1) compares \"boundary and axis flux within 5 % of the axis-to-boundary flux span\" across two codes, but poloidal flux carries an arbitrary additive datum: the stored reference has `psi_axis=0.6461`, `psi_boundary=0.1389` at slice 0 and `psi_axis=0.0661`, `psi_boundary=-0.4908` at slice 7, so its boundary flux is not zero and its datum drifts over the pulse, while the clause names no alignment rule, so the band cannot be evaluated",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/inverse-equilibrium-baseline.html:53",
+      "id": "anchors_resolve-1",
+      "reason": "the house convention for a sibling plan is `/nova/plans/<slug>` and the target document does exist at `docs/plans/spine-efit-parity.html`, so this is a one-line href repair that changes no declaration, band or decision.",
+      "text": "the \u00a70 citation `<a href=\"/nova/spine-efit-parity\">` resolves, under the docs surface's `.html` convention, to `docs/spine-efit-parity.html`, which does not exist, so the evidence for the plan's opening claim (\"the assembled chain failed 10 of 12 EFIT parity metrics with no converged fraction on MAST\") cannot be reached",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "e0560b5880f991cae47c37315cc86d6da4294cf3",
+  "plan_fingerprint": "b9e99e4afc893fcef649cf9910e3abbe2a45c099c1589aab2fed9b51db15d42c",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 6,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "90f7a8ef666c051c81f1bafffd1401c907f90dfa",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 2 clause 1 now bands the magnitude of q95 within 2.0 and reports the sign each state stores beside it.",
+      "reason": "",
+      "when": "2026-11-14T11:50:34.713850+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "finding": "reasoning-2",
+      "reason": "Both states are free-boundary solutions driven by the same conductor currents, so their poloidal flux is absolute, not defined up to a datum: the change in the reference between slices is the solenoid flux swing, not drift. Comparing absolute axis and boundary flux, scaled by the span, is the intended and stronger test; aligning a datum would hide a real offset in the vacuum field.",
+      "when": "2026-11-14T11:50:47.308647+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "finding": "anchors_resolve-1",
+      "reason": "Non-changing finding, and three earlier content rounds on this plan verified that the extensionless href /nova/spine-efit-parity resolves to docs/plans/spine-efit-parity.html under the docs surface; the section is landed context and is left as authored.",
+      "when": "2026-11-14T11:50:59.559923+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "reason": "Non-changing finding, and three earlier content rounds on this plan verified that the extensionless href /nova/spine-efit-parity resolves to docs/plans/spine-efit-parity.html under the docs surface; the section is landed context and is left as authored.",
+      "when": "2026-11-14T11:50:59.559923+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "commit": "90f7a8ef666c051c81f1bafffd1401c907f90dfa",
+      "commit_basis": "edit",
+      "note": "Section 2 clause 1 now bands the magnitude of q95 within 2.0 and reports the sign each state stores beside it.",
+      "reason": "",
+      "when": "2026-11-14T11:50:34.713850+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "d2b31d35-d43f-471c-8494-93ef30b1d4b5",
+      "reason": "Both states are free-boundary solutions driven by the same conductor currents, so their poloidal flux is absolute, not defined up to a datum: the change in the reference between slices is the solenoid flux swing, not drift. Comparing absolute axis and boundary flux, scaled by the span, is the intended and stronger test; aligning a datum would hide a real offset in the vacuum field.",
+      "when": "2026-11-14T11:50:47.308647+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261114T111451990713-plan-review-of-inverse-equilibrium-baseline.json",
+  "review_run_id": "r-20261114T111451990713-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "ba46b394fa2d5da1302ccbc4988fa51649891f51",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the \u00a70 citation `/nova/spine-efit-parity` resolves to `docs/spine-efit-parity.html`, which does not exist; the document is at `docs/plans/spine-efit-parity.html`.",
+    "done_when": "pass \u2014 \u00a71, \u00a72 and \u00a74 each name a constructed negative control with a stated failing outcome, and \u00a73's clause (2) is a control in substance (a deliberately perturbed state must rank worse on every case).",
+    "evidence_paths": "pass \u2014 the plan names one durable record, `docs/evidence/archive/inverse-equilibrium-baseline-landed.html`, and no gate writes to a scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach a symbol, and the plan prescribes no code name; `fitted-unknowns` and `vertical-freedom` are decision keys, not source identifiers.",
+    "reasoning": "a finding \u2014 \u00a72 clause (1) compares q95 and the axis/boundary flux values against a stored reference whose q95 is negative and whose flux datum is arbitrary, so the bands fail for a reason that is neither a fit nor a forward disagreement; the implementation-prescription check passes, since the section names inputs and measurement procedures rather than code paths or formulas.",
+    "single_goal": "pass \u2014 each of \u00a71\u2013\u00a75 states one deliverable (a recovery, a comparison table, a scoreboard, a cost record, a disposition decision) and \u00a72's fit/forward split is a column of its own table rather than a second deliverable.",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares s2\u2192s1, s3\u2192s2, s4\u2192s2, s5\u2192s3, every target exists, and `plan-after` names `converged-forward-solve`, which resolves."
+  },
+  "section_digests": {
+    "_document": "c6c6aa089a9d737755926df022ec646c6eb5ba0fb28a0c91f4809b8a5e61508a",
+    "s0": "57b2e9e2f3010f18ee32b61a28f0473cd8ca9692e9e2a7eed5aa3d1776fdd77f",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "0b0d34222e2563d9ca36a0140b3d5245b49b2626bd2e667c0182bb137132a075",
+    "s3": "aabab320c034e5a6720e0b3877958935e6c3b63577de3674cd6e87f6120889ba",
+    "s4": "a8f5721b1827357df497c97788c8bc9c5bb1266579ca0d04f61045c915138730",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T11:50:05.064055+00:00",
+  "total": null
+}

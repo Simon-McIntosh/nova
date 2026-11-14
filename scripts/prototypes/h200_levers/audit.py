@@ -1,0 +1,311 @@
+"""Validate receipt provenance, agreement and geometry before wall adjudication."""
+
+import argparse
+import json
+import subprocess
+from pathlib import Path
+
+from scripts.prototypes.h200_levers.run import refuse_inert
+
+
+def decision(off, on, spread, incumbent):
+    """Retain an incumbent unless its alternative wins beyond the margin."""
+    margin = max(0.03, spread)
+    if on > off * (1 + margin):
+        return "off", margin
+    if off > on * (1 + margin):
+        return "on", margin
+    return incumbent, margin
+
+
+def precision(reference, candidate, radius):
+    """Compare every lane to the same physical input's paired reference."""
+    import numpy as np
+
+    values = {}
+    for key in reference:
+        if key.endswith("-axis") or key.endswith("-saddle"):
+            bound = 5e-4
+            error = np.linalg.norm(candidate[key] - reference[key], axis=-1) / radius
+        elif key.endswith("-boundary"):
+            bound = 1e-4
+            span = np.abs(reference[key.removesuffix("-boundary") + "-span"])
+            assert np.all(np.isfinite(span)) and np.all(span > 0)
+            error = np.abs(candidate[key] - reference[key]) / span
+        elif key == "matrix":
+            relative = np.linalg.norm(candidate[key] - reference[key])
+            relative /= np.linalg.norm(reference[key])
+            assert np.isfinite(relative) and relative <= 1e-12
+            values[key] = float(relative)
+            continue
+        else:
+            continue
+        assert np.all(np.isfinite(error)) and np.max(error) <= bound, (key, error)
+        values[key] = float(np.max(error))
+    assert values, "precision guard saw no geometry or matrix data"
+    return values
+
+
+def main():
+    parser = argparse.ArgumentParser(__doc__)
+    parser.add_argument("run", type=Path)
+    parser.add_argument("--negative-control", action="store_true")
+    parser.add_argument("--inventory", action="store_true")
+    parser.add_argument("--partial", action="store_true")
+    args = parser.parse_args()
+    if args.negative_control:
+        sample = dict(rows=[dict(lowered_sha256="known-program")])
+        other = dict(rows=[dict(lowered_sha256="different-program")])
+        refuse_inert(sample, other)
+        print("POSITIVE_CONTROL different programs admitted", flush=True)
+        refuse_inert(sample, sample)
+        raise AssertionError("identical-program negative control was admitted")
+    import numpy as np
+
+    run = args.run.resolve()
+    (run / "audit-summary.json").write_text(json.dumps(dict(completed=False)))
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    import jax
+
+    assert jax.config.jax_enable_x64 is True
+    from tests.equilibrium.test_topology_read import _analytic_inputs
+
+    oracle, *_ = _analytic_inputs("diverted")
+    radius = float(oracle.minor_radius)
+    assert radius > 0
+    if args.inventory:
+        inventory = json.loads((run / "measurement-jobs.json").read_text())
+        items = list(inventory["jobs"])
+        repairs = run / "repair-jobs.json"
+        if repairs.exists():
+            items += json.loads(repairs.read_text())["jobs"]
+        jobs = [item["job_id"] for item in items]
+        output = subprocess.check_output(
+            [
+                "sacct",
+                "-n",
+                "-X",
+                "-j",
+                ",".join(jobs),
+                "-o",
+                "JobIDRaw,State%30,ExitCode",
+                "-P",
+            ],
+            text=True,
+        )
+        observed = {
+            fields[0]: fields[1:3]
+            for row in output.splitlines()
+            if len(fields := row.split("|")) >= 3
+        }
+        for item in items:
+            if item.get("superseded_by"):
+                assert item["superseded_by"] in jobs
+                assert item["failure_attribution"].startswith("scaffolding:")
+                assert observed.get(item["job_id"]) == ["FAILED", "1:0"]
+            else:
+                assert observed.get(item["job_id"]) == ["COMPLETED", "0:0"], observed
+        retained = json.loads((run / "retained-receipts.json").read_text())
+        import hashlib
+
+        for path, digest in retained.items():
+            assert hashlib.sha256(Path(path).read_bytes()).hexdigest() == digest
+        summaries = [
+            json.loads((run / "h200-levers-corrected/summary.json").read_text())
+        ]
+        for item in items:
+            directory = Path(item["output"])
+            value = json.loads((directory / "summary.json").read_text())
+            assert not value["smoke"]
+            if item.get("superseded_by"):
+                assert not value["completed"]
+                assert (directory / "job.log").read_text().splitlines()[-1] == "EXIT=1"
+            else:
+                assert value["completed"]
+                assert (directory / "job.log").read_text().splitlines()[-1] == "EXIT=0"
+            summaries.append(value)
+    else:
+        value = json.loads((run / "summary.json").read_text())
+        assert args.partial or value["completed"], (
+            "job has not completed every comparison"
+        )
+        if not args.partial:
+            assert (run / "job.log").read_text().splitlines()[-1] == "EXIT=0"
+        summaries = [value]
+    selected_comparisons = {}
+    for value in summaries:
+        for comparison in value["comparisons"]:
+            key = (
+                comparison["name"],
+                comparison["width"],
+                comparison.get("step", 1e-5),
+                comparison.get("population", "diverted"),
+            )
+            selected_comparisons[key] = comparison
+    summary = dict(
+        arms=[
+            arm
+            for value in summaries
+            for arm in value["arms"]
+            if arm["exit_status"] == 0
+        ],
+        comparisons=list(selected_comparisons.values()),
+    )
+    receipts = {}
+    maximum_residual = 0.0
+    for arm in summary["arms"]:
+        assert arm["exit_status"] == 0
+        assert Path(arm["log"]).read_text().splitlines()[-1] == "EXIT=0"
+        path = Path(arm["receipt"])
+        value = json.loads(path.read_text())
+        assert value["complete"] and value["x64"] and not value.get("smoke", False)
+        assert value["device"] == "NVIDIA H200 NVL"
+        terminal_residuals = [
+            row["residual"] for row in value["rows"] if "residual" in row
+        ]
+        if value.get("subsolves"):
+            terminal_residuals.append(value["subsolves"][-1]["residual"])
+        for residuals in terminal_residuals:
+            assert len(residuals) == value["width"]
+            assert np.all(np.isfinite(residuals))
+            maximum_residual = max(maximum_residual, *residuals)
+            assert max(residuals) <= 1e-10
+        receipts[json.dumps(value, sort_keys=True)] = path
+    verified = []
+    provenance_errors = []
+    for comparison in summary["comparisons"]:
+        arms = comparison.get("tiles") or [comparison["off"], comparison["on"]]
+        references = arms[0]["records"]
+        assert len(references) == 2
+        assert not comparison.get("refusal")
+        for candidate_arm in arms[1:]:
+            assert not candidate_arm.get("refusal")
+            for left, right in zip(references, candidate_arm["records"], strict=True):
+                refuse_inert(left, right)
+        for arm in arms:
+            assert all(spread <= 0.05 for spread in arm["spreads"].values())
+            for index, candidate in enumerate(arm["records"]):
+                reference = references[index]
+                if candidate["input_sha256"] != reference["input_sha256"]:
+                    provenance_errors.append(
+                        dict(
+                            name=comparison["name"],
+                            width=comparison["width"],
+                            arm=arm["arm"],
+                            process=index + 1,
+                            reference=reference["input_sha256"],
+                            candidate=candidate["input_sha256"],
+                        )
+                    )
+                assert candidate["bank_sha256"] == reference["bank_sha256"]
+                left = receipts[json.dumps(reference, sort_keys=True)].with_suffix(
+                    ".npz"
+                )
+                right = receipts[json.dumps(candidate, sort_keys=True)].with_suffix(
+                    ".npz"
+                )
+                with (
+                    np.load(left, allow_pickle=False) as a,
+                    np.load(right, allow_pickle=False) as b,
+                ):
+                    errors = precision(a, b, radius)
+                verified.append(
+                    dict(
+                        name=comparison["name"],
+                        width=comparison["width"],
+                        arm=arm["arm"],
+                        process=index + 1,
+                        errors=errors,
+                    )
+                )
+    # The decision-free read rebuilds geometry. Its frozen-reading branch is
+    # retained for attribution and cannot be the refreshed-work comparison.
+    for comparison in summary["comparisons"]:
+        if comparison["name"] != "carried-decisions":
+            continue
+        for reference, candidate in zip(
+            comparison["off"]["records"], comparison["on"]["records"], strict=True
+        ):
+            left = receipts[json.dumps(reference, sort_keys=True)].with_suffix(".npz")
+            right = receipts[json.dumps(candidate, sort_keys=True)].with_suffix(".npz")
+            with (
+                np.load(left, allow_pickle=False) as a,
+                np.load(right, allow_pickle=False) as b,
+            ):
+                full = {
+                    key.removeprefix("full-"): a[key]
+                    for key in a
+                    if key.startswith("full-")
+                }
+                carried = {
+                    key.removeprefix("carried-"): b[key]
+                    for key in b
+                    if key.startswith("carried-")
+                }
+                errors = precision(
+                    {"reading-" + k: v for k, v in full.items()},
+                    {"reading-" + k: v for k, v in carried.items()},
+                    radius,
+                )
+            verified.append(
+                dict(
+                    name="decision-free-full-to-carried",
+                    width=comparison["width"],
+                    errors=errors,
+                )
+            )
+    for value in summaries:
+        if "headline" not in value:
+            continue
+        headline = value["headline"]
+        assert len(headline["records"]) == 2
+        assert all(x <= 0.05 for x in headline["spreads"].values())
+        left, right = headline["records"]
+        assert left["input_sha256"] == right["input_sha256"]
+        with (
+            np.load(
+                receipts[json.dumps(left, sort_keys=True)].with_suffix(".npz")
+            ) as a,
+            np.load(
+                receipts[json.dumps(right, sort_keys=True)].with_suffix(".npz")
+            ) as b,
+        ):
+            errors = precision(a, b, radius)
+        verified.append(dict(name="secant-headline", width=16, errors=errors))
+    (run / "precision-audit.json").write_text(json.dumps(verified, indent=2))
+    (run / "input-provenance-errors.json").write_text(
+        json.dumps(provenance_errors, indent=2)
+    )
+    print(
+        f"GEOMETRY {len(verified)} paired process receipts inside precision budget",
+        flush=True,
+    )
+    assert not provenance_errors, (
+        "paired input fingerprints differ",
+        provenance_errors,
+    )
+    assert 0 < maximum_residual <= 1e-10
+    result = dict(
+        completed=True,
+        paired_geometry_records=len(verified),
+        input_mismatches=len(provenance_errors),
+        max_solved_residual=maximum_residual,
+        minor_radius=radius,
+        comparisons=len(summary["comparisons"]),
+        selected_arms=sum(
+            len(c.get("tiles") or [c["off"], c["on"]]) for c in summary["comparisons"]
+        ),
+    )
+    (run / "audit-summary.json").write_text(json.dumps(result, indent=2))
+    print(
+        f"SUMMARY {len(verified)} paired process receipts inside precision budget; "
+        f"{result['comparisons']} comparisons; "
+        "no input mismatches; inert controls passed; "
+        f"max residual {maximum_residual:.12g}"
+    )
+
+
+if __name__ == "__main__":
+    main()

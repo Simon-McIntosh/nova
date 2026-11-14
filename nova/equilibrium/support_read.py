@@ -14,6 +14,7 @@ serves any state of the same layout.
 
 import json
 from dataclasses import dataclass, field, replace
+from functools import partial
 from typing import NamedTuple
 
 import jax
@@ -22,6 +23,7 @@ import numpy as np
 
 from nova.database import content_store
 from nova.equilibrium import clip_quadrature, current, fixed_points, topology
+from nova.equilibrium.constraint import CurrentCentroidConstraint
 from nova.equilibrium.solve import _damped_scale
 
 # Node and cell counts a machine's mesh is padded up to, so two geometries of
@@ -61,6 +63,11 @@ class SupportOperands:
     ``bucket`` is static and enters the compile key; ``active_nodes`` is a
     traced leaf, because two geometries in one bucket need not carry the same
     active count and a differing static value would recompile.
+
+    ``coil_exterior`` optionally holds unit-current jets with shape
+    (bucket nodes, coils, six entries), with zero-padded node tails.
+    ``coil_count`` is a traced scalar masking unused coil columns. Runtime
+    currents are contracted into ``exterior`` at the solve/read seam.
     """
 
     geometry: topology.TopologyGeometry
@@ -83,7 +90,6 @@ class SupportOperands:
         nodes=None,
         sample_index=None,
         bucket=None,
-        *,
         coil_exterior=None,
     ):
         """Assemble operands from prebuilt rows; nodes follow the sample points.
@@ -100,14 +106,11 @@ class SupportOperands:
         nodes = np.asarray(nodes)
         rows = np.asarray(rows)
         exterior = np.asarray(exterior)
-        coil_exterior = (
-            np.zeros((len(nodes), 0, 6), dtype=exterior.dtype)
-            if coil_exterior is None
-            else np.asarray(coil_exterior)
-        )
-        if coil_exterior.ndim != 3 or coil_exterior.shape[::2] != (len(nodes), 6):
+        coils = None if coil_exterior is None else np.asarray(coil_exterior)
+        if coils is not None and (
+            coils.ndim != 3 or coils.shape[0] != len(nodes) or coils.shape[-1] != 6
+        ):
             raise ValueError("coil_exterior must have shape (nodes, coils, 6)")
-        coil_count = coil_exterior.shape[1]
         mesh_nodes = nodes
         active = len(nodes)
         if bucket is not None:
@@ -120,12 +123,11 @@ class SupportOperands:
                 (bucket, *exterior.shape[1:]), dtype=exterior.dtype
             )
             padded_exterior[:active] = exterior
-            padded_coils = np.zeros((bucket, coil_count, 6), dtype=coil_exterior.dtype)
-            padded_coils[:active] = coil_exterior
-            coil_exterior = padded_coils
             padded_nodes = np.zeros((bucket, nodes.shape[-1]), dtype=nodes.dtype)
             padded_nodes[:active] = nodes
             rows, exterior, nodes = padded_rows, padded_exterior, padded_nodes
+            if coils is not None:
+                coils = np.pad(coils, ((0, bucket - active), (0, 0), (0, 0)))
         mesh = fixed_points.build_mesh(mesh_nodes, sample_index, geometry)
         return cls(
             geometry,
@@ -136,8 +138,8 @@ class SupportOperands:
             jnp.asarray(exterior),
             bucket,
             jnp.asarray(active),
-            jnp.asarray(coil_exterior),
-            jnp.asarray(coil_count, dtype=jnp.int32),
+            None if coils is None else jnp.asarray(coils),
+            jnp.asarray(0 if coils is None else coils.shape[1], dtype=jnp.int32),
         )
 
 
@@ -175,8 +177,49 @@ class SupportRead(NamedTuple):
     rebuilt: jax.Array
 
 
-def nodal_jets(operands: SupportOperands, moments) -> jax.Array:
+def driven_operands(operands: SupportOperands, coil_currents=None):
+    """Bind one lane's traced currents into the existing exterior operand.
+
+    Every read and Newton field then uses the same total external jet. The
+    bank's fixed exterior remains separate in storage and at the public seam.
+    """
+    if coil_currents is None:
+        return operands
+    if operands.coil_exterior is None:
+        if coil_currents.shape[-1] != 0:
+            raise ValueError("coil currents require coil_exterior in the bank")
+        return operands
+    if coil_currents.shape != (operands.coil_exterior.shape[1],):
+        raise ValueError("coil currents must name every bank coil")
+    count = operands.coil_count
+    live = (
+        jnp.ones_like(coil_currents, dtype=bool)
+        if count is None
+        else (jnp.arange(coil_currents.size) < count)
+    )
+    exterior = operands.exterior + jnp.einsum(
+        "nkq,k->nq", operands.coil_exterior, jnp.where(live, coil_currents, 0.0)
+    )
+    return replace(operands, exterior=exterior)
+
+
+def _driven_cache(operands, cache):
+    """Refresh populated row-window slots from their bank-node identities."""
+    slots = cache.lookup
+    active = slots >= 0
+    # Padding can repeat slot zero; additive scatter with a live mask avoids
+    # overwriting the real slot with an unpopulated node's value.
+    exterior = (
+        jnp.zeros_like(cache.exterior)
+        .at[jnp.maximum(slots, 0)]
+        .add(jnp.where(active[:, None], operands.exterior[: slots.size], 0.0))
+    )
+    return replace(cache, exterior=exterior)
+
+
+def nodal_jets(operands: SupportOperands, moments, coil_currents=None) -> jax.Array:
     """Contract the booked moments once into every node's value and derivatives."""
+    operands = driven_operands(operands, coil_currents)
     stacked = jnp.stack(tuple(moments), axis=-1)
     return operands.exterior + jnp.einsum("ncmq,cm->nq", operands.rows, stacked)
 
@@ -285,6 +328,7 @@ def read(
     jets=None,
     tracking: TrackingState | None = None,
     rebuild: bool | None = None,
+    coil_currents=None,
 ) -> SupportRead:
     """Solve the stationary points, then read membership at them.
 
@@ -301,6 +345,9 @@ def read(
     stationary fluxes, fragment areas, edge intervals and saddle normal form
     are refreshed from the current state on both branches.
     """
+    if coil_currents is not None:
+        operands = driven_operands(operands, coil_currents)
+        cache = _driven_cache(operands, cache)
     stencil = stationary_stencil(
         operands,
         cache,
@@ -416,6 +463,7 @@ def read_batch(
     jets=None,
     tracking: TrackingState | None = None,
     certificate=None,
+    coil_currents=None,
 ) -> SupportRead:
     """One read over a batch of slices, taking one decision branch for all.
 
@@ -436,6 +484,48 @@ def read_batch(
     needs the decision rebuilt the batch rebuilds all of them, so every lane
     reports the rebuild it took part in.
     """
+    if coil_currents is not None:
+
+        def lane(index):
+            bank = driven_operands(operands, coil_currents[index])
+            return read(
+                bank,
+                _driven_cache(bank, cache),
+                jax.tree.map(lambda value: value[index], moments),
+                seeds[index],
+                previous[index],
+                convention,
+                policy,
+                axis_sign,
+                iterations=iterations,
+                jets=None if jets is None else jets[index],
+                tracking=None
+                if tracking is None
+                else jax.tree.map(lambda value: value[index], tracking),
+            )
+
+        result = jax.vmap(lane)(jnp.arange(moments[0].shape[0]))
+        if certificate is not None:
+            result = jax.lax.cond(
+                jnp.any(certificate(result)),
+                lambda _: read_batch(
+                    operands,
+                    cache,
+                    moments,
+                    seeds,
+                    previous,
+                    convention,
+                    policy,
+                    axis_sign,
+                    iterations=iterations,
+                    jets=jets,
+                    tracking=tracking,
+                    coil_currents=coil_currents,
+                ),
+                lambda _: result,
+                None,
+            )
+        return result
     stack = jax.vmap(
         lambda state, seed, warm: stationary_stencil(
             operands,
@@ -576,6 +666,7 @@ def read_and_book(
     psi=None,
     iterations: int = 12,
     tracking: TrackingState | None = None,
+    coil_currents=None,
 ):
     """One step: one contraction, one read, one booking.
 
@@ -584,6 +675,9 @@ def read_and_book(
     contraction is over every node, which booking needs, so it is not part of
     what tracking saves; the read's own whole-mesh fit and Bell rebuild are.
     """
+    if coil_currents is not None:
+        operands = driven_operands(operands, coil_currents)
+        cache = _driven_cache(operands, cache)
     jets = nodal_jets(operands, moments)
     if psi is None:
         psi = jets[operands.sample_index, 0]
@@ -614,13 +708,13 @@ def tracking_of(support: SupportRead) -> TrackingState:
     )
 
 
-def bank_program(operands: SupportOperands, moments) -> jax.Array:
+def bank_program(operands: SupportOperands, moments, coil_currents=None) -> jax.Array:
     """Apply the bank to booked moments: the minimal program it is measured through.
 
     Every operand is a traced argument, so the program is reused for any state
     and any geometry of the operand's shape bucket; only ``bucket`` is static.
     """
-    jets = nodal_jets(operands, moments)
+    jets = nodal_jets(operands, moments, coil_currents)
     active = jnp.asarray(
         jets.shape[0] if operands.active_nodes is None else operands.active_nodes
     )
@@ -653,6 +747,8 @@ def step_residual(
     support: SupportRead,
     profile,
     quadrature,
+    *,
+    coil_currents=None,
 ) -> StepResidual:
     """Book a state while preserving one read's ownership and clip set.
 
@@ -660,6 +756,7 @@ def step_residual(
     point coordinates stay fixed by the stationary-point envelope argument;
     changes of ownership or clipped-cell set require a new support read.
     """
+    operands = driven_operands(operands, coil_currents)
     direction = tuple(
         value - base for value, base in zip(moments, base_moments, strict=True)
     )
@@ -692,8 +789,11 @@ def step_jacobian_vector(
     booked: current.Booking | None = None,
     *,
     fresh_geometry: bool = False,
+    coil_currents=None,
 ):
     """Apply the bank, booking tangent and optional moving saddle geometry."""
+    operands = driven_operands(operands, coil_currents)
+    density_gradient = getattr(profile, "density_gradient", density_gradient)
     psi = nodal_jets(operands, moments)[operands.sample_index, 0]
     if booked is None:
         booked = current.book(
@@ -1217,9 +1317,7 @@ def _local_booking_sensitivities(
     # normalization derivative; recover the level channel by linearity below.
     field_direction = field_direction.at[samples + 7, :, 0].set(1.0)
     if quadrature.cut_batch_width == current.Quadrature().cut_batch_width:
-        quadrature = replace(
-            quadrature, cut_batch_width=_LOCAL_BOOKING_CUT_BATCH_WIDTH
-        )
+        quadrature = replace(quadrature, cut_batch_width=_LOCAL_BOOKING_CUT_BATCH_WIDTH)
     response = current.book_tangent_channels(
         psi,
         psi_direction,
@@ -1250,6 +1348,7 @@ def step_jacobian(
     booked=None,
     *,
     fresh_geometry: bool = False,
+    coil_currents=None,
 ):
     """Compose the bank with closed-form cell-local booking sensitivities.
 
@@ -1257,6 +1356,63 @@ def step_jacobian(
     A stencil crossing into further nodes returns a nonfinite matrix, so its
     truncated geometry cannot supply an accepted Newton correction.
     """
+    operands = driven_operands(operands, coil_currents)
+    if isinstance(profile, current.TabulatedProfile):
+        return _tabulated_jacobian(
+            operands,
+            moments,
+            support,
+            profile,
+            quadrature,
+            booked,
+            fresh_geometry=fresh_geometry,
+        )
+    return _booking_jacobian(
+        operands,
+        moments,
+        support,
+        profile,
+        density_gradient,
+        quadrature,
+        booked,
+        fresh_geometry=fresh_geometry,
+    )
+
+
+@partial(jax.jit, static_argnames=("fresh_geometry",))
+def _tabulated_jacobian(
+    operands, moments, support, profile, quadrature, booked, *, fresh_geometry
+):
+    """Share one traced Jacobian body across moment and pin corrections.
+
+    All numerical values, including both profile tables, remain operands.
+    The evaluation rule and geometry-refresh policy define the program.
+    """
+    return _booking_jacobian(
+        operands,
+        moments,
+        support,
+        profile,
+        None,
+        quadrature,
+        booked,
+        fresh_geometry=fresh_geometry,
+    )
+
+
+def _booking_jacobian(
+    operands,
+    moments,
+    support,
+    profile,
+    density_gradient,
+    quadrature,
+    booked,
+    *,
+    fresh_geometry,
+):
+    """Compose the bank rows with the local booking channels."""
+    density_gradient = getattr(profile, "density_gradient", density_gradient)
     if booked is None:
         psi = nodal_jets(operands, moments)[operands.sample_index, 0]
         booked = current.book(
@@ -1726,6 +1882,8 @@ class SolveResult(NamedTuple):
     update_path: jax.Array
     factor: NewtonFactor
     factor_valid: jax.Array
+    pin_amplitude: jax.Array | None = None
+    pin_error: jax.Array | None = None
 
 
 def solve_batch(
@@ -1750,6 +1908,8 @@ def solve_batch(
     contraction_limit: float = 0.5,
     freeze_active_set: bool = True,
     iterations: int = 12,
+    coil_currents=None,
+    vertical_pin=None,
 ) -> SolveResult:
     """Converge independent lanes in one staged loop with a batch refactor branch.
 
@@ -1771,7 +1931,37 @@ def solve_batch(
     ``profile`` is either one shared profile or a callable taking a traced
     lane index and returning that lane's profile. The callable is evaluated
     inside the lane map for both residuals and Newton booking derivatives.
+    ``coil_currents`` has shape (lanes, coils). Its values and a tabulated
+    profile's 33-knot arrays are traced inputs. Driven lanes bind an effective
+    exterior and refresh their row-window jets before entering the existing
+    solver. ``vertical_pin`` accepts VerticalPositionPin with scalar or
+    per-lane targets; the returned amplitude is its normalized source unknown.
     """
+    if coil_currents is not None or vertical_pin is not None:
+        return _solve_driven_batch(
+            operands,
+            cache,
+            moments,
+            seeds,
+            previous,
+            convention,
+            policy,
+            profile,
+            density_gradient,
+            quadrature,
+            axis_sign,
+            coil_currents=coil_currents,
+            vertical_pin=vertical_pin,
+            max_steps=max_steps,
+            tolerance=tolerance,
+            freeze_threshold=freeze_threshold,
+            reuse_factor=reuse_factor,
+            factor_cache=factor_cache,
+            factor_valid=factor_valid,
+            contraction_limit=contraction_limit,
+            freeze_active_set=freeze_active_set,
+            iterations=iterations,
+        )
     lanes, cells = moments[0].shape
     lane_profile = profile if callable(profile) else lambda _: profile
     lane_indices = jnp.arange(lanes)
@@ -1840,6 +2030,22 @@ def solve_batch(
         jnp.full((lanes, max_steps + 1), jnp.nan, dtype).at[:, 0].set(norm),
         jnp.full((lanes, max_steps), jnp.nan, dtype),
     )
+    if max_steps == 0:
+        return SolveResult(
+            moments,
+            support,
+            norm,
+            accepted,
+            initial[11],
+            initial[12],
+            initial[13],
+            initial[14],
+            initial[15],
+            initial[16],
+            initial[17],
+            initial[8],
+            jnp.full((lanes,), initial[9], bool),
+        )
 
     def keep_going(carried):
         return jnp.any(~carried[3]) & (jnp.max(carried[11]) < max_steps)
@@ -1944,14 +2150,18 @@ def solve_batch(
                 condition_diagnostics=False,
             )
 
-        correction = jax.lax.cond(
-            rebuild,
-            lambda _: jax.vmap(one_fresh)((state, step_support, lane_indices)),
-            lambda _: jax.lax.map(
-                one_with_factor, (state, step_support, factor, lane_indices)
-            ),
-            None,
-        )
+        if reuse_factor:
+            correction = jax.lax.cond(
+                rebuild,
+                lambda _: jax.vmap(one_fresh)((state, step_support, lane_indices)),
+                lambda _: jax.lax.map(
+                    one_with_factor, (state, step_support, factor, lane_indices)
+                ),
+                None,
+            )
+        else:
+            # A static fresh-factor policy stages no carried-factor branch.
+            correction = jax.vmap(one_fresh)((state, step_support, lane_indices))
 
         def evaluate(trial):
             trial_read = read_batch(
@@ -2067,7 +2277,9 @@ def solve_batch(
             freezes + start_freeze.astype(jnp.int32),
             unfreezes + (changed | drift).astype(jnp.int32),
             residual_path.at[:, slot + 1].set(next_norm),
-            update_path.at[:, slot].set(jnp.where(active, update_norm, 0.0)),
+            update_path.at[:, slot].set(jnp.where(active, update_norm, 0.0))
+            if max_steps
+            else update_path,
         )
 
     final = jax.lax.while_loop(keep_going, advance, initial)
@@ -2112,6 +2324,332 @@ def solve_batch(
     )
 
 
+def _external_booking_tangent(
+    operands, moments, support, profile, gradient, quadrature, jets, booked
+):
+    """Analytic booking response to an external-field amplitude."""
+    field = fixed_points.field_from_jets(jets, operands.sample_index, operands.mesh)
+    tangent = current.book_tangent(
+        nodal_jets(operands, moments)[operands.sample_index, 0],
+        jets[operands.sample_index, 0],
+        support.reading,
+        field.sampled_coefficient(operands.geometry),
+        field.value(support.reading.axis),
+        field.value(support.reading.boundary),
+        operands.geometry,
+        profile,
+        gradient,
+        quadrature,
+        booked,
+    )
+    geometry = _normal_geometry_booking_tangent(
+        operands, moments, jets, support, profile, quadrature, booked
+    )
+    return jnp.concatenate(tuple(a + b for a, b in zip(tangent, geometry, strict=True)))
+
+
+def _solve_pinned_lane(
+    operands,
+    cache,
+    moments,
+    seeds,
+    previous,
+    convention,
+    policy,
+    profile,
+    gradient,
+    quadrature,
+    axis_sign,
+    pin,
+    options,
+):
+    """Solve moments and the centroid source in one bordered Newton loop.
+
+    The moment Jacobian eliminates the centroid row using two right-hand
+    sides. A shared evaluator owns the full fresh read and booking at both
+    initialization and every damped trial; no inner equilibrium solve is staged.
+    """
+    from nova.equilibrium.constraint import uniform_radial_field_jet
+
+    centroid = partial(
+        CurrentCentroidConstraint.booked_height,
+        centre_height=operands.geometry.centre[:, 1],
+        target_height=pin.target_height,
+    )
+
+    if pin.coil_direction is None:
+        basis = uniform_radial_field_jet(operands.nodes) * pin.source_scale
+    else:
+        if operands.coil_exterior is None:
+            raise ValueError("a coil-direction pin requires coil_exterior")
+        basis = (
+            jnp.einsum(
+                "nkq,k->nq", operands.coil_exterior, jnp.asarray(pin.coil_direction)
+            )
+            * pin.source_scale
+        )
+    if operands.active_nodes is not None:
+        basis = jnp.where(
+            (jnp.arange(len(basis)) < operands.active_nodes)[:, None], basis, 0.0
+        )
+    gradient = getattr(profile, "density_gradient", gradient)
+    initial_amplitude = jnp.asarray(pin.initial_unknown, dtype=moments[0].dtype)
+
+    def at(amplitude):
+        bank = replace(operands, exterior=operands.exterior + amplitude * basis)
+        return bank, _driven_cache(bank, cache)
+
+    tolerance = options["tolerance"]
+    # Preserve the combined update budget of the scalar and moment corrections.
+    budget = 8 * options["max_steps"]
+    dtype = moments[0].dtype
+
+    @jax.jit
+    def evaluate(state, amplitude, warm):
+        bank, window = at(amplitude)
+        support = read(
+            bank,
+            window,
+            state,
+            seeds,
+            warm,
+            convention,
+            policy,
+            axis_sign,
+            iterations=options["iterations"],
+        )
+        residual = step_residual(bank, state, state, support, profile, quadrature)
+        norm = jnp.max(jnp.abs(jnp.concatenate(residual.residual)))
+        error = centroid(jnp.stack(state, axis=-1))
+        error = jnp.where(jnp.isfinite(error), error, jnp.inf)
+        merit = jnp.maximum(
+            norm / tolerance,
+            jnp.where(pin.active, jnp.abs(error) / pin.tolerance, 0.0),
+        )
+        return support, residual.booked, residual.residual, norm, error, merit
+
+    fresh = evaluate(moments, initial_amplitude, previous)
+    size = 3 * moments[0].size
+    empty_factor = NewtonFactor(
+        jnp.zeros((size, size), dtype),
+        jnp.ones(size, dtype),
+        jnp.ones(size, dtype),
+        jnp.zeros((size, 3), dtype),
+        jnp.zeros(size, jnp.int32),
+    )
+    initial = (
+        moments,
+        initial_amplitude,
+        fresh,
+        jnp.int32(0),
+        jnp.int32(1),
+        jnp.full((budget + 1,), jnp.nan, dtype).at[0].set(fresh[3]),
+        jnp.full((budget,), jnp.nan, dtype),
+    )
+
+    def accepted(fresh):
+        return fresh[0].valid & jnp.isfinite(fresh[5]) & (fresh[5] <= 1.0)
+
+    def advance(carried):
+        state, amplitude, fresh, count, reads, residual_path, update_path = carried
+        support, booked, residual, norm, error, merit = fresh
+        bank, _ = at(amplitude)
+        matrix = step_jacobian(
+            bank,
+            state,
+            support,
+            profile,
+            gradient,
+            quadrature,
+            booked,
+            fresh_geometry=True,
+        )
+        source = _external_booking_tangent(
+            bank,
+            state,
+            support,
+            profile,
+            gradient,
+            quadrature,
+            basis,
+            booked,
+        )
+        balanced, row_scale, column_scale = _equilibrate(matrix, state, booked)
+        right = jnp.stack((-jnp.concatenate(residual), source), axis=-1)
+        directions = column_scale[:, None] * jnp.linalg.solve(
+            balanced, right / row_scale[:, None]
+        )
+        free, response = directions[:, 0], directions[:, 1]
+        # The centroid numerator is linear in the moments and remains defined
+        # for a cold zero-current state. Normalize by the booked current there.
+        total_scale = jnp.maximum(
+            jnp.maximum(jnp.abs(jnp.sum(state[0])), jnp.abs(jnp.sum(booked[0]))), 1e-12
+        )
+        mismatch, free_height, rate = centroid(
+            jnp.stack((jnp.concatenate(state), free, response))
+            .reshape(3, 3, -1)
+            .swapaxes(-1, -2),
+            scale=total_scale * pin.row_scale,
+        )
+        delta = jnp.where(
+            pin.active,
+            (-mismatch - free_height) / jnp.where(pin.active, rate, 1.0),
+            0.0,
+        )
+        update = tuple(jnp.split(free + delta * response, 3))
+
+        def trial(candidate):
+            result = evaluate(candidate[0], candidate[1], support.stationary.position)
+            return result[5], result[0].valid, result
+
+        search = _damped_scale(
+            trial,
+            (state, amplitude),
+            (update, delta),
+            merit,
+            fresh,
+            max_steps=8,
+            tolerance=1.0,
+            keep_incumbent=False,
+        )
+        next_state, next_amplitude = search.state
+        update_norm = jnp.max(
+            jnp.abs(
+                jnp.concatenate(
+                    tuple(a - b for a, b in zip(next_state, state, strict=True))
+                )
+            )
+        )
+        return (
+            next_state,
+            next_amplitude,
+            search.auxiliary,
+            count + 1,
+            reads + search.evaluations,
+            residual_path.at[count + 1].set(search.auxiliary[3]),
+            update_path.at[count].set(update_norm),
+        )
+
+    final = (
+        initial
+        if budget == 0
+        else jax.lax.while_loop(
+            lambda carried: (carried[3] < budget) & ~accepted(carried[2]),
+            advance,
+            initial,
+        )
+    )
+    state, amplitude, fresh, count, reads, residual_path, update_path = final
+    return SolveResult(
+        state,
+        fresh[0],
+        fresh[3],
+        accepted(fresh),
+        count,
+        count,
+        reads,
+        jnp.int32(0),
+        jnp.int32(0),
+        residual_path,
+        update_path,
+        empty_factor,
+        jnp.asarray(False),
+        amplitude,
+        fresh[4],
+    )
+
+
+def _solve_driven_batch(
+    operands,
+    cache,
+    moments,
+    seeds,
+    previous,
+    convention,
+    policy,
+    profile,
+    gradient,
+    quadrature,
+    axis_sign,
+    *,
+    coil_currents,
+    vertical_pin,
+    **options,
+):
+    """Map the existing solver over lanes with their own traced exterior."""
+    lanes = moments[0].shape[0]
+    if coil_currents is not None and coil_currents.shape[0] != lanes:
+        raise ValueError("coil currents must carry one row per lane")
+
+    def lane(index):
+        bank = driven_operands(
+            operands, None if coil_currents is None else coil_currents[index]
+        )
+        window = _driven_cache(bank, cache)
+        state = jax.tree.map(lambda value: value[index], moments)
+        selected_profile = profile(index) if callable(profile) else profile
+        lane_options = dict(options)
+        lane_options["tolerance"] = jnp.broadcast_to(options["tolerance"], (lanes,))[
+            index
+        ]
+        if options["factor_cache"] is not None:
+            lane_options["factor_cache"] = jax.tree.map(
+                lambda value: value[index][None], options["factor_cache"]
+            )
+        lane_options["factor_valid"] = jnp.broadcast_to(
+            options["factor_valid"], (lanes,)
+        )[index]
+        if vertical_pin is not None:
+            pin = replace(
+                vertical_pin,
+                **{
+                    name: jnp.broadcast_to(
+                        jnp.asarray(getattr(vertical_pin, name)), (lanes,)
+                    )[index]
+                    for name in (
+                        "target_height",
+                        "source_scale",
+                        "row_scale",
+                        "tolerance",
+                        "initial_unknown",
+                        "active",
+                    )
+                },
+            )
+            return _solve_pinned_lane(
+                bank,
+                window,
+                state,
+                seeds[index],
+                previous[index],
+                convention,
+                policy,
+                selected_profile,
+                gradient,
+                quadrature,
+                axis_sign,
+                pin,
+                lane_options,
+            )
+        result = solve_batch(
+            bank,
+            window,
+            tuple(value[None] for value in state),
+            seeds[index][None],
+            previous[index][None],
+            convention,
+            policy,
+            selected_profile,
+            gradient,
+            quadrature,
+            axis_sign,
+            **lane_options,
+        )
+        return jax.tree.map(lambda value: value[0], result)
+
+    return jax.vmap(lane)(jnp.arange(lanes))
+
+
 def solve(
     operands,
     cache,
@@ -2127,6 +2665,8 @@ def solve(
     **kwargs,
 ) -> SolveResult:
     """Converge one seed using the same staged driver as independent lanes."""
+    if kwargs.get("coil_currents") is not None:
+        kwargs["coil_currents"] = jnp.asarray(kwargs["coil_currents"])[None]
     batched = solve_batch(
         operands,
         cache,
@@ -2166,6 +2706,18 @@ def _bank_payload(operands: SupportOperands) -> bytes:
             np.asarray(operands.rows).shape[0]
             if operands.active_nodes is None
             else operands.active_nodes
+        ),
+        coil_exterior=np.asarray(operands.coil_exterior)
+        if operands.coil_exterior is not None
+        else np.zeros(
+            (len(operands.nodes), 0, 6), dtype=np.asarray(operands.exterior).dtype
+        ),
+        coil_count=np.asarray(
+            0
+            if operands.coil_exterior is None
+            else operands.coil_exterior.shape[1]
+            if operands.coil_count is None
+            else operands.coil_count
         ),
     )
     return buffer.getvalue()
@@ -2222,11 +2774,7 @@ def read_bank(cache_directory, digest: str, geometry, mesh) -> SupportOperands:
         sample_index = archive["sample_index"]
         bucket = int(archive["bucket"])
         active_nodes = int(archive["active_nodes"])
-        coil_exterior = (
-            archive["coil_exterior"]
-            if "coil_exterior" in archive
-            else np.zeros((len(nodes), 0, 6), dtype=exterior.dtype)
-        )
+        coil_exterior = archive["coil_exterior"] if "coil_exterior" in archive else None
         coil_count = int(archive["coil_count"]) if "coil_count" in archive else 0
     return SupportOperands(
         geometry,
@@ -2237,6 +2785,8 @@ def read_bank(cache_directory, digest: str, geometry, mesh) -> SupportOperands:
         jnp.asarray(exterior),
         None if bucket < 0 else bucket,
         jnp.asarray(active_nodes),
-        jnp.asarray(coil_exterior),
+        None
+        if coil_exterior is None or coil_exterior.shape[1] == 0
+        else jnp.asarray(coil_exterior),
         jnp.asarray(coil_count, dtype=jnp.int32),
     )

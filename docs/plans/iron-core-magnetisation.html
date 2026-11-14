@@ -25,8 +25,8 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="89">
-<meta name="plan-modified" content="2026-11-13">
+<meta name="plan-version" content="95">
+<meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
   <main class="plan-doc">
@@ -782,7 +782,25 @@
     <div class="r-comment-body"><p>WEST 62751 solved on the Galerkin iron operator at 0.08 m (1695 cells, 4 exact Newton corrections) and 0.04 m (6632 cells, 5 corrections) from M = 0 at full drive; probes at +1/+2/+4 m read 242.651/200.369/96.326 and 242.645/174.105/79.769 µT, so the mesh-pair error bar is 0.006/26.3/16.6 µT (0.003/13.1/17.2 % of the coarse value), the +1 m probe and the table-versus-flat-215 change (9.4/9.1/8.9 % of the air-core field) are mesh-robust, and the +2/+4 m probes are not.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-11-13T12:15:00Z">
-    <div class="r-comment-body"><p>§4 landed. (1) Law exact at every table point with a 0.343 % saturation rise and both mutants failing; Galerkin G/&mu;<sub>0</sub> spectrum [4.9e-5, 0.99994] on WEST with the centroid mutant failing; shell refinement at least 2.63&times;/2.93&times; at &mu;<sub>r</sub> 100/1000 under every ceiling; sphere bound 7.08e-6. (2) WEST 62751 converges from M = 0 in 4/5 Newton corrections at 0.08/0.04 m with &mu;<sub>r</sub> 215 to 1683; two starts agree to 2.55e-9; Picard needs 12 iterations on the Galerkin operator and cycles on the centroid operator. Quote the +1 m far field (242.6 &micro;T against 7024 &micro;T air-core); +2/+4 m carry 13 to 17 % mesh error, which §5 must close. (3) One iron reader in nova/imas/machine.py. Merged at 7a4b9182a (operator), 9483fffd5 (cleanup), b278e3d54 (Picard), ddca80d58 (mesh pair); receipts on GPFS under west-62751/.</p></div>
+    <div class="r-comment-body"><p>§4 landed. (1) Law exact at every table point with a 0.343 % saturation rise and both mutants failing; Galerkin G/μ<sub>0</sub> spectrum [4.9e-5, 0.99994] on WEST with the centroid mutant failing; shell refinement at least 2.63×/2.93× at μ<sub>r</sub> 100/1000 under every ceiling; sphere bound 7.08e-6. (2) WEST 62751 converges from M = 0 in 4/5 Newton corrections at 0.08/0.04 m with μ<sub>r</sub> 215 to 1683; two starts agree to 2.55e-9; Picard needs 12 iterations on the Galerkin operator and cycles on the centroid operator. Quote the +1 m far field (242.6 µT against 7024 µT air-core); +2/+4 m carry 13 to 17 % mesh error, which §5 must close. (3) One iron reader in nova/imas/machine.py. Merged at 7a4b9182a (operator), 9483fffd5 (cleanup), b278e3d54 (Picard), ddca80d58 (mesh pair); receipts on GPFS under west-62751/.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261113T195542683111-review-of-icm-graded-refinement-4bd1ccd452f1" data-who="reckon-build" data-when="2026-11-13T20:08:26.747Z">
+    <div class="r-comment-body"><p>review stored at review-records/r-20261113T121328652501-icm-graded-refinement.json and its .at-4bd1ccd452f15242d6c515d6e62bef0e2ea953fc.json companion; verdict is 1 blocking and 5 non-blocking findings across 6 dimensions.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261113T200045309025-review-of-icm-graded-refinement-4bd1ccd452f1-figure" data-who="reckon-build" data-when="2026-11-13T20:16:49.166Z">
+    <div class="r-comment-body"><p>figure review filed for run r-20261113T121328652501-icm-graded-refinement against head 4bd1ccd45 (base f4954eb77): six rubric verdicts, no blocking finding, two non-blocking findings (final uniform marker straddles the 0.5 % limit; four of six x ticks unlabelled).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261113T220606320378-review-of-icm-graded-refinement-7a44dd216978" data-who="reckon-build" data-when="2026-11-13T22:11:36.724Z">
+    <div class="r-comment-body"><p>independent review of run r-20261113T121328652501-icm-graded-refinement over commits 4bd1ccd45..7a44dd216 records a parsed verdict at head 7a44dd21 with scores goal_fidelity 18, evidence 16, scope_discipline 19, durability 15, fit 16, reuse 12, zero added failures, and three non-blocking findings (a wrong transition-length figure in the evidence fragment, and two defects in the new suite-arm launcher: a whole-file control revert pinned to a commit sha, and a copied extract-and-run block).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261113T220756192987-review-of-icm-graded-refinement-7a44dd216978-figure" data-who="reckon-build" data-when="2026-11-13T22:15:35.235Z">
+    <div class="r-comment-body"><p>figure review of run r-20261113T121328652501-icm-graded-refinement at head 7a44dd216 (base f4954eb77) stored at review-records/r-20261113T121328652501-icm-graded-refinement.figure.json with its .at-7a44dd216978 companion; six rubric verdicts pass, no blocking finding, three non-blocking findings (last uniform marker straddles the 0.5 % limit; four of six x ticks unlabelled; graded best-probe trace at 2.45:1 on white).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261113T121328652501-icm-graded-refinement" data-who="reckon-build" data-when="2026-11-13T22:03:12Z">
+    <div class="r-comment-body"><p>awaiting coordinator review; do not edit the plan</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s5-graded-measured" data-who="nova-coordinator" data-when="">
+    <div class="r-comment-body"><p>Graded refinement, the first §5 candidate, is measured, merged in commit 7a44dd216 and promoted. The evidence is in fragment <code>icm-graded-refinement</code>. It does not meet §5:</p><ul><li><strong>Closed shell, μ<sub>r</sub> = 1000:</strong> at equal cell count, grading gives no accuracy gain over a uniform mesh. Both families follow one error-versus-cells curve. The pinned graded arm reaches 0.397 % worst-probe at 13 410 cells, where the uniform arm would need about 9 500, and its doubled arm misses at 1.052 %.</li><li><strong>WEST 62751, graded 16/80 mm → 8/40 mm:</strong> the field moves +3.47 % at +1 m, −5.21 % at +2 m and −7.16 % at +4 m, so clause (2) is missed at every probe.</li><li><strong>Lane:</strong> the graded arms ran on CPU, because the P100 cannot hold the dense factor above about 11k cells.</li></ul><p>The piecewise-constant cell route is therefore not converged at the far probes at affordable cell counts. The remaining candidates are piecewise-linear magnetisation and the surface scalar formulation; the formulation decision is with the lead. The run's non-blocking review findings go to the deferred scripts-cleanup node.</p></div>
 </div>
 </section>
 </main>

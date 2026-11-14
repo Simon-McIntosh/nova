@@ -1,0 +1,106 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T16:48:44.000Z",
+  "dispatched_at": "2026-11-13T16:40:48Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:124",
+      "id": "done_when-1",
+      "reason": "as written the control can pass while the convergence detection is broken, so the one guard the node's whole measure rests on is never exercised; the plan's own cited receipt (h200/slice-0013.json, converged false, residual 2.333e-3) shows that an iterating failure is cheaply available and is what the control should produce.",
+      "text": "negative control (c) seeds a displaced slice with an update budget of zero, so the slice is rejected before a single Newton step and the failure is reported by the budget check rather than by the per-slice convergence accounting that clause (c)'s 90%-to-1e-10 floor depends on",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:124",
+      "id": "done_when-2",
+      "reason": "each worker will pick its own interpretation and the gate cannot be reproduced or failed, so the number it records is not comparable with any later build.",
+      "text": "clause (a) requires the ITER bank to \"build once and load in at most a few seconds on an H200\", a bound no reader can adjudicate.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:123",
+      "id": "wiring-1",
+      "reason": "a reader following the declared links forward reaches a lever-measurement section \u00a76 consumes nothing from, and misses the bank code whose landed state \u00a76's start depends on; correcting the link set is a one-line change to the section element.",
+      "text": "the section element declares data-links to s1 and s5, but \u00a76's text consumes the landed code of s2 and s3 and points at s4's seam, and never references \u00a75 (speed levers), so the declared relationship set names one section \u00a76 does not use and omits the three its prose names",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "1686476e9a88b1259549c285ae48656ee772e803",
+  "plan_fingerprint": "308d2b2d5c35751a7204f692e5d2711f4ddcb66aa0f6d5c8094f61748000ff28",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 319,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "the control exists to show a failed slice enters the per-slice accounting and lowers the converged fraction, which the section requires whichever check marks it failed; a zero-update slice cannot reach the 1e-10 residual, so it must be counted as unconverged by the same accounting the 90% floor reads",
+      "when": "2026-11-13T16:48:40.893796+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "the load wall is a recorded measurement; the node review adjudicates it against the section 1 fixture bound of 1 s scaled by the ITER node count, and the scenario run measures the load in its own wall, so no separate fixed figure is set before the bank size is known",
+      "when": "2026-11-13T16:48:44.909789+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "data-links record provenance, not waits: section 6 extends the section 1 bank machinery and cites a section 5 measurement record; its use of sections 2 and 3 landed code and of the section 4 seam is stated in its text, and no section wait is declared because it consumes code, not closing measures",
+      "when": "2026-11-13T16:48:48.512518+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "the control exists to show a failed slice enters the per-slice accounting and lowers the converged fraction, which the section requires whichever check marks it failed; a zero-update slice cannot reach the 1e-10 residual, so it must be counted as unconverged by the same accounting the 90% floor reads",
+      "when": "2026-11-13T16:48:40.893796+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "the load wall is a recorded measurement; the node review adjudicates it against the section 1 fixture bound of 1 s scaled by the ITER node count, and the scenario run measures the load in its own wall, so no separate fixed figure is set before the bank size is known",
+      "when": "2026-11-13T16:48:44.909789+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "data-links record provenance, not waits: section 6 extends the section 1 bank machinery and cites a section 5 measurement record; its use of sections 2 and 3 landed code and of the section 4 seam is stated in its text, and no section wait is declared because it consumes code, not closing measures",
+      "when": "2026-11-13T16:48:48.512518+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-sub-millisecond-forward-path.v319.json",
+  "review_run_id": "r-20261113T163920566275-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "719820d88d7995a72f18d1b28851d9f8dff5b157",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 both cited run directories, all three cited receipt globs, the DINA collection path, the h200 receipts holding 39.9/5.78 ms, and the named symbols support_read.solve_batch and drive_continuation.advance_drive all resolve; \u00a76 no longer cites the unwritten bank fragment.",
+    "done_when": "a finding \u2014 negative control (c) fails its slice by refusing to iterate (update budget zero) rather than by failing to converge, and clause (a)'s load time is bounded only as \"a few seconds\".",
+    "evidence_paths": "pass \u2014 the run receipts it cites resolve under the cited run directories and the section names a durable GPFS path (run directory or ~/.cache/nova-iter-bank/) for compilation logs, receipts, memory and width probe.",
+    "naming": "pass \u2014 the section carries no new symbol, filename or comment naming a plan, stage, ticket or version.",
+    "reasoning": "pass \u2014 the stated root cause (the general route cannot serve a scenario) matches the cited receipts, and the two gated measures are reachable and can fail; the one implementation-prescription reading was previously declined and the paragraph is unchanged, so it is not re-raised.",
+    "single_goal": "pass \u2014 each of nodes (a), (b) and (c) names one deliverable, one measure set and its own negative control.",
+    "wiring": "a finding \u2014 s6's section element declares data-links to s1 and s5, while the section's own prose consumes s2/s3's landed code and opens onto s4's seam, and never mentions s5."
+  },
+  "section_digests": {
+    "_document": "7c04d976a904c7818b8132edfa63c4c9920d51bb5de540921c8404f16f58d9a3",
+    "s0": "02c484da982db49df058949810d449b2e95a1a134ec03272e31dda4df5bed6d2",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "5aa72ecf3d63060b466bd064d76dc02fa5439343113fd1657038c73094f830b2",
+    "s4": "91bd28dc1cffb091dd5b8e3154b8052ae494fc161f98b81c4aa3d7fc4b7d4fca",
+    "s5": "93a5e678cdf44d386b06e74db9abd0f022782fcfa12a51ed6c8332d5636661cd",
+    "s6": "7d36ea6e2baeb1ddceeefb8692913ab61376d00a12f0d8c88b6b66728f9cb12c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T16:48:14.403830+00:00",
+  "total": null
+}

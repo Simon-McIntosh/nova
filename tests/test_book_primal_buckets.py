@@ -32,9 +32,9 @@ pytestmark = [pytest.mark.slow, pytest.mark.timeout(1800)]
 
 
 def test_scalar_cut_tile_keeps_wide_batches():
-    # At 16 cells, conic strip propagation doubles from 672 to 1344 launches
-    # per residual call on the diverted 550-cell bank.
-    assert current._SCALAR_CUT_BATCH_WIDTH == 32
+    # Wide conic tiles reduce strip-propagation batches in diverted banks.
+    # Normal-form rings use their own smaller tile width.
+    assert current._SCALAR_CUT_BATCH_WIDTH == 128
 
 
 def reference_book(psi, read, geometry, profile, quadrature=Quadrature()):

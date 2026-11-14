@@ -13,6 +13,13 @@
   ],
   "completed_at": "2026-11-13T13:56:35.847Z",
   "dispatched_at": "2026-11-13T13:39:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "h200-levers",
+      "recorded_at": "2026-11-13T17:07:07.196089+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_book_primal_buckets.py",

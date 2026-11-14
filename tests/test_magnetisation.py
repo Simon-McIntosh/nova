@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -74,6 +75,34 @@ def shell():
         .difference(shapely.Point(0, 0).buffer(0.9, 512))
         .intersection(shapely.box(0, -1, 1, 1))
     )
+
+
+def two_radius_region():
+    """Two concentric guards, so the interaction spans more than one radius."""
+    outer = (
+        shapely.Point(0, 0)
+        .buffer(1.0, 128)
+        .difference(shapely.Point(0, 0).buffer(0.9, 128))
+    )
+    inner = (
+        shapely.Point(0, 0)
+        .buffer(0.6, 128)
+        .difference(shapely.Point(0, 0).buffer(0.55, 128))
+    )
+    return outer.union(inner).intersection(shapely.box(0, -1.2, 1.2, 1.2))
+
+
+def test_galerkin_spectrum_is_the_volume_weighted_symmetric_range():
+    cells = iron._mesh(two_radius_region(), 0.05)
+    gram = iron._galerkin_interaction(cells)
+    spectrum = iron.galerkin_spectrum(cells, gram)
+    assert spectrum["volume_symmetry"] < 1e-12
+    assert spectrum["minimum"] > -1e-12
+    assert spectrum["maximum"] <= 1.0
+    # G is unsymmetric because the 2*pi*r volume measure lives in the energy
+    # form, so eigvalsh reads one triangle and reports a fold it does not have.
+    raw = np.linalg.eigvalsh(np.asarray(gram) / iron._MU0)
+    assert raw[0] < -0.05 < 1.0 < raw[-1]
 
 
 def uniform(points, strength=0.01):
@@ -234,6 +263,128 @@ def test_closed_shell_refines_toward_exact_shielding(mu, capsys):
         assert np.all(fine_error <= np.asarray(collocation_fine) + 0.005), (
             "fine-mesh error must stay within 0.5 percentage points of collocation"
         )
+
+
+# The graded shell arm: spacing at the shell faces, the coarse limit away from
+# them, and the cells the 0.1 m wall keeps across its thickness.
+GRADED_FINE = 0.002
+GRADED_COARSE = 0.0048
+GRADED_CELLS_ACROSS = 20.0
+
+
+def mesh_digest(cells):
+    """Return a digest of the cell basis: every polygon, centroid and area."""
+    digest = hashlib.sha256()
+    for polygon in cells.polygons:
+        digest.update(polygon.tobytes())
+    digest.update(cells.centroids.tobytes())
+    digest.update(cells.areas.tobytes())
+    return digest.hexdigest()
+
+
+def graded_shell_field(scale=1.0):
+    """Return the shell's grading, optionally coarsened by ``scale``."""
+    return iron.graded_cell_size(
+        [0.9, 1.0],
+        [-1.0, 1.0],
+        GRADED_FINE * scale,
+        GRADED_COARSE * scale,
+        cells_across=GRADED_CELLS_ACROSS,
+    )
+
+
+def test_uniform_cell_size_reproduces_the_recorded_grid():
+    # Digests recorded from the uniform grid before the spacing field existed,
+    # so any perturbation of the default mesh changes them.
+    recorded = {
+        0.1: (46, "0a354c798c78a034dfdb0a729c1778689309dd36a9811bfd510a551386c313be"),
+        0.04: (228, "aa787e3776037d958c92c61754003913177d66f63719b18a9a573a8c97aee7ec"),
+    }
+    region = shell()
+    for size, (count, digest) in recorded.items():
+        cells = iron._mesh(region, size)
+        assert len(cells.polygons) == count
+        assert mesh_digest(cells) == digest
+
+
+def test_graded_cell_size_grades_away_from_named_surfaces():
+    field = graded_shell_field()
+    assert field.radial(0.9) == pytest.approx(GRADED_FINE)
+    assert field.radial(1.0) == pytest.approx(GRADED_FINE)
+    # The 0.1 m shell wall keeps at least the prescribed cells across its
+    # thickness, and never coarsens past the coarse limit.
+    wall = min(GRADED_COARSE, 0.1 / GRADED_CELLS_ACROSS)
+    assert field.radial(0.95) == pytest.approx(wall)
+    assert 0.1 / field.radial(0.95) >= GRADED_CELLS_ACROSS - 1e-9
+    # Far inside the bore the spacing coarsens to the coarse limit.
+    assert field.radial(0.5) == pytest.approx(GRADED_COARSE)
+    assert field.vertical(0.0) == pytest.approx(GRADED_COARSE)
+    assert field.scaled(0.5).radial(0.95) == pytest.approx(0.5 * wall)
+    with pytest.raises(ValueError):
+        iron.graded_cell_size([], [-1.0, 1.0], 0.002, 0.02)
+    with pytest.raises(ValueError):
+        iron.graded_cell_size([0.9, 1.0], [-1.0, 1.0], 0.03, 0.02)
+    with pytest.raises(ValueError):
+        iron.graded_cell_size([0.9, 1.0], [-1.0, 1.0], 0.002, 0.02, growth=1.0)
+
+
+def test_graded_mesh_resolves_the_shell_wall_and_tiles_it():
+    field = graded_shell_field()
+    cells = iron._mesh(shell(), field)
+    axis = iron._axis(0.9, 1.0, field.radial)
+    assert np.max(np.diff(axis)) <= 0.1 / GRADED_CELLS_ACROSS + 1e-12
+    assert cells.areas.sum() == pytest.approx(shell().area, abs=1e-9)
+    merged = shapely.union_all([shapely.Polygon(p) for p in cells.polygons])
+    assert shell().symmetric_difference(merged).area < 1e-14
+    assert all(
+        shapely.Polygon(p).contains(shapely.Point(c))
+        for p, c in zip(cells.polygons, cells.centroids)
+    )
+
+
+def graded_shell_error(field, capsys):
+    """Return the exact-shielding relative error at the shell's three probes."""
+    started = perf_counter()
+    result = iron.solve_magnetisation(
+        shell(), loop, [0, 10], [1000, 1000], cell_size=field
+    )
+    wall = perf_counter() - started
+    assert result.converged
+    probes = np.array([[2.0, 0], [0, 2.0], [3.0, 1.0]])
+    air = loop(probes)
+    total = air + result.field(probes)
+    shielding = np.linalg.norm(air, axis=1) / np.linalg.norm(total, axis=1)
+    mu = 1000.0
+    exact = ((2 * mu + 1) * (mu + 2) - 2 * (mu - 1) ** 2 * 0.9**3) / (9 * mu)
+    error = np.abs(shielding / exact - 1)
+    with capsys.disabled():
+        print(
+            f"\ngraded shell: cells={result.cell_count}, "
+            f"iterations={result.iterations}, "
+            f"shielding={shielding.tolist()}, "
+            f"analytic_relative_error={error.tolist()}, "
+            f"wall_seconds={wall:.6f}",
+            flush=True,
+        )
+    return error, result.cell_count
+
+
+@pytest.mark.slow
+# Both arms assemble a dense cell interaction: the pinned grading measured
+# 3660 s of assembly plus 237 s of solve at 13410 cells, and the doubled arm
+# 566 s plus 26 s at 4017 cells, on 16 CPU threads. The bound leaves room for
+# a slower node without letting a hung run hold the lane indefinitely.
+@pytest.mark.timeout(7200)
+def test_graded_shell_reaches_half_percent_where_its_doubled_arm_misses(capsys):
+    error, count = graded_shell_error(graded_shell_field(), capsys)
+    doubled, doubled_count = graded_shell_error(graded_shell_field(2.0), capsys)
+    assert doubled_count < count
+    assert np.all(error <= 0.005), (
+        "the graded Galerkin solve must reach 0.5 percent at every probe"
+    )
+    assert np.any(doubled > 0.005), (
+        "doubling the cell-size field through the shell must miss 0.5 percent"
+    )
 
 
 def test_mesh_merges_slivers_without_losing_material():

@@ -10,6 +10,11 @@
       "kind": "exempted",
       "reason": "tautological float-order check in a prototype report; stage attribution is verified separately by the HLO-frame rule and the paired carried-read reproduction, so the assertion guards nothing a reader relies on",
       "recorded_at": "2026-11-14T07:45:37.493932+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "nothing misreported: the fragment states 64 is the largest requested width admitted; a width-128 throughput probe belongs to the next H200 speed node, not to this attribution record",
+      "recorded_at": "2026-11-14T07:45:46.476831+00:00"
     }
   },
   "findings": [

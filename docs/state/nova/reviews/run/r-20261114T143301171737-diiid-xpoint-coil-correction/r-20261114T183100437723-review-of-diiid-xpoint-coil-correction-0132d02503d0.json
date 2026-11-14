@@ -18,6 +18,11 @@
       "kind": "exempted",
       "reason": "prototype batch runner duplicated between two diagnosis records under scripts/prototypes; no product module is duplicated, and the arms are superseded by the external-current propagation trace",
       "recorded_at": "2026-11-14T20:29:58.664512+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "one 90-character line in a prototype driver; ruff excludes nothing here but the line is in a record script no product imports, and the land is not worth a further round",
+      "recorded_at": "2026-11-14T20:30:33.629526+00:00"
     }
   },
   "findings": [

@@ -18,6 +18,11 @@
       "kind": "exempted",
       "reason": "the record already excludes 179L from every total and states only 146D converged; its 224-cell support is disclosed, so the per-row vertical share is read as a non-converged state",
       "recorded_at": "2026-11-14T10:32:54.140105+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "summary.json marks every uncounted row counted:false with not_counted_reason beside the component share; a measurement receipt, not consumed by product code",
+      "recorded_at": "2026-11-14T10:33:03.924657+00:00"
     }
   },
   "findings": [

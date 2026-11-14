@@ -11,7 +11,10 @@ configure_dtypes()
 import jax  # noqa: E402
 import numpy as np  # noqa: E402
 from nova.biot.magnetisation import _fit_law, _linear_factor  # noqa: E402
-from scripts.iron_linear_magnetisation.controls import require_clean_script  # noqa: E402
+from scripts.iron_linear_magnetisation.controls import (  # noqa: E402
+    SHELL_MU,
+    require_clean_script,
+)
 
 
 def main():
@@ -48,7 +51,9 @@ def main():
         def shape(value):
             return jax.ShapeDtypeStruct(value, np.float64)
 
-        law = tuple(shape(value.shape) for value in _fit_law([0, 10], [1000, 1000]))
+        law = tuple(
+            shape(value.shape) for value in _fit_law([0, 10], [SHELL_MU, SHELL_MU])
+        )
         operands = (
             shape((unknowns, unknowns)),
             shape((unknowns,)),

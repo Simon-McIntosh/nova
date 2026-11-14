@@ -14,6 +14,9 @@ import numpy as np  # noqa: E402
 from scipy.special import binom, eval_legendre  # noqa: E402
 from scripts.iron_linear_magnetisation.controls import (  # noqa: E402
     SHELL_MU,
+    SHELL_INNER_RADIUS,
+    SHELL_OUTER_RADIUS,
+    LOOP_RADIUS,
     SHELL_PROBES,
     exact_shielding,
     loop,
@@ -33,6 +36,7 @@ def exterior_reference(terms):
     cosine, sine = SHELL_PROBES[:, 1] / radius, SHELL_PROBES[:, 0] / radius
     vacuum = np.zeros_like(SHELL_PROBES)
     shielded = np.zeros_like(SHELL_PROBES)
+    ratio = SHELL_INNER_RADIUS / SHELL_OUTER_RADIUS
     for index in range(terms):
         degree = 2 * index + 1
         polynomial = eval_legendre(degree, cosine)
@@ -45,7 +49,7 @@ def exterior_reference(terms):
         coefficient = (
             (4e-7 * np.pi / 2)
             * binom(-1.5, index)
-            * 0.05 ** (2 * index + 2)
+            * LOOP_RADIUS ** (2 * index + 2)
             / (2 * index + 2)
         )
         radial = (degree + 1) * coefficient * polynomial / radius ** (degree + 2)
@@ -56,20 +60,20 @@ def exterior_reference(terms):
         mu = SHELL_MU
         shielding = (
             (degree * mu + degree + 1) * ((degree + 1) * mu + degree)
-            - degree * (degree + 1) * (mu - 1) ** 2 * 0.9 ** (2 * degree + 1)
+            - degree * (degree + 1) * (mu - 1) ** 2 * ratio ** (2 * degree + 1)
         ) / (mu * (2 * degree + 1) ** 2)
         if degree == 1:
             np.testing.assert_allclose(shielding, exact_shielding(), rtol=2e-15)
-        inner, inverse = 0.9**degree, 0.9 ** (-degree - 1)
+        inner, inverse = ratio**degree, ratio ** (-degree - 1)
         # Solve continuity of scalar potential and normal permeability times
         # its derivative at both faces, independently of the reduced formula.
         boundary = np.array(
             [
                 [inner, -inner, -inverse, 0],
                 [
-                    degree * inner / 0.9,
-                    -mu * degree * inner / 0.9,
-                    mu * (degree + 1) * inverse / 0.9,
+                    degree * inner / ratio,
+                    -mu * degree * inner / ratio,
+                    mu * (degree + 1) * inverse / ratio,
                     0,
                 ],
                 [0, 1, 1, -1],
@@ -77,7 +81,7 @@ def exterior_reference(terms):
             ]
         )
         transmitted = np.linalg.solve(
-            boundary, [-inverse, (degree + 1) * inverse / 0.9, 0, 0]
+            boundary, [-inverse, (degree + 1) * inverse / ratio, 0, 0]
         )[-1]
         np.testing.assert_allclose(transmitted, 1 / shielding, rtol=2e-12)
         vacuum += field

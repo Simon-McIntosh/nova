@@ -108,7 +108,23 @@ def test_circuit_boundary_preserves_volume_and_outward_normals(annulus):
 
 
 def test_invalid_permeability_is_refused():
-    panels = Panels(np.array([[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]]))
-    model = SurfaceModel(panels, lambda p: np.ones_like(p), rotations=1, reflect=False)
+    vertices = np.array(
+        [[1.0, 1.0, 1.0], [-1.0, -1.0, 1.0], [-1.0, 1.0, -1.0], [1.0, -1.0, -1.0]]
+    )
+    triangles = vertices[ConvexHull(vertices).simplices]
+    normals = np.cross(
+        triangles[:, 1] - triangles[:, 0], triangles[:, 2] - triangles[:, 0]
+    )
+    reverse = np.sum(normals * triangles.mean(axis=1), axis=1) < 0
+    triangles[reverse] = triangles[reverse, ::-1]
+    model = SurfaceModel(
+        Panels(triangles), lambda p: np.ones_like(p), rotations=1, reflect=False
+    )
     with pytest.raises(ValueError, match="permeability"):
         model.solve(1.0)
+
+
+def test_open_surface_is_refused_by_solid_angle_identity():
+    panels = Panels(np.array([[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]]))
+    with pytest.raises(ValueError, match="not closed"):
+        SurfaceModel(panels, lambda p: np.ones_like(p), rotations=1, reflect=False)

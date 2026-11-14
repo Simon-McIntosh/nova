@@ -1,0 +1,28 @@
+<article id="ilf-six-limb-reference-checkpoint">
+  <h3>Six-limb reference: numerical checkpoint, acceptance unmet</h3>
+  <p>The saved prototype states reproduce column fluxes of 12.7222264 Wb at
+    0.133333 m and 13.4730559 Wb at 0.1 m for relative permeability 200:
+    a 5.5728% change relative to the finer value. Their represented column
+    areas are 1.280 and 1.320 m², against the circle's 1.385116 m².</p>
+  <p>A fixed-boundary triangular surface-charge solver and a measurement
+    driver were added. Exact triangular fields match the independent brick
+    kernel inside and outside a cuboid. The circuit's oriented surface
+    integral preserves its volume. These checks do not certify convergence.</p>
+  <p>The initial centroid formulation with a diagonal conservation correction
+    is rejected: between 0.18 and 0.13 m its flux changes by 16.91% and 21.36%
+    at relative permeabilities 50 and 200, and its in-vessel vector-field
+    changes are 62.77% and 68.51%. Small linear residuals do not make these
+    values a usable reference.</p>
+  <p>The subsequent area-weighted adjoint formulation preserves the
+    solid-angle identity without a diagonal correction. Its 1,280-panel sphere
+    check at relative permeability 50 gives interior H/H₀ = 0.06146019,
+    against 3/52 = 0.05769231, outside the test's 0.003 absolute tolerance.
+    The repeated-failure rule stopped further numerical work. The final code
+    remains experimental; no accepted six-limb or annulus result is claimed.</p>
+  <p>Per-resolution diagnostic fields and charges are retained under
+    <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/reference/surface-charge-20261114/</code>.
+    The run's <code>measurement.log</code> records the prototype reproduction
+    and rejected refinement; <code>qualocation-tests.log</code> records the
+    failing independent sphere check. The rigel measurement job was cancelled
+    before annulus validation and the missing-limb control completed.</p>
+</article>

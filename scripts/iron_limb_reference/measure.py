@@ -126,9 +126,9 @@ def solve_resolution(case, size, output, annulus=False, bore=0.0, missing=None):
             * np.sum(panels.areas * np.sum(panels.centres * panels.normals, axis=1))
             / (6 if missing is not None else 1)
         ),
-        correction_range=[
-            float(model.conservation_correction.min()),
-            float(model.conservation_correction.max()),
+        solid_angle_error_range=[
+            float(model.conservation_error.min()),
+            float(model.conservation_error.max()),
         ],
         rows=[],
     )
@@ -244,7 +244,10 @@ def main():
     parser.add_argument("--case", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
-        "--sizes", type=float, nargs="+", default=[0.5, 0.35, 0.25, 0.18, 0.13]
+        "--sizes",
+        type=float,
+        nargs="+",
+        default=[0.5, 0.35, 0.25, 0.18, 0.13, 0.1, 0.075],
     )
     parser.add_argument(
         "--axisymmetric-sizes", type=float, nargs="+", default=[0.25, 0.18]

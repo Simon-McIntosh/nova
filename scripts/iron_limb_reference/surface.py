@@ -2,7 +2,9 @@
 
 The charge is sigma = M.n. Its interior normal field has the jump -sigma/2,
 so ((mu+1)/(2*(mu-1)) I - K) sigma = H_external.n, with K the principal-value
-normal field of the single layer. Panels integrate a constant charge exactly;
+normal field of the single layer. Qualocation integrates the target normal
+exactly using the area-weighted adjoint of the double-layer operator;
+panels integrate a constant charge exactly for the field evaluation;
 only the charge distribution is discretised. No outer truncation boundary is
 introduced. Rotation images are optional; reflection uses the odd charge of
 an up-down symmetric circuit.
@@ -95,17 +97,15 @@ def triangle_field(point, vertices, normal, area, lengths, outward):
 
 
 @njit(parallel=True)
-def _normal_matrix(
-    targets, normals, vertices, source_normals, areas, lengths, outward, signs
-):
-    transposed = np.zeros((len(vertices), targets.shape[1]))
-    correction = np.zeros(len(vertices))
-    for j in prange(len(vertices)):
-        integral = 0.0
-        for i in range(targets.shape[1]):
-            even, odd = 0.0, 0.0
+def _normal_matrix(targets, vertices, source_normals, areas, lengths, outward, signs):
+    double_layer = np.zeros((targets.shape[1], len(vertices)))
+    conservation_error = np.zeros(targets.shape[1])
+    for i in prange(targets.shape[1]):
+        even_sum = 0.0
+        for j in range(len(vertices)):
+            odd = 0.0
             for k in range(len(signs)):
-                point, normal = targets[k, i], normals[k, i]
+                point = targets[k, i]
                 hx, hy, hz = _triangle_components(
                     point[0],
                     point[1],
@@ -116,13 +116,20 @@ def _normal_matrix(
                     lengths[j],
                     outward[j],
                 )
-                value = hx * normal[0] + hy * normal[1] + hz * normal[2]
+                value = (
+                    hx * source_normals[j, 0]
+                    + hy * source_normals[j, 1]
+                    + hz * source_normals[j, 2]
+                )
                 odd += signs[k] * value
-                even += value
-            transposed[j, i] = odd
-            integral += areas[i] * even
-        correction[j] = 0.5 - integral / areas[j]
-    return np.ascontiguousarray(transposed.T), correction
+                even_sum += value
+            double_layer[i, j] = odd
+        conservation_error[i] = 0.5 + even_sum
+    result = np.ascontiguousarray(double_layer.T)
+    for i in prange(len(vertices)):
+        for j in range(len(vertices)):
+            result[i, j] *= -areas[j] / areas[i]
+    return result, conservation_error
 
 
 @njit(parallel=True)
@@ -174,10 +181,8 @@ class SurfaceModel:
         self.frames, self.signs = image_frames(rotations, reflect)
         self.external = external
         targets = np.stack([panels.centres @ frame for frame in self.frames])
-        normals = np.stack([panels.normals @ frame for frame in self.frames])
-        self.interaction, self.conservation_correction = _normal_matrix(
+        self.interaction, self.conservation_error = _normal_matrix(
             targets,
-            normals,
             panels.vertices,
             panels.normals,
             panels.areas,
@@ -185,13 +190,14 @@ class SurfaceModel:
             panels.outward,
             self.signs,
         )
-        # Gauss' law fixes each area-weighted column integral to half its source
-        # area. Enforce this exact identity to remove centroid-test quadrature
-        # bias. Compute the identity with even charge parity before applying
-        # the physical odd reflection parity to the solve.
-        self.interaction[np.diag_indices_from(self.interaction)] += (
-            self.conservation_correction
-        )
+        # Qualocation integrates the target normal exactly and samples the
+        # source charge. It is the area-weighted adjoint of the double layer,
+        # whose constant-potential identity follows from the solid-angle sum.
+        # This conserves charge without modifying the flat panel's self term.
+        if np.max(np.abs(self.conservation_error)) > 1e-8:
+            raise ValueError(
+                "surface is not closed: solid-angle sum violates Gauss' law"
+            )
         self.rhs = np.sum(external(panels.centres) * panels.normals, axis=1) / MU0
         if not np.isfinite(self.interaction).all():
             raise ValueError("nonfinite surface interaction")

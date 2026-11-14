@@ -23,6 +23,33 @@ BANKED_BASE_DISTANCE_M = {
     "146L": 0.05129600751,
     "179L": 0.01442593043,
 }
+TERMINATION = {
+    1: "CONVERGED",
+    7: "ACTIVE_SET_CYCLE_DETECTED",
+    12: "ACTIVE_SET_STEP_REFUSED",
+}
+# A share is read only off a state that is the same plasma as its base row. A
+# solve that stops short of converged, or that retains a collapsed fraction of
+# the support, has answered a different question: its distance is the separation
+# of two configurations and not a fall in the offset, so it is reported per row
+# and never summed.
+SUPPORT_RETENTION = 0.9
+
+
+def readable(base, edge):
+    """Whether this row's share counts toward the headline, and why not."""
+
+    if not edge["converged"]:
+        reason = TERMINATION.get(edge["reason"], edge["reason"])
+        return False, (
+            f"edge arm did not converge: {reason} at residual {edge['residual']:.2e}"
+        )
+    if edge["support_cells"] < SUPPORT_RETENTION * base["support_cells"]:
+        return False, (
+            f"edge state lost its plasma: support {edge['support_cells']} cells "
+            f"against the base arm's {base['support_cells']}"
+        )
+    return True, ""
 
 
 def read(root, arm, case):
@@ -91,10 +118,14 @@ def main():
             "reproduced": abs(base["lower_x_distance_m"] - banked) < 5.0e-4,
         }
         fraction = 100 * closed / base["lower_x_distance_m"]
+        counted, why = readable(base, edge)
+        share = f"closed {100 * closed:.2f} cm ({fraction:.1f}%)"
+        if not counted:
+            share = f"share NOT READ ({why})"
         print(
             f"{name} base {base['lower_x_distance_m']:.5f} m "
             f"(banked {banked:.5f}) -> edge {edge['lower_x_distance_m']:.5f} m; "
-            f"closed {100 * closed:.2f} cm ({fraction:.1f}%); "
+            f"{share}; "
             f"R {100 * components['radius']['base_m']:.4f}->"
             f"{100 * components['radius']['edge_m']:.4f} cm, Z "
             f"{100 * components['height']['base_m']:.4f}->"
@@ -103,16 +134,28 @@ def main():
     report["all_bases_reproduced"] = all(
         item["reproduced"] for item in report["control"].values()
     )
-    report["total_closed_m"] = sum(item["closed_m"] for item in report["rows"].values())
-    report["total_base_m"] = sum(
-        item["base"]["lower_x_distance_m"] for item in report["rows"].values()
+    report["headline_rows"] = []
+    report["excluded"] = {}
+    for name, item in report["rows"].items():
+        counted, reason = readable(item["base"], item["edge"])
+        if counted:
+            report["headline_rows"].append(name)
+        else:
+            report["excluded"][name] = reason
+    counted = [report["rows"][name] for name in report["headline_rows"]]
+    report["total_closed_m"] = sum(item["closed_m"] for item in counted)
+    report["total_base_m"] = sum(item["base"]["lower_x_distance_m"] for item in counted)
+    report["total_share_closed"] = (
+        report["total_closed_m"] / report["total_base_m"] if counted else None
     )
-    report["total_share_closed"] = report["total_closed_m"] / report["total_base_m"]
     args.output.write_text(json.dumps(report, indent=2) + "\n")
+    for name, reason in report["excluded"].items():
+        print(f"EXCLUDED {name}: {reason}")
     print(
         f"TOTAL {100 * report['total_closed_m']:.2f} of "
         f"{100 * report['total_base_m']:.2f} cm "
-        f"({100 * report['total_share_closed']:.1f}%)"
+        f"({100 * report['total_share_closed']:.1f}%) "
+        f"over {', '.join(report['headline_rows'])}"
     )
 
 

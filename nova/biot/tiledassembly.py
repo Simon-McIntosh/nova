@@ -2097,106 +2097,22 @@ def _polygon_current_geometry(polygons):
     return edge, weight, norm, incidence
 
 
-@functools.lru_cache(maxsize=16)
-def _polygon_current_evaluator(flux_only, nodes, kernel="quadrature", edge_count=3):
+@functools.lru_cache(maxsize=8)
+def _polygon_current_evaluator(flux_only, nodes, kernel="quadrature"):
     """Reuse the polygon tile owner for one fixed block of selected pairs."""
     block = 2048 if nodes == 192 else 8192
     return tile_evaluator(
         TilePlan(256, 256, block, 16, nodes),
         batched=True,
         kernel=kernel,
-        edge_count=edge_count,
+        edge_count=3,
         flux_only=flux_only,
         pairwise=True,
     )
 
 
-def _polygon_current_full_geometry(polygons, packed):
-    """Pack full source contours and conservative all-triangle far bounds."""
-    from nova.biot.polygon import pack_section
-
-    edge, _, _, incidence = packed
-    owners = incidence.indices
-    triangle_centres = np.mean(edge[:, :2], axis=0).T
-    diameters = np.max(
-        np.hypot(edge[:, 2] - edge[:, 0], edge[:, 3] - edge[:, 1]), axis=0
-    )
-    centres = np.array([np.mean(polygon, axis=0) for polygon in polygons])
-    radii = np.zeros(len(polygons))
-    np.maximum.at(
-        radii,
-        owners,
-        np.linalg.norm(triangle_centres - centres[owners], axis=1) + 4 * diameters,
-    )
-    radii *= 1 + 32 * np.finfo(float).eps
-    areas = np.asarray(incidence.sum(axis=0)).ravel()
-    groups = {}
-    for cell, polygon in enumerate(polygons):
-        contour, weight, norm = pack_section(polygon)
-        live = weight != 0
-        count = int(live.sum())
-        bucket = next(
-            (size for size in (2, 3, 4, 8, 16, 32, 64) if size >= count),
-            1 << (count - 1).bit_length(),
-        )
-        groups.setdefault(bucket, []).append((cell, contour[live], norm * areas[cell]))
-    packed_groups = []
-    for bucket, members in groups.items():
-        edges = np.zeros((bucket, 4, len(members)))
-        weights = np.zeros((bucket, len(members)))
-        norms, cells = [], []
-        for column, (cell, contour, norm) in enumerate(members):
-            edges[: len(contour), :, column] = contour
-            weights[: len(contour), column] = 1
-            norms.append(norm)
-            cells.append(cell)
-        packed_groups.append((np.asarray(cells), edges, weights, np.asarray(norms)))
-    return centres, radii, owners, packed_groups
-
-
-def _polygon_far_flux(points, plan, full_packed, result):
-    """Cancel internal triangle edges only where every triangle uses one rule."""
-    centres, radii, _, groups = full_packed
-    far_cells = np.zeros((len(points), result.shape[-1]), dtype=bool)
-    for cells, edge, weight, norm in groups:
-        evaluator = _polygon_current_evaluator(True, 48, edge_count=len(edge))
-        for target, source in plan.tiles(len(points), len(cells)):
-            rows = np.arange(target.start, target.stop)
-            columns = np.arange(source.start, source.stop)
-            rr, cc = np.repeat(rows, len(columns)), np.tile(columns, len(rows))
-            selected_cells = cells[cc]
-            far = (
-                np.linalg.norm(points[rr] - centres[selected_cells], axis=1)
-                >= radii[selected_cells]
-            )
-            far_cells[rr, selected_cells] = far
-            chosen = np.flatnonzero(far)
-            for start in range(0, len(chosen), 8192):
-                selected = chosen[start : start + 8192]
-                r, c = rr[selected], cc[selected]
-                values = np.asarray(
-                    evaluator(
-                        np.where(points[r, 0] == 0, 1.0, points[r, 0]),
-                        points[r, 1],
-                        edge[:, :, c],
-                        weight[:, c],
-                        norm[c],
-                    )
-                )[0]
-                values[points[r, 0] == 0] = 0
-                result[0, r, cells[c]] = values
-    return far_cells
-
-
 def _polygon_current_response(
-    polygons,
-    points,
-    plan,
-    *,
-    packed=None,
-    flux_only=False,
-    kernel="quadrature",
-    full_packed=None,
+    polygons, points, plan, *, packed=None, flux_only=False, kernel="quadrature"
 ):
     """Evaluate uniform volume currents through the polygon quadrature owner.
 
@@ -2217,11 +2133,6 @@ def _polygon_current_response(
     )
     components = 1 if flux_only else 3
     result = np.zeros((components, len(points), len(polygons)))
-    far_cells = (
-        _polygon_far_flux(points, tile, full_packed, result)
-        if flux_only and kernel == "quadrature" and full_packed is not None
-        else None
-    )
     for target, source in tile.tiles(len(points), len(norm)):
         rows = np.arange(target.start, target.stop)
         columns = np.arange(source.start, source.stop)
@@ -2229,18 +2140,8 @@ def _polygon_current_response(
         cc = np.tile(columns, len(rows))
         axis = points[rows, 0] == 0
         near = np.linalg.norm(points[rr] - centres[cc], axis=1) < 4 * diameters[cc]
-        retained = (
-            np.ones(len(rr), dtype=bool)
-            if far_cells is None
-            else ~far_cells[rr, full_packed[2][cc]]
-        )
-        if not retained.any():
-            continue
-        value = np.zeros((components, len(rr)))
-        for selected, order, block in (
-            (near & retained, 192, 2048),
-            (~near & retained, 48, 8192),
-        ):
+        value = np.empty((components, len(rr)))
+        for selected, order, block in ((near, 192, 2048), (~near, 48, 8192)):
             indices = np.flatnonzero(selected)
             evaluator = _polygon_current_evaluator(flux_only, order, kernel)
             for begin in range(0, len(indices), block):
@@ -2282,7 +2183,6 @@ def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 2
     geometry = linear_magnetisation_geometry(polygons)
     atoms = geometry["atoms"]
     packed = _polygon_current_geometry(polygons)
-    full_packed = _polygon_current_full_geometry(polygons, packed)
     edge = geometry["edge_coefficient"]
     volume = geometry["volume_coefficient"]
     mutual = _linear_edge_mutual(atoms, plan, order)
@@ -2299,12 +2199,7 @@ def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 2
             selected[:, 1:] - selected[:, :1]
         )
         flux = _polygon_current_response(
-            polygons,
-            points.reshape(-1, 2),
-            plan,
-            packed=packed,
-            flux_only=True,
-            full_packed=full_packed,
+            polygons, points.reshape(-1, 2), plan, packed=packed, flux_only=True
         )[0]
         flux = flux.reshape(len(selected), boundary_order, len(polygons))
         moments = np.einsum(
@@ -2332,12 +2227,7 @@ def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 2
         if point_count < 4096 and cell + 1 < len(polygons):
             continue
         flux = _polygon_current_response(
-            polygons,
-            np.concatenate(pending),
-            plan,
-            packed=packed,
-            flux_only=True,
-            full_packed=full_packed,
+            polygons, np.concatenate(pending), plan, packed=packed, flux_only=True
         )[0]
         offset = 0
         for local, weight in enumerate(pending_weights):

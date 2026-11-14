@@ -16,6 +16,11 @@ def main():
                 lowered.compiler_ir().operation.get_asm(enable_debug_info=False).encode()
             ).hexdigest(),""",
     )
+    owner = 'if "step_jacobian" in names:'
+    assert source.count(owner) == 1
+    source = source.replace(
+        owner, 'if names & {"step_jacobian", "book_and_local_sensitivities"}:'
+    )
     scope = dict(__file__=str(driver), __name__="__main__")
     exec(compile(source, str(driver), "exec"), scope)
 

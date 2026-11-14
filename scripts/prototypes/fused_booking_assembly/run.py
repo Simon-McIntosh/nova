@@ -25,6 +25,11 @@ def main():
     parser.add_argument("head")
     parser.add_argument("--inputs", type=Path, required=True)
     args = parser.parse_args()
+    for name in ("base", "head"):
+        revision = subprocess.check_output(
+            ["git", "-C", str(args.root), "rev-parse", getattr(args, name)], text=True
+        ).strip()
+        setattr(args, name, revision)
     args.output.mkdir(exist_ok=True)
     env = dict(
         os.environ,

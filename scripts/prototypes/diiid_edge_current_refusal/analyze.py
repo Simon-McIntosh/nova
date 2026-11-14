@@ -286,6 +286,9 @@ def analyze(capture):
             summary["stages"].append(dict(**stage, physical=physical, **transition))
             previous = support, current, shadow, physical
             write(output / "spatial.json", summary)
+        from transition import discriminate
+
+        discriminate(output, summary["stages"], scale, flux_size, reading)
     print(
         "SPATIAL_SUMMARY "
         + json.dumps(

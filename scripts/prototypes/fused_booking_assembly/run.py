@@ -195,7 +195,8 @@ def main():
                 refuse_inert(digest(on["records"][0]), digest(on["records"][0]))
             except ValueError as error:
                 control.write_text(
-                    f"# revision: {args.head} command: refuse_inert(on, on)\n{error}\nEXIT=1\n"
+                    f"# revision: {args.head} command: refuse_inert(on, on)\n"
+                    f"{error}\nEXIT=1\n"
                 )
             else:
                 raise AssertionError("identical compiled program was admitted")

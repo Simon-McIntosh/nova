@@ -1,0 +1,18 @@
+<article id="dina-flattop-scenario-record">
+<h3>DINA flattop: verified inputs, H200 measurement queued</h3>
+<p>The sequential driver is committed and the input preparation completed. The H200 job has not yet started; no convergence fraction, scenario timing, terminal-field comparison or solved animation is claimed.</p>
+<table><thead><tr><th>Input check</th><th>Observed result</th></tr></thead><tbody>
+<tr><td>Scenario</td><td>DINA 105027/run 1, DD 3.38.1, imas-python</td></tr>
+<tr><td>Consecutive stored indices</td><td>129–148, twenty slices</td></tr>
+<tr><td>Time span</td><td>30.145587808–34.873396748 s</td></tr>
+<tr><td>Flattop selection</td><td>All twenty have |Ip| at least 95% of the pulse peak</td></tr>
+<tr><td>Bank verification</td><td>Eight persisted arrays match after reload; twelve active coils in source order</td></tr>
+<tr><td>Bank identity</td><td><code>sha256:fd912554f8e9e7efddce53b119242a46e88f20ac30e029f83781c6253f828425</code></td></tr>
+<tr><td>First seed Ip</td><td>Integrated −5.019747 MA; stored −4.977717 MA; the difference is retained without rescaling</td></tr>
+<tr><td>Centroid target</td><td>Current-weighted height including each cell's local vertical first moment</td></tr>
+</tbody></table>
+<p>The bank's original run directory has moved beneath <code>/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261113T165038806629-iter-bank/h200/</code>. Its bank, geometry and source receipts are copied to <code>/home/ITER/mcintos/.cache/nova-dina-flattop/inputs/bank/</code>. Twenty source records and <code>selection.json</code> live under the enclosing inputs directory.</p>
+<p>Preparation ran on <code>all_debug</code>, job <code>1315686</code>, at revision <code>2369edcab6ea5f943f6dbe175745497cbc379854</code>. Its log reports <code>INPUTS_VERIFIED consecutive=20 bank_arrays=8 coils=12</code> and <code>EXIT=0</code>, followed by the scratch-cleanup inventory. The complete log is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T171121699975-dina-flattop-scenario/prepare.log</code>.</p>
+<p>H200 job <code>1315698</code> pins measurement revision <code>de06d0db1726406c0edd54e6e1ea3d6a3cf9cf8f</code>. One job runs a warmup and two fresh processes at widths 1 and 16; lanes are independent copies of the pulse. Each slice uses traced coil currents, 33-knot tabulated gradients and a vertical centroid pin. The driver records fresh residuals, null-finder counts and classifications, native DINA differences, compilation messages and both refusal controls. The known Hessian discrepancy is not changed here.</p>
+<p>The remaining work is the actual H200 measurement, assessment of every requirement from its receipts, rendering on <code>all_debug</code>, visual inspection of every vector panel, and publication of the flattop GIF and its contact sheet. The queued job is an ordinary scheduling wait, not a numerical verdict or an authority blocker.</p>
+</article>

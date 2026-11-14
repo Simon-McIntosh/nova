@@ -229,12 +229,24 @@ def main():
     )
     animation = write_gif(frames, args.figures / "flattop.gif", duration=10)
     # The contact sheet is a separate browsing artifact, not a raster twin of an SVG.
+    contact_indices = sorted(
+        {
+            0,
+            len(frames) - 1,
+            *(
+                i
+                for i, row in enumerate(receipt["slices"])
+                if not all(row["converged"])
+            ),
+        }
+    )
     contact = write_contact_sheet(
-        [f.resize((700, 360)) for f in frames],
+        [frames[i].resize((700, 360)) for i in contact_indices],
         args.figures / "flattop-frames.png",
         columns=2,
-        count=6,
+        count=len(contact_indices),
     )
+    contact["pulse_frame_indices"] = contact_indices
     converged = sum(all(r["converged"]) for r in receipt["slices"])
     body = [
         f'<article id="dina-flattop-scenario-record"><h3>DINA flattop on the ITER bank route</h3><p>'
@@ -314,7 +326,7 @@ def main():
         '<figure id="dina-flattop-scenario-animation"><img src="/nova/figures/sub-millisecond-forward-path/dina-flattop-scenario/flattop.gif" alt="Consecutive terminal bank fields beside native DINA fields"><figcaption>'
         "Every finite returned terminal field in time order; each frame states its fresh residual and convergence flag. Failed fields remain failed in the animation.</figcaption></figure>",
         '<figure id="dina-flattop-scenario-contact"><img src="/nova/figures/sub-millisecond-forward-path/dina-flattop-scenario/flattop-frames.png" alt="Six evenly spaced terminal comparisons"><figcaption>'
-        "Six evenly spaced frames from the animation, including its first and last. Full-resolution vector panels below retain the field and null comparisons.</figcaption></figure>",
+        "The first slice, every failed slice, and the last slice: indices 129, 131, 132, 134, 136 and 148. Full-resolution vector panels below retain the field and null comparisons.</figcaption></figure>",
         *figures,
         "</article>",
     ]

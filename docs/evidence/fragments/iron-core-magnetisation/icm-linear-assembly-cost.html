@@ -9,129 +9,157 @@
 </head>
 <body><main>
   <h1 id="icm-linear-assembly-cost-state">Affine magnetisation assembly cost</h1>
-  <p>Resumed after adjudication of the cancellation-sensitive diagnostic.
-  The first batched 40 mm operator passes the full-shell accuracy bar and
-  takes 399.624 s against 901.041 s before batching. Further cost work and
-  the completed 10 mm solve remain in progress.
+  <p><strong>Blocked: the final full-contour candidate fails the unchanged
+  1e-12 full-shell operator requirement.</strong> Its 40 mm P100 assembly took
+  325.573394 s, but its Frobenius discrepancy is 1.2535667630752062e-11 and
+  maximum-entry discrepancy over the reference maximum is 3.6333369489778486e-11.
+  Job 1316250 stopped at that comparison, before the 20 and 10 mm rows.
+  The dependent CPU solve 1316251 was cancelled by its explicit job id.
+  No threshold was loosened and no further numerical repair was attempted.
   This record does not select a formulation or measure WEST.</p>
 
-  <h2 id="icm-linear-assembly-cost-before">What the delivered assembly spends</h2>
-  <p>The 40 mm shell has 228 cells, 1368 unknowns, 2635 atomic edges,
-  2576 source triangles and 92736 volume test points. One Tesla P100-PCIE-16GB
-  assembled it in 901.041073 s: 7.346338 s compilation, 544.571334 s
-  synchronised kernel execution and 349.123402 s of host assembly, transfers
-  and dispatch overhead. Compilation is 0.8153 percent of the measured wall.</p>
-  <table>
-    <thead><tr><th>Evaluator</th><th>Padded pairs per call</th><th>Calls</th>
-      <th>Compile [s]</th><th>Execute [s]</th></tr></thead>
-    <tbody>
-      <tr><td>Self edge, order 24</td><td>256</td><td>2635</td><td>2.193734</td><td>1.422275</td></tr>
-      <tr><td>Adjacent edge, order 24</td><td>256</td><td>2542</td><td>1.819975</td><td>1.348811</td></tr>
-      <tr><td>Near regular edge, order 24</td><td>256</td><td>2624</td><td>0.978032</td><td>0.891166</td></tr>
-      <tr><td>Far regular edge, order 8</td><td>256</td><td>14602</td><td>0.730512</td><td>3.380721</td></tr>
-      <tr><td>Near polygon flux, 16 × 192 angular rule</td><td>64</td><td>370225</td><td>0.795548</td><td>223.385485</td></tr>
-      <tr><td>Far polygon flux, 16 × 48 angular rule</td><td>1024</td><td>323319</td><td>0.828537</td><td>314.142875</td></tr>
-    </tbody>
-  </table>
-  <p>There are six compiled evaluator programs, with 6934.984303 padded kernel
-  pairs per cell pair. The polygon kernels account for 693544 launches. The
-  receipt distinguishes padded evaluations from mathematical pairs; it counts
-  the assembly evaluators rather than unrelated JAX support operations.</p>
-  <p>Before receipt: <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/assembly-cost/before/assembly-0.04.json</code>.
-  Executed revision <code>a4083c99792f8fe176b7953ee25930df7726c35f</code>,
-  script blob <code>fc61ba466108670e3d3745bf76feec459bb6483a</code>.
-  The product interaction-owner blob is unchanged from the assigned base.</p>
+  <h2 id="icm-linear-assembly-cost-before">The measured bottleneck</h2>
+  <p>The delivered 40 mm shell has 228 cells, 1368 unknowns, 2635 atomic edges,
+  2576 source triangles and 92736 volume test points. On one Tesla P100-PCIE-16GB,
+  compilation is 0.8153 percent of wall. The polygon kernels launch 693544 times;
+  launch count and execution, rather than a large compile cost, dominate.</p>
+  <table><thead><tr><th>Evaluator</th><th>Padded pairs per call</th><th>Calls</th>
+    <th>Compile [s]</th><th>Execute [s]</th></tr></thead><tbody>
+    <tr><td>Self edge, order 24</td><td>256</td><td>2635</td><td>2.193734</td><td>1.422275</td></tr>
+    <tr><td>Adjacent edge, order 24</td><td>256</td><td>2542</td><td>1.819975</td><td>1.348811</td></tr>
+    <tr><td>Near regular edge, order 24</td><td>256</td><td>2624</td><td>0.978032</td><td>0.891166</td></tr>
+    <tr><td>Far regular edge, order 8</td><td>256</td><td>14602</td><td>0.730512</td><td>3.380721</td></tr>
+    <tr><td>Near polygon flux, 16 × 192 angular rule</td><td>64</td><td>370225</td><td>0.795548</td><td>223.385485</td></tr>
+    <tr><td>Far polygon flux, 16 × 48 angular rule</td><td>1024</td><td>323319</td><td>0.828537</td><td>314.142875</td></tr>
+  </tbody></table>
+  <p>The six evaluator programs account for 6934.984303 padded kernel pairs per
+  cell pair at 40 mm. Padded counts include inactive lanes; unrelated JAX support
+  operations are outside this evaluator count. At 20 mm, all six compiled
+  shapes are reused and no additional evaluator compilation is recorded.</p>
 
-  <h2 id="icm-linear-assembly-cost-schedule">The scheduling change</h2>
-  <p>Boundary quadrature is batched across 256 atomic edges and volume test
-  points across cells. Near and far polygon buckets now use the existing warm
-  <code>tile_evaluator</code>, with paired input geometry and flux-only output
-  as explicit executable identities. Both quadrature and closed reduction use
-  that owner through its existing kernel flag; the duplicate polygon trace is
-  removed. Edge-current pairs are batched across rectangular tiles, with
-  reciprocal entries written in vectorised blocks. The integration rules,
-  near/far criteria and triangle incidence are preserved.</p>
-  <p>The constant interaction functions are unchanged. The affine entry points
-  are exported in <code>tiledassembly.__all__</code>. The shell-cell pin passes. The first complete coarse-shell comparison
-  also passes: 6.00192482353315e-15 relative Frobenius difference and
-  2.0299154721388616e-14 maximum-entry difference divided by the reference's
-  maximum entry. Both are below 1e-12.</p>
+  <h2 id="icm-linear-assembly-cost-schedule">Changes and measured candidates</h2>
+  <p>Boundary quadrature is batched across atomic edges and volume quadrature
+  across cells. Near and far polygon buckets reuse the existing warm
+  <code>tile_evaluator</code>, with fixed paired input shapes and flux-only
+  output as explicit executable identities. Edge-current pairs are batched
+  across tiles and reciprocal entries written in vectorised blocks. The affine
+  entry points are exported in <code>tiledassembly.__all__</code>.</p>
+  <table><thead><tr><th>Candidate</th><th>Spacing [mm]</th><th>Assembly [s]</th>
+    <th>Compile [s]</th><th>Execute [s]</th><th>Host remainder [s]</th>
+    <th>New programs</th><th>Polygon launches</th></tr></thead><tbody>
+    <tr><td>Delivered</td><td>40</td><td>901.041073</td><td>7.346338</td><td>544.571334</td><td>349.123402</td><td>6</td><td>693544</td></tr>
+    <tr><td>Delivered</td><td>20</td><td>1780.271290</td><td>0</td><td>1041.915724</td><td>738.355566</td><td>0</td><td>1224093</td></tr>
+    <tr><td>Paired batching</td><td>40</td><td>399.623631</td><td>7.903288</td><td>289.372027</td><td>102.348316</td><td>6</td><td>49469</td></tr>
+    <tr><td>Full contours; rejected</td><td>40</td><td>325.573394</td><td>19.017928</td><td>244.391586</td><td>62.163879</td><td>12</td><td>20291</td></tr>
+  </tbody></table>
+  <p>Paired batching is 2.25472 times faster at 40 mm and launches polygon tiles
+  14.0198 times less often. The later contour candidate cancels interior source
+  triangle edges only where a conservative distance bound establishes that all
+  triangles use the same angular rule. It groups cell contours by fixed edge
+  buckets and retains near-triangle integration. It preserves the mathematical
+  quadrature but fails the required numerical operator agreement; its source
+  is retained as a rejected candidate, not an accepted optimisation.</p>
+  <table><thead><tr><th>40 mm candidate</th><th>Wall per cell pair [ms]</th>
+    <th>5864 cells [h]</th><th>11708 cells [h]</th></tr></thead><tbody>
+    <tr><td>Paired batching</td><td>7.687435</td><td>73.428878</td><td>292.714606</td></tr>
+    <tr><td>Full contours; rejected</td><td>6.262954</td><td>59.822511</td><td>238.474606</td></tr>
+  </tbody></table>
+  <p>These are coarse-row quadratic projections of total measured wall, including
+  compilation and host overhead. They are not WEST measurements and cannot
+  substitute for the missing 3168-cell per-pair projection.</p>
 
-  <h2 id="icm-linear-assembly-cost-provenance">Reference provenance refusal</h2>
-  <p>The revision defect reproduced before repair: the reference program wrote
-  a completed receipt with <code>revision: deliberately-unresolvable</code>.
-  That raw receipt is retained as <code>unchecked-revision.json</code> in this
-  run's directory. The reference now verifies its argument against the executed
-  tree through the shared clean-script check. A focused test passed for valid
-  provenance and exercised wrong-revision, wrong-blob and dirty-tree refusals:
+  <h2 id="icm-linear-assembly-cost-accuracy">Full-shell acceptance and refusal</h2>
+  <p>The frozen delivered reference is <code>assembly-cost/before/operator.npy</code>,
+  SHA-256 <code>15cc869291f3f7f418c98fa8e6477a6d33089ea089b865a997123aa7100fce5e</code>.
+  Both comparisons cover the full 1368 × 1368 matrix.</p>
+  <table><thead><tr><th>Candidate revision</th><th>Relative Frobenius</th>
+    <th>Max difference / reference max</th><th>Bar</th></tr></thead><tbody>
+    <tr><td><code>1b025e6a81734031103d53ebd1eed31534125093</code></td><td>6.00192482353315e-15</td><td>2.0299154721388616e-14</td><td>Pass, both ≤ 1e-12</td></tr>
+    <tr><td><code>1ed17820d5ee9b9253497dcc6e51cf28c38ff7ce</code></td><td>1.2535667630752062e-11</td><td>3.6333369489778486e-11</td><td>Fail, both &gt; 1e-12</td></tr>
+  </tbody></table>
+  <p>The rejected receipt records <code>completed: false</code>. Its job exits 1
+  with <code>linear operator differs from delivered interaction</code>.
+  The acceptance guard fires before saving a qualified interaction or advancing
+  the refinement loop.</p>
+
+  <h2 id="icm-linear-assembly-cost-control">Controls that exercised refusals</h2>
+  <p>At revision <code>96410a07565407282058b9c4f64dce32c5f79dba</code>, P100
+  job 1316223 compared the constant 228-cell operator with the delivered owner:
+  both are bit-identical, with SHA-256
+  <code>cbb171d037d40628e13647ba7b384c4bdcf4b8a541b53c1e5bb93da7f5d1c61b</code>.
+  The constant interaction functions and defaults are unchanged by this node.</p>
+  <p>The same job multiplied one affine quadrature weight by 1.1 and ran
+  <code>tests/test_magnetisation.py::test_linear_shell_operator_pin</code> against
+  the full frozen shell matrix. It failed with Frobenius error
+  <code>0.025386852118416837</code> and max-entry error
+  <code>0.033576366681201106</code>:
+  <code>1 failed, 1 warning in 398.82s (0:06:38)</code>, <code>EXIT=1</code>.
+  An earlier attempt reached pytest's 300 s default bound before producing
+  metrics and is not admitted as a successful negative control.</p>
+  <p>The reference provenance defect reproduced before repair: the executed
+  reference program wrote a completed receipt with
+  <code>revision: deliberately-unresolvable</code>. The raw
+  <code>unchecked-revision.json</code> remains in the run directory.
+  <code>reference.py</code> now checks its revision against the executed clean
+  tree in addition to its script blob. The focused test exercised valid
+  provenance and wrong-revision, wrong-blob and dirty-tree refusals:
   <code>1 passed, 59 deselected in 3.38s</code>.</p>
 
-  <h2 id="icm-linear-assembly-cost-validation">Validation checkpoint</h2>
-  <p>The marker-filtered baseline gate at
-  <code>79a578d6940ecb9115ecd8a23a171f66ccb7dada</code> passed:
-  <code>63 passed, 9 deselected in 274.43s</code>, <code>EXIT=0</code>.
-  The unfiltered baseline suite's initial all_debug allocation was cancelled
-  incomplete after its recorded approximately 6590 s duration was found to
-  exceed that partition's one-hour limit. Its replacement runs on rigel.
-  No complete-suite result is claimed from the cancelled arm.</p>
-  <h2 id="icm-linear-assembly-cost-stop">Counted failures and retained control</h2>
-  <p>The first head fast gate at
-  <code>362f1e500e8e16f440c0d715a9c2e2df2650c317</code> finished with
-  <code>1 failed, 66 passed, 9 deselected in 269.78s</code>, <code>EXIT=1</code>.
-  The sole failure is
-  <code>tests/test_magnetisation.py::test_paired_polygon_tiles_reuse_one_shape_and_preserve_cartesian_rows</code>.
-  Its flux-only result was compared with a three-output Cartesian trace;
-  the maximum relative discrepancy was <code>9.11897259e-12</code>.</p>
-  <p>The correction at <code>a47d8f547</code> matched output selection and
-  retained the test's <code>1e-13</code> tolerance. A focused repeat also failed:
-  <code>1 failed, 62 deselected in 7.85s</code>. It reported two vertical-field
-  entries differing by at most <code>2.22028511e-19</code> absolute and
-  <code>5.80494233e-13</code> relative. The node's two-failure stop rule now
-  applies. No tolerance was widened and no third repair was attempted.
-  The full-operator requirement remains <code>1e-12</code>; this failed
-  per-triangle comparison is a stricter, newly added diagnostic.</p>
-  <p>The shell-cell pin passed in the head fast gate. Perturbing one affine
-  quadrature weight by ten percent made it fail at
-  <code>0.00015580038218152245</code> relative:
-  <code>1 failed, 62 deselected in 9.95s</code>, <code>EXIT=1</code>.
-  The red log is <code>fast-gate/negative-control.log</code> in this run's
-  directory. The compact pin covers three selected 40 mm shell cells; the
-  separate complete 1368 × 1368 operator comparison remains pending.</p>
-  <h2 id="icm-linear-assembly-cost-remaining">Recovery state</h2>
-  <p>At the stop, four bounded external scheduler jobs remain recoverable from
-  their named receipts and logs: baseline 20 mm profiling (1316078, titan),
-  after-change 40/20/10 mm profiling plus complete coarse-operator comparison
-  (1316100, queued for titan), both fixed-tile polygon routes (1316106, queued
-  for titan), and the unfiltered baseline suite (1316108, rigel).</p>
-  <p>The coordinator must adjudicate the paired-tile diagnostic before another
-  repair. A cancellation-aware error scale based on the existing polygon
-  owner's end terms is one candidate, while retaining the full shell operator's
-  <code>1e-12</code> requirement and the active quadrature-weight mutant.
-  The alternative is to make paired evaluation reproduce the Cartesian
-  arithmetic before repeating the check. These are proposals, not outcomes.</p>
-  <h2 id="icm-linear-assembly-cost-ruling">Cancellation scale and resumed work</h2>
-  <p>The coordinator adjudicated the per-net-triangle diagnostic: the guard
-  now bounds the discrepancy by 1e-12 times the sum of the absolute edge
-  contributions, while retaining the unchanged full-shell 1e-12 bar in both
-  norms. Its focused repeat passed: <code>1 passed, 62 deselected in 7.41s</code>.
-  The measured errors over that contribution sum are
+  <h2 id="icm-linear-assembly-cost-routes">One polygon owner and bounded experiments</h2>
+  <p>The duplicate polygon tracing was replaced by the existing tile owner
+  behind its quadrature/closed kernel flag. On a 16-pair, three-edge P100 tile,
+  quadrature compiled in 1.893919 s and executed in 0.002565 s. The closed-form
+  route did not finish compilation within the declared 1200 s bound; its
+  receipt is explicitly incomplete, with no execution time claimed.</p>
+  <p>An explicit weighted angular-sum contraction returned identical values to
+  the dot contraction and unchanged temporary storage, without a reliable
+  wall benefit, so that mechanism was removed. An endpoint-graded angular-rule
+  experiment missed its near-field density-scaled comparison (about 4.5e-10)
+  and was not adopted. Both experiments have receipts; neither changes the
+  delivered integration rule.</p>
+
+  <h2 id="icm-linear-assembly-cost-tests">Diagnostics and suite state</h2>
+  <p>The initial paired/Cartesian diagnostic failed twice while comparing
+  cancellation-sensitive net triangle outputs at 1e-13 relative. The coordinator
+  adjudicated that scale: the guard now uses 1e-12 times the sum of absolute
+  edge contributions. It passes with scaled discrepancies
   <code>3.3396646162763453e-15</code> for all rows and
-  <code>1.0016473419842563e-15</code> for flux-only evaluation.</p>
-  <table><thead><tr><th>Route</th><th>Spacing [mm]</th><th>Assembly [s]</th>
-  <th>Compile [s]</th><th>Execute [s]</th><th>Polygon launches</th></tr></thead><tbody>
-  <tr><td>Delivered</td><td>40</td><td>901.041073</td><td>7.346338</td><td>544.571334</td><td>693544</td></tr>
-  <tr><td>Delivered</td><td>20</td><td>1780.271290</td><td>0</td><td>1041.915724</td><td>1224093</td></tr>
-  <tr><td>Batched dot contractions</td><td>40</td><td>399.623631</td><td>7.903288</td><td>289.372027</td><td>49469</td></tr>
-  </tbody></table>
-  <p>The 20 mm delivered arm introduces no new evaluator program: the six
-  fixed shapes compiled at 40 mm serve it unchanged. The 40 mm batching gain
-  is 2.25472 times, with 14.0198 times fewer polygon launches. The next cost
-  measurement compares the dot contraction with a fused weighted angular sum
-  in affine flux-only tiles; the quadrature nodes and weights are unchanged.</p>
-  <p>The required 10 mm assembly bound of 900 s, completed solve, dipole and
-  finite-loop errors, 20-to-10 order, largest-mesh per-pair projections, final
-  figure point and exact-delivered-head suite are all still missing. The
-  figure producer was checked and its existing-point PNG inspected, but that
-  preflight is not published as the requested completed refinement figure.</p>
+  <code>1.0016473419842563e-15</code> for flux-only evaluation:
+  <code>1 passed, 62 deselected in 7.41s</code>.</p>
+  <p>A distinct compact three-cell CPU pin is still red. Comparing the recorded
+  baseline owner with its stored fixture on a different CPU reproduces exactly
+  the same drift as the batched owner (8.4818e-12 Frobenius and 1.4585e-11 max),
+  proving the fixture comparison is sensitive to execution hardware. Computing
+  the immutable owner on the same CPU removes that fixture drift but the final
+  contour candidate still differs by 4.6036e-12 Frobenius and 1.1077e-11 max.
+  No tolerance was relaxed. The binding full-shell P100 failure above is the
+  reason numerical work stops regardless of this compact diagnostic.</p>
+  <p>The base marker-filtered gate passed
+  <code>63 passed, 9 deselected in 274.43s</code>. The latest completed head
+  marker-filtered arm at <code>ce0b060bdb568c6a0e8d33af08b2517ae57faa9c</code>
+  failed only the compact pin; it is not a final-head suite certificate.
+  The unfiltered baseline suite remains in job 1316108 on rigel. The exact
+  final-head unfiltered suite has not run because the binding operator check
+  requires this stop. No completed suite is inferred from a running log.</p>
+
+  <h2 id="icm-linear-assembly-cost-receipts">Durable receipts and remaining work</h2>
+  <p>All measurement receipts are under
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/assembly-cost/</code>:
+  <code>before/assembly-0.04.json</code>, <code>before/assembly-0.02.json</code>,
+  <code>after/assembly-0.04.json</code>, <code>after/operator-comparison.json</code>,
+  <code>contour/assembly-0.04.json</code>, <code>operator-check-extended.json</code>,
+  <code>operator-check-extended.log</code>, <code>quadrature-route.json</code>,
+  <code>closed-route.json</code>, <code>kernel-cost.json</code> and
+  <code>angular-density-cost.json</code>. Executed scripts carry their blob hash,
+  revision, x64 assertion and device kind; job payloads refuse a dirty tree and
+  build the executed tree from a git archive in job-local scratch.</p>
+  <p>The after-change 20 mm row, ≤ 900 s 10 mm assembly, completed 19008-unknown
+  solve, dipole and finite-loop errors, 20-to-10 order, fine-row projections,
+  published figure point and exact-final-head suite remain unmet. The plot
+  producer's preflight SVG/PNG was checked and inspected in the run directory;
+  it is not published as a completed refinement figure. The next action is
+  coordinator adjudication of the measured full-shell failure and selection of
+  a numerically qualified continuation. The failed contour source is retained
+  for review and must not be promoted as a completed optimisation.</p>
 </main></body>
 </html>

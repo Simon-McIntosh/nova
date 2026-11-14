@@ -20,11 +20,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,efit,grad-shafranov,convergence">
   <meta name="plan-after" content="converged-forward-solve">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;deferred&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;inverse-equilibrium-baseline#s1&quot;],&quot;s3&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s4&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s5&quot;:[&quot;inverse-equilibrium-baseline#s3&quot;]}">
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
   <main class="plan-doc">
@@ -68,7 +70,7 @@
       <thead><tr><th>Section</th><th>Hours</th><th>Reasoning</th><th>Risk</th><th>Waits on</th></tr></thead>
       <tbody>
         <tr><td>§1 Known-answer recovery</td><td>8</td><td>deep</td><td>moderate</td><td>—</td></tr>
-        <tr><td>§2 The same inputs as EFIT</td><td>7</td><td>deep</td><td>elevated</td><td>§1 and two decisions</td></tr>
+        <tr><td>§2 The same inputs as EFIT</td><td>7</td><td>deep</td><td>elevated</td><td>§1</td></tr>
         <tr><td>§3 One scoreboard for every estimator</td><td>4</td><td>standard</td><td>low</td><td>§2</td></tr>
         <tr><td>§4 Cost on the H200</td><td>3</td><td>standard</td><td>moderate</td><td>§2</td></tr>
         <tr><td>§5 The reduced-model reconstructions</td><td>3</td><td>standard</td><td>moderate</td><td>§3 and a decision</td></tr>
@@ -94,10 +96,11 @@
     fails clause (1) on the flux map and reports that row as the largest whitened residual.</p>
 
     <h2 id="s2">§2 — The same inputs as EFIT</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="7.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="deferred" data-links=""></section>
-    <p>Deferred until the decisions <code>fitted-unknowns</code> and <code>vertical-freedom</code> are
-    locked: they fix what is fitted, and the bands below are only meaningful against a fit of the same
-    configuration.</p>
+    <section data-reckon="section" data-id="s2" data-effort-hours="7.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>The decisions <code>fitted-unknowns</code> and <code>vertical-freedom</code> were locked on
+    2026-11-14: the class fits the profile coefficients and the conductor currents, the currents weighted
+    by their measurement uncertainty, and the vertical position is whatever the magnetics determine, with
+    its residual reported. The bands below are read against a fit of that configuration.</p>
     <p>The comparison the lead asked for: the inverse class and imas-efit answer the same question from the
     same inputs. The case set is read from imas-efit's own committed cases through IMAS, at the data
     dictionary version each was written in: one MAST slice, one TCV slice and one ITER scenario slice, none
@@ -118,8 +121,8 @@
     levels, with both null sets and the wall, under the repository plotting rules.</p>
 
     <h2 id="s3">§3 — One scoreboard for every estimator</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="deferred" data-links=""></section>
-    <p>Deferred with §2, whose case set and configured fit it scores.</p>
+    <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p>Waits on §2, whose case set and configured fit it scores.</p>
     <p>The baseline is only useful if a new approach can be put beside it without re-deriving the
     comparison. The §2 case set and bands become a scoreboard that accepts any reconstructed state supplied
     as an IMAS equilibrium, whichever code produced it, and scores it with the same comparator and the same
@@ -134,8 +137,8 @@
     comparison passes.</p>
 
     <h2 id="s4">§4 — Cost on the H200</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="deferred" data-links=""></section>
-    <p>Deferred with §2: the fit decisions set the unknown count, and so the cost measured here.</p>
+    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>Waits on §2: the locked fit decisions set the unknown count, and so the cost measured here.</p>
     <p>A baseline that cannot be run over a pulse is of little use for development. The cost of one
     reconstruction is measured where the forward solve's cost is decided, on the H200.</p>
     <p><strong>Done when.</strong> (1) The record reports, for the §2 MAST case at batch widths 1, 16 and
@@ -161,49 +164,49 @@
     carries one column group per retained reconstruction.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="inverse-in-nova" data-choice="development-instrument" data-by="lead" data-when="2026-11-13">
-        <p class="r-dec-q">Does nova carry an inverse class at all, given the north star?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="development-instrument">yes, as a development and comparison instrument outside the forward solve</button>
-          <button class="r-opt" data-value="none">no, every inverse lives in imas-ambix</button>
-        </p>
-        <p class="r-dec-rat">Lead 2026-11-13: nova is not an inverse code and the strategy stands, but an inverse class is useful for development, for comparison with EFIT and as a baseline when developing new approaches. The forward solve's public request gains no measurement field.</p>
-      </div>
-      <div class="r-dec" data-key="fitted-unknowns" data-choice="" data-by="" data-when="" data-sections="s2">
-        <p class="r-dec-q">What does the class fit on the EFIT comparison cases?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="profiles-only">profile coefficients only, with measured conductor currents prescribed</button>
-          <button class="r-opt" data-value="profiles-and-currents">profile coefficients and conductor currents, the currents weighted by their measurement uncertainty</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="vertical-freedom" data-choice="" data-by="" data-when="" data-sections="s2">
-        <p class="r-dec-q">How is the vertical position of an elongated plasma held during a fit?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="data-determined-centroid">the current centroid is a fitted quantity determined by the magnetics, with its residual reported</button>
-          <button class="r-opt" data-value="rigid-shift-like-efit">a rigid vertical shift freedom, as imas-efit's fit carries</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="reduced-reconstructions" data-choice="" data-by="" data-when="" data-sections="s5">
-        <p class="r-dec-q">Once the scoreboard exists, do the harmonic, moment and profile reconstructions stay?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="supersede">the inverse class supersedes them and they leave the tree</button>
-          <button class="r-opt" data-value="keep-scored">they stay, each scored as its own column</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="fitted-unknowns" data-choice="profiles-and-currents" data-by="lead" data-when="2026-11-14T07:56:07+00:00" data-sections="s2">
+    <p class="r-dec-q">What does the class fit on the EFIT comparison cases?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="profiles-only">profile coefficients only, with measured conductor currents prescribed</button>
+      <button class="r-opt chosen" data-value="profiles-and-currents">profile coefficients and conductor currents, the currents weighted by their measurement uncertainty</button>
+      </p>
+    <p class="r-dec-rat">Lead 2026-11-14: fit the profile coefficients and the conductor currents, each current weighted by its measurement uncertainty, so the fit carries the same unknown set as imas-efit and a disagreement is not confounded by a different one.</p>
+    </div>
+<div class="r-dec" data-key="inverse-in-nova" data-choice="development-instrument" data-by="lead" data-when="2026-11-13">
+    <p class="r-dec-q">Does nova carry an inverse class at all, given the north star?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="development-instrument">yes, as a development and comparison instrument outside the forward solve</button>
+      <button class="r-opt" data-value="none">no, every inverse lives in imas-ambix</button>
+      </p>
+    <p class="r-dec-rat">Lead 2026-11-13: nova is not an inverse code and the strategy stands, but an inverse class is useful for development, for comparison with EFIT and as a baseline when developing new approaches. The forward solve&#x27;s public request gains no measurement field.</p>
+    </div>
+<div class="r-dec" data-key="reduced-reconstructions" data-choice="" data-by="" data-when="" data-sections="s5">
+    <p class="r-dec-q">Once the scoreboard exists, do the harmonic, moment and profile reconstructions stay?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="supersede">the inverse class supersedes them and they leave the tree</button>
+      <button class="r-opt" data-value="keep-scored">they stay, each scored as its own column</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="vertical-freedom" data-choice="data-determined-centroid" data-by="lead" data-when="2026-11-14T07:56:07+00:00" data-sections="s2">
+    <p class="r-dec-q">How is the vertical position of an elongated plasma held during a fit?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="data-determined-centroid">the current centroid is a fitted quantity determined by the magnetics, with its residual reported</button>
+      <button class="r-opt" data-value="rigid-shift-like-efit">a rigid vertical shift freedom, as imas-efit&#x27;s fit carries</button>
+      </p>
+    <p class="r-dec-rat">Lead 2026-11-14: the current centroid is determined by the magnetics and its residual is reported; no rigid shift freedom is added, so a vertical drift shows as a result and cannot absorb a forward-solve defect.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-ieb-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="reckon-create" data-written-at="2026-11-13" data-recommends-skill="/reckon-build inverse-equilibrium-baseline §1" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Recover a known state from its own synthetic magnetics (§1)</h4>
-        <div class="r-fu-body"><p>The plan owes its design review before the first implementation node; §2 waits on the two open fit decisions.</p></div>
-        <pre class="r-fu-prompt">/reckon-build inverse-equilibrium-baseline §1</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ieb-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="reckon-create" data-written-at="2026-11-13" data-recommends-skill="/reckon-build inverse-equilibrium-baseline §1" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Recover a known state from its own synthetic magnetics (§1)</h4>
+    <div class="r-fu-body"><p>The plan owes its design review before the first implementation node; §2 waits on the two open fit decisions.</p></div>
+    <pre class="r-fu-prompt">/reckon-build inverse-equilibrium-baseline §1</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

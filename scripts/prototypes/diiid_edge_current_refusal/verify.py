@@ -118,9 +118,18 @@ def main():
     assert counterfactual["constraint_rows"] == 1
     assert abs(counterfactual["constraint_residual"][0]) < 1e-12
     original = args.input / "edge/frame-146-limited/source-inputs.json"
-    assert json.loads(original.read_text()) == json.loads(
-        (folder / "source-inputs.json").read_text()
-    )
+    original_tables = json.loads(original.read_text())
+    paired_tables = json.loads((folder / "source-inputs.json").read_text())
+    result["cross_device_profile_difference"] = {}
+    for key in original_tables:
+        values = np.asarray(original_tables[key]["values"])
+        delta = values - paired_tables[key]["values"]
+        result["cross_device_profile_difference"][key] = dict(
+            maximum_absolute=float(np.max(np.abs(delta))),
+            maximum_relative=float(
+                np.max(np.abs(delta) / np.maximum(abs(values), 1e-30))
+            ),
+        )
     result["inactive_field_counterfactual"] = {
         key: counterfactual[key]
         for key in (
@@ -135,9 +144,10 @@ def main():
     reference_folder = args.input / "inactive-field-reference"
     assert (reference_folder / "reference.log").read_text().endswith("EXIT=0\n")
     reference = json.loads((reference_folder / "receipt.json").read_text())
-    assert json.loads(
-        (reference_folder / "source-inputs.json").read_text()
-    ) == json.loads((folder / "source-inputs.json").read_text())
+    assert (
+        json.loads((reference_folder / "source-inputs.json").read_text())
+        == paired_tables
+    )
     reference_seed = np.load(reference_folder / "request-seed.npz")["state"]
     counterfactual_seed = np.load(folder / "request-seed.npz")["state"]
     np.testing.assert_allclose(

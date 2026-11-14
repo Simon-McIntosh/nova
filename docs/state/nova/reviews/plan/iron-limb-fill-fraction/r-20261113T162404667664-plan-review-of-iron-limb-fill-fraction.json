@@ -1,0 +1,75 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T16:32:32.606Z",
+  "dispatched_at": "2026-11-13T16:24:53Z",
+  "findings": [
+    {
+      "anchor": "nova/biot/magnetisation.py:266",
+      "id": "reuse_search-1",
+      "reason": "\u00a72 must read as an extension of the one production solve, because the node will otherwise port the prototype's solver and \u00a72 done-when (3)'s \"ten Newton corrections\" will be measured on a loop that is not the one it names.",
+      "text": "\u00a72's endpoint is a four-line change to `_residual` (`iron = total + MU0*gain*state`, then `state - (fill*coefficient*iron)`) plus `fill` and `gain` carried in the operand tuple that `solve_magnetisation` already packs at `:396-399`, yet the prototype implemented it as a second solver (`axisymmetric.py:109-155,158-226`) that reads `_mesh`, `_average_external`, `_galerkin_interaction` and `_coefficient` out of the owner, so the production solve now has a private-API consumer whose copy will drift from the adaptive regularisation it duplicates; the census of this defect type is this one site \u2014 `bricks.py:50`'s rectangle closed form has no owner in nova (`nova/biot/polygonanalytic.py` is the 2D poloidal polygon kernel, not a 3D brick face), so \u00a71 is genuinely new work and only the material rule has an owner to extend",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/prototypes/iron_limb_fill/axisymmetric.py:164",
+      "id": "deep_module-1",
+      "reason": "\u00a73 done-when (1) integrates `f` across each section to 1e-3 relative and \u00a72 reports `N`, so the plan must place the derivation in one mechanism or it will be measured against two definitions of its own input.",
+      "text": "the mapping from machine geometry to the per-cell rule is spread across the caller: `Model.__init__` composes `gain = ((1-fill)/fill)*(1-factor)` at `:164-172`, `limb_demagnetising` at `:94` decides which component takes `N` and is called from two sites (`:259`, `:373`), `flat_fill` at `:333` defines `f` as `min(1, 0.764/R)` while `limb_fraction` at `:50` defines the same `f` as `6/pi*arcsin(0.4/max(R,0.8))`, and the two differ in the hub transition band they clamp over; a deep design takes the limb section and the axis orientation and returns the rule, so `f`, `N` and `gain` are one object rather than three lambdas at every call site",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/prototypes/iron_limb_fill/axisymmetric.py:130",
+      "id": "thin_wrapper-1",
+      "reason": "\u00a72 done-when (1) asserts both arms are bit-identical when `f` is omitted, so the plan must state that the production loop and production tile plan carry both arms or that assertion cannot hold.",
+      "text": "`newton` reproduces `solve_magnetisation`'s acceptance test exactly \u2014 the `ratio > 0.25` threshold, the 35 attempts, the x0.3/x2/x10 damping schedule, lambda starting at 1e-6 (`nova/biot/magnetisation.py:408,422-442`) \u2014 around a residual the owner could accept as a parameter, and `Model` at `:158` adds nothing but the fill/gain arithmetic over `_mesh`, `_average_external`, `_galerkin_interaction` and `_coefficient`; it also pins its own `TilePlan(128,128,256,16,48)` at `:40` rather than the module default `_PLAN`, so the prototype's interaction and the production solve's are tuned differently and no measurement in \u00a72 can be compared across them without saying which plan produced it",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/machine.py:445",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a73 must return the region along with `f` to retire twelve duplicate constructions, and a read that returns only `f` leaves the outline rebuildable and the done-when unmeasurable.",
+      "text": "`MachineIronSegment` carries `name`, `description`, `outline` and `material` but no region, and no fill fraction, so twelve call sites rebuild the shapely region from `outline.r`/`outline.z` by hand and would each rebuild the true flat outline independently: scripts/west_iron_solve/measure.py:183, scripts/west_iron_solve/diagnose.py:196, scripts/west_iron_solve/probe.py:46, scripts/west_iron_solve/diagnostic_figure.py:39, scripts/west_iron_galerkin/measure.py:231, scripts/west_iron_galerkin_pair/measure.py:351, scripts/west_picard_control/measure.py:338, scripts/west_root_branch/measure.py:235, scripts/west_stray_field/solve.py:76, scripts/sheet_tile_census/measure.py:83, scripts/prototypes/iron_magnetisation/west.py:34, scripts/prototypes/iron_limb_fill/axisymmetric.py:298; \u00a73's endpoint adds `f` to this read and stops there, so done-when (3)'s \"no second construction of the flat outline in the tree\" is unenforceable \u2014 the census is the twelve sites above, and the prototype is the one that already goes furthest, building `flat` at `axisymmetric.py:306-314` and `flat_fill` at `:333` outside the owner",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/machine.py:445",
+      "id": "interface_budget-1",
+      "reason": "the plan should say in its own text that \u00a72's inputs are the single material-rule surface and that \u00a73's refusal is a tightened existing read, because at zero in all four families this section is where the week's whole interface growth lands.",
+      "text": "with public_definitions 0, cli_options 0, mcp_views 0 and refusal_families 0, \u00a73 adds a per-region fill fraction to the machine read and a new refusal (\"a stored outline that does not obey thickness times radius constant to 1% is refused by name\"), and \u00a72 adds per-cell fill and cross-field inputs to the production material solve; \u00a73's retirement statement covers only the flat-outline construction and nothing about the new record field or the refusal, and \u00a72's states that `f = 1` reproduces the present residual but not whether the new inputs are the only material rule or sit beside the existing full-iron path",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "6832f2fa097d7faaa71cfeba03ef9da9edcb7287",
+  "plan_fingerprint": "91df91526a5866e8bc088c913e8108a03ec6ad6d22926dd4295f2961ae890899",
+  "plan_slug": "iron-limb-fill-fraction",
+  "plan_version": 5,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261113T162404667664-plan-review-of-iron-limb-fill-fraction",
+  "reviewed_blob_sha": "e3c046a6c59cfde24686b82ab506bf7ca36a6db5",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 in the prototype the geometry-to-`gain` derivation and the demagnetising factor are caller code (`axisymmetric.py:164-172`, `:94`, `:333`), so the same machine quantity `f` has two definitions in one file.",
+    "duplicate_owner": "a finding \u2014 `MachineIronSegment` at `nova/imas/machine.py:445` owns the iron read, and twelve script sites rebuild its region by hand; \u00a73 adds `f` to the read but not the region, so done-when (3) cannot be met.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 and \u00a73 each add surface and name no retirement, and \u00a73's \"refused by name\" is a new refusal family stated as though it were free.",
+    "reuse_search": "a finding \u2014 the \u00a72 material rule already exists in the tree at `scripts/prototypes/iron_limb_fill/axisymmetric.py:109-226`, which imports `nova/biot/magnetisation.py`'s private helpers and adds only four lines to its residual; nova has no separate brick or 3D kernel, so \u00a71's reference and \u00a74's reuses are correctly new/ownered, and \u00a72's regression gate is correctly anchored on `tests/test_magnetisation.py`.",
+    "thin_wrapper": "a finding \u2014 `newton` at `axisymmetric.py:130-155` is a copy of the production regularisation loop around a swapped residual, and `Model` at `:158` forwards to four private helpers of `nova/biot/magnetisation.py`."
+  },
+  "section_digests": {
+    "_document": "eecae07a73ba67f93c1d35e51d3c483acbca2fa68a6f9ae0548fdb8493372fc9",
+    "s0": "014c5cf5459093a3fae537a48d048f04e870e43d06586623f64736b1514fc654",
+    "s1": "e48e22264625d301a03c2465befa19e826c3b4b92491fdfc62b6094bb88dad69",
+    "s2": "844171896115e212887c9e01fea5cd99b5a26ff6d336cb85ebb0aae689989738",
+    "s3": "8b41520dbb08ef198c948d8eb843edb151fe116cec844f6d379c3b134c7066bb",
+    "s4": "1891ed7f15b2f37f0901f06dfc51aafb5c24c6a0a110975e20eb644b084cd08c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T07:38:32.895062+00:00",
+  "total": null
+}

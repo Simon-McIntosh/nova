@@ -1,0 +1,41 @@
+<section id="carried-read-refresh-result">
+<h2>Faster carried reads; full refresh retained by default</h2>
+<p>Selective refresh improves the isolated carried read at every measured width, but increases complete single-pulse forward-slice wall by 10.68%, beyond the 3% decision margin. Widths 16 and 64 have unresolved complete-slice differences. The support read therefore selects full refresh by default; selective refresh remains available through <code>topology.refresh_at_stationary_points(reuse=True)</code>. The table records the measured revision before that default change; it does not claim a second timing run at the changed default.</p>
+<p>The carried read retains conic fragments only when their signed coefficients are unchanged, or a conservative polynomial bound certifies unchanged full or empty support and the edge slots agree. Saddle fragments are retained only when the entire normal form agrees. Changed conic and saddle populations run in separate device loops; uncertain cut geometry is always recomputed. Stationary roots and curvature are still evaluated at the current state.</p>
+<p>The base reproduction recorded <code>valid=True rebuilt=False recomputed_cells=50 total_cells=50</code> for an unchanged carried state. Its log is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144016445105-carried-read-refresh/reproduce.log</code>. The selective test executes zero; changing one cut cell executes one; the boundary-motion fixture executes 39 of 50. All compare with forced full refresh at the existing tolerances. The stale-mask mutation deliberately reuses changing cut cells and must fail the head-passing tests.</p>
+<p>One paired H200 job completed all 36 fresh processes. The largest measured-process spread is 3.427%, below the 5% bound. The worst fresh residual is 3.30544e-11 (budget 1e-10); maximum axis and saddle position errors are 5.23121e-05 and 2.20046e-05 of the minor radius (budget 5e-4), and boundary error is 5.24994e-05 of the flux span (budget 1e-4). The profiler's positive control observes a 2 MiB transfer and a kernel in every process. The independent receipt audit is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144016445105-carried-read-refresh/h200-resumed/audit.json</code>.</p>
+<h3 id="carried-read-refresh-read">Carried read</h3>
+<table><thead><tr><th>Width</th><th>Refresh</th><th>Process 1 [ms/batch]</th><th>Process 2 [ms/batch]</th><th>Mean [ms/slice]</th><th>Spread</th><th>Optimized operations</th></tr></thead><tbody>
+<tr><td>1</td><td>full</td><td>2.8471</td><td>2.8344</td><td>2.8407</td><td>0.447%</td><td>83089</td></tr>
+<tr><td>1</td><td>selective</td><td>2.3867</td><td>2.4684</td><td>2.4276</td><td>3.427%</td><td>86895</td></tr>
+<tr><td>16</td><td>full</td><td>8.9216</td><td>8.8928</td><td>0.5567</td><td>0.323%</td><td>77891</td></tr>
+<tr><td>16</td><td>selective</td><td>4.7551</td><td>4.7573</td><td>0.2973</td><td>0.047%</td><td>81379</td></tr>
+<tr><td>64</td><td>full</td><td>26.5870</td><td>26.6572</td><td>0.4160</td><td>0.264%</td><td>75883</td></tr>
+<tr><td>64</td><td>selective</td><td>11.5246</td><td>11.4499</td><td>0.1795</td><td>0.652%</td><td>79501</td></tr>
+</tbody></table>
+<p>Width 1: 14.54% lower wall; margin 3.43%; resolved improvement.</p>
+<p>Width 16: 46.60% lower wall; margin 3.00%; resolved improvement.</p>
+<p>Width 64: 56.85% lower wall; margin 3.00%; resolved improvement.</p>
+<h3 id="carried-read-refresh-slice">Forward slice with secant prediction</h3>
+<table><thead><tr><th>Width</th><th>Refresh</th><th>Process 1 [ms/batch]</th><th>Process 2 [ms/batch]</th><th>Mean [ms/slice]</th><th>Spread</th><th>Optimized operations</th></tr></thead><tbody>
+<tr><td>1</td><td>full</td><td>33.6529</td><td>34.0638</td><td>33.8584</td><td>1.221%</td><td>202550</td></tr>
+<tr><td>1</td><td>selective</td><td>37.3840</td><td>37.5667</td><td>37.4753</td><td>0.489%</td><td>206404</td></tr>
+<tr><td>16</td><td>full</td><td>117.7313</td><td>117.8632</td><td>7.3623</td><td>0.112%</td><td>189204</td></tr>
+<tr><td>16</td><td>selective</td><td>120.4881</td><td>119.8355</td><td>7.5101</td><td>0.545%</td><td>192697</td></tr>
+<tr><td>64</td><td>full</td><td>375.6845</td><td>375.6977</td><td>5.8702</td><td>0.004%</td><td>186273</td></tr>
+<tr><td>64</td><td>selective</td><td>377.8327</td><td>377.1909</td><td>5.8986</td><td>0.170%</td><td>189880</td></tr>
+</tbody></table>
+<p>Width 1: 10.68% higher wall; margin 3.00%; resolved regression.</p>
+<p>Width 16: 2.01% higher wall; margin 3.00%; unresolved difference.</p>
+<p>Width 64: 0.48% higher wall; margin 3.00%; unresolved difference.</p>
+<figure id="carried-read-refresh-figure"><img src="/nova/figures/sub-millisecond-forward-path/carried-read-refresh/paired-walls.svg" alt="Full and selective refresh wall per slice across independent pulse widths 1, 16 and 64."><figcaption>Each point is the mean of two fresh-process medians of eleven synchronized warm calls, following one warming process per arm. Width one is single-pulse latency. Wider values divide concurrent independent-pulse batch wall by width; slices within one TORAX-coupled pulse remain sequential. Grey dashed squares show full refresh; blue solid circles show selective refresh.</figcaption></figure>
+<p>Measured revision <code>15155aedc709a0db964e10f4ed2051d0cafc1a0a</code>. The unchanged slice-profile instrument supplies compile and execute walls separately, full fresh certificates and the analytic precision checks. All 36 receipts and logs are retained under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144016445105-carried-read-refresh/h200-resumed</code>. Off/on optimized operation counts differ, and comparing an arm with itself is refused as an inert lever. Common input <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144016445105-carried-read-refresh/inputs/common-streams.npz</code> has SHA256 <code>52f8d4fb9e60dbdbe1530e8b64a171d3bb6470fb5cf73a1ddcf760895d09a0e9</code>.</p>
+<h3 id="carried-read-refresh-correctness">CPU comparison</h3>
+<p>Each compatibility file ran in a separate fresh process with a unique temporary directory. The baseline is <code>975f3e98cfa2b2976d2bbe1b94ead37f8623b529</code>; the measured head is <code>15155aedc709a0db964e10f4ed2051d0cafc1a0a</code>. All twenty file logs were audited against their receipts.</p>
+<table><thead><tr><th>Arm</th><th>Completed files</th><th>Passed</th><th>Failed</th><th>Skipped</th><th>Incomplete files</th></tr></thead><tbody>
+<tr><td>baseline</td><td>8</td><td>89</td><td>3</td><td>2</td><td>2</td></tr>
+<tr><td>after</td><td>8</td><td>89</td><td>3</td><td>2</td><td>2</td></tr>
+</tbody></table>
+<p>No added head failures were observed. The three failing IDs match; both batch files terminate with <code>EXIT=-9</code> in both arms. The runner completed its loop, but SLURM records <code>OUT_OF_MEMORY</code> and four OOM kills. These shared failures and incomplete files are retained under the authorized delta rule; this is not a fully passing suite.</p>
+<p>The full-refresh default is pinned at <code>489d9497bd3505dfab796e2836ba6dcf2472717b</code>. Its scoped suite reports <code>7 passed in 112.10s (0:01:52)</code>. Corrupting the reuse mask reports <code>4 failed, 3 passed in 108.55s (0:01:48)</code> and fails head-passing tests. The base has no scoped test file and its arm is explicitly unarmed. Receipts: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144016445105-carried-read-refresh/default-gate</code>; per-file audit: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144016445105-carried-read-refresh/per-file/audit.json</code>.</p>
+</section>

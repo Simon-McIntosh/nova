@@ -446,6 +446,7 @@ def _rebuilt_reading(
         stencil.solved,
         decision,
         skip_wall=skip_wall,
+        reuse=False,
     )
 
 

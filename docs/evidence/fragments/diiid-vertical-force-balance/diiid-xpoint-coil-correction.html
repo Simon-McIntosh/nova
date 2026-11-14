@@ -1,0 +1,75 @@
+<section id=diiid-xpoint-coil-correction>
+<h2>Removing the fitted conductor-field mismatch as a measured-current correction moves the DIII-D lower X-point by nothing, and the fitted corrections are too large to be measurement errors</h2>
+<p><strong>Applying the fitted equivalent forward-field error as a subtraction from the measured coil currents leaves the solved equilibrium bit-identical on both frames where both arms were solved: 137D and 146D converge to the same residual and the same lower X-point to the last stored digit.</strong> The recorded inputs show the correction did reach the source seam, so this is not a correction that failed to be passed: every one of the nineteen conductors carries its fitted ampere-turns into <code>current-inputs.json</code>, and F1A's applied current falls from &minus;177.235 to &minus;231.293 kA&middot;turn. The solved state is unmoved, and the maximum absolute difference between the two arms' terminal flux arrays is exactly zero on both landed frames. This record therefore reports the movement as <em>unmeasured rather than zero</em>, and reports the fit itself, which is the more informative result: the fitted corrections reach 30 to 50 percent of the current in most conductors and up to 2473 percent on ECOILA, which is not a measurement error in any plausible magnet calibration.</p>
+<p><strong>The fitted corrections are implausible as current-measurement errors on their own terms.</strong> Nine of the nineteen conductors take a correction between 27 and 59 percent of their own measured current, four exceed 200 percent, and only six fall under 5 percent. A magnet calibration error is a gain, so it would appear as one common fraction of each coil's current; a single coil's turns or geometry error would not move the other eighteen. Neither shape is what the fit produces.</p>
+
+<h3>What the fit is</h3>
+<p>The gauge-free external difference over the governed vessel is projected onto the nineteen conductor response columns by a column-scaled SVD with relative cutoff 10<sup>-8</sup>. Every fit here has rank 19 at a scaled condition number of 2984.57, and a known injected 1 kA&middot;turn F1A error is recovered before any absence is read. The coefficients are the equivalent error of the forward field, so removing that error from the measured current carries the same sign. Each row is fitted on its own solved basis state, with the archive and frame that basis was built from.</p>
+<table>
+<caption>Conductor fit per row. The mismatch column is the share of the external-field difference the nineteen columns represent over the fitted region. The last two columns quote F1A and the conductor whose relative correction is largest.</caption>
+<thead><tr><th>case</th><th>rank</th><th>scaled condition</th><th>mismatch represented [%]</th><th>F1A equivalent error [kA&middot;turn]</th><th>F1A relative [%]</th><th>largest corner</th><th>largest relative [%]</th></tr></thead>
+<tbody>
+<tr><td>137D</td><td>19</td><td>2984.57</td><td>93.11</td><td>+54.06</td><td>&minus;30.50</td><td>ECOILA</td><td>2473.1</td></tr>
+<tr><td>146D</td><td>19</td><td>2984.57</td><td>90.05</td><td>+52.14</td><td>&minus;28.51</td><td>F9B</td><td>547.6</td></tr>
+<tr><td>146L</td><td>19</td><td>2984.57</td><td>90.05</td><td>+52.14</td><td>&minus;28.51</td><td>F9B</td><td>547.6</td></tr>
+<tr><td>179L</td><td>19</td><td>2984.57</td><td>90.57</td><td>&minus;4.54</td><td>+2.12</td><td>F3A</td><td>4278.1</td></tr>
+</tbody></table>
+<p>The two 146 rows share one fit to the last printed digit because the external-field difference is built from the frame's own measured currents and EFIT map, neither of which differs between the diverted and limited branches; only the basis state's local offset does.</p>
+
+<h3>Which of the three explanations the pattern supports</h3>
+<p><strong>Not a calibration.</strong> A calibration error is multiplicative and per-coil, so the fitted correction would be a fixed fraction of each coil's own current and stable between frames. The fitted fractions range from 0.1 to 2473 percent within one frame.</p>
+<p><strong>Not a single coil's turns or geometry.</strong> Twelve of the eighteen F conductors take a correction between +18 and +98 kA&middot;turn, which is a common-mode offset of most of the set rather than a defect in one coil, and the coefficients barely move between 137D and 146D although every measured current differs by about 3 percent.</p>
+<p><strong>What remains is a difference in the conductor response or in EFIT's implied external field.</strong> A near-uniform, frame-independent coefficient vector with the same sign on most coils is the shape a common-mode scaling of the nineteen response columns produces, and the response columns are the one input that is neither the measured current nor the plasma state. This record does not identify which normalization differs; it rules out the two per-coil explanations and leaves the common-mode one standing.</p>
+<p><strong>This recomputation does not reproduce the published fit for the same frames, and this record says so rather than reconciling by choice.</strong> The earlier attribution reported 98.02 percent for 137D and 95.16 percent for 146D, with F1A at &minus;2.51 and &minus;0.27 kA&middot;turn and mixed signs across the set. The figures here are 93.11 and 90.05 percent with F1A at +54.06 and +52.14 kA&middot;turn. Both were computed by the same function on the same archive and frame, so the difference lies in the field difference the projection is taken against rather than in the solver; the earlier run's working directories have since been retired from the run store and could not be compared directly. Every number in this record is the recomputation's, and the banked table is quoted only as a disagreement.</p>
+
+<h3>The two arms</h3>
+<table>
+<caption>Each row solved twice on the base profile tables: measured currents, and those currents less the fitted equivalent error. Residual, convergence flag, termination, support and in-plasma extrema come from the solve and the retained census; the distance is measured to the same EFIT null the banked cohort was measured against. "Share closed" is the fall in distance over the base distance, and it is not read on any row here because the corrected state is the base state.</caption>
+<thead><tr><th>case</th><th>arm</th><th>residual</th><th>converged</th><th>termination</th><th>in-plasma maxima / minima</th><th>support cells</th><th>lower-X offset (R,Z) [cm]</th><th>distance from EFIT [cm]</th><th>share closed</th></tr></thead>
+<tbody>
+<tr><td>137D</td><td>measured</td><td>1.14&middot;10<sup>-12</sup></td><td>yes</td><td>CONVERGED</td><td>1 / 0</td><td>339</td><td>+0.660 / +2.266</td><td>2.360</td><td>not read</td></tr>
+<tr><td>137D</td><td>corrected</td><td>1.14&middot;10<sup>-12</sup></td><td>yes</td><td>CONVERGED</td><td>1 / 0</td><td>339</td><td>+0.660 / +2.266</td><td>2.360</td><td>not read</td></tr>
+<tr><td>146D</td><td>measured</td><td>1.26&middot;10<sup>-15</sup></td><td>yes</td><td>CONVERGED</td><td>1 / 0</td><td>339</td><td>+0.627 / +2.893</td><td>2.960</td><td>not read</td></tr>
+<tr><td>146D</td><td>corrected</td><td>1.26&middot;10<sup>-15</sup></td><td>yes</td><td>CONVERGED</td><td>1 / 0</td><td>339</td><td>+0.627 / +2.893</td><td>2.960</td><td>not read</td></tr>
+<tr><td>146L</td><td>measured</td><td>2.42&middot;10<sup>-9</sup></td><td>yes</td><td>CONVERGED</td><td>1 / 0</td><td>290</td><td>+3.907 / +3.323</td><td>5.130</td><td>not read</td></tr>
+<tr><td>179L</td><td>measured</td><td>3.36&middot;10<sup>-15</sup></td><td>yes</td><td>CONVERGED</td><td>1 / 0</td><td>309</td><td>+1.043 / +0.997</td><td>1.443</td><td>not read</td></tr>
+</tbody></table>
+<p>The corrected 146L and 179L rows had not landed when this record was written; their measured arms are complete and their fits are recorded above.</p>
+<p>The measured arms reproduce the banked cohort exactly, which is the control: 137D 2.360 cm, 146D 2.960 cm, 179L 1.443 cm and 146L 5.130 cm against the same EFIT nulls. The base arm is therefore a working reference against which the corrected arm is a null result and not a broken run.</p>
+
+<h3>Per-conductor correction</h3>
+<table>
+<caption>Each conductor's measured ampere-turns beside the fitted equivalent error and the fraction that error is of the measured current. A correction above 5 percent of the coil's own current is marked implausible as a measurement error.</caption>
+<thead><tr><th>conductor</th><th>137D measured [kA&middot;turn]</th><th>137D equivalent [kA&middot;turn]</th><th>137D [%]</th><th>146D measured [kA&middot;turn]</th><th>146D equivalent [kA&middot;turn]</th><th>146D [%]</th><th>flag</th></tr></thead>
+<tbody>
+<tr><td>F1A</td><td>&minus;177.235</td><td>+54.06</td><td>30.5</td><td>&minus;182.900</td><td>+52.14</td><td>28.5</td><td>implausible</td></tr>
+<tr><td>F2A</td><td>&minus;168.819</td><td>+55.24</td><td>32.7</td><td>&minus;168.921</td><td>+56.46</td><td>33.4</td><td>implausible</td></tr>
+<tr><td>F3A</td><td>&minus;3.700</td><td>+54.21</td><td>1465.2</td><td>&minus;11.590</td><td>+49.97</td><td>431.1</td><td>implausible</td></tr>
+<tr><td>F4A</td><td>+30.403</td><td>+78.28</td><td>257.5</td><td>+34.117</td><td>+77.02</td><td>225.7</td><td>implausible</td></tr>
+<tr><td>F5A</td><td>+160.368</td><td>+46.60</td><td>29.1</td><td>+166.530</td><td>+61.81</td><td>37.1</td><td>implausible</td></tr>
+<tr><td>F6A</td><td>&minus;248.255</td><td>&minus;3.54</td><td>1.4</td><td>&minus;257.559</td><td>&minus;1.48</td><td>0.6</td><td>within</td></tr>
+<tr><td>F7A</td><td>&minus;251.115</td><td>+6.68</td><td>2.7</td><td>&minus;241.128</td><td>+11.24</td><td>4.7</td><td>within</td></tr>
+<tr><td>F8A</td><td>+113.457</td><td>+30.91</td><td>27.2</td><td>+116.739</td><td>+33.32</td><td>28.5</td><td>implausible</td></tr>
+<tr><td>F9A</td><td>&minus;86.964</td><td>&minus;2.27</td><td>2.6</td><td>&minus;86.303</td><td>+12.09</td><td>14.0</td><td>implausible</td></tr>
+<tr><td>F1B</td><td>&minus;155.924</td><td>+55.18</td><td>35.4</td><td>&minus;159.553</td><td>+49.90</td><td>31.3</td><td>implausible</td></tr>
+<tr><td>F2B</td><td>&minus;122.701</td><td>+58.27</td><td>47.5</td><td>&minus;122.944</td><td>+56.38</td><td>45.9</td><td>implausible</td></tr>
+<tr><td>F3B</td><td>&minus;168.625</td><td>+55.89</td><td>33.1</td><td>&minus;166.792</td><td>+57.05</td><td>34.2</td><td>implausible</td></tr>
+<tr><td>F4B</td><td>+124.456</td><td>+66.55</td><td>53.5</td><td>+123.721</td><td>+64.19</td><td>51.9</td><td>implausible</td></tr>
+<tr><td>F5B</td><td>+195.552</td><td>+80.08</td><td>40.9</td><td>+197.840</td><td>+98.91</td><td>50.0</td><td>implausible</td></tr>
+<tr><td>F6B</td><td>&minus;195.398</td><td>&minus;0.17</td><td>0.1</td><td>&minus;206.998</td><td>+1.84</td><td>0.9</td><td>within</td></tr>
+<tr><td>F7B</td><td>&minus;400.016</td><td>&minus;4.54</td><td>1.1</td><td>&minus;383.511</td><td>+0.88</td><td>0.2</td><td>within</td></tr>
+<tr><td>F8B</td><td>+181.436</td><td>&minus;5.62</td><td>3.1</td><td>+173.712</td><td>&minus;3.97</td><td>2.3</td><td>within</td></tr>
+<tr><td>F9B</td><td>&minus;8.023</td><td>+18.78</td><td>234.0</td><td>&minus;4.868</td><td>+26.66</td><td>547.6</td><td>implausible</td></tr>
+<tr><td>ECOILA</td><td>&minus;12.993</td><td>&minus;321.33</td><td>2473.1</td><td>&minus;15.438</td><td>+77.64</td><td>502.9</td><td>implausible</td></tr>
+</tbody></table>
+<p>Only six of the nineteen conductors take a correction under 5 percent, and the large corrections are not concentrated on one coil: nine fall between 27 and 59 percent, so the pattern is a large, nearly common-mode offset on most of the set.</p>
+
+<h3>Figures</h3>
+<figure><img src="/nova/figures/diiid-xpoint-coil-correction/frame-137-diverted-lower-xpoint.svg" alt="137D solved flux with the measured and the corrected coil currents beside EFIT, whole vessel and a 10 cm zoom on EFIT's lower null."><figcaption>137D at 3000 ms, measured currents (left pair) and measured minus the fitted equivalent error (right pair), on the base profile tables. The left panel of each pair is the whole vessel, the right a 10 cm box anchored on EFIT's lower null so both arms are read at the same place. Solved flux is solid blue with a filled cross at its null and a solid triangle at its magnetic axis; EFIT's is dashed dark grey with a hollow square at its null and a hollow triangle at its axis. Each field is gauged to its own null, the wall is drawn on every panel, and the axes are off. The two arms are one field drawn twice: the residual under both is 1.14&middot;10<sup>-12</sup>.</figcaption></figure>
+<figure><img src="/nova/figures/diiid-xpoint-coil-correction/frame-146-diverted-lower-xpoint.svg" alt="146D solved flux with the measured and the corrected coil currents beside EFIT, whole vessel and a 10 cm zoom on EFIT's lower null."><figcaption>146D, diverted branch, on the same two arms and the same conventions. Residual 1.26&middot;10<sup>-15</sup> under both. The open circles at the lower null are the shadow nodes the residual mask retains; the corrected arm moves none of them.</figcaption></figure>
+
+<h3>What this record does not do, and what follows</h3>
+<p>It does not measure how far the lower X-point moves toward EFIT under the fitted correction, because the solve was indifferent to the correction at this seam. A 30 percent change in every coil current is large enough that an unconsumed correction cannot be read as a small effect: either the solve path resolves its external field from something other than the current vector handed to it at this seam, or the operator normalizes the coil field away before the residual is formed. This record does not distinguish those two and does not change <code>nova/</code> to find out.</p>
+<p>The next experiment is stated by the finding: recompute the fit against an explicit response normalization, and drive corrected currents through a path whose external field is proven to respond by a single-coil perturbation injected the same way, before any cohort is run. Both are outside this record's fence.</p>
+<p>The measurement ran on one titan allocation: base arms, four conductor fits and corrected arms inside one job, two rows at a time on four P100 cards, with the shared root interpreter, <code>TMPDIR=/tmp</code> and no <code>uv</code> invocation on the compute node. Every figure was rendered on a <code>rigel</code> job and inspected as a PNG before it was committed.</p>
+</section>

@@ -25,8 +25,8 @@
     },
     "1": {
       "kind": "exempted",
-      "reason": "the cohort spatial.json is verified complete before rendering (verify.py refuses a missing spatial summary, exercised by completion-negative-control.log), so an emptied proposals list cannot reach the marker check in this record",
-      "recorded_at": "2026-11-14T19:42:50.989649+00:00"
+      "reason": "verify.py refuses a missing spatial summary before rendering (completion-negative-control.log), so an emptied proposals list cannot reach the marker check here",
+      "recorded_at": "2026-11-14T19:44:58.843250+00:00"
     },
     "2": {
       "kind": "exempted",

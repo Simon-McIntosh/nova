@@ -38,10 +38,14 @@ def measured(monkeypatch, tmp_path):
                 interior=dict(
                     bank=[0.25, 0.25], direct=[0.2, 0.2], reference_bound=[1e-12, 1e-12]
                 ),
+                interior_residuals={
+                    name: (jets[key][:2, 4:6] - reference["plasma"][state, :2]).tolist()
+                    for name, key in (("bank", "actual"), ("direct", "expected"))
+                },
                 negative_control=dict(threshold=1e-8),
             )
         )
-    (root / "split.json").write_text(json.dumps(dict(states=states)))
+    (root / "split.json").write_text(json.dumps(dict(states=states), default=float))
     (root / "retained-inputs.json").write_text("[]")
     for node in (2, 3, -1):
         values = np.ones((5, 2, 3, 2))
@@ -110,6 +114,32 @@ def test_zeroed_measured_curvature_is_refused(measured):
         archive["expected"][:, 5] = 0
     with pytest.raises(AssertionError, match="psi_ZZ"):
         report.main()
+
+
+def test_mutation_detected_when_scalar_error_norm_cancels(measured, monkeypatch):
+    root, archives = measured
+    split = json.loads((root / "split.json").read_text())
+    for state, archive in enumerate(archives):
+        for name, key in (("bank", "actual"), ("direct", "expected")):
+            truth = np.array([3, 5]) * (state + 1)
+            archive[key][:2, 5] = [truth[0], 0]
+            split["states"][state]["interior"][name][1] = float(5 / np.sqrt(34))
+            residual = split["states"][state]["interior_residuals"][name]
+            residual[0][1], residual[1][1] = 0, -float(truth[1])
+    (root / "split.json").write_text(json.dumps(split))
+    report.main()
+    baseline = json.loads((root / "receipt.json").read_text())
+    monkeypatch.setattr(sys, "argv", ["report", "--mutate"])
+    with pytest.raises(AssertionError, match="psi_ZZ"):
+        report.main()
+    mutated = json.loads((root / "mutation.json").read_text())
+    for before, after in zip(baseline["states"], mutated["states"], strict=True):
+        for route in ("bank", "direct"):
+            assert (
+                abs(after["interior"][route][1] - before["interior"][route][1]) < 1e-10
+            )
+            assert after["control"]["changes"][route] > 1e-7
+        assert not after["control"]["accepted"]
 
 
 def test_document_check_refuses_changed_receipt(measured, monkeypatch, tmp_path):

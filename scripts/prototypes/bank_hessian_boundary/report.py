@@ -12,6 +12,8 @@ from scripts.prototypes.bank_hessian_boundary.inspect import (
     STATES,
     load,
     relative,
+    route_residuals,
+    comparison_control,
 )
 from scripts.prototypes.bank_hessian_boundary.corners import coefficients
 
@@ -56,10 +58,24 @@ def main():
         nodes=[],
         corner_prediction=predicted,
         retained_corner_revision="3ea364d9bb6703ccc9d084938932bb9661d17a58",
+        interior_count=int(interior.sum()),
     )
     for state, state_id in enumerate(STATES):
+        truth = ref["plasma"][state] + ref["coils"][state]
+        baseline = split["states"][state]["interior"]
+        measured = route_residuals(
+            archives[state], ref["indices"], interior, truth, mutate=args.mutate
+        )
         row = dict(
-            state=state_id, interior=split["states"][state]["interior"], boundary={}
+            state=state_id,
+            interior={
+                **{
+                    name: relative(r, truth[interior]).tolist()
+                    for name, r in measured.items()
+                },
+                "reference_bound": baseline["reference_bound"],
+            },
+            boundary={},
         )
         final = values[:, -1, :, state]
         choices = dict(lower=final[:, 0], upper=final[:, 1], average=final.mean(axis=1))
@@ -138,16 +154,19 @@ def main():
                 for j in range(values.shape[1])
             ],
         )
-        truth = ref["plasma"][state, interior] + ref["coils"][state, interior]
-        candidate = truth.copy()
-        if args.mutate:
-            candidate[:, 1] *= np.longdouble("1.000001")
-        error = relative(candidate - truth, truth)[1]
-        threshold = split["states"][state]["negative_control"]["threshold"]
-        row["control"] = dict(
-            relative=float(error),
-            threshold=threshold,
-            accepted=bool(error <= threshold),
+        threshold = max(1e-8, 4 * float(baseline["reference_bound"][1]))
+        row["control"] = comparison_control(
+            split["states"][state]["interior_residuals"],
+            measured,
+            truth[interior],
+            threshold,
+        )
+        current = route_residuals(archives[state], ref["indices"], interior, truth)
+        perturbed = route_residuals(
+            archives[state], ref["indices"], interior, truth, mutate=True
+        )
+        row["sensitivity"] = comparison_control(
+            current, perturbed, truth[interior], threshold
         )
         output["states"].append(row)
         print("RESULT", json.dumps(row, default=float), flush=True)
@@ -197,13 +216,16 @@ def main():
     )
     print("EDGE_CONTROL", json.dumps(output["uniform_edge_control"]), flush=True)
     assert control_error < 1e-5, "known horizontal edge density jump not recovered"
+    assert all(r["sensitivity"]["detected"] for r in output["states"]), (
+        "measured psi_ZZ perturbation is inert"
+    )
     assert all(r["control"]["accepted"] for r in output["states"]), (
-        "interior psi_ZZ perturbation refused"
+        "interior psi_ZZ measurement or perturbation refused"
     )
     print(
         "BOUNDARY_MEASURE_COMPLETE",
         len(records),
-        "boundary nodes; 64 interior nodes; three states",
+        f"boundary nodes; {int(interior.sum())} interior nodes; three states",
         flush=True,
     )
 

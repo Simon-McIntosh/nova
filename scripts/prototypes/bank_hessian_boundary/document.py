@@ -1,24 +1,50 @@
 """Fill the evidence fragment from the completed numerical receipt."""
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
-import re
 
 
 def pair(values):
     return " / ".join(f"{x:.6g}" for x in values)
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("fragment", type=Path)
-    args = parser.parse_args()
-    root = Path.home() / ".cache/nova-hessian-boundary"
-    data = json.loads((root / "receipt.json").read_text())
-    assert len(data["nodes"]) == 92
+def render(data):
     assert all(row["control"]["accepted"] for row in data["states"])
+    digest = hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()
+    interior = data["interior_count"]
+    boundary = len(data["nodes"])
     parts = [
+        f'<section id="bank-hessian-boundary-result" data-receipt-sha256="{digest}">',
+        "<h3>Interior and one-sided boundary checks of the retained ITER Hessians</h3>",
+        f"<p><strong>The boundary-only explanation is refuted.</strong> The same "
+        f"{interior + boundary} sampled nodes contain {interior} interior nodes "
+        f"more than 8 mm from every source edge, and {boundary} boundary-group "
+        "nodes. Both retained routes have large interior discrepancies against "
+        "the independent estimate. The preceding all-node discrepancies are "
+        "reproduced before interpreting this split.</p>",
+        "<table><thead><tr><th>State</th><th>Component</th><th>Bank error</th>"
+        "<th>Direct error</th><th>Reference envelope</th></tr></thead><tbody>",
+    ]
+    for row in data["states"]:
+        for column, component in enumerate(("RZ", "ZZ")):
+            item = row["interior"]
+            parts.append(
+                f"<tr><td>{row['state']}</td><td>ψ<sub>{component}</sub></td>"
+                + "".join(
+                    f"<td>{item[key][column]:.9g}</td>"
+                    for key in ("bank", "direct", "reference_bound")
+                )
+                + "</tr>"
+            )
+    parts += [
+        "</tbody></table>",
+        "<p>Errors are Euclidean discrepancy norms divided by the independent "
+        "total-field component norm, including coils. The numerical envelopes "
+        "are empirical indicators, not interval enclosures. The corner correction "
+        "in the retained reference already uses arbitrary-precision differences "
+        "bounded by the stored coordinate’s actual boundary clearance.</p>",
         '<div id="bank-hessian-boundary-limits">',
         "<p>The boundary table compares each route with the lower-side estimate, "
         "upper-side estimate and their average at the smallest retained distance. "
@@ -96,17 +122,88 @@ def main():
         f"{control['extrapolated_relative']:.6g} after distance extrapolation. "
         "This is the positive control for the jump instrument.</p></div>",
     ]
-    text = args.fragment.read_text()
-    text, count = re.subn(
-        r'<div id="bank-hessian-boundary-limits">.*?</div>',
-        "\n".join(parts),
-        text,
-        count=1,
-        flags=re.S,
-    )
-    assert count == 1
-    args.fragment.write_text(text)
-    print("DOCUMENT_COMPLETE: 92 boundary nodes, 64 interior nodes, three states")
+    parts += [
+        "<p>The Grad–Shafranov equation constrains ψ<sub>RR</sub> + ψ<sub>ZZ</sub> "
+        "− ψ<sub>R</sub>/R = −2πμ<sub>0</sub>RJ. Across a smooth edge the Hessian "
+        "jump is the forcing jump times n⊗n. ψ<sub>ZZ</sub> therefore carries "
+        "the n<sub>Z</sub>² fraction, and ψ<sub>RZ</sub> the "
+        "n<sub>R</sub>n<sub>Z</sub> "
+        "fraction. At corners, opposing logarithmic terms cancel in the trace.</p>",
+        "<p>The nominal corner differs from the rounded stored coordinate. The "
+        "approach sequence diagnoses the nominal corner behaviour down to 100 nm; "
+        "the retained arbitrary-precision correction estimates the derivative at "
+        "the stored coordinate. The interior discrepancy survives both readings.</p>",
+        '<p id="bank-hessian-boundary-controls">The sensitivity control multiplies '
+        "the <em>measured bank and direct-route</em> interior ψ<sub>ZZ</sub> values "
+        "by 1.000001 before recomputing their errors against the unchanged independent "
+        "estimate. The table records norms of the changes in per-node residuals, "
+        "normalised by the independent component norm. Comparing vectors before "
+        "reducing them avoids cancellation between scalar error norms. A "
+        "positive arm reproduces the retained unperturbed measurements; the "
+        "perturbed arm must be refused in every state and route. These controls "
+        "detect measurement-path regressions and do not certify either route’s "
+        "physical accuracy.</p>",
+        "<table><thead><tr><th>State</th><th>Bank change</th><th>Direct change</th>"
+        "<th>Threshold</th></tr></thead><tbody>",
+    ]
+    for row in data["states"]:
+        control = row["sensitivity"]
+        parts.append(
+            f"<tr><td>{row['state']}</td><td>{control['changes']['bank']:.9g}</td>"
+            f"<td>{control['changes']['direct']:.9g}</td><td>{control['threshold']:.9g}</td></tr>"
+        )
+    parts += [
+        "</tbody></table>",
+        '<p id="bank-hessian-boundary-method">Each side uses cell-contained '
+        "central differences of analytic first-derivative fields with four steps "
+        "and eighth-order Richardson extrapolation. The split and the derivative "
+        "stencils use one shared point-to-edge clearance primitive. At active "
+        "corners only nearby source cells are reevaluated, with the independently "
+        "measured smooth remainder held at the target. Finite-distance totals "
+        "therefore omit that remainder’s O(distance) variation. Elsewhere the "
+        "complete active-source field is reevaluated. Coil Hessians stay at the "
+        "target. No terminal solve or timing claim is produced.</p>",
+        '<p id="bank-hessian-boundary-provenance">Owned receipts, input copies '
+        "and per-file digests: "
+        "<code>/home/ITER/mcintos/.cache/nova-hessian-boundary/</code>. "
+        "The numerical receipt is <code>receipt.json</code>; <code>split.json</code>, "
+        "<code>mutation.json</code>, <code>retained-inputs.json</code> and "
+        "<code>nodes/</code> retain the split, refusals, provenance and full "
+        "one-sided records. The receipt fingerprint on this section binds every "
+        "rendered table to that receipt. The gate regenerates this entire fragment "
+        "and then checks it for exact agreement.</p>",
+        f"<p>Reporting revision: <code>{data['revision']}</code>. Numerical "
+        "record revisions: "
+        + ", ".join(
+            f"<code>{r}</code>"
+            for r in sorted({n.get("revision", "unspecified") for n in data["nodes"]})
+        )
+        + ". The bank budget is 1e-8; this diagnostic does not hold bank or "
+        "scenario work. Product source is unchanged.</p>",
+        "</section>",
+    ]
+    return "\n".join(parts) + "\n"
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("fragment", type=Path)
+    parser.add_argument("--check", action="store_true")
+    args = parser.parse_args()
+    root = Path.home() / ".cache/nova-hessian-boundary"
+    data = json.loads((root / "receipt.json").read_text())
+    text = render(data)
+    if args.check:
+        if not args.fragment.exists() or args.fragment.read_text() != text:
+            print(f"stale evidence fragment: {args.fragment}")
+            raise SystemExit(1)
+        print("DOCUMENT_CHECK_COMPLETE")
+    else:
+        args.fragment.write_text(text)
+        print(
+            f"DOCUMENT_COMPLETE: {len(data['nodes'])} boundary nodes, "
+            f"{data['interior_count']} interior nodes"
+        )
 
 
 if __name__ == "__main__":

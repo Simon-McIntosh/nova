@@ -17,7 +17,8 @@ run_one() {
     name=$1
     module=$2
     shift 2
-    command=(env "PYTHONPATH=$repo" JAX_PLATFORMS=cpu "$python" -m "scripts.prototypes.bank_hessian_boundary.$module" "$@")
+    if [ "$module" != pytest ]; then module="scripts.prototypes.bank_hessian_boundary.$module"; fi
+    command=(env "PYTHONPATH=$repo" JAX_PLATFORMS=cpu "$python" -m "$module" "$@")
     {
         printf '# revision: %s; tree: %s; command: ' "$revision" "$repo"
         printf '%q ' "${command[@]}"
@@ -28,12 +29,18 @@ run_one() {
     } > "$output/$name.log" 2>&1
     return "$result"
 }
+run_one regression pytest -p no:cacheprovider -q "$repo/scripts/prototypes/bank_hessian_boundary/test_measurement.py"
 run_one split inspect
-run_one limits limits --workers 16 "${extra[@]}"
+if [ "${extra[0]:-}" != --reuse-limits ]; then
+    run_one limits limits --workers 16 "${extra[@]}"
+fi
 run_one positive report
 set +e
 run_one negative report --mutate
 negative_status=$?
 set -e
 test "$negative_status" = 1
+fragment="$repo/docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-boundary.html"
+run_one document document "$fragment"
+run_one document-check document "$fragment" --check
 echo 'MEASURE_COMPLETE; positive accepted; deliberate interior perturbation refused'

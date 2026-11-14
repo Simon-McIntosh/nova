@@ -2,6 +2,7 @@
 
 import argparse
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from importlib import import_module
 import json
 import multiprocessing
 import os
@@ -13,21 +14,35 @@ from shapely.geometry import Polygon
 
 import scripts.prototypes
 from scripts.prototypes.bank_hessian_boundary.inspect import ROOT, load
-
-scripts.prototypes.__path__.append(str(ROOT / "source/scripts/prototypes"))
-from scripts.prototypes.bank_hessian_reference.probe import coupling, gradient  # noqa: E402
-from scripts.prototypes.bank_hessian_reference.measure import extrapolate  # noqa: E402
-from scripts.prototypes.bank_hessian_reference.report import reference  # noqa: E402
+from scripts.prototypes.bank_hessian_boundary.geometry import clearance
 
 
-def clearance(point, polygons):
-    start = np.concatenate(polygons)
-    delta = np.concatenate([np.roll(p, -1, axis=0) - p for p in polygons])
-    offset = point - start
-    fraction = np.clip(
-        np.sum(offset * delta, axis=-1) / np.sum(delta**2, axis=-1), 0, 1
-    )
-    return np.linalg.norm(offset - fraction[:, None] * delta, axis=-1).min()
+def reference_module(name):
+    path = str(ROOT / "source/scripts/prototypes")
+    if path not in scripts.prototypes.__path__:
+        scripts.prototypes.__path__.append(path)
+    return import_module(f"scripts.prototypes.bank_hessian_reference.{name}")
+
+
+def coupling(polygons):
+    return reference_module("probe").coupling(polygons)
+
+
+def gradient(points, packed, moments):
+    return reference_module("probe").gradient(points, packed, moments)
+
+
+def reference(values):
+    return reference_module("report").reference(values)
+
+
+def extrapolate(values):
+    """Eliminate the quadratic, quartic and sixth-order central-step terms."""
+    levels = [values]
+    for order in range(1, 4):
+        prior = levels[-1]
+        levels.append((4**order * prior[1:] - prior[:-1]) / (4**order - 1))
+    return levels
 
 
 def membership(points, polygons):

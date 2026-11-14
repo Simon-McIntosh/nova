@@ -15,6 +15,7 @@ def program():
         assert source.count(before) == count, (before, source.count(before), count)
         source = source.replace(before, after)
 
+    substitute("import json\n", "import json\nimport os\n")
     substitute(
         "    args = parser.parse_args()",
         '    parser.add_argument("--arm", choices=("off", "on"), required=True)\n'
@@ -37,6 +38,13 @@ def program():
     substitute(
         "        revision=args.revision,",
         "        arm=args.arm,\n        revision=args.revision,",
+    )
+    substitute(
+        "        x64=True,",
+        "        x64=True,\n"
+        "        allocator=dict(preallocate=os.environ.get("
+        "'XLA_PYTHON_CLIENT_PREALLOCATE'), memory_fraction=os.environ.get("
+        "'XLA_CLIENT_MEM_FRACTION')),",
     )
     substitute(
         "            compile_seconds=perf_counter() - started,",

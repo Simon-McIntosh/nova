@@ -34,10 +34,13 @@ uniform radial-field jet, or the declared coil direction. Its dimensionless
 amplitude is converted by <code>source_scale</code>. Current-centroid height is
 <code>sum(z_cell * I_cell + local_vertical_moment) / sum(I_cell)</code>, so cell-local
 moments are translated before summation. The height row is scaled by
-<code>row_scale</code>. An outer scalar Newton correction eliminates this row
-through the existing moment Jacobian and the analytic external-field booking
-tangent, including moving saddle geometry. Every corrected field is solved and
-read afresh before acceptance, with at most eight outer corrections. The receipt
+<code>row_scale</code>. One bordered Newton loop updates the moments and source
+amplitude together. Two right-hand sides of the equilibrated moment Jacobian
+eliminate the centroid row, using the analytic external-field booking tangent,
+including moving saddle geometry. One shared evaluator performs a full fresh
+read and booking for initialization and each damped trial. Acceptance requires
+both the moment residual and centroid tolerance; the combined update cap is
+eight times the supplied moment-step budget. The receipt
 returns <code>pin_amplitude</code> and <code>pin_error</code>; an unsatisfied pin
 cannot report convergence. A changed pin field invalidates the carried factor.</p>
 <h3 id="bank-traced-inputs-reproduction">Reproductions and controls</h3>
@@ -159,14 +162,68 @@ The new file ends <code>1 failed, 6 passed in 480.97s (0:08:00)</code> and
 <p>The second attempt timed out at <code>jax.block_until_ready(result)</code>.
 Its exception representation includes first-slice pin errors
 <code>[6.85215773e-16, -8.50014503e-17]</code>, but the acceptance assertions and
-second-slice full-program reuse check were not reached. Those clauses remain
-unverified. Both attempts retained the 300 s limit and all numerical tolerances.
+second-slice full-program reuse check were not reached. Those clauses were unverified at that stopping point. Both attempts retained the 300 s limit and all numerical tolerances.
 Two counted product-gate failures exhausted the restarted retry allowance, so no
 third implementation attempt was made and no final-head replay was started.</p>
-<p>The next graph repair can remove the real read/residual used only to initialise
-the pin loop's carry, retaining the actual first solve in the loop body and the
-zero-budget read path; alternatively the centroid row can be folded into the
-moment Newton loop. Either needs a new explicit retry instruction and fresh
-normal-limit numerical verification. Detailed logs and graph JSON are under
-<code>graph-checked/</code> and <code>shared-jacobian/</code> in the run directory.</p>
+<p>Detailed logs and graph JSON for those two attempts remain under
+<code>graph-checked/</code> and <code>shared-jacobian/</code> in the run directory.
+The coordinator then renewed the retry allowance and required the flat solve
+and a standalone numerical probe before another product gate.</p>
+<h3 id="bank-traced-inputs-flat-loop">One bordered loop and one fresh evaluator</h3>
+<p>Implementation <code>6316c7016e038d9d5f20a7ee835738d1fbdba19d</code>
+removes the inner equilibrium solve. Its bordered update solves
+<code>A dm - c dα = -R</code> and
+<code>centroid_row dm = -centroid_numerator / (current_scale * row_scale)</code>
+together. The numerator <code>sum((z_cell - target) I_cell + local_vertical_moment)</code>
+is linear in the moments and remains defined at a cold zero-current state,
+with the same physical source and tolerances. The shared fresh evaluator
+eliminates repeated construction of initialization, trial and terminal reads;
+every retained trial already carries a full read. An equilibrated dense solve
+applies the two right-hand sides. A pin solve returns no reusable moment factor.</p>
+<table id="bank-traced-inputs-flat-graph"><thead><tr><th>Measure</th>
+<th>Shared-Jacobian predecessor</th><th>Flat bordered loop</th></tr></thead><tbody>
+<tr><td>Staged operations</td><td>222,415</td><td>67,230</td></tr>
+<tr><td>Unique jaxprs</td><td>3,961</td><td>1,151</td></tr>
+<tr><td>Graph inventory trace [s]</td><td>114.611</td><td>23.504</td></tr>
+<tr><td>Booking construction sites</td><td>7</td><td>1</td></tr>
+<tr><td>Jacobian callers / bodies</td><td>2 / 1</td><td>1 / 1</td></tr>
+</tbody></table>
+<p>Rigel job <code>1314928</code> runs the committed graph inventory and then
+<code>numerics.py</code> in fresh processes, without pytest. The latter records
+the cold compilation and both slices' centroid displacements and fresh residuals,
+and counts new compilations after changing currents, profile tables and targets.
+Receipts live under <code>flat-pin-probe/</code> in the run directory.</p>
+<p>The first standalone flat-loop probe (<code>6316c7016</code>) traced in
+22.926 s and compiled in 44.182 s, but failed its convergence assertion:
+the cold fixture has zero plasma current, so dividing the centroid row by that
+current produced NaNs, zero amplitude movement, and 32 exhausted updates.
+Its numerical log ends <code>AssertionError</code> and <code>EXIT=1</code>;
+<code>flat-pin-probe/numerics.json</code> retains both failed slice receipts.
+The second slice added zero compilations, but numerical acceptance failed.</p>
+<p>The numerator-row correction at
+<code>cc2260a3cb6b5a6c58be689d63e3e551e425cbf4</code> preserves this graph reduction:
+67,241 staged operations, 1,151 unique jaxprs, one booking and one Jacobian
+construction, inventory trace 23.684 s. Rigel job <code>1314939</code> then ran
+the same plain numerical probe successfully, with no pytest timeout involved.</p>
+<table id="bank-traced-inputs-flat-walls"><thead><tr><th>Cold program stage</th>
+<th>Flat loop [s]</th><th>Numerator row [s]</th></tr></thead><tbody>
+<tr><td>Trace</td><td>22.926</td><td>22.810</td></tr>
+<tr><td>MLIR conversion</td><td>4.397</td><td>4.480</td></tr>
+<tr><td>XLA compile</td><td>44.182</td><td>43.416</td></tr>
+<tr><td>Trace + compile</td><td>67.108</td><td>66.226</td></tr>
+</tbody></table>
+<table id="bank-traced-inputs-plain-numerics"><thead><tr><th>Slice</th>
+<th>Targets [m]</th><th>Maximum displacement [m]</th>
+<th>Maximum fresh residual</th><th>Updates per lane</th></tr></thead><tbody>
+<tr><td>First</td><td>0.005, -0.008</td><td>9.37e-17</td><td>1.013e-12</td><td>2</td></tr>
+<tr><td>Changed currents, tables and targets</td><td>0.006, -0.007</td>
+<td>2.02e-16</td><td>2.541e-11</td><td>2</td></tr>
+</tbody></table>
+<p>Both slices' two lanes report convergence. The physical height tolerance stays
+1e-8 m and the fresh residual tolerance stays 1e-10. The compilation log sees
+one cold program and zero changed-slice compilations. The first call takes
+74.042 s including tracing, conversion, compilation and execution; the second
+call takes 2.722 s. <code>flat-pin-cold-start/numerics.log</code> ends
+<code>EXIT=0</code>, and its JSON records the full per-lane results and imported
+module path. These plain-script results precede the next product-gate attempt.</p>
 </section>

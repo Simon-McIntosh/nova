@@ -1198,13 +1198,34 @@ def test_linear_shell_operator_pin():
     )
     cells = iron._mesh(shell(), 0.04)
     assert len(cells.polygons) == control["shell_cells"] == 228
-    polygons = tuple(cells.polygons[index] for index in control["selected_cells"])
+    import os
+
+    full_reference = os.environ.get("NOVA_LINEAR_OPERATOR_REFERENCE")
+    polygons = (
+        cells.polygons
+        if full_reference
+        else tuple(cells.polygons[index] for index in control["selected_cells"])
+    )
     actual, _ = iron.linear_galerkin_cell_interaction(polygons, plan=iron._PLAN)
-    expected = np.array(control["operator"])
+    expected = (
+        np.load(full_reference) if full_reference else np.array(control["operator"])
+    )
     assert np.isfinite(actual).all()
-    relative = np.linalg.norm(actual - expected) / np.linalg.norm(expected)
-    print("40 mm shell-cell operator relative difference:", relative)
+    difference = actual - expected
+    relative = np.linalg.norm(difference) / np.linalg.norm(expected)
+    maximum = np.max(np.abs(difference)) / np.max(np.abs(expected))
+    print(
+        "40 mm operator metrics",
+        json.dumps(
+            dict(
+                unknowns=len(actual),
+                frobenius_relative=float(relative),
+                max_entry_relative=float(maximum),
+            )
+        ),
+    )
     assert relative <= 1e-12
+    assert maximum <= 1e-12
 
 
 def test_paired_polygon_tiles_reuse_one_shape_and_preserve_cartesian_rows():

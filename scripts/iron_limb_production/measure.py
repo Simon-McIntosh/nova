@@ -120,7 +120,8 @@ def measure_control(record, output):
         (EVIDENCE / "case.json").read_bytes()
     ).hexdigest()
     record["control"] = []
-    for size in (0.1, 0.05):
+    fitted_factor = None
+    for size in (0.05, 0.1):
         # Flat-outline arms share one assembly; the smear is solved last.
         with reuse_operators():
             for name in ("solid", "plain", "geometry", "fitted", "smear"):
@@ -128,14 +129,21 @@ def measure_control(record, output):
                     reference = np.asarray(references[mu]["iron_average_T"])
 
                     def objective(factor):
-                        solution = control_result(case, "fitted", size, mu, factor)
-                        field = solution.field(probes[:16])
-                        return np.linalg.norm(field - reference[:16]) / np.linalg.norm(
-                            reference[:16]
-                        )
+                        errors = []
+                        for permeability in (50.0, 200.0):
+                            solution = control_result(
+                                case, "fitted", size, permeability, factor
+                            )
+                            target = np.asarray(
+                                references[permeability]["iron_average_T"]
+                            )[:16]
+                            errors.append(
+                                np.linalg.norm(solution.field(probes[:16]) - target)
+                                / np.linalg.norm(target)
+                            )
+                        return float(np.linalg.norm(errors))
 
-                    fitted = None
-                    if name == "fitted":
+                    if name == "fitted" and fitted_factor is None:
                         fit = minimize_scalar(
                             objective,
                             bounds=(0.0, 1.0),
@@ -143,7 +151,15 @@ def measure_control(record, output):
                             options={"xatol": 0.005},
                         )
                         assert fit.success
-                        fitted = float(fit.x)
+                        fitted_factor = float(fit.x)
+                        record["fit"] = dict(
+                            factor=fitted_factor,
+                            size_m=size,
+                            permeabilities=[50.0, 200.0],
+                            objective="norm of both vessel relative rms errors",
+                            error=float(fit.fun),
+                        )
+                    fitted = fitted_factor if name == "fitted" else None
                     started = perf_counter()
                     result = control_result(
                         case,
@@ -281,6 +297,10 @@ def main():
     device = jax.devices()[0]
     assert device.platform == "gpu", device
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    assert not subprocess.check_output(
+        ["git", "status", "--porcelain", "--untracked-files=no"], text=True
+    ).strip(), "production measurement requires a clean committed tree"
+    assert Path(iron.__file__).resolve().is_relative_to(Path.cwd().resolve())
     record = dict(
         revision=revision,
         module=iron.__file__,

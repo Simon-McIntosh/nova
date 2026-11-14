@@ -1,5 +1,5 @@
 <section id="known-answer-recovery-record">
-  <h2>Known-answer recovery: implementation checkpoint, scientific gate unmeasured</h2>
+  <h2>Initial implementation checkpoint: scientific gate unmeasured</h2>
   <p>The fitting class and its single receipt are committed at
     <code>40fdde05441b227ac41c560dad5e94c6688771bc</code>. Every coefficient
     evaluation issues a typed <code>ForwardSolveRequest</code> through
@@ -62,4 +62,117 @@
     counts or residual history instead of an invented iteration field. Only a
     qualified generating receipt permits the three physical recovery cases,
     their poloidal panels, the displaced-loop mutation and both suite arms.</p>
+</section>
+
+<section id="known-answer-recovery-resumed-record">
+  <h2>Resumed public-forward check: a qualified analytic state and a MAST refusal</h2>
+  <p>The resumed attempt on 2026-11-14 repaired the probe recorder and continued.
+    The former recorder and multiprocessing errors are scaffolding errors, not
+    solver failures. The 110-cell weak-reactor carrier was neither reused nor
+    repaired. The stopping condition below is a reproduced public-forward
+    numerical failure on the separately selected MAST request.</p>
+  <p>The implementation now accepts a declared linear basis over the polynomial
+    coefficients and returns the recovered <code>source_profile</code> on the
+    same fit receipt, so an independent forward solve needs no fitting object.
+    The physical tests declare the two projected profile shapes as basis
+    functions and fit their amplitudes, starting at 0.98 and 1.02. The generating
+    profiles therefore belong to the fitted basis. Nine focused unit tests
+    passed in <strong>6.41 s</strong>; four physical tests were deselected in
+    that unit-only run.</p>
+  <table id="known-answer-recovery-generating-results">
+    <thead><tr><th>Generating request</th><th>Carrier and source</th>
+      <th>Public-forward outcome</th><th>Residual</th><th>Recorded trips</th></tr></thead>
+    <tbody>
+      <tr><td>Conventional Solov'ev</td><td>342 cells; constant polynomial
+        gradients; absolute source; conventional analytic certificate</td>
+        <td>Qualified and converged</td><td>2.5945296862777358e-15,
+        against 1e-12</td><td>2</td></tr>
+      <tr><td>MAST 22086, slice 43</td><td>1089 grid cells and 37 wall nodes;
+        the persisted 101-circuit response carrier; degree-six projected
+        gradients; absolute source with live free-boundary support</td>
+        <td>NONFINITE_RESIDUAL; converged=false; axis_admitted=false</td>
+        <td>NaN</td><td>1</td></tr>
+      <tr><td>ITER</td><td>The cached-machine fixture is wired into the test</td>
+        <td>Not run after the MAST numerical stopping condition</td>
+        <td>Unmeasured</td><td>Unmeasured</td></tr>
+    </tbody>
+  </table>
+  <p>The analytic public solve took <strong>189.2686875835061 s</strong>. Its
+    complete receipt was saved before deriving the trip count from its finite
+    residual-history entries. The stored receipt is
+    <code>solovev-generating-receipt.pkl</code> in the run directory.</p>
+  <p>The MAST public call raised <code>NoQualifiedAxisError</code> while
+    qualifying its terminal field, before a forward receipt could be returned.
+    Its unchanged request was reproduced in the focused pytest gate, which saved
+    the actual terminal <code>FixedPointResult</code> from the public call's
+    traceback before reporting the residual. Its termination code is
+    <code>3</code>, the owner's <code>NONFINITE_RESIDUAL</code> value. This is
+    evidence about this generating request, not a measurement of inverse
+    recovery accuracy and not a claim about every MAST equilibrium.</p>
+  <figure id="known-answer-recovery-mast-refusal-figure">
+    <img src="/nova/figures/inverse-equilibrium-baseline/known-answer-recovery/mast-generating-refusal.svg"
+      alt="Stored MAST starting-field contours beside the rejected terminal-field contours on the same physical levels">
+    <figcaption>MAST 22086/43: stored starting field in grey and the rejected
+      terminal field in blue, on one shared physical flux-level array, with the
+      same vessel. Grey null markers in both panels belong to the starting
+      field: its admitted axis is at R=0.9052605679418458 m,
+      Z=0.003452472527914593 m. The terminal field has no admitted axis and
+      carries no terminal null marker. Its recorded residual is NaN and its
+      converged flag is false. The starting field's admitted axis is a positive
+      control for the refusal. Text bounds and overlaps passed the mechanical
+      check; the rendered PNG was visually inspected before committing.</figcaption>
+  </figure>
+  <table id="known-answer-recovery-resumed-recovery-results">
+    <thead><tr><th>Case</th><th>Flux-map sup error / span</th>
+      <th>Whitened residual</th><th>Independent re-solve agreement</th>
+      <th>Fit iterations, spectrum and undetermined coefficients</th></tr></thead>
+    <tbody>
+      <tr><td>Solov'ev</td><td colspan="4">Unmeasured: generating state is
+        qualified, but recovery was not started after the MAST prerequisite failed.</td></tr>
+      <tr><td>MAST</td><td colspan="4">Unmeasured: public generating solve
+        refused terminal topology before entering the inverse class.</td></tr>
+      <tr><td>ITER</td><td colspan="4">Not run under the numerical stopping condition.</td></tr>
+      <tr><td>One loop displaced by 5 cm</td><td colspan="4">Test written;
+        the declared mutation run remains unmeasured. The MAST failure log is
+        not substituted for the required geometry-mutation red log.</td></tr>
+    </tbody>
+  </table>
+  <h3 id="known-answer-recovery-resumed-suite-results">One-batch verification</h3>
+  <p>All three commands below ran in one <code>all_debug</code> allocation,
+    job <code>1314823</code>, with eight CPUs and 64 GB. The two requested
+    revision arms ran in source snapshots beneath the job's temporary directory;
+    each log records the actual imported module and working directory. Those
+    snapshots were removed when the job ended; logs remain in the run directory.</p>
+  <table id="known-answer-recovery-suite-results">
+    <thead><tr><th>Measurement</th><th>Revision</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Baseline arm</td><td><code>87cf7ec68f6922173c471aa0bc742f07cc2256f3</code></td>
+        <td>34 passed, 1 failed in 23.21 s</td></tr>
+      <tr><td>Requested after arm</td><td><code>9607543b1d565062256c9d945985bc43675ec8d6</code></td>
+        <td>41 passed, 1 failed in 24.61 s; zero added failures</td></tr>
+      <tr><td>Focused MAST failure capture</td><td><code>84ca3cf57b21b128fc0d5284265dcf9a1429ccee</code></td>
+        <td>One failure in 129.49 s; stopped on the generating-state refusal</td></tr>
+    </tbody>
+  </table>
+  <p>Both revision arms fail the same pre-existing test,
+    <code>test_the_solve_defaults_to_the_root_find</code>: it expects a literal
+    <code>"newton_krylov"</code> signature default while the declared-defaults
+    seam exposes <code>None</code>. The test was left unchanged. The focused
+    gate names <code>test_known_state_recovery[mast]</code> and the forward
+    boundary file and stops at the reproduced MAST failure; it is not reported
+    as a completed three-state recovery gate.</p>
+  <p><strong>Evidence:</strong> <code>prerequisite-persisted.log</code>,
+    <code>solovev-generating-receipt.json</code>, <code>machine-generators.log</code>,
+    <code>mast-generating-inputs.json</code>, <code>baseline-suite.log</code>,
+    <code>after-suite.log</code>, <code>focused-gate.log</code>,
+    <code>measurement/mast-generating-failure.json</code>,
+    <code>measurement/mast-rejected-history.pkl</code>, and
+    <code>render-failure.log</code>, beneath
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/</code>.</p>
+  <p><strong>Disposition:</strong> blocked on qualification of the selected
+    MAST generating request. No tolerance was widened and no reduced model was
+    substituted. The next numerical work is to establish a qualified absolute
+    MAST source state through the public forward seam before resuming the
+    three recoveries and the displaced-loop check. Repairs to the forward or
+    topology implementation require their own write scope.</p>
 </section>

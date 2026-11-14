@@ -27,14 +27,18 @@ class Evaluators:
 
     def wrap(self, name, function):
         def evaluate(*arguments):
-            key = (
-                name,
-                tuple((np.shape(x), str(np.asarray(x).dtype)) for x in arguments),
-            )
+            tile = isinstance(function, tiled.TileEvaluator)
+            prepared = function.prepare(*arguments) if tile else None
+            arrays = prepared[2] if tile else arguments
+            key = (name, tuple((np.shape(x), str(x.dtype)) for x in arrays))
             label = repr(key)
             if key not in self.executables:
                 started = time.monotonic()
-                self.executables[key] = function.lower(*arguments).compile()
+                self.executables[key] = (
+                    function.compile(prepared)
+                    if tile
+                    else function.lower(*arguments).compile()
+                )
                 self.programs[label] = dict(
                     evaluator=name,
                     shapes=[list(np.shape(x)) for x in arguments],
@@ -45,12 +49,16 @@ class Evaluators:
                 )
             row = self.programs[label]
             started = time.monotonic()
-            result = self.executables[key](*arguments)
+            result = self.executables[key](*arrays)
             jax.block_until_ready(result)
             row["execute_seconds"] += time.monotonic() - started
             row["calls"] += 1
-            row["padded_pairs"] += len(arguments[0])
-            return result
+            row["padded_pairs"] += function.plan.block if tile else len(arguments[0])
+            return (
+                function.materialize(result, prepared[0], prepared[1])
+                if tile
+                else result
+            )
 
         return evaluate
 
@@ -74,6 +82,7 @@ def main():
     parser.add_argument("--revision", required=True)
     parser.add_argument("--blob", required=True)
     parser.add_argument("--sizes", type=float, nargs="+", default=[0.04, 0.02])
+    parser.add_argument("--comparison", type=Path)
     args = parser.parse_args()
     stamp = dict(
         revision=args.revision,
@@ -144,11 +153,27 @@ def main():
             seconds_per_cell_pair=row["assembly_seconds"] / len(cells.polygons) ** 2,
             completed=True,
         )
-        if size == 0.04:
-            target = args.output / "operator.npy"
-            np.save(target, operator)
-            row["operator_path"] = str(target)
-            row["operator_sha256"] = hashlib.sha256(target.read_bytes()).hexdigest()
+        row["host_seconds"] = (
+            row["assembly_seconds"] - row["compile_seconds"] - row["execute_seconds"]
+        )
+        row["projected_seconds"] = {
+            str(count): row["seconds_per_cell_pair"] * count**2
+            for count in (5864, 11708)
+        }
+        if args.comparison and size == 0.04:
+            delivered = np.load(args.comparison)
+            row["operator_relative_difference"] = float(
+                np.linalg.norm(operator - delivered) / np.linalg.norm(delivered)
+            )
+            if row["operator_relative_difference"] > 1e-12:
+                save()
+                raise SystemExit("linear operator differs from delivered interaction")
+        target = args.output / f"operator-{size:g}.npy"
+        np.save(target, operator)
+        row["operator_path"] = str(target)
+        row["operator_sha256"] = hashlib.file_digest(
+            target.open("rb"), "sha256"
+        ).hexdigest()
         save()
         print(json.dumps(row), flush=True)
 

@@ -68,7 +68,7 @@ def main():
     for ax, row in zip(axes, receipt["states"], strict=True):
         for name, marker in (("reference", "o"), ("bank", "x")):
             values = (
-                abs(np.array(row["trace"][name]["residual"]))
+                abs(np.array(row["trace"][name]["residual"], dtype=np.longdouble))
                 / row["trace"][name]["scale"]
             )
             assert np.all(values > 0), "a zero trace requires explicit treatment"

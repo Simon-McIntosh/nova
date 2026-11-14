@@ -19,7 +19,6 @@ execute() {
     printf 'EXIT=%s\n' "$result" >> "$log"
     return "$result"
 }
-execute "$run/independent-refinement.log" "$python" -m scripts.prototypes.bank_hessian_diagnosis.cell --independent || exit $?
 execute "$run/report-positive.log" "$python" -m scripts.prototypes.bank_hessian_diagnosis.report || exit $?
 execute "$run/report-negative.log" "$python" -m scripts.prototypes.bank_hessian_diagnosis.report --mutate
 negative=$?

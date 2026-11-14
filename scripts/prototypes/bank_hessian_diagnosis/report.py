@@ -372,7 +372,7 @@ def main():
         "the source-gradient Richardson reference is corroborated."
     )
     path = ROOT / ("mutation.json" if args.mutate else "receipt.json")
-    path.write_text(json.dumps(output, indent=2, default=float))
+    path.write_text(json.dumps(output, indent=2, default=str))
     np.savez(ROOT / "comparison.npz", **arrays)
     assert all(row["control"]["positive_pass"] for row in rows), "source trace fails"
     assert all(
@@ -413,7 +413,7 @@ def main():
         )
         for row in rows
     ]
-    print("DIAGNOSIS_SUMMARY", json.dumps(summary), flush=True)
+    print("DIAGNOSIS_SUMMARY", json.dumps(summary, default=float), flush=True)
     print(
         "DIAGNOSIS_COMPLETE", len(indices), "interior nodes; three states", flush=True
     )

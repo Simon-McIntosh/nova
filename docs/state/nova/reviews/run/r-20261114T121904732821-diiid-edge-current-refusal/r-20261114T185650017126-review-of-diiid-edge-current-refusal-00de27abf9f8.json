@@ -10,6 +10,23 @@
   ],
   "completed_at": "2026-11-14T19:25:56.028Z",
   "dispatched_at": "2026-11-14T18:57:25Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "marker_visibility.py is a prototype checker for this diagnosis record only; consolidating it with the core-zoom prototype checker would touch another record's scripts for no product effect, and neither is imported by nova/",
+      "recorded_at": "2026-11-14T19:42:45.617489+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the cohort spatial.json is verified complete before rendering (verify.py refuses a missing spatial summary, exercised by completion-negative-control.log), so an emptied proposals list cannot reach the marker check in this record",
+      "recorded_at": "2026-11-14T19:42:50.989649+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "non-blocking strengthening of a prototype verifier in a diagnosis record that changes no product; the premise, trip counts and mask reconciliation it records are re-measured by the finite-edge and inactive-compensator reruns on their own gates",
+      "recorded_at": "2026-11-14T19:42:57.438869+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_edge_current_refusal/marker_visibility.py",

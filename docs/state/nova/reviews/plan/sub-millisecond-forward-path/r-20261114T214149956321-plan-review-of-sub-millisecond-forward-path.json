@@ -53,6 +53,13 @@
       "note": "Negative control (a) now reverts node (a)'s own change to polygonanalytic.py wherever the repair lands, the tangent rule or the projected-offset denominator.",
       "reason": "",
       "when": "2026-11-14T23:52:57.842761+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "finding": "wiring-1",
+      "reason": "The reciprocal wait belongs on kernel-compile-barrier, which session nova-3c owns and this session must not edit; nova-3c agreed in writing to hold its section 6 until node (a) delivers, and has been asked to declare plan-section-depends-on on its own plan. Section 7 itself waits on nothing in that plan.",
+      "when": "2026-11-14T23:53:10.156689+00:00"
     }
   ],
   "responses": {
@@ -73,6 +80,12 @@
       "note": "Section 7 now names ~/.cache/nova-polygon-tangent-repair/ and ~/.cache/nova-iter-bank/ (or the run directory) for node (a) trace records and edge-term rows and node (b) re-certification receipts.",
       "reason": "",
       "when": "2026-11-14T23:52:46.586607+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "reason": "The reciprocal wait belongs on kernel-compile-barrier, which session nova-3c owns and this session must not edit; nova-3c agreed in writing to hold its section 6 until node (a) delivers, and has been asked to declare plan-section-depends-on on its own plan. Section 7 itself waits on nothing in that plan.",
+      "when": "2026-11-14T23:53:10.156689+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261114T214149956321-plan-review-of-sub-millisecond-forward-path.json",

@@ -7,7 +7,7 @@ set -u
 export TMPDIR=/tmp JAX_PLATFORMS=cpu OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
 export PYTHONPATH="$PWD"
 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider \
-    -q tests/test_magnetisation.py -k linear -s
+    -q tests/test_magnetisation.py -k test_linear_ -s
 result=$?
 echo EXIT=$result
 exit "$result"

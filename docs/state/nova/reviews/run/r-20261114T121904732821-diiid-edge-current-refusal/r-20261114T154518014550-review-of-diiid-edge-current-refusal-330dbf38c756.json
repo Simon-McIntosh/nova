@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-11-14T18:01:18.274Z",
   "dispatched_at": "2026-11-14T17:42:21Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking strengthening of a prototype verifier in a diagnosis record that changes no product; the premise, trip counts and mask reconciliation it records are re-measured by the finite-edge and inactive-compensator reruns on their own gates",
+      "recorded_at": "2026-11-14T18:49:15.162337+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_edge_current_refusal/verify.py",

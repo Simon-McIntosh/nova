@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-14T19:31:49.215Z",
+  "dispatched_at": "2026-11-14T19:09:45Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "line": "186",
+      "severity": "non-blocking",
+      "text": "non-blocking: the COIL_LABELS line prints sections={len(coils)} labelled={len(coils)}, the same value on both sides, and detail_coils=0 is a hard-coded literal, so the check reported in the gate log can never show a missing label; only gate.py's SVG id count (itself a hard-coded 14) actually guards the labelling clause."
+    },
+    {
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "line": "42",
+      "severity": "non-blocking",
+      "text": "non-blocking: the label-over-data guard's collections branch, which is the one covering the coil polygons and the plasma mesh because draw_coils and draw_plasma_cells add collections (nova/media/poloidal.py:96 and :125), is never exercised by a negative control; control-data.log drives ax.plot and therefore fires only the lines branch at render.py:47-50, so the branch that matters for this figure is untested."
+    },
+    {
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "line": "40",
+      "severity": "non-blocking",
+      "text": "non-blocking: the label-clearance check runs only for text artists whose gid starts with 'direct-label', so a label added without that gid is silently unchecked while the save still reports labels_over_data=0, a fail-open over the very thing the check exists to catch."
+    },
+    {
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "line": "101",
+      "severity": "non-blocking",
+      "text": "non-blocking: the first wall is drawn #666666 (about 5.74:1 against white) and the coils #929292 (about 3.11:1), so the reference wall remains the figure's darkest mark at a higher contrast than the subject plasma mesh at 3.490750:1; the mesh reads as the clearest mark through its density, not through its contrast."
+    },
+    {
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "line": "133",
+      "severity": "non-blocking",
+      "text": "non-blocking: source.json carries 12 coil_names for 14 coil polygons, so two adjacent CS modules both read 'CS1' and the two VS3 sections both read 'VS3'; the labels faithfully copy the preparer's names but leave each pair indistinguishable to a reader of the figure they were added for."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-figure-redraw.html",
+      "line": "12",
+      "severity": "non-blocking",
+      "text": "non-blocking: the durable record names all_debug job 1315707 (gate-final.log at a31e87d5), while the committed-head gate that produced the committed SVG ran as job 1315718 (gate-committed.log at 6c7f62c), so the job id cited does not name the run behind the committed numbers."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read both commits against 8907e864; a31e87d5 rewrites the panel layout, style variant, coil labels and checked_save, and 6c7f62c makes the direct-label gids unique, refreshes the SVG and adds the landing fragment.",
+    "done_when": "The done_when's three clauses are asserted: contrast 3.490750:1 on an independent ImageMagick raster, 14 direct-label element ids parsed from the SVG against a required 14, and ink 7.6017% against the 4.5% floor, all recorded in gate-committed.log at the head revision.",
+    "goal": "The node goal is to redraw docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh.svg so the plasma mesh is the clearest mark; the rendered figure raises plasma contrast from 1.639551:1 to 3.490750:1 and labels all 14 coil sections, so the mesh is the visually dominant mark, though render.py:101 keeps the first wall darker still.",
+    "manifest": "Read; it records both commits, the all_debug gate, the 3.490750:1 and 7.6017% measurements, the three control refusals, and states the suite fence was unarmed so no baseline/after pair ran.",
+    "write_paths": "Read the manifest's declared paths and the commit-by-commit diff; the four changed paths sit inside render.py, docs/figures/sub-millisecond-forward-path/iter-bank/ and the two fragment paths the manifest declares."
+  },
+  "justifications": {
+    "durability": "No committed test reaches scripts/prototypes/iter_bank/render.py, and the only guards are the one-off gate.py assertions and the run-directory control logs, so nothing in the repository reddens if the contrast, the labelling or the label-clearance check regresses.",
+    "evidence": "gate-committed.log records median plasma-outline contrast 3.490750:1 measured on a 1400x1073 ImageMagick raster at head 6c7f62c, with the retained 1.639551:1 defect reproduced by the gate's own base assertion.",
+    "fit": "render.py:94-103 takes a DEFAULT_INK.variant and draws through the nova.media.poloidal painters as the neighbouring prototype drivers do, the added identifiers carry no plan or ticket label, and no lint finding is recorded.",
+    "goal_fidelity": "The subject's median rendered contrast rises from 1.639551:1 to 3.490750:1 and every coil section is labelled in docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh.svg, though render.py:101 keeps the first wall darker than the subject.",
+    "reuse": "The diff extends the existing local checked_save rather than adding a new definition, and no production save-with-check owner exists in nova/media; the search found prototype-local copies at scripts/prototypes/bank_fold_vertical/plot.py:34 and scripts/prototypes/iron_magnetisation/figures.py:40, which this file does not converge with.",
+    "scope_discipline": "Every one of the four changed paths (render.py, iter-bank/iter-mesh.svg, iter-bank.html and the landing fragment) sits inside the declared write paths recorded in the manifest."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to redraw docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh.svg so the plasma mesh is the clearest mark; the rendered figure raises plasma contrast from 1.639551:1 to 3.490750:1 and labels all 14 coil sections, so the mesh is the visually dominant mark, though render.py:101 keeps the first wall darker still.\nVERDICT done_when: the done_when's three clauses are asserted: contrast 3.490750:1 on an independent ImageMagick raster, 14 direct-label element ids parsed from the SVG against a required 14, and ink 7.6017% against the 4.5% floor, all recorded in gate-committed.log at the head revision.\nVERDICT write_paths: read the manifest's declared paths and the commit-by-commit diff; the four changed paths sit inside scripts/prototypes/iter_bank/render.py, docs/figures/sub-millisecond-forward-path/iter-bank/ and the two fragment paths the manifest declares.\nVERDICT manifest: read; it records both commits, the all_debug gate, the 3.490750:1 and 7.6017% measurements, the three control refusals, and states the suite fence was unarmed so no baseline/after pair ran.\nVERDICT diff: read both commits against 8907e864; a31e87d5 rewrites the panel layout, style variant, coil labels and checked_save, and 6c7f62c makes the direct-label gids unique, refreshes the SVG and adds the landing fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh.svg raises the subject's median contrast from 1.639551:1 to 3.490750:1 and labels every section, though render.py:101 keeps the reference wall darker than the subject.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-committed.log records the 3.490750:1 median on a 1400x1073 raster at head 6c7f62c and reproduces the retained 1.639551:1 defect, though render.py:186 reports a self-comparison rather than an independent label count.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all four changed paths (render.py, iter-mesh.svg, iter-bank.html and the landing fragment) are inside the write paths the manifest declares.\nSCORE durability: 6\nJUSTIFICATION durability: no committed test imports scripts/prototypes/iter_bank/render.py, so nothing in the repository fails if the contrast, labelling or label-clearance behaviour at render.py:40-50 regresses.\nSCORE fit: 16\nJUSTIFICATION fit: render.py:94-103 uses DEFAULT_INK.variant and the nova.media.poloidal painters as the neighbouring prototype drivers do, and carries no plan or ticket identifier.\nSCORE reuse: 15\nJUSTIFICATION reuse: the diff extends the existing local checked_save and no production save-with-check owner exists in nova/media, but nothing converges the fourth prototype-local copy with scripts/prototypes/bank_fold_vertical/plot.py:34.\nFINDING scripts/prototypes/iter_bank/render.py:186 non-blocking: the COIL_LABELS line compares len(coils) with len(coils) and hard-codes detail_coils=0, so it can never show a missing label.\nFINDING scripts/prototypes/iter_bank/render.py:42 non-blocking: the collections branch of the label-over-data guard is never driven by a negative control, and control-data.log exercises only the lines branch at render.py:47-50.\nFINDING scripts/prototypes/iter_bank/render.py:40 non-blocking: a label without the direct-label gid is silently unchecked while the save reports labels_over_data=0.\nFINDING scripts/prototypes/iter_bank/render.py:101 non-blocking: the #666666 first wall measures about 5.74:1, darker than the 3.490750:1 subject, so the reference is the figure's darkest mark.\nFINDING scripts/prototypes/iter_bank/render.py:133 non-blocking: two CS modules both read 'CS1' and both VS3 sections 'VS3', leaving each pair indistinguishable.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-figure-redraw.html:12 non-blocking: the record cites job 1315707 while the committed-head gate ran as job 1315718.",
+  "review_run_id": "r-20261114T190636430978-review-of-iter-bank-figure-redraw-6c7f62c36f02",
+  "reviewed_base_sha": "8907e8648d8b1c4b1db610185f6b9efd4e49f6d8",
+  "reviewed_head_sha": "6c7f62c36f02f0ad814e0aad9baec744d59dad63",
+  "reviewed_run_id": "r-20261114T171346258899-iter-bank-figure-redraw",
+  "scores": {
+    "durability": 6,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T20:38:59.929401+00:00",
+  "total": 88
+}

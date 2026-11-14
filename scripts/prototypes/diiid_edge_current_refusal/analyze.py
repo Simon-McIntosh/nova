@@ -262,6 +262,30 @@ def analyze(capture):
             )
         summary["directional_discriminator"] = sweep
     write(output / "spatial.json", summary)
+    if receipt["branch"] == "limited":
+        summary["stages"] = []
+        previous = None
+        for index, stage in enumerate(capture.stages):
+            values = np.load(output / f"{stage['stage']}-{stage['index']}.npz")
+            state = values["state"][:flux_size] * scale
+            physical, support, current, shadow = reading(state, f"stage-read-{index}")
+            transition = {}
+            if previous is not None:
+                before, before_current, before_shadow, before_physical = previous
+                transition = dict(
+                    support_changes=int(np.sum(support != before)),
+                    shadow_changes=int(np.sum(shadow != before_shadow)),
+                    current_change_l2_a=float(np.linalg.norm(current - before_current)),
+                    axis_displacement_m=float(
+                        np.linalg.norm(
+                            np.asarray(physical["axis_rz_m"])
+                            - before_physical["axis_rz_m"]
+                        )
+                    ),
+                )
+            summary["stages"].append(dict(**stage, physical=physical, **transition))
+            previous = support, current, shadow, physical
+            write(output / "spatial.json", summary)
     print(
         "SPATIAL_SUMMARY "
         + json.dumps(

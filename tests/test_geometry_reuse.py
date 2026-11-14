@@ -191,13 +191,71 @@ def test_solve_accepts_support_through_continuation_options(monkeypatch):
         start_drive=1.0,
         target_drive=1.00001,
         update_budget=0,
-        solve_options={"initial_support": support},
+        solve_options={"initial_support": support, "reuse_geometry": True},
     )
     assert result.certified
     assert seen
     np.testing.assert_array_equal(
         seen[0].reading.membership, support.reading.membership
     )
+
+
+@pytest.mark.parametrize("width,expected", [(1, False), (16, True), (64, True)])
+def test_solve_geometry_default_follows_pulse_width(monkeypatch, width, expected):
+    from tests import test_bank_solve_driver as toy
+
+    observed = []
+
+    def read(*args, **kwargs):
+        observed.append(kwargs["reuse_geometry"])
+        return toy._toy_read(*args, **kwargs)
+
+    monkeypatch.setattr(support_read, "read_batch", read)
+    monkeypatch.setattr(support_read, "step_residual", toy._toy_residual)
+    state = tuple(jnp.zeros((width, 1)) for _ in range(3))
+    seeds = jnp.zeros((width, 1, 2))
+    result = support_read.solve_batch(
+        None, None, state, seeds, seeds, None, None, None, None, None, max_steps=0
+    )
+    assert np.all(result.converged)
+    assert observed and all(mode is expected for mode in observed)
+
+
+def test_read_geometry_policy_switch_preserves_support():
+    from tests.test_read_wall_skip import wall_case, batch_inputs
+
+    case = wall_case(target=30)
+    inputs = batch_inputs(case, (1,))
+
+    def run(mode, tracking=None):
+        return jax.jit(
+            lambda *args: support_read.read_batch(
+                *args, reuse_geometry=mode, tracking=tracking
+            )
+        )(*inputs)
+
+    default = run(None)
+    enabled = run(True)
+    disabled = run(False, support_read.tracking_of(enabled))
+    populated = run(True, support_read.tracking_of(default))
+    assert default.reading.cell_fragments is None
+    assert disabled.reading.cell_fragments is None
+    assert enabled.reading.cell_fragments is not None
+    assert populated.reading.cell_fragments is not None
+    for result in (enabled, disabled, populated):
+        assert np.all(result.valid)
+        for name in topology.TopologyRead._fields[:26]:
+            for got, want in zip(
+                jax.tree.leaves(getattr(result.reading, name)),
+                jax.tree.leaves(getattr(default.reading, name)),
+                strict=True,
+            ):
+                np.testing.assert_allclose(
+                    got, want, atol=1e-12, rtol=1e-10, equal_nan=True
+                )
+    multiple = jax.jit(support_read.read_batch)(*batch_inputs(case, (1, 1)))
+    assert multiple.reading.cell_fragments is not None
+    assert np.all(multiple.valid)
 
 
 def test_identical_lowered_programs_are_refused():

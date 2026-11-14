@@ -481,6 +481,16 @@ def main():
             name="inactive-field-suppressed",
         )
     )
+    rows.append(
+        panel(
+            args.input / "inactive-field-reference",
+            146,
+            "limited",
+            args.output,
+            args.previews,
+            name="inactive-field-reference",
+        )
+    )
     traces(args.input, args.output, args.previews)
     limited_trajectories(args.input, args.output, args.previews)
     source_changes(args.input, args.output, args.previews)

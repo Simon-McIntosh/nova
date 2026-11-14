@@ -155,6 +155,7 @@ def main():
             flush=True,
         )
     analyze(args.input / "inactive-field-suppressed")
+    analyze(args.input / "inactive-field-reference")
 
 
 if __name__ == "__main__":

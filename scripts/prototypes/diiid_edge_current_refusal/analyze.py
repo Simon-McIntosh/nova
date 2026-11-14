@@ -317,3 +317,20 @@ def analyze(capture):
                 str(control),
             ],
         )
+    if (
+        output.name == "inactive-field-suppressed"
+        and os.environ.get("NOVA_LANE_RUNG") == "h200"
+    ):
+        # A device-matched unmodified reference separates the operator change
+        # from arithmetic differences between the two GPU lanes.
+        root = Path(__file__).resolve().parents[3]
+        reference = output.with_name("inactive-field-reference")
+        os.execv(
+            "/usr/bin/bash",
+            [
+                "bash",
+                str(Path(__file__).with_name("reference.sh")),
+                str(root),
+                str(reference),
+            ],
+        )

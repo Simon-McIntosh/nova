@@ -154,6 +154,7 @@ def main():
     for frame, branch in ROWS:
         audit(args.input / "edge" / f"frame-{frame}-{branch}")
     audit(args.input / "inactive-field-suppressed")
+    audit(args.input / "inactive-field-reference")
 
 
 if __name__ == "__main__":

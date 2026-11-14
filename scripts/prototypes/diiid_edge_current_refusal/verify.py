@@ -17,6 +17,38 @@ EXPECTED_REASON = {
 }
 
 
+def completion(input_root, folder, spatial):
+    """Distinguish a completed trace from its optional counterfactual tail."""
+    log = (folder / "row.log").read_text()
+    if log.endswith("EXIT=0\n"):
+        return dict(process_exit=0, basis="row completed normally")
+    # A tail import failure occurs after the spatial summary has been flushed.
+    # Qualify that record explicitly and preserve the original nonzero exit.
+    assert folder.name == "frame-179-limited" and log.endswith("EXIT=1\n")
+    failed = input_root / "inactive-field-import-failure/control.log"
+    tail = failed.read_text()
+    assert tail.endswith("EXIT=1\n")
+    assert "AttributeError: module 'measure' has no attribute 'load'" in tail
+    assert "PROFILE_ARM " not in tail and "REQUEST " not in tail
+    full_log = (input_root.parent / "titan-trace.log").read_text()
+    records = [
+        json.loads(line.removeprefix("SPATIAL_SUMMARY "))
+        for line in full_log.splitlines()
+        if line.startswith("SPATIAL_SUMMARY ")
+    ]
+    matched = [row for row in records if row["terminal"] == spatial["terminal"]]
+    assert len(matched) == 1
+    assert matched[0]["trips"] == len(spatial["trips"])
+    assert matched[0]["proposals"] == len(spatial["proposals"])
+    assert len(spatial["directional_discriminator"]) == 8
+    assert spatial["stages"]
+    return dict(
+        process_exit=1,
+        basis="complete spatial receipt precedes optional pre-solver import failure",
+        preserved_failure_log=str(failed),
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True)
@@ -25,9 +57,9 @@ def main():
     rows = []
     for frame, branch in ROWS:
         folder = args.input / "edge" / f"frame-{frame}-{branch}"
-        assert (folder / "row.log").read_text().endswith("EXIT=0\n")
         receipt = json.loads((folder / "receipt.json").read_text())
         spatial = json.loads((folder / "spatial.json").read_text())
+        completed = completion(args.input, folder, spatial)
         tables = json.loads((folder / "source-inputs.json").read_text())
         for table in tables.values():
             assert len(table["coordinate"]) == 29
@@ -45,6 +77,7 @@ def main():
             changed.update(trip["entering_indices"])
             changed.update(trip["leaving_indices"])
         result = dict(
+            completion=completed,
             frame=frame,
             branch=branch,
             residual=receipt["residual"],
@@ -99,12 +132,31 @@ def main():
             "constraint_residual",
         )
     }
+    reference_folder = args.input / "inactive-field-reference"
+    assert (reference_folder / "reference.log").read_text().endswith("EXIT=0\n")
+    reference = json.loads((reference_folder / "receipt.json").read_text())
+    assert json.loads(
+        (reference_folder / "source-inputs.json").read_text()
+    ) == json.loads((folder / "source-inputs.json").read_text())
+    reference_seed = np.load(reference_folder / "request-seed.npz")["state"]
+    counterfactual_seed = np.load(folder / "request-seed.npz")["state"]
+    np.testing.assert_allclose(
+        reference_seed, counterfactual_seed, rtol=2e-14, atol=2e-14
+    )
+    result["paired_reference"] = {
+        key: reference[key] for key in result["inactive_field_counterfactual"]
+    }
+    result["paired_seed_difference_sup_wb"] = float(
+        np.max(np.abs(reference_seed - counterfactual_seed))
+    )
     args.output.write_text(json.dumps(result, indent=2) + "\n")
     assert np.isfinite([row["residual"] for row in rows]).all()
+    failed_tails = sum(row["completion"]["process_exit"] != 0 for row in rows)
     print(
         f"VERIFIED {len(rows)} spatial receipts; "
         f"failure premise reproduced={result['all_premises_reproduced']}; "
-        f"control converged={result['control_converged']}"
+        f"control converged={result['control_converged']}; "
+        f"completed traces with failed optional tail={failed_tails}"
     )
 
 

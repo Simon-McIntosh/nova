@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,efit,grad-shafranov,convergence">
   <meta name="plan-after" content="converged-forward-solve">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;deferred&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;inverse-equilibrium-baseline#s1&quot;],&quot;s3&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s4&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s5&quot;:[&quot;inverse-equilibrium-baseline#s3&quot;]}">
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -78,7 +78,7 @@
     </table>
 
     <h2 id="s1">§1 — Known-answer recovery</h2>
-    <section data-reckon="section" data-id="s1" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s1" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>The inverse class is first judged where the answer is known. A converged forward state with
     prescribed p′, FF′ and conductor currents supplies synthetic flux-loop, field-probe and plasma-current
     rows through nova's own synthetic-diagnostic responses; the class is handed those rows, the conductor
@@ -222,6 +222,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261114T212524974913-review-of-known-answer-recovery-a32993c90e07-figure" data-who="reckon-build" data-when="2026-11-14T22:05:12.980Z">
     <div class="r-comment-body"><p>none</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-close-s1" data-who="coordinator" data-when="2026-11-14">
+    <div class="r-comment-body">Landed at merge 814f91c4b from head a32993c90. H200 gate 48 passed, 1 pre-existing failure; codex review 117/120. Hand-merged on the lead's decision because the landing guard accepts only CPU suite arms.</div>
 </div>
 </section>
 </main>

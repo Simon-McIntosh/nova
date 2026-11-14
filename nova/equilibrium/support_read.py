@@ -53,6 +53,10 @@ class SupportOperands:
     ``geometry``. The total nodal jet of a state is ``exterior`` plus ``rows``
     contracted with the state's booked moments.
 
+    ``coil_exterior`` has shape (nodes, coils, six jet entries), one
+    unit-current response per driven coil, with signed turns already included.
+    ``coil_count`` is a traced scalar. ``exterior`` holds only the fixed field.
+
     Padded to a shape bucket, ``rows``, ``exterior`` and ``nodes`` carry
     ``bucket`` rows of which the first ``active_nodes`` are the machine's own
     and the rest are zero, so one program serves every geometry of the bucket.
@@ -2730,6 +2734,9 @@ def write_bank(operands: SupportOperands, cache_directory) -> str:
         {
             "kind": "nova-support-operator-bank",
             "bucket": operands.bucket,
+            "coil_count": 0
+            if operands.coil_count is None
+            else int(operands.coil_count),
             "active_nodes": None
             if operands.active_nodes is None
             else int(operands.active_nodes),

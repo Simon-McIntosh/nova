@@ -60,6 +60,26 @@ def exterior_reference(terms):
         ) / (mu * (2 * degree + 1) ** 2)
         if degree == 1:
             np.testing.assert_allclose(shielding, exact_shielding(), rtol=2e-15)
+        inner, inverse = 0.9**degree, 0.9 ** (-degree - 1)
+        # Solve continuity of scalar potential and normal permeability times
+        # its derivative at both faces, independently of the reduced formula.
+        boundary = np.array(
+            [
+                [inner, -inner, -inverse, 0],
+                [
+                    degree * inner / 0.9,
+                    -mu * degree * inner / 0.9,
+                    mu * (degree + 1) * inverse / 0.9,
+                    0,
+                ],
+                [0, 1, 1, -1],
+                [0, mu * degree, -mu * (degree + 1), degree + 1],
+            ]
+        )
+        transmitted = np.linalg.solve(
+            boundary, [-inverse, (degree + 1) * inverse / 0.9, 0, 0]
+        )[-1]
+        np.testing.assert_allclose(transmitted, 1 / shielding, rtol=2e-12)
         vacuum += field
         shielded += field / shielding
     return vacuum, shielded
@@ -86,17 +106,28 @@ def main():
         shielded, exterior_reference(6)[1], rtol=2e-15, atol=1e-25
     )
     reference = np.linalg.norm(owner, axis=1) / np.linalg.norm(shielded, axis=1)
-    rows = {}
-    for path in sorted(args.rows.glob("linear-*.json")):
-        row = json.loads(path.read_text())
+    rows, previous = {}, None
+    records = [
+        (path, json.loads(path.read_text())) for path in args.rows.glob("linear-*.json")
+    ]
+    for path, row in sorted(
+        records, key=lambda pair: pair[1]["cell_size_m"], reverse=True
+    ):
         if row.get("completed"):
+            errors = np.abs(np.asarray(row["shielding"]) / reference - 1)
             rows[path.name] = dict(
                 revision=row["revision"],
+                cell_size_m=row["cell_size_m"],
                 unknowns=row["unknowns"],
-                relative_errors=np.abs(
-                    np.asarray(row["shielding"]) / reference - 1
-                ).tolist(),
+                relative_errors=errors.tolist(),
+                worst_error=float(errors.max()),
             )
+            if previous is not None:
+                rows[path.name]["per_probe_order"] = (
+                    np.log(previous[1] / errors)
+                    / np.log(previous[0] / row["cell_size_m"])
+                ).tolist()
+            previous = row["cell_size_m"], errors
     receipt = dict(
         revision=args.revision,
         script_blob=blob,

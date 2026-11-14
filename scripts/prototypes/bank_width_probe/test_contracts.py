@@ -229,6 +229,16 @@ def test_unwitnessed_runtime_failures_are_not_memory_refusals(message):
 
 @pytest.mark.parametrize("launcher", ["job.sh", "report_job.sh"])
 def test_launchers_stop_when_contract_tests_fail(tmp_path, launcher):
+    package = tmp_path
+    for name in ("scripts", "prototypes", "bank_width_probe"):
+        package = package / name
+        package.mkdir()
+        (package / "__init__.py").write_text("")
+    for name in ("run.py", "report.py"):
+        (package / name).write_text(
+            "print('MEASUREMENT_MUST_NOT_START')\nraise SystemExit(99)\n"
+        )
+    (tmp_path / "audited.json").write_text("{}")
     fake_python = tmp_path / "python"
     fake_python.write_text(
         "#!/bin/sh\nif [ \"$1 $2\" = '-m pytest' ]; then "
@@ -258,7 +268,7 @@ def test_launchers_stop_when_contract_tests_fail(tmp_path, launcher):
         capture_output=True,
         text=True,
     )
+    assert "MEASUREMENT_MUST_NOT_START" not in result.stdout
     assert result.returncode == 23, result.stdout + result.stderr
     assert "CONTRACT_CONTROL_REFUSED" in result.stdout
-    assert "MEASUREMENT_MUST_NOT_START" not in result.stdout
     assert result.stdout.splitlines()[-1] == "EXIT=23"

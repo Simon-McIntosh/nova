@@ -61,8 +61,9 @@ def marker_instances(root):
     return circles, stars
 
 
-def check(figures, cohort, case):
-    folder = cohort / "edge" / case if case.startswith("frame-") else cohort / case
+def check(figures, cohort, case, folder=None):
+    if folder is None:
+        folder = cohort / "edge" / case if case.startswith("frame-") else cohort / case
     refused, cutoff = expected_marks(folder)
     root = ET.parse(figures / f"{case}.svg").getroot()
     circles, stars = marker_instances(root)

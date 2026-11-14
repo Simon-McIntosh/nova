@@ -23,6 +23,9 @@ import numpy as np
 
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import draw_flux_contours, draw_nulls, draw_wall
+from scripts.prototypes.diiid_edge_current_refusal.marker_visibility import (
+    check as check_markers,
+)
 from scripts.prototypes.diiid_xpoint_attribution.attribute import field
 from scripts.prototypes.diiid_xpoint_offset.style import (
     CANVAS,
@@ -233,20 +236,38 @@ def panel(root, frame, branch, output, previews, name=None):
                 for line in ax.lines[start:]:
                     line.set_markerfacecolor("none")
         draw_wall(ax, units=data["limiter"], color=WALL, linewidth=1.5, zorder=5)
-        if len(marks):
+        if len(marks) and ax is axes[0]:
             ax.plot(
                 *marks.T,
                 ls="none",
                 marker=marker,
-                ms=4 if ax is axes[0] else 6,
+                ms=4,
                 mfc="none",
                 mec=color,
-                mew=0.8 if ax is axes[0] else 1.3,
-                zorder=1 if ax is axes[0] else 14,
+                mew=0.8,
+                zorder=1,
             )
+        if ax is axes[1]:
+            coincident = np.any(
+                np.all(refused[:, None, :] == cutoff_points[None, :, :], axis=2),
+                axis=1,
+            )
+            for shared, size in ((False, 6), (True, 16)):
+                group = refused[coincident == shared]
+                if len(group):
+                    ax.plot(
+                        *group.T,
+                        ls="none",
+                        marker="o",
+                        ms=size,
+                        mfc="none",
+                        mec=REFUSED,
+                        mew=1.3,
+                        zorder=14,
+                    )
         if ax is axes[1] and len(cutoff_points):
             ax.plot(
-                *cutoff_points.T, ls="none", marker="*", ms=13, color=REFUSED, zorder=15
+                *cutoff_points.T, ls="none", marker="*", ms=9, color=REFUSED, zorder=15
             )
         ax.set_xlim(*r_limits)
         ax.set_ylim(*z_limits)
@@ -318,8 +339,22 @@ def panel(root, frame, branch, output, previews, name=None):
             ha="center",
         ),
     ]
+    if np.any(coincident):
+        notes.append(
+            figure.text(
+                0.5,
+                0.025,
+                "A circled star is both a refused cell and a source cutoff.",
+                ha="center",
+                fontsize=12,
+            )
+        )
     name = name or f"frame-{frame}-{branch}"
     save(figure, axes, notes, output / f"{name}.svg", previews / f"{name}.png")
+    visibility = check_markers(output, root, name, folder=folder)
+    print("MARKER_VISIBILITY " + json.dumps(visibility))
+    if visibility["errors"]:
+        raise ValueError(f"{name}: {visibility['errors']}")
     plt.close(figure)
     return dict(
         case=name,
@@ -329,6 +364,7 @@ def panel(root, frame, branch, output, previews, name=None):
         converged=receipt["converged"],
         levels_wb=LEVELS.tolist(),
         source_cutoff_cells=len(cutoff_points),
+        source_cutoff_refused_cells=int(np.count_nonzero(coincident)),
         changed_shadow_nodes=len(shadow_changed),
         r_limits_m=list(r_limits),
         z_limits_m=list(z_limits),
@@ -535,40 +571,43 @@ def source_changes(root, output, previews):
 
 
 def main():
+    cases = {f"frame-{frame}-{branch}": (None, frame, branch) for frame, branch in ROWS}
+    cases.update(
+        {
+            name: (name, 146, "limited")
+            for name in ("inactive-field-suppressed", "inactive-field-reference")
+        }
+    )
+    trace_writers = {
+        "trip-traces": traces,
+        "limited-trajectories": limited_trajectories,
+        "source-cutoff-traces": source_changes,
+    }
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--previews", type=Path, required=True)
+    parser.add_argument("--only", nargs="+", choices=[*cases, *trace_writers])
     args = parser.parse_args()
     plt.style.use(Path.home() / ".config/matplotlib/stylelib/data-ink.mplstyle")
     plt.rcParams.update({"svg.fonttype": "none", "font.size": 14})
-    rows = [
-        panel(args.input, frame, branch, args.output, args.previews)
-        for frame, branch in ROWS
-    ]
-    rows.append(
-        panel(
-            args.input / "inactive-field-suppressed",
-            146,
-            "limited",
-            args.output,
-            args.previews,
-            name="inactive-field-suppressed",
-        )
-    )
-    rows.append(
-        panel(
-            args.input / "inactive-field-reference",
-            146,
-            "limited",
-            args.output,
-            args.previews,
-            name="inactive-field-reference",
-        )
-    )
-    traces(args.input, args.output, args.previews)
-    limited_trajectories(args.input, args.output, args.previews)
-    source_changes(args.input, args.output, args.previews)
+    selected = args.only or [*cases, *trace_writers]
+    rows = []
+    for name in selected:
+        if name in cases:
+            subfolder, frame, branch = cases[name]
+            rows.append(
+                panel(
+                    args.input / subfolder if subfolder else args.input,
+                    frame,
+                    branch,
+                    args.output,
+                    args.previews,
+                    name=name,
+                )
+            )
+        else:
+            trace_writers[name](args.input, args.output, args.previews)
     (args.previews / "render-receipt.json").write_text(
         json.dumps(rows, indent=2) + "\n"
     )

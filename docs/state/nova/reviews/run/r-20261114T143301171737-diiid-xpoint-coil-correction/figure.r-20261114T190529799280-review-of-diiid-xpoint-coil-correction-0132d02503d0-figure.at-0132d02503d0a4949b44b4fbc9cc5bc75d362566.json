@@ -18,6 +18,11 @@
       "kind": "exempted",
       "reason": "the zoom scale is stated in the fragment's figcaption beside the figure; the panel follows the poloidal axis-off rule and reads correctly on the page it is published on",
       "recorded_at": "2026-11-14T20:31:14.650413+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the identity of the two arms is the measured result, stated in bold in the fragment and in each panel's residual line; the external-current trace explains it",
+      "recorded_at": "2026-11-14T20:31:29.527186+00:00"
     }
   },
   "findings": [

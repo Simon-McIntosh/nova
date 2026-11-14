@@ -110,6 +110,7 @@ def main():
     args = parser.parse_args()
     for frame, branch in ROWS:
         audit(args.input / "edge" / f"frame-{frame}-{branch}")
+    audit(args.input / "inactive-field-suppressed")
 
 
 if __name__ == "__main__":

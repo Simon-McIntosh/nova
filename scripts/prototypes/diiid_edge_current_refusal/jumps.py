@@ -131,6 +131,7 @@ def main():
             ),
             flush=True,
         )
+    analyze(args.input / "inactive-field-suppressed")
 
 
 if __name__ == "__main__":

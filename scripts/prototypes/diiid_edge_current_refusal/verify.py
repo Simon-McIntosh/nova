@@ -79,6 +79,26 @@ def main():
         all_premises_reproduced=all(row["premise_reproduced"] for row in rows),
         control_converged=control["converged"],
     )
+    folder = args.input / "inactive-field-suppressed"
+    assert (folder / "control.log").read_text().endswith("EXIT=0\n")
+    counterfactual = json.loads((folder / "receipt.json").read_text())
+    assert counterfactual["constraint_rows"] == 1
+    assert abs(counterfactual["constraint_residual"][0]) < 1e-12
+    original = args.input / "edge/frame-146-limited/source-inputs.json"
+    assert json.loads(original.read_text()) == json.loads(
+        (folder / "source-inputs.json").read_text()
+    )
+    result["inactive_field_counterfactual"] = {
+        key: counterfactual[key]
+        for key in (
+            "residual",
+            "converged",
+            "terminal_reason",
+            "support",
+            "axis_rz_m",
+            "constraint_residual",
+        )
+    }
     args.output.write_text(json.dumps(result, indent=2) + "\n")
     assert np.isfinite([row["residual"] for row in rows]).all()
     print(

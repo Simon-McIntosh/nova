@@ -15,7 +15,7 @@ import jax.numpy as jnp
 
 from nova.equilibrium.constraint import UniformRadialFieldUnknown
 
-from measure import extent
+from measure import HERE, branch, captures, extent, observed_load
 
 
 if __name__ == "__main__":
@@ -40,4 +40,10 @@ if __name__ == "__main__":
         )
         + "\n"
     )
+    branch.original_load = observed_load
     extent.main()
+    assert len(captures) == 1
+    sys.path.insert(0, str(HERE))
+    from analyze import analyze
+
+    analyze(captures[0])

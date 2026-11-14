@@ -31,8 +31,16 @@ LEVELS = np.array([-0.02, 0.0, 0.02, 0.2, 0.6, 1.0, 1.6, 2.0])
 REFUSED = "#bf3446"
 
 
+def case_folder(root, frame, branch):
+    return (
+        root
+        if (root / "terminal.npz").is_file()
+        else root / "edge" / f"frame-{frame}-{branch}"
+    )
+
+
 def load(root, frame, branch):
-    folder = root / "edge" / f"frame-{frame}-{branch}"
+    folder = case_folder(root, frame, branch)
     return (
         dict(np.load(folder / "terminal.npz")),
         json.loads((folder / "receipt.json").read_text()),
@@ -46,7 +54,7 @@ def points(entries):
     return np.unique(np.vstack(nonempty), axis=0) if nonempty else np.empty((0, 2))
 
 
-def panel(root, frame, branch, output, previews):
+def panel(root, frame, branch, output, previews, name=None):
     data, receipt, spatial, census = load(root, frame, branch)
     changed = points(
         [
@@ -56,7 +64,7 @@ def panel(root, frame, branch, output, previews):
         ]
     )
     last_inner = len(spatial["trips"]) - 1
-    folder = root / "edge" / f"frame-{frame}-{branch}"
+    folder = case_folder(root, frame, branch)
     cutoff = json.loads((folder / "cutoff-jumps.json").read_text())[
         "smallest_crossing_pair"
     ]
@@ -229,7 +237,7 @@ def panel(root, frame, branch, output, previews):
             ha="center",
         ),
     ]
-    name = f"frame-{frame}-{branch}"
+    name = name or f"frame-{frame}-{branch}"
     save(figure, axes, notes, output / f"{name}.svg", previews / f"{name}.png")
     plt.close(figure)
     return dict(
@@ -433,6 +441,16 @@ def main():
         panel(args.input, frame, branch, args.output, args.previews)
         for frame, branch in ROWS
     ]
+    rows.append(
+        panel(
+            args.input / "inactive-field-suppressed",
+            146,
+            "limited",
+            args.output,
+            args.previews,
+            name="inactive-field-suppressed",
+        )
+    )
     traces(args.input, args.output, args.previews)
     limited_trajectories(args.input, args.output, args.previews)
     source_changes(args.input, args.output, args.previews)

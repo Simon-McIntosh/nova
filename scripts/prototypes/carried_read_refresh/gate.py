@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import re
+import resource
 import shlex
 import subprocess
 import tarfile
@@ -20,6 +21,10 @@ EXISTING = [
     "tests/test_read_live_candidates.py",
     "tests/test_tracked_read_steady_batch.py",
     "tests/test_tracked_read_batch.py",
+    "tests/test_support_read.py",
+    "tests/test_bank_step_geometry.py",
+    "tests/test_bank_drive_continuation.py",
+    "tests/test_bank_lane_drive.py",
 ]
 
 
@@ -33,9 +38,11 @@ def main():
     parser.add_argument(
         "--existing", action=argparse.BooleanOptionalAction, default=True
     )
+    parser.add_argument("--existing-only", action="store_true")
     args = parser.parse_args()
     args.output.mkdir(exist_ok=True)
     receipts = {}
+    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     with tempfile.TemporaryDirectory(
         prefix="refresh-gate-", dir=os.environ["TMPDIR"]
     ) as temporary:
@@ -45,6 +52,8 @@ def main():
             ("negative", args.head),
         ):
             if arm not in args.arms:
+                continue
+            if args.existing_only and arm == "negative":
                 continue
             tree = Path(temporary) / arm
             tree.mkdir()
@@ -89,9 +98,10 @@ def main():
             )
             env.pop("PYTEST_ADDOPTS", None)
             files = [TEST] if (tree / TEST).exists() else []
-            groups = {arm: files}
+            groups = {} if args.existing_only else {arm: files}
             if arm != "negative" and args.existing:
-                groups[arm + "-existing"] = EXISTING
+                for path in EXISTING:
+                    groups[arm + "-existing-" + Path(path).stem] = [path]
             for label, files in groups.items():
                 log = args.output / (label + ".log")
                 if not files:
@@ -126,7 +136,9 @@ def main():
                         json.dumps(receipts, indent=2)
                     )
                     continue
-                suffix = " -rfP" if label.endswith("existing") else ""
+                existing = "-existing-" in label
+                basetemp = Path(temporary) / (label + "-pytest")
+                suffix = f" -rfP --basetemp={basetemp}" if existing else ""
                 command = (
                     f"PYTHONPATH=. JAX_PLATFORMS=cpu {PYTHON} "
                     f"-m pytest -p no:cacheprovider -q{suffix} " + " ".join(files)
@@ -140,6 +152,8 @@ def main():
                         [
                             PYTHON,
                             "-c",
+                            "from nova.jax.config import configure_dtypes; "
+                            "configure_dtypes(); "
                             "from nova.equilibrium import topology; "
                             "from pathlib import Path; "
                             "print('MODULE='+topology.__file__); "
@@ -174,6 +188,8 @@ def main():
                     failure_ids=failures,
                     log_path=str(log),
                     tree=str(tree),
+                    test_files=files,
+                    crashed=bool(re.search(r"Fatal Python error|LLVM ERROR", text)),
                 )
                 (args.output / "receipts.json").write_text(
                     json.dumps(receipts, indent=2)
@@ -181,10 +197,39 @@ def main():
                 print("ARM", label, json.dumps(receipts[label]), flush=True)
                 if arm == "negative":
                     assert result.returncode and failures, "stale reuse was not refused"
-                elif result.returncode:
+                elif result.returncode and not existing:
                     raise RuntimeError(f"correctness arm failed: {log}")
     (args.output / "receipts.json").write_text(json.dumps(receipts, indent=2))
-    print("SUMMARY correctness arms and stale-reuse refusal complete", flush=True)
+    comparisons = []
+    for path in EXISTING:
+        key = "-existing-" + Path(path).stem
+        before, after = (receipts.get(arm + key) for arm in ("baseline", "after"))
+        if before is None or after is None:
+            continue
+        def passed(row):
+            return row["completed"] and row["exit_status"] == 0
+        added = sorted(set(after["failure_ids"]) - set(before["failure_ids"]))
+        if not before["completed"]:
+            verdict = (
+                "shared crash"
+                if before.get("crashed") and after.get("crashed")
+                else "base incomplete"
+            )
+            added = []
+        elif passed(before) and not passed(after):
+            verdict = "added failure"
+            added = added or [path + "::process-incomplete"]
+        elif added:
+            verdict = "added failure"
+        else:
+            verdict = "zero added failures"
+        comparisons.append(
+            dict(test_file=path, verdict=verdict, added_failure_ids=added)
+        )
+    (args.output / "comparisons.json").write_text(json.dumps(comparisons, indent=2))
+    print("SUMMARY", json.dumps(comparisons), flush=True)
+    if any(row["added_failure_ids"] for row in comparisons):
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

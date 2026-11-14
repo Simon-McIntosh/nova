@@ -245,7 +245,7 @@ def measure_control(record, output):
     write(output / "summary.json", record)
 
 
-def measure_west(record, output):
+def measure_west(record, output, sizes=(0.08, 0.04), max_iterations=10):
     assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == SOURCE_SHA256
     with SOURCE.open("rb") as stream:
         data = pickle.load(stream)
@@ -260,7 +260,7 @@ def measure_west(record, output):
     record["west_source_sha256"] = SOURCE_SHA256
     record["west_time_s"] = float(data["time"])
     record["gaps"] = "kept as stored; decision remains open"
-    for size in (0.08, 0.04):
+    for size in sizes:
         started = perf_counter()
         result = iron.solve_magnetisation(
             flat,
@@ -272,7 +272,7 @@ def measure_west(record, output):
             cross_field_factor=lambda c: limb_demagnetising(
                 c, arm_floor, limb_face, GEOMETRY_FACTOR
             ),
-            max_iterations=10,
+            max_iterations=max_iterations,
             tolerance=1e-8,
         )
         row = dict(
@@ -303,7 +303,9 @@ def measure_west(record, output):
         del result
         jax.clear_caches()
     record["west_passed"] = all(
-        r["converged"] and r["iterations"] <= 10 and r["residual_history"][-1] <= 1e-8
+        r["converged"]
+        and r["iterations"] <= max_iterations
+        and r["residual_history"][-1] <= 1e-8
         for r in record["west"]
     )
 

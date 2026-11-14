@@ -59,7 +59,7 @@ control records <code>assert 1 == 0</code>, <code>1 failed, 5 deselected</code>,
 and <code>EXIT=1</code>. The ordinary focused arm passed that compilation check.
 The logger also has to observe the cold compilation before its zero-change count
 is accepted.</p>
-<h3 id="bank-traced-inputs-measurement">Paired CPU evidence</h3>
+<h3 id="bank-traced-inputs-measurement">Initial paired CPU evidence</h3>
 <p>Rigel job <code>1314536</code> uses seven CPUs and 96 GiB and runs each file in a
 fresh interpreter from git-archive trees. Base is the dispatch revision above;
 implementation head is <code>b8caeae4a9820e80f822b6d51fc7a59e9a04ba56</code>.
@@ -94,7 +94,7 @@ The lead selected a smaller pin graph while retaining the normal timeout; the re
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T165201745905-bank-traced-inputs/</code>:
 <code>focused/</code> retains the first failure and closure control;
 <code>paired-final/</code> retains the paired files and repeated closure control.
-The final-head replay was not started because the pin gate did not pass. The
+In that attempt, the final-head replay was not started because the pin gate did not pass. The
 fragment and harness commits after the measured implementation head change no
 product source or tests.</p>
 <h3 id="bank-traced-inputs-graph-repair">Single solver construction inside the pin loop</h3>
@@ -123,7 +123,7 @@ The successful inventories are under <code>graph-checked/</code> and
 <code>shared-jacobian/</code> in the run directory. A fresh process inventories each
 product graph, and every test file runs in its own fresh process. The measurement
 script was committed before submission.</p>
-<h3 id="bank-traced-inputs-graph-measures">Measured graph reductions and remaining refusal</h3>
+<h3 id="bank-traced-inputs-graph-measures">Earlier graph reductions and timeout refusals</h3>
 <p>Rigel job <code>1314830</code> measured both graph inventories on one node:
 pre-repair <code>5391ff27c10fc2ecd16c9e307ca1d58bd1ae41ec</code> traced in 208.326 s;
 first repair <code>21856d999b8549d7b1976d053405dce3efbebb22</code> traced in 117.127 s.
@@ -226,4 +226,38 @@ one cold program and zero changed-slice compilations. The first call takes
 call takes 2.722 s. <code>flat-pin-cold-start/numerics.log</code> ends
 <code>EXIT=0</code>, and its JSON records the full per-lane results and imported
 module path. These plain-script results precede the next product-gate attempt.</p>
+<h3 id="bank-traced-inputs-normal-limit-pass">Normal-limit paired gate passed</h3>
+<p>Rigel job <code>1314952</code> ran the three existing files at dispatch base
+<code>5f8e4a269cafc9a00c7320fb6a72d8cbfc95a249</code> and head
+<code>55720c301fc257ca5dee3880deeb6298435bf0ca</code>, and the new file at head.
+Each file used a fresh shared-environment interpreter, an archived arm tree,
+<code>JAX_PLATFORMS=cpu</code> and <code>-rfP</code>, in one allocation with
+seven CPUs and 96 GiB. The normal per-test timeout remains 300 s.</p>
+<table id="bank-traced-inputs-passing-pair"><thead><tr><th>File</th>
+<th>Base</th><th>Head</th><th>Added failures</th></tr></thead><tbody>
+<tr><td>test_support_read</td><td>13 passed, 2 skipped</td><td>13 passed, 2 skipped</td><td>0</td></tr>
+<tr><td>test_bank_drive_continuation</td><td>10 passed</td><td>10 passed</td><td>0</td></tr>
+<tr><td>test_bank_lane_drive</td><td>11 passed</td><td>11 passed</td><td>0</td></tr>
+<tr><td>test_bank_traced_inputs</td><td>absent</td><td>7 passed</td><td>0</td></tr>
+</tbody></table>
+<p>The new file ends <code>7 passed in 252.32s (0:04:12)</code> and
+<code>EXIT=0</code>. Its full pin program traces in 22.192 s, converts to MLIR
+in 4.309 s and compiles in 43.870 s: trace plus compile 66.062 s, compared
+with the historical 462.910 s. It constructs one Jacobian body and no nested
+moment solver. Both first-slice lanes converge, with fresh residuals
+<code>[1.01252340e-12, 2.13162821e-13]</code>. The changed-slice convergence and
+pin assertions also pass. Its compilation receipt reads
+<code>SOLVE_COMPILATIONS cold 1 changed 0</code>.</p>
+<p>The same job applies the declared closure-constant mutation. Its log records
+<code>SLICE_COMPILATIONS cold 1 changed 1 captured True</code>,
+<code>FAILED tests/test_bank_traced_inputs.py::test_slice_inputs_cause_zero_new_compilations</code>,
+<code>1 failed, 6 deselected</code> and terminal <code>EXIT=1</code>.
+The positive head has no failing test ids. This observes the guarded recompilation
+and the test's refusal, rather than inferring protection from a passing suite.</p>
+<p>All gate commands, imported module paths, working directories, terminal statuses
+and failure ids are durable under <code>flat-pin-paired/</code> in the run directory.
+A second paired run at the fragment's final commit is recorded separately under
+<code>flat-pin-delivery/</code>; its authoritative completion and exact revision
+are in the manifest and that directory's receipts. Product and test content is
+unchanged by this evidence-only commit.</p>
 </section>

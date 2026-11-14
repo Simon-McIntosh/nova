@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs: base-test_bank_traced_inputs.log at 02a0145f ends '10 passed in 302.48s' with EXIT=0 and delivery-test_bank_traced_inputs.log at 14ae5e0ad ends '14 passed in 307.82s' with EXIT=0; base and after test_bank_drive_continuation.log both end '10 passed', test_bank_lane_drive.log both '11 passed', and base and after test_support_read.log both '13 passed, 2 skipped', every one EXIT=0 and none carrying a FAILED line. No after arm contributes a failing id.",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:2371",
+    "nova/equilibrium/support_read.py:506",
+    "nova/equilibrium/support_read.py:1356",
+    "nova/equilibrium/drive_continuation.py:206",
+    "scripts/prototypes/bank_lane_drive/measure.py:100"
+  ],
+  "completed_at": "2026-11-14T13:49:04.736Z",
+  "dispatched_at": "2026-11-14T13:30:48Z",
+  "finding_dispositions": {},
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-traced-cleanup.html",
+      "line": "65",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment states the armed file uses the prescribed command, but both armed arms were run without -rfP (base-test_bank_traced_inputs.log and delivery-test_bank_traced_inputs.log command lines) while the done_when asks both arms to carry it; the omission changes nothing here because neither arm had a failure to report, but the document overstates conformance to the measure it cites."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read both commits against the base 02a0145f1 in full: e21a76b08 carries the product change (+14/-4 constraint.py, +14/-18 current.py, +18/-23 support_read.py, +143/-13 tests) and 14ae5e0ad is docs-only (+106 fragment), so the runner's arms at e21a76b08 cover the entire product change.",
+    "done_when": "Read the done-when's three clauses and checked each against the artefacts: the new tests exist and pass (14 passed at the delivery head), the paired files record 10, 10, 11 and 13 passed with 2 skips in both arms and zero added failures, the two mutations are red at EXIT=1 in negative-coils.log and negative-retry.log, and the product-line accounting at docs/evidence/fragments/sub-millisecond-forward-path/bank-traced-cleanup.html counts 44 added against 45 deleted.",
+    "goal": "Read the goal from the source run's brief: one profile interface, one centroid formula, and two gaps each with a test that reddens; nova/equilibrium/current.py:65 now subclasses DomainProfile, constraint.py:1093 owns the only centroid reduction, support_read.py:506 forwards the retry arguments, and tests/test_bank_traced_inputs.py:471 uses a coil-sensitive fixture.",
+    "manifest": "Read the manifest: status complete at 14ae5e0ad5a6d96e16c655b0f7ed1333b9203c44, two commits with bodies, literal gate commands for both arms, a negative_control_log path, paired receipts and six rubric lines.",
+    "write_paths": "Read the manifest's declared paths and compared them with git diff --numstat 02a0145f1..14ae5e0ad5a6d96e16c655b0f7ed1333b9203c44: five files changed, all within nova/equilibrium/current.py, support_read.py, constraint.py, tests/test_bank_traced_inputs.py and docs/evidence/fragments/sub-millisecond-forward-path/, and source.py was left untouched because its owner already existed."
+  },
+  "justifications": {
+    "durability": "tests/test_bank_traced_inputs.py:521 records the retry values observed by a patched read and reddens to [-1,-1] under the recorded mutation in negative-retry.log, :471 compares against a Jacobian assembled from an independently contracted exterior and reddens by 2.7e-4 under the recorded mutation in negative-coils.log, :193 checks the shared reduction against np.average of the same moments, and :165 checks the inherited primitives against analytic integrals, so each fails on the defect it names.",
+    "evidence": "Both arms ran on rigel (sacct: jobs 1315268 and 1315299 COMPLETED with 7 CPUs each), the eight gate logs record 44 passed and 2 skipped at the base against 48 passed and 2 skipped at the head with no FAILED line and EXIT=0 throughout, the armed file re-ran at the delivery head as 14 passed in 307.82s with EXIT=0, and both mutations are recorded red at EXIT=1; the one shortfall is that the armed arms ran without the -rfP the done_when names.",
+    "fit": "The additions follow the frozen-dataclass and pytree-registration idiom already used at nova/equilibrium/current.py:60 and reuse the mechanism-named keyword arguments of the surrounding code, with no plan label, ticket reference or author attribution in the new symbols or docstrings.",
+    "goal_fidelity": "nova/equilibrium/current.py:65 makes TabulatedProfile a DomainProfile and deletes its own current_density, nova/equilibrium/constraint.py:1093 gains the cell-height and target terms so nova/equilibrium/support_read.py:2371 can call it for the pin error and both bordered-row terms, and nova/equilibrium/support_read.py:506 forwards jets and tracking into the certificate retry, covering all four brief items.",
+    "reuse": "The change removes duplication rather than adding it: TabulatedProfile now extends the DomainProfile owner at nova/equilibrium/source.py:338 instead of restating it, and the pin at nova/equilibrium/support_read.py:2371 calls CurrentCentroidConstraint.booked_height instead of inlining a second centroid formula.",
+    "scope_discipline": "Every changed path (nova/equilibrium/current.py, constraint.py, support_read.py, tests/test_bank_traced_inputs.py, docs/evidence/fragments/sub-millisecond-forward-path/bank-traced-cleanup.html) lies inside the declared write paths, and the only API widening, constraint.py:1093 accepting ndim greater than 2 and a supplied scale, is what the bordered row at support_read.py:2484 requires."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the brief asks for one profile interface, one centroid formula and two repaired gaps; nova/equilibrium/current.py:65 subclasses DomainProfile and deletes its own current_density, nova/equilibrium/constraint.py:1093 becomes the single centroid reduction called at nova/equilibrium/support_read.py:2371, and support_read.py:506 forwards the retry's jets and tracking.\nVERDICT done_when: the three clauses are each measured; the paired rigel arms (jobs 1315268 and 1315299 COMPLETED with 7 CPUs each) record 44 passed to 48 passed with 2 skips in both and zero added failures, the armed file re-runs 14 passed at the delivery head, both mutations are red at EXIT=1, and the fragment counts 44 added against 45 deleted product lines.\nVERDICT write_paths: read the manifest's declared paths and the numstat of 02a0145f1..14ae5e0ad5a6d96e16c655b0f7ed1333b9203c44; all five changed files lie inside nova/equilibrium/current.py, support_read.py, constraint.py, tests/test_bank_traced_inputs.py and docs/evidence/fragments/sub-millisecond-forward-path/, and nothing outside them is touched.\nVERDICT manifest: read in full; it reports status complete at 14ae5e0ad5a6d96e16c655b0f7ed1333b9203c44 with two bounded commits, literal commands for both arms, a bare negative_control_log path, the paired receipts and six rubric lines.\nVERDICT diff: read commit by commit against 02a0145f1; e21a76b08dab2769835554a21311a6a76e911368 holds the whole product change (+14/-4 constraint.py, +14/-18 current.py, +18/-23 support_read.py, +143/-13 tests) and 14ae5e0ad5a6d96e16c655b0f7ed1333b9203c44 adds only the evidence fragment, so the arms recorded at e21a76b08 cover everything the head carries.\nCALL_SITES: nova/equilibrium/support_read.py:2371, nova/equilibrium/support_read.py:506, nova/equilibrium/support_read.py:1356, nova/equilibrium/drive_continuation.py:206, scripts/prototypes/bank_lane_drive/measure.py:100\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py:65, constraint.py:1093 and support_read.py:2371 together deliver all four brief items with the tabulated numerical contract preserved.\nSCORE evidence: 18\nJUSTIFICATION evidence: the rigel arm logs, the delivery re-run and both mutation logs are recorded with EXIT lines, but the armed arms omit the -rfP the done_when names (docs/evidence/fragments/sub-millisecond-forward-path/bank-traced-cleanup.html:65).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every changed path is inside the declared write paths and the only widening, constraint.py:1093 accepting ndim greater than 2, is required by the bordered row at support_read.py:2484.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_bank_traced_inputs.py:521 and :471 each redden under their recorded source mutation in negative-retry.log and negative-coils.log, and :193 and :165 compare against independent expected values rather than the inputs they supplied.\nSCORE fit: 18\nJUSTIFICATION fit: the change reuses the frozen-dataclass and pytree idiom of nova/equilibrium/current.py:60 and introduces no plan label, ticket reference or attribution.\nSCORE reuse: 20\nJUSTIFICATION reuse: current.py:65 now extends the DomainProfile owner at nova/equilibrium/source.py:338 and support_read.py:2371 calls the booked_height owner at nova/equilibrium/constraint.py:1093, deleting both duplicates.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-traced-cleanup.html:65 non-blocking: the fragment says the armed file uses the prescribed command, but both armed arms ran without -rfP while the done_when asks for it; immaterial here because neither arm had a failure to report.\n",
+  "review_node": "review-of-bank-traced-cleanup-14ae5e0ad5a6",
+  "review_run_id": "r-20261114T132359810462-review-of-bank-traced-cleanup-14ae5e0ad5a6",
+  "reviewed_base_sha": "02a0145f1bf322385b4f3472fbb5c260e28c58ff",
+  "reviewed_head_sha": "14ae5e0ad5a6d96e16c655b0f7ed1333b9203c44",
+  "reviewed_run_id": "r-20261114T124345725457-bank-traced-cleanup",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261114T132359810462-review-of-bank-traced-cleanup-14ae5e0ad5a6"
+  },
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T14:05:00+00:00",
+  "total": 113
+}

@@ -98,10 +98,16 @@ def analyze(folder):
                 measured_cell_jump_a=measured[affected].tolist(),
             )
         )
+    finest, finest_arrays, finest_norm, _ = sweep[-1]
+    eligible = np.flatnonzero(finest_arrays["participation"])
+    closest = eligible[np.argmin(np.abs(finest_norm[eligible] - 1))]
     result = dict(
         cell_area_m2=float(area),
         pairs=pairs,
         smallest_crossing_pair=pairs[-1] if pairs else None,
+        finest_step_factor=finest["factor"],
+        closest_source_sample_rz_m=coordinates[closest].tolist(),
+        closest_source_sample_psi_norm=float(finest_norm[closest]),
     )
     (folder / "cutoff-jumps.json").write_text(json.dumps(result, indent=2) + "\n")
     return result

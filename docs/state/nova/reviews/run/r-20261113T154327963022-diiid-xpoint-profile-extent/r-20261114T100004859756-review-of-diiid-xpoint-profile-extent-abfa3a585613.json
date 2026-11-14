@@ -23,6 +23,11 @@
       "kind": "exempted",
       "reason": "summary.json marks every uncounted row counted:false with not_counted_reason beside the component share; a measurement receipt, not consumed by product code",
       "recorded_at": "2026-11-14T10:33:03.924657+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "manifest formatting of a completed run; the negative-control logs exist at the named paths and the review scored every dimension",
+      "recorded_at": "2026-11-14T10:33:14.474828+00:00"
     }
   },
   "findings": [

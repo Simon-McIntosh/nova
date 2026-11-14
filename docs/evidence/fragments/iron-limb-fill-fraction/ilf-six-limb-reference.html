@@ -1,28 +1,58 @@
 <article id="ilf-six-limb-reference-checkpoint">
-  <h3>Six-limb reference: numerical checkpoint, acceptance unmet</h3>
-  <p>The saved prototype states reproduce column fluxes of 12.7222264 Wb at
-    0.133333 m and 13.4730559 Wb at 0.1 m for relative permeability 200:
-    a 5.5728% change relative to the finer value. Their represented column
-    areas are 1.280 and 1.320 m², against the circle's 1.385116 m².</p>
-  <p>A fixed-boundary triangular surface-charge solver and a measurement
-    driver were added. Exact triangular fields match the independent brick
-    kernel inside and outside a cuboid. The circuit's oriented surface
-    integral preserves its volume. These checks do not certify convergence.</p>
-  <p>The initial centroid formulation with a diagonal conservation correction
-    is rejected: between 0.18 and 0.13 m its flux changes by 16.91% and 21.36%
-    at relative permeabilities 50 and 200, and its in-vessel vector-field
-    changes are 62.77% and 68.51%. Small linear residuals do not make these
-    values a usable reference.</p>
-  <p>The subsequent area-weighted adjoint formulation preserves the
-    solid-angle identity without a diagonal correction. Its 1,280-panel sphere
-    check at relative permeability 50 gives interior H/H₀ = 0.06146019,
-    against 3/52 = 0.05769231, outside the test's 0.003 absolute tolerance.
-    The repeated-failure rule stopped further numerical work. The final code
-    remains experimental; no accepted six-limb or annulus result is claimed.</p>
-  <p>Per-resolution diagnostic fields and charges are retained under
-    <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/reference/surface-charge-20261114/</code>.
-    The run's <code>measurement.log</code> records the prototype reproduction
-    and rejected refinement; <code>qualocation-tests.log</code> records the
-    failing independent sphere check. The rigel measurement job was cancelled
-    before annulus validation and the missing-limb control completed.</p>
+  <h3>Six-limb surface reference: mesh convergence established, calibration pending</h3>
+  <p>The surface formulation constrains the net charge of each closed body.
+    The circuit's odd mirror images enforce the same constraint by parity.
+    Analytically integrated double-layer solid angles fix the exact row sum;
+    the area-weighted adjoint supplies the single-layer normal operator.
+    The normal drive is integrated around each panel using the prescribed
+    filaments' vector potential, with independent quadrature refinement.</p>
+  <p>The saved prototype states reproduce 12.7222264 and 13.4730559 Wb at
+    relative permeability 200 on 0.133333 and 0.1 m bricks: a 5.5728% change.
+    The pre-repair sphere reading of H/H₀ = 0.06146019 against 3/52 =
+    0.05769231 also reproduces. The sphere is now judged by three meshes.</p>
+  <table>
+    <caption>Sphere interior-field error relative to 3/(μᵣ + 2), with the
+      observed order between adjacent meshes. Both finest errors are below 1%.</caption>
+    <thead><tr><th>μᵣ</th><th>5,120 panels</th><th>20,480 panels</th>
+      <th>81,920 panels</th><th>Observed orders</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>1.65100%</td><td>0.41466%</td><td>0.10388%</td><td>1.9933, 1.9970</td></tr>
+      <tr><td>200</td><td>7.00951%</td><td>1.76057%</td><td>0.44106%</td><td>1.9933, 1.9970</td></tr>
+    </tbody>
+  </table>
+  <p>The largest sphere net-charge ratio is 5.02 × 10⁻¹⁷. The largest raw
+    solid-angle sum error is 2.51 × 10⁻¹⁴. Exact triangular fields agree
+    with the independent brick kernel inside and outside a cuboid.</p>
+  <table>
+    <caption>Six-limb reference, 0.18 to 0.13 m maximum panel scale.
+      The meshes contain 8,908 and 18,706 unknowns in the upper 60° sector.
+      In-vessel change is the vector rms divided by the finer iron-field rms;
+      the outside column is the largest vector change divided by the finer
+      total-field norm at any of the twelve outside probes.</caption>
+    <thead><tr><th>μᵣ</th><th>Coarse flux [Wb]</th><th>Fine flux [Wb]</th>
+      <th>Flux change</th><th>In-vessel change</th><th>Largest outside change</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>4.32090011</td><td>4.27618989</td><td>1.0456%</td><td>0.2200%</td><td>0.2960%</td></tr>
+      <tr><td>200</td><td>15.58251472</td><td>15.39557058</td><td>1.2143%</td><td>0.2428%</td><td>0.3347%</td></tr>
+    </tbody>
+  </table>
+  <p>All three measures pass the 2% refinement bound at both permeabilities.
+    The explicit column slab integral is refined independently to 0.1%.
+    Nova's annulus flux is evaluated from exact cell–slab overlap volumes,
+    without selecting whole cells by their centroids. At the coarsest surface
+    mesh the normal drive's centroid bias is 85.29%; the admitted line-integral
+    quadrature change is 2.58 × 10⁻⁸.</p>
+  <p>The declared negative control flips one brick face charge. Its dipole
+    and cube-demagnetisation test fails with EXIT=1 after verifying that the
+    mutated scratch module is the one imported. The current node suite has
+    fourteen passing tests.</p>
+  <p>Acceptance awaits the full-annulus comparison with Nova and the
+    missing-limb symmetry control. They are running in the same rigel job
+    as the current reference measurement, job 1314904.</p>
+  <p>Per-resolution values, charges and toroidally resolved probe fields:
+    <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/reference/surface-qualified-20261114/summary.json</code>.
+    Sphere values and orders are in the run's <code>sphere-qualified.json</code>;
+    numerical gates are in <code>sphere-qualified-suite.log</code> and
+    <code>circuit-qualified.log</code>; the mutation is in
+    <code>negative-control-neutral.log</code>.</p>
 </article>

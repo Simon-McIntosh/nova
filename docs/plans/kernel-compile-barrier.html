@@ -24,7 +24,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="52">
+<meta name="plan-version" content="53">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -208,6 +208,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T125329159851-review-of-compile-pass-profile-4cab176b6bcb-figure" data-who="reckon-build" data-when="2026-10-27T13:05:20.721Z">
     <div class="r-comment-body"><p>Figure review of the point-jet pass-profile figure at 4cab176b6bcb: all six rubric items pass on the rendered 1400x720 PNG (ink spans 18-1379 x 20-701, no clipping; text 7.94:1 and 19.68:1, bars 5.37:1 and 2.85:1 on white), with two non-blocking findings - the left panel shows the top 12 of 96 passes without saying so (76.22 s of the 91.19 s attributed), and every bar is a sum over that pass's dumps while the axis reads "time per pass [s]" (ir-no-opt is 253 dumps).</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20261114T211337888895" data-who="reckon-build" data-when="">
+    <div class="r-comment-body"><p>Held, not dispatched. Run r-20261114T211231918544-polygon-tangent-repair (plan sub-millisecond-forward-path §7) repairs the custom height tangent in the same kernel file and reports these four rows at base and head on the H200, with a per-row statement of whether each departure from the pin is intended and no re-pinning. If its fix clears the rows this section closes on that evidence; if not, this section's node builds on that run's head. That repair changes Hessian values on purpose, so it and §2 re-base their identity reference on whichever lands first.</p></div>
 </div>
 </section>
 </main>

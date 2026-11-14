@@ -8,6 +8,13 @@
   ],
   "completed_at": "2026-11-14T19:23:47.699Z",
   "dispatched_at": "2026-11-14T18:45:47Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the 146 rows share one fit to the printed digit and 179L's vector is in cohort/results.json; the conclusion the table supports (corrections implausible as measurement error) holds on the two rows shown, and the external-current propagation trace now supersedes the coil-correction question",
+      "recorded_at": "2026-11-14T20:29:31.172638+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html",

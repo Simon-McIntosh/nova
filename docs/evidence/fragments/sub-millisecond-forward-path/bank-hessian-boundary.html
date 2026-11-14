@@ -1,0 +1,123 @@
+<section id="bank-hessian-boundary-result">
+<h3>Interior and one-sided boundary checks of the retained ITER Hessians</h3>
+<p><strong>The order-one error is not a source-boundary sampling artefact.</strong>
+Of the same 156 sampled nodes, 64 are more than 8 mm from every authored source
+edge: even the largest independent Richardson step remains inside a smooth region.
+Both retained routes still disagree strongly with the independent estimate there.
+The remaining 92 nodes comprise 79 near source corners active in at least one
+retained state, 10 near inactive
+source corners, and 3 within 8 mm of an edge. The corner threshold is 0.1 µm.</p>
+<p>The retained all-node plasma errors reproduce the preceding independent receipt
+before this split is interpreted. Its corner correction already used 60-digit
+differences bounded by the actual boundary clearance; it was not simply an
+uncorrected central difference straddling a source edge. This measurement reuses
+that qualified estimate and its source gradient evaluator from digest-verified
+copies under <code>/home/ITER/mcintos/.cache/nova-hessian-boundary/</code>.</p>
+<table><thead><tr><th>State</th><th>Component</th><th>Interior bank error</th>
+<th>Interior direct error</th><th>Independent numerical envelope</th></tr></thead>
+<tbody>
+<tr><td>220</td><td>ψ<sub>RZ</sub></td><td>0.557328863</td><td>0.557328861</td><td>1.94e-9</td></tr>
+<tr><td>220</td><td>ψ<sub>ZZ</sub></td><td>0.265106148</td><td>0.265106149</td><td>3.83e-9</td></tr>
+<tr><td>333</td><td>ψ<sub>RZ</sub></td><td>0.615235927</td><td>0.615235925</td><td>1.57e-9</td></tr>
+<tr><td>333</td><td>ψ<sub>ZZ</sub></td><td>0.320312412</td><td>0.320312413</td><td>3.49e-9</td></tr>
+<tr><td>336</td><td>ψ<sub>RZ</sub></td><td>0.586319923</td><td>0.586319922</td><td>1.63e-9</td></tr>
+<tr><td>336</td><td>ψ<sub>ZZ</sub></td><td>0.249342113</td><td>0.249342113</td><td>3.42e-9</td></tr>
+</tbody></table>
+<p>Each error is the Euclidean norm of the discrepancy over the 64 interior nodes,
+divided by the norm of the same independently estimated total-field component.
+Thus the normalisation includes the coil field, whereas the preceding receipt's
+headline table normalised the plasma component alone. The independent envelope
+is empirical, not an interval proof; it is much smaller than the discrepancies.
+These rows establish neither a preference between the two retained routes nor a
+1e-8 certification of either route.</p>
+<div id="bank-hessian-boundary-limits">
+<p>The boundary table compares each route with the lower-side estimate, upper-side estimate and their average at the smallest retained distance. Each entry is the relative norm error for ψ<sub>RZ</sub> / ψ<sub>ZZ</sub>. At active corners these are finite-distance comparisons, not finite limiting values. Neither route implements one consistent side or average.</p>
+<table><thead><tr><th>State</th><th>Route</th><th>Lower</th><th>Upper</th><th>Average</th></tr></thead><tbody>
+<tr><td>220</td><td>bank</td><td>1.16725 / 0.381194</td><td>1.20149 / 0.385334</td><td>1.18747 / 0.36711</td></tr>
+<tr><td>220</td><td>direct</td><td>1.16725 / 0.381194</td><td>1.20149 / 0.385334</td><td>1.18747 / 0.36711</td></tr>
+<tr><td>333</td><td>bank</td><td>1.49896 / 0.476495</td><td>1.49253 / 0.481135</td><td>1.49829 / 0.46177</td></tr>
+<tr><td>333</td><td>direct</td><td>1.49896 / 0.476495</td><td>1.49253 / 0.481135</td><td>1.49829 / 0.46177</td></tr>
+<tr><td>336</td><td>bank</td><td>1.34331 / 0.468981</td><td>1.35002 / 0.473619</td><td>1.34929 / 0.463963</td></tr>
+<tr><td>336</td><td>direct</td><td>1.34331 / 0.468981</td><td>1.35002 / 0.473619</td><td>1.34929 / 0.463963</td></tr>
+</tbody></table>
+<p>For the nodes without a current-carrying corner in each state (20, 20, 13 nodes respectively), quadratic extrapolation of the three smallest approach distances estimates finite limits. The table reports errors against their average, the lower-versus-upper limit discrepancy, and an empirical envelope from extrapolation order and the finite-difference estimate. The receipt retains all three comparisons separately for each route.</p>
+<p>The observed side discrepancy is larger than the extrapolation-only envelope in some entries. These limits are therefore resolved to only a few parts in a million, not 1e-8; the envelope is an empirical indicator, not an enclosure. The route discrepancies remain much larger.</p>
+<table><thead><tr><th>State</th><th>Bank</th><th>Direct</th><th>Side discrepancy</th><th>Envelope</th></tr></thead><tbody>
+<tr><td>220</td><td>0.395585 / 0.12633</td><td>0.395585 / 0.12633</td><td>2.61072e-06 / 4.26183e-06</td><td>9.63213e-07 / 1.22736e-06</td></tr>
+<tr><td>333</td><td>0.297237 / 0.125875</td><td>0.297237 / 0.125875</td><td>3.26404e-06 / 2.20006e-06</td><td>1.91831e-06 / 8.56704e-07</td></tr>
+<tr><td>336</td><td>0.306726 / 0.0634493</td><td>0.306726 / 0.0634493</td><td>4.58767e-06 / 4.82621e-06</td><td>1.27953e-06 / 1.23406e-06</td></tr>
+</tbody></table>
+<p>The source-wedge calculation finds a nonzero logarithmic curvature coefficient at 72, 72, 79 nodes in states 220, 333, 336 respectively. Such nominal corners have no finite one-sided Hessian limit or finite average. The jump in the trace, however, can be checked against the density forcing. The following relative discrepancies use the 1 mm approach, where the derivative calculation is best conditioned; all five distances are in the receipt.</p>
+<table><thead><tr><th>State</th><th>Trace jump versus density</th><th>ψ<sub>ZZ</sub> jump versus density</th></tr></thead><tbody>
+<tr><td>220</td><td>5.62858e-09</td><td>0.3828</td></tr>
+<tr><td>333</td><td>4.06965e-09</td><td>0.387283</td></tr>
+<tr><td>336</td><td>6.36085e-09</td><td>0.384948</td></tr>
+</tbody></table>
+<p>A uniform rectangular source at a horizontal edge recovers the density jump to 2.60268e-07 relative at 100 nm, and 5.32595e-09 after distance extrapolation. This is the positive control for the jump instrument.</p></div>
+<p>The Grad–Shafranov equation constrains
+ψ<sub>RR</sub> + ψ<sub>ZZ</sub> − ψ<sub>R</sub>/R = −2πμ<sub>0</sub>RJ.
+Across a smooth edge the Hessian jump is the forcing jump times n⊗n, where n is
+the edge normal. Thus ψ<sub>ZZ</sub> carries the n<sub>Z</sub>² fraction of that
+jump; ψ<sub>RZ</sub> carries n<sub>R</sub>n<sub>Z</sub>. At a corner, the second
+angular harmonic of the piecewise source density can produce logarithmic
+curvature. The opposing ψ<sub>RR</sub> and ψ<sub>ZZ</sub> logarithms cancel in
+the trace. Treating every corner as a horizontal smooth edge therefore gives
+the wrong jump test.</p>
+<p>A separate local-wedge calculation predicts the measured increments per
+decade of decreasing distance. Over the 79 active-corner records, the relative
+norm differences are 1.28e-5/9.71e-6 for ψ<sub>RZ</sub>/ψ<sub>ZZ</sub> at state
+220, 1.11e-5/1.18e-5 at 333, and 1.21e-5/9.79e-6 at 336. At node 943 and state
+220 the predicted increments are 1.481364 and 3.099123 Wb/m² per decade;
+the measured increments are 1.481347 and 3.099104. This checks the logarithmic
+interpretation against the source geometry, independently of either bank Hessian.</p>
+<p>The nominal source corner and its rounded stored node are distinct. The
+corner approach sequence reaches 100 nm; at node 943 this is far above the
+0.542 pm separation between the stored coordinate and the source corner.
+It diagnoses the nominal corner limit, while the preceding arbitrary-precision
+correction estimates the derivative at the actual stored coordinate. Neither
+interpretation makes the interior discrepancies disappear.</p>
+<p id="bank-hessian-boundary-controls">An unperturbed interior reference arm is
+accepted. Multiplying its ψ<sub>ZZ</sub> values by 1.000001 produces a relative
+error of 1.000000e-6 at each state and is refused. The respective discrimination
+thresholds are 1.53034e-8, 1.39477e-8 and 1.36917e-8: the larger of the 1e-8
+bank budget and four times the reference envelope. This is the declared
+instrument control, not a claim that either bank route passes the fidelity budget.</p>
+<p id="bank-hessian-boundary-method">The one-sided experiment approaches every
+boundary-group node from below and above. Each derivative stencil is wholly
+contained in the same source-cell membership as its displaced centre, checked
+against every authored polygon. First-derivative fields are evaluated in extended
+precision, then differentiated with four central steps and eighth-order
+Richardson extrapolation. At an active corner, only its nearby source cells are
+reevaluated; the independently measured smooth remainder is held at the target.
+Consequently finite-distance totals omit the smooth remainder's O(distance)
+variation, while retaining the limiting corner behaviour. At nodes without an
+active corner the complete active-source field is reevaluated. Coil Hessians are
+held at the target in both cases. No terminal forward solve or timing lever is
+produced by this measurement.</p>
+<p id="bank-hessian-boundary-provenance">Numerical receipt:
+<code>/home/ITER/mcintos/.cache/nova-hessian-boundary/receipt.json</code>.
+The same directory holds <code>split.json</code>, <code>mutation.json</code>,
+<code>retained-inputs.json</code>, and one complete approach record per sampled
+boundary node under <code>nodes/</code>. Copied sweeps and the qualified reference
+are under <code>measurement/</code>; copied source geometry and retained route
+images are under <code>h200/</code> and <code>diagnosis/</code>.
+The reference evaluator is copied from commit
+<code>e4da03b98a2d5a548047a364b8f56dbad0ec6a10</code>; its producing kernels are
+unchanged at this worker's base <code>975f3e98cfa2b2976d2bbe1b94ead37f8623b529</code>.
+Measurement and control logs are under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144425418254-bank-hessian-boundary/</code>.
+The active-corner and uniform-edge records are pinned to
+<code>3ea364d9bb6703ccc9d084938932bb9661d17a58</code>; the remaining 13 records
+are pinned to
+<code>61fb372241224ea05cefae9978c733c6b9c7e3f7</code>. The latter evaluates the
+same vertical stencils without radial derivatives unused by the smooth-node
+comparison. The final state-specific grouping and reporting controls ran at
+<code>c63da2d51cab297e38a24b4d21d25a1adfebab4b</code>, with
+<code>report-positive.log</code> ending in <code>EXIT=0</code> and
+<code>report-negative.log</code> ending in <code>EXIT=1</code> after refusing all
+three perturbed states. The preliminary two-node probe timed out after one record; a broader
+attempt was deliberately interrupted after its 79 corner records and uniform-edge
+control completed. Both incomplete attempts remain named in the manifest.
+The later brief's relaxed bank budget is 1e-8; this diagnostic does not hold the
+bank or scenario work.</p>
+</section>

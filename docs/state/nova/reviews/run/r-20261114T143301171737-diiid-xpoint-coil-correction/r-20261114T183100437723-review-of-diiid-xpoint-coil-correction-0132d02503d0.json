@@ -12,6 +12,11 @@
       "kind": "exempted",
       "reason": "prototype drivers for a measured null result whose mechanism is being traced separately (diiid-external-current-propagation); durable product checks belong to that trace's proposed repair, not to these drivers",
       "recorded_at": "2026-11-14T20:30:50.983601+00:00"
+    },
+    "reuse": {
+      "kind": "exempted",
+      "reason": "the duplicated cohort runner is prototype-only; no product module is duplicated",
+      "recorded_at": "2026-11-14T20:30:59.803447+00:00"
     }
   },
   "dispatched_at": "2026-11-14T18:45:47Z",

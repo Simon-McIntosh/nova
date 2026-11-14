@@ -1134,6 +1134,46 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "a542665c81ce30642874ae909eee2da2f162ac2c",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261114T210757731472-review-of-iter-bank-figure-redraw-dc3f36454233",
+    "scratch_bytes": 1295103,
+    "scratch_host": "98dci4-clu-2001.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261114T210757731472-review-of-iter-bank-figure-redraw-dc3f36454233",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 1295103,
+        "path": "/tmp/reckon-crew-scratch/r-20261114T210757731472-review-of-iter-bank-figure-redraw-dc3f36454233"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/c042a637-16e6-44bd-9cd2-b340a6f891dc/review-of-iter-bank-figure-redraw-dc3f36454233",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/_trash/r-20261114T210757731472-review-of-iter-bank-figure-redraw-dc3f36454233-20261114T230206211373Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

@@ -37,14 +37,14 @@ def checked_save(figure, output):
                 raise ValueError(
                     f"text overlaps: {artist.get_text()} / {other.get_text()}"
                 )
-        if (artist.get_gid() or "").startswith("direct-label"):
+        for ax in figure.axes:
             clear = Bbox.from_extents(box.x0 - 2, box.y0 - 2, box.x1 + 2, box.y1 + 2)
-            for collection in artist.axes.collections:
+            for collection in ax.collections:
                 for path in collection.get_paths():
                     path = path.transformed(collection.get_transform())
                     if path.intersects_bbox(clear, filled=False):
                         raise ValueError(f"label over data: {artist.get_text()}")
-            for line in artist.axes.lines:
+            for line in ax.lines:
                 path = line.get_path().transformed(line.get_transform())
                 if path.intersects_bbox(clear, filled=False):
                     raise ValueError(f"label over data: {artist.get_text()}")
@@ -72,24 +72,136 @@ def checked_save(figure, output):
     )
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--geometry", type=Path, required=True)
-    parser.add_argument("--source", type=Path, help="Coil identities from the preparer")
-    parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--preview", type=Path, required=True)
-    args = parser.parse_args()
-    source = json.loads(
-        (args.source or args.geometry.with_name("source.json")).read_text()
-    )
-    with np.load(args.geometry, allow_pickle=False) as archive:
-        wall = archive["wall"]
-        cells = [
-            p[:n]
-            for p, n in zip(archive["vertices"], archive["vertex_count"], strict=True)
+def read_geometry(path, source=None):
+    """Read only the native geometry needed for a reproducible drawing."""
+    if path.suffix == ".json":
+        geometry = json.loads(path.read_text())
+    else:
+        names = json.loads((source or path.with_name("source.json")).read_text())
+        with np.load(path, allow_pickle=False) as archive:
+            geometry = {
+                "wall": archive["wall"],
+                "cells": [
+                    p[:n]
+                    for p, n in zip(
+                        archive["vertices"], archive["vertex_count"], strict=True
+                    )
+                ],
+                "coils": [archive[f"coil_{i}"] for i in range(len(archive["turns"]))],
+                "owners": archive["owners"],
+                "coil_names": names["coil_names"],
+            }
+    return {
+        **geometry,
+        "wall": np.asarray(geometry["wall"]),
+        "cells": [np.asarray(p) for p in geometry["cells"]],
+        "coils": [np.asarray(p) for p in geometry["coils"]],
+    }
+
+
+def section_names(geometry):
+    """Distinguish sections of one named circuit by their vertical position."""
+    coils, owners = geometry["coils"], np.asarray(geometry["owners"])
+    labels = []
+    for index, (polygon, owner) in enumerate(zip(coils, owners, strict=True)):
+        name = geometry["coil_names"][int(owner)]
+        siblings = np.flatnonzero(owners == owner)
+        if len(siblings) == 2:
+            heights = [(coils[i].min(0)[1] + coils[i].max(0)[1]) / 2 for i in siblings]
+            if heights[0] == heights[1]:
+                raise ValueError(f"sections have indistinguishable heights: {name}")
+            name += "\nupper" if index == siblings[np.argmax(heights)] else "\nlower"
+        elif len(siblings) > 2:
+            height = (polygon.min(0)[1] + polygon.max(0)[1]) / 2
+            name += f"\nZ = {height:.2f} m"
+        labels.append(name)
+    return labels
+
+
+def contrast(rgb):
+    """Contrast against white, from linearized sRGB luminance."""
+    rgb = np.asarray(rgb)
+    linear = np.where(rgb <= 0.04045, rgb / 12.92, ((rgb + 0.055) / 1.055) ** 2.4)
+    return 1.05 / (linear @ np.array([0.2126, 0.7152, 0.0722]) + 0.05)
+
+
+def scene_metrics(figure):
+    """Measure actual antialiased mesh pixels, including their edge pixels."""
+    canvas = FigureCanvasAgg(figure)
+    canvas.draw()
+    rgb = np.asarray(canvas.buffer_rgba())[:, :, :3].astype(float) / 255
+    mesh = (rgb[:, :, 2] > rgb[:, :, 0] + 0.02) & (rgb[:, :, 0] > rgb[:, :, 1] + 0.02)
+    mesh[:55] = False
+    if mesh.sum() < 10000:
+        raise ValueError(f"mesh not visible: {mesh.sum()} pixels")
+    return {
+        "mesh_pixels": int(mesh.sum()),
+        "median_contrast": float(np.median(contrast(rgb[mesh]))),
+        "ink_fraction": float(np.mean(rgb.min(axis=2) < 0.90)),
+    }
+
+
+def check_scene(figure, expected_labels):
+    """Refuse missing identities, stray geometry and a subordinate plasma mesh."""
+    overview, detail = figure.axes
+    expected = {f"direct-label-{i}": name for i, name in enumerate(expected_labels)}
+    observed = {label.get_gid(): label.get_text() for label in overview.texts}
+    if len(overview.texts) != len(expected) or observed != expected:
+        raise ValueError(
+            f"coil labels: expected {len(expected)}, observed {len(overview.texts)}; "
+            "identities differ"
+        )
+    if len(set(observed.values())) != len(observed):
+        raise ValueError("coil-section identities are not unique")
+    for ax in (overview, detail):
+        unknown = [
+            c.get_gid()
+            for c in ax.collections
+            if not (c.get_gid() or "").startswith(("plasma-cells-", "coil-sections"))
         ]
-        coils = [archive[f"coil_{i}"] for i in range(len(archive["turns"]))]
-        owners = archive["owners"]
+        if unknown:
+            raise ValueError(f"unidentified collections: {unknown}")
+
+    def coil_paths(ax):
+        return sum(
+            len(c.get_paths()) for c in ax.collections if c.get_gid() == "coil-sections"
+        )
+
+    sections, detail_coils = coil_paths(overview), coil_paths(detail)
+    if sections != len(expected) or detail_coils:
+        raise ValueError(
+            f"coil geometry: expected {len(expected)}, observed {sections}, "
+            f"detail {detail_coils}"
+        )
+    metrics = scene_metrics(figure)
+    if metrics["median_contrast"] < 3:
+        raise ValueError(f"plasma contrast below 3:1: {metrics['median_contrast']}")
+    if metrics["ink_fraction"] <= 0.045:
+        raise ValueError(f"ink coverage below 4.5%: {metrics['ink_fraction']}")
+    reference_colours = [line.get_color() for ax in figure.axes for line in ax.lines]
+    reference_colours += [
+        c.get_edgecolors()[0, :3]
+        for ax in figure.axes
+        for c in ax.collections
+        if c.get_gid() == "coil-sections"
+    ]
+    if any(
+        float(contrast(to_rgb(colour))) >= metrics["median_contrast"]
+        for colour in reference_colours
+    ):
+        raise ValueError("reference geometry is darker than the plasma mesh")
+    return {
+        **metrics,
+        "sections": sections,
+        "labelled": len(observed),
+        "detail_coils": detail_coils,
+    }
+
+
+def build_figure(geometry):
+    """Draw prepared machine geometry through the media painters."""
+    wall, cells, coils = (geometry[key] for key in ("wall", "cells", "coils"))
+    labels = section_names(geometry)
     # Keep the plasma hue while strengthening its lightness and opacity.
     style = DEFAULT_INK.variant(
         plasma_edgecolor=tuple(0.7 * np.array(to_rgb(DEFAULT_INK.plasma_edgecolor))),
@@ -98,7 +210,7 @@ def main():
         zorder_plasma=5,
         coil_edgecolor="#929292",
         coil_linewidth=1.4,
-        wall_color="#666666",
+        wall_color="#929292",
         wall_linewidth=1.3,
     )
     all_points = np.concatenate((*coils, wall))
@@ -116,7 +228,9 @@ def main():
     figure = Figure(figsize=(14, height), dpi=100)
     axes = []
     left = 0.4
-    for bounds, ratio in zip((overview, detail), ratios, strict=True):
+    for panel, (bounds, ratio) in enumerate(
+        zip((overview, detail), ratios, strict=True)
+    ):
         width = panel_height * ratio
         ax = figure.add_axes(
             (left / 14, 0.25 / height, width / 14, panel_height / height)
@@ -124,18 +238,19 @@ def main():
         axes.append(ax)
         poloidal_axes(ax, style)
         draw_wall(ax, units=(wall,), style=style)
-        draw_plasma_cells(ax, cells, style=style, facecolor="none")
+        draw_plasma_cells(
+            ax, cells, style=style, facecolor="none", gid=f"plasma-cells-{panel}"
+        )
         ax.set_xlim(bounds[:, 0])
         ax.set_ylim(bounds[:, 1])
         left += width + 0.7
-    draw_coils(axes[0], coils, style=style)
-    for index, (polygon, owner) in enumerate(zip(coils, owners, strict=True)):
-        name = source["coil_names"][int(owner)]
+    draw_coils(axes[0], coils, style=style, gid="coil-sections")
+    for index, (polygon, name) in enumerate(zip(coils, labels, strict=True)):
         low, high = polygon.min(0), polygon.max(0)
         centre = (low + high) / 2
         if name.startswith("CS"):
             position, align = (low[0] - 0.18, centre[1]), "right"
-        elif name == "VS3":
+        elif name.startswith("VS"):
             position, align = (high[0] + 0.22, centre[1]), "left"
         else:
             position, align = (centre[0], high[1] + 0.22), "center"
@@ -178,14 +293,23 @@ def main():
         frameon=False,
         fontsize=14,
     )
+    return figure
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--geometry", type=Path, required=True)
+    parser.add_argument("--source", type=Path, help="Coil identities from the preparer")
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--preview", type=Path, required=True)
+    args = parser.parse_args()
+    geometry = read_geometry(args.geometry, args.source)
+    figure = build_figure(geometry)
+    report = check_scene(figure, section_names(geometry))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     checked_save(figure, args.output)
     figure.savefig(args.preview, dpi=100)
-    print(f"CANVAS inches=14x{height:.6f} panel_width_ratios={ratios}", flush=True)
-    print(
-        f"COIL_LABELS sections={len(coils)} labelled={len(coils)} detail_coils=0",
-        flush=True,
-    )
+    print("SCENE_CHECK " + json.dumps(report, sort_keys=True), flush=True)
     print("FIGURE", args.output, "PREVIEW", args.preview, flush=True)
 
 

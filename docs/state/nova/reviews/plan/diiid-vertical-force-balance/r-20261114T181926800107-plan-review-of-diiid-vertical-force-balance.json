@@ -51,6 +51,26 @@
       "note": "The diagnosis record lands on main before the s6 node is dispatched, so the cited fragment resolves when a worker opens it; its review round is closing now.",
       "reason": "",
       "when": "2026-11-14T18:53:32.256852+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "s5 is declared done with a landed summary: node (a) closed negative, node (b) landed, and node (c) answered by the existing translation owners, so no undefined completion condition remains.",
+      "reason": "",
+      "when": "2026-11-14T18:53:45.122300+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "s5 is declared done and records which of its three parts landed and how the placement question is answered, so no queue built from declarations re-solves the landed prototype.",
+      "reason": "",
+      "when": "2026-11-14T18:53:53.232728+00:00"
     }
   ],
   "responses": {
@@ -62,6 +82,24 @@
       "note": "The diagnosis record lands on main before the s6 node is dispatched, so the cited fragment resolves when a worker opens it; its review round is closing now.",
       "reason": "",
       "when": "2026-11-14T18:53:32.256852+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "note": "s5 is declared done with a landed summary: node (a) closed negative, node (b) landed, and node (c) answered by the existing translation owners, so no undefined completion condition remains.",
+      "reason": "",
+      "when": "2026-11-14T18:53:45.122300+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "note": "s5 is declared done and records which of its three parts landed and how the placement question is answered, so no queue built from declarations re-solves the landed prototype.",
+      "reason": "",
+      "when": "2026-11-14T18:53:53.232728+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261114T181926800107-plan-review-of-diiid-vertical-force-balance.json",

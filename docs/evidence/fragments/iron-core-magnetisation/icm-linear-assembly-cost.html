@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <title>Affine magnetisation assembly cost</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body><main>
+  <h1 id="icm-linear-assembly-cost-state">Affine magnetisation assembly cost</h1>
+  <p>Measurement in progress. The delivered operator has been retained for a
+  full-matrix comparison. The fixed-shape scheduling repair is committed;
+  its numerical gates, after-change cost and completed 10 mm solve are pending.
+  This record does not select a formulation or measure WEST.</p>
+
+  <h2 id="icm-linear-assembly-cost-before">What the delivered assembly spends</h2>
+  <p>The 40 mm shell has 228 cells, 1368 unknowns, 2635 atomic edges,
+  2576 source triangles and 92736 volume test points. One Tesla P100-PCIE-16GB
+  assembled it in 901.041073 s: 7.346338 s compilation, 544.571334 s
+  synchronised kernel execution and 349.123402 s of host assembly, transfers
+  and dispatch overhead. Compilation is 0.8153 percent of the measured wall.</p>
+  <table>
+    <thead><tr><th>Evaluator</th><th>Padded pairs per call</th><th>Calls</th>
+      <th>Compile [s]</th><th>Execute [s]</th></tr></thead>
+    <tbody>
+      <tr><td>Self edge, order 24</td><td>256</td><td>2635</td><td>2.193734</td><td>1.422275</td></tr>
+      <tr><td>Adjacent edge, order 24</td><td>256</td><td>2542</td><td>1.819975</td><td>1.348811</td></tr>
+      <tr><td>Near regular edge, order 24</td><td>256</td><td>2624</td><td>0.978032</td><td>0.891166</td></tr>
+      <tr><td>Far regular edge, order 8</td><td>256</td><td>14602</td><td>0.730512</td><td>3.380721</td></tr>
+      <tr><td>Near polygon flux, 16 × 192 angular rule</td><td>64</td><td>370225</td><td>0.795548</td><td>223.385485</td></tr>
+      <tr><td>Far polygon flux, 16 × 48 angular rule</td><td>1024</td><td>323319</td><td>0.828537</td><td>314.142875</td></tr>
+    </tbody>
+  </table>
+  <p>There are six compiled evaluator programs, with 6934.984303 padded kernel
+  pairs per cell pair. The polygon kernels account for 693544 launches. The
+  receipt distinguishes padded evaluations from mathematical pairs; it counts
+  the assembly evaluators rather than unrelated JAX support operations.</p>
+  <p>Before receipt: <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/assembly-cost/before/assembly-0.04.json</code>.
+  Executed revision <code>a4083c99792f8fe176b7953ee25930df7726c35f</code>,
+  script blob <code>fc61ba466108670e3d3745bf76feec459bb6483a</code>.
+  The product interaction-owner blob is unchanged from the assigned base.</p>
+
+  <h2 id="icm-linear-assembly-cost-schedule">The scheduling change</h2>
+  <p>Boundary quadrature is batched across 256 atomic edges and volume test
+  points across cells. Near and far polygon buckets now use the existing warm
+  <code>tile_evaluator</code>, with paired input geometry and flux-only output
+  as explicit executable identities. Both quadrature and closed reduction use
+  that owner through its existing kernel flag; the duplicate polygon trace is
+  removed. Edge-current pairs are batched across rectangular tiles, with
+  reciprocal entries written in vectorised blocks. The integration rules,
+  near/far criteria and triangle incidence are preserved.</p>
+  <p>The constant interaction functions are unchanged. The affine entry points
+  are exported in <code>tiledassembly.__all__</code>. Numerical validation of
+  the scheduling change is pending; no speedup is claimed yet.</p>
+
+  <h2 id="icm-linear-assembly-cost-provenance">Reference provenance refusal</h2>
+  <p>The revision defect reproduced before repair: the reference program wrote
+  a completed receipt with <code>revision: deliberately-unresolvable</code>.
+  That raw receipt is retained as <code>unchecked-revision.json</code> in this
+  run's directory. The reference now verifies its argument against the executed
+  tree through the shared clean-script check. A focused test passed for valid
+  provenance and exercised wrong-revision, wrong-blob and dirty-tree refusals:
+  <code>1 passed, 59 deselected in 3.38s</code>.</p>
+
+  <h2 id="icm-linear-assembly-cost-validation">Validation checkpoint</h2>
+  <p>The marker-filtered baseline gate at
+  <code>79a578d6940ecb9115ecd8a23a171f66ccb7dada</code> passed:
+  <code>63 passed, 9 deselected in 274.43s</code>, <code>EXIT=0</code>.
+  The unfiltered baseline suite's initial all_debug allocation was cancelled
+  incomplete after its recorded approximately 6590 s duration was found to
+  exceed that partition's one-hour limit. Its replacement runs on rigel.
+  No complete-suite result is claimed from the cancelled arm.</p>
+</main></body>
+</html>

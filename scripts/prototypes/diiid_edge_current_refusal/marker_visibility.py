@@ -9,6 +9,8 @@ from pathlib import Path
 import re
 import xml.etree.ElementTree as ET
 
+from scripts.prototypes.diiid_edge_current_refusal.verify import captured_proposals
+
 SVG = "{http://www.w3.org/2000/svg}"
 HREF = "{http://www.w3.org/1999/xlink}href"
 REFUSED = "#bf3446"
@@ -16,6 +18,7 @@ REFUSED = "#bf3446"
 
 def expected_marks(folder):
     spatial = json.loads((folder / "spatial.json").read_text())
+    captured_proposals(folder, spatial)
     last_inner = len(spatial["trips"]) - 1
     refused = {
         tuple(point)

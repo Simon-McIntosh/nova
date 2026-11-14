@@ -8,13 +8,14 @@ from pathlib import Path
 
 import numpy as np
 
-from verify import ROWS
+from verify import ROWS, captured_iterations
 
 
 def audit(folder):
     data = dict(np.load(folder / "terminal.npz"))
     receipt = json.loads((folder / "receipt.json").read_text())
     spatial = json.loads((folder / "spatial.json").read_text())
+    captured_iterations(folder, receipt, spatial)
     coordinates = np.load(folder / "spatial-marks.npz")["node_coordinates"]
     size = len(coordinates)
     unknown = -float(receipt["constraint_residual"][0])
@@ -96,24 +97,28 @@ def audit(folder):
                 "returned state equals terminal, unchanged shadow makes its saved "
                 "map live, and its residual equals the reported outer residual"
             )
-        shadow_transition = {}
-        if selection is not None:
-            selected = np.load(folder / f"{selection}-read-{index}.npz")["shadow"]
-            frozen = diagnostics["frozen_shadow"][:size]
-            entering, leaving = selected & ~frozen, frozen & ~selected
-            measured = int(np.sum(entering | leaving))
-            reported = receipt["changed_mask_entries"][index]
-            shadow_transition = dict(
-                selected_endpoint=selection,
-                selection_basis=selection_basis,
-                frozen_shadow_count=int(frozen.sum()),
-                selected_shadow_count=int(selected.sum()),
-                changed_entries=measured,
-                reported_changed_entries=reported,
-                matches_reported=measured == reported,
-                entering_rz_m=coordinates[entering].tolist(),
-                leaving_rz_m=coordinates[leaving].tolist(),
+        if selection is None:
+            raise ValueError(f"trip {index}: cannot bind the selected endpoint")
+        selected = np.load(folder / f"{selection}-read-{index}.npz")["shadow"]
+        frozen = diagnostics["frozen_shadow"][:size]
+        entering, leaving = selected & ~frozen, frozen & ~selected
+        measured = int(np.sum(entering | leaving))
+        reported = receipt["changed_mask_entries"][index]
+        if measured != reported:
+            raise ValueError(
+                f"trip {index}: measured {measured} shadow changes, reported {reported}"
             )
+        shadow_transition = dict(
+            selected_endpoint=selection,
+            selection_basis=selection_basis,
+            frozen_shadow_count=int(frozen.sum()),
+            selected_shadow_count=int(selected.sum()),
+            changed_entries=measured,
+            reported_changed_entries=reported,
+            matches_reported=True,
+            entering_rz_m=coordinates[entering].tolist(),
+            leaving_rz_m=coordinates[leaving].tolist(),
+        )
         result["trips"].append(
             dict(
                 index=index,

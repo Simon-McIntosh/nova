@@ -17,6 +17,81 @@ EXPECTED_REASON = {
 }
 
 
+def captured_proposals(folder, spatial):
+    """Bind spatial proposals to the observer's complete ladder inventory."""
+    receipt = json.loads((folder / "receipt.json").read_text())
+    captured = json.loads((folder / "proposals.json").read_text())
+    expected = receipt["counts"]["ladder"]
+    if not captured or len(captured) != expected:
+        raise ValueError("captured proposal inventory is absent or incomplete")
+    if len(spatial["trips"]) != receipt["counts"]["inner"]:
+        raise ValueError("spatial trip inventory does not match captured inner solves")
+    observed = spatial["proposals"]
+    if len(observed) != len(captured):
+        raise ValueError("spatial proposal inventory does not match captured ladders")
+    for index, (source, proposal) in enumerate(zip(captured, observed, strict=True)):
+        if source["index"] != index or not 0 <= source["inner"] < len(spatial["trips"]):
+            raise ValueError(f"captured proposal {index} has an invalid solve binding")
+        if any(proposal[key] != source[key] for key in source):
+            raise ValueError(f"spatial proposal {index} differs from its capture")
+        with np.load(folder / f"proposal-{index}.npz") as arrays:
+            for key in ("accepted", "distrusted"):
+                if source[key] != bool(arrays[f"ladder_{key}"]):
+                    raise ValueError(
+                        f"proposal {index} {key} differs from solver output"
+                    )
+            if len(proposal["comparisons"]) != 2:
+                raise ValueError(f"proposal {index} lacks both sampled displacements")
+            for row, slot in zip(
+                proposal["comparisons"], (0, len(arrays["factors"]) - 1), strict=True
+            ):
+                for key, array in (
+                    ("factor", "factors"),
+                    ("merit", "merits"),
+                    ("predicted_merit", "predicted_merits"),
+                    ("residual", "residuals"),
+                ):
+                    np.testing.assert_equal(row[key], arrays[array][slot])
+    return captured
+
+
+def captured_iterations(folder, receipt, spatial):
+    """Check every reported Newton action against the raw diagnostic arrays."""
+    count = receipt["counts"]["inner"]
+    if len(spatial["trips"]) != count or len(receipt["inner"]) != count or count == 0:
+        raise ValueError("inner-solve inventory is absent or incomplete")
+    for index, trip in enumerate(spatial["trips"]):
+        if trip["index"] != index or trip["inner"] != receipt["inner"][index]:
+            raise ValueError(f"trip {index} differs from its captured inner solve")
+        with np.load(folder / f"diagnostics-{index}.npz") as arrays:
+            active = arrays["inner_iteration_accepted"] >= 0
+            rows = trip["iterations"]
+            if len(rows) != int(active.sum()):
+                raise ValueError(f"trip {index} omits captured Newton actions")
+            for key in arrays.files:
+                if key.startswith("inner_iteration_"):
+                    np.testing.assert_array_equal(
+                        [row[key] for row in rows],
+                        arrays[key][active],
+                        err_msg=f"trip {index}: {key} differs from solver diagnostics",
+                    )
+            np.testing.assert_array_equal(
+                [row["levenberg_damping"] for row in rows],
+                arrays["promotion_model_rebuild_damping"][active],
+            )
+
+
+def require_premise(frame, branch, receipt):
+    """Refuse a cohort that no longer reproduces its declared failure or control."""
+    expected = EXPECTED_REASON[frame, branch]
+    if receipt["terminal_reason"] != expected:
+        raise ValueError(f"{frame} {branch}: failure premise was not reproduced")
+    if bool(receipt["converged"]) != (expected == 1):
+        raise ValueError(
+            f"{frame} {branch}: convergence contradicts the declared premise"
+        )
+
+
 def completion(input_root, folder, spatial):
     """Distinguish a completed trace from its optional counterfactual tail."""
     log = (folder / "row.log").read_text()
@@ -38,8 +113,8 @@ def completion(input_root, folder, spatial):
     ]
     matched = [row for row in records if row["terminal"] == spatial["terminal"]]
     assert len(matched) == 1
-    assert matched[0]["trips"] == len(spatial["trips"])
-    assert matched[0]["proposals"] == len(spatial["proposals"])
+    # This flushed record locates the failure in the process log. Completeness
+    # is established separately against the captured solver diagnostics.
     assert len(spatial["directional_discriminator"]) == 8
     assert spatial["stages"]
     return dict(
@@ -65,6 +140,9 @@ def main():
             assert len(table["coordinate"]) == 29
             assert table["coordinate"][-1] == 1.0
             assert table["values"][-1] != 0
+        require_premise(frame, branch, receipt)
+        captured_iterations(folder, receipt, spatial)
+        captured_proposals(folder, spatial)
         assert len(spatial["trips"]) == receipt["counts"]["inner"] > 0
         assert spatial["terminal"]["support"] == receipt["support"] > 0
         iterations = [row for trip in spatial["trips"] for row in trip["iterations"]]

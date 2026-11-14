@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="iron-core-magnetisation">
+  <title>Piecewise-linear Galerkin magnetisation on the closed shell | nova</title>
+</head>
+<body>
+<main class="plan-doc">
+  <h2 id="icm-linear-magnetisation-result">Piecewise-linear magnetisation on the closed shell</h2>
+  <!-- measured-result -->
+  <p>The affine basis passes its small-mesh energy and material-projection checks.
+  The full-resolution μ<sub>r</sub> = 1000 shell measurements are running; no
+  accuracy or cost verdict is asserted until their receipts complete.</p>
+  <!-- measured-result-end -->
+
+  <h3 id="icm-linear-magnetisation-route">Bound-current route and existing kernel owners</h3>
+  <p>Each cell carries three scalar basis functions per component,
+  <code>1, (r − rc)/h, (z − zc)/h</code>, with
+  <code>h = sqrt(cell area)</code>: six unknowns per cell. Dividing a stored
+  gradient coefficient by <code>h</code> recovers the physical gradient in
+  A/m². The returned <code>magnetisation</code> remains the value at the area
+  centroid; <code>linear_coefficients</code> carries the complete scaled basis.</p>
+  <p>The field uses the bound-current route. Along an oriented cell edge,
+  <code>Kφ ds = M<sub>R</sub> dr + M<sub>Z</sub> dz</code> is linear in the
+  edge parameter. In the cell interior,
+  <code>Jφ = ∂M<sub>R</sub>/∂z − ∂M<sub>Z</sub>/∂r</code> is constant.
+  The existing <code>nova/biot/tiledassembly.py</code> owns both the energy
+  assembly and field evaluation; no parallel assembly module is introduced.</p>
+  <table>
+    <thead><tr><th>contribution</th><th>kernel and contraction</th></tr></thead>
+    <tbody>
+      <tr><td>affine edge–edge energy</td><td>The existing
+      <code>_mutual_edge_evaluator</code> gains the four products of constant
+      and first edge-parameter moments. It retains the existing complete
+      elliptic/filament-flux owner and graded Duffy treatment of coincident
+      and endpoint-adjacent edges.</td></tr>
+      <tr><td>edge–volume and volume–volume energy</td><td>
+      <code>packed_analytic_greens</code> supplies the closed polygon-section
+      flux for a uniform toroidal volume current. A constrained triangulation
+      preserves each authored polygon and holds the packed graph at three
+      edges. Area weights convert per-ampere responses to per-current-density
+      responses.</td></tr>
+      <tr><td>exterior field</td><td><code>sheet_edge_field</code> supplies
+      each constant edge-sheet part; <code>traced_filament_greens</code>
+      supplies the zero-mean first moment with 24-point edge quadrature;
+      <code>packed_analytic_greens</code> supplies the uniform-volume curl
+      current. These are the existing closed sheet, ring and polygon owners.</td></tr>
+    </tbody>
+  </table>
+  <p>The edge-current incidence is built over the existing split shared-edge
+  geometry. Opposite currents on a shared edge cancel in the same current
+  space. Edge-pair energy uses order 24 for singular and near pairs and order
+  8 for distant pairs; continuous polygon potential uses order 12 along the
+  boundary and order 6 over the cell area. Tiny CPU operators evaluate the
+  same packed polygon algebra directly because they cannot amortise its
+  compilation; larger and device assemblies trace it.</p>
+
+  <h3 id="icm-linear-magnetisation-energy">The Gram matrix and the material law</h3>
+  <p>The local Gram is
+  <code>Hᵢⱼ = ∫cell φᵢ φⱼ 2πr dr dz</code>. It includes off-diagonal
+  first moments: an area-centred radial basis is not volume-centred. The
+  reciprocal current energy <code>E</code> gives the field-coefficient
+  operator <code>G = H⁻¹E</code>. The extended
+  <code>galerkin_spectrum(..., basis="linear")</code> solves the generalized
+  problem <code>(E/μ₀) v = λ H v</code>, rather than treating <code>G</code>
+  as Euclidean symmetric.</p>
+  <p>The prescribed field is projected with the same volume rule. During
+  Newton, the total Galerkin field polynomial is reconstructed at the
+  <code>section_nodes</code> volume quadrature points, the existing B–H law is
+  evaluated there, and its magnetisation is projected back through
+  <code>H⁻¹</code>. The nonlinear law therefore sees the spatially varying
+  reconstructed field, including its gradients. Local quadrature tangents
+  are contracted to 6 × 6 cell blocks before multiplication by the dense
+  interaction, avoiding a quadrature-points-by-global-unknowns Jacobian.</p>
+  <p><code>solve_magnetisation(..., basis="linear")</code> selects the
+  candidate. The default remains <code>basis="constant"</code>. The constant
+  operator, uniform mesh construction and default arithmetic are retained.</p>
+
+  <h3 id="icm-linear-magnetisation-spectrum">Small-mesh spectral gate and a control that fails</h3>
+  <p>The fast checks use two meshes of a closed polygonal shell with inner
+  and outer radii 0.28 and 0.4 m, each circle represented by an octagon.
+  These isolate the discrete energy property; the accuracy study below uses
+  the existing full-resolution 0.9–1 m shell.</p>
+  <table>
+    <thead><tr><th>spacing [mm]</th><th>cells</th><th>unknowns</th><th>minimum λ</th><th>maximum λ</th><th>Gram symmetry defect</th><th>maximum λ without 2πr</th></tr></thead>
+    <tbody>
+      <tr><td>200</td><td>6</td><td>36</td><td>7.0764246e-5</td><td>0.9952702042</td><td>8.97e-17</td><td>1.9203930164</td></tr>
+      <tr><td>160</td><td>8</td><td>48</td><td>0.0026778194</td><td>0.9744377724</td><td>1.08e-16</td><td>2.1228529691</td></tr>
+    </tbody>
+  </table>
+  <p>Both full-basis spectra lie in [0, 1] within 1e-10. The declared mutation
+  removes <code>2πr</code> only from the polynomial Gram. Both tests then fail
+  their upper-bound assertion: <code>2 failed, 56 deselected</code>,
+  <code>EXIT=1</code>. The ordinary head has no failing test ids.
+  <code>negative-control.log</code> contains the runner's assertions and
+  summary. The local nonlinear-projection test and a differential-Jacobian
+  comparison against direct differentiation also pass, as does the
+  constant-mode field comparison against the closed sheet route.</p>
+
+  <h3 id="icm-linear-magnetisation-shell">The full-resolution μr = 1000 shell</h3>
+  <p>The shared source and shell constants live in
+  <code>scripts/iron_linear_magnetisation/controls.py</code>, with no imports
+  from tests. The source is the existing one-ampere, 50 mm loop at the origin.
+  Probes are (2, 0), (0, 2) and (3, 1) m. Shielding is compared with the same
+  spherical-dipole reference <code>S = 61.101838</code> as the constant-basis
+  study. The finite loop is retained so both bases measure the same control.</p>
+  <!-- measured-table -->
+  <p>The linear 40, 20 and 10 mm receipts are pending.</p>
+  <!-- measured-table-end -->
+  <p>The fresh constant 40 mm arm reproduces the previous P100 shielding
+  vector bit for bit: <code>[57.05106693488571, 54.619292861196286,
+  57.01841837762691]</code>, giving 10.6094110 % worst-probe error at
+  456 unknowns. The base's independent CPU arm records 10.6094110 % at
+  228 cells and 3.3674008 % at 828 cells, reproducing the recorded limitation
+  before the candidate is judged.</p>
+
+  <h3 id="icm-linear-magnetisation-figure">Error against unknown count</h3>
+  <!-- measured-figure -->
+  <p>The error-versus-unknowns figure is generated after the receipts complete.</p>
+  <!-- measured-figure-end -->
+
+  <h3 id="icm-linear-magnetisation-verification">Verification and provenance</h3>
+  <p>The requested marker-filtered gate ran in one <code>all_debug</code> job,
+  each revision in its own archived tree with a local index: base
+  <code>60d418bb85426142f3ca0a5f7a45afc4232b3255</code>,
+  <code>57 passed, 9 deselected</code>; head
+  <code>300dc39aedc7836229c564aeff622c614bfa0021</code>,
+  <code>62 passed, 9 deselected</code>. Both end in <code>EXIT=0</code>.
+  This includes the existing grid-digest and constant-spectrum tests.</p>
+  <!-- measured-suites -->
+  <p>The complete unfiltered baseline and optimized-head suite arms are running
+  on <code>rigel</code>; their completed JSON receipts belong in the manifest.</p>
+  <!-- measured-suites-end -->
+  <p>The P100 shell run uses a clean archived tree at
+  <code>300dc39aedc7836229c564aeff622c614bfa0021</code> and verifies the executed
+  measurement script's git blob
+  <code>9f6be671d4f6d0d2da66524b315378ecba882db8</code>. Receipts record the
+  imported module, working directory, float64 assertion, device kind, lane,
+  unknown count, per-probe errors and elapsed times. Deliberately dirtying the
+  launcher's tracked source gives <code>refusing to measure a dirty tree</code>
+  and <code>EXIT=2</code>; no measurement starts from it.</p>
+  <p>Shell receipts are under
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/</code>.
+  Gate and control logs are under
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/</code>,
+  in <code>fast-gate/</code>, <code>suites/</code> and
+  <code>head-suites/</code>. This record measures the closed-shell candidate;
+  it neither runs WEST nor records the formulation decision.</p>
+</main>
+</body>
+</html>

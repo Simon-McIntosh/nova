@@ -5,6 +5,13 @@
   "call_sites": [],
   "call_sites_note": "No module outside scripts/prototypes/bank_width_probe imports the added modules; a search over scripts/ and nova/ for 'bank_width_probe' returns only the node's own files.",
   "completed_at": "2026-11-14T21:29:42.104Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-bank-width-probe-69aacfb324c5",
+      "recorded_at": "2026-11-14T21:55:37.305193+00:00"
+    }
+  },
   "dispatched_at": "2026-11-14T20:50:54Z",
   "findings": [
     {

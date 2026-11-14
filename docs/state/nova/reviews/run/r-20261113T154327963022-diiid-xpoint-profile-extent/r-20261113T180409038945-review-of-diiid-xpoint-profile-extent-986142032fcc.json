@@ -35,6 +35,11 @@
       "node": "diiid-xpoint-profile-extent",
       "recorded_at": "2026-11-14T07:44:00.835318+00:00"
     },
+    "4": {
+      "kind": "exempted",
+      "reason": "prototype arm-table builder needs an explicit surface set the benchmark owner does not take; the duplication is confined to scripts/prototypes and the record names the owner",
+      "recorded_at": "2026-11-14T07:44:23.942943+00:00"
+    },
     "5": {
       "kind": "folded",
       "node": "diiid-xpoint-profile-extent",

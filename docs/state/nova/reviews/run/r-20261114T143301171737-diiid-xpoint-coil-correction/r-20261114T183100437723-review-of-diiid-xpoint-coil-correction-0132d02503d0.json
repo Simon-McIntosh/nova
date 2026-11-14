@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "benchmarks/diiid_forward_gs_match.py:_source_current",
+    "nova/equilibrium/forward.py:ForwardProfile.solve"
+  ],
+  "completed_at": "2026-11-14T19:23:47.699Z",
+  "dispatched_at": "2026-11-14T18:45:47Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html",
+      "line": "41",
+      "severity": "non-blocking",
+      "text": "non-blocking: the per-conductor table carries only 137D and 146D columns, so the done_when's per-coil correction beside the measured current is not reported for 179L or 146L even though 179L's fit is a different vector (F1A -4.54 kA-turn against 137D's +54.06), leaving the implausibility flag for one of the four rows asserted rather than shown."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_coil_correction/batch.py",
+      "line": "55",
+      "severity": "non-blocking",
+      "text": "non-blocking: environment() and run_all() at batch.py:55-103, with case_name() at :20 and landed() at :24, re-implement the cohort runner already owned by scripts/prototypes/diiid_xpoint_profile_extent/batch.py:27-160 (same ROWS tuple, same row.log header, same five-second poll, same results.json resume) instead of importing it, where scripts/prototypes/diiid_xpoint_held_nodes/batch.py:22 shows the reuse idiom."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_coil_correction/measure.py",
+      "line": "44",
+      "severity": "non-blocking",
+      "text": "non-blocking: the added line is 90 characters against the project's ruff line-length of 88 (pyproject.toml:201), and ruff check over the added scripts reports this as its only finding, so the node leaves one lint failure in a neighbourhood that is otherwise clean."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "Read all seven commits (b452d0ed8..0132d0250) against 17b416ba3; they add the batch driver, fit, measure hook, render wrapper, summarizer, two probes, the fragment and two SVG figures with their window JSON, and the later commits correct an earlier correction-fraction read and add the probe evidence.",
+    "done_when": "The done_when's quantitative measure is the two-arm table plus the per-conductor check; the worker records it in a fragment rather than a suite, and I re-read the receipts behind it (cohort/summary.json, probe-external.log, probe-applied.log) and the md5 identity of terminal.npz across the two arms rather than re-running the solve.",
+    "goal": "The node goal is to measure how far the lower X-point moves when the fitted conductor-field mismatch is removed from the measured currents; scripts/prototypes/diiid_xpoint_coil_correction/batch.py:11 runs both arms on all four rows and the record reports the movement as unmeasurable because the two terminal states are byte-identical.",
+    "manifest": "Read; it records the six commits, the titan job 1315558 and the rigel probe jobs 1315756 and 1315771, states the corrected arms are identical to the measured ones, reports the published-fit disagreement under outside_scope, and leaves tests empty with the reason that no test reaches the change.",
+    "write_paths": "Read the manifest's declared paths and the commit-by-commit diff: all thirteen changed paths sit inside scripts/prototypes/diiid_xpoint_coil_correction/, docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html and docs/figures/diiid-xpoint-coil-correction/."
+  },
+  "justifications": {
+    "durability": "The diff adds no test, and its single assertion, scripts/prototypes/diiid_xpoint_coil_correction/measure.py:83, guards only that the benchmark module resolved inside the tree, so nothing reddens if the fit, the correction install or the summarizer regresses.",
+    "evidence": "Every reported number reconciles with the run receipts: cohort/summary.json reproduces 137D 2.360 cm, residual 137D 1.139e-12 and F1A +54.06 kA-turn, and cohort/probe-external.log and cohort/probe-applied.log carry the 6.063/1.677 and 0.397 Wb readings the record quotes.",
+    "fit": "The scripts follow the neighbouring diiid_xpoint_* drivers and the naming checks are clean, but scripts/prototypes/diiid_xpoint_coil_correction/measure.py:44 is 90 characters against pyproject.toml:201's line-length of 88 and is the only lint finding among the added scripts.",
+    "goal_fidelity": "The eight-arm table at docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html:28 carries residual, convergence, termination, in-plasma extrema, support, both lower-X offset components and the share for all four rows on both arms, and the record states the movement as unmeasured rather than zero.",
+    "reuse": "measure.py, fit.py and render.py wrap existing owners (diiid_xpoint_held_nodes/measure.py, diiid_xpoint_attribution/attribute.py, diiid_xpoint_profile_extent/render.py), but scripts/prototypes/diiid_xpoint_coil_correction/batch.py:20-103 duplicates the cohort runner owned by scripts/prototypes/diiid_xpoint_profile_extent/batch.py:27-160 instead of importing it.",
+    "scope_discipline": "Every path in the commit-by-commit diff sits under the three declared write paths (scripts/prototypes/diiid_xpoint_coil_correction/, the fragment and docs/figures/diiid-xpoint-coil-correction/), and no nova/ or tests/ file changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to measure how far the lower X-point moves when the fitted conductor-field mismatch is removed from the measured currents; scripts/prototypes/diiid_xpoint_coil_correction/batch.py:11 runs both arms on all four rows and the record reports the movement as unmeasured because the two terminal states are byte-identical.\nVERDICT done_when: the done_when's quantitative measure is the two-arm table plus the per-conductor check; the worker records it in a fragment rather than a suite, and I re-read the receipts behind it (cohort/summary.json, cohort/probe-external.log, cohort/probe-applied.log) and the md5 identity of terminal.npz across the two arms rather than re-running the solve.\nVERDICT write_paths: read the manifest's declared paths and the commit-by-commit diff; all thirteen changed paths sit inside scripts/prototypes/diiid_xpoint_coil_correction/, the fragment and docs/figures/diiid-xpoint-coil-correction/.\nVERDICT manifest: read; it records the six commits, the titan job 1315558 and the rigel probe jobs 1315756 and 1315771, states the corrected arms are identical to the measured ones, and reports the published-fit disagreement under outside_scope.\nVERDICT diff: read all seven commits (b452d0ed8..0132d0250) against 17b416ba3; they add the batch driver, fit, measure hook, render wrapper, summarizer, two probes, the fragment and two SVG figures with their window JSON.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py:_source_current, nova/equilibrium/forward.py:ForwardProfile.solve\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html:28 carries residual, convergence, termination, extrema, support, both offset components and share for all eight arms.\nSCORE evidence: 18\nJUSTIFICATION evidence: cohort/summary.json reconciles 137D 2.360 cm and F1A +54.06 kA-turn, cohort/probe-applied.log carries the 0.397 Wb reading the record quotes, and terminal.npz is md5-identical across the two arms.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every diff path sits under the three declared write paths listed in the manifest, and no nova/ or tests/ file changed.\nSCORE durability: 5\nJUSTIFICATION durability: scripts/prototypes/diiid_xpoint_coil_correction/measure.py:83 asserts only the import provenance, so no test fails if the fit or the arm comparison regresses.\nSCORE fit: 15\nJUSTIFICATION fit: scripts/prototypes/diiid_xpoint_coil_correction/measure.py:44 is 90 characters against pyproject.toml:201's line-length of 88.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/diiid_xpoint_coil_correction/batch.py:55 duplicates the runner owned by scripts/prototypes/diiid_xpoint_profile_extent/batch.py:27 rather than importing it.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html:41 non-blocking: the per-conductor table covers only 137D and 146D, so 179L's different fit is not tabulated beside its measured currents.\nFINDING scripts/prototypes/diiid_xpoint_coil_correction/batch.py:55 non-blocking: environment() and run_all() duplicate the cohort runner owned by scripts/prototypes/diiid_xpoint_profile_extent/batch.py:27 instead of importing it.\nFINDING scripts/prototypes/diiid_xpoint_coil_correction/measure.py:44 non-blocking: the line is 90 characters against the project's ruff line-length of 88 and is the only lint finding in the added scripts.",
+  "review_run_id": "r-20261114T183100437723-review-of-diiid-xpoint-coil-correction-0132d02503d0",
+  "reviewed_base_sha": "17b416ba373f6d3c82c0a61e7370414495440a0e",
+  "reviewed_head_sha": "0132d02503d0a4949b44b4fbc9cc5bc75d362566",
+  "reviewed_run_id": "r-20261114T143301171737-diiid-xpoint-coil-correction",
+  "scores": {
+    "durability": 5,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T19:27:59.686086+00:00",
+  "total": 78
+}

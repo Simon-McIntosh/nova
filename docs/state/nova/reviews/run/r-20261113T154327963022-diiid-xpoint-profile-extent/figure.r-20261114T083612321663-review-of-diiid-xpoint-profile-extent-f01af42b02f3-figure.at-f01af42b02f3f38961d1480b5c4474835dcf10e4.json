@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "canvas_px": [
+    1714,
+    882
+  ],
+  "completed_at": "2026-11-14T08:59:51.768Z",
+  "dispatched_at": "2026-11-14T08:36:40Z",
+  "drawing_script": "scripts/prototypes/diiid_xpoint_profile_extent/render.py",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_xpoint_profile_extent/render.py",
+      "id": "f4f27186fb9",
+      "line": 229,
+      "severity": "non-blocking",
+      "summary": "On both frame-137 panels the EFIT magnetic-axis marker is drawn underneath the solved one and cannot be found by a reader. Both arms are drawn through the same style -> draw_nulls pass with zorder_markers=12 (render.py:229,243), the reference arm first and the solved arm last, so where the two axes coincide the filled blue triangle covers the hollow EFIT triangle. Measured on the rendered PNG: in the 137D base whole-vessel panel the hollow triangle survives only as two dark specks at the upper corners of the blue triangle (its top bar and both upper vertices), and in the 137D edge whole-vessel panel the same two specks are the only trace of it; a reader sees a filled triangle wearing two stray dark marks rather than the legend's hollow triangle. On 146L the two axes are far enough apart that both markers read cleanly (hollow triangle 25 px up and left of the filled one), so this is a coincidence-in-the-data overlap. It does not withhold the datum - the two axes agree to within the marker's own footprint of about 1 px, which is the message - but the legend announces a marker that is invisible on the figure the legend sits over, and the surviving specks read as a drawing fault."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261114T083612321663-review-of-diiid-xpoint-profile-extent-f01af42b02f3-figure",
+  "reviewed_base_sha": "3d98ff615c7beeea56357e68ff87c7596b57dc27",
+  "reviewed_head_sha": "f01af42b02f3f38961d1480b5c4474835dcf10e4",
+  "reviewed_images": {
+    "edge-profiles.png": "docs/figures/diiid-xpoint-profile-extent/edge-profiles.svg",
+    "frame-137-diverted-lower-xpoint.png": "docs/figures/diiid-xpoint-profile-extent/frame-137-diverted-lower-xpoint.svg",
+    "frame-146-limited-lower-xpoint.png": "docs/figures/diiid-xpoint-profile-extent/frame-146-limited-lower-xpoint.svg"
+  },
+  "reviewed_run_id": "r-20261113T154327963022-diiid-xpoint-profile-extent",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "edge-profiles.svg": [
+      "RUBRIC legibility: passes - every panel now prints its own y scale. Measured on the rendered PNG: the three p' panels carry the tick labels 0.000/-0.015/-0.030 at rows 166/217/269, 402/453/504 and 637/689/740 (tick spacing 51-52 px per 0.015 in all three), and all three FF' panels carry 0.02/0.00/-0.02/-0.04 at rows 175/213/252/290, 411/449/487/526 and 646/685/723/761 (spacing 38-39 px per 0.02 in all three). The half of the figure the previous round found unreadable - the FF' arm comparison - can now be read in magnitude on every row.",
+      "RUBRIC data_ink: passes - the two arms carry the weight at 3.0 pt, the extraction knots are 7 px open circles sitting on the blue curve, and no ink is spent on anything the figure does not ask a question about.",
+      "RUBRIC decoration: passes - white ground, no gridline, no fill, no gradient, no shading; top and right spines are removed.",
+      "RUBRIC contrast: passes - text renders at 10.8:1 against white (mean text pixel 61,61,60) and the solved-arm blue at 5.2:1, so the series reads at its thin grey-dashed comparator.",
+      "RUBRIC table_form: passes - two profile quantities against normalised flux are curves; nothing here is naturally a table.",
+      "RUBRIC label_collision: passes - zero ink in the outer 1 px frame of the canvas, so no artist is clipped, and the row labels (137D/146L/179L), the two column titles, the three-entry legend and the x tick labels occupy disjoint space. The blue curves on the 146L and 179L rows sit 18 and 9 px above their bottom spines, so no line or marker is cut: the flat-bottomed appearance of the open circles there is the blue curve passing through them, not a clip."
+    ],
+    "frame-137-diverted-lower-xpoint.svg": [
+      "RUBRIC legibility: passes with a defect - both pairs read: the whole-vessel panel shows the two arms' separatrix stacks against the wall, the upper null is marked on both arms, and the 10 cm zoom resolves the two crossings, the solved null sitting up and to the right of EFIT's hollow square by the reported 0.94 cm. The defect is the magnetic-axis marker: the hollow EFIT triangle is drawn under the filled solved triangle and shows only as two dark specks at its upper corners, so the keyed marker is effectively absent from both panels. The datum is not withheld - the axes coincide within about a pixel - but the legend promises a mark the reader cannot find.",
+      "RUBRIC data_ink: passes - solved solid blue, EFIT dashed near-black, wall a thin light grey; the zero level is the one heavier stroke and it is the level the reader is asked to compare.",
+      "RUBRIC decoration: passes - axes off on every panel, no gridline, no fill and no shading band; the reference geometry is an unfilled outline.",
+      "RUBRIC contrast: passes - text is 12.6:1 on white (mean text pixel 48,51,58), the solved blue 5.2:1, and the EFIT dashes read at near-black.",
+      "RUBRIC table_form: passes - two spatial panels per arm, not a picture of a table.",
+      "RUBRIC label_collision: passes with the axis defect above - no clipped text (zero ink in the outer 1 px frame) and the two rows of notes sit clear below their panels; the one overlap is the two axis markers, recorded as the finding."
+    ],
+    "frame-146-limited-lower-xpoint.svg": [
+      "RUBRIC legibility: passes with a note - the base pair reads cleanly, with the solved null 5.13 cm from EFIT's in the zoom. In the edge pair the zoom panel carries no solved contour and no solved null, which the caption states: that state's null lies 42.9 cm above the window and its only in-window contour is an open path the zoom rule drops. The whole-vessel edge panel shows the non-converged field with contours crossing one another and the axis marker displaced high and left of EFIT's, which is the state the residual 0.0233 / converged 0 note identifies.",
+      "RUBRIC data_ink: passes - the arms carry the weight; the crossing blue contours of the non-converged edge state are that state's own field and not decoration.",
+      "RUBRIC decoration: passes - axes off, no gridline, no fill, no shading.",
+      "RUBRIC contrast: passes - text 12.5:1 on white (mean text pixel 51,52,54), solved blue 5.1:1 against the near-black EFIT dashes.",
+      "RUBRIC table_form: passes - spatial panels, not a table.",
+      "RUBRIC label_collision: passes - no clipped text, no overlap between the notes and the drawn geometry, and here both axis triangles read cleanly because the two axes are visibly apart (hollow triangle 25 px up and left of the filled one)."
+    ]
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T09:01:07.832538+00:00",
+  "total": null
+}

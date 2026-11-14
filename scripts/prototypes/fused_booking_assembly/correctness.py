@@ -21,6 +21,9 @@ def main():
     parser.add_argument("--baseline", action="store_true")
     parser.add_argument("--node-only", action="store_true")
     args = parser.parse_args()
+    args.revision = subprocess.check_output(
+        ["git", "-C", str(args.root), "rev-parse", args.revision], text=True
+    ).strip()
     args.output.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(
         prefix="booking-correctness-", dir=os.environ["TMPDIR"]

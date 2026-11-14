@@ -35,6 +35,7 @@ def load():
     )
     distances = np.linalg.norm(offset - fraction[..., None] * delta, axis=-1)
     clearance = distances.min(axis=1)
+    assert np.all(np.isfinite(clearance))
     interior = clearance > reference["steps"].max()
     return polygons, archives, reference, points, clearance, interior
 
@@ -50,6 +51,7 @@ def main():
     ).min(axis=1)
     assert interior.any() and (~interior).any()
     records = []
+    prior = json.loads((ROOT / "measurement/receipt.json").read_text())
     for s, state in enumerate(STATES):
         truth = ref["plasma"][s] + ref["coils"][s]
         bounds = ref["plasma_bound"][s] + ref["coil_bound"][s]
@@ -62,6 +64,17 @@ def main():
             interior_count=int(interior.sum()),
             boundary_count=int((~interior).sum()),
         )
+        item["reproduced_plasma"] = {
+            name: relative(value - truth, ref["plasma"][s]).tolist()
+            for name, value in routes.items()
+        }
+        for name in routes:
+            np.testing.assert_allclose(
+                item["reproduced_plasma"][name],
+                prior["states"][s][f"{name}_relative"],
+                rtol=1e-8,
+                atol=1e-12,
+            )
         for subset, mask in (
             ("all", np.ones(len(points), bool)),
             ("interior", interior),

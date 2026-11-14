@@ -21,8 +21,7 @@ run_one() {
         printf '%q ' "${command[@]}"
         printf '\n'
         printf '# job: %s; host: %s\n' "${SLURM_JOB_ID:-none}" "$(hostname)"
-        "${command[@]}"
-        result=$?
+        if "${command[@]}"; then result=0; else result=$?; fi
         echo "EXIT=$result"
     } > "$output/$name.log" 2>&1
     return "$result"

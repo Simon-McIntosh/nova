@@ -35,13 +35,13 @@ REFUSED = "#bf3446"
 def save(figure, axes, notes, output, preview):
     """Keep the common physical width when a stacked trace needs more height."""
     checked_save(figure, axes, notes, output, preview)
-    width, height = figure.get_size_inches()
+    _, height = figure.get_size_inches()
     text = re.sub(
         r'(<svg\b[^>]*\bwidth=")[^"]+', r"\g<1>31.1cm", output.read_text(), count=1
     )
     text = re.sub(
         r'(<svg\b[^>]*\bheight=")[^"]+',
-        rf"\g<1>{31.1 * height / width:.5f}cm",
+        rf"\g<1>{16 * height / CANVAS[1]:.5f}cm",
         text,
         count=1,
     )
@@ -399,7 +399,7 @@ def limited_trajectories(root, output, previews):
         for ax, values, label in zip(
             axes[:, column],
             series,
-            ("axis Z [m]", "support cells", "radial field [mT]"),
+            ("axis Z [m]", "support cells", "inactive field [mT]"),
             strict=True,
         ):
             ax.plot(np.arange(len(stages)), values, color=SOLVED, lw=3)

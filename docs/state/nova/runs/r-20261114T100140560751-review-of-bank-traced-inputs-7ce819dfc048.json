@@ -314,6 +314,46 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "af4b7b5be6d8fac0051e8952b21efdbd129e4643",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048",
+    "scratch_bytes": 198699,
+    "scratch_host": "98dci4-clu-2001.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 198699,
+        "path": "/tmp/reckon-crew-scratch/r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/c042a637-16e6-44bd-9cd2-b340a6f891dc/review-of-bank-traced-inputs-7ce819dfc048",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/_trash/r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048-20261114T102855437547Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

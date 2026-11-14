@@ -24,8 +24,8 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="44">
-<meta name="plan-modified" content="2026-11-13">
+<meta name="plan-version" content="45">
+<meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
   <main class="plan-doc">
@@ -156,6 +156,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20261113-pass-table-owed" data-who="reckon-build" data-when="2026-11-13T17:00:00Z">
     <div class="r-comment-body"><p>Correction: the per-pass table for both arms of §2's gate does not exist yet. It is owed by node <code>variadic-split</code> at <code>docs/evidence/fragments/kernel-compile-barrier/variadic-split.html</code>, the path its dispatch assigns, and §2 is not accepted without it.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20261114-variadic-split-first-attempt" data-who="reckon-build" data-when="2026-11-14T07:45:00Z">
+    <div class="r-comment-body"><p><strong>variadic-split, first attempt: not accepted, node resumed.</strong> Run <code>r-20261113T165600620184-variadic-split</code> shared the shifted and directional moment programs of the regular Hessian path. In one paired H200 job (1314468) the production row program went from 355.92 s to 145.59 s cold and from 402,141 to 174,686 instructions after the splitter. The instruction bound passes. The cold bound of 133.79 s is missed by 11.79 s. Identity fails: the 10,000-point polygon jet's value and gradients are identical, but its radial-radial Hessian differs by up to 7.7e-7 relative against the 1e-9 allowed, on an entry of magnitude 7.7e-13, and the packed-primal and production source-row byte checks fail. The filament set and all nine finite-difference Hessian cases pass. The restored-source control reproduces 402,141 instructions and zero identity difference, so the gates discriminate. The baseline edge-term suite file was OOM-killed at 134 GiB against 128 GiB, so no importer delta exists yet. Nothing is merged. The worker is resumed to find which sharing step breaks which identity, keep only identity-clean sharing, look for the remaining seconds in the near-corner weighted residual path, and rerun the suite arm at 192 GB. No tolerance or bound is changed.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261020-coarse-tie-run-phase" data-who="reckon-build" data-when="2026-10-20T07:03:00Z">
     <div class="r-comment-body"><p>From crew run <code>r-20261019T223150157038-coarse-tie-census-memory</code>, landed as evidence at merge <code>19a02ca16</code> (failed, correct refusal): a second provisioning job (sirius 1290676, 450G, 5 h) reproduced the cold compile at 7,013 s and about 378 GB, then held that memory for a further ~11,000 s in the 533-batch node loop without publishing the operand. So the jets build's cost is not only its compile: the batch loop after it also outlasts a five-hour wall at 2,132 nodes. §3's done-when (1) bounds the compile; the node that builds §3 should also report the loop's wall per batch, so a bounded compile is not followed by an unbounded run. The 500-cell coarse-tie census test stays a known failure until §3 lands. <a href="/nova/evidence/fragments/converged-forward-solve/coarse-tie-census-memory.html">evidence</a></p></div>

@@ -221,11 +221,12 @@ def test_solve_geometry_default_follows_pulse_width(monkeypatch, width, expected
     assert observed and all(mode is expected for mode in observed)
 
 
-def test_read_geometry_policy_switch_preserves_support():
+@pytest.mark.parametrize("selector", [0, 1], ids=["diverted", "limited"])
+def test_read_geometry_policy_switch_preserves_support(selector):
     from tests.test_read_wall_skip import wall_case, batch_inputs
 
     case = wall_case(target=30)
-    inputs = batch_inputs(case, (1,))
+    inputs = batch_inputs(case, (selector,))
 
     def run(mode, tracking=None):
         return jax.jit(
@@ -245,6 +246,10 @@ def test_read_geometry_policy_switch_preserves_support():
     for result in (enabled, disabled, populated):
         assert np.all(result.valid)
         for name in topology.TopologyRead._fields[:26]:
+            if name == "saddle_form" and not np.any(default.reading.normal_form_cells):
+                # A limited support has no cells consuming the unselected form.
+                assert not np.any(default.reading.x_point_valid)
+                continue
             for got, want in zip(
                 jax.tree.leaves(getattr(result.reading, name)),
                 jax.tree.leaves(getattr(default.reading, name)),
@@ -253,7 +258,9 @@ def test_read_geometry_policy_switch_preserves_support():
                 np.testing.assert_allclose(
                     got, want, atol=1e-12, rtol=1e-10, equal_nan=True
                 )
-    multiple = jax.jit(support_read.read_batch)(*batch_inputs(case, (1, 1)))
+    multiple = jax.jit(support_read.read_batch)(
+        *batch_inputs(case, (selector, selector))
+    )
     assert multiple.reading.cell_fragments is not None
     assert np.all(multiple.valid)
 

@@ -37,7 +37,7 @@ def checked_save(figure, output):
                 raise ValueError(
                     f"text overlaps: {artist.get_text()} / {other.get_text()}"
                 )
-        if artist.get_gid() == "direct-label":
+        if (artist.get_gid() or "").startswith("direct-label"):
             clear = Bbox.from_extents(box.x0 - 2, box.y0 - 2, box.x1 + 2, box.y1 + 2)
             for collection in artist.axes.collections:
                 for path in collection.get_paths():
@@ -129,7 +129,7 @@ def main():
         ax.set_ylim(bounds[:, 1])
         left += width + 0.7
     draw_coils(axes[0], coils, style=style)
-    for polygon, owner in zip(coils, owners, strict=True):
+    for index, (polygon, owner) in enumerate(zip(coils, owners, strict=True)):
         name = source["coil_names"][int(owner)]
         low, high = polygon.min(0), polygon.max(0)
         centre = (low + high) / 2
@@ -146,7 +146,7 @@ def main():
             va="bottom" if name.startswith("PF") else "center",
             fontsize=14,
             color="#333333",
-            gid="direct-label",
+            gid=f"direct-label-{index}",
             zorder=7,
         )
     figure.legend(

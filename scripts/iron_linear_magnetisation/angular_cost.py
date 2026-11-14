@@ -37,7 +37,8 @@ def main():
     experiment._phi_rule = graded_rule
     cells = iron._mesh(shell(), 0.04)
     geometry = tiled.linear_magnetisation_geometry(cells.polygons)
-    edge, weight, norm, _ = tiled._polygon_current_geometry(cells.polygons)
+    edge, weight, norm, incidence = tiled._polygon_current_geometry(cells.polygons)
+    areas = np.asarray(incidence.sum(axis=1)).ravel()
     centres = np.mean(edge[:, :2], axis=0).T
     diameters = np.max(
         np.hypot(edge[:, 2] - edge[:, 0], edge[:, 3] - edge[:, 1]), axis=0
@@ -100,6 +101,11 @@ def main():
         )
         for nodes in (8, 12, 16, 24, 32, 48):
             after, compiled, executed = evaluate(experiment, nodes, points, indices)
+            zero = scale == 0
+            assert np.all(before[zero] == 0) and np.all(after[zero] == 0)
+            active = ~zero
+            assert np.isfinite(before).all() and np.isfinite(after).all()
+            density_scale = areas[indices]
             row["rows"].append(
                 dict(
                     bucket=label,
@@ -111,10 +117,19 @@ def main():
                     compile_seconds=compiled,
                     execute_seconds=executed,
                     difference_over_absolute_edge_sum=float(
-                        np.max(np.abs(after - before) / scale)
+                        np.max(np.abs(after[active] - before[active]) / scale[active])
                     ),
                     difference_over_max_entry=float(
                         np.max(np.abs(after - before)) / np.max(np.abs(before))
+                    ),
+                    zero_scale_controls=int(zero.sum()),
+                    density_max_relative=float(
+                        np.max(np.abs(after - before) * density_scale)
+                        / np.max(np.abs(before) * density_scale)
+                    ),
+                    density_frobenius_relative=float(
+                        np.linalg.norm((after - before) * density_scale)
+                        / np.linalg.norm(before * density_scale)
                     ),
                     frobenius_relative=float(
                         np.linalg.norm(after - before) / np.linalg.norm(before)

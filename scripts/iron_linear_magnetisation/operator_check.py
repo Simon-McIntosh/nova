@@ -61,6 +61,7 @@ def main():
                 [
                     "-p",
                     "no:cacheprovider",
+                    "--timeout=1800",
                     "-q",
                     "tests/test_magnetisation.py::test_linear_shell_operator_pin",
                     "-s",

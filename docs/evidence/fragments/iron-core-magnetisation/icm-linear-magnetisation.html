@@ -103,13 +103,13 @@
   <table>
     <thead><tr><th>spacing [mm]</th><th>cells</th><th>unknowns</th><th>minimum λ</th><th>maximum λ</th><th>Gram symmetry defect</th><th>maximum λ without 2πr</th></tr></thead>
     <tbody>
-      <tr><td>200</td><td>6</td><td>36</td><td>7.0764246e-5</td><td>0.9952702042</td><td>8.97e-17</td><td>1.9203930164</td></tr>
-      <tr><td>160</td><td>8</td><td>48</td><td>0.0026778194</td><td>0.9744377724</td><td>1.08e-16</td><td>2.1228529691</td></tr>
+      <tr><td>200</td><td>6</td><td>36</td><td>7.0764246e-5</td><td>0.9952702042</td><td>9.18e-17</td><td>1.9203930164</td></tr>
+      <tr><td>160</td><td>8</td><td>48</td><td>0.0026778194</td><td>0.9744377724</td><td>1.21e-16</td><td>2.1228529691</td></tr>
     </tbody>
   </table>
   <p>Both full-basis spectra lie in [0, 1] within 1e-10. The declared mutation
   removes <code>2πr</code> only from the polynomial Gram. Both tests then fail
-  their upper-bound assertion: <code>2 failed, 56 deselected</code>,
+  their upper-bound assertion: <code>2 failed, 57 deselected</code>,
   <code>EXIT=1</code>. The ordinary head has no failing test ids.
   <code>negative-control.log</code> contains the runner's assertions and
   summary. The local nonlinear-projection test and a differential-Jacobian
@@ -143,15 +143,15 @@
   each revision in its own archived tree with a local index: base
   <code>60d418bb85426142f3ca0a5f7a45afc4232b3255</code>,
   <code>57 passed, 9 deselected</code>; head
-  <code>300dc39aedc7836229c564aeff622c614bfa0021</code>,
-  <code>62 passed, 9 deselected</code>. Both end in <code>EXIT=0</code>.
+  <code>bb00950f7a0078e73a49641e7f24cb2dc19771e2</code>,
+  <code>63 passed, 9 deselected</code>. Both end in <code>EXIT=0</code>.
   This includes the existing grid-digest and constant-spectrum tests.</p>
   <!-- measured-suites -->
   <p>The complete unfiltered baseline and optimized-head suite arms are running
   on <code>rigel</code>; their completed JSON receipts belong in the manifest.</p>
   <!-- measured-suites-end -->
   <p>The P100 shell run uses a clean archived tree at
-  <code>300dc39aedc7836229c564aeff622c614bfa0021</code> and verifies the executed
+  <code>bb00950f7a0078e73a49641e7f24cb2dc19771e2</code> and verifies the executed
   measurement script's git blob
   <code>9f6be671d4f6d0d2da66524b315378ecba882db8</code>. Receipts record the
   imported module, working directory, float64 assertion, device kind, lane,
@@ -162,8 +162,8 @@
   <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/</code>.
   Gate and control logs are under
   <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/</code>,
-  in <code>fast-gate/</code>, <code>suites/</code> and
-  <code>head-suites/</code>. This record measures the closed-shell candidate;
+  in <code>adaptive-fast/</code>, <code>suites/</code> and
+  <code>adaptive-head-suites/</code>. This record measures the closed-shell candidate;
   it neither runs WEST nor records the formulation decision.</p>
 </main>
 </body>

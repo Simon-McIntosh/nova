@@ -9,6 +9,58 @@ from pathlib import Path
 from scripts.prototypes.carried_read_refresh.run import compare
 
 
+def cpu_evidence(run):
+    """Keep completed compatibility and mutation checks beside the timing."""
+    audit = json.loads((run / "per-file/audit.json").read_text())
+    assert not audit["added_head_failures"]
+    assert audit["totals"]["baseline"] == audit["totals"]["after"]
+    scoped = json.loads((run / "default-gate/receipts.json").read_text())
+    after, negative = scoped["after"], scoped["negative"]
+    assert after["completed"] and after["exit_status"] == 0
+    assert negative["completed"] and negative["exit_status"] != 0
+    assert set(negative["failure_ids"]) - set(after["failure_ids"])
+    after_summary = Path(after["log_path"]).read_text().splitlines()[-2]
+    negative_summary = Path(negative["log_path"]).read_text().splitlines()[-2]
+    body = [
+        '<h3 id="carried-read-refresh-correctness">CPU comparison</h3>',
+        "<p>Each compatibility file ran in a separate fresh process with "
+        "a unique temporary directory. The baseline is "
+        f"<code>{audit['baseline_revision']}</code>; the measured head is "
+        f"<code>{audit['measured_head']}</code>. All twenty file logs were "
+        "audited against their receipts.</p>",
+        "<table><thead><tr><th>Arm</th><th>Completed files</th>"
+        "<th>Passed</th><th>Failed</th><th>Skipped</th>"
+        "<th>Incomplete files</th></tr></thead><tbody>",
+    ]
+    for arm in ("baseline", "after"):
+        totals = audit["totals"][arm]
+        body.append(
+            f"<tr><td>{arm}</td><td>{totals['completed_files']}</td>"
+            f"<td>{totals['passed']}</td><td>{totals['failed']}</td>"
+            f"<td>{totals['skipped']}</td>"
+            f"<td>{totals['incomplete_files']}</td></tr>"
+        )
+    body += [
+        "</tbody></table>",
+        "<p>No added head failures were observed. The three failing IDs match; "
+        "both batch files terminate with <code>EXIT=-9</code> in both arms. "
+        "The runner completed its loop, but SLURM records "
+        "<code>OUT_OF_MEMORY</code> and four OOM kills. These shared failures "
+        "and incomplete files are retained under the authorized delta rule; "
+        "this is not a fully passing suite.</p>",
+        f"<p>The full-refresh default is pinned at <code>{after['revision']}"
+        f"</code>. Its scoped suite reports <code>{escape(after_summary)}</code>. "
+        "Corrupting the reuse mask reports "
+        f"<code>{escape(negative_summary)}</code> and fails head-passing tests. "
+        "The base "
+        "has no scoped test file and its arm is explicitly unarmed. "
+        f"Receipts: <code>{escape(str(run / 'default-gate'))}</code>; "
+        f"per-file audit: <code>{escape(str(run / 'per-file/audit.json'))}</code>."
+        "</p>",
+    ]
+    return body
+
+
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("run", type=Path)
@@ -93,8 +145,26 @@ def main():
 
     body = [
         '<section id="carried-read-refresh-result">',
-        "<h2>Selective continuous fragment refresh</h2>",
+        "<h2>Faster carried reads; full refresh retained by default</h2>",
     ]
+    regressions = [
+        row
+        for row in summary["comparisons"]
+        if row["kind"] == "slice" and row["gain"] < -row["margin"]
+    ]
+    assert regressions, "the default decision requires a resolved slice regression"
+    single = next(row for row in regressions if row["width"] == 1)
+    body.append(
+        "<p>Selective refresh improves the isolated carried read at every "
+        "measured width, but increases complete single-pulse forward-slice wall "
+        f"by {-single['gain']:.2%}, beyond the {single['margin']:.0%} decision "
+        "margin. Widths 16 and 64 have "
+        "unresolved complete-slice differences. The support read therefore "
+        "selects full refresh by default; selective refresh remains available "
+        "through <code>topology.refresh_at_stationary_points(reuse=True)</code>."
+        " The table records the measured revision before that default change; "
+        "it does not claim a second timing run at the changed default.</p>"
+    )
     body += [
         "<p>The carried read retains conic fragments only when their signed "
         "coefficients are unchanged, or a conservative polynomial bound certifies "
@@ -150,8 +220,10 @@ def main():
                     if row["gain"] < -row["margin"]
                     else "unresolved difference"
                 )
+                direction = "lower" if row["gain"] >= 0 else "higher"
                 body.append(
-                    f"<p>Width {row['width']}: {row['gain']:.2%} lower wall; "
+                    f"<p>Width {row['width']}: {abs(row['gain']):.2%} "
+                    f"{direction} wall; "
                     f"margin {row['margin']:.2%}; {verdict}.</p>"
                 )
     source = (
@@ -179,6 +251,7 @@ def main():
         "<code>52f8d4fb9e60dbdbe1530e8b64a171d3bb6470fb5cf73a1ddcf760895d09a0e9"
         "</code>.</p>"
     )
+    body.extend(cpu_evidence(args.run))
     body.append("</section>")
     args.fragment.parent.mkdir(parents=True, exist_ok=True)
     args.fragment.write_text("\n".join(body) + "\n")

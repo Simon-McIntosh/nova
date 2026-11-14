@@ -14,10 +14,10 @@
   <h2 id="icm-linear-magnetisation-result">Piecewise-linear magnetisation on the closed shell</h2>
   <!-- measured-result -->
   <p>The 40 mm linear shell reaches <strong>0.0625439 % worst-probe error at
-  1,368 unknowns</strong>, below the 0.5 % target. The observed constant-basis
-  graded target crossing uses 26,820 unknowns, so this measured coarse linear
-  point uses 19.6 times fewer. The 20 and 10 mm arms remain in progress; the
-  refinement orders are not yet asserted.</p>
+  1,368 unknowns</strong>, below the 0.5 % target. The observed
+  graded constant target crossing uses 26,820 unknowns, so this measured
+  linear point uses 19.6 times fewer. Completed uniform spacings:
+  40, 20 mm. The 10 mm receipt remains pending.</p>
   <!-- measured-result-end -->
 
   <h3 id="icm-linear-magnetisation-route">Bound-current route and existing kernel owners</h3>
@@ -127,19 +127,20 @@
   study. The finite loop is retained so both bases measure the same control.</p>
   <!-- measured-table -->
   <table>
-    <thead><tr><th>spacing [mm]</th><th>cells</th><th>unknowns</th><th>error at (2, 0) [%]</th><th>error at (0, 2) [%]</th><th>error at (3, 1) [%]</th><th>worst error [%]</th></tr></thead>
-    <tbody><tr><td>40</td><td>228</td><td>1,368</td><td>0.0216019</td><td>0.0625439</td><td>0.000239244</td><td>0.0625439</td></tr></tbody>
+    <thead><tr><th>spacing [mm]</th><th>cells</th><th>unknowns</th><th>(2, 0) error [%]</th><th>(0, 2) error [%]</th><th>(3, 1) error [%]</th><th>worst [%]</th><th>finite-loop worst [%]</th></tr></thead>
+    <tbody><tr><td>40</td><td>228</td><td>1,368</td><td>0.02160188</td><td>0.0625439</td><td>0.0002392439</td><td>0.0625439</td><td>0.01529066</td></tr><tr><td>20</td><td>828</td><td>4,968</td><td>0.03513736</td><td>0.05080213</td><td>0.0110901</td><td>0.05080213</td><td>0.001760174</td></tr></tbody>
   </table>
-  <p>On the Tesla P100, the 40 mm assembly takes 810.445 s; the solve including
-  assembly takes 816.413 s, and the total including exterior field evaluation
-  takes 831.398 s. These are fresh-process elapsed times, including any
-  compilation required by the persistent-cache state; compile and execution
-  are not separately timed.
-  One Newton correction gives a relative material residual of 1.37316e-15.</p>
-  <p>The constant comparison is the observed graded 13,410-cell result:
-  0.397396 % worst-probe error, with two unknowns per cell. It is an observed
-  target crossing, not a claim about the minimal constant-basis mesh. Linear
-  refinement and its successive-halving orders remain pending.</p>
+  <p>Primary errors retain the dipole reference. The last column uses the independently checked finite-loop reference below.</p>
+  <table>
+    <thead><tr><th>spacing [mm]</th><th>lane</th><th>assembly [min]</th><th>solve incl. assembly [min]</th><th>total incl. field [min]</th><th>Newton steps</th><th>relative residual</th></tr></thead>
+    <tbody><tr><td>40</td><td>gpu</td><td>13.507</td><td>13.607</td><td>13.857</td><td>1</td><td>1.37e-15</td></tr><tr><td>20</td><td>gpu</td><td>27.443</td><td>27.596</td><td>27.824</td><td>1</td><td>1.7e-15</td></tr></tbody>
+  </table>
+  <p>All these rows ran on a Tesla P100-PCIE-16GB. Times include any compilation required by the persistent-cache state; compile and execution are not separately timed. The last column is the terminal relative material residual.</p>
+  <table>
+    <thead><tr><th>halving [mm]</th><th>reference</th><th>order at (2, 0)</th><th>order at (0, 2)</th><th>order at (3, 1)</th></tr></thead>
+    <tbody><tr><td>40 → 20</td><td>dipole</td><td>-0.7018</td><td>0.3000</td><td>-5.5346</td></tr><tr><td>40 → 20</td><td>finite loop</td><td>3.1189</td><td>3.0189</td><td>3.0279</td></tr></tbody>
+  </table>
+  <p>The constant comparison is the observed graded 13,410-cell result: 0.397396 % worst-probe error, with two unknowns per cell. It is an observed target crossing, not a claim about the minimal constant-basis mesh. The 10 mm receipt remains pending.</p>
   <!-- measured-table-end -->
   <p>The fresh constant 40 mm arm reproduces the previous P100 shielding
   vector bit for bit: <code>[57.05106693488571, 54.619292861196286,
@@ -179,13 +180,13 @@
   <!-- measured-figure -->
   <figure>
     <img src="/nova/figures/iron-core-magnetisation/icm-linear-magnetisation/error-against-unknowns.svg" alt="Measured worst-probe shielding error against unknowns for uniform constant, graded constant and linear magnetisation.">
-    <figcaption>The μr = 1000 shell at the three stated probes. Circles show
-    the previous uniform constant-basis P100 measurements; open squares show
-    the graded constant-basis CPU measurements. The blue diamond is the
-    completed linear 40 mm P100 arm; the 20 and 10 mm arms are pending. Counts
-    use two unknowns per constant cell and six per linear cell. The dotted grey
-    line is 0.5 %. The save check validates every text boundary and text overlap;
-    the SVG was rendered to PNG and visually inspected before committing.</figcaption>
+    <figcaption>The μr = 1000 shell at the three stated probes. Circles show the
+    previous uniform constant P100 measurements; open squares show the graded
+    constant CPU measurements. Blue diamonds show the completed linear 40, 20 mm
+    P100 arms. Counts use two unknowns per constant cell and six per linear cell.
+    The dotted grey line is 0.5 %. Primary errors retain the dipole reference,
+    including its finite-loop offset; the separate table gives finite-loop orders.
+    The SVG passed its on-save text checks, was rendered to PNG and visually inspected.</figcaption>
   </figure>
   <!-- measured-figure-end -->
 

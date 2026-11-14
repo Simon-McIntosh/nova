@@ -56,6 +56,7 @@ def main():
         / "data-ink.mplstyle"
     )
     plt.rcParams["svg.fonttype"] = "none"
+    plt.rcParams["svg.hashsalt"] = "magnetisation-basis"
     fig, axis = plt.subplots(figsize=(WIDTH_INCHES, HEIGHT_INCHES), dpi=100)
     for label, values, colour, dash, marker, width, layer in (
         ("constant, uniform", constant, CONSTANT, "--", "o", 2.6, 3),
@@ -127,7 +128,7 @@ def main():
     svg = re.sub(
         r'width="[^"]+" height="[^"]+"', 'width="31.111cm" height="16cm"', svg, count=1
     )
-    args.output.write_text(svg)
+    args.output.write_text("\n".join(line.rstrip() for line in svg.splitlines()) + "\n")
     print(
         f"checked {len(names)} text artists; every major tick labelled; {args.output}"
     )

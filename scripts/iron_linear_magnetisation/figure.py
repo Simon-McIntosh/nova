@@ -22,6 +22,20 @@ from scripts.iron_graded_refinement.figure import (
 )  # noqa: E402
 
 
+def save_figure(fig, output, png):
+    """Apply the common slide canvas and check its text before publishing."""
+    fig.set_size_inches(WIDTH_INCHES, HEIGHT_INCHES)
+    names = save_checked(fig, str(output), str(png))
+    svg = re.sub(
+        r'width="[^"]+" height="[^"]+"',
+        'width="31.111cm" height="16cm"',
+        output.read_text(),
+        count=1,
+    )
+    output.write_text("\n".join(line.rstrip() for line in svg.splitlines()) + "\n")
+    return names
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--linear", type=Path, required=True)
@@ -37,6 +51,13 @@ def main():
         if label.startswith("uniform") and row["converged"]
     ]
     linear = []
+    finite = []
+    from scripts.iron_linear_magnetisation.reference import exterior_reference
+    from scripts.iron_linear_magnetisation.controls import loop, SHELL_PROBES
+
+    reference_shielding = np.linalg.norm(loop(SHELL_PROBES), axis=1) / np.linalg.norm(
+        exterior_reference(10)[1], axis=1
+    )
     graded = []
     if args.graded:
         graded = [
@@ -48,6 +69,17 @@ def main():
         row = json.loads(path.read_text())
         if row.get("completed") and row["converged"]:
             linear.append((row["unknowns"], row["worst_error"] * 100))
+            finite.append(
+                (
+                    row["unknowns"],
+                    float(
+                        np.abs(
+                            np.asarray(row["shielding"]) / reference_shielding - 1
+                        ).max()
+                    )
+                    * 100,
+                )
+            )
     if not constant or not linear:
         raise SystemExit("both measured basis families are required")
     plt.style.use(
@@ -60,7 +92,8 @@ def main():
     fig, axis = plt.subplots(figsize=(WIDTH_INCHES, HEIGHT_INCHES), dpi=100)
     for label, values, colour, dash, marker, width, layer in (
         ("constant, uniform", constant, CONSTANT, "--", "o", 2.6, 3),
-        ("linear", linear, LINEAR, "-", "D", 3.0, 4),
+        ("linear, dipole", linear, LINEAR, "--", "D", 2.6, 4),
+        ("linear, finite loop", finite, LINEAR, "-", "D", 3.0, 5),
     ):
         values = np.asarray(sorted(values))
         axis.plot(
@@ -93,7 +126,7 @@ def main():
     )
     axis.set_xscale("log")
     axis.set_yscale("log")
-    all_values = np.array(constant + graded + linear)
+    all_values = np.array(constant + graded + linear + finite)
     low, high = all_values[:, 0].min() / 1.25, all_values[:, 0].max() * 1.25
     bottom, top = min(0.5, all_values[:, 1].min()) / 1.7, all_values[:, 1].max() * 1.6
     axis.set_xlim(low, high)
@@ -118,17 +151,11 @@ def main():
     axis.set_xlabel("magnetisation unknowns")
     axis.set_ylabel("worst-probe shielding error [%]")
     axis.spines[["top", "right"]].set_visible(False)
-    fig.legend(loc="upper center", ncol=4, frameon=False, bbox_to_anchor=(0.5, 0.99))
-    fig.tight_layout(rect=(0.01, 0.01, 0.99, 0.91))
+    fig.legend(loc="upper center", ncol=3, frameon=False, bbox_to_anchor=(0.5, 0.99))
+    fig.tight_layout(rect=(0.01, 0.01, 0.99, 0.85))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.png.parent.mkdir(parents=True, exist_ok=True)
-    names = save_checked(fig, str(args.output), str(args.png))
-    # Physical dimensions preserve the slide size independently of SVG pixels.
-    svg = args.output.read_text()
-    svg = re.sub(
-        r'width="[^"]+" height="[^"]+"', 'width="31.111cm" height="16cm"', svg, count=1
-    )
-    args.output.write_text("\n".join(line.rstrip() for line in svg.splitlines()) + "\n")
+    names = save_figure(fig, args.output, args.png)
     print(
         f"checked {len(names)} text artists; every major tick labelled; {args.output}"
     )

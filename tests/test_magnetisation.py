@@ -1205,3 +1205,46 @@ def test_linear_shell_operator_pin():
     relative = np.linalg.norm(actual - expected) / np.linalg.norm(expected)
     print("40 mm shell-cell operator relative difference:", relative)
     assert relative <= 1e-12
+
+
+def test_paired_polygon_tiles_reuse_one_shape_and_preserve_cartesian_rows():
+    from nova.biot import tiledassembly as tiled
+
+    triangle = np.array([[1.0, 0.0], [1.01, 0.0], [1.0, 0.01]])
+    edge, weight, norm = tiled.pad_batch(
+        [triangle, triangle + [0.1, 0.0], triangle + [0.0, 0.1]], edge_count=3
+    )
+    points = np.array([[0.8, 0.1], [2.0, 0.2], [1.001, 0.002]])
+    cartesian = tiled.tile_evaluator(
+        tiled.TilePlan(3, 3, 9, 16, 48), batched=True, edge_count=3
+    )
+    expected = np.array(cartesian(*points.T, edge, weight, norm))[
+        :, np.arange(3), np.arange(3)
+    ]
+    for flux_only in (False, True):
+        paired = tiled.tile_evaluator(
+            tiled.TilePlan(3, 3, 8, 16, 48),
+            batched=True,
+            edge_count=3,
+            flux_only=flux_only,
+            pairwise=True,
+        )
+        actual = np.array(paired(*points.T, edge, weight, norm))
+        np.testing.assert_allclose(
+            actual, expected[:1] if flux_only else expected, rtol=1e-13, atol=1e-25
+        )
+        paired(*points[:1].T, edge[:, :, :1], weight[:, :1], norm[:1])
+        assert paired.compile_count == 1
+        with pytest.raises(ValueError, match="one source per target"):
+            paired(*points[:1].T, edge, weight, norm)
+
+
+def test_polygon_current_routes_share_the_warm_tile_owner():
+    from nova.biot import tiledassembly as tiled
+
+    for kernel in ("quadrature", "closed"):
+        evaluator = tiled._polygon_current_evaluator(True, 192, kernel)
+        assert evaluator is tiled._polygon_current_evaluator(True, 192, kernel)
+        assert evaluator.kernel == kernel
+        assert evaluator.pairwise
+        assert evaluator.components == ("Psi",)

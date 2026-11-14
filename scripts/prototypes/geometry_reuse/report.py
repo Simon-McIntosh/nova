@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 
 
@@ -81,7 +82,18 @@ def main():
         for rows in arms.values()
         for row in rows
     ]
-    axis.set_ylim(min(all_walls) * 0.8, max(all_walls) * 1.25)
+    lower, upper = min(all_walls) * 0.8, max(all_walls) * 1.25
+    axis.set_yticks(
+        [
+            multiple * 10.0**power
+            for power in range(
+                math.floor(math.log10(lower)), math.ceil(math.log10(upper)) + 1
+            )
+            for multiple in (1, 2, 5)
+            if lower <= multiple * 10.0**power <= upper
+        ]
+    )
+    axis.set_ylim(lower, upper)
     axis.set_xlim(0.85, 75)
     axis.set_xlabel("Concurrent independent pulses")
     axis.set_ylabel("Throughput cost [ms/slice]")

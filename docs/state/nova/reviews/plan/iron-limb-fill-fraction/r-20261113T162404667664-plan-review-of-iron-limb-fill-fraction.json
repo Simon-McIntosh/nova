@@ -77,6 +77,13 @@
       "finding": "duplicate_owner-1",
       "reason": "Reuse map for the node brief: the machine-description brief will cite the twelve call sites and require the read to return the region with its fill fraction, which is what makes clause three of that section measurable.",
       "when": "2026-11-14T07:39:53.645109+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "finding": "interface_budget-1",
+      "reason": "Carried in the two node briefs: the fill and cross-field inputs are the single material-rule surface with full iron as their default, and the refusal tightens the existing iron read; neither adds a public definition, option or view.",
+      "when": "2026-11-14T07:40:05.439101+00:00"
     }
   ],
   "responses": {
@@ -91,6 +98,12 @@
       "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
       "reason": "Reuse map for the node brief: the machine-description brief will cite the twelve call sites and require the read to return the region with its fill fraction, which is what makes clause three of that section measurable.",
       "when": "2026-11-14T07:39:53.645109+00:00"
+    },
+    "interface_budget-1": {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "reason": "Carried in the two node briefs: the fill and cross-field inputs are the single material-rule surface with full iron as their default, and the refusal tightens the existing iron read; neither adds a public definition, option or view.",
+      "when": "2026-11-14T07:40:05.439101+00:00"
     },
     "reuse_search-1": {
       "action": "declined",

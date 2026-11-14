@@ -1,0 +1,235 @@
+<article id="ilf-six-limb-reference-checkpoint">
+  <h3>Six-limb reference passes the field-uncertainty clause</h3>
+  <p>The surface formulation constrains the net charge of each closed body.
+    The circuit's odd mirror images enforce the same constraint by parity.
+    Analytically integrated double-layer solid angles fix the exact row sum;
+    the area-weighted adjoint supplies the single-layer normal operator.
+    The normal drive is integrated around each panel using the prescribed
+    filaments' vector potential, with independent quadrature refinement.</p>
+  <p>The saved prototype states reproduce 12.7222264 and 13.4730559 Wb at
+    relative permeability 200 on 0.133333 and 0.1 m bricks: a 5.5728% change.
+    The pre-repair sphere reading of H/H₀ = 0.06146019 against 3/52 =
+    0.05769231 also reproduces. The sphere is now judged by three meshes.</p>
+  <table>
+    <caption>Sphere interior-field error relative to 3/(μᵣ + 2), with the
+      observed order between adjacent meshes. Both finest errors are below 1%.</caption>
+    <thead><tr><th>μᵣ</th><th>5,120 panels</th><th>20,480 panels</th>
+      <th>81,920 panels</th><th>Observed orders</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>1.65100%</td><td>0.41466%</td><td>0.10388%</td><td>1.9933, 1.9970</td></tr>
+      <tr><td>200</td><td>7.00951%</td><td>1.76057%</td><td>0.44106%</td><td>1.9933, 1.9970</td></tr>
+    </tbody>
+  </table>
+  <p>The largest sphere net-charge ratio is 5.02 × 10⁻¹⁷. The largest raw
+    solid-angle sum error is 2.51 × 10⁻¹⁴. Exact triangular fields agree
+    with the independent brick kernel inside and outside a cuboid.</p>
+  <table>
+    <caption>The entire seven-rung six-limb ladder. Step changes are relative to the finer rung; the largest outside column is a summary, while every individual probe step appears below.</caption>
+    <thead><tr><th>μᵣ</th><th>Size [m]</th><th>Panels</th><th>Column flux [Wb]</th><th>Flux step [%]</th><th>Vessel step [%]</th><th>Largest outside step [%]</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>0.5</td><td>1164</td><td>4.75592139</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr><td>50</td><td>0.35</td><td>2128</td><td>4.77632680</td><td>0.42722</td><td>0.49107</td><td>1.03506</td></tr>
+      <tr><td>50</td><td>0.25</td><td>4326</td><td>4.70999266</td><td>1.40837</td><td>4.91328</td><td>1.01638</td></tr>
+      <tr><td>50</td><td>0.18</td><td>8908</td><td>4.32090011</td><td>9.00490</td><td>2.13739</td><td>0.30404</td></tr>
+      <tr><td>50</td><td>0.13</td><td>18706</td><td>4.27618989</td><td>1.04556</td><td>0.22000</td><td>0.29605</td></tr>
+      <tr><td>50</td><td>0.1</td><td>35694</td><td>4.36529380</td><td>2.04119</td><td>0.60369</td><td>0.03746</td></tr>
+      <tr><td>50</td><td>0.075</td><td>68470</td><td>4.28190555</td><td>1.94746</td><td>0.88561</td><td>0.20165</td></tr>
+      <tr><td>200</td><td>0.5</td><td>1164</td><td>17.41964374</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr><td>200</td><td>0.35</td><td>2128</td><td>17.50109585</td><td>0.46541</td><td>0.82315</td><td>1.19247</td></tr>
+      <tr><td>200</td><td>0.25</td><td>4326</td><td>17.18906832</td><td>1.81527</td><td>5.40125</td><td>1.25161</td></tr>
+      <tr><td>200</td><td>0.18</td><td>8908</td><td>15.58251472</td><td>10.30998</td><td>2.38983</td><td>0.43280</td></tr>
+      <tr><td>200</td><td>0.13</td><td>18706</td><td>15.39557058</td><td>1.21427</td><td>0.24277</td><td>0.33470</td></tr>
+      <tr><td>200</td><td>0.1</td><td>35694</td><td>15.76785169</td><td>2.36101</td><td>0.62420</td><td>0.05211</td></tr>
+      <tr><td>200</td><td>0.075</td><td>68470</td><td>15.41677741</td><td>2.27722</td><td>0.96061</td><td>0.24085</td></tr>
+    </tbody>
+  </table>
+  <table>
+    <caption>Every outside-probe step and the finest reference value. Probe numbers follow the case-file order after the sixteen vessel points. Uncertainty is the largest of the two differences among 0.13, 0.1 and 0.075 m, not just the last step.</caption>
+    <thead><tr><th>μᵣ</th><th>Outside probe</th><th>0.5 → 0.35 m [%]</th><th>0.35 → 0.25 m [%]</th><th>0.25 → 0.18 m [%]</th><th>0.18 → 0.13 m [%]</th><th>0.13 → 0.1 m [%]</th><th>0.1 → 0.075 m [%]</th><th>Finest total field [mT]</th><th>Three-finest uncertainty [%]</th><th>Below 2%?</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>0</td><td>0.46317</td><td>0.76022</td><td>0.14455</td><td>0.14472</td><td>0.01175</td><td>0.13304</td><td>8.864021</td><td>0.13304</td><td>Pass</td></tr>
+      <tr><td>50</td><td>1</td><td>0.48205</td><td>0.76984</td><td>0.14452</td><td>0.14725</td><td>0.01219</td><td>0.13434</td><td>8.106911</td><td>0.13434</td><td>Pass</td></tr>
+      <tr><td>50</td><td>2</td><td>0.50794</td><td>0.78917</td><td>0.14479</td><td>0.15278</td><td>0.01308</td><td>0.13717</td><td>6.502083</td><td>0.13717</td><td>Pass</td></tr>
+      <tr><td>50</td><td>3</td><td>0.53998</td><td>0.81255</td><td>0.14767</td><td>0.15914</td><td>0.01334</td><td>0.14030</td><td>4.284832</td><td>0.14030</td><td>Pass</td></tr>
+      <tr><td>50</td><td>4</td><td>0.55010</td><td>0.82121</td><td>0.15762</td><td>0.16132</td><td>0.01061</td><td>0.14128</td><td>2.090954</td><td>0.14128</td><td>Pass</td></tr>
+      <tr><td>50</td><td>5</td><td>0.28774</td><td>0.73625</td><td>0.20508</td><td>0.08023</td><td>0.01563</td><td>0.10843</td><td>16.116845</td><td>0.10843</td><td>Pass</td></tr>
+      <tr><td>50</td><td>6</td><td>1.03506</td><td>1.01638</td><td>0.13794</td><td>0.29605</td><td>0.02237</td><td>0.20165</td><td>25.372287</td><td>0.20165</td><td>Pass</td></tr>
+      <tr><td>50</td><td>7</td><td>0.60534</td><td>0.78952</td><td>0.22830</td><td>0.18449</td><td>0.01886</td><td>0.15568</td><td>18.061215</td><td>0.15568</td><td>Pass</td></tr>
+      <tr><td>50</td><td>8</td><td>0.30435</td><td>0.65699</td><td>0.30404</td><td>0.10992</td><td>0.03746</td><td>0.11195</td><td>11.758338</td><td>0.11195</td><td>Pass</td></tr>
+      <tr><td>50</td><td>9</td><td>0.58532</td><td>0.79553</td><td>0.21873</td><td>0.18056</td><td>0.01747</td><td>0.15316</td><td>16.100377</td><td>0.15316</td><td>Pass</td></tr>
+      <tr><td>50</td><td>10</td><td>0.54777</td><td>0.78813</td><td>0.21869</td><td>0.16816</td><td>0.01885</td><td>0.14784</td><td>11.990847</td><td>0.14784</td><td>Pass</td></tr>
+      <tr><td>50</td><td>11</td><td>0.67146</td><td>0.89662</td><td>0.12302</td><td>0.18545</td><td>0.02599</td><td>0.15203</td><td>6.404081</td><td>0.15203</td><td>Pass</td></tr>
+      <tr><td>200</td><td>0</td><td>0.66800</td><td>1.08237</td><td>0.22968</td><td>0.19850</td><td>0.01186</td><td>0.18841</td><td>9.265137</td><td>0.18841</td><td>Pass</td></tr>
+      <tr><td>200</td><td>1</td><td>0.69020</td><td>1.09376</td><td>0.22932</td><td>0.20173</td><td>0.01249</td><td>0.19005</td><td>8.480226</td><td>0.19005</td><td>Pass</td></tr>
+      <tr><td>200</td><td>2</td><td>0.72219</td><td>1.11663</td><td>0.22894</td><td>0.20870</td><td>0.01379</td><td>0.19356</td><td>6.810554</td><td>0.19356</td><td>Pass</td></tr>
+      <tr><td>200</td><td>3</td><td>0.76037</td><td>1.14302</td><td>0.23119</td><td>0.21654</td><td>0.01445</td><td>0.19729</td><td>4.491213</td><td>0.19729</td><td>Pass</td></tr>
+      <tr><td>200</td><td>4</td><td>0.76960</td><td>1.14889</td><td>0.24176</td><td>0.21839</td><td>0.01137</td><td>0.19784</td><td>2.187689</td><td>0.19784</td><td>Pass</td></tr>
+      <tr><td>200</td><td>5</td><td>0.45681</td><td>1.06119</td><td>0.31331</td><td>0.12260</td><td>0.02247</td><td>0.16171</td><td>15.691642</td><td>0.16171</td><td>Pass</td></tr>
+      <tr><td>200</td><td>6</td><td>1.19247</td><td>1.21530</td><td>0.18285</td><td>0.33470</td><td>0.02178</td><td>0.24085</td><td>25.743129</td><td>0.24085</td><td>Pass</td></tr>
+      <tr><td>200</td><td>7</td><td>0.71294</td><td>1.02023</td><td>0.34505</td><td>0.21134</td><td>0.03361</td><td>0.19704</td><td>18.031490</td><td>0.19704</td><td>Pass</td></tr>
+      <tr><td>200</td><td>8</td><td>0.36745</td><td>0.90031</td><td>0.43280</td><td>0.12242</td><td>0.05211</td><td>0.15084</td><td>11.884726</td><td>0.15084</td><td>Pass</td></tr>
+      <tr><td>200</td><td>9</td><td>0.69974</td><td>1.02852</td><td>0.33103</td><td>0.20829</td><td>0.03128</td><td>0.19474</td><td>16.138345</td><td>0.19474</td><td>Pass</td></tr>
+      <tr><td>200</td><td>10</td><td>0.67576</td><td>1.02819</td><td>0.32428</td><td>0.19832</td><td>0.03111</td><td>0.19026</td><td>12.109834</td><td>0.19026</td><td>Pass</td></tr>
+      <tr><td>200</td><td>11</td><td>0.92621</td><td>1.25161</td><td>0.19875</td><td>0.25225</td><td>0.03104</td><td>0.21360</td><td>6.769548</td><td>0.21360</td><td>Pass</td></tr>
+    </tbody>
+  </table>
+  <table>
+    <caption>Finest downstream reference is the 0.075 m rung with 68,470 unknowns. Values and vector components are the receipt finest_reference rows. Field uncertainties are below 2%; flux uncertainty is stated because the sequence scatters.</caption>
+    <thead><tr><th>μᵣ</th><th>Finest flux [Wb]</th><th>Flux uncertainty [%]</th><th>Finest vessel iron rms [mT]</th><th>Vessel uncertainty [%]</th><th>Largest outside uncertainty [%]</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>4.28190555</td><td>2.04119</td><td>5.99216560</td><td>0.88561</td><td>0.20165</td></tr>
+      <tr><td>200</td><td>15.41677741</td><td>2.36101</td><td>6.67093795</td><td>0.96061</td><td>0.24085</td></tr>
+    </tbody>
+  </table>
+  <p><strong>The uncertainty verdict passes.</strong> The four finest mesh
+    ratios are 1.384615, 1.300000 and 1.333333. Each reported uncertainty is
+    the largest step among 0.13, 0.1 and 0.075 m. Vessel and every outside
+    field uncertainty are below 2%. Column-flux uncertainty is stated,
+    without a 2% bound: <strong>2.0% at μᵣ = 50 and 2.4% at μᵣ = 200</strong>
+    (unrounded 2.04119% and 2.36101%).</p>
+  <p>The live plan clause, version 9, is the authoritative basis. Its four
+    sufficiently spaced resolutions, field uncertainty limits and reported
+    flux scatter replace the withdrawn monotonicity requirement. The ladder
+    verdict code and its test evaluate this single rule. The test also checks
+    that a large penultimate field change is refused even when the final
+    change is below 2%, and that flux scatter above 2% is reported.</p>
+  <p>The stored summary now has completed=true and passed=true, with a
+    per-quantity uncertainty and limit in each convergence measure. Its
+    annulus-comparator and symmetry verdicts also pass. Re-evaluation uses
+    stored values only; no numerical solve or scheduler job was started.
+    A backup of the submitted-job summary and its old EXIT=1 log preserve
+    the measurement history. Readback confirms the reference arrays, step
+    values and finest-reference values are unchanged. The refreshed verdict
+    records its source revision and a digest of those measured values.</p>
+  <p>The 0.25 to 0.18 m flux step is 9.0049% at μᵣ = 50 and 10.3100% at
+    μᵣ = 200. Its cause remains unexplained by the receipt. Total panel counts
+    and integral checks do not establish a face-level or gap-resolution cause.</p>
+  <p>The reference is the finest 0.075 m rung with the uncertainties above.
+    The explicit column slab integral is refined independently to 0.1%.
+    Nova's annulus flux is evaluated from exact cell–slab overlap volumes,
+    without selecting whole cells by their centroids. At the coarsest surface
+    mesh the normal drive's centroid bias is 85.29%; the admitted line-integral
+    quadrature change is 2.58 × 10⁻⁸.</p>
+  <p>The declared negative control now mutates the landed surface solver:
+    disabling its area-weighted body-neutrality projection makes
+    <code>test_each_body_charge_is_deflated</code> fail with net charge
+    689.3562214 against the required absolute bound of 10⁻¹¹. The scratch
+    module import is verified, the unmutated control passes, and the mutated
+    runner records EXIT=1 in <code>negative-control-surface.log</code>.</p>
+  <p>The extended ladder is complete and the finest reference is 0.075 m.
+    The sphere benchmark and full-geometry missing-limb control remain valid.
+    Rigel job 1315360 measured the two new rungs with a twelve-hour limit
+    requested at submission. The annulus is judged by the finest surface values and
+    their last-step changes. Its small oscillations do not require a surface
+    Richardson fit and the earlier fit refusal is not a disagreement.</p>
+  <p>All values below are recomputed from the stored receipt by
+    <code>scripts/iron_limb_reference/comparison.py</code>, with an arithmetic
+    test that checks vector directions, total-field addition, mesh-change
+    denominators and the finest fallback. No new solver run or scheduler job
+    was used for this table.</p>
+  <p>The surface meshes at 0.1, 0.075 and 0.05 m have 29,966, 48,966 and
+    103,030 unknowns. Nova has 2,352, 4,224 and 9,264 cells. Last-step changes
+    below compare 0.075 with 0.05 m, relative to each method's own finest
+    value. Surface flux changes are 0.13296% and 0.15795%; vessel vector-rms
+    changes are 0.06605% and 0.06783%; the largest outside changes are
+    0.04346% and 0.04123%. These are the surface mesh uncertainties.</p>
+  <p>The selected comparison uses an admissible stored axisymmetric
+    extrapolate and otherwise its finest value. Flux errors use that selected
+    comparator as denominator; field errors use the accepted finest surface
+    field norm. Vessel values are iron-field vector rms; outside values are
+    total-field magnitudes, while their errors retain vector direction.
+    Both finest-mesh and extrapolate/fallback differences are shown to keep
+    the comparator choice explicit. Parentheses beside an extrapolate give
+    its finest-to-extrapolated correction as a percentage.</p>
+  <table>
+    <caption>Annulus flux and vessel field. Selected differences use an admissible axisymmetric extrapolate and otherwise its finest value. Every comparison passes the stated limit max(2%, the axisymmetric last mesh step). The finest-only difference remains a separate diagnostic.</caption>
+    <thead><tr><th>μᵣ</th><th>Measure</th><th>Surface finest</th><th>Surface step [%]</th><th>Nova finest</th><th>Nova step [%]</th><th>Nova extrapolate (correction)</th><th>Selected difference [%]</th><th>Allowed limit [%]</th><th>Finest difference [%]</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>flux [Wb]</td><td>5.571287</td><td>0.13296</td><td>5.512401</td><td>0.76740</td><td>5.540837 (0.5132%)</td><td>0.5496</td><td>2.0000</td><td>1.0682</td></tr>
+      <tr><td>50</td><td>vessel rms [mT]</td><td>17.586422</td><td>0.06605</td><td>17.550134</td><td>0.38258</td><td>17.556706 (0.0808%)</td><td>0.4778</td><td>2.0000</td><td>0.5580</td></tr>
+      <tr><td>200</td><td>flux [Wb]</td><td>21.124067</td><td>0.15795</td><td>20.366619</td><td>2.58953</td><td>20.713424 (1.6743%)</td><td>1.9825</td><td>2.5895</td><td>3.7191</td></tr>
+      <tr><td>200</td><td>vessel rms [mT]</td><td>19.090267</td><td>0.06783</td><td>19.009733</td><td>1.23673</td><td>19.029926 (0.3522%)</td><td>1.4121</td><td>2.0000</td><td>1.7621</td></tr>
+    </tbody>
+  </table>
+  <table>
+    <caption>Every annulus outside probe, numbered in case-file order after sixteen vessel points. All selected vector differences pass their explicitly stated comparator-mesh limit. Values are total-field magnitudes in mT.</caption>
+    <thead><tr><th>μᵣ</th><th>Measure</th><th>Surface finest</th><th>Surface step [%]</th><th>Nova finest</th><th>Nova step [%]</th><th>Nova extrapolate (correction)</th><th>Selected difference [%]</th><th>Allowed limit [%]</th><th>Finest difference [%]</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>outside 0 [mT]</td><td>3.292688</td><td>0.00650</td><td>3.271459</td><td>0.51931</td><td>3.280743 (0.2830%)</td><td>0.3628</td><td>2.0000</td><td>0.6447</td></tr>
+      <tr><td>50</td><td>outside 1 [mT]</td><td>3.039630</td><td>0.00451</td><td>3.022567</td><td>0.40989</td><td>3.028878 (0.2083%)</td><td>0.3537</td><td>2.0000</td><td>0.5613</td></tr>
+      <tr><td>50</td><td>outside 2 [mT]</td><td>2.480387</td><td>0.00218</td><td>2.470034</td><td>0.24171</td><td>2.472288 (0.0911%)</td><td>0.3265</td><td>2.0000</td><td>0.4174</td></tr>
+      <tr><td>50</td><td>outside 3 [mT]</td><td>1.658480</td><td>0.00059</td><td>1.654235</td><td>0.06860</td><td>1.654372 (0.0083%)</td><td>0.2477</td><td>2.0000</td><td>0.2559</td></tr>
+      <tr><td>50</td><td>outside 4 [mT]</td><td>0.807020</td><td>0.00092</td><td>0.805765</td><td>0.03141</td><td>Unavailable; finest used</td><td>0.1555</td><td>2.0000</td><td>0.1555</td></tr>
+      <tr><td>50</td><td>outside 5 [mT]</td><td>26.176450</td><td>0.03658</td><td>26.225705</td><td>0.12399</td><td>26.211482 (0.0543%)</td><td>0.1338</td><td>2.0000</td><td>0.1882</td></tr>
+      <tr><td>50</td><td>outside 6 [mT]</td><td>10.929780</td><td>0.00563</td><td>10.850325</td><td>0.91926</td><td>10.885132 (0.4738%)</td><td>0.5187</td><td>2.0000</td><td>0.9874</td></tr>
+      <tr><td>50</td><td>outside 7 [mT]</td><td>6.452839</td><td>0.02006</td><td>6.432033</td><td>0.34701</td><td>6.437799 (0.2969%)</td><td>0.2476</td><td>2.0000</td><td>0.4878</td></tr>
+      <tr><td>50</td><td>outside 8 [mT]</td><td>3.607792</td><td>0.04346</td><td>3.637330</td><td>1.10293</td><td>3.578721 (1.6463%)</td><td>0.8083</td><td>2.0000</td><td>0.8251</td></tr>
+      <tr><td>50</td><td>outside 9 [mT]</td><td>5.781335</td><td>0.01956</td><td>5.765063</td><td>0.26228</td><td>5.768330 (0.1950%)</td><td>0.2425</td><td>2.0000</td><td>0.3949</td></tr>
+      <tr><td>50</td><td>outside 10 [mT]</td><td>4.340036</td><td>0.01925</td><td>4.331979</td><td>0.08052</td><td>Unavailable; finest used</td><td>0.2124</td><td>2.0000</td><td>0.2124</td></tr>
+      <tr><td>50</td><td>outside 11 [mT]</td><td>2.647886</td><td>0.00748</td><td>2.651607</td><td>0.37524</td><td>Unavailable; finest used</td><td>0.1466</td><td>2.0000</td><td>0.1466</td></tr>
+      <tr><td>200</td><td>outside 0 [mT]</td><td>2.553280</td><td>0.01646</td><td>2.477502</td><td>2.20949</td><td>2.510524 (1.3153%)</td><td>1.6745</td><td>2.2095</td><td>2.9678</td></tr>
+      <tr><td>200</td><td>outside 1 [mT]</td><td>2.361718</td><td>0.01395</td><td>2.297670</td><td>1.87256</td><td>2.322032 (1.0492%)</td><td>1.6804</td><td>2.0000</td><td>2.7120</td></tr>
+      <tr><td>200</td><td>outside 2 [mT]</td><td>1.935211</td><td>0.01120</td><td>1.892096</td><td>1.31088</td><td>1.903461 (0.5971%)</td><td>1.6406</td><td>2.0000</td><td>2.2279</td></tr>
+      <tr><td>200</td><td>outside 3 [mT]</td><td>1.301032</td><td>0.00952</td><td>1.279544</td><td>0.68174</td><td>1.281929 (0.1860%)</td><td>1.4683</td><td>2.0000</td><td>1.6516</td></tr>
+      <tr><td>200</td><td>outside 4 [mT]</td><td>0.636625</td><td>0.00782</td><td>0.628319</td><td>0.32222</td><td>0.628584 (0.0421%)</td><td>1.2630</td><td>2.0000</td><td>1.3046</td></tr>
+      <tr><td>200</td><td>outside 5 [mT]</td><td>27.122151</td><td>0.03727</td><td>27.225375</td><td>0.24281</td><td>27.203903 (0.0789%)</td><td>0.3014</td><td>2.0000</td><td>0.3806</td></tr>
+      <tr><td>200</td><td>outside 6 [mT]</td><td>9.976336</td><td>0.00719</td><td>9.677726</td><td>4.14759</td><td>9.845114 (2.4340%)</td><td>2.1277</td><td>4.1476</td><td>4.5210</td></tr>
+      <tr><td>200</td><td>outside 7 [mT]</td><td>5.253910</td><td>0.01627</td><td>5.123101</td><td>1.77019</td><td>5.175373 (1.1351%)</td><td>1.5544</td><td>2.0000</td><td>2.6606</td></tr>
+      <tr><td>200</td><td>outside 8 [mT]</td><td>2.808945</td><td>0.04123</td><td>2.874627</td><td>4.08837</td><td>2.715294 (6.7137%)</td><td>3.9542</td><td>4.0884</td><td>2.5510</td></tr>
+      <tr><td>200</td><td>outside 9 [mT]</td><td>4.735293</td><td>0.01509</td><td>4.631733</td><td>1.42266</td><td>4.665715 (0.7923%)</td><td>1.5047</td><td>2.0000</td><td>2.2767</td></tr>
+      <tr><td>200</td><td>outside 10 [mT]</td><td>3.577001</td><td>0.01418</td><td>3.520701</td><td>0.71256</td><td>3.529061 (0.2371%)</td><td>1.3420</td><td>2.0000</td><td>1.5759</td></tr>
+      <tr><td>200</td><td>outside 11 [mT]</td><td>2.087159</td><td>0.01390</td><td>2.084792</td><td>1.16504</td><td>Unavailable; finest used</td><td>0.1134</td><td>2.0000</td><td>0.1134</td></tr>
+    </tbody>
+  </table>
+  <p>The largest finest-mesh outside differences are 0.9874% at μᵣ = 50
+    and 4.5210% at μᵣ = 200, both at outside probe 6. At that probe Nova's
+    last-step changes are 0.9193% and 4.1476%; the surface changes are
+    0.00563% and 0.00719%. Using admissible vector extrapolates with finest
+    fallback gives largest outside differences of 0.8083% and 3.9542%, at
+    outside probe 8; Nova's corresponding extrapolation corrections are
+    1.6463% and 6.7137%. The allowed limits at that selected worst probe
+    are 2.0000% and 4.0884%, respectively, so the control passes with its
+    comparator-mesh limit explicitly stated.</p>
+  <p><strong>At μᵣ = 200 the outside-probe agreement is limited by the
+    axisymmetric comparator's own mesh error and is not shown to 2%.</strong>
+    The six-limb uncertainty clause passes as recorded above.
+    This record retains the separate comparator caveat; it does not claim a 2% outside-probe
+    validation at μᵣ = 200. The stored surface Richardson refusal is retained
+    as a diagnostic and is not used as an acceptance condition.</p>
+  <p>The accepted surface solver is unchanged. The optional 0.0375 m Nova
+    rung was skipped by the elapsed-time rule declared before submission.
+    Nova flux extrapolates are 5.54083687 and 20.71342359 Wb, with observed
+    orders 2.2476 and 2.2802 and corrections of 0.5132% and 1.6743%.
+    The field extrapolates in the table retain the stored vector-fit
+    convention and are shown beside the conservative finest-field reading.</p>
+  <table>
+    <caption>Full-geometry sixfold symmetry control. Defect is the resolved
+      outside iron-field change after a 60° shift divided by its field norm.
+      Pass requires signal above max(0.001, ten times symmetric noise).</caption>
+    <thead><tr><th>μᵣ</th><th>Symmetric noise</th><th>Missing-limb defect</th><th>Signal / noise</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>50</td><td>7.876739 × 10⁻¹⁵</td><td>0.732769681</td><td>9.3030 × 10¹³</td><td>Pass</td></tr>
+      <tr><td>200</td><td>9.656770 × 10⁻¹⁵</td><td>1.016970354</td><td>1.0531 × 10¹⁴</td><td>Pass</td></tr>
+    </tbody>
+  </table>
+  <p>Both control receipts are complete. The historical annulus job exited 1
+    under its Richardson-only acceptance rule; the symmetry job exited 0.
+    Their measured values are unchanged by this direct comparison. All
+    twelve annulus method/permeability rows contain finite, nonzero,
+    nonuniform probe fields; all four resolved symmetry arrays contain
+    144 angles, 28 probes and three components with nonzero finite norms.</p>
+  <p>Receipts beneath
+    <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/reference/</code>:
+    <code>six-limb-extended-20261114/summary.json</code> provides the final
+    seven-rung ladder, finest reference, per-quantity uncertainties and
+    passing refreshed verdict. Earlier controls are in
+    <code>surface-qualified-20261114/summary.json</code>,
+    <code>annulus-extrapolated-20261114/summary.json</code> and
+    <code>missing-limb-noise-20261114/summary.json</code>. The recomputed table
+    is captured in <code>stored-comparison-final.log</code>; the final suite
+    is <code>uncertainty-final-head-suite.log</code>. That suite validates the
+    existing sphere receipt against the unchanged solver source digest and
+    does not repeat the accepted sphere solve. The declared mutation log
+    remains <code>negative-control-surface.log</code>. Verdict-only replay
+    is captured in <code>uncertainty-verdict-refresh.log</code>.</p>
+</article>

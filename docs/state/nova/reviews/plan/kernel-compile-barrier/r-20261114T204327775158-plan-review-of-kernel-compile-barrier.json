@@ -41,7 +41,30 @@
   "plan_slug": "kernel-compile-barrier",
   "plan_version": 52,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0d542ac0e2c26724c7a9093fed4c5b7f23c40052",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "A plan comment restates the unmerged run result in full and says where the fragment lives until the stacked node lands.",
+      "reason": "",
+      "when": "2026-11-14T23:44:39.083960+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0d542ac0e2c26724c7a9093fed4c5b7f23c40052",
+      "commit_basis": "edit",
+      "note": "A plan comment restates the unmerged run result in full and says where the fragment lives until the stacked node lands.",
+      "reason": "",
+      "when": "2026-11-14T23:44:39.083960+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261114T204327775158-plan-review-of-kernel-compile-barrier.json",
   "review_run_id": "r-20261114T204327775158-plan-review-of-kernel-compile-barrier",
   "reviewed_blob_sha": "9413fa2babb4a359bfc565221edf88b5f439962b",
   "rubric": "content",

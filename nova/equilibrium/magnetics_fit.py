@@ -65,10 +65,11 @@ class MagneticsFitReceipt:
 
 
 class MagneticsFit:
-    """Fit polynomial source coefficients by damped Gauss--Newton steps.
+    """Fit polynomial source coefficients by damped Gauss--Newton corrections.
 
     ``magnetic_source`` maps a qualified forward receipt onto a Biot source
-    carrying its terminal plasma currents and the prescribed conductors. Its
+    carrying its terminal plasma currents. Known conductor signals are supplied
+    in ``SliceMeasurement.vacuum`` and subtracted at the declared sensor geometry. Its
     geometry can be built once and reused; it receives no measurements and
     must not infer currents from sampled flux. The existing virtual diagnostic
     kernels then read it at ``magnetics`` coordinates. All forward evaluations,
@@ -218,16 +219,20 @@ class MagneticsFit:
         measured = np.asarray(measurement.measured, dtype=np.float64)
         mask = np.asarray(measurement.mask, dtype=bool)
         scale = np.asarray(measurement.scale, dtype=np.float64)
-        if any(value.shape != (size,) for value in (measured, mask, scale)):
+        vacuum = np.asarray(measurement.vacuum, dtype=np.float64)
+        if any(value.shape != (size,) for value in (measured, vacuum, mask, scale)):
             raise ValueError("measurement rows must align with magnetics geometry")
         if (
             not np.all(np.isfinite(measured[mask]))
+            or not np.all(np.isfinite(vacuum[mask]))
             or not np.all(np.isfinite(scale[mask]))
             or np.any(scale[mask] <= 0.0)
             or not np.isfinite(measurement.plasma_current)
         ):
             raise ValueError("active measurement rows and scales must be finite")
-        target = np.r_[np.where(mask, measured, 0.0), measurement.plasma_current]
+        target = np.r_[
+            np.where(mask, measurement.signature, 0.0), measurement.plasma_current
+        ]
         weight = np.r_[measurement.weight, 1.0 / plasma_current_scale]
         coefficients = self._initial.copy()
         forward, values = self._evaluate(coefficients, None)

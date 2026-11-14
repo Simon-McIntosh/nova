@@ -1090,14 +1090,24 @@ class CurrentCentroidConstraint:
         return len(self.components)
 
     @staticmethod
-    def booked_height(moments: jax.Array) -> jax.Array:
-        """Current-centroid height from booked cell current and first moments."""
+    def booked_height(
+        moments: jax.Array, *, centre_height=0.0, target_height=0.0, scale=None
+    ) -> jax.Array:
+        """Reduce global or cell-local moments to a centroid-height residual.
+
+        Cell-local first moments need their cell heights. A prescribed current
+        scale keeps the numerator linear for a bordered solve at zero current.
+        """
         booked = jnp.asarray(moments)
-        if booked.ndim != 2 or booked.shape[-1] != 3:
+        if booked.ndim < 2 or booked.shape[-1] != 3:
             raise ValueError(
                 "booked moments must have current, radial and vertical columns"
             )
-        return jnp.sum(booked[:, 2]) / jnp.sum(booked[:, 0])
+        scale = jnp.sum(booked[..., 0], axis=-1) if scale is None else scale
+        numerator = jnp.sum(
+            (centre_height - target_height) * booked[..., 0] + booked[..., 2], axis=-1
+        )
+        return numerator / jnp.where(scale != 0, scale, jnp.nan)
 
     def observed(
         self,

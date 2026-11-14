@@ -135,7 +135,6 @@ def main():
             "reproduced": abs(base["lower_x_distance_m"] - banked) < 5.0e-4,
         }
         fraction = 100 * closed / base["lower_x_distance_m"]
-        counted, why = readable(base, edge)
         share = f"closed {100 * closed:.2f} cm ({fraction:.1f}%)"
         if not counted:
             share = f"share NOT READ ({why})"

@@ -74,8 +74,8 @@ def main():
         os.environ,
         PYTHONPATH=".",
         TMPDIR="/tmp",
-        OPENBLAS_NUM_THREADS="8",
-        OMP_NUM_THREADS="8",
+        OPENBLAS_NUM_THREADS=os.environ.get("SLURM_CPUS_PER_TASK", "8"),
+        OMP_NUM_THREADS=os.environ.get("SLURM_CPUS_PER_TASK", "8"),
         XLA_PYTHON_CLIENT_PREALLOCATE="false",
     )
     env.pop("UV_NO_SYNC", None)

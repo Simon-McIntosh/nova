@@ -9,12 +9,19 @@
     "scripts/prototypes/diiid_edge_current_refusal/render.py:354"
   ],
   "completed_at": "2026-11-14T19:25:56.028Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "reuse scored on a duplicated SVG marker check between two prototype records under scripts/prototypes; no product module is duplicated, and the record reuses the profile-extent arm, batch runner and nova.media painters",
+      "recorded_at": "2026-11-14T19:44:00.519828+00:00"
+    }
+  },
   "dispatched_at": "2026-11-14T18:57:25Z",
   "finding_dispositions": {
     "0": {
       "kind": "exempted",
-      "reason": "marker_visibility.py is a prototype checker for this diagnosis record only; consolidating it with the core-zoom prototype checker would touch another record's scripts for no product effect, and neither is imported by nova/",
-      "recorded_at": "2026-11-14T19:42:45.617489+00:00"
+      "reason": "marker_visibility.py is a prototype checker for this diagnosis record only; consolidating it with the core-zoom prototype checker touches another record's scripts for no product effect",
+      "recorded_at": "2026-11-14T19:44:34.076841+00:00"
     },
     "1": {
       "kind": "exempted",

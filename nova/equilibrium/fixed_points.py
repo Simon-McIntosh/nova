@@ -348,11 +348,8 @@ def _source_jets(point, coupling):
         )
         return value, gradient
 
-    def gradient_with_value(target):
-        value, gradient = value_gradient(target)
-        return gradient, (value, gradient)
-
-    hessian, (value, gradient) = jax.jacfwd(gradient_with_value, has_aux=True)(point)
+    value, gradient = value_gradient(point)
+    hessian = jax.jacfwd(lambda target: value_gradient(target)[1])(point)
     coefficients = jnp.concatenate(
         (
             value[..., None],

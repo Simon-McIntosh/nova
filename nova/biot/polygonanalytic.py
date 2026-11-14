@@ -3107,6 +3107,7 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
     def evaluate(*arguments):
         return _packed_analytic_moments_primal(jnp, *arguments, nodes=nodes)
 
+    value, ordinary = jax.jvp(evaluate, primals, tangents)
     target_z = primals[1]
     edge = primals[2]
     nearest = jnp.minimum(
@@ -3114,19 +3115,8 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
         jnp.min(jnp.abs(edge[:, 3] - target_z), axis=0),
     )
     near_corner = nearest <= 1e-7
-
-    def directional(include_height):
-        direction = (
-            *tangents[:1],
-            jnp.where(include_height, tangents[1], jnp.zeros_like(target_z)),
-            *tangents[2:],
-        )
-        return jax.jvp(evaluate, primals, direction)
-
-    values, derivatives = jax.lax.map(directional, jnp.asarray((True, False)))
-    value = tuple(row[0] for row in values)
-    ordinary = tuple(row[0] for row in derivatives)
-    other = tuple(row[1] for row in derivatives)
+    without_height = (*tangents[:1], jnp.zeros_like(target_z), *tangents[2:])
+    _, other = jax.jvp(evaluate, primals, without_height)
 
     shifts = jnp.asarray((1e-5, -1e-5, 5e-6, -5e-6), dtype=target_z.dtype)
     shifted = jax.lax.map(

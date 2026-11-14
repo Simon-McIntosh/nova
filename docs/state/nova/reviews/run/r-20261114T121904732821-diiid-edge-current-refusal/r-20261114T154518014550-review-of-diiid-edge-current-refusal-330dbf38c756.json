@@ -23,6 +23,11 @@
       "kind": "exempted",
       "reason": "non-blocking strengthening of a prototype verifier in a diagnosis record that changes no product; the premise, trip counts and mask reconciliation it records are re-measured by the finite-edge and inactive-compensator reruns on their own gates",
       "recorded_at": "2026-11-14T18:49:29.607200+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the rewrite in render.py writes the same 31.1 cm by 16 cm declaration checked_save writes, in a prototype renderer that no other driver imports; the drift risk is confined to this record",
+      "recorded_at": "2026-11-14T18:49:35.915793+00:00"
     }
   },
   "findings": [

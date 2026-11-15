@@ -209,7 +209,14 @@ def main() -> None:
         Line2D([], [], color=SOLVED, lw=3.0, label="clipped level"),
         Line2D([], [], color=WALL, lw=1.5, label="first wall"),
         Line2D([], [], color=SOLVED, marker="^", ls="none", label="magnetic axis"),
-        Line2D([], [], color=SOLVED, marker="X", ls="none", label="solved X-point"),
+        Line2D(
+            [],
+            [],
+            color=SOLVED,
+            marker="X",
+            ls="none",
+            label="solved lower null or contact",
+        ),
         Line2D(
             [],
             [],
@@ -217,12 +224,12 @@ def main() -> None:
             marker="o",
             mfc="none",
             ls="none",
-            label="EFIT X-point",
+            label="EFIT lower null or contact",
         ),
     ]
     figure.legend(
         handles=handles,
-        ncol=6,
+        ncol=3,
         loc="upper center",
         frameon=False,
         bbox_to_anchor=(0.5, 0.99),

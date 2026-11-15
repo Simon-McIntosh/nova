@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run carries empty baseline_suite and after_suite blocks, and scripts/prototypes/bank_width_probe/test_contracts.py does not exist at reviewed_base_sha 69aacfb3, so there is no baseline arm and no suite delta to derive. The head arm is readable and was re-checked: the gate the node names, re-run at f2cdfd4a, ends '28 passed in 6.72s' with EXIT=0, matching the run's own reuse-repair/review-head.log.",
+  "call_sites": [
+    "scripts/prototypes/bank_width_probe/job.sh",
+    "scripts/prototypes/bank_width_probe/report_job.sh",
+    "scripts/prototypes/bank_h200_slice_profile/job.sh"
+  ],
+  "call_sites_note": "scripts/prototypes/bank_width_probe/job.sh and report_job.sh invoke scripts.prototypes.bank_width_probe.run and .report; scripts/prototypes/bank_h200_slice_profile/job.sh invokes the refactored slice-profile driver whose archive_revision, execute_arm and measurement_environment the refactor redefined.",
+  "completed_at": "2026-11-15T02:58:22.864Z",
+  "dispatched_at": "2026-11-15T02:15:14Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_width_probe/test_contracts.py",
+      "line": 108,
+      "severity": "non-blocking",
+      "summary": "the assertion compares report.audit's echoed largest_admitted_width with the value the receipts fixture itself wrote into summary.json, while report.py:81 assigns that file's field straight through rather than deriving it from the arms, so the two sides move together and the line holds whatever the boundary actually admitted; the boundary remains covered by audit's own admitted-and-adjacent assertions and by the nonadjacent mutation case, so this is a weak line rather than an unguarded boundary."
+    },
+    {
+      "file": "scripts/prototypes/bank_width_probe/report.py",
+      "line": 81,
+      "severity": "non-blocking",
+      "summary": "the report copies largest_admitted_width and first_refused_width from summary.json instead of deriving them from the arm outcomes, so the boundary the published headline rests on is trusted to the probe that wrote the summary and is only cross-checked for adjacency and for the two boundary rows."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read all five commits against 69aacfb3, where 5fd82b435 extracts measure_widths and audit and adds test_contracts.py plus launcher preflights, 70dc7c6d3 gives the launcher sentinels runnable fixtures, 989964fd2 and f2cdfd4af record the evidence in the fragment, and 1159a5787 moves measurement_environment, archive_revision and execute_arm into bank_h200_slice_profile/run.py with both drivers calling them.",
+    "done_when": "the done_when asks the fragment to state the largest admitted width with bytes and per-slice wall, and this range leaves that statement untouched while its own measure is the durability and reuse repair, recorded in reuse-repair/review-head.log as 28 passed with EXIT=0 and in reuse-repair/review-inverse.log as 4 failed with EXIT=1.",
+    "goal": "the node goal is to measure the largest batch width the bank route admits on one H200 and its per-slice throughput, and the reviewed repair commits change no measured number while docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html:13 still states 78 default-allocator pulses at 5.783966 ms/slice, so this range hardens an already-delivered result rather than producing it.",
+    "manifest": "read manifest.md, which records status complete, eleven commits, the width-78 headline at 5.783966 ms/slice and 172.892 slices per second, 28 passing focused checks, two and four expected inverse failures, and states plainly that baseline_suite and after_suite stay empty because the dispatch's template resolved no test files.",
+    "write_paths": "the node declared scripts/prototypes/bank_width_probe, docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html, docs/figures/sub-millisecond-forward-path/bank-width-probe and scripts/prototypes/bank_h200_slice_profile/run.py, and git diff --stat 69aacfb3..f2cdfd4a lists exactly seven paths, every one of them inside those grants."
+  },
+  "justifications": {
+    "durability": "test_contracts.py:230 parameterises both launchers against a fake interpreter that exits 23 on -m pytest, so removing the preflight makes the sentinel print MEASUREMENT_MUST_NOT_START, which guard-repair/review-inverse.log shows failing both cases.",
+    "evidence": "the gate the node names was re-run at the reviewed head and review-head-gate.log ends 28 passed followed by EXIT=0, matching the run's own reuse-repair/review-head.log.",
+    "fit": "bank_h200_slice_profile/run.py:79 archive_revision and :90 execute_arm are mechanism-named in the sibling prototype idiom, and no added name carries a plan label, version suffix or ticket reference.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html:13 still carries the width-78 result at 5.783966 ms/slice and no repair commit edits a measured number.",
+    "reuse": "bank_h200_slice_profile/run.py:79 and :90 now own the archive-and-execute capability and scripts/prototypes/bank_width_probe/run.py:134 calls them, replacing the private copy that the earlier review scored at 5.",
+    "scope_discipline": "git diff --stat 69aacfb3..f2cdfd4a names seven files, all inside scripts/prototypes/bank_width_probe, the bank-width-probe fragment, its figures directory or scripts/prototypes/bank_h200_slice_profile/run.py."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to measure the largest batch width the bank route admits on one H200 and its per-slice throughput, and the reviewed repair commits change no measured number while docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html:13 still states 78 default-allocator pulses at 5.783966 ms/slice, so this range hardens an already-delivered result rather than producing it.\nVERDICT done_when: the done_when asks the fragment to state the largest admitted width with bytes and per-slice wall, and this range leaves that statement untouched while its own measure is the durability and reuse repair, recorded in reuse-repair/review-head.log as 28 passed with EXIT=0 and in reuse-repair/review-inverse.log as 4 failed with EXIT=1.\nVERDICT write_paths: the node declared scripts/prototypes/bank_width_probe, docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html, docs/figures/sub-millisecond-forward-path/bank-width-probe and scripts/prototypes/bank_h200_slice_profile/run.py, and git diff --stat 69aacfb3..f2cdfd4a lists exactly seven paths, every one of them inside those grants.\nVERDICT manifest: read manifest.md, which records status complete, eleven commits, the width-78 headline at 5.783966 ms/slice and 172.892 slices per second, 28 passing focused checks, two and four expected inverse failures, and states plainly that baseline_suite and after_suite stay empty because the dispatch's template resolved no test files.\nVERDICT diff: read all five commits against 69aacfb3, where 5fd82b435 extracts measure_widths and audit and adds test_contracts.py plus launcher preflights, 70dc7c6d3 gives the launcher sentinels runnable fixtures, 989964fd2 and f2cdfd4af record the evidence in the fragment, and 1159a5787 moves measurement_environment, archive_revision and execute_arm into bank_h200_slice_profile/run.py with both drivers calling them.\nCALL_SITES: scripts/prototypes/bank_width_probe/job.sh, scripts/prototypes/bank_width_probe/report_job.sh, scripts/prototypes/bank_h200_slice_profile/job.sh\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html:13 still carries the width-78 result at 5.783966 ms/slice and no repair commit edits a measured number.\nSCORE evidence: 19\nJUSTIFICATION evidence: the gate the node names was re-run at the reviewed head and review-head-gate.log ends 28 passed followed by EXIT=0, matching the run's own reuse-repair/review-head.log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 69aacfb3..f2cdfd4a names seven files, all inside scripts/prototypes/bank_width_probe, the bank-width-probe fragment, its figures directory or scripts/prototypes/bank_h200_slice_profile/run.py.\nSCORE durability: 18\nJUSTIFICATION durability: test_contracts.py:230 parameterises both launchers against a fake interpreter that exits 23 on -m pytest, so removing the preflight makes the sentinel print MEASUREMENT_MUST_NOT_START, which guard-repair/review-inverse.log shows failing both cases.\nSCORE fit: 18\nJUSTIFICATION fit: bank_h200_slice_profile/run.py:79 archive_revision and :90 execute_arm are mechanism-named in the sibling prototype idiom, and no added name carries a plan label, version suffix or ticket reference.\nSCORE reuse: 19\nJUSTIFICATION reuse: bank_h200_slice_profile/run.py:79 and :90 now own the archive-and-execute capability and scripts/prototypes/bank_width_probe/run.py:134 calls them, replacing the private copy that the earlier review scored at 5.\nFINDING scripts/prototypes/bank_width_probe/test_contracts.py:108 the assertion compares report.audit's echoed largest_admitted_width with the value the receipts fixture itself wrote into summary.json, while report.py:81 assigns that file's field straight through rather than deriving it from the arms, so the two sides move together and the line holds whatever the boundary actually admitted; the boundary remains covered by audit's own admitted-and-adjacent assertions and by the nonadjacent mutation case, so this is a weak line rather than an unguarded boundary.\nFINDING scripts/prototypes/bank_width_probe/report.py:81 the report copies largest_admitted_width and first_refused_width from summary.json instead of deriving them from the arm outcomes, so the boundary the published headline rests on is trusted to the probe that wrote the summary and is only cross-checked for adjacency and for the two boundary rows.",
+  "review_run_id": "r-20261114T223650667156-review-of-bank-width-probe-f2cdfd4afaf8",
+  "reviewed_base_sha": "69aacfb324c5abda0afce26133f3287894be09b8",
+  "reviewed_head_sha": "f2cdfd4afaf868f685a51e3b2dd4ba2746725a1a",
+  "reviewed_run_id": "r-20261114T144332616609-bank-width-probe",
+  "rubric": "text",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T02:59:17.063754+00:00",
+  "total": 113
+}

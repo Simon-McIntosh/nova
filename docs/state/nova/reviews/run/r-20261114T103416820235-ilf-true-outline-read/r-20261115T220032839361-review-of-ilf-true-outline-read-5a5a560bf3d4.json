@@ -21,6 +21,11 @@
   "completed_at": "2026-11-15T22:21:46.026Z",
   "dispatched_at": "2026-11-15T22:20:57Z",
   "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The delegation equality is redundant but harmless; the independent 0 < fill < 1 bound and the section-mismatch test pin the fill rule, and the WEST evidence node exercises the fill against a solve.",
+      "recorded_at": "2026-11-15T22:42:38.356208+00:00"
+    },
     "2": {
       "kind": "folded",
       "node": "ilf-west-true-outline-evidence",

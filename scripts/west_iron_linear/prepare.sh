@@ -12,7 +12,7 @@ if [ -n "$(git -C "$source_tree" status --porcelain --untracked-files=no)" ]; th
     echo 'refusing to prepare from a dirty tree'
     exit 2
 fi
-script=scripts/west_iron_linear/prepare.py
+script=${IRON_PREPARATION_SCRIPT:-scripts/west_iron_linear/prepare.py}
 blob=$(git -C "$source_tree" rev-parse "$revision:$script")
 scratch=$(mktemp -d "$TMPDIR/west-linear-prepare-${SLURM_JOB_ID}-XXXX")
 trap 'rm -rfv "$scratch"' EXIT

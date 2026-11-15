@@ -38,7 +38,11 @@ def mesh_size(label, inputs):
         return float(label.removeprefix("uniform-"))
     fine, coarse = {"graded-16-80": (0.016, 0.08), "graded-8-40": (0.008, 0.04)}[label]
     return iron.graded_cell_size(
-        fine=fine, coarse=coarse, cells_across=20, **inputs["surfaces"]
+        inputs["surfaces"]["radial"],
+        inputs["surfaces"]["vertical"],
+        fine=fine,
+        coarse=coarse,
+        cells_across=20,
     )
 
 
@@ -213,6 +217,7 @@ def main():
             np.asarray(row["full_drive"]["field_T"], dtype=np.float64).tobytes()
             == np.asarray(original["full_drive"]["field_T"], dtype=np.float64).tobytes()
         )
+        save(args.output / "replay.json", row)
         assert row["bit_identical"], "fresh-process probe fields changed"
         with SOURCE.open("rb") as stream:
             data = copy.deepcopy(pickle.load(stream))

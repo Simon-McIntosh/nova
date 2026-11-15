@@ -38,7 +38,11 @@ PY
 cd "$scratch/tree"
 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -s \
     tests/test_magnetisation.py -k test_linear_shell_operator_pin > "$out/h200-operator-pin.log" 2>&1
-for mesh in uniform-0.08 uniform-0.04 graded-16-80 graded-8-40; do
+meshes=("${@:2}")
+if [ "${#meshes[@]}" -eq 0 ]; then
+    meshes=(uniform-0.08 uniform-0.04 graded-16-80 graded-8-40)
+fi
+for mesh in "${meshes[@]}"; do
     /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
         --revision "$revision" --blob "$blob" --output "$out" --mesh "$mesh"
 done

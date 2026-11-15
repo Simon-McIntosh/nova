@@ -9,18 +9,32 @@ export TMPDIR=/tmp
 source_tree=$PWD
 out=$1
 base=$2
+after_revision=${3:-}
 scratch=$(mktemp -d "$TMPDIR/west-linear-suites-${SLURM_JOB_ID}-XXXX")
 trap 'rm -rfv "$scratch"' EXIT
+export TMPDIR="$scratch"
 mkdir -p "$out"
 for arm in baseline after; do
     revision=$base
     if [ "$arm" = after ]; then
-        until [ -s "$out/delivered-head.txt" ]; do sleep 30; done
-        revision=$(cat "$out/delivered-head.txt")
+        if [ -n "$after_revision" ]; then
+            revision=$after_revision
+        else
+            until [ -s "$out/delivered-head.txt" ]; do sleep 30; done
+            revision=$(cat "$out/delivered-head.txt")
+        fi
     fi
     tree=$scratch/$arm
     mkdir -p "$tree"
     git -C "$source_tree" archive "$revision" | tar -x -C "$tree"
+    PYTHONPATH="$source_tree" /home/ITER/mcintos/Code/nova/.venv/bin/python \
+        - "$tree" "$revision" "$source_tree" <<'PY'
+from pathlib import Path
+import sys
+from scripts.iron_graded_refinement.gate import prepare
+tree, revision, source = sys.argv[1:]
+prepare(Path(tree), revision, Path(source))
+PY
     export PYTHONPATH="$tree" JAX_PLATFORMS=cpu OPENBLAS_NUM_THREADS=8 OMP_NUM_THREADS=8
     export MPLCONFIGDIR="$scratch/matplotlib"
     log=$out/$arm-suite.log

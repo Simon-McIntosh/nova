@@ -677,6 +677,41 @@
       <tr><td>probe:36:037</td><td>mT</td><td>-199.1302</td><td>3.982604</td><td>-200.1389</td><td>-6.718475</td><td>-206.8573</td><td>-211.154</td><td>-1.940227</td><td>-3.01908</td></tr>
       <tr><td>probe:37:038</td><td>mT</td><td>-219.654</td><td>4.39308</td><td>-247.781</td><td>20.57053</td><td>-227.2104</td><td>-234.6622</td><td>-1.720082</td><td>-3.416334</td></tr>
     </tbody></table></details>
+  <h3 id="efit-comparison-reader-bindings">Bound diagnostic geometry and passive sources</h3>
+  <p>The reader now binds each loop observation to the native convention's
+    <code>SIGMA_BP</code>, rather than using map flux directly. The measured
+    constraints and stored equilibrium map remain unchanged. A multi-position
+    path contributes its signed toroidal-leg fraction at each leg's own R,Z;
+    poloidal legs have zero contribution to the axisymmetric vector-potential
+    integral. A toroidal leg that also changes R or Z is still refused with
+    <q>a slanted toroidal leg needs distributed segment observations</q>.
+    The fitter and diagnostic replay use the same
+    <code>Magnetics.loop_quadrature</code> geometry and existing observation
+    kernel owners. A point-only projection refuses segmented geometry.</p>
+  <p>TCV's 256 nonzero-turn passive sources are now included with their measured
+    current and positive primitive <code>current_error_upper</code>. The
+    sampled MAST-U passives declare zero signed turns on all 82 elements;
+    those remain zero-field sources, following the same turn-count fields
+    read by imas-efit's <code>getPassiveStructure</code>. No current, turn count
+    or uncertainty is invented, and a placed source without measured current
+    and positive uncertainty still refuses input.</p>
+  <p>Twenty-two focused tests pass, including signed multi-leg observations
+    through the fitter, the remaining slanted-leg refusal, and passive
+    primitive-sigma/IDS-time handling. The repaired kernel replay is running
+    in titan P100 job 1318520; its panels use the <code>bound-inputs/</code>
+    figure directory so the original overlays above remain preserved.
+    TCV's changed passive-source forward request may use at most three seeds
+    only after every nonzero-reference family agrees within 5% relative L2.
+    This diagnostic rule changes no physical comparison band. ITER's first
+    solver attempts follow its exact rectangular-loop reader repair, carrying
+    the different-constraint-set and baseline-age caveats already stated.</p>
+  <p>No additional MAST-U equilibrium seed is run: its prescribed forward
+    source is unchanged. Polarity alone reduces the loop mismatch from 201.25%
+    to 28.43% relative L2, which remains too large for a solver-only attribution.
+    Its measured and fitted circuit currents differ, and the output vector's
+    active/passive split does not directly identify its physical sources.
+    The source mapping must be established before treating the stored plasma
+    with measured conductor currents as the same fitted exterior field.</p>
   <h3 id="efit-comparison-tcv-refusal">TCV: first attempt with pp/FF′ ndeg 2/2</h3>
   <p>The complete TCV case took 4857.176419 s on a Tesla P100-PCIE-16GB,
     including setup and cold compilation. This is not a warm reconstruction

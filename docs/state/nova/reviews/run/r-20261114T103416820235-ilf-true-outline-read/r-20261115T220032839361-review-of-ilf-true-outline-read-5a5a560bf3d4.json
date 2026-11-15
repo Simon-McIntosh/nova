@@ -20,6 +20,13 @@
   ],
   "completed_at": "2026-11-15T22:21:46.026Z",
   "dispatched_at": "2026-11-15T22:20:57Z",
+  "finding_dispositions": {
+    "2": {
+      "kind": "folded",
+      "node": "ilf-west-true-outline-evidence",
+      "recorded_at": "2026-11-15T22:42:14.003786+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_imas_iron_read.py",

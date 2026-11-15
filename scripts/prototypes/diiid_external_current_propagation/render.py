@@ -1,9 +1,11 @@
 """Draw the base and positive-control terminal flux of frame 137D together.
 
-Both panels share one absolute level array so the two terminal states are read
-on the same contour values. Each panel carries the vessel, its own nulls in the
-solved vocabulary and the base arm's nulls as the reference set, so a movement
-is read against a mark that does not depend on which panel is open.
+Both panels share one absolute level array, so the two terminal states are read
+on the same contour values. Each draws the vessel, its own nulls and, on the
+scaled arm, the base arm's lower null as a reference that does not move with
+the panel. The flux grid is 33 by 33 over the canonical axes, so a lower-null
+displacement of a few centimetres is far below one cell; the nulls are drawn
+from the terminal topology, which resolves them independently of the grid.
 """
 
 from __future__ import annotations
@@ -33,12 +35,15 @@ from scripts.prototypes.diiid_xpoint_offset.style import (  # noqa: E402
     WALL,
 )
 
-CANVAS = (14, 7.2)
 LEVEL_COUNT = 22
 PANELS = (
     ("base", "measured currents"),
     ("row", "coil currents scaled x1.1"),
 )
+COLUMN_LEFT = (0.06, 0.56)
+COLUMN_WIDTH = 0.36
+PANEL_BOTTOM = 0.085
+PANEL_HEIGHT = 0.775
 
 
 def _load(folder: Path, arm: str):
@@ -56,8 +61,7 @@ def _levels(base_flux, wall, radius, height):
         np.column_stack((grid_r.ravel(), grid_z.ravel())), wall
     ).reshape(base_flux.shape)
     values = base_flux[inside]
-    low, high = float(np.min(values)), float(np.max(values))
-    return np.linspace(low, high, LEVEL_COUNT)[1:-1]
+    return np.linspace(float(np.min(values)), float(np.max(values)), LEVEL_COUNT)[1:-1]
 
 
 def main():
@@ -76,23 +80,28 @@ def main():
     wall = base["wall"]
     # Saved flux is (radius, height); the painter wants (height, radius).
     levels = _levels(base["flux"].T, wall, radius, height)
-    reference = dict(
-        axis=base["axis"],
-        x_point=base["lower_x"][None, :],
-    )
+    reference = base["lower_x"][None, :]
 
     figure = plt.figure(figsize=(14, 7.2), dpi=100)
-    boxes = ((0.03, 0.16, 0.44, 0.74), (0.51, 0.16, 0.44, 0.74))
-    axes = [figure.add_axes(box) for box in boxes]
-    notes = []
-    for axes_item, box, (arm, label) in zip(axes, boxes, PANELS, strict=True):
+    axes: list = []
+    notes: list = []
+    for index, (arm, label) in enumerate(PANELS):
         data = arms[arm]
-        axes_item.set_axis_off()
-        draw_wall(
-            axes_item, units=None, radius=wall[:, 0], height=wall[:, 1], color=WALL
+        record = json.loads(
+            (args.input / f"arm-{arm}.json").read_text(encoding="utf-8")
         )
+        # Offsets come from the stored null coordinates in metres, never from
+        # the arm record's centimetre field.
+        offset_cm = 100.0 * (
+            np.asarray(data["lower_x"]) - np.asarray(data["efit_lower_x"])
+        )
+        left = COLUMN_LEFT[index]
+        item = figure.add_axes((left, PANEL_BOTTOM, COLUMN_WIDTH, PANEL_HEIGHT))
+        axes.append(item)
+        item.set_axis_off()
+        draw_wall(item, units=None, radius=wall[:, 0], height=wall[:, 1], color=WALL)
         draw_flux_contours(
-            axes_item,
+            item,
             radius,
             height,
             data["flux"].T,
@@ -102,31 +111,29 @@ def main():
             linewidth=1.2,
         )
         draw_nulls(
-            axes_item,
+            item,
             magnetic_axis=data["axis"],
             x_points=data["lower_x"][None, :],
-            other_x_points=reference["x_point"] if arm != "base" else None,
+            other_x_points=None if arm == "base" else reference,
         )
-        axes_item.set_xlim(radius.min() - 0.08, radius.max() + 0.08)
-        axes_item.set_ylim(height.min() - 0.08, height.max() + 0.08)
-        axes_item.set_aspect("equal")
-        axes_item.set_axis_off()
+        item.set_xlim(radius.min() - 0.04, radius.max() + 0.04)
+        item.set_ylim(height.min() - 0.04, height.max() + 0.04)
+        item.set_aspect("equal")
+        item.set_axis_off()
         notes.append(
             figure.text(
-                box[0], 0.945, label, va="bottom", ha="left", fontsize=14, color=SOLVED
+                left, 0.945, label, va="bottom", ha="left", fontsize=14, color=SOLVED
             )
         )
-        record = json.loads(
-            (args.input / f"arm-{arm}.json").read_text(encoding="utf-8")
-        )
         notes.append(
             figure.text(
-                box[0],
-                0.055,
-                "lower X offset %.3f / %.3f cm, residual %.2e"
+                left,
+                0.025,
+                "offset %.3f / %+.3f cm, %.3f cm from EFIT null, residual %.1e"
                 % (
-                    record["lower_x_offset_cm"][0],
-                    record["lower_x_offset_cm"][1],
+                    offset_cm[0],
+                    offset_cm[1],
+                    float(np.linalg.norm(offset_cm)),
                     record["residual"],
                 ),
                 va="bottom",

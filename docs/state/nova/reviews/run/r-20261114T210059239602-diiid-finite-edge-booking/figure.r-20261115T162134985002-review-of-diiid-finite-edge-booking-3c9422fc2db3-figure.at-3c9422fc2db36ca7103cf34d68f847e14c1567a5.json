@@ -20,6 +20,11 @@
       "kind": "exempted",
       "reason": "Taken up in the repair round's figure changes (62b1fd391). The figure re-review at f4bf6f5e4 checks the limited-panel legend.",
       "recorded_at": "2026-11-15T17:33:06.423122+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The caption is re-stated with the marker repair (62b1fd391, f4bf6f5e4). The figure re-review at f4bf6f5e4 checks that the caption matches the render.",
+      "recorded_at": "2026-11-15T17:33:14.604766+00:00"
     }
   },
   "findings": [

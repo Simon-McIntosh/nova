@@ -112,7 +112,10 @@ def main() -> None:
         "axis_flux_wb": axis,
         "boundary_flux_wb": boundary,
     }
-    if not (np.isfinite(axis) and np.isfinite(boundary)) or not (boundary > axis):
+    # The span's sign follows the solve's own polarity and the normalised level
+    # reads one at the boundary either way, so the band test takes the span as
+    # it comes and rejects only an unresolved or degenerate level.
+    if not (np.isfinite(axis) and np.isfinite(boundary)) or boundary == axis:
         receipt["status"] = "unresolved boundary level"
         receipt.update(row_receipts(args.output))
         emit(args.output, receipt)

@@ -32,6 +32,13 @@
     "FINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html:55 non-blocking: The caption calls the pale blue contours 'the shared levels inside the wall' after identifying the solid dark stepped outline as 'the physical DIII-D first wall', but render.py:131 computes the levels inside the registered pseudo-wall and the drawn contours extend outside the physical wall on both panels, so the levels the caption names are inside the dotted reference rectangle, not the wall.",
     "FINDING scripts/prototypes/diiid_external_current_propagation/render.py:55 non-blocking: _corpus_row reads the parquet corpus under bench.DEFAULT_DATA and imports the whole benchmark (and its jax dependency) to obtain the EFIT boundary and lower null, so the committed SVG cannot be regenerated from the committed receipts and evidence alone; storing the boundary in the arm npz at solve time would keep the render path reading only its own records."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Prototype-local duplication of a bilinear sampler between two diagnosis scripts. Neither script is product code, and consolidating them would touch a script outside this run's scope for no change in any measured value.",
+      "recorded_at": "2026-11-15T15:55:30.091345+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_external_current_propagation/render.py",

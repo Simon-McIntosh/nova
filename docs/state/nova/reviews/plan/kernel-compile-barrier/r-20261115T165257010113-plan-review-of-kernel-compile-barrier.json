@@ -61,6 +61,16 @@
       "note": "s3 says the two tests read paired receipts through NOVA_PRODUCTION_COMPILE_BASE and NOVA_PRODUCTION_COMPILE_HEAD and skip without them, and that the node supplies both from its paired H200 profile job",
       "reason": "",
       "when": "2026-11-15T17:03:25.411805+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "6d0487d5723e75aec96c9afb0668486dd1758f87",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "s4 splits into two nodes with separate verdicts: the compile clause, and the read-path regression arm over the three files",
+      "reason": "",
+      "when": "2026-11-15T17:03:39.365320+00:00"
     }
   ],
   "responses": {
@@ -81,6 +91,15 @@
       "note": "s3 names the two levers still open (a fixed-capacity scan over the term order, and a cheaper regular-Hessian form) and states that a clean form missing 60 s lands as a partial result with the section left open",
       "reason": "",
       "when": "2026-11-15T17:03:10.100000+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "6d0487d5723e75aec96c9afb0668486dd1758f87",
+      "commit_basis": "edit",
+      "note": "s4 splits into two nodes with separate verdicts: the compile clause, and the read-path regression arm over the three files",
+      "reason": "",
+      "when": "2026-11-15T17:03:39.365320+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261115T165257010113-plan-review-of-kernel-compile-barrier.json",

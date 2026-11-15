@@ -13,6 +13,13 @@
     "benchmarks/efit_forward_parity_slice.py:551"
   ],
   "completed_at": "2026-11-15T16:30:56.782Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "The reuse score rested on the duplicated column completion in the benchmark. It moved into the adapter's owner, nova/imas/diiid_current.py, at 3fea105c8, and the re-review at f4bf6f5e4 re-scores it.",
+      "recorded_at": "2026-11-15T17:32:51.387686+00:00"
+    }
+  },
   "dispatched_at": "2026-11-15T16:21:14Z",
   "finding_dispositions": {
     "0": {

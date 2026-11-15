@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Importer failure-id delta of the shared point jet</title></head>
+<body>
+<h1 id="importer-delta-title">Importer failure-id delta of the shared point jet</h1>
+<p id="importer-delta-method">Every file below ran in a fresh process, one process per file and arm, with the JAX compilation cache disabled before JAX initialised, the repository's single project environment as the interpreter, and <code>PYTHONPATH</code> naming the tree under test. The base arm is the revision before the sharing work, <code>00ec05512bb40668a9c5e618a1287428cbff0f8d</code>; the head is <code>cf87218b61ddb37e0b7c19e359d7da55bbfb24a1</code>, which reorders how the point jet combines its height samples. The verdict is the set of failed and errored test ids present at head and absent from the base arm on the same device. A failure the base arm already carries is reported, not repaired.</p>
+<p id="importer-delta-verdict">Added failure ids: <strong>0 on CPU</strong> over the twenty files with a recorded base arm on that device; <strong>none established on the H200</strong>, where no arm has completed over the four files long enough to be given the card. The two test files the head adds have no base arm and are marked as such.</p>
+<h2 id="importer-delta-cpu-heading">CPU, twenty files with a recorded base arm and the two the head adds</h2>
+<table id="importer-delta-cpu-table">
+<thead><tr><th>test file</th><th>base failures</th><th>head failures</th><th>added at head</th></tr></thead><tbody>
+<tr><td><code>tests/biot/test_kernel_compile_cost.py</code></td><td>1</td><td>1</td><td>none</td></tr>
+<tr><td><code>tests/biot/test_moment_path_parity.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/biot/test_moment_program_identity.py</code></td><td>no base arm</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/biot/test_near_collinear_tangent.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/biot/test_production_row_compile.py</code></td><td>no base arm</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/biot/test_traced_section_moments.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotbandedcoupling.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotcircle.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotgeometryautograd.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotgreens.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotpolygon.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotpolygonanalytic.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotpolygonarc.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotpolygonmoments.py</code></td><td>1</td><td>1</td><td>none</td></tr>
+<tr><td><code>tests/test_biotpolysection.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotsectionaverage.py</code></td><td>1</td><td>1</td><td>none</td></tr>
+<tr><td><code>tests/test_carrier_identity.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_coupling_build.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_domain_participation_continuity.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_fixed_points.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_moment_field_hessian.py</code></td><td>0</td><td>0, killed</td><td>unreadable</td></tr>
+<tr><td><code>tests/test_polygon_analytic_batched_moments.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+</tbody></table>
+<p id="importer-delta-unreadable">One CPU arm did not complete: <code>tests/test_moment_field_hessian.py</code> was killed at its job memory ceiling without reaching a summary line. Its base arm passes nine tests in 316 s inside a 192 GB job; the head arm reached a 490 GB peak and exceeded an hour without a test outcome. It is reported as unreadable, not as an added failure.</p>
+<h2 id="importer-delta-h200-heading">H200, four long files, both arms in one job</h2>
+<p id="importer-delta-h200-note">These four files are the ones whose CPU arms run longest at the recorded revision: reference 3636 s, vertex tangents 6105 s, edge tangents 11429 s, tiled backend 20018 s. Job <code>1316220</code> is still working through its first arm on <code>98dci4-gpu-0003</code>; the queued second job <code>1316330</code> has not started because all eight cards on the node are held by other work. No H200 arm has reached a summary line, so this table carries no result rather than a zero. The device verdict above rests on CPU alone.</p>
+<table id="importer-delta-h200-table">
+<thead><tr><th>test file</th><th>base failures</th><th>head failures</th><th>added at head</th></tr></thead><tbody>
+<tr><td><code>tests/test_equilibrium_forward_reference.py</code></td><td>not run</td><td>not run</td><td>no result</td></tr>
+<tr><td><code>tests/biot/test_vertex_term_tangents.py</code></td><td>not run</td><td>not run</td><td>no result</td></tr>
+<tr><td><code>tests/biot/test_edge_term_tangents.py</code></td><td>not run</td><td>not run</td><td>no result</td></tr>
+<tr><td><code>tests/test_biottiledbackend.py</code></td><td>not run</td><td>not run</td><td>no result</td></tr>
+</tbody></table>
+<h2 id="importer-delta-receipts-heading">Receipts</h2>
+<ul id="importer-delta-receipts">
+<li>base revision <code>00ec05512bb40668a9c5e618a1287428cbff0f8d</code>; head revision <code>cf87218b61ddb37e0b7c19e359d7da55bbfb24a1</code></li>
+<li>H200 job <code>1316220</code> on <code>98dci4-gpu-0003</code>; queued <code>1316330</code> on the same node</li>
+<li>CPU jobs <code>1316221</code> on <code>98dci4-clu-5016</code> and <code>1316273</code> on <code>98dci4-clu-5011</code></li>
+<li>per-file logs, receipts and the comparison output: <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/importer-delta</code></li>
+<li>comparison control log: <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/importer-delta/negative-control.log</code></li>
+</ul>
+</body>
+</html>

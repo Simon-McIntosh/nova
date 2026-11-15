@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import fields, replace
 from types import SimpleNamespace
 
@@ -16,6 +17,28 @@ from nova.equilibrium.measurement import Magnetics, SliceMeasurement, whitened_s
 from nova.equilibrium.solve_request import ForwardSolveReceipt, ForwardSolveRequest
 from nova.equilibrium.source import DomainProfile, ForwardSource, PolynomialFluxFunction
 from nova.jax.config import configure_dtypes
+
+
+def test_refused_residuals_preserve_strict_json_receipts(tmp_path):
+    from tests.test_magnetics_fit_efit_comparison import _residual_fields, _write
+
+    path = tmp_path / "receipt.json"
+    for value, state in [
+        (float("nan"), "nan"),
+        (float("inf"), "positive_infinity"),
+        (-float("inf"), "negative_infinity"),
+    ]:
+        _write(path, dict(marker="refusal-recorded", **_residual_fields(value)))
+        assert json.loads(path.read_text()) == dict(
+            marker="refusal-recorded", residual=None, residual_state=state
+        )
+    assert _residual_fields(0.0) == dict(residual=0.0, residual_state="finite")
+    assert _residual_fields(None) == dict(residual=None, residual_state="unavailable")
+    before = path.read_bytes()
+    with pytest.raises(ValueError, match="not JSON compliant") as refusal:
+        _write(path, dict(unexpected=float("nan")))
+    print(f"STRICT_JSON_GUARD_REFUSED {refusal.value}")
+    assert path.read_bytes() == before
 
 
 def test_rank_deficient_data_exposes_its_null_direction():

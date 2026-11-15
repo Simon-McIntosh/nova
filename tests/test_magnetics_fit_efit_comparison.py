@@ -108,6 +108,23 @@ def _write(path, value):
     pending.replace(path)
 
 
+def _residual_fields(value):
+    """Represent a refused numerical residual without emitting invalid JSON."""
+    if value is None:
+        return dict(residual=None, residual_state="unavailable")
+    value = float(value)
+    if math.isfinite(value):
+        return dict(residual=value, residual_state="finite")
+    state = (
+        "nan"
+        if math.isnan(value)
+        else "positive_infinity"
+        if value > 0
+        else "negative_infinity"
+    )
+    return dict(residual=None, residual_state=state)
+
+
 def _sample(signal, ids, time, field="data"):
     values = np.asarray(getattr(signal, field), dtype=float)
     clock = np.asarray(
@@ -682,6 +699,7 @@ def _attempt(data, request, label):
         if histories:
             data["terminal_flux"] = np.asarray(histories[-1].state)
             data["terminal_residual"] = float(histories[-1].residual)
+            data["terminal_termination_reason"] = int(histories[-1].termination_reason)
         print(
             "PUBLIC_FORWARD_REFUSAL",
             label,
@@ -698,7 +716,7 @@ def _attempt(data, request, label):
         dict(
             qualified=bool(receipt.qualified),
             converged=bool(receipt.terminal_state.fixed_point.converged),
-            residual=data["terminal_residual"],
+            **_residual_fields(data["terminal_residual"]),
             termination_reason=int(receipt.termination_reason),
             wall_seconds=perf_counter() - started,
             device=str(jax.devices()[0]),
@@ -723,6 +741,26 @@ def _generating(data):
     return None
 
 
+def _record_forward_refusal(data):
+    """Persist an exhausted public seed portfolio and its terminal panel."""
+    result = dict(
+        case=data["name"],
+        status="forward-failed",
+        attempts=3,
+        qualified=False,
+        converged=False,
+        **_residual_fields(data.get("terminal_residual")),
+        termination_reason=data.get("terminal_termination_reason"),
+        device=str(jax.devices()[0]),
+        constraint_context=data["constraint_context"],
+    )
+    if "recovery" in data:
+        result["recovery"] = data["recovery"]
+    _write(_output() / f"{data['name']}-result.json", result)
+    _panel(data, qualified=False)
+    print("FORWARD_REFUSAL_RECORDED " + json.dumps(result), flush=True)
+
+
 @pytest.mark.slow
 @pytest.mark.timeout(27000)
 @pytest.mark.parametrize("name", tuple(CASES))
@@ -733,18 +771,7 @@ def test_shared_magnetics_reconstruction(name, monkeypatch):
     data = _problem(_read_case(name), monkeypatch)
     forward = _generating(data)
     if forward is None:
-        _write(
-            _output() / f"{name}-result.json",
-            dict(
-                case=name,
-                status="forward-failed",
-                attempts=3,
-                residual=data.get("terminal_residual"),
-                device=str(jax.devices()[0]),
-                constraint_context=data["constraint_context"],
-            ),
-        )
-        _panel(data, qualified=False)
+        _record_forward_refusal(data)
         pytest.fail(f"{name}: public forward solve did not qualify in three seeds")
     _compare_fit(data, forward)
 

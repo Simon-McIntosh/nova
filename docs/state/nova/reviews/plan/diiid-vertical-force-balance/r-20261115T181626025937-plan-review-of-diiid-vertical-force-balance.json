@@ -17,7 +17,30 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 85,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "90b08f3ca844ced3a68a5438a918e279256419b5",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The equality now reads the conductor-name mapping that fit.py writes to correction-<frame>.json, and names equivalent_error_a_turn in conductor-fit-<frame>.json as the same values.",
+      "reason": "",
+      "when": "2026-11-15T18:28:30.079952+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "90b08f3ca844ced3a68a5438a918e279256419b5",
+      "commit_basis": "edit",
+      "note": "The equality now reads the conductor-name mapping that fit.py writes to correction-<frame>.json, and names equivalent_error_a_turn in conductor-fit-<frame>.json as the same values.",
+      "reason": "",
+      "when": "2026-11-15T18:28:30.079952+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261115T181626025937-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261115T181626025937-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "f225d364ab59e1bf8ba2d7af94a96b9d58b55d2c",
   "rubric": "content",

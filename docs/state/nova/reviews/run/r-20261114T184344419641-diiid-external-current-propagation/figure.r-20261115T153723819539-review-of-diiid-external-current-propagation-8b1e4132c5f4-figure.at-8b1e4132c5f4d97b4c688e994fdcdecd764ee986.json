@@ -31,6 +31,11 @@
       "kind": "exempted",
       "reason": "The caption decodes the EFIT boundary as the thin dark line and the stepped outline as the vessel. The two have different shapes, so they are told apart in the image.",
       "recorded_at": "2026-11-15T15:56:06.923371+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "Two equal-aspect DIII-D panels on a 14 in by 7.2 in canvas leave side margins. The comparison reads at this size, and the diagnosis figure is not redrawn a third time for width.",
+      "recorded_at": "2026-11-15T15:56:13.992809+00:00"
     }
   },
   "findings": [

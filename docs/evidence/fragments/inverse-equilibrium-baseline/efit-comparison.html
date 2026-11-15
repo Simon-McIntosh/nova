@@ -152,6 +152,22 @@
       The inspection receipt is appended to the case gate log.</figcaption>
   </figure>
   <h3 id="efit-comparison-band-state">Physical band and split availability</h3>
+  <p>The MAST-U missing-current refusal is resolved at circuit selection.
+    Input PF_COIL_17 has zero current samples and zero uncertainty samples;
+    its column is zero in all 13 signed connection matrices. A reader positive
+    control, PF_COIL_1, has 30 current and uncertainty samples and a nonzero
+    connection column. The generating configuration at
+    <code>configuration/machines/MASTU/constraints/magnetics.xml:2</code> sets
+    deselectWhenNoData=true; the legacy weights file also gives PF_COIL_17 zero
+    weight at <code>configuration/machines/MASTU/weights/standard/pf.xml:19</code>.
+    <code>src/imas.cpp:2053</code> excludes empty-current coils, and
+    <code>src/efitCircuits.cpp:171</code> and <code>:226</code> construct only the
+    resulting circuit list. The comparison reader now mirrors this explicit
+    selection for an empty, unconnected coil. A connected coil still reaches
+    the missing-current guard. No current or uncertainty is invented and the
+    fitting class's guard is unchanged. Fifteen focused fitter/reader checks
+    pass, including this selection rule. A MAST-U-only titan measurement follows;
+    TCV is not retried beyond its three seeds.</p>
   <table><thead><tr><th>Measure</th><th>Unchanged band / unit</th>
     <th>MAST-U</th><th>TCV</th><th>ITER</th></tr></thead><tbody>
     <tr><td>Axis distance</td><td>≤0.20 m</td><td>Not reconstructed</td>

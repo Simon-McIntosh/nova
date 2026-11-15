@@ -203,6 +203,24 @@ def test_loop_reader_reduces_zero_extent_and_refuses_missing_path_information():
         _flux_loop_point(SimpleNamespace(position=[point, other]))
 
 
+def test_empty_coil_is_omitted_only_with_explicit_deselection_and_no_connection():
+    from tests.test_magnetics_fit_efit_comparison import _omit_empty_unconnected_coil
+
+    active = SimpleNamespace(
+        supply=[object()],
+        coil=[
+            SimpleNamespace(current=SimpleNamespace(data=np.array([10.0]))),
+            SimpleNamespace(current=SimpleNamespace(data=np.array([]))),
+        ],
+        circuit=[SimpleNamespace(connections=np.array([[1, -1, 0], [-1, 1, 0]]))],
+    )
+    assert not _omit_empty_unconnected_coil(active, 0, True)
+    assert not _omit_empty_unconnected_coil(active, 1, False)
+    assert _omit_empty_unconnected_coil(active, 1, True)
+    active.circuit[0].connections[:, 2] = [1, -1]
+    assert not _omit_empty_unconnected_coil(active, 1, True)
+
+
 def test_known_conductor_subtraction_changes_the_target(linear_fit):
     fitter, measurement, truth, _ = linear_fit
     vacuum = np.array([0.7, -0.4, 1.1, 0.2])

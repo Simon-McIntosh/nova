@@ -79,6 +79,22 @@ def _flux_loop_point(channel):
     raise ValueError("a nonzero-toroidal-extent path needs segment observations")
 
 
+def _omit_empty_unconnected_coil(active, index, deselect_when_no_data):
+    """Mirror explicit circuit deselection without losing a wired source."""
+    if not deselect_when_no_data or len(active.coil[index].current.data):
+        return False
+    column = len(active.supply) + index
+    for circuit in active.circuit:
+        matrix = np.asarray(circuit.connections)
+        if not matrix.size:
+            continue
+        if matrix.ndim != 2 or matrix.shape[1] <= column:
+            raise ValueError("cannot verify the missing coil's circuit connections")
+        if np.any(matrix[:, column] != 0):
+            return False
+    return True
+
+
 def _profile_basis(count):
     """Map the live Bernstein functions, with their endpoint dropped, to powers."""
     if count == 0:
@@ -243,8 +259,34 @@ def _read_case(name):
         flux_loop_fraction=np.asarray(fractions),
     )
     active = ids["pf_active"]
+    import xml.etree.ElementTree as element_tree
+
+    circuit_config = (
+        INPUT_ROOT.parents[2]
+        / "configuration/machines"
+        / base.split("/")[0]
+        / "constraints/magnetics.xml"
+    )
+    deselect_when_no_data = False
+    if circuit_config.exists():
+        directive = next(
+            element_tree.parse(circuit_config).getroot().iter("efitCircuits"), None
+        )
+        deselect_when_no_data = (
+            directive is not None and directive.get("deselectWhenNoData") == "true"
+        )
+    omitted_conductors = []
     conductors, element_coils, currents, uncertainty, coil_names = [], [], [], [], []
     for coil_index, coil in enumerate(active.coil):
+        if _omit_empty_unconnected_coil(active, coil_index, deselect_when_no_data):
+            omitted_conductors.append(
+                dict(
+                    name=str(coil.name),
+                    reason="empty current and no circuit connection",
+                    configuration=str(circuit_config),
+                )
+            )
+            continue
         current = _sample(coil.current, active, time)
         sigma = _sample(coil.current, active, time, "data_error_upper")
         placed = []
@@ -384,6 +426,7 @@ def _read_case(name):
             )
         ),
         conductor_count=len(currents),
+        omitted_conductors=omitted_conductors,
         occurrences=occurrences,
         ip_a=ip,
         flux_span_wb=span,

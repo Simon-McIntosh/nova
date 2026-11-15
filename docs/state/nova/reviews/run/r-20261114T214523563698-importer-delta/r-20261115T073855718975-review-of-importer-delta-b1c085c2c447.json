@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-15T07:52:13.659Z",
   "dispatched_at": "2026-11-15T07:39:54Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "importer-delta-repaired-head",
+      "recorded_at": "2026-11-15T10:18:09.147615+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/kernel-compile-barrier/importer-delta.html",

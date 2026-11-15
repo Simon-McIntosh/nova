@@ -8,6 +8,13 @@
   "call_sites_emission": "none",
   "completed_at": "2026-11-15T00:32:01.172Z",
   "dispatched_at": "2026-11-14T23:31:01Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "dina-flattop-rerun",
+      "recorded_at": "2026-11-15T00:35:31.239066+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/dina_flattop_scenario/verify.py",

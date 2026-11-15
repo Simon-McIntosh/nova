@@ -43,6 +43,16 @@
       "note": "The section now generates its state from profiles that are members of the basis imas-efit resolves for the run, with the nova fit given the same functions, so both codes' fit functions contain the generating profiles and the bands test wiring, not basis mismatch.",
       "reason": "",
       "when": "2026-11-15T20:08:57.438601+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8d01e88436a6351e819b514197319efd387e0c2d",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The comparison now bands the magnitude of q95 with the sign each state stores reported beside it, and compares fluxes after reading each state's stored flux sign, as the EFIT comparison section does.",
+      "reason": "",
+      "when": "2026-11-15T20:09:12.252523+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "The section now generates its state from profiles that are members of the basis imas-efit resolves for the run, with the nova fit given the same functions, so both codes' fit functions contain the generating profiles and the bands test wiring, not basis mismatch.",
       "reason": "",
       "when": "2026-11-15T20:08:57.438601+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "8d01e88436a6351e819b514197319efd387e0c2d",
+      "commit_basis": "edit",
+      "note": "The comparison now bands the magnitude of q95 with the sign each state stores reported beside it, and compares fluxes after reading each state's stored flux sign, as the EFIT comparison section does.",
+      "reason": "",
+      "when": "2026-11-15T20:09:12.252523+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261115T193830501969-plan-review-of-inverse-equilibrium-baseline.json",

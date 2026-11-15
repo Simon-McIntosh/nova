@@ -39,6 +39,11 @@
       "kind": "exempted",
       "reason": "The independent check is the public-builder assertion at :426, which the reviewer names; the pass-through assertion is redundant but harmless",
       "recorded_at": "2026-11-15T22:59:47.647992+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "Coordinator amends the landed fragment to name 9c102cbae as the row revision and say the later commits moved the completion without changing the operator values",
+      "recorded_at": "2026-11-15T22:59:59.953746+00:00"
     }
   },
   "findings": [

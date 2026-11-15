@@ -23,6 +23,7 @@ mkdir -p "$scratch/tree" "$out"
 git -C "$source_tree" archive "$revision" | tar -x -C "$scratch/tree"
 export PYTHONPATH="$scratch/tree" TMPDIR="$scratch" MPLCONFIGDIR="$scratch/matplotlib"
 export XLA_PYTHON_CLIENT_PREALLOCATE=false OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
+export XLA_FLAGS=--xla_gpu_autotune_level=0
 export JAX_PLATFORMS=cuda
 export NOVA_COMPILATION_CACHE_ROOT="$scratch/compile-cache"
 /home/ITER/mcintos/Code/nova/.venv/bin/python - "$source_tree" "$scratch/tree" "$revision" <<'PY'
@@ -35,6 +36,8 @@ prepare(Path(tree), revision, Path(source))
 subprocess.run(['git', '-C', tree, 'update-ref', 'HEAD', revision], check=True)
 PY
 cd "$scratch/tree"
+/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -s \
+    tests/test_magnetisation.py -k test_linear_shell_operator_pin > "$out/h200-operator-pin.log" 2>&1
 for mesh in uniform-0.08 uniform-0.04 graded-16-80 graded-8-40; do
     /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
         --revision "$revision" --blob "$blob" --output "$out" --mesh "$mesh"

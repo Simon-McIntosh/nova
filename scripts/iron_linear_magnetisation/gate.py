@@ -60,21 +60,22 @@ def main():
     if args.mode == "fast" and args.arm in {"both", "after"}:
         path = args.head_tree / "nova/biot/tiledassembly.py"
         source = path.read_text()
-        original = "blocks.append(basis.T @ (volume_weight[:, None] * basis))"
+        original = "    x, y = jnp.asarray(x.reshape(-1)), jnp.asarray(y.reshape(-1))"
         if source.count(original) != 1:
-            raise SystemExit(
-                "Gram mutation did not identify exactly one volume-weighted block"
-            )
+            raise SystemExit("quadrature mutation did not identify one rule")
         path.write_text(
             source.replace(
-                original, "blocks.append(basis.T @ (weight[:, None] * basis))"
+                original,
+                original
+                + "\n    if linear:\n"
+                "        weight = weight.at[weight.size // 2].multiply(1.1)",
             )
         )
         row = arm(
             "negative-control",
             args.head_tree,
             args.head_revision,
-            [*SUITE, "-k", "linear_shell_spectrum_uses_its_volume_gram", "-s"],
+            [*SUITE, "-k", "linear_shell_operator_pin", "-s"],
             args.output,
         )
         record["negative_control"] = receipt(row, args.head_revision)
@@ -82,7 +83,9 @@ def main():
             json.dumps(record, indent=2) + "\n"
         )
         if row["exit"] == 0 or not record["negative_control"]["failure_ids"]:
-            raise SystemExit("Gram negative control did not produce a failing test id")
+            raise SystemExit(
+                "quadrature negative control did not produce a failing test id"
+            )
     return int(
         any(
             record[name]["exit_status"] != 0

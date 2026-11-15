@@ -17,10 +17,15 @@ SHELL_PROBES = np.array([[2.0, 0.0], [0.0, 2.0], [3.0, 1.0]])
 UNIFORM_SIZES = (0.04, 0.02, 0.01)
 
 
-def require_clean_script(path, expected_blob):
+def require_clean_script(path, expected_blob, expected_revision=None):
     """Refuse tracked edits and verify the executed script's committed bytes."""
     path = Path(path).resolve()
     tree = path.parents[2]
+    revision = subprocess.check_output(
+        ["git", "-C", str(tree), "rev-parse", "HEAD"], text=True
+    ).strip()
+    if expected_revision is not None and revision != expected_revision:
+        raise SystemExit("executed revision differs from its stamp")
     dirty = subprocess.check_output(
         ["git", "-C", str(tree), "status", "--porcelain", "--untracked-files=no"],
         text=True,

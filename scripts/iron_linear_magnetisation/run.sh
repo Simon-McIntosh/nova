@@ -23,11 +23,23 @@ trap 'rm -rfv "$scratch"' EXIT
 mkdir -p "$scratch/tree"
 git -C "$source_tree" archive "$revision" | tar -x -C "$scratch/tree"
 export TMPDIR="$scratch" PYTHONPATH="$scratch/tree" MPLCONFIGDIR="$scratch/matplotlib"
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export JAX_PLATFORMS=${JAX_PLATFORMS:-cuda}
 export OPENBLAS_NUM_THREADS=${IRON_MEASUREMENT_THREADS:-4}
 export OMP_NUM_THREADS=${IRON_MEASUREMENT_THREADS:-4}
+/home/ITER/mcintos/Code/nova/.venv/bin/python - "$source_tree" "$scratch/tree" "$revision" <<'PYCODE'
+from pathlib import Path
+import subprocess
+import sys
+from scripts.iron_graded_refinement.gate import prepare
+source, tree, revision = sys.argv[1:]
+prepare(Path(tree), revision, Path(source))
+subprocess.run(['git', '-C', tree, 'update-ref', 'HEAD', revision], check=True)
+PYCODE
 cd "$scratch/tree"
-/home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
-    --revision "$revision" --blob "$blob" --output "$1" --basis constant --sizes 0.04
+if [ "${IRON_SKIP_CONSTANT:-0}" != 1 ]; then
+    /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
+        --revision "$revision" --blob "$blob" --output "$1" --basis constant --sizes 0.04
+fi
 /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
     --revision "$revision" --blob "$blob" --output "$1" "${@:2}"

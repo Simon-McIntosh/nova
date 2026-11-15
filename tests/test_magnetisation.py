@@ -1138,3 +1138,158 @@ def test_linear_local_tangent_matches_differentiating_the_projected_law():
     jacobian = jax.jacfwd(iron._linear_residual)(state, operands)
     direction = iron.jla.lu_solve(iron._linear_factor(state, operands), jnp.ones(6))
     np.testing.assert_allclose(jacobian @ direction, np.ones(6), rtol=2e-14)
+
+
+def test_reference_stamp_refuses_wrong_revision_and_dirty_tree(tmp_path):
+    import hashlib
+    import subprocess
+    from scripts.iron_linear_magnetisation.controls import require_clean_script
+
+    script = tmp_path / "scripts" / "iron_linear_magnetisation" / "reference.py"
+    script.parent.mkdir(parents=True)
+    data = b'"""Reference measurement."""\n'
+    script.write_bytes(data)
+
+    def git(*arguments):
+        return subprocess.check_output(
+            ["git", "-C", str(tmp_path), *arguments], text=True
+        ).strip()
+
+    git("init", "--quiet")
+    git("add", "scripts/iron_linear_magnetisation/reference.py")
+    git(
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.invalid",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "commit",
+        "-qm",
+        "test: record reference\n\nProvide committed bytes for stamp checks.",
+    )
+    revision = git("rev-parse", "HEAD")
+    blob = hashlib.sha1(
+        b"blob %d\0" % len(data) + data, usedforsecurity=False
+    ).hexdigest()
+    assert require_clean_script(script, blob, revision) == blob
+    with pytest.raises(SystemExit, match="executed revision differs"):
+        require_clean_script(script, blob, "unresolvable-revision")
+    with pytest.raises(SystemExit, match="executed script differs"):
+        require_clean_script(script, "invalid-blob", revision)
+    script.write_bytes(data + b"\n")
+    with pytest.raises(SystemExit, match="dirty tree"):
+        require_clean_script(script, blob, revision)
+
+
+def test_linear_shell_operator_pin(tmp_path):
+    """The affine integration rule preserves its delivered shell-cell operator."""
+    import json
+    from pathlib import Path
+    from scripts.iron_linear_magnetisation.controls import shell
+
+    control = json.loads(
+        (
+            Path(__file__).parents[1]
+            / "scripts"
+            / "iron_linear_magnetisation"
+            / "operator-control.json"
+        ).read_text()
+    )
+    cells = iron._mesh(shell(), 0.04)
+    assert len(cells.polygons) == control["shell_cells"] == 228
+    import os
+
+    full_reference = os.environ.get("NOVA_LINEAR_OPERATOR_REFERENCE")
+    polygons = (
+        cells.polygons
+        if full_reference
+        else tuple(cells.polygons[index] for index in control["selected_cells"])
+    )
+    actual, _ = iron.linear_galerkin_cell_interaction(polygons, plan=iron._PLAN)
+    if full_reference:
+        expected = np.load(full_reference)
+    else:
+        from scripts.iron_linear_magnetisation.kernel_cost import load_owner
+
+        reference = load_owner(
+            control["revision"], "compact_reference_owner", directory=tmp_path
+        )
+        expected, _ = reference.linear_galerkin_cell_interaction(
+            polygons, plan=iron._PLAN
+        )
+    assert np.isfinite(actual).all()
+    difference = actual - expected
+    relative = np.linalg.norm(difference) / np.linalg.norm(expected)
+    maximum = np.max(np.abs(difference)) / np.max(np.abs(expected))
+    print(
+        "40 mm operator metrics",
+        json.dumps(
+            dict(
+                unknowns=len(actual),
+                frobenius_relative=float(relative),
+                max_entry_relative=float(maximum),
+            )
+        ),
+    )
+    assert relative <= 1e-12
+    assert maximum <= 1e-12
+
+
+def test_paired_polygon_tiles_reuse_one_shape_and_preserve_cartesian_rows():
+    from nova.biot import tiledassembly as tiled
+
+    triangle = np.array([[1.0, 0.0], [1.01, 0.0], [1.0, 0.01]])
+    edge, weight, norm = tiled.pad_batch(
+        [triangle, triangle + [0.1, 0.0], triangle + [0.0, 0.1]], edge_count=3
+    )
+    points = np.array([[0.8, 0.1], [2.0, 0.2], [1.001, 0.002]])
+    for flux_only in (False, True):
+        cartesian = tiled.tile_evaluator(
+            tiled.TilePlan(3, 3, 9, 16, 48),
+            batched=True,
+            edge_count=3,
+            flux_only=flux_only,
+        )
+        expected = np.array(cartesian(*points.T, edge, weight, norm))[
+            :, np.arange(3), np.arange(3)
+        ]
+        paired = tiled.tile_evaluator(
+            tiled.TilePlan(3, 3, 8, 16, 48),
+            batched=True,
+            edge_count=3,
+            flux_only=flux_only,
+            pairwise=True,
+        )
+        actual = np.array(paired(*points.T, edge, weight, norm))
+        contributions = []
+        for index in range(len(weight)):
+            isolated = np.zeros_like(weight)
+            isolated[index] = weight[index]
+            contributions.append(
+                np.array(cartesian(*points.T, edge, isolated, norm))[
+                    :, np.arange(3), np.arange(3)
+                ]
+            )
+        scale = np.abs(contributions).sum(axis=0)
+        assert np.isfinite(actual).all()
+        assert np.all(np.abs(actual - expected) <= 1e-12 * scale)
+        print(
+            "paired polygon error over absolute edge sum:",
+            float(np.max(np.abs(actual - expected) / scale)),
+        )
+        paired(*points[:1].T, edge[:, :, :1], weight[:, :1], norm[:1])
+        assert paired.compile_count == 1
+        with pytest.raises(ValueError, match="one source per target"):
+            paired(*points[:1].T, edge, weight, norm)
+
+
+def test_polygon_current_routes_share_the_warm_tile_owner():
+    from nova.biot import tiledassembly as tiled
+
+    for kernel in ("quadrature", "closed"):
+        evaluator = tiled._polygon_current_evaluator(True, 192, kernel)
+        assert evaluator is tiled._polygon_current_evaluator(True, 192, kernel)
+        assert evaluator.kernel == kernel
+        assert evaluator.pairwise
+        assert evaluator.components == ("Psi",)

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 import time
@@ -21,6 +20,7 @@ from scripts.iron_linear_magnetisation.controls import (  # noqa: E402
     exact_shielding,
     loop,
     shell,
+    require_clean_script,
 )
 
 
@@ -31,16 +31,10 @@ def main():
     parser.add_argument("--blob", required=True)
     parser.add_argument("--sizes", type=float, nargs="+", default=UNIFORM_SIZES)
     parser.add_argument("--basis", choices=("constant", "linear"), default="linear")
+    parser.add_argument("--interaction-dir", type=Path)
     args = parser.parse_args()
     assert jax.config.jax_enable_x64
-    data = Path(__file__).read_bytes()
-    actual = hashlib.sha1(
-        b"blob %d\0" % len(data) + data, usedforsecurity=False
-    ).hexdigest()
-    if actual != args.blob:
-        raise SystemExit(
-            f"executed script blob {actual} differs from stamp {args.blob}"
-        )
+    actual = require_clean_script(__file__, args.blob, args.revision)
     args.output.mkdir(parents=True, exist_ok=True)
     previous = None
     for size in args.sizes:
@@ -86,6 +80,31 @@ def main():
                     "dense factor exceeds the device argument limit; rerun on CPU"
                 )
             assembly_start = time.monotonic()
+            if args.interaction_dir:
+                receipt = json.loads(
+                    (args.interaction_dir / f"assembly-{size:g}.json").read_text()
+                )
+                if not receipt["completed"] or receipt["cells"] != len(cells.polygons):
+                    raise SystemExit(
+                        "cached interaction does not name this completed mesh"
+                    )
+                result = np.load(receipt["operator_path"])
+                import hashlib
+
+                digest = hashlib.file_digest(
+                    Path(receipt["operator_path"]).open("rb"), "sha256"
+                ).hexdigest()
+                if digest != receipt["operator_sha256"]:
+                    raise SystemExit("cached interaction digest differs")
+                row["interaction_load_seconds"] = time.monotonic() - assembly_start
+                row["interaction_receipt"] = str(
+                    args.interaction_dir / f"assembly-{size:g}.json"
+                )
+                row["assembly_lane"] = receipt["devices"]
+                row["assembly_revision"] = receipt["revision"]
+                row["assembly_seconds"] = receipt["assembly_seconds"]
+                save()
+                return result
             result = production(*arguments, **keywords)
             row["assembly_seconds"] = time.monotonic() - assembly_start
             save()
@@ -109,7 +128,16 @@ def main():
         total = air + solution.field(SHELL_PROBES)
         shielding = np.linalg.norm(air, axis=1) / np.linalg.norm(total, axis=1)
         errors = np.abs(shielding / exact_shielding() - 1)
+        from scripts.iron_linear_magnetisation.reference import exterior_reference
+
+        reference = np.linalg.norm(air, axis=1) / np.linalg.norm(
+            exterior_reference(10)[1], axis=1
+        )
+        finite_errors = np.abs(shielding / reference - 1)
         row.update(
+            finite_loop_shielding=reference.tolist(),
+            finite_loop_relative_errors=finite_errors.tolist(),
+            finite_loop_worst_error=float(finite_errors.max()),
             cells=solution.cell_count,
             unknowns=solution.cell_count * (6 if args.basis == "linear" else 2),
             probe_coordinates_m=SHELL_PROBES.tolist(),
@@ -126,6 +154,13 @@ def main():
         if previous is not None:
             row["per_probe_order"] = (
                 np.log(np.asarray(previous["relative_errors"]) / errors)
+                / np.log(previous["cell_size_m"] / size)
+            ).tolist()
+        if previous is not None:
+            row["finite_loop_per_probe_order"] = (
+                np.log(
+                    np.asarray(previous["finite_loop_relative_errors"]) / finite_errors
+                )
                 / np.log(previous["cell_size_m"] / size)
             ).tolist()
         save()

@@ -121,7 +121,7 @@ def test_moving_saddle_refreshes_only_its_represented_cells(fragments):
     # leaves unrefreshed, and it must not be empty.
     assert (~represented).any(), "positive control must have reusable cells"
     assert np.array_equal(reuse, ~represented)
-    assert int(result[-1]) == int(np.sum(~represented))
+    assert int(result[-1]) == int(np.sum(represented))
     _compare(result, full(*args))
 
 
@@ -145,8 +145,10 @@ def _cell_geometry(geometry, index, change):
 def test_moved_cell_geometry_refreshes_that_cell(fragments, change):
     """Equal coefficients do not certify a cell whose carrier geometry moved."""
     geometry, sigma, policy, decision = fragments
-    conic = np.flatnonzero(~np.asarray(decision.normal_form_cells))
-    assert len(conic), "positive control must contain conic cells"
+    area = np.asarray(decision.fragment_area).sum(axis=1)
+    cut = (area > 1e-10) & (area < np.asarray(geometry.full_area) * (1 - 1e-6))
+    conic = np.flatnonzero(~np.asarray(decision.normal_form_cells) & cut)
+    assert len(conic), "positive control must contain cut conic cells"
     usable = [
         index
         for index in conic

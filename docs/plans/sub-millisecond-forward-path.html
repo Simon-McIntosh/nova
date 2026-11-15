@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="368">
+<meta name="plan-version" content="369">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -1095,6 +1095,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261114T211406516739-carried-read-mask-geometry" data-who="reckon-build" data-when="2026-11-15T04:25:22Z">
     <div class="r-comment-body"><p>nova/equilibrium/topology.py records the carrier each read was built on and adds _same_carrier_geometry to _fragment_reuse_mask, so a cell whose vertices, count, centre or pitch moved refreshes even with equal signed coefficients; the moved-cell case now chooses a cell and a displacement that provably change its fragment area before asserting the refresh; four cases fail at base 13312a9bf and under the coefficients-only mask, and three per-file arms show 0 added failures.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T042542823666-review-of-carried-read-mask-geometry-b098fc16dbc0" data-who="reckon-build" data-when="2026-11-15T04:55:37.062Z">
+    <div class="r-comment-body"><p>review of r-20261114T211406516739-carried-read-mask-geometry at base 5d2ac4f563d0 and head b098fc16dbc0 stores a parsed record scoring goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20 (117/120) with 0 added failures from the reviewed run&#x27;s base and head gate logs and no findings; the delta is bcf1af59c (tests, 71 insertions/23 deletions) and b098fc16d (evidence, 17/9), both inside declared write paths.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048" data-who="reckon-build" data-when="2026-11-14T10:26:14.839Z">
     <div class="r-comment-body"><p>two review records under review-records/ of run r-20261113T165201745905-bank-traced-inputs, one plain and one pinned at the reviewed head; this node's suite fence is unarmed so no pytest gate exists for it and none ran.</p></div>

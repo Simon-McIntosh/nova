@@ -12,6 +12,9 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+import hashlib
+import json
+from pathlib import Path
 
 import jax
 import jax.numpy as jnp
@@ -34,6 +37,9 @@ from nova.jax.config import configure_dtypes
 __all__ = [
     "CellSizeField",
     "MagnetisationSolution",
+    "MagnetisationInteraction",
+    "load_magnetisation_interaction",
+    "save_magnetisation_interaction",
     "galerkin_spectrum",
     "graded_cell_size",
     "solve_magnetisation",
@@ -253,6 +259,80 @@ def _galerkin_interaction(cells, plan=_PLAN, *, basis="constant"):
     return galerkin_cell_interaction(
         tuple(p * _SHEET_LENGTH_SCALE for p in cells.polygons), plan=plan
     )
+
+
+def _geometry_digest(cells, basis):
+    if basis not in {"constant", "linear"}:
+        raise ValueError("basis must be constant or linear")
+    digest = hashlib.sha256(basis.encode("ascii"))
+    for polygon in cells.polygons:
+        vertices = np.asarray(polygon, dtype="<f8")
+        digest.update(np.asarray(vertices.shape, dtype="<i8").tobytes())
+        digest.update(vertices.tobytes())
+    return digest.hexdigest()
+
+
+@dataclass(frozen=True)
+class MagnetisationInteraction:
+    """A Galerkin response bound to ordered mesh vertices and basis functions."""
+
+    matrix: np.ndarray
+    geometry_digest: str
+    basis: str
+
+    def validate(self, cells, basis):
+        """Refuse a response belonging to another mesh or component layout."""
+        if (
+            self.geometry_digest != _geometry_digest(cells, basis)
+            or self.basis != basis
+        ):
+            raise ValueError("interaction geometry digest does not match the mesh")
+        unknowns = len(cells.polygons) * (6 if basis == "linear" else 2)
+        if self.matrix.shape != (unknowns, unknowns):
+            raise ValueError("interaction shape does not match the mesh and basis")
+        if (
+            self.matrix.dtype != np.dtype("float64")
+            or not np.isfinite(self.matrix).all()
+        ):
+            raise ValueError("interaction must contain finite float64 entries")
+
+
+def save_magnetisation_interaction(
+    path, matrix, *, region, cell_size, basis="constant"
+):
+    """Persist a float64 response and its mesh identity as NPY and JSON.
+
+    The caller supplies the Galerkin matrix assembled on this exact mesh.
+    No currents, material law or time slice enter the geometry identity.
+    """
+    cells = _mesh(region, cell_size)
+    response = MagnetisationInteraction(
+        np.asarray(matrix), _geometry_digest(cells, basis), basis
+    )
+    response.validate(cells, basis)
+    path = Path(path)
+    with path.open("wb") as stream:
+        np.save(stream, response.matrix, allow_pickle=False)
+    path.with_suffix(".json").write_text(
+        json.dumps(dict(geometry_digest=response.geometry_digest, basis=basis)) + "\n"
+    )
+    return response
+
+
+def load_magnetisation_interaction(path, *, region, cell_size, basis="constant"):
+    """Load a response only when the ordered mesh geometry and basis match."""
+    path = Path(path)
+    metadata = json.loads(path.with_suffix(".json").read_text())
+    cells = _mesh(region, cell_size)
+    if metadata["geometry_digest"] != _geometry_digest(cells, basis):
+        raise ValueError("interaction geometry digest does not match the mesh")
+    response = MagnetisationInteraction(
+        np.load(path, mmap_mode="r", allow_pickle=False),
+        metadata["geometry_digest"],
+        metadata["basis"],
+    )
+    response.validate(cells, basis)
+    return response
 
 
 def galerkin_spectrum(cells, gram, *, basis="constant"):
@@ -591,6 +671,7 @@ def solve_magnetisation(
     tile_plan: TilePlan = _PLAN,
     initial_magnetisation: np.ndarray | None = None,
     basis: str = "constant",
+    interaction: MagnetisationInteraction | None = None,
 ) -> MagnetisationSolution:
     """Mesh iron and solve M = c(|B|) B for B = B_external + G M.
 
@@ -606,6 +687,8 @@ def solve_magnetisation(
     Its initial values have shape (cells, 6), ordered by component then basis.
     The returned ``linear_coefficients`` have shape (2, cells, 3); gradients
     multiply coordinates divided by the square root of each cell area.
+    ``interaction`` accepts a persisted response loaded for this mesh and basis;
+    its geometry digest is checked before any source evaluation or assembly.
 
     Try exact Newton first, then adapt a diagonal regularisation lambda.
     The shifted equation F(M + p) + lambda*p = 0 is an implicit pseudo-time
@@ -627,6 +710,8 @@ def solve_magnetisation(
     if basis not in {"constant", "linear"}:
         raise ValueError("basis must be constant or linear")
     cells = _mesh(region, cell_size)
+    if interaction is not None:
+        interaction.validate(cells, basis)
     if basis == "linear":
         geometry = linear_magnetisation_geometry(cells.polygons)
         values = np.asarray(external_field(geometry["points"]), dtype=np.float64)
@@ -658,9 +743,13 @@ def solve_magnetisation(
             "the averaged external field must be finite (cells, 2) components"
         )
     gram = (
-        _galerkin_interaction(cells, tile_plan, basis=basis)
-        if basis == "linear"
-        else _galerkin_interaction(cells, tile_plan)
+        interaction.matrix
+        if interaction is not None
+        else (
+            _galerkin_interaction(cells, tile_plan, basis=basis)
+            if basis == "linear"
+            else _galerkin_interaction(cells, tile_plan)
+        )
     )
     if not np.all(np.isfinite(gram)):
         raise ValueError("the sheet interaction contains nonfinite entries")

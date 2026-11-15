@@ -1,0 +1,13 @@
+<section id="importer-delta-landing">
+<h3>Importer failure-id delta of the shared point jet</h3>
+<p id="importer-delta-method">Every file below ran in a fresh process, one process per file and arm, with the JAX compilation cache disabled before JAX initialised, the repository's single project environment as the interpreter, and <code>PYTHONPATH</code> naming the tree under test. Each arm is judged only against the other arm on the same device, because a compile wall differs by device and a failure count does not. The verdict is the set of failed and errored test ids present at head and absent from the base arm on that same device; a failure the base arm already carries is reported, not repaired. An id is a failed or an errored test, not a failed-and-passed line, so a file whose fixtures error contributes those ids as well.</p>
+<p id="importer-delta-verdict">VERDICT_LINE</p>
+<h4 id="importer-delta-cpu-heading">CPU, one file per process</h4>
+CPU_TABLE
+<p id="importer-delta-unreadable">UNREADABLE_LINE</p>
+<h4 id="importer-delta-card-heading">H200, the four long files, both arms in one job</h4>
+H200_NOTE
+H200_TABLE
+<h4 id="importer-delta-receipts-heading">Receipts</h4>
+RECEIPTS_BLOCK
+</section>

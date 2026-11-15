@@ -294,7 +294,7 @@ def graded_shell_field(scale=1.0):
 
 
 def test_uniform_cell_size_reproduces_the_recorded_grid():
-    # Digests recorded from the uniform grid before the spacing field existed,
+    # These digests pin every polygon, centroid and area of the uniform grid,
     # so any perturbation of the default mesh changes them.
     recorded = {
         0.1: (46, "0a354c798c78a034dfdb0a729c1778689309dd36a9811bfd510a551386c313be"),
@@ -1036,6 +1036,206 @@ def test_mutual_self_block_converges_with_logarithmic_quadrature():
     assert errors[2] < 2e-8
 
 
+@pytest.mark.parametrize("fill", [1.0, lambda c: np.ones(len(c))])
+def test_explicit_unit_fill_preserves_solid_solution(fill):
+    arguments = (sphere(), uniform, [0, 1, 2], [10, 12, 8])
+    solid = iron.solve_magnetisation(*arguments, cell_size=0.1)
+    explicit = iron.solve_magnetisation(
+        *arguments, cell_size=0.1, fill_fraction=fill, cross_field_factor=0.4
+    )
+    for attribute in ("magnetisation", "permeability_relative", "residual_history"):
+        np.testing.assert_array_equal(
+            getattr(explicit, attribute), getattr(solid, attribute)
+        )
+    probes = np.array([[1.0, 0.2], [0.0, 1.0]])
+    np.testing.assert_array_equal(explicit.field(probes), solid.field(probes))
+
+
+def test_cell_fill_and_cross_field_match_linear_tensor(monkeypatch):
+    """Independent two-cell constitutive solution checks both component orders."""
+    gram = iron._MU0 * np.array(
+        [
+            [0.4, 0.03, 0.01, -0.02],
+            [0.02, 0.5, 0.04, 0.01],
+            [0.01, 0.02, 0.3, 0.04],
+            [-0.01, 0.01, 0.03, 0.6],
+        ]
+    )
+    external = np.array([[0.01, 0.02], [-0.03, 0.04]])
+    fill = np.array([0.2, 0.6])
+    cross = np.array([[0.4, 0.0], [0.0, 0.3]])
+    mu = 50.0
+    # Eliminating the iron's internal field gives a diagonal effective
+    # susceptibility multiplying the toroidal-mean total field.
+    beta = 1 - 1 / mu
+    effective = (fill[:, None] * beta / iron._MU0) / (
+        1 - beta * (1 - fill[:, None]) * (1 - cross)
+    )
+    effective = effective.T.reshape(-1)
+    expected = (
+        np.linalg.solve(
+            np.eye(4) - effective[:, None] * gram, effective * external.T.reshape(-1)
+        )
+        .reshape(2, -1)
+        .T
+    )
+    monkeypatch.setattr(iron, "_galerkin_interaction", lambda *args: gram)
+    monkeypatch.setattr(iron, "_average_external", lambda *args: external)
+    result = iron.solve_magnetisation(
+        shapely.box(1, 0, 2, 2),
+        uniform,
+        [0, 10],
+        [mu, mu],
+        cell_size=1,
+        fill_fraction=lambda c: fill,
+        cross_field_factor=lambda c: cross,
+    )
+    assert result.converged and result.iterations == 1
+    np.testing.assert_allclose(result.magnetisation, expected, rtol=1e-12)
+    np.testing.assert_allclose(
+        result.iron_magnetisation, expected / fill[:, None], rtol=1e-12
+    )
+    np.testing.assert_allclose(result.permeability_relative, mu, rtol=1e-12)
+    np.testing.assert_array_equal(result.fill_fraction, fill)
+    np.testing.assert_array_equal(result.cross_field_factor, cross)
+
+
+@pytest.mark.parametrize(
+    "keyword,value",
+    [
+        ("fill_fraction", 0),
+        ("fill_fraction", 1.01),
+        ("fill_fraction", np.nan),
+        ("fill_fraction", [0.2, 0.3]),
+        ("cross_field_factor", -0.1),
+        ("cross_field_factor", 1.01),
+        ("cross_field_factor", [0.4]),
+    ],
+)
+def test_cell_material_refuses_invalid_values(keyword, value, monkeypatch):
+    def forbidden(*args):
+        raise AssertionError("invalid material reached expensive interaction assembly")
+
+    monkeypatch.setattr(iron, "_galerkin_interaction", forbidden)
+    with pytest.raises(ValueError, match=keyword):
+        iron.solve_magnetisation(
+            shapely.box(1, 0, 2, 1),
+            uniform,
+            [0, 1],
+            [50, 50],
+            cell_size=1,
+            **{keyword: value},
+        )
+
+
+def test_cross_field_gain_keeps_linear_reference():
+    """The local gain is necessary even without any cell interaction assembly."""
+    mu, fill, cross = 50.0, 0.2, 0.4
+    beta = 1 - 1 / mu
+    external = np.array([0.01, 0.02])
+    gain = np.full((2, 1), (1 - fill) / fill * (1 - cross))
+    effective = fill * beta / iron._MU0 / (1 - beta * (1 - fill) * (1 - cross))
+    reference = jnp.asarray(effective * external)
+    operands = tuple(
+        jnp.asarray(value)
+        for value in (
+            np.zeros((2, 2)),
+            external,
+            *iron._fit_law([0, 10], [mu, mu]),
+            np.array([fill]),
+            gain,
+        )
+    )
+    np.testing.assert_allclose(iron._residual(reference, operands), 0, atol=2e-10)
+    without_gain = (*operands[:6], jnp.zeros_like(operands[6]))
+    assert np.linalg.norm(iron._residual(reference, without_gain)) > (
+        0.1 * np.linalg.norm(reference)
+    )
+
+
+@pytest.mark.parametrize("mu,limit", [(50.0, 0.10), (200.0, 0.11)])
+def test_control_receipt_enforces_permeability_specific_bounds(tmp_path, mu, limit):
+    """A fine-grid receipt passes and a value beyond either bound is refused."""
+    from scripts.iron_limb_production.gate import (
+        _CONTROL_RECEIPT,
+        validate_control_receipt,
+    )
+
+    result = validate_control_receipt(_CONTROL_RECEIPT)
+    assert result["passed"] and result["size_m"] == 0.032
+    row = next(row for row in result["acceptance"] if row["mu"] == mu)
+    assert row["limit"] == limit
+    source = json.loads(_CONTROL_RECEIPT.read_text())
+    row = next(
+        row
+        for row in source["control"]
+        if row["size_m"] == 0.032 and row["model"] == "geometry" and row["mu"] == mu
+    )
+    row["vessel_relative_rms"] = limit + 1e-6
+    changed = tmp_path / "control.json"
+    changed.write_text(json.dumps(source))
+    with pytest.raises(AssertionError, match=f"mu={mu:g}.*bound {limit}"):
+        validate_control_receipt(changed)
+
+
+def test_control_receipt_preserves_smear_reduction(tmp_path):
+    from scripts.iron_limb_production.gate import (
+        _CONTROL_RECEIPT,
+        validate_control_receipt,
+    )
+
+    source = json.loads(_CONTROL_RECEIPT.read_text())
+    rows = {
+        row["model"]: row
+        for row in source["control"]
+        if row["size_m"] == 0.032 and row["mu"] == 50
+    }
+    rows["smear"]["vessel_relative_rms"] = 2 * rows["geometry"]["vessel_relative_rms"]
+    changed = tmp_path / "control.json"
+    changed.write_text(json.dumps(source))
+    with pytest.raises(AssertionError, match="smear ratio"):
+        validate_control_receipt(changed)
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(1800)
+@pytest.mark.parametrize("mu", [50.0, 200.0])
+def test_in_vessel_fill_matches_six_limb_reference(mu):
+    """Resolve material-rule improvements on the coarse CPU comparison grid."""
+    from scripts.iron_limb_production.measure import (
+        control_result,
+        reference_inputs,
+        reuse_operators,
+    )
+
+    case, references = reference_inputs()
+    reference = np.asarray(references[mu]["iron_average_T"])[:16]
+    assert np.isfinite(reference).all() and np.linalg.norm(reference) > 1e-3
+    errors = {}
+    with reuse_operators():
+        for name in ("geometry", "plain"):
+            result = control_result(case, name, 0.1, mu)
+            measured = result.field(np.asarray(case["probes"])[:16])
+            assert result.converged
+            errors[name] = np.linalg.norm(measured - reference) / np.linalg.norm(
+                reference
+            )
+    print(f"six-limb in-vessel mu={mu:g} errors={errors}", flush=True)
+    assert errors["geometry"] <= 0.5 * errors["plain"]
+
+
+def test_compatibility_comparison_resolves_reference_scale():
+    from scripts.iron_limb_production.compatibility import assert_compatible
+
+    reference = np.array([0.0, 2e4])
+    scale = np.max(np.abs(reference))
+    assert_compatible(reference + 1e-16 * scale, reference)
+    changed = reference.copy()
+    changed[1] *= 1 + 1e-9
+    with pytest.raises(AssertionError, match="Not equal to tolerance"):
+        assert_compatible(changed, reference)
+
+
 @pytest.mark.parametrize("size", [0.20, 0.16])
 def test_linear_shell_spectrum_uses_its_volume_gram(size):
     """The affine B projection is reciprocal and bounded in its own metric."""
@@ -1118,7 +1318,8 @@ def test_linear_volume_current_matches_closed_polygon_field():
     np.testing.assert_allclose(response, expected, rtol=2e-8, atol=1e-20)
 
 
-def test_linear_local_tangent_matches_differentiating_the_projected_law():
+@pytest.mark.parametrize("fill", [1.0, 0.2])
+def test_linear_local_tangent_matches_differentiating_the_projected_law(fill):
     cells = iron._mesh(shapely.box(1, 0, 2, 1), 1.0)
     geometry = iron.linear_magnetisation_geometry(cells.polygons)
     owners = geometry["owners"]
@@ -1134,6 +1335,9 @@ def test_linear_local_tangent_matches_differentiating_the_projected_law():
     operands = tuple(
         map(jnp.asarray, (operator, external, *law, geometry["basis"], project, owners))
     )
+    if fill != 1:
+        gain = (1 - fill) / fill * np.array([[0.6], [1.0]])
+        operands += (jnp.array([fill]), jnp.asarray(gain))
     state = jnp.arange(6, dtype=jnp.float64) * 10
     jacobian = jax.jacfwd(iron._linear_residual)(state, operands)
     direction = iron.jla.lu_solve(iron._linear_factor(state, operands), jnp.ones(6))
@@ -1293,3 +1497,61 @@ def test_polygon_current_routes_share_the_warm_tile_owner():
         assert evaluator.kernel == kernel
         assert evaluator.pairwise
         assert evaluator.components == ("Psi",)
+
+
+@pytest.mark.parametrize("fill", [1.0, 0.2])
+def test_linear_fill_and_cross_field_match_affine_tensor(monkeypatch, fill):
+    """Affine spatial variation retains the per-cell iron constitutive tensor."""
+    region = shapely.box(1, 0, 2, 1)
+    cells = iron._mesh(region, 1.0)
+    geometry = iron.linear_magnetisation_geometry(cells.polygons)
+    monkeypatch.setattr(
+        iron, "_galerkin_interaction", lambda *args, **kwargs: np.zeros((6, 6))
+    )
+
+    def external(points):
+        return np.column_stack((0.02 + 0.01 * points[:, 0], 0.03 + 0.04 * points[:, 1]))
+
+    cross = np.array([[0.4, 0.0]])
+    mu = 50.0
+    beta = 1 - 1 / mu
+    effective = fill * beta / iron._MU0 / (1 - beta * (1 - fill) * (1 - cross[0]))
+    expected = np.linalg.solve(
+        geometry["gram"][0],
+        geometry["basis"].T
+        @ (geometry["weights"][:, None] * external(geometry["points"]) * effective),
+    )
+    result = iron.solve_magnetisation(
+        region,
+        external,
+        [0, 10],
+        [mu, mu],
+        cell_size=1.0,
+        basis="linear",
+        fill_fraction=fill,
+        cross_field_factor=cross,
+    )
+    assert result.converged and result.iterations == 1
+    np.testing.assert_allclose(
+        result.linear_coefficients[:, 0].T,
+        expected,
+        rtol=1e-12,
+        atol=1e-12 * np.max(np.abs(expected)),
+    )
+    np.testing.assert_allclose(
+        result.iron_magnetisation[0], expected[0] / fill, rtol=1e-12
+    )
+    np.testing.assert_allclose(result.permeability_relative, mu, rtol=1e-12)
+    if fill == 1:
+        implicit = iron.solve_magnetisation(
+            region, external, [0, 10], [mu, mu], cell_size=1.0, basis="linear"
+        )
+        for name in (
+            "magnetisation",
+            "linear_coefficients",
+            "permeability_relative",
+            "residual_history",
+        ):
+            np.testing.assert_array_equal(
+                getattr(result, name), getattr(implicit, name)
+            )

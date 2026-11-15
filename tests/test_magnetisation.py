@@ -1386,7 +1386,8 @@ def test_reference_stamp_refuses_wrong_revision_and_dirty_tree(tmp_path):
         require_clean_script(script, blob, revision)
 
 
-def test_linear_shell_operator_pin(tmp_path):
+@pytest.mark.parametrize("batch_edges", [False, True], ids=["compact", "batch-edges"])
+def test_linear_shell_operator_pin(tmp_path, monkeypatch, batch_edges):
     """The affine integration rule preserves its delivered shell-cell operator."""
     import json
     from pathlib import Path
@@ -1404,24 +1405,54 @@ def test_linear_shell_operator_pin(tmp_path):
     assert len(cells.polygons) == control["shell_cells"] == 228
     import os
 
-    full_reference = os.environ.get("NOVA_LINEAR_OPERATOR_REFERENCE")
+    full_reference = (
+        os.environ.get("NOVA_LINEAR_OPERATOR_REFERENCE") if not batch_edges else None
+    )
     polygons = (
         cells.polygons
         if full_reference
         else tuple(cells.polygons[index] for index in control["selected_cells"])
     )
-    actual, _ = iron.linear_galerkin_cell_interaction(polygons, plan=iron._PLAN)
-    if full_reference:
-        expected = np.load(full_reference)
-    else:
-        from scripts.iron_linear_magnetisation.kernel_cost import load_owner
+    plan = iron._PLAN
+    if batch_edges:
+        from nova.biot import sectionaverage, tiledassembly
 
-        reference = load_owner(
-            control["revision"], "compact_reference_owner", directory=tmp_path
-        )
-        expected, _ = reference.linear_galerkin_cell_interaction(
-            polygons, plan=iron._PLAN
-        )
+        section_nodes = sectionaverage.section_nodes
+        assert sum(len(section_nodes(polygon, 6)[0]) for polygon in polygons) < 4096
+        atoms = iron.linear_magnetisation_geometry(polygons)["atoms"]
+        assert plan.tile_count(len(atoms), len(atoms)) == 1
+
+        def split_weights(polygon, order):
+            points, weights = section_nodes(polygon, order)
+            if np.array_equal(polygon, polygons[0]):
+                repeats = (4096 + len(points) - 1) // len(points)
+                points = np.tile(points, (repeats, 1))
+                weights = np.tile(weights / repeats, repeats)
+            return points, weights
+
+        # Splitting weights preserves the rule while crossing a real flush.
+        assert len(split_weights(polygons[0], 6)[0]) >= 4096
+        assert len(polygons) > 1
+        crossing = tiledassembly.TilePlan(8, 8, plan.block, plan.n_panels, plan.n_nodes)
+        assert any(s.stop <= t.start for t, s in crossing.tiles(len(atoms), len(atoms)))
+        with monkeypatch.context() as patch:
+            patch.setattr(sectionaverage, "section_nodes", split_weights)
+            actual, _ = iron.linear_galerkin_cell_interaction(polygons, plan=crossing)
+        # The same owner and CPU compare batching without cross-platform rounding.
+        expected, _ = iron.linear_galerkin_cell_interaction(polygons, plan=plan)
+    else:
+        actual, _ = iron.linear_galerkin_cell_interaction(polygons, plan=plan)
+        if full_reference:
+            expected = np.load(full_reference)
+        else:
+            from scripts.iron_linear_magnetisation.kernel_cost import load_owner
+
+            reference = load_owner(
+                control["revision"], "compact_reference_owner", directory=tmp_path
+            )
+            expected, _ = reference.linear_galerkin_cell_interaction(
+                polygons, plan=iron._PLAN
+            )
     assert np.isfinite(actual).all()
     difference = actual - expected
     relative = np.linalg.norm(difference) / np.linalg.norm(expected)

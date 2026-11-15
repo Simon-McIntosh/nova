@@ -11,7 +11,6 @@ length and ten segment lengths away from the middle and from each end.
 from __future__ import annotations
 
 import importlib.util
-from functools import lru_cache
 import sys
 from pathlib import Path
 
@@ -22,6 +21,7 @@ from nova.biot.completeelliptic import complete_kind, complete_pole
 from nova.biot.sheet import MU0, SheetFlux, sheet_field, sheet_flux
 
 import nova.biot.sheet as sheet_module
+from tests.sheet_fixtures import axis_pair, axis_pair_jacobian
 
 REFERENCE_PATH = (
     Path(__file__).resolve().parents[1] / "scripts" / "edge_sheet" / "reference.py"
@@ -855,18 +855,6 @@ AXIS_WITNESSES = (
 )
 
 
-@lru_cache(maxsize=1)
-def _compiled_axis_pair():
-    import jax
-    import jax.numpy as jnp
-    from nova.biot.sheet import packed_sheet_field
-
-    def evaluate(values):
-        return jnp.stack(packed_sheet_field(jnp, *[x[None] for x in values])).ravel()
-
-    return jax.jit(evaluate), jax.jit(jax.jacfwd(evaluate))
-
-
 @pytest.mark.parametrize("start,end,point", AXIS_WITNESSES)
 def test_axis_sheet_limits_match_graded_reference(start, end, point):
     """Zero source radii and axis targets take their finite, disjoint limits."""
@@ -878,7 +866,7 @@ def test_axis_sheet_limits_match_graded_reference(start, end, point):
     wanted = np.array([expected.br, expected.bz])
     scale = np.linalg.norm(wanted)
     scalar = np.array(sheet_field(*point, start, end))
-    packed = np.asarray(_compiled_axis_pair()[0](jnp.array((*point, *start, *end))))
+    packed = np.asarray(axis_pair(jnp.array((*point, *start, *end))))
     assert np.isfinite(scalar).all() and np.isfinite(packed).all()
     for got in (scalar, packed):
         assert np.linalg.norm(got - wanted) <= TOLERANCE * scale
@@ -915,7 +903,7 @@ def test_axis_approaches_match_graded_reference(radius, limit, capsys):
         reference_flux, *components = precise
         wanted = np.array(components)
     scalar = np.array(sheet_field(*point, start, end))
-    packed = np.asarray(_compiled_axis_pair()[0](jnp.array((*point, *start, *end))))
+    packed = np.asarray(axis_pair(jnp.array((*point, *start, *end))))
     for got in (scalar, packed):
         assert np.linalg.norm(got - wanted) <= TOLERANCE * np.linalg.norm(wanted)
     flux = sheet_flux(*point, start, end)
@@ -959,7 +947,7 @@ def test_axis_limits_keep_inactive_gradient_paths_finite(start, end, point):
     import jax.numpy as jnp
 
     values = jnp.array((*point, *start, *end))
-    assert np.isfinite(_compiled_axis_pair()[1](values)).all()
+    assert np.isfinite(axis_pair_jacobian(values)).all()
 
 
 @pytest.mark.timeout(900)
@@ -999,7 +987,7 @@ def test_shell_oblique_radial_magnetisation():
         end = np.array([edges.end_r[i], edges.end_z[i]]) / 1024
         expected = reference.graded_precise_ring_reference(start, end, point)[1:]
         got = np.array(sheet_field(*point, start, end))
-        traced = np.asarray(_compiled_axis_pair()[0](jnp.array((*point, *start, *end))))
+        traced = np.asarray(axis_pair(jnp.array((*point, *start, *end))))
         for value in (got, traced):
             np.testing.assert_allclose(value, expected, rtol=1e-10, atol=1e-28)
         scalar += coefficient * got
@@ -1009,7 +997,7 @@ def test_shell_oblique_radial_magnetisation():
     np.testing.assert_allclose(scalar, wanted, rtol=1e-10, atol=1e-28)
     np.testing.assert_allclose(packed, wanted, rtol=1e-10, atol=1e-28)
 
-    derivative = _compiled_axis_pair()[1](jnp.array((*point, *start, *end)))
+    derivative = axis_pair_jacobian(jnp.array((*point, *start, *end)))
     assert np.isfinite(derivative).all()
 
 
@@ -1022,7 +1010,7 @@ def test_sheet_remainder_resolves_both_azimuthal_layers():
     end = (0.09919998656445313, -0.8945162730019531)
     wanted = reference.graded_precise_ring_reference(start, end, point)[1:]
     scalar = np.array(sheet_field(*point, start, end))
-    packed = np.asarray(_compiled_axis_pair()[0](jnp.array((*point, *start, *end))))
+    packed = np.asarray(axis_pair(jnp.array((*point, *start, *end))))
     for value in (scalar, packed):
         np.testing.assert_allclose(value, wanted, rtol=1e-10, atol=1e-25)
 
@@ -1051,7 +1039,7 @@ def test_packed_sheet_binary_dilation_preserves_the_field(point, start, end):
     values = []
     for scale in (1.0, 1024.0):
         pair = coordinates * scale
-        value = np.asarray(_compiled_axis_pair()[0](jnp.asarray(pair)))
+        value = np.asarray(axis_pair(jnp.asarray(pair)))
         ends = np.asarray(
             sheet_module.packed_sheet_end_scale(np, *[np.array([x]) for x in pair])
         ).ravel()

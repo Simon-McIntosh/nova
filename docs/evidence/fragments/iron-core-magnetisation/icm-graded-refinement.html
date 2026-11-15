@@ -116,12 +116,13 @@
 
     <h2 id="icm-graded-refinement-device">Why the graded arms run on the CPU lane</h2>
     <p>The P100 admits a single HLO argument of at most 13 653 508 096 bytes.
-    A mesh of <code>n</code> cells carries <code>3n</code> unknowns and a dense
-    factor near <code>8 (3n)^2</code> bytes: 11 000 cells needs about 8.7 GB and
+    A mesh of <code>n</code> cells carries <code>2n</code> unknowns (M<sub>r</sub>, M<sub>z</sub>) and a dense
+    factor near <code>8 (2n)^2</code> bytes: 11 000 cells needs about 3.9 GB and
     failed at 5.37 GiB more; 12 851 cells failed earlier at 11.09 GiB. The
-    pinned graded arm measured 13 410 cells, 40 230 unknowns and a factor of
-    about 12.9 GB before the interaction matrix is counted, which is the
-    argument the device refuses. It runs on the CPU lane with 110 GB of host
+    pinned graded arm measured 13 410 cells, 26 820 unknowns and a factor of
+    about 5.8 GB before the interaction matrix and compiled temporaries are
+    counted; the factor alone does not explain the recorded device refusals.
+    It runs on the CPU lane with 110 GB of host
     memory, assembling in 3660 s and solving in 237 s. No grading that meets 0.5 per cent at every
     probe both fits the card and stays inside the bound, so the choice was the
     lane, not a looser target: the 0.5 per cent bound and the doubled-arm

@@ -36,6 +36,7 @@ from nova.biot.tiledassembly import (
     packed_sheet_field,
 )
 from nova.jax.config import configure_dtypes
+from tests.sheet_fixtures import packed_field
 
 configure_dtypes()
 assert jax.config.jax_enable_x64, "the sheet tile's contract is float64"
@@ -175,7 +176,7 @@ def unbatched_edge_field(target_r, target_z, edges):
     in flat chunks, which is the arithmetic the tile's padded blocks are checked
     against.
     """
-    kernel = jax.jit(lambda *values: packed_sheet_field(jnp, *values))
+    kernel = packed_field
     targets = target_r.size
     sources = edges.start_r.size
     radial = np.empty((targets, sources))
@@ -394,7 +395,7 @@ def test_flat_cpu_pair_is_independent_of_batch_size():
     polygons, centroids = west_mesh()
     edges = cell_edges(polygons)
     target, edge = 0, 1129
-    kernel = jax.jit(lambda *values: packed_sheet_field(jnp, *values))
+    kernel = packed_field
     pair = (
         centroids[target, 0],
         centroids[target, 1],
@@ -420,7 +421,7 @@ def test_exterior_cylinder_cpu_pair_is_independent_of_batch_size(edge):
     polygons, centroids = west_mesh()
     edges = cell_edges(polygons)
     target = 844
-    kernel = jax.jit(lambda *values: packed_sheet_field(jnp, *values))
+    kernel = packed_field
     pair = (
         centroids[target, 0],
         centroids[target, 1],

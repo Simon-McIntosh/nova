@@ -51,7 +51,7 @@ def capture_build(original):
 
 
 def capture_adapter(original):
-    """Complete the sampling-node conductor target the booked route clips on.
+    """Retain the operator the current adapter completed.
 
     The completed adapter's profile is the one the row goes on to solve, so it
     is retained here: the build call returns a six-item tuple, not a profile,
@@ -59,7 +59,7 @@ def capture_adapter(original):
     """
 
     def adapter(profile, **kwargs):
-        result = bench.extend_sample_current_response(original(profile, **kwargs))
+        result = original(profile, **kwargs)
         BUILT["profile"] = result.profile
         return result
 

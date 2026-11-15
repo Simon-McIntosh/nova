@@ -119,7 +119,6 @@ from nova.imas.diiid_description import (
 from nova.imas.diiid_current import (
     DEFAULT_ACTIVE_COIL_DD_VERSION,
     DEFAULT_ACTIVE_COIL_ENTRY,
-    DiiidCurrentAdapter,
     circuit_current_map,
     complete_profile_current_adapter,
     shipped_current_at,
@@ -1527,56 +1526,6 @@ def _build_profile(
             },
         },
         seed_wall_flux_sha256=_array_sha256(seed_wall_flux),
-    )
-
-
-def extend_sample_current_response(adapter: DiiidCurrentAdapter) -> DiiidCurrentAdapter:
-    """Append the circuit-driven columns to the sampling-node conductor target.
-
-    The current adapter appends the pf_active circuit groups to the grid and
-    wall conductor responses, because those groups produce flux at every
-    target. The sampling nodes the booked route clips on are a third target
-    and need the same columns: without them the sample rows would be solved
-    against a shorter conductor vector than the one the solve supplies.
-    """
-
-    profile = adapter.profile
-    sample = profile.operator.sample
-    if sample is None:
-        return adapter
-    coordinate = np.asarray(sample.coordinate, dtype=np.float64)
-    names, response, receipt = active_coil_response_from_imas(
-        DEFAULT_ACTIVE_COIL_ENTRY,
-        DEFAULT_ACTIVE_COIL_DD_VERSION,
-        CIRCUIT_DRIVEN_CONDUCTORS,
-        coordinate[:, 0],
-        coordinate[:, 1],
-    )
-    if names != CIRCUIT_DRIVEN_CONDUCTORS:
-        raise RuntimeError("active-coil response did not preserve requested order")
-    expected = int(profile.operator.grid.source_target.shape[1])
-    extended = len(names) + int(sample.source_target.shape[1])
-    if extended != expected or np.shape(response)[1] != coordinate.shape[0]:
-        raise RuntimeError(
-            "sampling-node conductor columns do not complete the shipped order"
-        )
-    operator = replace(
-        profile.operator,
-        sample=replace(
-            sample,
-            source_target=jnp.column_stack(
-                (sample.source_target, jnp.asarray(response.T))
-            ),
-        ),
-    )
-    return replace(
-        adapter,
-        profile=replace(profile, operator=operator),
-        response_receipt={
-            **adapter.response_receipt,
-            "sample": receipt,
-            "sample_rows": int(coordinate.shape[0]),
-        },
     )
 
 

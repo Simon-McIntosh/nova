@@ -93,13 +93,6 @@ def main() -> None:
 
     configure_dtypes()
     arms.install(bench, args.arm)
-    complete = bench.complete_profile_current_adapter
-
-    def adapter(profile, **kwargs):
-        return bench.extend_sample_current_response(complete(profile, **kwargs))
-
-    bench.complete_profile_current_adapter = adapter
-
     prepared = branches._prepare_frame(args.frame, None)
     operator = prepared["profile"].operator
     state = np.load(args.output / "terminal.npz")

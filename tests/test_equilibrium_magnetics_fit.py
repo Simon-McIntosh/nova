@@ -237,6 +237,74 @@ def test_dependent_basis_is_refused(linear_fit):
         )
 
 
+def test_conductor_currents_use_measurement_uncertainties_and_typed_requests(
+    linear_fit,
+):
+    fitter, measurement, truth, calls = linear_fit
+    conductor_response = np.array([[1.0, 0.0], [0.0, 2.0], [1.0, -1.0], [-1.0, 1.0]])
+    current = np.array([0.4, -0.2])
+    total = replace(
+        measurement,
+        measured=measurement.measured + conductor_response @ current + [0.1, 0, 0, 0],
+        conductor_current=current + [0.05, -0.1],
+        conductor_scale=np.array([0.01, 0.3]),
+    )
+    active = replace(fitter.request, current=jnp.zeros(2))
+    receipt = MagneticsFit(
+        fitter.profile,
+        active,
+        fitter.magnetics,
+        fitter.magnetic_source,
+        conductor_response=conductor_response,
+        conductor_names=("upper_coil", "lower_coil"),
+    ).fit(total, plasma_current_scale=1.0)
+    response = np.array(
+        [[1.0, 0.0, 2.0], [0.0, 1.0, -1.0], [2.0, 1.0, 1.0], [1.0, -2.0, 1.0]]
+    )
+    design = np.block(
+        [
+            [response, conductor_response],
+            [np.ones((1, 3)), np.zeros((1, 2))],
+            [np.zeros((2, 3)), np.eye(2)],
+        ]
+    )
+    weights = np.r_[total.weight, 1.0, 1.0 / total.conductor_scale]
+    target = np.r_[total.measured, total.plasma_current, total.conductor_current]
+    expected = np.linalg.lstsq(design * weights[:, None], target * weights, rcond=None)[
+        0
+    ]
+    assert receipt.converged
+    assert np.max(np.abs(receipt.whitened_residuals)) > 0.01
+    np.testing.assert_allclose(receipt.coefficients, expected, atol=1e-10)
+    np.testing.assert_allclose(receipt.conductor_currents, expected[-2:], atol=1e-10)
+    np.testing.assert_allclose(
+        receipt.whitened_residuals, (design @ expected - target) * weights, atol=1e-10
+    )
+    assert receipt.coefficient_names[-2:] == ("upper_coil", "lower_coil")
+    assert receipt.covariance.shape == (5, 5)
+    assert receipt.forward_evaluations == len(calls)
+    assert receipt.wall_seconds > 0
+    assert receipt.device
+    assert any(np.linalg.norm(call.current) > 0 for call in calls)
+    np.testing.assert_array_equal(active.current, [0.0, 0.0])
+
+
+def test_fitted_conductor_currents_refuse_missing_uncertainties(linear_fit):
+    fitter, measurement, _, _ = linear_fit
+    fitter = MagneticsFit(
+        fitter.profile,
+        replace(fitter.request, current=jnp.zeros(1)),
+        fitter.magnetics,
+        fitter.magnetic_source,
+        conductor_response=np.ones((4, 1)),
+    )
+    with pytest.raises(ValueError, match="positive uncertainties"):
+        fitter.fit(
+            replace(measurement, conductor_current=np.zeros(1)),
+            plasma_current_scale=1.0,
+        )
+
+
 def _physical_problem(name):
     """Load fixture-owned machine operands and declare a polynomial source."""
     configure_dtypes()

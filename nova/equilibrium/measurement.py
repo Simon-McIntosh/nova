@@ -66,6 +66,12 @@ class SliceMeasurement:
     vacuum_flux: np.ndarray | None = field(default=None, repr=False)
     """Known-conductor flux on the reconstruction grid [Wb], for a boundary push."""
 
+    conductor_current: np.ndarray | None = field(default=None, repr=False)
+    """Measured currents [A], in the fitted conductor response column order."""
+
+    conductor_scale: np.ndarray | None = field(default=None, repr=False)
+    """Positive current measurement uncertainties [A], in that same order."""
+
     @cached_property
     def weight(self) -> np.ndarray:
         """Return the whitening weight, zero on untrusted rows."""

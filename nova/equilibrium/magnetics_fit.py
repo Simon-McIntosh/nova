@@ -1,6 +1,6 @@
 """Weighted profile-coefficient inversion around the public forward solve.
 
-Geometry and conductor currents belong to the supplied forward problem. A
+Geometry belongs to the supplied forward problem. A
 source adapter binds a terminal receipt's currents to that same magnetic
 geometry; the observation kernels own the sensor evaluation. Neither the
 measurement nor the least-squares state enters a forward request.
@@ -10,7 +10,8 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, replace
-from typing import TYPE_CHECKING
+from time import perf_counter
+from typing import TYPE_CHECKING, Literal
 
 import jax
 import jax.numpy as jnp
@@ -43,7 +44,8 @@ class MagneticsFitReceipt:
     Coefficients use the declared fitting basis. The default concatenates
     ascending-power pressure and diamagnetic vectors; ``source_profile`` always
     carries the recovered physical functions for an independent forward solve.
-    Residuals keep the magnetics row order, with the plasma-current row last;
+    Residuals keep the magnetics row order, then plasma current and any measured
+    conductor currents. Coefficients concatenate profiles and fitted currents;
     excluded rows carry zero. Singular values describe the whitened,
     column-normalised response before regularisation. ``null_directions`` are
     unit vectors in the coefficient frame, and ``undetermined_coefficients``
@@ -62,6 +64,9 @@ class MagneticsFitReceipt:
     covariance: np.ndarray
     converged: bool
     forward_evaluations: int
+    conductor_currents: np.ndarray
+    wall_seconds: float
+    device: str
 
 
 class MagneticsFit:
@@ -78,6 +83,13 @@ class MagneticsFit:
     ``coefficient_basis`` optionally maps fitted coefficients to the concatenated
     polynomial coefficients. It can declare fixed profile shapes with fitted
     amplitudes, without introducing an unobserved polynomial direction.
+
+    ``conductor_response`` adds current unknowns and their diagnostic responses
+    [Wb/A or T/A]. Its columns match the complete vector in the request field
+    named by ``conductor_current_field``. The measurement's ``vacuum`` excludes
+    those fitted currents and retains only fixed exterior contributions.
+    Measured conductor currents and their uncertainties supply extra fit rows;
+    every trial carries the currents through the existing forward request.
     """
 
     def __init__(
@@ -88,6 +100,9 @@ class MagneticsFit:
         magnetic_source: Callable[[ForwardSolveReceipt], Biot],
         *,
         coefficient_basis: np.ndarray | None = None,
+        conductor_response: np.ndarray | None = None,
+        conductor_current_field: Literal["current", "prescribed_current"] = "current",
+        conductor_names: tuple[str, ...] | None = None,
     ) -> None:
         configure_dtypes()
         assert jax.config.jax_enable_x64 is True
@@ -136,9 +151,38 @@ class MagneticsFit:
         self._initial = initial
         if coefficient_basis is not None:
             self._names = tuple(f"basis_{index}" for index in range(basis.shape[1]))
+        self._profile_count = initial.size
+        self._conductor_field = conductor_current_field
+        self._conductor_response = np.empty((magnetics.number, 0))
+        if conductor_response is not None:
+            if conductor_current_field not in {"current", "prescribed_current"}:
+                raise ValueError("fitted currents require a conductor request field")
+            currents = np.asarray(
+                getattr(request, conductor_current_field), dtype=np.float64
+            )
+            response = np.asarray(conductor_response, dtype=np.float64).copy()
+            if (
+                currents.ndim != 1
+                or currents.size == 0
+                or not np.all(np.isfinite(currents))
+                or response.shape != (magnetics.number, currents.size)
+                or not np.all(np.isfinite(response))
+            ):
+                raise ValueError("conductor response must align with request currents")
+            names = (
+                tuple(f"conductor_{index}" for index in range(currents.size))
+                if conductor_names is None
+                else tuple(conductor_names)
+            )
+            if len(names) != currents.size or len(set(names)) != len(names):
+                raise ValueError("conductor names must be unique and column-aligned")
+            response.setflags(write=False)
+            self._conductor_response = response
+            self._initial = np.r_[initial, currents]
+            self._names += names
 
     def _source(self, coefficients):
-        coefficients = self._basis @ coefficients
+        coefficients = self._basis @ coefficients[: self._profile_count]
         source = self.request.source_profile
         core = source.core
         split = self._pressure_count
@@ -157,6 +201,9 @@ class MagneticsFit:
 
     def _evaluate(self, coefficients, seed):
         request = replace(self.request, source_profile=self._source(coefficients))
+        currents = coefficients[self._profile_count :]
+        if currents.size:
+            request = replace(request, **{self._conductor_field: jnp.asarray(currents)})
         if seed is not None:
             request = replace(request, seed_policy=ExplicitSolveSeed(seed))
         receipt = self.profile.solve(request)
@@ -181,6 +228,9 @@ class MagneticsFit:
                 biot, coordinates[~loops], orientation
             ).values
         values[-1] = float(np.sum(receipt.terminal_state.cell_current))
+        if currents.size:
+            values[:-1] += self._conductor_response @ currents
+            values = np.r_[values, currents]
         if not np.all(np.isfinite(values)):
             raise ValueError("the forward observation contains non-finite values")
         return receipt, values
@@ -204,7 +254,11 @@ class MagneticsFit:
         correction in the column-normalised response frame, with an optional
         per-column ``penalty``. A zero ridge declares unregularised least
         squares; unobserved directions remain reported even with a ridge.
+        Convergence means either an exact data fit or a stationary least-squares
+        objective: the column-normalised data gradient is below ``tolerance``.
+        Nonzero sensor residuals therefore remain visible on a converged fit.
         """
+        started = perf_counter()
         if (
             not np.isfinite(plasma_current_scale)
             or plasma_current_scale <= 0.0
@@ -234,6 +288,27 @@ class MagneticsFit:
             np.where(mask, measurement.signature, 0.0), measurement.plasma_current
         ]
         weight = np.r_[measurement.weight, 1.0 / plasma_current_scale]
+        conductor_count = self._initial.size - self._profile_count
+        if conductor_count:
+            currents = np.asarray(measurement.conductor_current, dtype=np.float64)
+            scales = np.asarray(measurement.conductor_scale, dtype=np.float64)
+            if (
+                currents.shape != (conductor_count,)
+                or scales.shape != (conductor_count,)
+                or not np.all(np.isfinite(currents))
+                or not np.all(np.isfinite(scales))
+                or np.any(scales <= 0.0)
+            ):
+                raise ValueError(
+                    "fitted currents require aligned positive uncertainties"
+                )
+            target = np.r_[target, currents]
+            weight = np.r_[weight, 1.0 / scales]
+        elif (
+            measurement.conductor_current is not None
+            or measurement.conductor_scale is not None
+        ):
+            raise ValueError("current measurements require a conductor response")
         coefficients = self._initial.copy()
         forward, values = self._evaluate(coefficients, None)
         evaluations = 1
@@ -260,7 +335,15 @@ class MagneticsFit:
                 diagnostics=True,
                 rcond=rcond,
             )
-            converged = bool(np.max(np.abs(residual)) <= tolerance)
+            weighted = response * weight[:, None]
+            column_scale = np.linalg.norm(weighted, axis=0)
+            gradient = (weighted.T @ residual) / np.where(
+                column_scale > 0, column_scale, 1.0
+            )
+            converged = bool(
+                np.max(np.abs(residual)) <= tolerance
+                or np.max(np.abs(gradient)) <= tolerance
+            )
             if converged or iterations == max_iterations:
                 break
             merit = np.linalg.norm(residual)
@@ -294,4 +377,7 @@ class MagneticsFit:
             covariance=covariance,
             converged=converged,
             forward_evaluations=evaluations,
+            conductor_currents=coefficients[self._profile_count :].copy(),
+            wall_seconds=perf_counter() - started,
+            device=str(jax.devices()[0]),
         )

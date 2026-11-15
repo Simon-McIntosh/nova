@@ -18,8 +18,8 @@
   "finding_dispositions": {
     "0": {
       "kind": "exempted",
-      "reason": "Non-blocking: the 12 pt panel notes stay legible (16 px cap height on the 1400 px canvas); the four booked-route panels are the node's evidence and the coil-correction re-solve redraws these rows with the shared painter, where one text size applies",
-      "recorded_at": "2026-11-15T22:51:19.223320+00:00"
+      "reason": "Non-blocking: the 12 pt panel notes stay legible (16 px cap height on the 1400 px canvas); the coil-correction re-solve redraws these rows with the shared painter, where one text size applies",
+      "recorded_at": "2026-11-15T22:51:48.899617+00:00"
     },
     "1": {
       "kind": "exempted",

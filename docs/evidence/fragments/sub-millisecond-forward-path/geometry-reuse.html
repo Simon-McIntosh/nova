@@ -1,8 +1,8 @@
 <section id="geometry-reuse-landing">
 <h2>Clipped geometry carried across sequential slices</h2>
-<p><strong>Reuse reduces throughput cost by 8.64% at width 16 and 12.15% at
-width 64.</strong> The paired means are 7.2591 to 6.6319 ms/slice and 5.8272 to
-5.1194 ms/slice. Width 1 becomes 46.33% slower, from 32.9142 to 48.1649 ms/slice.
+<p><strong>Reuse reduces throughput cost by 8.75% at width 16 and 12.39% at
+width 64.</strong> The paired means are 7.2595 to 6.6242 ms/slice and 5.8369 to
+5.1138 ms/slice. Width 1 becomes 13.04% slower, from 32.7737 to 37.0465 ms/slice.
 Every difference clears the 3% decision margin. The current default agrees:
 reuse is off for one pulse and on for multiple independent pulses. The
 sub-millisecond throughput target is not reached.</p>
@@ -13,13 +13,13 @@ bound gives wholly positive or negative cells a constant clipping representation
 Connected qualification still runs in full before terminal acceptance.
 The preceding slice’s support enters <code>solve_batch(initial_support=...)</code>
 through continuation’s existing <code>solve_options</code>.</p>
-<p>Measured revision <code>db1c4ab72f4a9061f3e44d85b73d74710b31ca07</code>.
+<p>Measured revision <code>3ae11c51a56a5511d4446377422036430913584a</code>.
 One H200 job pairs off/on arms at widths 1, 16 and 64, with one warming process
 and two fresh measured processes per arm. Each uses the committed slice-profile
 driver’s three sequential drive steps and eleven synchronized warm samples.
 Width counts independent pulses; slices of each pulse remain sequential.
 The width-64 population cycles the 16 retained input streams four times.
-Job <code>1316474</code> ran on an NVIDIA H200 NVL in <code>betelgeuse</code>
+Job <code>1317358</code> ran on an NVIDIA H200 NVL in <code>betelgeuse</code>
 under <code>gpu_0003_grpA</code>, requesting one GPU, four CPUs and 96 GB of
 host memory. Both arms preallocated an 80% device-memory pool. All 18 timing
 processes completed, including six warming processes; no agreement retry was
@@ -27,10 +27,10 @@ needed.</p>
 <table><thead><tr><th>Width</th><th>Off processes [ms/slice]</th>
 <th>On processes [ms/slice]</th><th>Reduction</th><th>Decision margin</th>
 <th>Verdict</th></tr></thead><tbody>
-<tr><td>1</td><td>32.9693 / 32.8591</td><td>47.9742 / 48.3555</td><td>-46.33%</td><td>3.00%</td><td>off</td></tr><tr><td>16</td><td>7.2859 / 7.2323</td><td>6.6443 / 6.6195</td><td>8.64%</td><td>3.00%</td><td>on</td></tr><tr><td>64</td><td>5.8258 / 5.8286</td><td>5.1107 / 5.1281</td><td>12.15%</td><td>3.00%</td><td>on</td></tr>
+<tr><td>1</td><td>33.0349 / 32.5125</td><td>36.9074 / 37.1857</td><td>-13.04%</td><td>3.00%</td><td>off</td></tr><tr><td>16</td><td>7.2310 / 7.2880</td><td>6.6163 / 6.6321</td><td>8.75%</td><td>3.00%</td><td>on</td></tr><tr><td>64</td><td>5.8381 / 5.8358</td><td>5.1035 / 5.1240</td><td>12.39%</td><td>3.00%</td><td>on</td></tr>
 </tbody></table>
-<p>The off/on process spreads are 0.335%/0.795% at width 1, 0.741%/0.375% at
-width 16 and 0.049%/0.341% at width 64. The decision margin is the greater of 3% and either arm’s process spread;
+<p>The off/on process spreads are 1.607%/0.754% at width 1, 0.788%/0.239% at
+width 16 and 0.039%/0.401% at width 64. The decision margin is the greater of 3% and either arm’s process spread;
 every reported pair agrees within 5%. A positive reduction favours reuse.
 Every lane passes the independent fresh residual bound of 1e-10, axis and saddle
 bounds of 5e-4 minor radii, and boundary-flux bound of 1e-4 of the flux span.
@@ -46,31 +46,39 @@ Both axes are logarithmic. Width 1 is causal slice latency; larger widths show
 aggregate throughput cost, not lower latency within one pulse. Each arm uses
 the same input stream and revision. Compilation is recorded separately and
 excluded from these warm walls.</figcaption></figure>
-<h3 id="geometry-reuse-owner">Canonical owner and measured revision</h3>
-<p>The no-ff merge <code>ef61975b13fb47c0403baa65edc6c1c31112ce7a</code>
+<h3 id="geometry-reuse-owner">Canonical owner and carrier certification</h3>
+<p>The no-ff merge <code>499b731fc26645089e597a50ae183098a08dc9e7</code>
 combines the prior geometry delivery with main
-<code>7d8ca007c7ddafb27ecca6f7cf2f30e3292fba78</code>.
-The canonical <code>topology._refresh_fragments</code> now owns one bounded
-loop for both projected fragment results and complete cached
-<code>CellFragments</code>/<code>SaddleFragments</code> records.
-<code>_fragments_at_level</code> calls that owner with clipping keys and the
-represented-cell mask. Complete slice breaks, labels, lower and upper
-geometry, validity and capacity data remain available to
-<code>_support_at_level</code>. The shared <code>_uniform_fragment_sign</code>
-provides the conservative sign certificate for both fragment coefficients
-and the reuse mask. The switch is <code>reuse_geometry</code> throughout
-<code>topology</code> and <code>support_read</code>.</p>
-<p>Before repeating timings, the job lowered the width-1 on program without
+<code>7244dcc3c1b8fe8c3a38476214d66a024fbf4d14</code>.
+Both changes survive in the measured source. The canonical
+<code>topology._refresh_fragments</code> owns one bounded loop for projected
+fragment results and complete cached <code>CellFragments</code>/<code>SaddleFragments</code>
+records. <code>_fragments_at_level</code> calls that owner with clipping keys
+and the represented-cell mask. Complete slice breaks, labels, lower and upper
+geometry, validity and capacity remain available to <code>_support_at_level</code>.</p>
+<p>The receipt also retains its carrier vertices, vertex count, centre and
+pitch. The <code>_same_carrier_geometry(geometry, decision)</code> conjunct in
+<code>_fragment_reuse_mask</code> requires those quantities to agree before
+reusing projected fragments; equal coefficients alone do not certify a moved
+carrier. Complete cached records retain their exact geometry clipping keys.
+The shared <code>_uniform_fragment_sign</code> provides the sign certificate
+for coefficients and the reuse mask. <code>reuse_geometry</code> is the single
+API switch across topology and support reading, including the measurement
+wrapper and test observer that forward it.</p>
+<p>Before timing, job <code>1317358</code> lowered the width-1 on program without
 compiling or timing a solve. Its digest changed from
-<code>c525234e38a2df88eb892facca6c0e6b75bb7f377578cdba96f62e55ed33d47c</code>
-at the prior measured revision <code>95290d174a5f87949cbc96c8e6319cf96e0579ec</code>
-to <code>1f37d5ce0e62a827c6e76c01772eb255de3149415d8eb459c3894b1ac237160b</code>
-at <code>db1c4ab72f4a9061f3e44d85b73d74710b31ca07</code>.
-That observed difference triggered the paired family in the same job.
-The table and figure above use only that complete merged-head family.
-<code>merge-provenance.json</code> records the imported main content separately
-from this node’s changes; <code>consolidation-owner-audit.json</code> verifies
-the canonical owner and switch markers.</p>
+<code>1f37d5ce0e62a827c6e76c01772eb255de3149415d8eb459c3894b1ac237160b</code>
+at the preceding measured revision <code>db1c4ab72f4a9061f3e44d85b73d74710b31ca07</code>
+to <code>d66b8ecfd04a91745452708074442514e64e7a3572279873d01b440886071c5a</code>
+at <code>3ae11c51a56a5511d4446377422036430913584a</code>.
+This observed difference triggered the paired family in the same job.
+The current table and figure use that complete family. The preceding
+<code>1316474</code> family remains under <code>h200-consolidated</code>.
+<code>carrier-merge-provenance.json</code> separates inherited main content
+from the 14 owned paths, including the two explicitly authorized keyword
+updates. <code>carrier-merge-source-audit.json</code> and
+<code>carrier-survived-markers.log</code> verify the committed carrier check,
+canonical owner and unified keyword.</p>
 <h3 id="geometry-reuse-default">Default and setup cost</h3>
 <p>The width-dependent policy introduced at
 <code>62488004193b84034fd93f45cb1874563fb9cb0f</code> is present at the measured
@@ -85,36 +93,39 @@ No source or default changed after this measurement.</p>
 <table><thead><tr><th>Width</th><th>Arm</th><th>Warming process: lower + compile [s]</th>
 <th>Measured process 1: lower + compile/load [s]</th>
 <th>Measured process 2: lower + compile/load [s]</th></tr></thead><tbody>
-<tr><td>1</td><td>off</td><td>123.36</td><td>37.78</td><td>37.86</td></tr><tr><td>1</td><td>on</td><td>172.56</td><td>55.07</td><td>55.54</td></tr><tr><td>16</td><td>off</td><td>127.21</td><td>35.72</td><td>35.98</td></tr><tr><td>16</td><td>on</td><td>177.87</td><td>53.80</td><td>53.71</td></tr><tr><td>64</td><td>off</td><td>130.42</td><td>37.18</td><td>37.52</td></tr><tr><td>64</td><td>on</td><td>200.94</td><td>54.19</td><td>54.36</td></tr>
+<tr><td>1</td><td>off</td><td>123.23</td><td>37.50</td><td>37.56</td></tr><tr><td>1</td><td>on</td><td>171.14</td><td>55.74</td><td>55.52</td></tr><tr><td>16</td><td>off</td><td>127.22</td><td>35.90</td><td>36.01</td></tr><tr><td>16</td><td>on</td><td>176.72</td><td>53.71</td><td>53.64</td></tr><tr><td>64</td><td>off</td><td>129.86</td><td>36.97</td><td>37.10</td></tr><tr><td>64</td><td>on</td><td>194.25</td><td>54.37</td><td>54.23</td></tr>
 </tbody></table>
 <p>These setup walls are excluded from synchronized execution timings.
 Predictor and independent-certificate setup walls are also recorded per
-process. Job <code>1316474</code> completed in 48 min 18 s, consuming
-0.805 GPU-hours of its 2.5-hour limit; the unused allocation was released
+process. Job <code>1317358</code> completed in 47 min 35 s, consuming
+0.793 GPU-hours of its 2.5-hour limit; the unused allocation was released
 when the complete measurement ended.</p>
 <p>The 80% pool policy was retained after an earlier width-64 allocation
 failure. In this family the width-64 off warming compile warns that its
-rematerialization estimate exceeds the requested reduction; the executable
-and all measured processes nevertheless complete. The recorded solve working
-footprints are 65.294 GB off and 66.525 GB on at width 64. Earlier partial
-families remain excluded. The prior complete family at a different code
-revision measured 63.826 ms for width-1 on, versus 48.165 ms here, and an
-older incomplete non-preallocated family measured 44.331 ms. Those changes
-combine code and allocation conditions, so their causes are not isolated;
-the default decision uses each family’s paired arms. All reject reuse at
-width 1.</p>
+rematerialization estimate exceeds the requested reduction; all processes
+complete. The recorded solve working footprints are 65.307 GB off and
+66.538 GB on at width 64. Earlier partial families remain excluded.
+Successive complete code revisions measured width-1 on costs of 63.826 ms,
+48.165 ms and 37.047 ms; an older incomplete non-preallocated family measured
+44.331 ms. These comparisons combine code and allocation conditions, so their
+causes are not isolated. The default uses paired arms within one family;
+all complete families reject reuse at width 1.</p>
 <h3 id="geometry-reuse-cpu">CPU compatibility and negative controls</h3>
-<p>Job <code>1316473</code> ran each file in a fresh CPU process on
-<code>rigel</code>, using the shared interpreter and archived revisions.
-Every log identifies the imported module, working directory, revision,
-literal command and final exit status. At measured head
-<code>db1c4ab72f4a9061f3e44d85b73d74710b31ca07</code>, the geometry file has
-<strong>13 passed in 419.07 s</strong>, and the canonical-owner file has
-<strong>7 passed in 111.08 s</strong>. The complete head collection has
-104 passed, two skipped and three compatibility failures. Failure
-attribution is recorded in the manifest’s <code>outside_scope</code> field;
-all 18 CPU file logs, including the imported-main attribution check, are
-validated by <code>consolidated-cpu-receipt-audit.json</code>.</p>
+<p>Job <code>1317357</code> ran the geometry and carried-refresh files together
+in one fresh CPU process on <code>rigel</code>, using the shared interpreter
+and an archived measured revision. The result is <strong>24 passed in
+582.91 s, EXIT=0</strong>: 13 geometry tests, seven canonical-owner cases and
+four carrier-motion cases. The latter independently change vertices, vertex
+count, centre and pitch while holding coefficients fixed and require the
+changed cell to rebuild. Each log identifies revision, imported module,
+working directory, literal command and final exit status.
+<code>carrier-head/suite.json</code> and <code>carrier-cpu-receipt-audit.json</code>
+bind these results to <code>3ae11c51a56a5511d4446377422036430913584a</code>.</p>
+<p>The combined command is:</p>
+<pre><code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_geometry_reuse.py tests/test_carried_read_refresh.py -rfP</code></pre>
+<p>The earlier broader compatibility comparison and its failure attribution
+remain recorded in the manifest’s <code>outside_scope</code> field and
+<code>consolidated-cpu-receipt-audit.json</code>.</p>
 <p>The fresh compatibility base at
 <code>975f3e98cfa2b2976d2bbe1b94ead37f8623b529</code> has 85 passed, two skipped
 and two failures. Its geometry-reuse test file does not exist, so the scoped
@@ -131,13 +142,14 @@ The diagnostic establishing that distinction remains in
 <p>The base reproduction records:</p>
 <pre><code>UNCHANGED_REFRESH pass=0 clipped_cells=30 total_cells=30
 UNCHANGED_REFRESH pass=1 clipped_cells=30 total_cells=30</code></pre>
-<p>The unchanged-support execution-counter check passes without a clip call;
+<p>The current combined log reports <code>CLIP_EXECUTION unchanged=0 moved= 30</code>.
+The unchanged-support execution-counter check passes without a clip call;
 its moved-cut positive control requires a call, and the cell-mask check
 requires only the changed cell to rebuild. The separate canonical-owner
 control reports <code>REFRESH_CELLS 39 TOTAL 50</code>, demonstrating selective
 work on a moved boundary.</p>
 <p>The declared mutation forces all clipping keys to compare unchanged.
-Its log ends with <code>4 failed, 9 passed in 425.23s</code> and
+Its log ends with <code>4 failed, 9 passed in 423.05s</code> and
 <code>EXIT=1</code>. The moved-cut comparison rejects stale membership
 0.1526714020264051 against 0.9999999999999991; the execution-counter positive
 control also fails because no rebuild occurs. All four mutant failures pass
@@ -156,9 +168,9 @@ because their lowered digests differ. The scoped CPU command is:</p>
 <h3 id="geometry-reuse-receipts">Reproducible evidence</h3>
 <p>The durable run root is
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144226749384-geometry-reuse</code>.
-The current H200 family is <code>h200-consolidated/summary.json</code>, with
+The current H200 family is <code>h200-carrier/summary.json</code>, with
 one receipt and log for the lowering inspection and each of 18 timing
-processes. <code>h200-consolidated/receipt-audit.json</code> checks all 19
+processes. <code>h200-carrier/receipt-audit.json</code> checks all 19
 receipts and logs, input/source hashes, exact revisions, imported module,
 allocator, precision, eleven positive wall samples per process, program
 identity, process agreement and decision margin.</p>
@@ -166,9 +178,9 @@ identity, process agreement and decision margin.</p>
 <code>52f8d4fb9e60dbdbe1530e8b64a171d3bb6470fb5cf73a1ddcf760895d09a0e9</code>,
 matching the landed slice-profile input. The report was regenerated with
 <code>scripts/prototypes/geometry_reuse/report.py</code> on
-<code>h200-consolidated</code>. <code>consolidated-report-job.log</code> records
+<code>h200-carrier</code>. <code>carrier-report-job.log</code> records
 <code>TEXT_CHECK=passed</code> and the exact SVG render; its visual inspection
-and hash are in <code>consolidated-figure-inspection.json</code>.
-The mutation log is <code>consolidated-mutation/test_geometry_reuse.log</code>.
+and hash are in <code>carrier-figure-inspection.json</code>.
+The mutation log is <code>carrier-mutation/test_geometry_reuse.log</code>.
 The manifest binds the final focused gate to its committed head.</p>
 </section>

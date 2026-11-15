@@ -113,16 +113,73 @@
     Bernstein ndeg 2/2 with one live function each. Its subsequent H200 request
     1317266 also never started and was cancelled with elapsed 00:00:00 before
     moving the measurement to titan.</p>
-  <p>The physical measurement now runs as one eight-hour titan job, with one
+  <p>The corrected measurement ran as titan job 1317671, with one
     P100, two CPU cores and 24 GiB requested through the lane launcher. Case
     receipts are persisted sequentially as each case finishes. All wall times
     from this job are titan P100 numbers, including cold compilation and machine
     construction where those are part of the measured interval; no time from
     this job is attributed to the H200. The H200 compilation cache is not
     reused on this device.</p>
-  <p>No physical band table, vertical-offset measurement, sensor-residual
-    comparison, forward/fit split, scaled-data control or overlay panel is
-    claimed yet. The CPU baseline arm was cut short in JAX's cache-read path
+  <h3 id="efit-comparison-tcv-refusal">TCV: three public forward refusals</h3>
+  <p>The complete TCV case took 4857.176419 s on a Tesla P100-PCIE-16GB,
+    including setup and cold compilation. This is not a warm reconstruction
+    measurement: the inverse class was never called. Three public forward
+    solves were attempted and none qualified. No further TCV seed is run and
+    no forward or topology implementation is changed.</p>
+  <table><thead><tr><th>Seed</th><th>Public result</th><th>Residual</th>
+    <th>Termination</th><th>Solve wall on titan P100 [s]</th></tr></thead><tbody>
+    <tr><td>Stored-field explicit seed</td><td>NoQualifiedAxisError</td>
+      <td>Nonfinite</td><td>3, NONFINITE_RESIDUAL; 10 trips</td>
+      <td>Not separately captured</td></tr>
+    <tr><td>Cold limited portfolio</td><td>qualified=false; converged=false</td>
+      <td>0.0165131095663</td><td>12, ACTIVE_SET_STEP_REFUSED</td>
+      <td>1725.248159</td></tr>
+    <tr><td>Cold diverted portfolio</td><td>qualified=false; converged=false</td>
+      <td>0.0165131159763</td><td>12, ACTIVE_SET_STEP_REFUSED</td>
+      <td>1677.634486</td></tr>
+  </tbody></table>
+  <figure id="efit-comparison-tcv-terminal">
+    <img src="/nova/figures/inverse-equilibrium-baseline/efit-comparison/tcv.svg"
+      alt="TCV stored imas-efit flux in grey overlaid with rejected nova forward flux in blue, with both null sets and the vessel">
+    <figcaption>TCV at 0.4 s. Wide grey contours and large grey null markers
+      show stored imas-efit; narrow blue contours and smaller blue null markers
+      show the third rejected nova forward terminal state. Both maps use the
+      same 12 uniformly spaced total-flux levels, −0.714151 to −0.552541 Wb,
+      and the same wall. Terminal residual 0.0165131159763,
+      qualified=false, converged=false. The 14 × 7.2 inch overlay was rendered
+      to PNG and visually inspected: wall and both null sets are visible,
+      legend text is readable, and no text is clipped or overlapping.
+      The inspection receipt is appended to the case gate log.</figcaption>
+  </figure>
+  <h3 id="efit-comparison-band-state">Physical band and split availability</h3>
+  <table><thead><tr><th>Measure</th><th>Unchanged band / unit</th>
+    <th>MAST-U</th><th>TCV</th><th>ITER</th></tr></thead><tbody>
+    <tr><td>Axis distance</td><td>≤0.20 m</td><td>Not reconstructed</td>
+      <td>Forward did not qualify</td><td>Configuration disagreement</td></tr>
+    <tr><td>Plasma current</td><td>≤1.5%</td><td>Not measured</td>
+      <td>Not measured</td><td>Not measured</td></tr>
+    <tr><td>Axis / boundary flux</td><td>Each ≤5% of reference span</td>
+      <td>Not measured</td><td>Not measured</td><td>Not measured</td></tr>
+    <tr><td>|q95| difference; each q sign</td><td>≤2.0; signs reported</td>
+      <td>Not measured</td><td>Not measured</td><td>Not measured</td></tr>
+    <tr><td>Boundary distance</td><td>Reported [mm]</td><td>Not measured</td>
+      <td>Not measured</td><td>Not measured</td></tr>
+    <tr><td>Centroid vertical offset; aligned axis / boundary distance</td>
+      <td>Reported [m; m; mm]</td><td>Not measured</td><td>Not measured</td>
+      <td>Not measured</td></tr>
+    <tr><td>Per-sensor whitened residuals versus imas-efit</td><td>Dimensionless</td>
+      <td>No inverse state</td><td>No inverse state</td><td>No inverse state</td></tr>
+    <tr><td>Fit part / forward part</td><td>Same physical measures</td>
+      <td>No forward state</td><td>No qualified forward state</td>
+      <td>Configuration disagreement</td></tr>
+    <tr><td>All-inputs ×1.10 physical control</td><td>Leave 1.5% current band</td>
+      <td>Not run</td><td>Not run</td><td>Not run</td></tr>
+  </tbody></table>
+  <p>The corrected batch's forward/unit arm completed with
+    <q>1 failed, 51 passed, 7 deselected in 48.54s</q>. Its sole failure is
+    the declared pre-existing root-find-default assertion. No inverse receipt,
+    fit/forward split or physical negative-control receipt was produced.
+    The CPU baseline arm was cut short in JAX's cache-read path
     and timed out; the CPU after arm never started. Their recovered receipts
     remain incomplete. No CPU arm is repeated, and the separate API-gap probe
     is not the declared physical negative control.</p>

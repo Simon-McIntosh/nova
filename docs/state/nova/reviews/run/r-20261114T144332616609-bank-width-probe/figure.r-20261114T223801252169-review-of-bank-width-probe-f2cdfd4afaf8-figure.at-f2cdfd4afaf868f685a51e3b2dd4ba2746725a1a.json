@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "a figure review runs no test suite, so no failure delta exists",
+  "completed_at": "2026-11-15T00:45:00.910Z",
+  "dispatched_at": "2026-11-15T00:07:38Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "same non-blocking legibility points exempted at the earlier figure review; the caption states them and the fragment table records the 78/79 boundary",
+      "recorded_at": "2026-11-15T00:51:09.316170+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "same non-blocking legibility points exempted at the earlier figure review; the caption states them and the fragment table records the 78/79 boundary",
+      "recorded_at": "2026-11-15T00:51:10.819398+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "same non-blocking legibility points exempted at the earlier figure review; the caption states them and the fragment table records the 78/79 boundary",
+      "recorded_at": "2026-11-15T00:51:12.738846+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_width_probe/report.py",
+      "id": "fbaffa36548",
+      "line": 156,
+      "severity": "non-blocking",
+      "summary": "the left panel draws the default width-96 refusal cross and the async width-96 execution diamond at identical coordinates, because default width 96 and async width 96 record the same 97.772 GB of compiled working bytes, so the red cross is rendered inside the hollow diamond and the two marks merge into one composite glyph; a reader scanning that panel sees a refused mark on the point the figure exists to show executed, and cannot separate the two without the caption, which does explain the shared location."
+    },
+    {
+      "file": "scripts/prototypes/bank_width_probe/report.py",
+      "id": "f287d2b5adc",
+      "line": 143,
+      "severity": "non-blocking",
+      "summary": "the overview panel filters the default arms to widths 64, 96 and 256, so the executing boundary this figure exists to establish (78 executes, 79 is refused) is absent from the left panel, and the whole admitted band 64-80 occupies about four percent of a panel axis that runs 48-272; a reader of that panel alone sees one executing point at 64 and refusals at 96 and 256, and must switch to the centre magnification, whose role the caption does name."
+    },
+    {
+      "file": "scripts/prototypes/bank_width_probe/report.py",
+      "id": "f40c3447ee0",
+      "line": 203,
+      "severity": "non-blocking",
+      "summary": "the right panel spans 60-100 pulses for four admitted widths at 64, 72, 76 and 78 plus one async point at 96, leaving the 78-96 interval blank, while 0.3 vertical margins stretch a 5.732-5.867 ms/slice range across 5.70-5.90 so a 1.42% difference draws as a steep fall; the caption discloses the expanded vertical scale and that the difference stays inside the decision margin, so the reading is recoverable, but the empty x-interval is not disclosed and the slope can be over-read as a resolved speedup."
+    }
+  ],
+  "judged_from": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T223801252169-review-of-bank-width-probe-f2cdfd4afaf8-figure/image-0.png",
+  "judged_note": "judged only from the rendered PNG attachment (1399x720, three panels); no SVG was opened, and no repository file was modified",
+  "project": "nova",
+  "review_run_id": "r-20261114T223801252169-review-of-bank-width-probe-f2cdfd4afaf8-figure",
+  "reviewed_base_sha": "975f3e98cfa2b2976d2bbe1b94ead37f8623b529",
+  "reviewed_figure": "docs/figures/sub-millisecond-forward-path/bank-width-probe/width-boundary.svg",
+  "reviewed_head_sha": "f2cdfd4afaf868f685a51e3b2dd4ba2746725a1a",
+  "reviewed_run_id": "r-20261114T144332616609-bank-width-probe",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass; tick, axis, direct and legend text render near-black or #555555 on white, and the blue #1f5d92 and red #b63636 marks all clear 4.5:1 against the background",
+    "data_ink": "pass; five filled markers, one blue trend line, three hollow diamonds, two grey dotted limit lines and red crosses for refusals carry every mark, and no series the text does not use is drawn",
+    "decoration": "pass; white background, no gradient, no background fill, no drop shadow, no styled theme and no gridlines; the only styling is a 1.2 pt grey dotted reference line, which is itself data (the allocator limit and its 90% ceiling)",
+    "label_collision": "pass; 'allocator limit' and '90% ceiling' sit in clear space at x=140 away from every mark, tick and legend entry, and no text is clipped at any canvas edge, including the right panel's '5.900' and '5.700' y labels and the '82' x label at the centre panel's right edge",
+    "legibility": "pass; the executing edge is readable at a glance in the centre panel (blue dot at width 78 beside the red cross at width 79), and the three panels, their axis labels and the right panel's nine y ticks read at full size with no crowding",
+    "table_form": "pass; memory and per-slice cost against independent pulse count are relationships, and the per-width numbers the text quotes stay in the fragment's table rather than being drawn"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T00:51:15.178176+00:00",
+  "total": null
+}

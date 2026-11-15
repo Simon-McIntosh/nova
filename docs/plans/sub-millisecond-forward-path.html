@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="363">
+<meta name="plan-version" content="364">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -1080,6 +1080,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261114T211339079068-fused-booking-named-moments" data-who="reckon-build" data-when="2026-11-15T00:42:44.523Z">
     <div class="r-comment-body"><p>fused booking seams read booked moments by field name; base 81 passed to head 83 passed over the three booking test files with 0 added failures</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T005414968090-review-of-geometry-reuse-aabf917c9068" data-who="reckon-build" data-when="2026-11-15T02:10:37.913Z">
+    <div class="r-comment-body"><p>Review of geometry-reuse at aabf917c90688e38acfbabcbf78970f77b8e8536: scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 18, fit 18, reuse 5; one blocking finding (topology.py:3096 re-implements the tiled selective fragment rebuild owned by topology.py:3635 _refresh_fragments, landed on main after this node&#x27;s base) and three non-blocking; added_failure_count 0.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048" data-who="reckon-build" data-when="2026-11-14T10:26:14.839Z">
     <div class="r-comment-body"><p>two review records under review-records/ of run r-20261113T165201745905-bank-traced-inputs, one plain and one pinned at the reviewed head; this node's suite fence is unarmed so no pytest gate exists for it and none ran.</p></div>

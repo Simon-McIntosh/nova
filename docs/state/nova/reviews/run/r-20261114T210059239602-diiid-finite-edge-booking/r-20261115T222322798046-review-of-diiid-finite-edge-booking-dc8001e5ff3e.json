@@ -54,6 +54,11 @@
       "kind": "exempted",
       "reason": "Coordinator amends the landed fragment's gate table to the final arms at 37b9ba7c4 and dc8001e5f (20 identical failure rows, 133 against 141 passed, eight contract cases)",
       "recorded_at": "2026-11-15T23:00:19.302848+00:00"
+    },
+    "7": {
+      "kind": "exempted",
+      "reason": "Non-blocking coupling to two private names of nova.equilibrium.forward; left for the operator owner's next pass",
+      "recorded_at": "2026-11-15T23:00:31.548779+00:00"
     }
   },
   "findings": [

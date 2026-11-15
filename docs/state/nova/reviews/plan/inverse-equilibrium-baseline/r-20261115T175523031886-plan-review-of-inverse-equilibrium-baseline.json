@@ -53,6 +53,16 @@
       "note": "The drifting-sensor section now runs imas-efit magnetics-only with its pressure and q0 priors disabled, confirmed from the configuration read back, so both codes carry one constraint set; a run that cannot disable them is reported under the same label the EFIT comparison uses.",
       "reason": "",
       "when": "2026-11-15T18:02:17.780091+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fd01e2c70b1ea26a609dd55b2ff8605e1be8c905",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "Running imas-efit on rows written by nova is now its own section with its own done-when and control, and the drifting-sensor section waits on it and drops the hours that work carried.",
+      "reason": "",
+      "when": "2026-11-15T18:02:28.390980+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "The drifting-sensor section now runs imas-efit magnetics-only with its pressure and q0 priors disabled, confirmed from the configuration read back, so both codes carry one constraint set; a run that cannot disable them is reported under the same label the EFIT comparison uses.",
       "reason": "",
       "when": "2026-11-15T18:02:17.780091+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fd01e2c70b1ea26a609dd55b2ff8605e1be8c905",
+      "commit_basis": "edit",
+      "note": "Running imas-efit on rows written by nova is now its own section with its own done-when and control, and the drifting-sensor section waits on it and drops the hours that work carried.",
+      "reason": "",
+      "when": "2026-11-15T18:02:28.390980+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261115T175523031886-plan-review-of-inverse-equilibrium-baseline.json",

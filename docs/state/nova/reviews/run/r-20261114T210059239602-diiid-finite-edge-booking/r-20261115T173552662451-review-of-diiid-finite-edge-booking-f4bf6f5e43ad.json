@@ -31,6 +31,11 @@
       "kind": "exempted",
       "reason": "Acted in resume turn 4: base and head arms rerun at the current head, with the adapter's and the pinned consumer's tests added.",
       "recorded_at": "2026-11-15T18:04:41.486893+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "Acted in resume turn 4: the pinned consumer's refusal is measured in the gate job, not predicted, and any re-registration is reported.",
+      "recorded_at": "2026-11-15T18:04:49.632603+00:00"
     }
   },
   "findings": [

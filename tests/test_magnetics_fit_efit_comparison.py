@@ -61,6 +61,11 @@ def _sample(signal, ids, time, field="data"):
     return float(np.interp(time, clock, values))
 
 
+def _probe_angle(clockwise_radians):
+    """Convert the IMAS clockwise sensor normal to counterclockwise degrees."""
+    return -np.rad2deg(clockwise_radians)
+
+
 def _profile_basis(count, family):
     """Map the live Bernstein functions, with their endpoint dropped, to powers."""
     if count == 0:
@@ -155,8 +160,7 @@ def _read_case(name):
                 angle = 0.0
             else:
                 position = channel.position
-                # IMAS angles are measured from vertical towards the radial direction.
-                angle = 90.0 - np.rad2deg(float(channel.poloidal_angle))
+                angle = _probe_angle(float(channel.poloidal_angle))
             sensors.append(
                 (float(position.r), float(position.z), angle, kind == "loop")
             )
@@ -831,6 +835,19 @@ def _compare_fit(data, forward):
     assert all(scores["bands"].values()), scores
     assert scaled_error > 0.015, (
         "scaled-input control failed to leave plasma-current band"
+    )
+
+
+def test_probe_normal_uses_clockwise_angle_from_outward_radius():
+    geometry = Magnetics(
+        r=np.ones(3),
+        z=np.zeros(3),
+        angle=_probe_angle(np.array([0.0, np.pi / 2, np.pi])),
+        flux_loop=np.zeros(3, dtype=bool),
+    )
+    np.testing.assert_allclose(
+        geometry.project(np.zeros(3), np.full(3, 2.0), np.full(3, 3.0)),
+        [2.0, -3.0, -2.0],
     )
 
 

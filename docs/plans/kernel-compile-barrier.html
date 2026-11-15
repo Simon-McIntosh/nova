@@ -25,7 +25,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="64">
+<meta name="plan-version" content="65">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -188,6 +188,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261115T111641531610-review-of-ordered-sharing-35fad52504c6" data-who="reckon-build" data-when="2026-11-15T12:11:04.873Z">
     <div class="r-comment-body"><p>Reviewed ordered-sharing at 35fad52504c6 against cf87218b6: parsed record with goal_fidelity 16, evidence 13, scope_discipline 19, durability 14, fit 17, reuse 20, added_failure_count 0, no blocking finding, three non-blocking findings (one-sided guard; CPU receipt names cf87218b6 for the e6b9ea32a patch; clause (3) twenty-four-file set unmeasured at head).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261114T101845147725-ordered-sharing" data-who="reckon-build" data-when="2026-11-15T11:02:29Z">
+    <div class="r-comment-body"><p>CPUregressionrepaired in e6b9ea32a:9CPUHessiancasespassed306.32s at4124.61MiB within192GiB; frozenheight40523eightpassedthencompilerabort139/371.23s, frozenordered14acrosses192GiB beforefirstoutcome/460.27s. FreshH2001316537all430000float64entriesbyte-identicalinclderivatives/signedzeros,maxima0; post267438 equalsrepaircap andimprovesheight305139by37701. Freshbase/headcold350.949245/217.903224s; original201070instructions/131.165945s boundsstillrefuse2IDs,unrelaxed. Newguardbroken1failed/repaired3passed; required73759diagnostics3passed2skipped. Completepairedper-passtable andupdatedinspectedSVGcommitted35fad5250/9d051bc27. [Evidence](/nova/evidence/fragments/kernel-compile-barrier/ordered-sharing.html#ordered-sharing-repaired-h200).</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261020-coarse-tie-run-phase" data-who="reckon-build" data-when="2026-10-20T07:03:00Z">
     <div class="r-comment-body"><p>From crew run <code>r-20261019T223150157038-coarse-tie-census-memory</code>, landed as evidence at merge <code>19a02ca16</code> (failed, correct refusal): a second provisioning job (sirius 1290676, 450G, 5 h) reproduced the cold compile at 7,013 s and about 378 GB, then held that memory for a further ~11,000 s in the 533-batch node loop without publishing the operand. So the jets build's cost is not only its compile: the batch loop after it also outlasts a five-hour wall at 2,132 nodes. §3's done-when (1) bounds the compile; the node that builds §3 should also report the loop's wall per batch, so a bounded compile is not followed by an unbounded run. The 500-cell coarse-tie census test stays a known failure until §3 lands. <a href="/nova/evidence/fragments/converged-forward-solve/coarse-tie-census-memory.html">evidence</a></p></div>

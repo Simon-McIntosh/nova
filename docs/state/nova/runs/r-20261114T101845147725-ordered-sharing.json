@@ -1,0 +1,565 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 9,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "40523b1a42a448125b98780ff01fd63e54cc5875",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101845147725-ordered-sharing/brief.md",
+    "sha256": "3934065e08bd1e6e7c3037fecd50e83e08dddffe8df046e7ce1afc2c413a5b3e"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 80560896,
+      "cached_input_tokens_cumulative": 80560896,
+      "input_tokens": 82031421,
+      "input_tokens_cumulative": 82031421,
+      "output_tokens": 402458,
+      "output_tokens_cumulative": 402458,
+      "reasoning_output_tokens": 220121,
+      "reasoning_output_tokens_cumulative": 220121
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1806,
+    "files": 5,
+    "removed": 10
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 147,
+        "name": "tangent",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 3998,
+        "name": "__init__",
+        "path": "nova/biot/polygonanalytic.py"
+      },
+      "window_line": 4021
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "value_gradient",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 122,
+        "name": "rows",
+        "path": "tests/biot/test_moment_program_identity.py"
+      },
+      "window_line": 128
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "131bbe8bdb3d6a4618093bd71a8cd61506983a02",
+    "90baac6ff0d2ff0fa8fa5375d359dad20b329e76",
+    "baa555d1bc87c2af14a9f57290170d7f466d75b7",
+    "1bd9388bdb47a5a3c0a53347c268c64b96c74479",
+    "7820c5c56cdbf8a95b25652d0bb6cd4480e61f7a",
+    "ee441b379ae4382f3edca832b72cffe2f2d66092",
+    "078cb84bbb4fb3a7bd709b14c9d0acb0fb65ed0f",
+    "b45f3e2f7970c80e119e473df3499a8a50424fbd",
+    "4d177a953ab7bf2f6d1d42a28718645d40392c9f",
+    "59babfc3a7fbe1ab0ac33bb02d27967f8dd76714",
+    "2937c72116fdbe9ae7bcc287815d96e64102605b",
+    "7dcf590cc668be430a54beca0e12c51776da9bb8",
+    "14a85a1590717ac9e71402bfcd676c34aa907c06",
+    "6cdacca1199dee4c587a5c3cf5f29dab41b73866",
+    "7ceb8dc58d33cd069e16acfb6caa0d425076a49a",
+    "5e2ef76f52c728179e7c8f7a9a10c4c20e4c2c60",
+    "2531e30208136d055d641326c545d253c77e311c",
+    "02cba51db454e72b8e630fe98f55cb5222eab376",
+    "3ad999ad93192375a50dba3fefb3850aaeaa1c4a",
+    "2db8ce6b804c27298a2344ddbad718c32d3a1002",
+    "390e8c54b54820a9152ddff2444363d42666e93b",
+    "0d278960242febc4f9635e9f595383a19561303a",
+    "cdf010704f7591ec2204561a394949262d11edd8",
+    "85727a53109641c2cc45382a78de9e8e1d6338c5",
+    "cf87218b61ddb37e0b7c19e359d7da55bbfb24a1",
+    "be4a7ecd96ec9e58a0eecc771729144760490d0e",
+    "e6b9ea32a5830ce3eef19a59d6dd84fdc3238807",
+    "a5bd51b43031adc93046ca6cb7d1caf48d6160e6",
+    "73759d5655fa6f69efb25c0b9787878dbfbcd1aa",
+    "9d051bc27e1e0a8cb34dccac1dc411af970a394e",
+    "35fad52504c6ef860e9b9025112d181674f7701f"
+  ],
+  "completed_at": "2026-11-15T11:02:29Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-14T10:19:57Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/biot/test_moment_program_identity.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101845147725-ordered-sharing/head-suite-repaired-delivery/after_suite.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.3827160493827161,
+    "plan": "kernel-compile-barrier",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.323062645011601,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-18T09:37:14Z, which is after this node's 14400s horizon ending 2026-11-14T14:18:50.315506+00:00",
+    "horizon_ends_at": "2026-11-14T14:18:50.315506+00:00",
+    "horizon_seconds": 14400,
+    "metered": true,
+    "observed_at": "2026-11-14T10:18:49Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-18T09:37:14Z",
+    "resets_at": "2026-11-19T16:24:40Z",
+    "seconds_until_reset": 453950,
+    "state": "quiet",
+    "utilisation_pct": 33.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-14T10:18:49Z",
+    "read_at": "2026-11-14T10:18:50Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 33.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-15T11:02:29Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-15T11:02:29Z",
+        "resets_at": 1795105480,
+        "used_percent": 86.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101845147725-ordered-sharing/manifest.md",
+  "member": "disposable-r-20261114T101845147725-ordered-sharing",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/biot/test_production_row_compile.py::test_production_row_cold_compile_savings",
+      "tests/biot/test_production_row_compile.py::test_production_row_splitter_instruction_budget"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/biot/test_production_row_compile.py::test_production_row_cold_compile_savings",
+      "tests/biot/test_production_row_compile.py::test_production_row_splitter_instruction_budget"
+    ],
+    "control_log_source": "manifest",
+    "control_run_failed": true,
+    "declaration": "restore the base combination of kernel terms in the point program: the identity tests still pass and the post-splitter instruction count check must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101845147725-ordered-sharing/negative-control-complete.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101845147725-ordered-sharing/negative-control-complete.log",
+    "test_paths": [
+      "tests/biot"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "ordered-sharing",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/ordered-sharing/brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101845147725-ordered-sharing/brief.md",
+    "brief_sha256": "3934065e08bd1e6e7c3037fecd50e83e08dddffe8df046e7ce1afc2c413a5b3e",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 982,
+          "cached_input_tokens": 385634,
+          "input_tokens": 386618,
+          "output_tokens": 3711,
+          "reasoning_output_tokens": 552,
+          "total_tokens": 390329,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "session_id": "0f4fa699-2444-4d93-b978-9931302ff6f8"
+    },
+    "done_when": "Primal bit-identical and tangent rows within 1e-9 of jax.jvp of the base on the 10,000-point identity sets, the production row program post-splitter instruction count at most half its base arm and its H200 cold compile lower by at least the two passes base seconds in one base-and-head job, and the test files importing a changed module pass at head with no added failure",
+    "estimated_hours": null,
+    "goal": "Recover the directional and auxiliary-output sharing of the moment programs with every output byte-identical to the base",
+    "id": "ordered-sharing",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-14T10:18:49Z",
+      "read_at": "2026-11-14T10:18:50Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 33.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101845147725-ordered-sharing/manifest.md",
+    "negative_control": "restore the base combination of kernel terms in the point program: the identity tests still pass and the post-splitter instruction count check must fail",
+    "over_fence_reason": "an H200 identity job measured at 38 to 47 min plus a paired cold profile at 12 min, after CPU iteration",
+    "peer_scopes": {
+      "bank-hessian-reference": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-reference.html",
+        "docs/figures/sub-millisecond-forward-path/bank-hessian-reference",
+        "scripts/prototypes/bank_hessian_reference"
+      ],
+      "bank-traced-inputs": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-traced-inputs.html",
+        "docs/figures/sub-millisecond-forward-path/bank-traced-inputs",
+        "nova/equilibrium/current.py",
+        "nova/equilibrium/support_read.py",
+        "scripts/prototypes/bank_traced_inputs",
+        "tests/test_bank_traced_inputs.py"
+      ],
+      "diiid-xpoint-profile-extent": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html",
+        "docs/figures/diiid-xpoint-profile-extent",
+        "scripts/prototypes/diiid_xpoint_profile_extent",
+        "scripts/prototypes/diiid_xpoint_profile_extent/render.py"
+      ],
+      "ilf-six-limb-reference": [
+        "docs/evidence/fragments/iron-limb-fill-fraction",
+        "docs/evidence/fragments/iron-limb-fill-fraction/ilf-six-limb-reference.html",
+        "docs/figures/iron-limb-fill-fraction/ilf-six-limb-reference",
+        "docs/figures/iron-limb-reference",
+        "scripts/iron_limb_reference",
+        "tests/test_iron_limb_reference.py"
+      ],
+      "iter-bank": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank.html",
+        "docs/figures/sub-millisecond-forward-path/iter-bank",
+        "nova/equilibrium/support_read.py",
+        "scripts/prototypes/iter_bank",
+        "tests/test_iter_bank.py"
+      ],
+      "known-answer-recovery": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+        "docs/figures/inverse-equilibrium-baseline",
+        "docs/figures/inverse-equilibrium-baseline/known-answer-recovery",
+        "nova/equilibrium/__init__.py",
+        "nova/equilibrium/magnetics_fit.py",
+        "nova/equilibrium/measurement.py",
+        "nova/equilibrium/observation_kernels.py",
+        "tests/test_equilibrium_forward.py",
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "variadic-split": [
+        "docs/evidence/fragments/kernel-compile-barrier/variadic-split.html",
+        "docs/figures/kernel-compile-barrier/variadic-split",
+        "nova/biot/elliptic.py",
+        "nova/biot/polygonanalytic.py",
+        "nova/biot/rangefunction.py",
+        "nova/equilibrium/fixed_points.py",
+        "tests/biot",
+        "tests/test_fixed_points.py"
+      ]
+    },
+    "plan": "kernel-compile-barrier",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "4h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "nova/equilibrium/fixed_points.py",
+      "nova/biot/polygonanalytic.py",
+      "tests/biot",
+      "docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html",
+      "docs/figures/kernel-compile-barrier/ordered-sharing"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 68311132.0,
+  "outcome": "",
+  "outside_scope_paths": [
+    "coordinator/previousnode;"
+  ],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 1.3227066298108248,
+      "derived": 0.2744372726489749,
+      "drain_hours": 168.0,
+      "effective_limit": 0.2744372726489749,
+      "elapsed_fraction": 0.24948842968088625,
+      "elapsed_hours": 41.91405618638889,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-11-14T10:19:30+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.6699999999999999,
+      "remaining_windows": null,
+      "resets_at": "2026-11-19T16:24:40Z",
+      "state": "observed",
+      "utilisation": 0.33,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.254826,
+      "decided_by": "window",
+      "margin": 0.48267400000000005,
+      "name": "ordered-sharing",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.33
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.602271,
+        "observed_at": "2026-11-14T10:19:30+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-19T16:24:40Z",
+        "state": "observed",
+        "utilisation": 0.33,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "ordered-sharing",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-14T10:19:30.602271+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Lane named by lead standing direction of 2026-11-07 for difficult nodes: floating-point operation-order preservation inside shared kernel programs; base is the previous node head on this section",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.908,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.3827160493827161,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "35fad52504c6ef860e9b9025112d181674f7701f",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "cf87218b61ddb37e0b7c19e359d7da55bbfb24a1",
+    "reviewed_head_sha": "35fad52504c6ef860e9b9025112d181674f7701f",
+    "scores": {
+      "durability": 14,
+      "evidence": 13,
+      "fit": 17,
+      "goal_fidelity": 16,
+      "reuse": 20,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 99
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261114T101845147725-ordered-sharing",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+  "session_harness": "codex",
+  "session_id": "01a1d992-93eb-7c33-806c-af2d9749fe32",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 80560896,
+    "cumulative_input_tokens": 82031421,
+    "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+    "generated_tokens": 622579,
+    "generation_seconds": 85435.883,
+    "machine_seconds": 3485.536,
+    "tokens_per_second": 7.29
+  },
+  "time_budget": "4h",
+  "tool_steps": 298.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 88952,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 9,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-15T11:02:33Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-15T10:54:44Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 75277734,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101845147725-ordered-sharing/codex-home/cache"
+      },
+      {
+        "bytes": 32753627,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101845147725-ordered-sharing/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261114T101845147725-ordered-sharing",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 2475,
+    "worker_pid": 1144964
+  },
+  "worker_seconds": 88921,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}

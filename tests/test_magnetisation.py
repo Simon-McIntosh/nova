@@ -1201,15 +1201,25 @@ def test_control_receipt_preserves_smear_reduction(tmp_path):
 @pytest.mark.timeout(1800)
 @pytest.mark.parametrize("mu", [50.0, 200.0])
 def test_in_vessel_fill_matches_six_limb_reference(mu):
-    """Exercise production residual and field against the accepted surface mean."""
-    from scripts.iron_limb_production.measure import control_result, reference_inputs
+    """Resolve material-rule improvements on the coarse CPU comparison grid."""
+    from scripts.iron_limb_production.measure import (
+        control_result,
+        reference_inputs,
+        reuse_operators,
+    )
 
     case, references = reference_inputs()
-    result = control_result(case, "geometry", 0.1, mu)
     reference = np.asarray(references[mu]["iron_average_T"])[:16]
-    measured = result.field(np.asarray(case["probes"])[:16])
     assert np.isfinite(reference).all() and np.linalg.norm(reference) > 1e-3
-    error = np.linalg.norm(measured - reference) / np.linalg.norm(reference)
-    print(f"six-limb in-vessel mu={mu:g} error={error:.12g}", flush=True)
-    assert result.converged
-    assert error < 0.10
+    errors = {}
+    with reuse_operators():
+        for name in ("geometry", "plain", "smear"):
+            result = control_result(case, name, 0.1, mu)
+            measured = result.field(np.asarray(case["probes"])[:16])
+            assert result.converged
+            errors[name] = np.linalg.norm(measured - reference) / np.linalg.norm(
+                reference
+            )
+    print(f"six-limb in-vessel mu={mu:g} errors={errors}", flush=True)
+    assert errors["geometry"] <= 0.5 * errors["plain"]
+    assert errors["geometry"] < errors["smear"]

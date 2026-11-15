@@ -32,6 +32,13 @@
     "FINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html:35 non-blocking: The fourth instrument check says the 'warm' arm is a second process against the same root and that in-process program reuse is what the same-program comparison rests on, but the in-process warm arm never ran: prototype5/warm/records.json is {} with no arm-warm-*.json in any prototype directory, and the 4.1e-13 warm agreement quoted in the manifest is prototype2/warm/arm-row.npz against prototype2/cold/arm-row.npz, two separate processes; the same bullet's KeyError shows no warm persistent cache existed either, so the cache hypothesis is refuted by the row arm and the cited program key lines, not by the measurement the sentence names.",
     "FINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html:23 non-blocking: The seam row's max|dpsi| 2.009e-05 is differenced against prototype/cold/arm-base.npz, not the prototype2/cold base the row and warm-base rows use (that pair gives 2.902e-05), and no landed script computes the column, so the table silently mixes three jobs and four base arm files and a reader cannot reconstruct which base each row was measured against; both seam values remain four orders below the 1.2045 Wb positive control, so the conclusion is unaffected."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The cache hypothesis stands refuted by the row arm (a warm re-solve of a changed current reproduces the cold solve to 4.1e-13 Wb across processes) and by the program key at forward.py:2112, which carries no current value. The wording that over-names the in-process warm arm does not change the verdict, and the landing appends a correction note to the fragment.",
+      "recorded_at": "2026-11-15T13:28:18.276014+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html",

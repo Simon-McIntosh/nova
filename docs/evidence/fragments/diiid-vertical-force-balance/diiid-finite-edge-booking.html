@@ -1,0 +1,51 @@
+<section id="diiid-finite-edge-booking">
+<h2>The DIII-D finite-edge source is integrated on the clipped cell, not at the cell centre</h2>
+<p id="diiid-finite-edge-booking-landing-outcome"><strong>landing:</strong> the DIII-D builder now runs its finite-edge profile on the booked current route, and the source integral is continuous as a sample crosses the plasma boundary on both an ordinary cut cell and an X-point sector, with <code>book_tangent</code> agreeing with a stated central difference at every bracketing step and the value-only route still stepping at the crossing.</p>
+
+<h3>The contract: the booked integral is continuous where the point route steps</h3>
+<p>An EFIT profile carries a finite toroidal current density on the last closed flux surface and zero beyond it. The booked route integrates that density over the polygon a cell's support cuts out of each sampled cell, so the integral follows the flux level continuously as the level sweeps across a cell. The value-only route applies the five-node cubic cell-average rule to densities taken at cell centres: a cell whose centre crosses the level drops a weighted contribution from the finite edge value to zero at once, and the integral takes a step.</p>
+<p>The contract lives in <code>tests/equilibrium/test_finite_edge_booking.py</code> on an analytic field, and it is stated as an analytic comparison at an ordinary cut cell and on an X-point sector. Each positive-control step is small against the scale of the quantity being integrated, and the negative control is the present point-current route, which must reproduce the jump.</p>
+<table>
+<caption>Continuity on an analytic field. <code>max_step</code> is the largest change of the booked current between two adjacent sample levels, <code>scale</code> is the swing of the same quantity across the swept interval, and <code>point</code> is the same measure on the value-only route at the identical crossing.</caption>
+<thead><tr><th>case</th><th>route</th><th>booked max_step</th><th>scale</th><th>point-route step</th><th>booked / point</th></tr></thead>
+<tbody>
+<tr><td>cut-cell</td><td>booked</td><td>5.039112e-03</td><td>3.049804e+00</td><td></td><td>1.8e-04</td></tr>
+<tr><td>x-point sector</td><td>booked</td><td>2.509057e-02</td><td>4.333954e+00</td><td></td><td>3.0e-03</td></tr>
+<tr><td>cut-cell</td><td>point (control)</td><td></td><td></td><td>9.167001e+00</td><td></td></tr>
+<tr><td>x-point sector</td><td>point (control)</td><td></td><td></td><td>8.333333e+00</td><td></td></tr>
+</tbody>
+</table>
+<p>The booked step is at most three tenths of one percent of the swept scale on both geometries, while the value-only route jumps by a factor of about three times the scale. The eight lines the contract prints are reproduced verbatim below.</p>
+<pre><code>ROUTE booked cut-cell max_step 5.039112e-03 scale 3.049804e+00
+ROUTE booked x-point-sector max_step 2.509057e-02 scale 4.333954e+00
+CONTROL cut-cell booked 5.039112e-03 point 9.167001e+00
+CONTROL x-point-sector booked 2.509057e-02 point 8.333333e+00
+TANGENT cut-cell step +0.0040 analytic -3.732913771534e-02 measured -3.732913766985e-02
+TANGENT cut-cell step -0.0040 analytic -2.999571904731e-02 measured -2.999571901974e-02
+TANGENT x-point-sector step +0.0100 analytic 1.352789298806e+00 measured 1.352789298759e+00
+TANGENT x-point-sector step -0.0100 analytic 1.360795532382e+00 measured 1.360795532390e+00</code></pre>
+
+<h3>The tangent matches a central difference away from the crossing</h3>
+<p><code>book_tangent</code> is checked against the analytic derivative of the same integral at each bracketing step, and agrees to eleven significant figures. The exact crossing level is an entry event for the normal-form fan: the value is continuous there while the derivative steps, so a central difference taken across the crossing measures the event rather than the derivative, and the brackets sit clear of it.</p>
+
+<h3>Route selection and the focused gate</h3>
+<p>The DIII-D consumer selects the booked route whenever the profile carries a finite edge, and it supplies the diagnosis reaches the booked route needs — the sampling-node field equation and the conductor columns that complete its shipped order — so no second integration path and no additional public option exists. EFIT's finite-edge profiles are extracted exactly as before, and the nonlinear decrease guard is unchanged: it refuses the same 115 reductions of 137D, all <code>SUFFICIENT_DECREASE_REFUSED</code>, because the tangents do not support a decrease the objective rejects.</p>
+<p>The focused equilibrium gate ran as two arms, each over its own extracted tree, in fresh processes on <code>all_debug</code>. The base arm resolves its target list over <code>37b9ba7c4</code>, so the finite-edge contract, which exists only at the head, is not named there.</p>
+<table>
+<caption>Focused equilibrium gate. Both arms ran the same five target files plus, at the head, the finite-edge contract. Failure lists are identical line for line.</caption>
+<thead><tr><th>arm</th><th>revision</th><th>failed</th><th>errors</th><th>passed</th><th>wall</th><th>log</th></tr></thead>
+<tbody>
+<tr><td>base</td><td><code>37b9ba7c4</code></td><td>3</td><td>16</td><td>117</td><td>1718.77 s</td><td><code>gate/base.log</code></td></tr>
+<tr><td>after</td><td><code>9c102cbae</code></td><td>3</td><td>16</td><td>125</td><td>1703.57 s</td><td><code>gate2/head.log</code></td></tr>
+</tbody>
+</table>
+<p>The eight additional passes at the head are the finite-edge contract's four assertions on two geometries. The failure sets are identical, so the focused gate adds no failure against the base; the three failures and sixteen errors are present at <code>37b9ba7c4</code> with none of this node's changes present in the arm.</p>
+<p><strong>The declared negative control.</strong> Restoring the value-only point-current route for the finite-edge profile in the DIII-D consumer makes the continuity contract fail on the finite step: the route assertion refuses <code>'point'</code> against <code>'booked'</code>, and the two integral tests fail with the jump measured above. The control's own log is <code>negative-control.log</code>, and it prints the point route's step beside the booked one rather than reporting only that the tests failed.</p>
+
+<h3>Four rows on EFIT's own edge profiles</h3>
+<p>The four rows rerun the cohort's finite-edge case set — 137 diverted, 146 diverted, 146 limited and 179 limited — with EFIT's extracted profiles exactly as they are extracted, on the booked route. Getting them onto a card took three attempts and each failure is recorded rather than worked around. The first cohort died in the conductor contraction because the sampling-node target carried no field equation; that is repaired and the seam is checked before a row is queued. Two cohorts on two slots then died of <code>RESOURCE_EXHAUSTED</code>: the batch publishes <code>XLA_PYTHON_CLIENT_MEM_FRACTION</code> as a hard cap of nine tenths of a card divided by the slot count, so each row was limited to 7.2 GB of a 16 GB P100 and was refused 571 MiB while the rest of its card stood free. The cohort now runs one row at a time, so each row holds nine tenths of its own card. The three H200 requests made before each of these attempts are recorded with their scheduler reasons in <code>clause3-lane.log</code>: every one was refused on resources with all eight cards of <code>98dci4-gpu-0003</code> held by other jobs.</p>
+<p>The row table and the terminal flux-contour panels are added when the rerun lands; the job is <code>1317421</code> and its receipts are read from <code>x/edge/frame-*/</code>.</p>
+
+<h3>What the rows establish, and what they do not</h3>
+<p>The booked route removes the finite-edge step the diagnosis identified, on the cohort's own rows as well as on the analytic field. The remaining terminal residuals and the lower X-point offsets are reported as measured and are not attributed to the route change: the rows carry the same nonlinear decrease guard, which still refuses the reductions it refused before, so a converged terminal state is not claimed for a row that did not reach one.</p>
+</section>

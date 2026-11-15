@@ -224,7 +224,7 @@ def card_note(card, meta):
             parts.append(
                 "Job <code>"
                 + job["id"]
-                + "</code> was submitted and had not started"
+                + "</code> was submitted and never started"
                 + (": " + job["note"] if job.get("note") else "")
                 + "."
             )

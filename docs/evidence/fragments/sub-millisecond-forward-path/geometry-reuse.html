@@ -1,0 +1,150 @@
+<section id="geometry-reuse-landing">
+<h2>Clipped geometry carried across sequential slices</h2>
+<p><strong>Reuse improves throughput by 11.18% at width 64: 5.8523 to
+5.1982 ms/slice.</strong> Width 1 becomes 86.16% slower, while width 16’s 1.24%
+reduction is unresolved against the 3% margin. The measured choice is off for a
+single pulse and on for multiple independent pulses, retaining the existing
+multi-pulse setting where the difference is unresolved. The sub-millisecond
+throughput target is not reached.</p>
+<p>The existing topology receipt carries conic strips, fragment validity and
+capacity, saddle fragments and exact clipping keys. Unchanged records are
+retained; changed cells are compacted into device tiles. A conservative box
+bound gives wholly positive or negative cells a constant clipping representation.
+Connected qualification still runs in full before terminal acceptance.
+The preceding slice’s support enters <code>solve_batch(initial_support=...)</code>
+through continuation’s existing <code>solve_options</code>.</p>
+<p>Measured revision <code>95290d174a5f87949cbc96c8e6319cf96e0579ec</code>.
+One H200 job pairs off/on arms at widths 1, 16 and 64, with one warming process
+and two fresh measured processes per arm. Each uses the committed slice-profile
+driver’s three sequential drive steps and eleven synchronized warm samples.
+Width counts independent pulses; slices of each pulse remain sequential.
+The width-64 population cycles the same 16 retained input streams four times.
+Job <code>1316115</code> ran on an NVIDIA H200 NVL in <code>betelgeuse</code> under
+<code>gpu_0003_grpA</code>, with one GPU, four CPUs and 96 GB requested host
+memory. Both arms preallocated an 80% device-memory pool. All 18 processes
+completed, including six warming processes; no agreement retry was needed.</p>
+<table><thead><tr><th>Width</th><th>Off processes [ms/slice]</th>
+<th>On processes [ms/slice]</th><th>Reduction</th><th>Decision margin</th>
+<th>Verdict</th></tr></thead><tbody>
+<tr><td>1</td><td>34.1766 / 34.3953</td><td>63.8553 / 63.7975</td><td>-86.16%</td><td>3.00%</td><td>off</td></tr><tr><td>16</td><td>7.3693 / 7.3161</td><td>7.2409 / 7.2631</td><td>1.24%</td><td>3.00%</td><td>unresolved</td></tr><tr><td>64</td><td>5.8546 / 5.8500</td><td>5.1970 / 5.1995</td><td>11.18%</td><td>3.00%</td><td>on</td></tr>
+</tbody></table>
+<p>The off/on process spreads are respectively 0.640%/0.090% at width 1,
+0.728%/0.306% at width 16 and 0.079%/0.050% at width 64.
+The decision margin is the greater of 3% and either arm’s process spread;
+every reported pair agrees within 5%. A positive reduction favours reuse.
+Every lane passes the independent fresh residual bound of 1e-10, axis and saddle
+bounds of 5e-4 minor radii, and boundary-flux bound of 1e-4 of the flux span.
+The maximum observed residual is 3.3794e-11; maximum axis and saddle errors are
+5.2313e-5 and 2.2005e-5 minor radii, and maximum boundary error is 5.2500e-5 of
+the flux span. Off/on lowered program digests differ at every width, and each
+arm’s two measured processes have identical lowered digests. Comparing an arm
+with itself is refused
+as an inert lever.</p>
+<figure id="geometry-reuse-wall"><img src="/nova/figures/sub-millisecond-forward-path/geometry-reuse/per-slice-wall.svg"
+alt="Paired geometry reuse walls across independent pulse widths">
+<figcaption>Mean of two fresh-process medians; whiskers span the two medians.
+Both axes are logarithmic. Width 1 is causal slice latency; larger widths show
+aggregate throughput cost, not lower latency within one pulse. Each arm uses
+the same input stream and revision. Compilation is recorded separately and
+excluded from these warm walls.</figcaption></figure>
+<h3 id="geometry-reuse-default">Default and timing provenance</h3>
+<p>Commit <code>62488004193b84034fd93f45cb1874563fb9cb0f</code> selects the
+width-dependent default after the measurement. <code>read_batch</code> and
+<code>solve_batch</code> default to <code>reuse_geometry=False</code> for one
+lane and <code>True</code> for multiple lanes; a direct scalar read defaults off.
+An explicit override is available through the same continuation
+<code>solve_options</code>. Disabling reuse drops cached records and does not
+prime the solve from incoming support. Enabling it from an uncached receipt
+performs a full read to populate the cache. Connected terminal qualification
+remains mandatory. The table records the measured revision above, before this
+default selection; it is not a new timing claim at the default commit.</p>
+<table><thead><tr><th>Width</th><th>Arm</th><th>Warming process: lower + compile [s]</th>
+<th>Measured process 1: lower + compile/load [s]</th><th>Measured process 2: lower + compile/load [s]</th>
+</tr></thead><tbody><tr><td>1</td><td>off</td><td>125.98</td><td>39.13</td><td>38.97</td></tr><tr><td>1</td><td>on</td><td>170.26</td><td>54.54</td><td>54.61</td></tr><tr><td>16</td><td>off</td><td>129.33</td><td>37.08</td><td>37.32</td></tr><tr><td>16</td><td>on</td><td>174.75</td><td>52.33</td><td>52.18</td></tr><tr><td>64</td><td>off</td><td>132.83</td><td>37.57</td><td>38.20</td></tr><tr><td>64</td><td>on</td><td>178.71</td><td>53.16</td><td>52.92</td></tr></tbody></table>
+<p>These setup walls are excluded from synchronized execution timings. Every
+process also records predictor and independent-certificate setup walls in its
+receipt. The 45 min 38 s allocation consumed 0.761 GPU-hours of its 2.5-hour
+limit. Earlier attempts consumed 0.630 GPU-hours: one could not load an input
+whose run directory had been archived, and another stopped on a width-64
+allocation failure. Their logs remain preserved and their partial timings are
+excluded from this accepted family. The earlier non-preallocated attempt’s
+width-1 on wall was 44.331 ms, compared with 63.826 ms here; the absolute cost
+differs between allocations and allocator configurations; the cause was not
+isolated. Both paired results reject reuse for one pulse.</p>
+<p>The retained input’s SHA256 is
+<code>52f8d4fb9e60dbdbe1530e8b64a171d3bb6470fb5cf73a1ddcf760895d09a0e9</code>.
+The audit checks every input and measured source digest, revision, imported
+module, allocator setting, lane precision result and terminal log status.
+<code>h200-pool/receipt-audit.json</code> holds those checks and
+<code>figure-inspection.json</code> identifies the exact SVG rendered and
+visually inspected after its canvas check passed.</p>
+<p>Durable per-arm receipts, compilation walls, lowered digests and gate logs:
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144226749384-geometry-reuse/h200-pool</code>. The reproduction at the pinned base rebuilt all 30 cells
+on each of two identical support refreshes. The selective-reuse check observes
+no conic clip execution on the unchanged support and observes execution when
+a cut moves. The moved-support mutation forces all clipping keys to compare
+unchanged and fails four tests that pass in the normal head arm. The CPU evidence below
+records the observed refusal.</p>
+<h3 id="geometry-reuse-cpu">CPU compatibility and negative controls</h3>
+<p>Each file ran in a fresh CPU process on <code>rigel</code>, using the shared
+interpreter and an archived revision with its imported module and working
+directory printed in the log. Base revision
+<code>975f3e98cfa2b2976d2bbe1b94ead37f8623b529</code> has no geometry-reuse test
+file; the scoped base arm is therefore unarmed. The compatibility base arms
+are retained in <code>baseline/suite.json</code> and
+<code>baseline-adapters/suite.json</code>.</p>
+<p>Default-selection compatibility was checked at
+<code>62488004193b84034fd93f45cb1874563fb9cb0f</code> in job
+<code>1316276</code>. The corrected geometry tests and mutation were checked at
+<code>2973da2b39a13ccc55a8e5ff068a25907a6e2a28</code> in job
+<code>1316288</code>. Product source is identical between those revisions.
+The thirteen geometry tests pass in 424.55 s. The seven compatibility files
+have 85 passes and two skips, with zero added failures against the base.
+Together these checks give <strong>98 passed, two skipped and two existing
+base failures</strong>.</p>
+<table><thead><tr><th>File</th><th>Base</th><th>Default-selection head</th></tr></thead>
+<tbody><tr><td><code>test_bank_drive_continuation.py</code></td><td>10 passed</td><td>10 passed</td></tr><tr><td><code>test_bank_lane_drive.py</code></td><td>11 passed</td><td>11 passed</td></tr><tr><td><code>test_support_read.py</code></td><td>13 passed, 2 skipped</td><td>13 passed, 2 skipped</td></tr><tr><td><code>test_tracked_read.py</code></td><td>15 passed</td><td>15 passed</td></tr><tr><td><code>test_read_wall_skip.py</code></td><td>10 passed</td><td>10 passed</td></tr><tr><td><code>test_read_live_candidates.py</code></td><td>12 passed</td><td>12 passed</td></tr><tr><td><code>test_read_tie_break.py</code></td><td>2 failed, 14 passed</td><td>2 failed, 14 passed</td></tr></tbody></table>
+<p>The two existing failures are the isolated and after-diverted variants of
+<code>test_original_limited_seed_tie_has_stable_winner</code>. Both revisions
+select raw wall-score index 1325 where the assertions hardcode 1327. Their
+failure IDs match exactly; those assertions were not changed.</p>
+<p>The new default-switch test covers limited and diverted supports. A limited
+support has no admitted X-point and no cell consuming a saddle form, so the
+test excludes only that inactive form metadata. All physical support fields
+and the represented diverted saddle form must agree at the original
+<code>atol=1e-12, rtol=1e-10</code>. The diagnostic identifying this distinction
+is <code>inspect-cache-policy.log</code>; it reports zero represented cells,
+zero admitted X-points and differences only in the unused form.</p>
+<p>The recorded base reproduction is literal:</p>
+<pre><code>UNCHANGED_REFRESH pass=0 clipped_cells=30 total_cells=30
+UNCHANGED_REFRESH pass=1 clipped_cells=30 total_cells=30</code></pre>
+<p>The implementation’s execution-counter test has an unchanged-support arm
+and a moved-cut positive control. Its development trace records
+<code>CLIP_EXECUTION unchanged=0 moved= 30</code>: padding evaluates repeated
+copies of the changed cell, and the separate cell-mask assertion requires
+exactly that one cell to rebuild. The immutable thirteen-test gate exercises
+both controls again.</p>
+<p>The declared mutation replaces the clipping-change mask with all-false,
+forcing reuse after a support move. The corrected mutation log ends with
+<code>4 failed, 9 passed in 422.68s</code> and <code>EXIT=1</code>.
+All four failing IDs pass the normal head arm:</p>
+<ul>
+<li><code>test_unchanged_support_skips_fragment_execution</code></li>
+<li><code>test_moved_support_rebuilds_only_changed_cells</code></li>
+<li><code>test_mixed_lanes_keep_their_own_geometry</code></li>
+<li><code>test_changed_mesh_invalidates_fragment_keys</code></li>
+</ul>
+<p>The timing control also executes the refused case. Every width emits
+<code>INERT_CONTROL_REFUSED inert lever: identical lowered programs</code>
+when an arm is compared with itself. The paired off/on programs pass that
+same guard because their lowered digests differ.</p>
+<p>The scoped gate command is:</p>
+<pre><code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_geometry_reuse.py</code></pre>
+<p>CPU receipts and complete logs are under the run directory
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144226749384-geometry-reuse</code>:
+<code>default-head/suite.json</code>, <code>policy-head/suite.json</code>,
+<code>policy-mutation/test_geometry_reuse.log</code> and
+<code>delivery-cpu-audit.json</code>. The manifest records the subsequent scoped
+gate at the final committed artifact head and its literal command, revision,
+module path, working directory and exit status.</p>
+</section>

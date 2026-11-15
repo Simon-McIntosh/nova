@@ -25,7 +25,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="61">
+<meta name="plan-version" content="62">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -178,7 +178,10 @@
     <div class="r-comment-body"><p>The figure at docs/figures/kernel-compile-barrier/ordered-sharing/pass-times.svg passes all six rubric items as a paired base-versus-ordered-sharing bar chart of H200 pass time, with one non-blocking note that the two rows labelled LLVM optimized IR and LLVM unoptimized IR are aggregated emitted-IR dump time plotted on a time-per-pass axis, which the figure's caption states.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261115T073855718975-review-of-importer-delta-b1c085c2c447" data-who="reckon-build" data-when="2026-11-15T07:52:13.659Z">
-    <div class="r-comment-body"><p>review of r-20261114T214523563698-importer-delta at head b1c085c2c447 against base cf87218b61ddb — scores goal_fidelity 13, evidence 14, scope_discipline 20, durability 10, fit 15, reuse 20; added_failure_count 0; one blocking finding (clause (3) covers 22 of the reviewed section&#x27;s 24 files) and four non-blocking findings.</p></div>
+    <div class="r-comment-body"><p>review of r-20261114T214523563698-importer-delta at head b1c085c2c447 against base cf87218b61ddb — scores goal_fidelity 13, evidence 14, scope_discipline 20, durability 10, fit 15, reuse 20; added_failure_count 0; one blocking finding (clause (3) covers 22 of the reviewed section's 24 files) and four non-blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261115T102031993256-review-of-importer-delta-a75cf9e91429" data-who="reckon-build" data-when="2026-11-15T11:02:53.764Z">
+    <div class="r-comment-body"><p>review of r-20261114T214523563698-importer-delta at head a75cf9e91 against base b1c085c2c — scores goal_fidelity 12, evidence 16, scope_discipline 20, durability 15, fit 17, reuse 15; added_failure_count 0; no blocking finding and five non-blocking findings (fill.py hard-codes the unreadable row&#x27;s figures, gate.sh reads the aggregate rather than the rows, nothing compares the committed fragment to the renderer&#x27;s output, four scripts invoke main() at module scope, and the failure-id set difference is a seventh inline with no shared owner)</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261020-coarse-tie-run-phase" data-who="reckon-build" data-when="2026-10-20T07:03:00Z">
     <div class="r-comment-body"><p>From crew run <code>r-20261019T223150157038-coarse-tie-census-memory</code>, landed as evidence at merge <code>19a02ca16</code> (failed, correct refusal): a second provisioning job (sirius 1290676, 450G, 5 h) reproduced the cold compile at 7,013 s and about 378 GB, then held that memory for a further ~11,000 s in the 533-batch node loop without publishing the operand. So the jets build's cost is not only its compile: the batch loop after it also outlasts a five-hour wall at 2,132 nodes. §3's done-when (1) bounds the compile; the node that builds §3 should also report the loop's wall per batch, so a bounded compile is not followed by an unbounded run. The 500-cell coarse-tie census test stays a known failure until §3 lands. <a href="/nova/evidence/fragments/converged-forward-solve/coarse-tie-census-memory.html">evidence</a></p></div>

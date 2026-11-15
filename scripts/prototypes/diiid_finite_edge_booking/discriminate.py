@@ -82,6 +82,13 @@ def main() -> None:
     parser.add_argument("--branch", type=str, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--arm", type=str, default="edge")
+    parser.add_argument(
+        "--probe-cell",
+        type=float,
+        nargs=2,
+        metavar=("R", "Z"),
+        help="report both routes at the grid cell nearest this position [m]",
+    )
     args = parser.parse_args()
 
     configure_dtypes()
@@ -142,8 +149,28 @@ def main() -> None:
             ),
             raw_current_a=float(booked.sum()),
         )
+        if args.probe_cell is not None:
+            receipt["probe_cell"] = probe(operator, booked, value_only, args.probe_cell)
     receipt.update(row_receipts(args.output))
     emit(args.output, receipt)
+
+
+def probe(operator, booked, value_only, cell: list[float]) -> dict[str, object]:
+    """Return both routes' current at the grid cell nearest a named position."""
+
+    radius = np.asarray(operator.grid.radius, dtype=np.float64)
+    height = np.asarray(operator.grid.height, dtype=np.float64)
+    distance = np.hypot(radius - cell[0], height - cell[1])
+    index = int(np.argmin(distance))
+    return {
+        "requested_rz_m": [float(cell[0]), float(cell[1])],
+        "grid_cell_index": index,
+        "grid_cell_rz_m": [float(radius[index]), float(height[index])],
+        "distance_m": float(distance[index]),
+        "booked_current_a": float(booked[index]),
+        "value_only_current_a": float(value_only[index]),
+        "difference_a": float(booked[index] - value_only[index]),
+    }
 
 
 def emit(folder: Path, receipt: dict[str, object]) -> None:

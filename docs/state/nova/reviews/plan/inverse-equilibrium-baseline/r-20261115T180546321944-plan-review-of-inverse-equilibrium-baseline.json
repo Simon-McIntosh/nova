@@ -1,0 +1,99 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T18:06:39.443Z",
+  "dispatched_at": "2026-11-15T18:06:19Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T180546321944-plan-review-of-inverse-equilibrium-baseline/plan.html:188",
+      "id": "done_when-1",
+      "reason": "as written the node cannot state that the control must fire, so \u00a78's only negative control may pass on a correct run and the section's claim \"so that \u00a77 measures drift and not wiring\" goes unguarded.",
+      "text": "\u00a78 clause (3) builds its control by scaling \"every magnetics row and the conductor currents\" by 1.10, but the measured plasma current is a separate input in this plan's own vocabulary (\u00a71 lists \"flux-loop, field-probe and plasma-current rows\"; \u00a72's clause (3) scales \"every magnetics row, the measured plasma current, and the measured conductor currents\"), and imas-efit enters the total-Ip measurement as its own single least-squares row against ~1176 flux-loop/probe rows (imas-efit `configuration/machines/ITER/machine.xml`, the `plasmaCurrent` block), so the unscaled Ip row keeps pulling the reconstruction's plasma current back toward the generating value and whether the control fires becomes an accident of the relative group weights rather than a property of the pipeline",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T180546321944-plan-review-of-inverse-equilibrium-baseline/plan.html:188",
+      "id": "done_when-2",
+      "reason": "without bands on the axis, flux and q95 the section cannot show that its wiring is unbiased on the very axes \u00a77 measures, which is the reason the section was split out of \u00a77.",
+      "text": "\u00a78 clause (2) tabulates magnetic axis position, boundary flux and axis flux (as a fraction of the span) and q95 against the generating state with no tolerance, and the only band in the section \u2014 plasma current within 1.5 % \u2014 is also exactly the quantity clause (3)'s control targets, so the section's comparison cannot fail on any of the quantities \u00a77 later reports as drift measures; a wiring bias of a few tenths of a metre in the axis would pass \u00a78 and then be read in \u00a77 as drift",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "8c9d6e542b95c353719a4f6196518c89e796d7b4",
+  "plan_fingerprint": "6f5a21a5c4554f7157c96e1252bb40c4bcda0caa1b1ca46742d74dedbd07c769",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 20,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8c9d6e542b95c353719a4f6196518c89e796d7b4",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The control in the section that runs imas-efit on nova rows now scales the measured plasma current together with every magnetics row and the conductor currents, so no unscaled row pulls the reconstruction back.",
+      "reason": "",
+      "when": "2026-11-15T19:27:16.784021+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8c9d6e542b95c353719a4f6196518c89e796d7b4",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The same section's comparison now carries bands on every quantity the drifting-sensor section later reports: axis position within 0.02 m, boundary and axis flux within 2 percent of the span and q95 within 0.1, beside the plasma current band.",
+      "reason": "",
+      "when": "2026-11-15T19:27:54.441990+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8c9d6e542b95c353719a4f6196518c89e796d7b4",
+      "commit_basis": "edit",
+      "note": "The control in the section that runs imas-efit on nova rows now scales the measured plasma current together with every magnetics row and the conductor currents, so no unscaled row pulls the reconstruction back.",
+      "reason": "",
+      "when": "2026-11-15T19:27:16.784021+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "8c9d6e542b95c353719a4f6196518c89e796d7b4",
+      "commit_basis": "edit",
+      "note": "The same section's comparison now carries bands on every quantity the drifting-sensor section later reports: axis position within 0.02 m, boundary and axis flux within 2 percent of the span and q95 within 0.1, beside the plasma current band.",
+      "reason": "",
+      "when": "2026-11-15T19:27:54.441990+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-inverse-equilibrium-baseline.v20.json",
+  "review_run_id": "r-20261115T180546321944-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "aa99502f8660c871f4a9731cb4619923af48094c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `/nova/spine-efit-parity` resolves as `docs/plans/spine-efit-parity.html` under the docs surface's `.html` convention (file present at `/home/ITER/mcintos/Code/nova/docs/plans/spine-efit-parity.html`), `/nova/figures/inverse-equilibrium-baseline/inverse-seam.svg` exists, `id=\"s8\"` matches the `s8` declaration, and the label *same magnetics, different constraints* that \u00a78 invokes is present in \u00a72.",
+    "done_when": "a finding \u2014 the new \u00a78 control (plan.html:188) scales magnetics rows and conductor currents but not the measured plasma-current row, although \u00a72's control and \u00a71's row inventory treat that measurement as its own input and imas-efit anchors it in a dedicated least-squares row; its comparison also bands only plasma current.",
+    "evidence_paths": "pass \u2014 the plan names its record at `docs/evidence/archive/inverse-equilibrium-baseline-landed.html` and its figures under `docs/figures/inverse-equilibrium-baseline/` (both exist on disk), and names no session scratchpad, node-local temporary directory or `$TMPDIR` path.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach any named artefact; \u00a77 and \u00a78 name quantities and tolerances only.",
+    "reasoning": "pass \u2014 \u00a77 states its drift thresholds against the held generating state instead of the \u00a72 bands and carries a stated path when the priors cannot be disabled; \u00a78's premise that imas-efit's ITER pressure and q0 priors are removable is supported by the cited configuration, where both are plain per-machine config literals (`configuration/machines/ITER/efitOptions.xml`, `pressurePriorBetaPol` and the `<q0 \u2026/>` block) rather than compiled defaults; neither section prescribes a code path, step sequence or formula.",
+    "single_goal": "pass \u2014 \u00a77 carries the drift study alone and \u00a78 carries the imas-efit run on nova-written rows alone, which is the split the earlier round asked for; each has one closing verdict.",
+    "wiring": "pass \u2014 each `plan-section-depends-on` entry resolves to a section that exists and matches the section's own opening (s7 \u2192 s6, s3, s8; s8 \u2192 none, with \u00a71 landed), and the \u00a70 Section contract table now carries the \u00a78 row with the same waits (\u00a77 \u2192 \u00a76, \u00a73 and \u00a78)."
+  },
+  "section_digests": {
+    "_document": "1a9005d5bd7bd2c4ec9cab70385056cbbe8ba4309dc5aa4f3a8339c5b150d6b8",
+    "s0": "18fa4b3820d8a53b8b11be7cc05c1e0e3838163b619eac989edfed114e1e0b7b",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "869fae9b37d5960c1ec034e608f17f0bda580b5851fa4c12723a067ed80b3da1",
+    "s3": "aabab320c034e5a6720e0b3877958935e6c3b63577de3674cd6e87f6120889ba",
+    "s4": "a8f5721b1827357df497c97788c8bc9c5bb1266579ca0d04f61045c915138730",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "0978908aa460ff2860214bf8e82c9b00ca29f895ece725317c79cb738cef9b01",
+    "s7": "5c750c79d813b34b96a3b3b418cd41dd92a06de78455a410a3cfd366c1aeabee",
+    "s8": "2ddaa8976308f81698c4ec7297d67064068a49a37d3a6294db4e199f5406a452"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T18:29:54.491227+00:00",
+  "total": null
+}

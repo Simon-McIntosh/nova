@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-11-15T15:09:37.610Z",
   "dispatched_at": "2026-11-15T15:08:36Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "line 199 is a vacuous restatement, but the test's discriminating guard is the tracking-not-None assertion at line 170; no behaviour rests on line 199",
+      "recorded_at": "2026-11-15T16:43:04.621442+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_geometry_reuse.py",

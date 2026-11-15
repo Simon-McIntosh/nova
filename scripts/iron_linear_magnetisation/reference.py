@@ -97,7 +97,7 @@ def main():
     parser.add_argument("--blob", required=True)
     args = parser.parse_args()
     assert jax.config.jax_enable_x64
-    blob = require_clean_script(__file__, args.blob)
+    blob = require_clean_script(__file__, args.blob, args.revision)
     vacuum, shielded = exterior_reference(10)
     owner = loop(SHELL_PROBES)
     np.testing.assert_allclose(vacuum, owner, rtol=2e-13, atol=1e-25)

@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="363">
+<meta name="plan-version" content="369">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -1080,6 +1080,24 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261114T211339079068-fused-booking-named-moments" data-who="reckon-build" data-when="2026-11-15T00:42:44.523Z">
     <div class="r-comment-body"><p>fused booking seams read booked moments by field name; base 81 passed to head 83 passed over the three booking test files with 0 added failures</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T005414968090-review-of-geometry-reuse-aabf917c9068" data-who="reckon-build" data-when="2026-11-15T02:10:37.913Z">
+    <div class="r-comment-body"><p>Review of geometry-reuse at aabf917c90688e38acfbabcbf78970f77b8e8536: scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 18, fit 18, reuse 5; one blocking finding (topology.py:3096 re-implements the tiled selective fragment rebuild owned by topology.py:3635 _refresh_fragments, landed on main after this node's base) and three non-blocking; added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261114T223650667156-review-of-bank-width-probe-f2cdfd4afaf8" data-who="reckon-build" data-when="2026-11-15T02:58:22.864Z">
+    <div class="r-comment-body"><p>review-of-bank-width-probe-f2cdfd4afaf8 — reviewed 69aacfb324c5abda0afce26133f3287894be09b8..f2cdfd4afaf868f685a51e3b2dd4ba2746725a1a and stored a parsed record scoring goal_fidelity 19, evidence 19, scope_discipline 20, durability 18, fit 18, reuse 19; the earlier round's folded durability (8) and reuse (5) findings are answered by 5fd82b435 with two inverse launcher failures and by 1159a5787 with four inverse delegation failures; two non-blocking findings recorded against the echoed boundary fields.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261114T144332616609-bank-width-probe" data-who="reckon-build" data-when="2026-11-14T22:32:01Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html#bank-width-probe-result — default H200 boundary 78 executing / 79 runtime-refused; width 78 is 5.783965620092856 ms/slice (172.8917607196887 slices/s), 79.503559598 GB compiled, repeat spread 0.0455545%; width 64 is 5.867182029760443 ms/slice, spread 0.122364%; separate cuda_malloc_async width 96 executes at 5.731683049816638 ms/slice (one process). Width 256 is refused at 191.107698404 GB; all numerical budgets pass; SVG inspected and committed; no default change or resolved speedup claimed. Review repairs add 28 automatically run contract checks, shared archive/executor ownership, 2 durability and 4 reuse inverse-commit failures, and matching three-arm CPU smoke checks at original base and repaired head.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T020831144946-review-of-carried-read-mask-geometry-5d2ac4f563d0" data-who="reckon-build" data-when="2026-11-15T03:04:47.879Z">
+    <div class="r-comment-body"><p>review of r-20261114T211406516739-carried-read-mask-geometry at head 5d2ac4f563d0dfd3fb7ef163098444529c059d92 against base 13312a9bf2e079f3ef87ad8efd7145044842c448 is parsed: goal_fidelity 18, evidence 18, scope_discipline 20, durability 19, fit 18, reuse 20, added_failure_count 0; two non-blocking findings, that nova/equilibrium/topology.py:3860 hands on the carried decision's carrier fields rather than the geometry the refreshed cells were evaluated on, and that tests/test_carried_read_refresh.py:8 imports dataclasses.replace after configure_dtypes(); the node's own gate holds — the moved-cell case reddens at the base revision and the removed conjunct reddens it at head.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261114T211406516739-carried-read-mask-geometry" data-who="reckon-build" data-when="2026-11-15T04:25:22Z">
+    <div class="r-comment-body"><p>nova/equilibrium/topology.py records the carrier each read was built on and adds _same_carrier_geometry to _fragment_reuse_mask, so a cell whose vertices, count, centre or pitch moved refreshes even with equal signed coefficients; the moved-cell case now chooses a cell and a displacement that provably change its fragment area before asserting the refresh; four cases fail at base 13312a9bf and under the coefficients-only mask, and three per-file arms show 0 added failures.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T042542823666-review-of-carried-read-mask-geometry-b098fc16dbc0" data-who="reckon-build" data-when="2026-11-15T04:55:37.062Z">
+    <div class="r-comment-body"><p>review of r-20261114T211406516739-carried-read-mask-geometry at base 5d2ac4f563d0 and head b098fc16dbc0 stores a parsed record scoring goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20 (117/120) with 0 added failures from the reviewed run&#x27;s base and head gate logs and no findings; the delta is bcf1af59c (tests, 71 insertions/23 deletions) and b098fc16d (evidence, 17/9), both inside declared write paths.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048" data-who="reckon-build" data-when="2026-11-14T10:26:14.839Z">
     <div class="r-comment-body"><p>two review records under review-records/ of run r-20261113T165201745905-bank-traced-inputs, one plain and one pinned at the reviewed head; this node's suite fence is unarmed so no pytest gate exists for it and none ran.</p></div>

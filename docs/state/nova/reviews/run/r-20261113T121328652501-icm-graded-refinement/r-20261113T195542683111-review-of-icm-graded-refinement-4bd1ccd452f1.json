@@ -19,6 +19,11 @@
       "kind": "folded",
       "node": "repair-of-icm-graded-refinement-4bd1ccd452f1",
       "recorded_at": "2026-11-13T22:04:09.443363+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "no longer reproduces: health review r-20261115T075436483339 found the docstring and __all__ name all five symbols",
+      "recorded_at": "2026-11-15T08:16:55.959953+00:00"
     }
   },
   "findings": [

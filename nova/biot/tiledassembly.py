@@ -307,6 +307,7 @@ def _traced_psi_gradient(jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm
     than mutated. The edge and limit loops are over STATIC bounds, so a trace
     unrolls them and the compiled kernel holds no control flow at all.
     """
+
     a_hat = da_dr = da_dz = jnp.zeros(r.shape[0], dtype=r.dtype)
     rc = r * cosp
     s = r * sinp
@@ -969,6 +970,7 @@ class TileEvaluator:
         precision: Precision = Precision.DOUBLE,
         edge_count: int | None = None,
         compilation: CompilationCacheConfiguration,
+        pairwise: bool = False,
     ):
         self._kernel = kernel
         self.plan = plan
@@ -983,6 +985,7 @@ class TileEvaluator:
         self.compilation_cache_receipt = compilation.receipt()
         self.dtype = np.float32 if precision is Precision.SINGLE else np.float64
         self._staged_shape = False
+        self.pairwise = pairwise
 
     @property
     def compile_count(self) -> int:
@@ -1001,7 +1004,23 @@ class TileEvaluator:
 
         plan = self.plan
         n_target = np.size(geometry[0])
-        if self.geometry == "ring":
+        if self.pairwise:
+            n_source = np.size(geometry[4])
+            if n_source != n_target or not 0 < n_target <= plan.block:
+                raise ValueError(
+                    "paired geometry must have one source per target within the block"
+                )
+            index = np.zeros(plan.block, dtype=np.intp)
+            index[:n_target] = np.arange(n_target)
+            filled = (
+                np.asarray(geometry[0])[index],
+                np.asarray(geometry[1])[index],
+                np.asarray(geometry[2])[:, :, index],
+                np.asarray(geometry[3])[:, index],
+                np.asarray(geometry[4])[index],
+            )
+            edge_count = np.shape(geometry[2])[0]
+        elif self.geometry == "ring":
             n_source = np.size(geometry[4])
             edge_count = np.shape(geometry[2])[0]
             filled = (
@@ -1050,6 +1069,8 @@ class TileEvaluator:
     def materialize(self, result, n_target: int, n_source: int):
         """Transfer device rows to host and restore component matrix shapes."""
         result = np.asarray(result)
+        if self.pairwise:
+            return tuple(result[:, :n_target])
         plan = self.plan
         if self.devices > 1:
             result = result.reshape(-1, len(self.components), plan.block)
@@ -1166,6 +1187,8 @@ def tile_evaluator(
     devices: int = 1,
     precision: Precision | str = Precision.AUTOMATIC,
     edge_count: int | None = None,
+    flux_only: bool = False,
+    pairwise: bool = False,
 ) -> TileEvaluator:
     """Return a compiled evaluator for the tiles of one plan.
 
@@ -1214,11 +1237,24 @@ def tile_evaluator(
     devices with replicated geometry; multiple devices require ``batched``
     evaluation because the shard unit is the mapped block axis.
 
+    ``flux_only`` emits only the flux row, allowing unused field arithmetic to
+    be eliminated from the same owner. ``pairwise`` accepts one source per
+    target instead of their Cartesian product and pads to ``plan.block``. This
+    lets geometry-dependent near/far buckets reuse the fixed-shape tile kernel.
+    Both choices are part of the warm evaluator identity and support the uniform
+    ring kernels on one device.
+
     ``edge_count`` is part of the executable identity because the edge loop is a
     static traced bound. Product and assembly adapters always supply it; direct
     diagnostic callers may omit it when they intentionally allow shape-driven JAX
     compilation and inspect :attr:`TileEvaluator.compile_count` themselves.
     """
+    if (flux_only or pairwise) and (
+        geometry != "ring" or kernel == "moments" or devices != 1
+    ):
+        raise ValueError(
+            "paired and flux-only tiles require a single-device uniform ring kernel"
+        )
     compilation = configure_production_compilation_cache()
     if geometry not in {"ring", "arc"}:
         raise ValueError(f"unknown geometry {geometry!r}")
@@ -1238,7 +1274,15 @@ def tile_evaluator(
             plan, batched, kernel, devices, resolved, edge_count, compilation
         )
     return _warm_evaluator(
-        plan, batched, kernel, devices, resolved, edge_count, compilation
+        plan,
+        batched,
+        kernel,
+        devices,
+        resolved,
+        edge_count,
+        compilation,
+        flux_only,
+        pairwise,
     )
 
 
@@ -1252,6 +1296,7 @@ def forget_evaluators() -> None:
     _warm_evaluator.cache_clear()
     _warm_arc_evaluator.cache_clear()
     _warm_sheet_evaluator.cache_clear()
+    _polygon_current_evaluator.cache_clear()
 
 
 @functools.lru_cache(maxsize=_WARM_EVALUATORS)
@@ -1263,6 +1308,8 @@ def _warm_evaluator(
     precision: Precision,
     edge_count: int | None,
     compilation: CompilationCacheConfiguration,
+    flux_only: bool = False,
+    pairwise: bool = False,
 ) -> TileEvaluator:
     """Trace and compile one tile kernel; see :func:`tile_evaluator`."""
     import jax
@@ -1276,7 +1323,10 @@ def _warm_evaluator(
     nodes = tuple(
         jnp.asarray(array, dtype=dtype) for array in (cosp, sinp, sin2p, w_cos)
     )
-    rows, columns = _device_blocks(plan, devices)
+    if pairwise:
+        rows = columns = np.arange(plan.block)
+    else:
+        rows, columns = _device_blocks(plan, devices)
     index = (jnp.asarray(rows), jnp.asarray(columns))
     two_pi = jnp.asarray(2.0 * np.pi, dtype=dtype)
 
@@ -1293,6 +1343,8 @@ def _warm_evaluator(
             *nodes,
             jnp.take(norm, columns),
         )
+        if flux_only:
+            return psi[None]
         two_pi_r = two_pi * r[:, 0]
         return jnp.stack([psi, -dpsi_dz / two_pi_r, dpsi_dr / two_pi_r])
 
@@ -1303,16 +1355,15 @@ def _warm_evaluator(
         quadrature there is no flux gradient to divide by ``2 pi r`` -- which is also
         why it stays finite on the axis.
         """
-        return jnp.stack(
-            packed_analytic_greens(
-                jnp,
-                jnp.take(target_r, rows),
-                jnp.take(target_z, rows),
-                jnp.take(edge, columns, axis=2),
-                jnp.take(weight, columns, axis=1),
-                jnp.take(norm, columns),
-            )
+        values = packed_analytic_greens(
+            jnp,
+            jnp.take(target_r, rows),
+            jnp.take(target_z, rows),
+            jnp.take(edge, columns, axis=2),
+            jnp.take(weight, columns, axis=1),
+            jnp.take(norm, columns),
         )
+        return jnp.stack(values[:1] if flux_only else values)
 
     def one_moment_block(
         target_r,
@@ -1363,7 +1414,9 @@ def _warm_evaluator(
 
         return jax.lax.scan(step, None, (rows, columns))[1]
 
-    if devices == 1:
+    if pairwise:
+        compiled = jax.jit(lambda *geometry: evaluate_block(*geometry, *index))
+    elif devices == 1:
         compiled = jax.jit(lambda *geometry: over_blocks(*geometry, *index))
     else:
         available = jax.local_devices()
@@ -1394,8 +1447,11 @@ def _warm_evaluator(
         devices=devices,
         precision=precision,
         edge_count=edge_count,
-        components=MOMENT_COMPONENTS if kernel == "moments" else COMPONENTS,
+        components=MOMENT_COMPONENTS
+        if kernel == "moments"
+        else (("Psi",) if flux_only else COMPONENTS),
         compilation=compilation,
+        pairwise=pairwise,
     )
 
 
@@ -1863,6 +1919,9 @@ __all__ = [
     "compilation_cache",
     "configure_production_compilation_cache",
     "forget_evaluators",
+    "linear_magnetisation_geometry",
+    "linear_galerkin_cell_interaction",
+    "linear_cell_interaction",
     "packed_sheet_end_scale",
     "packed_sheet_field",
     "plan_tiles",
@@ -1956,25 +2015,43 @@ def _linear_edge_mutual(atoms, plan, order):
     lengths = np.linalg.norm(atoms[:, 1] - atoms[:, 0], axis=1)
     centres = atoms.mean(axis=1)
     mutual = np.empty((2 * count, 2 * count))
-    block = max(1, plan.block)
-    for row in range(count):
-        columns = np.arange(row, count)
-        a = np.repeat(atoms[row, 0][None], len(columns), axis=0)
-        b = np.repeat(atoms[row, 1][None], len(columns), axis=0)
+    tile = TilePlan(
+        plan.target_tile,
+        plan.source_tile,
+        max(1024, plan.block),
+        plan.n_panels,
+        plan.n_nodes,
+    )
+    blocks = mutual.reshape(count, 2, count, 2)
+    transform = np.array([[1.0, 1.0], [0.0, -1.0]])
+    for target, source in tile.tiles(count, count):
+        if source.stop <= target.start:
+            continue
+        rows = np.repeat(
+            np.arange(target.start, target.stop), source.stop - source.start
+        )
+        columns = np.tile(
+            np.arange(source.start, source.stop), target.stop - target.start
+        )
+        keep = columns >= rows
+        rows, columns = rows[keep], columns[keep]
+        a, b = atoms[rows, 0].copy(), atoms[rows, 1].copy()
         c, d = atoms[columns, 0].copy(), atoms[columns, 1].copy()
-        same = columns == row
-        adjacent = np.zeros(len(columns), dtype=bool)
-        flip_left = np.zeros(len(columns), dtype=bool)
-        flip_right = np.zeros(len(columns), dtype=bool)
+        same = rows == columns
+        adjacent = np.zeros(len(rows), dtype=bool)
+        flip_left = np.zeros(len(rows), dtype=bool)
+        flip_right = np.zeros(len(rows), dtype=bool)
         for first, second in ((0, 0), (0, 1), (1, 0), (1, 1)):
-            shared = np.all(atoms[row, first] == atoms[columns, second], axis=1) & ~same
+            shared = (
+                np.all(atoms[rows, first] == atoms[columns, second], axis=1) & ~same
+            )
             adjacent |= shared
             flip_left |= shared & bool(first)
             flip_right |= shared & bool(second)
         a[flip_left], b[flip_left] = b[flip_left].copy(), a[flip_left].copy()
         c[flip_right], d[flip_right] = d[flip_right].copy(), c[flip_right].copy()
-        near = np.linalg.norm(centres[row] - centres[columns], axis=1) < 3 * (
-            lengths[row] + lengths[columns]
+        near = np.linalg.norm(centres[rows] - centres[columns], axis=1) < 3 * (
+            lengths[rows] + lengths[columns]
         )
         for kind, selected, nodes in (
             ("self", same, order),
@@ -1984,23 +2061,19 @@ def _linear_edge_mutual(atoms, plan, order):
         ):
             indices = np.flatnonzero(selected)
             evaluator = _mutual_edge_evaluator(nodes, kind, True)
-            for offset in range(0, len(indices), block):
-                chosen = indices[offset : offset + block]
-                padded = np.pad(chosen, (0, block - len(chosen)), mode="edge")
+            for offset in range(0, len(indices), tile.block):
+                chosen = indices[offset : offset + tile.block]
+                padded = np.pad(chosen, (0, tile.block - len(chosen)), mode="edge")
                 value = np.array(evaluator(a[padded], b[padded], c[padded], d[padded]))[
                     : len(chosen)
                 ]
-                transform = np.array([[1.0, 1.0], [0.0, -1.0]])
                 value[flip_left[chosen]] = transform.T @ value[flip_left[chosen]]
                 value[flip_right[chosen]] = value[flip_right[chosen]] @ transform
-                value *= (lengths[row] * lengths[columns[chosen]])[:, None, None]
-                for k, column in enumerate(columns[chosen]):
-                    mutual[2 * row : 2 * row + 2, 2 * column : 2 * column + 2] = value[
-                        k
-                    ]
-                    mutual[2 * column : 2 * column + 2, 2 * row : 2 * row + 2] = value[
-                        k
-                    ].T
+                value *= (lengths[rows[chosen]] * lengths[columns[chosen]])[
+                    :, None, None
+                ]
+                blocks[rows[chosen], :, columns[chosen], :] = value
+                blocks[columns[chosen], :, rows[chosen], :] = value.transpose(0, 2, 1)
     return mutual
 
 
@@ -2024,34 +2097,23 @@ def _polygon_current_geometry(polygons):
     return edge, weight, norm, incidence
 
 
-@functools.lru_cache(maxsize=4)
-def _polygon_current_evaluator(flux_only, nodes):
-    """Compile only requested polygon rows at one fixed angular rule."""
-    import jax
-    import jax.numpy as jnp
-
-    configure_production_compilation_cache()
-    phi, weights = _phi_rule(16, nodes)
-    angular = tuple(
-        map(
-            jnp.asarray,
-            (np.cos(phi), np.sin(phi), np.sin(2 * phi), weights * np.cos(phi)),
-        )
+@functools.lru_cache(maxsize=8)
+def _polygon_current_evaluator(flux_only, nodes, kernel="quadrature"):
+    """Reuse the polygon tile owner for one fixed block of selected pairs."""
+    block = 2048 if nodes == 192 else 8192
+    return tile_evaluator(
+        TilePlan(256, 256, block, 16, nodes),
+        batched=True,
+        kernel=kernel,
+        edge_count=3,
+        flux_only=flux_only,
+        pairwise=True,
     )
 
-    @jax.jit
-    def evaluate(r, z, edge, weight, norm):
-        psi, dr, dz = _traced_psi_gradient(
-            jnp, r[:, None], z[:, None], edge[..., None], weight, *angular, norm
-        )
-        if flux_only:
-            return psi[None]
-        return jnp.stack((psi, -dz / (2 * jnp.pi * r), dr / (2 * jnp.pi * r)))
 
-    return evaluate
-
-
-def _polygon_current_response(polygons, points, plan, *, packed=None, flux_only=False):
+def _polygon_current_response(
+    polygons, points, plan, *, packed=None, flux_only=False, kernel="quadrature"
+):
     """Evaluate uniform volume currents through the polygon quadrature owner.
 
     Triangle decomposition holds the traced graph at three edges even for
@@ -2064,7 +2126,7 @@ def _polygon_current_response(polygons, points, plan, *, packed=None, flux_only=
     edge, weight, norm, incidence = packed or _polygon_current_geometry(polygons)
     from nova.biot.polygonanalytic import _packed_axis_vertical_field, _packed_topology
 
-    tile = TilePlan(32, 32, 16, 16, 192)
+    tile = TilePlan(256, 256, plan.block, 16, 192)
     centres = np.mean(edge[:, :2], axis=0).T
     diameters = np.max(
         np.hypot(edge[:, 2] - edge[:, 0], edge[:, 3] - edge[:, 1]), axis=0
@@ -2079,13 +2141,12 @@ def _polygon_current_response(polygons, points, plan, *, packed=None, flux_only=
         axis = points[rows, 0] == 0
         near = np.linalg.norm(points[rr] - centres[cc], axis=1) < 4 * diameters[cc]
         value = np.empty((components, len(rr)))
-        for selected, order, block in ((near, 192, 64), (~near, 48, 1024)):
+        for selected, order, block in ((near, 192, 2048), (~near, 48, 8192)):
             indices = np.flatnonzero(selected)
-            evaluator = _polygon_current_evaluator(flux_only, order)
+            evaluator = _polygon_current_evaluator(flux_only, order, kernel)
             for begin in range(0, len(indices), block):
                 chosen = indices[begin : begin + block]
-                padded = np.pad(chosen, (0, block - len(chosen)), mode="edge")
-                r, c = rr[padded], cc[padded]
+                r, c = rr[chosen], cc[chosen]
                 value[:, chosen] = np.asarray(
                     evaluator(
                         np.where(points[r, 0] == 0, 1.0, points[r, 0]),
@@ -2132,8 +2193,8 @@ def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 2
     parameter, weights = (nodes + 1) / 2, weights / 2
     # Integrate each affine boundary test against uniform polygon flux.
     edge_volume = np.empty((2 * len(atoms), len(polygons)))
-    for begin in range(0, len(atoms), 16):
-        selected = atoms[begin : begin + 16]
+    for begin in range(0, len(atoms), 256):
+        selected = atoms[begin : begin + 256]
         points = selected[:, :1] + parameter[None, :, None] * (
             selected[:, 1:] - selected[:, :1]
         )
@@ -2157,12 +2218,22 @@ def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 2
     # The continuous volume potential uses the same area rule as the local law;
     # the logarithmic edge-pair singularities alone need the higher Duffy order.
     volume_mutual = np.empty((len(polygons), len(polygons)))
+    pending, pending_weights, first, point_count = [], [], 0, 0
     for cell, polygon in enumerate(polygons):
         points, weights = section_nodes(polygon, max(6, order // 4))
+        pending.append(points)
+        pending_weights.append(weights)
+        point_count += len(points)
+        if point_count < 4096 and cell + 1 < len(polygons):
+            continue
         flux = _polygon_current_response(
-            polygons, points, plan, packed=packed, flux_only=True
+            polygons, np.concatenate(pending), plan, packed=packed, flux_only=True
         )[0]
-        volume_mutual[cell] = weights @ flux
+        offset = 0
+        for local, weight in enumerate(pending_weights):
+            volume_mutual[first + local] = weight @ flux[offset : offset + len(weight)]
+            offset += len(weight)
+        pending, pending_weights, first, point_count = [], [], cell + 1, 0
     energy += np.asarray((volume @ volume_mutual) @ volume.T)
     energy = (energy + energy.T) / 2
     blocks = geometry["gram"]

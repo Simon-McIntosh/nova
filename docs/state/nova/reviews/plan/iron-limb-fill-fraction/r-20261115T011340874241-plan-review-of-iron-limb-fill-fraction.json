@@ -11,6 +11,17 @@
         "_document"
       ],
       "when": "2026-11-15T01:46:22.925466+00:00"
+    },
+    {
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "digests": {
+        "s2": "505e3e39d633d69d88e923fe5da753785e1230bb9a96227dc45e9bb2d869b5a4"
+      },
+      "reason": "Lead restated the WEST convergence bound from ten to fifteen corrections after measuring six and twelve; no other unit changed",
+      "units": [
+        "s2"
+      ],
+      "when": "2026-11-15T09:46:47.395223+00:00"
     }
   ],
   "completed_at": "2026-11-15T01:41:16.013Z",
@@ -101,7 +112,7 @@
       "when": "2026-11-15T01:46:17.706919+00:00"
     }
   },
-  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-limb-fill-fraction.v13.json",
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-limb-fill-fraction/r-20261115T011340874241-plan-review-of-iron-limb-fill-fraction.json",
   "review_run_id": "r-20261115T011340874241-plan-review-of-iron-limb-fill-fraction",
   "reviewed_blob_sha": "7a889dbe2ba9d6af8ee8fa26f6cc0be5b773a582",
   "rubric": "content",

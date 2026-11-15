@@ -20,7 +20,7 @@ def main():
     refresh = topology.refresh_at_stationary_points
 
     def selected_refresh(*values, **kwargs):
-        kwargs["reuse"] = args.reuse == "on"
+        kwargs["reuse_geometry"] = args.reuse == "on"
         return refresh(*values, **kwargs)
 
     topology.refresh_at_stationary_points = selected_refresh

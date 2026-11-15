@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -184,15 +184,15 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="drift-noise-model" data-choice="" data-by="" data-when="" data-sections="s7" data-recommended="parametric-sweep" data-recommended-by="coordinator">
+<div class="r-dec" data-key="drift-noise-model" data-choice="parametric-sweep" data-by="lead" data-when="2026-11-15T17:11:01+00:00" data-sections="s7" data-recommended="parametric-sweep" data-recommended-by="coordinator">
     <p class="r-dec-q">Where does the 1/f noise model in §7 come from?</p>
     <p class="r-dec-ctx">§7 needs a noise size and the two frequencies bounding the 1/f range for each sensor family. No such figures are recorded in nova. A swept model claims nothing about the real sensors and finds the size at which each code fails; a specified or measured model ties the result to hardware but needs a source the plan does not hold.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="parametric-sweep">Sweep the size and frequency range; make no claim about real sensors</button>
+      <button class="r-opt chosen" data-value="parametric-sweep">Sweep the size and frequency range; make no claim about real sensors</button>
       <button class="r-opt" data-value="specified-drift">Use the ITER integrator drift requirement, supplied by the lead</button>
       <button class="r-opt" data-value="measured-spectrum">Fit the spectrum to pre-pulse signals from an archived machine</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead&#x27;s ruling of 2026-11-15, given through the decision census: a specified or measured spectrum applies only where real data exists, and ITER is synthetic, so the study sweeps spectral index and corner frequency. The lead&#x27;s words: &quot;this is only possible for real data, iter is synthetic&quot;.</p>
     </div>
 <div class="r-dec" data-key="efit-on-synthetic-rows" data-choice="" data-by="" data-when="" data-sections="s7" data-recommended="efit-session-runs" data-recommended-by="coordinator">
     <p class="r-dec-q">Who runs imas-efit on nova&#x27;s synthetic noisy rows in §7?</p>
@@ -255,6 +255,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-close-s1" data-who="coordinator" data-when="2026-11-14">
     <div class="r-comment-body">Landed at merge 814f91c4b from head a32993c90. H200 gate 48 passed, 1 pre-existing failure; codex review 117/120. Hand-merged on the lead's decision because the landing guard accepts only CPU suite arms.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-s2-iter-priors" data-who="coordinator" data-when="2026-11-15">
+    <div class="r-comment-body"><p>Lead's ruling of 2026-11-15, given through the decision census: imas-efit's ITER reconstruction carries a synthesised on-axis pressure point and a q0 prior that nova's magnetics fit does not. The section lands with the ITER row labelled <strong>same magnetics, different constraints</strong>, and the size of the gap is read before any prior is added to nova's fit or an imas-efit run without priors is requested. The fit dimensions used are imas-efit's resolved ones: MAST-U one live linear function each for p' and FF'; ITER one live p' and two live FF' functions; TCV p' fixed at zero and one live linear FF' function.</p></div>
 </div>
 </section>
 </main>

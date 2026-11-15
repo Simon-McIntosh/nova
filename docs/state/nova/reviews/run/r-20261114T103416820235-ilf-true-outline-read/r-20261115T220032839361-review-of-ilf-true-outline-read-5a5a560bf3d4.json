@@ -50,6 +50,11 @@
       "kind": "folded",
       "node": "ilf-west-true-outline-evidence",
       "recorded_at": "2026-11-15T22:42:30.578936+00:00"
+    },
+    "6": {
+      "kind": "exempted",
+      "reason": "A manifest bookkeeping error with no effect on the landed tree: git show --stat of the head lists the twelve changed readers, and the coordinator audited the diff against the declared write paths.",
+      "recorded_at": "2026-11-15T22:43:04.867108+00:00"
     }
   },
   "findings": [

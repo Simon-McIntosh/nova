@@ -1,7 +1,9 @@
 """Run each material measurement in one allocation on its declared device lane."""
 
 import argparse
+import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import shutil
@@ -9,6 +11,67 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+
+_CONTROL_RECEIPT = Path(
+    "/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/production/"
+    "material-refinement-20261114/summary.json"
+)
+
+
+def validate_control_receipt(path):
+    """Assert section-derived material accuracy on the completed fine GPU grid."""
+    raw = path.read_bytes()
+    source = json.loads(raw)
+    assert "H200" in source["device"], "fine-grid acceptance requires its H200 receipt"
+    assert source["geometry_factor"] == 0.4
+    rows = [row for row in source["control"] if row["size_m"] == 0.032]
+    expected = {
+        (name, mu)
+        for name in ("plain", "smear", "geometry", "fitted")
+        for mu in (50.0, 200.0)
+    }
+    assert len(rows) == len(expected)
+    assert {(row["model"], row["mu"]) for row in rows} == expected
+    for row in rows:
+        assert row["converged"] and row["device"] == source["device"]
+        assert math.isfinite(row["vessel_relative_rms"])
+        assert row["vessel_relative_rms"] >= 0
+        field = row["iron_T"]
+        assert len(field) >= 16 and all(len(point) == 2 for point in field)
+        assert all(math.isfinite(value) for point in field for value in point)
+        assert sum(value**2 for point in field[:16] for value in point) > 0
+    acceptance = []
+    for mu, limit in ((50.0, 0.10), (200.0, 0.11)):
+        geometry = next(
+            row for row in rows if row["mu"] == mu and row["model"] == "geometry"
+        )
+        smear = next(row for row in rows if row["mu"] == mu and row["model"] == "smear")
+        assert geometry["cross_field_factor"] == 0.4
+        error = geometry["vessel_relative_rms"]
+        assert error <= limit, f"mu={mu:g} vessel rms {error} exceeds bound {limit}"
+        assert smear["vessel_relative_rms"] > 0
+        ratio = error / smear["vessel_relative_rms"]
+        assert ratio <= 1 / 3, f"mu={mu:g} smear ratio {ratio} exceeds one third"
+        acceptance.append(
+            dict(mu=mu, limit=limit, error=error, smear_error_ratio=ratio, passed=True)
+        )
+    return dict(
+        source_receipt=str(path),
+        source_sha256=hashlib.sha256(raw).hexdigest(),
+        device=source["device"],
+        size_m=0.032,
+        geometry_factor=0.4,
+        acceptance=acceptance,
+        comparison=[
+            {
+                key: value
+                for key, value in row.items()
+                if key not in ("iron_T", "passed")
+            }
+            for row in rows
+        ],
+        passed=True,
+    )
 
 
 def execute(command, cwd, env, log, revision):
@@ -70,8 +133,11 @@ def main():
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--base", required=True)
+    parser.add_argument("--control-receipt", type=Path, default=_CONTROL_RECEIPT)
     parser.add_argument(
-        "--mode", choices=("production", "suites", "all"), default="production"
+        "--mode",
+        choices=("production", "suites", "all", "control"),
+        default="production",
     )
     args = parser.parse_args()
     tree = Path.cwd().resolve()
@@ -96,6 +162,20 @@ def main():
         receipt.write_text(json.dumps(record, indent=2) + "\n")
 
     save()
+    if args.mode == "control":
+        record["control"] = validate_control_receipt(args.control_receipt)
+        record["passed"] = True
+        args.output.mkdir(parents=True, exist_ok=True)
+        (args.output / "accepted-comparison.json").write_text(
+            json.dumps(record["control"], indent=2, allow_nan=False) + "\n"
+        )
+        save()
+        print(
+            "CONTROL_ACCEPTANCE " + json.dumps(record["control"]["acceptance"]),
+            flush=True,
+        )
+        print("SUMMARY passed=True control_passed=True", flush=True)
+        return
     if args.mode in ("production", "all"):
         command = (
             f"{python} -m scripts.iron_limb_production.measure --output {args.output}"

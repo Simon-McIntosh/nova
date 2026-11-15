@@ -1153,6 +1153,50 @@ def test_cross_field_gain_keeps_linear_reference():
     )
 
 
+@pytest.mark.parametrize("mu,limit", [(50.0, 0.10), (200.0, 0.11)])
+def test_control_receipt_enforces_permeability_specific_bounds(tmp_path, mu, limit):
+    """A fine-grid receipt passes and a value beyond either bound is refused."""
+    from scripts.iron_limb_production.gate import (
+        _CONTROL_RECEIPT,
+        validate_control_receipt,
+    )
+
+    result = validate_control_receipt(_CONTROL_RECEIPT)
+    assert result["passed"] and result["size_m"] == 0.032
+    row = next(row for row in result["acceptance"] if row["mu"] == mu)
+    assert row["limit"] == limit
+    source = json.loads(_CONTROL_RECEIPT.read_text())
+    row = next(
+        row
+        for row in source["control"]
+        if row["size_m"] == 0.032 and row["model"] == "geometry" and row["mu"] == mu
+    )
+    row["vessel_relative_rms"] = limit + 1e-6
+    changed = tmp_path / "control.json"
+    changed.write_text(json.dumps(source))
+    with pytest.raises(AssertionError, match=f"mu={mu:g}.*bound {limit}"):
+        validate_control_receipt(changed)
+
+
+def test_control_receipt_preserves_smear_reduction(tmp_path):
+    from scripts.iron_limb_production.gate import (
+        _CONTROL_RECEIPT,
+        validate_control_receipt,
+    )
+
+    source = json.loads(_CONTROL_RECEIPT.read_text())
+    rows = {
+        row["model"]: row
+        for row in source["control"]
+        if row["size_m"] == 0.032 and row["mu"] == 50
+    }
+    rows["smear"]["vessel_relative_rms"] = 2 * rows["geometry"]["vessel_relative_rms"]
+    changed = tmp_path / "control.json"
+    changed.write_text(json.dumps(source))
+    with pytest.raises(AssertionError, match="smear ratio"):
+        validate_control_receipt(changed)
+
+
 @pytest.mark.slow
 @pytest.mark.timeout(1800)
 @pytest.mark.parametrize("mu", [50.0, 200.0])

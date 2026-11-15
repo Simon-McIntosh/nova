@@ -19,6 +19,7 @@ from scipy.linalg import block_diag
 from scipy.spatial import cKDTree
 
 from nova.equilibrium import MagneticsFit
+from nova.equilibrium.convention import SIGMA_BP
 from nova.equilibrium.measurement import Magnetics, SliceMeasurement
 from nova.equilibrium.solve_request import (
     ColdSeedPortfolio,
@@ -124,17 +125,37 @@ def _probe_angle(clockwise_radians):
     return -np.rad2deg(clockwise_radians)
 
 
-def _flux_loop_point(channel):
-    """Reduce whole circles and zero-toroidal-extent paths exactly."""
+def _flux_loop_segments(channel):
+    """Integrate declared toroidal legs of an axisymmetric diagnostic path."""
     if not len(channel.position):
         raise ValueError("a differential flux loop needs its declared references")
-    point = channel.position[0]
-    if len(channel.position) == 1:
-        return point, 1.0
-    phi = np.array([float(p.phi) for p in channel.position])
-    if np.all(np.isfinite(phi)) and np.all(np.diff(phi) == 0.0):
-        return point, 0.0
-    raise ValueError("a nonzero-toroidal-extent path needs segment observations")
+    points = np.array(
+        [[float(p.r), float(p.z), float(p.phi)] for p in channel.position]
+    )
+    if not np.all(np.isfinite(points)):
+        raise ValueError("flux-loop path coordinates must be finite")
+    if len(points) == 1:
+        return np.array([[*points[0, :2], float(SIGMA_BP)]])
+    fraction = SIGMA_BP * np.diff(points[:, 2]) / (2.0 * np.pi)
+    live = fraction != 0.0
+    if np.any(np.abs(np.diff(points[:, :2], axis=0)[live]) > 1e-12):
+        raise ValueError(
+            "a slanted toroidal leg needs distributed segment observations"
+        )
+    return np.column_stack((points[1:, :2][live], fraction[live]))
+
+
+def _sample_passive(loop, ids, time, field="current"):
+    """Read passive-loop primitive currents on their declared time base."""
+    values = np.asarray(getattr(loop, field), dtype=float)
+    clock = np.asarray(
+        ids.time if int(ids.ids_properties.homogeneous_time) == 1 else loop.time
+    )
+    if values.size == 0:
+        return None
+    if len(clock) != len(values):
+        raise ValueError("passive current and IDS time lengths differ")
+    return float(np.interp(time, clock, values))
 
 
 def _omit_empty_unconnected_coil(active, index, deselect_when_no_data):
@@ -239,7 +260,7 @@ def _read_case(name):
             raise ValueError("the selected case carries an iron-core occurrence")
         ids = {
             key: entry.get(key, 0, lazy=False, autoconvert=False)
-            for key in ("magnetics", "pf_active", "wall")
+            for key in ("magnetics", "pf_active", "pf_passive", "wall")
         }
     with open_db_entry(
         source / "regression" / regression, dd_version="4.1.0", backend="hdf5"
@@ -288,6 +309,7 @@ def _read_case(name):
         [],
         [],
     )
+    loop_segments = []
     for kind, channels, constraints, quantity in (
         ("loop", m.flux_loop, ts.constraints.flux_loop, "flux"),
         ("probe", m.b_field_pol_probe, ts.constraints.b_field_pol_probe, "field"),
@@ -308,12 +330,16 @@ def _read_case(name):
                 and weight > 0
             )
             if kind == "loop":
-                position, fraction = _flux_loop_point(channel)
+                position = channel.position[0]
+                terms = _flux_loop_segments(channel)
+                loop_segments.append(terms)
+                fraction = SIGMA_BP if np.any(terms[:, 2] != 0) else 0.0
                 angle = 0.0
             else:
                 position = channel.position
                 angle = _probe_angle(float(channel.poloidal_angle))
                 fraction = 1.0
+                loop_segments.append(np.empty((0, 3)))
             sensors.append(
                 (float(position.r), float(position.z), angle, kind == "loop")
             )
@@ -332,6 +358,7 @@ def _read_case(name):
         angle=sensors[:, 2],
         flux_loop=sensors[:, 3].astype(bool),
         flux_loop_fraction=np.asarray(fractions),
+        flux_loop_segments=tuple(loop_segments),
     )
     active = ids["pf_active"]
     circuit_config = (
@@ -381,6 +408,59 @@ def _read_case(name):
         for item, sign in placed:
             conductors.append(item)
             element_coils.append((column, sign))
+    active_elements = len(conductors)
+    passive_ids = ids["pf_passive"]
+    for loop_index, loop in enumerate(passive_ids.loop):
+        current = _sample_passive(loop, passive_ids, time)
+        sigma = _sample_passive(loop, passive_ids, time, "current_error_upper")
+        placed = []
+        for element_index, element in enumerate(loop.element):
+            turns = float(element.turns_with_sign)
+            if not np.isfinite(turns) or abs(turns) > 1e20:
+                raise ValueError(f"invalid passive signed turns: {str(loop.name)}")
+            if turns == 0:
+                continue
+            item = owner._conductor(
+                f"passive_{loop_index}_{element_index}",
+                element.geometry,
+                (current or 0.0) * np.sign(turns),
+                abs(turns),
+            )
+            if item is not None:
+                placed.append((item, np.sign(turns)))
+        if not placed:
+            omitted_conductors.append(
+                dict(
+                    name=str(loop.name), reason="no nonzero-turn placed passive element"
+                )
+            )
+            continue
+        if current is None and deselect_when_no_data:
+            omitted_conductors.append(
+                dict(
+                    name=str(loop.name),
+                    reason="explicit no-data passive deselection",
+                    configuration=str(circuit_config),
+                )
+            )
+            continue
+        if (
+            current is None
+            or not np.isfinite(current)
+            or sigma is None
+            or not np.isfinite(sigma)
+            or sigma <= 0
+        ):
+            raise ValueError(
+                f"placed passive lacks measured current/uncertainty: {str(loop.name)}"
+            )
+        column = len(currents)
+        currents.append(current)
+        uncertainty.append(sigma)
+        coil_names.append(f"passive:{str(loop.name)}")
+        for item, sign in placed:
+            conductors.append(item)
+            element_coils.append((column, sign))
     projection = np.zeros((len(conductors), len(currents)))
     for row, (column, sign) in enumerate(element_coils):
         projection[row, column] = sign
@@ -419,8 +499,8 @@ def _read_case(name):
         separatrix=boundary,
         x_point=nulls,
         wall=vessels[0].vertices,
-        active=tuple(conductors),
-        passive=(),
+        active=tuple(conductors[:active_elements]),
+        passive=tuple(conductors[active_elements:]),
         unplaced=(),
         grid_radius=np.asarray(surface.grid.dim1),
         grid_height=np.asarray(surface.grid.dim2),
@@ -493,6 +573,9 @@ def _read_case(name):
             )
         ),
         conductor_count=len(currents),
+        active_element_count=active_elements,
+        passive_element_count=len(conductors) - active_elements,
+        flux_loop_polarity=SIGMA_BP,
         omitted_conductors=omitted_conductors,
         occurrences=occurrences,
         ip_a=ip,
@@ -529,7 +612,7 @@ def _problem(data, monkeypatch):
         context.setattr(owner, "RUN", "stored-magnetics")
         context.setattr(owner, "DD_VERSION", "4.1.0")
         context.setattr(owner, "TIME_SLICE", data["reference_slice"])
-        machine = owner.cached_machine(case, -300, passive=False)
+        machine = owner.cached_machine(case, -300, passive=bool(case.passive))
     sample_nodes = machine.moment_geometry.sample_node_coordinates
     distance, rows = cKDTree(machine.sample_coordinates).query(sample_nodes)
     assert np.max(distance) < 1e-12
@@ -818,7 +901,7 @@ def test_shared_magnetics_reconstruction_observation_replay(name):
         name=[f"density_{i}" for i in range(len(r))],
     )
     conductor = CoilSet(dcoil=-1, field_attrs=["Psi", "Br", "Bz"])
-    for item in case.active:
+    for item in (*case.active, *case.passive):
         conductor.coil.insert(
             *item.placement, nturn=item.turns, Ic=item.current, name=item.name
         )
@@ -1217,7 +1300,7 @@ def _compare_fit(data, forward):
     machine, case = data["machine"], data["case"]
     source = _PlasmaDiagnosticSource(machine.cell_polygons)
     conductor = CoilSet(dcoil=-1, field_attrs=["Psi", "Br", "Bz"])
-    for item in case.active:
+    for item in (*case.active, *case.passive):
         conductor.coil.insert(*item.placement, nturn=item.turns, Ic=0.0, name=item.name)
     for name in ("point", "probe", "poloidal_flux_loop"):
         _PlasmaDiagnosticSource._cache_factory(getattr(conductor, name))

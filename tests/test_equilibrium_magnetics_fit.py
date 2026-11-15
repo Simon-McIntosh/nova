@@ -192,15 +192,76 @@ def test_zero_extent_flux_row_retains_residual_and_fractional_response(linear_fi
     )
 
 
-def test_loop_reader_reduces_zero_extent_and_refuses_missing_path_information():
-    from tests.test_magnetics_fit_efit_comparison import _flux_loop_point
+def test_loop_reader_preserves_polarity_and_integrates_toroidal_legs():
+    from tests.test_magnetics_fit_efit_comparison import _flux_loop_segments
+    from nova.equilibrium.convention import SIGMA_BP
 
     point = SimpleNamespace(r=1.0, z=0.0, phi=0.0)
-    assert _flux_loop_point(SimpleNamespace(position=[point])) == (point, 1.0)
-    assert _flux_loop_point(SimpleNamespace(position=[point, point])) == (point, 0.0)
+    np.testing.assert_array_equal(
+        _flux_loop_segments(SimpleNamespace(position=[point])), [[1.0, 0.0, SIGMA_BP]]
+    )
+    assert _flux_loop_segments(SimpleNamespace(position=[point, point])).shape == (0, 3)
+    path = [
+        point,
+        SimpleNamespace(r=1.0, z=0.4, phi=0.0),
+        SimpleNamespace(r=1.0, z=0.4, phi=np.pi),
+        SimpleNamespace(r=1.0, z=0.0, phi=np.pi),
+        point,
+    ]
+    terms = _flux_loop_segments(SimpleNamespace(position=path))
+    np.testing.assert_allclose(
+        terms, [[1.0, 0.4, SIGMA_BP * 0.5], [1.0, 0.0, -SIGMA_BP * 0.5]]
+    )
     other = SimpleNamespace(r=1.0, z=0.1, phi=0.2)
-    with pytest.raises(ValueError, match="segment observations"):
-        _flux_loop_point(SimpleNamespace(position=[point, other]))
+    with pytest.raises(ValueError, match="distributed segment observations"):
+        _flux_loop_segments(SimpleNamespace(position=[point, other]))
+
+
+def test_segmented_loop_fitter_uses_every_signed_observation_term(linear_fit):
+    fitter, measurement, _, _ = linear_fit
+    fitter.magnetics = replace(
+        fitter.magnetics,
+        flux_loop_segments=(
+            np.array([[1.0, 0.0, 0.25], [3.0, 0.0, -0.5]]),
+            np.empty((0, 3)),
+            np.array([[3.0, 0.0, 1.0]]),
+            np.empty((0, 3)),
+        ),
+    )
+    design = np.array(
+        [
+            [0.25, 0.0, 0.5],
+            [0.0, 1.0, -1.0],
+            [2.0, 1.0, 1.0],
+            [1.0, -2.0, 1.0],
+            [1.0, 1.0, 1.0],
+        ]
+    )
+    design[0] -= 0.5 * design[2]
+    scale = np.r_[measurement.scale, 1.0]
+    target = np.r_[measurement.measured, measurement.plasma_current]
+    expected = np.linalg.lstsq(design / scale[:, None], target / scale, rcond=None)[0]
+    result = fitter.fit(measurement, plasma_current_scale=1.0)
+    np.testing.assert_allclose(result.coefficients, expected, atol=1e-7)
+    with pytest.raises(ValueError, match="loop_quadrature"):
+        fitter.magnetics.project(np.ones(4), np.ones(4), np.zeros(4))
+
+
+def test_passive_current_uses_primitive_sigma_and_the_ids_clock():
+    from tests.test_magnetics_fit_efit_comparison import _sample_passive
+
+    loop = SimpleNamespace(
+        current=np.array([10.0, 20.0]),
+        current_error_upper=np.array([0.2, 0.4]),
+        time=np.array([]),
+    )
+    ids = SimpleNamespace(
+        ids_properties=SimpleNamespace(homogeneous_time=1), time=np.array([0.0, 1.0])
+    )
+    assert _sample_passive(loop, ids, 0.5) == 15.0
+    assert _sample_passive(loop, ids, 0.5, "current_error_upper") == pytest.approx(0.3)
+    loop.current_error_upper = np.array([])
+    assert _sample_passive(loop, ids, 0.5, "current_error_upper") is None
 
 
 def test_empty_coil_is_omitted_only_with_explicit_deselection_and_no_connection():
@@ -771,9 +832,14 @@ def _physical_sensor_rows(biot, sensors):
     points = np.column_stack((sensors.r, sensors.z))
     loops = np.asarray(sensors.flux_loop, dtype=bool)
     rows = np.empty(sensors.number)
-    rows[loops] = (
-        virtual_flux_loops(biot, points[loops]).values * sensors.loop_fraction[loops]
-    )
+    loop_points, loop_rows, fractions = sensors.loop_quadrature
+    rows[loops] = 0.0
+    if len(loop_points):
+        np.add.at(
+            rows,
+            loop_rows,
+            virtual_flux_loops(biot, loop_points).values * fractions,
+        )
     angle = np.deg2rad(sensors.angle[~loops])
     direction = np.column_stack((np.cos(angle), np.sin(angle)))
     rows[~loops] = virtual_poloidal_probes(biot, points[~loops], direction).values

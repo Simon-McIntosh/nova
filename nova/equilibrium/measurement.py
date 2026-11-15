@@ -33,6 +33,8 @@ class Magnetics:
     angle: np.ndarray
     flux_loop: np.ndarray
     flux_loop_fraction: np.ndarray | None = None
+    flux_loop_segments: tuple[np.ndarray, ...] | None = None
+    """Optional per-row (R, Z, signed toroidal fraction) observation terms."""
 
     @cached_property
     def loop_fraction(self) -> np.ndarray:
@@ -51,8 +53,38 @@ class Magnetics:
         """Return the sensor count."""
         return int(np.asarray(self.r).size)
 
+    @cached_property
+    def loop_quadrature(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Return sample points, sensor-row indices and oriented loop weights."""
+        rows = np.flatnonzero(self.flux_loop)
+        if self.flux_loop_segments is None:
+            return (
+                np.column_stack((self.r, self.z))[rows],
+                rows,
+                self.loop_fraction[rows],
+            )
+        if len(self.flux_loop_segments) != self.number:
+            raise ValueError("loop segments must align with every sensor row")
+        points, indices, weights = [], [], []
+        for row in rows:
+            terms = np.asarray(self.flux_loop_segments[row], dtype=float)
+            if terms.ndim != 2 or terms.shape[1] != 3:
+                raise ValueError("loop segments must have columns R, Z and fraction")
+            if not np.all(np.isfinite(terms)) or np.any(terms[:, 0] <= 0):
+                raise ValueError("loop segments require finite positive-radius points")
+            points.extend(terms[:, :2])
+            indices.extend([row] * len(terms))
+            weights.extend(terms[:, 2])
+        return (
+            np.asarray(points, dtype=float).reshape(-1, 2),
+            np.asarray(indices, dtype=int),
+            np.asarray(weights, dtype=float),
+        )
+
     def project(self, psi: np.ndarray, br: np.ndarray, bz: np.ndarray) -> np.ndarray:
         """Return each sensor's reading of a per-ampere field: flux or field."""
+        if self.flux_loop_segments is not None:
+            raise ValueError("segmented loops require fields at loop_quadrature points")
         angle = np.deg2rad(np.asarray(self.angle, dtype=np.float64))
         flux_loop = np.asarray(self.flux_loop, dtype=bool)
         fraction = self.loop_fraction

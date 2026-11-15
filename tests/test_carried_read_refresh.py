@@ -5,6 +5,8 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
+from dataclasses import replace
+
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -101,12 +103,67 @@ def test_moving_saddle_refreshes_only_its_represented_cells(fragments):
     form = decision.saddle_form._replace(
         position=decision.saddle_form.position + jnp.asarray([1e-5, 0.0])
     )
-    assert bool(jnp.any(decision.normal_form_cells))
+    represented = np.asarray(decision.normal_form_cells)
+    assert represented.any()
     refresh, full = _program(*fragments)
     args = decision.field_coefficients, decision.boundary_flux, form
     result = refresh(*args)
-    assert int(result[-1]) == int(jnp.sum(decision.normal_form_cells))
+    signed = (
+        (sigma * decision.field_coefficients)
+        .at[:, 0]
+        .add(-sigma * decision.boundary_flux)
+    )
+    reuse = np.asarray(
+        topology._fragment_reuse_mask(geometry, signed, form, decision, sigma)
+    )
+    # A mask that reuses nothing refreshes every cell and fails both lines:
+    # the reusable population must be exactly the cells the masked program
+    # leaves unrefreshed, and it must not be empty.
+    assert (~represented).any(), "positive control must have reusable cells"
+    assert np.array_equal(reuse, ~represented)
+    assert int(result[-1]) == int(np.sum(~represented))
     _compare(result, full(*args))
+
+
+def _cell_geometry(geometry, index, change):
+    """The same carrier with one cell's geometry changed and nothing else."""
+    pitch = float(geometry.pitch[index])
+    if change == "vertices":
+        vertices = geometry.vertices.at[index, 0, 0].add(1e-2 * pitch)
+        return replace(geometry, vertices=vertices)
+    if change == "vertex_count":
+        return replace(geometry, vertex_count=geometry.vertex_count.at[index].add(-1))
+    if change == "centre":
+        centre = geometry.centre.at[index, 0].add(1e-2 * pitch)
+        return replace(geometry, centre=centre)
+    if change == "pitch":
+        return replace(geometry, pitch=geometry.pitch.at[index].multiply(1.001))
+    raise ValueError(change)
+
+
+@pytest.mark.parametrize("change", ["vertices", "vertex_count", "centre", "pitch"])
+def test_moved_cell_geometry_refreshes_that_cell(fragments, change):
+    """Equal coefficients do not certify a cell whose carrier geometry moved."""
+    geometry, sigma, policy, decision = fragments
+    conic = np.flatnonzero(~np.asarray(decision.normal_form_cells))
+    assert len(conic), "positive control must contain conic cells"
+    usable = [
+        index
+        for index in conic
+        if change != "vertex_count" or int(geometry.vertex_count[index]) > 3
+    ]
+    assert usable, change
+    index = int(usable[0])
+    moved = _cell_geometry(geometry, index, change)
+    refresh, full = _program(moved, sigma, policy, decision)
+    args = decision.field_coefficients, decision.boundary_flux, decision.saddle_form
+    result, reference = refresh(*args), full(*args)
+    # The carried decision is stale for this cell: the moved carrier changes
+    # its fragments, so reuse would report the old area.
+    stale = np.asarray(decision.fragment_area[index])
+    assert np.max(np.abs(np.asarray(reference[0][index]) - stale)) > 0.0, index
+    assert int(result[-1]) == 1
+    _compare(result, reference)
 
 
 def test_batched_reuse_preserves_each_lanes_changed_population(fragments):

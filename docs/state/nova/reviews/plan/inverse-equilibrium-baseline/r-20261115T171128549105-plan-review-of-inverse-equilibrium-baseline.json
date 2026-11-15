@@ -33,7 +33,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 15,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The contract table rows for the EFIT comparison and the white-noise section, the white-noise section's opening sentence and the first followup now say the recovery section has landed and no longer holds them, matching the emptied wait fields; the drifting-sensor row no longer counts the locked noise-model decision.",
+      "reason": "",
+      "when": "2026-11-15T17:52:51.510532+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+      "commit_basis": "edit",
+      "note": "The contract table rows for the EFIT comparison and the white-noise section, the white-noise section's opening sentence and the first followup now say the recovery section has landed and no longer holds them, matching the emptied wait fields; the drifting-sensor row no longer counts the locked noise-model decision.",
+      "reason": "",
+      "when": "2026-11-15T17:52:51.510532+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261115T171128549105-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261115T171128549105-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "46b971bac97b22a9e2bf0496ae61d940f071e906",
   "rubric": "content",

@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T07:52:13.659Z",
+  "dispatched_at": "2026-11-15T07:39:54Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/importer-delta.html",
+      "line": 7,
+      "severity": "blocking",
+      "text": "The verdict claims a failure-id delta for the plan's file set, but the set is the twenty-four files listed in the base arm of job 1314800 and only twenty-two of them carry any head arm on either device. tests/biot/test_edge_term_tangents.py has a base arm and no completing head arm (h200-head-tests--biot--test_edge_term_tangents.py.log holds six progress characters and no summary line, so the arm started and was cut at the eight-hour job ceiling rather than never running), and tests/test_biottiledbackend.py has no arm at all; tests/test_moment_field_hessian.py, which the section names as the guard for the second-derivative path, has an unreadable head arm at a 490 GB peak against a base arm that passes nine tests in 316 s. Clause (3) of the section's done_when is therefore not established by this evidence, and the node's status of complete overstates it: a follow-up measurement node is required for those three pairs."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/importer-delta.html",
+      "line": 36,
+      "severity": "non-blocking",
+      "text": "The H200 note closes with 'Where the H200 figure is absent, the CPU device is what answers', which is false for both files whose H200 rows carry no result: neither tests/biot/test_edge_term_tangents.py nor tests/test_biottiledbackend.py appears in the CPU table or in cpu-receipts.json. A reader deciding whether the two remaining pairs need remeasuring is told the CPU device already covers them, when no arm of either file ran on CPU."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/importer-delta.html",
+      "line": 47,
+      "severity": "non-blocking",
+      "text": "The receipts bullet says the head arms resolved over trees 91170a685 and 14b4e3321, but every CPU arm completed between 23:47 and 00:21 before either commit existed, and cpu-receipts.json records revision cf87218b6 for all twenty-two CPU rows. The three trees are documentation-only descendants of cf87218b6 so no test file differs and the conclusion holds, but a reader reproducing the arms is pointed at two commits the CPU arms never ran over."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/cpu_gate.sh",
+      "line": 21,
+      "severity": "non-blocking",
+      "text": "The gate's only assertion is sys.exit(0 if added == 0 else 1), which holds for an empty delta table and does not fail on a row whose head arm never completed; the log prints CPU_UNREADABLE but exits zero on it, and no assertion covers the H200 delta at all, so the gate cannot distinguish 'measured no added failure' from 'measured nothing'. The negative control does prove the comparison instrument detects an added and a removed id (negative-control.log controls 2 and 3), so the defect is the aggregate assertion, not the comparison."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/importer-delta.html",
+      "line": 50,
+      "severity": "non-blocking",
+      "text": "The fragment's producer is unversioned: assemble.py, compare.py, fill_fragment.py, the template and cpu_gate.sh live only under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta, while every sibling fragment in docs/evidence/fragments/kernel-compile-barrier/ has its producer committed under scripts/prototypes/<topic>/ (compile_pass_profile/job.sh, kernel_compile_census/report.py, edge_tangent_failures). Nothing in the repository regenerates or checks this fragment, so its numbers can be neither reproduced nor caught from a checkout."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261115T073855718975-review-of-importer-delta-b1c085c2c447",
+  "reviewed_base_sha": "cf87218b61ddb37e0b7c19e359d7da55bbfb24a1",
+  "reviewed_head_sha": "b1c085c2c447d629b5f258b1930bb691f0e17ffd",
+  "reviewed_run_id": "r-20261114T214523563698-importer-delta",
+  "rubric": "node",
+  "scores": {
+    "durability": 10,
+    "evidence": 14,
+    "fit": 15,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T07:53:58.155871+00:00",
+  "total": 92
+}

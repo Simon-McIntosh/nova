@@ -80,7 +80,7 @@ def test_eager_moment_tangent_does_not_compile_shared_scans(monkeypatch):
         )
 
     def refuse_scan(*arguments, **options):
-        raise AssertionError("eager moment tangents must not stage a shared scan")
+        raise AssertionError("eager moment tangents must avoid shared scan compilation")
 
     monkeypatch.setattr(polygonanalytic, "_packed_analytic_moments_primal", primal)
     monkeypatch.setattr(jax.lax, "scan", refuse_scan)

@@ -192,6 +192,7 @@ from nova.biot.polygon import _held_edge, _packed_topology, pack_section
 from nova.biot.rangefunction import (
     _across_the_range_tangent,
     _array_program,
+    _is_staged,
     _contract_tangent,
     _product_range_tangent,
     _product_tangent,
@@ -3107,16 +3108,20 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
     only the affected field derivative uses two centred differences.
     """
 
-    scale, d_scale = jax.jvp(
-        lambda value: -value / (4.0 * np.pi), (primals[4],), (tangents[4],)
-    )
-    primals = (*primals, scale)
-    tangents = (*tangents, d_scale)
+    staged = any(_is_staged(value) for value in jax.tree.leaves(primals))
+    if staged:
+        scale, d_scale = jax.jvp(
+            lambda value: -value / (4.0 * np.pi), (primals[4],), (tangents[4],)
+        )
+        primals = (*primals, scale)
+        tangents = (*tangents, d_scale)
 
     def evaluate(*arguments):
-        return _packed_analytic_moments_primal(
-            jnp, *arguments[:9], nodes=nodes, negative_field_scale=arguments[9]
-        )
+        if staged:
+            return _packed_analytic_moments_primal(
+                jnp, *arguments[:9], nodes=nodes, negative_field_scale=arguments[9]
+            )
+        return _packed_analytic_moments_primal(jnp, *arguments, nodes=nodes)
 
     target_z = primals[1]
     edge = primals[2]
@@ -3137,17 +3142,28 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
     def ordered_direction(carry, include_height):
         return carry, directional(include_height)
 
-    _, (values, derivatives) = jax.lax.scan(
-        ordered_direction, None, jnp.asarray((True, False)), unroll=2
-    )
-    value = tuple(row[0] for row in values)
-    ordinary = tuple(row[0] for row in derivatives)
-    other = tuple(row[1] for row in derivatives)
+    if staged:
+        _, (values, derivatives) = jax.lax.scan(
+            ordered_direction, None, jnp.asarray((True, False)), unroll=2
+        )
+        value = tuple(row[0] for row in values)
+        ordinary = tuple(row[0] for row in derivatives)
+        other = tuple(row[1] for row in derivatives)
+    else:
+        value, ordinary = jax.jvp(evaluate, primals, tangents)
+        without_height = (*tangents[:1], jnp.zeros_like(target_z), *tangents[2:])
+        _, other = jax.jvp(evaluate, primals, without_height)
 
     shifts = jnp.asarray((1e-5, -1e-5, 5e-6, -5e-6), dtype=target_z.dtype)
-    shifted = jax.lax.map(
-        lambda shift: evaluate(primals[0], target_z + shift, *primals[2:]), shifts
-    )
+    if staged:
+        shifted = jax.lax.map(
+            lambda shift: evaluate(primals[0], target_z + shift, *primals[2:]), shifts
+        )
+    else:
+        samples = tuple(
+            evaluate(primals[0], target_z + shift, *primals[2:]) for shift in shifts
+        )
+        shifted = tuple(jnp.stack(rows) for rows in zip(*samples, strict=True))
     coarse = tuple((row[0] - row[1]) / (2.0 * shifts[0]) for row in shifted)
     fine = tuple((row[2] - row[3]) / (2.0 * shifts[2]) for row in shifted)
     stable = tuple((4.0 * a - b) / 3.0 for a, b in zip(fine, coarse, strict=True))

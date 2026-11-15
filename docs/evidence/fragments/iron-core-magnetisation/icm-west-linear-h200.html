@@ -1,0 +1,60 @@
+<section id="icm-west-linear-h200-state">
+<h3>WEST affine iron: CPU controls prepared; H200 measurement awaits admission</h3>
+<p>The affine WEST measurement is queued as job <code>1316958</code> on betelgeuse,
+requesting one H200, four CPUs and 280 GB host memory. No WEST affine field,
+H200 assembly wall, or refinement verdict has been measured yet. The queued job
+is retained for the H200 measurement. The 6632-cell affine mesh has 39 792
+unknowns: its interaction alone is 12.667 GB, and a same-size Newton factor adds
+another 12.667 GB before temporary storage. It cannot run on a 16 GB P100.</p>
+
+<h4>Constant-basis comparison inputs, quoted without recomputation</h4>
+<table>
+<thead><tr><th>mesh</th><th>cells</th><th>constant unknowns</th><th>+1 m [µT]</th><th>+2 m [µT]</th><th>+4 m [µT]</th></tr></thead>
+<tbody>
+<tr><td>uniform 80 mm</td><td>1695</td><td>3390</td><td>242.651092807</td><td>200.369378227</td><td>96.325592194</td></tr>
+<tr><td>uniform 40 mm</td><td>6632</td><td>13264</td><td>242.644735631</td><td>174.104623884</td><td>79.769382215</td></tr>
+<tr><td>graded 16/80 mm</td><td>5864</td><td>11728</td><td>234.327197120</td><td>177.585819226</td><td>81.772254905</td></tr>
+<tr><td>graded 8/40 mm</td><td>11708</td><td>23416</td><td>242.454626259</td><td>168.339521069</td><td>75.920212698</td></tr>
+</tbody>
+</table>
+<p>The uniform pair is quoted from
+<code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/mesh-pair/measurement.json</code>,
+SHA-256 <code>b1b178c34a9c695a7b35b27fb6a865960ab5d1b5721a66199e70c842c71dff03</code>.
+The graded pair is quoted from
+<code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/graded-refinement/west-cpu/measurement.json</code>,
+SHA-256 <code>7e478b3ef0c447a5d2796ae83532f3fdbd81208fcf8d21b3dce5a819283310c9</code>.
+The CPU preparation writes these references, their row keys and their full-precision
+fields to <code>linear-magnetisation/west-h200/cpu-preparation/constant-references.json</code>
+beneath the same iron-core evidence root.</p>
+
+<h4>Interaction persistence and controls</h4>
+<p><code>solve_magnetisation</code> accepts an optional persisted interaction;
+its default assembly route is unchanged. The response is stored as float64 NPY
+with a sidecar identity containing the basis and SHA-256 digest of the ordered
+mesh vertices. Both loading and solving verify the geometry, component layout,
+shape and finite float64 entries before using the response. Currents, the B-H
+law and time are excluded from the geometry identity.</p>
+<p>The focused control passes four tests, including bit-identical constant and
+linear solutions with reassembly forbidden. A translated mesh has the same cell
+count and matrix shape but a different digest. Removing the two digest checks
+fails both refusal cases with <code>DID NOT RAISE ValueError</code>:
+<code>2 failed, 65 deselected in 3.72s</code>, <code>EXIT=1</code>.
+The all_debug preparation separately assembles a real spherical-shell operator,
+reloads it in a fresh process, and tests refusal at another shell mesh size.
+That preparation is still running; it is not a WEST pay-once result.</p>
+
+<h4>Validation and remaining measurement</h4>
+<p>The filtered two-tree gate passes at base
+<code>17c8e25635b9bc9658fe2f953977c01d3a041c45</code>
+(<code>67 passed, 9 deselected in 272.56s</code>) and product head
+<code>97c17d8ddcc3e04070e46f7734c2adad67d786ce</code>
+(<code>71 passed, 9 deselected in 300.60s</code>), both with <code>EXIT=0</code>.
+The unfiltered baseline and after arms run in rigel job <code>1316941</code>;
+the requested after revision is <code>f437292cc422552f82df32b1426485d9cfaffad4</code>.</p>
+<p>The H200 batch will record compile, execute and host assembly walls, the full-drive
+Newton histories, probe fields, permeability ranges, compiled factor capacity,
+fresh-process replay and a half-coil-drive slice with plasma unchanged.
+The H200 rate per cell pair, its 11 708-cell projection, the probe-versus-unknowns
+SVG, and whether the +2/+4 m fields settle under refinement remain unmeasured.
+No formulation decision is taken here.</p>
+</section>

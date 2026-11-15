@@ -1,0 +1,45 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T11:35:04.609Z",
+  "dispatched_at": "2026-11-15T11:19:19Z",
+  "figure": "docs/figures/kernel-compile-barrier/ordered-sharing/pass-times.svg",
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The caption at the figure in docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html already states that the LLVM entries sum emitted-IR dump time, and the row names say IR rather than naming a pass. This is the same finding an earlier figure review of this run recorded and exempted for the same caption; the caption is unchanged at the reviewed head, and relabelling or re-scoping the rows would change a figure whose numbers are correct for a reader who has the caption in the same view.",
+      "file": "docs/figures/kernel-compile-barrier/ordered-sharing/pass-times.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The rows 'LLVM optimized IR' and 'LLVM unoptimized IR' plot the summed time of every emitted IR dump file in that stage rather than the time of a named compiler pass, yet they sit under a reader-facing axis title of 'time per pass [s]'; read alone, the 13.5 s and 8.6 s base bars can be taken as one pass's cost. The number of files behind each bar is far from constant between arms (328 base against 293 head for the optimized stage), so the two lengths are not measuring the same population either. The caption directly beneath states 'LLVM entries sum emitted-IR dump time', which is what keeps this out of the blocking set."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The blue series is the only non-base series, so there is no ambiguity about which bars the legend entry names, and the caption immediately beneath names both arms by commit (base 00ec05512, head e6b9ea32a), which is the stronger identity statement. Renaming the legend would require re-rendering a figure whose numbers and layout are correct, and the review is read-only.",
+      "file": "docs/figures/kernel-compile-barrier/ordered-sharing/pass-times.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The legend names the head arm 'eager/staged-sharing' while the caption identifies the same blue series as 'repaired sharing e6b9ea32a', so a reader matching legend to caption has to infer that two different names denote one series, and the legend carries no commit identifier for either arm while the caption carries one for both."
+    }
+  ],
+  "note": "The attached PNG is the render of the figure at the reviewed head (1399x720 px, the figure's 14 x 7.2 in canvas at 100 dpi); the figure was drawn and committed inside this run's diff (docs/figures/kernel-compile-barrier/ordered-sharing/pass-times.svg added at 9d051bc2 inside 40523b1a..35fad525). Bar lengths were measured in the PNG against its own axis and agree with the paired profile receipt the figure is generated from (base variadic-op-splitter 159.881 s, multi_output_fusion 59.902 s; head 88.868 s and 43.236 s), and the caption's cold-compile pair 350.949245 s to 217.903224 s matches the same job's receipt. The caption states the job, the arms' commits, what is drawn (the union of each arm's six largest entries with the remainder aggregated), the LLVM summation caveat, the compile pair and the separate CPU importer result; it does not merely repeat a title.",
+  "project": "nova",
+  "review_run_id": "r-20261115T111744342976-review-of-ordered-sharing-35fad52504c6-figure",
+  "reviewed_base_sha": "40523b1a42a448125b98780ff01fd63e54cc5875",
+  "reviewed_head_sha": "35fad52504c6ef860e9b9025112d181674f7701f",
+  "reviewed_image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T111744342976-review-of-ordered-sharing-35fad52504c6-figure/image-0.png",
+  "reviewed_run_id": "r-20261114T101845147725-ordered-sharing",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Row and tick text render in the near-black body colour (sampled about #524f4e) on white, clearing contrast at reading size; the base series is the #929292 data grey (about 3.0:1 on white) and the head series a clean blue #3366cc (about 5.3:1). Both series are separable from the white field and from each other, and they are also separated vertically within each row.",
+    "data_ink": "The ink is the fourteen bars, one axis title, eight tick labels, seven row labels and one two-entry legend; nothing else is drawn. The bar lengths carry the comparison the caption states: measured against the 5.12 px/s axis scale, base variadic-op-splitter ends at 159.9 s of a 175 s axis and head at 88.6 s, and the aggregate row reads 83.4 s against 56.1 s; the splitter and the remainder agree with the paired profile receipt the render reads (base 159.881 s and head 88.868 s; remainder 83.518 s against 56.115 s).",
+    "decoration": "No gridlines, no fill beneath or behind the bars, no gradient, no panel background, no frame or shadow. The field is white with a bottom and a left spine only, and the legend is frameless above the plot.",
+    "label_collision": "No label is clipped, overlapping another label, or overlapping data. Row labels occupy x 204-468 left of the axis at x 475, so none meets a bar (all bars start at x 476); tick labels sit at y 639-653 below the lowest bar at y 600; the axis title sits at y 664-685 under the tick row; and the legend at y 17-36 clears the top bar group starting at y 104. The widest text right edge is 1387 of a 1399 px canvas and the lowest is 685 of 720 px, so nothing is cut off at the canvas edge.",
+    "legibility": "Readable at a glance. Seven row labels (variadic-op-splitter, multi_output_fusion, LLVM optimized IR, LLVM unoptimized IR, zero_sized_hlo_elimination, call-inliner, all remaining passes) sit in a 14 pt column right of a single linear axis, and every row carries a grey base bar above a blue head bar. All eight tick labels are rendered and legible (0, 25, 50, 75, 100, 125, 150, 175; verified as eight label clusters in the PNG at x centres 475, 603, 731, 859, 987, 1115, 1243, 1371 against the 475-1371 axis span). The smallest pair (call-inliner, 5.6 s against 4.7 s) still separates at bar height 0.31.",
+    "table_form": "The image plots a magnitude comparison across seven categories for two arms; the exact per-pass seconds live in the paired profile receipt and the evidence document, and the figure adds the ordering and the base-to-head ratio that a table does not give at a glance. It is not information that is naturally a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T11:40:18.072074+00:00",
+  "total": null
+}

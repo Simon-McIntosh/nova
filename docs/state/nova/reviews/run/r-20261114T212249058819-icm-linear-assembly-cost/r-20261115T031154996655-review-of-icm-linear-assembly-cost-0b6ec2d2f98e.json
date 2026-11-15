@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/biot/magnetisation.py:_galerkin_interaction",
+    "nova/biot/magnetisation.py:galerkin_spectrum",
+    "nova/biot/magnetisation.py:Solution.field",
+    "nova/biot/magnetisation.py:solve_magnetisation"
+  ],
+  "completed_at": "2026-11-15T04:05:08.558Z",
+  "dispatched_at": "2026-11-15T03:12:59Z",
+  "findings": [
+    {
+      "file": "tests/test_magnetisation.py",
+      "line": 1205,
+      "severity": "non-blocking",
+      "text": "The fast operator pin compares only control[\"selected_cells\"] (3 of 228 shell cells) unless NOVA_LINEAR_OPERATOR_REFERENCE is set, which no gate sets; with ~30 quadrature points per cell the 4096-point flush in linear_galerkin_cell_interaction and the tile-boundary skip in _linear_edge_mutual are never crossed, so a regression confined to a flush or tile boundary leaves the suite green. The full-shell check exists only as a separate receipt (paired-full-shell-negative.log, 6.0e-15)."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-linear-assembly-cost.html",
+      "line": 7,
+      "severity": "non-blocking",
+      "text": "The done_when quantitative bar (10 mm 3168-cell linear assembly at most 900 s on one P100) is unmet at 4107.743 s, 4.6x over. The miss is recorded honestly at lines 7-8 and 55 as a measured outcome under the coordinator's ruling, so the node does not misreport."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit across 23 commits and 18 files: the tile-owner reuse, pairwise/flux-only evaluator flags, batched cell quadrature, the reference revision guard, new cost scripts, four new tests and the evidence fragment and figure.",
+    "done_when": "The done_when demands a compile/execute split receipt, a 1e-12 operator pin with a failing negative control, constant bit identity, and the 10 mm solve plus figure; the manifest names the gate pytest command and both arms are readable (59 passed base, 63 passed head, EXIT=0).",
+    "goal": "The node goal is to cut the piecewise-linear Galerkin assembly cost and complete the 10 mm closed-shell row; nova/biot/tiledassembly.py:2028-2168 routes the polygon quadrature through the existing tile owner and nova/biot/magnetisation.py:250 completes the linear 10 mm row via a persisted interaction solved on rigel CPU.",
+    "manifest": "Read; it states status complete, records 59 passed baseline and 63 passed in 6638.00s after, zero failures, names its five test logs and its negative_control_log, and cites the GPFS receipts.",
+    "write_paths": "Read the six declared paths in the source prompt (prompt.txt:155-160); all 18 files in the diff lie inside nova/biot/tiledassembly.py, tests/test_magnetisation.py, scripts/iron_linear_magnetisation and the named docs/evidence and docs/figures paths."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:1235 compares the head operator against the delivered blob 919fc749 loaded from git at control revision 0d4ad57d, and the recorded mutant reddens it, but tests/test_magnetisation.py:1205 pins only 3 of 228 shell cells in the gate; the full shell is a separate receipt.",
+    "evidence": "The after-final/after-suites.log records 63 passed, EXIT=0 at the exact head and the paired-full-shell-negative.log records the mutant failing at 0.0254 Frobenius with EXIT=1, so the measurement is recorded rather than claimed.",
+    "fit": "The change keeps the existing TilePlan/tile_evaluator vocabulary and extends tiledassembly.__all__ at nova/biot/tiledassembly.py:1919 with the three linear entry points; no plan, version or ticket label appears in any symbol, path or comment.",
+    "goal_fidelity": "nova/biot/tiledassembly.py:2038 folds the per-cell polygon trace into tile_evaluator and the receipts show 40/20/10 mm walls of 403.4/821.0/4107.7 s against the delivered 901.0/1780.3/8906.1 s, so the cost is cut 2.17-2.23x and the 10 mm row completes, though the 900 s bar is missed.",
+    "reuse": "nova/biot/tiledassembly.py:2104 replaces the duplicate _traced_psi_gradient polygon evaluator with tile_evaluator and scales/_linear_edge_mutual reuse pad_batch and TilePlan; scripts/iron_linear_magnetisation/figure.py:25 wraps the shared save_checked rather than reimplementing the text check, and load_owner in kernel_cost.py:20 follows the existing prototype module load_owner idiom, for which no single owner exists.",
+    "scope_discipline": "Every path in git diff --stat 79a578d..0b6ec2d2f lies inside the six declared write paths and no out-of-scope source file is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to cut the piecewise-linear Galerkin assembly cost and complete the 10 mm closed-shell row; nova/biot/tiledassembly.py:2028-2168 routes the polygon quadrature through the existing tile owner and nova/biot/magnetisation.py:250 completes the linear 10 mm row via a persisted interaction solved on rigel CPU.\nVERDICT done_when: The done_when demands a compile/execute split receipt, a 1e-12 operator pin with a failing negative control, constant bit identity, and the 10 mm solve plus figure; the manifest names the gate pytest command and both arms are readable (59 passed base, 63 passed head, EXIT=0).\nVERDICT write_paths: Read the six declared paths in the source prompt (prompt.txt:155-160); all 18 files in the diff lie inside nova/biot/tiledassembly.py, tests/test_magnetisation.py, scripts/iron_linear_magnetisation and the named docs/evidence and docs/figures paths.\nVERDICT manifest: Read; it states status complete, records 59 passed baseline and 63 passed in 6638.00s after, zero failures, names its five test logs and its negative_control_log, and cites the GPFS receipts.\nVERDICT diff: Read commit by commit across 23 commits and 18 files: the tile-owner reuse, pairwise/flux-only evaluator flags, batched cell quadrature, the reference revision guard, new cost scripts, four new tests and the evidence fragment and figure.\nCALL_SITES: nova/biot/magnetisation.py:_galerkin_interaction, nova/biot/magnetisation.py:galerkin_spectrum, nova/biot/magnetisation.py:Solution.field, nova/biot/magnetisation.py:solve_magnetisation\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: nova/biot/tiledassembly.py:2038 folds the per-cell polygon trace into tile_evaluator and the receipts show 40/20/10 mm walls of 403.4/821.0/4107.7 s against the delivered 901.0/1780.3/8906.1 s, so the cost is cut 2.17-2.23x and the 10 mm row completes, though the 900 s bar is missed.\nSCORE evidence: 16\nJUSTIFICATION evidence: The after-final/after-suites.log records 63 passed, EXIT=0 at the exact head and the paired-full-shell-negative.log records the mutant failing at 0.0254 Frobenius with EXIT=1, so the measurement is recorded rather than claimed.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: Every path in git diff --stat 79a578d..0b6ec2d2f lies inside the six declared write paths and no out-of-scope source file is touched.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_magnetisation.py:1235 compares the head operator against the delivered blob 919fc749 loaded from git at control revision 0d4ad57d, and the recorded mutant reddens it, but tests/test_magnetisation.py:1205 pins only 3 of 228 shell cells in the gate; the full shell is a separate receipt.\nSCORE fit: 18\nJUSTIFICATION fit: The change keeps the existing TilePlan/tile_evaluator vocabulary and extends tiledassembly.__all__ at nova/biot/tiledassembly.py:1919 with the three linear entry points; no plan, version or ticket label appears in any symbol, path or comment.\nSCORE reuse: 18\nJUSTIFICATION reuse: nova/biot/tiledassembly.py:2104 replaces the duplicate _traced_psi_gradient polygon evaluator with tile_evaluator and scales/_linear_edge_mutual reuse pad_batch and TilePlan; scripts/iron_linear_magnetisation/figure.py:25 wraps the shared save_checked rather than reimplementing the text check, and load_owner in kernel_cost.py:20 follows the existing prototype module load_owner idiom, for which no single owner exists.\nFINDING tests/test_magnetisation.py:1205 non-blocking: The fast operator pin compares only control[\"selected_cells\"] (3 of 228 shell cells) unless NOVA_LINEAR_OPERATOR_REFERENCE is set, which no gate sets; with ~30 quadrature points per cell the 4096-point flush in linear_galerkin_cell_interaction and the tile-boundary skip in _linear_edge_mutual are never crossed, so a regression confined to a flush or tile boundary leaves the suite green. The full-shell check exists only as a separate receipt (paired-full-shell-negative.log, 6.0e-15).\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-linear-assembly-cost.html:7 non-blocking: The done_when quantitative bar (10 mm 3168-cell linear assembly at most 900 s on one P100) is unmet at 4107.743 s, 4.6x over. The miss is recorded honestly at lines 7-8 and 55 as a measured outcome under the coordinator's ruling, so the node does not misreport.\n",
+  "review_run_id": "r-20261115T031154996655-review-of-icm-linear-assembly-cost-0b6ec2d2f98e",
+  "reviewed_base_sha": "79a578d6940ecb9115ecd8a23a171f66ccb7dada",
+  "reviewed_head_sha": "0b6ec2d2f98ef6f7a508e9c9480ff7ebaf891ea0",
+  "reviewed_run_id": "r-20261114T212249058819-icm-linear-assembly-cost",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T04:06:59.222575+00:00",
+  "total": 101
+}

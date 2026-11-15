@@ -314,6 +314,20 @@ def _verdict(
     )
 
 
+def _geometry_tracking(tracking, reuse_geometry):
+    """Keep the loop receipt compatible with its static geometry-cache policy."""
+    if tracking is None:
+        return None
+    if reuse_geometry:
+        # A cache-free incoming receipt needs one full read to populate records.
+        return tracking if tracking.reading.cell_fragments is not None else None
+    return tracking._replace(
+        reading=tracking.reading._replace(
+            cell_fragments=None, saddle_fragments=None, fragment_geometry=None
+        )
+    )
+
+
 def read(
     operands: SupportOperands,
     cache: fixed_points.RowCache,
@@ -329,6 +343,7 @@ def read(
     tracking: TrackingState | None = None,
     rebuild: bool | None = None,
     coil_currents=None,
+    reuse_geometry: bool = False,
 ) -> SupportRead:
     """Solve the stationary points, then read membership at them.
 
@@ -345,6 +360,7 @@ def read(
     stationary fluxes, fragment areas, edge intervals and saddle normal form
     are refreshed from the current state on both branches.
     """
+    tracking = _geometry_tracking(tracking, reuse_geometry)
     if coil_currents is not None:
         operands = driven_operands(operands, coil_currents)
         cache = _driven_cache(operands, cache)
@@ -370,7 +386,13 @@ def read(
             bank_exterior=operands.exterior,
         )
         return topology.read_at_stationary_points(
-            field, operands.geometry, convention, policy, stencil.solved
+            field,
+            operands.geometry,
+            convention,
+            policy,
+            stencil.solved,
+            cached=None if tracking is None else tracking.reading,
+            reuse_geometry=reuse_geometry,
         )
 
     if tracking is None:
@@ -386,7 +408,14 @@ def read(
             # lane whether or not a lane needs it; :func:`read_batch` avoids
             # that by taking one branch for the whole batch.
             reading = _rebuilt_reading(
-                operands, stencil, moments, convention, policy, jets, tracking.reading
+                operands,
+                stencil,
+                moments,
+                convention,
+                policy,
+                jets,
+                tracking.reading,
+                reuse_geometry=reuse_geometry,
             )
         else:
             reading = jax.lax.cond(
@@ -400,6 +429,7 @@ def read(
                     policy,
                     jets,
                     tracking.reading,
+                    reuse_geometry=reuse_geometry,
                 ),
                 None,
             )
@@ -423,6 +453,8 @@ def _rebuilt_reading(
     decision=None,
     *,
     skip_wall=False,
+    cached_geometry=None,
+    reuse_geometry=None,
 ):
     """The connected-domain decision of one stencil, fitted over the whole mesh."""
     field_jets = nodal_jets(operands, moments) if jets is None else jets
@@ -436,7 +468,13 @@ def _rebuilt_reading(
     )
     if decision is None:
         return topology.read_at_stationary_points(
-            field, operands.geometry, convention, policy, stencil.solved
+            field,
+            operands.geometry,
+            convention,
+            policy,
+            stencil.solved,
+            cached=cached_geometry,
+            reuse_geometry=reuse_geometry,
         )
     return topology.refresh_at_stationary_points(
         field,
@@ -446,7 +484,7 @@ def _rebuilt_reading(
         stencil.solved,
         decision,
         skip_wall=skip_wall,
-        reuse=False,
+        reuse_geometry=reuse_geometry,
     )
 
 
@@ -465,6 +503,7 @@ def read_batch(
     tracking: TrackingState | None = None,
     certificate=None,
     coil_currents=None,
+    reuse_geometry: bool | None = None,
 ) -> SupportRead:
     """One read over a batch of slices, taking one decision branch for all.
 
@@ -484,7 +523,13 @@ def read_batch(
     ``rebuilt`` and the ``rebuilds`` counter are batch-uniform: when one lane
     needs the decision rebuilt the batch rebuilds all of them, so every lane
     reports the rebuild it took part in.
+
+    Geometry caching defaults off for one lane and on for multiple lanes.
+    ``reuse_geometry`` overrides that static policy without changing decisions.
     """
+    if reuse_geometry is None:
+        reuse_geometry = moments[0].shape[0] > 1
+    tracking = _geometry_tracking(tracking, reuse_geometry)
     if coil_currents is not None:
 
         def lane(index):
@@ -503,6 +548,7 @@ def read_batch(
                 tracking=None
                 if tracking is None
                 else jax.tree.map(lambda value: value[index], tracking),
+                reuse_geometry=reuse_geometry,
             )
 
         result = jax.vmap(lane)(jnp.arange(moments[0].shape[0]))
@@ -522,6 +568,7 @@ def read_batch(
                     jets=jets,
                     tracking=tracking,
                     coil_currents=coil_currents,
+                    reuse_geometry=reuse_geometry,
                 ),
                 lambda _: result,
                 None,
@@ -540,16 +587,43 @@ def read_batch(
         )
     )(moments, seeds, previous)
 
-    def whole_mesh():
+    def whole_mesh(cached_geometry=None):
+        if not reuse_geometry:
+            cached_geometry = None
+        if cached_geometry is not None:
+            return jax.vmap(
+                lambda stencil, state, prior: _rebuilt_reading(
+                    operands,
+                    stencil,
+                    state,
+                    convention,
+                    policy,
+                    None,
+                    cached_geometry=prior,
+                    reuse_geometry=reuse_geometry,
+                )
+            )(stack, moments, cached_geometry)
         if jets is None:
             return jax.vmap(
                 lambda stencil, state: _rebuilt_reading(
-                    operands, stencil, state, convention, policy, None
+                    operands,
+                    stencil,
+                    state,
+                    convention,
+                    policy,
+                    None,
+                    reuse_geometry=reuse_geometry,
                 )
             )(stack, moments)
         return jax.vmap(
             lambda stencil, state, jet: _rebuilt_reading(
-                operands, stencil, state, convention, policy, jet
+                operands,
+                stencil,
+                state,
+                convention,
+                policy,
+                jet,
+                reuse_geometry=reuse_geometry,
             )
         )(stack, moments, jets)
 
@@ -578,12 +652,12 @@ def read_batch(
             tracked.rebuilds + needed.astype(tracked.rebuilds.dtype),
         )
 
-    def full_verdict():
+    def full_verdict(cached_geometry=None):
         return jax.vmap(
             lambda stencil, reading, tracked: _verdict(
                 stencil, reading, jnp.asarray(True), tracked.rebuilds + 1
             )
-        )(stack, whole_mesh(), tracking)
+        )(stack, whole_mesh(cached_geometry), tracking)
 
     def carry(_):
         def refresh(skip_wall):
@@ -598,6 +672,7 @@ def read_batch(
                         None,
                         decision,
                         skip_wall=skip_wall,
+                        reuse_geometry=reuse_geometry,
                     )
                 )(stack, moments, tracking.reading)
             return jax.vmap(
@@ -610,6 +685,7 @@ def read_batch(
                     jet,
                     decision,
                     skip_wall=skip_wall,
+                    reuse_geometry=reuse_geometry,
                 )
             )(stack, moments, jets, tracking.reading)
 
@@ -630,11 +706,11 @@ def read_batch(
         if certificate is not None:
             changed = changed | certificate(carried)
         return jax.lax.cond(
-            jnp.any(changed), lambda _: full_verdict(), lambda _: carried, None
+            jnp.any(changed), lambda _: full_verdict(reading), lambda _: carried, None
         )
 
     def rebuild(_):
-        return jax.vmap(verdict)(stack, whole_mesh(), tracking)
+        return jax.vmap(verdict)(stack, whole_mesh(tracking.reading), tracking)
 
     return jax.lax.cond(needed, rebuild, carry, None)
 
@@ -1985,6 +2061,8 @@ def solve_batch(
     iterations: int = 12,
     coil_currents=None,
     vertical_pin=None,
+    initial_support=None,
+    reuse_geometry: bool | None = None,
 ) -> SolveResult:
     """Converge independent lanes in one staged loop with a batch refactor branch.
 
@@ -2003,6 +2081,14 @@ def solve_batch(
     that trial and rebuilds at the incumbent if it fails the contraction limit.
     The returned factor is usable only where ``factor_valid`` is true.
 
+    ``initial_support`` carries the preceding slice's geometry. Its clipping
+    keys are checked against the predicted state on device; changed cells are
+    rebuilt. It can be supplied through drive continuation's ``solve_options``.
+    Connected qualification is still rebuilt before accepting a terminal state.
+    Geometry reuse defaults off for one independent pulse and on for multiple
+    pulses; ``reuse_geometry`` explicitly selects either mode. When off, an
+    incoming support does not prime the first read or retain clipped records.
+
     ``profile`` is either one shared profile or a callable taking a traced
     lane index and returning that lane's profile. The callable is evaluated
     inside the lane map for both residuals and Newton booking derivatives.
@@ -2012,6 +2098,10 @@ def solve_batch(
     solver. ``vertical_pin`` accepts VerticalPositionPin with scalar or
     per-lane targets; the returned amplitude is its normalized source unknown.
     """
+    if reuse_geometry is None:
+        reuse_geometry = moments[0].shape[0] > 1
+    if not reuse_geometry:
+        initial_support = None
     if coil_currents is not None or vertical_pin is not None:
         return _solve_driven_batch(
             operands,
@@ -2036,10 +2126,21 @@ def solve_batch(
             contraction_limit=contraction_limit,
             freeze_active_set=freeze_active_set,
             iterations=iterations,
+            initial_support=initial_support,
+            reuse_geometry=reuse_geometry,
         )
     lanes, cells = moments[0].shape
     lane_profile = profile if callable(profile) else lambda _: profile
     lane_indices = jnp.arange(lanes)
+
+    def magnitude(state, reading):
+        result = jax.vmap(
+            lambda one, one_read, lane: step_residual(
+                operands, one, one, one_read, lane_profile(lane), quadrature
+            )
+        )(state, reading, lane_indices)
+        return jnp.max(jnp.abs(jnp.concatenate(result.residual, axis=-1)), axis=-1)
+
     support = read_batch(
         operands,
         cache,
@@ -2050,15 +2151,16 @@ def solve_batch(
         policy,
         axis_sign,
         iterations=iterations,
+        reuse_geometry=reuse_geometry,
+        **(
+            {
+                "tracking": tracking_of(initial_support),
+                "certificate": lambda reading: magnitude(moments, reading) <= tolerance,
+            }
+            if initial_support is not None
+            else {}
+        ),
     )
-
-    def magnitude(state, reading):
-        result = jax.vmap(
-            lambda one, one_read, lane: step_residual(
-                operands, one, one, one_read, lane_profile(lane), quadrature
-            )
-        )(state, reading, lane_indices)
-        return jnp.max(jnp.abs(jnp.concatenate(result.residual, axis=-1)), axis=-1)
 
     def selection_changed(reading, cut_set, normal_set, fragments):
         cut = (reading.membership > 0) & (reading.membership < 1 - 1e-14)
@@ -2250,6 +2352,7 @@ def solve_batch(
                 axis_sign,
                 iterations=iterations,
                 tracking=tracking_of(fresh),
+                reuse_geometry=reuse_geometry,
                 certificate=lambda reading: (
                     (magnitude(trial, reading) <= tolerance)
                     | (jnp.max(steps) + 1 >= max_steps)
@@ -2373,6 +2476,7 @@ def solve_batch(
             policy,
             axis_sign,
             iterations=iterations,
+            reuse_geometry=reuse_geometry,
         )
         return reading, magnitude(final[0], reading)
 
@@ -2670,6 +2774,10 @@ def _solve_driven_batch(
         if options["factor_cache"] is not None:
             lane_options["factor_cache"] = jax.tree.map(
                 lambda value: value[index][None], options["factor_cache"]
+            )
+        if options.get("initial_support") is not None:
+            lane_options["initial_support"] = jax.tree.map(
+                lambda value: value[index][None], options["initial_support"]
             )
         lane_options["factor_valid"] = jnp.broadcast_to(
             options["factor_valid"], (lanes,)

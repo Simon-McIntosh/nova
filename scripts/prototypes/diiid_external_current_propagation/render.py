@@ -1,16 +1,19 @@
 """Draw the measured-current and scaled-current terminal flux of frame 137D.
 
-The view is the vessel's own extent, so the whole DIII-D wall is drawn and it
-closes. Both panels share one absolute level array, so the two terminal states
-are read on the same contour values. Each panel draws its own magnetic axis and
-lower X-point, the contour through that X-point as the arm's separatrix, and the
-EFIT boundary and EFIT lower X-point as the reference every offset in the footer
-is measured from.
+The view spans the union of the physical first wall and the registered
+pseudo-wall, so the physical vessel is drawn closed through draw_wall and the
+pseudo-wall is drawn as a dotted reference. Both panels share one absolute level
+array over the pseudo-wall, so the two terminal states are read on the same
+contour values. Each panel draws its own magnetic axis and lower X-point, the
+contour through that X-point as the arm's separatrix, the EFIT boundary and EFIT
+lower X-point as the reference every offset is measured from, and its own
+residual read from the stored arm record.
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import sys
 
@@ -65,7 +68,7 @@ def _corpus_row():
         + bench._CURRENT_COLUMNS
         + bench._PLASMA_CURRENT_COLUMNS
     )
-    return bench._read(match[0].path, columns)
+    return bench, bench._read(match[0].path, columns)
 
 
 def _efit_boundary(row):
@@ -127,14 +130,19 @@ def main():
     base = arms["base"]
     radius = base["radius"]
     height = base["height"]
-    wall = base["wall"]
-    levels = _levels(base["flux"].T, wall, radius, height)
-    boundary = _efit_boundary(_corpus_row())
-
-    r_lo = float(wall[:, 0].min()) - VIEW_MARGIN_M
-    r_hi = float(wall[:, 0].max()) + VIEW_MARGIN_M
-    z_lo = float(wall[:, 1].min()) - VIEW_MARGIN_M
-    z_hi = float(wall[:, 1].max()) + VIEW_MARGIN_M
+    pseudo_wall = base["wall"]
+    levels = _levels(base["flux"].T, pseudo_wall, radius, height)
+    bench, row = _corpus_row()
+    boundary = _efit_boundary(row)
+    vessel, _vessel_receipt = bench._physical_wall_ring(
+        bench.DEFAULT_MACHINE_ARTIFACT_CACHE, bench.DEFAULT_MACHINE_ARTIFACT_DIGEST
+    )
+    extent_r = np.r_[vessel[:, 0], pseudo_wall[:, 0]]
+    extent_z = np.r_[vessel[:, 1], pseudo_wall[:, 1]]
+    r_lo = float(extent_r.min()) - VIEW_MARGIN_M
+    r_hi = float(extent_r.max()) + VIEW_MARGIN_M
+    z_lo = float(extent_z.min()) - VIEW_MARGIN_M
+    z_hi = float(extent_z.max()) + VIEW_MARGIN_M
     span_ratio = (r_hi - r_lo) / (z_hi - z_lo)
     height_in = PANEL_HEIGHT_FRACTION * FIGURE_HEIGHT_IN
     width_fraction = height_in * span_ratio / FIGURE_WIDTH_IN
@@ -142,10 +150,23 @@ def main():
     left = (0.5 - COLUMN_GAP / 2 - width_fraction, 0.5 + COLUMN_GAP / 2)
 
     figure = plt.figure(figsize=(FIGURE_WIDTH_IN, FIGURE_HEIGHT_IN), dpi=100)
+    notes: list = [
+        figure.text(
+            0.5,
+            0.99,
+            "solid dark: physical first wall;  dotted grey: registered pseudo-wall",
+            ha="center",
+            va="top",
+            fontsize=12,
+            color=REFERENCE,
+        )
+    ]
     axes: list = []
-    notes: list = []
     for index, (arm, label) in enumerate(PANELS):
         data = arms[arm]
+        # The residual is the solve's own record of the arm, read from the
+        # stored arm JSON so the footer, the table and the caption agree
+        record = json.loads((args.input / f"arm-{arm}.json").read_text())
         # Offsets come from the stored null coordinates in metres, never from
         # the arm record's centimetre field, which reads ten times too large
         offset_cm = 100.0 * (
@@ -154,7 +175,22 @@ def main():
         separatrix = _flux_at(data["flux"], radius, height, data["lower_x"])
         item = figure.add_axes((left[index], BOTTOM, width_fraction, height_fraction))
         axes.append(item)
-        draw_wall(item, units=None, radius=wall[:, 0], height=wall[:, 1], color=WALL)
+        draw_wall(
+            item,
+            units=None,
+            radius=vessel[:, 0],
+            height=vessel[:, 1],
+            color=REFERENCE,
+            linewidth=1.4,
+        )
+        item.plot(
+            pseudo_wall[:, 0],
+            pseudo_wall[:, 1],
+            color=WALL,
+            linewidth=1.0,
+            linestyle=":",
+            zorder=1,
+        )
         item.plot(boundary[:, 0], boundary[:, 1], color=REFERENCE, linewidth=1.2)
         draw_flux_contours(
             item,
@@ -163,7 +199,7 @@ def main():
             data["flux"].T,
             levels,
             color=SOLVED,
-            wall=wall,
+            wall=pseudo_wall,
             linewidth=1.1,
             alpha=0.55,
         )
@@ -174,7 +210,7 @@ def main():
             data["flux"].T,
             [separatrix],
             color=SOLVED,
-            wall=wall,
+            wall=pseudo_wall,
             linewidth=2.6,
         )
         draw_nulls(
@@ -212,7 +248,22 @@ def main():
                 left[index],
                 BOTTOM - 0.055,
                 "offset %.3f / %+.3f cm, %.3f cm from the EFIT null"
-                % (offset_cm[0], offset_cm[1], float(np.linalg.norm(offset_cm))),
+                % (
+                    offset_cm[0],
+                    offset_cm[1],
+                    float(np.linalg.norm(offset_cm)),
+                ),
+                va="bottom",
+                ha="left",
+                fontsize=12,
+                color=REFERENCE,
+            )
+        )
+        notes.append(
+            figure.text(
+                left[index],
+                BOTTOM - 0.100,
+                "residual %.3e, from arm-%s.json" % (record["residual"], arm),
                 va="bottom",
                 ha="left",
                 fontsize=12,

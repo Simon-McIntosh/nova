@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "a figure review runs no test suite, so no failure delta exists",
+  "completed_at": "",
+  "dispatched_at": "2026-11-14T23:31:35Z",
+  "findings": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/dina-flattop-scenario/flattop-frames.png",
+      "id": "f5d1af5e181",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "the sheet's six-entry legend defines 'Bank X-point' only with the filled blue cross, but the slice-134 cell (top of the second row, titled 'Bank (limited)') draws a hollow cross at the null; the meaning of the hollow form -- qualified but not selected as the plasma boundary -- is stated only in the per-slice SVG captions, which this sheet does not carry, so a reader of the contact sheet meets a marker with no legend entry and no explanation anywhere on the figure"
+    },
+    {
+      "file": "scripts/prototypes/dina_flattop_scenario/render.py",
+      "id": "f6a3a281b65",
+      "line": 247,
+      "severity": "non-blocking",
+      "summary": "the contact sheet is composed by resizing six complete slice frames to 700x360 and stacking them, so each cell carries its own full six-entry legend and the sheet draws one legend six times; one figure-level legend would free a visible band at the top of every cell and cut the sheet's non-data ink by roughly a sixth without losing any information"
+    },
+    {
+      "file": "scripts/prototypes/dina_flattop_scenario/render.py",
+      "id": "fb992a7b835",
+      "line": 186,
+      "severity": "non-blocking",
+      "summary": "the annotation line prints the slice's pulse time as a bare '30.146 s' beside 'fresh residual' and 'converged', so the only labelled quantity is the residual; in a run whose headline per-slice figure is compute wall at about 0.3 s, an unlabelled 30 s invites the reader to take the pulse time for the slice's solve time, and the residual is formatted with a bare '.3g' so the four failed frames read '977', '39.9', '48.8' and '1.74e+03' next to converged frames reading '9.82e-11', which makes magnitudes harder to compare across frames than a fixed scientific format would"
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/dina-flattop-scenario/flattop.gif",
+      "id": "f6b4d562ad9",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "the four frames that did not converge (residuals 977, 39.9, 48.8 and 1.74e+03) are drawn with the same blue contour family, the same wall and the same neutral annotation styling as the sixteen converged frames, so the only encoding of failure is the words 'converged False' at the end of a small bottom line; at the animation's half-second hold a reader skimming sees a plausible equilibrium for a state that did not converge, where changing the annotation's weight or colour on the frames' own text would make the failure legible without altering the field"
+    }
+  ],
+  "judged_from": "docs/figures/sub-millisecond-forward-path/dina-flattop-scenario/flattop-frames.png; docs/figures/sub-millisecond-forward-path/dina-flattop-scenario/flattop.gif; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214636808030-review-of-dina-flattop-scenario-a3cae5e86ec6-figure/image-2.png through image-21.png (the twenty animation frames, 1399x720 each)",
+  "judged_note": "judged only from the rendered PNG attachments and the GIF attachment; no SVG was opened, no file was edited",
+  "project": "nova",
+  "review_run_id": "r-20261114T214636808030-review-of-dina-flattop-scenario-a3cae5e86ec6-figure",
+  "reviewed_base_sha": "8907e8648d8b1c4b1db610185f6b9efd4e49f6d8",
+  "reviewed_figure": "docs/figures/sub-millisecond-forward-path/dina-flattop-scenario/flattop-frames.png",
+  "reviewed_head_sha": "a3cae5e86ec648a199142f20b211a4d7a5955212",
+  "reviewed_run_id": "r-20261114T171121699975-dina-flattop-scenario",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass; legends, titles and residual lines are near-black on white, the dashed DINA contours read at roughly 8:1 and the blue Bank contours at roughly 4:1 against the same white",
+    "data_ink": "pass; the blue solid contour family, the dashed DINA family, two black null markers per side and the black first wall carry all the ink, and no other mark competes with them; the contact sheet repeats one legend above each of its six cells, which finding 2 records without blocking any reading",
+    "decoration": "pass; every panel is white with no gradient, no background fill, no band or shading, no drop shadow and no gridline, and the poloidal panels carry no axis furniture at all",
+    "label_collision": "pass; no label is clipped at any canvas edge, the annotation line clears the bottom edge by about 40 px on every frame, and no legend entry, title or text line overlaps another or lands on plotted data in any of the twenty-two attached images",
+    "legibility": "pass; the contact sheet (1408x1096), the GIF and all twenty frames (1399x720) put each panel pair, the six-entry legend, the two panel titles and the residual line at full size and every glyph is readable at a glance, with the contour family, the wall and both null sets distinguishable in both the blue Bank panel and the dashed DINA panel",
+    "table_form": "pass; the images show pairs of poloidal flux-contour fields whose comparison is inherently spatial, and the numbers a table can carry (per-slice wall times, residuals, null iterations and the width table) stay in the fragment's tables"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T00:31:28.528699+00:00",
+  "total": null
+}

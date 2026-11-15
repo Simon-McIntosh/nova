@@ -37,6 +37,11 @@
       "kind": "exempted",
       "reason": "The cache hypothesis stands refuted by the row arm (a warm re-solve of a changed current reproduces the cold solve to 4.1e-13 Wb across processes) and by the program key at forward.py:2112, which carries no current value. The wording that over-names the in-process warm arm does not change the verdict, and the landing appends a correction note to the fragment.",
       "recorded_at": "2026-11-15T13:28:18.276014+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Both seam differences (2.0e-5 and 2.9e-5 Wb) sit four orders below the 1.2045 Wb positive control, so the conclusion holds against either base. The landing appends a note naming the base each row was differenced against.",
+      "recorded_at": "2026-11-15T13:28:26.387327+00:00"
     }
   },
   "findings": [

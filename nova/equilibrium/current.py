@@ -701,7 +701,10 @@ def book_tangent(
     cut = (read.membership > 0) & ~full
     whole = jax.vmap(whole_cell)(jnp.arange(cells))
     whole = jax.tree.map(lambda value: jnp.where(full, value, 0.0), whole)
-    batch_width = _scalar_cut_width(quadrature)
+    # Bound the tile by the population: every padded slot evaluates the same
+    # program on a discarded index, so an unbounded width multiplies the
+    # compiled footprint of a small cell population by the tile size.
+    batch_width = min(_scalar_cut_width(quadrature), cells)
     cut_count = jnp.sum(cut, dtype=jnp.int32)
     cut_index = jnp.nonzero(cut, size=cells, fill_value=0)[0]
     cut_index = jnp.pad(cut_index, (0, (-cells) % batch_width))

@@ -221,6 +221,20 @@ def test_empty_coil_is_omitted_only_with_explicit_deselection_and_no_connection(
     assert not _omit_empty_unconnected_coil(active, 1, True)
 
 
+def test_circuit_deselection_reads_multiple_xml_fragments(tmp_path):
+    from tests.test_magnetics_fit_efit_comparison import _deselect_missing_current
+
+    path = tmp_path / "constraints.xml"
+    path.write_text(
+        '<?xml version="1.0"?>\n'
+        '<efitCircuits deselectWhenNoData="true"/>\n'
+        '<magneticProbes deselectWhenNoData="true"/>\n'
+    )
+    assert _deselect_missing_current(path)
+    path.write_text('<efitCircuits deselectWhenNoData="false"/><fluxLoops/>')
+    assert not _deselect_missing_current(path)
+
+
 def test_known_conductor_subtraction_changes_the_target(linear_fit):
     fitter, measurement, truth, _ = linear_fit
     vacuum = np.array([0.7, -0.4, 1.1, 0.2])

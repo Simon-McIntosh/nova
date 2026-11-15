@@ -166,7 +166,13 @@
     selection for an empty, unconnected coil. A connected coil still reaches
     the missing-current guard. No current or uncertainty is invented and the
     fitting class's guard is unchanged. Fifteen focused fitter/reader checks
-    pass, including this selection rule. A MAST-U-only titan measurement follows;
+    pass, including this selection rule. The subsequent MAST-U-only job
+    1317851 exposed the configuration file's multiple top-level XML fragments
+    before any solve. The reader now parses those fragments under a temporary
+    document root; the actual MAST-U file parses and yields the explicit true
+    directive. A regression test also covers a declaration and multiple roots,
+    bringing the focused fitter/reader count to sixteen passing checks.
+    A corrected MAST-U-only titan measurement follows;
     TCV is not retried beyond its three seeds.</p>
   <table><thead><tr><th>Measure</th><th>Unchanged band / unit</th>
     <th>MAST-U</th><th>TCV</th><th>ITER</th></tr></thead><tbody>

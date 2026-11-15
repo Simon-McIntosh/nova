@@ -95,6 +95,20 @@ def _omit_empty_unconnected_coil(active, index, deselect_when_no_data):
     return True
 
 
+def _deselect_missing_current(path):
+    """Read the circuit directive from an EFIT XML fragment collection."""
+    import xml.etree.ElementTree as element_tree
+
+    if not path.exists():
+        return False
+    content = path.read_text().lstrip()
+    if content.startswith("<?xml"):
+        content = content.partition("?>")[2]
+    root = element_tree.fromstring("<configuration>" + content + "</configuration>")
+    directive = next(root.iter("efitCircuits"), None)
+    return directive is not None and directive.get("deselectWhenNoData") == "true"
+
+
 def _profile_basis(count):
     """Map the live Bernstein functions, with their endpoint dropped, to powers."""
     if count == 0:
@@ -259,22 +273,13 @@ def _read_case(name):
         flux_loop_fraction=np.asarray(fractions),
     )
     active = ids["pf_active"]
-    import xml.etree.ElementTree as element_tree
-
     circuit_config = (
         INPUT_ROOT.parents[2]
         / "configuration/machines"
         / base.split("/")[0]
         / "constraints/magnetics.xml"
     )
-    deselect_when_no_data = False
-    if circuit_config.exists():
-        directive = next(
-            element_tree.parse(circuit_config).getroot().iter("efitCircuits"), None
-        )
-        deselect_when_no_data = (
-            directive is not None and directive.get("deselectWhenNoData") == "true"
-        )
+    deselect_when_no_data = _deselect_missing_current(circuit_config)
     omitted_conductors = []
     conductors, element_coils, currents, uncertainty, coil_names = [], [], [], [], []
     for coil_index, coil in enumerate(active.coil):

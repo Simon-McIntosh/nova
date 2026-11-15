@@ -150,7 +150,6 @@ def solve(inputs, size, interaction, external=None):
     )
     wall = time.monotonic() - started
     iron._linear_residual = residual
-    assert result.converged, result.termination
     air = (external or inputs["external"])(inputs["probes"])
     total = air + result.field(inputs["probes"])
     return dict(
@@ -210,10 +209,9 @@ def main():
         )
         row["load_seconds"] = time.monotonic() - started
         row["full_drive"] = solve(inputs, size, interaction)
-        row["bit_identical"] = bool(
-            np.array_equal(
-                row["full_drive"]["field_T"], original["full_drive"]["field_T"]
-            )
+        row["bit_identical"] = (
+            np.asarray(row["full_drive"]["field_T"], dtype=np.float64).tobytes()
+            == np.asarray(original["full_drive"]["field_T"], dtype=np.float64).tobytes()
         )
         assert row["bit_identical"], "fresh-process probe fields changed"
         with SOURCE.open("rb") as stream:
@@ -237,6 +235,7 @@ def main():
         row["assembly_calls"] = 0
         row["completed"] = True
         save(args.output / "replay.json", row)
+        assert row["full_drive"]["converged"] and row["half_coil_drive"]["converged"]
         print(json.dumps(row), flush=True)
         return
     save(path, row)
@@ -275,6 +274,7 @@ def main():
     row["completed"] = True
     save(path, row)
     print(json.dumps(row), flush=True)
+    assert row["full_drive"]["converged"], row["full_drive"]["termination"]
 
 
 if __name__ == "__main__":

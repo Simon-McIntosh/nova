@@ -17,6 +17,11 @@
       "kind": "exempted",
       "reason": "line 199 is a vacuous restatement, but the test's discriminating guard is the tracking-not-None assertion at line 170; no behaviour rests on line 199",
       "recorded_at": "2026-11-15T16:43:04.621442+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the manifest's summary pair names different files, but the real paired arms (consolidated-base 975f3e98 against consolidated-head db1c4ab, and the carrier-delivery arms at cc5175d49) cover the same files; the only failure, tests/test_bank_lane_drive.py, also failed on main and was repaired separately by fused-booking-none-quadrature",
+      "recorded_at": "2026-11-15T16:43:11.749141+00:00"
     }
   },
   "findings": [

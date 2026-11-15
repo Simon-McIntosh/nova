@@ -60,6 +60,13 @@
     "The dispatch fence said at most ten Newton corrections while plan section 2 and the restated receipt say fifteen; the recorded WEST corrections are 6 at 0.08 m and 12 at 0.04 m with terminal residual 1.387e-12 at 0.04 m.",
     "added_failure_count is derived from the reviewed run's gate logs: baseline-suite.log ends '53 passed in 4595.82s' with EXIT=0 and merge-head-suite.log ends '83 passed in 7948.20s' with EXIT=0 and 0 compatibility mismatches, so no failure id is added."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "ilf-west-true-outline-evidence",
+      "recorded_at": "2026-11-15T20:03:18.278907+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/iron_limb_production/gate.py",

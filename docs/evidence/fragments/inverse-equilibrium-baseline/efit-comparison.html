@@ -142,6 +142,57 @@
     construction where those are part of the measured interval; no time from
     this job is attributed to the H200. The H200 compilation cache is not
     reused on this device.</p>
+  <h3 id="efit-comparison-mastu-refusal">MAST-U: three public forward refusals</h3>
+  <p>Job 1317874 used pp/FF′ ndeg 2/2, one live Bernstein function each,
+    and the 24 measured conductor currents. Its complete physical case took
+    17601.813304 s on titan P100, including geometry and compilation. No
+    inverse reconstruction or scaled-fit control ran. The field collapsed
+    into the lower divertor corner rather than retaining the stored midplane
+    plasma. Further seeds are stopped pending the kernel-only input check.</p>
+  <table><thead><tr><th>Public seed</th><th>Qualified / converged</th>
+    <th>Terminal residual</th><th>Termination</th><th>P100 solve wall [s]</th>
+    </tr></thead><tbody>
+    <tr><td>Stored-field explicit seed</td><td>No / no</td><td>NaN</td>
+      <td>NoQualifiedAxisError; NONFINITE_RESIDUAL (3), 8 trips</td>
+      <td>Not separately captured</td></tr>
+    <tr><td>Second public seed</td><td>No / no</td><td>0.32346821501655815</td>
+      <td>ACTIVE_SET_STEP_REFUSED (12)</td><td>487.421769</td></tr>
+    <tr><td>Third public seed</td><td>No / no</td><td>0.32346821501659323</td>
+      <td>ACTIVE_SET_STEP_REFUSED (12)</td><td>379.436578</td></tr>
+  </tbody></table>
+  <figure id="efit-comparison-mastu-terminal">
+    <img src="/nova/figures/inverse-equilibrium-baseline/efit-comparison/mastu.svg"
+      alt="MAST-U imas-efit midplane plasma in grey and rejected nova state collapsed into the lower divertor corner in blue">
+    <figcaption>MAST-U at 0.2 s. Wide grey imas-efit contours lie beneath narrow
+      blue nova contours on the same 12 interior levels of the reference
+      axis-to-boundary flux range (span −0.507176 Wb). The wall and reference
+      nulls are drawn; the rejected state supplies no qualified nova null.
+      Terminal residual 0.32346821501659323, qualified=false, converged=false.
+      This is a refused forward state, not an inverse result. The rendered
+      preview was inspected: the corner collapse is visible, and the legend
+      and reference nulls are readable without clipped or overlapping text.</figcaption>
+  </figure>
+  <h3 id="efit-comparison-row-replay">Stored-current observation replay</h3>
+  <p>A kernel-only replay now images the stored imas-efit grid current density
+    with exactly the conductor currents and turns supplied by the nova reader.
+    It calls nova's flux-loop and probe observation owners and no equilibrium
+    solve. The MAST-U density is nonzero at 3604 grid nodes; the generator's
+    full-cell-area integral gives 760951.7255892475 A, versus the stored
+    760951.7255892473 A. No density normalisation is applied.</p>
+  <p>The replay records every sensor row, active mask, uncertainty, plasma and
+    vacuum parts, measured value and imas-efit reconstructed value. Family
+    tables report whitened RMS and maximum residuals, physical RMS, relative
+    L2 error and signed gain. A zero family is interpreted only after both
+    plasma and conductor probe predictions show a nonzero response. An
+    implied vacuum reference is explicitly labelled: imas-efit's reconstructed
+    total minus nova's stored-density plasma image depends on that plasma
+    quadrature and is not an independent vacuum measurement.</p>
+  <p>Twenty focused tests pass, including refusal of an all-zero stored-density
+    source and deliberate sign-reversed and doubled observation controls.
+    These diagnostic controls are separate from the declared 1.10 physical
+    scaled-fit control, which remains unrun. Kernel evaluation and replay-map
+    panels for MAST-U and TCV are running together in titan job 1318469;
+    the ITER-containing job 1318196 remains independent.</p>
   <h3 id="efit-comparison-tcv-refusal">TCV: first attempt with pp/FF′ ndeg 2/2</h3>
   <p>The complete TCV case took 4857.176419 s on a Tesla P100-PCIE-16GB,
     including setup and cold compilation. This is not a warm reconstruction
@@ -203,7 +254,7 @@
   <table><thead><tr><th>Measure</th><th>Unchanged band / unit</th>
     <th>MAST-U</th><th>TCV: corrected 0/2 pending</th>
     <th>ITER: different constraint sets</th></tr></thead><tbody>
-    <tr><td>Axis distance</td><td>≤0.20 m</td><td>Not reconstructed</td>
+    <tr><td>Axis distance</td><td>≤0.20 m</td><td>Three public forward refusals; residual 0.32346821501659323</td>
       <td>Prior 2/2 attempt did not qualify; corrected attempt pending</td>
       <td>Pending; different constraint sets</td></tr>
     <tr><td>Plasma current</td><td>≤1.5%</td><td>Not measured</td>

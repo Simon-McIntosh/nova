@@ -198,7 +198,7 @@ def _record(
         ),
         dtype=float,
     )
-    offset_cm = 1000.0 * (lower_x - efit_x)
+    offset_cm = 100.0 * (lower_x - efit_x)
     record = {
         "arm": name,
         "frame": FRAME,

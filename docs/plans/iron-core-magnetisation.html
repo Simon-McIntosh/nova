@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="101">
+<meta name="plan-version" content="102">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -819,6 +819,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261114T212249058819-icm-linear-assembly-cost" data-who="reckon-build" data-when="2026-11-15T03:10:11Z">
     <div class="r-comment-body"><p>Paired affine batching preserves the full shell operator at 6.002e-15 Frobenius / 2.030e-14 max-entry relative and constant operators bit-identically. P100 40/20/10 mm walls are 403.361/821.019/4107.743 s; the 900 s outcome is missed and recorded. The CPU 19008-unknown solve converges at 0.0495673% dipole and 0.000436058% finite-loop worst error, finite-loop 20-to-10 order 1.906–2.013. Inspected figure and receipts: /nova/evidence/fragments/iron-core-magnetisation/icm-linear-assembly-cost.html#icm-linear-assembly-cost-state.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-lead-ruling-west-h200-wait" data-who="lead" data-when="2026-11-15T17:15:00Z">
+    <div class="r-comment-body"><p>Lead ruling (2026-11-15, about 17:15Z, given through the reckon-f2 decision census): the WEST linear-basis H200 continuation job 1317867 (graded 16/80 mesh, operator reload, half-drive slice) keeps waiting for a card. No card is taken from the local model-serving job, and the graded meshes stay in scope. Earlier the same day the lead ruled that WEST is measured on the H200 before the §5 basis decision. The uniform pair is done on the H200: assembly 395 s at 0.08 m (1695 cells) and 6502 s at 0.04 m (6632 cells), with 59 % host time at 0.04 m. That projects about 5.6 h of assembly for 11 708 cells.</p></div>
 </div>
 </section>
 </main>

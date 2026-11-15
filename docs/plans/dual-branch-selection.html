@@ -27,8 +27,8 @@
 <meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8,a9ea090c">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,benchmarks/fork_arming_economics.py,benchmarks/two_branch_batch_cost.py,nova/equilibrium/branch_selection.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/figures/dual-branch-selection/fork-arming-economics.json,docs/figures/dual-branch-selection/two-branch-batch-cost.json,docs/evidence/archive/dual-branch-selection-landed.html">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="16">
-<meta name="plan-modified" content="2026-11-13">
+<meta name="plan-version" content="17">
+<meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
   <main class="plan-doc">
@@ -572,7 +572,7 @@
       </p>
     <p class="r-dec-rat">Lead decision 2026-10-01, from the traced-selection receipt this decision asked for: 53/53 exact-class agreement, both 257-point rails continuous (max adjacent step 3.5255e-4), and p_diverted against sigmoid(class_margin/0.01) agreeing to 2.2e-16. Each observable does one job: the smooth weight carries selection and gradients, and the exact signed margin carries reporting and gates. A gate reading only the smooth weight judges a softened quantity. Using only the exact margin leaves no gradient through branch selection. Accepted cost: two observables must stay consistent, which the receipt&#x27;s agreement check enforces. The margin&#x27;s definition moves to signed webers under contour-tree-topology-authority; the roles are unchanged by that.</p>
     </div>
-<div class="r-dec" data-key="unqualified-branch-semantics" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="unqualified-branch-semantics" data-choice="degrade-with-recorded-stall" data-by="lead" data-when="2026-11-15T17:15:15+00:00">
     <p class="r-dec-q">What does the published label carry when the diverted arm never
         qualifies — degrade to the limited root with the diverted stall recorded, publish a
         two-state receipt with no single class, or withhold the label? On present evidence this is
@@ -581,11 +581,11 @@
         the pure map does not contract; deciding earlier would encode today&#x27;s stall as a permanent
         semantic.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="degrade-with-recorded-stall">degrade-with-recorded-stall</button>
+      <button class="r-opt chosen" data-value="degrade-with-recorded-stall">degrade-with-recorded-stall</button>
       <button class="r-opt" data-value="two-state-receipt">two-state-receipt</button>
       <button class="r-opt" data-value="withhold-label">withhold-label</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Publish the limited root with the diverted stall recorded on the receipt, one class per label. Answered by the lead on 2026-11-15 at about 17:30Z through the decision census and relayed by the reckon coordinator session. The prerequisite study has reported: a diverted root exists (22086/43 converged to 3.6e-16, class diverted) and the pure map contracts slowly (ratio 0.96-0.98), so the stall is a rate problem and the limited root is the honest published state when the diverted arm does not qualify.</p>
     </div>
 </section>
 

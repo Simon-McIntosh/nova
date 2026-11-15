@@ -13,7 +13,36 @@
     "benchmarks/efit_forward_parity_slice.py:551"
   ],
   "completed_at": "2026-11-15T16:30:56.782Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "The reuse score rested on the duplicated column completion in the benchmark. It moved into the adapter's owner, nova/imas/diiid_current.py, at 3fea105c8, and the re-review at f4bf6f5e4 re-scores it.",
+      "recorded_at": "2026-11-15T17:32:51.387686+00:00"
+    }
+  },
   "dispatched_at": "2026-11-15T16:21:14Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Repaired in this run's repair round at 3fea105c8. The sampling-node conductor target is now completed in nova/imas/diiid_current.py, where the adapter completes the grid and wall targets, so every build_profile consumer gets 24 columns. The re-review at f4bf6f5e4 checks it.",
+      "recorded_at": "2026-11-15T17:32:08.032801+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Repaired at 02180da22: the negative control now drives the production point route through the operator it tests, rather than a copy of the stencil.",
+      "recorded_at": "2026-11-15T17:32:17.559116+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "Addressed in the repair round (02180da22, f4bf6f5e4). The route-selection claim is re-checked by the re-review at f4bf6f5e4.",
+      "recorded_at": "2026-11-15T17:32:34.058784+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "The point/booked switch exists only to drive the declared negative control against the production route. The repair round re-states the route wording (f4bf6f5e4), and the re-review judges whether it stays.",
+      "recorded_at": "2026-11-15T17:32:44.071530+00:00"
+    }
+  },
   "findings": [
     {
       "file": "benchmarks/diiid_forward_gs_match.py",

@@ -57,6 +57,13 @@
     "The 0.08 m and 0.032 m measurements predate the head revision; git log over nova/biot/magnetisation.py shows the production module unchanged from 2c87ab9f to 5b63d8e7, which is what makes those rows applicable.",
     "I re-ran tests/test_magnetisation.py::test_explicit_unit_fill_preserves_solid_solution at the reviewed head as a doubt check: 2 passed in 56.52s."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The 1e-12 baseline capture is a multi-megabyte receipt and nova keeps such receipts out of git; the unit-fill test in tests/test_magnetisation.py guards the default path in the repository and the full capture comparison (68 captures, zero mismatches) is recorded in the landed evidence.",
+      "recorded_at": "2026-11-15T16:46:07.296539+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/iron_limb_production/compatibility.py",

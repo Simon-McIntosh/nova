@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="365">
+<meta name="plan-version" content="366">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -1085,7 +1085,10 @@
     <div class="r-comment-body"><p>Review of geometry-reuse at aabf917c90688e38acfbabcbf78970f77b8e8536: scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 18, fit 18, reuse 5; one blocking finding (topology.py:3096 re-implements the tiled selective fragment rebuild owned by topology.py:3635 _refresh_fragments, landed on main after this node's base) and three non-blocking; added_failure_count 0.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261114T223650667156-review-of-bank-width-probe-f2cdfd4afaf8" data-who="reckon-build" data-when="2026-11-15T02:58:22.864Z">
-    <div class="r-comment-body"><p>review-of-bank-width-probe-f2cdfd4afaf8 — reviewed 69aacfb324c5abda0afce26133f3287894be09b8..f2cdfd4afaf868f685a51e3b2dd4ba2746725a1a and stored a parsed record scoring goal_fidelity 19, evidence 19, scope_discipline 20, durability 18, fit 18, reuse 19; the earlier round&#x27;s folded durability (8) and reuse (5) findings are answered by 5fd82b435 with two inverse launcher failures and by 1159a5787 with four inverse delegation failures; two non-blocking findings recorded against the echoed boundary fields.</p></div>
+    <div class="r-comment-body"><p>review-of-bank-width-probe-f2cdfd4afaf8 — reviewed 69aacfb324c5abda0afce26133f3287894be09b8..f2cdfd4afaf868f685a51e3b2dd4ba2746725a1a and stored a parsed record scoring goal_fidelity 19, evidence 19, scope_discipline 20, durability 18, fit 18, reuse 19; the earlier round's folded durability (8) and reuse (5) findings are answered by 5fd82b435 with two inverse launcher failures and by 1159a5787 with four inverse delegation failures; two non-blocking findings recorded against the echoed boundary fields.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261114T144332616609-bank-width-probe" data-who="reckon-build" data-when="2026-11-14T22:32:01Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html#bank-width-probe-result — default H200 boundary 78 executing / 79 runtime-refused; width 78 is 5.783965620092856 ms/slice (172.8917607196887 slices/s), 79.503559598 GB compiled, repeat spread 0.0455545%; width 64 is 5.867182029760443 ms/slice, spread 0.122364%; separate cuda_malloc_async width 96 executes at 5.731683049816638 ms/slice (one process). Width 256 is refused at 191.107698404 GB; all numerical budgets pass; SVG inspected and committed; no default change or resolved speedup claimed. Review repairs add 28 automatically run contract checks, shared archive/executor ownership, 2 durability and 4 reuse inverse-commit failures, and matching three-arm CPU smoke checks at original base and repaired head.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048" data-who="reckon-build" data-when="2026-11-14T10:26:14.839Z">
     <div class="r-comment-body"><p>two review records under review-records/ of run r-20261113T165201745905-bank-traced-inputs, one plain and one pinned at the reviewed head; this node's suite fence is unarmed so no pytest gate exists for it and none ran.</p></div>

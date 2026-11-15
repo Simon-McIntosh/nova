@@ -43,9 +43,28 @@
       "note": "\u00a79 now states that the correction reached the operator at the build seam, as the record says, and that complete_profile_current_adapter replaced it downstream before the solve, the step the propagation trace located.",
       "reason": "",
       "when": "2026-11-15T18:01:45.456558+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "71c6c80f15a9f9dfe43adb6a036543ec153c7509",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The equality now subtracts the fitted equivalent ampere-turns (equivalent_current_a_turn) from the measured current, with the F1A 137D arithmetic shown.",
+      "reason": "",
+      "when": "2026-11-15T18:02:11.726267+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "71c6c80f15a9f9dfe43adb6a036543ec153c7509",
+      "commit_basis": "edit",
+      "note": "The equality now subtracts the fitted equivalent ampere-turns (equivalent_current_a_turn) from the measured current, with the F1A 137D arithmetic shown.",
+      "reason": "",
+      "when": "2026-11-15T18:02:11.726267+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",

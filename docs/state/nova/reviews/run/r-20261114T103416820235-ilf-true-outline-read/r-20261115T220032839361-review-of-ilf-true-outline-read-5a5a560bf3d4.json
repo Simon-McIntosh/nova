@@ -41,6 +41,11 @@
       "node": "ilf-west-true-outline-evidence",
       "recorded_at": "2026-11-15T22:42:21.866908+00:00"
     },
+    "4": {
+      "kind": "exempted",
+      "reason": "A count typo in the fragment prose (16 for 17 passed); the log and the verification bullet carry the correct 1 failed, 17 passed, and the cumulative landing record states the count from the log.",
+      "recorded_at": "2026-11-15T22:42:55.195581+00:00"
+    },
     "5": {
       "kind": "folded",
       "node": "ilf-west-true-outline-evidence",

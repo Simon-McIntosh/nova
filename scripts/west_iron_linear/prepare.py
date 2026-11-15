@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -36,7 +37,7 @@ def solve(region, interaction):
         loop,
         [0, 10],
         [1000, 1000],
-        cell_size=0.08,
+        cell_size=0.04,
         basis="linear",
         interaction=interaction,
         tolerance=1e-10,
@@ -70,12 +71,12 @@ def main():
         completed=False,
         device=jax.devices()[0].device_kind,
         x64=True,
-        cell_size_m=0.08,
+        cell_size_m=0.04,
     )
     if args.reload:
         started = time.monotonic()
         loaded = iron.load_magnetisation_interaction(
-            path, region=region, cell_size=0.08, basis="linear"
+            path, region=region, cell_size=0.04, basis="linear"
         )
         row["load_seconds"] = time.monotonic() - started
         row["solution"] = solve(region, loaded)
@@ -102,15 +103,28 @@ def main():
             reference["sha256"],
             flush=True,
         )
-    cells = iron._mesh(region, 0.08)
+    cells = iron._mesh(region, 0.04)
     row["cells"] = len(cells.polygons)
     row["unknowns"] = 6 * row["cells"]
     write(args.output / "shell-preparation.json", row)
     started = time.monotonic()
-    matrix = iron._galerkin_interaction(cells, basis="linear")
-    row["assembly_seconds"] = time.monotonic() - started
+    reference_path = Path(
+        "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/"
+        "linear-magnetisation/assembly-cost/paired/assembly-0.04.json"
+    )
+    reference = json.loads(reference_path.read_text())
+    matrix_path = Path(reference["operator_path"])
+    with matrix_path.open("rb") as stream:
+        digest = hashlib.file_digest(stream, "sha256").hexdigest()
+    assert digest == reference["operator_sha256"], "shell operator artifact drifted"
+    assert reference["cells"] == row["cells"] and reference["cell_size_m"] == 0.04
+    matrix = np.load(matrix_path, allow_pickle=False)
+    row["source_operator_receipt"] = str(reference_path)
+    row["source_operator_sha256"] = digest
+    row["source_operator_device"] = reference["devices"]
+    row["source_operator_load_seconds"] = time.monotonic() - started
     stored = iron.save_magnetisation_interaction(
-        path, matrix, region=region, cell_size=0.08, basis="linear"
+        path, matrix, region=region, cell_size=0.04, basis="linear"
     )
     row["geometry_digest"] = stored.geometry_digest
     row["operator_bytes"] = matrix.nbytes
@@ -138,7 +152,7 @@ def main():
     assert row["fresh_process_bit_identical"]
     try:
         iron.load_magnetisation_interaction(
-            path, region=region, cell_size=0.16, basis="linear"
+            path, region=region, cell_size=0.08, basis="linear"
         )
     except ValueError as error:
         assert "geometry digest" in str(error)

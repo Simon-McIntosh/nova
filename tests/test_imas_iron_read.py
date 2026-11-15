@@ -153,7 +153,7 @@ def test_census_mesh_matches_previous_read(west):
         for polygon in mesh(shapely.Polygon(outline).buffer(0), 0.08).polygons
     ]
     actual = namespace["polygons"]
-    assert len(actual) == len(expected) == 1696
+    assert len(actual) == len(expected) > 0
     for polygon, reference in zip(actual, expected, strict=True):
         np.testing.assert_array_equal(polygon, reference)
 

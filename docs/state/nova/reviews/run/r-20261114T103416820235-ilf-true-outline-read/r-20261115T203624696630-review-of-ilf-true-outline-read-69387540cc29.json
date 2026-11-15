@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-15T20:43:37.407Z",
+  "dispatched_at": "2026-11-15T20:43:20Z",
+  "findings": [
+    {
+      "file": "tests/test_imas_iron_read.py",
+      "line": "398",
+      "severity": "blocking",
+      "text": "blocking: the assertion `\"read_iron_core\" in names or \"read_west_iron_outline\" in names` is satisfied by the code path that already existed at base 0c74ef1 \u2014 all twelve WEST_READERS contain `read_iron_core` and none contains a FLAT_OUTLINE_NAMES token at that revision \u2014 so it cannot fail on a regression of this read and no production file calls `read_west_iron_outline` at 69387540c; the done_when clause that the script readers call this read is therefore both unmet and unmeasured, and the repair (point one scoped reader at the new read, require that name in the test) lies inside the node's own write paths."
+    },
+    {
+      "file": "nova/imas/machine.py",
+      "line": "548",
+      "severity": "non-blocking",
+      "text": "non-blocking: `IronFillRegion.covered` re-implements the point-in-polygon mask the repository owns at nova/equilibrium/wall_mask.py:70 (`inside_polygon`, public in `__all__`, numpy, no shapely) and nova/imas/machine.py already imports from that module at line 21; it duplicates rather than wraps the owner, so a cell counted inside here and inside a vessel mask can drift apart with no test to notice."
+    },
+    {
+      "file": "scripts/prototypes/iron_limb_fill/axisymmetric.py",
+      "line": "291",
+      "severity": "non-blocking",
+      "text": "non-blocking: a second flat-outline construction (`west_regions`, `flat_fill`, `WEST_JOIN` at lines 291-335) remains in the tree with its consumer scripts/iron_limb_production/measure.py:252, so the done_when's \"no second construction of the flat outline in the tree\" is unmet; both paths lie outside this node's write paths and the node correctly recorded them under outside_scope rather than editing them."
+    },
+    {
+      "file": "nova/imas/machine.py",
+      "line": "648",
+      "severity": "non-blocking",
+      "text": "non-blocking: `IronCoreOutline.cross_field` \u2014 with `IronCoreOutline.fill` at line 640 and `IronFillRegion.covered` \u2014 is public surface added without any assertion (tests exercise only `cross_field_factor`), and the per-cell demagnetising factor is not a fill fraction, so it is both untested and beyond the goal."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T103416820235-ilf-true-outline-read/manifest.md",
+      "line": "12",
+      "severity": "non-blocking",
+      "text": "non-blocking: the `tests:` line names tests/test_%imas_iron_read.py, a path that does not exist, so promotion's gate receipt cannot be re-run, and the record carries no test_logs, baseline_suite, after_suite or negative_control_log field although logs/base-pytest.log, logs/after-pytest.log and logs/negative-control.log hold those runs."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read both commits against base 0c74ef10074fcbb3dd6b66b864457333d3c67c3a; 61e8e63a7 adds 510 lines to nova/imas/machine.py and 108 to tests/test_imas_iron_read.py, 69387540c adds the 114-line landing fragment, and no hunk edits anything the goal does not imply apart from the demagnetising API at nova/imas/machine.py:648.",
+    "done_when": "the done_when asks for a section-per-radian reproduction to 1e-3, the stored 2 mm gap under one named input, a named refusal at 1 % thickness-times-radius, and that the script readers call this read with no second flat-outline construction in the tree; the receipt /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/machine/west-true-outline.json (sha256 b67c7b5c\u2026) reads maximum_relative_section_error 3.259485021024042e-05 and limb_arm_gap_m 0.0021 with gap_input \"stored\", the refusal is falsified by logs/negative-control.log, but the reader-adoption clause is asserted only by tests/test_imas_iron_read.py:398, which is green at the base revision and no script calls `read_west_iron_outline` at 69387540c.",
+    "goal": "the goal is \"Read the WEST iron on its true flat outline with a fill fraction per region from one machine-description read\"; nova/imas/machine.py:879 `StaticMachineDescription.read_west_iron_outline` delegates to `read_iron_core` once and nova/imas/machine.py:957 `iron_core_outline` returns six `IronFillRegion`s on flat boxes with a fill profile per arm and limb, so the deliverable exists and is correct on the artefacts, but nothing outside the test file calls it.",
+    "manifest": "read the reviewed run's manifest.md; line 11 records the landing and the 3.26e-05 measure, line 7 the two commits 61e8e63a7 and 69387540c, line 9 one retry failure whose line 10 attribution is scaffolding, but line 12's `tests:` field carries the corrupted path tests/test_%imas_iron_read.py and no test_logs, baseline_suite, after_suite or negative_control_log line is present although logs/ holds all four logs.",
+    "write_paths": "the declared paths are nova/imas/machine.py, tests/test_imas_iron_read.py, the scripts/west_* and scripts/magnetisation_law readers, and docs/evidence/fragments/iron-limb-fill-fraction/ilf-true-outline-read.html; `git diff --stat 0c74ef1 69387540c` reports exactly those three files, so no path in the diff is outside the fence."
+  },
+  "justifications": {
+    "durability": "the refusal guard is falsified by logs/negative-control.log (1 failed, 16 passed, exit 1 on test_stored_arm_thickness_scaled_at_one_radius_is_refused_by_name), but tests/test_imas_iron_read.py:398 holds at the base revision and nova/imas/machine.py:640-660 (`fill`, `cross_field`) carries no assertion.",
+    "evidence": "logs/base-pytest.log (12 passed) and logs/after-pytest.log (17 passed) plus logs/negative-control.log (1 failed, 16 passed) and the receipt whose sha256 matches the fragment are on disk, but the manifest records none of them in its structured fields and tests/test_imas_iron_read.py:398 measures nothing this change introduced.",
+    "fit": "`ruff check` on the two added files at 69387540c reports \"All checks passed\", frozen dataclasses and docstrings follow nova/imas/machine.py:440-460, and the only idiom deviation is the function-local `import shapely` at nova/imas/machine.py:548 against nova/imas/profiles.py:14's module-level import.",
+    "goal_fidelity": "nova/imas/machine.py:879 reads the stored iron once and nova/imas/machine.py:957 returns the flat regions with per-region fill knots, matching the goal, though no production caller reaches either.",
+    "reuse": "no owner exists for the flat-outline read or the eager first moment (`nova/equilibrium/clip_quadrature.py:366` is a private JAX kernel, not reachable from a numpy machine `read_iron_core`), but `IronFillRegion.covered` duplicates nova/equilibrium/wall_mask.py:70 `inside_polygon` without extending it.",
+    "scope_discipline": "every path in `git diff --stat 0c74ef1 69387540c` is inside the manifest's orientation_write_paths, with unrequested extra surface only at nova/imas/machine.py:648."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is \"Read the WEST iron on its true flat outline with a fill fraction per region from one machine-description read\"; nova/imas/machine.py:879 `StaticMachineDescription.read_west_iron_outline` delegates to `read_iron_core` once and nova/imas/machine.py:957 `iron_core_outline` returns six `IronFillRegion`s on flat boxes with a fill profile per arm and limb, so the deliverable exists and is correct on the artefacts, but nothing outside the test file calls it.\nVERDICT done_when: the done_when asks for a section-per-radian reproduction to 1e-3, the stored 2 mm gap under one named input, a named refusal at 1 % thickness-times-radius, and that the script readers call this read with no second flat-outline construction in the tree; the receipt /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/machine/west-true-outline.json (sha256 b67c7b5c\u2026) reads maximum_relative_section_error 3.259485021024042e-05 and limb_arm_gap_m 0.0021 with gap_input \"stored\", the refusal is falsified by logs/negative-control.log, but the reader-adoption clause is asserted only by tests/test_imas_iron_read.py:398, which is green at the base revision and no script calls `read_west_iron_outline` at 69387540c.\nVERDICT write_paths: the declared paths are nova/imas/machine.py, tests/test_imas_iron_read.py, the scripts/west_* and scripts/magnetisation_law readers, and docs/evidence/fragments/iron-limb-fill-fraction/ilf-true-outline-read.html; `git diff --stat 0c74ef1 69387540c` reports exactly those three files, so no path in the diff is outside the fence.\nVERDICT manifest: read the reviewed run's manifest.md; line 11 records the landing and the 3.26e-05 measure, line 7 the two commits 61e8e63a7 and 69387540c, line 9 one retry failure whose line 10 attribution is scaffolding, but line 12's `tests:` field carries the corrupted path tests/test_%imas_iron_read.py and no test_logs, baseline_suite, after_suite or negative_control_log line is present although logs/ holds all four logs.\nVERDICT diff: read both commits against base 0c74ef10074fcbb3dd6b66b864457333d3c67c3a; 61e8e63a7 adds 510 lines to nova/imas/machine.py and 108 to tests/test_imas_iron_read.py, 69387540c adds the 114-line landing fragment, and no hunk edits anything the goal does not imply apart from the demagnetising API at nova/imas/machine.py:648.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/imas/machine.py:879 reads the stored iron once and nova/imas/machine.py:957 returns the flat regions with per-region fill knots, matching the goal, though no production caller reaches either.\nSCORE evidence: 12\nJUSTIFICATION evidence: logs/base-pytest.log (12 passed) and logs/after-pytest.log (17 passed) plus logs/negative-control.log (1 failed, 16 passed) and the receipt whose sha256 matches the fragment are on disk, but the manifest records none of them in its structured fields and tests/test_imas_iron_read.py:398 measures nothing this change introduced.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: every path in `git diff --stat 0c74ef1 69387540c` is inside the manifest's orientation_write_paths, with unrequested extra surface only at nova/imas/machine.py:648.\nSCORE durability: 11\nJUSTIFICATION durability: the refusal guard is falsified by logs/negative-control.log (1 failed, 16 passed, exit 1 on test_stored_arm_thickness_scaled_at_one_radius_is_refused_by_name), but tests/test_imas_iron_read.py:398 holds at the base revision and nova/imas/machine.py:640-660 (`fill`, `cross_field`) carries no assertion.\nSCORE fit: 18\nJUSTIFICATION fit: `ruff check` on the two added files at 69387540c reports \"All checks passed\", frozen dataclasses and docstrings follow nova/imas/machine.py:440-460, and the only idiom deviation is the function-local `import shapely` at nova/imas/machine.py:548 against nova/imas/profiles.py:14's module-level import.\nSCORE reuse: 5\nJUSTIFICATION reuse: no owner exists for the flat-outline read or the eager first moment (`nova/equilibrium/clip_quadrature.py:366` is a private JAX kernel, not reachable from a numpy machine `read_iron_core`), but `IronFillRegion.covered` duplicates nova/equilibrium/wall_mask.py:70 `inside_polygon` without extending it.\nFINDING tests/test_imas_iron_read.py:398 blocking: the assertion `\"read_iron_core\" in names or \"read_west_iron_outline\" in names` is satisfied by the code path that already existed at base 0c74ef1 \u2014 all twelve WEST_READERS contain `read_iron_core` and none contains a FLAT_OUTLINE_NAMES token at that revision \u2014 so it cannot fail on a regression of this read and no production file calls `read_west_iron_outline` at 69387540c; the done_when clause that the script readers call this read is therefore both unmet and unmeasured, and the repair (point one scoped reader at the new read, require that name in the test) lies inside the node's own write paths.\nFINDING nova/imas/machine.py:548 non-blocking: `IronFillRegion.covered` re-implements the point-in-polygon mask the repository owns at nova/equilibrium/wall_mask.py:70 (`inside_polygon`, public in `__all__`, numpy, no shapely) and nova/imas/machine.py already imports from that module at line 21; it duplicates rather than wraps the owner, so a cell counted inside here and inside a vessel mask can drift apart with no test to notice.\nFINDING scripts/prototypes/iron_limb_fill/axisymmetric.py:291 non-blocking: a second flat-outline construction (`west_regions`, `flat_fill`, `WEST_JOIN` at lines 291-335) remains in the tree with its consumer scripts/iron_limb_production/measure.py:252, so the done_when's \"no second construction of the flat outline in the tree\" is unmet; both paths lie outside this node's write paths and the node correctly recorded them under outside_scope rather than editing them.\nFINDING nova/imas/machine.py:648 non-blocking: `IronCoreOutline.cross_field` \u2014 with `IronCoreOutline.fill` at line 640 and `IronFillRegion.covered` \u2014 is public surface added without any assertion (tests exercise only `cross_field_factor`), and the per-cell demagnetising factor is not a fill fraction, so it is both untested and beyond the goal.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T103416820235-ilf-true-outline-read/manifest.md:12 non-blocking: the `tests:` line names tests/test_%imas_iron_read.py, a path that does not exist, so promotion's gate receipt cannot be re-run, and the record carries no test_logs, baseline_suite, after_suite or negative_control_log field although logs/base-pytest.log, logs/after-pytest.log and logs/negative-control.log hold those runs.",
+  "review_run_id": "r-20261115T203624696630-review-of-ilf-true-outline-read-69387540cc29",
+  "reviewed_base_sha": "0c74ef10074fcbb3dd6b66b864457333d3c67c3a",
+  "reviewed_head_sha": "69387540cc2910bfb0b490f9b21574fe037f8c1b",
+  "reviewed_run_id": "r-20261114T103416820235-ilf-true-outline-read",
+  "scores": {
+    "durability": 11,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T20:58:03.974182+00:00",
+  "total": 80
+}

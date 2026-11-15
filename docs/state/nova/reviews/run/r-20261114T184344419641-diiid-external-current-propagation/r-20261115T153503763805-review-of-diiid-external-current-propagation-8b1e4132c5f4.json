@@ -13,6 +13,11 @@
       "kind": "exempted",
       "reason": "This run is a read-only diagnosis, with product and test edits outside its scope. The guard is the proposed refusal in complete_profile_current_adapter, which goes to the lead as a decision and is built with its own test as a separate node.",
       "recorded_at": "2026-11-15T15:56:38.758983+00:00"
+    },
+    "reuse": {
+      "kind": "exempted",
+      "reason": "The score rests on render.py re-sampling flux where a sibling prototype has a sampler. That duplication is prototype-local and is exempted under finding 0; no product module is forked.",
+      "recorded_at": "2026-11-15T15:56:45.695591+00:00"
     }
   },
   "dispatched_at": "2026-11-15T15:36:08Z",

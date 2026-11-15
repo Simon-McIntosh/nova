@@ -1353,7 +1353,7 @@ def book_and_local_sensitivities(
 ):
     """Reduce primal moments and unnormalized assembly channels in one pass."""
     raw_rule = replace(quadrature, target_current=None)
-    raw, local = _local_booking_sensitivities(
+    unscaled, local = _local_booking_sensitivities(
         operands,
         moments,
         support,
@@ -1364,7 +1364,11 @@ def book_and_local_sensitivities(
         fuse_booking=True,
     )
     booked = current._normalize_booking(
-        raw[:3],
+        current.ClippedCurrentMoments(
+            cell_current=unscaled.cell_current,
+            radial_moment=unscaled.radial_moment,
+            vertical_moment=unscaled.vertical_moment,
+        ),
         support.reading,
         support.reading.boundary_flux - support.reading.axis_flux,
         quadrature,

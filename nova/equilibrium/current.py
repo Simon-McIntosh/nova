@@ -567,7 +567,7 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
 
 def _normalize_booking(moments, read, span, quadrature):
     """Apply the global current constraint after the cell-local reduction."""
-    raw = jnp.sum(moments[0])
+    raw = jnp.sum(moments.cell_current)
     valid = read.valid & read.qualified & (span != 0) & jnp.isfinite(raw)
     if quadrature.target_current is None:
         normalization = jnp.ones_like(raw)
@@ -575,10 +575,14 @@ def _normalize_booking(moments, read, span, quadrature):
         valid &= (raw != 0) & jnp.isfinite(quadrature.target_current)
         normalization = quadrature.target_current / jnp.where(raw != 0, raw, 1.0)
     return Booking(
-        *(jnp.where(valid, value * normalization, jnp.nan) for value in moments),
-        raw,
-        normalization,
-        valid,
+        cell_current=jnp.where(valid, moments.cell_current * normalization, jnp.nan),
+        radial_moment=jnp.where(valid, moments.radial_moment * normalization, jnp.nan),
+        vertical_moment=jnp.where(
+            valid, moments.vertical_moment * normalization, jnp.nan
+        ),
+        raw_current=raw,
+        normalization=normalization,
+        valid=valid,
     )
 
 

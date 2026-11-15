@@ -1,19 +1,36 @@
 #!/usr/bin/env bash
-# Run the focused equilibrium gate at the base revision and at the two heads.
+# Run one arm of the focused equilibrium gate.
+#
+# Usage: gate.sh <tree> <base-sha> <output-dir> <base|head>
+#
+# The arms run as separate jobs because together they outlast a one-hour debug
+# partition. The base arm resolves the target list over the base tree, so a
+# test file that exists only at the head is not named there.
 set -uo pipefail
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cpu
+# The compilation cache is off: two arms sharing one cache directory write the
+# same entries, and a cancelled arm leaves a half-written entry behind.
+export JAX_ENABLE_COMPILATION_CACHE=0
+export JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none
+unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
 TREE=${1:?worktree}
 BASE_SHA=${2:?base revision}
 OUT=${3:?output directory}
+ARM=${4:?arm}
 PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
 mkdir -p "$OUT"
 WORK=$(mktemp -d /tmp/base-XXXXXX)
-BASE="$WORK/base"
-mkdir -p "$BASE"
-git -C "$TREE" archive "$BASE_SHA" | tar -x -C "$BASE"
-printf '# revision: head %s; base %s; tree %s; command: gate.sh\n' \
-    "$(git -C "$TREE" rev-parse HEAD)" "$BASE_SHA" "$TREE"
+trap 'rm -rf "$WORK"' EXIT
+if [ "$ARM" = base ]; then
+    ROOT="$WORK/base"
+    mkdir -p "$ROOT"
+    git -C "$TREE" archive "$BASE_SHA" | tar -x -C "$ROOT"
+else
+    ROOT="$WORK/head"
+    mkdir -p "$ROOT"
+    git -C "$TREE" archive "$(git -C "$TREE" rev-parse HEAD)" | tar -x -C "$ROOT"
+fi
 TARGETS=(
     tests/test_current_book_fragments.py
     tests/test_current_book_vectorised.py
@@ -21,26 +38,20 @@ TARGETS=(
     tests/test_equilibrium_forward_solve.py
     tests/test_equilibrium_forward.py
 )
-printf '== baseline arm at %s\n' "$BASE_SHA"
-cd "$BASE" || exit 2
-PYTHONPATH="$BASE" "$PYTHON" -m pytest -p no:cacheprovider -q \
-    "${TARGETS[@]}" > "$OUT/baseline.log" 2>&1
-BASELINE_STATUS=$?
-printf 'baseline_exit=%s\n' "$BASELINE_STATUS"
-printf '== after arm at %s\n' "$TREE"
-cd "$TREE" || exit 2
-PYTHONPATH="$TREE" "$PYTHON" -m pytest -p no:cacheprovider -q -s \
-    tests/equilibrium/test_finite_edge_booking.py "${TARGETS[@]}" \
-    > "$OUT/after.log" 2>&1
-AFTER_STATUS=$?
-printf 'after_exit=%s\n' "$AFTER_STATUS"
-grep -E '^(FAILED|ERROR)' "$OUT/baseline.log" > "$OUT/baseline-failures.txt"
-grep -E '^(FAILED|ERROR)' "$OUT/after.log" > "$OUT/after-failures.txt"
-tail -2 "$OUT/baseline.log"
-tail -2 "$OUT/after.log"
-rm -rf "$WORK"
-if [ "$AFTER_STATUS" -ne 0 ]; then
-    printf 'EXIT=%s\n' "$AFTER_STATUS"
-else
-    printf 'EXIT=0\n'
+if [ "$ARM" = head ]; then
+    TARGETS+=(tests/equilibrium/test_finite_edge_booking.py)
 fi
+printf '# arm: %s; revision: %s; tree: %s; command: gate.sh %s %s %s %s\n' \
+    "$ARM" "$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || echo "$BASE_SHA")" \
+    "$TREE" "$TREE" "$BASE_SHA" "$OUT" "$ARM"
+printf 'TARGETS %s\n' "${TARGETS[*]}"
+cd "$ROOT" || exit 2
+PYTHONPATH="$ROOT" "$PYTHON" -m pytest -p no:cacheprovider -v -rA -s \
+    "${TARGETS[@]}" > "$OUT/$ARM.log" 2>&1
+STATUS=$?
+grep -E '^(FAILED|ERROR)' "$OUT/$ARM.log" > "$OUT/$ARM-failures.txt"
+grep -E '^(ROUTE|CONTROL|TANGENT)' "$OUT/$ARM.log" > "$OUT/$ARM-printed.txt"
+printf 'arm_exit=%s failures=%s printed=%s\n' "$STATUS" \
+    "$(wc -l < "$OUT/$ARM-failures.txt")" "$(wc -l < "$OUT/$ARM-printed.txt")"
+tail -3 "$OUT/$ARM.log"
+printf 'EXIT=%s\n' "$STATUS"

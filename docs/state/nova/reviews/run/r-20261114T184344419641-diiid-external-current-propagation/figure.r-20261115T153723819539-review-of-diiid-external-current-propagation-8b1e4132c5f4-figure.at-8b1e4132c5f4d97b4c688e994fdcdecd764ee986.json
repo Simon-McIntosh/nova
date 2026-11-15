@@ -21,6 +21,11 @@
       "kind": "exempted",
       "reason": "The two marks sit 4 px apart because the solved lower X-point lies 2.8 cm from the EFIT null; the overlap is the measurement, and the footer states the distance.",
       "recorded_at": "2026-11-15T15:55:51.594867+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The shared levels and the pseudo-wall are deliberately background. The subject marks (separatrices, nulls, vessel, EFIT boundary) clear 3:1, and the comparison is carried by those.",
+      "recorded_at": "2026-11-15T15:55:59.687118+00:00"
     }
   },
   "findings": [

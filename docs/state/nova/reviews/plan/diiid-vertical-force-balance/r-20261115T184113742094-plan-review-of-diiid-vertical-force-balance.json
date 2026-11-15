@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T18:47:32.298Z",
+  "dispatched_at": "2026-11-15T18:44:46Z",
+  "findings": [],
+  "plan_commit": "90b08f3ca844ced3a68a5438a918e279256419b5",
+  "plan_fingerprint": "b94dd8ddfe575bf359e729324e612751754c7816a98f3f5ceb550363b0124fdd",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 86,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261115T184113742094-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "51a04ee9d49f1e6b9df2501afd4ca709e3032c8f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited fragment, prototype directory, `fit.py`, `correction-<frame>.json`, `conductor-fit-<frame>.json`, `equivalent_error_a_turn`, `magnetics_*` and `complete_profile_current_adapter` all resolve; \u00a79's mentions are `<code>` paths, and the only retired artifact (`current-inputs.json`) is named as retired in the same sentence rather than offered as an openable pointer.",
+    "done_when": "pass \u2014 \u00a79's done-when states an entry-by-entry equality against a named committed receipt, which `fit.py` and `conductor_correction.applied_currents` verify, and declares two controls: a fitted arm equal to its measured arm over the shipped conductors reddens when the correction fails to reach the solve, and installing the same vector at the build seam must trigger \u00a78's refusal.",
+    "evidence_paths": "pass \u2014 the fitted vector is committed as a receipt beside `docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html`, a tracked repository path, and the deliverable fragment sits in the same durable directory.",
+    "naming": "pass \u2014 the changed clause names receipt files and one JSON field, all runtime artifacts of the committed fit; no plan label, stage name, ticket number or changelog prose enters a symbol or comment.",
+    "reasoning": "pass \u2014 the stated root cause matches the cited propagation record (the adapter's fresh corpus read replaces the build-seam vector), the endpoint is obtainable (rewriting the corpus columns makes the build seam and the adapter agree, so \u00a78's comparison passes), and the changed clause fixes a record question rather than prescribing a mechanism. Naming `fit.py` fixes the provenance of the receipt being re-derived, not a code path for the deliverable.",
+    "single_goal": "pass \u2014 \u00a79 delivers one endpoint, the four cohort rows re-solved with the fitted vector actually reaching the solve and reported beside their measured arms.",
+    "wiring": "pass \u2014 \u00a79's `depends-on` names s7 and s8, both present and both `implementable`; s6 is reached transitively through them, and no declared relationship points at a missing or wrong node."
+  },
+  "section_digests": {
+    "_document": "3f7773e8dc84f9f7857984a8a118b5f84a217ae4f4641f6df572ddc2b6ba7656",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "8c29d80c4569a34f471efe37576ac7bf2f7e98ccd4b5f8ae369936abb0dd64b7",
+    "s8": "8632587216eaa0edebdbe9d2f34107c6a23a5c5d466a12ce012fb753a7b1c661",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T19:07:09.503162+00:00",
+  "total": null
+}

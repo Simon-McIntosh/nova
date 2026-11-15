@@ -1,0 +1,129 @@
+{
+  "absent_items": [],
+  "accepted_edits": [
+    {
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "digests": {
+        "_document": "dd9e3ef7d0f1e25e4bdc4299f39f799cf01f26a919c0f2e731cfac073c479f7e"
+      },
+      "reason": "edits answer the two reasoning findings of the content review and change no bound",
+      "units": [
+        "_document"
+      ],
+      "when": "2026-11-15T01:46:22.925466+00:00"
+    }
+  ],
+  "completed_at": "2026-11-15T01:41:16.013Z",
+  "dispatched_at": "2026-11-15T01:14:29Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iron-limb-fill-fraction.html:262",
+      "id": "reasoning-1",
+      "reason": "the author would name which reference each set is measured against (the prototype's unfinished reference or the converged \u00a71 reference) and cite the receipt, since a gate tolerance of 11 % derived from an unreconciled pair of readings is a tolerance that will be re-litigated at the node.",
+      "text": "the decision \"Where does the cross-field factor N come from?\" is locked to `section-geometry` with the rationale \"Locked from the control-circuit table: N = 0.4 \u2026 reads 5.2 % and 10.7 % in-vessel error at relative permeability 50 and 200 on the 0.032 m mesh, against 5.0 % and 6.6 % for N = 0.76 fitted \u2026 and 41 % for the plain fill fraction\", but the control-circuit table in \u00a70 reads 0.032 and 0.051 for the cross-field rule (3.2 % and 5.1 %, not 5.2 % and 10.7 %) and 0.339 and 0.311 for the plain fill fraction (34 % and 31 %, not 41 %), so every number the lock rests on is roughly a factor of two away from the plan's own table and no reference or receipt distinguishes the two sets; \u00a70's prose makes the same point at the old scale (\"The plain fill fraction's 0.31 to 0.34 in-vessel reading lies outside the 0.10 bound\"), and \u00a72's new 11 % bound is derived from the rationale's set, so the plan now carries a tolerance taken from figures a reader cannot reconcile with the table cited as their source",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iron-limb-fill-fraction.html:205",
+      "id": "reasoning-2",
+      "reason": "the clause should be restated as reproducing the values the lock rests on and reporting the disagreement, rather than naming a future locking act, or the decision should be reopened until \u00a72's table exists.",
+      "text": "\u00a72's changed clause (2) requires the fitted and plain-fill values to be \"reported beside it, the table the cross-field decision below is locked from\", but that decision is no longer below to be locked: it carries `data-choice=\"section-geometry\"` and `data-when=\"2026-11-15T00:13:54+00:00\"` in the same edit that added this clause, so \u00a72's node is dispatched to construct the table a closed decision was already taken from, and if its reproduced numbers disagree with the rationale, nobody can say which governs",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/iron-limb-fill-fraction.html:299",
+      "id": "wiring-1",
+      "reason": "the imas-efit hand-off is tracked by the open `imas-efit-owner` question, so nothing is lost, but the outcome line names the wrong record and would be corrected in one line.",
+      "text": "the resolved followup `f-ilf-002`'s outcome says \"Recorded as the open question imas-efit-hand-off\", but `imas-efit-hand-off` carries `data-status=\"resolved\"` (`data-resolved-at=\"2026-11-13T16:22:37+00:00\"`) and is anchored to `s4`, while the live record is the separate open question `imas-efit-owner` on `s0`, so a reader following the plan's own pointer lands on a closed question",
+      "type": "wiring",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "113a29b789a62f0cc8a8e957e969a83a76c66e20",
+  "plan_fingerprint": "47afe839e4fc1031f2d38d2e546438dc2e2b13b6b0ae8b1df05ee49f38f0b1ed",
+  "plan_slug": "iron-limb-fill-fraction",
+  "plan_version": 13,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "113a29b789a62f0cc8a8e957e969a83a76c66e20",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "the rationale now names the production receipt against the six-limb reference and says it supersedes the prototype table",
+      "reason": "",
+      "when": "2026-11-15T01:45:49.448011+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "113a29b789a62f0cc8a8e957e969a83a76c66e20",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "the clause now says the decision was locked from the table and the landed record reproduces it",
+      "reason": "",
+      "when": "2026-11-15T01:45:58.666796+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "finding": "wiring-1",
+      "reason": "a resolved followup outcome is not an editable field; the open question imas-efit-owner carries the hand-off and nothing is lost",
+      "when": "2026-11-15T01:46:17.706919+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "113a29b789a62f0cc8a8e957e969a83a76c66e20",
+      "commit_basis": "edit",
+      "note": "the rationale now names the production receipt against the six-limb reference and says it supersedes the prototype table",
+      "reason": "",
+      "when": "2026-11-15T01:45:49.448011+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "commit": "113a29b789a62f0cc8a8e957e969a83a76c66e20",
+      "commit_basis": "edit",
+      "note": "the clause now says the decision was locked from the table and the landed record reproduces it",
+      "reason": "",
+      "when": "2026-11-15T01:45:58.666796+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "reason": "a resolved followup outcome is not an editable field; the open question imas-efit-owner carries the hand-off and nothing is lost",
+      "when": "2026-11-15T01:46:17.706919+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-iron-limb-fill-fraction.v13.json",
+  "review_run_id": "r-20261115T011340874241-plan-review-of-iron-limb-fill-fraction",
+  "reviewed_blob_sha": "7a889dbe2ba9d6af8ee8fa26f6cc0be5b773a582",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/archive/iron-limb-fill-fraction-landed.html#reference`, `#ilf-six-limb-reference-checkpoint`, `tests/test_magnetisation.py`, `nova/biot/magnetisation.py`, `scripts/prototypes/iron_limb_fill/` and the three `docs/figures/iron-limb-fill/*.svg` all resolve; the \u00a74 record that does not yet exist is a forward declaration of an unbuilt section, not a stale pointer.",
+    "done_when": "pass \u2014 \u00a72's three clauses each carry a threshold and a stated control (the solid-outline f = 1 reading must exceed 100 %, the unchanged-solution check at 1e-12), and the new 11 % bound at \u03bcr = 200 is met by the finest-mesh reading it cites (10.7 %).",
+    "evidence_paths": "pass \u2014 \u00a72 now names `/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/production/` for its device-stamped values, joining \u00a71's `reference/`, \u00a73's `machine/` and \u00a74's `west-62751/` on durable GPFS, and I confirmed the `production/` directory exists holding `material-20261114` and `material-refinement-20261114`.",
+    "naming": "pass \u2014 the changed units add no plan labels, stage names, ticket numbers or changelog prose, and the new decision rationale speaks in mechanism terms.",
+    "reasoning": "a finding \u2014 the locked cross-field decision is justified by in-vessel errors that contradict the table the decision names as its own source, and \u00a72 still describes producing that table as the act that locks a decision already locked.",
+    "single_goal": "pass \u2014 \u00a72 delivers one thing (the production axisymmetric iron solve carrying a fill fraction and a cross-field factor), judged on the control circuit with the WEST 62751 convergence as its second consequence.",
+    "wiring": "a finding \u2014 the `f-ilf-002` outcome points at a question that is already resolved, while the live hand-off record is a separate open question."
+  },
+  "section_digests": {
+    "_document": "ce484aab9df227cc6ec6acda35aa301ab79ec8b15769ed4b3a2f0501bd2ead3f",
+    "s0": "014c5cf5459093a3fae537a48d048f04e870e43d06586623f64736b1514fc654",
+    "s1": "365236988237f49786cac6fb55635af9bbfaa495123585914354b12a85e203b5",
+    "s2": "51afc385adbd95e29b416bdceb2f9bcc90e3b87c75fd58cbdfd60eb8ded71342",
+    "s3": "91fe32ab6b6975e0b08d6d2d8acd5d5c82da89493a50428fa14f18acc86324a7",
+    "s4": "1891ed7f15b2f37f0901f06dfc51aafb5c24c6a0a110975e20eb644b084cd08c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T01:45:45.803362+00:00",
+  "total": null
+}

@@ -15,6 +15,11 @@
       "kind": "exempted",
       "reason": "the boundary values are read from the probe's own summary and cross-checked for adjacency against the arm receipts; the raw arm logs remain the authority and were read in review",
       "recorded_at": "2026-11-15T03:01:50.899396+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the boundary values are read from the probe's own summary and cross-checked for adjacency against the arm receipts; the raw arm logs remain the authority and were read in review",
+      "recorded_at": "2026-11-15T03:02:01.977511+00:00"
     }
   },
   "findings": [

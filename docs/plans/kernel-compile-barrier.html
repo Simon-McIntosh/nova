@@ -25,7 +25,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="65">
+<meta name="plan-version" content="66">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -191,6 +191,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261114T101845147725-ordered-sharing" data-who="reckon-build" data-when="2026-11-15T11:02:29Z">
     <div class="r-comment-body"><p>CPUregressionrepaired in e6b9ea32a:9CPUHessiancasespassed306.32s at4124.61MiB within192GiB; frozenheight40523eightpassedthencompilerabort139/371.23s, frozenordered14acrosses192GiB beforefirstoutcome/460.27s. FreshH2001316537all430000float64entriesbyte-identicalinclderivatives/signedzeros,maxima0; post267438 equalsrepaircap andimprovesheight305139by37701. Freshbase/headcold350.949245/217.903224s; original201070instructions/131.165945s boundsstillrefuse2IDs,unrelaxed. Newguardbroken1failed/repaired3passed; required73759diagnostics3passed2skipped. Completepairedper-passtable andupdatedinspectedSVGcommitted35fad5250/9d051bc27. [Evidence](/nova/evidence/fragments/kernel-compile-barrier/ordered-sharing.html#ordered-sharing-repaired-h200).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20261115T125458071525" data-who="reckon-build" data-when="">
+    <div class="r-comment-body"><p>Partial result landed on main (head <code>35fad5250</code>, product source <code>e6b9ea32a</code>); this section stays open. On the H200, fresh process and cache disabled, the production row program at 132 went from 402,141 to 267,438 post-splitter instructions and from 350.9 s to 217.9 s cold, with value, gradient and Hessian byte-identical to the base on 430,000 entries (job 1316537). Both bounds, 201,070 instructions and 131.2 s, are still missed and were not relaxed; the two budget tests in <code>tests/biot/test_production_row_compile.py</code> fail on the H200 by design until the bound is met. Clause (3) so far: 0 added failure ids on CPU over 22 files at this head, including <code>tests/test_moment_field_hessian.py</code> (nine passed, 299 s, 4.1 GB; the earlier head crossed 192 GB). The four slow files on the H200 are still being measured (job 1317509). Follow-ups carried from review: no tracked test holds the 267,438 ceiling on the traced path; the value, gradient and Hessian helper duplicates an idiom in <code>topology.py</code>; the CPU Hessian receipt names the pre-repair revision. The variadic split evidence commit <code>dc36cd209</code> is now on main.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261020-coarse-tie-run-phase" data-who="reckon-build" data-when="2026-10-20T07:03:00Z">
     <div class="r-comment-body"><p>From crew run <code>r-20261019T223150157038-coarse-tie-census-memory</code>, landed as evidence at merge <code>19a02ca16</code> (failed, correct refusal): a second provisioning job (sirius 1290676, 450G, 5 h) reproduced the cold compile at 7,013 s and about 378 GB, then held that memory for a further ~11,000 s in the 533-batch node loop without publishing the operand. So the jets build's cost is not only its compile: the batch loop after it also outlasts a five-hour wall at 2,132 nodes. §3's done-when (1) bounds the compile; the node that builds §3 should also report the loop's wall per batch, so a bounded compile is not followed by an unbounded run. The 500-cell coarse-tie census test stays a known failure until §3 lands. <a href="/nova/evidence/fragments/converged-forward-solve/coarse-tie-census-memory.html">evidence</a></p></div>

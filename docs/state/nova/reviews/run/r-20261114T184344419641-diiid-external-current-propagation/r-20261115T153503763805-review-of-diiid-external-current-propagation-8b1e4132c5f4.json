@@ -37,6 +37,11 @@
       "kind": "exempted",
       "reason": "Prototype-local duplication of a bilinear sampler between two diagnosis scripts. Neither script is product code, and consolidating them would touch a script outside this run's scope for no change in any measured value.",
       "recorded_at": "2026-11-15T15:55:30.091345+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Caption wording only: the levels span the pseudo-wall, and the landing appends a one-line correction to the fragment saying so. No number changes.",
+      "recorded_at": "2026-11-15T15:55:37.457109+00:00"
     }
   },
   "findings": [

@@ -39,9 +39,36 @@ linear solutions with reassembly forbidden. A translated mesh has the same cell
 count and matrix shape but a different digest. Removing the two digest checks
 fails both refusal cases with <code>DID NOT RAISE ValueError</code>:
 <code>2 failed, 65 deselected in 3.72s</code>, <code>EXIT=1</code>.
-The all_debug preparation separately assembles a real spherical-shell operator,
-reloads it in a fresh process, and tests refusal at another shell mesh size.
-That preparation is still running; it is not a WEST pay-once result.</p>
+The all_debug control reuses the full 40 mm spherical-shell interaction from
+its existing P100 assembly receipt, verifying operator SHA-256
+<code>1591ad0d2c980ee54e950d14c104d5ce88f3d6f40ed283146dc2847f6d6a2c56</code>
+before attaching the geometry identity. This is a CPU persistence control,
+not a WEST H200 measurement.</p>
+<table>
+<thead><tr><th>shell persistence quantity</th><th>result</th></tr></thead>
+<tbody>
+<tr><td>cells / unknowns</td><td>228 / 1368</td></tr>
+<tr><td>operator bytes</td><td>14 971 392</td></tr>
+<tr><td>verified source-operator read [s]</td><td>0.044767</td></tr>
+<tr><td>fresh-process validated reload [s]</td><td>0.299923</td></tr>
+<tr><td>first / fresh-process material solve [s]</td><td>4.029562 / 3.978289</td></tr>
+<tr><td>Newton corrections, both solves</td><td>1</td></tr>
+<tr><td>relative residual, seed → terminal</td><td>0.9990000000000002 → 1.3304054436616638e-15</td></tr>
+<tr><td>fresh-process assembly calls</td><td>0, with assembly forbidden</td></tr>
+<tr><td>probe field identity</td><td>all float64 bytes identical</td></tr>
+<tr><td>another shell mesh, 80 mm</td><td>refused: interaction geometry digest does not match the mesh</td></tr>
+</tbody>
+</table>
+<p>The total B<sub>Z</sub> at shell probes (2, 0) and (0, 2) m is
+−1.607523272703 pT and 3.212479029987 pT in both processes; the comparison
+covers both components at all three probes, including the third probe (3, 1) m.
+Solve walls include geometry and external-field preparation plus Newton, and
+exclude the separate probe-field evaluation. Receipts
+<code>cpu-preparation/shell-preparation.json</code> and
+<code>cpu-preparation/shell-reload.json</code> under
+<code>linear-magnetisation/west-h200/</code> both record completion at
+<code>1b79e5d8213d2094a47a4a8c78ba11422bb06dde</code>; all_debug job
+<code>1317018</code> completed successfully.</p>
 
 <h4>Validation and remaining measurement</h4>
 <p>The filtered two-tree gate passes at base

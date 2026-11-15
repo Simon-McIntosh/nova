@@ -42,6 +42,11 @@
       "kind": "exempted",
       "reason": "Caption wording only: the levels span the pseudo-wall, and the landing appends a one-line correction to the fragment saying so. No number changes.",
       "recorded_at": "2026-11-15T15:55:37.457109+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The EFIT boundary and null come from the committed corpus the benchmark reads. Regeneration needs that corpus, as every DIII-D cohort figure does, and the diagnosis needs no repeat render.",
+      "recorded_at": "2026-11-15T15:55:44.672507+00:00"
     }
   },
   "findings": [

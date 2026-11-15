@@ -1,0 +1,65 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T17:53:01.005Z",
+  "dispatched_at": "2026-11-15T17:52:13Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:94",
+      "id": "reasoning-1",
+      "reason": "the section's premise and its negative control both rest on the correction failing to reach the solve, and reconciling \u00a79 with the cited record (or with \u00a78's 1.20 Wb corpus-column sensitivity, which the record does not show on this route) is what decides whether the control can be satisfied at all.",
+      "text": "\u00a79 states the prototype's \"states were solved with the measured currents ... because the correction was installed at the build seam \u00a78 now refuses\", but the record it cites says the opposite in its opening paragraph: \"The recorded inputs show the correction did reach the source seam, so this is not a correction that failed to be passed: every one of the nineteen conductors carries its fitted ampere-turns into current-inputs.json\", and it places the indifference \"downstream of the operator rather than at the seam\", reporting the movement as \"unmeasured rather than zero\". A node dispatched on \u00a79 therefore inherits an explanation its own evidence denies, and the two differ in consequence: if the check is the one the record found, no re-solve through the corpus columns can move the arms, while \u00a79's done-when (2) requires the fitted arm's terminal flux to differ from the measured arm's",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:96",
+      "id": "done_when-1",
+      "reason": "the clause is the node's only equality measure on the installed vector, so a wrong sign turns it into a guaranteed failure or, read charitably, into an unwritten rule the next reader cannot recover from the plan.",
+      "text": "done-when (1) requires each fitted arm's solved current vector to equal \"the measured current plus the applied ampere-turn correction from that frame's `correction-<frame>.json` receipt\", but that receipt holds the equivalent forward-field error (`equivalent_current_a_turn`, written at `scripts/prototypes/diiid_xpoint_coil_correction/fit.py:59,81`; `fit_conductors` labels the coefficients \"diagnostic equivalent ampere-turns, never measured currents or a product correction\", `scripts/prototypes/diiid_xpoint_attribution/attribute.py:79-103`), and the arm's applied current is the measured current with that error removed \u2014 the record's own table reads F1A measured \u2212177.235 with fitted +54.06 and applied \u2212231.293, i.e. measured \u2212 error. A worker following the check literally would demand \u2212123.2 kA\u00b7turn for F1A and reject the vector the plan intends, on all nineteen entries",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:96",
+      "id": "done_when-2",
+      "reason": "the control needs a stated per-row discriminator (an operator-field change, or a terminal-flux tolerance tied to the fitted magnitude) or it reads as a failure on the row where the fit predicts near-indifference, and the node's verdict would be wrong on correct work.",
+      "text": "done-when (2) states the negative control as \"reddens when a fitted arm's solved current vector or terminal flux equals its measured arm's\", with no discriminator beyond exact equality, while the cited record writes the fitted offsets as a prediction whose small rows are expected to move little: on 179L F1A takes \u22124.54 kA\u00b7turn and \"most conductors fall within 5 percent\" (`docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html`, 179L table). A bit-equal terminal flux on 179L is therefore a plausible outcome of a correct run, so the control cannot tell a correction that landed from one that did not, which is the distinction the section exists to draw",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "bcd3ecaa2d333ec246064cddbe906d65921f3c0e",
+  "plan_fingerprint": "633abbc63c122f17c81972ca376fd7d5230541e268356a30a560d62343f4b100",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 80,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261115T175047861182-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "22b6fa3fb4e787703acf137eb8bce8e3c7e2ff48",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html`, `scripts/prototypes/diiid_xpoint_coil_correction/` and `fit.py` all exist, and `correction-<frame>.json` is a file `fit.py` itself writes (`scripts/prototypes/diiid_xpoint_coil_correction/fit.py:81`).",
+    "done_when": "a finding \u2014 \u00a79's equality check reads the `correction-<frame>.json` receipt with the wrong sign, and the second control can redden on a correct run.",
+    "evidence_paths": "pass \u2014 the fitted-vector receipt is committed beside the fragment under `docs/evidence/fragments/diiid-vertical-force-balance/`, which is durable and in git, and the solves the record tabulates are the node's own.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket identifiers appear in \u00a79; the `<frame>` placeholder is a data key, not a tracker reference.",
+    "reasoning": "a finding \u2014 \u00a79's stated cause for the prototype's null result is the one its own cited record explicitly excludes.",
+    "single_goal": "pass \u2014 \u00a79's three clauses are one deliverable chain: re-derive and commit the fitted vector, solve its measured and fitted arms, tabulate both in the record.",
+    "wiring": "pass \u2014 \u00a79 declares depends-on s7 and s8 in `plan-section-depends-on`, and s7 carries s6, so the text's \"head carrying \u00a76, \u00a77 and \u00a78\" resolves without a missing edge."
+  },
+  "section_digests": {
+    "_document": "3f7773e8dc84f9f7857984a8a118b5f84a217ae4f4641f6df572ddc2b6ba7656",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "8c29d80c4569a34f471efe37576ac7bf2f7e98ccd4b5f8ae369936abb0dd64b7",
+    "s8": "8632587216eaa0edebdbe9d2f34107c6a23a5c5d466a12ce012fb753a7b1c661",
+    "s9": "ef301ef8199d9a4f7a359aa11dd1695c3f576a7ec9f654affe55bc85a2b326b6"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T18:01:04.676123+00:00",
+  "total": null
+}

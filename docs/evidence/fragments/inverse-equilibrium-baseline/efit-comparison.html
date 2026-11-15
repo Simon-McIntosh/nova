@@ -81,6 +81,32 @@
     Nonzero FF′ and the later nonzero MAST-U pressure samples serve as positive
     controls for the sample reader.</p>
   <h3 id="efit-comparison-progress">Measurement state</h3>
+  <p>The first titan batch, 1317665 at
+    <code>344becea0fc99f38279aa4175b3cdc7d96ad1ab7</code>, stopped before either
+    MAST-U or TCV reached a forward solve. MAST-U reproduced
+    <q>a comparison flux loop must have one poloidal position</q>; TCV reproduced
+    <q>has no attribute 'boundary_separatrix'</q>. These are comparison-reader
+    failures, not solver failures. Their complete pytest logs and per-case
+    index are preserved under <code>titan-measurement-1317665/</code>.</p>
+  <p>The corrected loop reader admits MAST-U's 102 single-position circles and
+    91 multi-position paths with identically zero toroidal extent. The latter
+    have zero axisymmetric poloidal-flux response, exactly as stored by
+    imas-efit: row 150, for example, has measured 0.120703 Wb and reconstructed
+    zero. Those measured rows remain active and retain their residuals.
+    Row 0, a full circle, has reconstructed 0.0291572 Wb and serves as a
+    positive control for the reader. <code>src/imas.cpp:888</code>–<code>:902</code>
+    confirms the circle and toroidal-segment interpretation. The unsupported
+    nonzero-extent segment guard still refuses a constructed path. DD4 null
+    positions are read from constraints.x_point.position_reconstructed, as the
+    writer at <code>src/imas.cpp:5188</code>–<code>:5193</code> records.</p>
+  <p>Fourteen focused fitter/reader checks pass, including an independent
+    weighted solution retaining a zero-response row's nonzero residual.
+    The first titan forward-contract and unit gate completed with
+    <q>1 failed, 37 passed, 3 deselected in 45.83s</q>; its failure is the
+    declared pre-existing root-find-default assertion. No forward guard is
+    weakened. ITER's actual profile-space refusal reports 0.419361 relative
+    sup error for its FF′ in the configured one-function space; its pressure
+    profile fits to 2.70×10⁻¹⁶.</p>
   <p>The earlier MAST-U request used pp/FF′ ndeg 0/2 and a monomial family.
     Job 1317183 never started and was cancelled while pending, with elapsed
     00:00:00. It produced no physical result. The corrected request will use

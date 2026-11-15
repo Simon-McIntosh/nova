@@ -220,7 +220,10 @@ class MagneticsFit:
         loops = np.asarray(self.magnetics.flux_loop, dtype=bool)
         values = np.empty(self.magnetics.number + 1, dtype=np.float64)
         if np.any(loops):
-            values[:-1][loops] = virtual_flux_loops(biot, coordinates[loops]).values
+            values[:-1][loops] = (
+                virtual_flux_loops(biot, coordinates[loops]).values
+                * self.magnetics.loop_fraction[loops]
+            )
         if np.any(~loops):
             angle = np.deg2rad(np.asarray(self.magnetics.angle)[~loops])
             orientation = np.column_stack((np.cos(angle), np.sin(angle)))

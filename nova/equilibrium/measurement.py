@@ -23,12 +23,28 @@ class Magnetics:
 
     ``angle`` is the poloidal orientation of a field probe [deg]; flux-loop rows
     ignore it, so a facility that leaves it unset can pass zeros.
+    ``flux_loop_fraction`` is the signed toroidal span divided by 2 pi for a
+    loop at one poloidal location. Zero also represents a path whose segments
+    all have zero toroidal extent; its measured row is retained in the fit.
     """
 
     r: np.ndarray
     z: np.ndarray
     angle: np.ndarray
     flux_loop: np.ndarray
+    flux_loop_fraction: np.ndarray | None = None
+
+    @cached_property
+    def loop_fraction(self) -> np.ndarray:
+        """Return the finite signed toroidal fraction in sensor row order."""
+        value = (
+            np.ones(self.number)
+            if self.flux_loop_fraction is None
+            else np.asarray(self.flux_loop_fraction, dtype=float)
+        )
+        if value.shape != (self.number,) or not np.all(np.isfinite(value)):
+            raise ValueError("flux-loop fractions must be finite and sensor aligned")
+        return value
 
     @property
     def number(self) -> int:
@@ -39,10 +55,14 @@ class Magnetics:
         """Return each sensor's reading of a per-ampere field: flux or field."""
         angle = np.deg2rad(np.asarray(self.angle, dtype=np.float64))
         flux_loop = np.asarray(self.flux_loop, dtype=bool)
+        fraction = self.loop_fraction
         if psi.ndim == 2:  # a column block: one row per sensor
             angle = angle[:, None]
             flux_loop = flux_loop[:, None]
-        return np.where(flux_loop, psi, br * np.cos(angle) + bz * np.sin(angle))
+            fraction = fraction[:, None]
+        return np.where(
+            flux_loop, psi * fraction, br * np.cos(angle) + bz * np.sin(angle)
+        )
 
 
 @dataclass(frozen=True)

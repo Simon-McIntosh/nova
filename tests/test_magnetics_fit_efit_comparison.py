@@ -66,6 +66,19 @@ def _probe_angle(clockwise_radians):
     return -np.rad2deg(clockwise_radians)
 
 
+def _flux_loop_point(channel):
+    """Reduce whole circles and zero-toroidal-extent paths exactly."""
+    if not len(channel.position):
+        raise ValueError("a differential flux loop needs its declared references")
+    point = channel.position[0]
+    if len(channel.position) == 1:
+        return point, 1.0
+    phi = np.array([float(p.phi) for p in channel.position])
+    if np.all(np.isfinite(phi)) and np.all(np.diff(phi) == 0.0):
+        return point, 0.0
+    raise ValueError("a nonzero-toroidal-extent path needs segment observations")
+
+
 def _profile_basis(count):
     """Map the live Bernstein functions, with their endpoint dropped, to powers."""
     if count == 0:
@@ -175,7 +188,8 @@ def _read_case(name):
             f"convention inconsistency: Ip={ip}, boundary_minus_axis={span}"
         )
     m = ids["magnetics"]
-    sensors, values, scales, names, reference_prediction, weights = (
+    sensors, values, scales, names, reference_prediction, weights, fractions = (
+        [],
         [],
         [],
         [],
@@ -203,15 +217,12 @@ def _read_case(name):
                 and weight > 0
             )
             if kind == "loop":
-                if len(channel.position) != 1:
-                    raise ValueError(
-                        "a comparison flux loop must have one poloidal position"
-                    )
-                position = channel.position[0]
+                position, fraction = _flux_loop_point(channel)
                 angle = 0.0
             else:
                 position = channel.position
                 angle = _probe_angle(float(channel.poloidal_angle))
+                fraction = 1.0
             sensors.append(
                 (float(position.r), float(position.z), angle, kind == "loop")
             )
@@ -222,12 +233,14 @@ def _read_case(name):
                 float(constraint.reconstructed) if present else 0.0
             )
             weights.append(present)
+            fractions.append(fraction)
     sensors = np.asarray(sensors)
     geometry = Magnetics(
         r=sensors[:, 0],
         z=sensors[:, 1],
         angle=sensors[:, 2],
         flux_loop=sensors[:, 3].astype(bool),
+        flux_loop_fraction=np.asarray(fractions),
     )
     active = ids["pf_active"]
     conductors, element_coils, currents, uncertainty, coil_names = [], [], [], [], []
@@ -270,7 +283,13 @@ def _read_case(name):
     surface = ts.profiles_2d[0]
     boundary = np.c_[ts.boundary.outline.r, ts.boundary.outline.z]
     nulls = np.array(
-        [[float(point.r), float(point.z)] for point in ts.boundary_separatrix.x_point]
+        [
+            [
+                float(point.position_reconstructed.r),
+                float(point.position_reconstructed.z),
+            ]
+            for point in ts.constraints.x_point
+        ]
     ).reshape(-1, 2)
     case = owner.ReferenceCase(
         user=str(source),
@@ -356,6 +375,14 @@ def _read_case(name):
         ),
         sensor_count=len(values),
         active_sensor_count=int(np.sum(weights)),
+        zero_extent_flux_rows=int(
+            np.sum(geometry.flux_loop & (geometry.loop_fraction == 0))
+        ),
+        active_zero_extent_flux_rows=int(
+            np.sum(
+                geometry.flux_loop & (geometry.loop_fraction == 0) & measurement.mask
+            )
+        ),
         conductor_count=len(currents),
         occurrences=occurrences,
         ip_a=ip,

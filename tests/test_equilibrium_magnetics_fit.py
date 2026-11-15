@@ -164,6 +164,45 @@ def test_coefficient_updates_issue_only_typed_source_requests(linear_fit):
     )
 
 
+def test_zero_extent_flux_row_retains_residual_and_fractional_response(linear_fit):
+    fitter, measurement, _, _ = linear_fit
+    fitter.magnetics = replace(
+        fitter.magnetics, flux_loop_fraction=np.array([0.0, 1.0, 0.5, 1.0])
+    )
+    design = np.array(
+        [
+            [0.0, 0.0, 0.0],
+            [0.0, 1.0, -1.0],
+            [1.0, 0.5, 0.5],
+            [1.0, -2.0, 1.0],
+            [1.0, 1.0, 1.0],
+        ]
+    )
+    scale = np.r_[measurement.scale, 1.0]
+    target = np.r_[measurement.measured, measurement.plasma_current]
+    expected = np.linalg.lstsq(design / scale[:, None], target / scale, rcond=None)[0]
+    result = fitter.fit(measurement, plasma_current_scale=1.0)
+    np.testing.assert_allclose(result.coefficients, expected, atol=1e-7)
+    assert result.whitened_residuals[0] == pytest.approx(
+        -measurement.measured[0] / measurement.scale[0]
+    )
+    np.testing.assert_allclose(
+        fitter.magnetics.project(np.ones(4), np.ones(4), np.zeros(4)),
+        [0.0, 1.0, 0.5, 1.0],
+    )
+
+
+def test_loop_reader_reduces_zero_extent_and_refuses_missing_path_information():
+    from tests.test_magnetics_fit_efit_comparison import _flux_loop_point
+
+    point = SimpleNamespace(r=1.0, z=0.0, phi=0.0)
+    assert _flux_loop_point(SimpleNamespace(position=[point])) == (point, 1.0)
+    assert _flux_loop_point(SimpleNamespace(position=[point, point])) == (point, 0.0)
+    other = SimpleNamespace(r=1.0, z=0.1, phi=0.2)
+    with pytest.raises(ValueError, match="segment observations"):
+        _flux_loop_point(SimpleNamespace(position=[point, other]))
+
+
 def test_known_conductor_subtraction_changes_the_target(linear_fit):
     fitter, measurement, truth, _ = linear_fit
     vacuum = np.array([0.7, -0.4, 1.1, 0.2])
@@ -632,7 +671,9 @@ def _physical_sensor_rows(biot, sensors):
     points = np.column_stack((sensors.r, sensors.z))
     loops = np.asarray(sensors.flux_loop, dtype=bool)
     rows = np.empty(sensors.number)
-    rows[loops] = virtual_flux_loops(biot, points[loops]).values
+    rows[loops] = (
+        virtual_flux_loops(biot, points[loops]).values * sensors.loop_fraction[loops]
+    )
     angle = np.deg2rad(sensors.angle[~loops])
     direction = np.column_stack((np.cos(angle), np.sin(angle)))
     rows[~loops] = virtual_poloidal_probes(biot, points[~loops], direction).values

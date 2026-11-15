@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="369">
+<meta name="plan-version" content="370">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -1097,7 +1097,7 @@
     <div class="r-comment-body"><p>nova/equilibrium/topology.py records the carrier each read was built on and adds _same_carrier_geometry to _fragment_reuse_mask, so a cell whose vertices, count, centre or pitch moved refreshes even with equal signed coefficients; the moved-cell case now chooses a cell and a displacement that provably change its fragment area before asserting the refresh; four cases fail at base 13312a9bf and under the coefficients-only mask, and three per-file arms show 0 added failures.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261115T042542823666-review-of-carried-read-mask-geometry-b098fc16dbc0" data-who="reckon-build" data-when="2026-11-15T04:55:37.062Z">
-    <div class="r-comment-body"><p>review of r-20261114T211406516739-carried-read-mask-geometry at base 5d2ac4f563d0 and head b098fc16dbc0 stores a parsed record scoring goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20 (117/120) with 0 added failures from the reviewed run&#x27;s base and head gate logs and no findings; the delta is bcf1af59c (tests, 71 insertions/23 deletions) and b098fc16d (evidence, 17/9), both inside declared write paths.</p></div>
+    <div class="r-comment-body"><p>review of r-20261114T211406516739-carried-read-mask-geometry at base 5d2ac4f563d0 and head b098fc16dbc0 stores a parsed record scoring goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20 (117/120) with 0 added failures from the reviewed run's base and head gate logs and no findings; the delta is bcf1af59c (tests, 71 insertions/23 deletions) and b098fc16d (evidence, 17/9), both inside declared write paths.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048" data-who="reckon-build" data-when="2026-11-14T10:26:14.839Z">
     <div class="r-comment-body"><p>two review records under review-records/ of run r-20261113T165201745905-bank-traced-inputs, one plain and one pinned at the reviewed head; this node's suite fence is unarmed so no pytest gate exists for it and none ran.</p></div>
@@ -1161,6 +1161,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T171121699975-dina-flattop-scenario" data-who="reckon-build" data-when="2026-11-14T21:22:08Z">
     <div class="r-comment-body"><p>[DINA flattop evidence](/nova/evidence/fragments/sub-millisecond-forward-path/dina-flattop-scenario.html#dina-flattop-scenario-record): twenty consecutive H200 slices129-148 returned in each of three width1 processes;16/20=80% converged, failed131/132/134/136 named. Measured medians296.786/298.219ms differ0.483%;20 post-first helper compilations. Width16 refused216.76GiB allocation before a slice. Twenty inspected SVG panels,20-frame GIF and contact sheet with all failures committed; numerical goal remains unmet.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261114T075414565081-bank-hessian-reference" data-who="reckon-build" data-when="2026-11-14T09:30:54Z">
+    <div class="r-comment-body"><p>[Independent Hessian evidence](/nova/evidence/fragments/sub-millisecond-forward-path/bank-hessian-reference.html#bank-hessian-reference-result): both routes share order-one errors at 156 sampled nodes per state; independent envelope 1.9e-9 to 4.2e-9; strict coil control fails at 4.38e-12 and plasma perturbation remains unresolved; inspected SVG and receipts committed.</p></div>
 </div>
 </section>
 </main>

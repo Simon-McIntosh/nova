@@ -73,6 +73,43 @@ def test_byte_diagnostics_count_a_larger_departure_without_reporting(capsys):
     assert _byte_differences(expected, expected, points, report=True) == 0
 
 
+def test_eager_moment_tangent_does_not_compile_shared_scans(monkeypatch):
+    def primal(xp, radius, height, *arguments, **options):
+        return tuple(
+            (index + 1.0) * radius + (index + 2.0) * height for index in range(9)
+        )
+
+    def refuse_scan(*arguments, **options):
+        raise AssertionError("eager moment tangents must not stage a shared scan")
+
+    monkeypatch.setattr(polygonanalytic, "_packed_analytic_moments_primal", primal)
+    monkeypatch.setattr(jax.lax, "scan", refuse_scan)
+    monkeypatch.setattr(jax.lax, "map", refuse_scan)
+    edge = jnp.asarray([[[0.0], [2.0], [1.0], [2.0]]])
+    one = jnp.ones(1)
+    centre = jnp.zeros((2, 1))
+
+    def rows(point):
+        return jnp.stack(
+            polygonanalytic.packed_analytic_moments(
+                jnp,
+                point[:1],
+                point[1:],
+                edge,
+                one,
+                one,
+                centre,
+                centre,
+                jnp.zeros(1, dtype=jnp.int32),
+                jnp.zeros(1, dtype=jnp.int32),
+            )
+        )
+
+    actual = jax.jacfwd(rows)(jnp.asarray((1.7, 0.3)))
+    expected = np.asarray([[[index + 1.0, index + 2.0]] for index in range(9)])
+    np.testing.assert_array_equal(actual, expected)
+
+
 @pytest.mark.skipif(
     jax.default_backend() != "gpu", reason="large identity gate requires a GPU"
 )

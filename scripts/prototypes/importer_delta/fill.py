@@ -112,9 +112,10 @@ def verdict(cpu, card, base_files):
     ]
     if killed:
         parts.append(
-            "One of those " + str(len(in_base)) + " ran a head arm that was "
-            "killed at the job memory ceiling without reaching a summary "
-            "line: " + names(killed) + ". That row states no verdict and is "
+            "Of the " + str(len(in_base)) + ", one ran a head arm that "
+            "did not reach a summary line: "
+            + names(killed)
+            + ". That row states no verdict and is "
             "reported as unreadable below."
         )
     if cpu_absent or card_absent:
@@ -150,18 +151,35 @@ def describe(row):
     return "<code>" + row["file"] + "</code> has neither arm"
 
 
+def arm_facts(row, which):
+    text = []
+    if row.get(which + "_summary"):
+        text.append(row[which + "_summary"])
+    if row.get(which + "_seconds") is not None:
+        text.append("%d s" % int(row[which + "_seconds"]))
+    if row.get(which + "_peak_kb"):
+        text.append("%.0f GB peak" % (row.get(which + "_peak_kb") / 1048576.0))
+    return ", ".join(text) if text else "nothing recorded"
+
+
 def unreadable(cpu):
     dead = [
         row for row in cpu if row["state"] == "measured" and not row["head_completed"]
     ]
     if not dead:
-        return "Every CPU arm reached its summary line."
+        return "Every arm below reached its summary line."
     return (
-        "CPU arm not readable: " + names(dead) + ". Its head arm was killed at "
-        "the job memory ceiling without reaching a summary line, while its base "
-        "arm passes nine tests in 316 s inside a 192 GB job; the head arm reached "
-        "a 490 GB peak and ran past an hour with no test outcome. The row is "
-        "reported as unreadable rather than as an added failure: no id was "
+        "Unreadable: "
+        + "; ".join(
+            "<code>"
+            + row["file"]
+            + "</code> base arm "
+            + arm_facts(row, "base")
+            + ", head arm "
+            + arm_facts(row, "head")
+            for row in dead
+        )
+        + ". A row with no head summary line states no verdict: no id was "
         "recorded for it, which is not the same as no id failing."
     )
 
@@ -226,14 +244,17 @@ def receipts(meta):
     items = [
         "<li>base revision <code>" + meta["base_revision"] + "</code>; head revision "
         "<code>" + meta["head_revision"] + "</code></li>",
-        "<li>the CPU head arms ran over tree <code>"
-        + meta["cpu_head_tree"]
-        + "</code>, the head revision itself, as their receipt rows record</li>",
-        "<li>the H200 head arms resolved over trees "
-        + ", ".join("<code>" + tree + "</code>" for tree in meta["h200_head_trees"])
-        + ", "
-        + meta["h200_head_trees_note"]
-        + "</li>",
+        "<li>each arm resolved over an extracted tree of its own revision: base "
+        "<code>"
+        + meta["base_tree"]
+        + "</code> at <code>"
+        + meta["base_tree_revision"]
+        + "</code>, head <code>"
+        + meta["head_tree"]
+        + "</code> at <code>"
+        + meta["head_tree_revision"]
+        + "</code>, both archived from that revision and reached through "
+        "<code>PYTHONPATH</code> rather than from the working checkout</li>",
     ]
     for job in (meta.get("jobs") or {}).get("h200", []):
         items.append(
@@ -259,10 +280,11 @@ def receipts(meta):
     items.append(
         "<li>gate <code>bash " + meta["gate"] + " &lt;receipts-dir&gt; "
         "&lt;base-rows&gt; &lt;out-dir&gt; &lt;device-config&gt;...</code>, "
-        "log <code>" + meta["gate_log"] + "</code>. It exits nonzero on this "
-        "record, naming the three unmeasured rows: a table that carries no "
-        "verdict for a declared row is a partial measurement, and the gate "
-        "refuses to pass it as a clean one.</li>"
+        "log <code>" + meta["gate_log"] + "</code>. It reads the rows and passes "
+        "only when every declared file carries a completed pair on one device "
+        "and no row adds an id: "
+        + meta["gate_note"]
+        + "</li>"
     )
     items.append(
         "<li>comparison controls <code>"
@@ -274,12 +296,54 @@ def receipts(meta):
     return '\n<ul id="importer-delta-receipts">\n' + "\n".join(items) + "\n</ul>"
 
 
+def earlier_rows(dirpath):
+    if not dirpath:
+        return []
+    deltas = Path(dirpath)
+    rows = []
+    for name in ("delta-cpu.json", "delta-h200.json"):
+        path = deltas / name
+        if path.exists():
+            rows.extend(table_rows(path))
+    return rows
+
+
+def earlier(dirpath, meta):
+    rows = earlier_rows(dirpath)
+    if not rows:
+        return ""
+    return table(rows, "earlier")
+
+
+def earlier_note(dirpath, meta):
+    rows = earlier_rows(dirpath)
+    if not rows:
+        return ""
+    dead = [
+        row
+        for row in rows
+        if not (row["state"] == "measured" and row["head_completed"])
+    ]
+    return (
+        '<p id="importer-delta-earlier-note">These are the same files measured '
+        "against the earlier head, <code>"
+        + meta["earlier_head"]
+        + "</code>, before its repair. "
+        + str(len(dead))
+        + " of these rows carry no head arm on the device that owns them, so the "
+        "table is kept as a record of an incomplete head rather than as a "
+        "verdict; the table above supersedes it. A row with no base arm is a file "
+        "the head adds, and is marked as such.</p>"
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--template", required=True)
     parser.add_argument("--meta", required=True)
     parser.add_argument("--deltas", required=True)
     parser.add_argument("--base-rows", required=True)
+    parser.add_argument("--earlier-deltas")
     parser.add_argument("--target", required=True)
     args = parser.parse_args()
 
@@ -295,6 +359,8 @@ def main():
     text = text.replace("UNREADABLE_LINE", unreadable(cpu))
     text = text.replace("H200_NOTE", card_note(card, meta))
     text = text.replace("H200_TABLE", table(card, "card"))
+    text = text.replace("EARLIER_TABLE", earlier(args.earlier_deltas, meta))
+    text = text.replace("EARLIER_NOTE", earlier_note(args.earlier_deltas, meta))
     text = text.replace("RECEIPTS_BLOCK", receipts(meta))
     if "_LINE" in text or "_TABLE" in text or "_NOTE" in text or "BLOCK" in text:
         raise SystemExit("a placeholder was left unfilled")
@@ -304,4 +370,5 @@ def main():
     return 0
 
 
-raise SystemExit(main())
+if __name__ == "__main__":
+    raise SystemExit(main())

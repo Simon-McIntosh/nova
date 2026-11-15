@@ -124,4 +124,5 @@ def main():
     return 0 if ok else 1
 
 
-raise SystemExit(main())
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -30,55 +30,85 @@ def by_file(rows):
     return table
 
 
+def facts(row):
+    if not row:
+        return {}
+    return {
+        "completed": bool(row.get("completed")),
+        "seconds": row.get("seconds"),
+        "summary": row.get("summary_line"),
+        "peak_kb": row.get("peak_rss_kb"),
+        "exit_status": row.get("exit_status"),
+        "revision": row.get("revision"),
+    }
+
+
+def detail(prefix, item):
+    return {
+        prefix + "_completed": item.get("completed"),
+        prefix + "_seconds": item.get("seconds"),
+        prefix + "_summary": item.get("summary"),
+        prefix + "_peak_kb": item.get("peak_kb"),
+        prefix + "_exit_status": item.get("exit_status"),
+        prefix + "_revision": item.get("revision"),
+    }
+
+
 def measure(head, base):
     base = base or {}
     head_ids = set(head["failure_ids"] or [])
     base_ids = set(base.get("failure_ids") or [])
-    return {
+    row = {
         "file": head["file"],
         "base_count": len(base_ids),
         "head_count": len(head_ids),
         "added": sorted(head_ids - base_ids),
         "removed": sorted(base_ids - head_ids),
         "head_only": not base,
-        "base_completed": bool(base.get("completed")) if base else None,
-        "head_completed": bool(head.get("completed")),
-        "base_seconds": base.get("seconds"),
-        "head_seconds": head.get("seconds"),
         "state": "measured",
     }
+    row.update(detail("base", facts(base) if base else {}))
+    row.update(detail("head", facts(head)))
+    return row
 
 
 def pending(file, base):
-    return {
+    row = {
         "file": file,
         "base_count": len(base["failure_ids"] or []),
         "head_count": None,
         "added": [],
         "removed": [],
         "head_only": False,
-        "base_completed": bool(base["completed"]),
-        "head_completed": None,
-        "base_seconds": base["seconds"],
-        "head_seconds": None,
         "state": "head-pending",
     }
+    row.update(detail("base", facts(base)))
+    row.update(detail("head", {}))
+    return row
 
 
 def absent(file):
-    return {
+    row = {
         "file": file,
         "base_count": None,
         "head_count": None,
         "added": [],
         "removed": [],
         "head_only": False,
-        "base_completed": None,
-        "head_completed": None,
-        "base_seconds": None,
-        "head_seconds": None,
         "state": "not-run",
     }
+    row.update(detail("base", {}))
+    row.update(detail("head", {}))
+    return row
+
+
+def pairs(row):
+    return (
+        row["state"] == "measured"
+        and not row["head_only"]
+        and bool(row["base_completed"])
+        and bool(row["head_completed"])
+    )
 
 
 def main():
@@ -92,20 +122,24 @@ def main():
     config_path = Path(args.config)
     config = json.loads(config_path.read_text())
     device = config["device"]
-    receipts = Path(config["receipts"])
-    if not receipts.is_absolute():
-        root = Path(args.receipts_dir) if args.receipts_dir else config_path.parent
-        receipts = (root / receipts).resolve()
+    names = config["receipts"]
+    if isinstance(names, str):
+        names = [names]
+    root = Path(args.receipts_dir) if args.receipts_dir else config_path.parent
+    receipts = [(root / name).resolve() for name in names]
 
-    arms = [dict(row, arm=row.get("arm", "head")) for row in rows_in(receipts)]
+    arms = []
+    for path in receipts:
+        arms.extend(dict(row, arm=row.get("arm", "head")) for row in rows_in(path))
     heads = by_file([row for row in arms if row["arm"] == "head"])
     recorded = by_file([row for row in arms if row["arm"] == "base"])
 
     base = {}
     if args.base_rows:
-        for row in rows_in(args.base_rows):
-            if row.get("device", device) == device:
-                base[row["file"]] = row
+        for path in args.base_rows.split(","):
+            for row in rows_in(path):
+                if row.get("device", device) == device:
+                    base[row["file"]] = row
     base.update(recorded)
 
     declared = set(config["files"])
@@ -137,15 +171,15 @@ def main():
 
     payload = {
         "device": device,
-        "receipts": str(receipts),
-        "base_rows": str(args.base_rows) if args.base_rows else None,
+        "receipts": [str(path) for path in receipts],
+        "base_rows": args.base_rows,
         "rows": result,
         "unmeasured": unmeasured,
         "added_total": sum(len(row["added"]) for row in result),
         "missing_base_files": missing,
     }
     Path(args.out).write_text(json.dumps(payload, indent=2))
-    verdicts = len(result) - len(unmeasured)
+    verdicts = sum(1 for row in result if pairs(row))
     print(
         "device="
         + device
@@ -155,4 +189,5 @@ def main():
     return 0
 
 
-raise SystemExit(main())
+if __name__ == "__main__":
+    raise SystemExit(main())

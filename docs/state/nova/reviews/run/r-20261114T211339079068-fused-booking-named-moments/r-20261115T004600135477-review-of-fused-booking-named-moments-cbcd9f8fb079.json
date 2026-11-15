@@ -13,6 +13,13 @@
   ],
   "completed_at": "2026-11-15T01:43:57.995Z",
   "dispatched_at": "2026-11-15T00:46:35Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking evidence-citation or test-strength detail; the reorder test fails at base and passes at head (22 passed at 177f0fe99), and the third call site was checked correct by the reviewer",
+      "recorded_at": "2026-11-15T01:47:32.917460+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-named-moments.html",

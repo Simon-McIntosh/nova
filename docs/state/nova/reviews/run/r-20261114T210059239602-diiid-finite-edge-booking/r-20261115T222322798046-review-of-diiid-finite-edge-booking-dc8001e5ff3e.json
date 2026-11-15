@@ -18,6 +18,13 @@
     "nova/equilibrium/support_read.py:880 book_tangent (linear-moment path)"
   ],
   "completed_at": "2026-11-15T22:25:30.511Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "exempted",
+      "reason": "The scope score reflects the adapter and its test written outside the declared paths; both are ratified at landing with --accept-path, and no other path left the scope",
+      "recorded_at": "2026-11-15T23:00:55.091946+00:00"
+    }
+  },
   "dispatched_at": "2026-11-15T22:24:54Z",
   "finding_dispositions": {
     "0": {

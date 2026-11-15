@@ -1,0 +1,49 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T18:18:56.107Z",
+  "dispatched_at": "2026-11-15T18:17:47Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:96",
+      "id": "done_when-1",
+      "reason": "the node's principal equality check is written against a key that no committed receipt carries, so a worker either fails to resolve the referent or reads the wrong file whose existence the plan never requires.",
+      "text": "done-when (1) names the referent for its equality as \"the fitted equivalent ampere-turns (`equivalent_current_a_turn`) in that frame's `correction-<frame>.json` receipt\", but that receipt is written by `scripts/prototypes/diiid_xpoint_coil_correction/fit.py:81-82` as `json.dumps(correction)` \u2014 a bare conductor-name-to-amperes mapping \u2014 so the key `equivalent_current_a_turn` is absent from it; the name exists only in the in-memory attribution result (`scripts/prototypes/diiid_xpoint_attribution/attribute.py:102`, asserted in `tests/test_xpoint_attribution.py:91`), and the sibling file `conductor-fit-<frame>.json` holds the same numbers under `equivalent_error_a_turn`, a field the plan does not name",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "30cefa1555b335166ad4b1bb8e2b4d1dd783162f",
+  "plan_fingerprint": "7c84f0b1c0815d81eff7a8078d684671cda3fbbc8cec4cb995777faa507cee9a",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 85,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261115T181626025937-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "f225d364ab59e1bf8ba2d7af94a96b9d58b55d2c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html`, `scripts/prototypes/diiid_xpoint_coil_correction/` and `.../fit.py` all resolve at the head, and the quoted numbers (F1A \u2212231.293 against measured \u2212177.235; nine conductors 27\u201359 percent, four above 200, six under 5; +54.06/+52.14 against \u22122.51/\u22120.27) all match the record's tables.",
+    "done_when": "a finding \u2014 s9's done-when (1) requires the equality check to read the fitted equivalent ampere-turns under the key `equivalent_current_a_turn` from `correction-<frame>.json`, and that file is a bare conductor-name mapping with no such key.",
+    "evidence_paths": "pass \u2014 the receipt is committed beside the evidence fragment under `docs/evidence/fragments/`, and the solve runs on the H200-then-titan rule, not in a scratch or node-local path.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach the described code; `complete_profile_current_adapter` is the recorded diagnosis's own name, not a label.",
+    "reasoning": "pass \u2014 the root cause now matches the trace it rests on (the correction reached the operator and the cohort's second read, whose overwrite the trace measures, leaves the state unmoved), the four rows' equality is obtainable from the solve's record, and the section's remaining step language describes where the correction must reach rather than what to build; the negative control in (2) can fail, since on the unfixed path the fitted arm's solved vector is the measured one.",
+    "single_goal": "pass \u2014 s9 names one deliverable, the measured-versus-fitted arms of the four coil-correction rows with their receipt and panels; the receipt derivation, the solve and the tabulation are parts of that one verdict.",
+    "wiring": "pass \u2014 s9's `data-links` name s7 and s8, both present, and the s6 the prose requires at the head is reached transitively through s7 (`data-links=\"diiid-vertical-force-balance#s6\"`), so no needed dependency is undeclared."
+  },
+  "section_digests": {
+    "_document": "3f7773e8dc84f9f7857984a8a118b5f84a217ae4f4641f6df572ddc2b6ba7656",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "8c29d80c4569a34f471efe37576ac7bf2f7e98ccd4b5f8ae369936abb0dd64b7",
+    "s8": "8632587216eaa0edebdbe9d2f34107c6a23a5c5d466a12ce012fb753a7b1c661",
+    "s9": "85dcfd4cdeb9bfde5dfe2cd232b1b0329efdd59101fad8585ad8a6fafce60edd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T18:27:58.296691+00:00",
+  "total": null
+}

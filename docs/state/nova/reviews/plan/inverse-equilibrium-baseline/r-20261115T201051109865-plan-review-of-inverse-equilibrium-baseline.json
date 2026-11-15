@@ -1,0 +1,49 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T20:11:41.170Z",
+  "dispatched_at": "2026-11-15T20:11:19Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T201051109865-plan-review-of-inverse-equilibrium-baseline/plan.html:204",
+      "id": "wiring-1",
+      "reason": "the pointer that navigates from the decision to its sections is correct and the ruling's rationale names the run itself; the question text is the decision's historical wording, and rewording it changes no node's endpoint, band or control.",
+      "text": "the decision `efit-on-synthetic-rows` now lists `data-sections=\"s7,s8\"` but its own question text still reads \"Who runs imas-efit on nova's synthetic noisy rows in \u00a77?\", and its context line still reads \"which no section of this plan does yet\", so a reader who opens the decision from \u00a78 finds a question scoped to the consumer only",
+      "type": "wiring",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "88109dfb624f1a408ca060b153e35cd8898c1ce1",
+  "plan_fingerprint": "e111dffe43d69acb9252fa29ad23dda3a61c6dac3712285d2801bbca76a2aecf",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 24,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261115T201051109865-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "e84a974e1383e1d2f7a4010661067580d941dbf3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a70's extensionless `/nova/spine-efit-parity` resolves as `docs/plans/spine-efit-parity.html`, the planned figure `/nova/figures/inverse-equilibrium-baseline/inverse-seam.svg` exists at `docs/figures/inverse-equilibrium-baseline/inverse-seam.svg`, the landed record exists at `docs/evidence/archive/inverse-equilibrium-baseline-landed.html`, the \u00a78 anchor `#s8` is present in the snapshot, and the snapshot's plan body is byte-identical to the live `docs/plans/inverse-equilibrium-baseline.html` at 88109dfb.",
+    "done_when": "pass \u2014 \u00a78's three done-when clauses are measurable and clause (3) is a declared negative control that scales every magnetics row, the measured plasma current and the conductor currents by 1.10 and requires the reconstructed plasma current to leave the 1.5 % band; the band it must leave is the same band clause (2) applies, so the control exercises the section's own measure rather than a neighbouring one.",
+    "evidence_paths": "pass \u2014 the reviewed units name no session scratch path; \u00a78's evidence is the plan record named in \u00a70 (`docs/evidence/archive/inverse-equilibrium-baseline-landed.html`, present on disk) and the panel is cited through the same record.",
+    "naming": "pass \u2014 the reviewed units carry no plan labels, ticket numbers or version tags into code; \u00a78's vocabulary (`p\u2032`, `FF\u2032`, `psi_axis`, `q95`, `data dictionary version`) is domain naming, and the metadata change in `_document` is file metadata only.",
+    "reasoning": "pass \u2014 all three checks hold on the reviewed units: the root cause \u00a78 states (imas-efit's stored ITER configuration carries a synthesised pressure point and a q0 prior that a magnetics-only comparison must not carry) is the one the plan's own `c-s2-iter-priors` ruling records; the endpoint is reachable and checkable (convergence, per-flux-function basis and coefficient count read from imas-efit's output or log, the five quantities banded with numbers, the control above, one overlaid contour panel with both null sets and the wall); the changed basis sentence specifies a property of the input state \u2014 the generating p\u2032 and FF\u2032 lie in the basis imas-efit resolves, and nova's fit is given the same functions \u2014 which is a checkable condition on the experiment rather than a code path, step sequence or call to extend; the flux comparison now reads each state's stored flux sign and the q95 comparison bands magnitude with the stored sign reported, which removes the convention mismatch that made the previous bands unachievable; and \u00a78's 0.02 m and 0.1 bands are genuinely below \u00a77 clause (3)'s 0.05 m and 0.2 thresholds, as the section claims.",
+    "single_goal": "pass \u2014 \u00a78 carries one deliverable, an imas-efit run on rows written by nova with its output read back and compared; the comparison table, the control and the contour panel are acceptance criteria of that one deliverable, not a second one.",
+    "wiring": "pass \u2014 for the reviewed units, `plan-section-depends-on` gives `s8: []` (correct, since \u00a71 has landed and \u00a78's text says \"Reuses the ITER machine and the fit of \u00a71, which has landed\"), `s7` lists `s8` as a wait, the \u00a70 Section contract table's \u00a77 row reads \"\u00a76, \u00a73 and \u00a78\" and its \u00a78 row reads \"\u00a71 (landed)\", and the `_document` decision `efit-on-synthetic-rows` now carries `data-sections=\"s7,s8\"`, naming both the section that delivers the run and the section that consumes it."
+  },
+  "section_digests": {
+    "_document": "6178db02b44e9ad3cff3cfe4fe6e5f90d4dc4fc328abed9922653dff8253e088",
+    "s0": "18fa4b3820d8a53b8b11be7cc05c1e0e3838163b619eac989edfed114e1e0b7b",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "869fae9b37d5960c1ec034e608f17f0bda580b5851fa4c12723a067ed80b3da1",
+    "s3": "aabab320c034e5a6720e0b3877958935e6c3b63577de3674cd6e87f6120889ba",
+    "s4": "a8f5721b1827357df497c97788c8bc9c5bb1266579ca0d04f61045c915138730",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "0978908aa460ff2860214bf8e82c9b00ca29f895ece725317c79cb738cef9b01",
+    "s7": "5c750c79d813b34b96a3b3b418cd41dd92a06de78455a410a3cfd366c1aeabee",
+    "s8": "a609d17e17a1eb1b6e8ad1052d90547086b7bf3e11af31c024bfa48ada28ae0d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T20:17:19.492766+00:00",
+  "total": null
+}

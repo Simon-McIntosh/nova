@@ -54,6 +54,15 @@ def read(folder: Path) -> dict:
     )
 
 
+def anchor(row: dict) -> np.ndarray:
+    """Return the row's own magnetic axis position."""
+
+    data = row["data"]
+    if "axis" in data:
+        return np.asarray(data["axis"], dtype=float)[:2]
+    return np.asarray(row["receipt"]["terminal_topology"]["axis_rz_m"], dtype=float)
+
+
 def panel(ax, row, label, limits):
     """Draw one row's terminal state and return its caption lines."""
 
@@ -117,8 +126,8 @@ def panel(ax, row, label, limits):
     return (
         label,
         f"residual {shadow['residual']:.2g}; converged {shadow['converged']}",
-        f"lower X {100 * shadow['lower_x_distance_m']:.2f} cm; "
-        f"band {edge['max_cell_difference_a']:.3g} A",
+        f"lower X {100 * shadow['lower_x_distance_m']:.1f} cm; "
+        f"band {edge['max_cell_difference_a'] / 1000:.2f} kA",
     )
 
 
@@ -131,17 +140,27 @@ def main() -> None:
     plt.style.use(Path.home() / ".config/matplotlib/stylelib/data-ink.mplstyle")
     plt.rcParams.update({"svg.fonttype": "none", "font.size": 14})
     rows = [read(args.input / "edge" / name) for name, _ in ROWS]
+    # The window has to hold each row's own axis, not only its X-point: a
+    # limited row's X-point is a limiter contact low in the vessel, and a
+    # window fitted to the diverted rows' X-points puts its closed flux off
+    # the panel.
     points = np.array(
         [
             point
             for row in rows
-            for point in (row["shadow"]["lower_x_rz_m"], row["shadow"]["efit_x_rz_m"])
+            for point in (
+                anchor(row),
+                row["shadow"]["lower_x_rz_m"],
+                row["shadow"]["efit_x_rz_m"],
+            )
         ]
     )
-    centre = (points.min(axis=0) + points.max(axis=0)) / 2
+    low, high = points.min(axis=0), points.max(axis=0)
+    centre = (low + high) / 2
+    half = 0.5 * float((high - low).max()) + 0.08
     limits = dict(
-        radius=(centre[0] - 0.42, centre[0] + 0.42),
-        height=(centre[1] - 0.42, centre[1] + 0.42),
+        radius=(centre[0] - half, centre[0] + half),
+        height=(centre[1] - half, centre[1] + half),
     )
     figure = plt.figure(figsize=CANVAS, dpi=100)
     axes = [
@@ -159,7 +178,7 @@ def main() -> None:
         for offset, text in zip((0.155, 0.105, 0.055), lines, strict=True):
             notes.append(
                 figure.text(
-                    ax.get_position().x0 + 0.115, offset, text, ha="center", fontsize=14
+                    ax.get_position().x0 + 0.115, offset, text, ha="center", fontsize=12
                 )
             )
     handles = [

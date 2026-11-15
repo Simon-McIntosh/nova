@@ -2753,7 +2753,12 @@ class TopologyGeometry:
 
 
 class TopologyRead(NamedTuple):
-    """One fixed-shape total-field topology and connected-support receipt."""
+    """One fixed-shape total-field topology and connected-support receipt.
+
+    The carrier fields record the geometry this read was built from, so a
+    carried fragment can be certified against the cells it was evaluated on
+    rather than against its coefficients alone.
+    """
 
     axis: jax.Array
     axis_flux: jax.Array
@@ -2781,6 +2786,10 @@ class TopologyRead(NamedTuple):
     normal_form_cells: jax.Array
     normal_form_radius: jax.Array
     contour_tree: object
+    cell_vertices: jax.Array
+    cell_vertex_count: jax.Array
+    cell_centre: jax.Array
+    cell_pitch: jax.Array
 
 
 def _inside_cells(geometry, point):
@@ -3559,6 +3568,26 @@ def _read_at_nulls(
         ),
         jnp.where(diverted, policy.normal_form_radius, 0.0),
         tree,
+        geometry.vertices,
+        geometry.vertex_count,
+        geometry.centre,
+        geometry.pitch,
+    )
+
+
+def _same_carrier_geometry(geometry, decision):
+    """Compare each cell's carrier against the one its decision was read on."""
+    slot = jnp.arange(geometry.vertices.shape[1])
+    live = slot[None, :] < geometry.vertex_count[:, None]
+    vertices = jnp.all(
+        jnp.where(live[..., None], geometry.vertices == decision.cell_vertices, True),
+        axis=(1, 2),
+    )
+    return (
+        vertices
+        & jnp.all(geometry.centre == decision.cell_centre, axis=1)
+        & (geometry.pitch == decision.cell_pitch)
+        & (geometry.vertex_count == decision.cell_vertex_count)
     )
 
 
@@ -3567,7 +3596,11 @@ def _fragment_reuse_mask(geometry, signed, form, decision, sigma):
 
     A cell's ownership alone cannot certify its area. The coefficient bound
     proves the sign over the entire cell, including an interior extremum;
-    uncertain cells retain the exact conic decomposition.
+    uncertain cells retain the exact conic decomposition. Equal coefficients
+    certify nothing about the cell they were read on, so a cell is reusable
+    only while its carrier geometry matches the decision's: changed vertices,
+    vertex count, centre or pitch refresh the cell even when the coefficients
+    did not move.
     """
     local = (geometry.vertices - geometry.centre[:, None, :]) / geometry.pitch[
         :, None, None
@@ -3627,8 +3660,10 @@ def _fragment_reuse_mask(geometry, signed, form, decision, sigma):
             ]
         )
     )
-    return decision.valid & jnp.where(
-        decision.normal_form_cells, same_form, same_conic | same_uniform
+    return (
+        decision.valid
+        & _same_carrier_geometry(geometry, decision)
+        & jnp.where(decision.normal_form_cells, same_form, same_conic | same_uniform)
     )
 
 

@@ -25,7 +25,24 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 13,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The operative rule is the interval the node computes for the directions it tests; the printed figure is illustrative, and the node brief will quote 0.745 to 1.302 for six directions.",
+      "when": "2026-11-15T01:22:47.134100+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The operative rule is the interval the node computes for the directions it tests; the printed figure is illustrative, and the node brief will quote 0.745 to 1.302 for six directions.",
+      "when": "2026-11-15T01:22:47.134100+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261115T005415168652-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261115T005415168652-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "e333ad918a8c709785aff782c9060ff09d8f838f",
   "rubric": "content",

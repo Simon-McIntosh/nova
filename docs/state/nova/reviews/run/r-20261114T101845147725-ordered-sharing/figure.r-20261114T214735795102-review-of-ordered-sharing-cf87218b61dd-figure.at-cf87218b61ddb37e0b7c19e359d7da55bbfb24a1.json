@@ -1,0 +1,37 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T00:06:01.431Z",
+  "dispatched_at": "2026-11-14T23:20:25Z",
+  "figure": "docs/figures/kernel-compile-barrier/ordered-sharing/pass-times.svg",
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_reason": "The caption at the figure in docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html already states that the LLVM entries sum emitted IR files, and the row names say IR rather than naming a pass; relabelling or re-scoping those rows would change a figure whose numbers are correct, for a reader who has the caption in the same view.",
+      "file": "docs/figures/kernel-compile-barrier/ordered-sharing/pass-times.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The rows 'LLVM optimized IR' and 'LLVM unoptimized IR' plot the summed time of 306 to 328 emitted IR dump files rather than the time of a named compiler pass, yet they sit under a reader-facing axis title of 'time per pass [s]'; read alone, the 13.6 s and 8.5 s base bars can be taken as one pass's cost. The caption immediately beneath states 'LLVM entries sum emitted IR files', so the figure is accurate for a reader who reads the caption, which is what keeps this out of the blocking set."
+    }
+  ],
+  "note": "The attached PNG is the render of the figure above. Bar lengths were measured in the PNG against the axis and agree with the run's own paired profile receipt (base variadic-op-splitter 159.481 s, multi_output_fusion 59.822 s, and the head arm 88.455 s and 43.340 s), and the caption's compile pair 349.757841 s to 216.521548 s matches the same job's summary. The caption states what is drawn and does not merely repeat a title.",
+  "project": "nova",
+  "review_run_id": "r-20261114T214735795102-review-of-ordered-sharing-cf87218b61dd-figure",
+  "reviewed_base_sha": "40523b1a42a448125b98780ff01fd63e54cc5875",
+  "reviewed_head_sha": "cf87218b61ddb37e0b7c19e359d7da55bbfb24a1",
+  "reviewed_image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214735795102-review-of-ordered-sharing-cf87218b61dd-figure/image-0.png",
+  "reviewed_run_id": "r-20261114T101845147725-ordered-sharing",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Dark grey row and tick text on white clears contrast at reading size, the base series renders as the #929292 data grey and the head series as a clean blue, and both are separable from each other and from the white field.",
+    "data_ink": "The ink is the fourteen bars, the 0-175 s tick row, seven row labels, one axis title and one two-entry legend; nothing else is drawn, and the bar lengths carry the base-to-head comparison the caption states, from the longest row at 159.5 s of 175 s of axis down to a 4.9 s row.",
+    "decoration": "No gridlines, no panel background fill, no gradient, no frame or shadow; the field is white with a bottom and left spine only and a frameless legend above the plot.",
+    "label_collision": "No label is clipped or overlapping: row labels right-align to the axis, the longest of them (zero_sized_hlo_elimination) clears the axis line at 2x magnification, the 0-175 tick labels and the title time per pass [s] sit inside the bottom margin, and the legend sits above the plot with clearance from the first bar group, consistent with the drawing script's own text-bound and collision assertions.",
+    "legibility": "Both arms' bars and all seven row labels (variadic-op-splitter through all remaining passes) read at a glance on a single linear 0-175 s axis; grey base bars stand left of blue ordered-sharing bars in every row, and the two largest rows dominate as the caption's claim requires.",
+    "table_form": "The image plots a magnitude comparison across seven categories for two arms; the precise per-pass milliseconds are retained in the evidence document's table, and the figure adds the visual magnitude ordering a table does not give, so it is not a table rendered as a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T00:08:42.784317+00:00",
+  "total": null
+}

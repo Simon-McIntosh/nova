@@ -103,22 +103,45 @@ def panel(ax, row, label, limits):
         wall=data["limiter"],
         zorder=4,
     )
+    # The reference null is drawn as an open ring beneath the solved cross. A
+    # centimetre is a couple of pixels at this window while a marker is ten, so
+    # two marks of comparable size at nearly the same place merge into one and
+    # the reader loses the achieved null behind the reference. A ring and a
+    # cross of half its diameter stay distinct at any offset: inside the ring
+    # the cross reads as an eccentricity, outside it as a separate null. The
+    # leader joins the two, and the panel note carries the offset between them.
+    ax.plot(
+        efit_x[0],
+        efit_x[1],
+        ls="none",
+        marker="o",
+        ms=16,
+        mew=1.2,
+        mfc="none",
+        color=REFERENCE,
+        zorder=DEFAULT_INK.zorder_markers + 1,
+    )
+    ax.plot(
+        [x_point[0], efit_x[0]],
+        [x_point[1], efit_x[1]],
+        color=REFERENCE,
+        lw=0.8,
+        ls=(0, (1.0, 1.0)),
+        zorder=DEFAULT_INK.zorder_markers,
+    )
     draw_nulls(
         ax,
         magnetic_axis=axis,
         x_points=x_point[None, :],
-        style=replace(DEFAULT_INK, axis_color=SOLVED, xpoint_color=SOLVED),
+        style=replace(
+            DEFAULT_INK,
+            axis_color=SOLVED,
+            xpoint_color=SOLVED,
+            xpoint_markersize=9.0,
+            xpoint_markeredgewidth=1.6,
+            zorder_markers=DEFAULT_INK.zorder_markers + 2,
+        ),
         contain=data["limiter"],
-    )
-    ax.plot(
-        *efit_x,
-        ls="none",
-        marker="X",
-        ms=9,
-        mfc="none",
-        mec=REFERENCE,
-        mew=1.6,
-        zorder=15,
     )
     draw_wall(ax, units=data["limiter"], color=WALL, linewidth=1.5, zorder=5)
     ax.set_xlim(limits["radius"])
@@ -186,8 +209,16 @@ def main() -> None:
         Line2D([], [], color=SOLVED, lw=3.0, label="clipped level"),
         Line2D([], [], color=WALL, lw=1.5, label="first wall"),
         Line2D([], [], color=SOLVED, marker="^", ls="none", label="magnetic axis"),
-        Line2D([], [], color=SOLVED, marker="x", ls="none", label="solved X-point"),
-        Line2D([], [], color=REFERENCE, marker="X", ls="none", label="EFIT X-point"),
+        Line2D([], [], color=SOLVED, marker="X", ls="none", label="solved X-point"),
+        Line2D(
+            [],
+            [],
+            color=REFERENCE,
+            marker="o",
+            mfc="none",
+            ls="none",
+            label="EFIT X-point",
+        ),
     ]
     figure.legend(
         handles=handles,

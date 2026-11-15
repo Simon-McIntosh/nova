@@ -1,9 +1,15 @@
-"""Record and compare every existing material test's state, history and fields."""
+"""Record and compare material states, residual histories and fields.
+
+Compare each array with rtol=1e-12 and an absolute allowance of 1e-12 times
+the largest reference magnitude. The shared array scale admits roundoff in
+analytically zero components without hiding relative changes in dominant values.
+"""
 
 import os
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from nova.biot import magnetisation as iron
 
@@ -44,19 +50,42 @@ def pytest_sessionstart(session):
     iron.MagnetisationSolution.field = observed_field
 
 
+def assert_compatible(actual, reference):
+    """Require relative agreement with a reference-scaled roundoff floor."""
+    scale = np.max(np.abs(reference), initial=0)
+    np.testing.assert_allclose(actual, reference, rtol=1e-12, atol=1e-12 * scale)
+
+
+@pytest.hookimpl(wrapper=True, tryfirst=True)
 def pytest_sessionfinish(session, exitstatus):
+    result = yield
     destination = Path(os.environ["NOVA_MATERIAL_CAPTURE"])
     np.savez(destination, **_records)
     baseline = os.environ.get("NOVA_MATERIAL_BASELINE")
     if baseline:
         with np.load(baseline) as reference:
-            assert reference.files, "baseline captured no material outputs"
+            mismatches = {}
+            if not reference.files:
+                mismatches["baseline"] = "captured no material outputs"
             counts = dict(magnetisation=0, permeability=0, history=0, field=0)
             for key in reference.files:
-                assert key in _records, f"missing baseline output {key}"
-                np.testing.assert_allclose(
-                    _records[key], reference[key], rtol=1e-12, atol=0, err_msg=key
-                )
+                if key not in _records:
+                    mismatches[key] = "missing baseline output"
+                    continue
                 counts[key.split("/")[-2]] += 1
-            assert all(counts.values()), counts
-        print(f"COMPATIBILITY rtol=1e-12 atol=0 compared={counts}", flush=True)
+                try:
+                    assert_compatible(_records[key], reference[key])
+                except AssertionError as error:
+                    mismatches[key] = str(error)
+            if not all(counts.values()):
+                mismatches["output kinds"] = f"incomplete comparison counts {counts}"
+        print(
+            "COMPATIBILITY rtol=1e-12 atol=1e-12*reference_max "
+            f"compared={counts} mismatches={len(mismatches)}",
+            flush=True,
+        )
+        for key, message in mismatches.items():
+            print(f"COMPATIBILITY FAILED {key}: {message}", flush=True)
+        if mismatches:
+            session.exitstatus = pytest.ExitCode.TESTS_FAILED
+    return result

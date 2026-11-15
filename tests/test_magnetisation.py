@@ -1222,3 +1222,15 @@ def test_in_vessel_fill_matches_six_limb_reference(mu):
             )
     print(f"six-limb in-vessel mu={mu:g} errors={errors}", flush=True)
     assert errors["geometry"] <= 0.5 * errors["plain"]
+
+
+def test_compatibility_comparison_resolves_reference_scale():
+    from scripts.iron_limb_production.compatibility import assert_compatible
+
+    reference = np.array([0.0, 2e4])
+    scale = np.max(np.abs(reference))
+    assert_compatible(reference + 1e-16 * scale, reference)
+    changed = reference.copy()
+    changed[1] *= 1 + 1e-9
+    with pytest.raises(AssertionError, match="Not equal to tolerance"):
+        assert_compatible(changed, reference)

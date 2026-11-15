@@ -1,0 +1,55 @@
+<article id="bounded-jets-build">
+<h2>A bounded jets build: scope defect at dispatch</h2>
+<p>Read of the live plan at version 70, section §3, in worktree <code>bounded-jets-build</code> at base <code>7479bb0b5d21fa399c83954490e59d2f1df5be57</code>. The declared write paths are the two artifacts, <code>docs/evidence/fragments/kernel-compile-barrier/bounded-jets-build.html</code> and <code>docs/figures/kernel-compile-barrier/bounded-jets-build</code>. The node goal and every clause of its done-when require product source edits, so the node cannot be worked inside its fence. Nothing was changed under <code>nova/</code> or <code>scripts/</code>; the facts below are read from the tree and the plan, and are what a re-dispatched node needs.</p>
+
+<section id="bounded-jets-build-duplication">
+<h3>The point program exists twice, and the two forms differ</h3>
+<p>The owner is <code>_source_jets</code> at <code>nova/equilibrium/fixed_points.py:323</code>, whose batched program is <code>_row_program</code> at <code>:524</code>. The prototype copy is <code>_source_jets</code> at <code>scripts/prototypes/read_route/jets.py:229</code>. Both functions are 60 and 57 lines; the only textual difference is the sharing of the gradient's value:</p>
+<pre><code>owner:  def gradient_with_value(target):
+            value, gradient = value_gradient(target)
+            return gradient, (value, gradient)
+        hessian, (value, gradient) = jax.jacfwd(gradient_with_value, has_aux=True)(point)
+
+copy:   value, gradient = value_gradient(point)
+        hessian = jax.jacfwd(lambda target: value_gradient(target)[1])(point)</code></pre>
+<p>The owner already carries the auxiliary-reuse form, so the copy is the older shape. Neither file contains a <code>lax.scan</code> or any other term-order scan: the program that compiles at 217.9 s and 267,438 post-splitter instructions on the H200 (§3's stated base, <code>ordered-sharing</code>) is the unrolled form in both files, and the §3 levers named in the plan — a fixed-capacity scan over the term order, then a cheaper regular Hessian at corner heights — have not been applied to either.</p>
+</section>
+
+<section id="bounded-jets-build-importers">
+<h3>The copy has ten importers across the tree, not three</h3>
+<p>§3 names three importers. The read at this base finds ten sites that import or reference the copy's <code>_source_jets</code>, so a cutover that migrates only the three named sites leaves stale bindings:</p>
+<table>
+<thead><tr><th>Site</th><th>Line</th><th>Use</th></tr></thead>
+<tbody>
+<tr><td><code>scripts/prototypes/read_route/jets.py</code></td><td>321</td><td>the jets build, <code>jax.jit(jax.vmap(...))</code>, whose batches built the 550-cell operator bank rows and report <code>JET_BUILD</code> throughput; defined at 229</td></tr>
+<tr><td><code>scripts/prototypes/fixed_points/solve.py</code></td><td>14, 121</td><td>module import into <code>_row_program</code></td></tr>
+<tr><td><code>scripts/prototypes/kernel_compile_census/row.py</code></td><td>113, 115</td><td>the census row <code>prototype_point_batch</code></td></tr>
+<tr><td><code>scripts/prototypes/bank_hessian_diagnosis/localize.py</code></td><td>16, 30, 39</td><td>source and moving programs, base and candidate draws</td></tr>
+<tr><td><code>scripts/prototypes/bank_hessian_diagnosis/terms.py</code></td><td>16, 81</td><td>per-point term decomposition</td></tr>
+<tr><td><code>scripts/prototypes/bank_hessian_diagnosis/cell.py</code></td><td>25, 105</td><td>uniform-cell point jet</td></tr>
+<tr><td><code>scripts/prototypes/bank_hessian_diagnosis/projected.py</code></td><td>17, 85</td><td>projected-rectangle check</td></tr>
+<tr><td><code>scripts/prototypes/fixed_points/measure.py</code></td><td>152, 157</td><td>lazy import inside a measurement function</td></tr>
+<tr><td><code>tests/biot/test_moment_program_identity.py</code></td><td>192, 226</td><td>parses the owner's source from git and compares against <code>fixed_points._source_jets</code>; no import of the copy, unaffected by the cutover</td></tr>
+<tr><td><code>scripts/prototypes/kernel_compile_census/run_job.py</code></td><td>19</td><td>names the census row, not the function</td></tr>
+</tbody>
+</table>
+<p>The census harness keeps both names deliberately: <code>production_point_batch</code> already calls <code>fixed_points._row_program</code> (<code>row.py:111-112</code>) and <code>prototype_point_batch</code> calls the copy. Pointing the latter at the owner is the one-line edit §3 permits there, and it makes the two census rows measure the same program — which is what §3 asks for, and also what removes the copy's only independent compile.</p>
+</section>
+
+<section id="bounded-jets-build-required-grants">
+<h3>Write paths the node's own goal and done-when require</h3>
+<p>The work the goal states — one bounded program in <code>nova/equilibrium/fixed_points.py</code>, the copy deleted, three importers repointed — needs these paths granted; every one lies outside the dispatch's fence:</p>
+<ul>
+<li><code>nova/equilibrium/fixed_points.py</code> — the term-order scan and the Hessian form; the owner of the program.</li>
+<li><code>nova/biot/polygonanalytic.py</code> — only if the second lever, a cheaper regular Hessian at corner heights, is taken; <code>tests/test_moment_field_hessian.py</code> is its stated guard.</li>
+<li><code>scripts/prototypes/read_route/jets.py</code> — delete <code>_source_jets</code> at 229 and import the owner at the jets-build call site.</li>
+<li><code>scripts/prototypes/fixed_points/solve.py</code>, <code>scripts/prototypes/kernel_compile_census/row.py</code>, and the four <code>scripts/prototypes/bank_hessian_diagnosis/*.py</code> modules — repoint the remaining importers so no stale copy binding survives.</li>
+</ul>
+<p>With those granted, the three done-when clauses also need scheduler jobs this node's host cannot open as steps: an H200 job at each of the two §0 arms (282 cells, 2,132 nodes) for clause (1), the 4-hour <code>--mem=450G</code> sirius job for clause (2)'s 64-node base subset, and a <code>--mem=64G</code> job for clause (3)'s 900 s coarse-tie census test. The allocation this node runs in is <code>98dci4-clu-2001</code> (CPU, 24 GB), so each of those is an <code>sbatch</code> job of its own.</p>
+</section>
+
+<section id="bounded-jets-build-cutover-risk">
+<h3>Cutover risk to settle before the copy is deleted</h3>
+<p>The operator bank rows that exist today were built by the copy's form, and the owner's <code>has_aux</code> form differentiates the same <code>value_gradient</code> closure, so the two are expected to agree; the tree carries no test that compares them, and this node could not add one inside its fence. The migration needs a byte comparison of the two jitted programs on one coupling; the two blocks above already show the exact source shapes to compare.</p>
+</section>
+</article>

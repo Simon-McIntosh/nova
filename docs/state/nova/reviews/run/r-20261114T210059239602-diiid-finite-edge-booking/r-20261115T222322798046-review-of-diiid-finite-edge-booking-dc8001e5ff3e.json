@@ -44,6 +44,11 @@
       "kind": "exempted",
       "reason": "Coordinator amends the landed fragment to name 9c102cbae as the row revision and say the later commits moved the completion without changing the operator values",
       "recorded_at": "2026-11-15T22:59:59.953746+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "Carried from the earlier round: the coil-correction re-solve re-banks these rows against the diagnosis numbers in one table, which is where that comparison is owed",
+      "recorded_at": "2026-11-15T23:00:10.606673+00:00"
     }
   },
   "findings": [

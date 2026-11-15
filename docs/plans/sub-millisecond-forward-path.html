@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="373">
+<meta name="plan-version" content="374">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -1107,6 +1107,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261115T150620387682-review-of-geometry-reuse-cc5175d495b8-figure" data-who="reckon-build" data-when="2026-11-15T15:20:52.118Z">
     <div class="r-comment-body"><p>figure review of geometry-reuse at cc5175d49: no findings; per-slice-wall.svg calibrated against the H200 receipt within 0.4-1.3 percent; the prior overlapping-marker finding is resolved at this head</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T150207034820-review-of-geometry-reuse-cc5175d495b8" data-who="reckon-build" data-when="2026-11-15T15:09:37.610Z">
+    <div class="r-comment-body"><p>Review of run r-20261114T144226749384-geometry-reuse at head cc5175d495b8f493631ca54dc40e10e46682e2e9 from base 975f3e98cfa2b2976d2bbe1b94ead37f8623b529: parsed, six dimensions scored goal_fidelity 18, evidence 17, scope_discipline 20, durability 19, fit 19, reuse 17; the prior blocking reuse finding at topology.py:3096 is resolved because no _refresh_fragment_cells remains at the head.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048" data-who="reckon-build" data-when="2026-11-14T10:26:14.839Z">
     <div class="r-comment-body"><p>two review records under review-records/ of run r-20261113T165201745905-bank-traced-inputs, one plain and one pinned at the reviewed head; this node's suite fence is unarmed so no pytest gate exists for it and none ran.</p></div>

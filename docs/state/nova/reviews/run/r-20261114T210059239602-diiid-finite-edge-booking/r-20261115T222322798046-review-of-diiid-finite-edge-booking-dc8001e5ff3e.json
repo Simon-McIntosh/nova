@@ -59,6 +59,11 @@
       "kind": "exempted",
       "reason": "Non-blocking coupling to two private names of nova.equilibrium.forward; left for the operator owner's next pass",
       "recorded_at": "2026-11-15T23:00:31.548779+00:00"
+    },
+    "8": {
+      "kind": "exempted",
+      "reason": "Non-blocking: the duplicate geometry agrees today by construction from the same cells; a coordinate check belongs to the operator owner",
+      "recorded_at": "2026-11-15T23:00:43.099085+00:00"
     }
   },
   "findings": [

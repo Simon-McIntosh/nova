@@ -150,23 +150,43 @@ def main() -> None:
             raw_current_a=float(booked.sum()),
         )
         if args.probe_cell is not None:
-            receipt["probe_cell"] = probe(operator, booked, value_only, args.probe_cell)
+            receipt["probe_cell"] = probe(
+                state, psi, booked, value_only, args.probe_cell
+            )
     receipt.update(row_receipts(args.output))
     emit(args.output, receipt)
 
 
-def probe(operator, booked, value_only, cell: list[float]) -> dict[str, object]:
-    """Return both routes' current at the grid cell nearest a named position."""
+def probe(state, psi, booked, value_only, cell: list[float]) -> dict[str, object]:
+    """Return both routes' current at the grid cell nearest a named position.
 
-    radius = np.asarray(operator.grid.radius, dtype=np.float64)
-    height = np.asarray(operator.grid.height, dtype=np.float64)
-    distance = np.hypot(radius - cell[0], height - cell[1])
-    index = int(np.argmin(distance))
+    The grid coordinates are the row's own product: the terminal state's radius
+    and height meshes ravel in the order the row stores its grid nodes, and the
+    saved grid flux matches the solved state under that same ravel. That match
+    is asserted rather than assumed, because a mesh raveled in another order
+    would put the probe on a cell the diagnosis never named.
+    """
+
+    radius = np.asarray(state["radius"], dtype=np.float64)
+    height = np.asarray(state["height"], dtype=np.float64)
+    mesh_flux = np.asarray(state["flux"], dtype=np.float64)
+    if not np.allclose(
+        mesh_flux.ravel(), np.asarray(psi)[: mesh_flux.size], rtol=0, atol=1e-9
+    ):
+        raise SystemExit(
+            "the saved grid flux does not match the solved state under the "
+            "radius-height ravel, so a cell cannot be named by position"
+        )
+    radius_mesh, height_mesh = np.meshgrid(radius, height, indexing="ij")
+    distance = np.hypot(radius_mesh - cell[0], height_mesh - cell[1])
+    i, j = np.unravel_index(int(np.argmin(distance)), distance.shape)
+    index = int(i * height.size + j)
     return {
         "requested_rz_m": [float(cell[0]), float(cell[1])],
         "grid_cell_index": index,
-        "grid_cell_rz_m": [float(radius[index]), float(height[index])],
-        "distance_m": float(distance[index]),
+        "grid_cell_ij": [int(i), int(j)],
+        "grid_cell_rz_m": [float(radius[i]), float(height[j])],
+        "distance_m": float(distance[i, j]),
         "booked_current_a": float(booked[index]),
         "value_only_current_a": float(value_only[index]),
         "difference_a": float(booked[index] - value_only[index]),

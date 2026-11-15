@@ -17,5 +17,8 @@ PYTHONPATH="$COPY" /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no
 RESULT=$?
 grep -E "^(ROUTE|CONTROL|FAILED|PASSED)" "$OUT/negative-control.log" 2>/dev/null || true
 rm -rf "$WORK"
+# The log carries its own exit status, so a reader of the file alone can tell
+# whether the control ran and failed as it should, without the job log.
+printf "EXIT=%s\n" "$RESULT" >> "$OUT/negative-control.log"
 printf "EXIT=%s\n" "$RESULT"
 exit "$RESULT"

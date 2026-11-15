@@ -24,6 +24,11 @@
       "kind": "exempted",
       "reason": "Repaired at 02180da22: the negative control now drives the production point route through the operator it tests, rather than a copy of the stencil.",
       "recorded_at": "2026-11-15T17:32:17.559116+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "Addressed in the repair round (02180da22, f4bf6f5e4). The route-selection claim is re-checked by the re-review at f4bf6f5e4.",
+      "recorded_at": "2026-11-15T17:32:34.058784+00:00"
     }
   },
   "findings": [

@@ -14,6 +14,13 @@
   ],
   "completed_at": "2026-11-15T16:30:56.782Z",
   "dispatched_at": "2026-11-15T16:21:14Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Repaired in this run's repair round at 3fea105c8. The sampling-node conductor target is now completed in nova/imas/diiid_current.py, where the adapter completes the grid and wall targets, so every build_profile consumer gets 24 columns. The re-review at f4bf6f5e4 checks it.",
+      "recorded_at": "2026-11-15T17:32:08.032801+00:00"
+    }
+  },
   "findings": [
     {
       "file": "benchmarks/diiid_forward_gs_match.py",

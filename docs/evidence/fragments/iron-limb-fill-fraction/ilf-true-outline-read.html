@@ -87,28 +87,39 @@
 <h3 id="ilf-true-outline-read-scope">What the scoped readers do</h3>
 
 <p>
-  No script under this node's write paths constructs a flat outline: every
-  WEST iron reader there reads through <code>StaticMachineDescription</code>,
-  asserted by a test over the twelve scoped scripts. Two files outside this
-  node's write paths still hold a second construction of the same outline —
+  All twelve WEST iron script readers under this node's write paths — the four
+  in <code>scripts/west_iron_solve</code>, and those in
+  <code>scripts/west_stray_field</code>, <code>scripts/west_iron_galerkin</code>,
+  <code>scripts/west_iron_galerkin_pair</code>,
+  <code>scripts/west_picard_control</code>, <code>scripts/west_root_branch</code>,
+  <code>scripts/iron_graded_refinement</code>,
+  <code>scripts/sheet_tile_census</code> and
+  <code>scripts/magnetisation_law</code> — now call
+  <code>read_west_iron_outline</code> and take its stored description, so no
+  reader there builds an outline of its own; the test requires that call by
+  name and fails on the base tree. Two files outside this node's write paths
+  still hold a second construction of the same outline —
   <code>scripts/prototypes/iron_limb_fill/axisymmetric.py</code>
   (<code>west_regions</code>, <code>flat_fill</code>,
   <code>limb_demagnetising</code>, <code>WEST_JOIN</code>) and its consumer
   <code>scripts/iron_limb_production/measure.py</code>. Removing them belongs
-  to the production path, not to a write this node may make; the node manifest
-  records it under <code>outside_scope</code>. The prototype's flat arm reaches
-  R&nbsp;=&nbsp;6.0 and its limb is 1.2035&nbsp;m deep, so its section over the
-  arm differs from the stored one by about 2&nbsp;m&sup2; per radian; the
-  regions returned here are the section-preserving choice.
+  to the WEST evidence node, not to a write this node may make; the node
+  manifest records it under <code>outside_scope</code>. The prototype's flat arm
+  reaches R&nbsp;=&nbsp;6.0 and its limb is 1.2035&nbsp;m deep, so its section
+  over the arm differs from the stored one by about 2&nbsp;m&sup2; per radian;
+  the regions returned here are the section-preserving choice.
 </p>
 
 <h3 id="ilf-true-outline-read-verification">Verification</h3>
 
 <ul>
-  <li>Gate at head <code>61e8e63a7</code>: 17 passed,
+  <li>Gate at head <code>202d97cc4</code>: 18 passed,
       <code>tests/test_imas_iron_read.py</code>.</li>
   <li>Base arm at <code>0c74ef1</code> in the extracted base tree: 12 passed.</li>
-  <li>Negative control, refusal disabled: 1 failed, 16 passed, exit 1.</li>
+  <li>The same reader assertion run against the base source with the head
+      test file fails at <code>scripts/west_iron_solve/measure.py</code>,
+      so the check is not satisfied by the base revision.</li>
+  <li>Negative control, refusal disabled: 1 failed, 17 passed, exit 1.</li>
 </ul>
 </body>
 </html>

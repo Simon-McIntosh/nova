@@ -1,11 +1,58 @@
 <section id="icm-west-linear-h200-state">
-<h3>WEST affine iron: CPU controls prepared; H200 measurement awaits admission</h3>
-<p>The affine WEST measurement is queued as job <code>1316958</code> on betelgeuse,
-requesting one H200, four CPUs and 280 GB host memory. No WEST affine field,
-H200 assembly wall, or refinement verdict has been measured yet. The queued job
-is retained for the H200 measurement. The 6632-cell affine mesh has 39 792
-unknowns: its interaction alone is 12.667 GB, and a same-size Newton factor adds
-another 12.667 GB before temporary storage. It cannot run on a 16 GB P100.</p>
+<h3>WEST affine iron: uniform H200 pair measured; graded refinement and replay in progress</h3>
+<p>The uniform 80 and 40 mm WEST meshes completed on one NVIDIA H200 NVL in
+job <code>1316958</code>. The job then stopped before graded assembly because the
+measurement driver passed the surface arrays under unsupported keyword names.
+The call now follows the existing graded driver. CPU check <code>1317860</code>
+asserts exactly 5864 cells at 16/80 mm and 11 708 at 8/40 mm against their
+constant-basis receipts. H200 job <code>1317867</code> runs only these two graded
+candidates, subject to the compiled factor capacity check, then replays the
+largest persisted interaction. The completed uniform assemblies are retained.</p>
+
+<h4>Uniform WEST assembly on the H200</h4>
+<table>
+<thead><tr><th>mesh</th><th>cells</th><th>unknowns</th><th>operator [GB]</th><th>compile [s]</th><th>device execute [s]</th><th>host remainder [s]</th><th>wall [s]</th></tr></thead>
+<tbody>
+<tr><td>80 mm</td><td>1695</td><td>10 170</td><td>0.827431</td><td>5.638979</td><td>202.436517</td><td>186.717996</td><td>394.793492</td></tr>
+<tr><td>40 mm</td><td>6632</td><td>39 792</td><td>12.667226</td><td>5.587231</td><td>2663.774200</td><td>3833.127367</td><td>6502.488799</td></tr>
+</tbody>
+</table>
+<p>At 40 mm, <strong>58.95% of assembly wall is host remainder</strong>, measured as
+wall minus evaluator compile and device execution. The measured rate is
+0.000147839532 s per cell pair. Scaling by (11 708 / 6632)² projects
+<strong>20 265 s = 5.629 h at 11 708 cells: 3.318 h host remainder,
+2.306 h device execution and 0.00484 h compile</strong>. This is a cell-pair-rate
+projection, not a measured graded-mesh wall. Host remainder includes all work
+outside the timed compile and device calls and has not been further profiled.
+A 39 792-square float64 interaction and same-sized factor require 12.667 GB
+each before temporaries; this mesh cannot run on a 16 GB P100.</p>
+
+<h4>Uniform WEST full-drive material solves</h4>
+<table>
+<thead><tr><th>mesh</th><th>Newton corrections</th><th>terminal residual</th><th>returned μr range</th><th>preparation [s]</th><th>Newton loop [s]</th><th>solve wall [s]</th></tr></thead>
+<tbody>
+<tr><td>80 mm</td><td>6</td><td>2.09443e-13</td><td>218.293–1692.487</td><td>49.830905</td><td>3.136854</td><td>54.081906</td></tr>
+<tr><td>40 mm</td><td>7</td><td>5.71975e-15</td><td>216.661–1692.255</td><td>190.768186</td><td>11.501026</td><td>203.403846</td></tr>
+</tbody>
+</table>
+<p>Both start from M = 0 at full drive, converge, and use unregularised Newton
+corrections throughout. The receipts retain every residual. The permeability
+range is the solver's returned cell value, evaluated from the constant affine
+field coefficient; the nonlinear material residual itself is tested at volume
+quadrature nodes. Preparation includes geometry validation and external-field
+projection; it is separate from the measured Newton loop.</p>
+<table>
+<thead><tr><th>linear mesh</th><th>+1 m [µT]</th><th>+2 m [µT]</th><th>+4 m [µT]</th></tr></thead>
+<tbody>
+<tr><td>80 mm</td><td>244.487432606</td><td>164.057049648</td><td>73.148024075</td></tr>
+<tr><td>40 mm</td><td>243.756996308</td><td>162.814339896</td><td>72.289647538</td></tr>
+<tr><td>fine / coarse − 1 [%]</td><td>−0.298762</td><td>−0.757486</td><td>−1.173479</td></tr>
+</tbody>
+</table>
+<p>The linear +2 m value moves by less than 1% across the uniform pair, whereas
+the constant basis moved 13.1%. The linear +4 m value still moves by 1.17%,
+against 17.2% for the constant basis, so the uniform linear pair does not yet
+meet the 1% criterion at every probe. The graded result remains outstanding.</p>
 
 <h4>Constant-basis comparison inputs, quoted without recomputation</h4>
 <table>
@@ -76,12 +123,18 @@ exclude the separate probe-field evaluation. Receipts
 (<code>67 passed, 9 deselected in 272.56s</code>) and product head
 <code>97c17d8ddcc3e04070e46f7734c2adad67d786ce</code>
 (<code>71 passed, 9 deselected in 300.60s</code>), both with <code>EXIT=0</code>.
-The unfiltered baseline and after arms run in rigel job <code>1316941</code>;
-the requested after revision is <code>f437292cc422552f82df32b1426485d9cfaffad4</code>.</p>
-<p>The H200 batch will record compile, execute and host assembly walls, the full-drive
-Newton histories, probe fields, permeability ranges, compiled factor capacity,
-fresh-process replay and a half-coil-drive slice with plasma unchanged.
-The H200 rate per cell pair, its 11 708-cell projection, the probe-versus-unknowns
-SVG, and whether the +2/+4 m fields settle under refinement remain unmeasured.
+The first unfiltered arms completed with one reference-read failure each:
+the exported trees lacked Git context for the shell pin's <code>git show</code>.
+The launcher now supplies the object context through the shared gate owner.
+Rigel job <code>1317862</code> repeats the exact unfiltered commands at the base
+and requested after revision <code>353d2cfe364fce7158867d278f584b4f329de524</code>;
+the original failure logs remain intact.</p>
+<p>The graded-only H200 continuation will record its assembly and Newton results,
+then perform fresh-process replay and a half-coil-drive slice with plasma
+unchanged on the largest persisted operator. Those results and the inspected
+probe-versus-unknowns SVG remain outstanding. Uniform receipts are
+<code>linear-magnetisation/west-h200/uniform-0.08.json</code> and
+<code>uniform-0.04.json</code> under the iron-core evidence root; both record
+completion at <code>353d2cfe364fce7158867d278f584b4f329de524</code>.
 No formulation decision is taken here.</p>
 </section>

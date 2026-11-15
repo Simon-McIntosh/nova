@@ -53,6 +53,16 @@
       "note": "The comparison now bands the magnitude of q95 with the sign each state stores reported beside it, and compares fluxes after reading each state's stored flux sign, as the EFIT comparison section does.",
       "reason": "",
       "when": "2026-11-15T20:09:12.252523+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8d01e88436a6351e819b514197319efd387e0c2d",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The decision on who runs imas-efit now lists the section that delivers the run beside the one that consumes it.",
+      "reason": "",
+      "when": "2026-11-15T20:09:24.082650+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "The comparison now bands the magnitude of q95 with the sign each state stores reported beside it, and compares fluxes after reading each state's stored flux sign, as the EFIT comparison section does.",
       "reason": "",
       "when": "2026-11-15T20:09:12.252523+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8d01e88436a6351e819b514197319efd387e0c2d",
+      "commit_basis": "edit",
+      "note": "The decision on who runs imas-efit now lists the section that delivers the run beside the one that consumes it.",
+      "reason": "",
+      "when": "2026-11-15T20:09:24.082650+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261115T193830501969-plan-review-of-inverse-equilibrium-baseline.json",

@@ -34,6 +34,11 @@
       "kind": "exempted",
       "reason": "The declared control reddens the public-builder route assertion, which is the consumer-level check the control targets; the continuity case is a fixture contract by design and the route assertion is what catches the restored value-only route",
       "recorded_at": "2026-11-15T22:59:39.174653+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "The independent check is the public-builder assertion at :426, which the reviewer names; the pass-through assertion is redundant but harmless",
+      "recorded_at": "2026-11-15T22:59:47.647992+00:00"
     }
   },
   "findings": [

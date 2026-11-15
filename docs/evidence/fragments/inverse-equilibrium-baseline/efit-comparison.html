@@ -8,7 +8,7 @@
     wall and device. Twelve focused unit checks pass, including an independent
     weighted linear solution with nonzero residuals and a refusal of missing
     current uncertainties.</p>
-  <p><strong>Blocked before physical comparison.</strong> The stored outputs do
+  <p><strong>Stored output provenance.</strong> The stored outputs do
     not identify the number of profile coefficients the original imas-efit
     fits carried. On all three outputs, <code>code.name</code> is
     <code>EFIT+</code>, but <code>code.commit</code>, <code>code.version</code>,
@@ -58,7 +58,42 @@
   <p>No reconstruction, forward-only split, vertical-offset correction,
     per-sensor residual comparison, scaled-data control or terminal flux panel
     is claimed. The physical bands remain unmeasured. No tolerance was changed.
-    Supply the original fitted profile dimensions and basis constraints, or
-    regenerate the comparison outputs with that configuration recorded, before
-    running the physical comparisons.</p>
+    The committed imas-efit configuration is now taken as the generating
+    configuration, as directed; the stored outputs themselves do not carry it.
+    Physical measurements are pending on the H200 lane.</p>
+  <h3 id="efit-comparison-configuration">Generating-configuration assumption</h3>
+  <p>The committed configuration at imas-efit revision
+    <code>cff16db99a5c964637534afc741b2351179b9f88</code> is taken as the
+    generating configuration. The output IDS does not prove that identity.
+    Paths below are relative to <code>~/Code/imas-efit/</code>.</p>
+  <table><thead><tr><th>Case</th><th>Configured pp / FF′ ndeg</th>
+    <th>Basis and edge condition</th><th>Free pp / FF′ coefficients</th>
+    <th>Source bindings</th></tr></thead><tbody>
+    <tr><td>MAST-U</td><td>0 / 2</td><td>Monomial; zero at edge</td><td>0 / 2</td>
+      <td><code>configuration/machines/MASTU/solver/magnetics.xml:4</code> and
+      <code>:6</code>; baseline family in <code>tests/data-manifest.json:2027</code>;
+      edge in <code>configuration/machines/_common/solver/default.xml:148</code>
+      and <code>:149</code>. Monomial edge functions are implemented in
+      <code>src/EFIT/basisfunc.f90:40</code> and <code>:42</code>.</td></tr>
+    <tr><td>TCV</td><td>2 / 2</td><td>Bernstein; endpoint function dropped</td><td>1 / 1</td>
+      <td><code>configuration/machines/TCV/solver/magnetics.xml:5</code> and
+      <code>:9</code>; FF′ selector and Bernstein floor in
+      <code>docs/auto-degree-logic.html:208</code> and <code>:211</code>;
+      shared basis and edge at <code>configuration/machines/_common/solver/default.xml:148</code>
+      and <code>:149</code>.</td></tr>
+    <tr><td>ITER</td><td>2 / 3</td><td>Bernstein; endpoint function dropped</td><td>1 / 2</td>
+      <td><code>configuration/machines/ITER/solver/magnetics.xml:3</code>;
+      shared basis and edge at <code>configuration/machines/_common/solver/default.xml:148</code>
+      and <code>:149</code>.</td></tr>
+  </tbody></table>
+  <p>For Bernstein, ndeg counts functions and edge=1 removes its last function:
+    <code>src/EFIT/basisfunc.f90:132</code> and <code>:140</code> establish the live
+    counts. The regularisation note <code>configuration/machines/_common/regularisation/default.xml:9</code>
+    describes the maximum allocated array, not the live Bernstein count.
+    The composed schema is <code>efit/config/schemas/efit_config.py:51</code>;
+    its basis fields are in <code>efit/config/schemas/solver.py:122</code>,
+    <code>:132</code> and <code>:139</code>. The MAST-U manifest's explicit
+    monomial family takes precedence over the shared Bernstein default for
+    that stored baseline. These are declared comparison assumptions, not
+    reconstructed output provenance.</p>
 </section>

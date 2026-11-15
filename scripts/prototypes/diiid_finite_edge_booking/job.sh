@@ -5,6 +5,11 @@ export TMPDIR=/tmp
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
 export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1
 export JAX_ENABLE_COMPILATION_CACHE=0 JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=none
+# The batch divides one fraction of the card between its slots, which is sized
+# for the large device; a row whose solve outgrows that fraction dies of
+# RESOURCE_EXHAUSTED on a card that still holds free memory. Grow on demand
+# instead, so each row reaches its own card's capacity.
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
 TREE=${1:?worktree}
 OUTPUT=${2:?run output}
 SLOTS=${3:-4}

@@ -1288,4 +1288,59 @@
     retained under <code>~/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/</code>.
     Input uncertainties are in <code>inspect-cases-signals.log</code> and stored
     samples and provenance in <code>audit-output.log</code>.</p>
+  <h3 id="efit-comparison-iter-terminal-refusal">ITER: three public refusals, terminal state recovered</h3>
+  <p>With exact signed rectangular-loop support and Bernstein ndeg 2/3
+    (one/two live functions), all three public forward attempts in titan job
+    1318520 refused qualification. Each raised <code>NoQualifiedAxisError</code>:
+    <q>no qualified magnetic-axis candidate has a resolved component</q>.
+    The saved native histories report <code>NONFINITE_RESIDUAL</code> (reason 3),
+    converged=false and a NaN residual. No typed qualified forward receipt was
+    returned, no inverse fit ran, and no further seed is admitted.</p>
+  <table><thead><tr><th>ITER seed</th><th>Public outcome</th><th>Residual</th>
+    <th>Termination reason</th><th>Trips</th><th>Finite terminal flux values</th>
+    </tr></thead><tbody>
+    <tr><td>Stored-field seed</td><td>NoQualifiedAxisError; unqualified</td><td>NaN</td><td>3</td><td>5</td><td>1568 / 1568</td></tr>
+    <tr><td>Limited seed</td><td>NoQualifiedAxisError; unqualified</td><td>NaN</td><td>3</td><td>15</td><td>1568 / 1568</td></tr>
+    <tr><td>Diverted seed</td><td>NoQualifiedAxisError; unqualified</td><td>NaN</td><td>3</td><td>15</td><td>1568 / 1568</td></tr>
+  </tbody></table>
+  <p>The original physical stage took 4857.785 s on a titan P100, including
+    geometry and compilation. Its native pytest log ends
+    <code>1 failed in 4842.25s (1:20:42)</code> because the final reporting helper
+    then rejected the NaN with <code>ValueError: Out of range float values are
+    not JSON compliant: nan</code>. That reporting failure is separate from
+    the three preceding public-solve refusals. Original JSON failure records,
+    pickle histories and the failed native log remain under
+    <code>titan-measurement-1318520/physical-iter/</code> in the run directory.</p>
+  <p>The strict JSON writer still refuses unexpected nonfinite values. The
+    refusal receipt now explicitly writes residual=null and residual_state=nan;
+    the native NaN remains in the preserved history. A focused check forces the
+    strict refusal, quotes its exception and verifies that an existing receipt
+    survives the failed atomic write. The reporting/fitter file records
+    <code>23 passed, 4 deselected in 15.19s</code>.</p>
+  <figure id="efit-comparison-iter-refusal-panel">
+    <img src="/nova/figures/inverse-equilibrium-baseline/efit-comparison/iter.svg"
+      alt="ITER terminal unqualified nova contours near the inner wall overlaid on the midplane imas-efit plasma and the vessel" />
+    <figcaption>ITER 135013, 75 s: grey wide imas-efit contours underneath blue
+      narrow nova terminal contours on one shared level array, with the wall
+      and reference nulls. No nova axis is admitted: the terminal null read
+      refuses with NoQualifiedAxisError. Public residual=NaN, qualified=false,
+      converged=false, reason=3. The finite third terminal state is recovered
+      from the original persisted history with zero additional equilibrium
+      solves; recovery job 1318719 enforces a refusing ForwardProfile.solve
+      sentinel and records 31.661 s on titan P100. The PNG was rendered and
+      inspected; legend and contours are clear, without axes or clipped or
+      overlapping text. The inspection receipt precedes native EXIT=0.</figcaption>
+  </figure>
+  <p><strong>Same magnetics rows; different constraint sets.</strong> The ITER
+    generating-configuration assumption includes imas-efit's synthesised
+    pressure prior (beta_pol=0.5) and q0 prior; nova's magnetics fit carries
+    neither. The one/two live counts follow today's selector code and reproduce
+    stored linear p-prime and quadratic FF-prime. Stored outputs carry no
+    generating configuration and may predate the ITER priors added after
+    2026-06-23; per-slice live counts await imas-efit confirmation. This caveat
+    applies to the seed rows and the panel as well as any later comparison.</p>
+  <p>No qualified reconstruction exists on any case. Physical band rows,
+    vertical-offset comparison, the fit/forward split and the 1.10 scaled-fit
+    control remain unmeasured. The kernel replay and strict JSON check do not
+    substitute for the declared physical negative control.</p>
 </section>

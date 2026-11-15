@@ -119,6 +119,7 @@ from nova.imas.diiid_description import (
 from nova.imas.diiid_current import (
     DEFAULT_ACTIVE_COIL_DD_VERSION,
     DEFAULT_ACTIVE_COIL_ENTRY,
+    DiiidCurrentAdapter,
     circuit_current_map,
     complete_profile_current_adapter,
     shipped_current_at,
@@ -1189,6 +1190,7 @@ def _moment_couplings(
     tuple[np.ndarray, np.ndarray, np.ndarray],
     tuple[np.ndarray, np.ndarray, np.ndarray],
     np.ndarray,
+    tuple[np.ndarray, np.ndarray, np.ndarray],
 ]:
     """Return the flux moment blocks and sampling nodes the booked route needs.
 
@@ -1197,7 +1199,8 @@ def _moment_couplings(
     route integrates are the moments of the same kernel that carries its
     uniform row. The sampling nodes are the cell vertices, which is where the
     boundary is clipped and therefore a different point set from the cell
-    centres: the grid blocks cannot be reused for them.
+    centres: the grid blocks cannot be reused for them, so the sampling nodes
+    carry their own blocks evaluated at the vertices.
     """
 
     cells = _lattice_cells(lattice)
@@ -1215,6 +1218,7 @@ def _moment_couplings(
         build_flux_blocks(centres, cells, centres),
         build_flux_blocks(np.asarray(wall, dtype=np.float64), cells, centres),
         sample_coordinate,
+        build_flux_blocks(sample_coordinate, cells, centres),
     )
 
 
@@ -1288,9 +1292,22 @@ def _couplings(
     plasma_to_grid = _green_block(coordinate, coordinate, width, vertical_extent)
     plasma_to_wall = _green_block(wall, coordinate, width, vertical_extent)
     if FINITE_EDGE_MOMENT_ROUTE == "booked":
-        grid_moments, wall_moments, sample_coordinate = _moment_couplings(lattice, wall)
+        grid_moments, wall_moments, sample_coordinate, sample_moments = (
+            _moment_couplings(lattice, wall)
+        )
+        # The sampling nodes are solved rows too, so they carry the same
+        # conductor population the grid carries, evaluated at the vertices with
+        # the polygon kernel the wall target uses. A target built from zeros
+        # would hold a flux of zero at the nodes the boundary is clipped on.
+        source_to_sample = _wall_source_response(
+            machine.physical, names, sample_coordinate
+        )
+        plasma_to_sample = _green_block(
+            sample_coordinate, coordinate, width, vertical_extent
+        )
     else:
-        grid_moments = wall_moments = sample_coordinate = None
+        grid_moments = wall_moments = sample_coordinate = sample_moments = None
+        source_to_sample = plasma_to_sample = None
     grid_rows = lattice.node_count
     wall_rows = len(wall)
     same_grid_seam = (
@@ -1306,6 +1323,17 @@ def _couplings(
         raise RuntimeError(
             "topology-surface targets do not share the labelled grid and wall seams"
         )
+    if sample_coordinate is not None:
+        sample_rows = int(np.shape(sample_coordinate)[0])
+        same_sample_seam = (
+            source_to_sample.shape == (sample_rows, source_to_grid.shape[1])
+            and plasma_to_sample.shape == (sample_rows, grid_rows)
+            and sample_moments[0].shape == (sample_rows, lattice.node_count)
+        )
+        if not same_sample_seam:
+            raise RuntimeError(
+                "sampling-node targets do not share the conductor and cell seams"
+            )
     result = (
         names,
         wall,
@@ -1317,6 +1345,9 @@ def _couplings(
         grid_moments,
         wall_moments,
         sample_coordinate,
+        source_to_sample,
+        plasma_to_sample,
+        sample_moments,
         statement,
         {
             **surface_receipt,
@@ -1328,8 +1359,15 @@ def _couplings(
                 else {
                     "grid": [int(value) for value in np.shape(grid_moments[0])],
                     "wall": [int(value) for value in np.shape(wall_moments[0])],
+                    "sample": [int(value) for value in np.shape(sample_moments[0])],
                     "sample_rows": int(np.shape(sample_coordinate)[0]),
                 }
+            ),
+            "source_to_sample_rows": (
+                None if source_to_sample is None else int(source_to_sample.shape[0])
+            ),
+            "plasma_to_sample_rows": (
+                None if plasma_to_sample is None else int(plasma_to_sample.shape[0])
             ),
             "source_to_wall_rows": int(source_to_wall.shape[0]),
             "source_to_wall_sha256": _array_sha256(source_to_wall),
@@ -1399,6 +1437,9 @@ def _build_profile(
         grid_moments,
         wall_moments,
         sample_coordinate,
+        source_to_sample,
+        plasma_to_sample,
+        sample_moments,
         statement,
         surface_receipt,
     ) = _couplings(
@@ -1441,9 +1482,11 @@ def _build_profile(
     seed = np.r_[label.ravel(), seed_wall_flux]
     if sample_coordinate is not None:
         sample = FluxTarget(
-            source_target=jnp.zeros((len(sample_coordinate), source_to_grid.shape[1])),
-            plasma_target=jnp.zeros((len(sample_coordinate), lattice.node_count)),
+            source_target=jnp.asarray(source_to_sample),
+            plasma_target=jnp.asarray(plasma_to_sample),
             null=Null1D(jnp.asarray(sample_coordinate)),
+            plasma_target_r=jnp.asarray(sample_moments[1]),
+            plasma_target_z=jnp.asarray(sample_moments[2]),
         )
         operator = replace(
             profile.operator,
@@ -1484,6 +1527,56 @@ def _build_profile(
             },
         },
         seed_wall_flux_sha256=_array_sha256(seed_wall_flux),
+    )
+
+
+def extend_sample_current_response(adapter: DiiidCurrentAdapter) -> DiiidCurrentAdapter:
+    """Append the circuit-driven columns to the sampling-node conductor target.
+
+    The current adapter appends the pf_active circuit groups to the grid and
+    wall conductor responses, because those groups produce flux at every
+    target. The sampling nodes the booked route clips on are a third target
+    and need the same columns: without them the sample rows would be solved
+    against a shorter conductor vector than the one the solve supplies.
+    """
+
+    profile = adapter.profile
+    sample = profile.operator.sample
+    if sample is None:
+        return adapter
+    coordinate = np.asarray(sample.coordinate, dtype=np.float64)
+    names, response, receipt = active_coil_response_from_imas(
+        DEFAULT_ACTIVE_COIL_ENTRY,
+        DEFAULT_ACTIVE_COIL_DD_VERSION,
+        CIRCUIT_DRIVEN_CONDUCTORS,
+        coordinate[:, 0],
+        coordinate[:, 1],
+    )
+    if names != CIRCUIT_DRIVEN_CONDUCTORS:
+        raise RuntimeError("active-coil response did not preserve requested order")
+    expected = int(profile.operator.grid.source_target.shape[1])
+    extended = len(names) + int(sample.source_target.shape[1])
+    if extended != expected or np.shape(response)[1] != coordinate.shape[0]:
+        raise RuntimeError(
+            "sampling-node conductor columns do not complete the shipped order"
+        )
+    operator = replace(
+        profile.operator,
+        sample=replace(
+            sample,
+            source_target=jnp.column_stack(
+                (sample.source_target, jnp.asarray(response.T))
+            ),
+        ),
+    )
+    return replace(
+        adapter,
+        profile=replace(profile, operator=operator),
+        response_receipt={
+            **adapter.response_receipt,
+            "sample": receipt,
+            "sample_rows": int(coordinate.shape[0]),
+        },
     )
 
 

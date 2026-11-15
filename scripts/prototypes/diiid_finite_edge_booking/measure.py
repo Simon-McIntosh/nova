@@ -50,6 +50,15 @@ def capture_build(original):
     return build
 
 
+def capture_adapter(original):
+    """Complete the sampling-node conductor target the booked route clips on."""
+
+    def adapter(profile, **kwargs):
+        return bench.extend_sample_current_response(original(profile, **kwargs))
+
+    return adapter
+
+
 def capture_solve(original):
     """Retain the equilibrium the row returned, so the read uses that one."""
 
@@ -145,6 +154,9 @@ def main() -> None:
     args = parser.parse_args()
 
     bench.build_profile = capture_build(bench.build_profile)
+    bench.complete_profile_current_adapter = capture_adapter(
+        bench.complete_profile_current_adapter
+    )
     bench.ForwardProfile.solve = capture_solve(bench.ForwardProfile.solve)
     extent.main()
     receipt = discriminator()

@@ -7,6 +7,7 @@ set -u
 
 tree=${1:?tree}
 name=${2:?name}
+rev=${REV:-}
 out=${OUT:-/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/bounded-jets-build}
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 command="PYTHONPATH=. JAX_PLATFORMS=cpu $python -m pytest -p no:cacheprovider -q tests/test_fixed_points.py"
@@ -16,7 +17,7 @@ mkdir -p "$out"
 payload=$(cat <<PAYLOAD
 cd $tree
 export TMPDIR=/tmp
-echo "revision=\$(git rev-parse HEAD 2>/dev/null || echo none)"
+echo "revision=${rev:-\$(git -C $tree rev-parse HEAD 2>/dev/null)}"
 echo "tree=\$(pwd -P)"
 PYTHONPATH=. JAX_PLATFORMS=cpu $python -c "import nova.equilibrium.fixed_points as m, os; print('module=' + m.__file__); print('cwd=' + os.getcwd())"
 echo "# command: $command"

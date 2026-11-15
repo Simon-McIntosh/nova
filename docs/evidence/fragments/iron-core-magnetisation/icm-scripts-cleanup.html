@@ -9,12 +9,33 @@
 <body>
 <section id="icm-scripts-cleanup-state">
   <h2>Iron test and evidence cleanup</h2>
-  <p>The stored 40 mm shell operator now has a fast batching control in addition
+  <p>The 40 mm shell operator now has a fast batching control in addition
   to its compact control. Repeated quadrature nodes divide their weights by
   their multiplicity, preserving the integration rule while sending the first
   selected cell through the real 4096-point flush. An 8 by 8 edge tile also
   crosses the reciprocal tile skip. Production operators, defaults, tolerances
   and stored operator values are unchanged.</p>
+  <p id="icm-scripts-cleanup-reference">The batching case compares two calls to
+  the same production owner in one process at the same 1e-12 Frobenius and
+  maximum-entry tolerances. The crossing call uses split quadrature weights
+  and 8 by 8 edge tiles; the reference uses the equivalent unsplit rule in
+  one volume flush and one edge tile. No cache is reset. This measures batch
+  invariance on the CPU executing the test.</p>
+  <p>The reference distinction is measured: the stored JSON control agrees
+  with the boundary case to 3.05e-15 on a Xeon Gold 5220, but differs by
+  8.48e-12 Frobenius and 1.46e-11 maximum-entry on a Broadwell E5-2680 v4.
+  Even the ordinary compact operator has that Broadwell discrepancy against
+  the stored JSON, while split versus ordinary on that same CPU agrees to
+  1.34e-15 Frobenius and 1.50e-15 maximum-entry. Fresh processes, persistent
+  cache enabled or disabled, and four or eight CPUs reproduce the contrast;
+  preceding linear tests leave it unchanged. These are CPU-family arithmetic
+  differences, not evidence of test-order dependence. The original compact
+  control is unchanged. Detailed controls and host identities are preserved
+  in <code>diagnosis-summary.json</code> and
+  <code>same-cpu-batching-comparison.json</code> in the run directory below.</p>
+  <p>The following table records the initial Gold probe against the stored
+  values; final same-process and mutant checks are retained separately in the
+  manifest, with each arm's CPU identity.</p>
   <table>
     <thead><tr><th>CPU control</th><th>Frobenius relative error</th><th>Maximum-entry relative error</th><th>Result</th><th>Call time [s]</th></tr></thead>
     <tbody>

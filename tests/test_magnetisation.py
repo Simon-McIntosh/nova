@@ -1214,6 +1214,9 @@ def test_linear_shell_operator_pin(tmp_path, monkeypatch, batch_edges):
         from nova.biot import sectionaverage, tiledassembly
 
         section_nodes = sectionaverage.section_nodes
+        assert sum(len(section_nodes(polygon, 6)[0]) for polygon in polygons) < 4096
+        atoms = iron.linear_magnetisation_geometry(polygons)["atoms"]
+        assert plan.tile_count(len(atoms), len(atoms)) == 1
 
         def split_weights(polygon, order):
             points, weights = section_nodes(polygon, order)
@@ -1226,24 +1229,26 @@ def test_linear_shell_operator_pin(tmp_path, monkeypatch, batch_edges):
         # Splitting weights preserves the rule while crossing a real flush.
         assert len(split_weights(polygons[0], 6)[0]) >= 4096
         assert len(polygons) > 1
-        monkeypatch.setattr(sectionaverage, "section_nodes", split_weights)
-        plan = tiledassembly.TilePlan(8, 8, plan.block, plan.n_panels, plan.n_nodes)
-        atoms = iron.linear_magnetisation_geometry(polygons)["atoms"]
-        assert any(s.stop <= t.start for t, s in plan.tiles(len(atoms), len(atoms)))
-    actual, _ = iron.linear_galerkin_cell_interaction(polygons, plan=plan)
-    if full_reference:
-        expected = np.load(full_reference)
-    elif batch_edges:
-        expected = np.asarray(control["operator"])
+        crossing = tiledassembly.TilePlan(8, 8, plan.block, plan.n_panels, plan.n_nodes)
+        assert any(s.stop <= t.start for t, s in crossing.tiles(len(atoms), len(atoms)))
+        with monkeypatch.context() as patch:
+            patch.setattr(sectionaverage, "section_nodes", split_weights)
+            actual, _ = iron.linear_galerkin_cell_interaction(polygons, plan=crossing)
+        # The same owner and CPU compare batching without cross-platform rounding.
+        expected, _ = iron.linear_galerkin_cell_interaction(polygons, plan=plan)
     else:
-        from scripts.iron_linear_magnetisation.kernel_cost import load_owner
+        actual, _ = iron.linear_galerkin_cell_interaction(polygons, plan=plan)
+        if full_reference:
+            expected = np.load(full_reference)
+        else:
+            from scripts.iron_linear_magnetisation.kernel_cost import load_owner
 
-        reference = load_owner(
-            control["revision"], "compact_reference_owner", directory=tmp_path
-        )
-        expected, _ = reference.linear_galerkin_cell_interaction(
-            polygons, plan=iron._PLAN
-        )
+            reference = load_owner(
+                control["revision"], "compact_reference_owner", directory=tmp_path
+            )
+            expected, _ = reference.linear_galerkin_cell_interaction(
+                polygons, plan=iron._PLAN
+            )
     assert np.isfinite(actual).all()
     difference = actual - expected
     relative = np.linalg.norm(difference) / np.linalg.norm(expected)

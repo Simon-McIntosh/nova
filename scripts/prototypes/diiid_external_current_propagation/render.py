@@ -82,12 +82,10 @@ def main():
     )
 
     figure = plt.figure(figsize=(14, 7.2), dpi=100)
-    axes = [
-        figure.add_axes(box)
-        for box in ((0.03, 0.10, 0.44, 0.80), (0.51, 0.10, 0.44, 0.80))
-    ]
+    boxes = ((0.03, 0.16, 0.44, 0.74), (0.51, 0.16, 0.44, 0.74))
+    axes = [figure.add_axes(box) for box in boxes]
     notes = []
-    for axes_item, (arm, label) in zip(axes, PANELS, strict=True):
+    for axes_item, box, (arm, label) in zip(axes, boxes, PANELS, strict=True):
         data = arms[arm]
         axes_item.set_axis_off()
         draw_wall(
@@ -109,32 +107,28 @@ def main():
             x_points=data["lower_x"][None, :],
             other_x_points=reference["x_point"] if arm != "base" else None,
         )
+        axes_item.set_xlim(radius.min() - 0.08, radius.max() + 0.08)
+        axes_item.set_ylim(height.min() - 0.08, height.max() + 0.08)
+        axes_item.set_aspect("equal")
+        axes_item.set_axis_off()
         notes.append(
-            axes_item.text(
-                0.02,
-                0.98,
-                label,
-                transform=axes_item.transAxes,
-                va="top",
-                ha="left",
-                fontsize=14,
-                color=SOLVED,
+            figure.text(
+                box[0], 0.945, label, va="bottom", ha="left", fontsize=14, color=SOLVED
             )
         )
         record = json.loads(
             (args.input / f"arm-{arm}.json").read_text(encoding="utf-8")
         )
         notes.append(
-            axes_item.text(
-                0.02,
-                0.02,
+            figure.text(
+                box[0],
+                0.055,
                 "lower X offset %.3f / %.3f cm, residual %.2e"
                 % (
                     record["lower_x_offset_cm"][0],
                     record["lower_x_offset_cm"][1],
                     record["residual"],
                 ),
-                transform=axes_item.transAxes,
                 va="bottom",
                 ha="left",
                 fontsize=12,

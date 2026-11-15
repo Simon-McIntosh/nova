@@ -51,10 +51,17 @@ def capture_build(original):
 
 
 def capture_adapter(original):
-    """Complete the sampling-node conductor target the booked route clips on."""
+    """Complete the sampling-node conductor target the booked route clips on.
+
+    The completed adapter's profile is the one the row goes on to solve, so it
+    is retained here: the build call returns a six-item tuple, not a profile,
+    and the discriminator needs the operator the adapter built.
+    """
 
     def adapter(profile, **kwargs):
-        return bench.extend_sample_current_response(original(profile, **kwargs))
+        result = bench.extend_sample_current_response(original(profile, **kwargs))
+        BUILT["profile"] = result.profile
+        return result
 
     return adapter
 
@@ -101,11 +108,11 @@ def terminal(equilibrium) -> dict[str, object]:
 def discriminator() -> dict[str, object]:
     """Return the booked and value-only current of the boundary-band cells."""
 
-    built = BUILT.get("value")
+    profile = BUILT.get("profile")
     equilibrium = SOLVED.get("value")
-    if built is None or equilibrium is None:
+    if profile is None or equilibrium is None:
         return {"status": "unavailable"}
-    operator = built.profile.operator
+    operator = profile.operator
     psi = equilibrium.flux
     topology = operator._fixed_design_read(psi)[1]
     axis = float(np.asarray(topology.axis_flux))

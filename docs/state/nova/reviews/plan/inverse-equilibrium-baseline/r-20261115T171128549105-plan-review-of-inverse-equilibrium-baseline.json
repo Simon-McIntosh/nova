@@ -53,6 +53,16 @@
       "note": "The EFIT comparison section's body and first clause now state that the ITER row shares magnetics rows but not the constraint set, is reported with that label outside the pass bands, and that the size of the gap is read before any prior is added.",
       "reason": "",
       "when": "2026-11-15T17:53:03.548822+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The drifting-sensor section's body and done-when now sweep the spectral index and the corner frequency as well as the noise size, with the swept ranges reported in the record.",
+      "reason": "",
+      "when": "2026-11-15T17:53:13.777539+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "The EFIT comparison section's body and first clause now state that the ITER row shares magnetics rows but not the constraint set, is reported with that label outside the pass bands, and that the size of the gap is read before any prior is added.",
       "reason": "",
       "when": "2026-11-15T17:53:03.548822+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+      "commit_basis": "edit",
+      "note": "The drifting-sensor section's body and done-when now sweep the spectral index and the corner frequency as well as the noise size, with the swept ranges reported in the record.",
+      "reason": "",
+      "when": "2026-11-15T17:53:13.777539+00:00"
     },
     "wiring-1": {
       "action": "acted",

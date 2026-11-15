@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "Derived from the reviewed run's own gate logs. baseline arms at 7244dcc3c1b8fe8c3a38476214d66a024fbf4d14: tests/test_bank_lane_drive.py '1 failed, 10 passed in 10.01s' EXIT=1 (failure_ids ['tests/test_bank_lane_drive.py::test_incoming_factor_rebuild_uses_lane_profiles']), tests/test_fused_booking_assembly.py '22 passed in 488.01s' EXIT=0, tests/test_bank_drive_continuation.py '10 passed in 10.49s' EXIT=0. after arms at f24e3ff741581be1ce0b7914642ed7cf781d82cf: '11 passed in 12.19s' EXIT=0, '22 passed in 491.31s' EXIT=0, '10 passed in 10.31s' EXIT=0. Every log runs to its pytest summary line; head failure set is empty, so the head adds zero failures. The only commit above the measured after arm, d6af4a5c20e9, adds a 14-line HTML evidence fragment and no executable code.",
+  "call_sites": [
+    "nova/equilibrium/support_read.py:1773 (newton_step, the only product caller of book_and_local_sensitivities)",
+    "nova/equilibrium/support_read.py:2202 (solve_batch one_fresh/one_with_factor pass quadrature through to newton_step)",
+    "scripts/prototypes/bank_newton_step/measure.py:233 (constructs current.Quadrature(sigma=convention.sigma, segments=64))",
+    "scripts/prototypes/bank_newton_step/measure.py:105 (route_quadrature = replace(quadrature, target_current=target_current))",
+    "scripts/prototypes/bank_lane_drive/measure.py:100 (solve_batch receives machine.quadrature at :93)",
+    "nova/equilibrium/drive_continuation.py:219 and :278 (advance_drive forwards the caller's rule unchanged)"
+  ],
+  "completed_at": "2026-11-15T12:37:57.981Z",
+  "dispatched_at": "2026-11-15T12:37:42Z",
+  "emissions": [
+    "VERDICT goal: the goal is to settle whether the lane-factor test or the product is wrong and land the matching repair; the reviewed head passes current.Quadrature() into solve_batch at tests/test_bank_lane_drive.py:392 while nova/equilibrium/support_read.py:1355 keeps replace(quadrature, target_current=None), which matches the node's settled case that production always supplies a real rule (scripts/prototypes/bank_newton_step/measure.py:233).",
+    "VERDICT done_when: the three clauses are the named test green at head, a negative control that re-fails with the same TypeError, and three files at base and head in one rigel job with zero added failures; verified/named-head.log reads '1 passed in 7.78s' with EXIT=0, verified/negative-control.log:82,105 reproduces 'nova/equilibrium/support_read.py:1355 in book_and_local_sensitivities' with 'TypeError: replace() should be called on dataclass instances' and EXIT=1, and verified/slurm-1317375.log lists all six file arms in job 1317375.",
+    "VERDICT write_paths: the declared paths are nova/equilibrium/support_read.py, tests/test_bank_lane_drive.py, docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-none-quadrature.html and docs/figures/sub-millisecond-forward-path/fused-booking-none-quadrature; git diff --stat 7244dcc3c1..d6af4a5c20e9 touches only the test (+16/-1) and the fragment (+14), leaving support_read.py and the figure path untouched.",
+    "VERDICT manifest: read; it records status complete, commits f24e3ff and d6af4a5, the three fresh-process file arms with revision, command, log path, failure_count and failure_ids, the negative-control log, the two scaffolding retry attributions, and the call-site sentence settling the case.",
+    "VERDICT diff: read both commits against base 7244dcc3c1; f24e3ff74158 adds a six-argument booking mock asserting isinstance(quadrature, current.Quadrature) and collecting per-lane profiles, replaces the fixture's None quadrature with current.Quadrature(), and asserts sorted(bookings) == [-0.75, 0.25]; d6af4a5c20e9 adds only the 14-line HTML landing fragment, and no product line moves.",
+    "CALL_SITES: nova/equilibrium/support_read.py:1773, nova/equilibrium/support_read.py:2202, scripts/prototypes/bank_newton_step/measure.py:233, scripts/prototypes/bank_newton_step/measure.py:105, scripts/prototypes/bank_lane_drive/measure.py:100, nova/equilibrium/drive_continuation.py:219",
+    "SCORE goal_fidelity: 19",
+    "JUSTIFICATION goal_fidelity: tests/test_bank_lane_drive.py:392 now passes current.Quadrature() and support_read.py:1355 is unchanged, which is the fixture-side resolution the brief prescribes when production never passes None.",
+    "SCORE evidence: 18",
+    "JUSTIFICATION evidence: verified/named-head.log and verified/slurm-1317375.log record all six fresh-process arms with their summaries and EXIT lines, though the after and named-head arms are bound to f24e3ff and not to the head d6af4a5c20e9 that adds only documentation.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: git diff 7244dcc3c1..d6af4a5c20e9 changes only tests/test_bank_lane_drive.py and docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-none-quadrature.html, both inside the declared paths.",
+    "SCORE durability: 16",
+    "JUSTIFICATION durability: tests/test_bank_lane_drive.py:339 asserts isinstance(quadrature, current.Quadrature) inside the mocked seam and :402 asserts sorted(bookings) == [-0.75, 0.25], so forwarding None or dropping a lane's profile reddens, but the real replace at support_read.py:1355 is bypassed by the mock and is guarded only by tests/test_fused_booking_assembly.py.",
+    "SCORE fit: 18",
+    "JUSTIFICATION fit: tests/test_bank_lane_drive.py:338-346 follows the monkeypatch-and-jax.debug.callback idiom of the same file (:357-361, :365-368) and reuses tests/test_bank_solve_driver.py's _toy_read, introducing no new module-level name.",
+    "SCORE reuse: 20",
+    "JUSTIFICATION reuse: the diff adds no reusable definition; searching tests/ for book_and_local_sensitivities and current.Booking shows the toy Booking built inline at test_bank_step_booking.py:151 and test_bank_step_speed.py:19 with no shared booking fixture to extend."
+  ],
+  "findings": [],
+  "justifications": {
+    "durability": "tests/test_bank_lane_drive.py:339 asserts isinstance(quadrature, current.Quadrature) inside the mocked seam and :402 asserts sorted(bookings) == [-0.75, 0.25], so forwarding None or dropping a lane's profile reddens, but the real replace at support_read.py:1355 is bypassed by the mock and is guarded only by tests/test_fused_booking_assembly.py.",
+    "evidence": "verified/named-head.log and verified/slurm-1317375.log record all six fresh-process arms with their summaries and EXIT lines, though the after and named-head arms are bound to f24e3ff and not to the head d6af4a5c20e9 that adds only documentation.",
+    "fit": "tests/test_bank_lane_drive.py:338-346 follows the existing monkeypatch-and-jax.debug.callback idiom of the same file (:357-361, :365-368) and reuses tests/test_bank_solve_driver.py's _toy_read, introducing no new module-level name.",
+    "goal_fidelity": "tests/test_bank_lane_drive.py:392 now passes current.Quadrature() and support_read.py:1355 is unchanged, which is the fixture-side resolution the brief prescribes when production never passes None.",
+    "reuse": "The diff adds no reusable definition; searching tests/ for book_and_local_sensitivities and current.Booking shows the toy Booking built inline in test_bank_step_booking.py:151 and test_bank_step_speed.py:19 with no shared booking fixture to extend.",
+    "scope_discipline": "git diff 7244dcc3c1..d6af4a5c20e9 changes only tests/test_bank_lane_drive.py and docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-none-quadrature.html, both inside the declared paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261115T114051931671-review-of-fused-booking-none-quadrature-d6af4a5c20e9",
+  "reviewed_base_sha": "7244dcc3c1b8fe8c3a38476214d66a024fbf4d14",
+  "reviewed_head_sha": "d6af4a5c20e9faf82d4c19e90d8ace6b172677b1",
+  "reviewed_run_id": "r-20261115T104904487312-fused-booking-none-quadrature",
+  "rubric_lines": [
+    "rubric.goal_fidelity: answered",
+    "rubric.evidence: answered",
+    "rubric.scope_discipline: answered",
+    "rubric.durability: answered",
+    "rubric.fit: answered",
+    "rubric.reuse: answered"
+  ],
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T13:55:00.000000+00:00",
+  "total": 111,
+  "verdicts": {
+    "diff": "Read both commits against base 7244dcc3c1: f24e3ff74158 adds a six-argument booking mock that asserts isinstance(quadrature, current.Quadrature) and collects per-lane profiles, replaces the fixture's None quadrature with current.Quadrature(), and asserts sorted(bookings) == [-0.75, 0.25]; d6af4a5c20e9 adds only the 14-line HTML landing fragment; no product line changes.",
+    "done_when": "The three clauses are the named test green at head, a negative control that re-fails with the same TypeError, and three files at base and head in one rigel job with zero added failures; verified/named-head.log reads '1 passed in 7.78s' with EXIT=0, verified/negative-control.log:82,105 reproduces 'nova/equilibrium/support_read.py:1355 in book_and_local_sensitivities' with 'TypeError: replace() should be called on dataclass instances' and EXIT=1, and verified/slurm-1317375.log lists all six file arms in job 1317375 (base 1 failed/10 passed + 22 passed + 10 passed; after 11 + 22 + 10 passed).",
+    "goal": "The goal is to settle whether the lane-factor test or the product is wrong and land the matching repair; the reviewed head passes current.Quadrature() into solve_batch at tests/test_bank_lane_drive.py:392 while nova/equilibrium/support_read.py:1355 keeps replace(quadrature, target_current=None), which matches the node's settled case that production always supplies a real rule.",
+    "manifest": "Read; it records status complete, commits f24e3ff and d6af4a5, the three fresh-process file arms with their revision, command, log path, failure_count and failure_ids, the negative-control log, the two scaffolding retry attributions, and the evidence_inputs sentence settling the case from the call sites.",
+    "write_paths": "The declared scope is nova/equilibrium/support_read.py, tests/test_bank_lane_drive.py, docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-none-quadrature.html and docs/figures/sub-millisecond-forward-path/fused-booking-none-quadrature; git diff --stat 7244dcc3c1..d6af4a5c20e9 touches only the test (+16/-1) and the fragment (+14), leaving support_read.py and the figure path untouched."
+  }
+}

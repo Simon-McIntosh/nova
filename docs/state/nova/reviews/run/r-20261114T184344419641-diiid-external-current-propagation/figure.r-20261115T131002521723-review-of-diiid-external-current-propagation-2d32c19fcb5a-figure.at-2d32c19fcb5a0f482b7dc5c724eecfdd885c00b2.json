@@ -16,6 +16,13 @@
       720
     ]
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Acted on: the coordinator resumed the same run (turn 3) to size each panel to its equal-aspect content and anchor the labels to it; the redrawn figure is reviewed again at the new head.",
+      "recorded_at": "2026-11-15T13:39:05.754392+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_external_current_propagation/render.py",

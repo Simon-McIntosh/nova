@@ -22,8 +22,8 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="88">
-<meta name="plan-modified" content="2026-11-15">
+<meta name="plan-version" content="89">
+<meta name="plan-modified" content="2026-11-16">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -309,7 +309,10 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
     <div class="r-comment-body"><p>figure review of r-20261114T210059239602-diiid-finite-edge-booking at dc8001e5ff3e is parsed; all six rubric items pass, with three non-blocking findings (note text size 12 pt against the figure's 14 pt legend and the 13 pt floor; the panel note's "band" quantity is undefined in the figure and its caption; the solved-null cross shares its colour with the thick clipped-level contour it lies on).</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261115T222322798046-review-of-diiid-finite-edge-booking-dc8001e5ff3e" data-who="reckon-build" data-when="2026-11-15T22:25:30.511Z">
-    <div class="r-comment-body"><p>A second-opinion review of r-20261114T210059239602-diiid-finite-edge-booking at head dc8001e5ff3e82a2f2848118127158ca3ecb82c9 is stored under review-records/r-20261114T210059239602-diiid-finite-edge-booking.at-dc8001e5ff3e82a2f2848118127158ca3ecb82c9.json and the run&#x27;s latest record, scoring goal_fidelity 17, evidence 14, scope_discipline 10, durability 13, fit 15, reuse 16, with added_failure_count 0 and one blocking finding: nova/imas/diiid_current.py and tests/imas/test_diiid_current.py lie outside the source node&#x27;s eight declared write paths.</p></div>
+    <div class="r-comment-body"><p>A second-opinion review of r-20261114T210059239602-diiid-finite-edge-booking at head dc8001e5ff3e82a2f2848118127158ca3ecb82c9 is stored under review-records/r-20261114T210059239602-diiid-finite-edge-booking.at-dc8001e5ff3e82a2f2848118127158ca3ecb82c9.json and the run's latest record, scoring goal_fidelity 17, evidence 14, scope_discipline 10, durability 13, fit 15, reuse 16, with added_failure_count 0 and one blocking finding: nova/imas/diiid_current.py and tests/imas/test_diiid_current.py lie outside the source node's eight declared write paths.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261114T210059239602-diiid-finite-edge-booking" data-who="reckon-build" data-when="2026-11-15T22:20:13Z">
+    <div class="r-comment-body"><p>The DIII-D finite-edge source is booked through the clipped-current route: the source integral and its tangent stay continuous across the boundary (eight contract cases plus a public-builder route test whose withheld-booking control reddens). Focused gate over eight files against a red base: base 37b9ba7c4 and head dc8001e5f fail the same 20 rows, zero added, head passes 8 more. Rows 137D and 146D converge (lower X 1.0 and 1.6 cm from EFIT); 146L and 179L do not converge. The pinned consumer refuses at both revisions on a -1.56% seed-current drift that predates this node.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

@@ -475,8 +475,9 @@ is 30 cores and no cards, so every submission states an explicit `--mem` (never
 `--mem=0`, which SLURM reads as the whole 1.5 TB and leaves the job pending on
 `Resources` while blocking the queue behind it) and sizes `--cpus-per-task`
 against the cores the serving jobs already hold
-(`squeue -w 98dci4-gpu-0003 -o '%C %b %m %j'`); the GPU rungs of
-`scripts/nova_lane/run.sh` request 4 cores unless the brief names more. The
+(`squeue -w 98dci4-gpu-0003 -o '%C %b %m %j'`). The H200 rung of
+`scripts/nova_lane/run.sh` requests 4 cores and the titan rung 2 cores and 24G,
+unless the brief names more. The
 **QoS** is what carries the
 cards and the memory, and it is the one that refuses:
 `sacctmgr show qos gpu_0003_grpa` reads `cpu=30,gres/gpu=4,mem=650G` with
@@ -511,7 +512,7 @@ rung, and that is a scope defect in the brief rather than a worker's choice.
 | Rung | Submission | When |
 |---|---|---|
 | 1. H200 | `--partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1` | always first; submit for real and read `squeue`, never a `--test-only` estimate |
-| 2. titan (P100) | `--partition=titan --gres=gpu:1` | only when a real betelgeuse submission is still pending on a resource or configuration reason |
+| 2. titan (P100) | `--partition=titan --gres=gpu:1 --cpus-per-task=2 --mem=24G` (per card, at most) | only when a real betelgeuse submission is still pending on a resource or configuration reason |
 | 3. CPU | `--partition=all_debug` (or `sirius` past the hour) with `JAX_PLATFORMS=cpu` | only when neither GPU rung can serve the shape |
 
 **Titan is a working JAX lane, measured rather than assumed.** The worry is that
@@ -521,6 +522,25 @@ It does not: on `98dci4-gpu-0002`, JAX 0.11.0 reports `devices
 `Tesla P100-PCIE-16GB`. The node carries `gpu:p100:8` with 20 cores and 256 GB,
 needs **no reservation and no special account**, and a plain submission starts
 immediately.
+
+**Titan runs out of cores before cards, so size each titan job to two cores and
+24G per card (binding, lead 2026-11-14).** Twenty cores over eight cards is 2.5
+per card. Measured 2026-11-14: every core on `98dci4-gpu-0002` was allocated
+with only 4 of 8 cards in use. Three nova one-card jobs held 6, 4 and 4 cores.
+All three were raw `sbatch --wrap` submissions named `wrap`, with 32-48G each.
+
+- A titan submission requests `--cpus-per-task=2` and at most `--mem=24G` per
+  card. A job that needs more cores or memory than that for one card belongs
+  on the H200 or a CPU partition, never on titan.
+- GPU work goes through `scripts/nova_lane/run.sh`, whose titan rung carries
+  that sizing, not through a raw `sbatch --wrap`.
+- Where `--wrap` is unavoidable, it carries a `--job-name` that names the
+  work, the sizing above, and an explicit `--mem`.
+
+The node's whole budget, with the serving jobs that share it, is in imas-ambix
+`imas_ambix/agent/AGENTS.md`, section "The P100 server: size each job to two
+cores per card". Check which resource ran out with
+`scontrol show node 98dci4-gpu-0002`, comparing `AllocTRES` against `CfgTRES`.
 
 Read a titan number as a titan number. It has 16 GB of device memory against the
 H200's 141, and P100 fp64 at roughly a seventh of H200 fp64, so it serves a

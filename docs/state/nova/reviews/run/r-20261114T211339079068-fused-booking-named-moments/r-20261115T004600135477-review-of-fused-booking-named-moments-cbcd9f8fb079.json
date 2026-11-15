@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "76fb8b84e76eabc8000abaf772f847a2cf6d9a4f",
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/current.py:565 book -> _normalize_booking(moments=ClippedCurrentMoments)",
+    "nova/equilibrium/current.py:934 book_tangent_channels (fuse_booking) -> _normalize_booking",
+    "nova/equilibrium/support_read.py:1366 book_and_local_sensitivities -> _normalize_booking (named ClippedCurrentMoments)",
+    "nova/equilibrium/support_read.py:1773 step path -> book_and_local_sensitivities"
+  ],
+  "completed_at": "2026-11-15T01:43:57.995Z",
+  "dispatched_at": "2026-11-15T00:46:35Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking evidence-citation or test-strength detail; the reorder test fails at base and passes at head (22 passed at 177f0fe99)",
+      "recorded_at": "2026-11-15T01:48:45.296314+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "non-blocking evidence-citation or test-strength detail; the reorder test fails at base and passes at head (22 passed at 177f0fe99)",
+      "recorded_at": "2026-11-15T01:48:57.891374+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "non-blocking evidence-citation or test-strength detail; the reorder test fails at base and passes at head (22 passed at 177f0fe99)",
+      "recorded_at": "2026-11-15T01:49:08.605457+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-named-moments.html",
+      "line": "31",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment says 'At head 177f0fe99 both cases pass in logs/head.reordered-named-moments.log', but that log's own header reads 'revision=76fb8b84e76eabc8000abaf772f847a2cf6d9a4f' because the fix was still uncommitted when it ran; the head-revision proof is logs/head.test_fused_booking_assembly.log, which reads 22 passed at 177f0fe99 with EXIT=0. The claim holds but the cited log's header names the base revision."
+    },
+    {
+      "file": "tests/test_fused_booking_assembly.py",
+      "line": "306",
+      "severity": "non-blocking",
+      "text": "non-blocking: the 'for name in current.Booking._fields' loop at :306-313 compares two invocations of the same _normalize_booking, so a construction-time swap of radial_moment and vertical_moment would move both sides together and pass; only cell_current is pinned against an independent value at :300-305. The reorder test forecloses the positional-current defect it was written for but does not independently pin the two non-current channels."
+    },
+    {
+      "file": "manifest.md",
+      "line": "25",
+      "severity": "non-blocking",
+      "text": "non-blocking: rubric.call_sites states 'both call sites of _normalize_booking', but there are three; the omitted site is nova/equilibrium/current.py:565 in book(), which passes a ClippedCurrentMoments built by the local jax.tree.map and is correct. The claim understates the call set it checked."
+    }
+  ],
+  "head_log_revision": "177f0fe99a3b1f510eaa312ce87323830c3b6a68",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified four production call sites: current.py:565 book(), current.py:934 book_tangent_channels fused path, support_read.py:1366 book_and_local_sensitivities, and support_read.py:1773 the step path that consumes book_and_local_sensitivities; all three _normalize_booking callers pass a value carrying cell_current, radial_moment and vertical_moment.",
+    "diff": "read commit by commit against 76fb8b84e: 177f0fe99 changes the two seams and adds the reorder test, and cbcd9f8fb adds only the evidence fragment; the Booking positional generator was replaced field by field and support_read's raw[:3] by a named ClippedCurrentMoments.",
+    "done_when": "the done_when names a reorder test red at base and green at head plus three per-file CPU arms adding no failures; tests/test_fused_booking_assembly.py:272-313 is that test, logs/base-code.reordered-named-moments.log fails it 2 cases EXIT=1 and logs/head.test_fused_booking_assembly.log passes 22 at 177f0fe99 EXIT=0, with base 20+6+55=81 and head 22+6+55=83 and 0 added failures recorded in the fragment.",
+    "goal": "the node's goal is that both fused seams read booked moments by field name so moment order stops being an unnamed invariant; nova/equilibrium/current.py:570 reads moments.cell_current and :577-587 builds the Booking by named fields, and nova/equilibrium/support_read.py:1366-1375 constructs a ClippedCurrentMoments from named fields, so neither seam reads the moment or Booking triple by position.",
+    "manifest": "read; status complete, commits 177f0fe99 and cbcd9f8fb, changed_paths the four landed files, tests the fused-assembly arm command, test_logs naming all eight arm and control logs, baseline_suite (76fb8b84e, 0 failures, completed true) and after_suite (177f0fe99, 0 failures, completed true), and the declared mutation logged.",
+    "write_paths": "the declared fence was current.py, support_read.py, tests/test_fused_booking_assembly.py and the fused-booking-named-moments evidence fragment; git diff 76fb8b84e..cbcd9f8fb touches exactly those four and nothing else, support_read.py recorded as the shared-file edit the lead ruling permits."
+  },
+  "justifications": {
+    "durability": "logs/base-code.reordered-named-moments.log and logs/negative-control.positional-current.log both fail the reorder test (2 cases, EXIT=1) on the positional read, and the independent raw_current == sum(cell_current) assertion at tests/test_fused_booking_assembly.py:300 separates the named read from the positional read.",
+    "evidence": "logs/base.test_fused_booking_assembly.log reads '20 passed' EXIT=0 at 76fb8b84e, logs/head.test_fused_booking_assembly.log reads '22 passed' EXIT=0 at 177f0fe99, the two other head arms read 6 and 55 passed EXIT=0, so added failures 0 and added_failure_ids empty are derived from logs that each end in a pytest summary before EXIT.",
+    "fit": "the added test names (ReorderedMoments, test_normalized_booking_reads_moments_by_field_name) describe the mechanism, and the product names moments.cell_current and unscaled use the existing NamedTuple field vocabulary with no version, plan or ticket label.",
+    "goal_fidelity": "nova/equilibrium/current.py:570 now reads raw = jnp.sum(moments.cell_current) and :577-587 rebuilds Booking field by field, and nova/equilibrium/support_read.py:1366-1375 hands the three named fields into a ClippedCurrentMoments instead of the positional raw[:3] the base carried.",
+    "reuse": "the change consumes ClippedCurrentMoments, the existing moment triple defined in nova/equilibrium/clip_quadrature.py, and Booking from nova/equilibrium/current.py:123; a search of nova/equilibrium found no other named-field moment container, and no parallel container was added.",
+    "scope_discipline": "git diff --numstat 76fb8b84e..cbcd9f8fb lists exactly current.py (+9/-5), support_read.py (+6/-2), tests/test_fused_booking_assembly.py (+53) and the named evidence fragment (+73), every one a declared write path."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is that both fused seams read booked moments by field name; nova/equilibrium/current.py:570 reads moments.cell_current and :577-587 builds the Booking by named fields, and nova/equilibrium/support_read.py:1366-1375 constructs a ClippedCurrentMoments from named fields, so neither seam reads the moment or Booking triple by position.\nVERDICT done_when: the done_when names a reorder test red at base and green at head plus three per-file CPU arms adding no failures; tests/test_fused_booking_assembly.py:272-313 is that test, logs/base-code.reordered-named-moments.log fails it 2 cases EXIT=1 and logs/head.test_fused_booking_assembly.log passes 22 at 177f0fe99 EXIT=0, with base 20+6+55=81 and head 22+6+55=83 and 0 added failures recorded in the fragment.\nVERDICT write_paths: the declared fence was current.py, support_read.py, tests/test_fused_booking_assembly.py and the evidence fragment; git diff 76fb8b84e..cbcd9f8fb touches exactly those four and nothing else, support_read.py recorded as the shared-file edit the lead ruling permits.\nVERDICT manifest: read; status complete, commits 177f0fe99 and cbcd9f8fb, changed_paths the four landed files, tests the fused-assembly arm command, test_logs naming all eight logs, baseline_suite (76fb8b84e, 0 failures, completed true) and after_suite (177f0fe99, 0 failures, completed true), and the declared mutation logged.\nVERDICT diff: read commit by commit against 76fb8b84e; 177f0fe99 changes the two seams and adds the reorder test, cbcd9f8fb adds only the evidence fragment; the Booking positional generator was replaced field by field and support_read's raw[:3] by a named ClippedCurrentMoments.\nCALL_SITES: nova/equilibrium/current.py:565 book -> _normalize_booking, nova/equilibrium/current.py:934 book_tangent_channels (fuse_booking) -> _normalize_booking, nova/equilibrium/support_read.py:1366 book_and_local_sensitivities -> _normalize_booking, nova/equilibrium/support_read.py:1773 step path -> book_and_local_sensitivities\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py:570 reads raw = jnp.sum(moments.cell_current) and :577-587 rebuilds Booking field by field.\nSCORE evidence: 19\nJUSTIFICATION evidence: logs/base.test_fused_booking_assembly.log reads 20 passed EXIT=0 at 76fb8b84e and logs/head.test_fused_booking_assembly.log reads 22 passed EXIT=0 at 177f0fe99, with the other two head arms 6 and 55 passed EXIT=0, so added failures is 0 derived from the logs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff: numstat 76fb8b84e..cbcd9f8fb lists only current.py 9/5, support_read.py 6/2, tests/test_fused_booking_assembly.py 53 and the evidence fragment 73.\nSCORE durability: 19\nJUSTIFICATION durability: logs/base-code.reordered-named-moments.log and logs/negative-control.positional-current.log both fail the reorder test 2 cases EXIT=1 on the positional read, and the independent raw_current==sum(cell_current) assertion at tests/test_fused_booking_assembly.py:300 separates the named read from the positional read.\nSCORE fit: 20\nJUSTIFICATION fit: the test names ReorderedMoments and test_normalized_booking_reads_moments_by_field_name and the product uses the existing moments.cell_current / unscaled field vocabulary with no version or plan label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change consumes ClippedCurrentMoments (nova/equilibrium/clip_quadrature.py) and Booking (nova/equilibrium/current.py:123), and no parallel container was added.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-named-moments.html:31 non-blocking: the fragment cites logs/head.reordered-named-moments.log as the head 177f0fe99 pass, but that log's header names base 76fb8b84e; logs/head.test_fused_booking_assembly.log is the head-revision proof at 22 passed EXIT=0.\nFINDING tests/test_fused_booking_assembly.py:306 non-blocking: the Booking._fields loop compares two invocations of the same _normalize_booking, so a radial/vertical swap would pass; only cell_current is pinned independently at :300.\nFINDING manifest.md:25 non-blocking: rubric.call_sites says 'both call sites' of _normalize_booking, but there are three; the omitted current.py:565 site passes a ClippedCurrentMoments and is correct.",
+  "review_run_id": "r-20261115T004600135477-review-of-fused-booking-named-moments-cbcd9f8fb079",
+  "reviewed_base_sha": "76fb8b84e76eabc8000abaf772f847a2cf6d9a4f",
+  "reviewed_head_sha": "cbcd9f8fb07986917e6add95cf5201ff84b80234",
+  "reviewed_run_id": "r-20261114T211339079068-fused-booking-named-moments",
+  "reviewer": {
+    "backend": "deepseek-v4.1-flash",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261115T004600135477-review-of-fused-booking-named-moments-cbcd9f8fb079"
+  },
+  "reviewer_run_id": "r-20261115T004600135477-review-of-fused-booking-named-moments-cbcd9f8fb079",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T01:47:19.501440+00:00",
+  "total": 118
+}

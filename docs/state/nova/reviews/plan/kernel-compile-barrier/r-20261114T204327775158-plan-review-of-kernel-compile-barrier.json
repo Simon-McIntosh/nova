@@ -1,0 +1,151 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T21:11:22.225Z",
+  "dispatched_at": "2026-11-14T20:44:06Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261114T204327775158-plan-review-of-kernel-compile-barrier/plan.html:168",
+      "id": "anchors_resolve-1",
+      "reason": "the plan serves this link to live readers, so the newest, most load-bearing negative result about \u00a72's own lever is unreadable, and a dispatch of \u00a72 would rest on a claim whose evidence is not reachable via the supplied URL.",
+      "text": "the new s2 comment links /nova/evidence/fragments/kernel-compile-barrier/variadic-split.html#variadic-split, and the file exists in no commit of the plan's own checkout working tree and only on the unmerged variadic-split branch; its own summary (13/13 numeric tests, 305,139 instructions against a 402,141 base, 251.134514 s cold against a 133.418724 s limit) is therefore recorded nowhere a reader of the live plan can open, and the plan already carries a correcting comment (plan.html:162) saying that same path does not exist yet and is owed by the node",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261114T204327775158-plan-review-of-kernel-compile-barrier/plan.html:77",
+      "id": "done_when-1",
+      "reason": "a worker can satisfy clause (1) for three rows and must then either invent a different measure for the fourth or declare the clause unmet, and the plan should instead say what is measured for the negative-control row.",
+      "text": "\u00a76 clause (1) requires, \"for each of the four rows, the first intermediate quantity at which main departs from the pinned copy is named, with the commit that introduced it\", but one of the four named rows is test_truncated_tangent_fails_identity[edge_terms], a negative control that fails because the truncated tangent still matches within SCAN_TOLERANCE (tests/biot/test_edge_term_tangents.py:324-336 asserts subject > 1e-9); there is no departure from the pinned copy to locate for that row, so clause (1) names no producible measure for it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261114T204327775158-plan-review-of-kernel-compile-barrier/plan.html:77",
+      "id": "reasoning-1",
+      "reason": "clause (1) asks the worker to name the commit that introduced each departure; a background claim narrowing the candidates to four invites a bisect that stops at the wrong commit or names one that cannot account for the edge rows, which is the whole object of the section.",
+      "text": "\u00a76 states \"Four later commits changed the kernel on purpose: 3a147537a, ffcbcb535, da28fc4e5 and cb42f656f\", but `git rev-list --no-merges --full-history 716d859f0..00ec05512 -- nova/biot/polygonanalytic.py` returns 16 non-merge commits in the pin-to-failing-base range (43 further commits including merges), among them 6d14132d2 (preserve edge tangent arithmetic order), 95044c7f6 and 79b6e772a (differentiate polygon edge reductions and the near-collinear edge logarithm) and 8bb3910cd (composed corner arsinh remainder), each of which can move an edge-tangent departure, so the stated candidate set is both incomplete and presented as exhaustive",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261114T204327775158-plan-review-of-kernel-compile-barrier/plan.html:59",
+      "id": "reasoning-2",
+      "reason": "the sentence tells a reader those files are covered by a byte-identity check that the plan elsewhere limits to named jet fixtures, so it understates real unguarded scope and would keep a coordinator from deciding whether the gap is acceptable or needs a gate.",
+      "text": "\u00a72 now says the read, bank and tracked-read test files \"are run by no gate in this plan. Clause (1) stands in for them: the point jet they reach must return the base's bytes\", but clause (1) is stated as judged \"on the 10,000-point polygon and filament jet identity sets\", and the same done-when later says explicitly \"Clause (1) is judged on its own named sets, the 10,000-point polygon and filament jets, not on these rows\"; those identity sets are not the code paths tests/test_tracked_read.py, tests/test_bank_newton_step.py and tests/test_support_read.py exercise, so the substitute asserted is not the measure the clause actually provides",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "35d65dc3697c7b8f9ecf9803a04bf615ead63b6a",
+  "plan_fingerprint": "8a0ee2e301a75492d92256b773413520c3db029e011a6ac8b427821c035e4386",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 52,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0d542ac0e2c26724c7a9093fed4c5b7f23c40052",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "A plan comment restates the unmerged run result in full and says where the fragment lives until the stacked node lands.",
+      "reason": "",
+      "when": "2026-11-14T23:44:39.083960+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0d542ac0e2c26724c7a9093fed4c5b7f23c40052",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Clause one now asks, for the negative-control row, for the measured error of the truncated tangent and why truncation does not move it.",
+      "reason": "",
+      "when": "2026-11-14T23:44:46.929730+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0d542ac0e2c26724c7a9093fed4c5b7f23c40052",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The section now states the range as sixteen non-merge commits plus merges and says any commit in the range is a candidate.",
+      "reason": "",
+      "when": "2026-11-14T23:44:54.533411+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0d542ac0e2c26724c7a9093fed4c5b7f23c40052",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The sentence now says the jet identity sets do not cover the read, bank and tracked-read files and records that as an open gap.",
+      "reason": "",
+      "when": "2026-11-14T23:45:02.889705+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0d542ac0e2c26724c7a9093fed4c5b7f23c40052",
+      "commit_basis": "edit",
+      "note": "A plan comment restates the unmerged run result in full and says where the fragment lives until the stacked node lands.",
+      "reason": "",
+      "when": "2026-11-14T23:44:39.083960+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0d542ac0e2c26724c7a9093fed4c5b7f23c40052",
+      "commit_basis": "edit",
+      "note": "Clause one now asks, for the negative-control row, for the measured error of the truncated tangent and why truncation does not move it.",
+      "reason": "",
+      "when": "2026-11-14T23:44:46.929730+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0d542ac0e2c26724c7a9093fed4c5b7f23c40052",
+      "commit_basis": "edit",
+      "note": "The section now states the range as sixteen non-merge commits plus merges and says any commit in the range is a candidate.",
+      "reason": "",
+      "when": "2026-11-14T23:44:54.533411+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "0d542ac0e2c26724c7a9093fed4c5b7f23c40052",
+      "commit_basis": "edit",
+      "note": "The sentence now says the jet identity sets do not cover the read, bank and tracked-read files and records that as an open gap.",
+      "reason": "",
+      "when": "2026-11-14T23:45:02.889705+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261114T204327775158-plan-review-of-kernel-compile-barrier.json",
+  "review_run_id": "r-20261114T204327775158-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "9413fa2babb4a359bfc565221edf88b5f439962b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the newly added s2 run comment links an evidence fragment that resolves nowhere in the served tree.",
+    "done_when": "a finding \u2014 \u00a76's clause (1) names a measure that cannot be produced for one of its four rows.",
+    "evidence_paths": "pass \u2014 every gate names a fresh-process, cache-disabled job on a named device and the plan has a settled evidence fragment root; \u00a76's fragment path is left to its dispatch, the same convention an earlier review accepted for \u00a72. The unreachable evidence pointer added by the new comment is reported under anchors_resolve.",
+    "naming": "pass \u2014 the changed text adds no plan label, stage name or ticket number to any symbol, file or comment, and the cited run ids, commit shas and job numbers are evidence rather than naming.",
+    "reasoning": "a finding \u2014 \u00a76's candidate set of kernel commits does not match the repository (four named, sixteen non-merge commits in the range), and \u00a72's claim that clause (1) stands in for the three unguarded test-file families is contradicted by the same section's statement that clause (1) is judged only on its own named identity sets.",
+    "single_goal": "pass \u2014 \u00a72 owns one deliverable (shrink the variadic program of the production row program) and \u00a76 owns one (the four edge-term tangent rows hold on main).",
+    "wiring": "pass \u2014 \u00a72 links \u00a75, \u00a74 links \u00a72 and \u00a75, and each link resolves to a section that exists; \u00a76 declares no relationship and needs none, because its clauses measure within their own paired job and reuse \u00a75's done chart rather than \u00a75's output."
+  },
+  "section_digests": {
+    "_document": "7a4ded9951e4f3f7ec46cb990b629742760b74992915790661ea8552e88cd748",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "1838a9bc231592c42d9b7018dec67e409e2d2bf1d96c8540d17b91261bfc6b07",
+    "s3": "ab68c20ce5d3e9242532f0e5cb72a8baf8b9ce57666cac7db68cee8904360fa1",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "dad56ebf395603b14bbbdda33abceea357f12e5cc0c1367d994ca5097dea7b20"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T21:20:25.320542+00:00",
+  "total": null
+}

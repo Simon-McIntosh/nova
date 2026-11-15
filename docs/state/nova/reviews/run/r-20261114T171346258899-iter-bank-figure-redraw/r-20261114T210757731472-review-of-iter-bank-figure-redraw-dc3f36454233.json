@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-14T23:00:40.226Z",
+  "dispatched_at": "2026-11-14T22:35:11Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking check-strength or test-collection detail on a prototype figure check; the figure meets its measured done-when and is redrawn again when section 7 re-certifies the bank",
+      "recorded_at": "2026-11-14T23:01:39.825382+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "iter-bank-recertify",
+      "recorded_at": "2026-11-14T23:01:38.311646+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "non-blocking check-strength or test-collection detail on a prototype figure check; the figure meets its measured done-when and is redrawn again when section 7 re-certifies the bank",
+      "recorded_at": "2026-11-14T23:01:41.508173+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "non-blocking check-strength or test-collection detail on a prototype figure check; the figure meets its measured done-when and is redrawn again when section 7 re-certifies the bank",
+      "recorded_at": "2026-11-14T23:01:43.653682+00:00"
+    }
+  },
+  "findings": [
+    "docs/figures/sub-millisecond-forward-path/iter-bank/test_render.py:64 non-blocking: 'assert report[\"labelled\"] == len(scene.axes[0].texts)' compares check_scene's returned labelled value, which render.py:175 builds as len(observed) from that very list, against the same list, so both sides move together and the assertion holds whatever the renderer does; a missing label is caught only by the independent comparison at line 60, and this line can never be the thing that reddens.",
+    "scripts/prototypes/iter_bank/render.py:213 non-blocking: wall_color=\"#929292\" makes the first wall the same colour as coil_edgecolor at :211 (1.11:1 apart in stroke width only), so the legend built at :286-288 draws 'coil sections' and 'first wall' as indistinguishable swatches and a reader cannot map either grey mark to a component; the contrast objective is met, but the identification cost of merging the two greys is not stated in the figure or the caption.",
+    "scripts/prototypes/iter_bank/render.py:134 non-blocking: 'mesh[:55] = False' removes a hard-coded 55 image rows before measuring contrast so the legend swatch is excluded; today that discards only 80 of 83,290 mesh pixels, but the constant encodes the current canvas height and legend position, so a layout change would silently crop real mesh pixels while the reported median still passes.",
+    "docs/figures/sub-millisecond-forward-path/iter-bank/test_render.py:1 non-blocking: the durable regression suite is not collected by the repository's default lane because pytest testpaths at pyproject.toml:289 lists only tests/ and five nova modules, so this file runs only when named, so a future regression reddens no automatic run; adding the figure tree to testpaths is outside this node's write scope."
+  ],
+  "item_verdicts": {
+    "diff": "Read both commits against 6c7f62c36 commit by commit; 50d65fa24 rewrites render.py into read_geometry/section_names/contrast/scene_metrics/check_scene/build_figure, makes checked_save check every text artist against both panels, merges the wall into the coil grey, renames the repeated sections, adds geometry.json and a 181-line test_render.py and refreshes the SVG and caption; dc3f36454 adds the control-results section to the evidence fragment.",
+    "done_when": "The done_when's three clauses are each asserted by a committed test rather than only by a one-off gate: test_render.py:57/103 assert >=3:1 median plasma contrast on both the Agg canvas and the rasterized saved SVG, :58/104 assert ink >4.5%, :60/:63/:65 assert all 14 section identities and zero detail-panel coils, and :168/:181 assert the checked-save refusals; repair-head.log records 22 passed, EXIT=0, at 50d65fa24 with its own MEASUREMENT_MODULE line.",
+    "goal": "The node goal is to redraw the ITER mesh figure so the plasma mesh is the clearest mark; the landed delta adds a durable native-input regression suite, removes the gid-dependent fail-open in checked_save (scripts/prototypes/iter_bank/render.py:40-50), disambiguates the duplicated CS1/VS3 identities (render.py:88-105) and makes the rendered figure meet every clause, verified independently at 3.480193:1 median plasma contrast (>=3:1) and 7.6479% ink (>4.5%) on the committed docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh.svg rasterized at 1400 px.",
+    "manifest": "Read the source manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T171346258899-iter-bank-figure-redraw/manifest.md; it declares status complete, four commits, and states the gate result (22 passed) with its log paths and measurement module, though its baseline_suite and an after_suite schema fields are empty and the head arm lives in a non-schema repair_suite key instead.",
+    "write_paths": "Read the manifest's declared write paths and the goal's six listed paths; both delta commits stay inside them exactly - git show --stat 50d65fa24 lists the six declared figure and evidence files plus render.py, and dc3f36454 touches only iter-bank-figure-redraw.html."
+  },
+  "justifications": {
+    "durability": "docs/figures/sub-millisecond-forward-path/iter-bank/test_render.py:126-131 and :166-169 fail on the recorded control runs - the reversed-answer arm fails all three untagged-label cases and removing the collection loop fails 8 cases - but line 64 asserts a tautology and the file sits outside pytest testpaths, so nothing reddens automatically, hence 15 rather than full marks.",
+    "evidence": "repair-head.log records '22 passed in 5.92s' and EXIT=0 at 50d65fa24, and my independent re-measurement of the committed SVG reproduced 83210 mesh pixels, 3.480193:1 and 7.6479% exactly; the source manifest leaves its baseline_suite and after_suite schema fields empty, so the head arm must be read from the non-schema repair_suite key.",
+    "fit": "scripts/prototypes/iter_bank/render.py:83-105 names section_names in mechanism terms with no plan or version labels, and the test beside the figure follows the one existing precedent docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py, but merging the wall into the coil grey at :213 leaves two legend swatches the reader cannot tell apart.",
+    "goal_fidelity": "scripts/prototypes/iter_bank/render.py:213 lifts the wall to #929292, which is what finally makes the plasma mesh rather than the wall the darkest mark, and render.py:88-105 splits the duplicated CS1 and VS3 identities.",
+    "reuse": "grep over nova/media and nova/ for a luminance, contrast, WCAG or text-clipping save helper found no owner: ink.py owns styles and poloidal.py owns the painters, which already accept gid through **kwargs, so scene_metrics/check_scene extend the existing script and the painters rather than forking anything.",
+    "scope_discipline": "Both delta commits touch only the six paths the goal lists, and nothing else in the tree."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to redraw docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh.svg so the plasma mesh is the clearest mark; the landed delta adds a committed regression suite, disambiguates the duplicated CS1/VS3 identities (render.py:88-105) and meets the contrast and ink clauses, verified independently at 3.480193:1 and 7.6479% on the committed SVG.\nVERDICT done_when: the three clauses are asserted by committed tests rather than a one-off gate - test_render.py:57 and :103 assert >=3:1 median plasma contrast on the Agg canvas and on the 1400-px rasterized SVG, :58 and :104 assert ink >4.5%, :60/:63/:65 assert 14 unique section identities and zero detail-panel coils, and repair-head.log records 22 passed, EXIT=0 at 50d65fa24.\nVERDICT write_paths: read the manifest's declared paths and the goal's six listed paths; git show --stat over both delta commits shows every touched file inside them and nothing else.\nVERDICT manifest: read the source manifest; it declares complete with four commits and records the 22-passed gate with log paths and measurement module, but leaves its baseline_suite and after_suite schema fields empty and carries the head arm in a non-schema repair_suite key.\nVERDICT diff: read both commits against 6c7f62c36; 50d65fa24 rewrites render.py into named primitives, removes the gid-dependent fail-open at render.py:40-50, adds geometry.json and a 181-line test suite and refreshes the SVG and caption, while dc3f36454 adds only the control-results section to iter-bank-figure-redraw.html.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/iter_bank/render.py:213 lifts the wall to #929292, which is what finally makes the plasma mesh rather than the wall the darkest mark, and render.py:88-105 splits the duplicated CS1 and VS3 identities.\nSCORE evidence: 17\nJUSTIFICATION evidence: repair-head.log records 22 passed and EXIT=0 at 50d65fa24, and an independent re-measurement of the committed SVG reproduced 83210 mesh pixels, 3.480193:1 and 7.6479%, but the source manifest leaves its baseline_suite and after_suite fields empty.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: both delta commits touch only the six paths the goal lists, with nothing outside them.\nSCORE durability: 15\nJUSTIFICATION durability: test_render.py fails on the recorded reversal and mutation arms, yet line 64 asserts a tautology and the file sits outside pytest testpaths at pyproject.toml:289, so no automatic run reddens.\nSCORE fit: 17\nJUSTIFICATION fit: render.py:83-105 names section_names by mechanism with no plan or version labels and the test follows the existing docs/figures precedent, but the two identical legend swatches at render.py:286-288 are a legibility cost.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search of nova/media and nova/ for a contrast, luminance or text-clipping save owner found none, and the painters already accept gid through **kwargs, so the additions extend the existing script rather than fork an owner.\nFINDING docs/figures/sub-millisecond-forward-path/iter-bank/test_render.py:64 non-blocking: the assertion compares check_scene's labelled count against the same axes text list it was measured from, so both sides move together and the assertion holds whatever the renderer does; only the line-60 comparison is a real guard.\nFINDING scripts/prototypes/iter_bank/render.py:213 non-blocking: wall_color=\"#929292\" equals coil_edgecolor, so the legend at :286-288 shows 'coil sections' and 'first wall' as indistinguishable swatches and a reader cannot map either grey mark to a component.\nFINDING scripts/prototypes/iter_bank/render.py:134 non-blocking: 'mesh[:55] = False' encodes the current canvas height and legend position in a hard-coded crop that would silently discard real mesh pixels after a layout change while the reported median still passes.\nFINDING docs/figures/sub-millisecond-forward-path/iter-bank/test_render.py:1 non-blocking: the durable suite is outside pytest testpaths at pyproject.toml:289, so the default lane never collects it and a future regression reddens no automatic run.\n",
+  "review_run_id": "r-20261114T210757731472-review-of-iter-bank-figure-redraw-dc3f36454233",
+  "reviewed_base_sha": "6c7f62c36f02f0ad814e0aad9baec744d59dad63",
+  "reviewed_head_sha": "dc3f36454233510b8308a667420b942cd9e7bfd3",
+  "reviewed_run_id": "r-20261114T171346258899-iter-bank-figure-redraw",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T23:01:54.940553+00:00",
+  "total": 107
+}

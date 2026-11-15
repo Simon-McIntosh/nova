@@ -1,0 +1,127 @@
+<article id="iter-bank-record">
+<h3 id="iter-bank-title">ITER operator bank: separate plasma Hessian and coil qualification budgets</h3>
+<p>The operator container stores <code>coil_exterior[nodes, coils, 6]</code>, each driven coil’s unit-current response with signed winding turns, and its traced scalar <code>coil_count</code>. The node response is padded and survives content-store publication and reload. The fixed <code>exterior</code> remains separate. The H200 bank built in <strong>597.683326 s</strong> and loaded in <strong>0.145668 s</strong>. Its retained three-state comparisons have plasma-containing Hessian discrepancies near 2e−9, while coil-only fields agree below 9.651e−14. The qualification now uses the authorized component budgets described below; the retained numerical arrays have not changed.</p>
+<h4 id="iter-bank-budget-decision">Component budgets and source-cell corner samples</h4>
+<p>The decision of 2026-11-14 permits <strong>1e−8 relative for plasma-containing Hessians</strong>, retaining <strong>1e−10 for flux, gradients and every coil-only jet entry</strong>. Bank moment and direct-kernel mixed and vertical Hessians agree at about 2e−9 relative. The independent check <code>bank-hessian-reference</code>, run <code>r-20261114T075414565081</code>, could not resolve the stricter 1e−10 plasma budget. The decision attributes its large reference errors to sample nodes on source-cell corners, where ψZZ is discontinuous. These second derivatives guide null finding; they do not define the unchanged 1e−10 terminal residual budget. This qualification is mutual agreement with the direct kernels at the stated budgets, not an independently established 1e−10 Hessian oracle.</p>
+<p>The qualification code expresses the budgets per jet entry. A guard test admits a 2e−9 plasma Hessian discrepancy, refuses the same discrepancy for coil-only jets, refuses a Hessian discrepancy above 1e−8, and refuses a flux discrepancy above 1e−10. The merged container convention remains: an absent coil response is <code>None</code> in memory, serializes as a zero-width response, and reads back as <code>None</code>.</p>
+<h4 id="iter-bank-source">Native scenario geometry and sampled states</h4>
+<p>The source is <code>/work/imas/shared/imasdb/ITER/3/105027/1</code>, read through imas-python at DD <code>3.38.1</code>. The written DD was verified for equilibrium, wall, active coils and passive coils. The scenario supplies all PF and CS geometry, so no machine-description fallback was needed. There are 12 driven coils and 14 conductor sections: CS1 has two sections and VS3 has two opposed sections. VS3 is retained with the PF and CS coils because its current changes per slice. The analytic comparison covers the modeled plasma and these active coils; the fixed exterior is zero in this bank measurement.</p>
+<table><thead><tr><th>Quantity</th><th>Prepared value</th></tr></thead><tbody>
+<tr><td>Plasma cells</td><td>558 (target approximately 550)</td></tr>
+<tr><td>Active nodes / node bucket</td><td>1,772 / 2,048</td></tr>
+<tr><td>Dense operator bytes</td><td>165,902,864 (158.217 MiB)</td></tr>
+<tr><td>Median stencil pitch</td><td>239.650 mm</td></tr>
+<tr><td>Limiter points</td><td>56, one native unit</td></tr>
+<tr><td>Cell area sum / limiter enclosed area</td><td>28.000097405000005 / 28.000097405000012 m²</td></tr>
+<tr><td>Coil order</td><td>CS3U, CS2U, CS1, CS2L, CS3L, PF1, PF2, PF3, PF4, PF5, PF6, VS3</td></tr>
+<tr><td>Element turns</td><td>Six CS sections at +554; PF1–PF6 at +248.6, +115.2, +185.9, +169.9, +216.8, +459.4; VS3 at +1 and −1</td></tr>
+</tbody></table>
+<p>The fixture-only mesh helper reproduced <code>AssertionError: carrier cell has disconnected vessel intersection</code> at an ITER divertor corner. The ITER preparer retains every connected fragment as its own source cell with the generator’s sampling stencil. A reentrant-wall test proves the clipped cells preserve the full enclosed area and remain inside the limiter. Geometry construction still uses <code>TopologyGeometry.from_cells</code>, and bank rows still use the existing <code>build_jet_matrix</code>.</p>
+<figure id="iter-bank-geometry"><img src="/nova/figures/sub-millisecond-forward-path/iter-bank/iter-mesh.svg" alt="ITER coil sections directly labelled around a 558-cell wall-clipped plasma mesh, with a larger wall and mesh view at right"><figcaption>Native DINA geometry: the complete coil layout at left, with all 14 sections directly labelled from the source coil identities, and the 558-cell mesh enlarged at right. The two CS1 sections and the two small VS3 sections are distinguished as upper and lower by their vertical positions; these qualifiers identify sections within the source circuits. The mesh panel contains no coils. Darker, opaque outlines retain the established plasma purple, over neutral coil and wall outlines, whose contrast is lower than the plasma mesh. All clipped cell components are retained around the reentrant divertor wall. Nova media painters keep equal aspect and axes off on a 14 × 10.73 inch canvas sized to the two machine views. The inspected 1400-pixel SVG rendering measures 3.48:1 median plasma-outline contrast against white and 7.65% ink coverage (pixels with a channel below 90% white), versus 1.64:1 and 4.71% in the retained rendering. All 17 text artists pass canvas and overlap checks; every label clears the plotted geometry, including labels without an identifying SVG ID.</figcaption></figure>
+<table><thead><tr><th>Slice index</th><th>Time [s]</th><th>Stored Ip [MA]</th><th>Integrated sampled Ip [MA]</th><th>Analytic jet comparison</th></tr></thead><tbody>
+<tr><td>220</td><td>52.789304</td><td>−5.007544</td><td>−5.007360</td><td>Measured mixed Hessian 6.397e−10; vertical Hessian 2.036e−9</td></tr>
+<tr><td>333</td><td>80.907326</td><td>−5.057992</td><td>−5.057767</td><td>Measured mixed Hessian 8.707e−10; vertical Hessian 2.212e−9</td></tr>
+<tr><td>336</td><td>81.653822</td><td>−5.009289</td><td>−5.009361</td><td>Measured mixed Hessian 7.410e−10; vertical Hessian 1.927e−9</td></tr>
+</tbody></table>
+<p>Samples use index-based equilibrium access and the homogeneous IDS time base. Plasma moments integrate the stored toroidal current-density map over cells clipped by the slice boundary, with four-point Gauss rules in each triangle coordinate. Coil currents are interpolated on their declared time bases. This samples DINA states for operator tests; it does not certify a DINA equilibrium reproduction.</p>
+<h4 id="iter-bank-measures">Build, load, fidelity and capacity</h4>
+<table><thead><tr><th>Measure</th><th>Requirement or scope</th><th>Observed result</th></tr></thead><tbody>
+<tr><td>Build / publication</td><td>One H200 build and content-store publication</td><td>Build 597.683326 s; publication 0.633340 s</td></tr>
+<tr><td>Load</td><td>Device-ready wall, at most a few seconds</td><td>0.145668 s; persisted arrays matched bitwise after reload</td></tr>
+<tr><td>Nodal jet fidelity</td><td>Relative norm error ≤1e−10 for flux/gradients, ≤1e−8 for plasma-containing Hessians; coil-only ≤1e−10</td><td>All three retained states lie within the authorized component budgets; CPU replay recorded below</td></tr>
+<tr><td>Missing-coil control</td><td>Remove PF1 response and fail the analytic-map test</td><td>Three additional conductor-test failures under mutation</td></tr>
+<tr><td>Shape bucket</td><td>2,048 nodes; 1,772 active; 558 cells</td><td>165,902,864 dense operator bytes; 277,388,544 device bytes live before width trials</td></tr>
+<tr><td>Width admission</td><td>Storage for shared bank and per-lane moments, currents and nodal jets</td><td>Largest observed fit 392,071; adjacent refusal 392,072; solver workspace excluded</td></tr>
+</tbody></table>
+<p>The content-store identity is <code>sha256:fd912554f8e9e7efddce53b119242a46e88f20ac30e029f83781c6253f828425</code>, retained under <code>h200/store/</code> in the run directory below. The source-row builder took 325.571292 s and produced 142,383,744 matrix bytes. Persistent compilation uses <code>NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm</code>.</p>
+<h4 id="iter-bank-h200-fidelity">Complete H200 analytic comparisons</h4>
+<p>Job <code>1314609</code> completed in 5 min 47 s on an NVIDIA H200 NVL and saved all three total-field arrays before reporting errors. Its successful scheduler exit means data collection completed; the following numbers are unchanged from the original diagnostic. Each table entry is the Euclidean norm of the bank-minus-direct difference divided by the direct norm for that jet entry, over active nodes. The direct reference evaluates the existing Biot kernels with the same moments and coil currents. The historical uniform 1e−10 check refused all three states; the authorized plasma Hessian budget is now 1e−8, with flux and gradients still at 1e−10.</p>
+<table><thead><tr><th>Slice / total field</th><th>ψ</th><th>ψR</th><th>ψZ</th><th>ψRR</th><th>ψRZ</th><th>ψZZ</th></tr></thead><tbody>
+<tr><td>220</td><td>3.132143190e-16</td><td>4.985725112e-14</td><td>5.481140415e-14</td><td>4.824260264e-16</td><td>6.396955318e-10</td><td>2.035885616e-09</td></tr>
+<tr><td>333</td><td>2.994943011e-16</td><td>5.132269190e-14</td><td>5.737171517e-14</td><td>8.426004576e-16</td><td>8.707406196e-10</td><td>2.211614945e-09</td></tr>
+<tr><td>336</td><td>3.205411831e-16</td><td>4.975877337e-14</td><td>5.234389633e-14</td><td>8.325560123e-16</td><td>7.409880369e-10</td><td>1.926684409e-09</td></tr>
+</tbody></table>
+<p>The first-state decomposition independently compares the plasma and conductor contributions. The plasma mixed and vertical Hessian errors exceed the historical 1e−10 floor and pass the authorized 1e−8 budget, while every conductor entry agrees below 2.751e−16. This isolates the component carrying the disagreement; it does not establish which side of the shared plasma-row/direct-kernel seam is numerically wrong.</p>
+<table><thead><tr><th>Slice / component</th><th>ψ</th><th>ψR</th><th>ψZ</th><th>ψRR</th><th>ψRZ</th><th>ψZZ</th></tr></thead><tbody>
+<tr><td>220 / plasma</td><td>9.759234219e-17</td><td>5.730019947e-14</td><td>3.822521925e-14</td><td>4.900131160e-16</td><td>6.403460972e-10</td><td>1.994434374e-09</td></tr>
+<tr><td>220 / coils</td><td>1.769352405e-16</td><td>1.891898462e-16</td><td>2.048819022e-16</td><td>1.632076537e-16</td><td>2.750499319e-16</td><td>1.917117496e-16</td></tr>
+</tbody></table>
+<p>One retained first-state witness is active node 943 at <code>(R, Z) = (5.890080315866, 0.398721144734) m</code>: bank ψZZ is <code>15.799512746770978</code> and direct ψZZ is <code>15.799512907478173</code>. The full first-state arrays and component arrays preserve this witness. The largest absolute ψZZ discrepancies at slices 220, 333 and 336 are respectively <code>1.607071951e−7</code>, <code>1.960135156e−7</code> and <code>1.607211857e−7</code>.</p>
+<h4 id="iter-bank-cross-device-refusal">Cross-device and contraction checks</h4>
+<p>The first full-field P100 array also refused the historical uniform 1e−10 guard: its six relative errors are <code>[3.412e−16, 6.403e−14, 7.785e−14, 4.682e−15, 6.615e−10, 2.254e−9]</code>. The full P100 diagnostic retained <code>diagnosis-titan/accuracy-220.npz</code>, then reached its 25-minute allocation limit; SLURM refused an extension to 35 minutes. <code>inspect-array.log</code> records that guard refusal with <code>EXIT=1</code>. The P100 receipt remains explicitly partial, while the H200 receipt above contains all three states.</p>
+<p>A separate contraction probe finds normwise cancellation factors from 1.002 to 8.057 across moments and jet entries. That makes ordinary moment-matvec summation error an unlikely explanation for the 1e−9 Hessian discrepancy. Full-map and conductor-only CPU direct-kernel compilations each exhausted a 96 GiB allocation before producing reference arrays; those failures carry no numerical verdict. No shared derivative kernel was changed. Only the qualification’s plasma Hessian allowance changed under the decision above.</p>
+<h4 id="iter-bank-coil-fidelity">Three-state driven-coil comparison</h4>
+<p>The published H200 bank’s conductor response also agrees with a direct conductor-only program on a Tesla P100-PCIE-16GB at all three current states. Its six relative errors are shown in full; their maximum is 9.650956044e−14. Removing PF1 while retaining it in the direct reference is refused at every state.</p>
+<table><thead><tr><th>Slice / P100 coil reference</th><th>ψ</th><th>ψR</th><th>ψZ</th><th>ψRR</th><th>ψRZ</th><th>ψZZ</th></tr></thead><tbody>
+<tr><td>220</td><td>2.063428968e-16</td><td>3.759615744e-14</td><td>6.588193870e-14</td><td>2.045573824e-14</td><td>9.650956044e-14</td><td>1.917117496e-16</td></tr>
+<tr><td>333</td><td>1.832686865e-16</td><td>4.190952813e-14</td><td>6.519500812e-14</td><td>2.216553177e-14</td><td>9.344399400e-14</td><td>1.883124789e-16</td></tr>
+<tr><td>336</td><td>1.925223627e-16</td><td>4.537927014e-14</td><td>6.556090011e-14</td><td>2.393433635e-14</td><td>8.469741367e-14</td><td>1.840457230e-16</td></tr>
+</tbody></table>
+<h4 id="iter-bank-capacity">Ordered H200 storage-width probe</h4>
+<p>Job <code>1314619</code> completed in 2 min 30 s with the bank loaded on an NVIDIA H200 NVL. Each trial allocates and synchronizes one float64 buffer representing 111,792 bytes per lane for moments, coil currents and six nodal jets, then releases it. All 34 trials are recorded in their actual execution order below. Successful small widths are the positive control for the allocation instrument; each refused width records <code>RESOURCE_EXHAUSTED: Out of memory</code>. This is buffer admission, not a timed bank contraction or a Newton solve.</p>
+<table><thead><tr><th>Memory quantity</th><th>Bytes</th><th>GiB</th></tr></thead><tbody>
+<tr><td>Dense bank</td><td>165,902,864</td><td>0.154509</td></tr>
+<tr><td>Device live before trials</td><td>277,388,544</td><td>0.258338</td></tr>
+<tr><td>Reported allocator limit</td><td>112,585,605,120</td><td>104.853516</td></tr>
+<tr><td>Live bytes at largest fit</td><td>44,107,865,344</td><td>41.078651</td></tr>
+</tbody></table>
+<p>The observed boundary is width <strong>392,071 admitted / 392,072 refused</strong> in this ordered probe. At the largest fit the allocator reports 44,107,865,344 live bytes, well below its 112,585,605,120-byte reported limit. The cause of this gap was not measured. Allocator history and device availability therefore limit interpretation: this is not an established fresh-process maximum for an H200, and it excludes factorization and solver workspace. Repeated live-byte counts near the boundary are preserved as reported, rather than inferred from width.</p>
+<table><thead><tr><th>Trial</th><th>Width</th><th>Allocation</th><th>Reported live device bytes</th></tr></thead><tbody>
+<tr><td>1</td><td>16</td><td>Admitted</td><td>279,177,216</td></tr>
+<tr><td>2</td><td>32</td><td>Admitted</td><td>281,778,944</td></tr>
+<tr><td>3</td><td>64</td><td>Admitted</td><td>284,543,232</td></tr>
+<tr><td>4</td><td>128</td><td>Admitted</td><td>297,443,584</td></tr>
+<tr><td>5</td><td>256</td><td>Admitted</td><td>306,007,296</td></tr>
+<tr><td>6</td><td>512</td><td>Admitted</td><td>334,626,048</td></tr>
+<tr><td>7</td><td>1,024</td><td>Admitted</td><td>391,863,552</td></tr>
+<tr><td>8</td><td>2,048</td><td>Admitted</td><td>545,824,000</td></tr>
+<tr><td>9</td><td>4,096</td><td>Admitted</td><td>814,259,456</td></tr>
+<tr><td>10</td><td>8,192</td><td>Admitted</td><td>1,193,188,608</td></tr>
+<tr><td>11</td><td>16,384</td><td>Admitted</td><td>2,108,988,672</td></tr>
+<tr><td>12</td><td>32,768</td><td>Admitted</td><td>3,940,588,800</td></tr>
+<tr><td>13</td><td>65,536</td><td>Admitted</td><td>7,603,789,056</td></tr>
+<tr><td>14</td><td>131,072</td><td>Admitted</td><td>14,930,189,568</td></tr>
+<tr><td>15</td><td>262,144</td><td>Admitted</td><td>29,582,990,592</td></tr>
+<tr><td>16</td><td>524,288</td><td>Refused: out of memory</td><td>—</td></tr>
+<tr><td>17</td><td>393,216</td><td>Refused: out of memory</td><td>—</td></tr>
+<tr><td>18</td><td>327,680</td><td>Admitted</td><td>36,909,391,104</td></tr>
+<tr><td>19</td><td>360,448</td><td>Admitted</td><td>40,572,591,360</td></tr>
+<tr><td>20</td><td>376,832</td><td>Admitted</td><td>42,404,191,488</td></tr>
+<tr><td>21</td><td>385,024</td><td>Admitted</td><td>43,319,991,552</td></tr>
+<tr><td>22</td><td>389,120</td><td>Admitted</td><td>43,777,891,584</td></tr>
+<tr><td>23</td><td>391,168</td><td>Admitted</td><td>44,107,865,344</td></tr>
+<tr><td>24</td><td>392,192</td><td>Refused: out of memory</td><td>—</td></tr>
+<tr><td>25</td><td>391,680</td><td>Admitted</td><td>44,107,865,344</td></tr>
+<tr><td>26</td><td>391,936</td><td>Admitted</td><td>44,107,865,344</td></tr>
+<tr><td>27</td><td>392,064</td><td>Admitted</td><td>44,107,865,344</td></tr>
+<tr><td>28</td><td>392,128</td><td>Refused: out of memory</td><td>—</td></tr>
+<tr><td>29</td><td>392,096</td><td>Refused: out of memory</td><td>—</td></tr>
+<tr><td>30</td><td>392,080</td><td>Refused: out of memory</td><td>—</td></tr>
+<tr><td>31</td><td>392,072</td><td>Refused: out of memory</td><td>—</td></tr>
+<tr><td>32</td><td>392,068</td><td>Admitted</td><td>44,107,865,344</td></tr>
+<tr><td>33</td><td>392,070</td><td>Admitted</td><td>44,107,865,344</td></tr>
+<tr><td>34</td><td>392,071</td><td>Admitted</td><td>44,107,865,344</td></tr>
+</tbody></table>
+<h4 id="iter-bank-recovery">Retained fixture, receipts and test arms</h4>
+<p>All data and complete logs are retained under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T165038806629-iter-bank/</code>. The native source and mesh are <code>prepared/source.json</code>, <code>prepared/geometry.npz</code> and <code>h200/geometry.npz</code>. The original builder’s <code>h200.log</code> and <code>h200/build-receipt.json</code> preserve build, publication, reload and its first-state refusal. The published bank remains in <code>h200/store/</code>. The completed H200 diagnostics are <code>diagnose.log</code>, <code>diagnosis/diagnosis.json</code>, <code>diagnosis/accuracy-220.npz</code>, <code>accuracy-333.npz</code>, <code>accuracy-336.npz</code> and <code>diagnosis/components.npz</code>. The test adapter <code>diagnosis/receipt.json</code> wraps the diagnostic records without changing their numbers. Width trials and their full refusals are in <code>capacity.log</code> and <code>h200/capacity.json</code>. The P100 conductor reference is <code>coils-titan/receipt.json</code> with its three <code>coil-accuracy-*.npz</code> files.</p>
+<h4 id="iter-bank-merged-validation">Merged-head CPU validation and reload</h4>
+<p>After integration, the source first reproduced <code>SyntaxError: keyword argument repeated: coil_exterior</code> in the bank payload call. Removing duplicate <code>coil_exterior</code>/<code>coil_count</code> keywords restored import without changing the absent-response convention. The qualification, regression tests and committed suite/reload helpers are at <code>2b24ed31282b97798adcebf1c70596a8dff72666</code>. Job <code>1315481</code> ran on <code>all_debug</code> with seven CPUs, 96 GiB, the shared interpreter, CPU x64 and a git-archive tree per arm. Each file ran in a fresh process with <code>-rfP</code>, the normal per-test bounds and node-local scratch; its full log, command, imported module path, working directory and final exit status are retained.</p>
+<table id="iter-bank-paired-suite"><thead><tr><th>Test file</th><th>Base 25ec3c9e8</th><th>Updated head 2b24ed312</th><th>Added failures</th></tr></thead><tbody>
+<tr><td>test_iter_bank.py</td><td>Absent; no pytest arm</td><td>13 passed in 2.83s</td><td>0</td></tr>
+<tr><td>test_bank_traced_inputs.py</td><td>Absent; no pytest arm</td><td>14 passed in 257.68s (0:04:17)</td><td>0</td></tr>
+<tr><td>test_support_read.py</td><td>13 passed, 2 skipped in 74.05s (0:01:14)</td><td>13 passed, 2 skipped in 79.83s (0:01:19)</td><td>0</td></tr>
+<tr><td>test_bank_drive_continuation.py</td><td>10 passed in 5.35s</td><td>10 passed in 5.59s</td><td>0</td></tr>
+<tr><td>test_bank_lane_drive.py</td><td>11 passed in 6.55s</td><td>11 passed in 6.63s</td><td>0</td></tr>
+</tbody></table>
+<p>The base’s existing files total <strong>34 passed, 2 skipped</strong>; the updated head totals <strong>61 passed, 2 skipped</strong>. Both new test files are absent at the base and have no pytest baseline arm. In particular, the original node’s absent baseline remains incomplete, rather than being reported as a passing test file. The traced-input solve records <code>SOLVE_COMPILATIONS cold 1 changed 0</code> after slice inputs change.</p>
+<p>The complete dropped-PF1 replay at the same updated head reports <strong>6 failed, 7 passed in 3.00 s</strong>, ending <code>EXIT=1</code>. All three <code>test_dina_nodal_jets_match_analytic_map</code> parameter IDs and all three <code>test_dina_coil_jets_match_analytic_map</code> parameter IDs fail under mutation and pass in the positive head. Thus the revised plasma Hessian allowance still refuses the missing coil, and the coil-only check retains its 1e−10 budget.</p>
+<table id="iter-bank-merged-reload"><thead><tr><th>Reload at updated merged head</th><th>Observed result</th></tr></thead><tbody>
+<tr><td>CPU device-ready reload wall</td><td>0.236632768 s</td></tr>
+<tr><td>Content identity</td><td>sha256:fd912554f8e9e7efddce53b119242a46e88f20ac30e029f83781c6253f828425</td></tr>
+<tr><td>Bucket / active nodes / coil count</td><td>2,048 / 1,772 / 12</td></tr>
+<tr><td>Verified persisted fields</td><td>rows, exterior, coil_exterior, coil_count, nodes, sample_index, bucket, active_nodes</td></tr>
+</tbody></table>
+<p>The CPU reload is a compatibility check of the retained H200-built bank at the updated source head, separate from the original H200 reload wall of 0.145668 s. It binds the original geometry and mesh and checks all eight persisted fields against the stored payload. No bank rebuild, content-store rewrite or new H200 run was needed. The absent-coil round-trip test separately proves <code>None → zero-width archive → None</code>.</p>
+<p>Receipts are <code>qualification-base/receipt.json</code>, <code>qualification-head/receipt.json</code>, <code>qualification-negative/receipt.json</code> and <code>qualification-reload.json</code> under the same run directory. Each test receipt points to its complete <code>test_*.log</code>; <code>qualification.log</code> ends <code>EXIT=0</code> for completion of the runner, including the deliberately red mutation subprocess. The manifest records the final evidence commit’s focused gate separately. All historical uniform-budget refusal logs, original measurements and the inspected SVG remain retained.</p>
+<p id="iter-bank-current-verdict">The bank qualifies against the direct kernels at the authorized component budgets for all three retained states, the dropped-coil control is refused, the paired existing files add no failures, and the published bank reloads at the updated merged head. The ordered capacity boundary and its allocator caveat remain as reported above.</p>
+</article>

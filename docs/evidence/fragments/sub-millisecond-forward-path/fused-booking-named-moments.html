@@ -1,0 +1,73 @@
+<section id="fused-booking-named-moments-landing">
+<h2>The fused booking seams read booked moments by field name
+</h2>
+<p>Fusing primal moments and assembly channels into one conic traversal left two
+seams reading the moment triple by position: <code>_normalize_booking</code>
+summed <code>moments[0]</code> for the current channel, and
+<code>book_and_local_sensitivities</code> handed the positional slice
+<code>raw[:3]</code> of a <code>Booking</code> back to it. Field order was
+therefore an unnamed invariant, and a reordering would have booked the radial
+moment as the current with no field name and no test to say so. Both seams now
+read and rebuild the named fields of the existing moment and booking types:
+the current channel is read as <code>moments.cell_current</code>, and the
+<code>Booking</code> returned by <code>_normalize_booking</code> is built field
+by field. No container was added; the moment order no longer decides anything
+at either seam.</p>
+<p>The plan's own moment primitive was left alone: the channel axis of the
+stacked array inside the fused traversal is the clip-quadrature channel layout,
+not the booking field order, and it is not read at either seam.</p>
+<h3 id="fused-booking-named-moments-order">A reordered moment triple no longer
+changes the booking</h3>
+<p><code>tests/test_fused_booking_assembly.py</code> builds the moment triple
+with the current channel last and asserts the normalized booking is identical
+to the same moments supplied in field order, and that
+<code>raw_current</code> is the sum of the current channel. At the base
+revision <code>76fb8b84e</code> the positional read summed the radial moment
+instead: the test failed on both the limited and diverted cases, reporting
+<code>raw_current</code> 0.003143 against the current channel's 2.241391 (max
+relative difference 0.9986), in
+<code>logs/base-code.reordered-named-moments.log</code> with EXIT=1. At head
+<code>177f0fe99</code> both cases pass in
+<code>logs/head.reordered-named-moments.log</code> with EXIT=0. The other
+tests in the file pass unchanged.</p>
+<h3 id="fused-booking-named-moments-arms">Fresh-process CPU arms add no
+failures</h3>
+<p>Each arm is one pytest process per file on the <code>rigel</code>
+partition, against the shared interpreter with <code>PYTHONPATH</code> set to
+the tree, <code>JAX_PLATFORMS=cpu</code> and <code>TMPDIR=/tmp</code>. The base
+arm ran at <code>76fb8b84e</code> before either seam was touched; the head arm
+adds only this node's change.</p>
+<table><thead><tr><th>File</th><th>Base <code>76fb8b84e</code></th>
+<th>Head <code>177f0fe99</code></th><th>Added failures</th>
+<th>Added passes</th></tr></thead><tbody>
+<tr><td><code>tests/test_book_primal_buckets.py</code></td><td>6 passed</td><td>6 passed</td><td>0</td><td>0</td></tr>
+<tr><td><code>tests/test_booking_scalar_tile.py</code></td><td>55 passed</td><td>55 passed</td><td>0</td><td>0</td></tr>
+<tr><td><code>tests/test_fused_booking_assembly.py</code></td><td>20 passed</td><td>22 passed</td><td>2, both the new reordered-fields cases at the base revision; 0 at head</td><td>2</td></tr>
+</tbody></table>
+<p>Totals: base 81 passed, head 83 passed, 0 failures in either arm.
+Arm exit status is 0 for all six processes.</p>
+<p>The product diff is 15 added and 7 deleted lines
+(<code>nova/equilibrium/current.py</code> +9/-5,
+<code>nova/equilibrium/support_read.py</code> +6/-2), all of it the named
+access and the field-by-field <code>Booking</code> construction; no product
+line grows for any other reason. The new test adds 53 lines.</p>
+<h3 id="fused-booking-named-moments-mutation">Positive control and the
+declared mutation</h3>
+<p>Because the test could pass for the wrong reason, it first asserts the
+radial and current channels are distinguishable before comparing. The declared
+mutation restores the positional <code>moments[0]</code> read in
+<code>_normalize_booking</code> and leaves the test otherwise untouched: it
+reddens exactly <code>test_normalized_booking_reads_moments_by_field_name</code>
+on both the limited and diverted cases (2 failed, EXIT=1,
+<code>logs/negative-control.positional-current.log</code>), which no head arm
+fails. The seam was restored and the tree returned clean at
+<code>177f0fe99</code> afterwards.</p>
+<h3 id="fused-booking-named-moments-paths">Paths</h3>
+<p>Changed: <code>nova/equilibrium/current.py</code>,
+<code>nova/equilibrium/support_read.py</code>,
+<code>tests/test_fused_booking_assembly.py</code>. Logs referenced above are
+under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T211339079068-fused-booking-named-moments/logs</code>.
+No timing claim is made; this is an interface fix with no performance effect
+and it was not measured for one.</p>
+</section>

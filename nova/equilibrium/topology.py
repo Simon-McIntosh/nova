@@ -3072,15 +3072,23 @@ def _fragment_coefficients(vertices, coefficient):
     and empty cells stable strip records even as the field amplitude changes.
     Cuts and numerically ambiguous signs keep their exact coefficients.
     """
+    classification = _uniform_fragment_sign(vertices, coefficient)
+    constant = jnp.zeros_like(coefficient).at[:, 0].set(classification)
+    return jnp.where((classification != 0)[:, None], constant, coefficient)
+
+
+def _uniform_fragment_sign(vertices, coefficient):
+    """Certify a strict finite sign across the cell with one box bound."""
     x, y = jnp.max(jnp.abs(vertices), axis=1).T
     powers = jnp.stack((x, y, x * x, x * y, y * y), axis=1)
     bound = jnp.sum(jnp.abs(coefficient[:, 1:]) * powers, axis=1)
-    margin = 64 * jnp.finfo(coefficient.dtype).eps
-    uniform = (jnp.abs(coefficient[:, 0]) > bound * (1 + margin)) & jnp.all(
-        jnp.isfinite(coefficient), axis=1
+    guard = 64 * jnp.finfo(coefficient.dtype).eps * (jnp.abs(coefficient[:, 0]) + bound)
+    sign = jnp.where(
+        coefficient[:, 0] > bound + guard,
+        1,
+        jnp.where(coefficient[:, 0] < -bound - guard, -1, 0),
     )
-    constant = jnp.zeros_like(coefficient).at[:, 0].set(jnp.sign(coefficient[:, 0]))
-    return jnp.where(uniform[:, None], constant, coefficient)
+    return jnp.where(jnp.all(jnp.isfinite(coefficient), axis=1), sign, 0)
 
 
 def _fragment_changes(keys, cached):
@@ -3091,28 +3099,6 @@ def _fragment_changes(keys, cached):
             (value != prior).reshape(value.shape[0], -1), axis=1
         )
     return changed
-
-
-def _refresh_fragment_cells(evaluate, arguments, prior, changed):
-    """Rebuild compact tiles of changed cells, retaining every other record.
-
-    Padding repeats a changed cell; it never evaluates a carried cell. A
-    zero-change call executes no tile. The loop and all indices stay on device.
-    """
-    count = jnp.sum(changed, dtype=jnp.int32)
-    tile = min(32, changed.size)
-    size = ((changed.size + tile - 1) // tile) * tile
-    first = jnp.argmax(changed)
-    indices = jnp.nonzero(changed, size=size, fill_value=first)[0]
-
-    def update(index, result):
-        selected = jax.lax.dynamic_slice(indices, (index * tile,), (tile,))
-        values = jax.vmap(evaluate)(*(value[selected] for value in arguments))
-        return jax.tree.map(
-            lambda stored, updated: stored.at[selected].set(updated), result, values
-        )
-
-    return jax.lax.fori_loop(0, (count + tile - 1) // tile, update, prior)
 
 
 def _fragments_at_level(
@@ -3126,7 +3112,7 @@ def _fragments_at_level(
     cached=None,
     *,
     return_cache=False,
-    cache_geometry=False,
+    reuse_geometry=False,
 ):
     """Continuous fragment areas and edge intervals under a fixed cell decision."""
     local_vertices = (geometry.vertices - geometry.centre[:, None, :]) / geometry.pitch[
@@ -3134,7 +3120,7 @@ def _fragments_at_level(
     ]
     signed = sigma * coefficient
     signed = signed.at[:, 0].add(-sigma * level)
-    if cache_geometry or cached is not None:
+    if reuse_geometry or cached is not None:
         signed = _fragment_coefficients(local_vertices, signed)
     keys = (
         geometry.vertices,
@@ -3160,33 +3146,19 @@ def _fragments_at_level(
 
     arguments = (local_vertices, geometry.vertex_count, signed)
     if cached is None:
-        changed = jnp.ones(len(coefficient), dtype=bool)
         fragments = jax.vmap(quadratic)(*arguments)
         saddle = jax.vmap(normal)(geometry.vertices, geometry.vertex_count)
     else:
-        changed = _fragment_changes(keys, cached.fragment_geometry[:-1])
-        changed = changed | ~cached.cell_fragments.valid
-        fragments = _refresh_fragment_cells(
-            quadratic, arguments, cached.cell_fragments, changed
-        )
-        geometry_changed = _fragment_changes(keys[:4], cached.fragment_geometry[:4])
-        form_changed = jnp.asarray(False)
-        for value, prior in zip(
-            jax.tree.leaves(form), jax.tree.leaves(cached.saddle_form), strict=True
-        ):
-            form_changed = form_changed | jnp.any(value != prior)
-        normal_changed = represented & (
-            geometry_changed
-            | form_changed
-            | ~cached.normal_form_cells
-            | ~cached.saddle_fragments.valid
-            | (policy.edge_tolerance != cached.fragment_geometry[-1])
-        )
-        saddle = _refresh_fragment_cells(
-            normal,
-            (geometry.vertices, geometry.vertex_count),
-            cached.saddle_fragments,
-            normal_changed,
+        fragments, saddle, _ = _refresh_fragments(
+            geometry,
+            coefficient,
+            sigma,
+            level,
+            form,
+            cached,
+            policy,
+            fragment_keys=keys,
+            represented=represented,
         )
     # Inactive normal-form cells have no saddle geometry. Canonical empty
     # records keep a carried receipt independent of its previous support.
@@ -3245,7 +3217,7 @@ def _support_at_level(
     cached=None,
     *,
     return_cache=False,
-    cache_geometry=False,
+    reuse_geometry=False,
 ):
     owner = _inside_cells(geometry, form.position) & saddle_live
     represented = represented_saddle_cells(
@@ -3262,7 +3234,7 @@ def _support_at_level(
             policy,
             cached,
             return_cache=return_cache,
-            cache_geometry=cache_geometry,
+            reuse_geometry=reuse_geometry,
         )
     )
     labels, wall = _connected_fragment_labels(
@@ -3442,12 +3414,12 @@ def read_at_stationary_points(
     them. No contour tree or null census is built: the supplied points are the
     census. ``field`` supplies ``sampled_coefficient(geometry)`` for the own-node
     fit and the point jets the saddle normal form and wall events differentiate.
-    The static option ``cache_geometry=True`` retains fragments on the receipt;
+    The static option ``reuse_geometry=True`` retains fragments on the receipt;
     passing
     ``cached`` supplies a prior receipt and enables that mode by default.
     """
     cached = cache_options.pop("cached", None)
-    cache_geometry = cache_options.pop("cache_geometry", cached is not None)
+    reuse_geometry = cache_options.pop("reuse_geometry", cached is not None)
     if cache_options:
         raise TypeError(f"unknown geometry-cache options: {tuple(cache_options)}")
     policy = _read_policy(geometry, policy)
@@ -3486,7 +3458,7 @@ def read_at_stationary_points(
         jnp.sum(live, dtype=jnp.int32),
         jnp.asarray(True),
         None,
-        **({"cached": cached, "cache_geometry": True} if cache_geometry else {}),
+        **({"cached": cached, "reuse_geometry": True} if reuse_geometry else {}),
     )
 
 
@@ -3502,7 +3474,7 @@ def _read_at_nulls(
     census_resolved,
     tree,
     cached=None,
-    cache_geometry=False,
+    reuse_geometry=False,
 ):
     """Select the confined support given the live stationary points."""
     sigma = convention.sigma
@@ -3514,7 +3486,7 @@ def _read_at_nulls(
     axis_index = jnp.argmax(axes)
     axis, axis_flux = nulls.position[axis_index], nulls.jet.value[axis_index]
     support_options = (
-        {"cached": cached, "cache_geometry": True} if cache_geometry else {}
+        {"cached": cached, "reuse_geometry": True} if reuse_geometry else {}
     )
 
     def normal_form(index):
@@ -3650,7 +3622,7 @@ def _read_at_nulls(
         form,
         diverted,
         policy,
-        **({**support_options, "return_cache": True} if cache_geometry else {}),
+        **({**support_options, "return_cache": True} if reuse_geometry else {}),
     )
     (
         area,
@@ -3754,6 +3726,197 @@ def _read_at_nulls(
     )
 
 
+def _fragment_reuse_mask(geometry, signed, form, decision, sigma):
+    """Certify unchanged conics or uniform support, including edge-slot identity.
+
+    A cell's ownership alone cannot certify its area. The coefficient bound
+    proves the sign over the entire cell, including an interior extremum;
+    uncertain cells retain the exact conic decomposition.
+    """
+    local = (geometry.vertices - geometry.centre[:, None, :]) / geometry.pitch[
+        :, None, None
+    ]
+    prior = sigma * decision.field_coefficients
+    prior = prior.at[:, 0].add(-sigma * decision.boundary_flux)
+    classification = _uniform_fragment_sign(local, signed)
+    same_uniform = (classification != 0) & (
+        classification == _uniform_fragment_sign(local, prior)
+    )
+
+    def full_intervals(vertices, count, coefficient):
+        slot = jnp.arange(vertices.shape[0])
+        end = vertices[jnp.where(slot + 1 < count, slot + 1, 0)]
+        first = _quadratic_value(coefficient, vertices)
+        last = _quadratic_value(coefficient, end)
+        middle = _quadratic_value(coefficient, 0.5 * (vertices + end))
+        quadratic = 2.0 * (first + last - 2.0 * middle)
+        roots = _quadratic_parameters(quadratic, last - first - quadratic, first)
+        roots = jnp.sort(jnp.clip(roots, 0.0, 1.0), axis=-1)
+        ends = jnp.concatenate(
+            (jnp.zeros((len(slot), 1)), roots, jnp.ones((len(slot), 1))), axis=1
+        )
+        start, stop = ends[:, :-1], ends[:, 1:]
+        return jnp.where(
+            ((slot < count)[:, None] & (stop > start))[..., None],
+            jnp.stack((start, stop), axis=-1),
+            0.0,
+        )
+
+    full = jax.vmap(full_intervals)(local, geometry.vertex_count, signed)
+    edge_same = jnp.all(full == decision.edge_interval[:, 0, :, :3], axis=(1, 2, 3))
+    same_uniform &= (classification < 0) | edge_same
+    same_conic = jnp.all(signed == prior, axis=1)
+    same_form = _saddle_form_unchanged(form, decision.saddle_form)
+    return decision.valid & jnp.where(
+        decision.normal_form_cells, same_form, same_conic | same_uniform
+    )
+
+
+def _saddle_form_unchanged(form, prior):
+    return jnp.all(
+        jnp.stack(
+            [
+                jnp.all(value == previous)
+                for value, previous in zip(
+                    jax.tree.leaves(form), jax.tree.leaves(prior), strict=True
+                )
+            ]
+        )
+    )
+
+
+def _refresh_fragments(
+    geometry,
+    coefficient,
+    sigma,
+    level,
+    form,
+    decision,
+    policy,
+    *,
+    fragment_keys=None,
+    represented=None,
+):
+    """Refresh compact changed populations with one bounded-tile scatter.
+
+    Complete cached records retain strip data for connected qualification.
+    Readers carrying only projected geometry use the same tile execution for
+    area and edge records. The counter excludes padding, whose evaluations
+    repeat a changed cell rather than touching any retained cell.
+    """
+    signed = (sigma * coefficient).at[:, 0].add(-sigma * level)
+    if fragment_keys is not None:
+        signed = fragment_keys[-1]
+    if represented is None:
+        represented = decision.normal_form_cells
+    local = (geometry.vertices - geometry.centre[:, None, :]) / geometry.pitch[
+        :, None, None
+    ]
+    cells = len(coefficient)
+
+    def update(mask, evaluate, records, computed, width):
+        width = min(width, cells)
+        count = jnp.sum(mask, dtype=jnp.int32)
+        first = jnp.argmax(mask)
+        indices = jnp.nonzero(mask, size=cells, fill_value=first)[0]
+        indices = jnp.pad(indices, (0, (-cells) % width), constant_values=first)
+
+        def bucket(batch, state):
+            records, computed = state
+            start = batch * width
+            index = jax.lax.dynamic_slice(indices, (start,), (width,))
+            live = start + jnp.arange(width) < count
+            values = jax.vmap(evaluate)(index)
+            destination = jnp.where(live, index, cells)
+            records = jax.tree.map(
+                lambda stored, fresh: stored.at[destination].set(fresh, mode="drop"),
+                records,
+                values,
+            )
+            return records, computed + jnp.sum(live, dtype=jnp.int32)
+
+        return jax.lax.fori_loop(
+            0, (count + width - 1) // width, bucket, (records, computed)
+        )
+
+    def conic_record(index):
+        return quadratic_cell_fragments(
+            local[index],
+            geometry.vertex_count[index],
+            signed[index],
+            policy.fragment_capacity,
+        )
+
+    def saddle_record(index):
+        return _normal_form_cell_fragments(
+            geometry.vertices[index],
+            geometry.vertex_count[index],
+            form,
+            policy.edge_tolerance,
+        )
+
+    computed = jnp.asarray(0, jnp.int32)
+    if fragment_keys is not None:
+        changed = _fragment_changes(fragment_keys, decision.fragment_geometry[:-1])
+        changed = changed | ~decision.cell_fragments.valid
+        fragments, computed = update(
+            changed, conic_record, decision.cell_fragments, computed, 64
+        )
+        geometry_changed = _fragment_changes(
+            fragment_keys[:4], decision.fragment_geometry[:4]
+        )
+        normal_changed = represented & (
+            geometry_changed
+            | ~_saddle_form_unchanged(form, decision.saddle_form)
+            | ~decision.normal_form_cells
+            | ~decision.saddle_fragments.valid
+            | (policy.edge_tolerance != decision.fragment_geometry[-1])
+        )
+        saddle, computed = update(
+            normal_changed, saddle_record, decision.saddle_fragments, computed, 4
+        )
+        return fragments, saddle, computed
+
+    reuse = _fragment_reuse_mask(geometry, signed, form, decision, sigma)
+    required = jnp.where(
+        represented, 2, jnp.sum(decision.fragment_area > 0, axis=1)
+    ).astype(jnp.int32)
+    records = (
+        decision.fragment_area,
+        decision.edge_interval,
+        jnp.full((cells,), decision.valid),
+        required,
+    )
+
+    def conic(index):
+        fragment = conic_record(index)
+        return (
+            fragment.area * geometry.pitch[index] ** 2,
+            jnp.pad(fragment.edge_interval, ((0, 0), (0, 0), (0, 10), (0, 0))),
+            fragment.valid,
+            fragment.required,
+        )
+
+    def saddle(index):
+        fragment = saddle_record(index)
+        sectors = jnp.nonzero(form.positive, size=2, fill_value=0)[0]
+        return (
+            jnp.pad(fragment.area[sectors], ((0, policy.fragment_capacity - 2),)),
+            jnp.pad(
+                fragment.edge_interval[sectors],
+                ((0, policy.fragment_capacity - 2), (0, 0), (0, 0), (0, 0)),
+            ),
+            fragment.valid,
+            jnp.asarray(2, jnp.int32),
+        )
+
+    records, computed = update(~reuse & ~represented, conic, records, computed, 64)
+    (area, intervals, valid, required), computed = update(
+        ~reuse & represented, saddle, records, computed, 4
+    )
+    return area, intervals, jnp.all(valid), jnp.max(required), computed
+
+
 def refresh_at_stationary_points(
     field,
     geometry,
@@ -3763,7 +3926,7 @@ def refresh_at_stationary_points(
     decision,
     *,
     skip_wall=False,
-    reuse_geometry=True,
+    reuse_geometry=None,
 ):
     """Refresh continuous geometry while carrying the connected decision.
 
@@ -3773,7 +3936,11 @@ def refresh_at_stationary_points(
     are evaluated at the supplied state. Limited boundaries re-evaluate wall
     events and retain the contact nearest the carried boundary. ``skip_wall``
     is a static hint; wall events are omitted only for diverted ownership.
+    ``reuse_geometry`` retains certified unchanged fragments and refreshes compact
+    changed populations. Disabling it evaluates every cell as a reference.
     """
+    if reuse_geometry is None:
+        reuse_geometry = decision.cell_fragments is not None
     policy = _read_policy(geometry, policy)
     sigma = convention.sigma
     saddle_index = jnp.argmax(decision.x_point_valid)
@@ -3837,7 +4004,11 @@ def refresh_at_stationary_points(
         policy,
     )
     geometry_update = {}
-    if decision.cell_fragments is None:
+    if decision.cell_fragments is None and reuse_geometry:
+        area, intervals, fragment_valid, required, _ = _refresh_fragments(
+            geometry, coefficient, sigma, level, form, decision, policy
+        )
+    elif decision.cell_fragments is None:
         area, intervals, fragment_valid, required, *_ = _fragments_at_level(*arguments)
     else:
         area, intervals, fragment_valid, required, fragments, _, _, saddle, keys = (
@@ -3845,7 +4016,7 @@ def refresh_at_stationary_points(
                 *arguments,
                 decision if reuse_geometry else None,
                 return_cache=True,
-                cache_geometry=True,
+                reuse_geometry=True,
             )
         )
         geometry_update = dict(

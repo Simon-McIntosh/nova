@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/current.py:566",
+    "nova/equilibrium/support_read.py:1763",
+    "nova/equilibrium/support_read.py:2100",
+    "nova/equilibrium/support_read.py:2457"
+  ],
+  "completed_at": "2026-11-14T17:37:07.118Z",
+  "dispatched_at": "2026-11-14T17:09:31Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "fused-booking-named-moments",
+      "recorded_at": "2026-11-14T17:46:30.130561+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "fused-booking-named-moments",
+      "recorded_at": "2026-11-14T17:46:32.609424+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "adoption at every width is deliberate: width 1 beats the 3% margin (-3.94%) and widths 16/64 are faster within spread (-1.92%, -0.95%), so no width regresses; the coordinator states this in the landing outcome",
+      "recorded_at": "2026-11-14T17:46:35.096444+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/current.py",
+      "line": "570",
+      "severity": "non-blocking",
+      "text": "non-blocking: _normalize_booking reads the current channel by position (moments[0]) where the base read moments.cell_current, so a reordering of the moment tuple would silently book the radial moment with no field name or test to catch it."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "line": "1362",
+      "severity": "non-blocking",
+      "text": "non-blocking: book_and_local_sensitivities feeds a positional slice raw[:3] of a Booking back into _normalize_booking, coupling the fused result to field order and making the moment order an unnamed invariant across the new seam."
+    },
+    {
+      "file": "nova/equilibrium/support_read.py",
+      "line": "1763",
+      "severity": "non-blocking",
+      "text": "non-blocking: fusion is enabled by default in newton_step for every width while the fragment records widths 16 and 64 as unresolved, and neither the fragment nor the manifest states that adoption rests on the width-one arm alone."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read across base 975f3e98cfa2b2976d2bbe1b94ead37f8623b529 to head 8871df8029f74e6f2ef62761bd5ba28857a3f4d2; nine files, 1835 insertions and 20 deletions, the last commit touching only the fragment and SVG (git diff 8e2ba6f57c7f33ec1248c398ff6765f4ce4705ff 8871df8029f74e6f2ef62761bd5ba28857a3f4d2 over nova tests scripts is empty).",
+    "done_when": "the done_when asks for docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-assembly.html to report the verdict against the 3%-or-spread margin with one SVG; that fragment exists and tables -3.94%/-1.92%/-0.95% with verdicts faster/unresolved/unresolved against a 3.00% margin, and docs/figures/sub-millisecond-forward-path/fused-booking-assembly/booking-assembly.svg renders clean.",
+    "goal": "the node goal is \"fuse conic booking and assembly into one pass over the cells and measure the saving on the H200\"; nova/equilibrium/current.py:816 and nova/equilibrium/support_read.py:816 add a density row beside the derivative channels on the existing conic traversal, tests/test_fused_booking_assembly.py:123 observes two conic constructions in the separate path against one fused, and the fused path is the default in newton_step at nova/equilibrium/support_read.py:1763.",
+    "manifest": "read; it reports the fused-versus-separate test and names /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144116292081-fused-booking-assembly/cpu-armed-head.log with 20 passed and EXIT=0.",
+    "write_paths": "the manifest declares six paths (nova/equilibrium/current.py, nova/equilibrium/support_read.py, tests/test_fused_booking_assembly.py, scripts/prototypes/fused_booking_assembly, the evidence fragment and the figure directory); all nine files in the diff sit inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_fused_booking_assembly.py:123 fails if the fused path stops sharing the conic traversal and tests/test_fused_booking_assembly.py:60 fails on a moment mismatch, and the recorded negative control at cpu-delivery/negative.log reddens eight parity cases with EXIT=1.",
+    "evidence": "h200/summary.json carries two fresh processes per arm agreeing within 0.219%, pins base and head, and reports relative_change -0.0394/-0.0192/-0.0095 against margin 0.03, matching docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-assembly.html.",
+    "fit": "the addition follows the NamedTuple and replace() idiom of nova/equilibrium/current.py:123, but nova/equilibrium/current.py:570 replaces the named moments.cell_current access with positional moments[0].",
+    "goal_fidelity": "nova/equilibrium/support_read.py:1346 supplies the booked moments and channels from one traversal and h200/summary.json measures the saving, though the anticipated 2.83 ms/slice is not realized and the factor-reuse path at nova/equilibrium/support_read.py:1789 keeps the unfused booking.",
+    "reuse": "scripts/prototypes/fused_booking_assembly/run.py:15 imports refuse_inert from scripts/prototypes/h200_levers/run.py and report.py imports stages from scripts/prototypes/bank_h200_slice_profile/report.py, and the fusion extends book_tangent_channels rather than forking a second traversal.",
+    "scope_discipline": "every path in the diff, including the shared-file edit at nova/equilibrium/support_read.py that the manifest records in changed_paths, lies inside the declared write paths in manifest.md."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is \"fuse conic booking and assembly into one pass over the cells and measure the saving on the H200\"; nova/equilibrium/current.py:816 and nova/equilibrium/support_read.py:816 add a density row beside the derivative channels on the existing conic traversal, tests/test_fused_booking_assembly.py:123 observes two conic constructions in the separate path against one fused, and the fused path is the default in newton_step at nova/equilibrium/support_read.py:1763.\nVERDICT done_when: the done_when asks for docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-assembly.html to report the verdict against the 3%-or-spread margin with one SVG; that fragment exists and tables -3.94%/-1.92%/-0.95% with verdicts faster/unresolved/unresolved against a 3.00% margin, and docs/figures/sub-millisecond-forward-path/fused-booking-assembly/booking-assembly.svg renders clean.\nVERDICT write_paths: the manifest declares six paths (nova/equilibrium/current.py, nova/equilibrium/support_read.py, tests/test_fused_booking_assembly.py, scripts/prototypes/fused_booking_assembly, the evidence fragment and the figure directory); all nine files in the diff sit inside them.\nVERDICT manifest: read; it reports the fused-versus-separate test and names /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144116292081-fused-booking-assembly/cpu-armed-head.log with 20 passed and EXIT=0.\nVERDICT diff: read across base 975f3e98cfa2b2976d2bbe1b94ead37f8623b529 to head 8871df8029f74e6f2ef62761bd5ba28857a3f4d2; nine files, 1835 insertions and 20 deletions, the last commit touching only the fragment and SVG (git diff 8e2ba6f57c7f33ec1248c398ff6765f4ce4705ff 8871df8029f74e6f2ef62761bd5ba28857a3f4d2 over nova tests scripts is empty).\nCALL_SITES: nova/equilibrium/current.py:566, nova/equilibrium/support_read.py:1763, nova/equilibrium/support_read.py:2100, nova/equilibrium/support_read.py:2457\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:1346 supplies the booked moments and channels from one traversal and h200/summary.json measures the saving, though the anticipated 2.83 ms/slice is not realized and the factor-reuse path at nova/equilibrium/support_read.py:1789 keeps the unfused booking.\nSCORE evidence: 18\nJUSTIFICATION evidence: h200/summary.json carries two fresh processes per arm agreeing within 0.219%, pins base and head, and reports relative_change -0.0394/-0.0192/-0.0095 against margin 0.03, matching docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-assembly.html.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff, including the shared-file edit at nova/equilibrium/support_read.py that the manifest records in changed_paths, lies inside the declared write paths in manifest.md.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_fused_booking_assembly.py:123 fails if the fused path stops sharing the conic traversal and tests/test_fused_booking_assembly.py:60 fails on a moment mismatch, and the recorded negative control at cpu-delivery/negative.log reddens eight parity cases with EXIT=1.\nSCORE fit: 15\nJUSTIFICATION fit: the addition follows the NamedTuple and replace() idiom of nova/equilibrium/current.py:123, but nova/equilibrium/current.py:570 replaces the named moments.cell_current access with positional moments[0].\nSCORE reuse: 19\nJUSTIFICATION reuse: scripts/prototypes/fused_booking_assembly/run.py:15 imports refuse_inert from scripts/prototypes/h200_levers/run.py and report.py imports stages from scripts/prototypes/bank_h200_slice_profile/report.py, and the fusion extends book_tangent_channels rather than forking a second traversal.\nFINDING nova/equilibrium/current.py:570 non-blocking: _normalize_booking reads the current channel by position (moments[0]) where the base read moments.cell_current, so a reordering of the moment tuple would silently book the radial moment with no field name or test to catch it.\nFINDING nova/equilibrium/support_read.py:1362 non-blocking: book_and_local_sensitivities feeds a positional slice raw[:3] of a Booking back into _normalize_booking, coupling the fused result to field order and making the moment order an unnamed invariant across the new seam.\nFINDING nova/equilibrium/support_read.py:1763 non-blocking: fusion is enabled by default in newton_step for every width while the fragment records widths 16 and 64 as unresolved, and neither the fragment nor the manifest states that adoption rests on the width-one arm alone.",
+  "review_run_id": "r-20261114T164440333069-review-of-fused-booking-assembly-8871df8029f7",
+  "reviewed_base_sha": "975f3e98cfa2b2976d2bbe1b94ead37f8623b529",
+  "reviewed_head_sha": "8871df8029f74e6f2ef62761bd5ba28857a3f4d2",
+  "reviewed_run_id": "r-20261114T144116292081-fused-booking-assembly",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T18:03:26.768359+00:00",
+  "total": 105
+}

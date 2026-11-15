@@ -1,0 +1,127 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/iron_linear_magnetisation/measure.py:96",
+    "nova/biot/magnetisation.py:562",
+    "scripts/magnetisation_high_permeability/measure.py:232",
+    "scripts/west_iron_galerkin/measure.py:132",
+    "scripts/west_iron_galerkin_pair/measure.py:167",
+    "scripts/west_picard_control/measure.py:232"
+  ],
+  "completed_at": "2026-11-14T18:41:27.708Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "icm-linear-assembly-cost",
+      "recorded_at": "2026-11-14T18:53:15.442294+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-14T18:18:33Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-linear-assembly-cost",
+      "recorded_at": "2026-11-14T18:42:24.345385+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "icm-linear-assembly-cost",
+      "recorded_at": "2026-11-14T18:42:26.654373+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "icm-scripts-cleanup",
+      "recorded_at": "2026-11-14T18:42:30.074756+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "icm-linear-assembly-cost",
+      "recorded_at": "2026-11-14T18:42:28.531944+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "the reviewer verified no product source or test file changes between the after_suite revision b3b57437 and the delivered head be8a6016, so the 59-pass arm covers the landed source; the coordinator's status repair records the same",
+      "recorded_at": "2026-11-14T18:42:31.872733+00:00"
+    }
+  },
+  "findings": [
+    {
+      "detail": "`_polygon_current_response` duplicates a capability the repository already owns: `nova/biot/polygonanalytic.py:1933 polygon_analytic_greens` returns psi, B_R and B_Z per unit azimuthal current density for a polygon section in closed form, and this function returns the same quantity through the traced quadrature kernel `_traced_psi_gradient` instead of extending that owner. The duplicate is validated against the owner (tests/test_magnetisation.py:1110 pins agreement to 2e-8 on a 10 mm triangle, and the fragment records 1.74e-11 at 128 nodes) and is kept for a measured cost reason -- the closed owner did not finish a shell assembly in about two hours on the P100 -- so it is recorded, not corrected; a later node should fold the two routes into one owner behind a route flag, as the sheet module already does.",
+      "file": "nova/biot/tiledassembly.py",
+      "line": 2054,
+      "severity": "non-blocking"
+    },
+    {
+      "detail": "The module's declared public surface is `__all__` at line 1849, and none of `linear_magnetisation_geometry` (1876), `linear_galerkin_cell_interaction` (2113) or `linear_cell_interaction` (2177) is listed in it, although `nova/biot/magnetisation.py:28-30` imports all three as the module's extension. A reader who takes `__all__` as the module's API cannot see the capability this node landed.",
+      "file": "nova/biot/tiledassembly.py",
+      "line": 1849,
+      "severity": "non-blocking"
+    },
+    {
+      "detail": "The column headed `gram` symmetry defect reports `galerkin_spectrum(...)[\"volume_symmetry\"]`, which `nova/biot/magnetisation.py:277-282` computes as the asymmetry of `metric @ gram / mu0`, the volume-weighted energy, not of the Gram matrix H itself. The values (9.18e-17, 1.21e-16) reproduce exactly from the run's own logs, so the measurement is sound; the label names a different matrix than the one measured.",
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-linear-magnetisation.html",
+      "line": 106,
+      "severity": "non-blocking"
+    },
+    {
+      "detail": "The node's declared evidence fence asks for the mu_r 1000 shell at uniform 40, 20 and 10 mm with the order between successive halvings; the 10 mm arm is `completed: false` in /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/linear-0.01.json (assembly 8906.079 s, Newton update RESOURCE_EXHAUSTED), so the measure is two of three spacings and one halving order, not two. The gap is stated in the fragment rather than concealed, and the coordinator's status-repair record for this run (review path .../status-repair.json) records a lead ruling of 2026-11-14 that lands the two completed rows and folds the 10 mm row and the per-cell assembly cost to a new section-5 node; folded there, which is why this finding does not hold the node.",
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-linear-magnetisation.html",
+      "line": 139,
+      "severity": "non-blocking"
+    },
+    {
+      "detail": "The `after_suite` arm names revision b3b57437ec271a0172a7dc9aaab6e2351fedaf69 while the reviewed head is be8a601672fc. Nine commits lie between them, and I verified by diff that no product source or test file changes across the gap: `nova/biot/magnetisation.py` differs only in the ValueError message for an invalid seed shape, and `nova/biot/tiledassembly.py` does not differ at all, so the 59-pass arm does cover the delivered source. The record still names a revision that is not the one being promoted, and the fragment states this explicitly.",
+      "file": "manifest.md",
+      "line": 15,
+      "severity": "non-blocking"
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:1053-1055 reddens under the declared Gram-weight mutation (validated-fast/negative-control.log shows the maxima at 1.9204 and 2.1229), and I re-ran that test at the head to confirm it passes, but the only end-to-end multi-cell linear solve in the suite leaves the dense operator monkeypatched to zero at tests/test_magnetisation.py:1063.",
+    "evidence": "The 40 and 20 mm receipts reconcile against their logs, but /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/linear-0.01.json records completed:false, so the done-when's three-spacing receipt clause is two-thirds met and the halving order rests on one pair.",
+    "fit": "The additions follow the module's idiom and its long mechanism docstrings, names are free of plan, version and ticket labels, and the one rough edge is that tiledassembly.py:1849 __all__ omits the three public names it defines at 1876-2177.",
+    "goal_fidelity": "nova/biot/magnetisation.py:582-762 lands the affine basis behind an opt-in argument with the constant default untouched, and the shell is measured at 40/20 mm (0.0625 % at 1368 unknowns, 0.0508 % at 4968) but the third spacing the evidence fence names has no solved error.",
+    "reuse": "The change extends _mutual_edge_evaluator (tiledassembly.py:661) and reuses section_nodes, sheet_edge_field, traced_filament_greens, _packed_axis_vertical_field, configure_production_compilation_cache and the graded-refinement gate and figure helpers, but _polygon_current_response at tiledassembly.py:2054 re-implements the uniform-polygon-current field that nova/biot/polygonanalytic.py:1933 polygon_analytic_greens already owns.",
+    "scope_discipline": "git diff --stat 60d418bb85426142f3ca0a5f7a45afc4232b3255 be8a601672fc59bee88836fca05468bcc9048413 lists only the declared paths, and the finite-loop reference in scripts/iron_linear_magnetisation/reference.py:1 serves the measurement rather than widening it."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261114T181745051438-review-of-icm-linear-magnetisation-be8a601672fc",
+  "reviewed_base_sha": "60d418bb85426142f3ca0a5f7a45afc4232b3255",
+  "reviewed_head_sha": "be8a601672fc59bee88836fca05468bcc9048413",
+  "reviewed_run_id": "r-20261114T101902963467-icm-linear-magnetisation",
+  "scores": {
+    "durability": 15,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T18:53:27.319339+00:00",
+  "total": 81,
+  "verdicts": [
+    {
+      "item": "goal",
+      "text": "The node's goal is to build piecewise-linear magnetisation on the Galerkin iron route and measure it on the mu_r 1000 closed shell; nova/biot/magnetisation.py:582 solve_magnetisation gains `basis=\"linear\"` with six unknowns per cell, nova/biot/tiledassembly.py:1876 linear_magnetisation_geometry and nova/biot/tiledassembly.py:2113 linear_galerkin_cell_interaction build the operator, and the shell is measured at 40 and 20 mm but not the third spacing the evidence fence names."
+    },
+    {
+      "item": "done_when",
+      "text": "The declared done-when has three clauses: a fast spectrum/negative-control/bit-identity clause is asserted by tests/test_magnetisation.py:1040 with a red control at validated-fast/negative-control.log (2 failed, EXIT=1, maxima 1.9204 and 2.1229 against the 1.0 bound), and the constant basis is pinned by the base arm's 53 passed; the receipt clause is met for 40 and 20 mm only, with linear-0.01.json recording completed:false; the fragment-and-figure clause is answered in docs/evidence/fragments/iron-core-magnetisation/icm-linear-magnetisation.html and the inspected SVG."
+    },
+    {
+      "item": "write_paths",
+      "text": "Declared paths are nova/biot/magnetisation.py, nova/biot/tiledassembly.py, tests/test_magnetisation.py, scripts/iron_linear_magnetisation, scripts/iron_graded_refinement/gate.sh, the evidence fragment and its figures directory; all 16 files of the diff (git diff --stat 60d418bb..be8a60167) sit inside those paths, and no path outside them is touched."
+    },
+    {
+      "item": "manifest",
+      "text": "Read; status complete (set by the coordinator under a recorded lead ruling after the delivered record read blocked), residual 53 passed EXIT=0, head 59 passed EXIT=0, fast gate 57->63 passed, negative control 2 failed EXIT=1, and both blockers and evidence_inputs state the 10 mm arm failed with an actual device OOM rather than claiming a converged error."
+    },
+    {
+      "item": "diff",
+      "text": "Read all 29 commits against 60d418bb85426142f3ca0a5f7a45afc4232b3255: 16 files, 2024 insertions and 19 deletions, the constant route's operator and defaults untouched, the linear route selecting the RHS, factor and update through local function pointers at magnetisation.py:702-717, and the receipts measured at bb00950f with only an error-message change to product source after it."
+    }
+  ]
+}

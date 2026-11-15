@@ -1,0 +1,451 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "assertion": "np.testing.assert_allclose(response @ coefficient, target, atol=2e-15)",
+      "failure_condition": "Returning incorrect least-squares coefficients makes the independent linear equations fail.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 27
+    },
+    {
+      "assertion": "np.all(np.isfinite(covariance))",
+      "failure_condition": "Nonfinite covariance fails this finiteness check.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 28
+    },
+    {
+      "assertion": "spectrum[0] > 1.0",
+      "failure_condition": "A zero or unnormalised dominant singular value fails the lower bound.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 29
+    },
+    {
+      "assertion": "spectrum[1] < 1e-14",
+      "failure_condition": "Treating the rank-deficient second direction as resolved fails the upper bound.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 30
+    },
+    {
+      "assertion": "null.shape == (1, 2)",
+      "failure_condition": "Dropping the null direction or returning the wrong coefficient frame fails its shape.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 31
+    },
+    {
+      "assertion": "np.testing.assert_allclose(response @ null.T, 0.0, atol=2e-15)",
+      "failure_condition": "A vector outside the independently specified matrix null space fails its zero projection.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 32
+    },
+    {
+      "assertion": "spectrum.size == 1",
+      "failure_condition": "Including ridge rows in the reported data spectrum changes its size.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 45
+    },
+    {
+      "assertion": "null.shape == (1, 2)",
+      "failure_condition": "Counting ridge as data determination removes the expected null row.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 46
+    },
+    {
+      "assertion": "np.testing.assert_allclose(response @ null.T, 0.0, atol=1e-15)",
+      "failure_condition": "An incorrect null vector has a nonzero response projection.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 47
+    },
+    {
+      "assertion": "np.testing.assert_allclose(coefficient, [2.0, 1.0], atol=1e-15)",
+      "failure_condition": "Omitting or misweighting the current anchor changes the independent solution [2,1].",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 60
+    },
+    {
+      "assertion": "spectrum.shape == (2,)",
+      "failure_condition": "Omitting the anchor loses the second singular value.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 61
+    },
+    {
+      "assertion": "spectrum[-1] > 0.0",
+      "failure_condition": "Omitting the independent anchor produces a zero smallest singular value.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 62
+    },
+    {
+      "assertion": "null.shape == (0, 2)",
+      "failure_condition": "Reporting a null direction for the full-rank anchored matrix changes this shape.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 63
+    },
+    {
+      "assertion": "MagneticsFitReceipt.__module__ == 'nova.equilibrium.magnetics_fit'",
+      "failure_condition": "Moving or mis-exporting the receipt changes its module identity.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 67
+    },
+    {
+      "assertion": "MagneticsFit.__module__ == 'nova.equilibrium.magnetics_fit'",
+      "failure_condition": "Moving or mis-exporting the fitter changes its module identity.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 68
+    },
+    {
+      "assertion": "'measurement' not in names",
+      "failure_condition": "Adding a measurement dataclass field to the forward request fails the boundary.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 70
+    },
+    {
+      "assertion": "pytest.raises(TypeError, match='measurement')",
+      "failure_condition": "Accepting a measurement constructor keyword removes the required TypeError.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 71
+    },
+    {
+      "assertion": "jax.config.jax_enable_x64 is True",
+      "failure_condition": "Constructing the unit-test source without enabled x64 fails the precision precondition.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 79
+    },
+    {
+      "assertion": "isinstance(active, ForwardSolveRequest)",
+      "failure_condition": "Bypassing typed request construction causes the fake public solve to reject the call.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 97
+    },
+    {
+      "assertion": "receipt.converged",
+      "failure_condition": "A nonconverged fit is not accepted.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 154
+    },
+    {
+      "assertion": "receipt.iterations > 0",
+      "failure_condition": "Removing coefficient updates yields zero iterations.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 155
+    },
+    {
+      "assertion": "receipt.forward_evaluations == len(calls)",
+      "failure_condition": "Miscounting public solves disagrees with the independently recorded call list.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 156
+    },
+    {
+      "assertion": "np.testing.assert_allclose(receipt.coefficients, truth, atol=1e-11)",
+      "failure_condition": "Removing or corrupting coefficient updates misses the known algebraic truth.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 157
+    },
+    {
+      "assertion": "np.max(np.abs(receipt.whitened_residuals)) <= 1e-08",
+      "failure_condition": "A materially incomplete algebraic fit exceeds the fixed residual threshold.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 158
+    },
+    {
+      "assertion": "receipt.undetermined_coefficients == ()",
+      "failure_condition": "Wrong rank identification reports undetermined coefficients for full-rank data.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 159
+    },
+    {
+      "assertion": "receipt.singular_values.shape == (3,)",
+      "failure_condition": "A missing response column changes the spectrum shape.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 160
+    },
+    {
+      "assertion": "all((active.target_current is None for active in calls))",
+      "failure_condition": "Putting measured plasma current into forward target_current fails the recorded-request boundary.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 161
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(fitter.request.source_profile.core.p_prime.coefficients, [0.8, 0.1])",
+      "failure_condition": "Mutating the caller source changes the independently fixed [0.8,0.1] coefficients.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 162
+    },
+    {
+      "assertion": "receipt.converged",
+      "failure_condition": "Letting a masked NaN poison the solve prevents convergence.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 175
+    },
+    {
+      "assertion": "receipt.whitened_residuals[1] == 0.0",
+      "failure_condition": "Failing to zero the masked residual produces a nonzero or NaN entry.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 176
+    },
+    {
+      "assertion": "np.testing.assert_allclose(receipt.coefficients, truth, atol=1e-11)",
+      "failure_condition": "Failing to recover from the remaining independent rows misses known truth.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 177
+    },
+    {
+      "assertion": "pytest.raises(RuntimeError, match='did not qualify')",
+      "failure_condition": "Removing qualification refusal eliminates the required RuntimeError; this does not independently assert sensor-read ordering.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 184
+    },
+    {
+      "assertion": "isinstance(caught.value.receipt, ForwardSolveReceipt)",
+      "failure_condition": "Dropping the terminal receipt from the refusal loses the required type.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 186
+    },
+    {
+      "assertion": "not caught.value.receipt.qualified",
+      "failure_condition": "Returning a qualified receipt on an unqualified refusal fails the flag check.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 187
+    },
+    {
+      "assertion": "fitted.converged",
+      "failure_condition": "Incorrect basis fitting cannot converge.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 200
+    },
+    {
+      "assertion": "np.testing.assert_allclose(fitted.coefficients, [0.0, 1.0], atol=1e-10)",
+      "failure_condition": "Ignoring or transposing the basis misses the independently fixed basis coefficients [0,1].",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 201
+    },
+    {
+      "assertion": "np.testing.assert_allclose(np.r_[fitted.source_profile.core.p_prime.coefficients, fitted.source_profile.core.ff_prime.coefficients], truth, atol=1e-10)",
+      "failure_condition": "Returning the wrong physical source disagrees with independently fixed raw truth.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 202
+    },
+    {
+      "assertion": "fitted.singular_values.shape == (2,)",
+      "failure_condition": "Reporting raw rather than fitted response columns changes this shape.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 210
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='independent columns')",
+      "failure_condition": "Removing basis rank validation accepts dependent columns instead of refusing.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 215
+    },
+    {
+      "assertion": "jax.config.jax_enable_x64 is True",
+      "failure_condition": "Fixture array construction without enabled x64 fails the precision precondition.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 228
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='direct sample target rows')",
+      "failure_condition": "Accepting inconsistent cached sample rows removes the required public-constructor refusal.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 299
+    },
+    {
+      "assertion": "np.max(distance) <= roundoff",
+      "failure_condition": "A missing geometry point produces coordinate distance above floating-point roundoff.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 307
+    },
+    {
+      "assertion": "len(np.unique(rows)) == len(sample_nodes)",
+      "failure_condition": "Selecting the same cached row for multiple required points fails uniqueness.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 308
+    },
+    {
+      "assertion": "np.isfinite(amplitude) and amplitude > 0.0",
+      "failure_condition": "A nonphysical sign or nonfinite calibration fails the amplitude check.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 354
+    },
+    {
+      "assertion": "bool(generated.qualified)",
+      "failure_condition": "An unqualified generating receipt fails the prerequisite.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 611
+    },
+    {
+      "assertion": "bool(generated.terminal_state.fixed_point.converged)",
+      "failure_condition": "A nonconverged generating state fails the prerequisite.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 616
+    },
+    {
+      "assertion": "error > 1e-06",
+      "failure_condition": "Starting inside the acceptance band, including a no-op initial perturbation, fails the positive error control.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 718
+    },
+    {
+      "assertion": "error <= 1e-06",
+      "failure_condition": "Removing coefficient updates leaves the independently compared generating flux outside its fixed acceptance band; this does not validate total sensor observations.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 927
+    },
+    {
+      "assertion": "summary['residual_sup'] <= 1e-08",
+      "failure_condition": "A poor row fit exceeds the fixed residual limit, but target rows use the same _evaluate implementation so shared observation errors can survive.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 928
+    },
+    {
+      "assertion": "bool(resolved.qualified)",
+      "failure_condition": "An unqualified independent recovered-source re-solve fails the qualification check.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 929
+    },
+    {
+      "assertion": "agreement <= case['request'].policy.kernel_tolerance",
+      "failure_condition": "Returning a source inconsistent with the recovered field fails the independent re-solve comparison.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 930
+    },
+    {
+      "assertion": "fitted.singular_values.size == 2",
+      "failure_condition": "Losing a declared basis response direction changes the required size.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 931
+    },
+    {
+      "assertion": "fitted.iterations > 0",
+      "failure_condition": "Skipping all fit updates fails the positive iteration requirement.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 932
+    },
+    {
+      "assertion": "error > 1e-06",
+      "failure_condition": "Removing the displaced-geometry sensitivity makes the map error fall inside acceptance.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 949
+    },
+    {
+      "assertion": "summary['largest_residual_row'] == 0",
+      "failure_condition": "Incorrectly reporting another row as the dominant displaced residual fails the literal row-zero expectation.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 950
+    },
+    {
+      "assertion": "jax.config.jax_enable_x64 is True",
+      "failure_condition": "A precision setup regression leaving x64 disabled fails immediately.",
+      "file": "nova/equilibrium/magnetics_fit.py",
+      "line": 92
+    }
+  ],
+  "assertion_independence": "No literal identity assertion comparing an unchanged supplied value to itself was found. The algebraic target/projection checks compare computed solutions with independently fixed matrices and expected coefficients. The physical residual assertion at line 928 has a shared-instrument weakness: rows are supplied by the same _evaluate used to predict them; the blocking finding names the untested conductor-observation omission that survives this arrangement.",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/__init__.py:459 __getattr__",
+    "nova/equilibrium/magnetics_fit.py:249 MagneticsFit.fit",
+    "nova/equilibrium/harmonic.py:472",
+    "nova/equilibrium/moment.py:613",
+    "nova/equilibrium/moment.py:958"
+  ],
+  "completed_at": "2026-11-14T15:06:39Z",
+  "decision": "blocking finding requires physical observation evidence repair; no implementation repair made by this review",
+  "dispatched_at": "2026-11-14T14:56:54Z",
+  "failure_delta_evidence": {
+    "after_suite": {
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -s tests/test_equilibrium_magnetics_fit.py tests/test_equilibrium_forward.py --timeout 3600",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find"
+      ],
+      "failure_ids_read_from_log": [
+        "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/final-focused-gate.log",
+      "revision": "8949ea237e0bf6f3cc84c36f87300406b8f9df9f",
+      "summary_read_from_log": "1 failed, 47 passed in 3162.62s (0:52:42)"
+    },
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_equilibrium_forward.py",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find"
+      ],
+      "failure_ids_read_from_log": [
+        "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/resumed-baseline-suite.log",
+      "revision": "87cf7ec68f6922173c471aa0bc742f07cc2256f3",
+      "summary_read_from_log": "1 failed, 34 passed in 22.90s"
+    }
+  },
+  "failure_delta_positive_control": "Both log parsers saw the known-present test_the_solve_defaults_to_the_root_find failure; the head log also records three nonzero initial errors and three RECOVERY rows, so an empty added set is a measured set difference, not an empty parser output.",
+  "figure_review": "Rendered all four exact-head SVG blobs with ImageMagick to 1400-pixel PNGs and inspected them; no clipped or overlapping labels, legibility blocker or unreadable contour population. The renderer emitted a read-only default-/tmp delegate warning despite exit zero; inspection verified all four complete nonblank figures. Coincident null sets overplot at this scale as the captions disclose.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-known-answer-recovery-8d762adb6194",
+      "recorded_at": "2026-11-14T17:39:44.994652+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": "633",
+      "severity": "blocking",
+      "text": "blocking: The physical gate creates sensor targets through MagneticsFit._evaluate using _PlasmaDiagnosticSource, whose only currents are terminal plasma cells (lines 420-467), and sets measurement.vacuum to zero (line 640); prescribed-conductor fields therefore never participate in either the recovery observations or the displaced-geometry control, so the recorded passes do not establish the required synthetic-magnetics endpoint with prescribed conductors, and a conductor-observation omission would survive every added physical assertion; synthesize total observations independently through the existing kernels, or explicitly validate the known-conductor subtraction at both the nominal and displaced sensor geometry, then record the same unchanged threshold checks."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read the 18-commit chain from 87cf7ec68f6922173c471aa0bc742f07cc2256f3 to 8d762adb6194b5d96d3ee04a92ec3825901567b3, the terminal implementation and assertions, and docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html; the final numerical source is identical to measured revision 8949ea237e0bf6f3cc84c36f87300406b8f9df9f and subsequent commits add evidence only.",
+    "done_when": "Read the three quantitative clauses in live section s1; tests/test_equilibrium_magnetics_fit.py:927-950 assert their numerical thresholds and final-focused-gate.log records all three passes and the displaced-loop result, with a missing conductor-observation check at tests/test_equilibrium_magnetics_fit.py:633.",
+    "goal": "The live inverse-equilibrium-baseline s1 goal requires known-state recovery from synthetic magnetics and prescribed conductors; nova/equilibrium/magnetics_fit.py:157 uses typed public solves and one complete receipt, but tests/test_equilibrium_magnetics_fit.py:420 exercises only plasma diagnostic sources.",
+    "manifest": "Read the source manifest and its baseline_suite/after_suite logs; resumed-baseline-suite.log records 1 failed/34 passed and final-focused-gate.log records 1 failed/47 passed, with the same root-default failure and zero added failures.",
+    "write_paths": "The source manifest orientation_write_paths permits all 10 paths in the base-to-head diff, including the evidence fragment and four SVGs, and no production forward module changed."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_magnetics_fit.py:157,718,927-950 fails if coefficient updates are removed or the geometry control stops detecting map error, but its self-generated plasma-only rows at line 637 cannot protect the prescribed-conductor observation boundary.",
+    "evidence": "final-focused-gate.log records recovered map fractions 6.9813806898190645e-12, 2.6192848527042244e-12 and 1.9175368557608253e-14 plus displaced error 0.006010064918571351 with row 0 largest, but tests/test_equilibrium_magnetics_fit.py:633 synthesizes those observations with the fitter itself and zero vacuum rows.",
+    "fit": "nova/equilibrium/magnetics_fit.py:40,67 uses the surrounding typed-request and dataclass idioms, nova/equilibrium/__init__.py:207 extends deferred exports, and the touched source introduces no forbidden plan-labelled names.",
+    "goal_fidelity": "nova/equilibrium/magnetics_fit.py:157-292 implements the requested external public-forward inversion and receipt, while tests/test_equilibrium_magnetics_fit.py:420-467 omits prescribed conductors from the observation adapter used to establish the physical endpoint.",
+    "reuse": "nova/equilibrium/magnetics_fit.py:173-180,249 wraps the existing observation kernels and whitened_solve owner extended in measurement.py:92; capability searches and reads of profile.py:455, inverse.py:287 and conductor_current.py:441 found reduced-model or conductor-current fits rather than an existing public-forward profile inversion.",
+    "scope_discipline": "All 10 changed paths match the declared paths in the source manifest, and the diff leaves nova/equilibrium/forward.py and nova/equilibrium/solve_request.py untouched."
+  },
+  "negative_control_evidence": {
+    "failure_id": "tests/test_equilibrium_magnetics_fit.py::test_known_state_recovery[solovev]",
+    "limitation": "This is the recorded plasma-only geometry control, not an independent total-field control.",
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/negative-control.log",
+    "quoted_reproduction": "flux_sup_fraction=0.006010064918571351 > 1e-6; residual_sup=0.026684685706950432; largest_residual_row=0; EXIT=1",
+    "summary": "1 failed in 937.28s (0:15:37)"
+  },
+  "numerical_source_unchanged_after_measurement": true,
+  "production_usage_limit": "No external production consumer of MagneticsFit was found at the reviewed revision; package deferred export reaches it, its own fit reaches the changed whitened_solve, and harmonic/moment are existing consumers of that shared owner.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The live inverse-equilibrium-baseline s1 goal requires known-state recovery from synthetic magnetics and prescribed conductors; nova/equilibrium/magnetics_fit.py:157 uses typed public solves and one complete receipt, but tests/test_equilibrium_magnetics_fit.py:420 exercises only plasma diagnostic sources.\nVERDICT done_when: Read the three quantitative clauses in live section s1; tests/test_equilibrium_magnetics_fit.py:927-950 assert their numerical thresholds and final-focused-gate.log records all three passes and the displaced-loop result, with a missing conductor-observation check at tests/test_equilibrium_magnetics_fit.py:633.\nVERDICT write_paths: The source manifest orientation_write_paths permits all 10 paths in the base-to-head diff, including the evidence fragment and four SVGs, and no production forward module changed.\nVERDICT manifest: Read the source manifest and its baseline_suite/after_suite logs; resumed-baseline-suite.log records 1 failed/34 passed and final-focused-gate.log records 1 failed/47 passed, with the same root-default failure and zero added failures.\nVERDICT diff: Read the 18-commit chain from 87cf7ec68f6922173c471aa0bc742f07cc2256f3 to 8d762adb6194b5d96d3ee04a92ec3825901567b3, the terminal implementation and assertions, and docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html; the final numerical source is identical to measured revision 8949ea237e0bf6f3cc84c36f87300406b8f9df9f and subsequent commits add evidence only.\nCALL_SITES: nova/equilibrium/__init__.py:459 __getattr__, nova/equilibrium/magnetics_fit.py:249 MagneticsFit.fit, nova/equilibrium/harmonic.py:472, nova/equilibrium/moment.py:613, nova/equilibrium/moment.py:958\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/equilibrium/magnetics_fit.py:157-292 implements the requested external public-forward inversion and receipt, while tests/test_equilibrium_magnetics_fit.py:420-467 omits prescribed conductors from the observation adapter used to establish the physical endpoint.\nSCORE evidence: 15\nJUSTIFICATION evidence: final-focused-gate.log records recovered map fractions 6.9813806898190645e-12, 2.6192848527042244e-12 and 1.9175368557608253e-14 plus displaced error 0.006010064918571351 with row 0 largest, but tests/test_equilibrium_magnetics_fit.py:633 synthesizes those observations with the fitter itself and zero vacuum rows.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All 10 changed paths match the declared paths in the source manifest, and the diff leaves nova/equilibrium/forward.py and nova/equilibrium/solve_request.py untouched.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_equilibrium_magnetics_fit.py:157,718,927-950 fails if coefficient updates are removed or the geometry control stops detecting map error, but its self-generated plasma-only rows at line 637 cannot protect the prescribed-conductor observation boundary.\nSCORE fit: 20\nJUSTIFICATION fit: nova/equilibrium/magnetics_fit.py:40,67 uses the surrounding typed-request and dataclass idioms, nova/equilibrium/__init__.py:207 extends deferred exports, and the touched source introduces no forbidden plan-labelled names.\nSCORE reuse: 20\nJUSTIFICATION reuse: nova/equilibrium/magnetics_fit.py:173-180,249 wraps the existing observation kernels and whitened_solve owner extended in measurement.py:92; capability searches and reads of profile.py:455, inverse.py:287 and conductor_current.py:441 found reduced-model or conductor-current fits rather than an existing public-forward profile inversion.\nFINDING tests/test_equilibrium_magnetics_fit.py:633 blocking: The physical gate creates sensor targets through MagneticsFit._evaluate using _PlasmaDiagnosticSource, whose only currents are terminal plasma cells (lines 420-467), and sets measurement.vacuum to zero (line 640); prescribed-conductor fields therefore never participate in either the recovery observations or the displaced-geometry control, so the recorded passes do not establish the required synthetic-magnetics endpoint with prescribed conductors, and a conductor-observation omission would survive every added physical assertion; synthesize total observations independently through the existing kernels, or explicitly validate the known-conductor subtraction at both the nominal and displaced sensor geometry, then record the same unchanged threshold checks.\n",
+  "reuse_search": "Searched public-forward profile inversion, Gauss-Newton, least_squares, minimize, fit, diagnostic kernels, persistence, cache and figure-bound checks in nova/equilibrium, nova/media, nova/database and nova/biot; opened measurement.whitened_solve, observation_kernels.virtual_flux_loops/virtual_poloidal_probes, profile._least_squares_coefficients, inverse.solve_current/optimize_current, conductor_current objective and media.ink. New orchestration composes the solver and observation owners; source replacement uses dataclasses.replace; test source adapters and plotting helpers wrap CoilSet, diagnostic factories and poloidal painters. No existing public-forward profile-fit owner or figure text-validation save owner was located in the searched production modules.",
+  "review_run_id": "r-20261114T145610212417-review-of-known-answer-recovery-8d762adb6194",
+  "reviewed_base_sha": "87cf7ec68f6922173c471aa0bc742f07cc2256f3",
+  "reviewed_head_sha": "8d762adb6194b5d96d3ee04a92ec3825901567b3",
+  "reviewed_run_id": "r-20261113T162733537202-known-answer-recovery",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 20,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "source_manifest_status_at_read": "in-progress; endpoint data present; source manifest evidence self-check retains older after-arm caveat although after_suite now names the final H200 log",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T15:14:06.059803+00:00",
+  "total": 108
+}

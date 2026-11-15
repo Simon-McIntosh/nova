@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_judgement": "the caption is substantive, not a restatement of the figure title: it names the two-median mean and the whisker meaning, states that both axes are logarithmic, states that width 1 is causal slice latency while larger widths are aggregate throughput, and discloses that compilation is excluded from the warm walls and that both arms share one input stream and revision, so no caption finding is recorded.",
+  "completed_at": "2026-11-15T01:31:48.905Z",
+  "dispatched_at": "2026-11-15T00:45:49Z",
+  "figure_reviewed": {
+    "artifact": "docs/figures/sub-millisecond-forward-path/geometry-reuse/per-slice-wall.svg",
+    "caption_source": "docs/evidence/fragments/sub-millisecond-forward-path/geometry-reuse.html",
+    "drawing_script": "scripts/prototypes/geometry_reuse/report.py",
+    "embedding": "fragment figure id geometry-reuse-wall, img src /nova/figures/sub-millisecond-forward-path/geometry-reuse/per-slice-wall.svg",
+    "method": "judged only the attached rendered PNG; no SVG was opened, read, searched, rendered or shown",
+    "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T004514330594-review-of-geometry-reuse-aabf917c9068-figure/image-0.png",
+    "rendered_size_px": [
+      1399,
+      720
+    ]
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the width-16 overlap shows exactly the unresolved result the fragment reports (difference inside the spread); the values are tabulated in the fragment",
+      "recorded_at": "2026-11-15T01:33:06.137274+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/geometry-reuse/per-slice-wall.svg",
+      "id": "f9532a0abd5",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "At width 16 the two arms differ by under 1.3% (off 7.343, on 7.252 ms/slice) on a log axis spanning 4.16 to 79.8, which puts the two marker centres about 2 px apart vertically in the 1399x720 render; because the script draws the on arm at a higher z-order (report.py:72) the blue circle covers all but a 4-row sliver of the grey square (22 grey pixels remain visible against 140 blue in a 15-px band), so a reader cannot see two distinct measurements at width 16 or which arm is higher there. It does not stop a reader reading the figure: the crossover is still visible from the converging lines and from the well-separated width-1 and width-64 points, the coincidence itself mirrors the unresolved verdict at that width, and the exact values and verdicts are given in the fragment's table. A horizontal marker offset at each width would remove it."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass: axis and tick labels are near-black on white; the off series (#666666) clears white at about 5.7:1 and the on series (#1f5d92) at about 6.2:1, so no label or mark is washed out.",
+    "data_ink": "pass: the wall values are carried by two marker-and-line series drawn at 3 pt and 2.6 pt with whisker caps, and nothing else competes for weight; no band, fill, reference line or annotation is drawn that the caption does not use.",
+    "decoration": "pass: white ground, no gridlines, no gradient or background fill, top and right spines hidden, and the one legend is frameless and sits in clear space above the axes.",
+    "label_collision": "pass: no label is clipped or overlapping; the ink bounding box is x 102-1344, y 15-663 inside a 1399x720 canvas, at least 15 px clear on every edge, the y-axis label and tick labels are in the left margin clear of the data, and the legend sits above the axes top (y=101) while the highest plotted mark begins at y=133.",
+    "legibility": "pass: a single panel at 1399x720 reads at a glance; the two arms are separated by colour, dash and marker as well as by position, both axes carry a named quantity and unit ('Concurrent independent pulses', 'Throughput cost [ms/slice]'), and the log y ticks (5, 10, 20, 50) and the x ticks (1, 16, 64) are fully drawn and readable.",
+    "table_form": "pass: the image plots per-slice wall against concurrent pulse width across 1, 16 and 64, a crossover relationship the two arms show at a glance (off slower at width 1, faster at width 64); the exact per-width values, spreads and verdicts are carried separately by the fragment's table (width, off processes, on processes, reduction, decision margin, verdict), so the image is not standing in for a table."
+  },
+  "notes": "read-only review: no figure or caption was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only files written are this review record and the review run's manifest. The figure review runs no suite, so added_failure_count is 0 with an empty failure-id list. Mark measurements were taken from the named rendered PNG only; the width-16 marker overlap and the ink bounding box were measured on that PNG's pixels.",
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: pass \u2014 a single panel at 1399x720 reads at a glance; the two arms are separated by colour, dash and marker as well as by position, both axes carry a named quantity and unit, and the log y ticks (5, 10, 20, 50) and x ticks (1, 16, 64) are fully drawn and readable.\nRUBRIC data_ink: pass \u2014 the wall values are carried by two marker-and-line series at 3 pt and 2.6 pt with whisker caps and nothing else competes for weight; no band, fill, reference line or annotation is drawn that the caption does not use.\nRUBRIC decoration: pass \u2014 white ground, no gridlines, no gradient or background fill, top and right spines hidden, one frameless legend in clear space above the axes.\nRUBRIC contrast: pass \u2014 near-black text on white; the grey off series clears white at about 5.7:1 and the blue on series at about 6.2:1, so no label or mark is washed out.\nRUBRIC table_form: pass \u2014 the image plots per-slice wall against pulse width across 1, 16 and 64, a crossover relationship the two arms show at a glance, while the exact values, spreads and verdicts are carried by the fragment's table.\nRUBRIC label_collision: pass \u2014 no label is clipped or overlapping; ink spans x 102-1344, y 15-663 inside a 1399x720 canvas, at least 15 px clear on every edge, and the legend sits above the axes top while the highest plotted mark begins 32 px below it.\nFINDING docs/figures/sub-millisecond-forward-path/geometry-reuse/per-slice-wall.svg null non-blocking: at width 16 the two arms' markers sit about 2 px apart and the blue on-series circle covers all but a 4-row sliver of the grey off-series square, so a reader cannot see two distinct measurements or which is higher at that width; the crossover and the width-1 and width-64 separation remain readable and the exact values are in the fragment's table.",
+  "review_run_id": "r-20261115T004514330594-review-of-geometry-reuse-aabf917c9068-figure",
+  "reviewed_base_sha": "975f3e98cfa2b2976d2bbe1b94ead37f8623b529",
+  "reviewed_head_sha": "aabf917c90688e38acfbabcbf78970f77b8e8536",
+  "reviewed_run_id": "r-20261114T144226749384-geometry-reuse",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T01:33:09.848727+00:00",
+  "total": null
+}

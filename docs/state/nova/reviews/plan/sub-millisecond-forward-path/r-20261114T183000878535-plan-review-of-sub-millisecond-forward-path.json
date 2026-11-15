@@ -1,0 +1,124 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T19:18:03.120Z",
+  "dispatched_at": "2026-11-14T18:52:03Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:130",
+      "id": "reasoning-1",
+      "reason": "a node reading \"second derivatives cannot affect the residual\" will clear the bank while \u00a73's fresh-read residual gate is exactly the measurement that fails if the saddle normal-form term is wrong.",
+      "text": "decision `bank-plasma-hessian-budget` justifies a 1e-8 plasma-Hessian allowance with \"Second derivatives feed null finding, not the 1e-10 fresh residual\", but \u00a73 (:98) builds its Jacobian from \"the derivatives of the read's continuous geometry that a fresh read moves: the saddle normal form and the clipped cells' edge intervals\", and records that removing those terms leaves the fresh-read residual stalled at 0.030; the saddle normal form is a second-derivative object, so an Hessian carrying a 0.26-0.40 relative error at interior nodes does feed the gate that decides whether \u00a73 and \u00a74 reach 1e-10",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:130",
+      "id": "reasoning-2",
+      "reason": "the decision's premise (\"the bank adds no error over the direct route, so it lands\") is mutual agreement with a route the cited evidence convicts, so the plan needs the repair and re-certification nodes the decision itself makes conditional on that conviction, or \u00a72 and \u00a76 will be built on a second-derivative operand known to be wrong at the edges the scenario exercises.",
+      "text": "the decision presents `bank-hessian-diagnosis` as the run that \"settles which side is wrong\" and says a convicted route then \"gets a kernel repair and bank re-certification as new nodes\", but that run has delivered its verdict: \"The bank and direct-kernel plasma Hessians carry the error; the source-gradient Richardson reference is corroborated\", with bank trace 0.264-0.399 against a reference of 5.95e-11-6.25e-11 at all 64 interior nodes and the error localised to `nova/biot/polygonanalytic.py:3096-3097` near projected edge lines; no section or node in the plan owns that repair or the re-certification, and \u00a72 relies on the Hessian's indefiniteness for its saddle branch",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:130",
+      "id": "anchors_resolve-1",
+      "reason": "both are unambiguous run names whose directories exist, so the record is recoverable by a coordinator; only the citation form and the missing fragment links are at stake, not a mechanism.",
+      "text": "the decision cites `bank-hessian-boundary` and `bank-hessian-diagnosis` by bare name where every other citation in the plan gives a run id and receipt path (`r-20261113T022334301162-dina3420-scenario`, `r-20261113T012704238111-bank-h200-slice-profile`), and neither `bank-hessian-boundary.html` nor `bank-hessian-diagnosis.html` resolves under `docs/evidence/fragments/sub-millisecond-forward-path/`, so a reader cannot open either measurement",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "f29d89a8f425a93efebf20c614db1e48af8a1eb3",
+  "plan_fingerprint": "a04e750e0cfc689461bf03e9d82033d901dda69951840c0a809e0755fb43f7cb",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 338,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "99862a5a63dd5486d11974fea054ceb285a52053",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The decision rationale now states that section 2's saddle branch and section 3's saddle normal form read second derivatives, so the defect reaches the convergence gates; sections 2 and 3 now wait on the new repair section 7.",
+      "reason": "",
+      "when": "2026-11-14T21:06:35.917651+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "99862a5a63dd5486d11974fea054ceb285a52053",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "Added section 7, which owns the polygon tangent repair and the ITER bank re-certification, citing the diagnosis verdict and polygonanalytic._packed_moments_height_tangent; the decision choice now records the repair-first ordering.",
+      "reason": "",
+      "when": "2026-11-14T21:06:48.691214+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "99862a5a63dd5486d11974fea054ceb285a52053",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The decision rationale and section 7 now cite both runs by run id and fragment path, matching the plan's other citations.",
+      "reason": "",
+      "when": "2026-11-14T21:06:59.633190+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "99862a5a63dd5486d11974fea054ceb285a52053",
+      "commit_basis": "edit",
+      "note": "The decision rationale and section 7 now cite both runs by run id and fragment path, matching the plan's other citations.",
+      "reason": "",
+      "when": "2026-11-14T21:06:59.633190+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "99862a5a63dd5486d11974fea054ceb285a52053",
+      "commit_basis": "edit",
+      "note": "The decision rationale now states that section 2's saddle branch and section 3's saddle normal form read second derivatives, so the defect reaches the convergence gates; sections 2 and 3 now wait on the new repair section 7.",
+      "reason": "",
+      "when": "2026-11-14T21:06:35.917651+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "99862a5a63dd5486d11974fea054ceb285a52053",
+      "commit_basis": "edit",
+      "note": "Added section 7, which owns the polygon tangent repair and the ITER bank re-certification, citing the diagnosis verdict and polygonanalytic._packed_moments_height_tangent; the decision choice now records the repair-first ordering.",
+      "reason": "",
+      "when": "2026-11-14T21:06:48.691214+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261114T183000878535-plan-review-of-sub-millisecond-forward-path.json",
+  "review_run_id": "r-20261114T183000878535-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "55aeb848851a0597dddda219612caa0f73ef9291",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the new decision names `bank-hessian-boundary` and `bank-hessian-diagnosis` bare, with no run id and no path, and neither run's fragment is present under `docs/evidence/fragments/sub-millisecond-forward-path/`.",
+    "done_when": "pass \u2014 the changed unit adds a decision, not a node, so no done-when changed; \u00a76's three clauses still carry the three negative controls earlier reviews accepted (dropped PF coil, captured coil current. displaced seed with zero update budget).",
+    "evidence_paths": "pass \u2014 \u00a76 still routes its compilation logs, receipts, memory record and width probe to a GPFS run directory or `~/.cache/nova-iter-bank/`, and the new decision cites run directories rather than temporary paths.",
+    "naming": "pass \u2014 the decision key and its rationale use mechanism terms; no plan label, stage name or ticket number is introduced into a symbol or file that a later node would create.",
+    "reasoning": "two findings \u2014 the decision's claim that second derivatives reach only null finding contradicts \u00a73's saddle normal-form requirement, and the diagnosis the decision defers to has already convicted the shared route while no plan node owns the repair.",
+    "single_goal": "pass \u2014 no node was added or split by this change; each of \u00a71\u2013\u00a76 keeps one deliverable.",
+    "wiring": "pass \u2014 the node table's `plan-section-depends-on` chain (s2/s3\u2192s1, s4\u2192s2,s3) is unchanged and resolves, and the new `bank-plasma-hessian-budget` decision declares no section link, which matches how `precision-budget` is recorded."
+  },
+  "section_digests": {
+    "_document": "a6e0e21912599de111bd3f908ae39c6f99c85219e3d56d48763cc6c93da06694",
+    "s0": "02c484da982db49df058949810d449b2e95a1a134ec03272e31dda4df5bed6d2",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "5aa72ecf3d63060b466bd064d76dc02fa5439343113fd1657038c73094f830b2",
+    "s4": "91bd28dc1cffb091dd5b8e3154b8052ae494fc161f98b81c4aa3d7fc4b7d4fca",
+    "s5": "93a5e678cdf44d386b06e74db9abd0f022782fcfa12a51ed6c8332d5636661cd",
+    "s6": "7d36ea6e2baeb1ddceeefb8692913ab61376d00a12f0d8c88b6b66728f9cb12c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T19:13:38.831262+00:00",
+  "total": null
+}

@@ -23,7 +23,7 @@ pytestmark = pytest.mark.timeout(1800)
 def case():
     args = small_case()
     decision = jax.jit(
-        lambda *a: topology.read_at_stationary_points(*a, cache_geometry=True)
+        lambda *a: topology.read_at_stationary_points(*a, reuse_geometry=True)
     )(*args)
     jax.block_until_ready(decision)
     assert bool(decision.valid)
@@ -63,14 +63,15 @@ def moved_field(case):
 @pytest.fixture
 def clipping_masks(monkeypatch):
     masks = []
-    original = topology._refresh_fragment_cells
+    original = topology._fragment_changes
 
-    def observed(evaluate, arguments, prior, changed):
-        if evaluate.__name__ == "quadratic":
+    def observed(keys, prior):
+        changed = original(keys, prior)
+        if len(keys) == 5:
             jax.debug.callback(lambda values: masks.append(np.asarray(values)), changed)
-        return original(evaluate, arguments, prior, changed)
+        return changed
 
-    monkeypatch.setattr(topology, "_refresh_fragment_cells", observed)
+    monkeypatch.setattr(topology, "_fragment_changes", observed)
     return masks
 
 
@@ -140,7 +141,7 @@ def test_capacity_change_rebuilds_complete_fragment_records(case):
     # compatible ownership rather than broadcasting the smaller selection.
     full = jax.jit(topology.read_at_stationary_points)(*args[:5], cached=decision)
     reference = jax.jit(
-        lambda *a: topology.read_at_stationary_points(*a, cache_geometry=True)
+        lambda *a: topology.read_at_stationary_points(*a, reuse_geometry=True)
     )(*args[:5])
     assert_read_equal(full, reference)
     assert full.cell_fragments.area.shape[-1] == 3

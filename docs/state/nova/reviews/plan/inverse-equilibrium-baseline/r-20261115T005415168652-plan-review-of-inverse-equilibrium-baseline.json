@@ -1,0 +1,86 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T01:17:53.125Z",
+  "dispatched_at": "2026-11-15T00:55:03Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T005415168652-plan-review-of-inverse-equilibrium-baseline/plan.html:179",
+      "id": "done_when-1",
+      "reason": "the operative rule is the sentence's own \"the node computes the interval for the number it tests and reports it\", so the number is only an illustration and a 3 % looser band does not alter what the section delivers.",
+      "text": "the illustrative interval \"about 0.72 to 1.32 for six directions\" is not the interval for six directions: the exact Bonferroni interval for 255 degrees of freedom at 99 % joint coverage is 0.745\u20131.302 for six directions, and 0.72\u20131.32 is roughly what fifteen to eighteen directions give, so a reader treating the printed band as the operative six-direction band tests about 3 % too loosely",
+      "type": "done_when",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T005415168652-plan-review-of-inverse-equilibrium-baseline/plan.html:179",
+      "id": "done_when-2",
+      "reason": "the clause is a harmless extra check, the reduced-chi-square half of clause (1) already surfaces any real bias, and removing or tightening it would not change what the node builds or how the section is judged.",
+      "text": "clause (2)'s first half, \"the mean of the recovered coefficients lies within three standard errors of the generating coefficients on every state\", cannot fail as \u00a76 specifies its fit: the noise is fixed zero-mean Gaussian and the fit is given exactly those standard deviations as its weights, and weighted least squares with correct weights is unbiased by construction, so the 256-realisation mean sits at the generating coefficients whatever the residual code does",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "467581fe4e991e3b771fb9b4e787954956246c6f",
+  "plan_fingerprint": "9cd11682e0aff253f4825c4cce38997aec47dd6a998c58871364428c699a5f90",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 13,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The operative rule is the interval the node computes for the directions it tests; the printed figure is illustrative, and the node brief will quote 0.745 to 1.302 for six directions.",
+      "when": "2026-11-15T01:22:47.134100+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "The fit is nonlinear in the amplitudes through the forward solve, so an unbiased mean is not guaranteed by construction; the check is cheap and stays.",
+      "when": "2026-11-15T01:23:13.247014+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The operative rule is the interval the node computes for the directions it tests; the printed figure is illustrative, and the node brief will quote 0.745 to 1.302 for six directions.",
+      "when": "2026-11-15T01:22:47.134100+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The fit is nonlinear in the amplitudes through the forward solve, so an unbiased mean is not guaranteed by construction; the check is cheap and stays.",
+      "when": "2026-11-15T01:23:13.247014+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261115T005415168652-plan-review-of-inverse-equilibrium-baseline.json",
+  "review_run_id": "r-20261115T005415168652-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "e333ad918a8c709785aff782c9060ff09d8f838f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a76 carries no href, and its only reference, \"\u00a71\", resolves to the `#s1` section that is declared `done`.",
+    "done_when": "a finding \u2014 clause (2)'s \"mean of the recovered coefficients lies within three standard errors\" cannot fail as the section specifies its fit, and the clause (1) illustration mislabels its interval, though neither changes what the node builds.",
+    "evidence_paths": "pass \u2014 the section's evidence is an H200 job's table and one figure per state, landing in the plan record `docs/evidence/archive/inverse-equilibrium-baseline-landed.html` named at \u00a70, which is a durable repository path rather than a session scratchpad.",
+    "naming": "pass \u2014 the changed \u00a76 text names row families (\"flux loops, field probes and the plasma current\"), records and measures (\"receipt covariance\", \"whitened residuals\", \"principal direction\"), and carries no plan label, stage name, ticket number or version tag. The change introduced no changelog prose.",
+    "reasoning": "pass \u2014 the stated root cause (\"\u00a71 recovers a known state from noise-free rows, so nothing yet tests the uncertainty the fit reports\") matches \u00a71's own done-when, which asks for iteration counts, singular values and undetermined coefficients but never compares the reported covariance against empirical scatter; the endpoint is reachable from the three \u00a71 states, and the section prescribes no code path, step sequence or formula. The changed row-family sentence names exactly the three families \u00a71 feeds (\"synthetic flux-loop, field-probe and plasma-current rows\") and keeps conductor currents supplied, which is what \u00a71 itself does (\"handed those rows, the conductor currents and the wall\").",
+    "single_goal": "pass \u2014 \u00a76 delivers one thing, the agreement of the fit's reported covariance with the scatter of repeated fits; the three clauses are that one measure's test, its bias side-check and its negative control.",
+    "wiring": "pass \u2014 \u00a76's depends-on names `inverse-equilibrium-baseline#s1` in `plan-section-depends-on` and in the \u00a70 section contract table, \u00a77 waits on s6 and s3, and the effort column reconciles (8+7+4+3+3+4+8 = 37 = `plan-effort-hours`)."
+  },
+  "section_digests": {
+    "_document": "4fc2db854bfd29d583d041cdee0aaac4f259d73ecb27b4795dfe7fe957e23f60",
+    "s0": "ef011e12e2f7a31af5be2aa25358b4a19900ac1b35d2d4d12eaa6cd83bc68f42",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "3078bb263c0d7680a56c9f385b77e02965283d27f7ff3e1bf628d2b08cda0995",
+    "s3": "aabab320c034e5a6720e0b3877958935e6c3b63577de3674cd6e87f6120889ba",
+    "s4": "a8f5721b1827357df497c97788c8bc9c5bb1266579ca0d04f61045c915138730",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "bdc9d075127100e7f9b765c97cb1be401aaa337b6a0c75ae175d8a766093ade9",
+    "s7": "df11956dff30b1fac6d6e8f3761cdc1fb00dfa118d2a17183781716dd3633d51"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T01:21:18.712857+00:00",
+  "total": null
+}

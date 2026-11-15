@@ -1034,3 +1034,107 @@ def test_mutual_self_block_converges_with_logarithmic_quadrature():
     )
     assert errors[1] < errors[0]
     assert errors[2] < 2e-8
+
+
+@pytest.mark.parametrize("size", [0.20, 0.16])
+def test_linear_shell_spectrum_uses_its_volume_gram(size):
+    """The affine B projection is reciprocal and bounded in its own metric."""
+    region = (
+        shapely.Point(0, 0)
+        .buffer(0.4, 2)
+        .difference(shapely.Point(0, 0).buffer(0.28, 2))
+        .intersection(shapely.box(0, -0.4, 0.4, 0.4))
+    )
+    cells = iron._mesh(region, size)
+    operator = iron._galerkin_interaction(cells, basis="linear")
+    spectrum = iron.galerkin_spectrum(cells, operator, basis="linear")
+    print("linear shell spectrum", size, spectrum)
+    assert operator.shape == (6 * len(cells.polygons),) * 2
+    assert spectrum["volume_symmetry"] < 1e-12
+    assert spectrum["minimum"] >= -1e-10
+    assert spectrum["maximum"] <= 1 + 1e-10
+
+
+def test_linear_material_projects_the_local_law_at_volume_nodes(monkeypatch):
+    """Spatial variation reaches the material law before its Galerkin projection."""
+    region = shapely.box(1, 0, 2, 1)
+    cells = iron._mesh(region, 1.0)
+    monkeypatch.setattr(
+        iron, "_galerkin_interaction", lambda *args, **kwargs: np.zeros((6, 6))
+    )
+    law_b, law_mu = [0.0, 0.2, 1.0], [2.0, 4.0, 2.0]
+
+    def external(points):
+        return np.column_stack((0.02 + 0.01 * points[:, 0], 0.03 + 0.04 * points[:, 1]))
+
+    result = iron.solve_magnetisation(
+        region, external, law_b, law_mu, cell_size=1.0, basis="linear", tolerance=1e-12
+    )
+    geometry = iron.linear_magnetisation_geometry(cells.polygons)
+    values = external(geometry["points"])
+    coefficient = np.asarray(
+        iron._coefficient(
+            jnp.asarray(np.linalg.norm(values, axis=1)),
+            *map(jnp.asarray, iron._fit_law(law_b, law_mu)),
+        )
+    )
+    expected = np.linalg.solve(
+        geometry["gram"][0],
+        geometry["basis"].T
+        @ (geometry["weights"][:, None] * values * coefficient[:, None]),
+    )
+    assert result.converged
+    np.testing.assert_allclose(result.linear_coefficients[:, 0].T, expected, rtol=2e-13)
+    np.testing.assert_allclose(result.magnetisation[0], expected[0], rtol=2e-13)
+    assert np.linalg.norm(expected[1:]) > 1000
+    with pytest.raises(ValueError, match=r"finite \(cells, 6\)"):
+        iron.solve_magnetisation(
+            region,
+            external,
+            law_b,
+            law_mu,
+            cell_size=1.0,
+            basis="linear",
+            initial_magnetisation=np.zeros((1, 2)),
+        )
+
+
+def test_linear_field_constant_mode_matches_closed_sheet_field():
+    cells = iron._mesh(shapely.box(1, 0, 1.2, 0.2), 0.2)
+    points = np.array([[0.2, 0.1], [2.0, 0.3], [0.0, 1.0]])
+    response = iron.linear_cell_interaction(cells.polygons, points, plan=iron._PLAN)
+    constant = iron._interaction(cells, points, iron._PLAN)
+    np.testing.assert_allclose(response[:, [0, 3]], constant, rtol=1e-12, atol=1e-20)
+
+
+def test_linear_volume_current_matches_closed_polygon_field():
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+    from nova.biot.tiledassembly import _polygon_current_response
+
+    polygon = np.array([[1.0, 0.0], [1.01, 0.0], [1.0, 0.01]])
+    points = np.array([[1.001, 0.002], [1.005, 0.003], [2.0, 0.2], [0.0, 2.0]])
+    expected = np.array(polygon_analytic_greens(*points.T, polygon)) * 0.00005
+    response = _polygon_current_response((polygon,), points, iron._PLAN)[:, :, 0]
+    np.testing.assert_allclose(response, expected, rtol=2e-8, atol=1e-20)
+
+
+def test_linear_local_tangent_matches_differentiating_the_projected_law():
+    cells = iron._mesh(shapely.box(1, 0, 2, 1), 1.0)
+    geometry = iron.linear_magnetisation_geometry(cells.polygons)
+    owners = geometry["owners"]
+    project = np.einsum(
+        "qij,qj,q->qi",
+        np.linalg.inv(geometry["gram"])[owners],
+        geometry["basis"],
+        geometry["weights"],
+    )
+    law = iron._fit_law([0, 0.2, 1.0], [2, 4, 2])
+    operator = np.arange(36).reshape(6, 6) * 1e-10
+    external = np.array([0.03, 0.01, 0.0, 0.06, 0.0, 0.02])
+    operands = tuple(
+        map(jnp.asarray, (operator, external, *law, geometry["basis"], project, owners))
+    )
+    state = jnp.arange(6, dtype=jnp.float64) * 10
+    jacobian = jax.jacfwd(iron._linear_residual)(state, operands)
+    direction = iron.jla.lu_solve(iron._linear_factor(state, operands), jnp.ones(6))
+    np.testing.assert_allclose(jacobian @ direction, np.ones(6), rtol=2e-14)

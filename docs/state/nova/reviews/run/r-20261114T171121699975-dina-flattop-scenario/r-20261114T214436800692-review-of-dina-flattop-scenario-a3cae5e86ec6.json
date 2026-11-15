@@ -1,0 +1,92 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_emission": "none",
+  "completed_at": "2026-11-15T00:32:01.172Z",
+  "dispatched_at": "2026-11-14T23:31:01Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "dina-flattop-rerun",
+      "recorded_at": "2026-11-15T00:35:31.239066+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "dina-flattop-rerun",
+      "recorded_at": "2026-11-15T00:35:38.934464+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "dina-flattop-rerun",
+      "recorded_at": "2026-11-15T00:35:44.978323+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "dina-flattop-rerun",
+      "recorded_at": "2026-11-15T00:36:55.539199+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/dina_flattop_scenario/verify.py",
+      "line": 85,
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion that the failed slice lowers the converged fraction is arithmetic rather than evidence: measure.py:487-488 computes with_failed_fraction as converged/(n+1) and normal_fraction as converged/n from the same numerator, so the inequality holds whether or not the displaced zero-budget slice failed, and only the converged==[False] assertion on verify.py:84 actually tests the control."
+    },
+    {
+      "file": "scripts/prototypes/dina_flattop_scenario/verify.py",
+      "line": 72,
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate counts only `Compiling jit(solve)` and never asserts the receipt's post_first_compilations, so it stays green under the 20 helper compilations the receipt and the fragment both record; the done-when clause \"zero new compilations after the first slice\" is reported in prose but not measured by the gate."
+    },
+    {
+      "file": "scripts/prototypes/dina_flattop_scenario/run.py",
+      "line": 72,
+      "severity": "non-blocking",
+      "text": "non-blocking: the first non-zero arm raises and aborts the arm loop, so the width-16 arm ran one process rather than the two fresh processes the brief requires, leaving the width-16 result a single observed refusal rather than a replicated one."
+    },
+    {
+      "file": "scripts/prototypes/dina_flattop_scenario/measure.py",
+      "line": 33,
+      "severity": "non-blocking",
+      "text": "non-blocking: the module re-implements the timing and compilation accounting that scripts/prototypes/bank_h200_slice_profile/measure.py owns (compile_program, timed, closure) instead of importing it."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all ten commits 2369edca..a3cae5e86 one by one; they add seven prototype modules, one fragment and 22 figure artifacts, and the later commits correct real defects (false X-point from conflating boundary contact with the tracked saddle at d00e5417, failed slices missing from the contact sheet at 13576e2b).",
+    "done_when": "read the three done-when clauses; clause 3 is fully delivered (docs/evidence/fragments/sub-millisecond-forward-path/dina-flattop-scenario.html plus 20 SVG panels and a 20-frame GIF), clause 2 is half delivered (width-1 walls and both negative controls present; width-16 throughput absent, unmeasured not zero), and clause 1's 90%-and-zero-recompiles measures are observed to fail at 16/20 and 20 recompilations, which the gate does not assert.",
+    "goal": "read the node goal (run the DINA 105027 flattop on the ITER bank route on the H200 in time order, each slice warm-started from the previous); scripts/prototypes/dina_flattop_scenario/measure.py:472-480 does seed each slice from the previous result, and the retained receipt shows indices 129-148 consecutive, but the quantitative arms (90% convergence, zero post-first compilations, width-16 throughput) are unmet and recorded as measured.",
+    "manifest": "read manifest.md and manifest.md.asdelivered; it states 16/20 converged, 20 post-first compilations, the 216.76 GiB width-16 refusal and blockers naming the unmet numerical clauses rather than claiming success, and its tests line names the artifact gate whose result I reproduced below.",
+    "write_paths": "read the manifest's declared paths and the full diff base 8907e8648..head a3cae5e86; all 30 changed files sit under scripts/prototypes/dina_flattop_scenario/, docs/evidence/fragments/sub-millisecond-forward-path/dina-flattop-scenario.html and docs/figures/sub-millisecond-forward-path/dina-flattop-scenario/, with no product source touched."
+  },
+  "justifications": {
+    "durability": "verify.py:38-41 reddens if any slice claims convergence above 1e-10, which I confirmed by running its own --mutate_failure path, so a false convergence is refused.",
+    "evidence": "I re-ran the named gate at the reviewed head (EXIT=0, ARTIFACTS_VERIFIED slices=20 converged=16 svg=20 gif_frames=20 false_convergence_refused=True) against the retained receipts, but verify.py:72-73 asserts only that jit(solve) compiles once, so the gate cannot measure the done-when's zero-recompilation clause it reports at verify.py:78-90.",
+    "fit": "`ruff check` on the added modules is clean and the modules follow the surrounding prototype idiom, e.g. scripts/prototypes/dina_flattop_scenario/measure.py:36-44 mirrors the logging-handler style of scripts/prototypes/bank_h200_slice_profile/measure.py:87-89.",
+    "goal_fidelity": "scripts/prototypes/dina_flattop_scenario/measure.py:472-480 chains a genuine warm start across all twenty slices, but the 90%-converged, zero-recompile and width-16 clauses the node was dispatched for are unmet at 16/20 and 20 recompilations.",
+    "reuse": "render.py:19-28 extends the owners it consumes (nova.media painters, iter_bank.render.checked_save), while scripts/prototypes/dina_flattop_scenario/measure.py:36-44 and 355-366 re-implement the compile-and-timing accounting that scripts/prototypes/bank_h200_slice_profile/measure.py:87-129 owns.",
+    "scope_discipline": "every path in `git diff --stat 8907e8648 a3cae5e86` lies inside the three declared write paths, and no file outside them changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the node goal (run the DINA 105027 flattop on the ITER bank route on the H200 in time order, each slice warm-started from the previous); scripts/prototypes/dina_flattop_scenario/measure.py:472-480 does seed each slice from the previous result, and the retained receipt shows indices 129-148 consecutive, but the quantitative arms (90% convergence, zero post-first compilations, width-16 throughput) are unmet and recorded as measured.\nVERDICT done_when: read the three done-when clauses; clause 3 is fully delivered (docs/evidence/fragments/sub-millisecond-forward-path/dina-flattop-scenario.html plus 20 SVG panels and a 20-frame GIF), clause 2 is half delivered (width-1 walls and both negative controls present; width-16 throughput absent, unmeasured not zero), and clause 1's 90%-and-zero-recompiles measures are observed to fail at 16/20 and 20 recompilations, which the gate does not assert.\nVERDICT write_paths: read the manifest's declared paths and the full diff base 8907e8648..head a3cae5e86; all 30 changed files sit under scripts/prototypes/dina_flattop_scenario/, docs/evidence/fragments/sub-millisecond-forward-path/dina-flattop-scenario.html and docs/figures/sub-millisecond-forward-path/dina-flattop-scenario/, with no product source touched.\nVERDICT manifest: read manifest.md and manifest.md.asdelivered; it states 16/20 converged, 20 post-first compilations, the 216.76 GiB width-16 refusal and blockers naming the unmet numerical clauses rather than claiming success, and its tests line names the artifact gate whose result I reproduced below.\nVERDICT diff: read all ten commits 2369edca..a3cae5e86 one by one; they add seven prototype modules, one fragment and 22 figure artifacts, and the later commits correct real defects (false X-point from conflating boundary contact with the tracked saddle at d00e5417, failed slices missing from the contact sheet at 13576e2b).\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: scripts/prototypes/dina_flattop_scenario/measure.py:472-480 chains a genuine warm start across all twenty slices, but the 90%-converged, zero-recompile and width-16 clauses the node was dispatched for are unmet at 16/20 and 20 recompilations.\nSCORE evidence: 14\nJUSTIFICATION evidence: I re-ran the named gate at the reviewed head (EXIT=0, ARTIFACTS_VERIFIED slices=20 converged=16 svg=20 gif_frames=20 false_convergence_refused=True) against the retained receipts, but verify.py:72-73 asserts only that jit(solve) compiles once, so the gate cannot measure the done-when's zero-recompilation clause it reports at verify.py:78-90.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in `git diff --stat 8907e8648 a3cae5e86` lies inside the three declared write paths, and no file outside them changed.\nSCORE durability: 15\nJUSTIFICATION durability: verify.py:38-41 reddens if any slice claims convergence above 1e-10, which I confirmed by running its own --mutate_failure path, so a false convergence is refused.\nSCORE fit: 18\nJUSTIFICATION fit: `ruff check` on the added modules is clean and the modules follow the surrounding prototype idiom, e.g. scripts/prototypes/dina_flattop_scenario/measure.py:36-44 mirrors the logging-handler style of scripts/prototypes/bank_h200_slice_profile/measure.py:87-89.\nSCORE reuse: 14\nJUSTIFICATION reuse: render.py:19-28 extends the owners it consumes (nova.media painters, iter_bank.render.checked_save), while scripts/prototypes/dina_flattop_scenario/measure.py:36-44 and 355-366 re-implement the compile-and-timing accounting that scripts/prototypes/bank_h200_slice_profile/measure.py:87-129 owns.\nFINDING scripts/prototypes/dina_flattop_scenario/verify.py:85 non-blocking: the assertion that the failed slice lowers the converged fraction is arithmetic rather than evidence: measure.py:487-488 computes with_failed_fraction as converged/(n+1) and normal_fraction as converged/n from the same numerator, so the inequality holds whether or not the displaced zero-budget slice failed, and only the converged==[False] assertion on verify.py:84 actually tests the control.\nFINDING scripts/prototypes/dina_flattop_scenario/verify.py:72 non-blocking: the gate counts only `Compiling jit(solve)` and never asserts the receipt's post_first_compilations, so it stays green under the 20 helper compilations the receipt and the fragment both record; the done-when clause \"zero new compilations after the first slice\" is reported in prose but not measured by the gate.\nFINDING scripts/prototypes/dina_flattop_scenario/run.py:72 non-blocking: the first non-zero arm raises and aborts the arm loop, so the width-16 arm ran one process rather than the two fresh processes the brief requires, leaving the width-16 result a single observed refusal rather than a replicated one.\nFINDING scripts/prototypes/dina_flattop_scenario/measure.py:33 non-blocking: the module re-implements the timing and compilation accounting that scripts/prototypes/bank_h200_slice_profile/measure.py owns (compile_program, timed, closure) instead of importing it.",
+  "review_run_id": "r-20261114T214436800692-review-of-dina-flattop-scenario-a3cae5e86ec6",
+  "reviewed_base_sha": "8907e8648d8b1c4b1db610185f6b9efd4e49f6d8",
+  "reviewed_head_sha": "a3cae5e86ec648a199142f20b211a4d7a5955212",
+  "reviewed_run_id": "r-20261114T171121699975-dina-flattop-scenario",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 12,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T00:33:14.784481+00:00",
+  "total": 93
+}

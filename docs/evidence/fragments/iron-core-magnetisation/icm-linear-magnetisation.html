@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="icm-linear-magnetisation">
+  <meta name="plan-evidence-for" content="iron-core-magnetisation">
+  <meta name="plan-verifies" content="iron-core-magnetisation#s5">
+  <title>Piecewise-linear Galerkin magnetisation on the closed shell | nova</title>
+</head>
+<body>
+<main class="plan-doc">
+  <h2 id="icm-linear-magnetisation-result">Piecewise-linear magnetisation on the closed shell</h2>
+  <!-- measured-result -->
+  <p>The 40 mm linear shell reaches <strong>0.0625439 % worst-probe error at
+  1,368 unknowns</strong>, below the 0.5 % target. The observed
+  graded constant target crossing uses 26,820 unknowns, so this measured
+  linear point uses 19.6 times fewer. Completed uniform spacings:
+  40, 20 mm. The required 10 mm error is missing after the P100 Newton update exhausted device memory.</p>
+  <!-- measured-result-end -->
+
+  <h3 id="icm-linear-magnetisation-route">Bound-current route and existing kernel owners</h3>
+  <p>Each cell carries three scalar basis functions per component,
+  <code>1, (r − rc)/h, (z − zc)/h</code>, with
+  <code>h = sqrt(cell area)</code>: six unknowns per cell. Dividing a stored
+  gradient coefficient by <code>h</code> recovers the physical gradient in
+  A/m². The returned <code>magnetisation</code> remains the value at the area
+  centroid; <code>linear_coefficients</code> carries the complete scaled basis.</p>
+  <p>The field uses the bound-current route. Along an oriented cell edge,
+  <code>Kφ ds = M<sub>R</sub> dr + M<sub>Z</sub> dz</code> is linear in the
+  edge parameter. In the cell interior,
+  <code>Jφ = ∂M<sub>R</sub>/∂z − ∂M<sub>Z</sub>/∂r</code> is constant.
+  The existing <code>nova/biot/tiledassembly.py</code> owns both the energy
+  assembly and field evaluation; no parallel assembly module is introduced.</p>
+  <table>
+    <thead><tr><th>contribution</th><th>kernel and contraction</th></tr></thead>
+    <tbody>
+      <tr><td>affine edge–edge energy</td><td>The existing
+      <code>_mutual_edge_evaluator</code> gains the four products of constant
+      and first edge-parameter moments. It retains the existing complete
+      elliptic/filament-flux owner and graded Duffy treatment of coincident
+      and endpoint-adjacent edges.</td></tr>
+      <tr><td>edge–volume and volume–volume energy</td><td>
+      The existing polygon angular kernel <code>_traced_psi_gradient</code>
+      supplies section flux for a uniform toroidal volume current. Flux-only
+      tracing omits its field derivatives. Sixteen angular panels use 192
+      Gauss nodes for a target within four source-triangle diameters, and
+      48 nodes for smooth distant pairs. A constrained triangulation
+      preserves each authored polygon and holds the packed graph at three
+      edges. Area weights convert per-ampere responses to per-current-density
+      responses.</td></tr>
+      <tr><td>exterior field</td><td><code>sheet_edge_field</code> supplies
+      each constant edge-sheet part; <code>traced_filament_greens</code>
+      supplies the zero-mean first moment with 24-point edge quadrature;
+      the polygon quadrature supplies the uniform-volume curl current. On
+      the axis, <code>_packed_axis_vertical_field</code> supplies the existing
+      exact finite-axis field. These are the existing sheet, ring and polygon owners.</td></tr>
+    </tbody>
+  </table>
+  <p>The edge-current incidence is built over the existing split shared-edge
+  geometry. Opposite currents on a shared edge cancel in the same current
+  space. Edge-pair energy uses order 24 for singular and near pairs and order
+  8 for distant pairs; continuous polygon potential uses order 12 along the
+  boundary and order 6 over the cell area. Polygon evaluation is tiled at
+  32 × 32 pairs, with near pairs evaluated in blocks of 64; its angular rule integrates over the source section before
+  quadrature, so it does not sample a spatial filament singularity.</p>
+  <p>The initial closed-polygon executable failed to finish the first shell
+  assembly in about two hours on the P100; a separate 16-pair exact-kernel
+  probe also reached its five-minute bound. Those partial receipts are
+  preserved. The existing angular-quadrature owner completed the corresponding
+  control in seconds. Against the closed owner on a 10 mm triangular section,
+  its 128-node rule agrees to 1.74e-11 relative in flux at the four control
+  points. The selected 192-node rule is additionally pinned by a closed-owner
+  parity test including an interior point, exterior point and the axis. The
+  final evaluator also separates nearby and distant pairs and traces only
+  flux for energy, avoiding unused field-gradient work in every volume pair.</p>
+
+  <h3 id="icm-linear-magnetisation-energy">The Gram matrix and the material law</h3>
+  <p>The local Gram is
+  <code>Hᵢⱼ = ∫cell φᵢ φⱼ 2πr dr dz</code>. It includes off-diagonal
+  first moments: an area-centred radial basis is not volume-centred. The
+  reciprocal current energy <code>E</code> gives the field-coefficient
+  operator <code>G = H⁻¹E</code>. The extended
+  <code>galerkin_spectrum(..., basis="linear")</code> solves the generalized
+  problem <code>(E/μ₀) v = λ H v</code>, rather than treating <code>G</code>
+  as Euclidean symmetric.</p>
+  <p>The prescribed field is projected with the same volume rule. During
+  Newton, the total Galerkin field polynomial is reconstructed at the
+  <code>section_nodes</code> volume quadrature points, the existing B–H law is
+  evaluated there, and its magnetisation is projected back through
+  <code>H⁻¹</code>. The nonlinear law therefore sees the spatially varying
+  reconstructed field, including its gradients. Local quadrature tangents
+  are contracted to 6 × 6 cell blocks before multiplication by the dense
+  interaction, avoiding a quadrature-points-by-global-unknowns Jacobian.</p>
+  <p><code>solve_magnetisation(..., basis="linear")</code> selects the
+  candidate. The default remains <code>basis="constant"</code>. The constant
+  operator, uniform mesh construction and default arithmetic are retained.</p>
+
+  <h3 id="icm-linear-magnetisation-spectrum">Small-mesh spectral gate and a control that fails</h3>
+  <p>The fast checks use two meshes of a closed polygonal shell with inner
+  and outer radii 0.28 and 0.4 m, each circle represented by an octagon.
+  These isolate the discrete energy property; the accuracy study below uses
+  the existing full-resolution 0.9–1 m shell.</p>
+  <table>
+    <thead><tr><th>spacing [mm]</th><th>cells</th><th>unknowns</th><th>minimum λ</th><th>maximum λ</th><th>Gram symmetry defect</th><th>maximum λ without 2πr</th></tr></thead>
+    <tbody>
+      <tr><td>200</td><td>6</td><td>36</td><td>7.0764246e-5</td><td>0.9952702042</td><td>9.18e-17</td><td>1.9203930164</td></tr>
+      <tr><td>160</td><td>8</td><td>48</td><td>0.0026778194</td><td>0.9744377724</td><td>1.21e-16</td><td>2.1228529691</td></tr>
+    </tbody>
+  </table>
+  <p>Both full-basis spectra lie in [0, 1] within 1e-10. The declared mutation
+  removes <code>2πr</code> only from the polynomial Gram. Both tests then fail
+  their upper-bound assertion: <code>2 failed, 57 deselected</code>,
+  <code>EXIT=1</code>. The ordinary head has no failing test ids.
+  <code>negative-control.log</code> contains the runner's assertions and
+  summary. The local nonlinear-projection test and a differential-Jacobian
+  comparison against direct differentiation also pass, as does the
+  constant-mode field comparison against the closed sheet route.</p>
+
+  <h3 id="icm-linear-magnetisation-capacity">The dense Newton working set</h3>
+  <p>The single factor size understates device demand. Abstract compilation of
+  the actual Newton call reports arguments, outputs and temporaries without
+  allocating or executing a dense factor. The completed 40 mm solve is a
+  positive control; the 10 and 8 mm shapes bind to their measured mesh counts.</p>
+  <table>
+    <thead><tr><th>spacing [mm]</th><th>unknowns</th><th>factor alone [GB]</th><th>compiled working set [GB]</th></tr></thead>
+    <tbody>
+      <tr><td>40</td><td>1,368</td><td>0.01497</td><td>0.05993</td></tr>
+      <tr><td>10</td><td>19,008</td><td>2.8904</td><td>11.5623</td></tr>
+      <tr><td>8</td><td>29,496</td><td>6.9601</td><td>27.8413</td></tr>
+    </tbody>
+  </table>
+  <p>The P100 has 17.1799 GB of physical memory. This is compiler memory
+  accounting, not a measured runtime peak; the probe uses one volume node per
+  cell to reduce quadrature storage and disables autotuning. Even that smaller
+  8 mm call exceeds physical memory. The raw accounting and device binding
+  are retained in <code>capacity.json</code>.</p>
+  <p><strong>The required 10 mm arm did not complete.</strong> Job 1315327
+  completed its 3,168-cell assembly in 8,906.079 s, then the Newton update
+  exhausted P100 memory while requesting another 5,780,866,816 bytes
+  (5.38 GiB). The traceback reports <code>RESOURCE_EXHAUSTED</code> at the
+  first residual-norm read after the asynchronous factor/update work.
+  The individual compile-only factor estimate above does not bound the live
+  working set of the complete solve. The partial <code>linear-0.01.json</code>
+  therefore carries an assembly time but no converged field, error or halving
+  order. A memory repair or longer CPU fallback is required; this node's
+  requested three-mesh measurement is incomplete.</p>
+  <!-- measured-capacity-status -->
+  <p>The finer 8 mm arm was attempted on <code>rigel</code> CPU with 16 cores
+  and <code>--mem=110G</code>. It was stopped after 51 min 30 s because two
+  assembly snapshots advanced from edge 32 to edge 192 in about 14 minutes,
+  against roughly 14,000 edges before the volume term. That rate cannot
+  complete within this worker's time limit. Its incomplete receipt is retained
+  under <code>cpu/linear-0.008.json</code>; it supplies no error or completed
+  solve time. Completing this optional finer arm requires a longer CPU job.</p>
+  <!-- measured-capacity-status-end -->
+
+  <h3 id="icm-linear-magnetisation-shell">The full-resolution μr = 1000 shell</h3>
+  <p>The shared source and shell constants live in
+  <code>scripts/iron_linear_magnetisation/controls.py</code>, with no imports
+  from tests. The source is the existing one-ampere, 50 mm loop at the origin.
+  Probes are (2, 0), (0, 2) and (3, 1) m. Shielding is compared with the same
+  spherical-dipole reference <code>S = 61.101838</code> as the constant-basis
+  study. The finite loop is retained so both bases measure the same control.</p>
+  <!-- measured-table -->
+  <table>
+    <thead><tr><th>spacing [mm]</th><th>cells</th><th>unknowns</th><th>(2, 0) error [%]</th><th>(0, 2) error [%]</th><th>(3, 1) error [%]</th><th>worst [%]</th><th>finite-loop worst [%]</th></tr></thead>
+    <tbody><tr><td>40</td><td>228</td><td>1,368</td><td>0.02160188</td><td>0.0625439</td><td>0.0002392439</td><td>0.0625439</td><td>0.01529066</td></tr><tr><td>20</td><td>828</td><td>4,968</td><td>0.03513736</td><td>0.05080213</td><td>0.0110901</td><td>0.05080213</td><td>0.001760174</td></tr></tbody>
+  </table>
+  <p>Primary errors retain the dipole reference. The last column uses the independently checked finite-loop reference below.</p>
+  <table>
+    <thead><tr><th>spacing [mm]</th><th>lane</th><th>assembly [min]</th><th>solve incl. assembly [min]</th><th>total incl. field [min]</th><th>Newton steps</th><th>relative residual</th></tr></thead>
+    <tbody><tr><td>40</td><td>gpu</td><td>13.507</td><td>13.607</td><td>13.857</td><td>1</td><td>1.37e-15</td></tr><tr><td>20</td><td>gpu</td><td>27.443</td><td>27.596</td><td>27.824</td><td>1</td><td>1.7e-15</td></tr></tbody>
+  </table>
+  <p>Recorded device kinds: Tesla P100-PCIE-16GB. The lane column identifies GPU and CPU walls. Times include any compilation required by the persistent-cache state; compile and execution are not separately timed. The last column is the terminal relative material residual.</p>
+  <table>
+    <thead><tr><th>refinement [mm]</th><th>reference</th><th>order at (2, 0)</th><th>order at (0, 2)</th><th>order at (3, 1)</th></tr></thead>
+    <tbody><tr><td>40 → 20</td><td>dipole</td><td>-0.7018</td><td>0.3000</td><td>-5.5346</td></tr><tr><td>40 → 20</td><td>finite loop</td><td>3.1189</td><td>3.0189</td><td>3.0279</td></tr></tbody>
+  </table>
+  <p>The constant comparison is the observed graded 13,410-cell result: 0.397396 % worst-probe error, with two unknowns per cell. It is an observed target crossing, not a claim about the minimal constant-basis mesh. The required 10 mm error is missing after the P100 Newton update exhausted device memory.</p>
+  <!-- measured-table-end -->
+  <p>The fresh constant 40 mm arm reproduces the previous P100 shielding
+  vector bit for bit: <code>[57.05106693488571, 54.619292861196286,
+  57.01841837762691]</code>, giving 10.6094110 % worst-probe error at
+  456 unknowns. The base's independent CPU arm records 10.6094110 % at
+  228 cells and 3.3674008 % at 828 cells, reproducing the recorded limitation
+  before the candidate is judged.</p>
+
+  <h3 id="icm-linear-magnetisation-reference">The finite-loop reference floor</h3>
+  <p>The requested errors retain the dipole reference above. The prescribed
+  50 mm loop also excites higher odd spherical harmonics. An independent
+  smooth-sphere reference transmits each harmonic through the two interfaces
+  using continuity of scalar potential and normal B. For degree ℓ, its
+  shielding is <code>[(ℓμ + ℓ + 1)((ℓ + 1)μ + ℓ)
+  − ℓ(ℓ + 1)(μ − 1)²(0.9)^(2ℓ + 1)] / [μ(2ℓ + 1)²]</code>.</p>
+  <p>The vacuum expansion agrees with the existing loop owner to 1.07e-14
+  relative at the probes. Six and ten odd harmonics agree within the asserted
+  2e-15 relative tolerance, and a separate four-condition interface solve
+  verifies every reduced transmission factor within 2e-12.</p>
+  <table>
+    <thead><tr><th>probe [m]</th><th>finite-loop shielding</th><th>offset from dipole [%]</th><th>40 mm error against finite loop [%]</th></tr></thead>
+    <tbody>
+      <tr><td>(2, 0)</td><td>61.1243834660</td><td>0.0368982</td><td>0.0152907</td></tr>
+      <tr><td>(0, 2)</td><td>61.0718066323</td><td>0.0491497</td><td>0.0134008</td></tr>
+      <tr><td>(3, 1)</td><td>61.1095816068</td><td>0.0126733</td><td>0.0129109</td></tr>
+    </tbody>
+  </table>
+  <p>Thus the primary refinement errors include a finite-source reference
+  offset. Their apparent orders measure change against that fixed dipole
+  reference; the separate finite-loop errors isolate the numerical and
+  polygon-geometry contribution. The stamped
+  <code>finite-loop-reference.json</code> is generated by
+  <code>scripts/iron_linear_magnetisation/reference.py</code>, blob
+  <code>2291175c10afdd6f6ba346fdd1bf9beb26e21825</code>.</p>
+
+  <p>The final reference invocation received an incorrect revision argument.
+  Its receipt retains that argument under
+  <code>as_executed_revision_argument</code> and an explicit correction to the
+  verified clean source revision
+  <code>187d4d989401bec66082146e2a7504b1ba6f4218</code>.
+  The verified script blob and numerical results are unchanged;
+  <code>revision-stamp-correction.log</code> retains the correction record.</p>
+
+  <h3 id="icm-linear-magnetisation-figure">Error against unknown count</h3>
+  <!-- measured-figure -->
+  <figure>
+    <img src="/nova/figures/iron-core-magnetisation/icm-linear-magnetisation/error-against-unknowns.svg" alt="Measured worst-probe shielding error against unknowns for uniform constant, graded constant and linear magnetisation.">
+    <figcaption>The μr = 1000 shell at the three stated probes. Circles show the
+    previous uniform constant P100 measurements; open squares show the graded
+    constant CPU measurements. Blue diamonds show the completed linear 40, 20 mm
+    arms; their lanes and devices are recorded in the table. Counts use two unknowns per constant cell and six per linear cell.
+    The dotted grey line is 0.5 %. Primary errors retain the dipole reference,
+    including its finite-loop offset; the separate table gives finite-loop orders.
+    The SVG passed its on-save text checks, was rendered to PNG and visually inspected.</figcaption>
+  </figure>
+  <!-- measured-figure-end -->
+
+  <h3 id="icm-linear-magnetisation-verification">Verification and provenance</h3>
+  <p>The requested marker-filtered gate ran in one <code>all_debug</code> job,
+  each revision in its own archived tree with a local index: base
+  <code>60d418bb85426142f3ca0a5f7a45afc4232b3255</code>,
+  <code>57 passed, 9 deselected</code>; head
+  <code>b3b57437ec271a0172a7dc9aaab6e2351fedaf69</code>,
+  <code>63 passed, 9 deselected</code>. Both end in <code>EXIT=0</code>.
+  This includes the existing grid-digest and constant-spectrum tests.</p>
+  <!-- measured-suites -->
+  <p>The complete unfiltered suite passes at both revisions: base
+    <code>60d418bb85426142f3ca0a5f7a45afc4232b3255</code>, <code>53 passed in 6590.65s (1:49:50)</code>;
+    head <code>b3b57437ec271a0172a7dc9aaab6e2351fedaf69</code>, <code>59 passed in 6533.64s (1:48:53)</code>.
+    Both logs end in <code>EXIT=0</code>, with zero added failures. Each arm ran
+    in its own exported tree and records the imported module and working directory.
+    These long CPU arms ran on <code>rigel</code>, separately from the one
+    <code>all_debug</code> fast/negative-control job.</p>
+  <!-- measured-suites-end -->
+  <p>The final evidence commit has not received an exact-delivered-head
+  suite arm. The 59-pass observation above verifies the final product source;
+  subsequent edits concern measurement helpers and evidence. The worker stops
+  blocked after the required measurement fails, leaving exact-head validation
+  for the recovery that completes that measurement.</p>
+  <p>The P100 shell run uses a clean archived tree at
+  <code>bb00950f7a0078e73a49641e7f24cb2dc19771e2</code> and verifies the executed
+  measurement script's git blob
+  <code>9f6be671d4f6d0d2da66524b315378ecba882db8</code>. Receipts record the
+  imported module, working directory, float64 assertion, device kind, lane,
+  unknown count, per-probe errors and elapsed times. Deliberately dirtying the
+  launcher's tracked source gives <code>refusing to measure a dirty tree</code>
+  and <code>EXIT=2</code>; no measurement starts from it.</p>
+  <p>The CPU refinement uses archive
+  <code>edbd6088785eaa8d58b3d282c002bbf21841f361</code> with the same measurement
+  script and shell constants. Both lanes share interaction-owner blob
+  <code>919fc7499189d37754220d0ea0707c754e6e84fe</code>. The only difference in
+  <code>magnetisation.py</code> is a corrected invalid-seed error message: the
+  existing refusal remains, and the linear route correctly requests six
+  values per cell. The recorded reproduction gives
+  <code>initial_magnetisation must be finite (cells, 2)</code>; the added
+  assertion passes with the corrected six-value message.</p>
+  <p>Shell receipts are under
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/</code>.
+  Gate and control logs are under
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/</code>,
+  in <code>validated-fast/</code>, <code>suites/</code> and
+  <code>validated-head-suites/</code>. This record measures the closed-shell candidate;
+  it neither measures WEST nor records the formulation decision.</p>
+</main>
+</body>
+</html>

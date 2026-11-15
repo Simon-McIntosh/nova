@@ -53,6 +53,10 @@ class SupportOperands:
     ``geometry``. The total nodal jet of a state is ``exterior`` plus ``rows``
     contracted with the state's booked moments.
 
+    ``coil_exterior`` has shape (nodes, coils, six jet entries), one
+    unit-current response per driven coil, with signed turns already included.
+    ``coil_count`` is a traced scalar. ``exterior`` holds only the fixed field.
+
     Padded to a shape bucket, ``rows``, ``exterior`` and ``nodes`` carry
     ``bucket`` rows of which the first ``active_nodes`` are the machine's own
     and the rest are zero, so one program serves every geometry of the bucket.
@@ -388,7 +392,7 @@ def read(
             policy,
             stencil.solved,
             cached=None if tracking is None else tracking.reading,
-            cache_geometry=reuse_geometry,
+            reuse_geometry=reuse_geometry,
         )
 
     if tracking is None:
@@ -411,7 +415,7 @@ def read(
                 policy,
                 jets,
                 tracking.reading,
-                cache_geometry=reuse_geometry,
+                reuse_geometry=reuse_geometry,
             )
         else:
             reading = jax.lax.cond(
@@ -425,7 +429,7 @@ def read(
                     policy,
                     jets,
                     tracking.reading,
-                    cache_geometry=reuse_geometry,
+                    reuse_geometry=reuse_geometry,
                 ),
                 None,
             )
@@ -450,7 +454,7 @@ def _rebuilt_reading(
     *,
     skip_wall=False,
     cached_geometry=None,
-    cache_geometry=True,
+    reuse_geometry=None,
 ):
     """The connected-domain decision of one stencil, fitted over the whole mesh."""
     field_jets = nodal_jets(operands, moments) if jets is None else jets
@@ -470,7 +474,7 @@ def _rebuilt_reading(
             policy,
             stencil.solved,
             cached=cached_geometry,
-            cache_geometry=cache_geometry,
+            reuse_geometry=reuse_geometry,
         )
     return topology.refresh_at_stationary_points(
         field,
@@ -480,6 +484,7 @@ def _rebuilt_reading(
         stencil.solved,
         decision,
         skip_wall=skip_wall,
+        reuse_geometry=reuse_geometry,
     )
 
 
@@ -595,7 +600,7 @@ def read_batch(
                     policy,
                     None,
                     cached_geometry=prior,
-                    cache_geometry=reuse_geometry,
+                    reuse_geometry=reuse_geometry,
                 )
             )(stack, moments, cached_geometry)
         if jets is None:
@@ -607,7 +612,7 @@ def read_batch(
                     convention,
                     policy,
                     None,
-                    cache_geometry=reuse_geometry,
+                    reuse_geometry=reuse_geometry,
                 )
             )(stack, moments)
         return jax.vmap(
@@ -618,7 +623,7 @@ def read_batch(
                 convention,
                 policy,
                 jet,
-                cache_geometry=reuse_geometry,
+                reuse_geometry=reuse_geometry,
             )
         )(stack, moments, jets)
 
@@ -667,7 +672,7 @@ def read_batch(
                         None,
                         decision,
                         skip_wall=skip_wall,
-                        cache_geometry=reuse_geometry,
+                        reuse_geometry=reuse_geometry,
                     )
                 )(stack, moments, tracking.reading)
             return jax.vmap(
@@ -680,7 +685,7 @@ def read_batch(
                     jet,
                     decision,
                     skip_wall=skip_wall,
-                    cache_geometry=reuse_geometry,
+                    reuse_geometry=reuse_geometry,
                 )
             )(stack, moments, jets, tracking.reading)
 
@@ -1365,7 +1370,15 @@ _LOCAL_BOOKING_CUT_BATCH_WIDTH = 128
 
 
 def _local_booking_sensitivities(
-    operands, moments, support, profile, density_gradient, quadrature, booked
+    operands,
+    moments,
+    support,
+    profile,
+    density_gradient,
+    quadrature,
+    booked,
+    *,
+    fuse_booking=False,
 ):
     """Differentiate one booking against its local flux and level inputs."""
     cells, samples = operands.sample_index.shape
@@ -1403,8 +1416,40 @@ def _local_booking_sensitivities(
         quadrature,
         booked,
         jnp.arange(samples, samples + 6),
+        fuse_booking=fuse_booking,
     )
-    return response.at[:, :, samples + 7].add(-response[:, :, samples])
+    if fuse_booking:
+        booked, response = response
+    response = response.at[:, :, samples + 7].add(-response[:, :, samples])
+    return (booked, response) if fuse_booking else response
+
+
+def book_and_local_sensitivities(
+    operands, moments, support, profile, density_gradient, quadrature
+):
+    """Reduce primal moments and unnormalized assembly channels in one pass."""
+    raw_rule = replace(quadrature, target_current=None)
+    unscaled, local = _local_booking_sensitivities(
+        operands,
+        moments,
+        support,
+        profile,
+        density_gradient,
+        raw_rule,
+        None,
+        fuse_booking=True,
+    )
+    booked = current._normalize_booking(
+        current.ClippedCurrentMoments(
+            cell_current=unscaled.cell_current,
+            radial_moment=unscaled.radial_moment,
+            vertical_moment=unscaled.vertical_moment,
+        ),
+        support.reading,
+        support.reading.boundary_flux - support.reading.axis_flux,
+        quadrature,
+    )
+    return booked, local
 
 
 _FRESH_GEOMETRY_NODE_CAPACITY = 3
@@ -1421,6 +1466,7 @@ def step_jacobian(
     *,
     fresh_geometry: bool = False,
     coil_currents=None,
+    local_sensitivities=None,
 ):
     """Compose the bank with closed-form cell-local booking sensitivities.
 
@@ -1438,6 +1484,7 @@ def step_jacobian(
             quadrature,
             booked,
             fresh_geometry=fresh_geometry,
+            local_sensitivities=local_sensitivities,
         )
     return _booking_jacobian(
         operands,
@@ -1448,12 +1495,21 @@ def step_jacobian(
         quadrature,
         booked,
         fresh_geometry=fresh_geometry,
+        local_sensitivities=local_sensitivities,
     )
 
 
 @partial(jax.jit, static_argnames=("fresh_geometry",))
 def _tabulated_jacobian(
-    operands, moments, support, profile, quadrature, booked, *, fresh_geometry
+    operands,
+    moments,
+    support,
+    profile,
+    quadrature,
+    booked,
+    *,
+    fresh_geometry,
+    local_sensitivities=None,
 ):
     """Share one traced Jacobian body across moment and pin corrections.
 
@@ -1469,6 +1525,7 @@ def _tabulated_jacobian(
         quadrature,
         booked,
         fresh_geometry=fresh_geometry,
+        local_sensitivities=local_sensitivities,
     )
 
 
@@ -1482,6 +1539,7 @@ def _booking_jacobian(
     booked,
     *,
     fresh_geometry,
+    local_sensitivities=None,
 ):
     """Compose the bank rows with the local booking channels."""
     density_gradient = getattr(profile, "density_gradient", density_gradient)
@@ -1500,15 +1558,17 @@ def _booking_jacobian(
             jnp.ones_like(booked.normalization),
             booked.valid,
         )
-    local = _local_booking_sensitivities(
-        operands,
-        moments,
-        support,
-        profile,
-        density_gradient,
-        local_quadrature,
-        local_booked,
-    )
+    local = local_sensitivities
+    if local is None:
+        local = _local_booking_sensitivities(
+            operands,
+            moments,
+            support,
+            profile,
+            density_gradient,
+            local_quadrature,
+            local_booked,
+        )
     cells = moments[0].size
 
     def bank_channels(index):
@@ -1784,7 +1844,25 @@ def newton_step(
     Exact condition estimates are automatic only for a single-cell diagnostic
     system; larger systems omit the two dense SVDs unless requested.
     """
-    residual = step_residual(operands, moments, moments, support, profile, quadrature)
+    local = None
+    if factor_cache is None:
+        booked, local = book_and_local_sensitivities(
+            operands, moments, support, profile, density_gradient, quadrature
+        )
+        valid = support.valid & booked.valid
+        residual = StepResidual(
+            tuple(
+                jnp.where(valid, value - predicted, jnp.nan)
+                for value, predicted in zip(moments, booked[:3], strict=True)
+            ),
+            booked,
+            support.reading,
+            valid,
+        )
+    else:
+        residual = step_residual(
+            operands, moments, moments, support, profile, quadrature
+        )
     cells = moments[0].size
     if condition_diagnostics is None:
         condition_diagnostics = cells == 1
@@ -1801,6 +1879,7 @@ def newton_step(
             quadrature,
             residual.booked,
             fresh_geometry=fresh_geometry,
+            local_sensitivities=local,
         )
         balanced, row, column = _equilibrate(matrix, moments, residual.booked)
         inverse, indices = _block_preconditioner(balanced)
@@ -2838,6 +2917,9 @@ def write_bank(operands: SupportOperands, cache_directory) -> str:
         {
             "kind": "nova-support-operator-bank",
             "bucket": operands.bucket,
+            "coil_count": 0
+            if operands.coil_count is None
+            else int(operands.coil_count),
             "active_nodes": None
             if operands.active_nodes is None
             else int(operands.active_nodes),

@@ -89,10 +89,22 @@ FORWARD_MODULES = (
 
 #: Modules and symbols that carry magnetic measurements or fit coefficients.
 FITTING_MODULES = frozenset(
-    {"nova.equilibrium.measurement", "nova.equilibrium.profile"}
+    {
+        "nova.equilibrium.measurement",
+        "nova.equilibrium.profile",
+        "nova.equilibrium.magnetics_fit",
+    }
 )
 FITTING_SYMBOLS = frozenset(
-    {"Magnetics", "ProfilePrior", "ReconstructProfile", "lstsq", "least_squares"}
+    {
+        "Magnetics",
+        "MagneticsFit",
+        "MagneticsFitReceipt",
+        "ProfilePrior",
+        "ReconstructProfile",
+        "lstsq",
+        "least_squares",
+    }
 )
 MEASUREMENT_TOKENS = ("measure", "sensor", "whiten", "magnetics", "prior")
 

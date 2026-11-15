@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "25ec3c9e8daea83922da4682d398c8f502a9428c",
+  "call_site_count": 7,
+  "call_sites": [
+    "nova/equilibrium/forward.py:607 ForwardProfile.support_bank",
+    "nova/equilibrium/support_read.py:180 driven_operands",
+    "nova/equilibrium/support_read.py:220 nodal_jets",
+    "nova/equilibrium/support_read.py:317 read",
+    "nova/equilibrium/support_read.py:452 read_batch",
+    "nova/equilibrium/support_read.py:711 bank_program",
+    "scripts/prototypes/bank_newton_step/measure.py:208 read_bank"
+  ],
+  "completed_at": "2026-11-14T16:13:48.210Z",
+  "dispatched_at": "2026-11-14T15:43:03Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "iter-bank-live-gate",
+      "recorded_at": "2026-11-14T16:48:53.563300+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "iter-bank-live-gate",
+      "recorded_at": "2026-11-14T16:49:00.029549+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "plan-state finding: the coordinator records the plasma-row Hessian budget decision on the plan's precision-budget decision at landing; no worker change",
+      "recorded_at": "2026-11-14T16:49:06.476656+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_iter_bank.py",
+      "line": "104",
+      "severity": "non-blocking",
+      "text": "non-blocking: lines 104-121 and 154-170 read `accuracy-*.npz` from the receipt directories named by NOVA_ITER_BANK_RECEIPT and NOVA_ITER_BANK_COIL_RECEIPT and compare the stored `actual` with the stored `expected`, so the landed code is never invoked and a regression in the coil contraction that `from_rows` and `nodal_jets` own would leave all six analytic-map cases green."
+    },
+    {
+      "file": "tests/test_iter_bank.py",
+      "line": "106",
+      "severity": "non-blocking",
+      "text": "non-blocking: each receipt test calls `pytest.skip` when its receipt environment variable is unset, and the manifest's `tests:` command records the gate without either variable, so a promotion re-running that recorded line measures 7 passed and 6 skipped and asserts none of the accuracy the manifest claims with the variables set in qualification-final.log."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank.html",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment cites a decision of 2026-11-14 permitting 1e-8 plasma Hessians but records neither a decision key nor a reference into the plan, and docs/plans/sub-millisecond-forward-path.html carries no 1e-8 decision, so the plan's \u00a76 done_when and its <code>precision-budget</code> decision still state 1e-10 and a later reader cannot reconcile the fragment with the plan."
+    }
+  ],
+  "head_log_revision": "87b72f601080d01bcfba2121517234d1ce7fe044",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 7 production call site(s)",
+    "diff": "read commit by commit; the product change is 5877d2d6, which threads coil_exterior and coil_count through from_rows and _bank_payload/write_bank/read_bank, and 2b24ed31 removes six duplicate payload keywords after a reproduced SyntaxError; the remaining commits are measurement scripts, tests, the fragment and the figure.",
+    "done_when": "\u00a76 node (a) asks for three sampled states matching the analytic map within 1e-10 relative with a failing dropped-coil control, plus recorded memory and width; qualification-final.log records tests/test_iter_bank.py at 13 passed with EXIT=0 against the retained `diagnosis` and `coils-titan` receipts, and qualification-negative/test_iter_bank.log records 6 failed, 7 passed with EXIT=1 under the PF1 mutation; the delivered flux and gradients meet 1e-10, while the plasma mixed and vertical Hessians sit near 2e-9 under the 1e-8 component budget the manifest attributes to a lead decision of 2026-11-14.",
+    "goal": "the node's goal is a published ITER operator bank that stores each driven coil's unit-current response; nova/equilibrium/support_read.py:81 adds `coil_exterior` and `coil_count`, :2687-2802 persist and reload them, and h200.log records the H200 build at 597.683 s with a 0.145668 s reload on `cuda:0`.",
+    "manifest": "read; it records the head gate and its log, the absent ITER baseline arm with the existing-file paired arms instead, the dropped-PF1 refusal, the published digest and the reload receipt, and it states the 1e-8 plasma Hessian budget rather than \u00a76's literal 1e-10.",
+    "write_paths": "the declared paths are nova/equilibrium/support_read.py, scripts/prototypes/iter_bank, tests/test_iter_bank.py and the fragment and figure directories; git show --name-only over the nineteen commits of the first-parent line names twelve files, every one inside those paths."
+  },
+  "justifications": {
+    "durability": "the four local unit tests at tests/test_iter_bank.py:41-100 and the reload probe do fail on a regression in the landed padding and roundtrip, but tests/test_iter_bank.py:104-121 and :154-170 read recorded npz arrays and would stay green if the landed contraction were reverted.",
+    "evidence": "qualification-final.log carries the 13-passed head gate and its header names the two receipt directories the accuracy tests need, yet the manifest's recorded command omits NOVA_ITER_BANK_RECEIPT and NOVA_ITER_BANK_COIL_RECEIPT, so the recorded gate line would skip six of the thirteen tests.",
+    "fit": "the added docstring at nova/equilibrium/support_read.py:55-70 and the tolerance comment at scripts/prototypes/iter_bank/measure.py:35-39 state the mechanism, and the test names describe what they assert.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:81 and its persistence at :2687-2802 deliver the stored per-coil response, and h200.log's BANK line records a 597.683 s build and a 0.145668 s reload, so the three clauses hold except the plasma Hessian, which is admitted at 1e-8 rather than \u00a76's 1e-10.",
+    "reuse": "the change extends the existing owners \u2014 SupportOperands and its write_bank and read_bank at nova/equilibrium/support_read.py plus scripts/prototypes/read_route/jets.py's build_jet_matrix and _source_jets \u2014 and forks no second bank or coil-response mechanism.",
+    "scope_discipline": "every path named by the commits lies inside the declared four-scope, and the only post-merge product edit is the six-line duplicate-keyword removal at nova/equilibrium/support_read.py:2693 that restores an import."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is a published ITER operator bank that stores each driven coil's unit-current response; nova/equilibrium/support_read.py:81 adds `coil_exterior` and `coil_count`, :2687-2802 persist and reload them, and h200.log records the H200 build at 597.683 s with a 0.145668 s reload on `cuda:0`.\nVERDICT done_when: \u00a76 node (a) asks for three sampled states matching the analytic map within 1e-10 relative with a failing dropped-coil control, plus recorded memory and width; qualification-final.log records tests/test_iter_bank.py at 13 passed with EXIT=0 against the retained `diagnosis` and `coils-titan` receipts, and qualification-negative/test_iter_bank.log records 6 failed, 7 passed with EXIT=1 under the PF1 mutation; the delivered flux and gradients meet 1e-10, while the plasma mixed and vertical Hessians sit near 2e-9 under the 1e-8 component budget the manifest attributes to a lead decision of 2026-11-14.\nVERDICT write_paths: the declared paths are nova/equilibrium/support_read.py, scripts/prototypes/iter_bank, tests/test_iter_bank.py and the fragment and figure directories; git show --name-only over the nineteen commits of the first-parent line names twelve files, every one inside those paths.\nVERDICT manifest: read; it records the head gate and its log, the absent ITER baseline arm with the existing-file paired arms instead, the dropped-PF1 refusal, the published digest and the reload receipt, and it states the 1e-8 plasma Hessian budget rather than \u00a76's literal 1e-10.\nVERDICT diff: read commit by commit; the product change is 5877d2d6, which threads coil_exterior and coil_count through from_rows and _bank_payload/write_bank/read_bank, and 2b24ed31 removes six duplicate payload keywords after a reproduced SyntaxError; the remaining commits are measurement scripts, tests, the fragment and the figure.\nCALL_SITES: nova/equilibrium/forward.py:607 ForwardProfile.support_bank, nova/equilibrium/support_read.py:180 driven_operands, nova/equilibrium/support_read.py:220 nodal_jets, nova/equilibrium/support_read.py:317 read, nova/equilibrium/support_read.py:452 read_batch, nova/equilibrium/support_read.py:711 bank_program, scripts/prototypes/bank_newton_step/measure.py:208 read_bank\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:81 and its persistence at :2687-2802 deliver the stored per-coil response, and h200.log's BANK line records a 597.683 s build and a 0.145668 s reload, so the three clauses hold except the plasma Hessian, which is admitted at 1e-8 rather than \u00a76's 1e-10.\nSCORE evidence: 16\nJUSTIFICATION evidence: qualification-final.log carries the 13-passed head gate and its header names the two receipt directories the accuracy tests need, yet the manifest's recorded command omits NOVA_ITER_BANK_RECEIPT and NOVA_ITER_BANK_COIL_RECEIPT, so the recorded gate line would skip six of the thirteen tests.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path named by the commits lies inside the declared four-scope, and the only post-merge product edit is the six-line duplicate-keyword removal at nova/equilibrium/support_read.py:2693 that restores an import.\nSCORE durability: 13\nJUSTIFICATION durability: the four local unit tests at tests/test_iter_bank.py:41-100 and the reload probe do fail on a regression in the landed padding and roundtrip, but tests/test_iter_bank.py:104-121 and :154-170 read recorded npz arrays and would stay green if the landed contraction were reverted.\nSCORE fit: 17\nJUSTIFICATION fit: the added docstring at nova/equilibrium/support_read.py:55-70 and the tolerance comment at scripts/prototypes/iter_bank/measure.py:35-39 state the mechanism, and the test names describe what they assert.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change extends the existing owners \u2014 SupportOperands and its write_bank and read_bank at nova/equilibrium/support_read.py plus scripts/prototypes/read_route/jets.py's build_jet_matrix and _source_jets \u2014 and forks no second bank or coil-response mechanism.\nFINDING tests/test_iter_bank.py:104 non-blocking: lines 104-121 and 154-170 read `accuracy-*.npz` from the receipt directories named by NOVA_ITER_BANK_RECEIPT and NOVA_ITER_BANK_COIL_RECEIPT and compare the stored `actual` with the stored `expected`, so the landed code is never invoked and a regression in the coil contraction that `from_rows` and `nodal_jets` own would leave all six analytic-map cases green.\nFINDING tests/test_iter_bank.py:106 non-blocking: each receipt test calls `pytest.skip` when its receipt environment variable is unset, and the manifest's `tests:` command records the gate without either variable, so a promotion re-running that recorded line measures 7 passed and 6 skipped and asserts none of the accuracy the manifest claims with the variables set in qualification-final.log.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank.html:5 non-blocking: the fragment cites a decision of 2026-11-14 permitting 1e-8 plasma Hessians but records neither a decision key nor a reference into the plan, and docs/plans/sub-millisecond-forward-path.html carries no 1e-8 decision, so the plan's \u00a76 done_when and its <code>precision-budget</code> decision still state 1e-10 and a later reader cannot reconcile the fragment with the plan.",
+  "review_run_id": "r-20261114T154229879985-review-of-iter-bank-87b72f601080",
+  "reviewed_base_sha": "25ec3c9e8daea83922da4682d398c8f502a9428c",
+  "reviewed_head_sha": "87b72f601080d01bcfba2121517234d1ce7fe044",
+  "reviewed_run_id": "r-20261113T165038806629-iter-bank",
+  "reviewer_run_id": "r-20261114T154229879985-review-of-iter-bank-87b72f601080",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T16:40:34.969546+00:00",
+  "total": 102
+}

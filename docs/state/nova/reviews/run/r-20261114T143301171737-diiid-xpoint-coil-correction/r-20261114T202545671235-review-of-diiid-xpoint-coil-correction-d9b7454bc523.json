@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/diiid_xpoint_coil_correction/summarize.py:coil_rows",
+    "scripts/prototypes/diiid_xpoint_coil_correction/measure.py:applied",
+    "scripts/prototypes/diiid_xpoint_profile_extent/batch.py:completed"
+  ],
+  "completed_at": "2026-11-14T20:47:31.632Z",
+  "dispatched_at": "2026-11-14T20:28:21Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "two predicates duplicated between prototype scripts of one diagnosis record; no product module is duplicated and the record's arms are superseded by the external-current propagation trace",
+      "recorded_at": "2026-11-14T20:49:51.257523+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "one ratio expression duplicated inside a prototype driver of a measured null result; no product effect",
+      "recorded_at": "2026-11-14T20:49:53.492147+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_xpoint_coil_correction/summarize.py",
+      "line": "34",
+      "severity": "non-blocking",
+      "text": "non-blocking: summarize.py:22 defines the ROWS tuple and :34 defines case_name(), both byte-identical to the owner at scripts/prototypes/diiid_xpoint_profile_extent/batch.py:24 and :27, so the refactor that made batch.py import the cohort predicates left the same predicates duplicated in a file it also touched."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_coil_correction/conductor_correction.py",
+      "line": "38",
+      "severity": "non-blocking",
+      "text": "non-blocking: relative_correction() at conductor_correction.py:38 is a capability duplicate of the inline expression at scripts/prototypes/diiid_xpoint_coil_correction/fit.py:71-74, so the arithmetic the refactor set out to share has two owners rather than one."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified 3 production call site(s) outside the node's own test file.",
+    "diff": "Read all three commits (0132d0250..d9b7454bc) against 0132d0250: they add conductor_correction.py and test_conductor_correction.py, fold the correction arithmetic into measure.py and summarize.py, replace batch.py's local ROWS/case_name/landed with imports from the profile-extent owner, add the 146L/179L per-conductor table to the fragment, and end five modules with a newline.",
+    "done_when": "The done_when's quantitative measure is the two-arm table plus the per-conductor correction beside each measured current for all four rows; the diff supplies the 146L and 179L per-conductor table and I reconciled four of its rows against cohort/summary.json (179L F1A -213.941 kA-turn measured, -4.54 equivalent, 2.1 percent, flag within on its own row) rather than re-running the solve.",
+    "goal": "The node goal is to measure and record how far the lower X-point moves when the fitted conductor-field mismatch is removed; these three commits extend the existing fragment so docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html:65 now reports the per-conductor correction beside the measured current for all four solved rows, which is what done_when item 2 asks for.",
+    "manifest": "Read; it records commits bdabfd690, a4e1dbc4d and d9b7454bc, the H200 job 1315558 and rigel jobs 1315756/1315771, both suite arms in cohort/arm-base.log and cohort/arm-head.log, and states the seven earlier review findings are answered rather than restating them.",
+    "write_paths": "The manifest declares scripts/prototypes/diiid_xpoint_coil_correction/, the fragment and docs/figures/diiid-xpoint-coil-correction/; all nine paths in the diff of these three commits sit inside those three paths."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/diiid_xpoint_coil_correction/test_conductor_correction.py:33 asserts the subtraction against a hand-computed -123.177, :43 asserts a short current vector is refused, and :74 asserts the fraction is read from the fit rather than the zero-correction applied arm, so each reddens if the guarded behaviour is reverted.",
+    "evidence": "The 146L and 179L rows reconcile exactly with the committed cohort/summary.json (F1A 179L -213.941 kA-turn measured, -4.54 equivalent, 2.1 percent), and both suite arms are recorded: cohort/arm-head.log records 8 passed at EXIT=0 and cohort/arm-base.log records the test path absent at its revision, EXIT=4.",
+    "fit": "ruff check over the nine changed files at d9b7454bc returns 'All checks passed!' (the earlier 90-character measure.py line is reformatted), and conductor_correction.py:1-8 follows the module-docstring idiom of its neighbouring prototypes.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html:65 carries the 146L and 179L measured current, equivalent error, percentage and implausibility flag for all nineteen conductors, closing the gap the done_when named.",
+    "reuse": "batch.py:22 imports ROWS, case_name and completed from scripts/prototypes/diiid_xpoint_profile_extent/batch.py:24-48 and measure.py:46 and summarize.py:96 import conductor_correction, but summarize.py:22-35 and fit.py:71-74 still restate predicates and arithmetic the same refactor now shares.",
+    "scope_discipline": "git diff --stat 0132d0250..d9b7454bc lists nine paths, every one inside scripts/prototypes/diiid_xpoint_coil_correction/, docs/evidence/fragments/diiid-vertical-force-balance/ or docs/figures/diiid-xpoint-coil-correction/, and no nova/ or tests/ file changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to measure and record how far the lower X-point moves when the fitted conductor-field mismatch is removed; the three commits extend docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html:65 so the per-conductor correction sits beside the measured current for all four solved rows.\nVERDICT done_when: the measure is the two-arm table plus the per-conductor correction for every row; the diff supplies the 146L and 179L table, and I reconciled four of its rows against cohort/summary.json rather than re-running the solve.\nVERDICT write_paths: the manifest declares the prototype, fragment and figures paths, and all nine paths in git diff --stat 0132d0250..d9b7454bc sit inside them.\nVERDICT manifest: read; it records the three commits, both suite arms and that the earlier review findings are answered.\nVERDICT diff: read all three commits against 0132d0250; they add conductor_correction.py and test_conductor_correction.py, fold the arithmetic into measure.py and summarize.py, import the cohort predicates in batch.py, add the 146L/179L table and end five modules with a newline.\nCALL_SITES: scripts/prototypes/diiid_xpoint_coil_correction/summarize.py:coil_rows, scripts/prototypes/diiid_xpoint_coil_correction/measure.py:applied, scripts/prototypes/diiid_xpoint_profile_extent/batch.py:completed\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html:65 carries the measured current, equivalent error, percentage and flag for all nineteen conductors on both remaining rows.\nSCORE evidence: 17\nJUSTIFICATION evidence: cohort/summary.json reconciles 179L F1A at -213.941 kA-turn measured and -4.54 equivalent, and cohort/arm-head.log records 8 passed at EXIT=0 against cohort/arm-base.log at EXIT=4.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: all nine paths in git diff --stat 0132d02503d0..d9b7454bc523 sit inside the three declared write paths and no nova/ or tests/ file changed.\nSCORE durability: 17\nJUSTIFICATION durability: test_conductor_correction.py:33 asserts a hand-computed -123.177, :43 asserts a short current vector is refused, and :74 asserts the fraction comes from the fit, so each reddens if the guarded behaviour regresses.\nSCORE fit: 15\nJUSTIFICATION fit: ruff check --config pyproject.toml over the nine files at d9b7454bc returns 'All checks passed!' and conductor_correction.py:1-8 matches the neighbouring prototype idiom.\nSCORE reuse: 15\nJUSTIFICATION reuse: batch.py:22 imports the cohort predicates from the profile-extent owner and measure.py:46 and summarize.py:96 import conductor_correction, but summarize.py:22-35 and fit.py:71-74 still restate them.\nFINDING scripts/prototypes/diiid_xpoint_coil_correction/summarize.py:34 non-blocking: ROWS at :22 and case_name at :34 duplicate scripts/prototypes/diiid_xpoint_profile_extent/batch.py:24 and :27, which the same refactor made batch.py import.\nFINDING scripts/prototypes/diiid_xpoint_coil_correction/conductor_correction.py:38 non-blocking: relative_correction() duplicates the inline expression at fit.py:71-74, so the shared arithmetic has two owners.\n",
+  "review_run_id": "r-20261114T202545671235-review-of-diiid-xpoint-coil-correction-d9b7454bc523",
+  "reviewed_base_sha": "0132d02503d0a4949b44b4fbc9cc5bc75d362566",
+  "reviewed_head_sha": "d9b7454bc52388eef2cba9b2e85082847ff65e09",
+  "reviewed_run_id": "r-20261114T143301171737-diiid-xpoint-coil-correction",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 15,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T20:50:12.710786+00:00",
+  "total": 98
+}

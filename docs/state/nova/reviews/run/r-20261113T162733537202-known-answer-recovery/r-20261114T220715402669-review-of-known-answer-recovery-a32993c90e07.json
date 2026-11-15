@@ -1,0 +1,815 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "assertion": "np.testing.assert_allclose(response @ coefficient, target, atol=2e-15)",
+      "fails_if": "Returning the initial/zero coefficient vector instead of solving fails the independently declared response-target equation.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 27
+    },
+    {
+      "assertion": "np.all(np.isfinite(covariance))",
+      "fails_if": "Returning a NaN covariance fails the finiteness check.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 28
+    },
+    {
+      "assertion": "spectrum[0] > 1.0",
+      "fails_if": "Returning zero singular values fails the known rank-one leading singular value.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 29
+    },
+    {
+      "assertion": "spectrum[1] < 1e-14",
+      "fails_if": "Including ridge or reporting full rank for the proportional columns raises the null singular value.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 30
+    },
+    {
+      "assertion": "null.shape == (1, 2)",
+      "fails_if": "Dropping the one unobserved direction changes its expected shape.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 31
+    },
+    {
+      "assertion": "np.testing.assert_allclose(response @ null.T, 0.0, atol=2e-15)",
+      "fails_if": "Reporting a direction outside the true response nullspace makes its matrix image nonzero.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 32
+    },
+    {
+      "assertion": "spectrum.size == 1",
+      "fails_if": "Reporting regularizer singular values rather than data singular values changes the one-row spectrum size.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 45
+    },
+    {
+      "assertion": "null.shape == (1, 2)",
+      "fails_if": "Treating ridge as measured information drops the data-null direction.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 46
+    },
+    {
+      "assertion": "np.testing.assert_allclose(response @ null.T, 0.0, atol=1e-15)",
+      "fails_if": "A false null direction produces a nonzero independent response image.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 47
+    },
+    {
+      "assertion": "np.testing.assert_allclose(coefficient, [2.0, 1.0], atol=1e-15)",
+      "fails_if": "Ignoring or misweighting the anchor fails the hand-solved coefficients [2,1].",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 60
+    },
+    {
+      "assertion": "spectrum.shape == (2,)",
+      "fails_if": "Omitting the anchor from diagnostics leaves only one singular value.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 61
+    },
+    {
+      "assertion": "spectrum[-1] > 0.0",
+      "fails_if": "A rank-deficient anchored response incorrectly reports a zero final singular value.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 62
+    },
+    {
+      "assertion": "null.shape == (0, 2)",
+      "fails_if": "Ignoring the independent anchor spuriously preserves a null direction.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 63
+    },
+    {
+      "assertion": "MagneticsFitReceipt.__module__ == 'nova.equilibrium.magnetics_fit'",
+      "fails_if": "Resolving the receipt export to another owner changes its module.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 67
+    },
+    {
+      "assertion": "MagneticsFit.__module__ == 'nova.equilibrium.magnetics_fit'",
+      "fails_if": "Resolving the fitter export to another owner changes its module.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 68
+    },
+    {
+      "assertion": "'measurement' not in names",
+      "fails_if": "Adding a measurement field to the typed request makes the field-name guard fail.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 70
+    },
+    {
+      "assertion": "pytest.raises(TypeError, match='measurement')",
+      "fails_if": "Accepting a measurement keyword removes the expected measurement-keyword TypeError.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 71
+    },
+    {
+      "assertion": "jax.config.jax_enable_x64 is True",
+      "fails_if": "Failing to configure x64 leaves this fixture precision control false.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 79
+    },
+    {
+      "assertion": "isinstance(active, ForwardSolveRequest)",
+      "fails_if": "Passing untyped objects to the mock public solve trips the request-type sentinel.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 97
+    },
+    {
+      "assertion": "receipt.converged",
+      "fails_if": "Suppressing coefficient updates leaves the deliberately perturbed linear fit unconverged.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 154
+    },
+    {
+      "assertion": "receipt.iterations > 0",
+      "fails_if": "Returning the initial fit without an update produces zero iterations.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 155
+    },
+    {
+      "assertion": "receipt.forward_evaluations == len(calls)",
+      "fails_if": "Incorrectly counting response or trial calls disagrees with the independently appended calls list.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 156
+    },
+    {
+      "assertion": "np.testing.assert_allclose(receipt.coefficients, truth, atol=1e-11)",
+      "fails_if": "Skipping updates or fitting the wrong row operator fails the independently declared truth vector.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 157
+    },
+    {
+      "assertion": "np.max(np.abs(receipt.whitened_residuals)) <= 1e-08",
+      "fails_if": "Stopping before the whitened tolerance leaves residuals above the absolute limit.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 158
+    },
+    {
+      "assertion": "receipt.undetermined_coefficients == ()",
+      "fails_if": "Misclassifying the known full-rank matrix marks coefficients undetermined.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 159
+    },
+    {
+      "assertion": "receipt.singular_values.shape == (3,)",
+      "fails_if": "Omitting a coefficient response column changes the three-value spectrum.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 160
+    },
+    {
+      "assertion": "all((active.target_current is None for active in calls))",
+      "fails_if": "Moving the observed current into the request sets target_current and trips the source-only check.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 161
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(fitter.request.source_profile.core.p_prime.coefficients, [0.8, 0.1])",
+      "fails_if": "Mutating the original request coefficients changes their fixed independent expected values.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 162
+    },
+    {
+      "assertion": "np.testing.assert_allclose(total.signature, measurement.measured, atol=2e-15)",
+      "fails_if": "Breaking the existing SliceMeasurement.signature subtraction fails recovery of the original synthetic plasma rows; this alone does not exercise MagneticsFit.fit.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 175
+    },
+    {
+      "assertion": "fitted.converged",
+      "fails_if": "Restoring the old measured-only target yields fitted.converged=False; the recorded reversed-commit control proves it.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 177
+    },
+    {
+      "assertion": "np.testing.assert_allclose(fitted.coefficients, truth, atol=1e-11)",
+      "fails_if": "Restoring the measured-only target biases coefficients away from independently fixed truth even if convergence were misreported.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 178
+    },
+    {
+      "assertion": "np.max(np.abs(fitted.whitened_residuals)) <= 1e-08",
+      "fails_if": "Ignoring the vacuum subtraction leaves a nonzero inconsistent whitened fit residual.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 179
+    },
+    {
+      "assertion": "receipt.converged",
+      "fails_if": "Allowing the masked NaN to poison fitting prevents convergence.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 190
+    },
+    {
+      "assertion": "receipt.whitened_residuals[1] == 0.0",
+      "fails_if": "Returning residuals without masking leaves NaN or a nonzero excluded residual.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 191
+    },
+    {
+      "assertion": "np.testing.assert_allclose(receipt.coefficients, truth, atol=1e-11)",
+      "fails_if": "Ignoring the valid remaining rows fails their independently fixed truth vector.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 192
+    },
+    {
+      "assertion": "pytest.raises(RuntimeError, match='did not qualify')",
+      "fails_if": "Removing the qualified-receipt refusal eliminates the expected RuntimeError.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 199
+    },
+    {
+      "assertion": "isinstance(caught.value.receipt, ForwardSolveReceipt)",
+      "fails_if": "Dropping the forward receipt attached to the error fails provenance typing.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 201
+    },
+    {
+      "assertion": "not caught.value.receipt.qualified",
+      "fails_if": "Attaching an unrelated qualified receipt contradicts the forced unqualified result.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 202
+    },
+    {
+      "assertion": "fitted.converged",
+      "fails_if": "Breaking basis-to-physical mapping prevents the exact two-coordinate fit from converging.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 215
+    },
+    {
+      "assertion": "np.testing.assert_allclose(fitted.coefficients, [0.0, 1.0], atol=1e-10)",
+      "fails_if": "Returning raw polynomial coordinates or the wrong basis solution fails independent [0,1].",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 216
+    },
+    {
+      "assertion": "np.testing.assert_allclose(np.r_[fitted.source_profile.core.p_prime.coefficients, fitted.source_profile.core.ff_prime.coefficients], truth, atol=1e-10)",
+      "fails_if": "Returning an unrecovered source_profile fails the independently declared physical truth vector.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 217
+    },
+    {
+      "assertion": "fitted.singular_values.shape == (2,)",
+      "fails_if": "Diagnosing the raw rather than fitted basis returns three rather than two singular values.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 225
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='independent columns')",
+      "fails_if": "Accepting a dependent all-ones coefficient basis removes the independent-column refusal.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 230
+    },
+    {
+      "assertion": "jax.config.jax_enable_x64 is True",
+      "fails_if": "Losing x64 initialization makes the physical-fixture precision sentinel fail.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 243
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='direct sample target rows')",
+      "fails_if": "Removing the existing direct-sample-layout guard makes this known-mismatch control fail when that mismatch is present.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 357
+    },
+    {
+      "assertion": "np.max(distance) <= roundoff",
+      "fails_if": "Selecting different cached geometric rows exceeds a roundoff bound based on independently requested sample nodes.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 365
+    },
+    {
+      "assertion": "len(np.unique(rows)) == len(sample_nodes)",
+      "fails_if": "Mapping two required nodes to one cached row fails uniqueness.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 366
+    },
+    {
+      "assertion": "np.isfinite(amplitude) and amplitude > 0.0",
+      "fails_if": "A zero/nonfinite or sign-reversed generating current produces an invalid source-amplitude scale.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 418
+    },
+    {
+      "assertion": "np.any(np.asarray(biot.sloc['Ic']) != 0.0)",
+      "fails_if": "Reading no nonzero prescribed source current fails the known-present conductor control.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 584
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(_physical_sensor_rows(biot, sensors), 0.0)",
+      "fails_if": "A sensor implementation returning stale readings after zeroing all source currents fails exact zero output.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 591
+    },
+    {
+      "assertion": "np.max(np.abs(vacuum[sensors.flux_loop] / scales[sensors.flux_loop])) > 1e-08",
+      "fails_if": "Omitting known loop fields makes their normalized amplitude fail the nonzero threshold.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 625
+    },
+    {
+      "assertion": "np.max(np.abs(vacuum[~sensors.flux_loop] / scales[~sensors.flux_loop])) > 1e-08",
+      "fails_if": "Omitting known probe fields makes their normalized amplitude fail the nonzero threshold.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 626
+    },
+    {
+      "assertion": "np.testing.assert_allclose((total - vacuum) / scales, plasma / scales, rtol=0, atol=1e-12)",
+      "fails_if": "Only changing local total construction or enough arithmetic roundoff fails this identity; any wrong known-field predictor used consistently on both sides, or production subtraction regression, survives. No regression-coverage credit.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": false,
+      "line": 629
+    },
+    {
+      "assertion": "bool(generated.qualified)",
+      "fails_if": "Using an unqualified generating receipt trips the explicit physical prerequisite.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 755
+    },
+    {
+      "assertion": "bool(generated.terminal_state.fixed_point.converged)",
+      "fails_if": "Using a nonconverged generating state trips the terminal fixed-point prerequisite.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 760
+    },
+    {
+      "assertion": "geometry_delta > 1e-12",
+      "fails_if": "A geometry-independent known-field reader fails the 5 cm displaced-versus-nominal response control.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 783
+    },
+    {
+      "assertion": "error > 1e-06",
+      "fails_if": "Returning the generating/accepted state as the initial qualified map fails the required initial error >1e-6.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 903
+    },
+    {
+      "assertion": "delta > 1e-12",
+      "fails_if": "Reusing nominal known-field geometry for the displaced fit fails its nonzero change control.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 930
+    },
+    {
+      "assertion": "error <= 1e-06",
+      "fails_if": "Suppressing inversion or returning the wrong terminal flux violates independently generated map error <=1e-6.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 1148
+    },
+    {
+      "assertion": "summary['residual_sup'] <= 1e-08",
+      "fails_if": "Misfitting sensor rows leaves the receipt whitened residual >1e-8.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 1149
+    },
+    {
+      "assertion": "bool(resolved.qualified)",
+      "fails_if": "Reconstructing a source that cannot independently forward-qualify fails the data-free solve prerequisite.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 1150
+    },
+    {
+      "assertion": "agreement <= case['request'].policy.kernel_tolerance",
+      "fails_if": "Returning source_profile inconsistent with terminal recovered flux causes the independent forward map difference to exceed the request tolerance.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 1151
+    },
+    {
+      "assertion": "fitted.singular_values.size == 2",
+      "fails_if": "Dropping an amplitude response direction changes the expected two-value spectrum.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 1152
+    },
+    {
+      "assertion": "fitted.iterations > 0",
+      "fails_if": "Passing through the initial state without updating fails positive iteration count.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 1153
+    },
+    {
+      "assertion": "error > 1e-06",
+      "fails_if": "Ignoring the 5 cm sensor displacement or fitting its shifted target instead of the nominal data makes the negative-control map error too small.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 1170
+    },
+    {
+      "assertion": "summary['largest_residual_row'] == 0",
+      "fails_if": "Incorrect row ordering or failure to localize the displaced sensor moves the largest whitened residual away from row zero.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independent": true,
+      "line": 1171
+    }
+  ],
+  "boundary_test_extension": "tests/test_equilibrium_forward.py:92,101 expands existing import/symbol blacklists; importing the fitter into a forward module now fails the existing unchanged AST guard. No existing assertion was weakened.",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/__init__.py:463 __getattr__",
+    "nova/equilibrium/magnetics_fit.py:254 MagneticsFit.fit",
+    "nova/equilibrium/harmonic.py:472 fit",
+    "nova/equilibrium/moment.py:613",
+    "nova/equilibrium/moment.py:958"
+  ],
+  "commit_audit": [
+    {
+      "paths": [
+        "nova/equilibrium/__init__.py",
+        "nova/equilibrium/magnetics_fit.py",
+        "nova/equilibrium/measurement.py",
+        "tests/test_equilibrium_forward.py",
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "sha": "40fdde05441b227ac41c560dad5e94c6688771bc",
+      "subject": "feat(equilibrium): fit profile coefficients through public forward requests"
+    },
+    {
+      "paths": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html"
+      ],
+      "sha": "9607543b1d565062256c9d945985bc43675ec8d6",
+      "subject": "docs(equilibrium): record blocked physical recovery verification"
+    },
+    {
+      "paths": [
+        "nova/equilibrium/magnetics_fit.py",
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "sha": "9d954fe1139cfde6f6e648984eebe5293bacd0f0",
+      "subject": "feat(equilibrium): declare profile fitting bases and physical recovery gates"
+    },
+    {
+      "paths": [
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "sha": "84ca3cf57b21b128fc0d5284265dcf9a1429ccee",
+      "subject": "test(equilibrium): persist terminal histories on forward qualification failure"
+    },
+    {
+      "paths": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+        "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast-generating-refusal.svg"
+      ],
+      "sha": "04b366d880cd4d7448958b6007065cb16e8795cd",
+      "subject": "docs(equilibrium): record qualified analytic state and rejected MAST generation"
+    },
+    {
+      "paths": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+        "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/solovev.svg",
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "sha": "963922bd73b12e658d167d25fb17156a4c5df532",
+      "subject": "test(equilibrium): demonstrate analytic magnetics recovery"
+    },
+    {
+      "paths": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html"
+      ],
+      "sha": "2054f5c7865093df53e464757baf64fb1a1a5126",
+      "subject": "docs(equilibrium): record displaced-loop detection"
+    },
+    {
+      "paths": [
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "sha": "94f1b307c94bf05ecd28543a4ecbc09320a8e83f",
+      "subject": "test(equilibrium): prescribe smooth machine source profiles"
+    },
+    {
+      "paths": [
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "sha": "c592ffa6717980ae3275d1b8b153197548b710b4",
+      "subject": "fix(equilibrium): persist analytic fit diagnostics without closures"
+    },
+    {
+      "paths": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "sha": "9301bf1be78a5eba6c6458d7f54e2485911635a1",
+      "subject": "test(equilibrium): align cached sample rows with moment geometry"
+    },
+    {
+      "paths": [
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "sha": "f79ea77719151c99561bde1828649a2dca2fae6e",
+      "subject": "test(equilibrium): require measurable error before local recovery"
+    },
+    {
+      "paths": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+        "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast.svg"
+      ],
+      "sha": "c0a9500654c0dff8c798f74a7d510522624ed86b",
+      "subject": "docs(equilibrium): demonstrate smooth MAST source recovery"
+    },
+    {
+      "paths": [
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "sha": "3bfc4dc810ac826e7c273d62fb4323ba5d97dd02",
+      "subject": "test(equilibrium): use measured local continuation for machine fits"
+    },
+    {
+      "paths": [
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "sha": "8949ea237e0bf6f3cc84c36f87300406b8f9df9f",
+      "subject": "fix(equilibrium): retain the stored ITER reference seed"
+    },
+    {
+      "paths": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html"
+      ],
+      "sha": "f2d23f27e1ff7466018073a9357fbf8aabf44830",
+      "subject": "docs(equilibrium): record the live measurement-boundary refusal"
+    },
+    {
+      "paths": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+        "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/iter.svg"
+      ],
+      "sha": "19663de3e56cbf966b1d3d3bcf8405b8a5163e2c",
+      "subject": "docs(equilibrium): record the stored-seed ITER recovery"
+    },
+    {
+      "paths": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html"
+      ],
+      "sha": "9a4fc2dbc6fdeada9882ad97b90e8678e336f833",
+      "subject": "docs(equilibrium): record terminal coefficient-recovery measures"
+    },
+    {
+      "paths": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html"
+      ],
+      "sha": "8d762adb6194b5d96d3ee04a92ec3825901567b3",
+      "subject": "docs(equilibrium): record terminal coefficient-recovery measures"
+    },
+    {
+      "paths": [
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "sha": "f198ab3ffdb63676899c495f6f3b5eb0f571364e",
+      "subject": "test(equilibrium): expose ignored known-conductor signals"
+    },
+    {
+      "paths": [
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "sha": "365a60e0bf225f69590b8fb22a9e4ce2709b6c4c",
+      "subject": "test(equilibrium): synthesize independent total magnetics rows"
+    },
+    {
+      "paths": [
+        "nova/equilibrium/magnetics_fit.py"
+      ],
+      "sha": "fe46b073b747b37f10e58c69c72a3ef5e070eb99",
+      "subject": "fix(equilibrium): fit the known-conductor-subtracted signature"
+    },
+    {
+      "paths": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+        "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/iter.svg",
+        "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast-generating-refusal.svg",
+        "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast.svg",
+        "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/solovev.svg"
+      ],
+      "sha": "a32993c90e07a255e838cd05007f1f10f660fe6c",
+      "subject": "docs(equilibrium): publish total-magnetics recovery evidence"
+    }
+  ],
+  "completed_at": "2026-11-14T22:15:37Z",
+  "decision": "No blocking finding; one non-blocking arithmetic-closure finding awaits coordinator disposition.",
+  "dispatched_at": "2026-11-14T22:07:48Z",
+  "failure_delta_evidence": {
+    "after_suite": {
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -s tests/test_equilibrium_magnetics_fit.py tests/test_equilibrium_forward.py --timeout 3600",
+      "completed": true,
+      "device": "H200",
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find"
+      ],
+      "job": "1315628",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/repair-focused-h200.log",
+      "log_sha256": "2673662fba556f54476680a7d5383d707b0b99e34b9b9c36134dab47b1c97bf8",
+      "observed_completed": true,
+      "observed_failure_ids": [
+        "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find"
+      ],
+      "observed_summary": "1 failed, 48 passed in 3167.40s (0:52:47)",
+      "revision": "fe46b073b747b37f10e58c69c72a3ef5e070eb99",
+      "summary": "1 failed, 48 passed in 3167.40s (0:52:47)"
+    },
+    "baseline_suite": {
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -s tests/test_equilibrium_magnetics_fit.py tests/test_equilibrium_forward.py --timeout 3600",
+      "completed": true,
+      "device": "H200",
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find"
+      ],
+      "job": "1315504",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/head-focused-gate.log",
+      "log_sha256": "373f589b60f9180559c709e4d54376e6f62210ca04012d8c610ad8fc267196cd",
+      "observed_completed": true,
+      "observed_failure_ids": [
+        "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find"
+      ],
+      "observed_summary": "1 failed, 47 passed in 2905.91s (0:48:25)",
+      "revision": "8d762adb6194b5d96d3ee04a92ec3825901567b3",
+      "summary": "1 failed, 47 passed in 2905.91s (0:48:25)"
+    }
+  },
+  "failure_delta_limit": "Delta is the source manifest declared H200 repair-base 8d762adb to measured after fe46b073b, not a whole-suite comparison against original dispatch base 87cf7ec68; incomplete CPU arms remain waived and are not counted as zero.",
+  "failure_delta_positive_control": "Both completed logs enumerate tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find, so the failure-id reader saw a known-present failure before computing the empty added set.",
+  "figure_review": {
+    "committed_svg_sha256_verified": true,
+    "inspected": [
+      "solovev.png",
+      "mast.png",
+      "iter.png"
+    ],
+    "observation": "All contour panels and labels readable, no text clipping/collision. Coincident generating/recovered null markers overlay as explicitly disclosed in captions; grey marker rim remains visible.",
+    "render_command": "convert -background white -density 100 INPUT.svg -resize 1400x OUTPUT.png (expanded per case, TMPDIR and MAGICK_TMPDIR set to this run scratch)",
+    "render_exit_statuses": [
+      0,
+      0,
+      0
+    ]
+  },
+  "finding_disposition_proposal": {
+    "file": "tests/test_equilibrium_magnetics_fit.py",
+    "line": 629,
+    "proposed": "exempted",
+    "reason": "Arithmetic closure can remain as a numerical sanity check; no durability score rests on it and the independent fit regression is mutation-proven. Coordinator owns the disposition."
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The reviewer scores it non-blocking and gives it no coverage credit: the line-629 check is arithmetic closure of the test's own constructed rows, and the conductor-subtraction regression is guarded independently by test_known_conductor_subtraction_changes_the_target, which the reversed-commit control reddens.",
+      "recorded_at": "2026-11-14T22:18:57.077614+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": "629",
+      "severity": "non-blocking",
+      "text": "non-blocking: _total_observations constructs total = plasma + vacuum at line 617 and immediately checks (total - vacuum)/scales against plasma/scales, so both sides share the same constructed operands and a wrong known-field predictor or reverted production subtraction leaves this assertion green; treat it only as arithmetic closure, not independent conductor-subtraction coverage, which is instead provided by test_known_conductor_subtraction_changes_the_target at lines 167-179."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read the 22 commits from 87cf7ec68f6922173c471aa0bc742f07cc2256f3 to a32993c90e07a255e838cd05007f1f10f660fe6c; the final source uses SliceMeasurement.signature and the sole commit after the measured fe46b073b head changes documentation/figures only.",
+    "done_when": "Live docs/plans/inverse-equilibrium-baseline.html#s1 requires map error <=1e-6, whitened residual <=1e-8, independent forward agreement and a displaced-loop refusal; repair-focused-h200.log records all three recoveries and the 5 cm control satisfying those clauses.",
+    "goal": "Source prompt.txt:43 requires an external public-forward coefficient inverse recovering three synthetic states; nova/equilibrium/magnetics_fit.py:67 implements it and tests/test_equilibrium_magnetics_fit.py:1097 measures all three using independent total observations.",
+    "manifest": "Source manifest.md records complete H200 baseline/after arms with the same forward-default failure, a reversed-repair negative control and an explicit CPU waiver; their actual logs corroborate those results, with zero added failure ids.",
+    "write_paths": "Source prompt.txt:271 and manifest.md declare the fitting module, exports, measurement owner, boundary/recovery tests and evidence/figure paths; all nine net changed paths and every intermediate commit path stay within those grants."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_magnetics_fit.py:177,178,1148,1170 fails for omitted known-field subtraction, missing coefficient recovery or ineffective geometry refusal, as repair-negative-control.log demonstrates, while the constructed closure assertion at line 629 supplies no independent guard and receives no coverage credit.",
+    "evidence": "repair-focused-h200.log records map fractions 7.229153382203303e-12, 2.621349183853333e-12 and 1.9499589765104044e-14 plus displaced map error 0.017454620962387497 with row 0 largest, although the accepted baseline measures the repair base rather than the original dispatch base and the CPU arms were waived.",
+    "fit": "nova/equilibrium/magnetics_fit.py:40,67 follows the surrounding frozen-receipt and typed-request idioms, nova/equilibrium/__init__.py:207 extends deferred exports, and touched source names carry no forbidden plan labels.",
+    "goal_fidelity": "nova/equilibrium/magnetics_fit.py:157,233,280 issues typed source-only public solves, fits known-field-subtracted rows and returns one complete fit receipt, while tests/test_equilibrium_magnetics_fit.py:1097 establishes all three required recoveries.",
+    "reuse": "nova/equilibrium/magnetics_fit.py:173,180,254 wraps the observation-kernel and whitened_solve owners, and capability searches/readings of profile.py:455, inverse.py:213 and biot/operate.py:326 found reduced-model fitting, conductor-current design and operator loading rather than an existing public-forward profile inverse or equivalent test table memoizer.",
+    "scope_discipline": "The nine net changed paths between 87cf7ec68f6922173c471aa0bc742f07cc2256f3 and a32993c90e07a255e838cd05007f1f10f660fe6c match source manifest.md:3, and the source-only ForwardSolveRequest owner remains untouched."
+  },
+  "negative_control_evidence": {
+    "exit_status": 1,
+    "failure_id": "tests/test_equilibrium_magnetics_fit.py::test_known_conductor_subtraction_changes_the_target",
+    "mutation": "Reverse answering commit fe46b073b while retaining independent test commits.",
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T162733537202-known-answer-recovery/repair-negative-control.log",
+    "quote": "tests/test_equilibrium_magnetics_fit.py:177: AssertionError; assert fitted.converged; fitted.converged=False",
+    "read_only_review": true,
+    "summary": "1 failed in 3.17s"
+  },
+  "net_changed_paths": [
+    "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+    "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/iter.svg",
+    "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast.svg",
+    "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/solovev.svg",
+    "nova/equilibrium/__init__.py",
+    "nova/equilibrium/magnetics_fit.py",
+    "nova/equilibrium/measurement.py",
+    "tests/test_equilibrium_forward.py",
+    "tests/test_equilibrium_magnetics_fit.py"
+  ],
+  "post_measurement": {
+    "changed_paths": [
+      "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+      "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/iter.svg",
+      "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast-generating-refusal.svg",
+      "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/mast.svg",
+      "docs/figures/inverse-equilibrium-baseline/known-answer-recovery/solovev.svg"
+    ],
+    "measured_head": "fe46b073b747b37f10e58c69c72a3ef5e070eb99",
+    "reviewed_head": "a32993c90e07a255e838cd05007f1f10f660fe6c",
+    "source_and_tests_unchanged": true
+  },
+  "prior_blocking_finding": {
+    "file": "tests/test_equilibrium_magnetics_fit.py",
+    "previous_line": 633,
+    "resolution": "Answered by 365a60e0b independent plasma-plus-exterior observations and fe46b073b signature target; new line 775 calls the helper rather than MagneticsFit._evaluate, with nonzero stored conductor rows and geometry deltas in the accepted log."
+  },
+  "production_usage_limit": "No external production caller of MagneticsFit exists at this revision beyond deferred export; the changed shared whitened_solve is reached by the production harmonic/moment call sites listed above.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: Source prompt.txt:43 requires an external public-forward coefficient inverse recovering three synthetic states; nova/equilibrium/magnetics_fit.py:67 implements it and tests/test_equilibrium_magnetics_fit.py:1097 measures all three using independent total observations.\nVERDICT done_when: Live docs/plans/inverse-equilibrium-baseline.html#s1 requires map error <=1e-6, whitened residual <=1e-8, independent forward agreement and a displaced-loop refusal; repair-focused-h200.log records all three recoveries and the 5 cm control satisfying those clauses.\nVERDICT write_paths: Source prompt.txt:271 and manifest.md declare the fitting module, exports, measurement owner, boundary/recovery tests and evidence/figure paths; all nine net changed paths and every intermediate commit path stay within those grants.\nVERDICT manifest: Source manifest.md records complete H200 baseline/after arms with the same forward-default failure, a reversed-repair negative control and an explicit CPU waiver; their actual logs corroborate those results, with zero added failure ids.\nVERDICT diff: Read the 22 commits from 87cf7ec68f6922173c471aa0bc742f07cc2256f3 to a32993c90e07a255e838cd05007f1f10f660fe6c; the final source uses SliceMeasurement.signature and the sole commit after the measured fe46b073b head changes documentation/figures only.\nCALL_SITES: nova/equilibrium/__init__.py:463 __getattr__, nova/equilibrium/magnetics_fit.py:254 MagneticsFit.fit, nova/equilibrium/harmonic.py:472 fit, nova/equilibrium/moment.py:613, nova/equilibrium/moment.py:958\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/magnetics_fit.py:157,233,280 issues typed source-only public solves, fits known-field-subtracted rows and returns one complete fit receipt, while tests/test_equilibrium_magnetics_fit.py:1097 establishes all three required recoveries.\nSCORE evidence: 19\nJUSTIFICATION evidence: repair-focused-h200.log records map fractions 7.229153382203303e-12, 2.621349183853333e-12 and 1.9499589765104044e-14 plus displaced map error 0.017454620962387497 with row 0 largest, although the accepted baseline measures the repair base rather than the original dispatch base and the CPU arms were waived.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The nine net changed paths between 87cf7ec68f6922173c471aa0bc742f07cc2256f3 and a32993c90e07a255e838cd05007f1f10f660fe6c match source manifest.md:3, and the source-only ForwardSolveRequest owner remains untouched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_equilibrium_magnetics_fit.py:177,178,1148,1170 fails for omitted known-field subtraction, missing coefficient recovery or ineffective geometry refusal, as repair-negative-control.log demonstrates, while the constructed closure assertion at line 629 supplies no independent guard and receives no coverage credit.\nSCORE fit: 20\nJUSTIFICATION fit: nova/equilibrium/magnetics_fit.py:40,67 follows the surrounding frozen-receipt and typed-request idioms, nova/equilibrium/__init__.py:207 extends deferred exports, and touched source names carry no forbidden plan labels.\nSCORE reuse: 20\nJUSTIFICATION reuse: nova/equilibrium/magnetics_fit.py:173,180,254 wraps the observation-kernel and whitened_solve owners, and capability searches/readings of profile.py:455, inverse.py:213 and biot/operate.py:326 found reduced-model fitting, conductor-current design and operator loading rather than an existing public-forward profile inverse or equivalent test table memoizer.\nFINDING tests/test_equilibrium_magnetics_fit.py:629 non-blocking: _total_observations constructs total = plasma + vacuum at line 617 and immediately checks (total - vacuum)/scales against plasma/scales, so both sides share the same constructed operands and a wrong known-field predictor or reverted production subtraction leaves this assertion green; treat it only as arithmetic closure, not independent conductor-subtraction coverage, which is instead provided by test_known_conductor_subtraction_changes_the_target at lines 167-179.\n",
+  "reuse_search": {
+    "cache": "Searched solve/cache/load_operators in nova/biot; opened Operate.solve_biot/post_solve/load_operators at operate.py:326-375. The test memoizer wraps factory-owned tables for repeated sensor coordinates rather than cloning operator construction.",
+    "diagnostic_helpers": "_PlasmaDiagnosticSource and _known_field_reader adapt existing CoilSet currents; _physical_sensor_rows calls the virtual diagnostic owners at observation_kernels.py:265,300; _total_observations composes these rows and adds no new physical kernel.",
+    "production": "Searched weighted/least-squares/profile inversion capabilities in nova/equilibrium; read measurement.py:92 and profile.py:455, inverse.py:213 and the harmonic/moment callers. The new class composes the declared owners; reduced-model and coil-current fitting solve different problems.",
+    "receipts_and_figures": "Searched save/persist/text-overlap in nova/media and nova/database; found no owner for this fit-test receipt serializer or recovery figure. _persist_forward handles the existing forward types; _persist_forward_failure preserves traceback terminal histories. _draw_recovery_panels wraps nova.media poloidal/ink painters; all artifacts are test evidence rather than a parallel public API.",
+    "tests": "Rank-deficiency, regularisation, anchor, typed-request, conductor-subtraction, masking, unqualified-state, basis and physical-control definitions are focused test scenarios, not runtime capability forks."
+  },
+  "review_run_id": "r-20261114T220715402669-review-of-known-answer-recovery-a32993c90e07",
+  "reviewed_base_sha": "87cf7ec68f6922173c471aa0bc742f07cc2256f3",
+  "reviewed_head_sha": "a32993c90e07a255e838cd05007f1f10f660fe6c",
+  "reviewed_run_id": "r-20261113T162733537202-known-answer-recovery",
+  "reviewed_worktree_head": "8b998a67a72551c6cea0cec0ee8237d7187e4013",
+  "revision_note": "Assigned review tree HEAD is newer; every reviewed source byte came from explicit git show/diff of the canonical pair, and rendered SVG bytes were checked against the source publication hashes.",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T22:19:35.269612+00:00",
+  "total": 117
+}

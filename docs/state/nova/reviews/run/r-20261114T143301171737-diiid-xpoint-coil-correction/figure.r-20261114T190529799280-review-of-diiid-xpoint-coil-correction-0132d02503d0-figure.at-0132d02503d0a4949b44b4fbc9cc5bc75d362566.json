@@ -1,0 +1,99 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-14T19:44:09.447Z",
+  "dispatched_at": "2026-11-14T19:15:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the zoom scale is stated in the fragment's figcaption beside the figure; the panel follows the poloidal axis-off rule and reads correctly on the page it is published on",
+      "recorded_at": "2026-11-14T20:31:06.773517+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the identity of the two arms is the measured result, stated in bold in the fragment and in each panel's residual line; the external-current trace explains it",
+      "recorded_at": "2026-11-14T20:31:21.486482+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the zoom scale is stated in the fragment's figcaption beside the figure; the panel follows the poloidal axis-off rule and reads correctly on the page it is published on",
+      "recorded_at": "2026-11-14T20:31:14.650413+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the identity of the two arms is the measured result, stated in bold in the fragment and in each panel's residual line; the external-current trace explains it",
+      "recorded_at": "2026-11-14T20:31:29.527186+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/diiid-xpoint-coil-correction/frame-137-diverted-lower-xpoint.svg",
+      "id": "f6e2c0021e4",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The rendered caption line under the two arms reads '137D measured currents' and '137D corrected currents' with the residual under each, and it does not name the zoom window shown by the right-hand panel of each pair. The axes are off by the project's poloidal rule, so a reader meeting this PNG without the surrounding fragment has no scale for the panel and cannot put a size on the 2.36 cm separation between the solved and EFIT lower nulls. The HTML figcaption beside the figure does state 'a 10 cm box anchored on EFIT's lower null', so the artifact is not unreadable; the condition simply travels with the page rather than with the image."
+    },
+    {
+      "file": "docs/figures/diiid-xpoint-coil-correction/frame-137-diverted-lower-xpoint.svg",
+      "id": "f6e2c0021e4",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The measured and corrected arms are visually identical, and the only on-figure cue that they are one field drawn twice is the duplicated residual string. Measured on the raster, the paired whole-vessel panels differ only in antialiased edges (mean absolute channel difference 3.1 of 765, identical wall bounding box, zero integer shift), which is what an identical field looks like. The fragment states the null result in bold, but a reader who meets the figure alone can read an identical pair as a plotting duplication rather than as the result the figure exists to establish. This is a caption-content gap, not a rendering defect: the panels are honest and correctly drawn."
+    },
+    {
+      "file": "docs/figures/diiid-xpoint-coil-correction/frame-146-diverted-lower-xpoint.svg",
+      "id": "ff7b8bc883b",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The rendered caption line names the frame ('146D') and both arms and gives 'residual 1.26e-15; converged 1' under each, but it does not name the zoom window of the right-hand panel. With the axes off by rule, a reader meeting the PNG alone cannot scale the panel or the null offset. The fragment's figcaption supplies '10 cm box anchored on EFIT's lower null' and identifies the open circles as the shadow nodes the residual mask retains, so the page reads correctly; the image does not carry that scale on its own."
+    },
+    {
+      "file": "docs/figures/diiid-xpoint-coil-correction/frame-146-diverted-lower-xpoint.svg",
+      "id": "ff7b8bc883b",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The 146D measured and corrected arms are likewise visually identical (mean absolute channel difference 3.1 of 765 between the paired whole-vessel panels), and the figure states the sameness only through the duplicated residual line. A reader comparing the arms is invited to look for a difference that is genuinely absent. The open circles at the lower null are the shadow nodes, as the fragment caption says, but that identification also lives only on the page, not in the image."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass \u2014 measured on the rendered PNGs: all text (legend and panel captions) is #0b0b0b on white at 19.7:1, and the darkest plotting ink, #333333, is 12.6:1. The grey wall line is #929292 at 3.0:1; it is data rather than text and clears the 3:1 data-mark floor.",
+    "data_ink": "pass \u2014 measured on the rendered PNGs: 94.0 percent of pixels are pure white, and the plotting ink is four flat colours only: #3366cc (14,298 px, solved), #333333 (4,596 px, EFIT), #929292 (wall) and #0b0b0b (text). The contours, wall, null and axis markers carry all of it, and no plotted element is filled, banded or shaded.",
+    "decoration": "pass \u2014 measured on both PNGs: zero rows and zero columns exceed 60 percent ink coverage, so there are no gridlines or bands; the background is pure white and carries no gradient; the axes are off, so no spines, ticks or tick labels are drawn on any of the eight panels.",
+    "label_collision": "pass \u2014 measured on both PNGs: the outermost three pixel rows and columns carry zero ink on all four borders, so nothing is clipped at the canvas edge; the legend sits above the panel rows and both caption lines sit below their own pair, clear of the plasma; no text is drawn over data. The two fields' lower-null markers overprint inside the whole-vessel panel because the nulls are 2.36 cm apart at that scale, but that region is the documented reason the zoom panel exists, and the zoom separates the markers cleanly.",
+    "legibility": "pass \u2014 both attached PNGs render at 1399x720 and read at a glance. An eight-entry legend ('solved', 'EFIT', 'wall', 'solved null', 'EFIT null', 'solved axis', 'EFIT axis', 'shadow nodes') sits in clear space across the top of the canvas; each arm is a four-panel rendering of two panels with a caption line in 14 pt text ('137D measured currents' / 'residual 1.14e-12; converged 1' in image-0, '146D' / 'residual 1.26e-15' in image-1). The inner contour bundle of the whole-vessel panel is dense where the inboard leg and the lower divertor converge, but that is exactly the region the paired 10 cm zoom redraws, and there both fields' separatrix branches and both null markers read separately.",
+    "table_form": "pass \u2014 the image is a spatial depiction of poloidal flux contours, separatrices and the first wall on a shared set of levels. The residual, offset and per-conductor tables the run produced live in the record fragment, not in either image, and no tabular information is drawn as a picture."
+  },
+  "notes": "Read-only figure review. Only the two PNGs named in this review were opened; both were inspected visually and probed for background fraction, border ink, gridline rows and columns, palette, text contrast and inter-arm raster agreement. Neither SVG source nor any other image was read, and no file was edited, created, moved, deleted, redrawn, relabelled or reformatted. The drawing code is scripts/prototypes/diiid_xpoint_coil_correction/render.py, which selects the arms and delegates the panel vocabulary to scripts/prototypes/diiid_xpoint_profile_extent/render.py; the findings are anchored to the figure paths rather than to those lines because nothing in the drawing code is at fault. No suite ran for this figure review, so added_failure_count is 0 and added_failure_ids is empty by construction.",
+  "project": "nova",
+  "review_run_id": "r-20261114T190529799280-review-of-diiid-xpoint-coil-correction-0132d02503d0-figure",
+  "reviewed_base_sha": "17b416ba373f6d3c82c0a61e7370414495440a0e",
+  "reviewed_commits": [
+    "b452d0ed8",
+    "44058d858",
+    "094fee677",
+    "44daee02e",
+    "67bffca78",
+    "0132d0250"
+  ],
+  "reviewed_figures": [
+    {
+      "drawing_script": "scripts/prototypes/diiid_xpoint_coil_correction/render.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T190529799280-review-of-diiid-xpoint-coil-correction-0132d02503d0-figure/image-0.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/diiid-xpoint-coil-correction/frame-137-diverted-lower-xpoint.svg"
+    },
+    {
+      "drawing_script": "scripts/prototypes/diiid_xpoint_coil_correction/render.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T190529799280-review-of-diiid-xpoint-coil-correction-0132d02503d0-figure/image-1.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/diiid-xpoint-coil-correction/frame-146-diverted-lower-xpoint.svg"
+    }
+  ],
+  "reviewed_head_sha": "0132d02503d0a4949b44b4fbc9cc5bc75d362566",
+  "reviewed_run_id": "r-20261114T143301171737-diiid-xpoint-coil-correction",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T19:40:21Z",
+  "total": null
+}

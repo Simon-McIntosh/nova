@@ -97,7 +97,12 @@ def whitened_solve(
     *,
     penalty: np.ndarray | None = None,
     anchor: tuple[np.ndarray, float, float] | None = None,
-) -> tuple[np.ndarray, np.ndarray]:
+    diagnostics: bool = False,
+    rcond: float | None = None,
+) -> (
+    tuple[np.ndarray, np.ndarray]
+    | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
+):
     """Solve a whitened, column-normalised ridge least-squares system.
 
     Whitening by the per-row measurement scale puts every channel on comparable
@@ -111,7 +116,11 @@ def whitened_solve(
     with ``anchor=None`` the solve is exactly the sensor-only solve.
 
     Returns the coefficients and their covariance, both in the raw (un-normalised)
-    coefficient frame.
+    coefficient frame. With ``diagnostics=True``, also return the singular values
+    of the whitened, column-normalised data response and its null directions in
+    the raw coefficient frame. The spectrum excludes the regulariser, which
+    cannot make an unobserved direction data-determined. ``rcond`` is the
+    relative singular-value cutoff used to identify those directions.
     """
     weighted = response * weight[:, None]
     rhs = target * weight
@@ -126,16 +135,34 @@ def whitened_solve(
     normalised = weighted / column_norm[None, :]
     count = normalised.shape[1]
     if count == 0:
-        return np.zeros(0), np.zeros((0, 0))
+        result = np.zeros(0), np.zeros((0, 0))
+        return (*result, np.zeros(0), np.zeros((0, 0))) if diagnostics else result
     if penalty is None:
         gram = normalised.T @ normalised + ridge * np.eye(count)
     else:
         gram = normalised.T @ normalised + np.diag(
             ridge * np.asarray(penalty, dtype=np.float64)[:count]
         )
-    coefficients = np.linalg.solve(gram, normalised.T @ rhs) / column_norm
+    if ridge == 0.0:
+        coefficients = np.linalg.lstsq(normalised, rhs, rcond=rcond)[0] / column_norm
+    else:
+        coefficients = np.linalg.solve(gram, normalised.T @ rhs) / column_norm
     try:
         covariance = np.linalg.pinv(gram) / np.outer(column_norm, column_norm)
     except np.linalg.LinAlgError:  # degenerate response
         covariance = np.full((count, count), np.nan)
-    return coefficients, covariance
+    if not diagnostics:
+        return coefficients, covariance
+    _, spectrum, right = np.linalg.svd(normalised, full_matrices=True)
+    cutoff = (
+        np.finfo(normalised.dtype).eps * max(normalised.shape)
+        if rcond is None
+        else rcond
+    )
+    rank = (
+        int(np.count_nonzero(spectrum > cutoff * spectrum[0])) if spectrum.size else 0
+    )
+    null = right[rank:] / column_norm[None, :]
+    if null.size:
+        null /= np.linalg.norm(null, axis=1, keepdims=True)
+    return coefficients, covariance, spectrum, null

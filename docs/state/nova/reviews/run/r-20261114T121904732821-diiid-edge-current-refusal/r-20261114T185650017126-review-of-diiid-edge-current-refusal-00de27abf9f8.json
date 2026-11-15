@@ -1,0 +1,129 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_basis": "the reviewed run declares no baseline_suite and no after_suite: it is a diagnostics prototype whose brief fences it out of tests/, so no suite pair was armed. Its gates are publish.sh (verify -> jumps -> audit -> render), whose log render.log ends EXIT=0 with no failing test ids, and the marker gate marker-head-check.log at the reviewed head ending EXIT=0. Both were read; neither reports a failing id, so the derived count is 0 and the id list is empty.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "scripts/prototypes/diiid_edge_current_refusal/render.py:354"
+  ],
+  "completed_at": "2026-11-14T19:25:56.028Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-diiid-edge-current-refusal-00de27abf9f8",
+      "recorded_at": "2026-11-14T19:52:07.879512+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-14T18:57:25Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "marker_visibility.py is a prototype checker for this diagnosis record only; consolidating it with the core-zoom prototype checker touches another record's scripts for no product effect",
+      "recorded_at": "2026-11-14T19:44:34.076841+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "verify.py refuses a missing spatial summary before rendering (completion-negative-control.log), so an emptied proposals list cannot reach the marker check here",
+      "recorded_at": "2026-11-14T19:44:58.843250+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "non-blocking strengthening of a prototype verifier in a diagnosis record; its claims are re-measured by the finite-edge and inactive-compensator reruns on their own gates",
+      "recorded_at": "2026-11-14T19:45:18.759199+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "non-blocking strengthening of a prototype verifier in a diagnosis record; its claims are re-measured by the finite-edge and inactive-compensator reruns on their own gates",
+      "recorded_at": "2026-11-14T19:45:43.251031+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "non-blocking strengthening of a prototype verifier in a diagnosis record; its claims are re-measured by the finite-edge and inactive-compensator reruns on their own gates",
+      "recorded_at": "2026-11-14T19:46:07.862587+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "same 31.1 cm by 16 cm declaration in a prototype renderer no other driver imports",
+      "recorded_at": "2026-11-14T19:46:30.107028+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_edge_current_refusal/marker_visibility.py",
+      "line": "64",
+      "severity": "non-blocking",
+      "text": "non-blocking: check() re-implements the SVG glyph extraction and stroke-separation test that scripts/prototypes/diiid_core_hold/check_core_zoom.py:20-76 already owns - the same ElementTree use/path-d parse, coordinate regex, stroke allowance and gap threshold - without importing or extending that owner, so a fix to one leaves the other testing geometry from the other's assumptions."
+    },
+    {
+      "file": "scripts/prototypes/diiid_edge_current_refusal/marker_visibility.py",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "non-blocking: expected_marks keeps only proposals whose inner equals len(trips)-1, so a spatial.json whose proposals list is empty - the shape a truncated or emptied receipt takes - yields refused=set() and the check passes with zero circle marks and a matching footer, making the guard unable to fail on absent evidence."
+    },
+    {
+      "file": "scripts/prototypes/diiid_edge_current_refusal/verify.py",
+      "line": "87",
+      "severity": "non-blocking",
+      "text": "non-blocking: premise_reproduced (and all_premises_reproduced at verify.py:112) is computed, printed and written to summary.json but never asserted, so a cohort whose rows stopped returning ACTIVE_SET_STEP_REFUSED or ACTIVE_SET_CYCLE_DETECTED would still end EXIT=0; this finding persists from the review at 330dbf38c."
+    },
+    {
+      "file": "scripts/prototypes/diiid_edge_current_refusal/verify.py",
+      "line": "41",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert matched[0][\"trips\"] == len(spatial[\"trips\"]) compares the SPATIAL_SUMMARY line, which analyze.py emits from the same summary dict later written to spatial.json, against that line's own source, so it can only detect a truncated log and not a solver regression; this finding persists from the review at 330dbf38c."
+    },
+    {
+      "file": "scripts/prototypes/diiid_edge_current_refusal/audit.py",
+      "line": "113",
+      "severity": "non-blocking",
+      "text": "non-blocking: matches_reported is stored per trip and never asserted, and audit.py:100 skips a trip whose endpoint it cannot bind without failing, so the record's fifteen reconciled mask counts are checked only by reading the JSON; this finding persists from the review at 330dbf38c."
+    },
+    {
+      "file": "scripts/prototypes/diiid_edge_current_refusal/render.py",
+      "line": "74",
+      "severity": "non-blocking",
+      "text": "non-blocking: save() rewrites the SVG width and height that scripts/prototypes/diiid_xpoint_offset/style.py:34 already writes, so the centimetre unit-sizing rule now has a second owner that can drift; this finding persists from the review at 330dbf38c."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit across the 31 commits of 0843b7d..00de27abf: the range adds four instrumentation modules (measure.py subclassing the profile-extent Capture, analyze.py, audit.py, jumps.py), the inactive-field counterfactual (control.py, reference.sh, transition.py), render.py and the launchers, the nine SVGs and the evidence fragment; the two newest commits f3be365bc and 00de27abf add marker_visibility.py and rewire render.py to draw a distinct outer ring on coincident cutoff stars and to refuse a panel whose saved glyphs disagree with the receipts; I compared the five re-rendered SVGs against their parents and, after normalising matplotlib's regenerated element ids and timestamp, the axes path geometry is identical, so the scientific contours and wall are unchanged as the commit claims.",
+    "done_when": "each of the brief's three clauses is measured: the cohort receipts carry per-trip residual, connected and shadow populations with the (R,Z) of entering and leaving cells, every inner iteration's decision_name, krylov_name and levenberg_damping, and the boundary flux and enclosed current; I recounted cohort/edge/*/spatial.json and got 281 iterations, 166 accepted and 115 SUFFICIENT_DECREASE_REFUSED with 281 Krylov ACCEPTED, matching the fragment's claim; jumps.py predicts each source jump independently; render.py draws the nine panels the brief specifies and verify.py reports all_premises_reproduced=true with the 146D control converged; the main trace ran as one titan job (six-hour limit, 2:02:06 elapsed) after a real H200 submission stayed pending, and a separate paired H200 job carried the counterfactual.",
+    "goal": "the goal is to diagnose, without touching nova/, why EFIT's finite boundary p' and FF' refuse the forward solve on 137D and 179L and collapse 146L; docs/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal.html adjudicates candidates (a)/(b)/(c) in its 'Mechanism adjudication' table and attributes all three to a pointwise source-cutoff jump in the numerical source integral (1.875371 kA measured against 1.875365 kA predicted on 137D) plus, for 146L, an inactive UniformRadialFieldUnknown compensator entering Levenberg recovery, with the product changes stated as proposed and not made.",
+    "manifest": "read: it records status complete, 31 commits, 25 changed paths, the publish.sh gate with render.log ending EXIT=0, the marker gate marker-head-check.log ending EXIT=0 with MARKER_SUMMARY cases=6 failed=0, the marker reverse-application negative control ending EXIT=1, the two earlier receipt and completion negative controls, the preserved EXIT=1 tails, and five repaired panels inspected with hashes in marker-inspections.md; its test_logs entry for marker-render.log is mis-stamped, noted under evidence.",
+    "write_paths": "the brief declares three scopes - scripts/prototypes/diiid_edge_current_refusal/, docs/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal.html and docs/figures/diiid-edge-current-refusal/ - and all 25 paths in git diff --stat 0843b7d12..00de27abf sit inside them, with no nova/ and no tests/ path anywhere in the change."
+  },
+  "justifications": {
+    "durability": "marker_visibility.py:78-90 is a real guard - with 00de27abf reverse-applied the same check reports -4.650 pt on frame-137-diverted, frame-146-limited and frame-179-limited and exits 1, while the head reports +2.350 pt - but marker_visibility.py:19-23 passes vacuously when spatial.json carries no proposals, and verify.py:87 and audit.py:113 only record two of the record's headline claims.",
+    "evidence": "publish.sh drives verify.py, jumps.py, audit.py and render.py and render.log ends EXIT=0, the head marker gate marker-head-check.log ends EXIT=0 with MARKER_SUMMARY cases=6 failed=0, and its negative control marker-negative-control.log ends EXIT=1 at -4.650 pt; the deductions are that verify.py:87 stores premise_reproduced without asserting it and that marker-render.log names revision f3be365bc in its own header, a revision whose render.py emits no MARKER_VISIBILITY line at all, so that receipt describes an uncommitted tree.",
+    "fit": "render.py:26-35 imports the repository's figure vocabulary through nova.media.ink, nova.media.poloidal and the sibling diiid_xpoint_offset style module, keeps axes off and shared contour levels, and a naming scan of the added scripts finds only domain terms (stages, SVG, HREF) with no plan, sprint or ticket identifier.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal.html closes with 'Recommended product changes - proposed, not made', and git diff --stat 0843b7d12..00de27abf lists no path under nova/ or tests/.",
+    "reuse": "scripts/prototypes/diiid_edge_current_refusal/marker_visibility.py:64 re-implements the saved-SVG marker extraction and stroke-separation test that scripts/prototypes/diiid_core_hold/check_core_zoom.py:20-76 already owns (the same ElementTree use/path-d parse, the same coordinate regex and stroke allowance) instead of extending it, and render.py:74-84 still rewrites the SVG width and height that scripts/prototypes/diiid_xpoint_offset/style.py:34 already declares.",
+    "scope_discipline": "git diff --stat 0843b7d12cc7a029315ee53ae27568ee364edcc6 00de27abf9f8a7984aa1f1188266b8ee3efdfa59 lists only scripts/prototypes/diiid_edge_current_refusal/, the one evidence fragment and nine figures, with no nova/ or tests/ path in the change."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to diagnose, without touching nova/, why EFIT's finite boundary p' and FF' refuse the forward solve on 137D and 179L and collapse 146L; docs/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal.html adjudicates candidates (a)/(b)/(c) in its 'Mechanism adjudication' table and attributes all three to a pointwise source-cutoff jump in the numerical source integral (1.875371 kA measured against 1.875365 kA predicted on 137D) plus, for 146L, an inactive UniformRadialFieldUnknown compensator entering Levenberg recovery, with the product changes stated as proposed and not made.\nVERDICT done_when: each of the brief's three clauses is measured: the cohort receipts carry per-trip residual, connected and shadow populations with the (R,Z) of entering and leaving cells, every inner iteration's decision_name, krylov_name and levenberg_damping, and the boundary flux and enclosed current; I recounted cohort/edge/*/spatial.json and got 281 iterations, 166 accepted and 115 SUFFICIENT_DECREASE_REFUSED with 281 Krylov ACCEPTED, matching the fragment's claim; jumps.py predicts each source jump independently; render.py draws the nine panels the brief specifies and verify.py reports all_premises_reproduced=true with the 146D control converged; the main trace ran as one titan job (six-hour limit, 2:02:06 elapsed) after a real H200 submission stayed pending, and a separate paired H200 job carried the counterfactual.\nVERDICT write_paths: the brief declares three scopes - scripts/prototypes/diiid_edge_current_refusal/, docs/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal.html and docs/figures/diiid-edge-current-refusal/ - and all 25 paths in git diff --stat 0843b7d12..00de27abf sit inside them, with no nova/ and no tests/ path anywhere in the change.\nVERDICT manifest: read: it records status complete, 31 commits, 25 changed paths, the publish.sh gate with render.log ending EXIT=0, the marker gate marker-head-check.log ending EXIT=0 with MARKER_SUMMARY cases=6 failed=0, the marker reverse-application negative control ending EXIT=1, the two earlier receipt and completion negative controls, the preserved EXIT=1 tails, and five repaired panels inspected with hashes in marker-inspections.md; its test_logs entry for marker-render.log is mis-stamped, noted under evidence.\nVERDICT diff: read commit by commit across the 31 commits of 0843b7d..00de27abf: the range adds four instrumentation modules (measure.py subclassing the profile-extent Capture, analyze.py, audit.py, jumps.py), the inactive-field counterfactual (control.py, reference.sh, transition.py), render.py and the launchers, the nine SVGs and the evidence fragment; the two newest commits f3be365bc and 00de27abf add marker_visibility.py and rewire render.py to draw a distinct outer ring on coincident cutoff stars and to refuse a panel whose saved glyphs disagree with the receipts; I compared the five re-rendered SVGs against their parents and, after normalising matplotlib's regenerated element ids and timestamp, the axes path geometry is identical, so the scientific contours and wall are unchanged as the commit claims.\nCALL_SITES: scripts/prototypes/diiid_edge_current_refusal/render.py:354\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal.html closes with 'Recommended product changes - proposed, not made', and git diff --stat 0843b7d12..00de27abf lists no path under nova/ or tests/.\nSCORE evidence: 16\nJUSTIFICATION evidence: publish.sh drives verify.py, jumps.py, audit.py and render.py and render.log ends EXIT=0, the head marker gate marker-head-check.log ends EXIT=0 with MARKER_SUMMARY cases=6 failed=0, and its negative control marker-negative-control.log ends EXIT=1 at -4.650 pt; the deductions are that verify.py:87 stores premise_reproduced without asserting it and that marker-render.log names revision f3be365bc in its own header, a revision whose render.py emits no MARKER_VISIBILITY line at all, so that receipt describes an uncommitted tree.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 0843b7d12cc7a029315ee53ae27568ee364edcc6 00de27abf9f8a7984aa1f1188266b8ee3efdfa59 lists only scripts/prototypes/diiid_edge_current_refusal/, the one evidence fragment and nine figures, with no nova/ or tests/ path in the change.\nSCORE durability: 15\nJUSTIFICATION durability: marker_visibility.py:78-90 is a real guard - with 00de27abf reverse-applied the same check reports -4.650 pt on frame-137-diverted, frame-146-limited and frame-179-limited and exits 1, while the head reports +2.350 pt - but marker_visibility.py:19-23 passes vacuously when spatial.json carries no proposals, and verify.py:87 and audit.py:113 only record two of the record's headline claims.\nSCORE fit: 18\nJUSTIFICATION fit: render.py:26-35 imports the repository's figure vocabulary through nova.media.ink, nova.media.poloidal and the sibling diiid_xpoint_offset style module, keeps axes off and shared contour levels, and a naming scan of the added scripts finds only domain terms (stages, SVG, HREF) with no plan, sprint or ticket identifier.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/diiid_edge_current_refusal/marker_visibility.py:64 re-implements the saved-SVG marker extraction and stroke-separation test that scripts/prototypes/diiid_core_hold/check_core_zoom.py:20-76 already owns (the same ElementTree use/path-d parse, the same coordinate regex and stroke allowance) instead of extending it, and render.py:74-84 still rewrites the SVG width and height that scripts/prototypes/diiid_xpoint_offset/style.py:34 already declares.\nFINDING scripts/prototypes/diiid_edge_current_refusal/marker_visibility.py:64 non-blocking: check() re-implements the SVG glyph extraction and stroke-separation test that scripts/prototypes/diiid_core_hold/check_core_zoom.py:20-76 already owns - the same ElementTree use/path-d parse, coordinate regex, stroke allowance and gap threshold - without importing or extending that owner, so a fix to one leaves the other testing geometry from the other's assumptions.\nFINDING scripts/prototypes/diiid_edge_current_refusal/marker_visibility.py:19 non-blocking: expected_marks keeps only proposals whose inner equals len(trips)-1, so a spatial.json whose proposals list is empty - the shape a truncated or emptied receipt takes - yields refused=set() and the check passes with zero circle marks and a matching footer, making the guard unable to fail on absent evidence.\nFINDING scripts/prototypes/diiid_edge_current_refusal/verify.py:87 non-blocking: premise_reproduced (and all_premises_reproduced at verify.py:112) is computed, printed and written to summary.json but never asserted, so a cohort whose rows stopped returning ACTIVE_SET_STEP_REFUSED or ACTIVE_SET_CYCLE_DETECTED would still end EXIT=0; this finding persists from the review at 330dbf38c.\nFINDING scripts/prototypes/diiid_edge_current_refusal/verify.py:41 non-blocking: assert matched[0][\"trips\"] == len(spatial[\"trips\"]) compares the SPATIAL_SUMMARY line, which analyze.py emits from the same summary dict later written to spatial.json, against that line's own source, so it can only detect a truncated log and not a solver regression; this finding persists from the review at 330dbf38c.\nFINDING scripts/prototypes/diiid_edge_current_refusal/audit.py:113 non-blocking: matches_reported is stored per trip and never asserted, and audit.py:100 skips a trip whose endpoint it cannot bind without failing, so the record's fifteen reconciled mask counts are checked only by reading the JSON; this finding persists from the review at 330dbf38c.\nFINDING scripts/prototypes/diiid_edge_current_refusal/render.py:74 non-blocking: save() rewrites the SVG width and height that scripts/prototypes/diiid_xpoint_offset/style.py:34 already writes, so the centimetre unit-sizing rule now has a second owner that can drift; this finding persists from the review at 330dbf38c.",
+  "review_run_id": "r-20261114T185650017126-review-of-diiid-edge-current-refusal-00de27abf9f8",
+  "reviewed_base_sha": "0843b7d12cc7a029315ee53ae27568ee364edcc6",
+  "reviewed_head_sha": "00de27abf9f8a7984aa1f1188266b8ee3efdfa59",
+  "reviewed_run_id": "r-20261114T121904732821-diiid-edge-current-refusal",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261114T185650017126-review-of-diiid-edge-current-refusal-00de27abf9f8"
+  },
+  "reviewer_run_id": "r-20261114T185650017126-review-of-diiid-edge-current-refusal-00de27abf9f8",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T19:27:59.456307+00:00",
+  "total": 92
+}

@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T17:05:35.643Z",
+  "dispatched_at": "2026-11-14T16:45:09Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261114T143825491255-plan-review-of-kernel-compile-barrier/plan.html:59",
+      "id": "done_when-1",
+      "reason": "the clause sets the worker's expectation for the H200 arm, so a worker who finds those identity rows red at base on the H200 must either read its own clause as wrong or report a pre-existing failure as a regression, and the rows that actually timed out are the compile-ratio rows the plan does not discuss.",
+      "text": "clause (3) says \"three identity rows of the first failed only on the 1,800 s per-test timeout, and its compile-ratio rows failed on their assertion\", but sirius job 1314800's base arm at `00ec05512` shows the reverse: the three `test_tangent_compiles_within_bound` rows are the ones that hit `Failed: Timeout (>1800.0s)`, while `test_tangent_matches_base_jvp[edge_integrands]` and `[flux_and_moment_terms]` fail `assert tangent <= bound` at `tangent_max_relative=2.383e-02` against `bound=1e-09` and `[edge_terms]` fails the `left.tobytes() == right.tobytes()` assertion with \"edge_terms: primal bits differ\", so the clause tells the worker a faster device clears assertions that no device clears",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261114T143825491255-plan-review-of-kernel-compile-barrier/plan.html:59",
+      "id": "reasoning-1",
+      "reason": "a red base on the very identity the section makes its correctness gate means either the base is genuinely not self-identical on `edge_terms`, so clause (1) must say which rows can satisfy it, or the identity instrument is defective and the section cannot rest on that row set at all.",
+      "text": "clause (1) requires every changed kernel's primal bit-identical to the base and its tangent rows within 1e-9 relative, while the cited base arm at `00ec05512` fails exactly those identities before any change of ours: `tangent_max_relative=2.383e-02` against `bound=1e-09` on two rows and \"primal bits differ\" on `[edge_terms]`, so the identity the section demands is unattainable at its own base for those rows, and clause (3)'s delta rule (\"no failure id at head that the base arm on that device does not have\") would let the node close with clause (1) unmet at both arms",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "8fdbd401c33be9470846502f3e7e053cbc3385cc",
+  "plan_fingerprint": "77eebbac57c66ba124915745e8ae2841944b9d1a94d110ba93e485c2ad3c339c",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 47,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261114T143825491255-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "162367440af8b552fcdc40c0963f596693a2be5a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `_source_jets` at `nova/equilibrium/fixed_points.py:323`, `_row_program` at `:521`, `maintain_rows` at `:543` and its call at `:608`; `scripts/prototypes/compile_pass_profile` exists; `production-point-batch-pass-profile.html`, `graph-growth-history.html` and `/nova/sub-millisecond-forward-path.html` exist; commits `7bd1d912c` and `00ec05512` resolve.",
+    "done_when": "a finding \u2014 clause (3) assigns the base arm's failure causes to the wrong test rows: the rows that timed out are the compile-ratio rows, while the identity rows failed on their assertion.",
+    "evidence_paths": "pass \u2014 the per-pass table's path is fixed by the node dispatch (declined at earlier reviews for that reason), and the base-arm receipt clause (3) cites resolves on a durable home-cache path, `/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/variadic-split/importers-192g/suite-receipts.json`, which I opened: 17 file rows.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag enters any named symbol, and the named test files exist.",
+    "reasoning": "a finding \u2014 clause (1) holds the tangent rows to 1e-9 relative against the base, but the base arm clause (3) cites already fails that identity at 2.383e-02, so the section's identity requirement and its own reference arm contradict each other.",
+    "single_goal": "pass \u2014 \u00a72 carries one deliverable, the shrunk variadic program, and clauses (1) to (3) all measure that one program.",
+    "wiring": "pass \u2014 s2 declares `data-links=\"kernel-compile-barrier#s5\"` (the done attribution section that hands it the lever), s3 names s2, and each decision s2 cites (`variadic-share-on-production-base`, `compile-target-shared`, `tangent-bound-retired`) is present and scoped to `s2,s3,s4`."
+  },
+  "section_digests": {
+    "_document": "19c46cca46cf251b2f56d75e5620c8069d6b72a6623a979673bb4a8e4258367e",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "4c70e615ca0157cf133cc4d3ed33cac9a1b3657ce29d2c527d42ca877530d0b5",
+    "s3": "ab68c20ce5d3e9242532f0e5cb72a8baf8b9ce57666cac7db68cee8904360fa1",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T17:39:03.299438+00:00",
+  "total": null
+}

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="titan-lane-sizing">
+<title>The P100 lane rung is sized two cores and 24G per card, so all eight cards can run</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="titan-lane-sizing"
+         data-negative-control-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T212519766812-titan-lane-sizing/negative_control.log">
+
+  <h2>The titan rung now defaults to two cores and 24G, so eight P100 cards can hold eight jobs</h2>
+
+  <p>The P100 node (partition <code>titan</code>, <code>98dci4-gpu-0002</code>) carries
+  eight cards against twenty cores. Measured on 2026-11-14, every core on the node was
+  allocated with only four of eight cards in use, because a job taking four cores leaves
+  half the devices idle. The launcher's titan rung defaulted to four cores, which is the
+  sizing that produced that state, and to the shared 64G memory default.</p>
+
+  <p><code>scripts/nova_lane/run.sh</code> now resolves core and memory defaults per rung:
+  <code>--dry-run</code> (dry run) prints four cores and 64G for <code>h200</code>, two
+  cores and 24G for <code>titan</code>, and seven cores and 64G for <code>cpu</code>. An
+  explicit <code>--cores</code> or <code>--mem</code> still wins on every rung, and the
+  <code>--mem=0</code> refusal is unchanged. Both sbatch constructions — the dry-run
+  listing and the real submission — read the per-rung value, so the printed line and the
+  submitted line cannot disagree.</p>
+
+  <h3>Dry-run output at the change's head</h3>
+<pre>SOURCE_REVISION=76fb8b84e76eabc8000abaf772f847a2cf6d9a4f
+RUNG=h200  JAX_PLATFORMS=cuda,cpu  --cpus-per-task=4 --mem=64G --time=01:00:00 ... --partition=betelgeuse --gres=gpu:1
+RUNG=titan JAX_PLATFORMS=cuda,cpu  --cpus-per-task=2 --mem=24G --time=01:00:00 ... --partition=titan --gres=gpu:1
+RUNG=cpu   JAX_PLATFORMS=cpu       --cpus-per-task=7 --mem=64G --time=01:00:00 ... --partition=all_debug</pre>
+
+  <p>The full lines, including the payload argv, are in <code>dryrun_all.log</code> in the
+  run directory named by this record's manifest. Eight cards at two cores each is sixteen
+  cores, inside the node's twenty, so eight concurrent jobs fit where four did before.</p>
+
+  <h3>Test arms</h3>
+  <p>Both arms run <code>tests/test_nova_lane_launcher.py</code> in a fresh process with
+  <code>-rfP</code>. The baseline arm at <code>76fb8b84e76eabc8000abaf772f847a2cf6d9a4f</code>
+  reports <code>14 passed</code>, exit 0. The after arm at this change's head reports
+  <code>18 passed</code>, exit 0. Added failures: 0.</p>
+
+  <p>The four cases the change adds are the titan sizing and the two override paths.
+  Run against the unmodified launcher in a scratch tree, the titan sizing cases fail —
+  <code>test_dry_run_titan_defaults_to_two_cores_and_24g</code> and
+  <code>test_dry_run_keeps_24g_only_on_titan</code>, both <code>2 failed</code> — which is
+  what the titan default being four cores and 64G looks like from the test's side.</p>
+
+  <p>The declared negative control restores <code>rung_cores</code> for titan to four and
+  runs the titan-default case: <code>1 failed, 17 deselected</code>, exit 1, naming
+  <code>test_dry_run_titan_defaults_to_two_cores_and_24g</code> — an id the after arm
+  passes.</p>
+
+  <h3>What this record does not measure</h3>
+  <p>No job was submitted on either lane. The submission path is exercised by the dry run
+  and by the launcher's own fallback test with a stubbed <code>sbatch</code>, so the
+  <code>--mem</code> and <code>--cpus-per-task</code> values reaching a real allocation are
+  inferred from the constructed argv, not observed on a node.</p>
+
+</article>
+</main>
+<footer><p>Recorded by the titan-lane-sizing worker; the landing record is the run's own manifest.</p></footer>
+</body>
+</html>

@@ -388,6 +388,7 @@ def _corpus_recipe():
     return bench._wall_topology_row(frame.path), frame.frame
 
 
+@pytest.mark.timeout(1800)
 def test_the_public_builder_books_the_route_it_runs():
     """Build the profile through the benchmark's own entry point.
 

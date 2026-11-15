@@ -1,99 +1,98 @@
 <section id="efit-comparison-record">
-  <h2>Shared-input EFIT comparison: fit configuration not recoverable</h2>
-  <p>The joint profile and conductor-current fit is implemented in
-    <code>nova/equilibrium/magnetics_fit.py</code>. Conductor currents enter the
-    existing typed forward request and are constrained by their measured
-    uncertainties. The receipt retains the fitted currents, the full whitened
-    residual vector, covariance, spectrum, forward-evaluation count, elapsed
-    wall and device. Twelve focused unit checks pass, including an independent
-    weighted linear solution with nonzero residuals and a refusal of missing
-    current uncertainties.</p>
-  <p><strong>Stored output provenance.</strong> The stored outputs do
-    not identify the number of profile coefficients the original imas-efit
-    fits carried. On all three outputs, <code>code.name</code> is
-    <code>EFIT+</code>, but <code>code.commit</code>, <code>code.version</code>,
-    <code>code.repository</code> and <code>code.library</code> are empty.
-    <code>code.parameters</code> contains only
-    <code>{"pressure_source":"not_fitted"}</code>. A sampled polynomial's
-    degree does not establish the fitted dimension: extra free coefficients
-    can have zero fitted values. Current configuration defaults cannot establish
-    the settings used for these stored reconstructions.</p>
-  <table>
-    <thead><tr><th>Candidate case</th><th>Input entry and written DD</th>
-      <th>EFIT output entry and written DD</th><th>Usable candidate slice</th>
-      <th>Stored constraints: loops / probes / active currents</th></tr></thead>
-    <tbody>
-      <tr><td>MAST-U 45272</td><td><code>MASTU/45272</code>, 4.1.0</td>
-        <td><code>MASTU/45272/regression/magnetics</code>, 4.1.0</td>
-        <td>0.2 s; 361 boundary vertices; 760.952 kA</td><td>193 / 398 / 14</td></tr>
-      <tr><td>TCV workshop</td><td><code>TCV/workshop</code>, 4.0.0</td>
-        <td><code>TCV/workshop/regression/magnetics</code>, 4.1.0</td>
-        <td>0.4 s; 361 boundary vertices; −240.259 kA</td><td>38 / 38 / 29</td></tr>
-      <tr><td>ITER 135013</td><td><code>ITER/135013</code>, 4.1.0</td>
-        <td><code>ITER/135013/regression/standalone</code>, 4.1.0</td>
-        <td>75 s; 361 boundary vertices; −15.5445 MA</td><td>261 / 915 / 12</td></tr>
-    </tbody>
-  </table>
-  <p>Entries are read in place under
-    <code>~/Code/imas-efit/tests/data/imas/</code>, through imas-python.
-    The input manifest is <code>~/Code/imas-efit/tests/data-manifest.json</code>.
-    All three input entries have magnetics, active-coil and wall occurrences,
-    and no iron-core occurrence. Each has homogeneous time equal to one; the
-    IDS-level clock supplies the time base. The TCV candidate is the first
-    slice with a successful output flag; the 0.2 s and 0.3 s outputs have flag
-    −2 and empty boundaries. The MAST-U comparator is the stored imas-efit
-    regression, as required, rather than the CCFE validation outputs.</p>
-  <p>The audit sees nonempty output flags and sampled profiles as positive
-    controls for the empty provenance fields. For example, MAST-U's 0.3 s
-    pressure derivative is linear to 4.44 × 10<sup>−16</sup> relative sup error;
-    ITER's 75 s FF′ is quadratic to 8.33 × 10<sup>−16</sup>. Neither result
-    licenses an assertion about the original number of free coefficients.</p>
-  <p>Inspection logs and scripts are retained under
-    <code>~/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/</code>:
-    <code>inspect-cases-signals.log</code> records the input uncertainties and
-    occurrences; <code>audit-output.log</code> records every stored slice,
-    output code field and polynomial residual. An initial inspection helper
-    used an unsupported metadata attribute; the corrected inspection completed
-    successfully and that script failure is not a solver result.</p>
-  <p>No reconstruction, forward-only split, vertical-offset correction,
-    per-sensor residual comparison, scaled-data control or terminal flux panel
-    is claimed. The physical bands remain unmeasured. No tolerance was changed.
-    The committed imas-efit configuration is now taken as the generating
-    configuration, as directed; the stored outputs themselves do not carry it.
-    Physical measurements are pending on the H200 lane.</p>
-  <h3 id="efit-comparison-configuration">Generating-configuration assumption</h3>
-  <p>The committed configuration at imas-efit revision
-    <code>cff16db99a5c964637534afc741b2351179b9f88</code> is taken as the
-    generating configuration. The output IDS does not prove that identity.
-    Paths below are relative to <code>~/Code/imas-efit/</code>.</p>
-  <table><thead><tr><th>Case</th><th>Configured pp / FF′ ndeg</th>
-    <th>Basis and edge condition</th><th>Free pp / FF′ coefficients</th>
-    <th>Source bindings</th></tr></thead><tbody>
-    <tr><td>MAST-U</td><td>0 / 2</td><td>Monomial; zero at edge</td><td>0 / 2</td>
-      <td><code>configuration/machines/MASTU/solver/magnetics.xml:4</code> and
-      <code>:6</code>; baseline family in <code>tests/data-manifest.json:2027</code>;
-      edge in <code>configuration/machines/_common/solver/default.xml:148</code>
-      and <code>:149</code>. Monomial edge functions are implemented in
-      <code>src/EFIT/basisfunc.f90:40</code> and <code>:42</code>.</td></tr>
-    <tr><td>TCV</td><td>2 / 2</td><td>Bernstein; endpoint function dropped</td><td>1 / 1</td>
-      <td><code>configuration/machines/TCV/solver/magnetics.xml:5</code> and
-      <code>:9</code>; FF′ selector and Bernstein floor in
-      <code>docs/auto-degree-logic.html:208</code> and <code>:211</code>;
-      shared basis and edge at <code>configuration/machines/_common/solver/default.xml:148</code>
-      and <code>:149</code>.</td></tr>
-    <tr><td>ITER</td><td>2 / 3</td><td>Bernstein; endpoint function dropped</td><td>1 / 2</td>
-      <td><code>configuration/machines/ITER/solver/magnetics.xml:3</code>;
-      shared basis and edge at <code>configuration/machines/_common/solver/default.xml:148</code>
-      and <code>:149</code>.</td></tr>
+  <h2>Shared-input EFIT comparison</h2>
+  <p>The existing MagneticsFit now fits conductor currents with their measured
+    uncertainties beside the profile coefficients. Its receipt carries fitted
+    currents, whitened residuals, covariance, spectrum, forward evaluations,
+    elapsed wall and device. Twelve focused fitter checks pass, including an
+    independent weighted solution and refusal of missing current uncertainty.</p>
+  <p><strong>Generating-configuration assumption.</strong> The stored outputs do
+    not carry their generating configuration. All three identify EFIT+ but leave
+    code.commit, version, repository and library empty; parameters contain only
+    pressure_source=not_fitted. The committed configuration is taken as the
+    generating one. The corrected comparison uses the shared Bernstein basis,
+    not the earlier interpretation of the MAST-U manifest's monomial label.
+    The configuration checkout was observed at
+    <code>ba8c1033ce46c5d664c0b3f8f82ab0744a9415b7</code>.
+    Paths in the configuration table are relative to
+    <code>/home/ITER/mcintos/Code/imas-efit/</code>.</p>
+  <table><thead><tr><th>Case</th><th>Input entry / DD</th>
+    <th>Stored imas-efit entry / DD</th><th>Slice</th>
+    <th>Stored loops / probes / current constraints</th></tr></thead><tbody>
+    <tr><td>MAST-U 45272</td><td>MASTU/45272 / 4.1.0</td>
+      <td>MASTU/45272/regression/magnetics / 4.1.0</td>
+      <td>0.2 s; 760.952 kA</td><td>193 / 398 / 14</td></tr>
+    <tr><td>TCV workshop</td><td>TCV/workshop / 4.0.0</td>
+      <td>TCV/workshop/regression/magnetics / 4.1.0</td>
+      <td>0.4 s; −240.259 kA</td><td>38 / 38 / 29</td></tr>
+    <tr><td>ITER 135013</td><td>ITER/135013 / 4.1.0</td>
+      <td>ITER/135013/regression/standalone / 4.1.0</td>
+      <td>75 s; −15.5445 MA</td><td>261 / 915 / 12</td></tr>
   </tbody></table>
-  <p>For Bernstein, ndeg counts functions and edge=1 removes its last function:
-    <code>src/EFIT/basisfunc.f90:132</code> and <code>:140</code> establish the live
-    counts. The regularisation note <code>configuration/machines/_common/regularisation/default.xml:9</code>
-    describes the maximum allocated array, not the live Bernstein count.
-    The composed schema is <code>efit/config/schemas/efit_config.py:51</code>;
-    its basis fields are in <code>efit/config/schemas/solver.py:122</code>,
-    <code>:132</code> and <code>:139</code>. The MAST-U manifest's explicit
-    monomial family takes precedence over the shared Bernstein default for
-    that stored baseline. These are declared comparison assumptions, not
-    reconstructed output provenance.</p>
+  <p>Inputs are read in place through imas-python at each manifest DD pin.
+    Each has magnetics, active coils and a wall, with no iron-core occurrence.
+    Homogeneous time is one and the IDS-level clock is used. These are stored
+    imas-efit magnetics-only regression outputs. The TCV slice is the first
+    successful output: its two earlier slices have flag −2 and empty boundaries.
+    The MAST-U CCFE validation outputs are not used. Every selected outline
+    has 361 vertices.</p>
+  <h3 id="efit-comparison-configuration">Profile dimensions and sample checks</h3>
+  <p>The shared <code>configuration/machines/_common/solver/default.xml:148</code>
+    and <code>:149</code> set func=8 (Bernstein), edge=1 and autoDegree=on.
+    <code>docs/auto-degree-logic.html:208</code>–<code>:211</code> impose the
+    Bernstein floor. The executable basis in <code>src/EFIT/basisfunc.f90:132</code>
+    and <code>:140</code> counts ndeg functions and zeroes the last: live count
+    is ndeg−1. Thus ndeg=2 has one live linear function, 1−x. The regularisation
+    allocation note at <code>configuration/machines/_common/regularisation/default.xml:9</code>
+    does not change this live count. Schema composition is in
+    <code>efit/config/schemas/efit_config.py:51</code>; basis fields are in
+    <code>efit/config/schemas/solver.py:122</code>, <code>:132</code>, <code>:139</code>.</p>
+  <table><thead><tr><th>Case</th><th>Resolved pp / FF′ ndeg</th>
+    <th>Live coefficients pp / FF′</th><th>Source bindings</th>
+    <th>Stored sample compatibility</th></tr></thead><tbody>
+    <tr><td>MAST-U</td><td>2 / 2</td><td>1 / 1</td>
+      <td><code>docs/auto-degree-logic.html:159</code>–<code>:163</code>:
+      epsilon=0.738, spherical, raw 1/2; floor at <code>:210</code>–<code>:211</code>.
+      The pp=0 comment in <code>configuration/machines/MASTU/solver/magnetics.xml:4</code>
+      does not resolve this spherical case.</td>
+      <td>At 0.2 s pp is identically zero and FF′ is linear; both lie in the
+      selected live spaces. At 0.3 s both profiles are nonzero linear functions,
+      with polynomial sup errors 4.44×10⁻¹⁶ and 3.12×10⁻¹⁷ in the audit.</td></tr>
+    <tr><td>TCV</td><td>2 / 2</td><td>1 / 1</td>
+      <td><code>docs/auto-degree-logic.html:187</code>–<code>:191</code>:
+      epsilon=0.292, large aspect, raw 1/2; floor at <code>:210</code>–<code>:211</code>.
+      <code>configuration/machines/TCV/solver/magnetics.xml:5</code> and <code>:9</code>
+      confirm the Bernstein floor.</td>
+      <td>pp is identically zero; FF′ is linear to 2.78×10⁻¹⁶ in the audit.
+      A zero fitted coefficient is admitted; zero samples do not establish
+      that the generating fit carried no pressure coefficient.</td></tr>
+    <tr><td>ITER</td><td>2 / 2 from selector</td><td>1 / 1 from selector</td>
+      <td><code>docs/auto-degree-logic.html:180</code>–<code>:184</code>:
+      epsilon=0.361, large aspect, raw 1/2; floor at <code>:210</code>–<code>:211</code>.
+      The comment in <code>configuration/machines/ITER/solver/magnetics.xml:3</code>
+      gives 2/3 instead.</td>
+      <td><strong>Disagreement; case stopped.</strong> Stored pp is linear,
+      but FF′ requires degree 2: linear sup error 0.281758 versus quadratic
+      8.33×10⁻¹⁶ in the audit. One live linear function cannot reproduce it.
+      No dimension is guessed and no physical ITER fit is claimed.</td></tr>
+  </tbody></table>
+  <p>The audit's polynomial errors use max(1, sample magnitude) as their scale;
+    the runnable profile-space check reports relative sup error using each
+    nonzero profile's own maximum. Zero profiles are identified explicitly.
+    Nonzero FF′ and the later nonzero MAST-U pressure samples serve as positive
+    controls for the sample reader.</p>
+  <h3 id="efit-comparison-progress">Measurement state</h3>
+  <p>The earlier MAST-U request used pp/FF′ ndeg 0/2 and a monomial family.
+    Job 1317183 never started and was cancelled while pending, with elapsed
+    00:00:00. It produced no physical result. The corrected request will use
+    Bernstein ndeg 2/2 with one live function each.</p>
+  <p>No physical band table, vertical-offset measurement, sensor-residual
+    comparison, forward/fit split, scaled-data control or overlay panel is
+    claimed yet. The CPU baseline arm was cut short in JAX's cache-read path
+    and timed out; the CPU after arm never started. Their recovered receipts
+    remain incomplete. No CPU arm is repeated, and the separate API-gap probe
+    is not the declared physical negative control.</p>
+  <p>Raw audits, recovered suite records, gate logs and scheduler receipts are
+    retained under <code>~/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/</code>.
+    Input uncertainties are in <code>inspect-cases-signals.log</code> and stored
+    samples and provenance in <code>audit-output.log</code>.</p>
 </section>

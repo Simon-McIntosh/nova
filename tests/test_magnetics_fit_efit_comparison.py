@@ -31,9 +31,9 @@ from nova.jax.config import configure_dtypes
 
 INPUT_ROOT = Path("/home/ITER/mcintos/Code/imas-efit/tests/data/imas")
 CASES = {
-    "mastu": ("MASTU/45272", "magnetics", "4.1.0", 0, 0, 2),
+    "mastu": ("MASTU/45272", "magnetics", "4.1.0", 0, 2, 2),
     "tcv": ("TCV/workshop", "magnetics", "4.0.0", 2, 2, 2),
-    "iter": ("ITER/135013", "standalone", "4.1.0", 0, 2, 3),
+    "iter": ("ITER/135013", "standalone", "4.1.0", 0, 2, 2),
 }
 
 
@@ -66,13 +66,10 @@ def _probe_angle(clockwise_radians):
     return -np.rad2deg(clockwise_radians)
 
 
-def _profile_basis(count, family):
+def _profile_basis(count):
     """Map the live Bernstein functions, with their endpoint dropped, to powers."""
     if count == 0:
         return np.zeros((1, 0))
-    if family == "monomial":
-        basis = np.vstack((np.eye(count), -np.ones((1, count))))
-        return basis
     degree = count - 1
     basis = np.zeros((count, count - 1))
     for k in range(count - 1):
@@ -81,6 +78,42 @@ def _profile_basis(count, family):
                 math.comb(degree, k) * math.comb(degree - k, j) * (-1.0) ** j
             )
     return basis
+
+
+def _profile_audit(x, values, count):
+    """Check sampled derivatives against the configured live function space."""
+    values = np.asarray(values, dtype=float)
+    scale = float(np.max(np.abs(values))) or 1.0
+    basis = _profile_basis(count)
+    design = np.polynomial.polynomial.polyvander(x, basis.shape[0] - 1) @ basis
+    coefficients = np.linalg.lstsq(design, values, rcond=None)[0]
+    error = float(np.max(np.abs(design @ coefficients - values)) / scale)
+    errors = [
+        float(
+            np.max(
+                np.abs(
+                    np.polynomial.polynomial.polyval(
+                        x, np.polynomial.polynomial.polyfit(x, values, degree)
+                    )
+                    - values
+                )
+            )
+            / scale
+        )
+        for degree in range(5)
+    ]
+    return dict(
+        ndeg=count,
+        live_coefficients=basis.shape[1],
+        identically_zero=bool(np.all(values == 0.0)),
+        lowest_polynomial_degree=next(
+            (degree for degree, residual in enumerate(errors) if residual < 1e-10),
+            None,
+        ),
+        polynomial_relative_sup_errors=errors,
+        configured_relative_sup_error=error,
+        representable=error < 1e-10,
+    )
 
 
 def _read_case(name):
@@ -117,6 +150,23 @@ def _read_case(name):
     time = float(eq.time[index])
     assert int(eq.code.output_flag[index]) == 0
     g, p = ts.global_quantities, ts.profiles_1d
+    flux_1d = np.asarray(p.psi)
+    x = (flux_1d - flux_1d[0]) / (flux_1d[-1] - flux_1d[0])
+    profile_audit = {
+        "pressure": _profile_audit(x, p.dpressure_dpsi, pressure_count),
+        "field": _profile_audit(x, p.f_df_dpsi, field_count),
+    }
+    _write(_output() / f"{name}-profile-audit.json", profile_audit)
+    if not all(item["representable"] for item in profile_audit.values()):
+        _write(
+            _output() / f"{name}-result.json",
+            dict(
+                case=name, status="configuration-disagreement", profiles=profile_audit
+            ),
+        )
+        pytest.fail(
+            f"{name}: configured live basis disagrees with stored profiles: {profile_audit}"
+        )
     span = float(g.psi_boundary) - float(g.psi_axis)
     ip = float(g.ip)
     if not (np.isfinite(span) and span * ip < 0):
@@ -216,8 +266,6 @@ def _read_case(name):
     vessels = [unit for unit in wall_units if unit.kind == "vessel"]
     if len(vessels) != 1:
         raise ValueError(f"expected one vessel unit, found {len(vessels)}")
-    flux_1d = np.asarray(p.psi)
-    x = (flux_1d - flux_1d[0]) / (flux_1d[-1] - flux_1d[0])
     surface = ts.profiles_2d[0]
     boundary = np.c_[ts.boundary.outline.r, ts.boundary.outline.z]
     nulls = np.array(
@@ -261,10 +309,10 @@ def _read_case(name):
         conductor_current=np.array(currents),
         conductor_scale=np.array(uncertainty),
     )
-    family = "monomial" if name == "mastu" else "Bernstein"
+    family = "Bernstein"
     pressure_basis, field_basis = (
-        _profile_basis(pressure_count, family),
-        _profile_basis(field_count, family),
+        _profile_basis(pressure_count),
+        _profile_basis(field_count),
     )
     pressure_raw = np.linalg.lstsq(
         np.polynomial.polynomial.polyvander(x, pressure_basis.shape[0] - 1)
@@ -299,6 +347,7 @@ def _read_case(name):
         field_ndeg=field_count,
         free_pressure=pressure_basis.shape[1],
         free_field=field_basis.shape[1],
+        profile_audit=profile_audit,
         basis=family + ", edge constrained to zero",
         configuration_assumption=(
             "Committed configuration taken as generating configuration; "
@@ -849,6 +898,20 @@ def test_probe_normal_uses_clockwise_angle_from_outward_radius():
         geometry.project(np.zeros(3), np.full(3, 2.0), np.full(3, 3.0)),
         [2.0, -3.0, -2.0],
     )
+
+
+def test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature():
+    x = np.linspace(0.0, 1.0, 65)
+    basis = _profile_basis(2)
+    np.testing.assert_allclose(basis[:, 0], [1.0, -1.0])
+    linear = _profile_audit(x, 7.0 * (1.0 - x), 2)
+    zero = _profile_audit(x, np.zeros_like(x), 2)
+    curved = _profile_audit(x, (1.0 - x) ** 2, 2)
+    assert linear["representable"] and linear["live_coefficients"] == 1
+    assert zero["representable"] and zero["identically_zero"]
+    assert not curved["representable"]
+    assert curved["lowest_polynomial_degree"] == 2
+    assert curved["configured_relative_sup_error"] > 0.1
 
 
 def test_supplied_equilibrium_reports_vertical_offset_and_physical_bands():

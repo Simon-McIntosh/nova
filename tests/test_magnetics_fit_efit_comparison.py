@@ -165,7 +165,8 @@ def _read_case(name):
             ),
         )
         pytest.fail(
-            f"{name}: configured live basis disagrees with stored profiles: {profile_audit}"
+            f"{name}: configured live basis disagrees with stored profiles: "
+            f"{profile_audit}"
         )
     span = float(g.psi_boundary) - float(g.psi_axis)
     ip = float(g.ip)
@@ -501,12 +502,12 @@ def _generating(data):
 
 
 @pytest.mark.slow
-@pytest.mark.timeout(7000)
+@pytest.mark.timeout(27000)
 @pytest.mark.parametrize("name", tuple(CASES))
 def test_shared_magnetics_reconstruction(name, monkeypatch):
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
-    assert jax.default_backend() == "gpu", "physical comparisons require the H200 lane"
+    assert jax.default_backend() == "gpu", "physical comparisons require a GPU lane"
     data = _problem(_read_case(name), monkeypatch)
     forward = _generating(data)
     if forward is None:

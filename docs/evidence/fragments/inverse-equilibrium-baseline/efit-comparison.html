@@ -84,7 +84,16 @@
   <p>The earlier MAST-U request used pp/FF′ ndeg 0/2 and a monomial family.
     Job 1317183 never started and was cancelled while pending, with elapsed
     00:00:00. It produced no physical result. The corrected request will use
-    Bernstein ndeg 2/2 with one live function each.</p>
+    Bernstein ndeg 2/2 with one live function each. Its subsequent H200 request
+    1317266 also never started and was cancelled with elapsed 00:00:00 before
+    moving the measurement to titan.</p>
+  <p>The physical measurement now runs as one eight-hour titan job, with one
+    P100, two CPU cores and 24 GiB requested through the lane launcher. Case
+    receipts are persisted sequentially as each case finishes. All wall times
+    from this job are titan P100 numbers, including cold compilation and machine
+    construction where those are part of the measured interval; no time from
+    this job is attributed to the H200. The H200 compilation cache is not
+    reused on this device.</p>
   <p>No physical band table, vertical-offset measurement, sensor-residual
     comparison, forward/fit split, scaled-data control or overlay panel is
     claimed yet. The CPU baseline arm was cut short in JAX's cache-read path

@@ -24,6 +24,7 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
+from benchmarks import diiid_forward_gs_match as bench
 from benchmarks.diiid_forward_gs_match import _booked_profile, _moment_couplings
 from nova.equilibrium import topology
 from nova.equilibrium.conservation import FluxLattice
@@ -371,6 +372,61 @@ def test_the_diiiid_builder_books_a_finite_edge():
     )
     assert sample.node_number > operator.grid.node_number, (
         "the sampling nodes are the cell vertices, so they outnumber the centres"
+    )
+
+
+def _corpus_recipe():
+    """Return one DIII-D corpus row and its frame, as the benchmark reads them."""
+
+    paths = sorted(bench.DEFAULT_DATA.glob("*.parquet"))
+    if not paths:
+        pytest.skip(f"no DIII-D corpus rows under {bench.DEFAULT_DATA}")
+    selected = bench.select_frames(paths[:8], 1, set())
+    if not selected:
+        pytest.skip("no corpus row qualified for a profile build")
+    frame = selected[0]
+    return bench._wall_topology_row(frame.path), frame.frame
+
+
+def test_the_public_builder_books_the_route_it_runs():
+    """Build the profile through the benchmark's own entry point.
+
+    ``_booked_operator`` above reads the seam in isolation. This reads the
+    public builder over a real corpus row, so a route the builder stops
+    supplying reddens here even while the seam still books when called
+    directly.
+    """
+
+    row, frame = _corpus_recipe()
+    profile, seed, _label, wall, _reliable, _statement = bench.build_profile(row, frame)
+    operator = profile.operator
+    sample = operator.sample
+    print(
+        f"PUBLIC BUILDER linear_moments {bool(operator.use_linear_moments)} "
+        f"grid {operator.grid.node_number} "
+        f"sample {None if sample is None else sample.node_number} "
+        f"columns {None if sample is None else int(sample.source_target.shape[1])} "
+        f"seed {seed.size}"
+    )
+    assert operator.use_linear_moments, (
+        "the public builder returned an operator on the value-only route"
+    )
+    assert sample is not None, (
+        "the public builder attached no sampling target, so nothing clips the edge"
+    )
+    for name in ("grid", "wall", "sample"):
+        target = getattr(operator, name)
+        assert target.plasma_target_r is not None, (
+            f"the {name} target carries no radial moment block"
+        )
+        assert target.plasma_target_z is not None, (
+            f"the {name} target carries no vertical moment block"
+        )
+    assert sample.source_target.shape[1] == operator.grid.source_target.shape[1], (
+        "the sampling target carries a different conductor count than the grid"
+    )
+    assert seed.size == (operator.grid.node_number + len(wall) + sample.node_number), (
+        "the seed does not carry one flux row per solved target row"
     )
 
 

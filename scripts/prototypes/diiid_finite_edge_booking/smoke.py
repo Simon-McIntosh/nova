@@ -63,7 +63,6 @@ def main() -> None:
     receipt = {
         "frame": args.frame,
         "arm": args.arm,
-        "route": bench.FINITE_EDGE_MOMENT_ROUTE,
         "conductor_current_rows": int(np.shape(prepared["current"])[0]),
         "grid_source_columns": int(operator.grid.source_target.shape[1]),
         "wall_source_columns": int(operator.wall.source_target.shape[1]),

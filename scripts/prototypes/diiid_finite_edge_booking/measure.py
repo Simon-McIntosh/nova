@@ -175,7 +175,6 @@ def main() -> None:
             frame=args.frame,
             branch=args.branch,
             revision=args.revision,
-            moment_route=bench.FINITE_EDGE_MOMENT_ROUTE,
         )
     )
     (args.output / "finite-edge.json").write_text(json.dumps(receipt, indent=2) + "\n")

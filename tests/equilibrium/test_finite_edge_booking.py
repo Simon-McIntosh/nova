@@ -24,9 +24,14 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
-from benchmarks.diiid_forward_gs_match import FINITE_EDGE_MOMENT_ROUTE
+from benchmarks.diiid_forward_gs_match import _booked_profile, _moment_couplings
 from nova.equilibrium import topology
+from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.current import Quadrature, book, book_tangent
+from nova.equilibrium.forward import ForwardProfile, _cubic_cell_average_stencil
+from nova.equilibrium.forward_operator import point_route_current
+from nova.equilibrium.solve_request import SampledFluxFunction
+from nova.equilibrium.source import DomainProfile, ForwardSource
 
 assert jax.config.jax_enable_x64 is True
 
@@ -35,12 +40,11 @@ SAMPLES = np.array(
     [[0.0, 0.0], [1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0], [1.0, 1.0]]
 )
 
-#: Five-node cubic cell-average rule of the value-only route: the centre sample
-#: carries five sixths and each axial neighbour one twenty-fourth.
-STENCIL_OFFSETS = np.array(
-    [[0.0, 0.0], [1.0, 0.0], [-1.0, 0.0], [0.0, 1.0], [0.0, -1.0]]
-)
-STENCIL_WEIGHTS = np.array([5.0 / 6.0, 1.0 / 24.0, 1.0 / 24.0, 1.0 / 24.0, 1.0 / 24.0])
+#: Cells per axis of the patch the value-only route reads. The route averages
+#: each cell against its four axial neighbours, so the patch has to carry them;
+#: the cell the sweep crosses is the middle one.
+POINT_PATCH = 3
+POINT_PATCH_CENTRE = (POINT_PATCH * POINT_PATCH) // 2
 
 #: Samples of the swept level, either side of the crossing. The cut cell sweeps
 #: two percent of the cell's flux half-range. The sector sweeps a tenth of that,
@@ -228,15 +232,65 @@ def _area(case):
     return 0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))
 
 
+class CentreSampledDensity:
+    """The value-only route's source, already sampled at one cell centre."""
+
+    def __init__(self, current):
+        self._current = jnp.asarray(current)
+
+    def cell_current(self, radius, area, masks):
+        del radius, area
+        return jnp.where(masks.profile_participation, self._current, 0.0)
+
+
+def _pitch(case):
+    """Return the cell's own radial and vertical pitch."""
+
+    return np.array(
+        [
+            case.vertices[1, 0] - case.vertices[0, 0],
+            case.vertices[2, 1] - case.vertices[1, 1],
+        ]
+    )
+
+
 def _point(case, level):
-    """Integrate the density the value-only route samples at cell centres."""
-    total = 0.0
-    for offset, weight in zip(STENCIL_OFFSETS, STENCIL_WEIGHTS, strict=True):
-        value = _field(case.coefficients, offset[None])[0]
-        normalized = (value - case.axis) / (level - case.axis)
-        density = FiniteEdgeDensity().current_density(0.0, jnp.asarray(normalized))
-        total += weight * float(np.asarray(density))
-    return _area(case) * total
+    """Integrate the level through the operator's own value-only route.
+
+    The patch carries the read cell and its four axial neighbours, because a
+    cell average is not a point sample: the route gathers the neighbour cells
+    with the production stencil and weights, so a change to the rule the
+    solver applies moves this control with it.
+    """
+
+    offsets = np.array(
+        [
+            (radial, height)
+            for radial in range(POINT_PATCH)
+            for height in range(POINT_PATCH)
+        ],
+        dtype=np.float64,
+    ) - 0.5 * (POINT_PATCH - 1)
+    pitch = _pitch(case)
+    centres = case.centre + offsets * pitch
+    normalized = (_field(case.coefficients, offsets) - case.axis) / (level - case.axis)
+    density = np.asarray(
+        FiniteEdgeDensity().current_density(0.0, jnp.asarray(normalized))
+    )
+    stencil, weight = _cubic_cell_average_stencil((POINT_PATCH, POINT_PATCH))
+    area = np.full(centres.shape[0], _area(case))
+    masks = SimpleNamespace(
+        profile_participation=jnp.ones(centres.shape[0], dtype=bool)
+    )
+    current = point_route_current(
+        CentreSampledDensity(density * area),
+        jnp.asarray(centres),
+        jnp.asarray(area),
+        masks,
+        stencil,
+        weight,
+    )
+    return float(np.asarray(current)[POINT_PATCH_CENTRE])
 
 
 def _levels(case, width=None):
@@ -244,30 +298,90 @@ def _levels(case, width=None):
     return case.crossing + np.linspace(-width, width, LEVEL_COUNT)
 
 
-def _route_values(case, kind):
-    """Integrate the swept level on whichever route the builder selects."""
-    if FINITE_EDGE_MOMENT_ROUTE == "booked":
-        return np.array([_booked(case, level) for level in _levels(case)])
-    return np.array([_point(case, level) for level in _levels(case)])
+#: Unit flux functions of the profile the builder's operator is assembled with.
+SURFACES = np.linspace(0.0, 1.0, 5)
 
 
-@pytest.mark.parametrize("kind", ["cut-cell", "x-point-sector"])
-def test_the_diiiid_builder_books_a_finite_edge(kind):
-    del kind
-    assert FINITE_EDGE_MOMENT_ROUTE == "booked", (
-        "a finite-edge profile falls back to the value-only point-current route, "
-        "so the source integral steps where a sample crosses the edge"
+def _booked_operator():
+    """Return the operator the DIII-D builder attaches to a booked profile.
+
+    The lattice, the wall and the moment blocks are the builder's own objects
+    and its own booked-route seam, so what this reads is the route the builder
+    attaches rather than a declaration about it.
+    """
+
+    radius = np.linspace(1.0, 2.0, 9)
+    height = np.linspace(-1.0, 1.0, 9)
+    lattice = FluxLattice(radius, height)
+    wall = np.array([[1.0, -1.0], [2.0, -1.0], [2.0, 1.0], [1.0, 1.0]])
+    grid_moments, wall_moments, sample_coordinate, sample_moments = _moment_couplings(
+        lattice, wall
+    )
+    nodes = lattice.node_count
+    sample_rows = int(np.shape(sample_coordinate)[0])
+    conductors = 3
+    source = ForwardSource(
+        core=DomainProfile(
+            p_prime=SampledFluxFunction(SURFACES, np.ones_like(SURFACES)),
+            ff_prime=SampledFluxFunction(SURFACES, np.ones_like(SURFACES)),
+        )
+    )
+    profile = ForwardProfile.from_lattice(
+        lattice,
+        source,
+        external_current=np.zeros(nodes),
+        source_to_grid=np.zeros((nodes, conductors)),
+        plasma_to_grid=np.zeros((nodes, nodes)),
+        source_to_wall=np.zeros((len(wall), conductors)),
+        plasma_to_wall=np.zeros((len(wall), nodes)),
+        wall_coordinate=wall,
+        polarity=1,
+    )
+    booked = _booked_profile(
+        profile,
+        grid_moments=grid_moments,
+        wall_moments=wall_moments,
+        sample_coordinate=sample_coordinate,
+        sample_moments=sample_moments,
+        source_to_sample=np.zeros((sample_rows, conductors)),
+        plasma_to_sample=np.zeros((sample_rows, nodes)),
+    )
+    return booked.operator
+
+
+def test_the_diiiid_builder_books_a_finite_edge():
+    operator = _booked_operator()
+    sample = operator.sample
+    print(
+        f"BUILDER linear_moments {bool(operator.use_linear_moments)} "
+        f"sample {None if sample is None else sample.node_number} "
+        f"columns {None if sample is None else int(sample.source_target.shape[1])}"
+    )
+    assert operator.use_linear_moments, (
+        "the builder left the operator on the value-only point-current route, so "
+        "the source integral steps where a sample crosses the edge"
+    )
+    assert sample is not None, (
+        "the builder attached no sampling target, so the booked route has no "
+        "nodes to clip the boundary on"
+    )
+    assert sample.source_target.shape[1] == operator.grid.source_target.shape[1], (
+        "the sampling target carries a shorter conductor response than the grid, "
+        "so the solve cannot contract it against the conductor vector"
+    )
+    assert sample.node_number > operator.grid.node_number, (
+        "the sampling nodes are the cell vertices, so they outnumber the centres"
     )
 
 
 @pytest.mark.parametrize("kind", ["cut-cell", "x-point-sector"])
 def test_the_finite_edge_integral_takes_no_step(kind):
     case = _case(kind)
-    values = _route_values(case, kind)
+    values = np.array([_booked(case, level) for level in _levels(case)])
     steps = np.abs(np.diff(values))
     print(
-        f"ROUTE {FINITE_EDGE_MOMENT_ROUTE} {kind} "
-        f"max_step {steps.max():.6e} scale {np.abs(values).max():.6e}"
+        f"ROUTE booked {kind} max_step {steps.max():.6e} "
+        f"scale {np.abs(values).max():.6e}"
     )
     assert steps.max() <= 1e-2 * np.abs(values).max()
 

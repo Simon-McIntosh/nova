@@ -106,7 +106,6 @@ def main() -> None:
         "frame": args.frame,
         "branch": args.branch,
         "arm": args.arm,
-        "moment_route": bench.FINITE_EDGE_MOMENT_ROUTE,
         # The route the row's own operator carries, read rather than declared:
         # the booked route needs the linear moments and the sampling target.
         "operator_linear_moments": bool(operator.use_linear_moments),

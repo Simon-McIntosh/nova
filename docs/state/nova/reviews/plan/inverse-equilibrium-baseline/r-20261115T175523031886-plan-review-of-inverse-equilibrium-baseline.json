@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T17:56:14.204Z",
+  "dispatched_at": "2026-11-15T17:55:58Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T175523031886-plan-review-of-inverse-equilibrium-baseline/plan.html:183",
+      "id": "done_when-1",
+      "reason": "the \u00a77 node has no band to leave and would either invent a threshold or report an unmeasurable clause, so the plan must state \u00a77's own per-code failure threshold against the generating state.",
+      "text": "\u00a77 clause (3) states \"the size at which the axis position and q95 first leave the \u00a72 bands\", but this review's s2 change makes the ITER row exempt: \u00a72 now reads \"The ITER row is reported against the same measures under the label same magnetics, different constraints and is not judged against the bands\" (snapshot:124), and \u00a77's only case is ITER, so the clause names a threshold that does not apply to the row it measures \u2014 additionally, \u00a72's bands are nova-versus-imas-efit agreement measures, while \u00a77's error is against the held generating state, so even a non-exempt row would not give the clause a defined threshold",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T175523031886-plan-review-of-inverse-equilibrium-baseline/plan.html:183",
+      "id": "reasoning-1",
+      "reason": "a reader of \u00a77 will compare the two columns as equal-constraint estimates, so the plan must carry that \u00a72 label into \u00a77's table and state that the per-code drift measures are not a like-for-like code comparison on ITER.",
+      "text": "\u00a77 presents the two codes as reconstructing \"both sequences from the same rows\" and reports per-code drift and band exit beside EFIT, while the same commit's s2 change records that on ITER the two codes do not share a constraint set (\"imas-efit's ITER reconstruction also carries a synthesised on-axis pressure point and a q0 prior that the class does not\", snapshot:107), and the c-s2-iter-priors ruling says the gap is read before any prior is added or a prior-free imas-efit run is requested; \u00a77's only stated handling is to read imas-efit's configuration back and report it, which does not stop the drift table being read as a like-for-like comparison",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T175523031886-plan-review-of-inverse-equilibrium-baseline/\u00a77 (plan.html:183)",
+      "id": "single_goal-1",
+      "reason": "an unmeasured prerequisite inside the comparison section makes \u00a77's single done-when unreviewable and its effort wrong, so the EFIT execution path needs its own section or a named prerequisite node.",
+      "text": "the locked `efit-on-synthetic-rows` choice makes \u00a77 deliver both the drift study and a new capability, \"a nova node builds and runs imas-efit on the synthetic noisy rows\" with nova owning the EFIT configuration, whose cost the decision's own context states (\"Running it from nova needs imas-efit's entry point to accept an ITER magnetics-only case built by nova\", snapshot:199); no section delivers or gates that path, and \u00a77 keeps its 8 h and its single implemented status, so its gate can fail on the imas-efit wiring while the drift measurement is sound, or vice versa",
+      "type": "single_goal",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fd01e2c70b1ea26a609dd55b2ff8605e1be8c905",
+  "plan_fingerprint": "c6b61bd6b91ed1e18f085e1f6ccb28f79750bc9314f4ac588d7a6ac34e2635e8",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 17,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261115T175523031886-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "ad49cffaa5ad717719c46530338c1a41854c3153",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the `inverse-seam.svg` figure exists under `docs/figures/inverse-equilibrium-baseline/`, the merge `814f91c4b` cited in followup f-ieb-001 resolves to a commit, and `/nova/spine-efit-parity` resolves under the surface's `.html` convention to `docs/plans/spine-efit-parity.html`, as three earlier rounds already recorded.",
+    "done_when": "a finding \u2014 \u00a77 clause (3) measures.",
+    "evidence_paths": "pass \u2014 the plan names one landed record at `docs/evidence/archive/inverse-equilibrium-baseline-landed.html` (snapshot:66) and otherwise leaves section receipts to the node briefs; no section points at a scratch or node-local path.",
+    "naming": "pass \u2014 the new text names mechanisms (\"same magnetics, different constraints\" is prose in a record label, not a symbol), and no plan label or version tag enters a code name.",
+    "reasoning": "a finding \u2014 \u00a77's EFIT comparison on ITER does not carry \u00a72's constraint-set asymmetry into its measures.",
+    "single_goal": "a finding \u2014 \u00a77 carries standing up imas-efit on nova-written rows as well as the drift study.",
+    "wiring": "pass \u2014 `plan-section-depends-on` gives s7 `[s6, s3]`, matching \u00a77's own opening wait line and the \u00a70 contract row \"\u00a76 and \u00a73\" (snapshot:183, 71-77), and s7's declaration is now `implementable`, consistent with its dependencies also being implementable."
+  },
+  "section_digests": {
+    "_document": "15f3e1fe17e373407a53c46d0d24a308ea7559b3805ad650144515b9a91c5d32",
+    "s0": "773a4f3dcea1d5961a8088acd2df62db6aaaeace8f0dd1817db1d8499ac8e646",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "869fae9b37d5960c1ec034e608f17f0bda580b5851fa4c12723a067ed80b3da1",
+    "s3": "aabab320c034e5a6720e0b3877958935e6c3b63577de3674cd6e87f6120889ba",
+    "s4": "a8f5721b1827357df497c97788c8bc9c5bb1266579ca0d04f61045c915138730",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "0978908aa460ff2860214bf8e82c9b00ca29f895ece725317c79cb738cef9b01",
+    "s7": "1d940bc88ac8612a0c73bdda139a71a54e64508829208321d974fbb6370d0e6d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T18:01:39.714224+00:00",
+  "total": null
+}

@@ -110,7 +110,7 @@ def program(name, size):
     if name == "production_point_batch":
         return fixed_points._row_program, (points[:3], field.coupling)
     if name == "prototype_point_batch":
-        from scripts.prototypes.read_route.jets import _source_jets
+        from nova.equilibrium.fixed_points import _source_jets
 
         return jax.jit(jax.vmap(_source_jets, in_axes=(0, None))), (
             points[:4],

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <title>Iron test and evidence cleanup</title>
+</head>
+<body>
+<section id="icm-scripts-cleanup-state">
+  <h2>Iron test and evidence cleanup</h2>
+  <p>The stored 40 mm shell operator now has a fast batching control in addition
+  to its compact control. Repeated quadrature nodes divide their weights by
+  their multiplicity, preserving the integration rule while sending the first
+  selected cell through the real 4096-point flush. An 8 by 8 edge tile also
+  crosses the reciprocal tile skip. Production operators, defaults, tolerances
+  and stored operator values are unchanged.</p>
+  <table>
+    <thead><tr><th>CPU control</th><th>Frobenius relative error</th><th>Maximum-entry relative error</th><th>Result</th><th>Call time [s]</th></tr></thead>
+    <tbody>
+      <tr><td>Compact</td><td>0</td><td>0</td><td>pass</td><td>20.17</td></tr>
+      <tr><td>Batch edges</td><td>3.05e-15</td><td>6.92e-15</td><td>pass at 1e-12</td><td>33.91</td></tr>
+      <tr><td>Shift one point across the flush</td><td>3.66e-4</td><td>—</td><td>batch edges fail; compact passes</td><td>33.61</td></tr>
+    </tbody>
+  </table>
+  <p>The mutant replaces the first point of the next volume batch with the
+  last point of the preceding batch, leaving its quadrature weight unchanged.
+  Its fresh pytest process reports <code>1 failed, 1 passed in 55.69s</code>;
+  the failing id is <code>test_linear_shell_operator_pin[batch-edges]</code>.
+  The unmutated process reports <code>2 passed in 56.37s</code>. Logs and the
+  exact mutation driver are preserved in the
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T081846316772-icm-scripts-cleanup/</code>
+  run directory as <code>probe/operator.log</code>,
+  <code>probe/negative-control.log</code> and <code>probe.py</code>.</p>
+  <p>The IMAS input checks use the production mesh and material-law owner.
+  Both sheet test files call one compiled packed-sheet program in
+  <code>tests/sheet_fixtures.py</code>. The ring prototype remains because its
+  WEST, shell, sphere, census and independent ring-reference callers still
+  need it.</p>
+  <p>The linear evidence column names the volume-weighted energy symmetry
+  defect. The graded evidence counts two constant-basis unknowns per cell:
+  13 410 cells give 26 820 unknowns and a factor-only estimate of 5.8 GB.
+  The two cumulative pages change one and five existing lines respectively;
+  recorded measurements are preserved. The final revision's filtered gate
+  and unfiltered baseline/head suite receipts are recorded in the worker
+  manifest in the same run directory.</p>
+</section>
+</body>
+</html>

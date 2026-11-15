@@ -25,6 +25,11 @@
       "kind": "exempted",
       "reason": "Non-blocking: 'band' is defined in the record's table caption directly above the figure; the coil-correction re-solve's panels use the full discriminator name",
       "recorded_at": "2026-11-15T22:51:23.215757+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "Non-blocking: the reviewer confirms both nulls stay distinguishable, the near-black EFIT ring beneath the cross and the stated offset carry the comparison; the earlier blocking merge is repaired",
+      "recorded_at": "2026-11-15T22:51:33.412976+00:00"
     }
   },
   "findings": [

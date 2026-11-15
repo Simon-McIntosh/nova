@@ -24,7 +24,11 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--png", type=Path, required=True)
     args = parser.parse_args()
-    rows = [json.loads(p.read_text()) for p in args.receipts.glob("*.json")]
+    rows = []
+    for path in args.receipts.glob("*.json"):
+        row = json.loads(path.read_text())
+        if path.stem == row.get("mesh"):
+            rows.append(row)
     rows = [r for r in rows if r.get("completed") and "constant" in r and "mesh" in r]
     assert len(rows) >= 3, "the three required WEST meshes must complete"
     plt.style.use(

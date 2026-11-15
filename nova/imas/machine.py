@@ -19,7 +19,7 @@ from nova.imas.database import CoilData, Database, IdsData
 from nova.imas.dataset import IdsBase, Ids, ImasIds, EMPTY_FLOAT, open_db_entry
 from nova.imas.ids_index import IdsIndex
 from nova.geometry.polygon import Polygon
-from nova.equilibrium.wall_mask import WallUnit, wall_units_from_ids
+from nova.equilibrium.wall_mask import WallUnit, inside_polygon, wall_units_from_ids
 
 
 if TYPE_CHECKING:
@@ -451,6 +451,228 @@ class MachineIronSegment:
     material: MachineIronMaterial
 
 
+WEST_IRON_SEGMENT_COUNT = 6
+"""WEST stores its iron as column, two hubs, two arms and one return limb."""
+
+WEST_IRON_SECTION_TOLERANCE = 0.01
+"""A stored outline is refused when thickness times radius deviates by this."""
+
+WEST_IRON_LIMB_WIDTH = 0.800
+"""Toroidal width of one of the six WEST arms and return limbs, in metres."""
+
+WEST_IRON_LIMB_DEPTH = 1.200
+"""Radial depth of the return limb and poloidal thickness of an arm, in metres."""
+
+
+def contour_moment(contour: tuple[tuple[float, float], ...]) -> float:
+    """Return the first moment about the toroidal axis of a closed contour.
+
+    This is the iron section per radian, ``integral of R dA`` over the poloidal
+    polygon, which is the quantity a toroidal fill fraction has to preserve.
+    """
+    radius = np.asarray([point[0] for point in contour], dtype=float)
+    height = np.asarray([point[1] for point in contour], dtype=float)
+    next_radius = np.roll(radius, -1)
+    next_height = np.roll(height, -1)
+    cross = radius * next_height - next_radius * height
+    return float(((radius + next_radius) * cross).sum() / 6)
+
+
+def _box(radius: tuple[float, float], height: tuple[float, float]) -> tuple:
+    """Return the closed rectangular contour spanning the two ranges."""
+    (r0, r1), (z0, z1) = radius, height
+    return ((r0, z0), (r1, z0), (r1, z1), (r0, z1), (r0, z0))
+
+
+@dataclass(frozen=True)
+class IronRegionSection:
+    """Stored and filled section per radian of one iron region."""
+
+    region: str
+    stored: float
+    filled: float
+
+    @property
+    def relative(self) -> float:
+        """Return the filled minus stored section relative to the stored one."""
+        return (self.filled - self.stored) / self.stored
+
+
+@dataclass(frozen=True)
+class IronFillRegion:
+    """One region of the true flat iron outline and its toroidal fill rule.
+
+    ``fill_knots`` holds the toroidal iron fraction at knot radii; it is
+    interpolated linearly between them and held constant outside. ``None``
+    marks a contiguous block of stored iron, whose fill fraction is one. The
+    knots are read from the stored outline's own section per radian, so the
+    region reproduces that section by construction.
+    """
+
+    name: str
+    kind: str
+    outline: tuple[tuple[float, float], ...]
+    fill_knots: tuple[tuple[float, float], ...] | None
+    stored_section_per_radian: float
+
+    @property
+    def radius(self) -> np.ndarray:
+        """Return the knot radii of the fill profile."""
+        if self.fill_knots is None:
+            r0, _, r1, _ = self.bounds
+            return np.array([r0, r1], dtype=float)
+        return np.asarray([knot[0] for knot in self.fill_knots], dtype=float)
+
+    @property
+    def profile(self) -> np.ndarray:
+        """Return the fill fraction at each knot radius."""
+        if self.fill_knots is None:
+            return np.ones(2)
+        return np.asarray([knot[1] for knot in self.fill_knots], dtype=float)
+
+    @property
+    def contiguity_radius(self) -> float:
+        """Return the outermost radius at which the region is fully iron."""
+        radius = self.radius[self.profile >= 1 - 1e-12]
+        return float(radius.max()) if len(radius) else float(self.radius[0])
+
+    def fill(self, radius) -> np.ndarray:
+        """Return the toroidal iron fraction at each radius."""
+        radius = np.asarray(radius, dtype=float)
+        if self.fill_knots is None:
+            return np.ones_like(radius)
+        return np.clip(np.interp(radius, self.radius, self.profile), 0.0, 1.0)
+
+    def covered(self, centroids) -> np.ndarray:
+        """Return the mask of poloidal centroids inside this region."""
+        centroids = np.asarray(centroids, dtype=float)
+        radius = np.asarray([point[0] for point in self.outline], dtype=float)
+        height = np.asarray([point[1] for point in self.outline], dtype=float)
+        return inside_polygon(centroids[:, 0], centroids[:, 1], radius, height)
+
+    @property
+    def is_rectangular(self) -> bool:
+        """Return whether the region is an axis-aligned box."""
+        radius = sorted({point[0] for point in self.outline})
+        height = sorted({point[1] for point in self.outline})
+        return len(radius) == 2 and len(height) == 2
+
+    @property
+    def bounds(self) -> tuple[float, float, float, float]:
+        """Return the (R min, Z min, R max, Z max) extents of the region."""
+        radius = [point[0] for point in self.outline]
+        height = [point[1] for point in self.outline]
+        return min(radius), min(height), max(radius), max(height)
+
+    def radial_integral(self) -> float:
+        """Return the exact ``integral of fill fraction times R dR``.
+
+        The profile is linear between knots, so each interval integrates in
+        closed form; this is the quantity the stored section per radian is
+        reproduced against.
+        """
+        radius, fill = self.radius, self.profile
+        total = 0.0
+        for index in range(len(radius) - 1):
+            x0, x1 = radius[index], radius[index + 1]
+            f0, f1 = fill[index], fill[index + 1]
+            span = x1 - x0
+            if span == 0:
+                continue
+            slope = (f1 - f0) / span
+            total += f0 * (x1**2 - x0**2) / 2 + slope * (
+                (x1**3 - x0**3) / 3 - x0 * (x1**2 - x0**2) / 2
+            )
+        return total
+
+    def section_per_radian(self) -> float:
+        """Return ``integral of fill fraction times R dA`` over the region."""
+        if self.fill_knots is None:
+            return contour_moment(self.outline)
+        r0, z0, r1, z1 = self.bounds
+        if not np.isclose(self.radius[0], r0) or not np.isclose(self.radius[-1], r1):
+            raise ValueError(
+                f"fill profile of region {self.name!r} spans "
+                f"{self.radius[0]:.6f} to {self.radius[-1]:.6f} m, its outline "
+                f"{r0:.6f} to {r1:.6f} m"
+            )
+        return (z1 - z0) * self.radial_integral()
+
+
+@dataclass(frozen=True)
+class IronCoreOutline:
+    """True flat iron outline, toroidal fill fraction and section accounting.
+
+    One read of the machine description serves every consumer: the stored
+    segments are retained, each arm and limb region carries the fill fraction
+    its section per radian requires, and ``sections`` reports the stored
+    section each region reproduces.
+    """
+
+    description: StaticMachineDescription
+    regions: tuple[IronFillRegion, ...]
+    sections: tuple[IronRegionSection, ...]
+    limb_width: float
+    limb_depth: float
+    limb_arm_gap: float
+    gap_input: str
+
+    @property
+    def cross_field_factor(self) -> float:
+        """Return the demagnetising factor of the limb section, N = w / (w + d)."""
+        return self.limb_width / (self.limb_width + self.limb_depth)
+
+    @property
+    def stored(self) -> tuple[MachineContour, ...]:
+        """Return the stored contours unchanged."""
+        return tuple(segment.outline for segment in self.description.iron_segments)
+
+    @property
+    def outlines(self) -> tuple[tuple[tuple[float, float], ...], ...]:
+        """Return every region outline on the true flat iron outline."""
+        return tuple(region.outline for region in self.regions)
+
+    def region(self, name: str) -> IronFillRegion:
+        """Return the named region."""
+        return next(region for region in self.regions if region.name == name)
+
+    def fill(self, centroids) -> np.ndarray:
+        """Return the toroidal iron fraction of each poloidal cell centroid."""
+        centroids = np.asarray(centroids, dtype=float)
+        fill = np.zeros(len(centroids), dtype=float)
+        for region in self.regions:
+            covered = region.covered(centroids)
+            fill[covered] = region.fill(centroids[covered, 0])
+        return fill
+
+    def cross_field(self, centroids) -> np.ndarray:
+        """Return the per-cell demagnetising factor (N_R, N_Z) of each cell.
+
+        A limb shares H with the gaps beside it along its own axis, so N is
+        zero there and ``cross_field_factor`` across it; an arm is crossed in
+        the vertical direction and a limb in the radial one.
+        """
+        centroids = np.asarray(centroids, dtype=float)
+        factor = np.zeros((len(centroids), 2))
+        for region in self.regions:
+            if region.fill_knots is None:
+                continue
+            component = 1 if region.kind == "arm" else 0
+            factor[region.covered(centroids), component] = self.cross_field_factor
+        return factor
+
+    def maximum_relative_section_error(self, kinds: tuple[str, ...]) -> float:
+        """Return the largest section mismatch over the named region kinds."""
+        selected = {
+            section.region: abs(section.relative)
+            for section, region in zip(self.sections, self.regions, strict=True)
+            if region.kind in kinds
+        }
+        if not selected:
+            raise ValueError(f"no {kinds} region carries a section")
+        return max(selected.values())
+
+
 @dataclass(frozen=True)
 class MachineSection:
     """Named active-coil section routed through the geometry reader seam."""
@@ -654,6 +876,43 @@ class StaticMachineDescription:
             return cls.from_iron_core_ids(iron)
 
     @classmethod
+    def read_west_iron_outline(
+        cls,
+        source: str | os.PathLike,
+        *,
+        dd_version: str,
+        limb_arm_gap: str = "stored",
+        limb_width: float = WEST_IRON_LIMB_WIDTH,
+        limb_depth: float = WEST_IRON_LIMB_DEPTH,
+    ) -> IronCoreOutline:
+        """Read the WEST iron once on its true flat outline.
+
+        The stored outline thins as ``thickness * radius = constant``, so the
+        true flat regions are rebuilt with a toroidal fill fraction that
+        preserves the section per radian of each arm and of the return limb.
+
+        * ``limb_arm_gap`` names how the stored 2 mm face gap between the
+          return limb and the arm underside is treated. Only ``'stored'`` is
+          supported: the gap decision keeps the description's own faces, and
+          any other value is refused rather than silently converted.
+        * ``limb_width`` and ``limb_depth`` are the section of the
+          limb-geometry decision, 0.800 m wide by 1.200 m deep.
+        """
+        if limb_arm_gap != "stored":
+            raise ValueError(
+                f"limb_arm_gap {limb_arm_gap!r} is not supported: the stored "
+                "2 mm limb to arm gap is kept as stored, so this read accepts "
+                "only 'stored'"
+            )
+        description = cls.read_iron_core(source, dd_version=dd_version)
+        return iron_core_outline(
+            description,
+            limb_width=limb_width,
+            limb_depth=limb_depth,
+            gap_input=limb_arm_gap,
+        )
+
+    @classmethod
     def from_record(cls, record: dict) -> StaticMachineDescription:
         """Route an IMAS extraction record through Nova's machine dataclasses."""
         contour_record = record.get("contour")
@@ -692,6 +951,257 @@ class StaticMachineDescription:
             ),
             active_coils=active_coils,
             wall_units=tuple(record.get("wall_units", ())),
+        )
+
+
+def iron_core_outline(
+    description: StaticMachineDescription,
+    *,
+    limb_width: float = WEST_IRON_LIMB_WIDTH,
+    limb_depth: float = WEST_IRON_LIMB_DEPTH,
+    gap_input: str = "stored",
+) -> IronCoreOutline:
+    """Build the true flat iron outline from one stored description.
+
+    The stored segments are classified by their own geometry — the return limb
+    is the only segment taller than two limb depths, the arms are the two whose
+    poloidal thickness is one limb depth, the column is the remaining segment
+    that straddles the midplane and the hubs are the rest. A stored arm or limb
+    that does not obey thickness times radius constant to
+    :data:`WEST_IRON_SECTION_TOLERANCE` is refused by name; it is never
+    converted.
+    """
+    segments = description.iron_segments
+    if len(segments) != WEST_IRON_SEGMENT_COUNT:
+        raise ValueError(
+            f"WEST iron outline expects {WEST_IRON_SEGMENT_COUNT} stored "
+            f"segments, read {len(segments)}"
+        )
+    extents = [_segment_extents(segment) for segment in segments]
+    tolerance = WEST_IRON_SECTION_TOLERANCE
+
+    arms = [
+        index
+        for index, (r0, z0, r1, z1) in enumerate(extents)
+        if abs((z1 - z0) - limb_depth) <= tolerance * limb_depth
+    ]
+    limbs = [
+        index
+        for index, (r0, z0, r1, z1) in enumerate(extents)
+        if (z1 - z0) > 2 * limb_depth
+    ]
+    if len(arms) != 2 or len(limbs) != 1:
+        raise ValueError(
+            "stored WEST iron is not column, two hubs, two arms and one "
+            f"return limb: arms {arms}, limbs {limbs}"
+        )
+    (limb_index,) = limbs
+    remaining = [
+        index for index in range(len(segments)) if index not in (*arms, *limbs)
+    ]
+    columns = [
+        index for index in remaining if extents[index][1] < 0 < extents[index][3]
+    ]
+    if len(columns) != 1:
+        raise ValueError(f"stored WEST iron has no single midplane column: {columns}")
+    (column_index,) = columns
+    hubs = [index for index in remaining if index != column_index]
+
+    upper = next((index for index in arms if extents[index][1] > 0), None)
+    lower = next((index for index in arms if extents[index][3] < 0), None)
+    if upper is None or lower is None:
+        raise ValueError(
+            "stored WEST iron arms are not one above and one below the "
+            f"midplane: {[extents[index][1::2] for index in arms]}"
+        )
+    thickness = {index: _arm_taper(segments[index], extents[index]) for index in arms}
+    constant = float(np.median(thickness[upper][:, 1]))
+    for index in arms:
+        _refuse_taper(segments[index], index, thickness[index], constant)
+    limb_r0, limb_z0, limb_r1, limb_z1 = extents[limb_index]
+    _refuse_limb(segments[limb_index], limb_index, extents[limb_index], constant)
+
+    upper_face = extents[upper][1]
+    lower_face = extents[lower][3]
+    gaps = (upper_face - limb_z1, limb_z0 - lower_face)
+    if gaps[0] < 0 or not np.isclose(gaps[0], gaps[1], rtol=0, atol=1e-9):
+        raise ValueError(
+            "stored WEST iron limb to arm gaps are not a stored face pair: "
+            f"{gaps[0]:.6f} m above the limb, {gaps[1]:.6f} m below it"
+        )
+    gap = float(gaps[0])
+
+    regions = []
+    for index, face, sign in ((upper, upper_face, 1), (lower, lower_face, -1)):
+        panel = (face, face + sign * limb_depth)
+        regions.append(
+            IronFillRegion(
+                name="upper arm" if sign > 0 else "lower arm",
+                kind="arm",
+                outline=_box((extents[index][0], extents[index][2]), panel),
+                fill_knots=_arm_fill_knots(segments[index], face, limb_depth),
+                stored_section_per_radian=contour_moment(_contour(segments[index])),
+            )
+        )
+    limb_section = contour_moment(_contour(segments[limb_index]))
+    regions.append(
+        IronFillRegion(
+            name="return limb",
+            kind="limb",
+            outline=_box((limb_r0, limb_r0 + limb_depth), (limb_z0, limb_z1)),
+            fill_knots=_limb_fill_knots(extents[limb_index], limb_depth, limb_section),
+            stored_section_per_radian=limb_section,
+        )
+    )
+    for index, kind, name in (
+        (column_index, "column", "central column"),
+        *((hub, "hub", f"hub {position}") for position, hub in enumerate(hubs)),
+    ):
+        regions.append(
+            IronFillRegion(
+                name=name,
+                kind=kind,
+                outline=_contour(segments[index]),
+                fill_knots=None,
+                stored_section_per_radian=contour_moment(_contour(segments[index])),
+            )
+        )
+    sections = tuple(
+        IronRegionSection(
+            region=region.name,
+            stored=region.stored_section_per_radian,
+            filled=region.section_per_radian(),
+        )
+        for region in regions
+    )
+    return IronCoreOutline(
+        description=description,
+        regions=tuple(regions),
+        sections=sections,
+        limb_width=limb_width,
+        limb_depth=limb_depth,
+        limb_arm_gap=float(gap),
+        gap_input=gap_input,
+    )
+
+
+def _contour(segment: MachineIronSegment) -> tuple[tuple[float, float], ...]:
+    """Return a stored segment as a closed coordinate contour."""
+    return tuple(zip(segment.outline.r, segment.outline.z, strict=True))
+
+
+def _segment_extents(segment: MachineIronSegment) -> tuple[float, float, float, float]:
+    """Return the (R min, Z min, R max, Z max) extents of a stored segment."""
+    radius = np.asarray(segment.outline.r, dtype=float)
+    height = np.asarray(segment.outline.z, dtype=float)
+    return (
+        float(radius.min()),
+        float(height.min()),
+        float(radius.max()),
+        float(height.max()),
+    )
+
+
+def _arm_fill_knots(
+    segment: MachineIronSegment, face: float, depth: float
+) -> tuple[tuple[float, float], ...]:
+    """Return the arm fill profile read from the stored arm's own thickness.
+
+    A knot sits at every stored vertex radius, so the linear interpolant
+    reproduces the stored piecewise-linear taper exactly and the region keeps
+    the stored section per radian.
+    """
+    knots = {}
+    for radius, height in zip(segment.outline.r, segment.outline.z, strict=True):
+        panel = abs(float(height) - face)
+        if panel > 1e-12:
+            knots[float(radius)] = panel / depth
+    return tuple(sorted(knots.items()))
+
+
+def _limb_fill_knots(
+    extents, depth: float, stored_section: float, nodes: int = 17
+) -> tuple[tuple[float, float], ...]:
+    """Return the limb fill profile that keeps ``fill times radius`` stored.
+
+    The stored limb is a full-depth block over a thin radial span, so the
+    filled flat limb carries a constant ``fill times radius`` across its own
+    depth. The knots sample that rule; seventeen nodes bind the linear
+    interpolation error below 1e-4 of the section.
+    """
+    r0, z0, _, z1 = extents
+    moment = stored_section / ((z1 - z0) * depth)
+    return tuple(
+        (float(radius), float(min(1.0, moment / radius)))
+        for radius in np.linspace(r0, r0 + depth, nodes)
+    )
+
+
+def _arm_taper(segment: MachineIronSegment, extents) -> np.ndarray:
+    """Return (radius, thickness times radius) at every tapered vertex.
+
+    Thickness is measured from the flat face nearest the midplane. Vertices
+    inboard of the contiguity radius carry the full limb depth; they are kept
+    with their radius so the refusal can check them separately.
+    """
+    _, z0, _, z1 = extents
+    face = z0 if z0 >= 0 else z1
+    rows = []
+    for radius, height in zip(segment.outline.r, segment.outline.z, strict=True):
+        panel = abs(float(height) - face)
+        if panel > 1e-12:
+            rows.append((float(radius), panel * float(radius)))
+    return np.asarray(rows, dtype=float)
+
+
+def _refuse_taper(
+    segment: MachineIronSegment, index: int, taper: np.ndarray, constant: float
+) -> None:
+    """Refuse a stored arm whose thickness times radius is not constant."""
+    tolerance = WEST_IRON_SECTION_TOLERANCE
+    depth = WEST_IRON_LIMB_DEPTH
+    contiguity = WEST_IRON_SEGMENT_COUNT * WEST_IRON_LIMB_WIDTH / (2 * np.pi)
+    for radius, moment in taper:
+        if moment / radius > depth * (1 + tolerance):
+            raise ValueError(
+                f"stored iron segment {index} {segment.name!r} does not obey "
+                "the limb section: thickness "
+                f"{moment / radius:.6f} m at radius {radius:.4f} m exceeds the "
+                f"limb depth {depth:.6f} m"
+            )
+        if radius < contiguity * (1 - 1e-9):
+            if abs(moment / radius - depth) > tolerance * depth:
+                raise ValueError(
+                    f"stored iron segment {index} {segment.name!r} does not obey "
+                    "thickness times radius constant: thickness "
+                    f"{moment / radius:.6f} m at radius {radius:.4f} m is not "
+                    f"the limb depth {depth:.6f} m"
+                )
+            continue
+        relative = moment / constant - 1
+        if abs(relative) > tolerance:
+            raise ValueError(
+                f"stored iron segment {index} {segment.name!r} does not obey "
+                f"thickness times radius constant: {moment:.6f} m2 at radius "
+                f"{radius:.4f} m against {constant:.6f} m2, {relative:+.2%} "
+                f"beyond the {tolerance:.0%} tolerance"
+            )
+
+
+def _refuse_limb(
+    segment: MachineIronSegment, index: int, extents, constant: float
+) -> None:
+    """Refuse a stored return limb whose depth times radius is not constant."""
+    r0, _, r1, _ = extents
+    moment = (r1 - r0) * 0.5 * (r0 + r1)
+    relative = moment / constant - 1
+    if abs(relative) > WEST_IRON_SECTION_TOLERANCE:
+        raise ValueError(
+            f"stored iron segment {index} {segment.name!r} does not obey "
+            f"thickness times radius constant: limb depth {r1 - r0:.6f} m times "
+            f"mean radius {0.5 * (r0 + r1):.6f} m reads {moment:.6f} m2 against "
+            f"{constant:.6f} m2, {relative:+.2%} beyond the "
+            f"{WEST_IRON_SECTION_TOLERANCE:.0%} tolerance"
         )
 
 

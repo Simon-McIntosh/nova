@@ -32,9 +32,9 @@ def main():
         solution = pickle.load(stream)
     with Path(record["source"]).open("rb") as stream:
         source = pickle.load(stream)
-    machine = StaticMachineDescription.read_iron_core(
+    machine = StaticMachineDescription.read_west_iron_outline(
         f"imas:hdf5?path={MACHINE}", dd_version="4.1.0"
-    )
+    ).description
     segments = [
         shapely.Polygon(np.column_stack((s.outline.r, s.outline.z)))
         for s in machine.iron_segments

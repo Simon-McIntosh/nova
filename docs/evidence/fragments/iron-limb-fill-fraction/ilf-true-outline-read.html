@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WEST iron on its true flat outline — one machine-description read</title>
+</head>
+<body>
+
+<h2 id="ilf-true-outline-read">WEST iron on its true flat outline</h2>
+
+<p>
+  The flat outline, the toroidal fill fraction and the cross-field factor are
+  read once from the machine description.
+  <code>StaticMachineDescription.read_west_iron_outline</code> opens the
+  <code>iron_core</code> at its manifest DD pin through the existing
+  <code>read_iron_core</code>, classifies the six stored segments by their own
+  geometry, and returns an <code>IronCoreOutline</code> carrying six regions on
+  the true outline, a fill profile per arm and limb, and the stored and filled
+  section per radian of every region.
+</p>
+
+<h3 id="ilf-true-outline-read-regions">Regions and section accounting</h3>
+
+<p>
+  A region's fill profile is read from the stored outline's own thickness, not
+  invented: an arm's knots sit at every stored vertex radius with
+  <code>fill = thickness / limb_depth</code>, so the linear interpolant
+  reproduces the stored piecewise-linear taper exactly; the return limb carries
+  a constant <code>fill times radius</code> sampled on seventeen nodes. The
+  limb and arm outlines use the limb-geometry decision of
+  <code>iron-core-magnetisation</code>: 0.800&nbsp;m wide by 1.200&nbsp;m deep.
+  The limb keeps its stored inner face at R&nbsp;=&nbsp;4.7965&nbsp;m and
+  extends outward to 5.9965&nbsp;m; the arms keep their stored radial extent
+  and become 1.200&nbsp;m thick panels from the stored flat face.
+</p>
+
+<table id="ilf-true-outline-read-sections">
+  <thead>
+    <tr>
+      <th>Region</th><th>Kind</th>
+      <th>Stored section per radian (m&sup2;)</th>
+      <th>Filled section per radian (m&sup2;)</th>
+      <th>Relative</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>upper arm</td><td>arm</td><td>4.267463857</td><td>4.267463857</td><td>-4.2e-16</td></tr>
+    <tr><td>lower arm</td><td>arm</td><td>4.267463857</td><td>4.267463857</td><td>-8.3e-16</td></tr>
+    <tr><td>return limb</td><td>limb</td><td>4.401775153</td><td>4.401918628</td><td>+3.26e-05</td></tr>
+    <tr><td>central column</td><td>column</td><td>0.383158104</td><td>0.383158104</td><td>0</td></tr>
+    <tr><td>hub 0</td><td>hub</td><td>0.780717433</td><td>0.780717433</td><td>0</td></tr>
+    <tr><td>hub 1</td><td>hub</td><td>0.780717433</td><td>0.780717433</td><td>0</td></tr>
+  </tbody>
+</table>
+
+<p>
+  The largest arm or limb mismatch is
+  <strong>3.26&nbsp;&times;&nbsp;10<sup>-5</sup></strong> against the plan's
+  1e-3, written to
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/machine/west-true-outline.json</code>
+  (sha256 <code>b67c7b5cd480ccdc381febb0eb0e8c29b099a2e085fc0498226952dac55f96f7</code>).
+  The stored limb-to-arm facing gap is kept as stored under the one named input
+  <code>limb_arm_gap="stored"</code>: it reads
+  <strong>0.002100&nbsp;m</strong> above and below the limb, and any other value
+  is refused by name. The cross-field factor is
+  <code>w / (w + d) = 0.800 / 2.000 = 0.400</code>.
+</p>
+
+<h3 id="ilf-true-outline-read-refusal">A stored outline that breaks the taper is refused by name</h3>
+
+<p>
+  Every tapered arm vertex and the limb depth are checked against the arm's own
+  median thickness times radius at 1&nbsp;%. Scaling one stored arm vertex's
+  thickness by 1.05 at R&nbsp;=&nbsp;4.0&nbsp;m makes that check fire:
+</p>
+
+<pre id="ilf-true-outline-read-refusal-message">ValueError: stored iron segment 2 '' does not obey thickness times radius constant:
+  0.962640 m2 at radius 4.0000 m against 0.916740 m2, +5.01% beyond the 1% tolerance</pre>
+
+<p>
+  The red run, with the check in <code>_refuse_taper</code> disabled,
+  <code>tests/test_imas_iron_read.py</code> fails on
+  <code>test_stored_arm_thickness_scaled_at_one_radius_is_refused_by_name</code>
+  with <code>DID NOT RAISE ValueError</code>: 1 failed, 16 passed, exit 1.
+</p>
+
+<h3 id="ilf-true-outline-read-scope">What the scoped readers do</h3>
+
+<p>
+  All twelve WEST iron script readers under this node's write paths — the four
+  in <code>scripts/west_iron_solve</code>, and those in
+  <code>scripts/west_stray_field</code>, <code>scripts/west_iron_galerkin</code>,
+  <code>scripts/west_iron_galerkin_pair</code>,
+  <code>scripts/west_picard_control</code>, <code>scripts/west_root_branch</code>,
+  <code>scripts/iron_graded_refinement</code>,
+  <code>scripts/sheet_tile_census</code> and
+  <code>scripts/magnetisation_law</code> — now call
+  <code>read_west_iron_outline</code> and take its stored description, so no
+  reader there builds an outline of its own; the test requires that call by
+  name and fails on the base tree. Two files outside this node's write paths
+  still hold a second construction of the same outline —
+  <code>scripts/prototypes/iron_limb_fill/axisymmetric.py</code>
+  (<code>west_regions</code>, <code>flat_fill</code>,
+  <code>limb_demagnetising</code>, <code>WEST_JOIN</code>) and its consumer
+  <code>scripts/iron_limb_production/measure.py</code>. Removing them belongs
+  to the WEST evidence node, not to a write this node may make; the node
+  manifest records it under <code>outside_scope</code>. The prototype's flat arm
+  reaches R&nbsp;=&nbsp;6.0 and its limb is 1.2035&nbsp;m deep, so its section
+  over the arm differs from the stored one by about 2&nbsp;m&sup2; per radian;
+  the regions returned here are the section-preserving choice.
+</p>
+
+<h3 id="ilf-true-outline-read-verification">Verification</h3>
+
+<ul>
+  <li>Gate at head <code>202d97cc4</code>: 18 passed,
+      <code>tests/test_imas_iron_read.py</code>.</li>
+  <li>Base arm at <code>0c74ef1</code> in the extracted base tree: 12 passed.</li>
+  <li>The same reader assertion run against the base source with the head
+      test file fails at <code>scripts/west_iron_solve/measure.py</code>,
+      so the check is not satisfied by the base revision.</li>
+  <li>Negative control, refusal disabled: 1 failed, 17 passed, exit 1.</li>
+</ul>
+</body>
+</html>

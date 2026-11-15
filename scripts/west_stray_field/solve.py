@@ -69,9 +69,9 @@ coils = [
 ]
 outline = wall.description_2d[0].limiter.unit[0].outline
 limiter = np.column_stack((np.asarray(outline.r), np.asarray(outline.z)))
-machine = StaticMachineDescription.read_iron_core(
+machine = StaticMachineDescription.read_west_iron_outline(
     f"imas:hdf5?path={MACHINE}", dd_version="4.1.0"
-)
+).description
 iron_outlines = [
     np.column_stack((segment.outline.r, segment.outline.z))
     for segment in machine.iron_segments

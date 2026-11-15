@@ -666,7 +666,289 @@ def test_shared_magnetics_reconstruction(name, monkeypatch):
     _compare_fit(data, forward)
 
 
-def _panel(data, qualified, flux=None):
+def _density_quadrature(radius, height, density):
+    """Carry the generator's uniform grid-node cell-area current rule."""
+    radius, height, density = map(np.asarray, (radius, height, density))
+    if density.shape != (len(radius), len(height)):
+        raise ValueError("stored current density does not align with its grid")
+    dr, dz = np.diff(radius), np.diff(height)
+    if not (np.all(dr > 0) and np.all(dz > 0)):
+        raise ValueError("stored current grid must be increasing")
+    if not (np.allclose(dr, dr[0], rtol=1e-3) and np.allclose(dz, dz[0], rtol=1e-3)):
+        raise ValueError("stored current quadrature requires its uniform grid")
+    if not np.all(np.isfinite(density)) or not np.any(density != 0):
+        raise ValueError("stored current density has no finite nonzero source")
+    rr, zz = np.meshgrid(radius, height, indexing="ij")
+    keep = density != 0.0
+    return rr[keep], zz[keep], density[keep] * dr[0] * dz[0], dr[0], dz[0]
+
+
+def _row_agreement(prediction, reference, scale):
+    """Report physical relative error beside the per-row uncertainty residual."""
+    prediction, reference, scale = map(np.asarray, (prediction, reference, scale))
+    error = prediction - reference
+    norm = float(np.linalg.norm(reference))
+    return dict(
+        rows=len(reference),
+        whitened_rms=float(np.sqrt(np.mean((error / scale) ** 2))),
+        whitened_max=float(np.max(np.abs(error / scale))),
+        physical_rms=float(np.sqrt(np.mean(error**2))),
+        reference_rms=float(np.sqrt(np.mean(reference**2))),
+        relative_l2=float(np.linalg.norm(error) / norm) if norm > 0 else None,
+        signed_gain=float(prediction @ reference / (reference @ reference))
+        if norm > 0
+        else None,
+        opposite_sign_rows=int(
+            np.count_nonzero(
+                (prediction * reference < 0)
+                & (np.abs(reference) > 0.01 * np.max(np.abs(reference)))
+            )
+        ),
+    )
+
+
+def _replay_nulls(radius, height, values, case):
+    """Read display-map stationary points using the shared spline polish."""
+    from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
+    from nova.linalg.tensor_spline import fit_tensor_spline
+    from matplotlib.path import Path as PolygonPath
+
+    rr, zz = np.meshgrid(radius[::4], height[::4], indexing="ij")
+    seeds = np.vstack((case.axis[None], case.x_point, np.c_[rr.ravel(), zz.ravel()]))
+    spline = fit_tensor_spline(
+        jnp.asarray(radius), jnp.asarray(height), jnp.asarray(values)
+    )
+    polished = polish_stationary_points(
+        spline,
+        jnp.asarray(seeds),
+        jnp.ones(len(seeds), dtype=bool),
+        stationary_steps=24,
+    )
+    positions, types = (
+        np.asarray(polished["position_rz"]),
+        np.asarray(polished["hessian_type"]),
+    )
+    valid = np.asarray(polished["converged"]) & PolygonPath(case.wall).contains_points(
+        positions
+    )
+    accepted, kinds = [], []
+    for point, kind in zip(positions[valid], types[valid], strict=True):
+        if not any(np.linalg.norm(point - old) < 1e-5 for old in accepted):
+            accepted.append(point)
+            kinds.append(kind)
+    points = np.asarray(accepted).reshape(-1, 2)
+    extrema, saddles = points[np.asarray(kinds) == 1], points[np.asarray(kinds) == -1]
+    axis = (
+        extrema[np.argmin(np.linalg.norm(extrema - case.axis, axis=1))]
+        if len(extrema)
+        else None
+    )
+    return dict(magnetic_axis=axis, other_x_points=saddles)
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(27000)
+@pytest.mark.parametrize("name", ("mastu", "tcv"))
+def test_shared_magnetics_reconstruction_observation_replay(name):
+    """Image a stored density with the actual conductor inputs, without solving."""
+    from nova.frame.coilset import CoilSet
+    from tests.test_equilibrium_magnetics_fit import _physical_sensor_rows
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
+    started = perf_counter()
+    data = _read_case(name)
+    case, sensors, measurement = data["case"], data["geometry"], data["measurement"]
+    ts = data["reference_eq"].time_slice[data["reference_slice"]]
+    density = np.asarray(ts.profiles_2d[0].j_phi)
+    r, z, current, dr, dz = _density_quadrature(
+        case.grid_radius, case.grid_height, density
+    )
+    integrated = float(np.sum(current))
+    if integrated * case.plasma_current <= 0:
+        raise ValueError(
+            f"stored density sign disagrees with Ip: grid={integrated}, "
+            f"Ip={case.plasma_current}"
+        )
+    base, _, dd, *_ = CASES[name]
+    with open_db_entry(INPUT_ROOT / base, dd_version=dd, backend="hdf5") as entry:
+        passive_ids = entry.get("pf_passive", 0, lazy=False, autoconvert=False)
+    passive = [
+        dict(
+            name=str(loop.name),
+            samples=len(loop.current.data),
+            current_a=_sample(loop.current, passive_ids, case.time),
+        )
+        for loop in passive_ids.loop
+    ]
+    inventory = dict(
+        case=name,
+        density_shape=list(density.shape),
+        nonzero_density_nodes=len(current),
+        integrated_current_a=integrated,
+        stored_current_a=case.plasma_current,
+        input_passive=passive,
+        reference_passive=[
+            dict(
+                measured=float(row.measured),
+                reconstructed=float(row.reconstructed),
+                weight=float(row.weight),
+            )
+            for row in ts.constraints.pf_passive_current
+        ],
+        reference_active=[
+            dict(
+                measured=float(row.measured),
+                reconstructed=float(row.reconstructed),
+                weight=float(row.weight),
+            )
+            for row in ts.constraints.pf_current
+        ],
+    )
+    _write(_output() / f"{name}-row-replay-inputs.json", inventory)
+    print("ROW_REPLAY_INPUTS " + json.dumps(inventory), flush=True)
+    plasma = CoilSet(dcoil=-1, field_attrs=["Psi", "Br", "Bz"])
+    plasma.coil.insert(
+        r,
+        z,
+        np.full(len(r), dr),
+        np.full(len(r), dz),
+        nturn=1.0,
+        Ic=current,
+        name=[f"density_{i}" for i in range(len(r))],
+    )
+    conductor = CoilSet(dcoil=-1, field_attrs=["Psi", "Br", "Bz"])
+    for item in case.active:
+        conductor.coil.insert(
+            *item.placement, nturn=item.turns, Ic=item.current, name=item.name
+        )
+    plasma_rows = _physical_sensor_rows(plasma, sensors)
+    vacuum = _physical_sensor_rows(conductor, sensors)
+    total = plasma_rows + vacuum
+    keep = measurement.mask
+    families = {}
+    for label, family in (
+        ("whole flux loops", sensors.flux_loop & (sensors.loop_fraction != 0)),
+        ("zero-extent flux paths", sensors.flux_loop & (sensors.loop_fraction == 0)),
+        ("poloidal probes", ~sensors.flux_loop),
+    ):
+        selected = keep & family
+        if not np.any(selected):
+            continue
+
+        def agreement(prediction, reference):
+            return _row_agreement(
+                prediction[selected], reference[selected], measurement.scale[selected]
+            )
+
+        families[label] = dict(
+            nova_vs_measured=agreement(total, measurement.measured),
+            efit_vs_measured=agreement(
+                data["reference_predictions"], measurement.measured
+            ),
+            nova_vs_efit=agreement(total, data["reference_predictions"]),
+            vacuum_vs_implied=agreement(
+                vacuum, data["reference_predictions"] - plasma_rows
+            ),
+            vacuum_rms=float(np.sqrt(np.mean(vacuum[selected] ** 2))),
+            plasma_rms=float(np.sqrt(np.mean(plasma_rows[selected] ** 2))),
+        )
+    rows = [
+        dict(
+            name=row,
+            active=bool(keep[i]),
+            sigma=float(measurement.scale[i]),
+            measured=float(measurement.measured[i]),
+            efit=float(data["reference_predictions"][i]),
+            plasma=float(plasma_rows[i]),
+            vacuum=float(vacuum[i]),
+            nova=float(total[i]),
+            nova_whitened=float(
+                (total[i] - measurement.measured[i]) / measurement.scale[i]
+            ),
+            efit_whitened=float(
+                (data["reference_predictions"][i] - measurement.measured[i])
+                / measurement.scale[i]
+            ),
+        )
+        for i, row in enumerate(data["sensor_names"])
+    ]
+    # Prove the current-bearing path before interpreting an empty family.
+    assert np.any(np.abs(plasma_rows[keep & ~sensors.flux_loop]) > 0)
+    assert np.any(np.abs(vacuum[keep & ~sensors.flux_loop]) > 0)
+    report = dict(
+        case=name,
+        equilibrium_solves=0,
+        integrated_current_a=integrated,
+        stored_current_a=case.plasma_current,
+        current_relative_error=abs(integrated / case.plasma_current - 1),
+        source_cells=len(current),
+        source_rule=(
+            "stored j_phi at each grid node times uniform generator "
+            "cell area; no current rescaling"
+        ),
+        conductors=list(data["conductor_names"]),
+        conductor_current_a=measurement.conductor_current.tolist(),
+        inventory=inventory,
+        families=families,
+        rows=rows,
+        vacuum_reference=(
+            "implied only: EFIT reconstructed total minus nova "
+            "stored-density plasma; dependent on plasma quadrature, "
+            "not an independent vacuum measurement"
+        ),
+        constraint_context=data["constraint_context"],
+        device=str(jax.devices()[0]),
+    )
+    _write(_output() / f"{name}-row-replay.json", report)
+    print(
+        "ROW_REPLAY " + json.dumps({k: v for k, v in report.items() if k != "rows"}),
+        flush=True,
+    )
+    radius, height = case.grid_radius[::2], case.grid_height[::2]
+    rr, zz = np.meshgrid(radius, height, indexing="ij")
+    points = np.c_[rr.ravel(), zz.ravel()]
+    maps = []
+    for biot in (plasma, conductor):
+        pieces = []
+        for start in range(0, len(points), 128):
+            biot.point.solve(points[start : start + 128])
+            pieces.append(np.asarray(biot.point.psi).copy())
+        maps.append(np.concatenate(pieces).reshape(rr.shape))
+    values = maps[0] + maps[1]
+    stationary = _replay_nulls(radius, height, values, case)
+    _panel(
+        data,
+        qualified=None,
+        flux=values,
+        sampled_grid=(radius, height),
+        stationary=stationary,
+        suffix="-row-replay",
+    )
+    report.update(
+        wall_seconds=perf_counter() - started,
+        map_relative_l2=float(
+            np.linalg.norm(values - (-case.grid_flux)[::2, ::2])
+            / np.linalg.norm(case.grid_flux[::2, ::2])
+        ),
+        stationary={
+            key: np.asarray(value).tolist() if value is not None else None
+            for key, value in stationary.items()
+        },
+    )
+    _write(_output() / f"{name}-row-replay.json", report)
+    print(
+        "ROW_REPLAY_COMPLETE "
+        + json.dumps(
+            {k: v for k, v in report.items() if k not in ("rows", "families")}
+        ),
+        flush=True,
+    )
+
+
+def _panel(
+    data, qualified, flux=None, *, sampled_grid=None, stationary=None, suffix=""
+):
     import matplotlib
 
     matplotlib.use("Agg")
@@ -701,18 +983,32 @@ def _panel(data, qualified, flux=None):
         linewidth=2.6,
         zorder=1,
     )
-    node = data["machine"].node
-    poloidal.draw_scattered_contours(
-        ax,
-        node[:, 0],
-        node[:, 1],
-        np.asarray(flux)[: len(node)],
-        levels,
-        data["wall_units"],
-        color=blue,
-        linewidth=1.4,
-        zorder=2,
-    )
+    if sampled_grid is None:
+        node = data["machine"].node
+        poloidal.draw_scattered_contours(
+            ax,
+            node[:, 0],
+            node[:, 1],
+            np.asarray(flux)[: len(node)],
+            levels,
+            data["wall_units"],
+            color=blue,
+            linewidth=1.4,
+            zorder=2,
+        )
+    else:
+        radius, height = sampled_grid
+        poloidal.draw_flux_contours(
+            ax,
+            radius,
+            height,
+            np.asarray(flux).T,
+            levels,
+            wall=data["wall_units"],
+            color=blue,
+            linewidth=1.4,
+            zorder=2,
+        )
     poloidal.draw_wall(ax, units=data["wall_units"])
     reference_style = DEFAULT_INK.variant(
         axis_color=grey,
@@ -729,7 +1025,17 @@ def _panel(data, qualified, flux=None):
         contain=data["wall_units"],
     )
     try:
-        _, topology = data["profile"].operator.read(jnp.asarray(flux))
+        if stationary is None:
+            _, topology = data["profile"].operator.read(jnp.asarray(flux))
+            stationary = dict(
+                magnetic_axis=np.asarray(topology.axis),
+                x_points=np.asarray(topology.x_point)
+                if bool(topology.diverted)
+                else None,
+                other_x_points=np.asarray(topology.x_point)
+                if not bool(topology.diverted)
+                else None,
+            )
         solved_style = DEFAULT_INK.variant(
             axis_color=blue,
             xpoint_color=blue,
@@ -739,11 +1045,7 @@ def _panel(data, qualified, flux=None):
         )
         poloidal.draw_nulls(
             ax,
-            magnetic_axis=np.asarray(topology.axis),
-            x_points=np.asarray(topology.x_point) if bool(topology.diverted) else None,
-            other_x_points=np.asarray(topology.x_point)
-            if not bool(topology.diverted)
-            else None,
+            **stationary,
             style=solved_style,
             contain=data["wall_units"],
         )
@@ -756,7 +1058,7 @@ def _panel(data, qualified, flux=None):
             Line2D([], [], color=grey, lw=2.6, marker="^", markersize=9),
             Line2D([], [], color=blue, lw=1.4, marker="^", markersize=6),
         ],
-        ["imas-efit", "nova"],
+        ["imas-efit", "nova current replay" if sampled_grid is not None else "nova"],
         loc="upper center",
         frameon=False,
         ncol=2,
@@ -775,7 +1077,7 @@ def _panel(data, qualified, flux=None):
         for other, other_box in boxes[i + 1 :]:
             if box.overlaps(other_box):
                 raise ValueError(f"figure text overlap: {label}, {other}")
-    destination = directory / f"{data['name']}.svg"
+    destination = directory / f"{data['name']}{suffix}.svg"
     figure.savefig(destination, format="svg")
     tree = element_tree.parse(destination)
     tree.getroot().set("width", "31.1cm")
@@ -785,7 +1087,7 @@ def _panel(data, qualified, flux=None):
     )
     description.text = data["constraint_context"]["caption"]
     tree.write(destination, encoding="utf-8", xml_declaration=True)
-    preview = _output() / f"{data['name']}-preview.png"
+    preview = _output() / f"{data['name']}{suffix}-preview.png"
     figure.savefig(preview, dpi=100)
     plt.close(figure)
     print(

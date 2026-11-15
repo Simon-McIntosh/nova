@@ -273,6 +273,36 @@ def test_reference_prior_context_does_not_add_nova_priors():
     assert _constraint_context("tcv")["reference_extra_priors"] == []
 
 
+def test_stored_density_integral_keeps_sign_and_generator_cell_area():
+    from tests.test_magnetics_fit_efit_comparison import _density_quadrature
+
+    radius, height = np.array([1.0, 1.2, 1.4]), np.array([-0.3, 0.0, 0.3])
+    density = np.array([[0.0, 2.0, 0.0], [-3.0, 4.0, 0.0], [0.0, 1.0, 0.0]])
+    r, z, current, dr, dz = _density_quadrature(radius, height, density)
+    np.testing.assert_allclose(current.sum(), density.sum() * 0.2 * 0.3)
+    np.testing.assert_array_equal(current < 0, density[density != 0] < 0)
+    assert len(r) == len(z) == len(current) == 4
+    assert dr == pytest.approx(0.2) and dz == pytest.approx(0.3)
+    with pytest.raises(ValueError, match="nonzero"):
+        _density_quadrature(radius, height, np.zeros_like(density))
+
+
+def test_row_agreement_exposes_a_reversed_current_sign_and_family_gain():
+    from tests.test_magnetics_fit_efit_comparison import _row_agreement
+
+    reference = np.array([1.0, -2.0, 4.0])
+    scale = np.full(3, 0.1)
+    exact = _row_agreement(reference, reference, scale)
+    reversed_rows = _row_agreement(-reference, reference, scale)
+    doubled = _row_agreement(2 * reference, reference, scale)
+    assert exact["whitened_rms"] == exact["relative_l2"] == 0
+    assert reversed_rows["relative_l2"] == 2
+    assert reversed_rows["signed_gain"] == -1
+    assert reversed_rows["opposite_sign_rows"] == 3
+    assert reversed_rows["whitened_rms"] > 50
+    assert doubled["relative_l2"] == 1 and doubled["signed_gain"] == 2
+
+
 def test_known_conductor_subtraction_changes_the_target(linear_fit):
     fitter, measurement, truth, _ = linear_fit
     vacuum = np.array([0.7, -0.4, 1.1, 0.2])

@@ -22,6 +22,17 @@
         "s2"
       ],
       "when": "2026-11-15T09:46:47.395223+00:00"
+    },
+    {
+      "by": "1a120e31-d8a6-4944-87b2-145a639763ba",
+      "digests": {
+        "_document": "2ece5ee1f0446a5f7926b928ec9a159223bcfb5cc9d4c32af8bfe53ec1bf16ae"
+      },
+      "reason": "Lead locked the limb-arm gap decision to the stored geometry and resolved the two open questions; no section text, bound or done-when changed",
+      "units": [
+        "_document"
+      ],
+      "when": "2026-11-15T16:45:00.793955+00:00"
     }
   ],
   "completed_at": "2026-11-15T01:41:16.013Z",

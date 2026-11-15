@@ -71,6 +71,26 @@
       "note": "s4 splits into two nodes with separate verdicts: the compile clause, and the read-path regression arm over the three files",
       "reason": "",
       "when": "2026-11-15T17:03:39.365320+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "6d0487d5723e75aec96c9afb0668486dd1758f87",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "the regression arm is one sirius CPU job with no conditional move to the H200; a file that does not finish is reported as cut short",
+      "reason": "",
+      "when": "2026-11-15T17:03:55.010805+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "6d0487d5723e75aec96c9afb0668486dd1758f87",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "the regression arm is one sirius CPU job with no conditional move to the H200; a file that does not finish is reported as cut short",
+      "reason": "",
+      "when": "2026-11-15T17:04:14.630347+00:00"
     }
   ],
   "responses": {
@@ -82,6 +102,15 @@
       "note": "s3 says the two tests read paired receipts through NOVA_PRODUCTION_COMPILE_BASE and NOVA_PRODUCTION_COMPILE_HEAD and skip without them, and that the node supplies both from its paired H200 profile job",
       "reason": "",
       "when": "2026-11-15T17:03:25.411805+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "6d0487d5723e75aec96c9afb0668486dd1758f87",
+      "commit_basis": "edit",
+      "note": "the regression arm is one sirius CPU job with no conditional move to the H200; a file that does not finish is reported as cut short",
+      "reason": "",
+      "when": "2026-11-15T17:04:14.630347+00:00"
     },
     "reasoning-1": {
       "action": "acted",

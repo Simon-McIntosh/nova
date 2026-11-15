@@ -33,7 +33,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 17,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fd01e2c70b1ea26a609dd55b2ff8605e1be8c905",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The drifting-sensor section's third clause now names its own thresholds against the held generating state (axis position error 0.05 m, q95 error 0.2) and no longer refers to the EFIT comparison's agreement bands.",
+      "reason": "",
+      "when": "2026-11-15T18:02:02.115850+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fd01e2c70b1ea26a609dd55b2ff8605e1be8c905",
+      "commit_basis": "edit",
+      "note": "The drifting-sensor section's third clause now names its own thresholds against the held generating state (axis position error 0.05 m, q95 error 0.2) and no longer refers to the EFIT comparison's agreement bands.",
+      "reason": "",
+      "when": "2026-11-15T18:02:02.115850+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261115T175523031886-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261115T175523031886-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "ad49cffaa5ad717719c46530338c1a41854c3153",
   "rubric": "content",

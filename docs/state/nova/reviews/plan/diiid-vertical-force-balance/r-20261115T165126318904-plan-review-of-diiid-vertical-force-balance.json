@@ -1,0 +1,73 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T16:52:43.275Z",
+  "dispatched_at": "2026-11-15T16:52:27Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:89",
+      "id": "reasoning-1",
+      "reason": "the section fixes the comparison the guard performs, and as written that guard contradicts its own done-when, so the worker needs the shipped-channel prefix named as the compared domain.",
+      "text": "\u00a78 requires the adapter to compare \"the vector the operator already carries with the resolution it is about to install\" and asserts they \"agree exactly\", but the operator built at `benchmarks/diiid_forward_gs_match.py:1356` carries the 19 shipped channels only, while `resolve_diiid_currents` (`nova/imas/diiid_current.py:191`) appends the five circuit-driven conductors ECOILB, E567UP, E567DN, E89UP, E89DN to the 24-current resolution that the adapter installs, so an equality over the two vectors raises on every legitimate call and the section states no comparison domain; a worker either implements a check that reddens the unpatched frame-137D run its own done-when (2) requires to pass, or silently narrows the check to a prefix the plan never names",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:94",
+      "id": "reasoning-2",
+      "reason": "the corrected arm's meaning is the plan's whole claim, and as stated a later reader would take an arm the evidence calls implausible as the coil-field measurement, so the section must state which arm the implausible vector yields or that the corrected arm is a bound rather than a correction.",
+      "text": "\u00a79 re-solves the cohort \"with the fitted correction\" and re-banks those offsets as the corrected arm, but the cited record `docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html` marks the very fit it quotes (F1A \u2212177.235 to \u2212231.293 kA\u00b7turn) as implausible for five of nineteen conductors (30.5 to 1465.2 percent of the coil's own current) and states it does not reproduce the published attribution (F1A +54.06/+52.14 against \u22122.51/\u22120.27 kA\u00b7turn), leaving a common-mode response or external-field error unidentified; the section would bank that vector as the corrected-current result without carrying its implausibility verdict",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:94",
+      "id": "anchors_resolve-1",
+      "reason": "the node must either supply the corrected vector or re-fit it, and with the named record unresolvable the plan's equality check \"the corrected vector its inputs name\" has no durable input to compare against.",
+      "text": "\u00a79 names `current-inputs.json` as the record of the corrected conductor vector, but neither cited location holds it: `scripts/prototypes/diiid_xpoint_coil_correction/` lists batch.py, conductor_correction.py, fit.py, job.sh, measure.py, probe_applied.py, probe_external.py, render.py, summarize.py, test_conductor_correction.py, and `docs/figures/diiid-xpoint-coil-correction/` holds two window JSON files and two SVGs; a repository-wide search finds the filename only in prose in the two evidence fragments and the plan itself, against the fragment's own statement that \"the earlier run's working directories have since been retired from the run store\"",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:96",
+      "id": "done_when-1",
+      "reason": "without a control that reddens when the corrected arm equals the measured arm, the node's record cannot distinguish a correction that reached the solve from the instrument fault it was created to repair.",
+      "text": "\u00a79's done-when declares no negative control: its three clauses are a solve, a tabulation, and a prototype test pass, and none of them can fail on the failure the plan itself records, where the corrected arm was bit-identical to the measured arm because the correction never reached the solve; a re-run in which the corpus-column patch again fails to move the state would satisfy every clause",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "b918ea8a91b34f923c230e085b57501ce38da36d",
+  "plan_fingerprint": "a4fea6df13e40f3d7f4a0ba1083381aca5afae91464196b03c8b6526249569cb",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 75,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261115T165126318904-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "f8853f6adead81ab856a0d7d96b7c3854d2150b6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a79 cites `current-inputs.json` as the record of the corrected vector, and no such file exists at either cited location or anywhere in the tree.",
+    "done_when": "a finding \u2014 \u00a79's done-when has no negative control, while the plan's own record shows the failure mode it must exclude (corrected arm bit-identical to the measured arm).",
+    "evidence_paths": "pass \u2014 \u00a78 and \u00a79 both bank into `docs/evidence/fragments/diiid-vertical-force-balance/`, which exists, and their gates run on declared partitions whose logs live under the run store, not a node-local path.",
+    "naming": "pass \u2014 the new sections carry no plan labels, ticket numbers or version tags; their titles state the behaviour.",
+    "reasoning": "a finding \u2014 \u00a78's stated comparison is between the operator's 19-conductor vector and the adapter's 24-conductor resolution, so the claim that \"matching inputs agree exactly\" is false at the vector level; and \u00a79's corrected arm rests on a fit its own cited record marks implausible and non-reproducing.",
+    "single_goal": "pass \u2014 \u00a78 delivers the adapter refusal and \u00a79 the re-solved corrected-cohort record; each is one deliverable with one closing verdict.",
+    "wiring": "pass \u2014 the meta dependency map is acyclic and complete: s8 depends on s6, s9 on s7 and s8, and s7 on s6, which matches each section's own text (\"at the head carrying \u00a76, \u00a77 and \u00a78\"); each section's `data-links` agrees with the declarations."
+  },
+  "section_digests": {
+    "_document": "3f7773e8dc84f9f7857984a8a118b5f84a217ae4f4641f6df572ddc2b6ba7656",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "8c29d80c4569a34f471efe37576ac7bf2f7e98ccd4b5f8ae369936abb0dd64b7",
+    "s8": "e9af235d224667f3a28167dad2823739dfa3f3200f12347de5f1595235414ede",
+    "s9": "74b44e96d5c932c59a959ca4c58753d2663a3be3009b40b5d0f8954cb969ce6d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T17:03:13.002597+00:00",
+  "total": null
+}

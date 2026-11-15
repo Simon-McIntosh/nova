@@ -10,6 +10,13 @@
       "png_dimensions": "1399x720"
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Repaired at 62b1fd391: the reference null is marked so it cannot pass for the solved one. The figure re-review at f4bf6f5e4 checks the render.",
+      "recorded_at": "2026-11-15T17:32:58.680378+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_finite_edge_booking/render.py",

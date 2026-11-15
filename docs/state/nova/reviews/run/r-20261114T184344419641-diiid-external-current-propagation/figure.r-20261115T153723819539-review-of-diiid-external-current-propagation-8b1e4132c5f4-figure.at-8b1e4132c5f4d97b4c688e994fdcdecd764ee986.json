@@ -26,6 +26,11 @@
       "kind": "exempted",
       "reason": "The shared levels and the pseudo-wall are deliberately background. The subject marks (separatrices, nulls, vessel, EFIT boundary) clear 3:1, and the comparison is carried by those.",
       "recorded_at": "2026-11-15T15:55:59.687118+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The caption decodes the EFIT boundary as the thin dark line and the stepped outline as the vessel. The two have different shapes, so they are told apart in the image.",
+      "recorded_at": "2026-11-15T15:56:06.923371+00:00"
     }
   },
   "findings": [

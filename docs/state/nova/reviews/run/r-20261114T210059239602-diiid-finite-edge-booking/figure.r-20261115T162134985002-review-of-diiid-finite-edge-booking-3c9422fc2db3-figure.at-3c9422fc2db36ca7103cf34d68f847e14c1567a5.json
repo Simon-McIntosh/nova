@@ -15,6 +15,11 @@
       "kind": "exempted",
       "reason": "Repaired at 62b1fd391: the reference null is marked so it cannot pass for the solved one. The figure re-review at f4bf6f5e4 checks the render.",
       "recorded_at": "2026-11-15T17:32:58.680378+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Taken up in the repair round's figure changes (62b1fd391). The figure re-review at f4bf6f5e4 checks the limited-panel legend.",
+      "recorded_at": "2026-11-15T17:33:06.423122+00:00"
     }
   },
   "findings": [

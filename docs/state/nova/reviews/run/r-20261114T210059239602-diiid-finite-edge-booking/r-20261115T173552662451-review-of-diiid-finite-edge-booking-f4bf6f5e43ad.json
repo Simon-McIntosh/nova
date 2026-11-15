@@ -36,6 +36,11 @@
       "kind": "exempted",
       "reason": "Acted in resume turn 4: the pinned consumer's refusal is measured in the gate job, not predicted, and any re-registration is reported.",
       "recorded_at": "2026-11-15T18:04:49.632603+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "The diagnosis per-row numbers are carried in the fragment's prose. The \u00a77 rerun reports the four rows beside the diagnosis trajectory, which is where a per-row comparison column belongs.",
+      "recorded_at": "2026-11-15T18:04:59.463209+00:00"
     }
   },
   "findings": [

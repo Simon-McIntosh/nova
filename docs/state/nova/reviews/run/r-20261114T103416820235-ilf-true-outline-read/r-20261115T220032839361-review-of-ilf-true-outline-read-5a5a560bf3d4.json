@@ -1,0 +1,102 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 12,
+  "call_sites": [
+    "scripts/west_iron_solve/measure.py:172",
+    "scripts/west_iron_solve/probe.py:40",
+    "scripts/west_iron_solve/diagnose.py:192",
+    "scripts/west_iron_solve/diagnostic_figure.py:35",
+    "scripts/west_stray_field/solve.py:72",
+    "scripts/west_iron_galerkin/measure.py:226",
+    "scripts/west_iron_galerkin_pair/measure.py:341",
+    "scripts/west_picard_control/measure.py:329",
+    "scripts/west_root_branch/measure.py:231",
+    "scripts/iron_graded_refinement/measure.py:237",
+    "scripts/sheet_tile_census/measure.py:77",
+    "scripts/magnetisation_law/figure.py:48"
+  ],
+  "completed_at": "2026-11-15T22:21:46.026Z",
+  "dispatched_at": "2026-11-15T22:20:57Z",
+  "findings": [
+    {
+      "file": "tests/test_imas_iron_read.py",
+      "line": "417",
+      "severity": "non-blocking",
+      "text": "non-blocking: `assert fill[0] == pytest.approx(arm.fill([2.0])[0])` compares IronCoreOutline.fill against the IronFillRegion.fill it delegates to at nova/imas/machine.py:643-646, so both sides move together and reverting the fill rule leaves it true; only the 0 < fill[0] < 1 bound at line 418 carries independent content."
+    },
+    {
+      "file": "tests/test_imas_iron_read.py",
+      "line": "422",
+      "severity": "non-blocking",
+      "text": "non-blocking: `factor[0].tolist() == [0.0, pytest.approx(outline.cross_field_factor)]` compares the array IronCoreOutline.cross_field writes at nova/imas/machine.py:661 against the same cross_field_factor property it is written from, so it cannot fail if that factor's value regresses; only the Z-not-R component index is independently pinned."
+    },
+    {
+      "file": "tests/test_imas_iron_read.py",
+      "line": "398",
+      "severity": "non-blocking",
+      "text": "non-blocking: the \"no second flat outline\" guard is a blacklist of four names (FLAT_OUTLINE_NAMES at line 309), so a reader that rebuilds the flat outline under any other name passes the assertion, leaving the capability it claims to guard unguarded."
+    },
+    {
+      "file": "scripts/west_iron_solve/measure.py",
+      "line": "172",
+      "severity": "non-blocking",
+      "text": "non-blocking: all twelve readers build the six-region IronCoreOutline and immediately keep only `.description`, and no production file at 5a5a560bf reads `.regions`, `.fill` or `.cross_field`, so each reader pays a full outline construction it discards while continuing to consume the stored tapered segments it was meant to replace."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-limb-fill-fraction/ilf-true-outline-read.html",
+      "line": "84",
+      "severity": "non-blocking",
+      "text": "non-blocking: the red-run paragraph states \"1 failed, 16 passed\" while its own Verification bullet at line 122 and logs/negative-control.log record 1 failed and 17 passed out of 18 collected at 202d97cc4, so the receipt contradicts its own log."
+    },
+    {
+      "file": "nova/imas/machine.py",
+      "line": "1162",
+      "severity": "non-blocking",
+      "text": "non-blocking: _refuse_taper checks thickness against the module constant WEST_IRON_LIMB_DEPTH rather than the limb_depth argument iron_core_outline accepts at line 961, so a caller passing any other limb depth gets its outline refused against 1.2 m and the parameter is only half honoured."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T103416820235-ilf-true-outline-read/manifest.md",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "non-blocking: changed_paths names scripts/west_placeholder, a path that exists in no commit (git log --all -- scripts/west_placeholder is empty) and on no disk, while omitting the eight changed readers outside scripts/west_iron_solve, so the record's own path audit cannot be trusted by a coordinator."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "scripts/west_iron_solve/measure.py:172, scripts/west_iron_solve/probe.py:40, scripts/west_iron_solve/diagnose.py:192, scripts/west_iron_solve/diagnostic_figure.py:35, scripts/west_stray_field/solve.py:72, scripts/west_iron_galerkin/measure.py:226, scripts/west_iron_galerkin_pair/measure.py:341, scripts/west_picard_control/measure.py:329, scripts/west_root_branch/measure.py:231, scripts/iron_graded_refinement/measure.py:237, scripts/sheet_tile_census/measure.py:77, scripts/magnetisation_law/figure.py:48",
+    "diff": "read both gained commits against base 69387540cc2910bfb0b490f9b21574fe037f8c1b; 202d97cc4 replaces the shapely point-in-polygon duplicate in IronFillRegion.covered with nova.equilibrium.wall_mask.inside_polygon and points twelve readers at read_west_iron_outline, and 5a5a560bf restates the fragment's scope and verification bullets.",
+    "done_when": "the done_when asks for a section-per-radian reproduction to 1e-3 with the receipt under /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/machine/, the stored 2 mm gap under one named input, a 1 % thickness-times-radius refusal by name, and reader routing; the receipt exists with sha256 b67c7b5cd480 and maximum_relative_section_error 3.259e-05 against 1e-3, logs/after-pytest-head.log at 5a5a560bf records 18 passed EXIT=0 and logs/base-pytest.log 12 passed EXIT=0.",
+    "goal": "the node goal is \"Read the WEST iron on its true flat outline with a fill fraction per region from one machine-description read\"; nova/imas/machine.py:879 read_west_iron_outline and nova/imas/machine.py:957 iron_core_outline deliver the read, but the twelve readers take only `.description` and no production file at 5a5a560 reads `.regions`, `.fill` or `.cross_field`, so the true outline reaches no consumer.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T103416820235-ilf-true-outline-read/manifest.md; its tests line is the literal gate command and its baseline_suite, after_suite and negative_control_log fields name on-disk logs, but changed_paths:8 names scripts/west_placeholder, which no commit or disk carries, and omits eight of the readers the run changed.",
+    "write_paths": "read the twelve declared write paths; all fifteen files in the diff 69387540c..5a5a560bf lie inside them, including docs/evidence/fragments/iron-limb-fill-fraction."
+  },
+  "justifications": {
+    "durability": "the refusal guard is falsified red in logs/negative-control.log and the reader assertion fails on the base source, but tests/test_imas_iron_read.py:417 and :422 compare the code under test against the same property it is built from.",
+    "evidence": "logs/after-pytest-head.log names revision 5a5a560bf and ends 18 passed/EXIT=0 while logs/base-pytest.log ends 12 passed/EXIT=0, but docs/evidence/fragments/iron-limb-fill-fraction/ilf-true-outline-read.html:84 contradicts its own negative-control log.",
+    "fit": "nova/imas/machine.py:467-680 follows the module's frozen-dataclass, dataclass-field and modern-annotation idiom with no name the repository rules forbid.",
+    "goal_fidelity": "nova/imas/machine.py:879 and :957 deliver the read and its receipt, but every call site listed above keeps only `.description`, so the true outline and fill fraction reach no production consumer.",
+    "reuse": "IronFillRegion.covered at nova/imas/machine.py:546 now delegates to nova/equilibrium/wall_mask.py:70 inside_polygon and read_west_iron_outline wraps read_iron_core; no owner of an exact first moment about the axis exists in nova/geometry/polygeom.py:108 area or nova/structural/properties.py:7 secondmoment.",
+    "scope_discipline": "all fifteen paths in 69387540c..5a5a560bf sit inside the node's declared write paths and no hunk edits anything the goal does not imply."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is \"Read the WEST iron on its true flat outline with a fill fraction per region from one machine-description read\"; nova/imas/machine.py:879 read_west_iron_outline and nova/imas/machine.py:957 iron_core_outline deliver the read, but the twelve readers take only `.description` and no production file at 5a5a560 reads `.regions`, `.fill` or `.cross_field`, so the true outline reaches no consumer.\nVERDICT done_when: the done_when asks for a section-per-radian reproduction to 1e-3 with the receipt under /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/machine/, the stored 2 mm gap under one named input, a 1 % thickness-times-radius refusal by name, and reader routing; the receipt exists with sha256 b67c7b5cd480 and maximum_relative_section_error 3.259e-05 against 1e-3, logs/after-pytest-head.log at 5a5a560bf records 18 passed EXIT=0 and logs/base-pytest.log 12 passed EXIT=0.\nVERDICT write_paths: read the twelve declared write paths; all fifteen files in the diff 69387540c..5a5a560bf lie inside them, including docs/evidence/fragments/iron-limb-fill-fraction.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T103416820235-ilf-true-outline-read/manifest.md; its tests line is the literal gate command and its baseline_suite, after_suite and negative_control_log fields name on-disk logs, but changed_paths:8 names scripts/west_placeholder, which no commit or disk carries, and omits eight of the readers the run changed.\nVERDICT diff: read both gained commits against base 69387540cc2910bfb0b490f9b21574fe037f8c1b; 202d97cc4 replaces the shapely point-in-polygon duplicate in IronFillRegion.covered with nova.equilibrium.wall_mask.inside_polygon and points twelve readers at read_west_iron_outline, and 5a5a560bf restates the fragment's scope and verification bullets.\nCALL_SITES: scripts/west_iron_solve/measure.py:172, scripts/west_iron_solve/probe.py:40, scripts/west_iron_solve/diagnose.py:192, scripts/west_iron_solve/diagnostic_figure.py:35, scripts/west_stray_field/solve.py:72, scripts/west_iron_galerkin/measure.py:226, scripts/west_iron_galerkin_pair/measure.py:341, scripts/west_picard_control/measure.py:329, scripts/west_root_branch/measure.py:231, scripts/iron_graded_refinement/measure.py:237, scripts/sheet_tile_census/measure.py:77, scripts/magnetisation_law/figure.py:48\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: nova/imas/machine.py:879 and :957 deliver the read and its receipt, but every call site listed above keeps only `.description`, so the true outline and fill fraction reach no production consumer.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/after-pytest-head.log names revision 5a5a560bf and ends 18 passed/EXIT=0 while logs/base-pytest.log ends 12 passed/EXIT=0, but docs/evidence/fragments/iron-limb-fill-fraction/ilf-true-outline-read.html:84 contradicts its own negative-control log.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: all fifteen paths in 69387540c..5a5a560bf sit inside the node's declared write paths and no hunk edits anything the goal does not imply.\nSCORE durability: 13\nJUSTIFICATION durability: the refusal guard is falsified red in logs/negative-control.log and the reader assertion fails on the base source, but tests/test_imas_iron_read.py:417 and :422 compare the code under test against the same property it is built from.\nSCORE fit: 18\nJUSTIFICATION fit: nova/imas/machine.py:467-680 follows the module's frozen-dataclass, dataclass-field and modern-annotation idiom with no name the repository rules forbid.\nSCORE reuse: 19\nJUSTIFICATION reuse: IronFillRegion.covered at nova/imas/machine.py:546 now delegates to nova/equilibrium/wall_mask.py:70 inside_polygon and read_west_iron_outline wraps read_iron_core; no owner of an exact first moment about the axis exists in nova/geometry/polygeom.py:108 area or nova/structural/properties.py:7 secondmoment.\nFINDING tests/test_imas_iron_read.py:417 non-blocking: `assert fill[0] == pytest.approx(arm.fill([2.0])[0])` compares IronCoreOutline.fill against the IronFillRegion.fill it delegates to at nova/imas/machine.py:643-646, so both sides move together and reverting the fill rule leaves it true; only the 0 < fill[0] < 1 bound at line 418 carries independent content.\nFINDING tests/test_imas_iron_read.py:422 non-blocking: `factor[0].tolist() == [0.0, pytest.approx(outline.cross_field_factor)]` compares the array IronCoreOutline.cross_field writes at nova/imas/machine.py:661 against the same cross_field_factor property it is written from, so it cannot fail if that factor's value regresses; only the Z-not-R component index is independently pinned.\nFINDING tests/test_imas_iron_read.py:398 non-blocking: the \"no second flat outline\" guard is a blacklist of four names (FLAT_OUTLINE_NAMES at line 309), so a reader that rebuilds the flat outline under any other name passes the assertion, leaving the capability it claims to guard unguarded.\nFINDING scripts/west_iron_solve/measure.py:172 non-blocking: all twelve readers build the six-region IronCoreOutline and immediately keep only `.description`, and no production file at 5a5a560bf reads `.regions`, `.fill` or `.cross_field`, so each reader pays a full outline construction it discards while continuing to consume the stored tapered segments it was meant to replace.\nFINDING docs/evidence/fragments/iron-limb-fill-fraction/ilf-true-outline-read.html:84 non-blocking: the red-run paragraph states \"1 failed, 16 passed\" while its own Verification bullet at line 122 and logs/negative-control.log record 1 failed and 17 passed out of 18 collected at 202d97cc4, so the receipt contradicts its own log.\nFINDING nova/imas/machine.py:1162 non-blocking: _refuse_taper checks thickness against the module constant WEST_IRON_LIMB_DEPTH rather than the limb_depth argument iron_core_outline accepts at line 961, so a caller passing any other limb depth gets its outline refused against 1.2 m and the parameter is only half honoured.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T103416820235-ilf-true-outline-read/manifest.md:8 non-blocking: changed_paths names scripts/west_placeholder, a path that exists in no commit (git log --all -- scripts/west_placeholder is empty) and on no disk, while omitting the eight changed readers outside scripts/west_iron_solve, so the record's own path audit cannot be trusted by a coordinator.\n",
+  "review_run_id": "r-20261115T220032839361-review-of-ilf-true-outline-read-5a5a560bf3d4",
+  "reviewed_base_sha": "69387540cc2910bfb0b490f9b21574fe037f8c1b",
+  "reviewed_head_sha": "5a5a560bf3d4aa2f9681c40b7e1e2b95bd01e872",
+  "reviewed_run_id": "r-20261114T103416820235-ilf-true-outline-read",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 19,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T22:41:21.906742+00:00",
+  "total": 96
+}

@@ -360,3 +360,124 @@ def test_one_augmented_newton_program_serves_free_and_pinned_requests():
         assert abs(_booked_terminal_height(flux) - expected) <= 1e-10
         if not active:
             np.testing.assert_array_equal(unknown, [0.0])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("route", ["newton", "rebuilt", "continuation", "descent"])
+@pytest.mark.parametrize("source", ["radial", "circuit"])
+@pytest.mark.parametrize("shadowed", [False, True])
+@pytest.mark.parametrize("active", [False, True])
+def test_compensator_image_and_tangent_on_every_proposal_route(
+    route, source, shadowed, active, monkeypatch
+):
+    """Observe every scored proposal, including off-root inactive unknowns."""
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    profile = _profile()
+    direction = None
+    if source == "circuit":
+        profile.operator.prescribed_current_field = PrescribedCurrentField(
+            response=jnp.asarray([[0.0, 0.0]] * 5 + [[0.0, 1.0]]),
+            current=jnp.zeros(2),
+        )
+        direction = np.asarray([0.0, 1.0])
+    pair = VerticalPositionPin(
+        0.7, active=active, coil_direction=direction, initial_unknown=0.25
+    ).pair(profile.operator)
+    target = jnp.asarray([1.0, 0.8, 0.3, 1.0, 1.2, 0.9])
+
+    def base_map(flux):
+        return target
+
+    system = assemble_augmented_system(
+        profile,
+        jnp.asarray(SEED),
+        (pair,),
+        base_map=base_map,
+        base_shadow_mask=lambda flux: jnp.zeros_like(flux, dtype=bool),
+        base_promoted_shadow_mask=lambda flux, previous: previous,
+        base_shadowed_map=lambda flux, shadow: jnp.where(shadow, flux, target),
+        requested_class=None,
+        target_current=None,
+    )
+    images, tangents = [], []
+    original_image = type(pair.unknown).flux_delta
+
+    def observed_image(*args):
+        delta = original_image(*args)
+        jax.debug.callback(lambda image: images.append(np.asarray(image)), delta)
+        return delta
+
+    monkeypatch.setattr(type(pair.unknown), "flux_delta", observed_image)
+
+    @jax.jit
+    def propose(runtime_pair):
+        def raw_map(state):
+            if shadowed:
+                return system.shadowed_map_fn(
+                    state, jnp.zeros_like(state, dtype=bool), (runtime_pair,)
+                )
+            return system.map_fn(state, (runtime_pair,))
+
+        def observed_map(state):
+            mapped = raw_map(state)
+            unknown_direction = jnp.zeros_like(state).at[-1].set(1.0)
+            tangent = jax.jvp(raw_map, (state,), (unknown_direction,))[1]
+            jax.debug.callback(
+                lambda value: tangents.append(np.asarray(value)),
+                tangent[:6],
+            )
+            return mapped
+
+        state = system.initial
+        mapped, tangent = jax.linearize(observed_map, state)
+        residual = fixed_point._relative_residual(mapped, state)
+        merit = fixed_point._smooth_relative_sup_merit(mapped, state)
+        if route == "rebuilt":
+            return fixed_point._rebuilt_model_promotion(
+                observed_map,
+                state,
+                residual,
+                merit,
+                gmres_iterations=7,
+                maximum_step=jnp.asarray(1.0),
+                initial_damping=jnp.asarray(1e-3),
+                model_trust_selection=False,
+            )
+        if route == "descent":
+            return fixed_point._steepest_descent_promotion(
+                observed_map, state, residual, merit, False
+            )
+        jacobian = jax.vmap(tangent)(jnp.eye(state.size)).T
+        step = jnp.linalg.solve(jnp.eye(state.size) - jacobian, mapped - state)
+
+        def model(candidate):
+            return mapped + tangent(candidate - state)
+
+        return fixed_point._backtracked_promotion(
+            observed_map,
+            model,
+            state,
+            step if route == "newton" else -step,
+            step,
+            residual,
+            merit,
+            jnp.asarray(0.1),
+            False,
+        )
+
+    proposal = propose(pair)
+    jax.block_until_ready(proposal)
+    jax.effects_barrier()
+    assert bool(proposal.accepted), route
+    assert not np.array_equal(proposal.state, system.initial), route
+    if route in ("newton", "continuation"):
+        assert bool(proposal.recovery_activated) == (route == "continuation")
+    assert len(images) > 1 and len(tangents) > 1, "candidate evaluations must run"
+    images, tangents = np.stack(images), np.stack(tangents)
+    if active:
+        assert np.any(images != 0), "active source is the known-present control"
+        assert np.any(tangents != 0), "active tangent is the known-present control"
+    else:
+        np.testing.assert_array_equal(images, np.zeros_like(images))
+        np.testing.assert_array_equal(tangents, np.zeros_like(tangents))

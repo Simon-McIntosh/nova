@@ -2096,8 +2096,16 @@ def assemble_augmented_system(
         steps = []
         for pair, row_slice in zip(runtime_pairs, row_slices, strict=True):
             value = unknowns[row_slice]
+            image_value = value
+            if (
+                isinstance(pair.functional, CurrentCentroidConstraint)
+                and pair.binding.payload is not None
+            ):
+                # An inactive row retains its zero-unknown equation, but its
+                # source cannot participate in off-root recovery proposals.
+                image_value = jnp.where(pair.binding.payload, value, 0.0)
             delta = pair.unknown.flux_delta(
-                profile, context, pair.functional, pair.binding.payload, value
+                profile, context, pair.functional, pair.binding.payload, image_value
             )
             mapped_flux = mapped_flux + jnp.where(flux_shadow, 0.0, delta)
             row = jnp.ravel(

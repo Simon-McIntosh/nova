@@ -60,7 +60,9 @@ def panel(ax, row, label, limits):
     data, shadow, edge = row["data"], row["shadow"], row["edge"]
     radius, height = data["radius"], data["height"]
     topology = row["receipt"]["terminal_topology"]
-    axis = np.asarray(topology["axis_rz_m"], dtype=float)
+    axis = np.asarray(
+        data["axis"] if "axis" in data else topology["axis_rz_m"], dtype=float
+    )[:2]
     x_point = np.asarray(shadow["lower_x_rz_m"], dtype=float)
     efit_x = np.asarray(shadow["efit_x_rz_m"], dtype=float)
     axis_flux = float(edge["axis_flux_wb"])

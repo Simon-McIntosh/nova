@@ -9,6 +9,13 @@
     "nova/imas/diiid_current.py:258 (complete_profile_current_adapter replacing the operator's external_current before the solve)"
   ],
   "completed_at": "2026-11-15T13:02:47.019Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "This run is a read-only diagnosis whose scope forbade product and test edits. The guard the reviewer asks for is the proposed adapter refusal in complete_profile_current_adapter, a product change that goes to the lead as a decision and, once chosen, is built as its own node with a test.",
+      "recorded_at": "2026-11-15T13:28:38.474158+00:00"
+    }
+  },
   "dispatched_at": "2026-11-15T13:02:29Z",
   "emissions": [
     "VERDICT goal: The goal is to name the mechanism by which the DIII-D terminal forward state is invariant when the external coil currents change, and to state whether each banked X-point offset was solved with the coil field its inputs name; the landed fragment names the double conductor-current read at benchmarks/diiid_forward_gs_match.py:1356 against :2462/:2471 with the overwrite at nova/imas/diiid_current.py:258 and audits exactly the four named offsets in docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html:40-45.",

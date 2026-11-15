@@ -61,9 +61,28 @@
       "note": "\u00a79 now carries the fit's implausibility verdict, calls the fitted arm a test of the fit rather than a coil-field measurement, and banks its offsets beside the measured ones, not in their place.",
       "reason": "",
       "when": "2026-11-15T17:04:22.842406+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "feb7cbbc86b9eb83d255802803fb371f760c31b5",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "\u00a79 no longer cites the retired current-inputs.json. It re-derives the vector with the committed fit.py and commits it as a receipt that the equality check reads.",
+      "reason": "",
+      "when": "2026-11-15T17:04:33.328757+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "feb7cbbc86b9eb83d255802803fb371f760c31b5",
+      "commit_basis": "edit",
+      "note": "\u00a79 no longer cites the retired current-inputs.json. It re-derives the vector with the committed fit.py and commits it as a receipt that the equality check reads.",
+      "reason": "",
+      "when": "2026-11-15T17:04:33.328757+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",

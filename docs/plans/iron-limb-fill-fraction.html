@@ -25,7 +25,7 @@
   <title>Iron Limb Fill Fraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -261,26 +261,28 @@
       </p>
     <p class="r-dec-rat">Locked from the production solve measured against the §1 six-limb reference (receipt /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/production/material-refinement-20261114/partial-convergence.json), which supersedes the prototype readings of the §0 table, taken against the brick reference that §1 found about 12 % low. N = 0.4 from the 0.8 by 1.2 m limb section reads 5.2 % and 10.7 % in-vessel error at relative permeability 50 and 200 on the 0.032 m mesh, against 5.0 % and 6.6 % for N = 0.76 fitted to the reference and 41 % for the plain fill fraction. The geometric value transfers to another machine without a 3D solve, so it is kept and the bound at 200 is restated to 11 %.</p>
     </div>
-<div class="r-dec" data-key="limb-arm-gaps" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="limb-arm-gaps" data-choice="real" data-by="smc" data-when="2026-11-15T16:44:31+00:00">
     <p class="r-dec-q">Are the 2 mm gaps between the stored limb top (Z = 2.4003 m) and arm underside (Z = 2.4024 m) real air gaps?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="real">Real gaps: keep them</button>
+      <button class="r-opt chosen" data-value="real">Real gaps: keep them</button>
       <button class="r-opt" data-value="artefact">Artefact of the stored segments: close them on the true outline</button>
       </p>
-    <p class="r-dec-rat">At a relative permeability near 1000 a 2 mm gap has the reluctance of about 2 m of iron, so the answer moves the column flux. The prototype kept the gaps in every model.</p>
+    <p class="r-dec-rat">Lead ruling 2026-11-15: the model keeps the 2 mm gaps exactly as the stored description carries them (limb top Z = 2.4003 m, arm underside Z = 2.4024 m). No drawing confirms or refutes them, so the stored geometry is the reference; closing them would change the circuit reluctance and require re-running the WEST evidence for no documented reason.</p>
     </div>
 </section>
 
     <section data-reckon="questions" id="questions" class="r-questions">
 <h2><span class="sec">§</span> Open questions</h2>
-<div class="r-q" data-id="limb-section-drawing" data-section="s3" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="" data-resolved-by="">
+<div class="r-q" data-id="limb-section-drawing" data-section="s3" data-status="resolved" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="2026-11-15T16:44:31+00:00" data-resolved-by="smc">
     <p class="r-q-body">Is there a drawing of the WEST (Tore Supra) arms and return limbs that confirms the 0.8 by 1.2 m section, which is at present derived from the stored taper?</p>
+    <p class="r-q-resolution">Lead ruling 2026-11-15: the limb section derived from the stored outline is accepted as the reference, and the cross-field factor N = 0.4 derived from it stands. The unconfirmed flag is dropped; a drawing that later disagrees reopens it through a new followup.</p>
     </div>
 <div class="r-q" data-id="imas-efit-hand-off" data-section="s4" data-status="resolved" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="2026-11-13T16:22:37+00:00" data-resolved-by="reckon-edit">
     <p class="r-q-body">imas-efit reads the tapered outlines directly into its boundary-current iron model. Its coordinator owns the equivalent change there: the flat outline with a position-dependent effective permeability. Who takes the hand-off once §1 has confirmed the table and figures of §0?</p>
     </div>
-<div class="r-q" data-id="imas-efit-owner" data-section="s0" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="" data-resolved-by="">
+<div class="r-q" data-id="imas-efit-owner" data-section="s0" data-status="resolved" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="2026-11-15T16:44:31+00:00" data-resolved-by="smc">
     <p class="r-q-body">imas-efit reads the tapered outlines directly into its boundary-current iron model, and its coordinator owns the equivalent change there. Who in imas-efit takes the flat-outline finding once the six-limb reference has confirmed it?</p>
+    <p class="r-q-resolution">Lead ruling 2026-11-15: the imas-efit coordinator session owns the hand-off. This plan's coordinator sends it a hand-off note once the WEST 62751 true-outline evidence lands; the work is planned and built in imas-efit.</p>
     </div>
 </section>
 

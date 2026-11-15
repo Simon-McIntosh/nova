@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="biot,iron-core,machine-description,efit">
   <meta name="plan-after" content="iron-core-magnetisation">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;iron-limb-fill-fraction#s1&quot;],&quot;s3&quot;:[&quot;iron-limb-fill-fraction#s2&quot;],&quot;s4&quot;:[&quot;iron-limb-fill-fraction#s2&quot;,&quot;iron-limb-fill-fraction#s3&quot;]}">
   <title>Iron Limb Fill Fraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="25">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -214,7 +214,7 @@
     </p>
 
     <h2 id="s3">§3 — The true outline as machine description</h2>
-<section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>
       The flat outline, the fill fraction and the cross-field factor are properties of the
       machine, so they are read once beside the iron segments and not rebuilt in each
@@ -327,7 +327,10 @@
     <div class="r-comment-body"><p>review-of-ilf-true-outline-read at head 5a5a560bf3d4aa2f9681c40b7e1e2b95bd01e872 against base 69387540cc2910bfb0b490f9b21574fe037f8c1b: scores goal_fidelity 14, evidence 15, scope_discipline 17, durability 13, fit 18, reuse 19 (total 96), added_failure_count 0, seven non-blocking findings; records filed under the reviewed run's review-records/</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261114T103416820235-ilf-true-outline-read" data-who="reckon-build" data-when="2026-11-15T20:05:30Z">
-    <div class="r-comment-body"><p>ilf-true-outline-read: added StaticMachineDescription.read_west_iron_outline in nova/imas/machine.py, reading the WEST iron segments once and returning true flat arm and limb regions with a fill profile per region; the largest arm or limb section mismatch against the stored outline is 3.26e-05 (plan bound 1e-3), the stored limb-to-arm gap is kept at 0.002100 m under limb_arm_gap=&quot;stored&quot;, a stored taper scaled by 1.05 at one radius is refused by name, and the twelve scoped WEST iron script readers now call the read; receipt at /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/machine/west-true-outline.json</p></div>
+    <div class="r-comment-body"><p>ilf-true-outline-read: added StaticMachineDescription.read_west_iron_outline in nova/imas/machine.py, reading the WEST iron segments once and returning true flat arm and limb regions with a fill profile per region; the largest arm or limb section mismatch against the stored outline is 3.26e-05 (plan bound 1e-3), the stored limb-to-arm gap is kept at 0.002100 m under limb_arm_gap="stored", a stored taper scaled by 1.05 at one radius is refused by name, and the twelve scoped WEST iron script readers now call the read; receipt at /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/machine/west-true-outline.json</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-11-15T22:50:00Z">
+    <div class="r-comment-body"><p>§3 landed: the WEST iron is read on its true flat outline with a fill profile per region; largest section mismatch 3.26e-05 against a 1e-3 bound, stored 2.1 mm gap kept. <a href="/nova/evidence/archive/iron-limb-fill-fraction-landed.html#true-outline-read">evidence</a></p></div>
 </div>
 </section>
 </main>

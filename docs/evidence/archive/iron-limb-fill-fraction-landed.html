@@ -38,6 +38,20 @@
 <p>Full tables, the fitted and plain-fill rows and the correction history: <a href="/nova/evidence/fragments/iron-limb-fill-fraction/ilf-material-fill-fraction.html">node record</a>. Receipts: <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/production/</code>.</p>
   </section>
 
+  <section id="true-outline-read" data-evidence-origin="append">
+    <h2>§3 — the true outline as machine description</h2>
+    <p><code>StaticMachineDescription.read_west_iron_outline</code> in <code>nova/imas/machine.py</code> reads the WEST iron segments once and returns the flat arm and limb regions with a fill profile per region. Landed by merge of <code>5a5a560bf</code>.</p>
+<ul>
+<li>Largest arm or limb section mismatch against the stored outline: 3.26e-05, against a bound of 1e-3.</li>
+<li>The stored limb-to-arm gap is kept at 2.100 mm.</li>
+<li>A stored taper scaled by 1.05 at one radius is refused by name.</li>
+<li>The twelve scoped WEST iron script readers call the read; the test requires that name and fails at the base revision.</li>
+</ul>
+<p>Gate: <code>tests/test_imas_iron_read.py</code>, 18 passed and 0 failed at the head against 12 passed at the base; the taper control fails 1 of 18 as declared.</p>
+<p>Not reached: the readers call the read but still consume the stored tapered segments through its description, so no production solve uses the flat regions yet. A second flat-outline construction remains in <code>scripts/prototypes/iron_limb_fill/axisymmetric.py</code>, consumed by <code>scripts/iron_limb_production/measure.py</code>; its flat arm reaches R = 6.0 m and carries about 2 m² per radian more arm section than the stored outline. The taper refusal checks a module constant, not the limb depth passed in. All three are carried to the WEST evidence node.</p>
+<p>Node record: <a href="/nova/evidence/fragments/iron-limb-fill-fraction/ilf-true-outline-read.html">true-outline read</a>. Receipt: <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/machine/west-true-outline.json</code>.</p>
+  </section>
+
 </main>
 </body>
 </html>

@@ -29,6 +29,7 @@ def main():
     parser.add_argument("output", type=Path)
     parser.add_argument("--mutation", action="store_true")
     parser.add_argument("--focused", action="store_true")
+    parser.add_argument("--combined", action="store_true")
     parser.add_argument("--files", nargs="+")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
@@ -71,16 +72,20 @@ def main():
         files = args.files or (
             [own] if args.focused or args.mutation else [own, *FILES]
         )
-        for name in files:
-            if not (tree / name).exists():
-                record["scoped_suite"] = "unarmed: test file absent at this revision"
-                save()
+        present = [name for name in files if (tree / name).exists()]
+        if len(present) != len(files):
+            record["scoped_suite"] = "unarmed: test file absent at this revision"
+            save()
+        groups = [present] if args.combined else [[name] for name in present]
+        for names in groups:
+            if not names:
                 continue
-            command = [PYTHON, "-m", "pytest", "-p", "no:cacheprovider", "-q", name]
-            if name != own:
+            command = [PYTHON, "-m", "pytest", "-p", "no:cacheprovider", "-q", *names]
+            if names != [own]:
                 command += ["-rfP"]
             command_text = "PYTHONPATH=. JAX_PLATFORMS=cpu " + shlex.join(command)
-            log = args.output / (Path(name).stem + ".log")
+            label = "combined" if args.combined else Path(names[0]).stem
+            log = args.output / (label + ".log")
             with log.open("w") as stream:
                 stream.write(
                     f"# revision: {args.revision} tree: {tree} "
@@ -133,7 +138,7 @@ def main():
                 )
             )
             save()
-            print("FILE", name, "EXIT", result.returncode, flush=True)
+            print("FILES", names, "EXIT", result.returncode, flush=True)
         record["complete"] = True
         save()
         print("REMOVING job-owned scratch", tree, flush=True)

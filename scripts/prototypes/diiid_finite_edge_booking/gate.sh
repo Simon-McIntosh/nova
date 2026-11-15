@@ -22,15 +22,20 @@ PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
 mkdir -p "$OUT"
 WORK=$(mktemp -d /tmp/base-XXXXXX)
 trap 'rm -rf "$WORK"' EXIT
+REVISION="$BASE_SHA"
+if [ "$ARM" = head ]; then
+    REVISION=$(git -C "$TREE" rev-parse HEAD)
+fi
+# Resolve the revision before extracting: the extracted tree carries no git
+# metadata, so a revision read from it falls back to the caller's argument and
+# reports the base on a head run.
 if [ "$ARM" = base ]; then
     ROOT="$WORK/base"
-    mkdir -p "$ROOT"
-    git -C "$TREE" archive "$BASE_SHA" | tar -x -C "$ROOT"
 else
     ROOT="$WORK/head"
-    mkdir -p "$ROOT"
-    git -C "$TREE" archive "$(git -C "$TREE" rev-parse HEAD)" | tar -x -C "$ROOT"
 fi
+mkdir -p "$ROOT"
+git -C "$TREE" archive "$REVISION" | tar -x -C "$ROOT"
 TARGETS=(
     tests/test_current_book_fragments.py
     tests/test_current_book_vectorised.py
@@ -42,7 +47,7 @@ if [ "$ARM" = head ]; then
     TARGETS+=(tests/equilibrium/test_finite_edge_booking.py)
 fi
 printf '# arm: %s; revision: %s; tree: %s; command: gate.sh %s %s %s %s\n' \
-    "$ARM" "$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || echo "$BASE_SHA")" \
+    "$ARM" "$REVISION" \
     "$TREE" "$TREE" "$BASE_SHA" "$OUT" "$ARM"
 printf 'TARGETS %s\n' "${TARGETS[*]}"
 cd "$ROOT" || exit 2

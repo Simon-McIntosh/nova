@@ -17,7 +17,24 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 24,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "The decision's question and context are its wording as put to the lead and are kept as the record of what was asked; its section list, the ruling's rationale and both sections' text name the delivering section, and no node's endpoint depends on the question text.",
+      "when": "2026-11-15T20:20:11.797464+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The decision's question and context are its wording as put to the lead and are kept as the record of what was asked; its section list, the ruling's rationale and both sections' text name the delivering section, and no node's endpoint depends on the question text.",
+      "when": "2026-11-15T20:20:11.797464+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261115T201051109865-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261115T201051109865-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "e84a974e1383e1d2f7a4010661067580d941dbf3",
   "rubric": "content",

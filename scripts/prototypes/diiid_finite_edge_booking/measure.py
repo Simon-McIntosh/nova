@@ -5,6 +5,11 @@ edge arm, run with the DIII-D consumer on the booked finite-edge route. After
 that row lands this driver reads the same built profile at the terminal state
 and reports the current the booked route gives the cells that straddle the
 level, beside the value-only route's assignment there.
+
+The two routes are read on one operator, so the comparison differs only in how
+the cell current is taken from the sampled density: the booked route integrates
+the moment blocks the consumer supplies, and the value-only route evaluates the
+point weight at the cell centre.
 """
 
 from __future__ import annotations
@@ -45,28 +50,71 @@ def capture_build(original):
     return build
 
 
+def capture_solve(original):
+    """Retain the equilibrium the row returned, so the read uses that one."""
+
+    def solve(profile, *args, **kwargs):
+        result = original(profile, *args, **kwargs)
+        SOLVED["value"] = result
+        return result
+
+    return solve
+
+
+def _optional(value):
+    """Return a JSON-safe float, or None where the field is absent."""
+
+    if value is None:
+        return None
+    array = np.asarray(value)
+    if array.size != 1:
+        return None
+    number = float(array.reshape(-1)[0])
+    return number if np.isfinite(number) else None
+
+
+def terminal(equilibrium) -> dict[str, object]:
+    """Return the terminal convergence and current-pin readings of one solve."""
+
+    fixed_point = equilibrium.fixed_point
+    normalisation = equilibrium.normalisation
+    return {
+        "terminal_residual": _optional(fixed_point.residual),
+        "converged": bool(np.asarray(fixed_point.converged)),
+        "termination_reason": int(
+            np.asarray(getattr(fixed_point, "termination_reason", -999)).reshape(-1)[0]
+        ),
+        "current_pin_amplitude": _optional(normalisation.amplitude),
+        "current_pin_policy": normalisation.policy_name,
+    }
+
+
 def discriminator() -> dict[str, object]:
     """Return the booked and value-only current of the boundary-band cells."""
 
-    import jax.numpy as jnp
-
     built = BUILT.get("value")
-    state = SOLVED.get("value")
-    if built is None or state is None:
+    equilibrium = SOLVED.get("value")
+    if built is None or equilibrium is None:
         return {"status": "unavailable"}
-    operator = built[0].operator
-    psi = jnp.asarray(np.asarray(state).reshape(-1))
-    axis = float(np.asarray(operator.declared_axis_flux))
-    boundary = float(np.asarray(operator.declared_boundary_flux))
-    physical = np.asarray(psi)[: operator.grid.node_number]
-    normalised = (physical - axis) / (boundary - axis)
+    operator = built.profile.operator
+    psi = equilibrium.flux
+    topology = operator._fixed_design_read(psi)[1]
+    axis = float(np.asarray(topology.axis_flux))
+    boundary = float(np.asarray(topology.boundary_flux))
+    if not (np.isfinite(axis) and np.isfinite(boundary)):
+        return {"status": "unresolved boundary level"}
+    # The state is ordered grid nodes, then wall nodes, then the sampling
+    # nodes, while a cell current carries one entry per grid cell, so both
+    # reads are restricted to the grid population.
+    cells = operator.grid.node_number
+    normalised = (np.asarray(psi)[:cells] - axis) / (boundary - axis)
     band = np.abs(normalised - 1.0) <= BAND
     if not band.any():
         return {"status": "empty band"}
-    booked = np.asarray(operator.cell_current(psi))
+    booked = np.asarray(operator.cell_current(psi))[:cells]
     point = np.asarray(
         replace(operator, use_linear_moments=False, sample=None).cell_current(psi)
-    )
+    )[:cells]
     difference = np.abs(booked - point)[band]
     band_peak = float(np.abs(booked[band]).max())
     return {
@@ -79,6 +127,9 @@ def discriminator() -> dict[str, object]:
         "difference_relative_to_band_peak": (
             float(difference.max() / band_peak) if band_peak else None
         ),
+        "raw_current_a": float(booked.sum()),
+        "axis_flux_wb": axis,
+        "boundary_flux_wb": boundary,
     }
 
 
@@ -94,16 +145,12 @@ def main() -> None:
     args = parser.parse_args()
 
     bench.build_profile = capture_build(bench.build_profile)
-    solve = bench.ForwardProfile.solve
-
-    def capture_solve(profile, request=None, *a, **kw):
-        result = solve(profile, request, *a, **kw)
-        SOLVED["value"] = getattr(result, "state", result)
-        return result
-
-    bench.ForwardProfile.solve = capture_solve
+    bench.ForwardProfile.solve = capture_solve(bench.ForwardProfile.solve)
     extent.main()
     receipt = discriminator()
+    equilibrium = SOLVED.get("value")
+    if equilibrium is not None:
+        receipt.update(terminal(equilibrium))
     receipt.update(
         dict(
             frame=args.frame,

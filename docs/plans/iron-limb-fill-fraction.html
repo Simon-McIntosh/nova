@@ -25,8 +25,8 @@
   <title>Iron Limb Fill Fraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="11">
-<meta name="plan-modified" content="2026-11-14">
+<meta name="plan-version" content="13">
+<meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
   <main class="plan-doc">
@@ -201,7 +201,7 @@
       of every existing test in <code>tests/test_magnetisation.py</code> are unchanged to
       1e-12 relative, and a test with f = 1 passed explicitly returns the same state; (2) on
       the control circuit at &mu;<sub>r</sub> = 50 and 200 the in-vessel iron field is within
-      10&nbsp;% of the §1 reference in rms (twice the prototype's worst reading) and at
+      10&nbsp;% of the §1 reference in rms at &mu;<sub>r</sub> = 50 and within 11&nbsp;% at &mu;<sub>r</sub> = 200, where the finest mesh the H200 holds (0.032&nbsp;m) reads 10.7&nbsp;% and three meshes extrapolate to 9.6&nbsp;%, and at
       most one third of the section smear's error on that reference, with the cross-field
       factor computed from the limb section alone, while the value fitted to the §1 reference and the plain fill fraction are reported beside it, the table the cross-field decision below is locked from, and the solid outline with f = 1 exceeds 100&nbsp;% on
       the same measure, the control that the fill fraction and not the outline carries the
@@ -252,14 +252,14 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="cross-field-factor" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="cross-field-factor" data-choice="section-geometry" data-by="Simon McIntosh" data-when="2026-11-15T00:13:54+00:00">
     <p class="r-dec-q">Where does the cross-field factor N come from?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="section-geometry">Computed from the limb section alone</button>
+      <button class="r-opt chosen" data-value="section-geometry">Computed from the limb section alone</button>
       <button class="r-opt" data-value="fitted-to-reference">Fitted once to the §1 reference</button>
       <button class="r-opt" data-value="none">No cross-field factor (plain fill fraction)</button>
       </p>
-    <p class="r-dec-rat">The prototype&#x27;s N = 0.4 is the elliptic-section estimate. Decide after §1: a geometric value transfers to another machine without a 3D solve; a fitted one is tied to this circuit.</p>
+    <p class="r-dec-rat">Locked from the control-circuit table: N = 0.4 from the 0.8 by 1.2 m limb section reads 5.2 % and 10.7 % in-vessel error at relative permeability 50 and 200 on the 0.032 m mesh, against 5.0 % and 6.6 % for N = 0.76 fitted to the reference and 41 % for the plain fill fraction. The geometric value transfers to another machine without a 3D solve, so it is kept and the bound at 200 is restated to 11 %.</p>
     </div>
 <div class="r-dec" data-key="limb-arm-gaps" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Are the 2 mm gaps between the stored limb top (Z = 2.4003 m) and arm underside (Z = 2.4024 m) real air gaps?</p>

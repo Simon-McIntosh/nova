@@ -11,7 +11,11 @@ printf "# revision: %s; tree: %s; read: %s\n" "$REVISION" "$TREE" "$OUTPUT"
 printf "JOB=%s NODE=%s\n" "${SLURM_JOB_ID:-none}" "$(hostname)"
 BASE="$TREE/scripts/prototypes/diiid_finite_edge_booking/discriminate.py"
 STATUS=0
-for ROW in 137:diverted:1.2119:0.80 146:diverted 146:limited 179:limited; do
+ROWS=(137:diverted:1.2119:0.80 146:diverted 146:limited 179:limited)
+if [ "$#" -gt 2 ]; then
+    ROWS=("${@:3}")
+fi
+for ROW in "${ROWS[@]}"; do
     FRAME=${ROW%%:*}
     REST=${ROW#*:}
     BRANCH=${REST%%:*}

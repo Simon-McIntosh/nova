@@ -114,6 +114,10 @@ def main() -> None:
         "branch": args.branch,
         "arm": args.arm,
         "moment_route": bench.FINITE_EDGE_MOMENT_ROUTE,
+        # The route the row's own operator carries, read rather than declared:
+        # the booked route needs the linear moments and the sampling target.
+        "operator_linear_moments": bool(operator.use_linear_moments),
+        "operator_has_sample_target": operator.sample is not None,
         "state_size": int(psi.size),
         "grid_cells": cells,
         "axis_flux_wb": axis,

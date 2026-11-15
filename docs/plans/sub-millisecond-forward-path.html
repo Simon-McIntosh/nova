@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="371">
+<meta name="plan-version" content="372">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -1101,6 +1101,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261115T114051931671-review-of-fused-booking-none-quadrature-d6af4a5c20e9" data-who="reckon-build" data-when="2026-11-15T12:37:57.981Z">
     <div class="r-comment-body"><p>Reviewed r-20261115T104904487312-fused-booking-none-quadrature at base 7244dcc3c1b8fe8c3a38476214d66a024fbf4d14 and head d6af4a5c20e9faf82d4c19e90d8ace6b172677b1: the node settled the fixture side, tests/test_bank_lane_drive.py:392 now passes current.Quadrature() while support_read.py:1355 is untouched, the original fixture re-fails with the same TypeError under the negative control, and the three fresh-process file arms record zero added failures; scores goal 19, evidence 18, scope 20, durability 16, reuse 20, fit 18, no findings.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T104904487312-fused-booking-none-quadrature" data-who="reckon-build" data-when="2026-11-15T11:18:17Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-none-quadrature.html#fused-booking-none-quadrature-landing — repaired the toy lane-factor fixture with a real Quadrature and profile-aware fused booking; one rigel job measures base 42 passed/1 failed to head 43 passed across three fresh-process files, zero added failures; original-fixture negative control reproduces the same TypeError.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048" data-who="reckon-build" data-when="2026-11-14T10:26:14.839Z">
     <div class="r-comment-body"><p>two review records under review-records/ of run r-20261113T165201745905-bank-traced-inputs, one plain and one pinned at the reviewed head; this node's suite fence is unarmed so no pytest gate exists for it and none ran.</p></div>

@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T16:53:45.592Z",
+  "dispatched_at": "2026-11-15T16:53:26Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:65",
+      "id": "reasoning-1",
+      "reason": "the plan's own evidence puts the best measured form at 145.6 s and its derivative sharing at 7.7e-7, so the 60 s clause needs either a further named lever or a conditioned bound before a worker is sent at it.",
+      "text": "s3 states \"Reaching 60 s from there needs the second-derivative path to shrink as well as the variadic ops\", then reports that the form which did share derivative directions reached 174,686 instructions and 145.6 s and moved Hessian entries by 7.7e-7 relative; the cited variadic-split fragment confirms 145.586033 s against a 133.79 s derived bound and a 2.41\u00d7 miss of the section's 60 s clause, so the only named lever is both insufficient for clause (1) and 770\u00d7 outside clause (2)'s 1e-9 \u2014 the section names no mechanism for the remaining factor but declares the bound as its done-when, and a node dispatched on it can only fail or invent a lever the plan did not sanction",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:65",
+      "id": "done_when-1",
+      "reason": "the clause must name the paired receipts to supply (or the skip as the report), otherwise the recorded negative control is two skips and the assertion the section claims the tests carry does not exist in them.",
+      "text": "s3 says \"Two tests in tests/biot/test_production_row_compile.py assert 201,070 instructions and the base compile less its two variadic passes. They fail on the H200 on main and stay enabled as visible failures; the node reports both at head and edits neither\", but both tests skip unless `NOVA_PRODUCTION_COMPILE_BASE` and `NOVA_PRODUCTION_COMPILE_HEAD` are set (`tests/biot/test_production_row_compile.py:15-21`), assert no literal 201,070 or literal 131.166 s, and derive both bounds from the supplied base arm (`test_production_row_splitter_instruction_budget`: `head * 2 <= base`; `test_production_row_cold_compile_savings`: `head_seconds <= base_seconds - passes`), so the node's own report prints `2 skipped` unless paired receipts are supplied \u2014 the declared red control cannot be observed as stated",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:71",
+      "id": "single_goal-1",
+      "reason": "one node cannot be closed on one verdict when its gate proves a compile bound and an unrelated three-file regression set at once, so the arm needs its own node or section.",
+      "text": "s4's added sentence gives one node a second deliverable, base-arm-then-head-arm runs of `tests/test_tracked_read.py`, `tests/test_bank_newton_step.py` and `tests/test_support_read.py` with no head failure the base lacks, on top of the three clauses about the topology read's 60 s compile, the `test_kernel_compile_growth` xfail and the marker removal; that is a fourth done-when clause and a second reviewable outcome, so neither the compile verdict nor the regression verdict closes the node",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:71",
+      "id": "done_when-2",
+      "reason": "the job count is what the node's evidence is built from, and an unsatisfiable job shape leaves the worker choosing between two instructions the plan states as one.",
+      "text": "s4's new sentence requires the three files to run base arm then head arm \"in one job (sirius on CPU at 192 GB; a file whose CPU wall passes ten minutes goes to the H200 instead)\", but partition and card membership are fixed at submission and a file's CPU wall is known only after it runs, so no single job can both serve sirius CPU and move an over-ten-minute file to the H200; the worker must either guess the rung blind or open a second job, which the same sentence forbids",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "6d0487d5723e75aec96c9afb0668486dd1758f87",
+  "plan_fingerprint": "26e8543c60df9700176bfd9dec2c69621a2bf1eaefcf52ea3764fb7be3aca1be",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 68,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261115T165257010113-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "d8e4fab7c546ac0143ef432fd168bdc2b2cea930",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `/nova/evidence/fragments/kernel-compile-barrier/ordered-sharing.html` resolves in the checkout (`docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html`, first committed 35fad5250); `tests/biot/test_production_row_compile.py`, `tests/equilibrium/test_topology_read.py` (marker at line 39), `tests/test_tracked_read.py`, `tests/test_bank_newton_step.py` and `tests/test_support_read.py` all exist, and the fragment carries the 267,438 / 217.9 s, 174,686 / 145.6 s and 7.7e-7 figures s3 cites.",
+    "done_when": "a finding \u2014 s3's red-control sentence and s4's job shape each name a check a worker cannot execute as written (two findings below).",
+    "evidence_paths": "pass \u2014 s3's measurement cites `docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html`, a tracked fragment, and s4 inherits the plan's fragment-under-`docs/evidence` convention rather than a scratch path.",
+    "naming": "pass \u2014 s3's new prose names measured forms (\"ordered sharing\", \"shared derivative directions\") and no plan label, stage name or ticket number reaches a symbol or comment.",
+    "reasoning": "a finding \u2014 s3's 60 s endpoint is contradicted by the very measurement the section cites as the path to it.",
+    "single_goal": "a finding \u2014 s4 now carries two deliverables, the topology read's compile clause and a base/head regression arm over three unrelated test files.",
+    "wiring": "pass \u2014 s3 and s4 each declare depends-on s2 and a link to s5, and both targets exist and are `done`, so no needed dependency is missing and s4's new three-file arm depends on nothing undeclared."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "b465cef1e2cc13170ec112ecc51774aeedecf0105d30a3902a7c0ecc0a762197",
+    "s3": "691619f085b22ece8a76e412338e6bb7f4a80f0decae000d916154d5ea5652e0",
+    "s4": "621774858c5b584296b38a791c4a70cab52c9f6d18e6e1a267b31be639dbd2a0",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T17:01:15.165221+00:00",
+  "total": null
+}

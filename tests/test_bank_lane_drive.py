@@ -13,6 +13,7 @@ configure_dtypes()
 assert jax.config.jax_enable_x64
 
 from nova.equilibrium import drive_continuation as driver  # noqa: E402
+from nova.equilibrium import current  # noqa: E402
 from nova.equilibrium import support_read as bank  # noqa: E402
 from tests import test_bank_solve_driver as solver_toy  # noqa: E402
 
@@ -332,6 +333,18 @@ def test_rejected_attempt_keeps_last_accepted_lane_support():
 def test_incoming_factor_rebuild_uses_lane_profiles(monkeypatch):
     """A poorly contracting carried factor rebuilds with each lane's profile."""
     builds = []
+    bookings = []
+
+    def booking(_operands, state, support, profile, _gradient, quadrature):
+        assert isinstance(quadrature, current.Quadrature)
+        jax.debug.callback(lambda target: bookings.append(float(target)), profile)
+        booked = current.Booking(
+            *(jnp.full_like(value, profile) for value in state),
+            jnp.asarray(1.0),
+            jnp.asarray(1.0),
+            support.valid,
+        )
+        return booked, None
 
     def residual(_operands, _base, state, support, profile, _quadrature):
         return bank.StepResidual(
@@ -352,6 +365,7 @@ def test_incoming_factor_rebuild_uses_lane_profiles(monkeypatch):
     monkeypatch.setattr(bank, "read_batch", solver_toy._toy_read)
     monkeypatch.setattr(bank, "step_residual", residual)
     monkeypatch.setattr(bank, "step_jacobian", jacobian)
+    monkeypatch.setattr(bank, "book_and_local_sensitivities", booking)
     targets = jnp.asarray([0.25, -0.75], dtype=jnp.float64)
     moments = tuple(jnp.ones((2, 1), dtype=jnp.float64) for _ in range(3))
     points = jnp.zeros((2, 1, 2), dtype=jnp.float64)
@@ -375,7 +389,7 @@ def test_incoming_factor_rebuild_uses_lane_profiles(monkeypatch):
             None,
             lambda lane: targets[lane],
             None,
-            None,
+            current.Quadrature(),
             factor_cache=factor,
             factor_valid=jnp.ones(2, bool),
             reuse_factor=True,
@@ -385,6 +399,7 @@ def test_incoming_factor_rebuild_uses_lane_profiles(monkeypatch):
     )(moments, incoming)
     jax.block_until_ready(result)
     jax.effects_barrier()
+    assert sorted(bookings) == [-0.75, 0.25]
     assert sorted(builds) == [(-0.75, 1.0), (0.25, 1.0)]
     np.testing.assert_array_equal(result.steps, [1, 1])
     np.testing.assert_array_equal(result.refactors, [1, 1])

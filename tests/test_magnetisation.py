@@ -1182,7 +1182,8 @@ def test_reference_stamp_refuses_wrong_revision_and_dirty_tree(tmp_path):
         require_clean_script(script, blob, revision)
 
 
-def test_linear_shell_operator_pin(tmp_path):
+@pytest.mark.parametrize("batch_edges", [False, True], ids=["compact", "batch-edges"])
+def test_linear_shell_operator_pin(tmp_path, monkeypatch, batch_edges):
     """The affine integration rule preserves its delivered shell-cell operator."""
     import json
     from pathlib import Path
@@ -1200,15 +1201,40 @@ def test_linear_shell_operator_pin(tmp_path):
     assert len(cells.polygons) == control["shell_cells"] == 228
     import os
 
-    full_reference = os.environ.get("NOVA_LINEAR_OPERATOR_REFERENCE")
+    full_reference = (
+        os.environ.get("NOVA_LINEAR_OPERATOR_REFERENCE") if not batch_edges else None
+    )
     polygons = (
         cells.polygons
         if full_reference
         else tuple(cells.polygons[index] for index in control["selected_cells"])
     )
-    actual, _ = iron.linear_galerkin_cell_interaction(polygons, plan=iron._PLAN)
+    plan = iron._PLAN
+    if batch_edges:
+        from nova.biot import sectionaverage, tiledassembly
+
+        section_nodes = sectionaverage.section_nodes
+
+        def split_weights(polygon, order):
+            points, weights = section_nodes(polygon, order)
+            if np.array_equal(polygon, polygons[0]):
+                repeats = (4096 + len(points) - 1) // len(points)
+                points = np.tile(points, (repeats, 1))
+                weights = np.tile(weights / repeats, repeats)
+            return points, weights
+
+        # Splitting weights preserves the rule while crossing a real flush.
+        assert len(split_weights(polygons[0], 6)[0]) >= 4096
+        assert len(polygons) > 1
+        monkeypatch.setattr(sectionaverage, "section_nodes", split_weights)
+        plan = tiledassembly.TilePlan(8, 8, plan.block, plan.n_panels, plan.n_nodes)
+        atoms = iron.linear_magnetisation_geometry(polygons)["atoms"]
+        assert any(s.stop <= t.start for t, s in plan.tiles(len(atoms), len(atoms)))
+    actual, _ = iron.linear_galerkin_cell_interaction(polygons, plan=plan)
     if full_reference:
         expected = np.load(full_reference)
+    elif batch_edges:
+        expected = np.asarray(control["operator"])
     else:
         from scripts.iron_linear_magnetisation.kernel_cost import load_owner
 

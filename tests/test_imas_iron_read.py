@@ -12,8 +12,8 @@ import pytest
 import shapely
 
 import nova.imas.machine as machine_module
+from nova.biot.magnetisation import _fit_law, _mesh as mesh
 from nova.imas.machine import ImasGeometryReader, StaticMachineDescription
-from scripts.prototypes.iron_magnetisation.magnetisation import Material, mesh
 
 ROOT = Path(__file__).resolve().parents[1]
 CALLERS = (
@@ -69,7 +69,6 @@ def _namespace(west):
         StaticMachineDescription=StaticMachineDescription,
         np=np,
         shapely=shapely,
-        Material=Material,
     )
 
 
@@ -102,7 +101,7 @@ def test_west_iron_segments_match_previous_reads(west):
 
 def test_prototype_inputs_match_previous_read(west):
     namespace = _read_assignments(
-        CALLERS[0], ("machine", "segments", "table", "material"), _namespace(west)
+        CALLERS[0], ("machine", "segments", "table"), _namespace(west)
     )
     iron = west[2]
     assert len(namespace["segments"]) == len(iron.segment) == 6
@@ -110,12 +109,18 @@ def test_prototype_inputs_match_previous_read(west):
         np.testing.assert_array_equal(
             actual.exterior.coords, shapely.Polygon(expected).exterior.coords
         )
+    np.testing.assert_array_equal(namespace["table"].b_field, iron.segment[0].b_field)
     np.testing.assert_array_equal(
-        namespace["material"].b_field, iron.segment[0].b_field
+        namespace["table"].permeability_relative, iron.segment[0].permeability_relative
     )
-    np.testing.assert_array_equal(
-        namespace["material"].mu_r, iron.segment[0].permeability_relative
+    table = namespace["table"]
+    actual = _fit_law(table.b_field, table.permeability_relative)
+    expected = _fit_law(
+        np.asarray(iron.segment[0].b_field),
+        np.asarray(iron.segment[0].permeability_relative),
     )
+    for got, wanted in zip(actual, expected, strict=True):
+        np.testing.assert_array_equal(got, wanted)
 
 
 def test_stray_field_outlines_match_previous_read(west):

@@ -81,6 +81,16 @@
       "note": "\u00a79's done-when adds a negative control that reddens when a fitted arm equals its measured arm, plus a second control requiring \u00a78's refusal at the build seam.",
       "reason": "",
       "when": "2026-11-15T17:04:47.814152+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "feb7cbbc86b9eb83d255802803fb371f760c31b5",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a78 now names the compared domain: the 19 shipped conductor entries, matched by name, excluding the five circuit-driven conductors the resolution appends.",
+      "reason": "",
+      "when": "2026-11-15T17:05:24.280647+00:00"
     }
   ],
   "responses": {
@@ -109,7 +119,7 @@
       "commit_basis": "edit",
       "note": "\u00a78 now names the compared domain: the 19 shipped conductor entries, matched by name, excluding the five circuit-driven conductors the resolution appends.",
       "reason": "",
-      "when": "2026-11-15T17:04:14.669337+00:00"
+      "when": "2026-11-15T17:05:24.280647+00:00"
     },
     "reasoning-2": {
       "action": "acted",

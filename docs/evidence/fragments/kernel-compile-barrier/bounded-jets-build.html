@@ -1,81 +1,33 @@
 <article id="bounded-jets-build">
-<h2>A bounded jets build: scope defect at dispatch</h2>
-<p>Read of the live plan at version 70, section §3, in worktree <code>bounded-jets-build</code> at base <code>7479bb0b5d21fa399c83954490e59d2f1df5be57</code>. The declared write paths are the two artifacts, <code>docs/evidence/fragments/kernel-compile-barrier/bounded-jets-build.html</code> and <code>docs/figures/kernel-compile-barrier/bounded-jets-build</code>. The node goal and every clause of its done-when require product source edits, so the node cannot be worked inside its fence. Nothing was changed under <code>nova/</code> or <code>scripts/</code>; the facts below are read from the tree and the plan, and are what a re-dispatched node needs.</p>
+<h2>A bounded jets build: one point program, and the two levers measured</h2>
+<p>Work begins at <code>7479bb0b5d21fa399c83954490e59d2f1df5be57</code> with <code>main</code> at <code>1dcef7ee8</code> merged in as <code>bf241750b</code> (<code>--no-ff</code>, no rebase). The live section was read at plan version 70. Every number below is on the device it names; a CPU number is a CPU number and carries no H200 bound.</p>
 
-<section id="bounded-jets-build-duplication">
-<h3>The point program exists twice, and the two forms differ</h3>
-<p>The owner is <code>_source_jets</code> at <code>nova/equilibrium/fixed_points.py:323</code>, whose batched program is <code>_row_program</code> at <code>:524</code>. The prototype copy is <code>_source_jets</code> at <code>scripts/prototypes/read_route/jets.py:229</code>. Both functions are 60 and 57 lines; the only textual difference is the sharing of the gradient's value:</p>
-<pre><code>owner:  def gradient_with_value(target):
-            value, gradient = value_gradient(target)
-            return gradient, (value, gradient)
-        hessian, (value, gradient) = jax.jacfwd(gradient_with_value, has_aux=True)(point)
-
-copy:   value, gradient = value_gradient(point)
-        hessian = jax.jacfwd(lambda target: value_gradient(target)[1])(point)</code></pre>
-<p>The owner already carries the auxiliary-reuse form, so the copy is the older shape. Neither file contains a <code>lax.scan</code> or any other term-order scan: the program that compiles at 217.9 s and 267,438 post-splitter instructions on the H200 (§3's stated base, <code>ordered-sharing</code>) is the unrolled form in both files, and the §3 levers named in the plan — a fixed-capacity scan over the term order, then a cheaper regular Hessian at corner heights — have not been applied to either.</p>
+<section id="bounded-jets-build-cutover">
+<h3>One point program: the copy is deleted and all ten import sites bind the owner</h3>
+<p>The prototype copy was <code>_source_jets</code> at <code>scripts/prototypes/read_route/jets.py:229</code>, 57 lines against the owner's 60 at <code>nova/equilibrium/fixed_points.py:323</code>, differing only in the sharing of the gradient's value (<code>has_aux</code> in the owner, a second <code>value_gradient</code> call in the copy). The copy is deleted and every site that referenced it now binds <code>fixed_points._source_jets</code>: the jets build's own call site (<code>read_route/jets.py</code>, re-exported for its two downstream importers in <code>iter_bank/measure.py</code> and <code>saddle_expansion/expansion.py</code>, which are outside this node's scope and keep working), <code>fixed_points/solve.py:14</code>, <code>kernel_compile_census/row.py:113</code>, the four <code>bank_hessian_diagnosis</code> modules (<code>localize.py</code>, <code>terms.py</code>, <code>cell.py</code>, <code>projected.py</code>) and <code>fixed_points/measure.py:152</code>.</p>
+<p>Byte identity of the removed copy against the owner was proved before deletion and is re-runnable afterwards: the copy's source is read from the base revision with <code>git show</code>, exec'd on its own, and both programs run eagerly (per-primitive, no single compiled program) over two cells and two points. Result: <code>TOTAL_ENTRIES=72 BYTE_DIFFERENCES=0 BIT_IDENTICAL=True</code>, <code>EXIT=0</code>. The log is <code>pinned-copy-identity.log</code> under the run's output root.</p>
 </section>
 
-<section id="bounded-jets-build-importers">
-<h3>The copy has ten importers across the tree, not three</h3>
-<p>§3 names three importers. The read at this base finds ten sites that import or reference the copy's <code>_source_jets</code>, so a cutover that migrates only the three named sites leaves stale bindings:</p>
-<table>
-<thead><tr><th>Site</th><th>Line</th><th>Use</th></tr></thead>
-<tbody>
-<tr><td><code>scripts/prototypes/read_route/jets.py</code></td><td>321</td><td>the jets build, <code>jax.jit(jax.vmap(...))</code>, whose batches built the 550-cell operator bank rows and report <code>JET_BUILD</code> throughput; defined at 229</td></tr>
-<tr><td><code>scripts/prototypes/fixed_points/solve.py</code></td><td>14, 121</td><td>module import into <code>_row_program</code></td></tr>
-<tr><td><code>scripts/prototypes/kernel_compile_census/row.py</code></td><td>113, 115</td><td>the census row <code>prototype_point_batch</code></td></tr>
-<tr><td><code>scripts/prototypes/bank_hessian_diagnosis/localize.py</code></td><td>16, 30, 39</td><td>source and moving programs, base and candidate draws</td></tr>
-<tr><td><code>scripts/prototypes/bank_hessian_diagnosis/terms.py</code></td><td>16, 81</td><td>per-point term decomposition</td></tr>
-<tr><td><code>scripts/prototypes/bank_hessian_diagnosis/cell.py</code></td><td>25, 105</td><td>uniform-cell point jet</td></tr>
-<tr><td><code>scripts/prototypes/bank_hessian_diagnosis/projected.py</code></td><td>17, 85</td><td>projected-rectangle check</td></tr>
-<tr><td><code>scripts/prototypes/fixed_points/measure.py</code></td><td>152, 157</td><td>lazy import inside a measurement function</td></tr>
-<tr><td><code>tests/biot/test_moment_program_identity.py</code></td><td>192, 226</td><td>parses the owner's source from git and compares against <code>fixed_points._source_jets</code>; no import of the copy, unaffected by the cutover</td></tr>
-<tr><td><code>scripts/prototypes/kernel_compile_census/run_job.py</code></td><td>19</td><td>names the census row, not the function</td></tr>
-</tbody>
-</table>
-<p>The census harness keeps both names deliberately: <code>production_point_batch</code> already calls <code>fixed_points._row_program</code> (<code>row.py:111-112</code>) and <code>prototype_point_batch</code> calls the copy. Pointing the latter at the owner is the one-line edit §3 permits there, and it makes the two census rows measure the same program — which is what §3 asks for, and also what removes the copy's only independent compile.</p>
+<section id="bounded-jets-build-levers">
+<h3>Both named levers are ruled out by measurement, and the cost they would have to remove is not where §3 places it.</h3>
+<p><strong>The term-order scan.</strong> The production point program is cell-invariant: lowering <code>production_point_batch</code> on CPU gives 8,408,375 StableHLO bytes at 8 cells, 7,482,936 at 16, 6,461,067 at 64 and 6,088,070 at 132. A one-hexagon program is 5,440,521 bytes and eight hexagons 5,442,157 (+0.03%). The cell axis therefore carries one body already, and a fixed-capacity scan over that axis replaces one body with one body plus loop machinery. The inverse experiment shows the same thing from the other side: a mutation that unrolls the term order into one moment body per term lowers to 27,479,507 bytes at 8 cells, 5.05 times the shared form, so the 5.05 factor is what the shared form already avoids rather than what remains to be won.</p>
+<p><strong>The cheaper regular Hessian at corner heights.</strong> The near-corner stabilisation in <code>polygonanalytic._packed_moments_height_tangent</code> — two <code>jax.jvp</code> directions plus four shifted evaluations of the full 9-row moment kernel — owns 28.8% of the lowered graph: with that jvp replaced by the ordinary first-order direction in a fresh process the program lowers to 5,990,537 bytes against 8,408,375, and the 1e-5 shift constant disappears from the module. A 28.8% ceiling cannot carry a 217.9 s cold compile to 60 s, and dropping or retiming the block changes near-corner derivative entries, which the identity ruling forbids.</p>
+<p><strong>Where the equations are.</strong> <code>attribute_graph</code> over the point program at 8 cells reports 248,141 expanded equations, led by <code>rangefunction._harmonic_pair_step</code> at 15.97%, <code>polygonanalytic._packed_analytic_moments_primal</code> at 9.74%, <code>rangefunction.evaluate</code> at 5.21%, <code>_product_sum_step</code> at 4.93% and <code>elliptic._pole_forward_step</code> at 3.83%, with 21.9% unattributed fused internals. That is the packed recurrence graph the section's earlier nodes already ranked; none of it is a per-term body that a scan could collapse.</p>
+<p>No clean form that reaches 60 s was produced in this attempt. A form was not abandoned for a bound it misses: the two levers the section names are measured here and neither can move the wall by the factor the bound needs.</p>
 </section>
 
-<section id="bounded-jets-build-required-grants">
-<h3>Write paths the node's own goal and done-when require</h3>
-<p>The work the goal states — one bounded program in <code>nova/equilibrium/fixed_points.py</code>, the copy deleted, three importers repointed — needs these paths granted; every one lies outside the dispatch's fence:</p>
-<ul>
-<li><code>nova/equilibrium/fixed_points.py</code> — the term-order scan and the Hessian form; the owner of the program.</li>
-<li><code>nova/biot/polygonanalytic.py</code> — only if the second lever, a cheaper regular Hessian at corner heights, is taken; <code>tests/test_moment_field_hessian.py</code> is its stated guard.</li>
-<li><code>scripts/prototypes/read_route/jets.py</code> — delete <code>_source_jets</code> at 229 and import the owner at the jets-build call site.</li>
-<li><code>scripts/prototypes/fixed_points/solve.py</code>, <code>scripts/prototypes/kernel_compile_census/row.py</code>, and the four <code>scripts/prototypes/bank_hessian_diagnosis/*.py</code> modules — repoint the remaining importers so no stale copy binding survives.</li>
-</ul>
-<p>With those granted, the three done-when clauses also need scheduler jobs this node's host cannot open as steps: an H200 job at each of the two §0 arms (282 cells, 2,132 nodes) for clause (1), the 4-hour <code>--mem=450G</code> sirius job for clause (2)'s 64-node base subset, and a <code>--mem=64G</code> job for clause (3)'s 900 s coarse-tie census test. The allocation this node runs in is <code>98dci4-clu-2001</code> (CPU, 24 GB), so each of those is an <code>sbatch</code> job of its own.</p>
+<section id="bounded-jets-build-arms">
+<h3>Cold-compile arms</h3>
+<p>The paired production-row profile on the H200 is <span id="bounded-jets-build-arms-pending">pending</span>.</p>
 </section>
 
-<section id="bounded-jets-build-cutover-risk">
-<h3>Cutover risk to settle before the copy is deleted</h3>
-<p>The operator bank rows that exist today were built by the copy's form, and the owner's <code>has_aux</code> form differentiates the same <code>value_gradient</code> closure, so the two are expected to agree; the tree carries no test that compares them, and this node could not add one inside its fence. The migration needs a byte comparison of the two jitted programs on one coupling; the two blocks above already show the exact source shapes to compare.</p>
-<p>An attempt at that comparison was made read-only and stopped by the worker after 191 s. It imported both programs and printed their modules (<code>OWNER_MODULE=…/nova/equilibrium/fixed_points.py</code>, <code>COPY_MODULE=…/scripts/prototypes/read_route/jets.py</code>), then entered the first cold compile on four points and grew past 2.9 GB resident. The program is the barrier regardless of the point count, and this node's allocation is 24 GB, so the run was killed before any numeric result. No value or tangent identity is claimed from it.</p>
+<section id="bounded-jets-build-guard">
+<h3>The budget guard fires on an unrolled term order</h3>
+<p><code>tests/equilibrium/test_bounded_point_program.py</code> lowers the shared program over eight cells and refuses more than 6,000,000 StableHLO bytes; the shared form measures 5,442,157. The guard was falsified by making the guarded thing happen: with the moment evaluation unrolled into one body per term the test fails on its own assertion — <code>point program lowered to 27479507 bytes; budget is 6000000</code>, <code>1 failed</code>, <code>MUTATION_EXIT=1</code> — and the mutated module was restored byte-for-byte (<code>RESTORED=True</code>). Two earlier mutations of the same file are recorded as instruments that did not test the guard: a duplicated moment body was removed by the compiler (test still passed), and a per-cell slice mutation failed to trace because the cell axis is last in <code>edge</code>, <code>weight</code> and <code>reflection_partner</code> but leading in <code>centre</code>.</p>
 </section>
 
-<section id="bounded-jets-build-scope-cannot-be-amended">
-<h3>The running worker cannot recover its own scope</h3>
-<p>A self-widen was attempted inside the run and refused by the sandbox before reaching any wrote state. The command and its observable result:</p>
-<pre><code>reckon crew widen --run r-20261114T232501755703-bounded-jets-build \
-  --write-path nova/equilibrium/fixed_points.py … \
-  --reason 'the node goal and all three done-when clauses require …'
-OSError: [Errno 30] Read-only file system:
-  '/home/ITER/mcintos/.config/reckon/crew/locks/r-20261114T232501755703-bounded-jets-build.lock'</code></pre>
-<p>That refusal is not the only obstacle, and the second is structural rather than a mount: the fence is read once, at launch. <code>reckon/crew/claims.py</code> names the field a widen rewrites (<code>WIDEN_FENCE_FIELD = "node.write_paths"</code>) and states that "a widen rewrites exactly this, and the fence reads it once at launch, so a worker already running cannot pick up a path added underneath it". A coordinator's widen of this run is refused for the same window: <code>widen_claim</code> raises <code>ClaimAmendmentRefusedError</code> with "its worker is still running; wait for that process to exit" unless the caller is the worker itself. So the repair is to let this attempt end and then widen and resume, or to re-dispatch the node with the paths above in its write paths.</p>
-<p>The one-step coordinator repair once this attempt has exited, from the project checkout:</p>
-<pre><code>reckon crew widen --run r-20261114T232501755703-bounded-jets-build \
-  --write-path nova/equilibrium/fixed_points.py \
-  --write-path scripts/prototypes/read_route/jets.py \
-  --write-path scripts/prototypes/fixed_points/solve.py \
-  --write-path scripts/prototypes/kernel_compile_census/row.py \
-  --write-path scripts/prototypes/bank_hessian_diagnosis/localize.py \
-  --write-path scripts/prototypes/bank_hessian_diagnosis/terms.py \
-  --write-path scripts/prototypes/bank_hessian_diagnosis/cell.py \
-  --write-path scripts/prototypes/bank_hessian_diagnosis/projected.py \
-  --write-path scripts/prototypes/fixed_points/measure.py \
-  --reason 'the node goal and its done-when need the owner program, the copy deletion and every importer'</code></pre>
-<p>Add <code>nova/biot/polygonanalytic.py</code> only if the resumed node takes §3's second lever, the cheaper regular Hessian at corner heights, whose stated guard is <code>tests/test_moment_field_hessian.py</code>.</p>
-<p>The order a resumed node can follow without re-deriving this record: (1) delete the copy at <code>scripts/prototypes/read_route/jets.py:229</code> and import <code>fixed_points._source_jets</code> at the jets-build call site, then repoint the seven remaining importers above in one commit, so no stale binding survives; (2) prove the cutover is value-neutral before touching the program — <code>tests/biot/test_moment_program_identity.py</code> pins the owner against its base revision and is the CPU arm available for this; (3) take the term-order scan lever in the owner and profile with <code>scripts/prototypes/compile_pass_profile</code> on base and head in one fresh-process, cache-disabled H200 job, which yields both the instruction count after <code>variadic-op-splitter</code> and the cold compile wall for the two arms; (4) only then run the §0 arms: the 282-cell and 2,132-node builds reporting the compile wall, peak host memory and the <code>JET_BUILD</code> per-batch wall, with a CPU arm recorded beside them and no CPU bound claimed.</p>
+<section id="bounded-jets-build-suite">
+<h3>Suite arms</h3>
+<p>The baseline arm ran at <code>7479bb0b5d21fa399c83954490e59d2f1df5be57</code> in an extracted tree at <code>base-tree</code> under the output root, with the module reported as that tree's <code>nova/equilibrium/fixed_points.py</code> and <code>19 passed in 30.20s</code>, <code>EXIT=0</code>. Two earlier submissions of this arm are retained as invalid instruments: the first could not resolve its tree from the fleet node's node-local <code>$TMPDIR</code>, and the second expanded an empty variable into <code>/base-tree</code>; both ran the worktree and neither is an arm.</p>
 </section>
 </article>

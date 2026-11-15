@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T16:32:03.683Z",
+  "dispatched_at": "2026-11-15T16:22:20Z",
+  "figures": [
+    {
+      "judged_from_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T162134985002-review-of-diiid-finite-edge-booking-3c9422fc2db3-figure/image-0.png",
+      "path": "docs/figures/diiid-finite-edge-booking/terminal-states.svg",
+      "png_dimensions": "1399x720"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_finite_edge_booking/render.py",
+      "id": "f8cbb9fcc6a",
+      "line": 121,
+      "severity": "blocking",
+      "summary": "The solved lower null is drawn by draw_nulls in blue at the marker default zorder 6, and EFIT's cross is then drawn over it in #333333 at marker size 9 with a 1.6 pt edge at zorder 15, so the reference marker sits above a solved marker that is smaller (7.5 pt) and painted in the same blue as the contours it lies on. At the shared panel window 1 cm spans about 2.6 px (measured on 179 limited, where the reported 2.0 cm offset separates the two marker centres by 5.3 px), so the 1.0 cm offset on 137 diverted and the 1.6 cm offset on 146 diverted place the two centres about 2.6 px and 4.2 px apart against markers roughly ten pixels across, so the near-black cross covers the blue one completely: the reader sees only EFIT's null, not the solved one the caption says is drawn in its own style, and cannot tell the achieved null from the reference. On 179 limited the 2.0 cm offset still leaves the two marks overlapping into one indistinct cluster. This is the failure the figure exists to avoid, a reference null standing in for a solved one."
+    },
+    {
+      "file": "scripts/prototypes/diiid_finite_edge_booking/render.py",
+      "id": "fe32f172269",
+      "line": 189,
+      "severity": "non-blocking",
+      "summary": "The legend names both topology markers 'X-point', 'solved X-point' and 'EFIT X-point', but on 146 limited and 179 limited the marker is a limiter contact rather than an X-point, which the caption states and the legend does not. A reader reading the limited panels from the legend alone is told the mark is an X-point when it is a contact low in the vessel."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html",
+      "id": "f74c1c2ecb4",
+      "line": 61,
+      "severity": "non-blocking",
+      "summary": "The caption describes the markers the other way round from what renders: it calls the solved null 'the hollow blue cross' and EFIT's 'the grey cross', but in the PNG the blue marker reads as a solid blue cross and EFIT's as the hollow one, and EFIT's colour is #333333 near-black rather than grey. A reader hunting for a hollow blue cross finds the hollow cross in EFIT's colour instead, which is exactly the identification the caption exists to settle."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261115T162134985002-review-of-diiid-finite-edge-booking-3c9422fc2db3-figure",
+  "reviewed_base_sha": "37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241",
+  "reviewed_head_sha": "3c9422fc2db36ca7103cf34d68f847e14c1567a5",
+  "reviewed_run_id": "r-20261114T210059239602-diiid-finite-edge-booking",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: readable at a glance, except that the solved and EFIT lower-null marks are not distinguishable on 137 diverted, 146 diverted and 179 limited (finding 1).",
+    "RUBRIC data_ink: passes; contours, one thick clipped level, the wall and three markers carry all the weight on white, with no fills, gradients or shading.",
+    "RUBRIC decoration: passes; axes off, no grid, frame, background fill or title, one unframed legend row, three annotation lines per panel.",
+    "RUBRIC contrast: passes; near-black text (#0b0b0b) on white, and the grey first-wall trace (#929292) reads as a receding reference at full size.",
+    "RUBRIC table_form: passes; a spatial flux map with per-panel annotations, not a table drawn as an image.",
+    "RUBRIC label_collision: passes for text labels; none clipped or overlapping, as the save-time check and the PNG agree. Marker-on-marker overlap is reported as finding 1."
+  ],
+  "rubric_verdicts": {
+    "contrast": "All text renders as near-black (#0b0b0b) on white and clears any contrast floor. The first-wall trace is grey (#929292) at 1.5 pt, near the 3:1 data floor rather than above it, which is the intended receding-reference role and reads acceptably at full size.",
+    "data_ink": "The data carry the visual weight: contours, one clipped-level line, the wall and three topology markers on plain white; there is no fill, gradient, shading, band or legend frame anywhere.",
+    "decoration": "No decorative ink is present: axes are off, there is no grid, no frame, no background fill, no title and no suptitle; the only non-data marks are the single-row legend at the top and the three annotation lines under each panel.",
+    "label_collision": "No text label is clipped or overlaps another: the saving path refuses clipping, text overlap and label-over-data, and the figure prints text clipping=0, overlaps=0, labels over data=0, which matches what the PNG shows. The overlap that does occur is between two data markers, reported under legibility as finding 1, not between labels.",
+    "legibility": "The four poloidal panels read at a glance as terminal flux states: one magnetic-axis triangle high in each panel, thin blue contour fans, one thick blue clipped level, a grey wall trace, and three annotation lines under every panel giving the residual, the convergence flag and the lower-null offset. The one place the picture stops being readable is the lower-null cluster: on 137 diverted and 146 diverted the solved null cannot be seen at all under EFIT's marker, and on 179 limited the two marks merge (finding 1).",
+    "table_form": "The image is a spatial poloidal flux map of four terminal states, which is naturally a plot; the three numeric lines beneath each panel annotate that panel and are not a table rendered as an image."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T17:31:29.696398+00:00",
+  "total": null
+}

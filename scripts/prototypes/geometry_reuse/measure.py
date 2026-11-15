@@ -19,7 +19,20 @@ def program():
     substitute(
         "    args = parser.parse_args()",
         '    parser.add_argument("--arm", choices=("off", "on"), required=True)\n'
+        '    parser.add_argument("--lower-only", action="store_true")\n'
         "    args = parser.parse_args()",
+    )
+    substitute(
+        "        program = lowered.compile()",
+        "        if args.lower_only and label == 'solve':\n"
+        "            record.update(complete=True, lowering_only=True, "
+        "lowered_solve_sha256=hashlib.sha256("
+        "lowered.as_text(debug_info=False).encode()).hexdigest())\n"
+        "            save()\n"
+        "            print('LOWERED_ONLY', record['lowered_solve_sha256'], "
+        "flush=True)\n"
+        "            raise SystemExit(0)\n"
+        "        program = lowered.compile()",
     )
     substitute(
         "sr.read_batch(b, c, m, s, s, cv, policy, tracking=tracking)",

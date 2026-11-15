@@ -49,6 +49,7 @@ def main():
     parser.add_argument("revision")
     parser.add_argument("output", type=Path)
     parser.add_argument("inputs", type=Path)
+    parser.add_argument("--reference", type=Path)
     parser.add_argument("--smoke", action="store_true")
     args = parser.parse_args()
     args.inputs = args.inputs.resolve(strict=True)
@@ -103,7 +104,7 @@ def main():
             archive.extractall(tree, filter="data")
         env.update(PYTHONPATH=str(tree), TMPDIR=str(tree))
 
-        def execute(width, arm, process):
+        def execute(width, arm, process, *, lower_only=False):
             destination = args.output / f"{arm}-{width}-{process}"
             destination.mkdir(exist_ok=True)
             command = [
@@ -124,6 +125,8 @@ def main():
             ]
             if args.smoke:
                 command += ["--smoke"]
+            if lower_only:
+                command += ["--lower-only"]
             log = destination / "gate.log"
             with log.open("w") as stream:
                 stream.write(
@@ -135,16 +138,18 @@ def main():
                     command, cwd=tree, env=env, stdout=stream, stderr=subprocess.STDOUT
                 )
                 stream.write(f"EXIT={result.returncode}\n")
-            summary["arms"].append(
-                dict(
-                    width=width,
-                    arm=arm,
-                    process=process,
-                    exit_status=result.returncode,
-                    log=str(log),
-                    receipt=str(destination / "receipt.json"),
-                )
+            entry = dict(
+                width=width,
+                arm=arm,
+                process=process,
+                exit_status=result.returncode,
+                log=str(log),
+                receipt=str(destination / "receipt.json"),
             )
+            if lower_only:
+                summary.setdefault("program_inspections", []).append(entry)
+            else:
+                summary["arms"].append(entry)
             save()
             print("ARM", destination.name, "EXIT", result.returncode, flush=True)
             if result.returncode:
@@ -152,6 +157,41 @@ def main():
             receipt = json.loads((destination / "receipt.json").read_text())
             assert receipt["complete"]
             return receipt
+
+        if args.reference:
+            reference = json.loads(args.reference.read_text())
+            for width in (1, 16, 64):
+                for arm in ("on", "off"):
+                    entry = next(
+                        row
+                        for row in reference["arms"]
+                        if row["width"] == width
+                        and row["arm"] == arm
+                        and row["process"] == 1
+                    )
+                    prior = json.loads(Path(entry["receipt"]).read_text())
+                    current = execute(width, arm, "inspect", lower_only=True)
+                    before = prior["programs"]["solve"]["lowered_sha256"]
+                    after = current["lowered_solve_sha256"]
+                    if before != after:
+                        summary["program_change"] = dict(
+                            width=width,
+                            arm=arm,
+                            before=before,
+                            after=after,
+                            reference_revision=reference["revision"],
+                        )
+                        break
+                if "program_change" in summary:
+                    break
+            save()
+            if "program_change" not in summary:
+                summary["timing_required"] = False
+                summary["complete"] = True
+                save()
+                print("PROGRAMS_IDENTICAL timing not repeated", flush=True)
+                return
+            print("PROGRAM_CHANGED", json.dumps(summary["program_change"]), flush=True)
 
         for width in [1] if args.smoke else [1, 16, 64]:
             paired = {}

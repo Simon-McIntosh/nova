@@ -1,0 +1,64 @@
+<section id="efit-comparison-record">
+  <h2>Shared-input EFIT comparison: fit configuration not recoverable</h2>
+  <p>The joint profile and conductor-current fit is implemented in
+    <code>nova/equilibrium/magnetics_fit.py</code>. Conductor currents enter the
+    existing typed forward request and are constrained by their measured
+    uncertainties. The receipt retains the fitted currents, the full whitened
+    residual vector, covariance, spectrum, forward-evaluation count, elapsed
+    wall and device. Twelve focused unit checks pass, including an independent
+    weighted linear solution with nonzero residuals and a refusal of missing
+    current uncertainties.</p>
+  <p><strong>Blocked before physical comparison.</strong> The stored outputs do
+    not identify the number of profile coefficients the original imas-efit
+    fits carried. On all three outputs, <code>code.name</code> is
+    <code>EFIT+</code>, but <code>code.commit</code>, <code>code.version</code>,
+    <code>code.repository</code> and <code>code.library</code> are empty.
+    <code>code.parameters</code> contains only
+    <code>{"pressure_source":"not_fitted"}</code>. A sampled polynomial's
+    degree does not establish the fitted dimension: extra free coefficients
+    can have zero fitted values. Current configuration defaults cannot establish
+    the settings used for these stored reconstructions.</p>
+  <table>
+    <thead><tr><th>Candidate case</th><th>Input entry and written DD</th>
+      <th>EFIT output entry and written DD</th><th>Usable candidate slice</th>
+      <th>Stored constraints: loops / probes / active currents</th></tr></thead>
+    <tbody>
+      <tr><td>MAST-U 45272</td><td><code>MASTU/45272</code>, 4.1.0</td>
+        <td><code>MASTU/45272/regression/magnetics</code>, 4.1.0</td>
+        <td>0.2 s; 361 boundary vertices; 760.952 kA</td><td>193 / 398 / 14</td></tr>
+      <tr><td>TCV workshop</td><td><code>TCV/workshop</code>, 4.0.0</td>
+        <td><code>TCV/workshop/regression/magnetics</code>, 4.1.0</td>
+        <td>0.4 s; 361 boundary vertices; −240.259 kA</td><td>38 / 38 / 29</td></tr>
+      <tr><td>ITER 135013</td><td><code>ITER/135013</code>, 4.1.0</td>
+        <td><code>ITER/135013/regression/standalone</code>, 4.1.0</td>
+        <td>75 s; 361 boundary vertices; −15.5445 MA</td><td>261 / 915 / 12</td></tr>
+    </tbody>
+  </table>
+  <p>Entries are read in place under
+    <code>~/Code/imas-efit/tests/data/imas/</code>, through imas-python.
+    The input manifest is <code>~/Code/imas-efit/tests/data-manifest.json</code>.
+    All three input entries have magnetics, active-coil and wall occurrences,
+    and no iron-core occurrence. Each has homogeneous time equal to one; the
+    IDS-level clock supplies the time base. The TCV candidate is the first
+    slice with a successful output flag; the 0.2 s and 0.3 s outputs have flag
+    −2 and empty boundaries. The MAST-U comparator is the stored imas-efit
+    regression, as required, rather than the CCFE validation outputs.</p>
+  <p>The audit sees nonempty output flags and sampled profiles as positive
+    controls for the empty provenance fields. For example, MAST-U's 0.3 s
+    pressure derivative is linear to 4.44 × 10<sup>−16</sup> relative sup error;
+    ITER's 75 s FF′ is quadratic to 8.33 × 10<sup>−16</sup>. Neither result
+    licenses an assertion about the original number of free coefficients.</p>
+  <p>Inspection logs and scripts are retained under
+    <code>~/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/</code>:
+    <code>inspect-cases-signals.log</code> records the input uncertainties and
+    occurrences; <code>audit-output.log</code> records every stored slice,
+    output code field and polynomial residual. An initial inspection helper
+    used an unsupported metadata attribute; the corrected inspection completed
+    successfully and that script failure is not a solver result.</p>
+  <p>No reconstruction, forward-only split, vertical-offset correction,
+    per-sensor residual comparison, scaled-data control or terminal flux panel
+    is claimed. The physical bands remain unmeasured. No tolerance was changed.
+    Supply the original fitted profile dimensions and basis constraints, or
+    regenerate the comparison outputs with that configuration recorded, before
+    running the physical comparisons.</p>
+</section>

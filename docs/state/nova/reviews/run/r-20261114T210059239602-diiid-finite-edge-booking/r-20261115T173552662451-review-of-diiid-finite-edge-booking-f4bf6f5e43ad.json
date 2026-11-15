@@ -1,0 +1,90 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite is the contract-file arm only: baseline-suite.log at 37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241 collects nothing (the file is new at the head) and ends EXIT=4, so it is an absent measurement, not an empty failure set; after-suite.log at 62b1fd391 91fcc5ad492a880f71c1db1945f1d47 reports 7 passed, EXIT=0. Zero after-arm failure ids against an unreadable baseline arm gives an empty added set. The readable focused pair is gate/base-failures.txt against gate2/head-failures.txt: both hold the same 19 ids (16 errors and 3 failures in tests/test_equilibrium_forward_solve.py and tests/test_equilibrium_forward.py), byte-identical (diff reports no difference), so the focused suite adds no failure there either; the 19 pre-existing ids are not attributed to this node.",
+  "call_site_count": 9,
+  "call_sites": [
+    "benchmarks/diiid_forward_gs_match.py:1548 (build_profile -> _build_profile)",
+    "benchmarks/diiid_forward_gs_match.py:4718 (_build_profile in the 89-update surface arm)",
+    "benchmarks/diiid_forward_gs_match.py:2603,2616 (build_profile then complete_profile_current_adapter) and :4736",
+    "benchmarks/diiid_current_pinned_forward.py:746,832 (build_profile) and :345 (adapter)",
+    "benchmarks/diiid_diverted_root_full_currents.py:761 (build_profile) and :316 (adapter)",
+    "benchmarks/diiid_constrained_cold_start.py:128 (build_profile) and :181 (adapter)",
+    "benchmarks/diiid_circuit_driven_forward_validation.py:204,775 (build_profile) and :811 (adapter)",
+    "benchmarks/diiid_diverted_solve_overlay.py:502, benchmarks/diiid_circuit_driven_vacuum.py:344",
+    "nova/equilibrium/forward_operator.py:3531 via _point_current_moments at :3230, :3519, :3621"
+  ],
+  "completed_at": "2026-11-15T17:36:46.833Z",
+  "dispatched_at": "2026-11-15T17:36:27Z",
+  "findings": [
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "1503",
+      "severity": "non-blocking",
+      "text": "the booked-route seam is attached inside _build_profile and nothing tests that call site: tests/equilibrium/test_finite_edge_booking.py:340 calls _booked_profile directly, so deleting the _booked_profile call at :1503 and the sample-seed extension at :1516 leaves all seven tests green and both done-when clause 1 and clause 2 need the built profile rather than the helper."
+    },
+    {
+      "file": "nova/imas/diiid_current.py",
+      "line": "203",
+      "severity": "non-blocking",
+      "text": "the repair commits _completed_target into a file outside the node's eight declared write paths (dispatch-detail.json admit_request.node.write_paths), so the landed change touches a module the node was fenced away from even though it extends the completion owner at :242 rather than duplicating it."
+    },
+    {
+      "file": "gate2/head-job.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the focused equilibrium gate's head arm is revision 9c102cbae, two source commits before the reviewed head 3fea105c8 (nova/imas/diiid_current.py, the sampling-node completion) and 02180da22 (nova/equilibrium/forward_operator.py, point_route_current), so clause 2's no-added-failure result is not measured on the code under review; after-suite.log covers only the contract file at 62b1fd391."
+    },
+    {
+      "file": "benchmarks/diiid_current_pinned_forward.py",
+      "line": "769",
+      "severity": "non-blocking",
+      "text": "the unconditional route change makes this consumer's pre-solve qualification compare a route-dependent quantity: seed_unscaled is _build_profile's seed read through profile.operator.cell_current, whose value the booked route changes, against a value registered in a prior recovery checkpoint at rtol 2.0e-6 (:85), and the fragment's own discriminator measures booked-minus-point cell currents of 1332.7 A on 137 diverted, far above 2e-6; the refusal is a reading-based prediction, since no consumer outside the four rows was run."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "the four-row table reports convergence, terminal residual, lower X offset, discriminator, raw current and pin amplitude but no column of the diagnosis numbers beside them, which clause 3 names explicitly, so a reader cannot compare the rerun against the diagnosis per row and only the prose at :59 carries the 1.875 kA repair numbers."
+    },
+    {
+      "file": "manifest.md",
+      "line": "11",
+      "severity": "non-blocking",
+      "text": "the reviewed run's manifest is malformed: baseline_suite is a JSON object cut off mid-string, after_suite is absent, and artifacts, commits and landing are not present, so the record it leaves behind cannot be read for the arm results its own test_logs name."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all 26 commits against 37b9ba7c4: one line in nova/equilibrium/current.py (the cut-tile bound), the point_route_current extraction in nova/equilibrium/forward_operator.py, the moment couplings plus booked seam and seed in benchmarks/diiid_forward_gs_match.py, the adapter completion in nova/imas/diiid_current.py, the new 436-line contract test, 9 prototype scripts, the evidence fragment and its SVG.",
+    "done_when": "clause 1 is measured by tests/equilibrium/test_finite_edge_booking.py (continuity on a cut cell and an X-point sector at :378, book_tangent against a central difference at TANGENT_RTOL=1e-6 at :401, and the point-route jump at :390 with STEP_CONTRAST=100); clause 2 by gate/base.log against gate2/head.log with identical 19 failure ids, though its head arm is 9c102cbae and not the landed head; clause 3 by the four-row table and its four-panel figure at docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html:49, whose rows do not carry the diagnosis numbers beside them.",
+    "goal": "the node goal is to route the DIII-D finite-edge source through the clipped-current booking; benchmarks/diiid_forward_gs_match.py:1385 _booked_profile attaches the grid, wall and sampling moment blocks and sets use_linear_moments=True, and :1516 extends the seed with the sampling-node flux, so the built profile now runs the booked route the goal names.",
+    "manifest": "read; it records status complete, the contract gate at 62b1fd391 (7 passed, 245 s) with a base arm that collects nothing (EXIT=4), and three negative controls, but its baseline_suite line is a JSON object truncated mid-string at line 11 and it carries no after_suite, artifacts, commits or landing field.",
+    "write_paths": "the admitted node record in dispatch-detail.json declares eight write paths; git diff --name-status 37b9ba7c4..f4bf6f5e43a lists sixteen, and one of them, nova/imas/diiid_current.py (added _completed_target at :203), is outside the declared eight (the rest sit under benchmarks/diiid_forward_gs_match.py, nova/equilibrium/{current,forward_operator}.py, tests/equilibrium/test_finite_edge_booking.py, scripts/prototypes/diiid_finite_edge_booking/, docs/figures/diiid-finite-edge-booking/ and docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html)."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_finite_edge_booking.py:340 calls _booked_profile directly rather than build_profile, so removing the call at benchmarks/diiid_forward_gs_match.py:1503 or the seed extension at :1516 leaves all seven tests green and the consumer-selection claim in clause 2 rests on no committed assertion.",
+    "evidence": "gate2/head-job.log ran its focused arm at 9c102cbae, two source commits before the reviewed head (3fea105c8 and 02180da22), and the only arm at the landed revision is after-suite.log's 7-passed-after-suite on the contract file, so clause 2's no-added-failure measure does not cover the code being reviewed.",
+    "fit": "point_route_current at nova/equilibrium/forward_operator.py:2320 follows the module's untyped helper idiom and _booked_profile at benchmarks/diiid_forward_gs_match.py:1385 builds its FluxTarget/Null1D with the same vocabulary as the grid and wall targets, with no name the repository rules forbid.",
+    "goal_fidelity": "benchmarks/diiid_forward_gs_match.py:1503 now always routes the built profile through _booked_profile, whose replace at :1385 sets use_linear_moments=True and attaches the sampling FluxTarget, so the finite-edge source integral runs on the clipped polygon the goal names.",
+    "reuse": "the moment blocks are built by the existing scripts/analytic_oracle_fixtures/coupling_build.py:29 build_flux_blocks rather than a new kernel, and the conductor completion is extended in its owner nova/imas/diiid_current.py:203 instead of the benchmark duplicate extend_sample_current_response that the previous review found.",
+    "scope_discipline": "nova/imas/diiid_current.py:203 adds _completed_target in a file absent from the eight write paths the node was admitted with, which is one file outside the declared scope though the added code extends the owner of the completion it replaces in the same module at :242."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal routes the DIII-D finite-edge source through the clipped-current booking; benchmarks/diiid_forward_gs_match.py:1385 _booked_profile attaches the grid, wall and sampling moment blocks and sets use_linear_moments=True, so the built profile runs the booked route.\nVERDICT done_when: clause 1 is measured by tests/equilibrium/test_finite_edge_booking.py:378 continuity, :401 book_tangent at TANGENT_RTOL=1e-6 and :390 the point-route jump; clause 2 by gate/base.log against gate2/head.log with identical 19 failure ids, both arms at revisions before the landed head; clause 3 by the four-row table at docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html:49 with its four-panel SVG.\nVERDICT write_paths: the admitted record declares eight paths and the diff lands sixteen, one of which, nova/imas/diiid_current.py:203, is outside them.\nVERDICT manifest: read; status complete with the contract gate at 62b1fd391 and a base arm that collects nothing, and its baseline_suite line is a JSON object truncated mid-string with no after_suite, artifacts, commits or landing field.\nVERDICT diff: read all 26 commits against 37b9ba7c4; one line in nova/equilibrium/current.py, the point_route_current extraction, the booked seam and seed in benchmarks/diiid_forward_gs_match.py, the adapter completion in nova/imas/diiid_current.py, the 436-line test, nine prototype scripts, the evidence fragment and SVG.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py:1548, benchmarks/diiid_forward_gs_match.py:4718, benchmarks/diiid_forward_gs_match.py:2603, benchmarks/diiid_current_pinned_forward.py:746, benchmarks/diiid_diverted_root_full_currents.py:761, benchmarks/diiid_constrained_cold_start.py:128, benchmarks/diiid_circuit_driven_forward_validation.py:204, benchmarks/diiid_diverted_solve_overlay.py:502, nova/equilibrium/forward_operator.py:3531\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: benchmarks/diiid_forward_gs_match.py:1503 always routes the built profile through _booked_profile, whose replace at :1385 sets use_linear_moments=True and attaches the sampling FluxTarget.\nSCORE evidence: 12\nJUSTIFICATION evidence: gate2/head-job.log ran its focused arm at 9c102cbae, two source commits before the reviewed head, and the only landed-revision arm is after-suite.log's 7-passed contract-file run.\nSCORE scope_discipline: 12\nJUSTIFICATION scope_discipline: nova/imas/diiid_current.py:203 adds _completed_target in a file absent from the node's eight declared write paths.\nSCORE durability: 12\nJUSTIFICATION durability: tests/equilibrium/test_finite_edge_booking.py:340 calls _booked_profile directly, so removing the call at benchmarks/diiid_forward_gs_match.py:1503 leaves all seven tests green.\nSCORE fit: 17\nJUSTIFICATION fit: point_route_current at nova/equilibrium/forward_operator.py:2320 follows the module's untyped helper idiom and _booked_profile builds its FluxTarget/Null1D with the grid and wall targets' vocabulary.\nSCORE reuse: 18\nJUSTIFICATION reuse: the moment blocks come from the existing scripts/analytic_oracle_fixtures/coupling_build.py:29 build_flux_blocks and the conductor completion is extended in its owner nova/imas/diiid_current.py:203, replacing the duplicate the previous review found.\nFINDING benchmarks/diiid_forward_gs_match.py:1503 non-blocking: the booked seam is attached inside _build_profile and nothing tests that call site, so deleting the call and the seed extension at :1516 leaves all seven tests green.\nFINDING nova/imas/diiid_current.py:203 non-blocking: _completed_target lands in a file outside the node's eight declared write paths.\nFINDING gate2/head-job.log:1 non-blocking: the focused gate's head arm is 9c102cbae, before source commits 3fea105c8 and 02180da22, so clause 2 is not measured on the reviewed head.\nFINDING benchmarks/diiid_current_pinned_forward.py:769 non-blocking: the unconditional route change moves the seed_unscaled this consumer checks against a registered value at rtol 2.0e-6, and no consumer outside the four rows was run.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html:49 non-blocking: the four-row table carries no diagnosis-number column beside the rerun rows that clause 3 names.\nFINDING manifest.md:11 non-blocking: baseline_suite is a JSON object truncated mid-string and after_suite, artifacts, commits and landing are absent from the record.",
+  "review_run_id": "r-20261115T173552662451-review-of-diiid-finite-edge-booking-f4bf6f5e43ad",
+  "reviewed_base_sha": "37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241",
+  "reviewed_head_sha": "f4bf6f5e43adfad899663295f103f03bf9f89d6c",
+  "reviewed_run_id": "r-20261114T210059239602-diiid-finite-edge-booking",
+  "scores": {
+    "durability": 12,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 12
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T17:53:46.709894+00:00",
+  "total": 88
+}

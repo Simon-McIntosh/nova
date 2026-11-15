@@ -77,8 +77,10 @@ def main() -> None:
             None if sample is None else int(sample.source_target.shape[1])
         ),
         "sample_rows": None if sample is None else int(sample.node_number),
-        "cold_limited_finite": bool(
-            np.all(np.isfinite(np.asarray(prepared["cold"].limited_flux)))
+        "sample_target_finite": (
+            None
+            if sample is None
+            else bool(np.all(np.isfinite(np.asarray(sample.source_target))))
         ),
     }
     if (

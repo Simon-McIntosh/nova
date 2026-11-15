@@ -277,9 +277,10 @@ def test_callers_delegate_iron_read_to_machine_owner():
         tree = ast.parse((ROOT / path).read_text())
         calls = [node for node in ast.walk(tree) if isinstance(node, ast.Call)]
         assert any(
-            isinstance(call.func, ast.Attribute) and call.func.attr == "read_iron_core"
+            isinstance(call.func, ast.Attribute)
+            and call.func.attr in ("read_iron_core", "read_west_iron_outline")
             for call in calls
-        )
+        ), path
         assert not any(
             isinstance(call.func, ast.Attribute)
             and call.func.attr == "get"
@@ -395,4 +396,29 @@ def test_scoped_west_readers_carry_no_flat_outline_construction():
             node.attr for node in ast.walk(tree) if isinstance(node, ast.Attribute)
         }
         assert not names & set(FLAT_OUTLINE_NAMES), path
-        assert "read_iron_core" in names or "read_west_iron_outline" in names, path
+        assert "read_west_iron_outline" in names, path
+
+
+def test_region_fill_and_cross_field_are_read_from_the_stored_section(west):
+    uri, dd_version, _ = west
+    outline = StaticMachineDescription.read_west_iron_outline(
+        uri, dd_version=dd_version
+    )
+    arm = outline.region("upper arm")
+    cells = np.array(
+        [
+            [2.0, 3.0],  # inside the upper arm panel
+            [0.3, 0.0],  # inside the central column
+            [0.5, 2.401],  # in the stored limb to arm gap: no region covers it
+        ]
+    )
+    assert arm.covered(cells).tolist() == [True, False, False]
+    fill = outline.fill(cells)
+    assert fill[0] == pytest.approx(arm.fill([2.0])[0])
+    assert 0 < fill[0] < 1
+    assert fill[1] == pytest.approx(1.0)
+    assert fill[2] == pytest.approx(0.0)
+    factor = outline.cross_field(cells)
+    assert factor[0].tolist() == [0.0, pytest.approx(outline.cross_field_factor)]
+    assert factor[1].tolist() == [0.0, 0.0]
+    assert factor[2].tolist() == [0.0, 0.0]

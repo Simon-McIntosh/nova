@@ -228,9 +228,9 @@ def main():
         extremes=ev.tolist(), residuals=errors, singular=control
     )
     write_json(out / "measurement.json", record)
-    machine = StaticMachineDescription.read_iron_core(
+    machine = StaticMachineDescription.read_west_iron_outline(
         "imas:hdf5?path=" + receipt["machine"], dd_version=receipt["dd_version"]
-    )
+    ).description
     bodies = [
         shapely.Polygon(np.column_stack((s.outline.r, s.outline.z)))
         for s in machine.iron_segments

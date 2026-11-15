@@ -338,7 +338,9 @@ def main():
     with SOURCE.open("rb") as stream:
         data = pickle.load(stream)
     uri, dd_version = machine_source()
-    machine = StaticMachineDescription.read_iron_core(uri, dd_version=dd_version)
+    machine = StaticMachineDescription.read_west_iron_outline(
+        uri, dd_version=dd_version
+    ).description
     assert len(machine.iron_segments) == 6
     table = machine.iron_segments[0].material
     table_b = np.asarray(table.b_field)

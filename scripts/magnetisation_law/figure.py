@@ -45,7 +45,9 @@ def render(output: Path, png: Path | None = None) -> None:
     configure_dtypes()
     assert jax.config.jax_enable_x64
     uri, dd_version, _ = west.__wrapped__()
-    machine = StaticMachineDescription.read_iron_core(uri, dd_version=dd_version)
+    machine = StaticMachineDescription.read_west_iron_outline(
+        uri, dd_version=dd_version
+    ).description
     material = machine.iron_segments[0].material
     b, mu = map(np.asarray, (material.b_field, material.permeability_relative))
     knots, coefficients, ends = iron._fit_law(b, mu)

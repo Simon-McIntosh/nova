@@ -19,7 +19,7 @@ from nova.imas.database import CoilData, Database, IdsData
 from nova.imas.dataset import IdsBase, Ids, ImasIds, EMPTY_FLOAT, open_db_entry
 from nova.imas.ids_index import IdsIndex
 from nova.geometry.polygon import Polygon
-from nova.equilibrium.wall_mask import WallUnit, wall_units_from_ids
+from nova.equilibrium.wall_mask import WallUnit, inside_polygon, wall_units_from_ids
 
 
 if TYPE_CHECKING:
@@ -545,10 +545,10 @@ class IronFillRegion:
 
     def covered(self, centroids) -> np.ndarray:
         """Return the mask of poloidal centroids inside this region."""
-        import shapely
-
-        polygon = shapely.Polygon(self.outline)
-        return shapely.contains_xy(polygon, centroids[:, 0], centroids[:, 1])
+        centroids = np.asarray(centroids, dtype=float)
+        radius = np.asarray([point[0] for point in self.outline], dtype=float)
+        height = np.asarray([point[1] for point in self.outline], dtype=float)
+        return inside_polygon(centroids[:, 0], centroids[:, 1], radius, height)
 
     @property
     def is_rectangular(self) -> bool:

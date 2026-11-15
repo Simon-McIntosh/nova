@@ -74,9 +74,9 @@ def main():
         machine = (
             "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/WEST/machine/dd4-1-0"
         )
-        description = StaticMachineDescription.read_iron_core(
+        description = StaticMachineDescription.read_west_iron_outline(
             f"imas:hdf5?path={machine}", dd_version="4.1.0"
-        )
+        ).description
         polygons = []
         for segment in description.iron_segments:
             region = shapely.Polygon(

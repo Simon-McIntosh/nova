@@ -169,9 +169,9 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     with args.source.open("rb") as stream:
         data = pickle.load(stream)
-    machine = StaticMachineDescription.read_iron_core(
+    machine = StaticMachineDescription.read_west_iron_outline(
         f"imas:hdf5?path={MACHINE}", dd_version="4.1.0"
-    )
+    ).description
     assert len(machine.iron_segments) == 6
     table = machine.iron_segments[0].material
     b, mu = np.asarray(table.b_field), np.asarray(table.permeability_relative)

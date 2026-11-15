@@ -24,6 +24,11 @@
       "kind": "exempted",
       "reason": "Ratified at landing: the coordinator passes --accept-path for nova/imas/diiid_current.py and tests/imas/test_diiid_current.py under the shared-file ruling; the completion belongs in the adapter's owner, as the earlier review asked, and the gate arms over both files add no failure",
       "recorded_at": "2026-11-15T22:59:20.601276+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Recorded for the operator owner, not this node: the booked first-moment rows come from the analytic polygon kernel while the kept uniform row is the hybrid Green block; the docstring overstates their consistency. Reported to the lead with the landing",
+      "recorded_at": "2026-11-15T22:59:30.530341+00:00"
     }
   },
   "findings": [

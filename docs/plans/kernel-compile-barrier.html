@@ -25,7 +25,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="58">
+<meta name="plan-version" content="59">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -170,6 +170,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20261114T212005178220" data-who="reckon-build" data-when="">
     <div class="r-comment-body"><p>The evidence link in the variadic-split run comment does not resolve on main. The fragment <code>docs/evidence/fragments/kernel-compile-barrier/variadic-split.html</code> exists only at commit <code>dc36cd209</code> in that run's kept worktree, because nothing from the run is merged. Its result, restated here so it can be read without the link: identity-clean height-sample sharing, 13 of 13 numeric identity tests passing with every maximum 0, 402,141 to 305,139 post-splitter instructions against a bound of 201,070, and 251.13 s cold against a limit of 133.42 s on the H200. The link resolves when the ordered-sharing node, stacked on that run, lands.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261114T214538711018-review-of-ordered-sharing-cf87218b61dd" data-who="reckon-build" data-when="2026-11-15T00:05:10.351Z">
+    <div class="r-comment-body"><p>Reviewed ordered-sharing at head cf87218b61ddb37e0b7c19e359d7da55bbfb24a1 against base 40523b1a42a448125b98780ff01fd63e54cc5875</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261020-coarse-tie-run-phase" data-who="reckon-build" data-when="2026-10-20T07:03:00Z">
     <div class="r-comment-body"><p>From crew run <code>r-20261019T223150157038-coarse-tie-census-memory</code>, landed as evidence at merge <code>19a02ca16</code> (failed, correct refusal): a second provisioning job (sirius 1290676, 450G, 5 h) reproduced the cold compile at 7,013 s and about 378 GB, then held that memory for a further ~11,000 s in the 533-batch node loop without publishing the operand. So the jets build's cost is not only its compile: the batch loop after it also outlasts a five-hour wall at 2,132 nodes. §3's done-when (1) bounds the compile; the node that builds §3 should also report the loop's wall per batch, so a bounded compile is not followed by an unbounded run. The 500-cell coarse-tie census test stays a known failure until §3 lands. <a href="/nova/evidence/fragments/converged-forward-solve/coarse-tie-census-memory.html">evidence</a></p></div>

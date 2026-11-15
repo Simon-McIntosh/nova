@@ -1,4 +1,4 @@
-"""Stored magnetics-only reconstructions through the public forward seam."""
+"""Shared magnetic rows through the public forward seam, with prior context."""
 
 from __future__ import annotations
 
@@ -32,9 +32,67 @@ from nova.jax.config import configure_dtypes
 INPUT_ROOT = Path("/home/ITER/mcintos/Code/imas-efit/tests/data/imas")
 CASES = {
     "mastu": ("MASTU/45272", "magnetics", "4.1.0", 0, 2, 2),
-    "tcv": ("TCV/workshop", "magnetics", "4.0.0", 2, 2, 2),
-    "iter": ("ITER/135013", "standalone", "4.1.0", 0, 2, 2),
+    "tcv": ("TCV/workshop", "magnetics", "4.0.0", 2, 0, 2),
+    "iter": ("ITER/135013", "standalone", "4.1.0", 0, 2, 3),
 }
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _record_comparison_source():
+    """Bind a collected comparison module to its source bytes and revision."""
+    import hashlib
+    import subprocess
+
+    path = Path(__file__).resolve()
+    revision = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=path.parents[1], text=True
+    ).strip()
+    print(
+        "COMPARISON_SOURCE "
+        + json.dumps(
+            dict(
+                revision_at_collection=revision,
+                module=str(path),
+                sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+            )
+        ),
+        flush=True,
+    )
+
+
+def _constraint_context(name):
+    different = name == "iter"
+    label = (
+        "same magnetics rows; different constraint sets"
+        if different
+        else "same magnetics rows; magnetics-only constraint set"
+    )
+    caveat = (
+        "Live counts follow the current selector code. Stored baselines may "
+        "predate ITER priors added after 2026-06-23; per-slice live counts "
+        "await imas-efit confirmation."
+    )
+    reference_priors = ["synthesised pressure prior", "q0 prior"] if different else []
+    pressure_ndeg, field_ndeg = CASES[name][-2:]
+    caption = (
+        f"{label}. Bernstein pp/FF-prime ndeg={pressure_ndeg}/{field_ndeg}, "
+        f"live={max(pressure_ndeg - 1, 0)}/{max(field_ndeg - 1, 0)}"
+    )
+    if different:
+        caption += (
+            ". Under the generating-configuration assumption, imas-efit ITER "
+            "carried a synthesised pressure prior (beta_pol=0.5) and a q0 prior; "
+            "nova's magnetics fit carries neither. " + caveat
+        )
+    return dict(
+        comparison_label=label,
+        reference_extra_priors=reference_priors,
+        nova_extra_priors=[],
+        caption=caption,
+        counts_caveat=caveat,
+        pressure_ndeg=pressure_ndeg,
+        field_ndeg=field_ndeg,
+    )
 
 
 def _output():
@@ -204,7 +262,10 @@ def _read_case(name):
         _write(
             _output() / f"{name}-result.json",
             dict(
-                case=name, status="configuration-disagreement", profiles=profile_audit
+                case=name,
+                status="configuration-disagreement",
+                profiles=profile_audit,
+                constraint_context=_constraint_context(name),
             ),
         )
         pytest.fail(
@@ -420,6 +481,7 @@ def _read_case(name):
             "Committed configuration taken as generating configuration; "
             "stored output does not carry it."
         ),
+        constraint_context=_constraint_context(name),
         sensor_count=len(values),
         active_sensor_count=int(np.sum(weights)),
         zero_extent_flux_rows=int(
@@ -453,6 +515,7 @@ def _read_case(name):
         wall_units=wall_units,
         reference_eq=eq,
         reference_slice=index,
+        constraint_context=_constraint_context(name),
     )
 
 
@@ -556,6 +619,7 @@ def _attempt(data, request, label):
             termination_reason=int(receipt.termination_reason),
             wall_seconds=perf_counter() - started,
             device=str(jax.devices()[0]),
+            constraint_context=data["constraint_context"],
         ),
     )
     return receipt if bool(receipt.qualified) else None
@@ -594,6 +658,7 @@ def test_shared_magnetics_reconstruction(name, monkeypatch):
                 attempts=3,
                 residual=data.get("terminal_residual"),
                 device=str(jax.devices()[0]),
+                constraint_context=data["constraint_context"],
             ),
         )
         _panel(data, qualified=False)
@@ -715,6 +780,10 @@ def _panel(data, qualified, flux=None):
     tree = element_tree.parse(destination)
     tree.getroot().set("width", "31.1cm")
     tree.getroot().set("height", "16cm")
+    description = element_tree.SubElement(
+        tree.getroot(), "{http://www.w3.org/2000/svg}desc"
+    )
+    description.text = data["constraint_context"]["caption"]
     tree.write(destination, encoding="utf-8", xml_declaration=True)
     preview = _output() / f"{data['name']}-preview.png"
     figure.savefig(preview, dpi=100)
@@ -727,6 +796,7 @@ def _panel(data, qualified, flux=None):
         "text_bounds=passed text_overlap=passed",
         f"qualified={qualified}",
         f"residual={data.get('terminal_residual')}",
+        "constraint_context=" + json.dumps(data["constraint_context"]),
         flush=True,
     )
 
@@ -935,6 +1005,7 @@ def _compare_fit(data, forward):
     ) / abs(case.plasma_current)
     result = dict(
         case=data["name"],
+        constraint_context=data["constraint_context"],
         status="measured",
         fit_converged=bool(fitted.converged),
         scores=scores,

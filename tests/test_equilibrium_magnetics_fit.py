@@ -235,6 +235,44 @@ def test_circuit_deselection_reads_multiple_xml_fragments(tmp_path):
     assert not _deselect_missing_current(path)
 
 
+def test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts():
+    from tests.test_magnetics_fit_efit_comparison import (
+        CASES,
+        _profile_audit,
+        _profile_basis,
+    )
+
+    assert CASES["mastu"][-2:] == (2, 2)
+    assert CASES["tcv"][-2:] == (0, 2)
+    assert CASES["iter"][-2:] == (2, 3)
+    assert _profile_basis(0).shape == (1, 0)
+    x = np.linspace(0.0, 1.0, 65)
+    fixed = _profile_audit(x, np.zeros_like(x), 0)
+    nonzero = _profile_audit(x, 1.0 - x, 0)
+    curved = _profile_audit(x, 3.0 * (1.0 - x) ** 2 - 0.4 * x * (1.0 - x), 3)
+    assert fixed["representable"] and fixed["live_coefficients"] == 0
+    assert not nonzero["representable"]
+    assert curved["representable"] and curved["live_coefficients"] == 2
+    assert curved["lowest_polynomial_degree"] == 2
+
+
+def test_reference_prior_context_does_not_add_nova_priors():
+    from tests.test_magnetics_fit_efit_comparison import _constraint_context
+
+    context = _constraint_context("iter")
+    assert (
+        context["comparison_label"] == "same magnetics rows; different constraint sets"
+    )
+    assert context["reference_extra_priors"] == [
+        "synthesised pressure prior",
+        "q0 prior",
+    ]
+    assert context["nova_extra_priors"] == []
+    assert "predate" in context["counts_caveat"]
+    assert "neither" in context["caption"]
+    assert _constraint_context("tcv")["reference_extra_priors"] == []
+
+
 def test_known_conductor_subtraction_changes_the_target(linear_fit):
     fitter, measurement, truth, _ = linear_fit
     vacuum = np.array([0.7, -0.4, 1.1, 0.2])

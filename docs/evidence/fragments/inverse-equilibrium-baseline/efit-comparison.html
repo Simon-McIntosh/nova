@@ -11,8 +11,9 @@
     pressure_source=not_fitted. The committed configuration is taken as the
     generating one. The corrected comparison uses the shared Bernstein basis,
     not the earlier interpretation of the MAST-U manifest's monomial label.
-    The configuration checkout was observed at
-    <code>ba8c1033ce46c5d664c0b3f8f82ab0744a9415b7</code>.
+    The initial configuration audit observed
+    <code>ba8c1033ce46c5d664c0b3f8f82ab0744a9415b7</code>; the corrected selector
+    code was read at <code>f9f63539e6ff49c614092abda677f96c4d0d377a</code>.
     Paths in the configuration table are relative to
     <code>/home/ITER/mcintos/Code/imas-efit/</code>.</p>
   <table><thead><tr><th>Case</th><th>Input entry / DD</th>
@@ -31,15 +32,17 @@
   <p>Inputs are read in place through imas-python at each manifest DD pin.
     Each has magnetics, active coils and a wall, with no iron-core occurrence.
     Homogeneous time is one and the IDS-level clock is used. These are stored
-    imas-efit magnetics-only regression outputs. The TCV slice is the first
+    imas-efit magnetics regression entries. ITER has the prior-related
+    constraint-set difference described below. The TCV slice is the first
     successful output: its two earlier slices have flag −2 and empty boundaries.
     The MAST-U CCFE validation outputs are not used. Every selected outline
     has 361 vertices.</p>
   <h3 id="efit-comparison-configuration">Profile dimensions and sample checks</h3>
   <p>The shared <code>configuration/machines/_common/solver/default.xml:148</code>
     and <code>:149</code> set func=8 (Bernstein), edge=1 and autoDegree=on.
-    <code>docs/auto-degree-logic.html:208</code>–<code>:211</code> impose the
-    Bernstein floor. The executable basis in <code>src/EFIT/basisfunc.f90:132</code>
+    <code>src/timeSliceNumericalControls.cpp:859</code>–<code>:882</code> implement
+    the Bernstein floor, preserving an explicitly zero pressure dimension.
+    The selector code supersedes the prose selector table. The executable basis in <code>src/EFIT/basisfunc.f90:132</code>
     and <code>:140</code> counts ndeg functions and zeroes the last: live count
     is ndeg−1. Thus ndeg=2 has one live linear function, 1−x. The regularisation
     allocation note at <code>configuration/machines/_common/regularisation/default.xml:9</code>
@@ -48,33 +51,52 @@
     <code>efit/config/schemas/solver.py:122</code>, <code>:132</code>, <code>:139</code>.</p>
   <table><thead><tr><th>Case</th><th>Resolved pp / FF′ ndeg</th>
     <th>Live coefficients pp / FF′</th><th>Source bindings</th>
-    <th>Stored sample compatibility</th></tr></thead><tbody>
+    <th>Stored sample compatibility and constraint set</th></tr></thead><tbody>
     <tr><td>MAST-U</td><td>2 / 2</td><td>1 / 1</td>
-      <td><code>docs/auto-degree-logic.html:159</code>–<code>:163</code>:
-      epsilon=0.738, spherical, raw 1/2; floor at <code>:210</code>–<code>:211</code>.
-      The pp=0 comment in <code>configuration/machines/MASTU/solver/magnetics.xml:4</code>
-      does not resolve this spherical case.</td>
+      <td><code>src/timeSliceNumericalControls.cpp:803</code>–<code>:804</code>:
+      spherical raw 1/2; Bernstein floor at <code>:878</code>–<code>:882</code>.</td>
       <td>At 0.2 s pp is identically zero and FF′ is linear; both lie in the
       selected live spaces. At 0.3 s both profiles are nonzero linear functions,
-      with polynomial sup errors 4.44×10⁻¹⁶ and 3.12×10⁻¹⁷ in the audit.</td></tr>
-    <tr><td>TCV</td><td>2 / 2</td><td>1 / 1</td>
-      <td><code>docs/auto-degree-logic.html:187</code>–<code>:191</code>:
-      epsilon=0.292, large aspect, raw 1/2; floor at <code>:210</code>–<code>:211</code>.
-      <code>configuration/machines/TCV/solver/magnetics.xml:5</code> and <code>:9</code>
-      confirm the Bernstein floor.</td>
-      <td>pp is identically zero; FF′ is linear to 2.78×10⁻¹⁶ in the audit.
-      A zero fitted coefficient is admitted; zero samples do not establish
-      that the generating fit carried no pressure coefficient.</td></tr>
-    <tr><td>ITER</td><td>2 / 2 from selector</td><td>1 / 1 from selector</td>
-      <td><code>docs/auto-degree-logic.html:180</code>–<code>:184</code>:
-      epsilon=0.361, large aspect, raw 1/2; floor at <code>:210</code>–<code>:211</code>.
-      The comment in <code>configuration/machines/ITER/solver/magnetics.xml:3</code>
-      gives 2/3 instead.</td>
-      <td><strong>Disagreement; case stopped.</strong> Stored pp is linear,
-      but FF′ requires degree 2: linear sup error 0.281758 versus quadratic
-      8.33×10⁻¹⁶ in the audit. One live linear function cannot reproduce it.
-      No dimension is guessed and no physical ITER fit is claimed.</td></tr>
+      with audit sup errors 4.44×10⁻¹⁶ and 3.12×10⁻¹⁷.</td></tr>
+    <tr><td>TCV</td><td>0 / 2</td><td>0 / 1</td>
+      <td><code>src/timeSliceNumericalControls.cpp:817</code>–<code>:826</code>:
+      large-aspect magnetics-only branch gives 0/2; <code>:874</code>–<code>:878</code>
+      leave zero pp unchanged.</td>
+      <td>Pressure derivative is fixed at zero, not fitted. FF′ has one live
+      linear function. The successful 0.4 s stored samples are compatible;
+      output_flag −2 at 0.2 s and 0.3 s supplies no basis evidence. The prior
+      attempt used 2/2 and one live pressure function, so one corrected 0/2
+      attempt of at most three public seeds is authorised.</td></tr>
+    <tr><td>ITER: same magnetics rows, different constraint sets</td>
+      <td>2 / 3</td><td>1 / 2</td>
+      <td><code>configuration/machines/ITER/efitOptions.xml:26</code> sets
+      pressurePriorBetaPol=0.5 and <code>:27</code> sets the q0 prior.
+      <code>src/efitPressures.cpp:253</code> and <code>:278</code>–<code>:280</code>
+      synthesise pressure points. The magnetics-plus-pressure selector at
+      <code>src/timeSliceNumericalControls.cpp:830</code>–<code>:835</code> gives 2/3.</td>
+      <td>One live linear pp function and two live quadratic FF′ functions match
+      the stored profiles. Under the generating-configuration assumption,
+      imas-efit's ITER fit carried a synthesised pressure prior and a q0 prior;
+      nova's magnetics fit carries neither. The earlier 0.419361 refusal used
+      the wrong magnetics-only cell and is retained as a superseded attempt.</td></tr>
   </tbody></table>
+  <p>Eighteen focused fitter/reader checks pass. The added checks admit
+    the two-function quadratic FF′ space, refuse nonzero pressure in the
+    zero-dimensional space, and verify that ITER's prior context adds no
+    nova prior entries. MAST-U job 1317874 is kept running with its already
+    loaded source. The further titan job batches TCV 0/2 and ITER 2/3;
+    each new stage records its source revision and test-module hashes.</p>
+  <p><strong>Count provenance caveat.</strong> These live counts are derived
+    from today's selector code, not recovered from the stored output IDS.
+    Stored baselines may predate ITER's priors, added after 2026-06-23;
+    imas-efit's own plan will confirm per-slice live counts later.
+    This caveat accompanies every new case receipt.</p>
+  <p id="efit-comparison-iter-constraint-context"><strong>ITER panel and row label:</strong>
+    same magnetics rows; different constraint sets. The assumed imas-efit
+    reconstruction includes the synthesised pressure prior (beta_pol=0.5) and
+    q0 prior (value 1.3, sigma 0.3, weight 4); nova includes neither. New ITER
+    SVG descriptions, gate captions and result receipts carry this label and
+    the baseline-age caveat. No pressure or q0 residual is added to nova.</p>
   <p>The audit's polynomial errors use max(1, sample magnitude) as their scale;
     the runnable profile-space check reports relative sup error using each
     nonzero profile's own maximum. Zero profiles are identified explicitly.
@@ -104,9 +126,9 @@
     The first titan forward-contract and unit gate completed with
     <q>1 failed, 37 passed, 3 deselected in 45.83s</q>; its failure is the
     declared pre-existing root-find-default assertion. No forward guard is
-    weakened. ITER's actual profile-space refusal reports 0.419361 relative
-    sup error for its FF′ in the configured one-function space; its pressure
-    profile fits to 2.70×10⁻¹⁶.</p>
+    weakened. The superseded ITER magnetics-only-cell attempt reported 0.419361
+    FF′ relative sup error in its one-function space; the corrected pressure
+    regime has two live FF′ functions and will be measured separately.</p>
   <p>The earlier MAST-U request used pp/FF′ ndeg 0/2 and a monomial family.
     Job 1317183 never started and was cancelled while pending, with elapsed
     00:00:00. It produced no physical result. The corrected request will use
@@ -120,12 +142,14 @@
     construction where those are part of the measured interval; no time from
     this job is attributed to the H200. The H200 compilation cache is not
     reused on this device.</p>
-  <h3 id="efit-comparison-tcv-refusal">TCV: three public forward refusals</h3>
+  <h3 id="efit-comparison-tcv-refusal">TCV: first attempt with pp/FF′ ndeg 2/2</h3>
   <p>The complete TCV case took 4857.176419 s on a Tesla P100-PCIE-16GB,
     including setup and cold compilation. This is not a warm reconstruction
     measurement: the inverse class was never called. Three public forward
-    solves were attempted and none qualified. No further TCV seed is run and
-    no forward or topology implementation is changed.</p>
+    solves were attempted and none qualified. This attempt declared one live
+    pressure function. A single corrected attempt with pp/FF′ ndeg 0/2 is now
+    permitted, with at most three public seeds. No forward or topology
+    implementation is changed.</p>
   <table><thead><tr><th>Seed</th><th>Public result</th><th>Residual</th>
     <th>Termination</th><th>Solve wall on titan P100 [s]</th></tr></thead><tbody>
     <tr><td>Stored-field explicit seed</td><td>NoQualifiedAxisError</td>
@@ -141,7 +165,8 @@
   <figure id="efit-comparison-tcv-terminal">
     <img src="/nova/figures/inverse-equilibrium-baseline/efit-comparison/tcv.svg"
       alt="TCV stored imas-efit flux in grey overlaid with rejected nova forward flux in blue, with both null sets and the vessel">
-    <figcaption>TCV at 0.4 s. Wide grey contours and large grey null markers
+    <figcaption>TCV at 0.4 s in the superseded pp/FF′ ndeg 2/2 attempt.
+      Wide grey contours and large grey null markers
       show stored imas-efit; narrow blue contours and smaller blue null markers
       show the third rejected nova forward terminal state. Both maps use the
       same 12 uniformly spaced total-flux levels, −0.714151 to −0.552541 Wb,
@@ -172,30 +197,33 @@
     document root; the actual MAST-U file parses and yields the explicit true
     directive. A regression test also covers a declaration and multiple roots,
     bringing the focused fitter/reader count to sixteen passing checks.
-    A corrected MAST-U-only titan measurement follows;
-    TCV is not retried beyond its three seeds.</p>
+    MAST-U job 1317874 remains running at that configuration. The new TCV
+    dimension correction separately permits one 0/2 attempt with at most
+    three public seeds.</p>
   <table><thead><tr><th>Measure</th><th>Unchanged band / unit</th>
-    <th>MAST-U</th><th>TCV</th><th>ITER</th></tr></thead><tbody>
+    <th>MAST-U</th><th>TCV: corrected 0/2 pending</th>
+    <th>ITER: different constraint sets</th></tr></thead><tbody>
     <tr><td>Axis distance</td><td>≤0.20 m</td><td>Not reconstructed</td>
-      <td>Forward did not qualify</td><td>Configuration disagreement</td></tr>
+      <td>Prior 2/2 attempt did not qualify; corrected attempt pending</td>
+      <td>Pending; different constraint sets</td></tr>
     <tr><td>Plasma current</td><td>≤1.5%</td><td>Not measured</td>
-      <td>Not measured</td><td>Not measured</td></tr>
+      <td>Not measured</td><td>Not measured; different constraint sets</td></tr>
     <tr><td>Axis / boundary flux</td><td>Each ≤5% of reference span</td>
-      <td>Not measured</td><td>Not measured</td><td>Not measured</td></tr>
+      <td>Not measured</td><td>Not measured</td><td>Not measured; different constraint sets</td></tr>
     <tr><td>|q95| difference; each q sign</td><td>≤2.0; signs reported</td>
-      <td>Not measured</td><td>Not measured</td><td>Not measured</td></tr>
+      <td>Not measured</td><td>Not measured</td><td>Not measured; different constraint sets</td></tr>
     <tr><td>Boundary distance</td><td>Reported [mm]</td><td>Not measured</td>
-      <td>Not measured</td><td>Not measured</td></tr>
+      <td>Not measured</td><td>Not measured; different constraint sets</td></tr>
     <tr><td>Centroid vertical offset; aligned axis / boundary distance</td>
       <td>Reported [m; m; mm]</td><td>Not measured</td><td>Not measured</td>
-      <td>Not measured</td></tr>
+      <td>Not measured; different constraint sets</td></tr>
     <tr><td>Per-sensor whitened residuals versus imas-efit</td><td>Dimensionless</td>
-      <td>No inverse state</td><td>No inverse state</td><td>No inverse state</td></tr>
+      <td>No inverse state</td><td>No inverse state</td><td>No inverse state; different constraint sets</td></tr>
     <tr><td>Fit part / forward part</td><td>Same physical measures</td>
       <td>No forward state</td><td>No qualified forward state</td>
-      <td>Configuration disagreement</td></tr>
+      <td>Pending; different constraint sets</td></tr>
     <tr><td>All-inputs ×1.10 physical control</td><td>Leave 1.5% current band</td>
-      <td>Not run</td><td>Not run</td><td>Not run</td></tr>
+      <td>Not run</td><td>Not run</td><td>Not run; different constraint sets</td></tr>
   </tbody></table>
   <p>The corrected batch's forward/unit arm completed with
     <q>1 failed, 51 passed, 7 deselected in 48.54s</q>. Its sole failure is

@@ -1,0 +1,117 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "fails_if": "an explicit f=1 or cross-field argument changes any solution field, because the explicit solve is compared bit-exactly with the omitted-fill solve; it would not redden if the unit-fill branch merely appended the same operands, so it guards the API and the default path rather than the division itself.",
+      "test": "tests/test_magnetisation.py:1038 test_explicit_unit_fill_preserves_solid_solution"
+    },
+    {
+      "fails_if": "the gain term, either component order of N, the per-cell fill or the iron_magnetisation division is wrong; the expected value comes from an independent elimination of the internal iron field, not from the solver.",
+      "test": "tests/test_magnetisation.py:1054 test_cell_fill_and_cross_field_match_linear_tensor"
+    },
+    {
+      "fails_if": "a zero or >1 fill, a two-component fill, a negative or >1 factor or a non-finite value is accepted, because the interaction assembly is poisoned to prove the refusal precedes assembly.",
+      "test": "tests/test_magnetisation.py:1094 test_cell_material_refuses_invalid_values"
+    },
+    {
+      "fails_if": "the gain is dropped from the residual; the same point scores zero with the gain and more than 0.1 of the reference norm without it.",
+      "test": "tests/test_magnetisation.py:1129 test_cross_field_gain_keeps_linear_reference"
+    },
+    {
+      "fails_if": "either receipt error passes its 10%/11% bound, proven by raising the stored row to limit+1e-6 and requiring the refusal, and it also fails if the receipt stops asserting the H200 device or the 0.4 factor.",
+      "test": "tests/test_magnetisation.py:1157 test_control_receipt_enforces_permeability_specific_bounds"
+    },
+    {
+      "fails_if": "the one-third smear ratio check is removed or loosened, proven by doubling the smear error to a 0.5 ratio and requiring the refusal.",
+      "test": "tests/test_magnetisation.py:1181 test_control_receipt_preserves_smear_reduction"
+    },
+    {
+      "fails_if": "the section factor stops improving on the plain fill by at least half on the 0.10 m grid; it cannot fail on the absolute bound, which the gate moved to the 0.032 m receipt.",
+      "test": "tests/test_magnetisation.py:1203 test_in_vessel_fill_matches_six_limb_reference"
+    },
+    {
+      "fails_if": "the tolerance is reverted to a zero absolute allowance (rejecting 1e-16-of-scale noise) or loosened past a 1e-9 relative change of a dominant element.",
+      "test": "tests/test_magnetisation.py:1239 test_compatibility_comparison_resolves_reference_scale"
+    },
+    {
+      "fails_if": "the affine factor stops matching the differentiated projected law, e.g. if the gain diagonal or the per-node fill factor is dropped from _linear_factor; the check runs at fill 1.0 and 0.2.",
+      "test": "tests/test_magnetisation.py:1350 test_linear_local_tangent_matches_differentiating_the_projected_law"
+    },
+    {
+      "fails_if": "the affine basis loses the per-cell fill or cross-field tensor; the expected coefficients come from the analytic effective susceptibility and the generalised Gram solve, independent of the solver.",
+      "test": "tests/test_magnetisation.py:1509 test_linear_fill_and_cross_field_match_affine_tensor"
+    }
+  ],
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/iron_limb_production/measure.py:61",
+    "scripts/iron_limb_production/measure.py:265",
+    "scripts/iron_limb_production/refinement.py:101"
+  ],
+  "completed_at": "2026-11-15T19:12:20.974Z",
+  "dispatched_at": "2026-11-15T19:11:49Z",
+  "evidence_caveats": [
+    "The fine-grid acceptance is asserted from the external receipt /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/production/material-refinement-20261114/summary.json, not recomputed by a test; I re-read it (sha256 dfa2a73d5e4b7bcadd098a0e1052d2ec7d8cf57aff3bc08350ffebfe0b07a66f) and its 0.032 m rows reproduce geometry 0.052446/0.106595 and smear 0.427729/0.499785 with device NVIDIA H200 NVL.",
+    "The control gate receipt was recorded at head_revision c5d1b1c5606e2ba4106f80bbf5a2e053e0742c2f while the receipt rows themselves are stamped 8ab69e765a812f1713129852eb65e4b5d886f26d; I diffed nova/biot/magnetisation.py from 8ab69e76 to 55d76179 and found the constant-basis residual, coefficient and material resolution unchanged, which is what makes those rows applicable to the reviewed head.",
+    "The production gate arm is recorded passed: false with production exit 1 in production-gate-receipt.json because measure.py:240 applies the 10% bound to the 0.05/0.1 m arms, which read 12.6% and 24.2% at mu=200; the node therefore relies on the control gate validator for the fine-grid acceptance rather than a green production arm.",
+    "The dispatch fence said at most ten Newton corrections while plan section 2 and the restated receipt say fifteen; the recorded WEST corrections are 6 at 0.08 m and 12 at 0.04 m with terminal residual 1.387e-12 at 0.04 m.",
+    "added_failure_count is derived from the reviewed run's gate logs: baseline-suite.log ends '53 passed in 4595.82s' with EXIT=0 and merge-head-suite.log ends '83 passed in 7948.20s' with EXIT=0 and 0 compatibility mismatches, so no failure id is added."
+  ],
+  "findings": [
+    {
+      "file": "scripts/iron_limb_production/gate.py",
+      "line": "44",
+      "severity": "non-blocking",
+      "text": "non-blocking: validate_control_receipt asserts only the 10%/11% geometry bounds and the one-third smear ratio from the 0.032 m receipt; the done-when's solid-outline f=1 control (>100% on the same measure, computed at scripts/iron_limb_production/measure.py:243 but read by no gate) and the midplane/above-arm ratio table are reported in the fragment but never asserted, so a regression that made the solid arm resemble the filled solve would redden no gate."
+    },
+    {
+      "file": "scripts/iron_limb_production/gate.py",
+      "line": "24",
+      "severity": "non-blocking",
+      "text": "non-blocking: validate_control_receipt reads source['device'] and the control rows but never source['revision'], so the accepted fine-grid receipt carries revision 8ab69e765a812f1713129852eb65e4b5d886f26d while the control gate ran at c5d1b1c5606e2ba4106f80bbf5a2e053e0742c2f and the reviewed head is 55d761795a8878ac842f39cba35dbb091f11617d; a receipt measured from unrelated code passes the gate unchanged."
+    },
+    {
+      "file": "scripts/iron_limb_production/compatibility.py",
+      "line": "64",
+      "severity": "non-blocking",
+      "text": "non-blocking: the node's 1e-12 omission-invariance check runs only when NOVA_MATERIAL_BASELINE names a captured npz, and that baseline (baseline-outputs.npz) lives in the run directory rather than the repository, so a clone cannot re-check the plan's first done-when clause and only the new unit-fill test guards the default path."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "I read the 20 node commits from bf61ef594ce36cb3fb75cbf57fc592e1185ffd4f to 5b63d8e79ced75662e165a0a40154e09f5be2bc5 (+1517/-4 across ten files) and the merge 55d761795a8878ac842f39cba35dbb091f11617d against its first parent (+197/-16 in nova/biot/magnetisation.py, +321 in tests/test_magnetisation.py), which preserves the fill and cross-field keywords and applies them to the affine basis the primary branch brought in.",
+    "done_when": "The quantitative clauses are the 10%/11% fine-grid bound with the one-third smear reduction, unit-fill invariance, the solid f=1 control, the two-cell-size ratio table and the WEST 1e-8 correction budget; scripts/iron_limb_production/gate.py:44-54 asserts the first two against a recorded H200 receipt, tests/test_magnetisation.py:1038-1046 and scripts/iron_limb_production/compatibility.py:64 assert unit-fill invariance, and the corrections 6 at 0.08 m and 12 at 0.04 m are recorded in the external receipts, but the solid control and ratio table are unasserted (see finding at gate.py:44).",
+    "goal": "The dispatched goal is a per-cell toroidal fill fraction and cross-field factor in the production axisymmetric iron solve; nova/biot/magnetisation.py:632-635 takes both as scalar, (cells,) or centroid-callback arguments, nova/biot/magnetisation.py:443-452 applies fill and gain in the constant residual, nova/biot/magnetisation.py:477-495 applies them at affine quadrature nodes, and nova/biot/magnetisation.py:565-573 exposes the iron magnetisation and the stored material fields.",
+    "manifest": "The manifest records status complete, 20 commits, ten changed paths, baseline-suite.log at bf61ef59 (53 passed, EXIT=0) and merge-head-suite.log at 55d76179 (83 passed, EXIT=0, 68 baseline captures compared with 0 compatibility mismatches), with the fine-grid acceptance 5.244561%/10.659474% and the WEST budget receipt at 15 corrections; its after_suite cites the repaired merge-head arm rather than the earlier failing after-suite.log, and the provenance correction in suites-gate-receipt.json discloses that substitution.",
+    "write_paths": "The reviewed manifest declares nova/biot/magnetisation.py, tests/test_magnetisation.py, scripts/iron_limb_production, docs/evidence/fragments/iron-limb-fill-fraction and docs/figures/iron-limb-fill-fraction/ilf-material-fill-fraction; the node's ten changed files all lie inside those grants, and the merge commit's resolution touches only nova/biot/magnetisation.py and tests/test_magnetisation.py."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:1054 and :1509 derive the expected per-cell tensor by eliminating the internal iron field independently, and tests/test_magnetisation.py:1157/1181 raise the stored error, so reinstating a dropped gain, a wrong component order or a loosened bound reddens them; the plan's 1e-12 omission invariance still rides on scripts/iron_limb_production/compatibility.py:64, whose baseline capture is not committed.",
+    "evidence": "scripts/iron_limb_production/gate.py:44-54 asserts bounds 0.10/0.11 and a 1/3 smear ratio against an H200 receipt whose 0.032 m rows I re-read (geometry 0.052446/0.106595, smear 0.427729/0.499785), but gate.py:24 never reads the receipt's revision and gate.py:44 never asserts the solid f=1 or ratio-table controls the done-when names.",
+    "fit": "The additions follow the surrounding dataclass, keyword-only and jnp idioms of nova/biot/magnetisation.py and introduce no name the repository rules forbid; the gate's acceptance logic is written with bare assert statements at scripts/iron_limb_production/gate.py:25-54, which vanish under python -O.",
+    "goal_fidelity": "nova/biot/magnetisation.py:632-635 carries fill_fraction and cross_field_factor on the public solve, scripts/iron_limb_production/measure.py:61-73 solves every control and WEST arm through them, and the merge at 55d76179 keeps both keywords beside the affine basis rather than replacing them.",
+    "reuse": "I searched nova for an existing cell-material resolver (def *_material*, callable-field resolution, CellSizeField) and for a reference-scaled close comparison (nova/imas, nova/equilibrium, nova/transport) and found no owner of either capability; the affine machinery is imported from its owner nova/biot/tiledassembly rather than reimplemented, and _cell_material and assert_compatible extend this module rather than fork a second mechanism.",
+    "scope_discipline": "The ten files in the node diff are inside the declared grants and the merge resolution is confined to nova/biot/magnetisation.py and tests/test_magnetisation.py; the 359-file first-parent diff at the merge carries the primary branch only."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: nova/biot/magnetisation.py:632-635 carries a per-cell toroidal fill fraction and cross-field factor on the production axisymmetric iron solve, consumed by scripts/iron_limb_production/measure.py:61-73 and preserved by the merge at 55d76179 beside the affine basis.\nVERDICT done_when: scripts/iron_limb_production/gate.py:44-54 asserts the 10%/11% fine-grid bounds and the one-third smear ratio against a recorded H200 receipt whose rows I re-read, and the WEST 6/12 correction rows exist in the external receipts, but the solid-outline f=1 control and the midplane/above-arm ratio table are never asserted.\nVERDICT write_paths: the manifest's declared grants cover every changed path; the node's ten files are nova/biot/magnetisation.py, tests/test_magnetisation.py and scripts/iron_limb_production/*, and the merge resolution touches only the first two.\nVERDICT manifest: read complete; it cites baseline-suite.log (53 passed, EXIT=0) and merge-head-suite.log (83 passed, EXIT=0, 68 captures compared, 0 mismatches) at the reviewed head, and I confirmed both log tails and the merge-head-receipt.json entry.\nVERDICT diff: read the 20 commits from bf61ef59 to 5b63d8e7 (+1517/-4, ten files) and the merge 55d76179 against its first parent (+197/-16 in nova/biot/magnetisation.py, +321 in tests/test_magnetisation.py); the fill/gain operands, the material validation and the result fields are all present at the head.\nCALL_SITES: scripts/iron_limb_production/measure.py:61, scripts/iron_limb_production/measure.py:265, scripts/iron_limb_production/refinement.py:101\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/biot/magnetisation.py:632-635 takes both material fields and scripts/iron_limb_production/measure.py:61-73 solves every control and WEST arm through them at the reviewed head.\nSCORE evidence: 16\nJUSTIFICATION evidence: scripts/iron_limb_production/gate.py:44-54 asserts the 10%/11% and one-third bounds against the H200 receipt, but gate.py:24 never reads the receipt revision and gate.py:44 never asserts the solid f=1 or ratio-table controls.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all ten changed paths lie inside the manifest's declared grants, and the merge resolution is limited to nova/biot/magnetisation.py and tests/test_magnetisation.py.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_magnetisation.py:1054 and :1509 fail on an independently derived per-cell tensor that a dropped gain or wrong component order would break.\nSCORE fit: 18\nJUSTIFICATION fit: the additions follow the keyword-only and jnp idiom of nova/biot/magnetisation.py, with the gate's assertions written as bare assert statements at scripts/iron_limb_production/gate.py:25-54.\nSCORE reuse: 20\nJUSTIFICATION reuse: no owner for a cell-material resolver or a reference-scaled close comparison exists in nova and the search over nova/biot, nova/imas and nova/equilibrium found none.\nFINDING scripts/iron_limb_production/gate.py:44 non-blocking: validate_control_receipt asserts the 10%/11% geometry bounds and the one-third smear ratio but never the done-when's solid-outline f=1 control or the midplane/above-arm ratio table, so a regression that made the solid arm resemble the filled solve would redden no gate.\nFINDING scripts/iron_limb_production/gate.py:24 non-blocking: the validator never reads the receipt's revision, so a receipt measured at 8ab69e76 passes the gate at head 55d76179 without any revision check in between.\nFINDING scripts/iron_limb_production/compatibility.py:64 non-blocking: the 1e-12 omission-invariance comparison runs only when NOVA_MATERIAL_BASELINE names a capture that lives in the run directory rather than the repository, so a clone cannot re-check the plan's first done-when clause and only the unit-fill test guards the default path.",
+  "review_run_id": "r-20261115T190603335019-review-of-ilf-material-fill-fraction-55d761795a88",
+  "reviewed_base_sha": "bf61ef594ce36cb3fb75cbf57fc592e1185ffd4f",
+  "reviewed_head_sha": "55d761795a8878ac842f39cba35dbb091f11617d",
+  "reviewed_run_id": "r-20261114T103234029961-ilf-material-fill-fraction",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T19:27:14+00:00",
+  "total": 110
+}

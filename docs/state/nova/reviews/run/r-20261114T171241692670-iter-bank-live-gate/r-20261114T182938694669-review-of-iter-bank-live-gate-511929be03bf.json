@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arm logs on disk: resumed-base.log records '7 passed, 6 skipped in 3.21s' with EXIT=0 at 8907e864 and delivery-head.log records '13 passed in 247.36s' with EXIT=0 at 511929be, neither carrying a FAILED line, so the set difference is empty (0).",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-14T19:16:35.937Z",
+  "dispatched_at": "2026-11-14T18:42:45Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "iter-bank-recertify",
+      "recorded_at": "2026-11-14T21:08:57.495867+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_iter_bank.py",
+      "line": "36",
+      "severity": "non-blocking",
+      "text": "the module-scoped iter_bank fixture takes 205-247 s in every run and the six live accuracy cases carry no slow marker, so the default (non-slow) lane now pays about four minutes for this file alone, contrary to nova AGENTS.md's marker policy that reserves slow for exactly this class of test; mark the live cases slow or shrink the fixture."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all five commits against base 8907e8648d8b; two files change (tests/test_iter_bank.py 166 insertions and 38 deletions, the evidence fragment new at 32 lines) and the test hunk replaces six stored-receipt cases with one module fixture and one direct analytic oracle.",
+    "done_when": "the done_when has three clauses: live cases at 1e-10 coil and 1e-8 plasma, no environment-gated skips, and a from_rows coil-drop mutation that fails a live case plus CPU base/head arms with zero added failures; tests/test_iter_bank.py:214 and :258 assert against the analytic kernels, the head file has zero 'skip'/'environ' occurrences, shared-negative.log records '6 failed, 7 passed' EXIT=1 under the coil-zeroing mutation, and resumed-base.log (7 passed, 6 skipped, EXIT=0) and delivery-head.log (13 passed, EXIT=0) record the two arms.",
+    "goal": "the node goal is to make tests/test_iter_bank.py's accuracy cases exercise the landed code rather than stored receipts; tests/test_iter_bank.py:35-128 builds one live ITER sub-bank through support_read.SupportOperands.from_rows and tests/test_iter_bank.py:208 and :252 call support_read.nodal_jets against a direct-kernel oracle, with no receipt read anywhere.",
+    "manifest": "read; it reports status complete, five commits, base 7 passed/6 skipped against head 13 passed, names shared-negative.log as the mutation log and four arm logs, and I confirmed each of resumed-base.log, shared-head.log, shared-negative.log and delivery-head.log by its header revision line and its closing EXIT= line.",
+    "write_paths": "the declared paths are tests/test_iter_bank.py and docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-live-gate.html; git diff 8907e864..511929be --stat changes exactly those two files and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/test_iter_bank.py:214 and :258 redden on the recorded from_rows coil-column mutation (shared-negative.log, 6 failed), so the assertions are not vacuous; I deducted because no assertion guards against these live cases reverting to an environment-gated skip.",
+    "evidence": "resumed-base.log and delivery-head.log each name the arms' per-field error prints and shared-negative.log names the mutation on its '# mutation:' header with '6 failed, 7 passed' EXIT=1, and the fragment's three headline error figures reconcile with delivery-head.log lines 16-37.",
+    "fit": "the code follows the module's existing configure_dtypes-first, noqa:E402 idiom and reuses measure.py's helpers, but the module-scoped fixture takes 205-247 s and is unmarked, which conflicts with nova AGENTS.md's marker policy that the default lane excludes heavy numerical tests.",
+    "goal_fidelity": "tests/test_iter_bank.py:35-128 builds the bank live through SupportOperands.from_rows on one plasma cell, PF1 and CS3U coils and seven nodes, and tests/test_iter_bank.py:208-219 and :214 call nodal_jets with runtime currents, so both faces of the goal are exercised.",
+    "reuse": "the diff reuses the existing owners SupportOperands.from_rows (nova/equilibrium/support_read.py:85), build_jet_matrix (scripts/prototypes/read_route/jets.py:288), pack, BiotMomentCoupling.evaluate and assert_accuracy; the local analytic_jets helper overlaps scripts/prototypes/iter_bank/measure.py:266's direct_map but composes the same primitives for one packed coupling and three moment states rather than forking the mechanism.",
+    "scope_discipline": "every changed path is inside the declared fence (tests/test_iter_bank.py and the manifest fragment), with no product code, tolerance or timeout change; the arms ran from scratch extractions rather than a written repository path."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to make tests/test_iter_bank.py's accuracy cases exercise the landed code rather than stored receipts; tests/test_iter_bank.py:35-128 builds one live ITER sub-bank through support_read.SupportOperands.from_rows and tests/test_iter_bank.py:208 and :252 call support_read.nodal_jets against a direct-kernel oracle, with no receipt read anywhere.\nVERDICT done_when: the done_when has three clauses: live cases at 1e-10 coil and 1e-8 plasma, no environment-gated skips, and a from_rows coil-drop mutation that fails a live case plus CPU base/head arms with zero added failures; tests/test_iter_bank.py:214 and :258 assert against the analytic kernels, the head file has zero 'skip'/'environ' occurrences, shared-negative.log records '6 failed, 7 passed' EXIT=1 under the coil-zeroing mutation, and resumed-base.log (7 passed, 6 skipped, EXIT=0) and delivery-head.log (13 passed, EXIT=0) record the two arms.\nVERDICT write_paths: the declared paths are tests/test_iter_bank.py and docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-live-gate.html; git diff 8907e864..511929be --stat changes exactly those two files and nothing else.\nVERDICT manifest: read; it reports status complete, five commits, base 7 passed/6 skipped against head 13 passed, names shared-negative.log as the mutation log and four arm logs, and I confirmed each of resumed-base.log, shared-head.log, shared-negative.log and delivery-head.log by its header revision line and its closing EXIT= line.\nVERDICT diff: read all five commits against base 8907e8648d8b; two files change (tests/test_iter_bank.py 166 insertions and 38 deletions, the evidence fragment new at 32 lines) and the test hunk replaces six stored-receipt cases with one module fixture and one direct analytic oracle.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/test_iter_bank.py:35-128 builds the bank live through SupportOperands.from_rows on one plasma cell, PF1 and CS3U coils and seven nodes, and tests/test_iter_bank.py:208-219 and :214 call nodal_jets with runtime currents, so both faces of the goal are exercised.\nSCORE evidence: 19\nJUSTIFICATION evidence: resumed-base.log and delivery-head.log each name the arms' per-field error prints and shared-negative.log names the mutation on its '# mutation:' header with '6 failed, 7 passed' EXIT=1, and the fragment's three headline error figures reconcile with delivery-head.log lines 16-37.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every changed path is inside the declared fence (tests/test_iter_bank.py and the manifest fragment), with no product code, tolerance or timeout change.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_iter_bank.py:214 and :258 redden on the recorded from_rows coil-column mutation (shared-negative.log, 6 failed), so the assertions are not vacuous; no assertion guards against these live cases reverting to an environment-gated skip.\nSCORE fit: 15\nJUSTIFICATION fit: the module-scoped fixture at tests/test_iter_bank.py:36 takes 205-247 s and is unmarked, conflicting with nova AGENTS.md's marker policy that the default lane excludes heavy numerical tests.\nSCORE reuse: 17\nJUSTIFICATION reuse: the diff reuses SupportOperands.from_rows (nova/equilibrium/support_read.py:85) and build_jet_matrix (scripts/prototypes/read_route/jets.py:288); the local analytic_jets helper overlaps scripts/prototypes/iter_bank/measure.py:266's direct_map but composes the same primitives for one packed coupling rather than forking the mechanism.\nFINDING tests/test_iter_bank.py:36 non-blocking: the module-scoped iter_bank fixture takes 205-247 s in every run and the six live accuracy cases carry no slow marker, so the default (non-slow) lane now pays about four minutes for this file alone, contrary to nova AGENTS.md's marker policy; mark the live cases slow or shrink the fixture.",
+  "review_node": "review-of-iter-bank-live-gate-511929be03bf",
+  "review_run_id": "r-20261114T182938694669-review-of-iter-bank-live-gate-511929be03bf",
+  "reviewed_base_sha": "8907e8648d8b1c4b1db610185f6b9efd4e49f6d8",
+  "reviewed_head_sha": "511929be03bff53e17e302dda0599a131676a645",
+  "reviewed_run_id": "r-20261114T171241692670-iter-bank-live-gate",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261114T182938694669-review-of-iter-bank-live-gate-511929be03bf"
+  },
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T20:36:26.965943+00:00",
+  "total": 108
+}

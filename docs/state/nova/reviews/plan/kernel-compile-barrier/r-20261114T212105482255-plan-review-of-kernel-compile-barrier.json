@@ -1,0 +1,70 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T21:42:51.432Z",
+  "dispatched_at": "2026-11-14T21:21:49Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261114T212105482255-plan-review-of-kernel-compile-barrier/plan.html:76",
+      "id": "wiring-1",
+      "reason": "expressing the hold as a declared wait (status deferred, or a section dependency on sub-millisecond-forward-path \u00a77) is what stops the queue and a coordinator dispatching from declarations from running \u00a76 before the evidence it consumes exists.",
+      "text": "\u00a76's new comment (line 216) states it is \"Held, not dispatched\" until run r-20261114T211231918544-polygon-tangent-repair reports the four rows, and that its node builds on that run's head only if the repair does not clear them; the section declaration at line 76 still reads data-status=\"implementable\" with data-links=\"\" and the plan's section-declarations meta lists \"s6\":\"implementable\", so the plan asserts the section is ready while its own content says it is waiting \u2014 a coordinator dispatching implementable sections, or the queue ordering on declared waits, has no record of the wait and can launch \u00a76 concurrently with the repair it is meant to build on, duplicating the identity work and re-basing \u00a72's identity reference twice.",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "52c39f4726281e9efa44033a607202c83293100d",
+  "plan_fingerprint": "7d4f3cdd925d44a98497d37c1b352449beba233802c923e444768c01fa2e8f65",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 56,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3f2dc1b485119de0c01dc3e8b476101b4029503d",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The section now declares a link to sub-millisecond-forward-path section 7, the peer repair it waits on, so the wait is in the declared graph and not only in a comment.",
+      "reason": "",
+      "when": "2026-11-14T21:44:15.039100+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3f2dc1b485119de0c01dc3e8b476101b4029503d",
+      "commit_basis": "edit",
+      "note": "The section now declares a link to sub-millisecond-forward-path section 7, the peer repair it waits on, so the wait is in the declared graph and not only in a comment.",
+      "reason": "",
+      "when": "2026-11-14T21:44:15.039100+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-kernel-compile-barrier.v56.json",
+  "review_run_id": "r-20261114T212105482255-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "5ba233b96eac6d42286709de987240d0d7f0fb0f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 _source_jets at nova/equilibrium/fixed_points.py:323 and _row_program at :521, tests/biot/test_edge_term_tangents.py, tests/biot/test_vertex_term_tangents.py, scripts/prototypes/compile_pass_profile/lowered_size.py, sub-millisecond-forward-path \u00a77 and both \u00a72 evidence fragments all resolve; the one run-comment link to variadic-split.html does not resolve, and the correcting comment immediately below it records that and restates the result in full, so no reader is sent to it without the numbers.",
+    "done_when": "pass \u2014 \u00a72's clauses are measurable and its base arm is measured in the same job as the arm it discriminates against, and \u00a76 names test_truncated_tangent_fails_identity as the negative control that must refuse the truncated tangent on every row.",
+    "evidence_paths": "pass \u2014 \u00a72 records its measurements under docs/evidence/fragments/kernel-compile-barrier/ (production-point-batch-pass-profile.html and graph-growth-history.html both resolve at HEAD), and \u00a76's measurement record is assigned by node dispatch on the plan's established convention.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or changelog prose reach a symbol or comment in \u00a72 or \u00a76; _source_jets and _row_program are the module's own names, not plan labels.",
+    "reasoning": "pass \u2014 \u00a72's figures reconcile with its cited evidence (351.4 s base, 220.7 s across variadic-op-splitter and multi_output_fusion, 64.9% of the 96.75%-attributed time, 2.14 and 1.29 growth factors, 130.8 s residual), the splitter's 750-to-402,141 expansion matches its profile, and \u00a76's corrected candidate set is exact (16 non-merge commits in 716d859f0..00ec05512, all six named commits among them, and da28fc4e5 and cb42f656f are merges that change polygonanalytic.py and are reachable in that base).",
+    "single_goal": "pass \u2014 \u00a72 delivers one bounded point program and \u00a76 one identity repair, each closable on a single verdict.",
+    "wiring": "a finding \u2014 \u00a76 records in its own new comment that it is held pending run r-20261114T211231918544-polygon-tangent-repair, yet its section declaration still reads data-status=\"implementable\" with empty data-links, so no wait or dependency is declared to the queue."
+  },
+  "section_digests": {
+    "_document": "7a4ded9951e4f3f7ec46cb990b629742760b74992915790661ea8552e88cd748",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "765292264a4414dba99e7fdef780af3ed6725c95ba8acbf1d171257250bf0b1a",
+    "s3": "ab68c20ce5d3e9242532f0e5cb72a8baf8b9ce57666cac7db68cee8904360fa1",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T21:43:25.873180+00:00",
+  "total": null
+}

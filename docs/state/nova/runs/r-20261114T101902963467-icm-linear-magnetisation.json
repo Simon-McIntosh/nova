@@ -1,0 +1,722 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "60d418bb85426142f3ca0a5f7a45afc4232b3255",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/brief.md",
+    "sha256": "04c4b2a5109cf93270da2d4cf111be8c14fd5a47dbcb9a3f92dccf0fba3351fe"
+  },
+  "budget": {
+    "budget_overrun": true,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 882,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 78478976,
+      "cached_input_tokens_cumulative": 78478976,
+      "input_tokens": 79038850,
+      "input_tokens_cumulative": 79038850,
+      "output_tokens": 394599,
+      "output_tokens_cumulative": 394599,
+      "reasoning_output_tokens": 265764,
+      "reasoning_output_tokens_cumulative": 265764
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 2024,
+    "files": 16,
+    "removed": 19
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 1121,
+        "name": "test_linear_local_tangent_matches_differentiating_the_projected_law",
+        "path": "tests/test_magnetisation.py"
+      },
+      "run_function": {
+        "line": 582,
+        "name": "solve_magnetisation",
+        "path": "nova/biot/magnetisation.py"
+      },
+      "window_line": 637
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_heterogeneous_padding_is_finite_at_source_corners",
+        "path": "tests/test_biotarctiledbackend.py"
+      },
+      "run_function": {
+        "line": 912,
+        "name": "_fill_arc_tile",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 914
+    },
+    {
+      "existing_function": {
+        "line": 1491,
+        "name": "test_packed_arc_builds_one_vectorized_state_for_each_moment_family",
+        "path": "tests/test_biotpolygonanalytic.py"
+      },
+      "run_function": {
+        "line": 912,
+        "name": "_fill_arc_tile",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 914
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_heterogeneous_padding_is_finite_at_source_corners",
+        "path": "tests/test_biotarctiledbackend.py"
+      },
+      "run_function": {
+        "line": 1419,
+        "name": "one_block",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1420
+    },
+    {
+      "existing_function": {
+        "line": 1491,
+        "name": "test_packed_arc_builds_one_vectorized_state_for_each_moment_family",
+        "path": "tests/test_biotpolygonanalytic.py"
+      },
+      "run_function": {
+        "line": 1419,
+        "name": "one_block",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1420
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_heterogeneous_padding_is_finite_at_source_corners",
+        "path": "tests/test_biotarctiledbackend.py"
+      },
+      "run_function": {
+        "line": 1446,
+        "name": "over_blocks",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1447
+    },
+    {
+      "existing_function": {
+        "line": 1491,
+        "name": "test_packed_arc_builds_one_vectorized_state_for_each_moment_family",
+        "path": "tests/test_biotpolygonanalytic.py"
+      },
+      "run_function": {
+        "line": 1446,
+        "name": "over_blocks",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1447
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_a_whole_build_compiles_the_kernel_once",
+        "path": "tests/test_biottiledbackend.py"
+      },
+      "run_function": {
+        "line": 1630,
+        "name": "assemble",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1720
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "pair_geometry",
+        "path": "tests/test_biottiledbackend.py"
+      },
+      "run_function": {
+        "line": 1630,
+        "name": "assemble",
+        "path": "nova/biot/tiledassembly.py"
+      },
+      "window_line": 1720
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "bc289fda44336d9d05f9fe13ef9bd380fe86932a",
+    "300dc39aedc7836229c564aeff622c614bfa0021",
+    "e1e6175b92108729c7891abcfea8979fa0387c98",
+    "84347f9f74284b09bd77bde62490db76605f53f9",
+    "11c9159a3911bad3cdc4d66de61e3e6fd05fbecb",
+    "bcb0f71e39457d74f9a68ebf5998e8e78ba88b57",
+    "671c86cc790348bdb330bf10c46603be0f8a2e92",
+    "5cd7be8c682460b595c618bbcdc36195f75ead45",
+    "4f0f874eeaa8691ddc5362dee8cff2395c503a90",
+    "bb00950f7a0078e73a49641e7f24cb2dc19771e2",
+    "e8e245ee1ebc113cc3404af765ab8fb24269afe1",
+    "c038963eba57505b00ab5569b0edbb21fc3bd621",
+    "b73eb252ee2832482fe7a986fb2ebc1fe9366a1b",
+    "a50b74d5a87571adf4c2d9900329954f1b813c49",
+    "131a7b556c0bad6ab6326f920c4251fa6b5cc0bd",
+    "2648d3d6f37205635e9e0ba19dba259664a860b7",
+    "6b6069bc3dd829bf6bbb2d397a1c62320926c71a",
+    "528541e7f2f67ac16b386e71db592c87d41fe127",
+    "f9ffb3dadf2b680698385fdd2199623e551a0175",
+    "1a43ed40e05e686298ab8b573a2cb8623ad19745",
+    "b3b57437ec271a0172a7dc9aaab6e2351fedaf69",
+    "b1167c51ccfe86ab33bab54e42738f8a2cc1d261",
+    "edbd6088785eaa8d58b3d282c002bbf21841f361",
+    "4d11e9808a4fd36669a1f033c75047b9b3c766ef",
+    "50d74f2116271b1e7f7c44fc9ca6de5625adb7f1",
+    "582d58bc91810d7df082e4fa925b732d04c4816d",
+    "21c23562f8b092b1985d5bef1b9abcfa004f8224",
+    "187d4d989401bec66082146e2a7504b1ba6f4218",
+    "be8a601672fc59bee88836fca05468bcc9048413"
+  ],
+  "completed_at": "2026-11-14T16:34:44Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-14T10:20:06Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_artifacts_carry_no_worktree_paths.py tests/test_imas_iron_read.py tests/test_magnetisation.py -m 'not slow'",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/validated-fast/after-fast.log"
+  },
+  "impl_move": {
+    "at_complete": 0.4841897233201581,
+    "at_dispatch": 0.4841897233201581,
+    "plan": "iron-core-magnetisation",
+    "reason": "section 5 stays open: the assembly-cost node, the WEST linear measurement and the formulation decision remain",
+    "verdict": "waived"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.3229135596253654,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-18T09:37:57Z, which is after this node's 21600s horizon ending 2026-11-14T16:19:07.690896+00:00",
+    "horizon_ends_at": "2026-11-14T16:19:07.690896+00:00",
+    "horizon_seconds": 21600,
+    "metered": true,
+    "observed_at": "2026-11-14T10:19:06Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-18T09:37:57Z",
+    "resets_at": "2026-11-19T16:24:40Z",
+    "seconds_until_reset": 453933,
+    "state": "quiet",
+    "utilisation_pct": 33.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-14T10:19:06Z",
+    "read_at": "2026-11-14T10:19:07Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 33.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-14T16:34:44Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-14T16:34:44Z",
+        "resets_at": 1795105480,
+        "used_percent": 54.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/manifest.md",
+  "member": "disposable-r-20261114T101902963467-icm-linear-magnetisation",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_magnetisation.py::test_linear_shell_spectrum_uses_its_volume_gram[0.16]",
+      "tests/test_magnetisation.py::test_linear_shell_spectrum_uses_its_volume_gram[0.2]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_magnetisation.py::test_linear_shell_spectrum_uses_its_volume_gram[0.16]",
+      "tests/test_magnetisation.py::test_linear_shell_spectrum_uses_its_volume_gram[0.2]"
+    ],
+    "control_log_source": "manifest",
+    "control_run_failed": true,
+    "declaration": "the linear-basis spectrum test with the 2 pi r volume weight dropped from the Gram must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/validated-fast/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/validated-fast/negative-control.log",
+    "test_paths": [
+      "tests/test_magnetisation.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "icm-linear-magnetisation",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.cache/nova-icm-briefs/icm-linear-magnetisation.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/brief.md",
+    "brief_sha256": "04c4b2a5109cf93270da2d4cf111be8c14fd5a47dbcb9a3f92dccf0fba3351fe",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 418,
+          "cached_input_tokens": 274000,
+          "input_tokens": 274420,
+          "output_tokens": 343,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 274763,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "5b10be66-c69b-456f-9a85-3840909f1723",
+      "session_id": "5b10be66-c69b-456f-9a85-3840909f1723"
+    },
+    "done_when": "(1) a fast test asserts the linear-basis interaction's spectrum against its own Gram lies in [0, 1] within 1e-10 on two shell meshes, a negative control that drops the 2 pi r volume weight makes that test fail, and the constant basis stays bit-identical (existing grid-digest and spectrum tests pass); (2) receipts under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/ record the mu_r 1000 shell per-probe errors, unknowns, walls and lane for the linear basis at uniform 40, 20 and 10 mm (and finer where it fits), the order between successive halvings, and whether it reaches 0.5 percent worst-probe at fewer unknowns than the constant basis (about 28 500 unknowns measured); (3) docs/evidence/fragments/iron-core-magnetisation/icm-linear-magnetisation.html states the field route and the kernels it rests on, with one inspected SVG of error against unknowns for both bases under docs/figures/iron-core-magnetisation/icm-linear-magnetisation",
+    "estimated_hours": null,
+    "goal": "Build piecewise-linear magnetisation on the Galerkin iron route and measure it on the mu_r 1000 closed shell",
+    "id": "icm-linear-magnetisation",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-14T10:19:06Z",
+      "read_at": "2026-11-14T10:19:07Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 33.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/manifest.md",
+    "negative_control": "the linear-basis spectrum test with the 2 pi r volume weight dropped from the Gram must fail",
+    "over_fence_reason": "operator derivation plus titan shell solves at several mesh sizes; the graded node's measurements ran 4-8 h",
+    "peer_scopes": {
+      "bank-hessian-reference": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-reference.html",
+        "docs/figures/sub-millisecond-forward-path/bank-hessian-reference",
+        "scripts/prototypes/bank_hessian_reference"
+      ],
+      "bank-traced-inputs": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-traced-inputs.html",
+        "docs/figures/sub-millisecond-forward-path/bank-traced-inputs",
+        "nova/equilibrium/current.py",
+        "nova/equilibrium/support_read.py",
+        "scripts/prototypes/bank_traced_inputs",
+        "tests/test_bank_traced_inputs.py"
+      ],
+      "diiid-xpoint-profile-extent": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-profile-extent.html",
+        "docs/figures/diiid-xpoint-profile-extent",
+        "scripts/prototypes/diiid_xpoint_profile_extent",
+        "scripts/prototypes/diiid_xpoint_profile_extent/render.py"
+      ],
+      "ilf-six-limb-reference": [
+        "docs/evidence/fragments/iron-limb-fill-fraction",
+        "docs/evidence/fragments/iron-limb-fill-fraction/ilf-six-limb-reference.html",
+        "docs/figures/iron-limb-fill-fraction/ilf-six-limb-reference",
+        "docs/figures/iron-limb-reference",
+        "scripts/iron_limb_reference",
+        "tests/test_iron_limb_reference.py"
+      ],
+      "iter-bank": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank.html",
+        "docs/figures/sub-millisecond-forward-path/iter-bank",
+        "nova/equilibrium/support_read.py",
+        "scripts/prototypes/iter_bank",
+        "tests/test_iter_bank.py"
+      ],
+      "known-answer-recovery": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+        "docs/figures/inverse-equilibrium-baseline",
+        "docs/figures/inverse-equilibrium-baseline/known-answer-recovery",
+        "nova/equilibrium/__init__.py",
+        "nova/equilibrium/magnetics_fit.py",
+        "nova/equilibrium/measurement.py",
+        "nova/equilibrium/observation_kernels.py",
+        "tests/test_equilibrium_forward.py",
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "variadic-split": [
+        "docs/evidence/fragments/kernel-compile-barrier/variadic-split.html",
+        "docs/figures/kernel-compile-barrier/variadic-split",
+        "nova/biot/elliptic.py",
+        "nova/biot/polygonanalytic.py",
+        "nova/biot/rangefunction.py",
+        "nova/equilibrium/fixed_points.py",
+        "tests/biot",
+        "tests/test_fixed_points.py"
+      ]
+    },
+    "plan": "iron-core-magnetisation",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "guided",
+    "time_budget": "6h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "nova/biot/magnetisation.py",
+      "nova/biot/tiledassembly.py",
+      "tests/test_magnetisation.py",
+      "scripts/iron_linear_magnetisation",
+      "scripts/iron_graded_refinement/gate.sh",
+      "docs/evidence/fragments/iron-core-magnetisation/icm-linear-magnetisation.html",
+      "docs/figures/iron-core-magnetisation/icm-linear-magnetisation"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 1.32264082116738,
+      "derived": 0.27445092741021826,
+      "drain_hours": 168.0,
+      "effective_limit": 0.27445092741021826,
+      "elapsed_fraction": 0.2495008431001984,
+      "elapsed_hours": 41.91614164083333,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-11-14T10:19:38+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.6699999999999999,
+      "remaining_windows": null,
+      "resets_at": "2026-11-19T16:24:40Z",
+      "state": "observed",
+      "utilisation": 0.33,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.254826,
+      "decided_by": "window",
+      "margin": 0.407674,
+      "name": "icm-linear-magnetisation",
+      "score": 0.6625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.33
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.109907,
+        "observed_at": "2026-11-14T10:19:38+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-19T16:24:40Z",
+        "state": "observed",
+        "utilisation": 0.33,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "icm-linear-magnetisation",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-14T10:19:38.109907+00:00",
+    "score": 0.6625,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "lead directive 2026-11-07: difficult work to codex sol; new linear-basis Galerkin operator with a convexity property, deep reasoning, strict verification",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.725,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.4841897233201581,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "be8a601672fc59bee88836fca05468bcc9048413",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_absent": true,
+    "scratch_bytes": null,
+    "scratch_host": "98dci4-clu-2001.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261114T101902963467-icm-linear-magnetisation",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-linear-magnetisation",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "60d418bb85426142f3ca0a5f7a45afc4232b3255",
+    "reviewed_head_sha": "be8a601672fc59bee88836fca05468bcc9048413",
+    "scores": {
+      "durability": 15,
+      "evidence": 12,
+      "fit": 16,
+      "goal_fidelity": 15,
+      "reuse": 5,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 81
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261114T101902963467-icm-linear-magnetisation",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+  "session_harness": "codex",
+  "session_id": "01a1d992-b930-70d3-955b-6a7919430119",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_magnetisation.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/head-suite/after-suite.log",
+      "revision": "be8a601672fc59bee88836fca05468bcc9048413"
+    },
+    "baseline_measured_nothing": false,
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_magnetisation.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/suites/baseline-suites.log",
+      "revision": "60d418bb85426142f3ca0a5f7a45afc4232b3255"
+    },
+    "failure_attribution": {},
+    "measured_by": "run",
+    "status": "clean",
+    "suite_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_magnetisation.py",
+    "waiver_reason": null
+  },
+  "tests_added": 6,
+  "throughput": {
+    "cumulative_cached_input_tokens": 78478976,
+    "cumulative_input_tokens": 79038850,
+    "detail": "model span bounded from the client rollout's tool spans; input cumulative summed across resets",
+    "generated_tokens": 660363,
+    "generation_seconds": 16430.003,
+    "machine_seconds": 6019.334,
+    "tokens_per_second": 40.19
+  },
+  "time_budget": "6h",
+  "tool_steps": 794.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 22478,
+  "watch_override": {
+    "arming_line": "reckon crew watch --project nova",
+    "attach_line": "/home/ITER/mcintos/Code/reckon/.venv/bin/reckon crew follow --project nova --session 5b10be66-c69b-456f-9a85-3840909f1723",
+    "requested": true,
+    "session_attached": true,
+    "watcher_live": true
+  },
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-14T16:34:47Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-14T10:20:16Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 74597326,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/codex-home/cache"
+      },
+      {
+        "bytes": 32753627,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T101902963467-icm-linear-magnetisation/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261114T101902963467-icm-linear-magnetisation",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 2290,
+    "worker_pid": 2666526
+  },
+  "worker_seconds": 22449,
+  "worker_seconds_source": "rollout_receipt",
+  "worktree_retention": null
+}

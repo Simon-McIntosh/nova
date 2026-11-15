@@ -1234,3 +1234,324 @@ def test_compatibility_comparison_resolves_reference_scale():
     changed[1] *= 1 + 1e-9
     with pytest.raises(AssertionError, match="Not equal to tolerance"):
         assert_compatible(changed, reference)
+
+
+@pytest.mark.parametrize("size", [0.20, 0.16])
+def test_linear_shell_spectrum_uses_its_volume_gram(size):
+    """The affine B projection is reciprocal and bounded in its own metric."""
+    region = (
+        shapely.Point(0, 0)
+        .buffer(0.4, 2)
+        .difference(shapely.Point(0, 0).buffer(0.28, 2))
+        .intersection(shapely.box(0, -0.4, 0.4, 0.4))
+    )
+    cells = iron._mesh(region, size)
+    operator = iron._galerkin_interaction(cells, basis="linear")
+    spectrum = iron.galerkin_spectrum(cells, operator, basis="linear")
+    print("linear shell spectrum", size, spectrum)
+    assert operator.shape == (6 * len(cells.polygons),) * 2
+    assert spectrum["volume_symmetry"] < 1e-12
+    assert spectrum["minimum"] >= -1e-10
+    assert spectrum["maximum"] <= 1 + 1e-10
+
+
+def test_linear_material_projects_the_local_law_at_volume_nodes(monkeypatch):
+    """Spatial variation reaches the material law before its Galerkin projection."""
+    region = shapely.box(1, 0, 2, 1)
+    cells = iron._mesh(region, 1.0)
+    monkeypatch.setattr(
+        iron, "_galerkin_interaction", lambda *args, **kwargs: np.zeros((6, 6))
+    )
+    law_b, law_mu = [0.0, 0.2, 1.0], [2.0, 4.0, 2.0]
+
+    def external(points):
+        return np.column_stack((0.02 + 0.01 * points[:, 0], 0.03 + 0.04 * points[:, 1]))
+
+    result = iron.solve_magnetisation(
+        region, external, law_b, law_mu, cell_size=1.0, basis="linear", tolerance=1e-12
+    )
+    geometry = iron.linear_magnetisation_geometry(cells.polygons)
+    values = external(geometry["points"])
+    coefficient = np.asarray(
+        iron._coefficient(
+            jnp.asarray(np.linalg.norm(values, axis=1)),
+            *map(jnp.asarray, iron._fit_law(law_b, law_mu)),
+        )
+    )
+    expected = np.linalg.solve(
+        geometry["gram"][0],
+        geometry["basis"].T
+        @ (geometry["weights"][:, None] * values * coefficient[:, None]),
+    )
+    assert result.converged
+    np.testing.assert_allclose(result.linear_coefficients[:, 0].T, expected, rtol=2e-13)
+    np.testing.assert_allclose(result.magnetisation[0], expected[0], rtol=2e-13)
+    assert np.linalg.norm(expected[1:]) > 1000
+    with pytest.raises(ValueError, match=r"finite \(cells, 6\)"):
+        iron.solve_magnetisation(
+            region,
+            external,
+            law_b,
+            law_mu,
+            cell_size=1.0,
+            basis="linear",
+            initial_magnetisation=np.zeros((1, 2)),
+        )
+
+
+def test_linear_field_constant_mode_matches_closed_sheet_field():
+    cells = iron._mesh(shapely.box(1, 0, 1.2, 0.2), 0.2)
+    points = np.array([[0.2, 0.1], [2.0, 0.3], [0.0, 1.0]])
+    response = iron.linear_cell_interaction(cells.polygons, points, plan=iron._PLAN)
+    constant = iron._interaction(cells, points, iron._PLAN)
+    np.testing.assert_allclose(response[:, [0, 3]], constant, rtol=1e-12, atol=1e-20)
+
+
+def test_linear_volume_current_matches_closed_polygon_field():
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+    from nova.biot.tiledassembly import _polygon_current_response
+
+    polygon = np.array([[1.0, 0.0], [1.01, 0.0], [1.0, 0.01]])
+    points = np.array([[1.001, 0.002], [1.005, 0.003], [2.0, 0.2], [0.0, 2.0]])
+    expected = np.array(polygon_analytic_greens(*points.T, polygon)) * 0.00005
+    response = _polygon_current_response((polygon,), points, iron._PLAN)[:, :, 0]
+    np.testing.assert_allclose(response, expected, rtol=2e-8, atol=1e-20)
+
+
+@pytest.mark.parametrize("fill", [1.0, 0.2])
+def test_linear_local_tangent_matches_differentiating_the_projected_law(fill):
+    cells = iron._mesh(shapely.box(1, 0, 2, 1), 1.0)
+    geometry = iron.linear_magnetisation_geometry(cells.polygons)
+    owners = geometry["owners"]
+    project = np.einsum(
+        "qij,qj,q->qi",
+        np.linalg.inv(geometry["gram"])[owners],
+        geometry["basis"],
+        geometry["weights"],
+    )
+    law = iron._fit_law([0, 0.2, 1.0], [2, 4, 2])
+    operator = np.arange(36).reshape(6, 6) * 1e-10
+    external = np.array([0.03, 0.01, 0.0, 0.06, 0.0, 0.02])
+    operands = tuple(
+        map(jnp.asarray, (operator, external, *law, geometry["basis"], project, owners))
+    )
+    if fill != 1:
+        gain = (1 - fill) / fill * np.array([[0.6], [1.0]])
+        operands += (jnp.array([fill]), jnp.asarray(gain))
+    state = jnp.arange(6, dtype=jnp.float64) * 10
+    jacobian = jax.jacfwd(iron._linear_residual)(state, operands)
+    direction = iron.jla.lu_solve(iron._linear_factor(state, operands), jnp.ones(6))
+    np.testing.assert_allclose(jacobian @ direction, np.ones(6), rtol=2e-14)
+
+
+def test_reference_stamp_refuses_wrong_revision_and_dirty_tree(tmp_path):
+    import hashlib
+    import subprocess
+    from scripts.iron_linear_magnetisation.controls import require_clean_script
+
+    script = tmp_path / "scripts" / "iron_linear_magnetisation" / "reference.py"
+    script.parent.mkdir(parents=True)
+    data = b'"""Reference measurement."""\n'
+    script.write_bytes(data)
+
+    def git(*arguments):
+        return subprocess.check_output(
+            ["git", "-C", str(tmp_path), *arguments], text=True
+        ).strip()
+
+    git("init", "--quiet")
+    git("add", "scripts/iron_linear_magnetisation/reference.py")
+    git(
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.invalid",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "commit",
+        "-qm",
+        "test: record reference\n\nProvide committed bytes for stamp checks.",
+    )
+    revision = git("rev-parse", "HEAD")
+    blob = hashlib.sha1(
+        b"blob %d\0" % len(data) + data, usedforsecurity=False
+    ).hexdigest()
+    assert require_clean_script(script, blob, revision) == blob
+    with pytest.raises(SystemExit, match="executed revision differs"):
+        require_clean_script(script, blob, "unresolvable-revision")
+    with pytest.raises(SystemExit, match="executed script differs"):
+        require_clean_script(script, "invalid-blob", revision)
+    script.write_bytes(data + b"\n")
+    with pytest.raises(SystemExit, match="dirty tree"):
+        require_clean_script(script, blob, revision)
+
+
+def test_linear_shell_operator_pin(tmp_path):
+    """The affine integration rule preserves its delivered shell-cell operator."""
+    import json
+    from pathlib import Path
+    from scripts.iron_linear_magnetisation.controls import shell
+
+    control = json.loads(
+        (
+            Path(__file__).parents[1]
+            / "scripts"
+            / "iron_linear_magnetisation"
+            / "operator-control.json"
+        ).read_text()
+    )
+    cells = iron._mesh(shell(), 0.04)
+    assert len(cells.polygons) == control["shell_cells"] == 228
+    import os
+
+    full_reference = os.environ.get("NOVA_LINEAR_OPERATOR_REFERENCE")
+    polygons = (
+        cells.polygons
+        if full_reference
+        else tuple(cells.polygons[index] for index in control["selected_cells"])
+    )
+    actual, _ = iron.linear_galerkin_cell_interaction(polygons, plan=iron._PLAN)
+    if full_reference:
+        expected = np.load(full_reference)
+    else:
+        from scripts.iron_linear_magnetisation.kernel_cost import load_owner
+
+        reference = load_owner(
+            control["revision"], "compact_reference_owner", directory=tmp_path
+        )
+        expected, _ = reference.linear_galerkin_cell_interaction(
+            polygons, plan=iron._PLAN
+        )
+    assert np.isfinite(actual).all()
+    difference = actual - expected
+    relative = np.linalg.norm(difference) / np.linalg.norm(expected)
+    maximum = np.max(np.abs(difference)) / np.max(np.abs(expected))
+    print(
+        "40 mm operator metrics",
+        json.dumps(
+            dict(
+                unknowns=len(actual),
+                frobenius_relative=float(relative),
+                max_entry_relative=float(maximum),
+            )
+        ),
+    )
+    assert relative <= 1e-12
+    assert maximum <= 1e-12
+
+
+def test_paired_polygon_tiles_reuse_one_shape_and_preserve_cartesian_rows():
+    from nova.biot import tiledassembly as tiled
+
+    triangle = np.array([[1.0, 0.0], [1.01, 0.0], [1.0, 0.01]])
+    edge, weight, norm = tiled.pad_batch(
+        [triangle, triangle + [0.1, 0.0], triangle + [0.0, 0.1]], edge_count=3
+    )
+    points = np.array([[0.8, 0.1], [2.0, 0.2], [1.001, 0.002]])
+    for flux_only in (False, True):
+        cartesian = tiled.tile_evaluator(
+            tiled.TilePlan(3, 3, 9, 16, 48),
+            batched=True,
+            edge_count=3,
+            flux_only=flux_only,
+        )
+        expected = np.array(cartesian(*points.T, edge, weight, norm))[
+            :, np.arange(3), np.arange(3)
+        ]
+        paired = tiled.tile_evaluator(
+            tiled.TilePlan(3, 3, 8, 16, 48),
+            batched=True,
+            edge_count=3,
+            flux_only=flux_only,
+            pairwise=True,
+        )
+        actual = np.array(paired(*points.T, edge, weight, norm))
+        contributions = []
+        for index in range(len(weight)):
+            isolated = np.zeros_like(weight)
+            isolated[index] = weight[index]
+            contributions.append(
+                np.array(cartesian(*points.T, edge, isolated, norm))[
+                    :, np.arange(3), np.arange(3)
+                ]
+            )
+        scale = np.abs(contributions).sum(axis=0)
+        assert np.isfinite(actual).all()
+        assert np.all(np.abs(actual - expected) <= 1e-12 * scale)
+        print(
+            "paired polygon error over absolute edge sum:",
+            float(np.max(np.abs(actual - expected) / scale)),
+        )
+        paired(*points[:1].T, edge[:, :, :1], weight[:, :1], norm[:1])
+        assert paired.compile_count == 1
+        with pytest.raises(ValueError, match="one source per target"):
+            paired(*points[:1].T, edge, weight, norm)
+
+
+def test_polygon_current_routes_share_the_warm_tile_owner():
+    from nova.biot import tiledassembly as tiled
+
+    for kernel in ("quadrature", "closed"):
+        evaluator = tiled._polygon_current_evaluator(True, 192, kernel)
+        assert evaluator is tiled._polygon_current_evaluator(True, 192, kernel)
+        assert evaluator.kernel == kernel
+        assert evaluator.pairwise
+        assert evaluator.components == ("Psi",)
+
+
+@pytest.mark.parametrize("fill", [1.0, 0.2])
+def test_linear_fill_and_cross_field_match_affine_tensor(monkeypatch, fill):
+    """Affine spatial variation retains the per-cell iron constitutive tensor."""
+    region = shapely.box(1, 0, 2, 1)
+    cells = iron._mesh(region, 1.0)
+    geometry = iron.linear_magnetisation_geometry(cells.polygons)
+    monkeypatch.setattr(
+        iron, "_galerkin_interaction", lambda *args, **kwargs: np.zeros((6, 6))
+    )
+
+    def external(points):
+        return np.column_stack((0.02 + 0.01 * points[:, 0], 0.03 + 0.04 * points[:, 1]))
+
+    cross = np.array([[0.4, 0.0]])
+    mu = 50.0
+    beta = 1 - 1 / mu
+    effective = fill * beta / iron._MU0 / (1 - beta * (1 - fill) * (1 - cross[0]))
+    expected = np.linalg.solve(
+        geometry["gram"][0],
+        geometry["basis"].T
+        @ (geometry["weights"][:, None] * external(geometry["points"]) * effective),
+    )
+    result = iron.solve_magnetisation(
+        region,
+        external,
+        [0, 10],
+        [mu, mu],
+        cell_size=1.0,
+        basis="linear",
+        fill_fraction=fill,
+        cross_field_factor=cross,
+    )
+    assert result.converged and result.iterations == 1
+    np.testing.assert_allclose(
+        result.linear_coefficients[:, 0].T,
+        expected,
+        rtol=1e-12,
+        atol=1e-12 * np.max(np.abs(expected)),
+    )
+    np.testing.assert_allclose(
+        result.iron_magnetisation[0], expected[0] / fill, rtol=1e-12
+    )
+    np.testing.assert_allclose(result.permeability_relative, mu, rtol=1e-12)
+    if fill == 1:
+        implicit = iron.solve_magnetisation(
+            region, external, [0, 10], [mu, mu], cell_size=1.0, basis="linear"
+        )
+        for name in (
+            "magnetisation",
+            "linear_coefficients",
+            "permeability_relative",
+            "residual_history",
+        ):
+            np.testing.assert_array_equal(
+                getattr(result, name), getattr(implicit, name)
+            )

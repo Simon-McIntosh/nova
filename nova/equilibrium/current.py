@@ -562,6 +562,11 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
     moments = jax.tree.map(
         lambda full_value, cut_value: full_value + cut_value, whole, cuts
     )
+    return _normalize_booking(moments, read, span, quadrature)
+
+
+def _normalize_booking(moments, read, span, quadrature):
+    """Apply the global current constraint after the cell-local reduction."""
     raw = jnp.sum(moments.cell_current)
     valid = read.valid & read.qualified & (span != 0) & jnp.isfinite(raw)
     if quadrature.target_current is None:
@@ -570,10 +575,14 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
         valid &= (raw != 0) & jnp.isfinite(quadrature.target_current)
         normalization = quadrature.target_current / jnp.where(raw != 0, raw, 1.0)
     return Booking(
-        *(jnp.where(valid, value * normalization, jnp.nan) for value in moments),
-        raw,
-        normalization,
-        valid,
+        cell_current=jnp.where(valid, moments.cell_current * normalization, jnp.nan),
+        radial_moment=jnp.where(valid, moments.radial_moment * normalization, jnp.nan),
+        vertical_moment=jnp.where(
+            valid, moments.vertical_moment * normalization, jnp.nan
+        ),
+        raw_current=raw,
+        normalization=normalization,
+        valid=valid,
     )
 
 
@@ -748,8 +757,20 @@ def book_tangent_channels(
     quadrature,
     booked,
     boundary_channels,
+    *,
+    fuse_booking=False,
 ):
-    """Evaluate every local booking channel over shared cell polygons."""
+    """Evaluate local sensitivities and optionally moments on shared polygons.
+
+    Fused booking adds a density row beside the derivative channels, so rings,
+    quadrature points and normalized flux are evaluated once per cell visit.
+    The returned pair carries the booking and its channel response.
+    """
+    if fuse_booking:
+        if quadrature.segments < 2:
+            raise ValueError("quadrature segments must be at least two")
+        if psi.shape != geometry.sample_points.shape[:-1]:
+            raise ValueError("psi must carry flux at every per-cell sample point")
     density_gradient = getattr(profile, "density_gradient", density_gradient)
     cells, samples = psi.shape
     channels = psi_tangent.shape[0]
@@ -802,7 +823,12 @@ def book_tangent_channels(
             weight[..., None, None] * basis[..., :, None] * moment_basis[..., None, :],
             axis=(0, 1),
         )
-        return normalized_rate[:, index] @ integral_basis
+        response = normalized_rate[:, index] @ integral_basis
+        if fuse_booking:
+            weighted = weights * profile.current_density(points[..., 0], flux)
+            primal = jnp.sum(weighted[..., None] * moment_basis, axis=(0, 1))
+            response = jnp.concatenate((primal[None], response), axis=0)
+        return response
 
     def whole_cell(index):
         with xla_metadata.set_xla_metadata(tangent_site="interior:whole"):
@@ -828,11 +854,15 @@ def book_tangent_channels(
                 moving = jnp.stack(
                     tuple(jnp.sum(component, axis=1) for component in moved), axis=-1
                 )
-                value = value.at[boundary_channels].add(moving)
+                value = value.at[boundary_channels + int(fuse_booking)].add(moving)
             return value
 
         return _integrate_live_rings(
-            rings, counts, evaluate, jnp.zeros((channels, 3), dtype=psi.dtype), width=2
+            rings,
+            counts,
+            evaluate,
+            jnp.zeros((channels + int(fuse_booking), 3), dtype=psi.dtype),
+            width=2,
         )
 
     def conic_cell(index):
@@ -887,7 +917,10 @@ def book_tangent_channels(
     whole = jnp.where(full[:, None, None], whole, 0.0)
     if quadrature.cut_batch_width < 1:
         raise ValueError("cut batch width must be positive")
-    batch_width = min(quadrature.cut_batch_width, cells)
+    batch_width = min(
+        _scalar_cut_width(quadrature) if fuse_booking else quadrature.cut_batch_width,
+        cells,
+    )
 
     normal = cut & read.normal_form_cells
     zero = jnp.zeros_like(whole)
@@ -896,6 +929,10 @@ def book_tangent_channels(
         normal, min(_NORMAL_CUT_BATCH_WIDTH, cells), normal_cell, zero
     )
     raw = whole + cuts
+    if fuse_booking:
+        moments = ClippedCurrentMoments(*(raw[:, 0, i] for i in range(3)))
+        booked = _normalize_booking(moments, read, span, quadrature)
+        raw = raw[:, 1:]
     total_rate = jnp.sum(raw[:, :, 0], axis=0)
     scale_rate = (
         jnp.zeros_like(total_rate)
@@ -904,4 +941,5 @@ def book_tangent_channels(
     )
     moment = jnp.stack(tuple(booked[:3]), axis=-1)
     response = booked.normalization * raw + scale_rate[None, :, None] * moment[:, None]
-    return jnp.moveaxis(jnp.where(booked.valid, response, jnp.nan), 1, -1)
+    response = jnp.moveaxis(jnp.where(booked.valid, response, jnp.nan), 1, -1)
+    return (booked, response) if fuse_booking else response

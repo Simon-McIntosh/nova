@@ -1,0 +1,37 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-14T18:02:17.554Z",
+  "dispatched_at": "2026-11-14T17:37:03Z",
+  "figure_reviewed": {
+    "artifact": "docs/figures/sub-millisecond-forward-path/fused-booking-assembly/booking-assembly.svg",
+    "caption_source": "docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-assembly.html",
+    "drawing_script": "scripts/prototypes/fused_booking_assembly/report.py",
+    "method": "judged only the attached rendered PNG; no SVG was opened, read, searched or shown; the drawing script and the evidence caption were read for the unit contracts each panel states",
+    "panels": "left: native throughput cost [ms/slice] against concurrent independent pulses at 1, 16, 64; right: booking + assembly device [ms/slice] over the same widths; two series, separate passes (grey dashed, square marker) and fused pass (blue solid, circle marker), one frameless legend above both panels",
+    "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T172421576508-review-of-fused-booking-assembly-8871df8029f7-figure/image-0.png",
+    "rendered_size_px": [
+      1399,
+      720
+    ]
+  },
+  "findings": [],
+  "item_verdicts": {
+    "contrast": "pass: all text is near-black on white; the grey arm is drawn at #929292 (measured luminance 146 against a 255 ground, about 3:1), which holds against white, and the blue arm at #1f5d92 is dark, so neither label nor mark is washed out.",
+    "data_ink": "pass: the plotted values are carried by two lines of 2.6 pt and 3.0 pt with markers, the fused arm taking the top layer (zorder 3 against 2), and nothing else competes for weight; the ink bounding box is x 46-1372 by y 17-671 in a 1399x720 canvas.",
+    "decoration": "pass: white ground, no gridlines, no gradient, band or background fill, top and right spines hidden on both axes, and the single legend is frameless in clear space above the panels.",
+    "label_collision": "pass: no label is clipped or overlapping; every border strip three pixels deep is blank (minimum luminance 255, zero pixels below 200), content keeps at least 17 px clear on the top edge, 46 px left, 26 px right and 48 px bottom, and no axis label, tick label or legend entry sits on the plotted marks.",
+    "legibility": "pass: both panels read at a glance at 1399x720; each y-axis label with its [ms/slice] unit, the x-axis label 'concurrent independent pulses', the three tick labels 1/16/64 on each panel and both legend entries are fully drawn, and the two arms are distinguishable at every plotted width (measured: the grey series draws visible pixels beside the fused series at all six points, including 54 grey pixels at the width-64 marker in the left panel and 34 in the right, so neither arm is lost behind the other).",
+    "table_form": "pass: the image plots a shape no table carries, the cost falling steeply from 1 to 16 concurrent pulses and flattening to 64, within two panels; the exact twelve values sit in the adjacent evidence table, so the figure is not standing in for a table."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261114T172421576508-review-of-fused-booking-assembly-8871df8029f7-figure",
+  "reviewed_base_sha": "975f3e98cfa2b2976d2bbe1b94ead37f8623b529",
+  "reviewed_head_sha": "8871df8029f74e6f2ef62761bd5ba28857a3f4d2",
+  "reviewed_run_id": "r-20261114T144116292081-fused-booking-assembly",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T18:03:45.934764+00:00",
+  "total": null
+}

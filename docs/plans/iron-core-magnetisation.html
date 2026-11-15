@@ -25,8 +25,8 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="95">
-<meta name="plan-modified" content="2026-11-14">
+<meta name="plan-version" content="101">
+<meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
   <main class="plan-doc">
@@ -568,6 +568,9 @@
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-s5-graded-measured" data-who="nova-coordinator" data-when="">
+    <div class="r-comment-body"><p>Graded refinement, the first §5 candidate, is measured, merged in commit 7a44dd216 and promoted. The evidence is in fragment <code>icm-graded-refinement</code>. It does not meet §5:</p><ul><li><strong>Closed shell, μ<sub>r</sub> = 1000:</strong> at equal cell count, grading gives no accuracy gain over a uniform mesh. Both families follow one error-versus-cells curve. The pinned graded arm reaches 0.397 % worst-probe at 13 410 cells, where the uniform arm would need about 9 500, and its doubled arm misses at 1.052 %.</li><li><strong>WEST 62751, graded 16/80 mm → 8/40 mm:</strong> the field moves +3.47 % at +1 m, −5.21 % at +2 m and −7.16 % at +4 m, so clause (2) is missed at every probe.</li><li><strong>Lane:</strong> the graded arms ran on CPU, because the P100 cannot hold the dense factor above about 11k cells.</li></ul><p>The piecewise-constant cell route is therefore not converged at the far probes at affordable cell counts. The remaining candidates are piecewise-linear magnetisation and the surface scalar formulation; the formulation decision is with the lead. The run's non-blocking review findings go to the deferred scripts-cleanup node.</p></div>
+</div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T222130291065-review-of-icm-strip-error-sweep-43dc514d920c-figure" data-who="reckon-build" data-when="2026-11-06T22:32:39.513Z">
     <div class="r-comment-body"><p>Figure review of run r-20261106T212311176377-icm-strip-error-sweep at head 43dc514d9 is parsed with no blocking finding: the strip-error curve figure renders clean (zero ink in the outer 8 px frame, ink bbox x 35..1365 y 86..690, one frameless legend row, the 1e-10 direct label in clear space), and one non-blocking finding records that the two lightest curve stops measure 2.61:1 and 1.93:1 against white, below the 3:1 a plotted line is required to hold, so the coincident right-hand branch is drawn in the palest trace.</p></div>
 </div>
@@ -799,8 +802,23 @@
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261113T121328652501-icm-graded-refinement" data-who="reckon-build" data-when="2026-11-13T22:03:12Z">
     <div class="r-comment-body"><p>awaiting coordinator review; do not edit the plan</p></div>
 </div>
-<div class="r-comment" data-section="_top" data-id="c-s5-graded-measured" data-who="nova-coordinator" data-when="">
-    <div class="r-comment-body"><p>Graded refinement, the first §5 candidate, is measured, merged in commit 7a44dd216 and promoted. The evidence is in fragment <code>icm-graded-refinement</code>. It does not meet §5:</p><ul><li><strong>Closed shell, μ<sub>r</sub> = 1000:</strong> at equal cell count, grading gives no accuracy gain over a uniform mesh. Both families follow one error-versus-cells curve. The pinned graded arm reaches 0.397 % worst-probe at 13 410 cells, where the uniform arm would need about 9 500, and its doubled arm misses at 1.052 %.</li><li><strong>WEST 62751, graded 16/80 mm → 8/40 mm:</strong> the field moves +3.47 % at +1 m, −5.21 % at +2 m and −7.16 % at +4 m, so clause (2) is missed at every probe.</li><li><strong>Lane:</strong> the graded arms ran on CPU, because the P100 cannot hold the dense factor above about 11k cells.</li></ul><p>The piecewise-constant cell route is therefore not converged at the far probes at affordable cell counts. The remaining candidates are piecewise-linear magnetisation and the surface scalar formulation; the formulation decision is with the lead. The run's non-blocking review findings go to the deferred scripts-cleanup node.</p></div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261114T181745051438-review-of-icm-linear-magnetisation-be8a601672fc" data-who="reckon-build" data-when="2026-11-14T18:41:27.708Z">
+    <div class="r-comment-body"><p>Independent review of r-20261114T101902963467-icm-linear-magnetisation at base 60d418bb85426142f3ca0a5f7a45afc4232b3255 and head be8a601672fc59bee88836fca05468bcc9048413 is stored parsed at both declared review-record paths, scoring goal_fidelity 15, evidence 12, scope_discipline 18, durability 15, fit 16, reuse 5 (total 81), with added_failure_count 0 and five non-blocking findings and none blocking.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261114T182925936026-review-of-icm-linear-magnetisation-be8a601672fc-figure" data-who="reckon-build" data-when="2026-11-14T19:19:30.330Z">
+    <div class="r-comment-body"><p>read-only figure review, no repository change; the verdict is stored only in the two review records, which `reckon crew check --review` accepts at EXIT=0.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261114T101902963467-icm-linear-magnetisation" data-who="reckon-build" data-when="2026-11-14T16:34:44Z">
+    <div class="r-comment-body"><p>Opt-in affine Galerkin magnetisation and its weighted spectral/local-law tests are committed. The shell reaches 0.0625439% worst-probe error at 1368 unknowns (40 mm) and 0.0508021% at 4968 (20 mm), versus the observed constant target crossing at 26820 unknowns. The inspected error-versus-unknowns SVG and fragment preserve these results; the required 10 mm solve failed with device OOM after 8906.079 s assembly, leaving the node incomplete.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T031354122293-review-of-icm-linear-assembly-cost-0b6ec2d2f98e-figure" data-who="reckon-build" data-when="2026-11-15T03:58:56.363Z">
+    <div class="r-comment-body"><p>figure review of r-20261114T212249058819-icm-linear-assembly-cost at head 0b6ec2d2f records 6 of 6 rubric items passing on docs/figures/iron-core-magnetisation/icm-linear-assembly-cost/error-unknowns, judged from the attached 1400x721 PNG, with zero findings and no blocking defect</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T031154996655-review-of-icm-linear-assembly-cost-0b6ec2d2f98e" data-who="reckon-build" data-when="2026-11-15T04:05:08.558Z">
+    <div class="r-comment-body"><p>none — this is a review node; it lands no source. Verdict: parsed review of r-20261114T212249058819-icm-linear-assembly-cost at head 0b6ec2d2f from base 79a578d694, scores goal_fidelity 15, evidence 16, scope_discipline 19, durability 15, fit 18, reuse 18 (total 101), added_failure_count 0, two non-blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261114T212249058819-icm-linear-assembly-cost" data-who="reckon-build" data-when="2026-11-15T03:10:11Z">
+    <div class="r-comment-body"><p>Paired affine batching preserves the full shell operator at 6.002e-15 Frobenius / 2.030e-14 max-entry relative and constant operators bit-identically. P100 40/20/10 mm walls are 403.361/821.019/4107.743 s; the 900 s outcome is missed and recorded. The CPU 19008-unknown solve converges at 0.0495673% dipole and 0.000436058% finite-loop worst error, finite-loop 20-to-10 order 1.906–2.013. Inspected figure and receipts: /nova/evidence/fragments/iron-core-magnetisation/icm-linear-assembly-cost.html#icm-linear-assembly-cost-state.</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/topology.py:3833",
+    "nova/equilibrium/support_read.py:441",
+    "scripts/prototypes/certified_carrier_export/export_records.py:133"
+  ],
+  "call_sites_count": 3,
+  "call_sites_emission": "names",
+  "completed_at": "2026-11-15T03:04:47.879Z",
+  "dispatched_at": "2026-11-15T02:09:49Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the stale carrier only causes a needless refresh (a cost, never a wrong reuse), selective refresh is opt-in, and the fixed-shape bank route does not vary geometry along a chain",
+      "recorded_at": "2026-11-15T03:07:14.422957+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "import placement under the file's existing E402 suppression; style only",
+      "recorded_at": "2026-11-15T03:07:18.616278+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": 3860,
+      "severity": "non-blocking",
+      "text": "the returned decision keeps the carried decision's cell_vertices, cell_vertex_count, cell_centre and cell_pitch while its fragment areas were evaluated on the supplied geometry, so a chain that ever varies geometry records a carrier its refreshed cells were not built on \u2014 the next read at that geometry refreshes needlessly, and a decision so returned that is later applied back to the original geometry would reuse fragments computed on the other one, which is the defect this node removed. No current caller varies geometry (nova/equilibrium/support_read.py:441 passes a fixed operands.geometry with reuse=False), so the repair is one _replace argument."
+    },
+    {
+      "file": "tests/test_carried_read_refresh.py",
+      "line": 8,
+      "severity": "non-blocking",
+      "text": "from dataclasses import replace sits after the module-level configure_dtypes() call and relies on the file-wide ruff E402 suppression rather than the stdlib-first order the rest of the module's imports use, so a narrowing of that suppression breaks the file."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all three commits against 13312a9bf \u2014 8cbfd771d adds the four carrier fields and the conjunct plus the moved-cell case, 6c520adf9 replaces the count-only saddle assertion with the population assertion, 5d2ac4f56 adds only the evidence fragment; 117 insertions and 6 deletions over 3 files, every one a declared write path.",
+    "done_when": "three clauses, all recorded \u2014 clause 1 at nova/equilibrium/topology.py:3578-3594 and :3655-3666; clause 2 by tests/test_carried_read_refresh.py:154-167, whose moved-cell case logs/base-defect.log reddens at base 13312a9bf (4 failed, assert 0 == 1 at :167) and logs/head-arm/head__test_carried_read_refresh.log passes at head 6c520adf9, with the :123 array_equal replacement whose reuse-nothing failure I checked by reading; clause 3 by the six per-file arms on rigel (7 -> 11 passed, 13+2 skipped -> 13+2 skipped, 14 -> 14 passed), all EXIT=0 with 0 added failures and tabulated at docs/evidence/fragments/sub-millisecond-forward-path/carried-read-mask-geometry.html:8-12.",
+    "goal": "the goal is to make the carried-read reuse mask certify a reused cell against the geometry its carried decision was built from, and to make its regression test able to fail; nova/equilibrium/topology.py:2789-2792 records cell_vertices, cell_vertex_count, cell_centre and cell_pitch on TopologyRead and :3665 adds _same_carrier_geometry (:3578-3594) to the _fragment_reuse_mask conjunction, so a cell whose carrier moved refreshes with equal signed coefficients.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T211406516739-carried-read-mask-geometry/manifest.md \u2014 status complete with the literal gate commands, baseline_suite and after_suite as JSON blocks each completed with failure_count 0, negative_control_log as a bare path, six rubric lines and a landing line.",
+    "write_paths": "the manifest declares nova/equilibrium/topology.py, tests/test_carried_read_refresh.py, the evidence fragment and a figures directory, and the three files in the node's commits are inside that set with no fourth file."
+  },
+  "items": {
+    "diff": "read all three commits against 13312a9bf \u2014 8cbfd771d adds the four carrier fields and the conjunct plus the moved-cell case, 6c520adf9 replaces the count-only saddle assertion with the population assertion, 5d2ac4f56 adds only the evidence fragment; 117 insertions and 6 deletions over 3 files, every one a declared write path.",
+    "done_when": "three clauses, all recorded \u2014 clause 1 at nova/equilibrium/topology.py:3578-3594 and :3655-3666; clause 2 by tests/test_carried_read_refresh.py:154-167, whose moved-cell case logs/base-defect.log reddens at base 13312a9bf (4 failed, assert 0 == 1 at :167) and logs/head-arm/head__test_carried_read_refresh.log passes at head 6c520adf9, with the :123 array_equal replacement whose reuse-nothing failure I checked by reading; clause 3 by the six per-file arms on rigel (7 -> 11 passed, 13+2 skipped -> 13+2 skipped, 14 -> 14 passed), all EXIT=0 with 0 added failures and tabulated at docs/evidence/fragments/sub-millisecond-forward-path/carried-read-mask-geometry.html:8-12.",
+    "goal": "the goal is to make the carried-read reuse mask certify a reused cell against the geometry its carried decision was built from, and to make its regression test able to fail; nova/equilibrium/topology.py:2789-2792 records cell_vertices, cell_vertex_count, cell_centre and cell_pitch on TopologyRead and :3665 adds _same_carrier_geometry (:3578-3594) to the _fragment_reuse_mask conjunction, so a cell whose carrier moved refreshes with equal signed coefficients.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T211406516739-carried-read-mask-geometry/manifest.md \u2014 status complete with the literal gate commands, baseline_suite and after_suite as JSON blocks each completed with failure_count 0, negative_control_log as a bare path, six rubric lines and a landing line.",
+    "write_paths": "the manifest declares nova/equilibrium/topology.py, tests/test_carried_read_refresh.py, the evidence fragment and a figures directory, and the three files in the node's commits are inside that set with no fourth file."
+  },
+  "justifications": {
+    "durability": "tests/test_carried_read_refresh.py:167 asserts the refreshed-cell count equals the constant 1, which the test never supplies to the code under test, and logs/negative-control.log reddens exactly those four ids; :123 compares the mask array with the complement of decision.normal_form_cells behind the :122 positive control, so a reuse-nothing mask returns all False and fails it.",
+    "evidence": "logs/base-defect.log isolates clause 2(a) (nova at base with the head test file, 4 failed, EXIT=1) and logs/negative-control.log isolates the conjunct (4 failed, 1 passed, EXIT=1 on the reverted head), and every arm log carries its revision, tree, module path and a bare EXIT= line, but no executed red run demonstrates the :123 assertion under a mask that reuses nothing, which is true by reading rather than by a recorded EXIT; quick-final.log ran at 5d2ac4f563d0 (+working tree), which the commit stat makes benign \u2014 that commit adds only the fragment.",
+    "fit": "the private _same_carrier_geometry and the four cell_ fields follow the file's own helper and field idiom at nova/equilibrium/topology.py:3578 and :2789, and no added name carries a plan or ticket label, with the one departure at tests/test_carried_read_refresh.py:8.",
+    "goal_fidelity": "nova/equilibrium/topology.py:3665 makes _same_carrier_geometry a conjunct of the reuse mask and :2789-2792 carries the four fields, so both halves of the goal are implemented, though the carrier record the returned read hands on is not the one its cells were evaluated on (:3860).",
+    "reuse": "I searched nova/ for an existing geometry-identity mechanism and found nova/equilibrium/forward_operator.py:2582 _compute_geometry_identity, a host-side sha256 cache digest that cannot run inside the jitted per-cell mask; _same_carrier_geometry at nova/equilibrium/topology.py:3578 extends the existing _fragment_reuse_mask conjunct rather than forking a capability.",
+    "scope_discipline": "the three changed files are exactly nova/equilibrium/topology.py, tests/test_carried_read_refresh.py and docs/evidence/fragments/sub-millisecond-forward-path/carried-read-mask-geometry.html, all declared, and 5d2ac4f56 touches the fragment alone."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to make the carried-read reuse mask certify a reused cell against the geometry its carried decision was built from, and to make its regression test able to fail; nova/equilibrium/topology.py:2789-2792 records cell_vertices, cell_vertex_count, cell_centre and cell_pitch on TopologyRead and :3665 adds _same_carrier_geometry (:3578-3594) to the _fragment_reuse_mask conjunction, so a cell whose carrier moved refreshes with equal signed coefficients.\nVERDICT done_when: three clauses, all recorded \u2014 clause 1 at nova/equilibrium/topology.py:3578-3594 and :3655-3666; clause 2 by tests/test_carried_read_refresh.py:154-167, whose moved-cell case logs/base-defect.log reddens at base 13312a9bf (4 failed, assert 0 == 1 at :167) and logs/head-arm/head__test_carried_read_refresh.log passes at head 6c520adf9, with the :123 array_equal replacement whose reuse-nothing failure I checked by reading; clause 3 by the six per-file arms on rigel (7 -> 11 passed, 13+2 skipped -> 13+2 skipped, 14 -> 14 passed), all EXIT=0 with 0 added failures and tabulated at docs/evidence/fragments/sub-millisecond-forward-path/carried-read-mask-geometry.html:8-12.\nVERDICT write_paths: the manifest declares nova/equilibrium/topology.py, tests/test_carried_read_refresh.py, the evidence fragment and a figures directory, and the three files in the node's commits are inside that set with no fourth file.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T211406516739-carried-read-mask-geometry/manifest.md \u2014 status complete with the literal gate commands, baseline_suite and after_suite as JSON blocks each completed with failure_count 0, negative_control_log as a bare path, six rubric lines and a landing line.\nVERDICT diff: read all three commits against 13312a9bf \u2014 8cbfd771d adds the four carrier fields and the conjunct plus the moved-cell case, 6c520adf9 replaces the count-only saddle assertion with the population assertion, 5d2ac4f56 adds only the evidence fragment; 117 insertions and 6 deletions over 3 files, every one a declared write path, and appending the four fields keeps nova/equilibrium/topology.py's positional return aligned for scripts/prototypes/bank_solve_trace/groups.py:40.\nCALL_SITES: nova/equilibrium/topology.py:3833, nova/equilibrium/support_read.py:441, scripts/prototypes/certified_carrier_export/export_records.py:133\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/topology.py:3665 makes _same_carrier_geometry a conjunct of the reuse mask and :2789-2792 carries the four fields, so both halves of the goal are implemented, though the carrier record the returned read hands on is not the one its cells were evaluated on (:3860).\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/base-defect.log isolates clause 2(a) (nova at base with the head test file, 4 failed, EXIT=1) and logs/negative-control.log isolates the conjunct (4 failed, 1 passed, EXIT=1 on the reverted head), and every arm log carries its revision, tree, module path and a bare EXIT= line, but no executed red run demonstrates the :123 assertion under a mask that reuses nothing, which is true by reading rather than by a recorded EXIT; quick-final.log ran at 5d2ac4f563d0 (+working tree), which the commit stat makes benign \u2014 that commit adds only the fragment.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the three changed files are exactly nova/equilibrium/topology.py, tests/test_carried_read_refresh.py and docs/evidence/fragments/sub-millisecond-forward-path/carried-read-mask-geometry.html, all declared, and 5d2ac4f56 touches the fragment alone.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_carried_read_refresh.py:167 asserts the refreshed-cell count equals the constant 1, which the test never supplies to the code under test, and logs/negative-control.log reddens exactly those four ids when the conjunct is removed; :123 compares the mask array with the complement of decision.normal_form_cells behind the :122 positive control, so a reuse-nothing mask returns all False and fails it.\nSCORE fit: 18\nJUSTIFICATION fit: the private _same_carrier_geometry and the four cell_ fields follow the file's own helper and field idiom at nova/equilibrium/topology.py:3578 and :2789, and no added name carries a plan or ticket label, with the one departure at tests/test_carried_read_refresh.py:8.\nSCORE reuse: 20\nJUSTIFICATION reuse: I searched nova/ for an existing geometry-identity mechanism and found nova/equilibrium/forward_operator.py:2582 _compute_geometry_identity, a host-side sha256 cache digest that cannot run inside the jitted per-cell mask; _same_carrier_geometry at nova/equilibrium/topology.py:3578 extends the existing _fragment_reuse_mask conjunct rather than forking a capability, and no other device-side geometry comparison exists.\nFINDING nova/equilibrium/topology.py:3860 non-blocking: the returned decision keeps the carried decision's cell_vertices, cell_vertex_count, cell_centre and cell_pitch while its fragment areas were evaluated on the supplied geometry, so a chain that ever varies geometry records a carrier its refreshed cells were not built on \u2014 the next read at that geometry refreshes needlessly, and a decision so returned that is later applied back to the original geometry would reuse fragments computed on the other one, which is the defect this node removed. No current caller varies geometry (nova/equilibrium/support_read.py:441 passes a fixed operands.geometry with reuse=False), so the repair is one _replace argument.\nFINDING tests/test_carried_read_refresh.py:8 non-blocking: from dataclasses import replace sits after the module-level configure_dtypes() call and relies on the file-wide ruff E402 suppression rather than the stdlib-first order the rest of the module's imports use, so a narrowing of that suppression breaks the file.\n",
+  "review_run_id": "r-20261115T020831144946-review-of-carried-read-mask-geometry-5d2ac4f563d0",
+  "reviewed_base_sha": "13312a9bf2e079f3ef87ad8efd7145044842c448",
+  "reviewed_head_sha": "5d2ac4f563d0dfd3fb7ef163098444529c059d92",
+  "reviewed_run_id": "r-20261114T211406516739-carried-read-mask-geometry",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T02:40:31Z",
+  "total": 113
+}

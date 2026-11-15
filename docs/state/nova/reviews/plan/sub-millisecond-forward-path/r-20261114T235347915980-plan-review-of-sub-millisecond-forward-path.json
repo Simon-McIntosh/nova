@@ -1,0 +1,128 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T00:35:49.811Z",
+  "dispatched_at": "2026-11-14T23:54:28Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:128",
+      "id": "wiring-1",
+      "reason": "naming the bank identifies it; if it is \u00a76(a)'s, an undeclared wait would dispatch (b) against a bank that does not exist.",
+      "text": "\u00a77(b) \"rebuild the ITER bank\" has no depends-on entry, while \u00a76 node (a) also delivers \"the ITER bank\" and is still implementable; a worker cannot tell which bank it rebuilds or whether it must wait for \u00a76",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:128",
+      "id": "done_when-1",
+      "reason": "a node cannot satisfy clause 3 and clause (a) together, so the author must scope one of them.",
+      "text": "clause 3 requires zero added failures over the test files covering polygonanalytic.py, while clause (a) requires a new regression test that fails at the base revision and passes at head; the new test is such a file, so its base arm must report an added failure and both clauses cannot hold",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:128",
+      "id": "done_when-2",
+      "reason": "naming that already-measured control as a required test row gates the \"both coordinates\" repair the node is asked for, instead of leaving the node to choose its own reference.",
+      "text": "node (a)'s only independent accuracy gate is the second-derivative trace identity, while the cited diagnosis measured a first-derivative failure too: at a 1e-12 m extended-line offset its rotated rectangle gives a 0.84% relative \u03c8RZ error against an independent boundary integral, and (b) gates first-derivative rows only as unchanged within 1e-10",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:128",
+      "id": "reasoning-1",
+      "reason": "that localisation is the cited diagnosis's measured finding rather than a guess, and moving the constraint into the node brief would not change what the section requires as done.",
+      "text": "the defect paragraph names the function, the initialiser and the terms method to change, and node (a) directs the repair \"in the existing owner ... do not add a parallel kernel\", which is a reuse map rather than an endpoint",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "9190ce1219f0a69655729fdb3b4abe7dc572b593",
+  "plan_fingerprint": "7e3239e6a4d416b963ff0c2461f7d35a2ce64e659089f76f6e405925da83d11d",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 354,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "finding": "wiring-1",
+      "reason": "Node (b) rebuilds the ITER bank that section 6 node (a) already landed on main (iter-bank, merged at 87b72f601); nothing in section 6 remains for it to wait on, and the node brief names that bank's scripts and store.",
+      "when": "2026-11-15T00:42:10.431425+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "finding": "done_when-1",
+      "reason": "Added failures are counted over test ids that exist at the base revision, the repository's paired-arm convention; the new regression test is outside that set, and its fail-at-base requirement is the separate negative-control clause.",
+      "when": "2026-11-15T00:42:13.029102+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "finding": "done_when-2",
+      "reason": "Carried in the node brief rather than the plan text: polygon-tangent-repair's brief now requires the diagnosis's rotated-rectangle control at a 1e-12 m extended-line offset, against its independent boundary integral, as a named test row in both coordinates.",
+      "when": "2026-11-15T00:42:15.683941+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "finding": "reasoning-1",
+      "reason": "The localisation is the diagnosis's measured finding, as the reviewer notes, and moving it would not change what the section requires as done.",
+      "when": "2026-11-15T00:42:18.441117+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "reason": "Added failures are counted over test ids that exist at the base revision, the repository's paired-arm convention; the new regression test is outside that set, and its fail-at-base requirement is the separate negative-control clause.",
+      "when": "2026-11-15T00:42:13.029102+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "reason": "Carried in the node brief rather than the plan text: polygon-tangent-repair's brief now requires the diagnosis's rotated-rectangle control at a 1e-12 m extended-line offset, against its independent boundary integral, as a named test row in both coordinates.",
+      "when": "2026-11-15T00:42:15.683941+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "reason": "The localisation is the diagnosis's measured finding, as the reviewer notes, and moving it would not change what the section requires as done.",
+      "when": "2026-11-15T00:42:18.441117+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "reason": "Node (b) rebuilds the ITER bank that section 6 node (a) already landed on main (iter-bank, merged at 87b72f601); nothing in section 6 remains for it to wait on, and the node brief names that bank's scripts and store.",
+      "when": "2026-11-15T00:42:10.431425+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-sub-millisecond-forward-path.v354.json",
+  "review_run_id": "r-20261114T235347915980-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "f1b543dad6a16f595c0848dd7fd43e35705e04c4",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every anchor resolves in the tree, checked with a positive control.",
+    "done_when": "two findings \u2014 clause 3 requires zero added failures over the test files covering polygonanalytic.py while clause (a) requires a new regression test that must fail at base; and node (a) gates only the second-derivative trace identity, not the first-derivative channel its own evidence shows failing.",
+    "evidence_paths": "pass \u2014 the Records paragraph names ~/.cache/nova-polygon-tangent-repair/ and ~/.cache/nova-iter-bank/ (or the run directory) for node (a)'s trace records and per-row edge-term results and node (b)'s re-certification receipts and reload walls, and refuses node /tmp; the cited diagnosis receipts under ~/.cache/nova-hessian-diagnosis/ exist today.",
+    "naming": "pass \u2014 mechanism names only; no plan labels, ticket numbers or version tags.",
+    "reasoning": "a finding \u2014 root cause matches the cited evidence, but the node text names functions to extend.",
+    "single_goal": "pass \u2014 node (a) delivers the repaired tangent and node (b) the re-certified bank, each with its own gate; the other clauses verify those two deliverables rather than adding deliverables.",
+    "wiring": "a finding \u2014 \u00a77(b) re-certifies \"the ITER bank\" with no plan-section-depends-on entry while \u00a76 node (a) also delivers \"the ITER bank\", so nothing records which bank node (b) rebuilds or whether it must wait for \u00a76."
+  },
+  "section_digests": {
+    "_document": "aa96bd007a9dad6fb02f668bafb1ff812709797e93e503defe80a75c75918112",
+    "s0": "02c484da982db49df058949810d449b2e95a1a134ec03272e31dda4df5bed6d2",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "5aa72ecf3d63060b466bd064d76dc02fa5439343113fd1657038c73094f830b2",
+    "s4": "91bd28dc1cffb091dd5b8e3154b8052ae494fc161f98b81c4aa3d7fc4b7d4fca",
+    "s5": "93a5e678cdf44d386b06e74db9abd0f022782fcfa12a51ed6c8332d5636661cd",
+    "s6": "7d36ea6e2baeb1ddceeefb8692913ab61376d00a12f0d8c88b6b66728f9cb12c",
+    "s7": "7886ad9cebfe0efed923daab849ffcb4f4af4fe731a11e6be763d12598c94325"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T00:41:44.598445+00:00",
+  "total": null
+}

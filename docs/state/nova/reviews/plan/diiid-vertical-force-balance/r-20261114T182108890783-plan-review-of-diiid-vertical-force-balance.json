@@ -1,0 +1,149 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T18:31:44.154Z",
+  "dispatched_at": "2026-11-14T18:21:53Z",
+  "findings": [
+    {
+      "anchor": "benchmarks/diiid_corpus_conventions.py:92",
+      "id": "reuse_search-1",
+      "reason": "node (c) would otherwise choose between two owners that are not the one the gate reads, and either choice forks a translation the drivers already share.",
+      "text": "\u00a75 node (c) is asked to decide where the COCOS translation lives between \"the ambix reader or the Nova consumer\" (plan \u00a75, third paragraph), but a third owner already exists and is the one the gate already uses: corpus_flux_to_nova_total, imported by six or more drivers (diiid_exact \u2014 benchmarks/diiid_exact_clipped_tare.py:269, split_fit_measured_maps.py:175, diiid_vacuum \u2014 benchmarks/diiid_vacuum_composition_audit.py:44, diiid_boundary_current_recovery.py:498, diiid_recovered_current_sign_control.py:345), beside the package-level owner nova_cocos imported at nova/equilibrium/convention.py:55 and documented there as the place a site reads a factor from rather than negating inline; the 2026-09-16 scout review also recorded eleven omitted efit_psirz consumer sites in benchmarks/, so the census of consumers is not the two the plan names",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward.py:703",
+      "id": "deep_module-1",
+      "reason": "the plan already forbids a second integration path; this fixes the mechanism the brief must name, and the plan's endpoint (continuous booked current on a cut cell, book_tangent matching a central difference) is unchanged by where the selection lives.",
+      "text": "\u00a76's endpoint (\"the DIII-D X-point consumer selects the booked route\") is already an operator field, not a route to be added: ForwardProfile.from_lattice sets use_linear_moments from the presence of the four optional moment coupling blocks (forward.py:703-711), and benchmarks/diiid_forward_gs_match.py:1353-1372 passes none of them, which is why _point_current_moments (forward_operator.py:3511) is selected and why changing clip_mode cannot reach book() \u2014 so the plan's \"extend that booking and its consumer selection\" is correct but its namesake is the operator field and the builder's four absent blocks",
+      "type": "deep_module",
+      "would_change": false
+    },
+    {
+      "anchor": "nova/equilibrium/constraint.py:2099",
+      "id": "duplicate_owner-1",
+      "reason": "the node must extend the payload owner and its single application site (and the existing test module tests/equilibrium/test_solve_vertical_pin.py:347-361, which pins the inactive row but never the image) rather than add gating at each route.",
+      "text": "\u00a77 asks that the inactive compensator's flux image and tangent \"vanish\" on every proposal route, which read literally means suppressing it in Newton, the rebuilt-model promotion (fixed_point.py:1637) and the descent/continuation recovery; but the owner of the active mask is the pair binding (constraint.py:531 payload=jnp.asarray(self.active)) and there is exactly one place the image is applied \u2014 the augmented map's evaluate at constraint.py:2099-2105, added unless flux_shadow \u2014 while the two unknowns that render it discard the payload outright (CircuitCurrentUnknown.flux_delta constraint.py:398, UniformRadialFieldUnknown.flux_delta constraint.py:448, both `del ... payload`), and the row already honours it (constraint.py:1143 payload_is_active_mask=True); the defect is therefore not route-specific and is live on every default newton_krylov request, and it reaches the row under test, because forward.py:2687 gives any newton_krylov request with no pin VerticalPositionPin(0.0, active=False) and forward.py:2699-2700 appends its pair unconditionally \u2014 the parallel gating the section describes would add four sites to drift from one that already exists",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/constraint.py:448",
+      "id": "reuse_search-2",
+      "reason": "it changes the brief's test target, not the endpoint; the plan's tolerance and negative-control requirement stand as written.",
+      "text": "\u00a77's done-when (1) asks for a committed test driving each proposal route with the compensator inactive; the closest existing instrument is tests/equilibrium/test_solve_vertical_pin.py, which already drives the same augmented system with active=False and an active=True parametrisation (test_one_augmented_newton_program_serves_free_and_pinned_requests, lines 307-361) and asserts the unknown stays zero while never asserting the flux image is zero, so the negative control the section asks for is an extension of that module and not a new harness",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+  "plan_fingerprint": "efb17221cbf8219e5e370f5c26787819bcd7513ccee296c8d2bd581b8505e2bf",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 69,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "s5 now records that node (c) is answered by the existing owners nova_cocos and corpus_flux_to_nova_total, and the section is declared done; no new translation owner is chosen.",
+      "reason": "",
+      "when": "2026-11-14T18:54:31.509911+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "finding": "deep_module-1",
+      "note": "The s6 node brief names use_linear_moments set by the four moment coupling blocks in ForwardProfile.from_lattice (forward.py:703-711) and the DIII-D builder that passes none of them, as the selection to extend.",
+      "reason": "",
+      "when": "2026-11-14T18:54:43.269310+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "s7 now asks that the binding's active mask be honoured once where the image is applied, not gated per route; the brief names constraint.py:2099-2105 and the payload discarded by the two unknowns.",
+      "reason": "",
+      "when": "2026-11-14T18:54:52.169579+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "finding": "reuse_search-2",
+      "note": "The s7 node brief points the test at tests/equilibrium/test_solve_vertical_pin.py, extending its active=False parametrisation to assert the flux image and tangent are zero.",
+      "reason": "",
+      "when": "2026-11-14T18:55:00.971763+00:00"
+    }
+  ],
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "note": "The s6 node brief names use_linear_moments set by the four moment coupling blocks in ForwardProfile.from_lattice (forward.py:703-711) and the DIII-D builder that passes none of them, as the selection to extend.",
+      "reason": "",
+      "when": "2026-11-14T18:54:43.269310+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "note": "s7 now asks that the binding's active mask be honoured once where the image is applied, not gated per route; the brief names constraint.py:2099-2105 and the payload discarded by the two unknowns.",
+      "reason": "",
+      "when": "2026-11-14T18:54:52.169579+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "note": "s5 now records that node (c) is answered by the existing owners nova_cocos and corpus_flux_to_nova_total, and the section is declared done; no new translation owner is chosen.",
+      "reason": "",
+      "when": "2026-11-14T18:54:31.509911+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "note": "The s7 node brief points the test at tests/equilibrium/test_solve_vertical_pin.py, extending its active=False parametrisation to assert the flux image and tangent are zero.",
+      "reason": "",
+      "when": "2026-11-14T18:55:00.971763+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261114T182108890783-plan-review-of-diiid-vertical-force-balance.json",
+  "review_run_id": "r-20261114T182108890783-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "5786832fcd443d092475c920b9a4893ad5dfa923",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a76 and \u00a77 each change one existing deep module (ForwardProfile.from_lattice's linear-moment path; the augmented constraint system's single flux-delta site) rather than adding surface. The finding below about \u00a76's selection mechanism restates the existing operator path, and the plan already forbids a second integration path.",
+    "duplicate_owner": "a finding \u2014 \u00a77's stated remedy (\"an invariant of every proposal route\") places the suppression at four proposal routes when the owner of the active mask is the constraint binding and its single application site.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a76 forecloses the clip_mode knob (solve_request.py:603 enumerates exactly chord/exact/chord_cells) and \u00a77 forbids any new constraint, so neither section adds surface and nothing needs retiring.",
+    "reuse_search": "a finding \u2014 the plan's \u00a75 endpoint asks where COCOS translation lives and offers only two owners while two already exist: nova_cocos (re-exported at nova/equilibrium/convention.py:55) and benchmarks/diiid_corpus_conventions.py:92.",
+    "thin_wrapper": "pass \u2014 neither \u00a76 nor \u00a77 proposes a forwarding layer; \u00a76 explicitly routes through the existing booking, and \u00a77 forbids a replacement compensator."
+  },
+  "section_digests": {
+    "_document": "15f154badce3c3548546cb12c63719b84a2a61944484438500fc56c5a781ece8",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "f8f9490f60a3855d5c71654302a05f64889ba735b5c77f7e188181b21f1c4229",
+    "s6": "43acabb26f7d86ab42d101ae9a6f4686a344e6cc8fbf8ba45c4f3f5dd143ea3a",
+    "s7": "2e56567ad09bdd847acad9c3b7d2531b6866b451388723ad922c8fd2f200937b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T18:52:24.066485+00:00",
+  "total": null
+}

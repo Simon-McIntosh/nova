@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/fixed_points.py:maintain_rows",
+    "nova/equilibrium/fixed_points.py:_source_jets",
+    "nova/biot/polygonanalytic.py:packed_analytic_moments",
+    "nova/biot/tiledassembly.py:1332",
+    "nova/equilibrium/topology.py:2514"
+  ],
+  "completed_at": "2026-11-15T00:05:10.351Z",
+  "dispatched_at": "2026-11-14T23:16:21Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/fixed_points.py",
+      "line": 351,
+      "severity": "non-blocking",
+      "text": "the added gradient_with_value plus jax.jacfwd(..., has_aux=True) reproduces the identical idiom already in nova/equilibrium/topology.py:2535-2539 (and the has_aux pattern at clip_quadrature.py:1180) without extending or wrapping that owner, so the value+gradient+hessian-with-aux capability now exists in three places."
+    },
+    {
+      "file": "tests/biot/test_production_row_compile.py",
+      "line": 76,
+      "severity": "non-blocking",
+      "text": "the delivered head fails both budget tests (267438*2 > 402141 instructions and 216.521548 s > the 130.454541 s bound), recorded as budget_failure_ids in paired-ordered/receipt.json; this is the disclosed and authorized fallback so it does not hold the node, but the failing ids never reach the manifest's baseline_suite/after_suite pair."
+    },
+    {
+      "file": "tests/biot/test_moment_program_identity.py",
+      "line": 120,
+      "severity": "non-blocking",
+      "text": "both substantive identity tests are skipif-gpu, so the recorded after_suite (2 passed, 2 skipped on CPU) exercises only the two added diagnostic tests and nothing of the changed kernel; the clause (1) evidence is an out-of-suite H200 job, recorded in the evidence fragment but not in the suite pair."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 5 production call sites",
+    "diff": "25 commits; product source frozen at 14a85a159, docs-only after; all inside scope",
+    "done_when": "clause (1) identity recorded; clause (2) bounds missed (267438/216.521548 vs 201070/130.454541) and clause (3) 24-file set not run by this node",
+    "goal": "recovered the derivative-direction and auxiliary-output sharing in base order; H200 receipts report all 430000 returned entries bit-identical",
+    "manifest": "status complete; both arms and the suite pair recorded with 0 failure ids",
+    "write_paths": "all five diff paths inside the declared write paths"
+  },
+  "justifications": {
+    "durability": "tests/biot/test_moment_program_identity.py:120 and :154 fail on any byte or 1e-9 departure from the pinned base, but they are skipif-gpu and were skipped in the recorded pair, so the added CPU assertions cover only the diagnostic helper.",
+    "evidence": "the bound at nova/biot/polygonanalytic.py:3026-3028 is missed (267438 > 201070 instructions, 216.521548 > 130.454541 s) and the recorded after_suite at logs/head-suite-delivery-after_suite.log skips both identity tests on CPU, so only the H200 receipts carry clause (1).",
+    "fit": "nova/biot/polygonanalytic.py:3137-3141 follows the module's jnp/jax idiom and introduces no plan label, ticket id or version suffix.",
+    "goal_fidelity": "nova/equilibrium/fixed_points.py:355 reuses the gradient's auxiliary outputs and nova/biot/polygonanalytic.py:3141 unrolls the two tangent directions, delivering the sharing in base order.",
+    "reuse": "nova/equilibrium/fixed_points.py:351 duplicates the value/gradient/hessian-with-aux idiom the repository already owns at nova/equilibrium/topology.py:2535 rather than extending it.",
+    "scope_discipline": "every path in diff 40523b1a4..cf87218b6 lies inside the manifest's declared write paths, with no out-of-scope edit."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node was dispatched to recover the derivative-direction and auxiliary-output sharing in a base-order form whose value, gradient and Hessian stay byte-identical; nova/equilibrium/fixed_points.py:351 and nova/biot/polygonanalytic.py:3118-3141 install exactly that sharing (jacfwd has_aux reuse, hoisted negative-field scale, unrolled two-direction scan) and the H200 receipts report all 430000 returned entries bit-identical.\nVERDICT done_when: clause (1) identity is recorded (paired H200 job 1315509 native identity passed, all-output-bytes.json 430000 entries 0 different) but clauses (2) and (3) are not met - the bound of 201070 instructions and 130.454541 s is missed at 267438 and 216.521548 s, and the 24-file suite set was not run by this node (outside_scope, delegated to r-20261114T214523563698-importer-delta).\nVERDICT write_paths: the manifest orientation_write_paths line names fixed_points.py, polygonanalytic.py, tests/biot, the ordered-sharing fragment and its figure dir; diff 40523b1a4..cf87218b6 touches exactly those five paths and nothing else.\nVERDICT manifest: read manifest.md; status complete, records the paired H200 402141->267438 instructions and 349.757841->216.521548 s with the per-pass table, and baseline_suite 2 skipped / after_suite 2 passed 2 skipped with 0 failure ids.\nVERDICT diff: read all 25 commits; the product source freezes at 14a85a159 with only the evidence fragment and pass-times.svg changing after, so the measured source equals head cf87218b6.\nCALL_SITES: nova/equilibrium/fixed_points.py:maintain_rows, nova/equilibrium/fixed_points.py:_source_jets, nova/biot/polygonanalytic.py:packed_analytic_moments, nova/biot/tiledassembly.py:1332, nova/equilibrium/topology.py:2514\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/equilibrium/fixed_points.py:355 reuses the gradient's auxiliary outputs and nova/biot/polygonanalytic.py:3141 unrolls the two tangent directions, delivering the sharing in base order.\nSCORE evidence: 12\nJUSTIFICATION evidence: the bound at nova/biot/polygonanalytic.py:3026-3028 is missed (267438 > 201070 instructions, 216.521548 > 130.454541 s) and the recorded after_suite at logs/head-suite-delivery-after_suite.log skips both identity tests on CPU, so only the H200 receipts carry clause (1).\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in diff 40523b1a4..cf87218b6 lies inside the manifest's declared write paths, with no out-of-scope edit.\nSCORE durability: 14\nJUSTIFICATION durability: tests/biot/test_moment_program_identity.py:120 and :154 fail on any byte or 1e-9 departure from the pinned base, but they are skipif-gpu and were skipped in the recorded pair, so the added CPU assertions cover only the diagnostic helper.\nSCORE fit: 17\nJUSTIFICATION fit: nova/biot/polygonanalytic.py:3137-3141 follows the module's jnp/jax idiom and introduces no plan label, ticket id or version suffix.\nSCORE reuse: 13\nJUSTIFICATION reuse: nova/equilibrium/fixed_points.py:351 duplicates the value/gradient/hessian-with-aux idiom the repository already owns at nova/equilibrium/topology.py:2535 rather than extending it.",
+  "review_run_id": "r-20261114T214538711018-review-of-ordered-sharing-cf87218b61dd",
+  "reviewed_base_sha": "40523b1a42a448125b98780ff01fd63e54cc5875",
+  "reviewed_head_sha": "cf87218b61ddb37e0b7c19e359d7da55bbfb24a1",
+  "reviewed_run_id": "r-20261114T101845147725-ordered-sharing",
+  "scores": {
+    "durability": 14,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 13,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T00:05:37.086006+00:00",
+  "total": 90
+}

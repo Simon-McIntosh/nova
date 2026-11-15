@@ -1,0 +1,124 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "Derived from the reviewed run's own gate logs: the run ran no suite arm. Its manifest's suite_arms line records that base 93a93c4a7ede437e9a51beeed9fae20c914a5501 and after 8b1e4132c both resolve node_test_files to an empty list because no path in the write scope carries a test_* file at either revision, so there is no baseline_suite or after_suite log to difference, and no added failure can be attributed. This is an absence of arms, recorded as zero rather than inferred from a green run.",
+  "call_sites": [
+    "scripts/prototypes/diiid_external_current_propagation/job.sh:20 (launches measure.py for the cold arms)",
+    "scripts/prototypes/diiid_external_current_propagation/job.sh:26 (launches the second process for the warm arms)",
+    "scripts/prototypes/diiid_xpoint_offset/style.py:17 save() (the guard and writer every figure in this family goes through)"
+  ],
+  "completed_at": "2026-11-15T15:49:55.763Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "This run is a read-only diagnosis, with product and test edits outside its scope. The guard is the proposed refusal in complete_profile_current_adapter, which goes to the lead as a decision and is built with its own test as a separate node.",
+      "recorded_at": "2026-11-15T15:56:38.758983+00:00"
+    },
+    "reuse": {
+      "kind": "exempted",
+      "reason": "The score rests on render.py re-sampling flux where a sibling prototype has a sampler. That duplication is prototype-local and is exempted under finding 0; no product module is forked.",
+      "recorded_at": "2026-11-15T15:56:45.695591+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-15T15:36:08Z",
+  "emissions": [
+    "VERDICT goal: Read the source node's goal in brief.md against the two commits gained since the prior review: the goal's diagnosis is unchanged and the gained commits carry done-when clause 3 and the caption corrections, landing the paired terminal-flux panel at docs/figures/diiid-external-current-propagation/frame-137-terminal-base-versus-scaled.svg with the physical first wall, each arm's own nulls and separatrix, the EFIT reference and axis off.",
+    "VERDICT done_when: The done_when's clause 3 requires one flux-contour panel with wall drawn, both null sets and axis off; the gate for that is the style.save() text guard plus the figure itself, and resume-4.jsonl records `FIGURE frame-137-terminal-base-versus-scaled.svg: text clipping=0; text overlaps=0; labels over data=0; bytes=76048`, a byte count equal to the committed SVG's own size, so the committed artefact is the guarded one.",
+    "VERDICT write_paths: Read the source manifest's declared write paths and the diff stat: the two gained commits touch only docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html, docs/figures/diiid-external-current-propagation/frame-137-terminal-base-versus-scaled.svg and scripts/prototypes/diiid_external_current_propagation/render.py, all three inside the fence.",
+    "VERDICT manifest: Read; it reports status complete, the three deliverables, the guard's clipping=0/overlaps=0 result and a suite_arms line recording that neither arm resolves a test file at 93a93c4a7ede437e9a51beeed9fae20c914a5501 or 8b1e4132c, which I confirmed against the manifest's own text.",
+    "VERDICT diff: Read both commits commit-by-commit against 2d32c19fc: 5babf86cb rewrote render.py's view and reference layers and added the two-part caption correction, and 8b1e4132c drew the physical wall through bench._physical_wall_ring, moved the residual into a footer read from each arm's stored record, and updated the fragment's base residual cell and its new base-pair paragraph; all arithmetic I checked reproduces.",
+    "CALL_SITES: scripts/prototypes/diiid_external_current_propagation/job.sh:20 (launches measure.py for the cold arms), scripts/prototypes/diiid_external_current_propagation/job.sh:26 (launches the second process for the warm arms), scripts/prototypes/diiid_xpoint_offset/style.py:17 save() (the guard and writer every figure in this family goes through)",
+    "SCORE goal_fidelity: 18",
+    "JUSTIFICATION goal_fidelity: render.py:142-149 draws the physical first wall from bench._physical_wall_ring through draw_wall and marks the pseudo-wall as a dotted reference, so the panel now shows the vessel the caption claims.",
+    "SCORE evidence: 18",
+    "JUSTIFICATION evidence: The committed SVG renders to the caption's description and its byte size (76048) equals the guarded run's reported bytes in resume-4.jsonl, while every quoted number reproduces from the stored records: prototype2/cold/arm-base.json 4.188355e-04, prototype2/cold/arm-row.json 1.282971e-03, prototype/cold/arm-base.json 4.190446e-04, seam-vs-prototype2 pair 2.9021e-05 Wb and warm-vs-cold row 4.0699e-13 Wb.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: git diff --stat 2d32c19fc..8b1e4132c lists exactly the three declared write paths and no file under nova/ or tests/.",
+    "SCORE durability: 6",
+    "JUSTIFICATION durability: No test reaches this change and the diff adds no assertion; the only guard is style.py:17 save(), which refuses clipped or overlapping labels at render time (render.py:277) and resumes nothing in the pytest lane, so a regression in render.py:142-160 would ship silently.",
+    "SCORE fit: 17",
+    "JUSTIFICATION fit: render.py:55-117 follows the sibling prototypes' idiom (module constants, style roles, save()), and its new names _corpus_row, _efit_boundary and _flux_at carry no plan label or version marker.",
+    "SCORE reuse: 5",
+    "JUSTIFICATION reuse: render.py:103 _flux_at hand-rolls bilinear point sampling that scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:268 _point_flux already owns with the same docstring claim, differing only in axis order.",
+    "FINDING scripts/prototypes/diiid_external_current_propagation/render.py:103 non-blocking: _flux_at re-implements the capability scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:268 _point_flux already owns (a RegularGridInterpolator over the same (radius, height) map, documented as 'genuine bilinear interpolation of the map at arbitrary points'), so the same sampling now exists twice in the prototype tree with divergent edge behaviour: _flux_at silently clamps an out-of-grid point to the last cell and extrapolates, where _point_flux returns nan.",
+    "FINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html:55 non-blocking: The caption calls the pale blue contours 'the shared levels inside the wall' after identifying the solid dark stepped outline as 'the physical DIII-D first wall', but render.py:131 computes the levels inside the registered pseudo-wall and the drawn contours extend outside the physical wall on both panels, so the levels the caption names are inside the dotted reference rectangle, not the wall.",
+    "FINDING scripts/prototypes/diiid_external_current_propagation/render.py:55 non-blocking: _corpus_row reads the parquet corpus under bench.DEFAULT_DATA and imports the whole benchmark (and its jax dependency) to obtain the EFIT boundary and lower null, so the committed SVG cannot be regenerated from the committed receipts and evidence alone; storing the boundary in the arm npz at solve time would keep the render path reading only its own records."
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Prototype-local duplication of a bilinear sampler between two diagnosis scripts. Neither script is product code, and consolidating them would touch a script outside this run's scope for no change in any measured value.",
+      "recorded_at": "2026-11-15T15:55:30.091345+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Caption wording only: the levels span the pseudo-wall, and the landing appends a one-line correction to the fragment saying so. No number changes.",
+      "recorded_at": "2026-11-15T15:55:37.457109+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The EFIT boundary and null come from the committed corpus the benchmark reads. Regeneration needs that corpus, as every DIII-D cohort figure does, and the diagnosis needs no repeat render.",
+      "recorded_at": "2026-11-15T15:55:44.672507+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_external_current_propagation/render.py",
+      "line": 103,
+      "severity": "non-blocking",
+      "summary": "_flux_at re-implements the capability scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:268 _point_flux already owns (a RegularGridInterpolator over the same (radius, height) map, documented as 'genuine bilinear interpolation of the map at arbitrary points'), so the same sampling now exists twice in the prototype tree with divergent edge behaviour: _flux_at silently clamps an out-of-grid point to the last cell and extrapolates, where _point_flux returns nan."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html",
+      "line": 55,
+      "severity": "non-blocking",
+      "summary": "The caption calls the pale blue contours 'the shared levels inside the wall' after identifying the solid dark stepped outline as 'the physical DIII-D first wall', but render.py:131 computes the levels inside the registered pseudo-wall and the drawn contours extend outside the physical wall on both panels, so the levels the caption names are inside the dotted reference rectangle, not the wall."
+    },
+    {
+      "file": "scripts/prototypes/diiid_external_current_propagation/render.py",
+      "line": 55,
+      "severity": "non-blocking",
+      "summary": "_corpus_row reads the parquet corpus under bench.DEFAULT_DATA and imports the whole benchmark (and its jax dependency) to obtain the EFIT boundary and lower null, so the committed SVG cannot be regenerated from the committed receipts and evidence alone; storing the boundary in the arm npz at solve time would keep the render path reading only its own records."
+    }
+  ],
+  "justifications": {
+    "durability": "No test reaches this change and the diff adds no assertion; the only guard is style.py:17 save(), which refuses clipped or overlapping labels at render time (render.py:277) and resumes nothing in the pytest lane, so a regression in render.py:142-160 would ship silently.",
+    "evidence": "The committed SVG renders to the caption's description and its byte size (76048) equals the guarded run's reported bytes in resume-4.jsonl, while every quoted number reproduces from the stored records: prototype2/cold/arm-base.json 4.188355e-04, prototype2/cold/arm-row.json 1.282971e-03, prototype/cold/arm-base.json 4.190446e-04, seam-vs-prototype2 pair 2.9021e-05 Wb and warm-vs-cold row 4.0699e-13 Wb.",
+    "fit": "render.py:55-117 follows the sibling prototypes' idiom (module constants, style roles, save()), and its new names _corpus_row, _efit_boundary and _flux_at carry no plan label or version marker.",
+    "goal_fidelity": "render.py:142-149 draws the physical first wall from bench._physical_wall_ring through draw_wall and marks the pseudo-wall as a dotted reference, so the panel now shows the vessel the caption claims.",
+    "reuse": "render.py:103 _flux_at hand-rolls bilinear point sampling that scripts/prototypes/diiid_vertical_loss/render_trip_panels.py:268 _point_flux already owns with the same docstring claim, differing only in axis order.",
+    "scope_discipline": "git diff --stat 2d32c19fc..8b1e4132c lists exactly the three declared write paths and no file under nova/ or tests/."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261115T153503763805-review-of-diiid-external-current-propagation-8b1e4132c5f4",
+  "reviewed_base_sha": "2d32c19fcb5a0f482b7dc5c724eecfdd885c00b2",
+  "reviewed_head_sha": "8b1e4132c5f4d97b4c688e994fdcdecd764ee986",
+  "reviewed_run_id": "r-20261114T184344419641-diiid-external-current-propagation",
+  "rubric_lines": [
+    "rubric.goal_fidelity: answered",
+    "rubric.evidence: answered",
+    "rubric.scope_discipline: answered",
+    "rubric.durability: answered",
+    "rubric.fit: answered",
+    "rubric.reuse: answered"
+  ],
+  "scores": {
+    "durability": 6,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T15:47:51.247557+00:00",
+  "total": 84,
+  "verdicts": {
+    "diff": "Read both commits commit-by-commit against 2d32c19fc: 5babf86cb rewrote render.py's view and reference layers and added the two-part caption correction, and 8b1e4132c drew the physical wall through bench._physical_wall_ring, moved the residual into a footer read from each arm's stored record, and updated the fragment's base residual cell and its new base-pair paragraph; all arithmetic I checked reproduces.",
+    "done_when": "The done_when's clause 3 requires one flux-contour panel with wall drawn, both null sets and axis off; the gate for that is the style.save() text guard plus the figure itself, and resume-4.jsonl records `FIGURE frame-137-terminal-base-versus-scaled.svg: text clipping=0; text overlaps=0; labels over data=0; bytes=76048`, a byte count equal to the committed SVG's own size, so the committed artefact is the guarded one.",
+    "goal": "Read the source node's goal in brief.md against the two commits gained since the prior review: the goal's diagnosis is unchanged and the gained commits carry done-when clause 3 and the caption corrections, landing the paired terminal-flux panel at docs/figures/diiid-external-current-propagation/frame-137-terminal-base-versus-scaled.svg with the physical first wall, each arm's own nulls and separatrix, the EFIT reference and axis off.",
+    "manifest": "Read; it reports status complete, the three deliverables, the guard's clipping=0/overlaps=0 result and a suite_arms line recording that neither arm resolves a test file at 93a93c4a7ede437e9a51beeed9fae20c914a5501 or 8b1e4132c, which I confirmed against the manifest's own text.",
+    "write_paths": "Read the source manifest's declared write paths and the diff stat: the two gained commits touch only docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html, docs/figures/diiid-external-current-propagation/frame-137-terminal-base-versus-scaled.svg and scripts/prototypes/diiid_external_current_propagation/render.py, all three inside the fence."
+  }
+}

@@ -2,7 +2,8 @@
 
 These pin the launcher's placement rules without submitting anything.  The
 dry-run path prints the sbatch line for every rung from one preference list,
-so a reader can check the partition, reservation and platform a rung would use.
+so a reader can check the partition, reservation, platform and per-rung core
+and memory sizing a rung would use.
 An explicit --mem=0 is refused before it can reach sbatch, where SLURM reads it
 as the whole node memory, leaving the job pending on Resources while blocking
 the queue behind it.
@@ -59,12 +60,14 @@ def test_dry_run_prints_a_submission_line_for_every_rung(tmp_path: Path) -> None
     assert "--gres" not in cpu
 
 
-def test_dry_run_requests_four_cores_on_the_gpu_rungs(tmp_path: Path) -> None:
+def test_dry_run_requests_each_rungs_core_default(tmp_path: Path) -> None:
     """A GPU rung is bound by its device, so it asks for fewer cores.
 
     The H200 reservation holds 30 cores shared with the worker model's
     server, so a GPU job that takes seven of them lets three concurrent jobs
-    fill it and compete with the serve.
+    fill it and compete with the serve.  The P100 node carries 20 cores over
+    8 cards, so it runs out of cores before cards: a 4-core job there leaves
+    half the cards idle, and 2 cores per card is what keeps all 8 usable.
     """
     result = _launch(
         "--dry-run",
@@ -80,27 +83,106 @@ def test_dry_run_requests_four_cores_on_the_gpu_rungs(tmp_path: Path) -> None:
     cpu = next(line for line in lines if line.startswith("RUNG=cpu "))
 
     assert "--cpus-per-task=4" in h200
-    assert "--cpus-per-task=4" in titan
+    assert "--cpus-per-task=2" in titan
     assert "--cpus-per-task=7" in cpu
 
 
-def test_dry_run_explicit_cores_override_every_rung(tmp_path: Path) -> None:
+def _rung_line(result: subprocess.CompletedProcess[str], rung: str) -> str:
+    return next(
+        line for line in result.stdout.splitlines() if line.startswith(f"RUNG={rung} ")
+    )
+
+
+def test_dry_run_titan_defaults_to_two_cores_and_24g(tmp_path: Path) -> None:
+    """Titan's budget is two cores and 24G per card.
+
+    The node carries 8 cards against 20 cores, so a job sized to the card and
+    not to the node lets every card run together.  A dry run for the titan
+    rung alone is what a caller sees before submitting.
+    """
     result = _launch(
         "--dry-run",
-        "--cores",
-        "2",
+        "--rungs",
+        "titan",
         "--log",
         str(tmp_path / "lane.log"),
         "--",
         "tests/example_target.py",
     )
     assert result.returncode == 0, result.stderr
-    lines = result.stdout.splitlines()
+    line = _rung_line(result, "titan")
+    assert "--cpus-per-task=2" in line
+    assert "--mem=24G" in line
+    assert "--mem=64G" not in line
+
+
+def test_dry_run_keeps_24g_only_on_titan(tmp_path: Path) -> None:
+    result = _launch(
+        "--dry-run",
+        "--log",
+        str(tmp_path / "lane.log"),
+        "--",
+        "tests/example_target.py",
+    )
+    assert result.returncode == 0, result.stderr
+    assert "--mem=64G" in _rung_line(result, "h200")
+    assert "--mem=24G" in _rung_line(result, "titan")
+    assert "--mem=64G" in _rung_line(result, "cpu")
+
+
+def test_dry_run_explicit_cores_override_every_rung(tmp_path: Path) -> None:
+    result = _launch(
+        "--dry-run",
+        "--cores",
+        "5",
+        "--log",
+        str(tmp_path / "lane.log"),
+        "--",
+        "tests/example_target.py",
+    )
+    assert result.returncode == 0, result.stderr
     for rung in ("h200", "titan", "cpu"):
-        line = next(line for line in lines if line.startswith(f"RUNG={rung} "))
-        assert "--cpus-per-task=2" in line
+        line = _rung_line(result, rung)
+        assert "--cpus-per-task=5" in line
+        assert "--cpus-per-task=2" not in line
         assert "--cpus-per-task=4" not in line
         assert "--cpus-per-task=7" not in line
+
+
+def test_dry_run_explicit_mem_overrides_the_titan_default(tmp_path: Path) -> None:
+    result = _launch(
+        "--dry-run",
+        "--rungs",
+        "titan",
+        "--mem",
+        "48G",
+        "--log",
+        str(tmp_path / "lane.log"),
+        "--",
+        "tests/example_target.py",
+    )
+    assert result.returncode == 0, result.stderr
+    line = _rung_line(result, "titan")
+    assert "--mem=48G" in line
+    assert "--mem=24G" not in line
+
+
+def test_dry_run_explicit_cores_override_the_titan_default(tmp_path: Path) -> None:
+    result = _launch(
+        "--dry-run",
+        "--rungs",
+        "titan",
+        "--cores",
+        "3",
+        "--log",
+        str(tmp_path / "lane.log"),
+        "--",
+        "tests/example_target.py",
+    )
+    assert result.returncode == 0, result.stderr
+    line = _rung_line(result, "titan")
+    assert "--cpus-per-task=3" in line
+    assert "--cpus-per-task=2" not in line
 
 
 def _h200_submission_line(result: subprocess.CompletedProcess[str]) -> str:

@@ -1,0 +1,38 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T23:39:22.951Z",
+  "dispatched_at": "2026-11-14T23:22:43Z",
+  "findings": [],
+  "plan_commit": "3f2dc1b485119de0c01dc3e8b476101b4029503d",
+  "plan_fingerprint": "a91e57b9b348dd1e22a14e8728a651ce07991e50c142c206f9064dfcf9c5427d",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 57,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261114T215740753796-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "1fd9ecefd5fc7adf4c38fe75c85be608d8e93058",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass for this unit \u2014 the cross-plan hrefs in the snapshot resolve under the house convention that plans are served from `docs/plans`: `/nova/converged-forward-solve.html`, `/nova/cpu-compile-abort.html` and `/nova/sub-millisecond-forward-path.html` are each present at `docs/plans/<slug>.html`, and `docs/evidence/fragments/kernel-compile-barrier/production-point-batch-pass-profile.html` exists. The one unresolvable anchor, `variadic-split.html`, was raised as `anchors_resolve-1` in review `r-20261114T204327775158` and is already answered in the plan's own comments at lines 170-171 and 161-162 (the file is owed by the ordered-sharing node); it is unchanged and not re-raised.",
+    "done_when": "pass for this unit \u2014 the version bump changes no done-when, and the node-level defects this item produced at earlier revisions (\u00a76 clause (1) requiring a per-row commit trace for a negative-control row, and clause (1) resting on identity sets that already fail at the base) are recorded unanswered in review `r-20261114T204327775158` and are not re-raised against unchanged text.",
+    "evidence_paths": "pass \u2014 every gate writes to an in-tree durable path: `docs/research/compile-cost-evidence.html` (\u00a71), `docs/evidence/fragments/kernel-compile-barrier/production-point-batch-pass-profile.html` and `graph-growth-history.html` (present on disk, \u00a72), and `docs/evidence/fragments/kernel-compile-barrier/variadic-split.html` (\u00a72's per-pass table, owed), with no session scratchpad or node-local temporary path named.",
+    "naming": "pass \u2014 the bump carries no new names; the section text keeps plan structure (section ids, decision keys) in plan metadata and names the code it touches by the mechanism it changes (`_source_jets`, `_row_program`, `variadic-op-splitter`, `multi_output_fusion`) rather than by plan labels, and no ticket or version tag reaches a symbol.",
+    "reasoning": "pass for this unit \u2014 a version bump asserts nothing about the system, so the three checks have no new claim to fail: the root causes the sections cite are unchanged from the revision earlier reviews scored, the bounds (130.8 s in \u00a72, 60 s and 64 GB in \u00a73 and \u00a74, 1e-9 tangent identity) are each reachable and each can fail, and no section's implementation text changed. The standing reasoning defects earlier reviews recorded at `r-20261114T204327775158` (\u00a76's \"four later commits\" against a 16-commit range, and the clause (1) identity sets) are unanswered and not re-raised.",
+    "single_goal": "pass \u2014 s0 through s6 each name one deliverable (a census, one restructured program's compile bound, one bounded jets build, one read meeting its compile clause, one attribution study, one identity repair), and the two multi-clause done-whens measure one endpoint from several arms rather than carrying two deliverables.",
+    "wiring": "pass \u2014 \u00a76's declared link to `sub-millisecond-forward-path#s7` resolves to that plan's `id=\"s7\"`, whose own text names kernel-compile-barrier \u00a76 as waiting on that section's node (a), so the wait the s6 comment describes is in the declared graph; \u00a73 and \u00a74 link to `kernel-compile-barrier#s2` and `#s5` (present, \u00a75 `done`), and \u00a72 links to `#s5`."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "765292264a4414dba99e7fdef780af3ed6725c95ba8acbf1d171257250bf0b1a",
+    "s3": "ab68c20ce5d3e9242532f0e5cb72a8baf8b9ce57666cac7db68cee8904360fa1",
+    "s4": "043c0ccddafb69cbd714f400a3810894eb704687755dfb014b018a750adc8b16",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T23:40:09.074827+00:00",
+  "total": null
+}

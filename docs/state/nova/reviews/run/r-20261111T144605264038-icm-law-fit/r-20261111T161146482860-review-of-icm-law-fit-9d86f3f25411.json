@@ -9,6 +9,13 @@
     "scripts/magnetisation_high_permeability/measure.py:284 (iron.solve_magnetisation)"
   ],
   "completed_at": "2026-11-11T16:39:41.296Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "icm-law-fit",
+      "recorded_at": "2026-11-11T17:34:17.176177+00:00"
+    }
+  },
   "dispatched_at": "2026-11-11T16:15:28Z",
   "emissions": [
     "VERDICT goal: the node's goal is to let the production B-H law accept a steel table whose permeability rises from the origin; nova/biot/magnetisation.py:122-184 splits an interval whose endpoint tangent exceeds twice its secant, and the unchanged DD 4.1.0 WEST table read through read_iron_core now fits with 27 fitted knots (25 authored), reproduced at negative-control.log:28-30.",

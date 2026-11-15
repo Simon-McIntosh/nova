@@ -25,6 +25,9 @@ from nova.biot.tiledassembly import (
     TilePlan,
     cell_interaction,
     galerkin_cell_interaction,
+    linear_cell_interaction,
+    linear_galerkin_cell_interaction,
+    linear_magnetisation_geometry,
 )
 from nova.jax.config import configure_dtypes
 
@@ -241,14 +244,18 @@ def _mesh(region, size: float | CellSizeField, sliver: float = 0.15) -> _Mesh:
     return _Mesh(tuple(polygons), np.asarray(centres), np.asarray(areas))
 
 
-def _galerkin_interaction(cells, plan=_PLAN):
+def _galerkin_interaction(cells, plan=_PLAN, *, basis="constant"):
     """Return the volume-tested cell interaction for the meshed iron."""
+    if basis == "linear":
+        return linear_galerkin_cell_interaction(cells.polygons, plan=plan)[0]
+    if basis != "constant":
+        raise ValueError("basis must be constant or linear")
     return galerkin_cell_interaction(
         tuple(p * _SHEET_LENGTH_SCALE for p in cells.polygons), plan=plan
     )
 
 
-def galerkin_spectrum(cells, gram):
+def galerkin_spectrum(cells, gram, *, basis="constant"):
     """Return the symmetric spectrum of the volume-weighted Galerkin operator.
 
     ``gram`` is the cell interaction returned by :func:`_galerkin_interaction`,
@@ -256,8 +263,27 @@ def galerkin_spectrum(cells, gram):
     ``2*pi*r`` enters the energy form, so the operator carrying the spectrum is
     ``V**(1/2) G V**(-1/2) / mu0`` with ``V`` the repeated cell volume. Reading
     ``eigvalsh`` off ``G`` alone reads one triangle of an unsymmetric matrix and
-    reports a range the projection does not have.
+    reports a range the projection does not have. For ``basis="linear"``,
+    solve the generalised eigenproblem for the energy against the full local
+    polynomial Gram blocks, including their off-diagonal volume moments.
     """
+    if basis == "linear":
+        from scipy.linalg import block_diag, eigvalsh
+
+        blocks = linear_magnetisation_geometry(cells.polygons)["gram"]
+        metric = block_diag(*blocks, *blocks)
+        energy = metric @ np.asarray(gram) / _MU0
+        eigenvalues = eigvalsh((energy + energy.T) / 2, metric)
+        return dict(
+            cells=int(len(cells.centroids)),
+            volume_symmetry=float(
+                np.linalg.norm(energy - energy.T) / np.linalg.norm(energy)
+            ),
+            minimum=float(eigenvalues[0]),
+            maximum=float(eigenvalues[-1]),
+        )
+    if basis != "constant":
+        raise ValueError("basis must be constant or linear")
     volume = np.tile(2 * np.pi * cells.areas * cells.centroids[:, 0], 2)
     root = np.sqrt(volume)
     weighted = np.asarray(gram) / _MU0 * root[:, None] / root[None, :]
@@ -449,6 +475,66 @@ def _update(state, operands, factor, scale):
     return candidate, _residual(candidate, operands)
 
 
+def _linear_residual(state, operands):
+    """Apply the material law at volume nodes before testing in the affine basis."""
+    gram, external, knots, coefficients, ends, basis, project, owners = operands[:8]
+    total = (external + gram @ state).reshape(2, -1, 3)
+    if len(operands) == 10:
+        total = total + _MU0 * operands[9][:, :, None] * state.reshape(2, -1, 3)
+    values = jnp.einsum("cqi,qi->cq", total[:, owners], basis)
+    squared = jnp.sum(values**2, axis=0)
+    magnitude = jnp.where(
+        squared > 0, jnp.sqrt(jnp.where(squared > 0, squared, 1.0)), 0.0
+    )
+    material = values * _coefficient(magnitude, knots, coefficients, ends)
+    if len(operands) == 10:
+        material = material * operands[8][owners]
+    tested = (
+        jnp.zeros_like(total).at[:, owners, :].add(material[:, :, None] * project[None])
+    )
+    return state - tested.reshape(-1)
+
+
+@jax.jit
+def _linear_factor(state, operands, regularisation=0.0):
+    """Contract local quadrature tangents before applying the dense B map."""
+    gram, external, knots, coefficients, ends, basis, project, owners = operands[:8]
+    count = state.size // 6
+    total = (external + gram @ state).reshape(2, count, 3)
+    response = gram
+    if len(operands) == 10:
+        gain = operands[9]
+        total = total + _MU0 * gain[:, :, None] * state.reshape(2, count, 3)
+        response = gram + jnp.diag(jnp.repeat(_MU0 * gain.reshape(-1), 3))
+    values = jnp.einsum("cqi,qi->qc", total[:, owners], basis)
+
+    def material(value):
+        squared = jnp.sum(value**2)
+        magnitude = jnp.where(
+            squared > 0, jnp.sqrt(jnp.where(squared > 0, squared, 1.0)), 0.0
+        )
+        return value * _coefficient(magnitude, knots, coefficients, ends)
+
+    tangent = jax.vmap(jax.jacfwd(material))(values)
+    if len(operands) == 10:
+        tangent = tangent * operands[8][owners, None, None]
+    integrand = jnp.einsum("qi,qab,qj->qaibj", project, tangent, basis)
+    local = jnp.zeros((count, 2, 3, 2, 3), dtype=state.dtype).at[owners].add(integrand)
+    response = response.reshape(2, count, 3, -1)
+    jacobian = -jnp.einsum("caibj,bcjk->acik", local, response).reshape(
+        state.size, state.size
+    )
+    jacobian += (1 + regularisation) * jnp.eye(state.size, dtype=state.dtype)
+    return jla.lu_factor(jacobian)
+
+
+@jax.jit
+def _linear_update(state, operands, factor, scale):
+    direction = jla.lu_solve(factor, -_linear_residual(state, operands))
+    candidate = state + scale * direction
+    return candidate, _linear_residual(candidate, operands)
+
+
 @dataclass(frozen=True)
 class MagnetisationSolution:
     """Solved cell magnetisation and its convergence receipt.
@@ -475,6 +561,7 @@ class MagnetisationSolution:
     regularisation_history: tuple[float, ...] = ()
     reduction_ratios: tuple[float, ...] = ()
     step_types: tuple[str, ...] = ()
+    linear_coefficients: np.ndarray | None = field(default=None, repr=False)
     fill_fraction: np.ndarray = field(default_factory=lambda: np.ones(0))
     cross_field_factor: np.ndarray = field(default_factory=lambda: np.zeros((0, 2)))
 
@@ -496,6 +583,11 @@ class MagnetisationSolution:
         points = _points(points)
         if not len(points):
             return np.empty((0, 2))
+        if self.linear_coefficients is not None:
+            response = linear_cell_interaction(
+                self._mesh.polygons, points, plan=self._plan
+            )
+            return (response @ self.linear_coefficients.reshape(-1)).reshape(2, -1).T
         response = _interaction(self._mesh, points, self._plan)
         return (response @ self.magnetisation.T.reshape(-1)).reshape(2, -1).T
 
@@ -541,6 +633,7 @@ def solve_magnetisation(
     initial_magnetisation: np.ndarray | None = None,
     fill_fraction=1.0,
     cross_field_factor=0.0,
+    basis: str = "constant",
 ) -> MagnetisationSolution:
     """Mesh iron and solve M = c(|B|) B for B = B_external + G M.
 
@@ -551,7 +644,11 @@ def solve_magnetisation(
     same shape. The table contains B [T] starting at zero and secant relative
     permeability. Its implied H [A/m] must increase strictly. The law is
     single-valued and has no hysteresis or remanence. An optional initial
-    magnetisation has shape (cells, 2) [A/m] on this mesh.
+    magnetisation has shape (cells, 2) [A/m] on this mesh. ``basis="linear"``
+    selects six unknowns per cell and quadrature projection of the local law.
+    Its initial values have shape (cells, 6), ordered by component then basis.
+    The returned ``linear_coefficients`` have shape (2, cells, 3); gradients
+    multiply coordinates divided by the square root of each cell area.
 
     ``fill_fraction`` is the toroidal iron fraction f in (0, 1], supplied as a
     scalar, a (cells,) array, or a callback of (cells, 2) centroids [m].
@@ -559,7 +656,9 @@ def solve_magnetisation(
     (cells, 2) array in (R, Z) order, or a centroid callback. Use N = 0 along
     a limb and its section-derived factor across it. The state is M_mean,
     with B_iron = B_mean + mu0 (1-f)/f (1-N) M_mean and
-    M_mean = f c(|B_iron|) B_iron. Unit fill uses the solid-iron residual.
+    M_mean = f c(|B_iron|) B_iron. The affine basis applies the same cellwise
+    fill and gain at its material quadrature nodes before projection. Unit
+    fill uses the solid-iron residual in either basis.
 
     Try exact Newton first, then adapt a diagonal regularisation lambda.
     The shifted equation F(M + p) + lambda*p = 0 is an implicit pseudo-time
@@ -578,21 +677,68 @@ def solve_magnetisation(
     if not isinstance(max_iterations, int) or max_iterations < 0:
         raise ValueError("max_iterations must be a nonnegative integer")
     law = _fit_law(b_field, permeability_relative)
+    if basis not in {"constant", "linear"}:
+        raise ValueError("basis must be constant or linear")
     cells = _mesh(region, cell_size)
     fill = _cell_material(fill_fraction, cells, "fill_fraction")
     cross = _cell_material(cross_field_factor, cells, "cross_field_factor", True)
-    external = _average_external(cells, external_field)
-    if external.shape != cells.centroids.shape or not np.all(np.isfinite(external)):
+    if basis == "linear":
+        geometry = linear_magnetisation_geometry(cells.polygons)
+        values = np.asarray(external_field(geometry["points"]), dtype=np.float64)
+        if values.shape != geometry["points"].shape or not np.isfinite(values).all():
+            raise ValueError(
+                "external_field must return finite (points, 2) field components"
+            )
+        owners = geometry["owners"]
+        project = np.einsum(
+            "qij,qj,q->qi",
+            np.linalg.inv(geometry["gram"])[owners],
+            geometry["basis"],
+            geometry["weights"],
+        )
+        external_coefficients = np.zeros((2, len(cells.polygons), 3))
+        for component in range(2):
+            np.add.at(
+                external_coefficients[component],
+                owners,
+                project * values[:, component, None],
+            )
+        external = external_coefficients.transpose(1, 0, 2).reshape(
+            len(cells.polygons), 6
+        )
+    else:
+        external = _average_external(cells, external_field)
+    expected_shape = (len(cells.centroids), 6 if basis == "linear" else 2)
+    if external.shape != expected_shape or not np.all(np.isfinite(external)):
         raise ValueError(
             "the averaged external field must be finite (cells, 2) components"
         )
-    gram = _galerkin_interaction(cells, tile_plan)
+    gram = (
+        _galerkin_interaction(cells, tile_plan, basis=basis)
+        if basis == "linear"
+        else _galerkin_interaction(cells, tile_plan)
+    )
     if not np.all(np.isfinite(gram)):
         raise ValueError("the sheet interaction contains nonfinite entries")
     operands = tuple(
         jnp.asarray(value, dtype=jnp.float64)
         for value in (gram, external.T.reshape(-1), *law)
     )
+    residual_function, factor_function, update_function = _residual, _factor, _update
+    if basis == "linear":
+        operands = (
+            jnp.asarray(gram),
+            jnp.asarray(external_coefficients.reshape(-1)),
+            *operands[2:],
+            jnp.asarray(geometry["basis"]),
+            jnp.asarray(project),
+            jnp.asarray(owners),
+        )
+        residual_function, factor_function, update_function = (
+            _linear_residual,
+            _linear_factor,
+            _linear_update,
+        )
     if np.any(fill != 1):
         gain = ((1 - fill) / fill)[None, :] * (1 - cross.T)
         operands += (jnp.asarray(fill), jnp.asarray(gain))
@@ -600,15 +746,20 @@ def solve_magnetisation(
     if initial_magnetisation is not None:
         initial = np.asarray(initial_magnetisation, dtype=np.float64)
         if initial.shape != external.shape or not np.all(np.isfinite(initial)):
-            raise ValueError("initial_magnetisation must be finite (cells, 2)")
-        state = jnp.asarray(initial.T.reshape(-1))
+            expected_shape = "(cells, 6)" if basis == "linear" else "(cells, 2)"
+            raise ValueError(f"initial_magnetisation must be finite {expected_shape}")
+        state = jnp.asarray(
+            initial.reshape(-1, 2, 3).transpose(1, 0, 2).reshape(-1)
+            if basis == "linear"
+            else initial.T.reshape(-1)
+        )
     history, scales = [], []
     regularisations, ratios, step_types = [], [], []
     regularisation = 1e-6
     reference = max(np.linalg.norm(external) / _MU0, 1e-30)
     termination = "iteration-budget"
     for iteration in range(max_iterations + 1):
-        residual = _residual(state, operands)
+        residual = residual_function(state, operands)
         norm = float(jnp.linalg.norm(residual))
         relative = norm / max(float(jnp.linalg.norm(state)), reference)
         history.append(relative)
@@ -620,8 +771,10 @@ def solve_magnetisation(
         accepted = False
         for attempt in range(35):
             damping = 0.0 if attempt == 0 else regularisation
-            factor = _factor(state, operands, jnp.asarray(damping))
-            candidate, trial = _update(state, operands, factor, jnp.asarray(1.0))
+            factor = factor_function(state, operands, jnp.asarray(damping))
+            candidate, trial = update_function(
+                state, operands, factor, jnp.asarray(1.0)
+            )
             defect = trial + damping * (candidate - state)
             ratio = 1 - (float(jnp.linalg.norm(defect)) / norm) ** 2
             if ratio > 0.25 and bool(jnp.any(candidate != state)):
@@ -645,11 +798,22 @@ def solve_magnetisation(
     total = (operands[1] + operands[0] @ state).reshape(2, -1)
     if len(operands) == 7:
         total = total + _MU0 * operands[6] * state.reshape(2, -1)
+    linear_coefficients = None
+    if basis == "linear":
+        linear_coefficients = np.asarray(state).reshape(2, -1, 3)
+        total = total.reshape(2, -1, 3)
+        if len(operands) == 10:
+            total = total + _MU0 * operands[9][:, :, None] * linear_coefficients
+        total = total[:, :, 0]
     magnitude = jnp.linalg.norm(total, axis=0)
     coefficient = _coefficient(magnitude, *operands[2:5])
     mu = 1 / (1 - _MU0 * coefficient)
     return MagnetisationSolution(
-        np.asarray(state).reshape(2, -1).T,
+        (
+            linear_coefficients[:, :, 0].T
+            if basis == "linear"
+            else np.asarray(state).reshape(2, -1).T
+        ),
         np.asarray(mu),
         tuple(history),
         tuple(scales),
@@ -660,6 +824,7 @@ def solve_magnetisation(
         tuple(regularisations),
         tuple(ratios),
         tuple(step_types),
-        fill,
-        cross,
+        fill_fraction=fill,
+        cross_field_factor=cross,
+        linear_coefficients=linear_coefficients,
     )

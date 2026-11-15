@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "76fb8b84e76eabc8000abaf772f847a2cf6d9a4f",
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/h200_test_lane/run.sh:41 exec nova_lane/run.sh --rungs h200 (no --cores/--mem, inherits h200 4/64G)",
+    "scripts/nova_lane/standing_suite.sh:173 $LANE --rungs h200 (no --cores/--mem, inherits h200 4/64G)"
+  ],
+  "completed_at": "2026-11-15T01:22:04.144Z",
+  "dispatched_at": "2026-11-15T00:43:46Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "evidence-record stamp inconsistency only; the dry-run log at 417611ba4 carries the measured 2/24G output",
+      "recorded_at": "2026-11-15T01:24:52.354293+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "coordinator read the diff: both sbatch constructions use rung_mem_size; the test gap on the second construction is noted, and the change is a two-line default with no further consumer",
+      "recorded_at": "2026-11-15T01:24:54.523167+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "manifest bookkeeping; the landing cites the reviewed head 7bd1b60ec",
+      "recorded_at": "2026-11-15T01:24:57.632157+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/titan-lane-sizing.html",
+      "id": "fb984a41b4f",
+      "line": "32",
+      "severity": "non-blocking",
+      "text": "non-blocking: the embedded head dry-run block is stamped SOURCE_REVISION=76fb8b84e (the base) beside titan --cpus-per-task=2 --mem=24G, which the base launcher cannot print, while the dryrun_all.log it points to reads SOURCE_REVISION=417611ba4; a reader cannot reconcile the record's own excerpt with its log."
+    },
+    {
+      "file": "tests/test_nova_lane_launcher.py",
+      "id": "fe33b60921b",
+      "line": "96",
+      "severity": "non-blocking",
+      "text": "non-blocking: every added sizing assertion reads the --dry-run construction only, so the second sbatch construction at scripts/nova_lane/run.sh:424 is unguarded -- reverting just that line to the shared memory value leaves the suite green even though the real submission would then request the wrong size."
+    },
+    {
+      "file": "manifest.md",
+      "id": "f4deb580f9f",
+      "line": "11",
+      "severity": "non-blocking",
+      "text": "non-blocking: the reviewed node's manifest names commits 417611ba4 only while the reviewed head is 7bd1b60ec, so the record's commit field does not identify the revision the review read."
+    }
+  ],
+  "head_log_revision": "417611ba4e3ae5a86540410dab39fb2f87f99102",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified the two production callers that exec the launcher: scripts/h200_test_lane/run.sh:41 passes --rungs h200 with no sizing flag, and scripts/nova_lane/standing_suite.sh:173 passes --rungs h200 with no sizing flag, so both inherit the unchanged h200 4-core/64G default and neither reaches the titan rung.",
+    "diff": "read both commits against base 76fb8b84e: commit 417611ba4 adds rung_mem, splits the renamed core-default case, routes both sbatch constructions through rung_mem_size and empties the shared mem default; commit 7bd1b60ec corrects two sentences of the evidence fragment; the test file adds four cases and retimes the explicit-cores case from 2 to 5 because 2 is now titan's default.",
+    "done_when": "the done_when asks for the dry-run to print --cpus-per-task=2 --mem=24G on titan with h200 and cpu unchanged, the new cases to fail at base, and a 0-added-failure pair run in a fresh process with -rfP; dryrun_titan.log and dryrun_all.log record the printed lines at EXIT=0, base_arm_titan_defaults.log shows 2 failed against the base launcher, and baseline_suite.log reads 14 passed against after_suite.log's 18 passed at EXIT=0, so the gate asserts the measure.",
+    "goal": "the node's goal is to size nova's P100 titan jobs two cores and 24G per card so all eight cards are usable; scripts/nova_lane/run.sh:73-93 resolves titan to 2 cores and 24G while h200 stays 4/64G and cpu 7/64G, which is the one-sentence deliverable.",
+    "manifest": "read; status complete, commits 417611ba4, changed_paths the three declared files, tests the named pytest command, test_logs naming both suite arms and four supporting logs, baseline_suite (76fb8b84e, 0 failures) and after_suite (417611ba4, 0 failures), and it states a declared negative control at negative_control.log.",
+    "write_paths": "the fence was scripts/nova_lane/run.sh, tests/test_nova_lane_launcher.py and docs/evidence/fragments/titan-lane-sizing.html; git diff --stat 76fb8b84e..7bd1b60ec touches exactly those three files and nothing else."
+  },
+  "justifications": {
+    "durability": "negative_control.log reddens test_dry_run_titan_defaults_to_two_cores_and_24g at EXIT=1 under the restored 4-core mutation, but no assertion in tests/test_nova_lane_launcher.py reads the submission construction at scripts/nova_lane/run.sh:424.",
+    "evidence": "dryrun_all.log reads SOURCE_REVISION=417611ba4 with titan --cpus-per-task=2 --mem=24G at EXIT=0 and baseline_suite.log reads 14 passed against after_suite.log's 18 passed at EXIT=0, but docs/evidence/fragments/titan-lane-sizing.html:32 stamps that head block with the base revision 76fb8b84e.",
+    "fit": "scripts/nova_lane/run.sh:78-82 states the budget as 20 cores over 8 cards in place of any plan or ticket label, and the added symbols (rung_mem, rung_mem_size) are mechanism-named.",
+    "goal_fidelity": "scripts/nova_lane/run.sh:73-93 resolves rung_mem per rung (titan 24G, h200/cpu 64G) beside the unchanged rung_cores (titan 2, h200 4, cpu 7), and tests/test_nova_lane_launcher.py:96-136 records the dry-run output as --cpus-per-task=2 --mem=24G for titan.",
+    "reuse": "rung_mem at scripts/nova_lane/run.sh:84-93 extends the existing rung_cores owner in the same file, and a one-line search over scripts/ for --mem found no other per-rung memory resolver to fork.",
+    "scope_discipline": "git diff --stat 76fb8b84e..7bd1b60ec lists exactly scripts/nova_lane/run.sh, tests/test_nova_lane_launcher.py and docs/evidence/fragments/titan-lane-sizing.html, all inside the declared fence."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to size nova's P100 titan jobs two cores and 24G per card so all eight cards are usable; scripts/nova_lane/run.sh:73-93 resolves titan to 2 cores and 24G while h200 stays 4/64G and cpu 7/64G, which is the one-sentence deliverable.\nVERDICT done_when: the done_when asks for the dry-run to print --cpus-per-task=2 --mem=24G on titan with h200 and cpu unchanged, the new cases to fail at base, and a 0-added-failure pair run in a fresh process with -rfP; dryrun_titan.log and dryrun_all.log record the printed lines at EXIT=0, base_arm_titan_defaults.log shows 2 failed against the base launcher, and baseline_suite.log reads 14 passed against after_suite.log's 18 passed at EXIT=0, so the gate asserts the measure.\nVERDICT write_paths: the fence was scripts/nova_lane/run.sh, tests/test_nova_lane_launcher.py and docs/evidence/fragments/titan-lane-sizing.html; git diff --stat 76fb8b84e..7bd1b60ec touches exactly those three files and nothing else.\nVERDICT manifest: read; status complete, commits 417611ba4, changed_paths the three declared files, tests the named pytest command, test_logs naming both suite arms and four supporting logs, baseline_suite (76fb8b84e, 0 failures) and after_suite (417611ba4, 0 failures), and it states a declared negative control at negative_control.log.\nVERDICT diff: read both commits against base 76fb8b84e: commit 417611ba4 adds rung_mem, splits the renamed core-default case, routes both sbatch constructions through rung_mem_size and empties the shared mem default; commit 7bd1b60ec corrects two sentences of the evidence fragment; the test file adds four cases and retimes the explicit-cores case from 2 to 5 because 2 is now titan's default.\nCALL_SITES: scripts/h200_test_lane/run.sh:41 exec nova_lane/run.sh --rungs h200 (no --cores/--mem, inherits h200 4/64G), scripts/nova_lane/standing_suite.sh:173 $LANE --rungs h200 (no --cores/--mem, inherits h200 4/64G)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scripts/nova_lane/run.sh:73-93 resolves rung_mem per rung (titan 24G, h200/cpu 64G) beside the unchanged rung_cores (titan 2, h200 4, cpu 7), and tests/test_nova_lane_launcher.py:96-136 records the dry-run output as --cpus-per-task=2 --mem=24G for titan.\nSCORE evidence: 15\nJUSTIFICATION evidence: dryrun_all.log reads SOURCE_REVISION=417611ba4 with titan --cpus-per-task=2 --mem=24G at EXIT=0 and baseline_suite.log reads 14 passed against after_suite.log's 18 passed at EXIT=0, but docs/evidence/fragments/titan-lane-sizing.html:32 stamps that head block with the base revision 76fb8b84e.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 76fb8b84e..7bd1b60ec lists exactly scripts/nova_lane/run.sh, tests/test_nova_lane_launcher.py and docs/evidence/fragments/titan-lane-sizing.html, all inside the declared fence.\nSCORE durability: 16\nJUSTIFICATION durability: negative_control.log reddens test_dry_run_titan_defaults_to_two_cores_and_24g at EXIT=1 under the restored 4-core mutation, but no assertion in tests/test_nova_lane_launcher.py reads the submission construction at scripts/nova_lane/run.sh:424.\nSCORE fit: 20\nJUSTIFICATION fit: scripts/nova_lane/run.sh:78-82 states the budget as 20 cores over 8 cards in place of any plan or ticket label, and the added symbols (rung_mem, rung_mem_size) are mechanism-named.\nSCORE reuse: 20\nJUSTIFICATION reuse: rung_mem at scripts/nova_lane/run.sh:84-93 extends the existing rung_cores owner in the same file, and a one-line search over scripts/ for --mem found no other per-rung memory resolver to fork.\nFINDING docs/evidence/fragments/titan-lane-sizing.html:32 non-blocking: the embedded head dry-run block is stamped SOURCE_REVISION=76fb8b84e (the base) beside titan --cpus-per-task=2 --mem=24G, which the base launcher cannot print, while the dryrun_all.log it points to reads SOURCE_REVISION=417611ba4; a reader cannot reconcile the record's own excerpt with its log.\nFINDING tests/test_nova_lane_launcher.py:96 non-blocking: every added sizing assertion reads the --dry-run construction only, so the second sbatch construction at scripts/nova_lane/run.sh:424 is unguarded -- reverting just that line to the shared memory value leaves the suite green even though the real submission would then request the wrong size.\nFINDING manifest.md:11 non-blocking: the reviewed node's manifest names commits 417611ba4 only while the reviewed head is 7bd1b60ec, so the record's commit field does not identify the revision the review read.",
+  "review_run_id": "r-20261115T004258287488-review-of-titan-lane-sizing-7bd1b60ec982",
+  "reviewed_base_sha": "76fb8b84e76eabc8000abaf772f847a2cf6d9a4f",
+  "reviewed_head_sha": "7bd1b60ec9824f0729a091e601ba68625101d39d",
+  "reviewed_run_id": "r-20261114T212519766812-titan-lane-sizing",
+  "reviewer_run_id": "r-20261115T004258287488-review-of-titan-lane-sizing-7bd1b60ec982",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T01:25:01.012187+00:00",
+  "total": 111
+}

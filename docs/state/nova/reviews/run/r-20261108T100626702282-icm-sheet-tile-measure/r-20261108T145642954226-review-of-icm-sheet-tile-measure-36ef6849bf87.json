@@ -4,6 +4,18 @@
   "call_sites": [],
   "completed_at": "2026-11-08T15:36:19.567Z",
   "dispatched_at": "2026-11-08T15:14:31Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "no longer reproduces: health review r-20261115T075436483339 found each component's scale built from its own terms via _sheet_end_terms",
+      "recorded_at": "2026-11-15T08:16:19.742066+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "no longer reproduces: health review r-20261115T075436483339 found both functions share _sheet_end_terms",
+      "recorded_at": "2026-11-15T08:16:28.175170+00:00"
+    }
+  },
   "findings": [
     {
       "file": "nova/biot/tiledassembly.py",

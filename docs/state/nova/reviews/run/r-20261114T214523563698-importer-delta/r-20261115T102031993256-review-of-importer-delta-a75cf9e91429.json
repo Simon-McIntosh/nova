@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T11:02:53.764Z",
+  "dispatched_at": "2026-11-15T10:21:57Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/importer_delta/fill.py",
+      "line": 162,
+      "severity": "non-blocking",
+      "text": "The unreadable paragraph hard-codes the one row's narrative \u2014 'nine tests in 316 s inside a 192 GB job', 'a 490 GB peak and ran past an hour' \u2014 while the module docstring and the commit body state that every count and every named file comes from the device tables so the prose cannot drift from the rows. The figures match the base arm's own pytest summary (9 passed in 316.26s) and the manifest's 490606960K peak today, but a later attempt of tests/test_moment_field_hessian.py that completed, or a third killed attempt at a different peak, re-renders exactly this stale sentence from fill.py:162 when the tables no longer support it."
+    },
+    {
+      "file": "scripts/prototypes/importer_delta/gate.sh",
+      "line": 62,
+      "severity": "non-blocking",
+      "text": "The gate's decided added-id count is read from the aggregate field assemble.py writes (data.get('added_total', 0)) rather than from the row-level 'added' lists it also walks to print the ADDED lines three lines above, so it never asserts that added_total equals the sum of the rows. A regression confined to assemble.py's aggregate would print every added id and still exit 0. The refusal I probed (a planted id on tests/test_biotcircle.py) fires today because the aggregate is computed by the same expression as the rows at assemble.py:144, so this is a coupling rather than an observation."
+    },
+    {
+      "file": "scripts/prototypes/importer_delta/fill.py",
+      "line": 301,
+      "severity": "non-blocking",
+      "text": "Nothing in the repository compares the committed fragment to what fill.py renders from the tables; the drift guard is the existence of the renderer, not a check. I re-rendered docs/evidence/fragments/kernel-compile-barrier/importer-delta.html from delta-cpu.json, delta-h200.json, fragment-meta.json and base-rows.json and it is byte-identical, but a hand edit of the fragment or a table rebuilt without re-rendering leaves the two silently inconsistent and no gate on this node or in the suite looks at the pair."
+    },
+    {
+      "file": "scripts/prototypes/importer_delta/assemble.py",
+      "line": 158,
+      "severity": "non-blocking",
+      "text": "assemble.py:158, compare.py:72, control.py:127 and fill.py:307 invoke main() at module scope (or bare main()) instead of the 'if __name__ == \"__main__\":' guard every one of these scripts' siblings uses (scripts/prototypes/kernel_compile_census/report.py, compile_pass_profile/summarise.py, bank_solve_cycle/receipts.py), so importing any of them for reuse runs the whole job and calls sys.exit."
+    },
+    {
+      "file": "scripts/prototypes/importer_delta/compare.py",
+      "line": 38,
+      "severity": "non-blocking",
+      "text": "The base-versus-head failure-id set difference is inlined here for at least the seventh time in this tree \u2014 bank_jacobian_launches/report.py:156, bank_candidate_loop/report.py:42, bank_compact_followups/gates.py:100, bank_near_root_polish/report.py:83, read_live_candidates/verify_combined.py:75 all carry the same 'set(head) - set(base)' shape \u2014 and none of them, this one included, joins scripts/prototypes/support/, the directory that owns shared prototype machinery. This copy earns its place by pairing only arms of the same device, which the earlier copies do not, but the device-aware pairing is the part worth sharing."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261115T102031993256-review-of-importer-delta-a75cf9e91429",
+  "reviewed_base_sha": "b1c085c2c447d629b5f258b1930bb691f0e17ffd",
+  "reviewed_head_sha": "a75cf9e9142994cde20684e252fa01407aa6d64d",
+  "reviewed_run_id": "r-20261114T214523563698-importer-delta",
+  "rubric": "node",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T11:08:48.338568+00:00",
+  "total": 95
+}

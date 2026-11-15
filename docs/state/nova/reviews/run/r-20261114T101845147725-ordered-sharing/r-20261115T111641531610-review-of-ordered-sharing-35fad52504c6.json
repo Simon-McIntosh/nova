@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/fixed_points.py:327",
+    "nova/equilibrium/topology.py:2514",
+    "nova/biot/tiledassembly.py:1383",
+    "nova/biot/polygonanalytic.py:3157"
+  ],
+  "completed_at": "2026-11-15T12:11:04.873Z",
+  "dispatched_at": "2026-11-15T12:10:49Z",
+  "findings": [
+    {
+      "file": "tests/biot/test_moment_program_identity.py",
+      "line": 76,
+      "severity": "non-blocking",
+      "text": "the added guard refuses jax.lax.scan and jax.lax.map during eager differentiation but never asserts that the traced path still carries the shared program; the 267438-instruction repair ceiling appears only in the run directory (paired-eager-1316537.log line 1) and in this run's evidence, never in a tracked test, so an eager-only regression would leave the suite green while restoring 402141 instructions."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html",
+      "line": 9,
+      "severity": "non-blocking",
+      "text": "the CPU receipt this line cites, cpu-hessian-candidate/test-arm.json, records revision cf87218b61ddb37e0b7c19e359d7da55bbfb24a1, the head that is refused at 192 GiB, because the field names the worktree revision rather than the patch measured; the measured module sha256 38cda0bc is bound to e6b9ea32a only in cpu-eager-install-binding.json, so a reader who opens the receipt alone attributes the nine-pass result to the failing revision."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html",
+      "line": 144,
+      "severity": "non-blocking",
+      "text": "the recorded suite pair measures only tests/biot/test_moment_program_identity.py (baseline 2 skipped in 2.72s, head 3 passed 2 skipped in 4.23s), so the plan's clause (3) delta over the twenty-four named files has no head arm for this repair; the nearest run is tests/test_moment_field_hessian.py at nine passed with an incomplete base arm (eight passed then exit 139), which is not a comparison."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "four production call sites reach the change, and each passes concrete or traced primals through packed_analytic_moments into the repaired defjvp rule.",
+    "diff": "read commit by commit cf87218b6..35fad5250: one product change in nova/biot/polygonanalytic.py:3102-3179, one test addition plus a message fix in tests/biot/test_moment_program_identity.py, three docs edits to the evidence fragment and one regenerated SVG; git diff e6b9ea32a..35fad5250 -- nova tests is empty, so the later commits are docs only.",
+    "done_when": "clause (1) is recorded by H200 job 1316537 (paired-eager/receipt.json: 430000 float64 entries compared, every maximum 0); clause (2) is measured and explicitly refused (267438 vs 201070 instructions, 217.903224 s vs the 131.165945 s bound, original_cold_gate_pass false); clause (3) has no head arm for this delta.",
+    "goal": "the goal is the identity-clean ordered-sharing form of nova/biot/polygonanalytic.py _packed_moments_height_tangent; production-hlo-comparison.json shows the traced production lowering at 6088067 bytes and sha256 7b5138c0 for both 14a85a159 and e6b9ea32a, and the eager path is restored to its base arithmetic.",
+    "manifest": "read; status complete, baseline_suite and after_suite both EXIT=0 with zero failure ids, and the CPU, H200, lowering and negative-control receipts named by path.",
+    "write_paths": "the manifest orientation_write_paths name the section's five paths; the delta's four paths, docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html, docs/figures/kernel-compile-barrier/ordered-sharing/pass-times.svg, nova/biot/polygonanalytic.py and tests/biot/test_moment_program_identity.py, are all inside them."
+  },
+  "justifications": {
+    "durability": "tests/biot/test_moment_program_identity.py:76 reddens on the pre-fix source (eager-guard-control.log, 1 failed in 12.47s at cf87218b6) but says nothing about the traced path, so the delivered sharing has no tracked test behind it.",
+    "evidence": "the recorded pair at logs/required-suite-baseline_suite.log (2 skipped in 2.72s) and head-suite-repaired-delivery/after_suite.log (3 passed, 2 skipped in 4.23s) executes the node's own file only, leaving the twenty-four-file delta unmeasured for this repair.",
+    "fit": "nova/biot/polygonanalytic.py:3145-3166 follows the module's jnp idiom and the existing staged/eager vocabulary, and introduces no plan label, ticket id or version suffix.",
+    "goal_fidelity": "nova/biot/polygonanalytic.py:3111 selects on _is_staged and nova/biot/polygonanalytic.py:3145-3166 restores the base eager jvp and four ordinary height evaluations, so the traced sharing is untouched and the eager importer stops compiling the shared scans.",
+    "reuse": "the change imports the existing owner nova/biot/rangefunction.py:99 _is_staged and adds no new predicate; the only other tracing predicate, nova/transport/evolved_state.py:54, answers whether a value would be forced onto the host and is a different question.",
+    "scope_discipline": "git diff --stat cf87218b6..35fad5250 lists exactly four files, all inside the declared write paths, and no tolerance, bound or test is relaxed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the delta's goal is the identity-clean ordered-sharing form of nova/biot/polygonanalytic.py _packed_moments_height_tangent, and it delivers it: nova/biot/polygonanalytic.py:3111 selects the staged branch on _is_staged, and production-hlo-comparison.json shows the traced lowering at 6088067 bytes and sha256 7b5138c0 for both 14a85a159 and e6b9ea32a.\nVERDICT done_when: clause (1) is recorded by H200 job 1316537 (paired-eager/receipt.json, 430000 float64 entries, every maximum 0); clause (2) is measured and refused (267438 vs 201070 instructions, 217.903224 s vs 131.165945 s); clause (3)'s twenty-four-file set has no head arm for this delta.\nVERDICT write_paths: read the manifest's five orientation write paths; the delta's four paths are inside them.\nVERDICT manifest: read; complete, both arms EXIT=0 with zero failure ids, and the CPU, H200, lowering and negative-control receipts named.\nVERDICT diff: read cf87218b6..35fad5250 commit by commit; one product change in nova/biot/polygonanalytic.py, one test addition plus a message fix, three docs edits and one regenerated SVG, all inside the declared scope.\nCALL_SITES: nova/equilibrium/fixed_points.py:327, nova/equilibrium/topology.py:2514, nova/biot/tiledassembly.py:1383, nova/biot/polygonanalytic.py:3157\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/biot/polygonanalytic.py:3111-3166 preserves the traced sharing and restores the base eager arithmetic.\nSCORE evidence: 13\nJUSTIFICATION evidence: logs/required-suite-baseline_suite.log and head-suite-repaired-delivery/after_suite.log cover the node's own file only, so the twenty-four-file delta has no measurement.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat cf87218b6..35fad5250 lists four files, all inside the declared write paths.\nSCORE durability: 14\nJUSTIFICATION durability: tests/biot/test_moment_program_identity.py:76 fails on the pre-fix source but nothing in the suite fails if the shared program is dropped.\nSCORE fit: 17\nJUSTIFICATION fit: nova/biot/polygonanalytic.py:3145-3166 follows the module's idiom and vocabulary.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change imports nova/biot/rangefunction.py:99 _is_staged and adds no new predicate.\nFINDING tests/biot/test_moment_program_identity.py:76 non-blocking: the guard is one-sided; no tracked test asserts the sharing is retained, so an eager-only regression passes the suite.\nFINDING docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html:9 non-blocking: the cited CPU receipt names revision cf87218b6 while the measured module is the e6b9ea32a patch bound only in cpu-eager-install-binding.json.\nFINDING docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html:144 non-blocking: the recorded suite pair covers the node's own file only, so the twenty-four-file clause has no head arm for this repair.",
+  "review_run_id": "r-20261115T111641531610-review-of-ordered-sharing-35fad52504c6",
+  "reviewed_base_sha": "cf87218b61ddb37e0b7c19e359d7da55bbfb24a1",
+  "reviewed_head_sha": "35fad52504c6ef860e9b9025112d181674f7701f",
+  "reviewed_run_id": "r-20261114T101845147725-ordered-sharing",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T12:42:52.550685+00:00",
+  "total": 99
+}

@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-14T15:51:03.086Z",
+  "dispatched_at": "2026-11-14T15:14:29Z",
+  "figure_path": "docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh.svg",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "iter-bank-figure-redraw",
+      "recorded_at": "2026-11-14T16:49:12.892605+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "iter-bank-figure-redraw",
+      "recorded_at": "2026-11-14T16:49:19.126295+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "iter-bank-figure-redraw",
+      "recorded_at": "2026-11-14T16:49:25.070935+00:00"
+    }
+  },
+  "findings": [
+    {
+      "disposition": "folded - figure repair on nova:sub-millisecond-forward-path section 6",
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "id": "f12ae7415c4",
+      "line": 76,
+      "severity": "non-blocking",
+      "summary": "The plasma cells are the figure's subject and its faintest mark: measured over the rendered PNG the cell outlines measure 1.76:1 median contrast against white (median sRGB 204,189,227; 99.8% of mesh pixels under 3:1), the colour being #a98fd0 at alpha 0.45. In the full-machine panel (156 px wide, 9 px cell pitch) the hexagons merge into a lavender tint at column width, so the left panel cannot be read as a 558-cell mesh the way the caption describes it; only the zoomed panel shows cells distinctly."
+    },
+    {
+      "disposition": "folded - figure repair on nova:sub-millisecond-forward-path section 6: give the section outlines a readable minimum size or a stated note in the caption",
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "id": "fe851cb90b6",
+      "line": 77,
+      "severity": "non-blocking",
+      "summary": "Two coil sections render at roughly 0.25 m and appear as 9x9 px diamonds, and in the zoom a third appears as a detached 8x3 px grey mark above the vessel apex (x 1012-1019, y 72-74), separated from every other outline. All are drawn in the coil colour the legend names, but at these sizes a reader cannot tell them from rendering debris: the mark above the apex has no neighbouring geometry to read it against."
+    },
+    {
+      "disposition": "folded - figure repair on nova:sub-millisecond-forward-path section 6: allocate the two panels unequal widths so the zoom carries more of the canvas",
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "id": "f5c8a4934fc",
+      "line": 73,
+      "severity": "non-blocking",
+      "summary": "Equal aspect plus a 14x7.2 in single-row layout letterboxes both panels: the left drawing occupies 409 of ~690 panel px and the right 291, and the rendered canvas carries ink on 4.5% of its pixels. The wall spans only 156 px in the left panel, which is why the mesh is small there, and the 'enlarged' right panel is a 1.77x zoom in a panel two and a half times its width."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261114T151345842827-review-of-iter-bank-87b72f601080-figure",
+  "reviewed_attachment": "image-0.png",
+  "reviewed_base_sha": "25ec3c9e8daea83922da4682d398c8f502a9428c",
+  "reviewed_head_sha": "87b72f601080d01bcfba2121517234d1ce7fe044",
+  "reviewed_run_id": "r-20261113T165038806629-iter-bank",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass: legend text is black on white (21:1); the plasma-cells legend swatch is drawn at 2.79:1, visibly darker than the 1.76:1 cells it names.",
+    "data_ink": "pass: three unfilled contour sets carry the ink, no fills or shading; ink covers 4.5 percent of the 1400x720 canvas.",
+    "decoration": "pass: no gridlines, background fill, gradient or theme; axes are off in both panels.",
+    "label_collision": "pass: the only text is the three-entry figure legend at top centre; nothing clipped, overlapping, or over the data.",
+    "legibility": "defect (non-blocking): coils, wall and divertor read at a glance in both panels, but the plasma mesh renders as a faint lavender texture; measured median contrast 1.76:1.",
+    "table_form": "pass: a poloidal geometry drawing, nothing that is naturally a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T16:49:46.894774+00:00",
+  "total": null
+}

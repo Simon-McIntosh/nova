@@ -1,0 +1,151 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T18:32:05.487Z",
+  "dispatched_at": "2026-11-14T18:20:11Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:79",
+      "id": "anchors_resolve-1",
+      "reason": "a build node dispatched from \u00a76 opens its only cited diagnosis record and finds a 404, so either the plan must cite a reachable record or the fragment must be landed first, and that is a change to what the plan depends on.",
+      "text": "\u00a76 cites `/nova/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal` as the record of the diagnosis, and that file does not exist at the plan's own tree: `docs/evidence/fragments/diiid-vertical-force-balance/` holds fourteen other fragments and not this one, and `git merge-base --is-ancestor 330dbf38c HEAD` (in the main checkout) returns non-zero, so the commit that wrote the fragment on 2026-11-14 16:35 is not reachable from the primary branch the docs server serves. The whole \u00a76 root cause (the pointwise source-cutoff step, the 1.875365 kA prediction against 1.875371 kA measured, the 115 SUFFICIENT_DECREASE_REFUSED refusals) rests on a document a later reader cannot open, and \u00a77's second cause rests on the same one.",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:66",
+      "id": "done_when-1",
+      "reason": "without a done-when the section's worker has no completion condition and the coordinator no verdict, which is the same defect the other lanes were split out to remove.",
+      "text": "\u00a75 closes with `Nodes, in order: (a) a read-only scout \u2026 (b) a prototype that runs the section's five frames \u2026 (c) the decision on where the translation lives`, and carries no done-when paragraph and no negative control. Node (b) states `tabulates extracted against EFIT p-prime and ff-prime per frame` with no tolerance, no independent reference and nothing that could fail; node (c) is a decision, which no test can measure. The section is declared `implementable`, so it can be dispatched and cannot be closed on any verdict.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:66",
+      "id": "single_goal-1",
+      "reason": "the declaration and the section text disagree with the plan's own recorded outcome, so a queue built from the declarations spends an H200 allocation on landed work; either the section is `done` and only the placement decision is carried, or the text must name which of (a)/(b)/(c) is still open, and either answer is a plan edit.",
+      "text": "\u00a75 packs three deliverables into one `implementable` section: a read-only COCOS scout across eight named quantities with file:line of every consumer, a five-frame forward-solve prototype, and a decision on where the COCOS translation lives. The section's own resolved followup f-dvf-006 records the prototype as landed (commits 78a2f700, 12840a9c, 974e9afe, 30b5e6f6; 0 of 5 converged, receipt under `docs/figures/diiid-vertical-force-balance/prescribed-profile-prototype/`) and f-dvf-003 records the scout half closed as a measured negative, yet the declaration still reads `implementable`. A node dispatched off that declaration re-solves five frames on the H200 that are already on the record, and no single verdict can close the three parts.",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:79",
+      "id": "reasoning-1",
+      "reason": "a mechanism written into a plan is a guess the reviewer has to check against the code, and each wrong guess costs a review round; moving the route to the brief leaves the plan stating only what the records must show.",
+      "text": "\u00a76 states its endpoint as an implementation route: `Route the DIII-D source through the existing clipped-current booking, nova/equilibrium/current.py book and book_tangent, with the moment coupling blocks that booking requires \u2026 Extend that booking and its consumer selection; add no second integration path. Changing clip_mode on the present value-only consumer does not select the booking route.` That is the reuse map \u2014 the module to extend and the seam not to widen \u2014 which belongs to the node brief composed from this review, and it also asserts a mechanism about `clip_mode` that a reader can only test against the code. The endpoint itself is stated well immediately before it (a booked current whose integrated value and tangent describe the same moving support), and the done-when (1) already measures it on an analytic field with a control on the present route, so the route sentence adds guess rather than commitment.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+  "plan_fingerprint": "efb17221cbf8219e5e370f5c26787819bcd7513ccee296c8d2bd581b8505e2bf",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 69,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The diagnosis record lands on main before the s6 node is dispatched, so the cited fragment resolves when a worker opens it; its review round is closing now.",
+      "reason": "",
+      "when": "2026-11-14T18:53:32.256852+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "s5 is declared done with a landed summary: node (a) closed negative, node (b) landed, and node (c) answered by the existing translation owners, so no undefined completion condition remains.",
+      "reason": "",
+      "when": "2026-11-14T18:53:45.122300+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "s5 is declared done and records which of its three parts landed and how the placement question is answered, so no queue built from declarations re-solves the landed prototype.",
+      "reason": "",
+      "when": "2026-11-14T18:53:53.232728+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The route sentence in s6 is replaced by the behaviour the records must show; the owner and selection mechanism move into the node brief.",
+      "reason": "",
+      "when": "2026-11-14T18:54:04.485669+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "note": "The diagnosis record lands on main before the s6 node is dispatched, so the cited fragment resolves when a worker opens it; its review round is closing now.",
+      "reason": "",
+      "when": "2026-11-14T18:53:32.256852+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "note": "s5 is declared done with a landed summary: node (a) closed negative, node (b) landed, and node (c) answered by the existing translation owners, so no undefined completion condition remains.",
+      "reason": "",
+      "when": "2026-11-14T18:53:45.122300+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "note": "The route sentence in s6 is replaced by the behaviour the records must show; the owner and selection mechanism move into the node brief.",
+      "reason": "",
+      "when": "2026-11-14T18:54:04.485669+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "commit": "939617652ca5e53f070fc0647d80aa380e2035d5",
+      "commit_basis": "edit",
+      "note": "s5 is declared done and records which of its three parts landed and how the placement question is answered, so no queue built from declarations re-solves the landed prototype.",
+      "reason": "",
+      "when": "2026-11-14T18:53:53.232728+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261114T181926800107-plan-review-of-diiid-vertical-force-balance.json",
+  "review_run_id": "r-20261114T181926800107-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "5786832fcd443d092475c920b9a4893ad5dfa923",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a76's diagnosis record `/nova/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal` resolves to no file on the surface the plan is read on; appending `.html` does not help.",
+    "done_when": "a finding \u2014 \u00a75 declares no done-when and no negative control at all, so whatever remains of that section cannot be judged complete or shown to guard anything.",
+    "evidence_paths": "pass \u2014 \u00a76's and \u00a77's reruns name the repository's figure and receipt conventions and the H200-then-titan lane; no evidence sits on a session scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 \u00a76 and \u00a77 name no new symbol, filename, comment or commit that carries a plan label, stage name, ticket number or version tag, and the landed-record paragraphs keep provenance in the plan where it belongs.",
+    "reasoning": "a finding \u2014 \u00a76 states its endpoint as an implementation route (the module and functions to call and extend) rather than as a behaviour the delivered records must show.",
+    "single_goal": "a finding \u2014 \u00a75 bundles three deliverables (a COCOS scout, a five-frame prototype solve, a placement decision) as one `implementable` section whose own followup f-dvf-006 records two of the three as landed.",
+    "wiring": "pass \u2014 the only declared section edge, `diiid-vertical-force-balance#s7` depends-on `diiid-vertical-force-balance#s6`, resolves to a section that exists, and all three `informs` targets (`gs-absolute-accuracy-gates`, `diiid-forward-onboarding`, `constraint-augmented-newton-krylov`) exist as plan files under `docs/plans/`; \u00a75, \u00a76 and \u00a77 name no dependency on an unlanded section."
+  },
+  "section_digests": {
+    "_document": "15f154badce3c3548546cb12c63719b84a2a61944484438500fc56c5a781ece8",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "f8f9490f60a3855d5c71654302a05f64889ba735b5c77f7e188181b21f1c4229",
+    "s6": "43acabb26f7d86ab42d101ae9a6f4686a344e6cc8fbf8ba45c4f3f5dd143ea3a",
+    "s7": "2e56567ad09bdd847acad9c3b7d2531b6866b451388723ad922c8fd2f200937b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T18:52:24.108463+00:00",
+  "total": null
+}

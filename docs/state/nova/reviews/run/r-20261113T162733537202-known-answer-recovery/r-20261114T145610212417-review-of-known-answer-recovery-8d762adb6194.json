@@ -387,6 +387,13 @@
   },
   "failure_delta_positive_control": "Both log parsers saw the known-present test_the_solve_defaults_to_the_root_find failure; the head log also records three nonzero initial errors and three RECOVERY rows, so an empty added set is a measured set difference, not an empty parser output.",
   "figure_review": "Rendered all four exact-head SVG blobs with ImageMagick to 1400-pixel PNGs and inspected them; no clipped or overlapping labels, legibility blocker or unreadable contour population. The renderer emitted a read-only default-/tmp delegate warning despite exit zero; inspection verified all four complete nonblank figures. Coincident null sets overplot at this scale as the captions disclose.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-known-answer-recovery-8d762adb6194",
+      "recorded_at": "2026-11-14T17:39:44.994652+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_equilibrium_magnetics_fit.py",

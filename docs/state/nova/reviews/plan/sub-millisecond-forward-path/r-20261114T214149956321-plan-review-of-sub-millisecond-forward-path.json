@@ -1,0 +1,119 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T23:14:29.678Z",
+  "dispatched_at": "2026-11-14T22:58:41Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:128",
+      "id": "evidence_paths-1",
+      "reason": "\u00a75 and \u00a76 each carry an explicit GPFS or `~/.cache/...` output path after the same gap was found there, and \u00a77's gate is per-row, so the row-by-row verdict cannot be checked later if the evidence dies with the job.",
+      "text": "\u00a77 names only its input receipts (`~/.cache/nova-hessian-diagnosis/`) and no durable path for what it produces: the repaired-kernel trace records at the 64 retained nodes, the rebuilt ITER bank's re-certification receipts, and the per-row base and head results of `tests/biot/test_edge_term_tangents.py` that its third done-when clause requires. A worker can leave all of these in node `/tmp`, which the job removes.",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:128",
+      "id": "done_when-1",
+      "reason": "an inert control cannot show the guard fires, and as written it steers the worker toward extending the guard rather than repairing the cancellation the section has just convicted; the control must revert the repair the node makes.",
+      "text": "\u00a77's negative control (a) is keyed to one implementation (\"restoring the corner-height-only guard must fail the new edge-line regression test\"), while the section's own root cause places the fault in the projected-offset plane denominator formed in `_Edge.__init__` and consumed by `_Edge.terms`. A repair made in that denominator leaves the corner guard untouched, so restoring the guard would not revert the repair and the control would pass without distinguishing a repaired kernel from an unrepaired one.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sub-millisecond-forward-path.html:128",
+      "id": "wiring-1",
+      "reason": "the in-plan waits now file \u00a77 ahead of \u00a72 and \u00a73 (\u00a77's own declarations), but the reciprocal cross-plan wait is prose only, so either of kernel-compile-barrier's \u00a76 repair or \u00a72 ordered-sharing can be dispatched against the unrepaired kernel and its own repair re-based on a tangent about to change; \u00a77 needed to declare its cross-plan waits itself.",
+      "text": "\u00a77 states \"kernel-compile-barrier ... Its \u00a76 repair waits on this section's node (a), and its \u00a72 ordered-sharing node restructures the same height-sample code\", but `kernel-compile-barrier.html` carries no `plan-section-depends-on` metadata at all, so nothing records or posts the link from \u00a77 to that plan's section \u00a76 or \u00a72.",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "ef1ddf424e9d369bdc53ddc930fff4e70620efb8",
+  "plan_fingerprint": "d78dc445894a5167b1c70772043e7c015191476325ae3d1a8567b5ea20b2cf93",
+  "plan_slug": "sub-millisecond-forward-path",
+  "plan_version": 349,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "9190ce1219f0a69655729fdb3b4abe7dc572b593",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "Section 7 now names ~/.cache/nova-polygon-tangent-repair/ and ~/.cache/nova-iter-bank/ (or the run directory) for node (a) trace records and edge-term rows and node (b) re-certification receipts.",
+      "reason": "",
+      "when": "2026-11-14T23:52:46.586607+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "9190ce1219f0a69655729fdb3b4abe7dc572b593",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Negative control (a) now reverts node (a)'s own change to polygonanalytic.py wherever the repair lands, the tangent rule or the projected-offset denominator.",
+      "reason": "",
+      "when": "2026-11-14T23:52:57.842761+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "finding": "wiring-1",
+      "reason": "The reciprocal wait belongs on kernel-compile-barrier, which session nova-3c owns and this session must not edit; nova-3c agreed in writing to hold its section 6 until node (a) delivers, and has been asked to declare plan-section-depends-on on its own plan. Section 7 itself waits on nothing in that plan.",
+      "when": "2026-11-14T23:53:10.156689+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "9190ce1219f0a69655729fdb3b4abe7dc572b593",
+      "commit_basis": "edit",
+      "note": "Negative control (a) now reverts node (a)'s own change to polygonanalytic.py wherever the repair lands, the tangent rule or the projected-offset denominator.",
+      "reason": "",
+      "when": "2026-11-14T23:52:57.842761+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "commit": "9190ce1219f0a69655729fdb3b4abe7dc572b593",
+      "commit_basis": "edit",
+      "note": "Section 7 now names ~/.cache/nova-polygon-tangent-repair/ and ~/.cache/nova-iter-bank/ (or the run directory) for node (a) trace records and edge-term rows and node (b) re-certification receipts.",
+      "reason": "",
+      "when": "2026-11-14T23:52:46.586607+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "c042a637-16e6-44bd-9cd2-b340a6f891dc",
+      "reason": "The reciprocal wait belongs on kernel-compile-barrier, which session nova-3c owns and this session must not edit; nova-3c agreed in writing to hold its section 6 until node (a) delivers, and has been asked to declare plan-section-depends-on on its own plan. Section 7 itself waits on nothing in that plan.",
+      "when": "2026-11-14T23:53:10.156689+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/sub-millisecond-forward-path/r-20261114T214149956321-plan-review-of-sub-millisecond-forward-path.json",
+  "review_run_id": "r-20261114T214149956321-plan-review-of-sub-millisecond-forward-path",
+  "reviewed_blob_sha": "556ed0667d4cb0f81c6ed1c524bdfee8b19e1c27",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the diagnosis fragment, `~/.cache/nova-hessian-diagnosis/`, `nova/biot/polygonanalytic.py` symbols, `scripts/prototypes/read_route/jets.py:_source_jets`, `nova/equilibrium/topology.py:BiotMomentCoupling`, `packed_analytic_moments`, `tests/biot/test_edge_term_tangents.py`, `tests/test_iter_bank.py`, kernel-compile-barrier \u00a72 and \u00a76, and pinned commit 716d859f0 all resolve; the two run ids name no directory under `crew/runs/`, but the fragment they are cited with resolves and holds the receipts.",
+    "done_when": "a finding \u2014 \u00a77's negative control (a) is keyed to one implementation rather than to a reverting of the repair it asks for.",
+    "evidence_paths": "a finding \u2014 \u00a77 names only its input receipts and no durable path for the records its own done-when requires.",
+    "naming": "pass \u2014 \u00a77 introduces no plan label, stage name, ticket number or version tag into a symbol, file or comment; the numbers it carries are measured values and physical tolerances.",
+    "reasoning": "pass \u2014 the stated root cause matches the cited evidence (the fragment's 0.264/0.398/0.280 bank-and-direct trace residuals against a 5.95e-11\u20136.25e-11 reference, the 1e-13 uniform-rectangle control, and its projected-offset/cancellation localization in `_Edge.__init__` and `_Edge.terms`), and the endpoint is checkable; the kernel symbols the section names are the diagnosis's own localization, not an implementation prescription.",
+    "single_goal": "pass \u2014 \u00a77 carries one deliverable, a correct plasma Hessian, delivered as two nodes chained by \"(b) waits on (a)\", each with its own gate.",
+    "wiring": "a finding \u2014 \u00a77 states that kernel-compile-barrier's \u00a76 repair waits on this section's node (a), but that wait is recorded in no declaration on either plan."
+  },
+  "section_digests": {
+    "_document": "aa96bd007a9dad6fb02f668bafb1ff812709797e93e503defe80a75c75918112",
+    "s0": "02c484da982db49df058949810d449b2e95a1a134ec03272e31dda4df5bed6d2",
+    "s1": "80e332b5e9b6fc57780809e818fb2d50967b00d2aab208be5d16b6b6d9ecbcb3",
+    "s2": "a8c03d8b5c16042c700083dfd2d13e234b66151970ccfab7f4fb55e7968008cb",
+    "s3": "5aa72ecf3d63060b466bd064d76dc02fa5439343113fd1657038c73094f830b2",
+    "s4": "91bd28dc1cffb091dd5b8e3154b8052ae494fc161f98b81c4aa3d7fc4b7d4fca",
+    "s5": "93a5e678cdf44d386b06e74db9abd0f022782fcfa12a51ed6c8332d5636661cd",
+    "s6": "7d36ea6e2baeb1ddceeefb8692913ab61376d00a12f0d8c88b6b66728f9cb12c",
+    "s7": "b212686f8540581eafbad1f60a40f0c1def1caf2747819cc9ce5020b27fb7f00"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T23:13:48.178228+00:00",
+  "total": null
+}

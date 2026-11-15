@@ -1,0 +1,95 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_judgement": "the caption is substantive rather than a restatement of the title: it names the view as the union of two walls, decodes every mark the panel draws (solid dark stepped outline = physical DIII-D first wall drawn unit-faithful through draw_wall; dotted grey rectangle = the registered pseudo-wall the solve's boundary condition uses and explicitly not the vessel; pale blue lines = the shared levels inside the wall; thick blue = each arm's separatrix; filled triangle = magnetic axis; filled cross = lower X-point; thin dark line = the EFIT boundary from the corpus row; hollow circle = the EFIT lower X-point every footer offset is measured from), gives both offsets (2.783 cm and 9.497 cm), discloses that neither arm qualifies a convergence-qualified diverted root and quotes both terminal residuals with the records they come from, and states in one sentence what the scale of the change is (6.7 cm and 1.20 Wb against 0.0006 cm and 0.00002 Wb at the build-time seam). No caption finding is recorded; the caption is the reason two of the four findings below are tolerable rather than blocking.",
+  "completed_at": "2026-11-15T15:54:48.685Z",
+  "dispatched_at": "2026-11-15T15:38:07Z",
+  "figure_reviewed": {
+    "artifact": "docs/figures/diiid-external-current-propagation/frame-137-terminal-base-versus-scaled.svg",
+    "caption_source": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html",
+    "drawing_script": "scripts/prototypes/diiid_external_current_propagation/render.py",
+    "embedding": "fragment figure img src /nova/figures/diiid-external-current-propagation/frame-137-terminal-base-versus-scaled.svg",
+    "method": "judged only the attached rendered PNG; no SVG and no other image was opened, read, listed, searched, rendered or shown; close readings were taken as lossless nearest-neighbour and Lanczos crops of the named PNG's own pixels under $TMPDIR; the drawing script and the caption fragment were read for anchoring only",
+    "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T153723819539-review-of-diiid-external-current-propagation-8b1e4132c5f4-figure/image-0.png",
+    "rendered_size_px": [
+      1399,
+      720
+    ]
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The two marks sit 4 px apart because the solved lower X-point lies 2.8 cm from the EFIT null; the overlap is the measurement, and the footer states the distance.",
+      "recorded_at": "2026-11-15T15:55:51.594867+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The shared levels and the pseudo-wall are deliberately background. The subject marks (separatrices, nulls, vessel, EFIT boundary) clear 3:1, and the comparison is carried by those.",
+      "recorded_at": "2026-11-15T15:55:59.687118+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The caption decodes the EFIT boundary as the thin dark line and the stepped outline as the vessel. The two have different shapes, so they are told apart in the image.",
+      "recorded_at": "2026-11-15T15:56:06.923371+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "Two equal-aspect DIII-D panels on a 14 in by 7.2 in canvas leave side margins. The comparison reads at this size, and the diagnosis figure is not redrawn a third time for width.",
+      "recorded_at": "2026-11-15T15:56:13.992809+00:00"
+    }
+  },
+  "findings": [
+    {
+      "detail": "The offset printed under the left panel is 1.328 / +2.445 cm. At 146 px/m (275 px of panel width over the 1.89 m union extent) that is 2.0 px in R and 3.6 px in Z, 4.1 px between centres, against a filled cross 11x11 px (x390-401, y541-552) and a hollow ring about 13 px in diameter whose visible remainder is a single arc from roughly 7 to 10 o'clock. A reader sees the reference ring only as a partial arc under the cross, so the direction of the solved point's displacement from its reference has to be taken from the printed numbers rather than from the panel. The same pair is cleanly separated in the right panel (cross centre x878.5 y535.5, ring centre about x878 y549, 14 px apart for the 9.332 cm Z offset, both fully visible), and the caption gives both distances, so the figure still communicates the comparison; a leader line, a small inset, or simply larger panels would resolve it.",
+      "file": "scripts/prototypes/diiid_external_current_propagation/render.py",
+      "id": "fdc9b68de0b",
+      "line": 216,
+      "severity": "non-blocking",
+      "summary": "In the left panel the solved lower X-point and the EFIT reference null it is measured from are drawn 4 px apart while the marks are 11 and 13 px across, so the red cross covers the hollow ring and the two read as one glyph"
+    },
+    {
+      "detail": "Measured on the render rather than from the markup: the contour stroke resolves to (143,171,227), relative luminance 0.4051, contrast 2.31:1 on the white ground; the dotted pseudo-wall resolves to (204,204,204), luminance 0.6038, contrast 1.61:1. For comparison the separatrix and the titles at #3366cc are 5.37:1, the text at #333333 is 12.63:1 and the null markers at #cc0000 are 5.89:1. Both faint elements are legible on a bright screen and both are named in the caption, so nothing is lost; but the level set is the figure's main data and the pseudo-wall is one of the two boundaries the panel exists to distinguish, and each is the faintest thing the page draws. The alpha is what takes the contours below the threshold: the same #3366cc at full strength is 5.37:1.",
+      "file": "scripts/prototypes/diiid_external_current_propagation/render.py",
+      "id": "f96797f22bb",
+      "line": 204,
+      "severity": "non-blocking",
+      "summary": "The 22 shared-level contours are drawn at alpha 0.55 and the registered pseudo-wall at #cccccc, giving 2.31:1 and 1.61:1 against white, both under the 3:1 threshold for a graphical mark"
+    },
+    {
+      "detail": "The note reads \"solid dark: physical first wall;  dotted grey: registered pseudo-wall\" and is the image's only legend. The image also draws the EFIT LCFS from the corpus row as a solid #333333 line at linewidth 1.2 (line 194) and the EFIT lower null as a hollow #333333 ring (lines 221-230), neither of which the note names; at 100 dpi the two dark lineweights render 1.67 px and 1.94 px, a 0.27 px difference. A reader who has read only the note will take the thin dark curve that hugs the plasma for the vessel. The fragment caption immediately below the image resolves this explicitly, and the physical wall's stepped divertor structure and the EFIT boundary's smooth oval are distinguishable on inspection, so the defect does not stop the figure being read; it does colour: the vessel and the EFIT boundary share one hue and one colour token (REFERENCE).",
+      "file": "scripts/prototypes/diiid_external_current_propagation/render.py",
+      "id": "fbf62f29f89",
+      "line": 157,
+      "severity": "non-blocking",
+      "summary": "The figure note decodes two of the six marks and calls all solid dark ink the physical first wall, though the EFIT boundary is drawn in the same #333333 at 1.2 pt against the wall's 1.4 pt, so within the image alone the two dark curves cannot be told apart"
+    },
+    {
+      "detail": "Panel borders sit at x318-593 and x806-1080, y109-624: each panel is 275x515 px of a 1399x720 canvas, the pair spans 762 px (54.5%), and 500 px of white sits outside it. PANEL_HEIGHT_FRACTION is 0.74 of a 7.2 in figure, so the panels use 5.33 in of a 7.2 in height while the titles (y67-81) and footers (y656-704) leave room for perhaps 20% more. This is the residual of the earlier finding that the panels were sized to their axes boxes rather than to their equal-aspect content - that part is fixed, the visible data now fills its box - but the pair is still drawn at about half the page width, which is also why the marker pair in the left panel has only 4 px of room. The layout is balanced and centred, so this is not a defect in what the reader sees; it is ink the figure could claim.",
+      "file": "scripts/prototypes/diiid_external_current_propagation/render.py",
+      "id": "fc4873d4166",
+      "line": 49,
+      "severity": "non-blocking",
+      "summary": "The two panels occupy 54% of the canvas width, 275 px each on a 1399 px canvas with about 315 px of blank ground either side, so the comparison is drawn smaller than the 14 in page allows"
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass for text: every string is #333333 at 12.63:1 on white, the two panel titles are #3366cc at 5.37:1, and no label sits on anything but white ground. Caveat recorded as a finding: the contour level set renders at 2.31:1 (alpha 0.55 of #3366cc) and the dotted pseudo-wall at 1.61:1, both under the 3:1 graphical threshold, so two of the data marks are the palest ink on the page.",
+    "data_ink": "pass: the ink is data - 22 shared-level contour strokes, one thick separatrix per arm, the closed vessel, the dotted pseudo-wall, the EFIT boundary, three null marks and four short strings per panel - with no gradient, fill, band, panel border or reference rule. Caveat recorded as a finding: the pair of panels occupies 54% of the canvas width, so about 500 px of the 1399 px page carries nothing.",
+    "decoration": "pass: white ground throughout, no gridlines, no background fill, no spines, ticks or tick labels (set_axis_off), no legend box, no drop styling. The only non-data-looking mark is the dotted style on the pseudo-wall, and that style is itself the encoding the note names.",
+    "label_collision": "pass: the text bands are disjoint and wholly inside the canvas - figure note y7-23 (x428-970), panel titles y67-81 (x312-492 and x798-1032), panel data y116-614, offsets y656-670 (x311-758 and x798-1252) and residuals y688-704 (x311-637 and x799-1114), with the whole ink box x311-1252 by y7-704 in 1399x720, at least 16 px clear on every edge and 48 px between the left footer's right end and the right panel's border. The left panel's two null marks do overlap each other; that is recorded as its own finding, and it is marker-on-marker rather than text. No label is clipped and no label sits on data.",
+    "legibility": "pass: two poloidal flux panels whose contours are drawn on one absolute level array spanning the pseudo-wall, so the two terminal states are compared on identical values; the filled triangle marks the axis in both panels. The closed solid vessel, the registered pseudo-wall, the EFIT boundary and the two null sets are all present, the arm name sits above each panel and that arm's offset and residual below it, and the movement between arms (the left panel's X-point sitting essentially on its reference, the right panel's 14 px above it) is readable at a glance. Caveats recorded as findings: the reference ring is merged under the solved cross in the left panel, and the pair is drawn at about half the page width.",
+    "table_form": "pass: the image is two spatial flux maps, and the offsets are carried as spatial position plus two short footers giving \u0394R / \u0394Z and the distance; the relationship the reader takes from the figure is where the null moved relative to the vessel, which is not tabular information and is not shown as a table in image form."
+  },
+  "notes": "read-only figure review: no figure, script, caption or other file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only files written are this record, its pinned copy at the reviewed head, and the review run's manifest. No suite was run, so added_failure_count is 0 with an empty failure-id list, and no suite delta is claimed. All positions, colours, contrast ratios and ink bounding boxes were measured on the named rendered PNG's own pixels; no SVG was opened, read, listed as content, searched, rendered or shown. The two findings the earlier review recorded at head 2d32c19 are answered by this redraw and are not repeated. No finding blocks.",
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: pass - two poloidal flux panels drawn on one shared absolute level array, filled triangle axis in both, closed solid vessel, dotted registered pseudo-wall, EFIT boundary, and both null sets present; arm name above each panel with its offset and residual below; the inter-arm movement is readable at a glance. Caveats (findings): the left panel's reference ring is merged under the solved cross, and the pair uses 54% of the canvas width.\nRUBRIC data_ink: pass - the ink is data only: contour strokes, separatrix, vessel, pseudo-wall, EFIT boundary, three null marks and four short strings per panel; no gradient, fill, band or reference rule. Caveat (finding): about 500 px of the 1399 px page carries nothing.\nRUBRIC decoration: pass - white ground, no gridlines, no background fill, no spines or ticks, no legend box, no drop styling; the dotted style on the pseudo-wall is the encoding the note names.\nRUBRIC contrast: pass for text - all strings #333333 at 12.63:1, titles #3366cc at 5.37:1. Caveat (finding): contour levels render 2.31:1 and the dotted pseudo-wall 1.61:1, under the 3:1 graphical threshold.\nRUBRIC table_form: pass - two spatial flux maps; the offsets are spatial position plus two short footers, not a table in image form.\nRUBRIC label_collision: pass - text bands y7-23, y67-81, y656-670 and y688-704 are disjoint from panel data y116-614; ink box x311-1252 by y7-704 inside 1399x720 with at least 16 px on every edge and 48 px between the left footer and the right panel. The left panel's two null marks overlap; recorded separately as a finding.\nFINDING scripts/prototypes/diiid_external_current_propagation/render.py 216 non-blocking: the left panel's solved lower X-point and EFIT reference null are 4 px apart while the marks are 11 and 13 px across, so the ring is legible only as a partial arc and the displacement direction comes from the printed numbers.\nFINDING scripts/prototypes/diiid_external_current_propagation/render.py 204 non-blocking: contours at alpha 0.55 render 2.31:1 and the dotted pseudo-wall 1.61:1 on white, both under 3:1; the caption names both.\nFINDING scripts/prototypes/diiid_external_current_propagation/render.py 157 non-blocking: the note decodes two of six marks and calls all solid dark ink the wall, while the EFIT boundary is the same #333333 at 1.2 pt against the wall's 1.4 pt; the caption resolves it.\nFINDING scripts/prototypes/diiid_external_current_propagation/render.py 49 non-blocking: panels occupy 54% of canvas width at 275x515 px each with about 315 px blank either side, drawn smaller than the 14 in page allows.",
+  "review_run_id": "r-20261115T153723819539-review-of-diiid-external-current-propagation-8b1e4132c5f4-figure",
+  "reviewed_base_sha": "2d32c19fcb5a0f482b7dc5c724eecfdd885c00b2",
+  "reviewed_head_sha": "8b1e4132c5f4d97b4c688e994fdcdecd764ee986",
+  "reviewed_run_id": "r-20261114T184344419641-diiid-external-current-propagation",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T15:54:58.719464+00:00",
+  "total": null
+}

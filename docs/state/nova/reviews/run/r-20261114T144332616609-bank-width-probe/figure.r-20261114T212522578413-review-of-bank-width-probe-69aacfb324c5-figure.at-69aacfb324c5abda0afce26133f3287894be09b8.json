@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "a figure review runs no test suite, so no failure delta exists",
+  "completed_at": "2026-11-14T21:54:23.802Z",
+  "dispatched_at": "2026-11-14T21:27:33Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "non-blocking legibility point on a measurement figure whose caption already states the shared location, the magnification's role and the expanded scale; the width boundary is recorded in the fragment table, and no decision rests on reading it off the plot",
+      "recorded_at": "2026-11-14T22:02:50.041284+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "non-blocking legibility point on a measurement figure whose caption already states the shared location, the magnification's role and the expanded scale; the width boundary is recorded in the fragment table, and no decision rests on reading it off the plot",
+      "recorded_at": "2026-11-14T22:02:51.716552+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "non-blocking legibility point on a measurement figure whose caption already states the shared location, the magnification's role and the expanded scale; the width boundary is recorded in the fragment table, and no decision rests on reading it off the plot",
+      "recorded_at": "2026-11-14T22:02:53.453576+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_width_probe/report.py",
+      "id": "f8570cce931",
+      "line": 147,
+      "severity": "non-blocking",
+      "summary": "the left panel draws the default width-96 refusal cross and the async width-96 execution diamond at identical coordinates, so the two marks merge into one composite glyph; a reader scanning the rendered left panel cannot tell the async arm executed rather than refused without reading the caption, which does explain the shared location."
+    },
+    {
+      "file": "scripts/prototypes/bank_width_probe/report.py",
+      "id": "f0051c8dd98",
+      "line": 134,
+      "severity": "non-blocking",
+      "summary": "the overview panel filters to widths 64, 96 and 256, so the executing boundary this figure exists to show (78 executes, 79 refused) is absent from the left panel; a reader scanning it sees data at 64 and refusals from 96 onward and must use the centre magnification, whose role the caption names."
+    },
+    {
+      "file": "scripts/prototypes/bank_width_probe/report.py",
+      "id": "f3212acf7be",
+      "line": 196,
+      "severity": "non-blocking",
+      "summary": "the right panel spans 60-100 pulses for four admitted widths at 64-78 plus one async point at 96, leaving the 78-96 interval blank, while the vertical margins expand a 5.732-5.867 ms/slice range to 5.70-5.90 so a 1.42% difference draws as a steep monotonic fall; the caption discloses the expanded vertical scale and that the difference is inside the decision margin, but not the empty x-span, so a reader can over-read the slope."
+    }
+  ],
+  "judged_from": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T212522578413-review-of-bank-width-probe-69aacfb324c5-figure/image-0.png",
+  "judged_note": "judged only from the rendered PNG attachment; no SVG was opened",
+  "project": "nova",
+  "review_run_id": "r-20261114T212522578413-review-of-bank-width-probe-69aacfb324c5-figure",
+  "reviewed_base_sha": "975f3e98cfa2b2976d2bbe1b94ead37f8623b529",
+  "reviewed_figure": "docs/figures/sub-millisecond-forward-path/bank-width-probe/width-boundary.svg",
+  "reviewed_head_sha": "69aacfb324c5abda0afce26133f3287894be09b8",
+  "reviewed_run_id": "r-20261114T144332616609-bank-width-probe",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "contrast": "pass; axis, tick and direct labels are near-black or #555555 on white, clearing well above 4.5:1",
+    "data_ink": "pass; filled and hollow markers, one blue trend line, two grey dotted limit lines and one frameless legend carry every mark, and no series the text does not use is drawn",
+    "decoration": "pass; white background, no gradient, no background fill, no styled theme or drop shadow, and no gridlines",
+    "label_collision": "pass; 'allocator limit' and '90% ceiling' sit in clear space at x=140 away from every plotted mark, tick label and legend entry, and no text is clipped at any canvas edge",
+    "legibility": "pass; three despined panels on the 1399x720 canvas render all tick, axis, direct and legend text at full size, and the executing edge (78 executes, 79 refused) is readable at a glance in the centre panel",
+    "table_form": "pass; the panels show memory and per-slice cost against independent pulse count as relationships, while the per-width numbers the text quotes stay in the fragment's table"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T22:02:56.002876+00:00",
+  "total": null
+}

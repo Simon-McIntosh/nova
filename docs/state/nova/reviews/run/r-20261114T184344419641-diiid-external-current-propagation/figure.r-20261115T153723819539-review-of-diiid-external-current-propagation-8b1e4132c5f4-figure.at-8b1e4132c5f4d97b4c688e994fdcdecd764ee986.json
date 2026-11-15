@@ -16,6 +16,13 @@
       720
     ]
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The two marks sit 4 px apart because the solved lower X-point lies 2.8 cm from the EFIT null; the overlap is the measurement, and the footer states the distance.",
+      "recorded_at": "2026-11-15T15:55:51.594867+00:00"
+    }
+  },
   "findings": [
     {
       "detail": "The offset printed under the left panel is 1.328 / +2.445 cm. At 146 px/m (275 px of panel width over the 1.89 m union extent) that is 2.0 px in R and 3.6 px in Z, 4.1 px between centres, against a filled cross 11x11 px (x390-401, y541-552) and a hollow ring about 13 px in diameter whose visible remainder is a single arc from roughly 7 to 10 o'clock. A reader sees the reference ring only as a partial arc under the cross, so the direction of the solved point's displacement from its reference has to be taken from the printed numbers rather than from the panel. The same pair is cleanly separated in the right panel (cross centre x878.5 y535.5, ring centre about x878 y549, 14 px apart for the 9.332 cm Z offset, both fully visible), and the caption gives both distances, so the figure still communicates the comparison; a leader line, a small inset, or simply larger panels would resolve it.",

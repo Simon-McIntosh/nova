@@ -49,6 +49,11 @@
       "kind": "exempted",
       "reason": "Carried from the earlier round: the coil-correction re-solve re-banks these rows against the diagnosis numbers in one table, which is where that comparison is owed",
       "recorded_at": "2026-11-15T23:00:10.606673+00:00"
+    },
+    "6": {
+      "kind": "exempted",
+      "reason": "Coordinator amends the landed fragment's gate table to the final arms at 37b9ba7c4 and dc8001e5f (20 identical failure rows, 133 against 141 passed, eight contract cases)",
+      "recorded_at": "2026-11-15T23:00:19.302848+00:00"
     }
   },
   "findings": [

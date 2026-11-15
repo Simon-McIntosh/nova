@@ -43,9 +43,28 @@
       "note": "The contract table rows for the EFIT comparison and the white-noise section, the white-noise section's opening sentence and the first followup now say the recovery section has landed and no longer holds them, matching the emptied wait fields; the drifting-sensor row no longer counts the locked noise-model decision.",
       "reason": "",
       "when": "2026-11-15T17:52:51.510532+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The EFIT comparison section's body and first clause now state that the ITER row shares magnetics rows but not the constraint set, is reported with that label outside the pass bands, and that the size of the gap is read before any prior is added.",
+      "reason": "",
+      "when": "2026-11-15T17:53:03.548822+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+      "commit_basis": "edit",
+      "note": "The EFIT comparison section's body and first clause now state that the ITER row shares magnetics rows but not the constraint set, is reported with that label outside the pass bands, and that the size of the gap is read before any prior is added.",
+      "reason": "",
+      "when": "2026-11-15T17:53:03.548822+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",

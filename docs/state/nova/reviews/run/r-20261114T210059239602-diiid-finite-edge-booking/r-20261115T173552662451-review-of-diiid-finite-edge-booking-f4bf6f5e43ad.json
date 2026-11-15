@@ -16,6 +16,13 @@
   ],
   "completed_at": "2026-11-15T17:36:46.833Z",
   "dispatched_at": "2026-11-15T17:36:27Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Acted in resume turn 4: a test that builds through build_profile and reddens when the _booked_profile call is removed.",
+      "recorded_at": "2026-11-15T18:04:23.372742+00:00"
+    }
+  },
   "findings": [
     {
       "file": "benchmarks/diiid_forward_gs_match.py",

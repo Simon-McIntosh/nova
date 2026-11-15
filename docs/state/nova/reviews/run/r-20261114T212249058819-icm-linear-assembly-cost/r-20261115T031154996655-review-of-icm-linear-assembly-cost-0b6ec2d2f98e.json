@@ -14,6 +14,11 @@
       "kind": "folded",
       "node": "icm-scripts-cleanup",
       "recorded_at": "2026-11-15T04:07:22.013995+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "coordinator ruling 2026-11-15: the 900 s bar became a measured outcome, recorded as missed at 4108 s; route kept for the 1e-12 operator pin",
+      "recorded_at": "2026-11-15T04:07:28.248135+00:00"
     }
   },
   "findings": [

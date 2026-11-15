@@ -33,7 +33,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 21,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8d01e88436a6351e819b514197319efd387e0c2d",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The section now generates its state from profiles that are members of the basis imas-efit resolves for the run, with the nova fit given the same functions, so both codes' fit functions contain the generating profiles and the bands test wiring, not basis mismatch.",
+      "reason": "",
+      "when": "2026-11-15T20:08:57.438601+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8d01e88436a6351e819b514197319efd387e0c2d",
+      "commit_basis": "edit",
+      "note": "The section now generates its state from profiles that are members of the basis imas-efit resolves for the run, with the nova fit given the same functions, so both codes' fit functions contain the generating profiles and the bands test wiring, not basis mismatch.",
+      "reason": "",
+      "when": "2026-11-15T20:08:57.438601+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261115T193830501969-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261115T193830501969-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "28544461434e21da6c197bbd7ad595c3a811bdda",
   "rubric": "content",

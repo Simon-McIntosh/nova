@@ -6,6 +6,7 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 from dataclasses import dataclass, replace
+from typing import NamedTuple
 from unittest.mock import patch
 
 import jax
@@ -257,4 +258,56 @@ def test_fused_booking_refuses_underresolved_quadrature():
             None,
             None,
             fuse_booking=True,
+        )
+
+
+class ReorderedMoments(NamedTuple):
+    """The booking moment triple with the current channel last."""
+
+    radial_moment: jax.Array
+    vertical_moment: jax.Array
+    cell_current: jax.Array
+
+
+def test_normalized_booking_reads_moments_by_field_name(physical):
+    bank, state, support = physical
+    profile = SmoothDensity()
+    rule = current.Quadrature(segments=8, target_current=3.7)
+    raw_rule = replace(rule, target_current=None)
+    booked, _ = jax.jit(
+        lambda b, m, s, p, q: support_read.book_and_local_sensitivities(
+            b, m, s, p, p.density_gradient, q
+        )
+    )(bank, state, support, profile, raw_rule)
+    named = current.ClippedCurrentMoments(
+        cell_current=booked.cell_current,
+        radial_moment=booked.radial_moment,
+        vertical_moment=booked.vertical_moment,
+    )
+    reordered = ReorderedMoments(
+        radial_moment=named.radial_moment,
+        vertical_moment=named.vertical_moment,
+        cell_current=named.cell_current,
+    )
+    assert not np.isclose(
+        np.sum(np.asarray(named.radial_moment)),
+        np.sum(np.asarray(named.cell_current)),
+    )
+    span = support.reading.boundary_flux - support.reading.axis_flux
+    expected = current._normalize_booking(named, support.reading, span, rule)
+    actual = current._normalize_booking(reordered, support.reading, span, rule)
+    assert bool(expected.valid) and bool(actual.valid)
+    np.testing.assert_allclose(
+        np.asarray(actual.raw_current),
+        np.sum(np.asarray(named.cell_current)),
+        rtol=1e-14,
+        atol=0.0,
+    )
+    for name in current.Booking._fields:
+        np.testing.assert_allclose(
+            np.asarray(getattr(actual, name)),
+            np.asarray(getattr(expected, name)),
+            rtol=1e-14,
+            atol=1e-14,
+            err_msg=name,
         )

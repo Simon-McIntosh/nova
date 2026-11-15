@@ -1,17 +1,16 @@
-"""Draw the base and positive-control terminal flux of frame 137D together.
+"""Draw the measured-current and scaled-current terminal flux of frame 137D.
 
-Both panels share one absolute level array, so the two terminal states are read
-on the same contour values. Each draws the vessel, its own nulls and, on the
-scaled arm, the base arm's lower null as a reference that does not move with
-the panel. The flux grid is 33 by 33 over the canonical axes, so a lower-null
-displacement of a few centimetres is far below one cell; the nulls are drawn
-from the terminal topology, which resolves them independently of the grid.
+The view is the vessel's own extent, so the whole DIII-D wall is drawn and it
+closes. Both panels share one absolute level array, so the two terminal states
+are read on the same contour values. Each panel draws its own magnetic axis and
+lower X-point, the contour through that X-point as the arm's separatrix, and the
+EFIT boundary and EFIT lower X-point as the reference every offset in the footer
+is measured from.
 """
 
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 import sys
 
@@ -28,6 +27,7 @@ from nova.media.poloidal import (  # noqa: E402
     draw_flux_contours,
     draw_nulls,
     draw_wall,
+    inside_wall_units,
 )
 from scripts.prototypes.diiid_xpoint_offset.style import (  # noqa: E402
     REFERENCE,
@@ -35,15 +35,45 @@ from scripts.prototypes.diiid_xpoint_offset.style import (  # noqa: E402
     WALL,
 )
 
+FRAME = 137
 LEVEL_COUNT = 22
 PANELS = (
     ("base", "measured currents"),
     ("row", "coil currents scaled x1.1"),
 )
-COLUMN_LEFT = (0.06, 0.56)
-COLUMN_WIDTH = 0.36
-PANEL_BOTTOM = 0.085
-PANEL_HEIGHT = 0.775
+FIGURE_WIDTH_IN = 14.0
+FIGURE_HEIGHT_IN = 7.2
+PANEL_HEIGHT_FRACTION = 0.74
+VIEW_MARGIN_M = 0.06
+COLUMN_GAP = 0.14
+BOTTOM = 0.12
+
+
+def _corpus_row():
+    from benchmarks import diiid_forward_gs_match as bench
+
+    paths = sorted(bench.DEFAULT_DATA.glob("*.parquet"))
+    selected = bench.select_frames(
+        paths, bench.EXECUTION_FRAME_COUNT, bench.polarity_population()
+    )
+    match = [item for item in selected if item.frame == FRAME]
+    if len(match) != 1:
+        raise RuntimeError(f"frame {FRAME} did not select exactly one corpus row")
+    columns = (
+        bench._LABEL_COLUMNS
+        + bench._GEOMETRY_COLUMNS
+        + bench._CURRENT_COLUMNS
+        + bench._PLASMA_CURRENT_COLUMNS
+    )
+    return bench._read(match[0].path, columns)
+
+
+def _efit_boundary(row):
+    count = int(row["efit_lcfs_n"][FRAME])
+    return np.c_[
+        np.asarray(row["efit_lcfs_r"][FRAME][:count], dtype=float),
+        np.asarray(row["efit_lcfs_z"][FRAME][:count], dtype=float),
+    ]
 
 
 def _load(folder: Path, arm: str):
@@ -52,16 +82,35 @@ def _load(folder: Path, arm: str):
 
 
 def _levels(base_flux, wall, radius, height):
-    """Return one absolute level array over the base field inside the vessel."""
+    """Return one absolute level array over the base field inside the vessel.
 
-    from nova.media.poloidal import inside_wall_units
+    The saved flux is shaped (radius, height) and the painter wants
+    (height, radius), so the caller transposes before asking for levels.
+    """
 
     grid_r, grid_z = np.meshgrid(radius, height)
     inside = inside_wall_units(
-        np.column_stack((grid_r.ravel(), grid_z.ravel())), wall
+        np.column_stack((grid_r.ravel(), grid_z.ravel())),
+        wall,
     ).reshape(base_flux.shape)
     values = base_flux[inside]
     return np.linspace(float(np.min(values)), float(np.max(values)), LEVEL_COUNT)[1:-1]
+
+
+def _flux_at(flux, radius, height, point):
+    """Bilinear flux at a point, from a field shaped (radius, height)."""
+
+    r = float(point[0])
+    z = float(point[1])
+    j = int(np.clip(np.searchsorted(radius, r) - 1, 0, radius.size - 2))
+    i = int(np.clip(np.searchsorted(height, z) - 1, 0, height.size - 2))
+    tr = (r - radius[j]) / (radius[j + 1] - radius[j])
+    tz = (z - height[i]) / (height[i + 1] - height[i])
+    f00, f01 = flux[j, i], flux[j + 1, i]
+    f10, f11 = flux[j, i + 1], flux[j + 1, i + 1]
+    return float(
+        (1.0 - tz) * ((1.0 - tr) * f00 + tr * f01) + tz * ((1.0 - tr) * f10 + tr * f11)
+    )
 
 
 def main():
@@ -76,30 +125,37 @@ def main():
 
     arms = {arm: _load(args.input, arm) for arm, _ in PANELS}
     base = arms["base"]
-    radius, height = base["radius"], base["height"]
+    radius = base["radius"]
+    height = base["height"]
     wall = base["wall"]
-    # Saved flux is (radius, height); the painter wants (height, radius).
     levels = _levels(base["flux"].T, wall, radius, height)
-    reference = base["lower_x"][None, :]
+    boundary = _efit_boundary(_corpus_row())
 
-    figure = plt.figure(figsize=(14, 7.2), dpi=100)
+    r_lo = float(wall[:, 0].min()) - VIEW_MARGIN_M
+    r_hi = float(wall[:, 0].max()) + VIEW_MARGIN_M
+    z_lo = float(wall[:, 1].min()) - VIEW_MARGIN_M
+    z_hi = float(wall[:, 1].max()) + VIEW_MARGIN_M
+    span_ratio = (r_hi - r_lo) / (z_hi - z_lo)
+    height_in = PANEL_HEIGHT_FRACTION * FIGURE_HEIGHT_IN
+    width_fraction = height_in * span_ratio / FIGURE_WIDTH_IN
+    height_fraction = PANEL_HEIGHT_FRACTION
+    left = (0.5 - COLUMN_GAP / 2 - width_fraction, 0.5 + COLUMN_GAP / 2)
+
+    figure = plt.figure(figsize=(FIGURE_WIDTH_IN, FIGURE_HEIGHT_IN), dpi=100)
     axes: list = []
     notes: list = []
     for index, (arm, label) in enumerate(PANELS):
         data = arms[arm]
-        record = json.loads(
-            (args.input / f"arm-{arm}.json").read_text(encoding="utf-8")
-        )
         # Offsets come from the stored null coordinates in metres, never from
-        # the arm record's centimetre field.
+        # the arm record's centimetre field, which reads ten times too large
         offset_cm = 100.0 * (
             np.asarray(data["lower_x"]) - np.asarray(data["efit_lower_x"])
         )
-        left = COLUMN_LEFT[index]
-        item = figure.add_axes((left, PANEL_BOTTOM, COLUMN_WIDTH, PANEL_HEIGHT))
+        separatrix = _flux_at(data["flux"], radius, height, data["lower_x"])
+        item = figure.add_axes((left[index], BOTTOM, width_fraction, height_fraction))
         axes.append(item)
-        item.set_axis_off()
         draw_wall(item, units=None, radius=wall[:, 0], height=wall[:, 1], color=WALL)
+        item.plot(boundary[:, 0], boundary[:, 1], color=REFERENCE, linewidth=1.2)
         draw_flux_contours(
             item,
             radius,
@@ -108,34 +164,55 @@ def main():
             levels,
             color=SOLVED,
             wall=wall,
-            linewidth=1.2,
+            linewidth=1.1,
+            alpha=0.55,
+        )
+        draw_flux_contours(
+            item,
+            radius,
+            height,
+            data["flux"].T,
+            [separatrix],
+            color=SOLVED,
+            wall=wall,
+            linewidth=2.6,
         )
         draw_nulls(
             item,
             magnetic_axis=data["axis"],
-            x_points=data["lower_x"][None, :],
-            other_x_points=None if arm == "base" else reference,
+            x_points=np.asarray(data["lower_x"])[None, :],
         )
-        item.set_xlim(radius.min() - 0.04, radius.max() + 0.04)
-        item.set_ylim(height.min() - 0.04, height.max() + 0.04)
+        item.plot(
+            float(data["efit_lower_x"][0]),
+            float(data["efit_lower_x"][1]),
+            marker="o",
+            markersize=9,
+            markerfacecolor="none",
+            markeredgecolor=REFERENCE,
+            markeredgewidth=1.3,
+            linestyle="none",
+        )
+        item.set_xlim(r_lo, r_hi)
+        item.set_ylim(z_lo, z_hi)
         item.set_aspect("equal")
         item.set_axis_off()
         notes.append(
             figure.text(
-                left, 0.945, label, va="bottom", ha="left", fontsize=14, color=SOLVED
+                left[index],
+                BOTTOM + height_fraction + 0.02,
+                label,
+                va="bottom",
+                ha="left",
+                fontsize=14,
+                color=SOLVED,
             )
         )
         notes.append(
             figure.text(
-                left,
-                0.025,
-                "offset %.3f / %+.3f cm, %.3f cm from EFIT null, residual %.1e"
-                % (
-                    offset_cm[0],
-                    offset_cm[1],
-                    float(np.linalg.norm(offset_cm)),
-                    record["residual"],
-                ),
+                left[index],
+                BOTTOM - 0.055,
+                "offset %.3f / %+.3f cm, %.3f cm from the EFIT null"
+                % (offset_cm[0], offset_cm[1], float(np.linalg.norm(offset_cm))),
                 va="bottom",
                 ha="left",
                 fontsize=12,

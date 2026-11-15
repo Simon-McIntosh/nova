@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "This figure review ran no suite; the count is the neutral value the record shape requires and is not a measurement. No base/head gate pair was read and no suite delta is claimed.",
+  "attachment_map": {
+    "image-0.png (1400x721, the run's single attachment, the only image opened)": "docs/figures/iron-core-magnetisation/icm-linear-assembly-cost/error-unknowns.svg"
+  },
+  "attachment_note": "One raster was attached and it was opened as an image and inspected at native resolution and in 2-3x crops of the legend, both axes, the four canvas edges and the dense constant series. No SVG was opened, rendered or read, and no other image was opened. Identification rests on content, not byte identity: the three linear points sit at the reviewed receipt's unknowns (1368, 4968, 19008) with heights descending from about 0.062 to about 0.0004, the constant series runs from about 10.6 percent at about 450 unknowns through the hollow-square graded control at about 26 820 unknowns just under 0.5 percent, and both the caption text and the table in the reviewed head's evidence fragment (docs/evidence/fragments/iron-core-magnetisation/icm-linear-assembly-cost.html) report exactly those values. That series set is unique to the reviewed head's figure; the earlier landed figure carried only the 40 and 20 mm arms. The base 79a578d69 is confirmed an ancestor of the head 0b6ec2d2f (git merge-base --is-ancestor exit 0).",
+  "completed_at": "2026-11-15T03:58:56.363Z",
+  "dispatched_at": "2026-11-15T03:15:09Z",
+  "figure_verdicts": [
+    {
+      "attachment": "image-0.png",
+      "figure": "docs/figures/iron-core-magnetisation/icm-linear-assembly-cost/error-unknowns.svg",
+      "render_check": "1400x721 render; outer 2 px frame carries zero non-white pixels; four identified ink colours and no fifth.",
+      "rubric": {
+        "contrast": "pass. Text is #0b0b0b on white (about 18:1) and tick labels #52514e (about 7.3:1). Linear blue #2e6fb7 computes to about 5.2:1 on white and constant #1a1a1a to about 17:1, so every data series clears the 3:1 floor. The 0.5 percent threshold is #929292 dotted, about 3.1:1, which is the reference grey role and is additionally distinguished by its dot pattern and its short legend swatch.",
+        "data_ink": "pass. Marks are the only ink carrying information: 4544 px of linear blue, 2769 px of constant near-black, 930 px of the dotted grey 0.5 percent threshold, plus ticks and axis titles. There is no fill, no shading, no gradient and no marker size that would swamp a neighbour; the largest marker is 8 px square.",
+        "decoration": "pass. White page only. No gridlines, no band, no drop shadow, no title box, no background tint; the top and right spines are off and the only furniture is the two scales and their labels.",
+        "label_collision": "pass. Zero non-white pixels in the outer 2 px frame, so no text artist is clipped at the canvas edge. Axis tick labels on both log scales are spaced at least 31 px apart in the tightest y spacing (0.001 to 0.0005) against about 19 px of glyph height, and the closest data markers clear every label: the lowest marker clears the bottom axis by 17 px, the right-hand hollow square sits inside the frame, and the black circle nearest the dotted threshold sits just above it with visible separation.",
+        "legibility": "pass. A log-log error-against-unknowns plot over one frameless three-column legend ('constant, uniform' black dashed circles, 'linear, dipole' blue dashed diamonds, 'linear, finite loop' blue solid diamonds, 'constant, graded' hollow squares, '0.5 % target' dotted grey). Every series is traceable at a glance: the three linear arms step down by decade across the width, and the top two dipole diamonds are one pixel apart vertically but about 90 px apart horizontally, so they read as two points rather than one. Axis labels 'magnetisation unknowns' and 'worst-probe shielding error [%]' are full and unclipped.",
+        "table_form": "pass. The image carries a monotone. The content is a continuous cost-against-accuracy tradeoff across two decades of unknowns and four decades of error, with a threshold crossing; a table of the same numbers (and the reviewed evidence fragment does have one) cannot show where each family crosses 0.5 percent or how the linear arms separate from the reference floor. The figure is the right form for the relationship it reports."
+      }
+    }
+  ],
+  "findings": [],
+  "item_verdicts": {
+    "caption_independence": "pass. The caption under the figure in docs/evidence/fragments/iron-core-magnetisation/icm-linear-assembly-cost.html does not repeat a title: the figure carries no title element at all, and the caption states the machine case (mu_r = 1000 closed shell), which lane assembled and which solved. It states the axis scales and that every major tick is labelled, names the 0.5 percent dotted threshold, describes what the two linear curves do (finite-loop continues down while the dipole approaches its reference floor), and says the SVG was rendered to PNG and inspected with the save check passing for 27 text artists. It is a description a reader can check against the picture, and the picture agrees with it.",
+    "finding_materiality": "No finding is recorded: nothing met the blocking bar (no clipped or overlapping label, no unreadable text, no data hidden from the reader) and nothing weaker was worth handing the coordinator, because every measured check the rubric names came back clean on the render.",
+    "rendered_artifact": "Every verdict above is read from the rendered attachment image-0.png, opened as an image and inspected at native resolution and in 2-3x crops of the legend, both scales, the four edges and the dense constant series. No SVG was opened or rendered and no other image was opened.",
+    "scope": "Read-only. No file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the figure, its caption and its drawing script were left untouched. The only writes are this record at its two declared paths and this run's manifest."
+  },
+  "justifications": {
+    "durability": "This record is written at both declared paths and checked with crew check --review --record before the manifest is closed.",
+    "evidence": "Geometry and ink are measured on the attachment itself: 1400x721 canvas, zero non-white pixels in the outer 2 px frame, one vertical and one horizontal spine only, and the bottom marker's 17 px clearance from the bottom axis. Contrast ratios are computed from the hex roles the drawing script declares (UNIFORM #1a1a1a, GRADED #2e6fb7, LIMIT #929292) and from the style sheet's text colours (#0b0b0b, #52514e).",
+    "legibility": "Read from the rendered picture: the legend, both scales, the four canvas edges and the dense constant series were inspected at 2-3x, and the marker heights agree with the reviewed receipt table's own values, so the render and the numbers it claims are the same artifact.",
+    "scope_discipline": "Read-only review: no source, figure or caption was changed; both findings slots and the plan are untouched, and the record is stored only at the two declared paths."
+  },
+  "project": "nova",
+  "render_check": {
+    "axes_furniture": "one vertical spine at x=142 and one horizontal spine at y=631, both #52514e; no top spine, no right spine, no gridlines, no background fill",
+    "canvas": "1400x721 (14.00 x 7.21 in at 100 dpi), the declared slide canvas width",
+    "column_heads": "values read off the render agree with the reviewed receipt table: dipole 0.0625/0.0508/0.0496 percent and 0.0153/0.00176/0.000436 percent against the finite loop at the three unknowns",
+    "ink_inventory_px": {
+      "constant_1a1a1a": 2769,
+      "limit_grey_929292": 930,
+      "linear_blue_2e6fb7": 4544,
+      "text_0b0b0b": 2794
+    },
+    "lowest_marker_clearance_px": "the bottom-most linear point spans y 591-614 against the bottom axis at y=631, so 17 px of clear white below its outline",
+    "outer_frame_non_white_px": 0
+  },
+  "review_run_id": "r-20261115T031354122293-review-of-icm-linear-assembly-cost-0b6ec2d2f98e-figure",
+  "reviewed_base_sha": "79a578d6940ecb9115ecd8a23a171f66ccb7dada",
+  "reviewed_figures": [
+    "docs/figures/iron-core-magnetisation/icm-linear-assembly-cost/error-unknowns.svg"
+  ],
+  "reviewed_head_sha": "0b6ec2d2f98ef6f7a508e9c9480ff7ebaf891ea0",
+  "reviewed_run_id": "r-20261114T212249058819-icm-linear-assembly-cost",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass. Log-log worst-probe shielding error against magnetisation unknowns; four series and one dotted threshold, all traceable at a glance in a frameless three-column legend, with full axis labels at 14-16 pt on a 1400 px canvas.",
+    "RUBRIC data_ink: pass. Information is carried by marker and line ink alone (4544 px linear blue, 2769 px constant near-black, 930 px grey threshold); no fill, gradient, band or shadow anywhere.",
+    "RUBRIC decoration: pass. No gridlines, no background fill, no top or right spine; the two labelled log scales are the only furniture.",
+    "RUBRIC contrast: pass. Text #0b0b0b and tick labels #52514e on white, linear blue #2e6fb7 about 5.2:1, constant #1a1a1a about 17:1, and the 3.1:1 dotted grey threshold additionally separated by dash pattern.",
+    "RUBRIC table_form: pass. A continuous cost-accuracy relationship with a threshold crossing at 0.5 percent; the crossing points and the fan between the linear and constant families are visible only in this form. The evidence fragment carries the tabulated values alongside, which is the right division.",
+    "RUBRIC label_collision: pass. No text in the outer 2 px frame; the tightest tick spacing (31 px) clears a 19 px glyph height; markers clear the axes (17 px at the bottom) and the dotted threshold."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T03:40:00+00:00",
+  "total": null
+}

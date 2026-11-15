@@ -10,6 +10,13 @@
   "call_sites_note": "scripts/prototypes/bank_width_probe/job.sh and report_job.sh invoke scripts.prototypes.bank_width_probe.run and .report; scripts/prototypes/bank_h200_slice_profile/job.sh invokes the refactored slice-profile driver whose archive_revision, execute_arm and measurement_environment the refactor redefined.",
   "completed_at": "2026-11-15T02:58:22.864Z",
   "dispatched_at": "2026-11-15T02:15:14Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the boundary values are read from the probe's own summary and cross-checked for adjacency against the arm receipts; the raw arm logs remain the authority and were read in review",
+      "recorded_at": "2026-11-15T03:01:50.899396+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_width_probe/test_contracts.py",

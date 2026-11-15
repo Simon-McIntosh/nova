@@ -49,6 +49,7 @@ from scipy.interpolate import RectBivariateSpline
 from scipy.spatial import cKDTree
 
 from benchmarks.diiid_state_of_play_figures import boundary_gradient_minimum
+from scripts.analytic_oracle_fixtures.coupling_build import build_flux_blocks
 
 from benchmarks.diiid_corpus_conventions import (
     CORPUS_COCOS,
@@ -59,6 +60,7 @@ from benchmarks.diiid_corpus_conventions import (
 )
 from nova.biot.greens import hybrid_greens
 from nova.biot.polygon import polygon_greens
+from nova.biot.target import FluxTarget, Null1D
 from nova.database.filepath import operand_cache_root, portable_path
 from nova.database import content_store
 from nova.media.ink import DEFAULT_INK, poloidal_axes, trace_axes
@@ -82,7 +84,13 @@ from nova.equilibrium.flux_surface_geometry import (
     FluxSurfaceGeometry,
     SurfaceGeometryError,
 )
-from nova.equilibrium.forward import ForwardProfile, SaddleSeedGeometry
+from nova.equilibrium.forward import (
+    ForwardProfile,
+    SaddleSeedGeometry,
+    _lattice_cells,
+    hex_stencil,
+)
+from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
 from nova.equilibrium.fixed_point import (
     KrylovActionQualification,
     kink_aware_newton_krylov,
@@ -1168,6 +1176,44 @@ def _green_block(
     )
 
 
+def _moment_couplings(
+    lattice: FluxLattice, wall: np.ndarray
+) -> tuple[
+    tuple[np.ndarray, np.ndarray, np.ndarray],
+    tuple[np.ndarray, np.ndarray, np.ndarray],
+    np.ndarray,
+    tuple[np.ndarray, np.ndarray, np.ndarray],
+]:
+    """Return the flux moment blocks and sampling nodes the booked route needs.
+
+    One analytic polygon evaluation per source column supplies the uniform,
+    radial and vertical flux rows together, so the second moments the booked
+    route integrates are the moments of the same kernel that carries its
+    uniform row. The sampling nodes are the cell vertices, which is where the
+    boundary is clipped and therefore a different point set from the cell
+    centres: the grid blocks cannot be reused for them, so the sampling nodes
+    carry their own blocks evaluated at the vertices.
+    """
+
+    cells = _lattice_cells(lattice)
+    centres = np.asarray(lattice.coordinate, dtype=np.float64)
+    geometry = MomentGeometry.from_cells(
+        StencilMesh(
+            coordinate=lattice.coordinate,
+            stencil=hex_stencil(lattice.shape),
+            area=lattice.cell_area,
+        ),
+        cells,
+    )
+    sample_coordinate = np.asarray(geometry.sample_node_coordinates, dtype=np.float64)
+    return (
+        build_flux_blocks(centres, cells, centres),
+        build_flux_blocks(np.asarray(wall, dtype=np.float64), cells, centres),
+        sample_coordinate,
+        build_flux_blocks(sample_coordinate, cells, centres),
+    )
+
+
 def _source_current(
     row: dict[str, Any], description, names: tuple[str, ...], time_ms: float
 ) -> np.ndarray:
@@ -1237,6 +1283,17 @@ def _couplings(
     vertical_extent = float(np.diff(height).mean())
     plasma_to_grid = _green_block(coordinate, coordinate, width, vertical_extent)
     plasma_to_wall = _green_block(wall, coordinate, width, vertical_extent)
+    grid_moments, wall_moments, sample_coordinate, sample_moments = _moment_couplings(
+        lattice, wall
+    )
+    # The sampling nodes are solved rows too, so they carry the same conductor
+    # population the grid carries, evaluated at the vertices with the polygon
+    # kernel the wall target uses. A target built from zeros would hold a flux
+    # of zero at the nodes the boundary is clipped on.
+    source_to_sample = _wall_source_response(machine.physical, names, sample_coordinate)
+    plasma_to_sample = _green_block(
+        sample_coordinate, coordinate, width, vertical_extent
+    )
     grid_rows = lattice.node_count
     wall_rows = len(wall)
     same_grid_seam = (
@@ -1252,6 +1309,16 @@ def _couplings(
         raise RuntimeError(
             "topology-surface targets do not share the labelled grid and wall seams"
         )
+    sample_rows = int(np.shape(sample_coordinate)[0])
+    same_sample_seam = (
+        source_to_sample.shape == (sample_rows, source_to_grid.shape[1])
+        and plasma_to_sample.shape == (sample_rows, grid_rows)
+        and sample_moments[0].shape == (sample_rows, lattice.node_count)
+    )
+    if not same_sample_seam:
+        raise RuntimeError(
+            "sampling-node targets do not share the conductor and cell seams"
+        )
     result = (
         names,
         wall,
@@ -1260,10 +1327,24 @@ def _couplings(
         source_to_wall,
         plasma_to_grid,
         plasma_to_wall,
+        grid_moments,
+        wall_moments,
+        sample_coordinate,
+        source_to_sample,
+        plasma_to_sample,
+        sample_moments,
         statement,
         {
             **surface_receipt,
             "coupling_cache_key": list(key),
+            "finite_edge_moment_blocks": {
+                "grid": [int(value) for value in np.shape(grid_moments[0])],
+                "wall": [int(value) for value in np.shape(wall_moments[0])],
+                "sample": [int(value) for value in np.shape(sample_moments[0])],
+                "sample_rows": int(np.shape(sample_coordinate)[0]),
+            },
+            "source_to_sample_rows": int(source_to_sample.shape[0]),
+            "plasma_to_sample_rows": int(plasma_to_sample.shape[0]),
             "source_to_wall_rows": int(source_to_wall.shape[0]),
             "source_to_wall_sha256": _array_sha256(source_to_wall),
             "plasma_to_wall_rows": int(plasma_to_wall.shape[0]),
@@ -1301,6 +1382,50 @@ def _couplings(
     return result
 
 
+def _booked_profile(
+    profile,
+    *,
+    grid_moments,
+    wall_moments,
+    sample_coordinate,
+    sample_moments,
+    source_to_sample,
+    plasma_to_sample,
+):
+    """Attach the booked current route's moment blocks and sampling target.
+
+    The route is not a choice: a finite-edge profile supplies a finite current
+    density on the last closed flux surface, and only the booked integral
+    follows that density as the level sweeps across a cell. The sampling nodes
+    are the cell vertices the boundary is clipped on, so they carry their own
+    moment blocks rather than reusing the grid's.
+    """
+
+    sample = FluxTarget(
+        source_target=jnp.asarray(source_to_sample),
+        plasma_target=jnp.asarray(plasma_to_sample),
+        null=Null1D(jnp.asarray(sample_coordinate)),
+        plasma_target_r=jnp.asarray(sample_moments[1]),
+        plasma_target_z=jnp.asarray(sample_moments[2]),
+    )
+    operator = replace(
+        profile.operator,
+        grid=replace(
+            profile.operator.grid,
+            plasma_target_r=grid_moments[1],
+            plasma_target_z=grid_moments[2],
+        ),
+        wall=replace(
+            profile.operator.wall,
+            plasma_target_r=wall_moments[1],
+            plasma_target_z=wall_moments[2],
+        ),
+        sample=sample,
+        use_linear_moments=True,
+    )
+    return replace(profile, operator=operator)
+
+
 def _build_profile(
     row: dict[str, Any],
     frame: int,
@@ -1329,6 +1454,12 @@ def _build_profile(
         source_to_wall,
         plasma_to_grid,
         plasma_to_wall,
+        grid_moments,
+        wall_moments,
+        sample_coordinate,
+        source_to_sample,
+        plasma_to_sample,
+        sample_moments,
         statement,
         surface_receipt,
     ) = _couplings(
@@ -1369,6 +1500,20 @@ def _build_profile(
     spline = RectBivariateSpline(radius, height, label, kx=3, ky=3, s=0)
     seed_wall_flux = np.asarray(spline.ev(wall[:, 0], wall[:, 1]), dtype=np.float64)
     seed = np.r_[label.ravel(), seed_wall_flux]
+    profile = _booked_profile(
+        profile,
+        grid_moments=grid_moments,
+        wall_moments=wall_moments,
+        sample_coordinate=sample_coordinate,
+        sample_moments=sample_moments,
+        source_to_sample=source_to_sample,
+        plasma_to_sample=plasma_to_sample,
+    )
+    seed_sample_flux = np.asarray(
+        spline.ev(sample_coordinate[:, 0], sample_coordinate[:, 1]),
+        dtype=np.float64,
+    )
+    seed = np.r_[seed, seed_sample_flux]
     return ProfileBuild(
         profile=profile,
         seed=seed,

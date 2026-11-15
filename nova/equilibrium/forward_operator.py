@@ -2317,6 +2317,24 @@ def stack_forward_operators(operators) -> ForwardOperatorBatch:
     return ForwardOperatorBatch(tuple(operators))
 
 
+def point_route_current(source, radius, area, masks, stencil, weight):
+    """Return the value-only route's cell integrals on one read domain mask.
+
+    The route samples the current density at cell centres and averages it over
+    the cubic cell rule, so a cell whose centre crosses the plasma edge drops
+    its contribution from the finite edge value to zero at once. ``stencil`` is
+    ``None`` where the rule is switched off and the centre sample carries the
+    integral alone.
+    """
+    point_current = source.cell_current(radius, area, masks)
+    if stencil is None:
+        return point_current
+    density = point_current / area
+    gathered = density[stencil]
+    average = jnp.einsum("ni,i->n", gathered, weight)
+    return jnp.where(masks.profile_participation, average * area, 0.0)
+
+
 @jax.tree_util.register_pytree_node_class
 @dataclass
 class ForwardFluxOperator:
@@ -3510,14 +3528,14 @@ class ForwardFluxOperator:
 
     def _point_current_moments(self, masks) -> CellCurrentMoments:
         """Return point-current moments from an already-read domain mask."""
-        point_current = self.source.cell_current(self.radius, self.area, masks)
-        density = point_current / self.area
-        if self.cell_average_stencil is None:
-            current = point_current
-        else:
-            gathered = density[self.cell_average_stencil]
-            average = jnp.einsum("ni,i->n", gathered, self.cell_average_weight)
-            current = jnp.where(masks.profile_participation, average * self.area, 0.0)
+        current = point_route_current(
+            self.source,
+            self.radius,
+            self.area,
+            masks,
+            self.cell_average_stencil,
+            self.cell_average_weight,
+        )
         zero = jnp.zeros_like(current)
         return CellCurrentMoments(current, zero, zero)
 

@@ -200,6 +200,45 @@ def resolve_diiid_currents(
     )
 
 
+def _completed_target(
+    target,
+    names: tuple[str, ...],
+    *,
+    label: str,
+    active_coil_entry: str | Path,
+    active_coil_dd_version: str,
+):
+    """Append the circuit-driven columns to one target's conductor response.
+
+    Every target the solve contracts against the conductor vector carries the
+    same columns: a target left at the shipped order is a shorter operand than
+    the current vector, which the contraction refuses.
+    """
+
+    if target.source_target.shape[1] != len(names):
+        raise ValueError(
+            f"{label} response columns do not match shipped conductor order"
+        )
+    circuit_names, response, receipt = active_coil_response_from_imas(
+        active_coil_entry,
+        active_coil_dd_version,
+        CIRCUIT_DRIVEN_CONDUCTORS,
+        np.asarray(target.coordinate)[:, 0],
+        np.asarray(target.coordinate)[:, 1],
+    )
+    if circuit_names != CIRCUIT_DRIVEN_CONDUCTORS:
+        raise RuntimeError("active-coil response did not preserve requested order")
+    return (
+        replace(
+            target,
+            source_target=jnp.column_stack(
+                (target.source_target, jnp.asarray(response.T))
+            ),
+        ),
+        receipt,
+    )
+
+
 def complete_profile_current_adapter(
     profile: ForwardProfile,
     *,
@@ -210,52 +249,42 @@ def complete_profile_current_adapter(
     active_coil_entry: str | Path = DEFAULT_ACTIVE_COIL_ENTRY,
     active_coil_dd_version: str = DEFAULT_ACTIVE_COIL_DD_VERSION,
 ) -> DiiidCurrentAdapter:
-    """Append circuit-driven columns and bind the ordered current resolution."""
+    """Append circuit-driven columns and bind the ordered current resolution.
+
+    The grid, the wall and the sampling nodes are all solved targets, so all
+    three carry the completed conductor order. The sampling nodes exist only
+    when the booked current route is attached, and completing them here keeps
+    the order in one place rather than at each call site that builds a booked
+    operator.
+    """
 
     names = tuple(str(name) for name in shipped_names)
-    if profile.operator.grid.source_target.shape[1] != len(names):
-        raise ValueError("grid response columns do not match shipped conductor order")
-    if profile.operator.wall.source_target.shape[1] != len(names):
-        raise ValueError("wall response columns do not match shipped conductor order")
     resolution = resolve_diiid_currents(
         names,
         shipped_current_a,
         circuit_bypass_priors,
         use_circuit=use_circuit,
     )
-    grid_names, grid_response, grid_receipt = active_coil_response_from_imas(
-        active_coil_entry,
-        active_coil_dd_version,
-        CIRCUIT_DRIVEN_CONDUCTORS,
-        np.asarray(profile.operator.grid.coordinate)[:, 0],
-        np.asarray(profile.operator.grid.coordinate)[:, 1],
-    )
-    wall_names, wall_response, wall_receipt = active_coil_response_from_imas(
-        active_coil_entry,
-        active_coil_dd_version,
-        CIRCUIT_DRIVEN_CONDUCTORS,
-        np.asarray(profile.operator.wall.coordinate)[:, 0],
-        np.asarray(profile.operator.wall.coordinate)[:, 1],
-    )
-    if grid_names != CIRCUIT_DRIVEN_CONDUCTORS or wall_names != grid_names:
-        raise RuntimeError("active-coil response did not preserve requested order")
-    grid = replace(
-        profile.operator.grid,
-        source_target=jnp.column_stack(
-            (profile.operator.grid.source_target, jnp.asarray(grid_response.T))
-        ),
-    )
-    wall = replace(
-        profile.operator.wall,
-        source_target=jnp.column_stack(
-            (profile.operator.wall.source_target, jnp.asarray(wall_response.T))
-        ),
-    )
+    targets = {}
+    receipts = {}
+    for label, target in (
+        ("grid", profile.operator.grid),
+        ("wall", profile.operator.wall),
+        ("sample", profile.operator.sample),
+    ):
+        if target is None:
+            continue
+        targets[label], receipts[label] = _completed_target(
+            target,
+            names,
+            label=label,
+            active_coil_entry=active_coil_entry,
+            active_coil_dd_version=active_coil_dd_version,
+        )
     operator = replace(
         profile.operator,
-        grid=grid,
-        wall=wall,
         external_current=jnp.asarray(resolution.current(resolution.prior_mean_a)),
+        **targets,
     )
     return DiiidCurrentAdapter(
         profile=replace(profile, operator=operator),
@@ -273,7 +302,13 @@ def complete_profile_current_adapter(
                 "supply": PF_ACTIVE_SUPPLY.as_record(),
                 "circuit": PF_ACTIVE_CIRCUIT.as_record(),
             },
-            "grid": grid_receipt,
-            "wall": wall_receipt,
+            "grid": receipts["grid"],
+            "wall": receipts["wall"],
+            "sample": receipts.get("sample"),
+            "sample_rows": (
+                None
+                if profile.operator.sample is None
+                else int(profile.operator.sample.node_number)
+            ),
         },
     )

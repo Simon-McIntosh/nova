@@ -9,6 +9,13 @@
       "rendered": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T223925969007-review-of-icm-galerkin-cleanup-013ead9900c9-figure/image-0.png"
     }
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "figure finding reviewed at 013ead99; redrawn layering landed in the merged spectrum-ramp.svg",
+      "recorded_at": "2026-11-13T00:26:34.896627+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-interaction.html",

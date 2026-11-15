@@ -1241,6 +1241,25 @@
     "reason": "corrective-run:resume",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m scripts.prototypes.dina_flattop_scenario.verify --results /home/ITER/mcintos/.cache/nova-dina-flattop/h200 --figures /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/c042a637-16e6-44bd-9cd2-b340a6f891dc/dina-flattop-scenario/docs/figures/sub-millisecond-forward-path/dina-flattop-scenario --fragment /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/c042a637-16e6-44bd-9cd2-b340a6f891dc/dina-flattop-scenario/docs/evidence/fragments/sub-millisecond-forward-path/dina-flattop-scenario.html --preview /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T171121699975-dina-flattop-scenario/rendered --revision a0b18605fb6a9e14232ad031b0298f665d895b2d",
+    "integrated_revision": "375a20f65d87f8d7ae353f604b48197d2c893028",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261114T171121699975-dina-flattop-scenario/review-landing/gate-375a20f65d87f8d7ae353f604b48197d2c893028.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c './.venv/bin/python -m scripts.prototypes.dina_flattop_scenario.verify --results /home/ITER/mcintos/.cache/nova-dina-flattop/h200 --figures ./docs/figures/sub-millisecond-forward-path/dina-flattop-scenario --fragment ./docs/evidence/fragments/sub-millisecond-forward-path/dina-flattop-scenario.html --preview /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T171121699975-dina-flattop-scenario/rendered --revision a0b18605fb6a9e14232ad031b0298f665d895b2d'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/c042a637-16e6-44bd-9cd2-b340a6f891dc/dina-flattop-scenario",
+      "/home/ITER/mcintos/Code/nova"
+    ]
+  },
   "lane": "codex",
   "lane_advisory": {
     "backend": "codex",

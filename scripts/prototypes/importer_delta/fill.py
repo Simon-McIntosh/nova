@@ -29,6 +29,16 @@ def one_row(row):
             cell + "<td>" + str(row["base_count"]) + "</td><td>not run</td>"
             "<td>no verdict, head arm did not start</td></tr>"
         )
+    if row["state"] == "head-other-revision":
+        return (
+            cell
+            + "<td>"
+            + str(row["base_count"])
+            + "</td><td>another revision</td><td>no verdict, the recorded head "
+            "arm measured <code>"
+            + (row.get("measured_head_revision") or "an unstated revision")[:9]
+            + "</code></td></tr>"
+        )
     base = "no base arm" if row["head_only"] else str(row["base_count"])
     if not row["head_completed"]:
         return (
@@ -124,7 +134,7 @@ def verdict(cpu, card, base_files):
             + str(len(cpu_absent) + len(card_absent))
             + " of the "
             + str(base_files)
-            + " carry no head arm at all: "
+            + " give no pair: "
             + "; ".join(describe(row) for row in cpu_absent + card_absent)
             + "."
         )
@@ -147,6 +157,14 @@ def describe(row):
         return (
             "<code>" + row["file"] + "</code> has a base arm and a head arm that "
             "never started"
+        )
+    if row["state"] == "head-other-revision":
+        return (
+            "<code>"
+            + row["file"]
+            + "</code> has a base arm and a head arm at <code>"
+            + (row.get("measured_head_revision") or "an unstated revision")[:9]
+            + "</code>, which is not this head"
         )
     return "<code>" + row["file"] + "</code> has neither arm"
 
@@ -202,6 +220,15 @@ def card_note(card, meta):
             "the recorded revision: " + spell + "."
         )
     for job in (meta.get("jobs") or {}).get("h200", []):
+        if job.get("held") is False:
+            parts.append(
+                "Job <code>"
+                + job["id"]
+                + "</code> was submitted and had not started"
+                + (": " + job["note"] if job.get("note") else "")
+                + "."
+            )
+            continue
         parts.append(
             "Job <code>"
             + job["id"]
@@ -223,11 +250,22 @@ def card_note(card, meta):
                 + " failure ids, and its head arm did "
                 "not start."
             )
+        elif row["state"] == "head-other-revision":
+            parts.append(
+                "The head arm recorded for <code>"
+                + row["file"]
+                + "</code> measured <code>"
+                + (row.get("measured_head_revision") or "an unstated revision")[:9]
+                + "</code> rather than the revision under test, so it is not this "
+                "head's arm and the row carries no verdict."
+            )
         elif row["state"] == "not-run":
-            parts.append("No arm of <code>" + row["file"] + "</code> ran.")
+            parts.append(
+                "No arm of <code>" + row["file"] + "</code> ran to a receipt."
+            )
     for job in meta.get("cancelled") or []:
         parts.append(
-            "The queued job <code>" + job["id"] + "</code> " + job["note"] + "."
+            "Job <code>" + job["id"] + "</code> " + job["note"].rstrip(".") + "."
         )
     parts.append(
         "A row reading not run in both failure cells has neither arm; a row "

@@ -11,6 +11,12 @@ the --base-rows file names. A declared file with a base arm and no head arm is
 written as head-pending, and one with neither arm as not-run. Neither carries an
 added id, because a row states no verdict until both arms of one device have
 completed.
+
+An arm counts for the revision the config declares and no other. A head row
+recorded at some earlier revision measures that revision's code, so pairing a
+head row with a base row without checking is how an earlier head's result gets
+read as this head's. Such a row is written as head-other-revision and names the
+revision it measured.
 """
 
 import argparse
@@ -72,7 +78,7 @@ def measure(head, base):
     return row
 
 
-def pending(file, base):
+def pending(file, base, state="head-pending", head_revision=None):
     row = {
         "file": file,
         "base_count": len(base["failure_ids"] or []),
@@ -80,11 +86,16 @@ def pending(file, base):
         "added": [],
         "removed": [],
         "head_only": False,
-        "state": "head-pending",
+        "state": state,
+        "measured_head_revision": head_revision,
     }
     row.update(detail("base", facts(base)))
     row.update(detail("head", {}))
     return row
+
+
+def at_revision(row, revision):
+    return not revision or row.get("revision") in (None, revision)
 
 
 def absent(file):
@@ -128,11 +139,19 @@ def main():
     root = Path(args.receipts_dir) if args.receipts_dir else config_path.parent
     receipts = [(root / name).resolve() for name in names]
 
+    head_revision = config.get("head_revision")
+    base_revision = config.get("base_revision")
+
     arms = []
     for path in receipts:
         arms.extend(dict(row, arm=row.get("arm", "head")) for row in rows_in(path))
-    heads = by_file([row for row in arms if row["arm"] == "head"])
-    recorded = by_file([row for row in arms if row["arm"] == "base"])
+    heads = by_file([row for row in arms if row["arm"] == "head" and at_revision(row, head_revision)])
+    elsewhere = by_file(
+        [row for row in arms if row["arm"] == "head" and not at_revision(row, head_revision)]
+    )
+    recorded = by_file(
+        [row for row in arms if row["arm"] == "base" and at_revision(row, base_revision)]
+    )
 
     base = {}
     if args.base_rows:
@@ -144,10 +163,19 @@ def main():
 
     declared = set(config["files"])
     result = []
-    for file in sorted(declared | set(heads)):
+    for file in sorted(declared | set(heads) | set(elsewhere)):
         head = heads.get(file)
         if head is not None:
             result.append(measure(head, base.get(file)))
+        elif file in base and file in elsewhere:
+            result.append(
+                pending(
+                    file,
+                    base[file],
+                    state="head-other-revision",
+                    head_revision=elsewhere[file].get("revision"),
+                )
+            )
         elif file in base:
             result.append(pending(file, base[file]))
         else:

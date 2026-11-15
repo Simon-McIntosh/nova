@@ -1,7 +1,7 @@
 <section id="importer-delta-landing">
 <h3>Importer failure-id delta of the shared point jet</h3>
 <p id="importer-delta-method">Every file below ran in a fresh process, one process per file and arm, with the JAX compilation cache disabled before JAX initialised, the repository's single project environment as the interpreter, and <code>PYTHONPATH</code> naming the tree under test. Each arm is judged only against the other arm on the same device, because a compile wall differs by device and a failure count does not. The verdict is the set of failed and errored test ids present at head and absent from the base arm on that same device; a failure the base arm already carries is reported, not repaired. An id is a failed or an errored test, not a failed-and-passed line, so a file whose fixtures error contributes those ids as well.</p>
-<p id="importer-delta-verdict">Added failure ids: <strong>0 on CPU</strong> and <strong>0 on the H200</strong>. This verdict covers 22 of the 24 test files in the base set. 21 of those give a pair, a base arm and a head arm that both completed on the same device, and none of them adds a failure id: 19 on CPU and 2 on the H200. One of those 22 ran a head arm that was killed at the job memory ceiling without reaching a summary line: <code>tests/test_moment_field_hessian.py</code>. That row states no verdict and is reported as unreadable below. The remaining 2 of the 24 carry no head arm at all: <code>tests/biot/test_edge_term_tangents.py</code> has a base arm and a head arm that never started; <code>tests/test_biottiledbackend.py</code> has neither arm. The 2 test files the head adds, <code>tests/biot/test_moment_program_identity.py</code>, <code>tests/biot/test_production_row_compile.py</code>, have no base arm, are marked as such, and lie outside the 24.</p>
+<p id="importer-delta-verdict">Added failure ids: <strong>0 on CPU</strong> and <strong>0 on the H200</strong>. This verdict covers 22 of the 24 test files in the base set. 22 of those give a pair, a base arm and a head arm that both completed on the same device, and none of them adds a failure id: 20 on CPU and 2 on the H200. The remaining 2 of the 24 give no pair: <code>tests/test_biottiledbackend.py</code> has neither arm; <code>tests/test_equilibrium_forward_reference.py</code> has a base arm and a head arm at <code>91170a685</code>, which is not this head. The 2 test files the head adds, <code>tests/biot/test_moment_program_identity.py</code>, <code>tests/biot/test_production_row_compile.py</code>, have no base arm, are marked as such, and lie outside the 24.</p>
 <h4 id="importer-delta-cpu-heading">CPU, one file per process</h4>
 <table id="importer-delta-cpu-table">
 <thead><tr><th>test file</th><th>base failures</th><th>head failures</th><th>added at head</th></tr></thead><tbody>
@@ -25,14 +25,45 @@
 <tr><td><code>tests/test_coupling_build.py</code></td><td>0</td><td>0</td><td>none</td></tr>
 <tr><td><code>tests/test_domain_participation_continuity.py</code></td><td>0</td><td>0</td><td>none</td></tr>
 <tr><td><code>tests/test_fixed_points.py</code></td><td>0</td><td>0</td><td>none</td></tr>
-<tr><td><code>tests/test_moment_field_hessian.py</code></td><td>0</td><td>0, killed</td><td>unreadable</td></tr>
+<tr><td><code>tests/test_moment_field_hessian.py</code></td><td>0</td><td>0</td><td>none</td></tr>
 <tr><td><code>tests/test_polygon_analytic_batched_moments.py</code></td><td>0</td><td>0</td><td>none</td></tr>
 </tbody></table>
-<p id="importer-delta-unreadable">CPU arm not readable: <code>tests/test_moment_field_hessian.py</code>. Its head arm was killed at the job memory ceiling without reaching a summary line, while its base arm passes nine tests in 316 s inside a 192 GB job; the head arm reached a 490 GB peak and ran past an hour with no test outcome. The row is reported as unreadable rather than as an added failure: no id was recorded for it, which is not the same as no id failing.</p>
+<p id="importer-delta-unreadable">Every arm below reached its summary line.</p>
 <h4 id="importer-delta-card-heading">H200, the four long files, both arms in one job</h4>
-<p id="importer-delta-card-note">These four files are the ones whose CPU arms run longest at the recorded revision: <code>test_biottiledbackend.py</code> 20018 s, <code>test_edge_term_tangents.py</code> 11429 s, <code>test_vertex_term_tangents.py</code> 6105 s, <code>test_equilibrium_forward_reference.py</code> 3636 s. Job <code>1316220</code> held one card on <code>98dci4-gpu-0003</code>, for its full eight hours and ended at that ceiling. The base arm of <code>tests/biot/test_edge_term_tangents.py</code> completed in 3273 s with 2 failure ids, and its head arm did not start. No arm of <code>tests/test_biottiledbackend.py</code> ran. The queued job <code>1316330</code> never started because every card on the node was held by other work, and was cancelled rather than left queued. A row reading not run in both failure cells has neither arm; a row whose head cell reads not run but whose base cell carries a count has a base arm and no head arm. Neither carries a verdict. An unmeasured row is left for a later dispatch rather than answered by the head arm of the other device, which is a different device measuring a different arm.</p>
+<p id="importer-delta-card-note">These four files are the ones whose CPU arms run longest at the recorded revision: <code>test_biottiledbackend.py</code> 20018 s, <code>test_edge_term_tangents.py</code> 11429 s, <code>test_vertex_term_tangents.py</code> 6105 s, <code>test_equilibrium_forward_reference.py</code> 3636 s. Job <code>1317509</code> held one card on <code>98dci4-gpu-0003</code>, delivered the head arms of tests/biot/test_edge_term_tangents.py and tests/biot/test_vertex_term_tangents.py; it was cancelled from outside this run while the tiled base arm was running. Job <code>1318750</code> was submitted and had not started: resubmitted for the three arms the cancellation left unreadable. No arm of <code>tests/test_biottiledbackend.py</code> ran to a receipt. The head arm recorded for <code>tests/test_equilibrium_forward_reference.py</code> measured <code>91170a685</code> rather than the revision under test, so it is not this head's arm and the row carries no verdict. Job <code>1317509</code> was cancelled at 23:47:36Z after 8 h 08 min, not by this run, while the tiled base arm was still in progress. A row reading not run in both failure cells has neither arm; a row whose head cell reads not run but whose base cell carries a count has a base arm and no head arm. Neither carries a verdict. An unmeasured row is left for a later dispatch rather than answered by the head arm of the other device, which is a different device measuring a different arm.</p>
 <table id="importer-delta-card-table">
 <thead><tr><th>test file</th><th>base failures</th><th>head failures</th><th>added at head</th></tr></thead><tbody>
+<tr><td><code>tests/biot/test_edge_term_tangents.py</code></td><td>2</td><td>2</td><td>none</td></tr>
+<tr><td><code>tests/biot/test_vertex_term_tangents.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biottiledbackend.py</code></td><td>not run</td><td>not run</td><td>no verdict</td></tr>
+<tr><td><code>tests/test_equilibrium_forward_reference.py</code></td><td>13</td><td>another revision</td><td>no verdict, the recorded head arm measured <code>91170a685</code></td></tr>
+</tbody></table>
+<h4 id="importer-delta-earlier-heading">The earlier head, measured before the repair</h4>
+<p id="importer-delta-earlier-note">These are the same files measured against the earlier head, <code>cf87218b61ddb37e0b7c19e359d7da55bbfb24a1</code>, before its repair. 3 of these rows carry no head arm on the device that owns them, so the table is kept as a record of an incomplete head rather than as a verdict; the table above supersedes it. A row with no base arm is a file the head adds, and is marked as such.</p>
+<table id="importer-delta-earlier-table">
+<thead><tr><th>test file</th><th>base failures</th><th>head failures</th><th>added at head</th></tr></thead><tbody>
+<tr><td><code>tests/biot/test_kernel_compile_cost.py</code></td><td>1</td><td>1</td><td>none</td></tr>
+<tr><td><code>tests/biot/test_moment_path_parity.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/biot/test_moment_program_identity.py</code></td><td>no base arm</td><td>0</td><td>no base arm</td></tr>
+<tr><td><code>tests/biot/test_near_collinear_tangent.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/biot/test_production_row_compile.py</code></td><td>no base arm</td><td>0</td><td>no base arm</td></tr>
+<tr><td><code>tests/biot/test_traced_section_moments.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotbandedcoupling.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotcircle.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotgeometryautograd.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotgreens.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotpolygon.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotpolygonanalytic.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotpolygonarc.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotpolygonmoments.py</code></td><td>1</td><td>1</td><td>none</td></tr>
+<tr><td><code>tests/test_biotpolysection.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_biotsectionaverage.py</code></td><td>1</td><td>1</td><td>none</td></tr>
+<tr><td><code>tests/test_carrier_identity.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_coupling_build.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_domain_participation_continuity.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_fixed_points.py</code></td><td>0</td><td>0</td><td>none</td></tr>
+<tr><td><code>tests/test_moment_field_hessian.py</code></td><td>0</td><td>0, killed</td><td>unreadable</td></tr>
+<tr><td><code>tests/test_polygon_analytic_batched_moments.py</code></td><td>0</td><td>0</td><td>none</td></tr>
 <tr><td><code>tests/biot/test_edge_term_tangents.py</code></td><td>2</td><td>not run</td><td>no verdict, head arm did not start</td></tr>
 <tr><td><code>tests/biot/test_vertex_term_tangents.py</code></td><td>0</td><td>0</td><td>none</td></tr>
 <tr><td><code>tests/test_biottiledbackend.py</code></td><td>not run</td><td>not run</td><td>no verdict</td></tr>
@@ -41,14 +72,13 @@
 <h4 id="importer-delta-receipts-heading">Receipts</h4>
 
 <ul id="importer-delta-receipts">
-<li>base revision <code>00ec05512bb40668a9c5e618a1287428cbff0f8d</code>; head revision <code>cf87218b61ddb37e0b7c19e359d7da55bbfb24a1</code></li>
-<li>the CPU head arms ran over tree <code>cf87218b61ddb37e0b7c19e359d7da55bbfb24a1</code>, the head revision itself, as their receipt rows record</li>
-<li>the H200 head arms resolved over trees <code>91170a685c06a319f8f8ad97161795de38b2fbee</code>, <code>14b4e3321be8d3ea10ba8ded14abfa71a016dbb3</code>, both documentation-only descendants of the head revision, so no test file differs between them</li>
-<li>H200 job <code>1316220</code> on <code>98dci4-gpu-0003</code></li>
-<li>CPU job <code>1316221</code> on <code>98dci4-clu-5016</code></li>
-<li>CPU job <code>1316273</code> on <code>98dci4-clu-5011</code></li>
+<li>base revision <code>00ec05512bb40668a9c5e618a1287428cbff0f8d</code>; head revision <code>35fad52504c6ef860e9b9025112d181674f7701f</code></li>
+<li>each arm resolved over an extracted tree of its own revision: base <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/importer-delta/base-tree</code> at <code>00ec05512bb40668a9c5e618a1287428cbff0f8d</code>, head <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/importer-delta/head-tree-35fad5250</code> at <code>35fad52504c6ef860e9b9025112d181674f7701f</code>, both archived from that revision and reached through <code>PYTHONPATH</code> rather than from the working checkout</li>
+<li>H200 job <code>1317509</code> on <code>98dci4-gpu-0003</code></li>
+<li>H200 job <code>1318750</code> on <code>queued</code></li>
+<li>CPU job <code>1317630</code> on <code>98dci4-clu-5016</code></li>
 <li>per-file logs, receipts and the device tables: <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/importer-delta</code></li>
-<li>gate <code>bash scripts/prototypes/importer_delta/gate.sh &lt;receipts-dir&gt; &lt;base-rows&gt; &lt;out-dir&gt; &lt;device-config&gt;...</code>, log <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/gate.log</code>. It exits nonzero on this record, naming the three unmeasured rows: a table that carries no verdict for a declared row is a partial measurement, and the gate refuses to pass it as a clean one.</li>
+<li>gate <code>bash scripts/prototypes/importer_delta/gate.sh &lt;receipts-dir&gt; &lt;base-rows&gt; &lt;out-dir&gt; &lt;device-config&gt;...</code>, log <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/gate.log</code>. It reads the rows and passes only when every declared file carries a completed pair on one device and no row adds an id: at this run the gate reports device=cpu rows=22 pairs=20 added=0 and device=h200 rows=4 pairs=2 added=0, with tests/test_biottiledbackend.py carrying no arm and tests/test_equilibrium_forward_reference.py carrying a head arm recorded at 91170a685, so it exits 1 rather than passing on the rows it did read</li>
 <li>comparison controls <code>scripts/prototypes/importer_delta/control.py</code>, log <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/negative-control.log</code></li>
 </ul>
 </section>

@@ -29,8 +29,10 @@ def main():
         row = json.loads(path.read_text())
         if path.stem == row.get("mesh"):
             rows.append(row)
-    rows = [r for r in rows if r.get("completed") and "constant" in r and "mesh" in r]
-    assert len(rows) >= 3, "the three required WEST meshes must complete"
+    rows = [r for r in rows if "constant" in r and "mesh" in r]
+    assert sum(bool(r.get("completed")) for r in rows) >= 3, (
+        "the three required WEST meshes must complete"
+    )
     plt.style.use(
         Path(__file__).parents[1] / "magnetisation_high_permeability/data-ink.mplstyle"
     )
@@ -40,7 +42,12 @@ def main():
         for basis, colour, factor in [("constant", CONSTANT, 2), ("linear", LINEAR, 6)]:
             for uniform, marker in [(True, "o"), (False, "s")]:
                 subset = sorted(
-                    (r for r in rows if r["mesh"].startswith("uniform") == uniform),
+                    (
+                        r
+                        for r in rows
+                        if r["mesh"].startswith("uniform") == uniform
+                        and (basis == "constant" or r.get("completed"))
+                    ),
                     key=lambda r: r["cells"],
                 )
                 if not subset:

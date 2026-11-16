@@ -25,6 +25,13 @@
       "table_form": "Passes: three wave/probe profiles against their own abscissae, which is a plotted relationship and not tabular."
     }
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The canvas and declared size differ in aspect but the rendered figure was inspected at 1400 px with no clipped or distorted text; named to the lead as optional polish",
+      "recorded_at": "2026-11-16T23:32:20.773914+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/iron_limb_production/figure.py",

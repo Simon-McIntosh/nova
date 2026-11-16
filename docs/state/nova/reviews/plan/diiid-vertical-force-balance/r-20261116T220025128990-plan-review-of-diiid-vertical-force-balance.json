@@ -65,6 +65,16 @@
       "note": "\u00a711 now runs the benchmark entry point first; it records the probe reading 1119994.165 A beside the banked 1137702.076 A and the registration, and explains the probe if the benchmark passes",
       "reason": "",
       "when": "2026-11-16T22:47:10.326458+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "efc4056cae459023108d512032293f46a1fb64e4",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "\u00a77's opening paragraph now says it is measured on the head carrying \u00a76 and \u00a710's single-kernel coupling",
+      "reason": "",
+      "when": "2026-11-16T22:47:20.892858+00:00"
     }
   ],
   "responses": {
@@ -88,6 +98,15 @@
       "by": "",
       "reason": "The symbols are the defect's location, read from the code at HEAD today (the uniform row at diiid_forward_gs_match.py:1284 from _green_block, moments from build_flux_blocks with block 0 discarded), and the lead chose the polygon kernel explicitly; naming them is the decision, not a guess",
       "when": "2026-11-16T22:46:40.699910+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "efc4056cae459023108d512032293f46a1fb64e4",
+      "commit_basis": "edit",
+      "note": "\u00a77's opening paragraph now says it is measured on the head carrying \u00a76 and \u00a710's single-kernel coupling",
+      "reason": "",
+      "when": "2026-11-16T22:47:20.892858+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261116T220025128990-plan-review-of-diiid-vertical-force-balance.json",

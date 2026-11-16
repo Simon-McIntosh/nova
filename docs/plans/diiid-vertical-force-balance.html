@@ -22,7 +22,7 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="90">
+<meta name="plan-version" content="92">
 <meta name="plan-modified" content="2026-11-16">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
@@ -313,6 +313,12 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T210059239602-diiid-finite-edge-booking" data-who="reckon-build" data-when="2026-11-15T22:20:13Z">
     <div class="r-comment-body"><p>The DIII-D finite-edge source is booked through the clipped-current route: the source integral and its tangent stay continuous across the boundary (eight contract cases plus a public-builder route test whose withheld-booking control reddens). Focused gate over eight files against a red base: base 37b9ba7c4 and head dc8001e5f fail the same 20 rows, zero added, head passes 8 more. Rows 137D and 146D converge (lower X 1.0 and 1.6 cm from EFIT); 146L and 179L do not converge. The pinned consumer refuses at both revisions on a -1.56% seed-current drift that predates this node.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261116T103915131247-review-of-diiid-inactive-compensator-recovery-7bf27cfc4068-figure" data-who="reckon-build" data-when="2026-11-16T10:50:11.633Z">
+    <div class="r-comment-body"><p>Figure review of five rendered panels at head 7bf27cfc: all six rubric items pass on all five figures; two non-blocking findings only — the flux legend keys neither the EFIT-axis open triangle nor the hollow unadmitted-saddle cross (render.py:137), and the trajectory axis-height panel has no tick below zero while the recovery series sits about 5.8 cm below it (render.py:214). Neither blocks, so both figures stand as drawn.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261116T103738381449-review-of-diiid-inactive-compensator-recovery-7bf27cfc4068" data-who="reckon-build" data-when="2026-11-16T10:43:03.826Z">
+    <div class="r-comment-body"><p>Review of r-20261114T205813832530-diiid-inactive-compensator-recovery at base 70c2026ce3f4745b42718f6f68f0a0630bd016ae and head 7bf27cfc406824415e9cb87958e5a8733238029c scores goal_fidelity 16, evidence 16, scope_discipline 19, durability 13, fit 18, reuse 5 (total 87) with four non-blocking findings: the reduced route still applies an inactive circuit image (nova/equilibrium/reduced_newton.py:2396), the shadowed parametrisation is degenerate (tests/equilibrium/test_solve_vertical_pin.py:418), the gate arm runner duplicates scripts/prototypes/diiid_core_hold/regressions.py:21 (scripts/prototypes/diiid_inactive_compensator/gate.py:24), and the 16-failure reproduction log was overwritten so only the radial half of the control is durable (docs/evidence/fragments fix: docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html:7).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

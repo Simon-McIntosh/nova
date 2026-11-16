@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures": [],
+  "added_failures_note": "Derived with reckon.crew.review.added_failures_from_gate_logs over the reviewed run's own arms: gate/baseline.log (revision 70c2026ce3f4745b42718f6f68f0a0630bd016ae, scratch tree, 6 passed, EXIT=0) and observer-head-gate/after.log (revision 9741737502a49caed1aef3892e666ec0960c28f2, 38 passed, EXIT=0), so the head adds no failing test and the count is a measured 0 rather than an unmeasured one.",
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/equilibrium/forward.py:2310",
+    "nova/equilibrium/forward.py:2687"
+  ],
+  "completed_at": "2026-11-16T10:43:03.826Z",
+  "dispatched_at": "2026-11-16T10:40:23Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/reduced_newton.py",
+      "line": "2396",
+      "severity": "non-blocking",
+      "text": "_RowAugmentation.flux_delta passes unknowns[row_slice] to pair.unknown.flux_delta and ignores pair.binding.payload, so an inactive circuit compensator still contributes its image and tangent on the reduced route; the file is in the node's declared write paths, the fix at nova/equilibrium/constraint.py:2099 does not reach it, and the goal's 'any proposal route' therefore holds only for the four routes the done_when enumerates."
+    },
+    {
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": "418",
+      "severity": "non-blocking",
+      "text": "both values of the shadowed parameter pass jnp.zeros_like(state, dtype=bool) to system.shadowed_map_fn, and the shadow branch at nova/equilibrium/constraint.py:2091-2097 selects base_shadowed_map only for a False mask, so the two arms are the same map; 16 parametrisations are 8 distinct cases and the claim of 'both live and frozen-shadow maps' at docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html:6 is unsupported."
+    },
+    {
+      "file": "scripts/prototypes/diiid_inactive_compensator/gate.py",
+      "line": "24",
+      "severity": "non-blocking",
+      "text": "arm() re-implements the arm runner owned at scripts/prototypes/diiid_core_hold/regressions.py:21 (same revision header, EXIT line, FAILED/ERROR extraction and completed flag) instead of importing it, which is what scripts/prototypes/diiid_xpoint_held_nodes/gates.py:21 does with the same owner."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html",
+      "line": "7",
+      "severity": "non-blocking",
+      "text": "the 16-failure unmasked reproduction is cited from a log the same paragraph says was overwritten, and the durable control at scripts/prototypes/diiid_inactive_compensator/gate.py:126 asserts that every failing id contains 'radial', so the circuit-source half of the guard has no recorded red run."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all seven commits against the base; 8452f6ac1 changes nova/equilibrium/constraint.py:2099-2108 and adds the new test, d0a801847 and a48436e60 add the cohort, gate and renderer scripts, 974173750 unwraps a ForwardSolveReceipt in the observer, and 69e78248f, e6a888f4d and 7bf27cfc4 are the record, figures and caption data.",
+    "done_when": "clause 1 is tests/equilibrium/test_solve_vertical_pin.py:365 driving newton, rebuilt, continuation and descent over radial and circuit sources with exact-zero image and tangent plus a declared mutation; clause 2 is one H200 job whose log shows four ROW lines (cohort-recovery.log:3456, :6870, :10413, :13884) and the 146L per-trip table; clause 3 is gate/baseline-focused.log and gate/after-focused.log, both 2 failed and 73 passed with identical ids.",
+    "goal": "the node's goal is that an inactive compensator contributes no flux and no tangent on any proposal route (docs/plans/diiid-vertical-force-balance.html:84); nova/equilibrium/constraint.py:2099-2108 masks the normalized unknown at the single augmented-map image site, and nova/equilibrium/forward.py:2687 still builds the default inactive pin for every newton_krylov request, so the diagnosed path now receives a zero image.",
+    "manifest": "read; it records status complete through 7bf27cfc4, baseline_suite 6 passed in 48.02s and after_suite 38 passed in 70.95s at tests/equilibrium/test_solve_vertical_pin.py, focused arms 2 failed and 73 passed in both, the 8-id negative control at gate/negative-control.log, and the four cohort rows in job 1319177.",
+    "write_paths": "the declared paths are nova/equilibrium/constraint.py, nova/equilibrium/fixed_point.py, nova/equilibrium/reduced_newton.py, tests/equilibrium/test_solve_vertical_pin.py, scripts/prototypes/diiid_inactive_compensator, docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html and the two docs figures directories; git diff --name-status 70c2026ce3f4745b42718f6f68f0a0630bd016ae 7bf27cfc406824415e9cb87958e5a8733238029c lists 15 files and every one is beneath one of them."
+  },
+  "justifications": {
+    "durability": "reverting nova/equilibrium/constraint.py:2106 reddens the 8 radial inactive ids in gate/negative-control.log, yet tests/equilibrium/test_solve_vertical_pin.py:418 hands system.shadowed_map_fn an all-False mask for both values of the shadowed parameter, so half the parametrisation is the same map.",
+    "evidence": "gate/baseline.log:5 records 6 passed in 48.02s and observer-head-gate/after.log records 38 passed in 70.95s, which reckon.crew.review.added_failures_from_gate_logs reads as a measured 0 added failures.",
+    "fit": "nova/equilibrium/constraint.py:2099-2106 sits in the existing evaluate loop and reuses the isinstance-plus-payload idiom that nova/equilibrium/constraint.py:2203 already uses for the terminal record.",
+    "goal_fidelity": "nova/equilibrium/constraint.py:2099-2106 gates the image at the one augmented-map application site, but nova/equilibrium/reduced_newton.py:2396 applies the same unknown image with pair.binding.payload ignored, so an inactive circuit compensator still contributes on the reduced route.",
+    "reuse": "nova/equilibrium/constraint.py:2099 extends the augmented system and scripts/prototypes/diiid_inactive_compensator/measure.py wraps scripts/prototypes/diiid_finite_edge_booking, but scripts/prototypes/diiid_inactive_compensator/gate.py:24 duplicates the arm runner at scripts/prototypes/diiid_core_hold/regressions.py:21.",
+    "scope_discipline": "git diff --name-status 70c2026ce3f4745b42718f6f68f0a0630bd016ae 7bf27cfc406824415e9cb87958e5a8733238029c lists 15 files, every one inside the declared write paths, and no declared path is written outside them."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is that an inactive compensator contributes no flux and no tangent on any proposal route (docs/plans/diiid-vertical-force-balance.html:84); nova/equilibrium/constraint.py:2099-2108 masks the normalized unknown at the single augmented-map image site, and nova/equilibrium/forward.py:2687 still builds the default inactive pin for every newton_krylov request, so the diagnosed path now receives a zero image.\nVERDICT done_when: clause 1 is tests/equilibrium/test_solve_vertical_pin.py:365 driving newton, rebuilt, continuation and descent over radial and circuit sources with exact-zero image and tangent plus a declared mutation; clause 2 is one H200 job whose log shows four ROW lines (cohort-recovery.log:3456, :6870, :10413, :13884) and the 146L per-trip table; clause 3 is gate/baseline-focused.log and gate/after-focused.log, both 2 failed and 73 passed with identical ids.\nVERDICT write_paths: the declared paths are nova/equilibrium/constraint.py, nova/equilibrium/fixed_point.py, nova/equilibrium/reduced_newton.py, tests/equilibrium/test_solve_vertical_pin.py, scripts/prototypes/diiid_inactive_compensator, docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html and the two docs figures directories; git diff --name-status 70c2026ce3f4745b42718f6f68f0a0630bd016ae 7bf27cfc406824415e9cb87958e5a8733238029c lists 15 files and every one is beneath one of them.\nVERDICT manifest: read; it records status complete through 7bf27cfc4, baseline_suite 6 passed in 48.02s and after_suite 38 passed in 70.95s at tests/equilibrium/test_solve_vertical_pin.py, focused arms 2 failed and 73 passed in both, the 8-id negative control at gate/negative-control.log, and the four cohort rows in job 1319177.\nVERDICT diff: read all seven commits against the base; 8452f6ac1 changes nova/equilibrium/constraint.py:2099-2108 and adds the new test, d0a801847 and a48436e60 add the cohort, gate and renderer scripts, 974173750 unwraps a ForwardSolveReceipt in the observer, and 69e78248f, e6a888f4d and 7bf27cfc4 are the record, figures and caption data.\nCALL_SITES: nova/equilibrium/forward.py:2310, nova/equilibrium/forward.py:2687\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/equilibrium/constraint.py:2099-2106 gates the image at the one augmented-map application site, but nova/equilibrium/reduced_newton.py:2396 applies the same unknown image with pair.binding.payload ignored, so an inactive circuit compensator still contributes on the reduced route.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate/baseline.log:5 records 6 passed in 48.02s and observer-head-gate/after.log records 38 passed in 70.95s, which reckon.crew.review.added_failures_from_gate_logs reads as a measured 0 added failures.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-status 70c2026ce3f4745b42718f6f68f0a0630bd016ae 7bf27cfc406824415e9cb87958e5a8733238029c lists 15 files, every one inside the declared write paths, and no declared path is written outside them.\nSCORE durability: 13\nJUSTIFICATION durability: reverting nova/equilibrium/constraint.py:2106 reddens the 8 radial inactive ids in gate/negative-control.log, yet tests/equilibrium/test_solve_vertical_pin.py:418 hands system.shadowed_map_fn an all-False mask for both values of the shadowed parameter, so half the parametrisation is the same map.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/constraint.py:2099-2106 sits in the existing evaluate loop and reuses the isinstance-plus-payload idiom that nova/equilibrium/constraint.py:2203 already uses for the terminal record.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/equilibrium/constraint.py:2099 extends the augmented system and scripts/prototypes/diiid_inactive_compensator/measure.py wraps scripts/prototypes/diiid_finite_edge_booking, but scripts/prototypes/diiid_inactive_compensator/gate.py:24 duplicates the arm runner at scripts/prototypes/diiid_core_hold/regressions.py:21.\nFINDING nova/equilibrium/reduced_newton.py:2396 non-blocking: _RowAugmentation.flux_delta passes unknowns[row_slice] to pair.unknown.flux_delta and ignores pair.binding.payload, so an inactive circuit compensator still contributes its image and tangent on the reduced route; the file is in the node's declared write paths, the fix at nova/equilibrium/constraint.py:2099 does not reach it, and the goal's 'any proposal route' therefore holds only for the four routes the done_when enumerates.\nFINDING tests/equilibrium/test_solve_vertical_pin.py:418 non-blocking: both values of the shadowed parameter pass jnp.zeros_like(state, dtype=bool) to system.shadowed_map_fn, and the shadow branch at nova/equilibrium/constraint.py:2091-2097 selects base_shadowed_map only for a False mask, so the two arms are the same map; 16 parametrisations are 8 distinct cases and the claim of 'both live and frozen-shadow maps' at docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html:6 is unsupported.\nFINDING scripts/prototypes/diiid_inactive_compensator/gate.py:24 non-blocking: arm() re-implements the arm runner owned at scripts/prototypes/diiid_core_hold/regressions.py:21 (same revision header, EXIT line, FAILED/ERROR extraction and completed flag) instead of importing it, which is what scripts/prototypes/diiid_xpoint_held_nodes/gates.py:21 does with the same owner.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html:7 non-blocking: the 16-failure unmasked reproduction is cited from a log the same paragraph says was overwritten, and the durable control at scripts/prototypes/diiid_inactive_compensator/gate.py:126 asserts that every failing id contains 'radial', so the circuit-source half of the guard has no recorded red run.\n",
+  "review_run_id": "r-20261116T103738381449-review-of-diiid-inactive-compensator-recovery-7bf27cfc4068",
+  "reviewed_base_sha": "70c2026ce3f4745b42718f6f68f0a0630bd016ae",
+  "reviewed_head_sha": "7bf27cfc406824415e9cb87958e5a8733238029c",
+  "reviewed_run_id": "r-20261114T205813832530-diiid-inactive-compensator-recovery",
+  "rubric": "review",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T11:01:22.359479+00:00",
+  "total": 87
+}

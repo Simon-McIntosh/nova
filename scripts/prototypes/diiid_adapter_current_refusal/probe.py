@@ -123,6 +123,11 @@ def main(argv: list[str] | None = None) -> int:
         help="adapter module source to exercise: 'tree' or a file path",
     )
     options = parser.parse_args(argv)
+    import jax
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    assert jax.config.jax_enable_x64
     diiid_current = _module(options.module)
 
     bench, row = _corpus_row()

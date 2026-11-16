@@ -1,0 +1,47 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T21:30:22.143Z",
+  "dispatched_at": "2026-11-16T21:30:06Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261116T212822387868-plan-review-of-kernel-compile-barrier/plan.html:66",
+      "id": "done_when-1",
+      "reason": "without stating which arm supplies the per-block post-splitter count (a CPU pass-dumped compile or only the H200 stubbed compiles of clause three), the attribution clause names a quantity its named instrument cannot produce and the erased-stub guard misfires.",
+      "text": "node (b)'s second clause asks for \"the lowered StableHLO size and that instruction count\" to be attributed to the source blocks \"by lowering the program on CPU with each block stubbed in turn\", but the 267,438 figure is a count after `variadic-op-splitter` and is produced only by a pass-dumped compile (\u00a72 states it is \"measured with \u00a75's harness\"; `scripts/prototypes/compile_pass_profile/lowered_size.py` states \"the compile itself is not run\"), and the new stub-visibility rule then requires each stubbed program's instruction count to differ from \"267,438 instructions on the H200\" \u2014 a comparison a CPU lowering cannot yield, so the five CPU stubs of clause two have no obtainable instruction count and a correct stub can be reported erased or the node blocked",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "a234b8c28f23b45b1b631b38a28d576eddcda9b2",
+  "plan_fingerprint": "f3be71de573e9a8c8143ea78ca2f82b35de75ae6e807f80916ea4c54574b96d6",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 83,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261116T212822387868-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "1d9dc292eadc8692bc9f7a1ae4faf40dbb5a7d00",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/equilibrium/fixed_points.py:323` is `def _source_jets`, `:546` is `def maintain_rows`, `:611` is the `_row_program(...)` call, `scripts/prototypes/read_route/jets.py:262` is the `jax.jit(jax.vmap(_source_jets, ...))` wrapper, `scripts/prototypes/fixed_points/solve.py:121` and `scripts/prototypes/kernel_compile_census/row.py:115` resolve, commits `da28fc4e5` and `00ec05512` resolve, and `ordered-sharing.html` exists; the four CPU lowerings 8,408,375 / 7,482,936 / 6,461,067 / 6,088,070 match `bounded-jets-build.html:13`, and 267,438 instructions and 217.9 s match `ordered-sharing.html:22-23`.",
+    "done_when": "a finding \u2014 node (b)'s second clause orders the 267,438 post-splitter instruction count attributed per block by CPU lowering, while that count exists only in a pass-dumped compile, and the added stub-visibility rule compares a CPU-lowered stub against the H200 count.",
+    "evidence_paths": "pass \u2014 node (b)'s record is `docs/evidence/fragments/kernel-compile-barrier/point-program-attribution.html`, its figure under `docs/figures/kernel-compile-barrier/point-program-attribution/`, its receipts under `~/.cache/nova-kernel-compile-barrier/point-program-attribution/`; none is a node-local temporary path.",
+    "naming": "pass \u2014 s3 introduces no code symbol; the receipt and figure paths repeat the plan's own evidence convention and no stage label reaches product naming, and naming the analysis instrument (`production_point_batch`, `_row_program`) is the subject measured, not a new naming convention.",
+    "reasoning": "pass \u2014 the cited evidence now supports the cell-invariance claim without asserting the scan is refuted (node (b) counts the per-term bodies that decide it), the 28.8% graph share is explicitly a size share, the 218.9 s control (node (a)'s landing) sits within 0.5% of the 217.9 s `ordered-sharing` base, and the endpoint \u2014 one attribution record, one figure, one control lowering \u2014 is obtainable and can fail.",
+    "single_goal": "pass \u2014 node (b) is one attribution deliverable (measurement only, no source or test change), node (c) is the bounded form, node (a) landed; each carries one verdict.",
+    "wiring": "pass \u2014 s3 declares links to s2 and s5 (declaration block line 63, meta plan-section-depends-on `s3:[kernel-compile-barrier#s2]`), both sections exist and are declared done; s4 depends on s3 and s4's body states it."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "b465cef1e2cc13170ec112ecc51774aeedecf0105d30a3902a7c0ecc0a762197",
+    "s3": "6031396285538f2e024df74202603fdea9ecb0faa3c790768d707b7ec936d8f5",
+    "s4": "b4c3eef27a064692dbf419c8ce536674acaafb04413c9c58789ff1b0a6338bcc",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T22:32:54.487105+00:00",
+  "total": null
+}

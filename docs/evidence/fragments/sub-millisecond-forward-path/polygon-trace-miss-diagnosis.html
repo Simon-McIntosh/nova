@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="polygon-trace-miss-diagnosis">
+<meta name="plan-title" content="Polygon trace miss: derivative routing at corner heights">
+<meta name="plan-summary" content="The corner branch bypasses the stable ordinary tangent at 58 of 64 targets; a scratch-only stable-corner measure is running">
+<meta name="plan-status" content="active">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s7">
+<title>Polygon trace derivative routing | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<article id="polygon-trace-miss-diagnosis-result">
+<h3 id="polygon-trace-miss-diagnosis-title">The corner branch bypasses the stable ordinary tangent</h3>
+<p><strong>The measured Hessian path enters the original corner expression.</strong> The candidate <code>ff92ac8f63e3088b4950104a0d146f37dcdc1842</code> stabilizes its ordinary field JVP, but a target near any source corner height instead selects <code>other + tangent_z × stable_height</code> for all six field moment rows. Both <code>other</code> and the four height samples are still built from the original pole product. The 64-node measurement selects that branch for 1,501 of 35,712 target–cell pairs and 58 of 64 targets. A scratch-only intervention is measuring those same derivative-side paths through the stable expression; its complete result is pending.</p>
+
+<h4 id="polygon-trace-miss-diagnosis-reproduction">The recorded failure reproduces without another bank measurement</h4>
+<p>The census reads the original plasma archives, checks their SHA256 identities and matching target coordinates, reconstructs the authored-density forcing with the existing diagnosis helpers, and reproduces the stop record exactly. The unchanged trace is <code>ψRR + ψZZ − ψR/R = −2π μ0 R J</code>, normalized by the larger of the forcing norm and the norm of the three left-hand-side terms. The bound remains <code>1e-8</code>.</p>
+<table id="polygon-trace-miss-diagnosis-errors"><thead><tr><th>State</th><th>Main relative error</th><th>Tangent-only relative error</th><th>Stable-corner scratch relative error</th></tr></thead><tbody>
+<tr><td>220</td><td>0.25412326933888046</td><td>0.07240561389990628</td><td>Pending</td></tr>
+<tr><td>333</td><td>0.2307181485696403</td><td>0.07431037785257429</td><td>Pending</td></tr>
+<tr><td>336</td><td>0.18477194395234264</td><td>0.08098246978802758</td><td>Pending</td></tr>
+</tbody></table>
+<p>The candidate guard actually refuses the saved result: <code>AssertionError: candidate trace relative 0.08098246978802758 exceeds unchanged limit 1e-8</code>, <code>EXIT=1</code>, in <code>candidate-refusal.log</code>. The known-present passing control is accepted at <code>1.8687273143042114e-9</code>; empty arrays or a guard that always refuses cannot satisfy these paired checks.</p>
+
+<h4 id="polygon-trace-miss-diagnosis-path">Which derivative the trace executes</h4>
+<p><code>BiotMomentCoupling.value_gradient</code> contracts analytic <code>Br</code> and <code>Bz</code> moment rows into <code>2πR × (Bz, −Br)</code>. The retained measurement takes <code>jax.jacfwd</code> of that gradient. Consequently the measured Hessian uses <em>one</em> application of the packed custom JVP to the analytic field rows, together with the derivative of the explicit <code>2πR</code> factor. It is not a nested JVP of the flux JVP.</p>
+<table id="polygon-trace-miss-diagnosis-calls"><thead><tr><th>Expression entry per measured point</th><th>Original product</th><th>Stable product</th><th>Role</th></tr></thead><tbody>
+<tr><td>JVPTracer</td><td>2</td><td>1</td><td>Original ordinary/value and non-height JVPs; stable ordinary JVP</td></tr>
+<tr><td>ArrayImpl</td><td>4</td><td>0</td><td>Height samples at ±10 µm and ±5 µm</td></tr>
+</tbody></table>
+<p>These are observed Python expression entries in the unmodified candidate's fresh CPU x64 first-point evaluation, rather than optimized instruction counts. At a selected corner, the final <code>where</code> discards the stable ordinary field tangent and uses the original non-height derivative plus a Richardson-extrapolated height derivative of original values. The six nodes with no selected corner contribute only <code>2.52e-22</code>, <code>2.38e-22</code> and <code>6.61e-23</code> of the candidate's squared residual at the three states; their largest absolute residuals are below <code>9.65e-11 Wb/m²</code>. The largest corner-selected residuals are <code>5.09</code>, <code>5.00</code> and <code>5.91 Wb/m²</code>.</p>
+<p>The instrument names and checks every inspected array. Target points have shape <code>(64,2)</code>, source moments <code>(3,558,3)</code>, packed edges <code>(10,4,558)</code>, nearest heights and corner masks <code>(64,558)</code>, authored density and forcing <code>(3,64)</code>, and owner counts <code>(64,)</code>. Both saved gradient arrays are <code>(3,64,2)</code> and both Hessian arrays <code>(3,64,2,2)</code>. Every listed array is finite. The exact printed records are in <code>census.log</code>.</p>
+
+<h4 id="polygon-trace-miss-diagnosis-intervention">One scratch intervention, original primal retained</h4>
+<p>The diagnostic archive changes only calls inside <code>_packed_moments_height_tangent</code>: the non-height directional JVP and all four corner-height samples use <code>tangent_expression</code>, which already selects <code>stable_poles=True</code>. It returns <code>evaluate(*primals)</code> from the original evaluator so the value used by the explicit radial prefactor remains original. The existing threshold, sample offsets, extrapolation and masks are unchanged. The patch lives in <code>stable-corner/scratch-kernel.patch</code>; no product source is committed.</p>
+<p>The run processes all three states together at each of 64 targets, in fresh four-target processes inside one rigel allocation. Each process persists its prefix before the next begins. The final receipt must be complete, finite and below the unchanged bound in every state before this intervention is treated as causal evidence.</p>
+
+<h4 id="polygon-trace-miss-diagnosis-control">The historical passing control was a different derivative design</h4>
+<p>The brief calls the historical <code>head-eager/receipt.json</code> a full pole-product rewrite. Its actual first bounded-process log names revision <code>8ddd54127fa90537d931634b8fb7707a0c6e86c9</code>. Its polygon kernel is byte-identical to <code>ac025dc6bf723192564918b9bfe67ab7a63ac0ff</code>, SHA256 <code>12f021ed5e8fc74643e6cb6fcf9f031dd8b3dc7511b048869da5f0720e74ad34</code>. That kernel takes sixth-order Richardson differences in both coordinates near extended edge lines, at ±1 mm, ±0.5 mm and ±0.25 mm. It predates the stable-product implementation. Its passing result establishes that the target identity is attainable, but does not measure the later analytic stable-product design. The scratch intervention above supplies the missing direct comparison.</p>
+
+<h4 id="polygon-trace-miss-diagnosis-recommendation">Structural recommendation and cost estimate</h4>
+<p>Pending the scratch result, the smallest recommended structural change is one derivative evaluator shared by <em>every</em> field-tangent path: ordinary, non-height and corner samples all select the stable product, while one separate original evaluator supplies the custom-JVP primal. The ordered direction pass can supply the ordinary tangent directly, avoiding the separate overwritten ordinary JVP. Keep the current corner rule rather than adding another stencil or a second kernel.</p>
+<p>The measured tangent-only production instruction ratio is <strong>1.32× main</strong> (<code>1.3183578998×</code>, 352,579 versus 267,438 instructions). For the recommended shared derivative expression, a planning estimate is <strong>about 1.5× main, with a 1.3–1.8× range</strong>. More corner evaluations carry compensated pole algebra, while eliminating the duplicated ordinary tangent can offset part of that increase. This is an estimate, not a new compiler measurement or a cost-budget verdict. Cold compile wall is optimizer-sensitive; the measured tangent-only <code>1.56×</code> is retained without extrapolating it into a measured wall for the recommendation.</p>
+
+<h4 id="polygon-trace-miss-diagnosis-provenance">Durable evidence and remaining qualification</h4>
+<p>All logs and numerical receipts are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T232556462356-polygon-trace-miss-diagnosis/</code>. Census job <code>1321021</code> and unmodified candidate instrumentation job <code>1321022</code> completed on rigel; stable-corner job <code>1321023</code> is running. The runner extracts candidate <code>ff92ac8f</code> with <code>git archive</code> into job-local scratch and loads the measurement helpers from <code>bf9964e4</code>. It records the imported module, resolved working directory, kernel hash, CPU backend and asserted x64 before array construction. The archived candidate hash is <code>a690303f87ce20a45f65d559c7110f4b8004bbdacb276ad1cb703b1880222120</code>.</p>
+<p>The original accepted archives retain SHA256 <code>1af597ae420d81c73ed4106b424d29b2a92897f96b0f1b4b8f3979f563501b21</code> for main and <code>08b559fc7d4d2638871eb269d69b66f9795ae18bde7174f17d7f63c6ffc49dab</code> for the candidate. The intervention qualifies a mechanism only. A production repair still needs its own corner-height regression, rectangle and coil invariance checks, paired importer gates, production compile measurement and bank re-certification. This node changes no path under <code>nova/</code> and has no armed suite pair.</p>
+</article>
+</main></body></html>

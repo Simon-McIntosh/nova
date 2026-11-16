@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-16T03:22:16Z",
+  "dispatched_at": "2026-11-16T00:37:43Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/importer-delta.html",
+      "line": 32,
+      "severity": "non-blocking",
+      "text": "The card table is marked 'information, not gate' while two of its four rows are now complete on-revision pairs at 35fad5250 with 0 added ids (tests/biot/test_edge_term_tangents.py 2/2, tests/biot/test_vertex_term_tangents.py 0/0), and gate.sh reports the same in gate.log line 10-11. h200-config.json sets \"gated\": false for the whole device, so a regression in either file would print in the table and leave GATE=PASS. The plan's ruling that the four slow files are gated once at the end of the plan makes this legitimate for the two unmeasured rows; for the two measured pairs the gate could hold them at no cost."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/importer-delta.html",
+      "line": 41,
+      "severity": "non-blocking",
+      "text": "The node's brief asks for 'one table, a row per file and device'; this range adds a third table of 26 superseded rows measured against an earlier head, which its own note calls superseded by the tables above. It duplicates 22 files already reported at the current head and doubles the fragment's row count, so a reader scanning for the verdict must first establish which table is live. The information is not wrong and the note is explicit; it is surplus to the deliverable."
+    },
+    {
+      "file": "scripts/prototypes/importer_delta/gate.sh",
+      "line": 48,
+      "severity": "non-blocking",
+      "text": "The manifest states that three probe receipt sets (a removed head row, a head row relabelled to another revision, a planted id) make the comparison of verify.py exit one, and no file under the run directory records any of the three: grep for 'UNMEASURED' or 'GATE=FAIL' over the run directory returns no log, only the worker's own resume transcripts. The gate's refusal path is the only thing that makes GATE=PASS mean anything, and this run records the pass and the two control PASSes but not the refusal it claims to have seen."
+    },
+    {
+      "file": "scripts/prototypes/importer_delta/assemble.py",
+      "line": 98,
+      "severity": "non-blocking",
+      "text": "at_revision() returns true for a receipt row whose revision is absent (row.get('revision') in (None, revision)), so a head row that lost its revision field pairs as this head's arm instead of being written head-other-revision. The commit this line adds is titled 'refuse an arm recorded at another revision', and an unrecorded revision is exactly the case where the gate cannot tell. No receipt in head-cpu-receipts.json, head-h200-receipts.json or h200-receipts.json omits revision today, so nothing is currently mispaired; the permissive default is latent."
+    },
+    {
+      "file": "scripts/prototypes/importer_delta/fill.py",
+      "line": 398,
+      "severity": "non-blocking",
+      "text": "Nothing compares the committed fragment to what fill.py renders from the delta tables, so the renderer having been run once is the only evidence that the prose matches the rows. The prior review raised the same gap and this range rewrote 248 lines of fill.py without adding such a check; a hand edit of the fragment or a table rebuilt without re-rendering leaves the two silently inconsistent. The placeholder-left guard at fill.py:394-397 checks the template, not the artefact."
+    },
+    {
+      "file": "scripts/prototypes/importer_delta/compare.py",
+      "line": 53,
+      "severity": "non-blocking",
+      "text": "The base-versus-head failure-id set difference is inlined here for at least the seventeenth time in this tree (bank_jacobian_launches/report.py, bank_candidate_loop/report.py, bank_compact_followups/gates.py, read_live_candidates/verify_combined.py and a dozen others carry the same shape), and scripts/prototypes/support/ owns the shared prototype machinery and holds none of it. This copy earns its place by pairing only arms of the same device, which the earlier copies do not, so the device-aware pairing is the part that belongs in support/ rather than a further copy of the subtraction."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261116T003631004900-review-of-importer-delta-9e3baf64ed48",
+  "reviewed_base_sha": "a75cf9e9142994cde20684e252fa01407aa6d64d",
+  "reviewed_head_sha": "9e3baf64ed48ac04e5a15cc326360f4ade20a74d",
+  "reviewed_run_id": "r-20261114T214523563698-importer-delta",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 12,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T03:26:10.424743+00:00",
+  "total": 86
+}

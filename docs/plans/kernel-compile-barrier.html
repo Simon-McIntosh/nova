@@ -25,8 +25,8 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="70">
-<meta name="plan-modified" content="2026-11-15">
+<meta name="plan-version" content="71">
+<meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
   <main class="plan-doc">
@@ -200,6 +200,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-11-15T18:10:00Z">
     <div class="r-comment-body"><p><strong>§2 closed on the lead's rulings of 2026-11-15.</strong> The bound is restated to what the byte-identical form reaches, and the remaining reduction moves to §3. Landed on main at head <code>35fad5250</code> (product source <code>e6b9ea32a</code>): on the H200, fresh process and cache disabled, the production row program at 132 went from 402,141 to 267,438 instructions after the splitter and from 350.9 s to 217.9 s cold, with value, gradient and Hessian byte-identical to the base on 430,000 entries (job 1316537). Clause (3): no added failure id on CPU at that head over the twenty fast files and the two files the node added (sirius job 1317508; receipts under <code>~/.cache/nova-kernel-compile-barrier/importer-delta/</code>); the evidence fragment for that comparison is still to land from run <code>r-20261114T214523563698-importer-delta</code>. The other rulings: the two budget tests in <code>tests/biot/test_production_row_compile.py</code> stay enabled and failing on the H200 until the program meets them; the read, bank and tracked-read files are gated in §4; the four slow files are gated once, when the plan's last section lands. <a href="/nova/evidence/fragments/kernel-compile-barrier/ordered-sharing.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261116T003631004900-review-of-importer-delta-9e3baf64ed48" data-who="reckon-build" data-when="2026-11-16T03:22:16Z">
+    <div class="r-comment-body"><p>review of run r-20261114T214523563698-importer-delta at head 9e3baf64ed48 over base a75cf9e91429 — scores goal_fidelity 16, evidence 15, scope_discipline 16, durability 12, fit 15, reuse 12, added_failure_count 0, no blocking finding and six non-blocking findings; recorded at review-records/r-20261114T214523563698-importer-delta.json and its head-keyed twin</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261020-coarse-tie-run-phase" data-who="reckon-build" data-when="2026-10-20T07:03:00Z">
     <div class="r-comment-body"><p>From crew run <code>r-20261019T223150157038-coarse-tie-census-memory</code>, landed as evidence at merge <code>19a02ca16</code> (failed, correct refusal): a second provisioning job (sirius 1290676, 450G, 5 h) reproduced the cold compile at 7,013 s and about 378 GB, then held that memory for a further ~11,000 s in the 533-batch node loop without publishing the operand. So the jets build's cost is not only its compile: the batch loop after it also outlasts a five-hour wall at 2,132 nodes. §3's done-when (1) bounds the compile; the node that builds §3 should also report the loop's wall per batch, so a bounded compile is not followed by an unbounded run. The 500-cell coarse-tie census test stays a known failure until §3 lands. <a href="/nova/evidence/fragments/converged-forward-solve/coarse-tie-census-memory.html">evidence</a></p></div>

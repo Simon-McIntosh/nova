@@ -14,6 +14,13 @@
   ],
   "completed_at": "2026-11-16T22:21:38.141Z",
   "dispatched_at": "2026-11-16T22:21:16Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "lead ruling 2026-11-16: the fresh-process H200 replay difference (8.7e-18 T, 1.2e-13 relative, identical operator bytes) is recorded as measured device roundoff, not a pass; no tolerance changed",
+      "recorded_at": "2026-11-16T23:19:59.486439+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/iron-core-magnetisation/icm-west-linear-h200.html",

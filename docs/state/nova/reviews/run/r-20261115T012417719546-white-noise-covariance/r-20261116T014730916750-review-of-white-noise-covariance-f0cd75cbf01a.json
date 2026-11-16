@@ -9,6 +9,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-11-16T02:11:16.404Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-white-noise-covariance-f0cd75cbf01a",
+      "recorded_at": "2026-11-16T02:34:43.158589+00:00"
+    }
+  },
   "dispatched_at": "2026-11-16T01:48:26Z",
   "failure_delta_evidence": {
     "after_suite": null,

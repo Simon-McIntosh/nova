@@ -307,6 +307,11 @@ def measure(record, output):
     )
     groups = probe_groups()
     record["probe_groups"] = {name: points.tolist() for name, points in groups.items()}
+    offsets, start = {}, 0
+    for name, points in groups.items():
+        offsets[name] = start
+        start += len(points)
+    record["group_offsets"] = offsets
     record["west"] = []
     points = np.concatenate(list(groups.values()))
     fields = {key: {} for key in ("true", "stored")}
@@ -409,3 +414,34 @@ def main():
     measure(record, args.output)
     print(f"SUMMARY west_passed={record["west_passed"]}", flush=True)
     raise SystemExit(0 if record["west_passed"] else 1)
+
+def fill_one_displacement(directory):
+    """Return the unit-fill displacement of the in-vessel field.
+
+    ``directory`` holds the measurement: the true model's fields at both
+    sizes and the unit-fill arm at the coarse size. The displacement the
+    declared mutation moves is compared with the true model's own mesh-pair
+    difference at the same probes.
+    """
+    directory = Path(directory)
+    summary = json.loads((directory / "summary.json").read_text())
+    sizes = summary["sizes_m"]
+    coarse, fine = max(sizes), min(sizes)
+    ring = len(summary["probe_groups"]["in_vessel"])
+    index = slice(0, ring)
+    true_coarse = np.load(directory / f"west-true-{coarse:g}.npz")["field"][index]
+    true_fine = np.load(directory / f"west-true-{fine:g}.npz")["field"][index]
+    mutation = np.load(directory / "west-true-fill-one.npz")["field"][index]
+    displacement = float(
+        np.linalg.norm(mutation - true_coarse)
+        / max(float(np.linalg.norm(true_coarse)), 1e-30)
+    )
+    mesh = float(
+        np.linalg.norm(true_coarse - true_fine)
+        / max(float(np.linalg.norm(true_fine)), 1e-30)
+    )
+    return dict(
+        displacement=displacement,
+        mesh_pair_difference=mesh,
+        exceeds=bool(displacement > mesh),
+    )

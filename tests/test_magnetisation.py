@@ -1242,6 +1242,23 @@ def test_control_receipt_refuses_a_solid_arm_resembling_the_filled_solve(tmp_pat
         validate_control_receipt(changed, _CONTROL_REVISION)
 
 
+def test_true_outline_fill_fraction_exceeds_its_mesh_pair_difference():
+    """Unit fill is refused as a stand-in: it moves the in-vessel field."""
+    import os
+
+    from scripts.iron_limb_production.outline import fill_one_displacement
+
+    directory = Path(
+        os.environ.get(
+            "NOVA_WEST_OUTLINE_RECEIPT",
+            "/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/west-62751",
+        )
+    )
+    measured = fill_one_displacement(directory)
+    assert measured["displacement"] > measured["mesh_pair_difference"], measured
+    assert measured["exceeds"], measured
+
+
 @pytest.mark.slow
 @pytest.mark.timeout(1800)
 @pytest.mark.parametrize("mu", [50.0, 200.0])

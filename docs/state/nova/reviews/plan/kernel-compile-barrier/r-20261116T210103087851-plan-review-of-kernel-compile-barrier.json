@@ -35,9 +35,28 @@
       "note": "s3 quotes the four CPU lowerings of the one program as the fragment gives them, and the control target is the 132-cell CPU figure 6,088,070",
       "reason": "",
       "when": "2026-11-16T21:27:17.740708+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "438b3a0a53fc330fb76125a6f8f21cada1d09e53",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "node (b) third clause requires each stubbed lowering to show a size and instruction-count change against the unstubbed form before its compile seconds are read",
+      "reason": "",
+      "when": "2026-11-16T21:27:35.635687+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "438b3a0a53fc330fb76125a6f8f21cada1d09e53",
+      "commit_basis": "edit",
+      "note": "node (b) third clause requires each stubbed lowering to show a size and instruction-count change against the unstubbed form before its compile seconds are read",
+      "reason": "",
+      "when": "2026-11-16T21:27:35.635687+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",

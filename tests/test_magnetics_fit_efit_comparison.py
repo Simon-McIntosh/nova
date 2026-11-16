@@ -1691,14 +1691,63 @@ def _compare_fit(data, forward):
         conductor_names=data["conductor_names"],
     )
     started = perf_counter()
-    fitted = fitter.fit(
-        data["measurement"],
-        plasma_current_scale=data["plasma_current_scale"],
-        tolerance=1e-5,
-        max_iterations=16,
-    )
+
+    def fit_and_persist(measurement, current_scale, label):
+        try:
+            receipt = fitter.fit(
+                measurement,
+                plasma_current_scale=current_scale,
+                tolerance=1e-5,
+                max_iterations=16,
+            )
+        except RuntimeError as error:
+            receipt = getattr(error, "fit_receipt", None)
+            if receipt is not None:
+                _persist_forward(
+                    receipt, _output() / f"{data['name']}-{label}-refused.pkl"
+                )
+                persist_trials(receipt, label)
+                data["terminal_residual"] = float(
+                    receipt.forward.terminal_state.fixed_point.residual
+                )
+                _panel(
+                    data,
+                    qualified=bool(receipt.forward.qualified),
+                    flux=receipt.forward.terminal_state.flux,
+                    suffix=f"-{label}-refused",
+                )
+            elif getattr(error, "receipt", None) is not None:
+                _persist_forward(
+                    error.receipt,
+                    _output() / f"{data['name']}-{label}-forward-refused.pkl",
+                )
+            raise
+        _persist_forward(receipt, _output() / f"{data['name']}-{label}.pkl")
+        persist_trials(receipt, label)
+        return receipt
+
+    def persist_trials(receipt, label):
+        _write(
+            _output() / f"{data['name']}-{label}-trials.json",
+            dict(
+                converged=bool(receipt.converged),
+                forward_evaluations=receipt.forward_evaluations,
+                last_accepted_coefficients=receipt.coefficients.tolist(),
+                rejected_trials=[
+                    dict(
+                        iteration=row["iteration"],
+                        fraction=row["fraction"],
+                        coefficients=row["coefficients"].tolist(),
+                        termination_reason=int(row["termination_reason"]),
+                        **_residual_fields(row["residual"]),
+                    )
+                    for row in receipt.rejected_trials
+                ],
+            ),
+        )
+
+    fitted = fit_and_persist(data["measurement"], data["plasma_current_scale"], "fit")
     warm_wall = perf_counter() - started
-    _persist_forward(fitted, _output() / f"{data['name']}-fit.pkl")
     state, centroid = _as_equilibrium(data, fitted.forward, fitted.source_profile)
     forward_state, forward_centroid = _as_equilibrium(data, forward, data["source"])
     reference_centroid = _reference_centroid(data)
@@ -1739,6 +1788,29 @@ def _compare_fit(data, forward):
             strict=True,
         )
     ]
+    _write(
+        _output() / f"{data['name']}-unscaled-result.json",
+        dict(
+            case=data["name"],
+            fit_converged=bool(fitted.converged),
+            scores=scores,
+            forward_part=forward_part,
+            fit_part=fit_part,
+            sensor_residuals=residuals,
+            warm_wall_seconds=warm_wall,
+            forward_evaluations=fitted.forward_evaluations,
+            device=fitted.device,
+            constraint_context=data["constraint_context"],
+        ),
+    )
+    data["terminal_residual"] = float(
+        fitted.forward.terminal_state.fixed_point.residual
+    )
+    _panel(
+        data,
+        qualified=bool(fitted.forward.qualified),
+        flux=fitted.forward.terminal_state.flux,
+    )
     scaled_measurement = replace(
         m,
         measured=m.measured * 1.10,
@@ -1747,13 +1819,9 @@ def _compare_fit(data, forward):
         conductor_current=m.conductor_current * 1.10,
         conductor_scale=m.conductor_scale * 1.10,
     )
-    scaled = fitter.fit(
-        scaled_measurement,
-        plasma_current_scale=data["plasma_current_scale"] * 1.10,
-        tolerance=1e-5,
-        max_iterations=16,
+    scaled = fit_and_persist(
+        scaled_measurement, data["plasma_current_scale"] * 1.10, "scaled-fit"
     )
-    _persist_forward(scaled, _output() / f"{data['name']}-scaled-fit.pkl")
     scaled_error = abs(
         float(np.sum(scaled.forward.terminal_state.cell_current)) - case.plasma_current
     ) / abs(case.plasma_current)
@@ -1780,12 +1848,6 @@ def _compare_fit(data, forward):
     if "continuation_provenance" in data:
         result["continuation_provenance"] = data["continuation_provenance"]
     _write(_output() / f"{data['name']}-result.json", result)
-    data["terminal_residual"] = result["residual"]
-    _panel(
-        data,
-        qualified=bool(fitted.forward.qualified),
-        flux=fitted.forward.terminal_state.flux,
-    )
     assert fitted.converged, "inverse did not reach a stationary fit"
     assert all(scores["bands"].values()), scores
     assert scaled_error > 0.015, (

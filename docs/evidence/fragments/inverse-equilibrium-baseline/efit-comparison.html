@@ -1636,3 +1636,49 @@
     fit/forward disagreement split and physical scaled-data control remain
     unavailable because no public receipt qualified for the inverse fit.</p>
 </section>
+
+<section id="efit-comparison-fitted-tcv-physical">
+  <h3>TCV public solve after fitted-current input verification</h3>
+  <p>The fitted-source replay passes before seeds are admitted: loop relative
+    L2 0.169823%, probe relative L2 0.190155%. The physical attempt retains
+    measured-current observations and their uncertainties, starts the
+    conductors at their stored fitted values, and uses Bernstein pp/FF-prime
+    ndeg=0/2, live=0/1: pressure gradient fixed at zero. All three public seed
+    candidates are exhausted; the inverse fit and physical scaled control
+    were not entered.</p>
+  <table><thead><tr><th>Seed</th><th>Relative residual</th><th>Converged</th>
+    <th>Qualified</th><th>Measured termination</th></tr></thead><tbody>
+    <tr><td>Stored field</td><td>0.030364200526436996</td><td>false</td><td>false</td>
+      <td>12, ACTIVE_SET_STEP_REFUSED; 1611.809386 s titan P100</td></tr>
+    <tr><td>Limited cold seed</td><td>NaN</td><td>false</td><td>false</td>
+      <td>3, NoQualifiedAxisError; native summary records 13 finite residual entries</td></tr>
+    <tr><td>Diverted cold seed</td><td>NaN</td><td>false</td><td>false</td>
+      <td>3, NoQualifiedAxisError; native summary records 13 finite residual entries</td></tr>
+  </tbody></table>
+  <p>The finite-entry count is not an attempted-trip count. The native summary
+    predates the reporting correction; its full saved histories are retained.
+    No reader exception occurred. Native pytest reports
+    <code>1 failed in 4111.60s (1:08:31)</code>; complete case wall
+    4139.724097 s on titan P100, including compilation. These are public
+    forward nonqualifications after sensor-family agreement, with the original
+    three-seed cap preserved. TCV remains stopped.</p>
+  <figure>
+    <img src="/nova/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/tcv.svg"
+      alt="TCV final cold seed on shared physical levels; grey reference contours and wall remain visible while no blue terminal contours appear" />
+    <figcaption>TCV final third public seed. imas-efit is grey and wide;
+      nova is blue and narrow on the same physical level array, with no blue
+      contours visible at those levels. Grey axis and X-point belong to
+      imas-efit; the terminal Nova null read refused qualification and no
+      axis was invented. Unit-faithful wall, no axes, one frameless legend,
+      14 × 7.2 in. Residual NaN; converged=false; qualified=false. Both fits
+      use the magnetics-only constraint set. PNG inspected and receipt
+      inserted before native EXIT=1.</figcaption>
+  </figure>
+  <p>Evidence: <code>fitted-physical-measurement-1318907/physical-tcv/</code>
+    in the run directory. The job completed and retained each case
+    independently. Its final focused forward/unit process at
+    <code>e3fc81d28267036870d67225c762827683b09388</code> reports
+    <code>1 failed, 65 passed, 10 deselected in 58.21s</code>.
+    No completed scaled-fit receipt exists, so no physical negative-control
+    log is adopted.</p>
+</section>

@@ -1,0 +1,66 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-16T04:08:06.518Z",
+  "dispatched_at": "2026-11-16T03:39:48Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "bounded-jets-build",
+      "recorded_at": "2026-11-16T04:11:41.959818+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bounded_jets_build/figure_time_per_pass.py",
+      "id": "ffbbcbe91f4",
+      "line": 88,
+      "severity": "blocking",
+      "summary": "The base arm's value label is drawn in white at a fixed offset from the axis (x = widest * 0.012, i.e. inside the bar's left end) instead of at the bar's end, so every base bar narrower than its own label loses its trailing glyphs to white-on-white. On the rendered PNG only the top two rows carry a whole base value: 159.9 and 60.3. The third row's 13.3 renders as '13.' with its final glyph on the white page, 9.0 renders as '9.', 5.6 as '5', 4.7 as '4', 4.7 as '4', and the rows at 3.4 s, 3.0 s, 2.3 s, 2.2 s and 2.2 s show no base value at all - only a faint white smudge inside a 3-7 px bar. Ten of the twelve base values are therefore unreadable, and the cut is dangerous rather than merely absent: '13.' and '9.' read as 13 and 9, which are wrong numbers, so a reader comparing the two arms of the figure's own headline passes (the splitter and the fusion pass are the two rows that survive) cannot read the rest of the table at all. The head value of every row is drawn in dark text past the bar's end and is fully legible, so the asymmetry is visible in the picture."
+    },
+    {
+      "file": "scripts/prototypes/bounded_jets_build/figure_time_per_pass.py",
+      "id": "fdd931a08d8",
+      "line": 26,
+      "severity": "non-blocking",
+      "summary": "The base series renders as rgb(178,178,178), which is 2.12:1 against the white page, and the white value text drawn on it (line 88) is the same 2.12:1 against its own bar. The project plot-style rules set about 3:1 as the floor for a grey that must still read as data and name a grey near 2:1 as already too light. The colour is legible in the two rows whose labels fit, so this is recorded non-blocking; the two rows are also the ones the blocking finding above leaves readable."
+    },
+    {
+      "file": "scripts/prototypes/bounded_jets_build/figure_time_per_pass.py",
+      "id": "ffd875304f5",
+      "line": 36,
+      "severity": "non-blocking",
+      "summary": "The left panel draws the top 12 of 104 base passes and 107 head passes with no mark that the tail is omitted, and neither the axis nor the caption says only the 12 costliest are shown. The drawn bars sum to 270.6 s of the base arm's 340.7 s attributed (79.4% of it) and 159.1 s of the head arm's 207.9 s (76.5%), while the legend attaches one number to each arm - 353.6 s and 218.9 s, the cold-compile walls - so a reader who sums the bars cannot reach either figure and is not told why. A truncation mark or a 'top 12 of 104 passes' note in the axis label or caption would settle it."
+    }
+  ],
+  "notes": [
+    "Every verdict was formed from the one attached PNG (image-0.png, 1400x720); no SVG was opened, read or shown, and no other image was consulted.",
+    "The caption in docs/evidence/fragments/kernel-compile-barrier/bounded-jets-build.html names both arms, the base and head revisions, the device, the program and size, and the two cold-compile walls; it does not merely repeat the title, so it is not a finding.",
+    "Pixel readings taken from the rendered PNG: base bar interior and the label's background rgb(178,178,178); base value glyphs rgb(255,255,255); ink bounding box x 12-1379, y 20-700 on the 1400x720 canvas.",
+    "Pass times quoted in the findings were read from the receipts the fragment names (variadic-split/paired-clean/base and bounded-jets-build/head-132 attribution.json), not inferred from the drawn labels: base 159.893, 60.262, 13.293, 8.958, 5.623, 4.723, 4.707, 3.436, 2.987, 2.298, 2.214, 2.203 s, attributed 340.666 s of 353.574 s; head attributed 207.928 s of 218.880 s.",
+    "The glyph-level checks used nearest-neighbour enlargements of the same rendered PNG (8x on single rows and 3x on groups of rows) to confirm which digits are lost; they introduced no image and changed no file."
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261116T032453158776-review-of-bounded-jets-build-26540704f99d-figure",
+  "reviewed_base_sha": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+  "reviewed_head_sha": "26540704f99de89ec4ba9fff8114f48a0df82981",
+  "reviewed_images": {
+    "image-0.png": "docs/figures/kernel-compile-barrier/bounded-jets-build/time-per-pass.svg"
+  },
+  "reviewed_run_id": "r-20261114T232501755703-bounded-jets-build",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/kernel-compile-barrier/bounded-jets-build/time-per-pass.svg": [
+      "RUBRIC legibility: fails - the head values and both panels read at a glance, but the base arm's own value is unreadable on ten of the twelve rows (13.3 shows as '13.', 9.0 as '9.', 5.6 as '5', 4.7 and 3.4 as one digit or a stub, and the five rows from 3.0 s down show nothing), so the left panel states its ranking but not its numbers for either arm's small passes.",
+      "RUBRIC data_ink: passes - every mark is a measurement: one grey and one blue solid bar per pass on one shared seconds axis, with the pass name, the axis unit and the per-arm totals. No gradient, no fill, no watermark.",
+      "RUBRIC decoration: passes - white background, no gridlines, top and right spines removed from both panels, no shading, frame or drop shadow.",
+      "RUBRIC contrast: fails - the tick labels, axis labels, legend text, head bar labels and right-panel labels are near-black or mid-blue and clear their backgrounds, but the base bar is rgb(178,178,178) at 2.12:1 on white and the white base value text at 2.12:1 on that bar, both under the 3:1 the project sets for a grey that must read as data.",
+      "RUBRIC table_form: passes - the left panel is a ranked bar comparison over a shared time axis, not tabular data, and the right panel's four totals (attributed and cold compile, base against head) are a two-value comparison rather than a table; the caption also states the two cold-compile walls in prose.",
+      "RUBRIC label_collision: fails - no two text artists overlap each other. The base labels are clipped by their own bars: ten of twelve run past the bar's end, and where the invisible tail carries a digit the readable prefix states a smaller and wrong number (13.3 reads as 13, 9.0 as 9). Nothing else in the canvas clips: the ink bounding box is x 12-1379 and y 20-700 on a 1400x720 canvas, and the legend sits inside the canvas."
+    ]
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T04:43:22.972167+00:00",
+  "total": null
+}

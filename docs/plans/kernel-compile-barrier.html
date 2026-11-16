@@ -25,7 +25,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="73">
+<meta name="plan-version" content="75">
 <meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
@@ -215,6 +215,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261113-s3-bound-needs-second-lever" data-who="reckon-build" data-when="2026-11-13T17:01:00Z">
     <div class="r-comment-body"><p>Before §3 is dispatched: its 60 s bound sits on the same program §2 changes, and the variadic lever alone leaves 130.8 s on today's base (content review <code>r-20261113T164531019507</code>). Reaching 60 s also needs the second-derivative path that grew the graph 2.75 times to shrink. §3's lever and bound are restated from the head-arm profile §2 lands, and the sentence in §2 that says the 10 s goal is met by §2 to §4 together is corrected in that same edit: no section owns 10 s yet.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261116T032453158776-review-of-bounded-jets-build-26540704f99d-figure" data-who="reckon-build" data-when="2026-11-16T04:08:06.518Z">
+    <div class="r-comment-body"><p>figure review parsed — the bounded-jets-build per-pass figure passes four of six rubric items; the base arm's own value is unreadable on ten of its twelve rows (blocking), the base grey sits at 2.12:1 on white and white-on-gate labels at 2.12:1, and the top-12-of-104 truncation is unmarked; no figure or caption was edited</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261116T032331803881-review-of-bounded-jets-build-26540704f99d" data-who="reckon-build" data-when="2026-11-16T03:40:31.867Z">
+    <div class="r-comment-body"><p>independent review of r-20261114T232501755703-bounded-jets-build at 26540704f99de89ec4ba9fff8114f48a0df82981 against base 7479bb0b5d21fa399c83954490e59d2f1df5be57 — parsed record, all six dimensions scored; 14/9/19/12/16/17; five non-blocking findings, no blocking finding, 0 added failures</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T105213580367-review-of-compile-pass-profile-56097c60b0a9-figure" data-who="reckon-build" data-when="2026-10-27T11:08:08.882Z">
     <div class="r-comment-body"><p>Figure review of the point-jet time-per-pass figure is parsed with all six rubric items: legibility, data_ink, decoration, contrast and label_collision pass, table_form carries the one non-blocking defect; four non-blocking findings are recorded and none blocks — the right panel's three bars sum to 99.235 s against the 96.116 s compile wall its axis names, aggregate passes are drawn identically to single passes, control figures sit in prose, and the blue/grey key lives only in the caption.</p></div>

@@ -50,6 +50,26 @@ def test_passive_zero_turns_remain_zero_response_weights():
         _passive_signed_turns(float("nan"))
 
 
+def test_fitted_replay_family_guard_refuses_before_public_seeds():
+    from tests.test_magnetics_fit_efit_comparison import _require_replay_agreement
+
+    report = dict(
+        conductor_state="stored fitted",
+        equilibrium_solves=0,
+        wall_seconds=1.0,
+        source_cells=2,
+        current_relative_error=0.0,
+        families={
+            "probes": dict(nova_vs_efit=dict(reference_rms=1.0, relative_l2=0.01))
+        },
+    )
+    _require_replay_agreement(report)
+    report["families"]["probes"]["nova_vs_efit"]["relative_l2"] = 0.0736
+    with pytest.raises(ValueError, match="physical fit refused") as refusal:
+        _require_replay_agreement(report)
+    print(f"REPLAY_ADMISSION_GUARD_REFUSED {refusal.value}")
+
+
 def test_fitted_circuit_binding_preserves_output_split_and_shared_members(
     tmp_path, monkeypatch
 ):

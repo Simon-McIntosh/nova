@@ -910,6 +910,29 @@ def _record_forward_refusal(data):
     print("FORWARD_REFUSAL_RECORDED " + json.dumps(result), flush=True)
 
 
+def _require_replay_agreement(report):
+    """Require completed fitted-source evidence before spending public seeds."""
+    if (
+        report.get("conductor_state") != "stored fitted"
+        or report.get("equilibrium_solves") != 0
+        or "wall_seconds" not in report
+        or report.get("source_cells", 0) <= 0
+        or report.get("current_relative_error", math.inf) > 1e-8
+    ):
+        raise ValueError("physical fit requires a completed fitted-source replay")
+    nonzero = 0
+    for name, family in report["families"].items():
+        score = family["nova_vs_efit"]
+        if score["reference_rms"] == 0.0:
+            continue
+        nonzero += 1
+        value = score["relative_l2"]
+        if value is None or not math.isfinite(value) or value > 0.05:
+            raise ValueError(f"physical fit refused by replay family {name}: {value}")
+    if nonzero == 0:
+        raise ValueError("physical fit requires a nonzero reference family")
+
+
 @pytest.mark.slow
 @pytest.mark.timeout(27000)
 @pytest.mark.parametrize("name", tuple(CASES))
@@ -917,7 +940,28 @@ def test_shared_magnetics_reconstruction(name, monkeypatch):
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
     assert jax.default_backend() == "gpu", "physical comparisons require a GPU lane"
-    data = _problem(_read_case(name), monkeypatch)
+    data = _read_case(name)
+    replay_root = os.environ.get("NOVA_EFIT_FITTED_REPLAY_ROOT")
+    if replay_root is not None:
+        directory = Path(replay_root) / name
+        report = json.loads((directory / f"{name}-row-replay.json").read_text())
+        _require_replay_agreement(report)
+        if not (directory / "gate.log").read_text().rstrip().endswith("EXIT=0"):
+            raise ValueError("physical fit requires the native replay EXIT=0 receipt")
+    data = _problem(data, monkeypatch)
+    if replay_root is not None:
+        data = _fitted_current_binding(data)
+        initial = jnp.asarray(data["fitted_conductor_current"])
+        data["request"] = replace(data["request"], current=initial)
+        data["profile"] = replace(
+            data["profile"],
+            operator=replace(data["profile"].operator, external_current=initial),
+        )
+        print(
+            "FIT_INITIAL_CURRENTS stored fitted guess; "
+            "measured current priors unchanged",
+            flush=True,
+        )
     forward = _generating(data)
     if forward is None:
         _record_forward_refusal(data)

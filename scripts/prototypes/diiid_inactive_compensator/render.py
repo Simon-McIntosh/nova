@@ -132,9 +132,33 @@ def panel(folder, output, previews):
     handles = [
         Line2D([], [], color=SOLVED, lw=2.6, label="solved flux"),
         Line2D([], [], color=REFERENCE, lw=2.6, ls="--", label="EFIT flux"),
-        Line2D([], [], color=WALL, lw=1.5, label="first wall"),
         Line2D([], [], color=SOLVED, marker="^", ls="none", label="solved axis"),
-        Line2D([], [], color=SOLVED, marker="X", ls="none", label="solved saddle"),
+        Line2D(
+            [],
+            [],
+            color=REFERENCE,
+            marker="v",
+            mfc="none",
+            ls="none",
+            label="EFIT axis",
+        ),
+        Line2D(
+            [],
+            [],
+            color=SOLVED,
+            marker="X",
+            ls="none",
+            label="admitted solved saddle",
+        ),
+        Line2D(
+            [],
+            [],
+            color=SOLVED,
+            marker="X",
+            mfc="none",
+            ls="none",
+            label="other solved saddle",
+        ),
         Line2D(
             [],
             [],
@@ -144,10 +168,11 @@ def panel(folder, output, previews):
             ls="none",
             label="EFIT saddle",
         ),
+        Line2D([], [], color=WALL, lw=1.5, label="first wall"),
     ]
     figure.legend(
         handles=handles,
-        ncol=3,
+        ncol=4,
         loc="upper center",
         bbox_to_anchor=(0.5, 0.99),
         frameon=False,
@@ -212,6 +237,8 @@ def trajectory(root, diagnosis, output, previews):
             )
     axes[0].set_ylabel("connected cells")
     axes[1].set_ylabel("axis height [cm]")
+    axes[1].set_ylim(-10, 75)
+    axes[1].set_yticks(np.arange(-10, 71, 10))
     figure.legend(
         *axes[0].get_legend_handles_labels(),
         ncol=2,

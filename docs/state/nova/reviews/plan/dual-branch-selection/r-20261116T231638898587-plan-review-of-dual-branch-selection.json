@@ -63,6 +63,16 @@
       "note": "The production clause adds a test that builds the request's cold seed inside jit and fails when seed construction leaves the trace, which is what the host path does today.",
       "reason": "",
       "when": "2026-11-16T23:49:21.819622+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2ae375b43d1fcdd97421a5c891a5cb55b0ebb846",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The section head now says the published class is read after the solve from connectivity and the exact margin, and that the smooth weight is a differentiable indicator that selects between no branches. The last paragraph says the emergence jump is a known limit for consumers that differentiate the weight.",
+      "reason": "",
+      "when": "2026-11-16T23:50:00.128401+00:00"
     }
   ],
   "responses": {
@@ -80,9 +90,9 @@
       "by": "",
       "commit": "2ae375b43d1fcdd97421a5c891a5cb55b0ebb846",
       "commit_basis": "edit",
-      "note": "The head now says the published class is read after the solve from connectivity and the exact margin, and that the smooth weight is a differentiable indicator selecting between no branches; the last paragraph says the emergence jump is a known limit for consumers that differentiate the weight, not work this section owns.",
+      "note": "The section head now says the published class is read after the solve from connectivity and the exact margin, and that the smooth weight is a differentiable indicator that selects between no branches. The last paragraph says the emergence jump is a known limit for consumers that differentiate the weight.",
       "reason": "",
-      "when": "2026-11-16T23:48:52.045382+00:00"
+      "when": "2026-11-16T23:50:00.128401+00:00"
     },
     "reasoning-2": {
       "action": "acted",

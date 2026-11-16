@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-16T10:50:11.633Z",
   "dispatched_at": "2026-11-16T10:39:56Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-inactive-compensator-recovery",
+      "recorded_at": "2026-11-16T11:03:31.842704+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_inactive_compensator/render.py",

@@ -288,6 +288,23 @@ class ConstraintPair:
         """Return the fixed number of residual rows in this tuple position."""
         return int(self.functional.row_count)
 
+    def flux_delta(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext | None,
+        normalized: jax.Array,
+    ) -> jax.Array:
+        """Apply the bound source, suppressing inactive centroid images and JVPs."""
+        if (
+            isinstance(self.functional, CurrentCentroidConstraint)
+            and self.binding.payload is not None
+        ):
+            # The inactive row still solves for zero, even off the root.
+            normalized = jnp.where(self.binding.payload, normalized, 0.0)
+        return self.unknown.flux_delta(
+            profile, context, self.functional, self.binding.payload, normalized
+        )
+
     def tree_flatten(self):
         """Keep the functional type static and map over unknown/binding leaves."""
         return ((self.unknown, self.binding), (self.functional,))
@@ -2096,9 +2113,7 @@ def assemble_augmented_system(
         steps = []
         for pair, row_slice in zip(runtime_pairs, row_slices, strict=True):
             value = unknowns[row_slice]
-            delta = pair.unknown.flux_delta(
-                profile, context, pair.functional, pair.binding.payload, value
-            )
+            delta = pair.flux_delta(profile, context, value)
             mapped_flux = mapped_flux + jnp.where(flux_shadow, 0.0, delta)
             row = jnp.ravel(
                 pair.functional.residual(

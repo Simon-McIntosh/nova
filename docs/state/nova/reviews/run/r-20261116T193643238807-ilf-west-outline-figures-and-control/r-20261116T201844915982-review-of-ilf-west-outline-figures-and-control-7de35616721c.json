@@ -29,6 +29,11 @@
       "kind": "exempted",
       "reason": "The coordinator re-ran the focused gate at the reviewed head 7de356167 (9 passed, exit 0, logs/gate-head.log); the later commit only adds figure copies",
       "recorded_at": "2026-11-16T23:31:58.399321+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "The figures were rendered and inspected by the worker and again by the coordinator; a committed structural assertion on a figure script is not required by the done-when",
+      "recorded_at": "2026-11-16T23:32:04.635307+00:00"
     }
   },
   "findings": [

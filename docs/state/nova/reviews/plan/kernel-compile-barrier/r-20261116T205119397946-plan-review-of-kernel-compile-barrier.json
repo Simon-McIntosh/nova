@@ -61,6 +61,13 @@
       "note": "node (b) third clause now always compiles the program with the regular Hessian block stubbed, and the largest-share block as well when it is a different block",
       "reason": "",
       "when": "2026-11-16T21:00:03.298843+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "finding": "reasoning-3",
+      "reason": "the owner, the deleted copy and the importers define what this section delivers and were reviewed in earlier rounds; stubbing blocks in turn is the definition of the attribution measure, not a reuse map",
+      "when": "2026-11-16T21:00:12.416019+00:00"
     }
   ],
   "responses": {
@@ -81,6 +88,12 @@
       "note": "node (b) third clause now always compiles the program with the regular Hessian block stubbed, and the largest-share block as well when it is a different block",
       "reason": "",
       "when": "2026-11-16T21:00:03.298843+00:00"
+    },
+    "reasoning-3": {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "reason": "the owner, the deleted copy and the importers define what this section delivers and were reviewed in earlier rounds; stubbing blocks in turn is the definition of the attribution measure, not a reuse map",
+      "when": "2026-11-16T21:00:12.416019+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261116T205119397946-plan-review-of-kernel-compile-barrier.json",

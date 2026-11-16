@@ -30,6 +30,11 @@
       "kind": "exempted",
       "reason": "The canvas and declared size differ in aspect but the rendered figure was inspected at 1400 px with no clipped or distorted text; named to the lead as optional polish",
       "recorded_at": "2026-11-16T23:32:20.773914+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Contour lines at 0.8 pt are thin against the house weight but readable in the inspected render, where a heavier stroke would merge the closely spaced levels near the limb faces; named to the lead as optional polish",
+      "recorded_at": "2026-11-16T23:32:27.551795+00:00"
     }
   },
   "findings": [

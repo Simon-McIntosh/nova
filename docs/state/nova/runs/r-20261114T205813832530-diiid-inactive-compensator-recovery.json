@@ -954,6 +954,24 @@
     "reason": "corrective-run:resume",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/equilibrium/test_solve_vertical_pin.py",
+    "integrated_revision": "50812452024eff096f1e8713c1123fd423187988",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261114T205813832530-diiid-inactive-compensator-recovery/review-landing/gate-50812452024eff096f1e8713c1123fd423187988.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'PYTHONPATH=. JAX_PLATFORMS=cpu ./.venv/bin/python -m pytest -p no:cacheprovider -q tests/equilibrium/test_solve_vertical_pin.py'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/nova"
+    ]
+  },
   "lane": "codex",
   "lane_advisory": {
     "backend": "codex",

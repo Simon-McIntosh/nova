@@ -25,7 +25,30 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 95,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "aa6495e403c8489b405c8316a27d399c2672fd5c",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Done-when (2) now names a measured control: re-solved from the converged unmasked state with the inactive image held at zero, the state must leave (residual above 1e-8 or lower null moving more than 1 mm)",
+      "reason": "",
+      "when": "2026-11-16T21:59:34.366387+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "aa6495e403c8489b405c8316a27d399c2672fd5c",
+      "commit_basis": "edit",
+      "note": "Done-when (2) now names a measured control: re-solved from the converged unmasked state with the inactive image held at zero, the state must leave (residual above 1e-8 or lower null moving more than 1 mm)",
+      "reason": "",
+      "when": "2026-11-16T21:59:34.366387+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261116T211526668302-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261116T211526668302-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "107ebf067c9f696b862ec6e135237d50de4e57ac",
   "rubric": "content",

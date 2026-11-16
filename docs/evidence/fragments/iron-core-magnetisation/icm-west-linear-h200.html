@@ -10,8 +10,8 @@ refinement pair. The 8/40 mm affine factor exceeds physical card capacity.</p>
 solution numerically, but the requested byte-identity assertion fails. Its
 largest probe-component difference is 8.673617379884035e-18 T. The persisted operator bytes are identical; this is measured H200 run-to-run
 roundoff, not a byte-identity pass. The assertion and criterion remain unchanged.
-The half-coil-drive slice is authorised as a separate continuation using the
-existing uniform 40 mm operator; its receipt is still pending.</p>
+The half-coil-drive slice also converged from M = 0 using that persisted
+operator with zero reassembly; the different-mesh loader refusal fired.</p>
 
 <h4>Assembly walls, measured on the H200</h4>
 <table><thead><tr><th>mesh</th><th>cells</th><th>unknowns</th><th>operator [GB]</th><th>compile [s]</th><th>device execute [s]</th><th>host remainder [s]</th><th>wall [s]</th></tr></thead><tbody>
@@ -115,12 +115,63 @@ original <code>replay.json</code> records <code>completed=false</code> and
 <code>replay-failed-as-delivered.json</code> in the run directory. Job
 <code>1317867</code> exited at that assertion, before the half-drive and WEST
 wrong-mesh control. The CPU wrong-mesh controls below remain valid separately.</p>
-<p>The half-coil-drive measurement is not yet present. A separate
-<code>--half-drive-only</code> driver path is prepared to load the same operator
-and write a separate receipt while preserving the failed byte check. One distinct H200 continuation has now been authorised for the half-drive
-slice, operator load wall and WEST wrong-mesh refusal. Interaction reuse was
-observed; the strict replay assertion remains failed and the second-slice
-measurement is pending.</p>
+<h4>Second slice: half coil drive, unchanged plasma</h4>
+<p>H200 job <code>1320444</code> completed successfully in a fresh process using
+<code>--half-drive-only</code> on the persisted uniform 40 mm operator. The
+separate <code>half-drive.json</code> records <code>completed=true</code>,
+<code>plasma_unchanged=true</code> and <code>assembly_calls=0</code>, with the
+assembly owner replaced by a refusal. Only the coil-current dictionary was
+scaled by 0.5; the prescribed plasma currents were retained. The operator
+loaded in <strong>15.871703 s</strong>. From M = 0, the material solve took
+<strong>239.518108 s</strong>: 195.672285 s preparation, 42.766639 s measured
+Newton loop and 1.079184 s remaining result construction. Probe evaluation is
+outside this solve wall. Load plus material solve was 255.389811 s.</p>
+<p>The half-drive solve converged in 15 accepted corrections to relative
+residual <strong>1.0591807540383918e-12</strong>, with returned cell μr range
+8.712516–1692.488633. Nine accepted corrections used diagonal regularisation,
+followed by six unregularised Newton corrections. The full residual and
+regularisation histories are in the receipt. Halving coils while retaining
+plasma does not halve the total field or its nonlinear material response.</p>
+<table><thead><tr><th>half-drive probe</th><th>B<sub>R</sub> [µT]</th><th>B<sub>Z</sub> [µT]</th><th>|B| [µT]</th></tr></thead><tbody>
+<tr><td>+1 m</td><td>-10.693227430636</td><td>437.396520792777</td><td>437.527212313143</td></tr>
+<tr><td>+2 m</td><td>-6.521253827744</td><td>327.244912505586</td><td>327.309883004278</td></tr>
+<tr><td>+4 m</td><td>-2.176087856932</td><td>162.733586264152</td><td>162.748135033104</td></tr>
+</tbody></table>
+<p>The WEST negative control handed the actual uniform 80 mm persisted operator
+to the uniform 40 mm loader. Its recorded refusal was
+<code>interaction geometry digest does not match the mesh</code>. This control
+executed after the half-drive solve and is independent of the failed strict
+full-drive replay assertion.</p>
+
+<h4>What the roughly 190 s preparation contains</h4>
+<p>The timing split below is measured inside the production solve during the
+half-drive continuation. Its 195.672285 s total is comparable to the original
+190.768186 s full-drive preparation and 189.143524 s replay preparation;
+those earlier walls were not separately instrumented.</p>
+<table><thead><tr><th>preparation component</th><th>wall [s]</th><th>work included</th></tr></thead><tbody>
+<tr><td>material-law fit</td><td>0.001011</td><td>B-H interpolation coefficients</td></tr>
+<tr><td>mesh construction</td><td>6.572215</td><td>region clipping, cell polygons and mesh measures</td></tr>
+<tr><td>interaction validation</td><td>1.145172</td><td>ordered geometry digest, basis, shape, dtype and finite matrix entries</td></tr>
+<tr><td>linear geometry</td><td>3.118750</td><td>quadrature nodes, basis, Gram blocks and bound-current incidence</td></tr>
+<tr><td>external-field evaluation</td><td>178.766231</td><td>coil quadrature and prescribed plasma contributions at every volume-quadrature node</td></tr>
+<tr><td>projection, checks and device setup</td><td>6.068906</td><td>remaining interval: inverse Gram projection and accumulation, another matrix finiteness scan, JAX operand construction and synchronized device transfers</td></tr>
+</tbody></table>
+<p><strong>External-field evaluation accounts for 91.36% of preparation.</strong>
+The source callback imported from <code>scripts/west_iron_galerkin_pair/measure.py</code>
+evaluates the ring Green functions in 256-target blocks and contracts them with
+coil and plasma currents. The production solve then projects those samples
+onto the affine cell basis. The measurement synchronizes operands before the
+first residual, so pending transfers are charged to preparation rather than
+Newton. The six disjoint intervals sum to the preparation wall.</p>
+<p><strong>The interaction is paid once per mesh.</strong> The persisted response
+served the full-drive replay and a different nonlinear time slice with
+assembly forbidden. The current cached path still repeats mesh/geometry work,
+source evaluation, projection, validation and device setup. It does not yet
+persist the coil-to-cell or cell-to-probe maps, so the measured slice cost is
+not just the 42.77 s Newton loop. Geometry-derived source and observation maps
+are candidates for further reuse; this measurement does not claim that reuse
+has been implemented. The full-drive convergence figure above stays at full
+drive; the separate table reports the changed-drive probes.</p>
 
 <h4>Constant-basis comparison inputs, quoted without recomputation</h4>
 <table>
@@ -185,7 +236,7 @@ exclude the separate probe-field evaluation. Receipts
 <code>1b79e5d8213d2094a47a4a8c78ba11422bb06dde</code>; all_debug job
 <code>1317018</code> completed successfully.</p>
 
-<h4>Validation, receipts and remaining work</h4>
+<h4>Validation and receipts</h4>
 <p>The filtered gate passed at base
 <code>17c8e25635b9bc9658fe2f953977c01d3a041c45</code>
 (<code>67 passed, 9 deselected in 272.56s</code>) and product head
@@ -210,7 +261,11 @@ Graded and replay receipts record revision
 <code>9d41f9d955b973b23e8f6eaed475b56a329c7e53</code>. Every required mesh
 has its own completed receipt, unknown count, operator size, full Newton
 history, returned permeability range and +1/+2/+4 m field. The optional finest
-mesh has a capacity receipt explaining its omission. The strict replay failure
-and missing half-drive slice prevent completion of this node. No formulation
-decision is taken here.</p>
+mesh has a capacity receipt explaining its omission. The half-drive receipt
+records revision <code>d414956a192347e935e7d0259f110534a028f54e</code> and
+script blob <code>4853ec5d4572b3b58a42b1dcc70bc2ec822659d4</code>. The
+strict replay assertion remains failed and is explicitly reported as measured
+H200 roundoff under the accepted disposition; it is not a byte-identity pass.
+The final-head suite result belongs to the manifest. No formulation decision
+is taken here.</p>
 </section>

@@ -125,6 +125,156 @@ def _residual_fields(value):
     return dict(residual=None, residual_state=state)
 
 
+def _passive_signed_turns(value):
+    """Preserve explicit zero turns as a zero response weight."""
+    turns = float(value)
+    if not np.isfinite(turns) or abs(turns) > 1e20:
+        raise ValueError("invalid passive signed turns")
+    return turns
+
+
+def _circuit_groups(active, *, join_chains):
+    """Read signed shared-node pairs and append coils without shared nodes."""
+    supply_count, coil_count = len(active.supply), len(active.coil)
+    count = supply_count + coil_count
+    pairs = []
+    for circuit in active.circuit:
+        for raw in np.asarray(circuit.connections, dtype=int):
+            row = np.where(np.abs(raw) > 1, 0, raw)
+            if len(row) == 2 * count:
+                row = row[::2] - row[1::2]
+            indices = np.flatnonzero(row[:count])
+            if len(indices) in (1, 2) and np.all(indices >= supply_count):
+                pairs.append([int((i - supply_count + 1) * row[i]) for i in indices])
+    groups, done = [], set()
+    for index, pair in enumerate(pairs):
+        if index in done:
+            continue
+        group = [-pair[0]]
+        done.add(index)
+        if len(pair) == 2:
+            tail = pair[1]
+            if join_chains:
+                for other in range(index + 1, len(pairs)):
+                    if other not in done and pairs[other][0] == -tail:
+                        group.append(-pairs[other][0])
+                        tail = pairs[other][1]
+                        done.add(other)
+            group.append(tail)
+        groups.append(group)
+    included = {abs(item) for pair in pairs for item in pair}
+    groups.extend([i] for i in range(1, coil_count + 1) if i not in included)
+    return groups
+
+
+def _fitted_current_binding(data):
+    """Bind the stored flattened circuit vector using its measured-row witness."""
+    active, passive = data["input_ids"]["pf_active"], data["input_ids"]["pf_passive"]
+    time = data["case"].time
+    ts = data["reference_eq"].time_slice[data["reference_slice"]]
+    rows = [
+        (f"pf_current[{i}]", row) for i, row in enumerate(ts.constraints.pf_current)
+    ] + [
+        (f"pf_passive_current[{i}]", row)
+        for i, row in enumerate(ts.constraints.pf_passive_current)
+    ]
+    passive_sources = [
+        loop
+        for loop in passive.loop
+        if _sample_passive(loop, passive, time) is not None
+        and any(int(e.geometry.geometry_type) in (2, 3, 5, 6) for e in loop.element)
+    ]
+    candidates = {}
+    for join in (False, True):
+        groups = [
+            [
+                i
+                for i in group
+                if _sample(active.coil[abs(i) - 1].current, active, time) is not None
+            ]
+            for group in _circuit_groups(active, join_chains=join)
+        ]
+        groups = [group for group in groups if group]
+        measured = [
+            _sample(active.coil[abs(group[0]) - 1].current, active, time)
+            for group in groups
+        ] + [_sample_passive(loop, passive, time) for loop in passive_sources]
+        witness = np.array([float(row.measured) for _, row in rows])
+        if len(measured) == len(rows) and np.allclose(
+            measured, witness, rtol=1e-10, atol=1e-6
+        ):
+            candidates[tuple(tuple(g) for g in groups)] = (groups, measured)
+    if len(candidates) != 1:
+        raise ValueError(
+            "stored circuit identities lack a unique measured-row witness: "
+            f"{len(candidates)}"
+        )
+    groups, measured = next(iter(candidates.values()))
+    effective, mapping = {}, []
+    for index, ((path, row), expected) in enumerate(zip(rows, measured, strict=True)):
+        fitted = float(row.reconstructed)
+        if not np.isfinite(fitted) or abs(fitted) > 1e30:
+            raise ValueError(f"missing fitted conductor current: {path}")
+        if index < len(groups):
+            group = groups[index]
+            members = [
+                (str(active.coil[abs(i) - 1].name), int(np.sign(i) * np.sign(group[0])))
+                for i in group
+            ]
+        else:
+            members = [("passive:" + str(passive_sources[index - len(groups)].name), 1)]
+        for name, polarity in members:
+            effective[name] = effective.get(name, 0.0) + polarity * fitted
+        mapping.append(
+            dict(
+                output=path,
+                source_index=index,
+                source_kind="active" if index < len(groups) else "passive",
+                members=[dict(name=n, polarity=p) for n, p in members],
+                measured_a=float(row.measured),
+                input_witness_a=float(expected),
+                fitted_a=fitted,
+                weight=float(row.weight),
+            )
+        )
+    fitted_columns = np.array([effective[name] for name in data["conductor_names"]])
+    element_current = data["projection"] @ fitted_columns
+    case = data["case"]
+    items = [
+        replace(item, current=float(value))
+        for item, value in zip(
+            (*case.active, *case.passive), element_current, strict=True
+        )
+    ]
+    data["case"] = replace(
+        case,
+        active=tuple(items[: len(case.active)]),
+        passive=tuple(items[len(case.active) :]),
+    )
+    data["fitted_conductor_current"] = fitted_columns
+    data["fitted_current_map"] = mapping
+    _write(
+        _output() / f"{data['name']}-fitted-current-map.json",
+        dict(
+            active_groups=len(groups),
+            sampled_passive_sources=len(passive_sources),
+            stored_active_entries=len(ts.constraints.pf_current),
+            stored_passive_entries=len(ts.constraints.pf_passive_current),
+            measured_witness_max_error_a=float(
+                np.max(np.abs(np.array(measured) - witness))
+            ),
+            mapping=mapping,
+            effective_current_a=effective,
+            rule=(
+                "Flatten both output constraint arrays before binding filtered "
+                "source order; sum every overlapping circuit contribution "
+                "at each physical coil."
+            ),
+        ),
+    )
+    return data
+
+
 def _sample(signal, ids, time, field="data"):
     values = np.asarray(getattr(signal, field), dtype=float)
     clock = np.asarray(
@@ -432,9 +582,7 @@ def _read_case(name):
         sigma = _sample_passive(loop, passive_ids, time, "current_error_upper")
         placed = []
         for element_index, element in enumerate(loop.element):
-            turns = float(element.turns_with_sign)
-            if not np.isfinite(turns) or abs(turns) > 1e20:
-                raise ValueError(f"invalid passive signed turns: {str(loop.name)}")
+            turns = _passive_signed_turns(element.turns_with_sign)
             if turns == 0:
                 continue
             item = owner._conductor(
@@ -616,6 +764,7 @@ def _read_case(name):
         reference_eq=eq,
         reference_slice=index,
         constraint_context=_constraint_context(name),
+        input_ids=ids,
     )
 
 
@@ -856,9 +1005,77 @@ def _replay_nulls(radius, height, values, case):
     return dict(magnetic_axis=axis, other_x_points=saddles)
 
 
+def _probe_response_audit(data, plasma, conductor, total):
+    """Contrast probe projection and calibration hypotheses on one field."""
+    from nova.equilibrium.observation_kernels import virtual_poloidal_probes
+
+    sensors = data["geometry"]
+    indices = np.flatnonzero(~sensors.flux_loop & data["measurement"].mask)
+    points = np.c_[sensors.r[indices], sensors.z[indices]]
+    fields = []
+    for direction in ([1.0, 0.0], [0.0, 1.0]):
+        normal = np.tile(direction, (len(indices), 1))
+        fields.append(
+            sum(
+                np.asarray(virtual_poloidal_probes(biot, points, normal).values)
+                for biot in (plasma, conductor)
+            )
+        )
+    radial, vertical = fields
+    angle = np.deg2rad(sensors.angle[indices])
+    reference = data["reference_predictions"][indices]
+    sigma = data["measurement"].scale[indices]
+    probes = data["input_ids"]["magnetics"].b_field_pol_probe
+    loop_count = len(data["input_ids"]["magnetics"].flux_loop)
+    parameters = [
+        dict(
+            name=data["sensor_names"][i],
+            angle_rad=float(probes[i - loop_count].poloidal_angle),
+            area_m2=float(probes[i - loop_count].area),
+            length_m=float(probes[i - loop_count].length),
+            turns=int(probes[i - loop_count].turns),
+            type_index=int(probes[i - loop_count].type.index),
+            type_name=str(probes[i - loop_count].type.name),
+        )
+        for i in indices
+    ]
+    variants = dict(
+        clockwise=radial * np.cos(angle) + vertical * np.sin(angle),
+        counterclockwise=radial * np.cos(angle) - vertical * np.sin(angle),
+        perpendicular=-radial * np.sin(angle) + vertical * np.cos(angle),
+        area_multiplied=total[indices] * np.array([p["area_m2"] for p in parameters]),
+    )
+    ranking = np.argsort(-np.abs((total[indices] - reference) / sigma))
+    return dict(
+        variants={
+            name: _row_agreement(value, reference, sigma)
+            for name, value in variants.items()
+        },
+        ranked_rows=[
+            dict(
+                **parameters[j],
+                measured_t=float(data["measurement"].measured[indices[j]]),
+                efit_t=float(reference[j]),
+                nova_t=float(total[indices[j]]),
+                residual_t=float(total[indices[j]] - reference[j]),
+                whitened_difference=float(
+                    (total[indices[j]] - reference[j]) / sigma[j]
+                ),
+                variants_t={name: float(value[j]) for name, value in variants.items()},
+            )
+            for j in ranking
+        ],
+        response_source=(
+            "EFIT responseFunctions.cpp passes R,Z,orientation,length,dLength; "
+            "type affects selection/weights; area/turns do not multiply "
+            "the Tesla response."
+        ),
+    )
+
+
 @pytest.mark.slow
 @pytest.mark.timeout(27000)
-@pytest.mark.parametrize("name", ("mastu", "tcv"))
+@pytest.mark.parametrize("name", tuple(CASES))
 def test_shared_magnetics_reconstruction_observation_replay(name):
     """Image a stored density with the actual conductor inputs, without solving."""
     from nova.frame.coilset import CoilSet
@@ -868,6 +1085,9 @@ def test_shared_magnetics_reconstruction_observation_replay(name):
     assert jax.config.jax_enable_x64
     started = perf_counter()
     data = _read_case(name)
+    fitted_currents = os.environ.get("NOVA_EFIT_REPLAY_FITTED_CURRENTS") == "1"
+    if fitted_currents:
+        data = _fitted_current_binding(data)
     case, sensors, measurement = data["case"], data["geometry"], data["measurement"]
     ts = data["reference_eq"].time_slice[data["reference_slice"]]
     density = np.asarray(ts.profiles_2d[0].j_phi)
@@ -999,6 +1219,11 @@ def test_shared_magnetics_reconstruction_observation_replay(name):
         ),
         conductors=list(data["conductor_names"]),
         conductor_current_a=measurement.conductor_current.tolist(),
+        conductor_state="stored fitted" if fitted_currents else "measured inputs",
+        fitted_conductor_current_a=data.get(
+            "fitted_conductor_current", np.array([])
+        ).tolist(),
+        fitted_current_map=data.get("fitted_current_map", []),
         inventory=inventory,
         families=families,
         rows=rows,
@@ -1010,6 +1235,8 @@ def test_shared_magnetics_reconstruction_observation_replay(name):
         constraint_context=data["constraint_context"],
         device=str(jax.devices()[0]),
     )
+    if name == "tcv":
+        report["probe_audit"] = _probe_response_audit(data, plasma, conductor, total)
     _write(_output() / f"{name}-row-replay.json", report)
     print(
         "ROW_REPLAY " + json.dumps({k: v for k, v in report.items() if k != "rows"}),

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import fields, replace
+from dataclasses import dataclass, fields, replace
 from types import SimpleNamespace
 
 import jax
@@ -39,6 +39,89 @@ def test_refused_residuals_preserve_strict_json_receipts(tmp_path):
         _write(path, dict(unexpected=float("nan")))
     print(f"STRICT_JSON_GUARD_REFUSED {refusal.value}")
     assert path.read_bytes() == before
+
+
+def test_passive_zero_turns_remain_zero_response_weights():
+    from tests.test_magnetics_fit_efit_comparison import _passive_signed_turns
+
+    assert _passive_signed_turns(0.0) == 0.0
+    assert _passive_signed_turns(-2.0) == -2.0
+    with pytest.raises(ValueError, match="invalid passive"):
+        _passive_signed_turns(float("nan"))
+
+
+def test_fitted_circuit_binding_preserves_output_split_and_shared_members(
+    tmp_path, monkeypatch
+):
+    from tests.test_magnetics_fit_efit_comparison import _fitted_current_binding
+    from tests.test_equilibrium_forward_reference import Conductor
+
+    @dataclass
+    class Case:
+        time: float
+        active: tuple
+        passive: tuple
+
+    coils = [
+        SimpleNamespace(name=str(i), current=SimpleNamespace(data=np.array([10.0])))
+        for i in range(3)
+    ]
+    active = SimpleNamespace(
+        supply=[None],
+        coil=coils,
+        circuit=[SimpleNamespace(connections=np.array([[0, -1, 1, 0], [0, 0, -1, 1]]))],
+        time=np.array([0.0]),
+        ids_properties=SimpleNamespace(homogeneous_time=1),
+    )
+    passive = SimpleNamespace(
+        loop=[
+            SimpleNamespace(
+                name="wall",
+                current=np.array([4.0]),
+                element=[SimpleNamespace(geometry=SimpleNamespace(geometry_type=2))],
+            )
+        ],
+        time=np.array([0.0]),
+        ids_properties=SimpleNamespace(homogeneous_time=1),
+    )
+
+    def row(measured, fitted):
+        return SimpleNamespace(measured=measured, reconstructed=fitted, weight=1.0)
+
+    constraints = SimpleNamespace(
+        pf_current=[row(10.0, 2.0), row(10.0, 3.0), row(4.0, 5.0)],
+        pf_passive_current=[],
+    )
+    case = Case(
+        0.0,
+        tuple(
+            Conductor(str(i), 10.0, 1.0, rectangle=(1.0, 0.0, 0.1, 0.1))
+            for i in range(3)
+        ),
+        (Conductor("wall", 4.0, 1.0, rectangle=(1.0, 0.0, 0.1, 0.1)),),
+    )
+    data = dict(
+        name="synthetic",
+        case=case,
+        input_ids=dict(pf_active=active, pf_passive=passive),
+        reference_eq=SimpleNamespace(
+            time_slice=[SimpleNamespace(constraints=constraints)]
+        ),
+        reference_slice=0,
+        conductor_names=("0", "1", "2", "passive:wall"),
+        projection=np.eye(4),
+    )
+    monkeypatch.setenv("NOVA_EFIT_COMPARISON_OUTPUT", str(tmp_path))
+    result = _fitted_current_binding(data)
+    np.testing.assert_array_equal(
+        result["fitted_conductor_current"], [2.0, 5.0, 3.0, 5.0]
+    )
+    assert result["fitted_current_map"][2]["source_kind"] == "passive"
+    assert result["fitted_current_map"][2]["output"] == "pf_current[2]"
+    constraints.pf_current[2].measured = 99.0
+    with pytest.raises(ValueError, match="unique measured-row witness") as refusal:
+        _fitted_current_binding(data)
+    print(f"CIRCUIT_WITNESS_GUARD_REFUSED {refusal.value}")
 
 
 def test_rank_deficient_data_exposes_its_null_direction():

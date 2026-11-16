@@ -1,0 +1,47 @@
+<article id="ilf-west-outline-figures-and-control-landing">
+  <h3>WEST 62751 figures redrawn and the unit-fill control reconciled</h3>
+  <p id="ilf-west-outline-figures-and-control-control">
+    The unit-fill displacement the receipt and the saved arrays carry is
+    0.0834 under one stated definition:
+    <code>||B(unit fill, 0.04)[0:16] - B(true, 0.04)[0:16]|| / ||B(true, 0.04)[0:16]||</code>
+    over the 16 in-vessel probes. The review's 0.0787 is the same difference
+    divided by <code>||B(unit fill, 0.04)[0:16]||</code>; the two differ only
+    in denominator, and the mesh-pair difference of 0.0081 reproduces under
+    the reference-normalised convention. The definition is stated in
+    <code>scripts/iron_limb_production/outline.py</code> and computed once, by
+    <code>displacement()</code>, which <code>mutation_result()</code> calls;
+    <code>--compare-only</code> recomputes the comparison rows from a finished
+    measurement's arrays and the saved west-62751 rows read 0.0694, 0.1366,
+    0.0240 and 0.0660 against mesh pairs of 0.0086, 0.0132, 0.0185 and 0.0115.
+  </p>
+  <p id="ilf-west-outline-figures-and-control-tests">
+    <code>test_true_outline_fill_fraction_exceeds_its_mesh_pair_difference</code>
+    no longer skips: it loads a 1.5 kB fixture of the three in-vessel field
+    rows (<code>tests/data/west-62751-control.npz</code>) and pins 0.0834 and
+    0.0081 to relative 2e-5. Replacing the unit-fill fixture field with the
+    true-outline field turns it red at displacement 0.0. A second fast test
+    drives <code>--compare-only</code> over synthetic arrays and reads the
+    rewritten rows.
+  </p>
+  <p id="ilf-west-outline-figures-and-control-figures">
+    Both figures were redrawn and inspected as rendered.
+    <code>docs/figures/iron-limb-fill/west-62751-permeability.svg</code>
+    contours each of the six iron regions on its own triangulation, with
+    every triangle a region polygon does not cover whole masked out, so no
+    contour leaves iron: 0 of 1628 stored and 0 of 5654 true contour vertices
+    fall outside their model's iron union. Region outlines are neutral grey in
+    both panels, which share one level array, one colour bar and the extent
+    R -0.1 to 6.25 m, Z -3.7 to 3.7 m. Every region carries at least 704 cells
+    at 0.04 m, so none is drawn as chords.
+    <code>docs/figures/iron-limb-fill/west-62751-stray-lines.svg</code> draws
+    three panels, one per probe group and each with its own x label and a
+    title naming the group; the behind-limb panel keeps upper and lower probes
+    as separate single-signed segments, and one figure-level legend carries
+    stored, true and one grey dotted entry for the 0.08 m mesh.
+  </p>
+  <p id="ilf-west-outline-figures-and-control-gate">
+    Focused gate:
+    <code>9 passed, 80 deselected</code> at
+    <code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_magnetisation.py -k 'control_receipt or whole_set or fill_fraction_exceeds or compare_only or reference_stamp'</code>.
+  </p>
+</article>

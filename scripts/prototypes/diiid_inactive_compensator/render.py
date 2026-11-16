@@ -26,7 +26,9 @@ from scripts.prototypes.diiid_xpoint_offset.style import (
 )
 
 ROWS = ((137, "diverted"), (146, "diverted"), (146, "limited"), (179, "limited"))
-LEVELS = np.asarray([-0.02, 0.0, 0.02, 0.2, 0.6, 1.0, 1.6, 2.0])
+LEVELS = np.asarray(
+    [-2.0, -1.6, -1.0, -0.6, -0.2, -0.02, 0.0, 0.02, 0.2, 0.6, 1.0, 1.6, 2.0]
+)
 
 
 def panel(folder, output, previews):
@@ -38,6 +40,11 @@ def panel(folder, output, previews):
     figure.subplots_adjust(left=0.04, right=0.96, bottom=0.15, top=0.79, wspace=0.25)
     solved_null = np.asarray(receipt["terminal_topology"]["lower_saddle_rz_m"])
     reference_null = np.asarray(receipt["efit_x_point_rz_m"])
+    solved_field = field(data["radius"], data["height"], data["flux"])
+    saddle_level = float(solved_field.ev(*solved_null)) - float(data["boundary"][2])
+    shared_levels = (
+        np.unique(np.r_[LEVELS, saddle_level]) if abs(saddle_level) > 0.05 else LEVELS
+    )
     centre = (solved_null + reference_null) / 2
     half = max(0.15, np.max(np.abs(solved_null - reference_null)) / 2 + 0.08)
     limits = (
@@ -66,7 +73,10 @@ def panel(folder, output, previews):
                 else float(data["boundary"][2])
             )
             values = interpolant(radius, height) - boundary
-            for levels, width in ((LEVELS[LEVELS != 0], 1.2), ([0.0], 3.0)):
+            for levels, width in (
+                (shared_levels[shared_levels != 0], 1.2),
+                ([0.0], 3.0),
+            ):
                 lines = draw_flux_contours(
                     ax,
                     radius,
@@ -117,14 +127,14 @@ def panel(folder, output, previews):
         ax.set_ylim(z_limits)
     notes = [
         figure.text(0.27, 0.08, "full vessel", ha="center"),
-        figure.text(0.73, 0.08, "lower null and wall contact region", ha="center"),
+        figure.text(0.73, 0.08, "lower saddle region", ha="center"),
     ]
     handles = [
         Line2D([], [], color=SOLVED, lw=2.6, label="solved flux"),
         Line2D([], [], color=REFERENCE, lw=2.6, ls="--", label="EFIT flux"),
         Line2D([], [], color=WALL, lw=1.5, label="first wall"),
         Line2D([], [], color=SOLVED, marker="^", ls="none", label="solved axis"),
-        Line2D([], [], color=SOLVED, marker="X", ls="none", label="admitted saddle"),
+        Line2D([], [], color=SOLVED, marker="X", ls="none", label="solved saddle"),
         Line2D(
             [],
             [],
@@ -149,6 +159,7 @@ def panel(folder, output, previews):
         output / (folder.name + ".svg"),
         previews / (folder.name + ".png"),
     )
+    print("SHARED_LEVELS", folder.name, shared_levels.tolist(), flush=True)
     print(
         "CAPTION",
         folder.name,
@@ -166,23 +177,25 @@ def panel(folder, output, previews):
 
 def trajectory(root, diagnosis, output, previews):
     current = json.loads((root / "edge/frame-146-limited/trips.json").read_text())
-    previous = json.loads(
-        (diagnosis / "cohort/edge/frame-146-limited/spatial.json").read_text()
-    )
+    previous = json.loads(diagnosis.read_text())
     figure, axes = plt.subplots(1, 2, figsize=CANVAS, dpi=100)
     figure.subplots_adjust(left=0.1, right=0.96, bottom=0.17, top=0.83, wspace=0.3)
-    for rows, color, dash, label in (
-        (previous["trips"], WALL, "--", "diagnosis"),
-        (current["trips"], SOLVED, "-", "inactive image masked"),
+    current_cells = [row["returned"]["connected_cells"] for row in current["trips"]]
+    current_heights = [row["returned"]["axis_rz_m"][1] for row in current["trips"]]
+    for cells, heights, color, dash, label in (
+        (
+            previous["connected_cells"],
+            previous["axis_height_m"],
+            WALL,
+            "--",
+            "diagnosis",
+        ),
+        (current_cells, current_heights, SOLVED, "-", "inactive image masked"),
     ):
-        cells = [
-            row["returned"].get("connected_cells", row["returned"].get("support"))
-            for row in rows
-        ]
-        height = [100 * row["returned"]["axis_rz_m"][1] for row in rows]
+        height = [100 * value for value in heights]
         for ax, values in zip(axes, (cells, height), strict=True):
             ax.plot(
-                np.arange(1, len(rows) + 1),
+                np.arange(1, len(cells) + 1),
                 values,
                 color=color,
                 ls=dash,
@@ -192,7 +205,9 @@ def trajectory(root, diagnosis, output, previews):
             )
             ax.set_xlabel("outer trip")
             ax.set_xticks(
-                np.arange(1, max(len(current["trips"]), len(previous["trips"])) + 1)
+                np.arange(
+                    1, max(len(current_cells), len(previous["connected_cells"])) + 1
+                )
             )
     axes[0].set_ylabel("connected cells")
     axes[1].set_ylabel("axis height [cm]")

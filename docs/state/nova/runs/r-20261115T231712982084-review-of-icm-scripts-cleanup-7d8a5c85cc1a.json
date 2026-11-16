@@ -1213,6 +1213,46 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "70c2026ce3f4745b42718f6f68f0a0630bd016ae",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261115T231712982084-review-of-icm-scripts-cleanup-7d8a5c85cc1a",
+    "scratch_bytes": 0,
+    "scratch_host": "98dci4-clu-2001.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261115T231712982084-review-of-icm-scripts-cleanup-7d8a5c85cc1a",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261115T231712982084-review-of-icm-scripts-cleanup-7d8a5c85cc1a"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/review-of-icm-scripts-cleanup-7d8a5c85cc1a",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/_trash/r-20261115T231712982084-review-of-icm-scripts-cleanup-7d8a5c85cc1a-20261116T001201481131Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

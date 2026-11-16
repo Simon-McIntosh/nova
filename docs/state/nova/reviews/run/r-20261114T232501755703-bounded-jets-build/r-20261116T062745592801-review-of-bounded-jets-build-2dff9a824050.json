@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "scripts/prototypes/dina_flattop_scenario/inputs.py:21, scripts/prototypes/iter_bank/check_coils.py:22, scripts/prototypes/iter_bank/diagnose.py:22, scripts/prototypes/iter_bank/probe_capacity.py:17, scripts/prototypes/saddle_expansion/speed_gate.py:34, scripts/prototypes/saddle_expansion/speed_gate.py:35, scripts/prototypes/read_route/jets.py:262, nova/equilibrium/fixed_points.py:524, scripts/prototypes/bank_solve_profile/plot.py:45 (save_checked, now called by scripts/prototypes/bounded_jets_build/figure_time_per_pass.py:157)",
+  "completed_at": "2026-11-16T06:32:15.044Z",
+  "dispatched_at": "2026-11-16T06:29:20Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bounded_jets_build/figure_time_per_pass.py",
+      "id": "fc6bb399b58",
+      "line": 69,
+      "severity": "non-blocking",
+      "text": "The figure is drawn at figsize=(14, 7.8) but written through save_checked, which stamps width=\"31.1cm\" height=\"16cm\" (aspect 1.944) onto a viewBox of 1008 x 561.6 (aspect 1.795); with the default meet scaling the 14 x 7.8 in drawing is fitted by height and rendered 28.72 cm wide, leaving about 1.19 cm of blank canvas on each side. The 31.1 x 16 cm stamp is calibrated to the owner's own 14 x 7.2 in figure at scripts/prototypes/bank_solve_profile/plot.py:90, so the mismatch arises from the reuse rather than from the drawing."
+    },
+    {
+      "file": "scripts/prototypes/bounded_jets_build/figure_time_per_pass.py",
+      "id": "f460852029f",
+      "line": 141,
+      "severity": "non-blocking",
+      "text": "The right axis is labelled \"whole cold-compile wall [s]\", but the axis carries two groups and the 'attributed' pair is 340.7 s (base) and 207.9 s (head) of attributed pass time, not the 353.6 s and 218.9 s whole walls the label names; the x tick labels distinguish them, so a reader can recover the meaning, but the axis unit as printed is wrong for one of its two groups."
+    },
+    {
+      "file": "tests/equilibrium/test_bounded_point_program.py",
+      "id": "f3596c0cd01",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The reviewed head 2dff9a824 has no suite arm of its own: the recorded after_suite names 26540704f, and the two importer edits in this commit are exercised only by tests/test_iter_bank.py, which neither arm includes, because the manifest's tests line runs tests/equilibrium/test_bounded_point_program.py and tests/test_fixed_points.py; the change's own test-file change is a docstring, so this hides no new failure but the head is unmeasured."
+    }
+  ],
+  "justifications": {
+    "durability": "the only test-file change is the docstring at tests/equilibrium/test_bounded_point_program.py:1-9 plus a closing parenthesis; no assertion is added, and reverting the two importer lines to the read-route re-export or restoring the figure's in-bar white labels would leave tests/test_iter_bank.py and the slow budget test green.",
+    "evidence": "baseline-suite-1318288.log (19 passed, EXIT=0 at 7479bb0b5) and after-suite-1318900.log (20 passed, EXIT=0) are recorded, but the after arm's revision header reads 26540704f and figure-gate.log's last probe prints 24 of 24 labels dark with no closing EXIT= line, so the reviewed head 2dff9a824 has no suite arm of its own.",
+    "fit": "the change keeps the module's existing idiom (matplotlib.use('Agg') before pyplot, '# ruff: noqa: E402', plt.style.use('data-ink'), trace_axes and DEFAULT_INK), and the head files compile and pass `ruff check --select E,F` unchanged, though scripts/prototypes/iter_bank/measure.py:31 places the nova import after the scripts import block.",
+    "goal_fidelity": "scripts/prototypes/iter_bank/measure.py:31 and scripts/prototypes/saddle_expansion/expansion.py:18 now import _source_jobs from nova/equilibrium/fixed_points.py:323, and figure_time_per_pass.py:99-110 places every drawn value outside its bar; the 'bounded' 60 s half of the goal remains unmet exactly as the run's recorded head receipt 218.880 s states.",
+    "reuse": "the figure now calls the existing scripts/prototypes/bank_solve_profile/plot.py:45 save_checked instead of an unchecked savefig, and every _source_jets reference resolves to the single owner at nova/equilibrium/fixed_points.py:323; a search over scripts/prototypes and nova for another point-ject definition found none.",
+    "scope_discipline": "git diff --name-only 26540704f9 2dff9a824 lists only the fragment, the SVG figure, the figure script, two importer scripts, membership/measure.py and the test file, all of which are among the granted write paths in the reviewed manifest."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261116T062745592801-review-of-bounded-jets-build-2dff9a824050",
+  "reviewed_base_sha": "26540704f99de89ec4ba9fff8114f48a0df82981",
+  "reviewed_head_sha": "2dff9a82405067d8e39c368eadd70b5e062f4fab",
+  "reviewed_run_id": "r-20261114T232501755703-bounded-jets-build",
+  "scores": {
+    "durability": 8,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T06:55:45.323224+00:00",
+  "total": 97,
+  "verdicts": {
+    "diff": "VERDICT diff: read commit by commit against base 26540704f9, one commit 2dff9a824 touching seven files; scripts/prototypes/bounded_jets_build/figure_time_per_pass.py:29-32, 93-98 and 99-110 draw both arms' labels in #1a1a1a beyond each bar's end and state the 12-of-104 truncation, the two script importers move to the owner, scripts/prototypes/membership/measure.py:55 and :67 key its cache on nova/equilibrium/fixed_points.py, the fragment caption is restated, and the test file changes only its docstring and a trailing newline.",
+    "done_when": "VERDICT done_when: the done_when asks for a 60 s / 64 GB H200 cold compile at two arms, row identity at 282 cells and a 64-node subset, and the 500-cell census test inside 900 s; the gate recorded for the reviewed run is pytest over tests/equilibrium/test_bounded_point_program.py and tests/test_fixed_points.py (20 passed, EXIT=0), which asserts a 6,000,000-byte lowering budget and not any of the four done_when clauses, and the recorded after arm is at 26540704f rather than at the reviewed head 2dff9a824.",
+    "goal": "VERDICT goal: the goal is one point program in nova/equilibrium/fixed_points.py serving the row window, the jets build and the operator bank with the prototype copy deleted and its three importers on the owner; commit 2dff9a824 is the increment reviewed here, and it moves the last two script importers (scripts/prototypes/iter_bank/measure.py:31 and scripts/prototypes/saddle_expansion/expansion.py:18) from the read-route re-export to nova/equilibrium/fixed_points.py:323, leaving scripts/prototypes/read_route/jets.py:262 as the only user of that re-export.",
+    "manifest": "VERDICT manifest: read at r-20261114T232501755703-bounded-jets-build/manifest.md; it records the baseline arm 19 passed in 30.20 s at 7479bb0b5 and the after arm at revision 26540704f (20 passed, EXIT=0, after-suite-1318900.log), names the figure gate in figure-gate.log and states in after_arm_note that the arm command 'resolves identically over the later tree' rather than having run at the reviewed head.",
+    "write_paths": "VERDICT write_paths: the granted list in the reviewed manifest's orientation_write_paths includes docs/evidence/fragments/kernel-compile-barrier/bounded-jets-build.html, docs/figures/kernel-compile-barrier/bounded-jets-build, scripts/prototypes/bounded_jets_build, scripts/prototypes/iter_bank/measure.py, scripts/prototypes/membership/measure.py, scripts/prototypes/saddle_expansion/expansion.py and tests/equilibrium/test_bounded_point_program.py; all seven paths in git diff 26540704f9 2dff9a824 lie inside it."
+  }
+}

@@ -358,6 +358,12 @@ def mutation_arm(
     solid, so its in-vessel field must move further than the true model's
     own mesh pair moves the same probes. Both sizes cost one solve each and
     run in the same allocation.
+
+    The in-vessel displacement of a row is
+    ``||B(unit fill) - B(true)|| / ||B(true)||`` over that size's in-vessel
+    probes: the difference is measured against the accepted true-outline
+    field at the same mesh, so it and the mesh-pair difference share one
+    relative-norm convention.
     """
     ring = slice(0, len(groups["in_vessel"]))
     accepted = {
@@ -419,6 +425,31 @@ def mutation_arm(
     )
 
 
+def displacement(true_fine, true_coarse, solid):
+    """Return the unit-fill displacement beside the true model's mesh pair.
+
+    ``true_fine`` and ``true_coarse`` are the accepted true-outline fields
+    at the fine and coarse mesh over the in-vessel probes, and ``solid`` is
+    the unit-fill field at the fine mesh. Both relative norms divide by
+    ``||true_fine||``, so a displacement no larger than the mesh-pair
+    difference is reported as not exceeding. Dividing the same difference by
+    ``||solid||`` instead reads about 6 % lower, because unit fill raises the
+    field norm it divides by.
+    """
+    measured = float(
+        np.linalg.norm(solid - true_fine) / max(float(np.linalg.norm(true_fine)), 1e-30)
+    )
+    mesh = float(
+        np.linalg.norm(true_coarse - true_fine)
+        / max(float(np.linalg.norm(true_fine)), 1e-30)
+    )
+    return dict(
+        displacement=measured,
+        mesh_pair_difference=mesh,
+        exceeds=bool(measured > mesh),
+    )
+
+
 def mutation_result(directory):
     """Recompute the unit-fill displacement from a measurement's arrays."""
     directory = Path(directory)
@@ -429,18 +460,7 @@ def mutation_result(directory):
     true_fine = np.load(directory / f"west-true-{fine:g}.npz")["field"][ring]
     true_coarse = np.load(directory / f"west-true-{coarse:g}.npz")["field"][ring]
     solid = np.load(directory / f"west-true-fill-one-{fine:g}.npz")["field"][ring]
-    displacement = float(
-        np.linalg.norm(solid - true_fine) / max(float(np.linalg.norm(true_fine)), 1e-30)
-    )
-    mesh = float(
-        np.linalg.norm(true_coarse - true_fine)
-        / max(float(np.linalg.norm(true_fine)), 1e-30)
-    )
-    return dict(
-        displacement=displacement,
-        mesh_pair_difference=mesh,
-        exceeds=bool(displacement > mesh),
-    )
+    return displacement(true_fine, true_coarse, solid)
 
 
 def main():
@@ -454,7 +474,17 @@ def main():
         action="store_true",
         help="add the unit-fill control to a finished measurement",
     )
+    parser.add_argument(
+        "--compare-only",
+        action="store_true",
+        help="recompute a finished measurement's comparison rows from its arrays",
+    )
     args = parser.parse_args()
+    if args.compare_only:
+        rows = compare_only(args.output)
+        for row in rows:
+            print("COMPARE " + json.dumps(row, sort_keys=True), flush=True)
+        raise SystemExit(0)
     assert jax.config.jax_enable_x64
     device = jax.devices()[0]
     assert device.platform == "gpu", device

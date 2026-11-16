@@ -1274,24 +1274,64 @@ def test_comparisons_whole_set_row_concatenates_the_groups():
 
 
 def test_true_outline_fill_fraction_exceeds_its_mesh_pair_difference():
-    """Unit fill is refused as a stand-in: it moves the in-vessel field."""
-    import os
+    """Unit fill is refused: the saved in-vessel rows read 0.0834 against 0.0081.
 
-    from scripts.iron_limb_production.outline import mutation_result
+    The fixture holds the 16 in-vessel field rows of the true outline at
+    0.04 m and 0.08 m and of the unit-fill arm at 0.04 m, and the values are
+    pinned to relative 2e-5 so the test runs away from the receipt path.
+    """
+    from scripts.iron_limb_production.outline import displacement
 
-    directory = Path(
+    fixture = Path(
         os.environ.get(
-            "NOVA_WEST_OUTLINE_RECEIPT",
-            "/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/west-62751",
+            "NOVA_WEST_OUTLINE_FIXTURE",
+            Path(__file__).parent / "data" / "west-62751-control.npz",
         )
     )
-    if not (directory / "summary.json").is_file() or not list(
-        directory.glob("west-true-fill-one-*.npz")
-    ):
-        pytest.skip("the unit-fill arm is not on this host")
-    measured = mutation_result(directory)
+    with np.load(fixture) as rows:
+        fields = {key: rows[key] for key in ("true_fine", "true_coarse", "unit_fill")}
+    measured = displacement(
+        fields["true_fine"], fields["true_coarse"], fields["unit_fill"]
+    )
+    assert measured["displacement"] == pytest.approx(0.083399, rel=2e-5), measured
+    assert measured["mesh_pair_difference"] == pytest.approx(0.0081199, rel=2e-5), (
+        measured
+    )
     assert measured["displacement"] > measured["mesh_pair_difference"], measured
     assert measured["exceeds"], measured
+
+
+def test_compare_only_recomputes_the_comparison_rows(tmp_path, monkeypatch):
+    """The command-line entry rewrites the profile rows from the saved arrays."""
+    from scripts.iron_limb_production import outline
+
+    ground = np.zeros((16, 2))
+    summary = {
+        "sizes_m": [0.08, 0.04],
+        "probe_groups": {"in_vessel": ground.tolist()},
+    }
+    (tmp_path / "summary.json").write_text(json.dumps(summary))
+    fields = {
+        ("true", 0.04): np.tile([1.0, 0.0], (16, 1)),
+        ("true", 0.08): np.tile([1.5, 0.0], (16, 1)),
+        ("stored", 0.04): np.tile([1.0, 0.0], (16, 1)),
+        ("stored", 0.08): np.tile([1.0, 0.0], (16, 1)),
+    }
+    for (key, size), field in fields.items():
+        np.savez(tmp_path / f"west-{key}-{size:g}.npz", field=field)
+    monkeypatch.setattr(
+        "sys.argv", ["outline", "--output", str(tmp_path), "--compare-only"]
+    )
+    with pytest.raises(SystemExit) as raised:
+        outline.main()
+    assert raised.value.code == 0
+    rows = json.loads((tmp_path / "summary.json").read_text())["west_comparison"]
+    assert [row["group"] for row in rows] == ["in_vessel", "all"]
+    for row in rows:
+        assert row["size_m"] == 0.04
+        assert row["model_difference"] == 0.0
+        assert row["mesh_pair_difference"] == pytest.approx(0.5)
+        assert not row["resolved"]
 
 
 @pytest.mark.slow

@@ -1751,3 +1751,56 @@
     fields and selection/polish scalars remain in those directories. ITER
     stays stopped at its original public-seed cap; no extra prior was added.</p>
 </section>
+
+<section id="efit-comparison-mastu-qualified-continuation">
+  <h3>MAST-U: one terminal continuation qualifies without relaxing admission</h3>
+  <p>The single authorised continuation starts from the banked stored-field
+    seed's terminal state. Its source profiles, conductor-current guess,
+    geometry, chord support and public qualification limit are retained.
+    Larger budgets and a tighter internal stopping tolerance let it test
+    below the public admission floor. The residual keeps falling; no stall
+    floor above qualification is observed.</p>
+  <table><thead><tr><th>Quantity</th><th>Banked solve</th><th>Continuation</th></tr></thead><tbody>
+    <tr><td>Terminal relative residual</td><td>4.864113698736961e-10</td><td>5.307643379157493e-16</td></tr>
+    <tr><td>Qualification tolerance</td><td>1e-10</td><td>1e-10, unchanged</td></tr>
+    <tr><td>Internal stopping tolerance</td><td>1e-8</td><td>1e-12</td></tr>
+    <tr><td>Newton budget</td><td>10</td><td>40</td></tr>
+    <tr><td>Outer active-set budget</td><td>16</td><td>64</td></tr>
+    <tr><td>Converged</td><td>true</td><td>true</td></tr>
+    <tr><td>Qualified</td><td>false</td><td>true</td></tr>
+    <tr><td>Continuation accepted live-read Newton promotions</td><td>not applicable</td><td>1</td></tr>
+    <tr><td>Continuation frozen outer trips</td><td>not applicable</td><td>3</td></tr>
+    <tr><td>Continuation flux/current/moments/conservation finite</td><td>not applicable</td><td>all true</td></tr>
+    <tr><td>Public-call wall, titan P100 including compilation</td><td>716.732490 s</td><td>629.764926 s</td></tr>
+  </tbody></table>
+  <p>The public route finishes with one live-read Newton promotion after the
+    frozen trips. Its retained per-trip array has a minimum 1.4759247013898337e-10;
+    that array describes the frozen stage. The owner explicitly preserves it
+    when replacing the terminal history with the live-read result in
+    <code>nova/equilibrium/forward.py:2037</code>. The terminal residual above
+    and the unchanged public qualification guard determine admission.
+    An independent x64 metadata read confirms one live-read step and all
+    finite flags; it performs zero map evaluations or solves.</p>
+  <figure>
+    <img src="/nova/figures/inverse-equilibrium-baseline/efit-comparison/terminal-state/mastu-continuation.svg"
+      alt="Qualified MAST-U continuation blue contours and nulls overlay grey imas-efit midplane plasma on shared physical levels inside the wall" />
+    <figcaption>MAST-U qualified continuation, before the inverse fit. The
+      imas-efit map and nulls are grey and wide; nova is blue and narrow on
+      the same physical levels, with its smaller axis and X-point markers.
+      The Nova state now retains the midplane plasma. Unit-faithful wall,
+      no axes, one frameless legend, 14 × 7.2 in. Residual
+      5.307643379157493e-16; converged=true; qualified=true. Bernstein
+      pp/FF-prime live counts 1/1, magnetics-only constraint set. PNG
+      inspected before the CPU render gate's EXIT=0. This is a forward
+      continuation; inverse-fit bands are not inferred from the image.</figcaption>
+  </figure>
+  <p>The existing <code>MagneticsFit</code> now proceeds from this qualified
+    state in the same titan job. Its completed fit, physical bands, vertical
+    rows, disagreement split and actual scaled-data control remain pending.
+    Banked continuation receipts are under
+    <code>terminal-state-followup-1319019/physical-mastu/</code>. The image
+    was rendered separately from the saved receipt using a verified machine
+    cache hit in <code>continuation-panel-1319047/</code>, with zero solves
+    and zero field evaluations. Its 48.118533 s CPU rendering wall is
+    separate from all P100 physics measurements; no CPU suite arm was rerun.</p>
+</section>

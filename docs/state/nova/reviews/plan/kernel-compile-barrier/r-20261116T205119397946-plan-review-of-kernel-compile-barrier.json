@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T20:52:57.712Z",
+  "dispatched_at": "2026-11-16T20:52:43Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:65",
+      "id": "reasoning-1",
+      "reason": "the refutation is the only thing that removes the scan lever, and on it the section commits node (b) to the Hessian path alone; if the inference does not hold, node (c) has been handed one lever while the plan records as measured that the other is dead.",
+      "text": "the paragraph refutes the fixed-capacity scan lever because \"the lowered program is 8,408,375 bytes at 8 cells and 6,088,070 at 132, so it is already one body that does not grow with the cell count, and a scan has nothing to fold\", but the lever was defined as replacing the unrolled per-term graph with one term body, and a lowered size invariant in the cell count is equally consistent with one term body per point and with every term unrolled per point \u2014 the cited pair varies cells, not terms, so it cannot distinguish the two; the figures also run the wrong way for a constant program (the 8-cell program is 38% larger than the 132-cell one), so the comparison is not a controlled one",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:65",
+      "id": "reasoning-2",
+      "reason": "node (c)'s lever is written into the section from (b)'s result, so a (b) that can omit the Hessian block leaves (c) unbuildable after two H200 jobs are spent.",
+      "text": "the paragraph states the regular-Hessian lever's compile wall is \"not yet measured\" and that it owns 28.8% of the lowered graph, then says \"Node (b) measures that wall\", but node (b)'s third clause compiles only \"the block holding the largest share\", which the section never shows to be the regular Hessian at corner heights; if some other block (value path, gradient, elliptic terms) holds the largest share, node (b) returns without the one number node (c)'s lever is written from",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:66",
+      "id": "reasoning-3",
+      "reason": "each named symbol is a guess a worker must test against code that may have moved, and an earlier round already had to repair exactly this class of stale anchor (fixed_points.py line numbers after node (a) landed).",
+      "text": "the section prescribes implementation rather than an endpoint: it names the module and the functions to bound (`nova/equilibrium/fixed_points.py`, `_source_jets`, `_row_program`, `maintain_rows`), the three importer call sites to repoint, \"that import change is the only edit to the census harness\", and in node (b) the mechanism of stubbing source blocks in turn and lowering on CPU, where the brief holds that the reuse map belongs to the node brief and the plan fixes only what counts as done",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:66",
+      "id": "done_when-1",
+      "reason": "an exact-match threshold carried from a different receipt turns a sound attribution record into a failing node with no defect behind it, and the fix is one stated number.",
+      "text": "node (b)'s second clause requires the unstubbed control to \"reproduce 6,088,067 bytes\", while the paragraph above reports the same 132-cell program at 6,088,070 bytes; one of the two is the control's target and no receipt distinguishes them, so a correct implementation can fail an exact-equality control on a 3-byte difference",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0350792600b5df65c7825c40751f8cea8c6f0f35",
+  "plan_fingerprint": "9568c382b46ed71a9d2730bcca0b6874324478b5c03244e7f67ebb955f6e9947",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 81,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261116T205119397946-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "10ed4d2f0f9b7bcdeb3697aad5fa2cf91fd56d2d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 against main 035079260, `nova/equilibrium/fixed_points.py:323` is `def _source_jets`, `:546` is `def maintain_rows(`, `:611` is the `_row_program(...)` call, `scripts/prototypes/read_route/jets.py:262` is the `jax.jit(jax.vmap(_source_jets, ...))` assignment, `scripts/prototypes/fixed_points/solve.py:121` and `scripts/prototypes/kernel_compile_census/row.py:115` hold the same wrap, `scripts/prototypes/compile_pass_profile` exists, and `docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html` resolves.",
+    "done_when": "a finding \u2014 node (b)'s unstubbed control compares against 6,088,067 bytes while the section states the same program's lowered size as 6,088,070 at 132 (plan.html:65/66).",
+    "evidence_paths": "pass \u2014 node (b)'s record lands under `docs/evidence/fragments/kernel-compile-barrier/`, its figure under `docs/figures/kernel-compile-barrier/point-program-attribution/`, and its receipts under `~/.cache/nova-kernel-compile-barrier/point-program-attribution/`, all of which outlive the run.",
+    "naming": "pass \u2014 no plan label, ticket number or version tag reaches a symbol; `node (a)/(b)/(c)` are plan-local references only.",
+    "reasoning": "three findings \u2014 the scan-lever refutation is an inference the cited bytes do not carry, node (b) does not measure the regular-Hessian block whose wall node (c) needs, and the section prescribes implementation.",
+    "single_goal": "pass \u2014 node (a) is the consolidation, node (b) the attribution record, node (c) the bounded form; each carries one verdict.",
+    "wiring": "pass \u2014 s3's declared links (`kernel-compile-barrier#s2`, `#s5`) both resolve to existing sections, and node (c)'s dependence on node (b)'s result is stated inside the section rather than left undeclared."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "b465cef1e2cc13170ec112ecc51774aeedecf0105d30a3902a7c0ecc0a762197",
+    "s3": "75dd51431ed82580f9fbb19a935a53eca547f0c4bd6dab9a3f3de534bf7d0c71",
+    "s4": "b4c3eef27a064692dbf419c8ce536674acaafb04413c9c58789ff1b0a6338bcc",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T20:57:10.534279+00:00",
+  "total": null
+}

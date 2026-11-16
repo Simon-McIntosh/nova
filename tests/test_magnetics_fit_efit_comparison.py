@@ -24,6 +24,7 @@ from nova.equilibrium.measurement import Magnetics, SliceMeasurement
 from nova.equilibrium.solve_request import (
     ColdSeedPortfolio,
     ExplicitSolveSeed,
+    ForwardSolveReceipt,
     ForwardSolveRequest,
 )
 from nova.equilibrium.source import DomainProfile, ForwardSource, PolynomialFluxFunction
@@ -877,6 +878,26 @@ def _attempt(data, request, label):
             constraint_context=data["constraint_context"],
         ),
     )
+    if "continuation_provenance" in data:
+        history = np.asarray(receipt.residual_history)
+        finite = history[np.isfinite(history)]
+        _write(
+            _output() / f"{label}-history.json",
+            dict(
+                provenance=data["continuation_provenance"],
+                resolved_defaults=receipt.resolved_defaults.to_dict(),
+                qualified=bool(receipt.qualified),
+                converged=data["terminal_converged"],
+                **_residual_fields(data["terminal_residual"]),
+                residual_history=[
+                    float(x) if np.isfinite(x) else None for x in history.ravel()
+                ],
+                lowest_recorded_residual=float(np.min(finite)) if finite.size else None,
+                last_finite_residual=float(finite[-1]) if finite.size else None,
+                attempted_newton_promotions=int(receipt.attempted_newton_promotions),
+                accepted_newton_promotions=int(receipt.accepted_newton_promotions),
+            ),
+        )
     return receipt if bool(receipt.qualified) else None
 
 
@@ -900,7 +921,7 @@ def _record_forward_refusal(data):
     result = dict(
         case=data["name"],
         status="forward-failed",
-        attempts=3,
+        attempts=data.get("attempts", 3),
         qualified=False,
         converged=bool(data.get("terminal_converged", False)),
         **_residual_fields(data.get("terminal_residual")),
@@ -910,6 +931,8 @@ def _record_forward_refusal(data):
     )
     if "recovery" in data:
         result["recovery"] = data["recovery"]
+    if "continuation_provenance" in data:
+        result["continuation_provenance"] = data["continuation_provenance"]
     _write(_output() / f"{data['name']}-result.json", result)
     _panel(data, qualified=False)
     print("FORWARD_REFUSAL_RECORDED " + json.dumps(result), flush=True)
@@ -967,10 +990,52 @@ def test_shared_magnetics_reconstruction(name, monkeypatch):
             "measured current priors unchanged",
             flush=True,
         )
-    forward = _generating(data)
+    continuation_path = os.environ.get("NOVA_EFIT_CONTINUATION_RECEIPT")
+    if continuation_path is None:
+        forward = _generating(data)
+    else:
+        import hashlib
+        import pickle
+
+        if name != "mastu" or replay_root is None:
+            raise ValueError("terminal continuation requires admitted MAST-U inputs")
+        payload = Path(continuation_path).read_bytes()
+        saved = pickle.loads(payload)
+        if not isinstance(saved, ForwardSolveReceipt):
+            raise ValueError("terminal continuation needs a public forward receipt")
+        policy = saved.resolved_defaults.policy
+        if (
+            policy.qualification_tolerance
+            != data["request"].policy.qualification_tolerance
+        ):
+            raise ValueError("terminal continuation cannot change qualification")
+        policy = replace(
+            policy,
+            newton_steps=40,
+            active_set_steps=64,
+            kernel_tolerance=min(policy.kernel_tolerance, 1e-12),
+        )
+        data["request"] = replace(
+            data["request"],
+            seed_policy=ExplicitSolveSeed(saved.terminal_state.flux),
+            policy=policy,
+        )
+        data["attempts"] = 1
+        data["continuation_provenance"] = dict(
+            receipt_sha256=hashlib.sha256(payload).hexdigest(),
+            previous_residual=float(saved.terminal_state.fixed_point.residual),
+            original_public_seeds=3,
+            additional_continuations=1,
+            policy=policy.to_dict(),
+        )
+        print(
+            "TERMINAL_CONTINUATION " + json.dumps(data["continuation_provenance"]),
+            flush=True,
+        )
+        forward = _attempt(data, data["request"], f"{name}-continuation")
     if forward is None:
         _record_forward_refusal(data)
-        pytest.fail(f"{name}: public forward solve did not qualify in three seeds")
+        pytest.fail(f"{name}: admitted public forward attempt did not qualify")
     _compare_fit(data, forward)
 
 
@@ -1688,6 +1753,7 @@ def _compare_fit(data, forward):
         tolerance=1e-5,
         max_iterations=16,
     )
+    _persist_forward(scaled, _output() / f"{data['name']}-scaled-fit.pkl")
     scaled_error = abs(
         float(np.sum(scaled.forward.terminal_state.cell_current)) - case.plasma_current
     ) / abs(case.plasma_current)
@@ -1705,9 +1771,14 @@ def _compare_fit(data, forward):
         device=fitted.device,
         scaled_current_relative_error=scaled_error,
         scaled_control_fired=scaled_error > 0.015,
+        scaled_fit_converged=bool(scaled.converged),
+        scaled_forward_qualified=bool(scaled.forward.qualified),
+        scaled_forward_evaluations=scaled.forward_evaluations,
         residual=float(fitted.forward.terminal_state.fixed_point.residual),
         terminal_converged=bool(fitted.forward.terminal_state.fixed_point.converged),
     )
+    if "continuation_provenance" in data:
+        result["continuation_provenance"] = data["continuation_provenance"]
     _write(_output() / f"{data['name']}-result.json", result)
     data["terminal_residual"] = result["residual"]
     _panel(

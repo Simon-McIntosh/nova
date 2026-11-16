@@ -7,7 +7,6 @@ from contextlib import contextmanager
 import hashlib
 import json
 from pathlib import Path
-import pickle
 import subprocess
 from time import perf_counter
 
@@ -20,18 +19,15 @@ import numpy as np  # noqa: E402
 from scipy.optimize import minimize_scalar  # noqa: E402
 
 from nova.biot import magnetisation as iron  # noqa: E402
+from scripts.iron_limb_production.outline import measure as measure_outline  # noqa: E402
 from scripts.prototypes.iron_limb_fill.axisymmetric import (  # noqa: E402
     ARM_Z,
     LIMB_R,
-    WEST_JOIN,
     axisymmetric_drive,
     limb_demagnetising,
     linear_fill,
     linear_regions,
-    west_regions,
 )
-from scripts.west_iron_galerkin_pair.measure import SOURCE, SOURCE_SHA256  # noqa: E402
-from scripts.west_iron_solve.measure import source_field  # noqa: E402
 
 EVIDENCE = Path("/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill")
 REFERENCE = EVIDENCE / "reference/six-limb-extended-20261114/six-limb-0.075.json"
@@ -246,68 +242,10 @@ def measure_control(record, output):
 
 
 def measure_west(record, output, sizes=(0.08, 0.04), max_iterations=10):
-    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == SOURCE_SHA256
-    with SOURCE.open("rb") as stream:
-        data = pickle.load(stream)
-    _, flat, arm_floor, limb_face, b, mu = west_regions()
-    external = source_field(data)
-
-    def fill(c):
-        outside = (np.abs(c[:, 1]) > arm_floor) | (c[:, 0] > limb_face)
-        return np.where(outside, np.minimum(1.0, WEST_JOIN / c[:, 0]), 1.0)
-
-    record["west"] = []
-    record["west_source_sha256"] = SOURCE_SHA256
-    record["west_time_s"] = float(data["time"])
-    record["gaps"] = "kept as stored; decision remains open"
-    for size in sizes:
-        started = perf_counter()
-        result = iron.solve_magnetisation(
-            flat,
-            external,
-            b,
-            mu,
-            cell_size=size,
-            fill_fraction=fill,
-            cross_field_factor=lambda c: limb_demagnetising(
-                c, arm_floor, limb_face, GEOMETRY_FACTOR
-            ),
-            max_iterations=max_iterations,
-            tolerance=1e-8,
-        )
-        row = dict(
-            size_m=size,
-            device=record["device"],
-            cells=result.cell_count,
-            converged=result.converged,
-            iterations=result.iterations,
-            residual_history=result.residual_history,
-            permeability_range=[
-                float(result.permeability_relative.min()),
-                float(result.permeability_relative.max()),
-            ],
-            seconds=perf_counter() - started,
-        )
-        record["west"].append(row)
-        write(output / "summary.json", record)
-        np.savez(
-            output / f"west-{size:g}.npz",
-            magnetisation=result.magnetisation,
-            permeability_relative=result.permeability_relative,
-            fill_fraction=result.fill_fraction,
-            cross_field_factor=result.cross_field_factor,
-            centroids=result._mesh.centroids,
-            areas=result._mesh.areas,
-        )
-        print("WEST " + json.dumps(row), flush=True)
-        del result
-        jax.clear_caches()
-    record["west_passed"] = all(
-        r["converged"]
-        and r["iterations"] <= max_iterations
-        and r["residual_history"][-1] <= 1e-8
-        for r in record["west"]
-    )
+    """Solve WEST 62751 on the stored outline and on the true one read."""
+    record["sizes_m"] = sorted(sizes, reverse=True)
+    record["max_iterations"] = max_iterations
+    measure_outline(record, output)
 
 
 def main():

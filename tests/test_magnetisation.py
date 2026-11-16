@@ -1158,10 +1158,11 @@ def test_control_receipt_enforces_permeability_specific_bounds(tmp_path, mu, lim
     """A fine-grid receipt passes and a value beyond either bound is refused."""
     from scripts.iron_limb_production.gate import (
         _CONTROL_RECEIPT,
+        _CONTROL_REVISION,
         validate_control_receipt,
     )
 
-    result = validate_control_receipt(_CONTROL_RECEIPT)
+    result = validate_control_receipt(_CONTROL_RECEIPT, _CONTROL_REVISION)
     assert result["passed"] and result["size_m"] == 0.032
     row = next(row for row in result["acceptance"] if row["mu"] == mu)
     assert row["limit"] == limit
@@ -1175,12 +1176,13 @@ def test_control_receipt_enforces_permeability_specific_bounds(tmp_path, mu, lim
     changed = tmp_path / "control.json"
     changed.write_text(json.dumps(source))
     with pytest.raises(AssertionError, match=f"mu={mu:g}.*bound {limit}"):
-        validate_control_receipt(changed)
+        validate_control_receipt(changed, _CONTROL_REVISION)
 
 
 def test_control_receipt_preserves_smear_reduction(tmp_path):
     from scripts.iron_limb_production.gate import (
         _CONTROL_RECEIPT,
+        _CONTROL_REVISION,
         validate_control_receipt,
     )
 
@@ -1194,7 +1196,50 @@ def test_control_receipt_preserves_smear_reduction(tmp_path):
     changed = tmp_path / "control.json"
     changed.write_text(json.dumps(source))
     with pytest.raises(AssertionError, match="smear ratio"):
-        validate_control_receipt(changed)
+        validate_control_receipt(changed, _CONTROL_REVISION)
+
+
+def test_control_receipt_refuses_a_revision_it_was_not_told_to_expect(tmp_path):
+    """A receipt measured at another revision is refused naming both revisions."""
+    from scripts.iron_limb_production.gate import (
+        _CONTROL_RECEIPT,
+        _CONTROL_REVISION,
+        validate_control_receipt,
+    )
+
+    source = json.loads(_CONTROL_RECEIPT.read_text())
+    assert source["revision"] == _CONTROL_REVISION
+    source["revision"] = "0" * 40
+    changed = tmp_path / "control.json"
+    changed.write_text(json.dumps(source))
+    with pytest.raises(AssertionError) as raised:
+        validate_control_receipt(changed, _CONTROL_REVISION)
+    assert "0" * 40 in str(raised.value)
+    assert _CONTROL_REVISION in str(raised.value)
+
+
+def test_control_receipt_refuses_a_solid_arm_resembling_the_filled_solve(tmp_path):
+    """The solid-outline control must stay beyond 100 % of the reference."""
+    from scripts.iron_limb_production.gate import (
+        _CONTROL_RECEIPT,
+        _CONTROL_REVISION,
+        validate_control_receipt,
+    )
+
+    source = json.loads(_CONTROL_RECEIPT.read_text())
+    origin = json.loads(Path(source["source_receipt"]).read_text())
+    rows = [row for row in origin["control"] if row["model"] == "solid"]
+    assert rows and all(row["vessel_relative_rms"] > 1 for row in rows)
+    for row in rows:
+        row["vessel_relative_rms"] /= 10
+    changed_origin = tmp_path / "material.json"
+    changed_origin.write_text(json.dumps(origin))
+    source["source_receipt"] = str(changed_origin)
+    source["source_sha256"] = hashlib.sha256(changed_origin.read_bytes()).hexdigest()
+    changed = tmp_path / "control.json"
+    changed.write_text(json.dumps(source))
+    with pytest.raises(AssertionError, match="solid arm must exceed 100"):
+        validate_control_receipt(changed, _CONTROL_REVISION)
 
 
 @pytest.mark.slow

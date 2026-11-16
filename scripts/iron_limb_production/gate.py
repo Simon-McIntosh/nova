@@ -16,14 +16,46 @@ _CONTROL_RECEIPT = Path(
     "/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/production/"
     "material-refinement-20261114/summary.json"
 )
+_CONTROL_REVISION = "8ab69e765a812f1713129852eb65e4b5d886f26d"
 
 
-def validate_control_receipt(path):
+def solid_rows(source):
+    """Return the solid-outline control rows the receipt carries or names.
+
+    The refinement receipt keeps only the four comparison arms, so the solid
+    rows are read once from the source receipt it names and hashes.
+    """
+    rows = [row for row in source["control"] if row["model"] == "solid"]
+    if rows:
+        return rows
+    origin = source.get("source_receipt")
+    assert origin, "control receipt carries no solid-outline control and names none"
+    raw = Path(origin).read_bytes()
+    recorded = source.get("source_sha256")
+    if recorded:
+        assert hashlib.sha256(raw).hexdigest() == recorded, origin
+    return [row for row in json.loads(raw)["control"] if row["model"] == "solid"]
+
+
+def validate_control_receipt(path, expected_revision=_CONTROL_REVISION):
     """Assert section-derived material accuracy on the completed fine GPU grid."""
     raw = path.read_bytes()
     source = json.loads(raw)
+    revision = source.get("revision")
+    assert revision == expected_revision, (
+        f"control receipt {path} was measured at revision {revision}, "
+        f"the gate expects {expected_revision}"
+    )
     assert "H200" in source["device"], "fine-grid acceptance requires its H200 receipt"
     assert source["geometry_factor"] == 0.4
+    solid = solid_rows(source)
+    assert solid, "control receipt carries no solid-outline control"
+    for row in solid:
+        assert row["vessel_relative_rms"] > 1.0, (
+            f"solid-outline control mu={row['mu']:g} at {row['size_m']:g} m is "
+            f"{row['vessel_relative_rms']:.4f} of the reference; the solid arm "
+            "must exceed 100 %"
+        )
     rows = [row for row in source["control"] if row["size_m"] == 0.032]
     expected = {
         (name, mu)
@@ -61,6 +93,11 @@ def validate_control_receipt(path):
         device=source["device"],
         size_m=0.032,
         geometry_factor=0.4,
+        revision=revision,
+        solid=[
+            dict(size_m=row["size_m"], mu=row["mu"], vessel_relative_rms=row["vessel_relative_rms"])
+            for row in solid
+        ],
         acceptance=acceptance,
         comparison=[
             {
@@ -134,6 +171,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--base", required=True)
     parser.add_argument("--control-receipt", type=Path, default=_CONTROL_RECEIPT)
+    parser.add_argument("--control-revision", default=_CONTROL_REVISION)
     parser.add_argument(
         "--mode",
         choices=("production", "suites", "all", "control"),
@@ -163,7 +201,9 @@ def main():
 
     save()
     if args.mode == "control":
-        record["control"] = validate_control_receipt(args.control_receipt)
+        record["control"] = validate_control_receipt(
+            args.control_receipt, args.control_revision
+        )
         record["passed"] = True
         args.output.mkdir(parents=True, exist_ok=True)
         (args.output / "accepted-comparison.json").write_text(

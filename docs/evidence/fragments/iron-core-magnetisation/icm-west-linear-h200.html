@@ -8,9 +8,10 @@ to 0.3304% at +2 m and 0.6182% at +4 m; these two layouts are not a nested
 refinement pair. The 8/40 mm affine factor exceeds physical card capacity.</p>
 <p>The persisted 40 mm interaction reloads and reaches the same converged
 solution numerically, but the requested byte-identity assertion fails. Its
-largest probe-component difference is 8.673617379884035e-18 T. That failure is
-retained without changing the criterion. The half-coil-drive slice did not run
-because the assertion stopped the job; this node remains incomplete.</p>
+largest probe-component difference is 8.673617379884035e-18 T. The persisted operator bytes are identical; this is measured H200 run-to-run
+roundoff, not a byte-identity pass. The assertion and criterion remain unchanged.
+The half-coil-drive slice is authorised as a separate continuation using the
+existing uniform 40 mm operator; its receipt is still pending.</p>
 
 <h4>Assembly walls, measured on the H200</h4>
 <table><thead><tr><th>mesh</th><th>cells</th><th>unknowns</th><th>operator [GB]</th><th>compile [s]</th><th>device execute [s]</th><th>host remainder [s]</th><th>wall [s]</th></tr></thead><tbody>
@@ -103,8 +104,12 @@ owner replaced by a refusal.</p>
 maximum absolute component difference is 8.673617379884035e-18 T, the maximum
 component-relative difference is 1.202186679034494e-13, and the maximum
 magnitude-relative difference is 5.562217353372034e-14. These small differences
-do not satisfy a byte equality requirement. Their cause has not been
-isolated, and no tolerance or operator was changed to accept them. The
+do not satisfy a byte equality requirement. The relative Frobenius difference is
+3.565720001176963e-14, while the persisted operator bytes are identical. The
+result is recorded as measured H200 run-to-run roundoff, not a strict replay
+pass; no tolerance or operator was changed to accept it. Separate
+<code>replay-notes.json</code> records this disposition and the SHA-256 of the
+unmodified raw receipt. The
 original <code>replay.json</code> records <code>completed=false</code> and
 <code>bit_identical=false</code>; an as-delivered copy is preserved at
 <code>replay-failed-as-delivered.json</code> in the run directory. Job
@@ -112,10 +117,10 @@ original <code>replay.json</code> records <code>completed=false</code> and
 wrong-mesh control. The CPU wrong-mesh controls below remain valid separately.</p>
 <p>The half-coil-drive measurement is not yet present. A separate
 <code>--half-drive-only</code> driver path is prepared to load the same operator
-and write a separate receipt while preserving the failed byte check. No new
-H200 continuation has been submitted without clarification of the lead's
-no-resubmission ruling. Interaction reuse was observed, but the complete
-strict replay and second-slice contract is not met.</p>
+and write a separate receipt while preserving the failed byte check. One distinct H200 continuation has now been authorised for the half-drive
+slice, operator load wall and WEST wrong-mesh refusal. Interaction reuse was
+observed; the strict replay assertion remains failed and the second-slice
+measurement is pending.</p>
 
 <h4>Constant-basis comparison inputs, quoted without recomputation</h4>
 <table>
@@ -194,9 +199,8 @@ are preserved. The after arm at
 <code>7a4ca25ebe2d2357a7ee18afe36a7327b6c2b029</code> completed in rigel job
 <code>1318885</code>: <code>67 passed in 7530.17s</code>, <code>EXIT=0</code>,
 with zero failures, against 63 passing tests at the base. Its record names the
-revision actually tested. The latest suite fence names
-<code>b182456c5ea7ac71ae444e805a2fb614a2c0dacc</code>; that after arm has not
-run and the completed earlier arm is not relabelled.</p>
+revision actually tested. The final delivered-head after suite will be recorded
+separately in the manifest; completed earlier arms are not relabelled.</p>
 <p>All large operators and measurement JSON remain under
 <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/west-h200/</code>.
 Uniform receipts record revision <code>353d2cfe364fce7158867d278f584b4f329de524</code>

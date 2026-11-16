@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+from contextlib import ExitStack
 import gc
 import hashlib
 import json
@@ -11,6 +12,7 @@ from pathlib import Path
 import pickle
 import subprocess
 import time
+from unittest.mock import patch
 
 from nova.jax.config import configure_dtypes
 
@@ -126,40 +128,82 @@ def solve(inputs, size, interaction, external=None):
     def refuse(*args, **kwargs):
         raise AssertionError("persisted solve attempted interaction assembly")
 
-    iron._galerkin_interaction = refuse
     residual = iron._linear_residual
     clock = {}
+    preparation = {}
+
+    def timed(name, function):
+        def call(*args, **kwargs):
+            began = time.monotonic()
+            try:
+                return function(*args, **kwargs)
+            finally:
+                preparation[name] = preparation.get(name, 0.0) + (
+                    time.monotonic() - began
+                )
+
+        return call
 
     def timed_residual(state, operands):
         if isinstance(state, jax.core.Tracer):
             return residual(state, operands)
+        if "start" not in clock:
+            # Charge pending operand transfers to preparation, before Newton.
+            jax.block_until_ready((state, operands))
         clock.setdefault("start", time.monotonic())
         value = residual(state, operands)
         jax.block_until_ready(value)
         clock["end"] = time.monotonic()
         return value
 
-    iron._linear_residual = timed_residual
-    started = time.monotonic()
-    result = iron.solve_magnetisation(
-        inputs["region"],
-        external or inputs["external"],
-        inputs["table_b"],
-        inputs["table_mu"],
-        cell_size=size,
-        basis="linear",
-        interaction=interaction,
-        tolerance=1e-10,
-        max_iterations=100,
+    with ExitStack() as stack:
+        for name, attribute in (
+            ("law_fit_seconds", "_fit_law"),
+            ("mesh_seconds", "_mesh"),
+            ("linear_geometry_seconds", "linear_magnetisation_geometry"),
+        ):
+            stack.enter_context(
+                patch.object(iron, attribute, timed(name, getattr(iron, attribute)))
+            )
+        stack.enter_context(
+            patch.object(
+                iron.MagnetisationInteraction,
+                "validate",
+                timed("interaction_validation_seconds", interaction.validate.__func__),
+            )
+        )
+        stack.enter_context(patch.object(iron, "_galerkin_interaction", refuse))
+        stack.enter_context(patch.object(iron, "_linear_residual", timed_residual))
+        started = time.monotonic()
+        result = iron.solve_magnetisation(
+            inputs["region"],
+            timed("external_field_seconds", external or inputs["external"]),
+            inputs["table_b"],
+            inputs["table_mu"],
+            cell_size=size,
+            basis="linear",
+            interaction=interaction,
+            tolerance=1e-10,
+            max_iterations=100,
+        )
+        wall = time.monotonic() - started
+    preparation["projection_checks_and_device_setup_seconds"] = (
+        clock["start"] - started - sum(preparation.values())
     )
-    wall = time.monotonic() - started
-    iron._linear_residual = residual
     air = (external or inputs["external"])(inputs["probes"])
     total = air + result.field(inputs["probes"])
     return dict(
         solve_seconds=wall,
         newton_seconds=clock["end"] - clock["start"],
         preparation_seconds=clock["start"] - started,
+        preparation_breakdown=preparation,
+        preparation_breakdown_note=(
+            "Disjoint host wall intervals inside solve_magnetisation. Linear geometry "
+            "includes quadrature, basis, Gram blocks and bound-current incidence. "
+            "The remainder includes external-field projection, matrix finiteness "
+            "scan, operand construction and synchronized host-to-device transfers. "
+            "Probe evaluation and persisted-operator loading are outside this split."
+        ),
         converged=bool(result.converged),
         iterations=result.iterations,
         termination=result.termination,

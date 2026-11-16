@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-16T06:50:49.926Z",
+  "dispatched_at": "2026-11-16T06:33:04Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/bounded_jets_build/figure_time_per_pass.py",
+      "id": "f194513287e",
+      "line": 141,
+      "severity": "non-blocking",
+      "summary": "The right panel's y-axis label reads 'whole cold-compile wall [s]', but that axis also heads the 'attributed' group, whose two bars sit at 340.7 s and 207.9 s - the passes' attributed time, not either arm's wall. The two groups differ by only 13 s and 11 s on screen, so the axis reads as if 'attributed' were a second wall measurement and 340.7 could be quoted as one. The caption's prose distinguishes them (340.67 s attributed, 96.4% of the 353.574 s wall), so the figure is not wrong on its own, but the axis names only the larger quantity."
+    },
+    {
+      "file": "scripts/prototypes/bounded_jets_build/figure_time_per_pass.py",
+      "id": "f4d27d8557f",
+      "line": 114,
+      "severity": "non-blocking",
+      "summary": "The right panel's 'cold compile' pair restates numbers the figure legend already prints in full text: the grey bar is the base wall (353.6) and the blue bar the head wall (218.9), and both values appear verbatim in the legend at the foot of the canvas ('base 00ec05512 - whole wall 353.6 s', 'head aa0344cb - whole wall 218.9 s'). Two of the right panel's four bars therefore redraw a figure the reader is already given, on the same canvas, while the 'attributed' pair carries the only information the right panel adds."
+    },
+    {
+      "file": "scripts/prototypes/bounded_jets_build/figure_time_per_pass.py",
+      "id": "faf910bdd9f",
+      "line": 107,
+      "severity": "non-blocking",
+      "summary": "The left panel's 24 per-pass value labels are drawn at fontsize 11 (and the right panel's four at 13), while the repository plot-style rules set direct labels at 14 pt and the script's own STYLE carries label_fontsize 14.0 for tick labels. At the rendered 1400 px width the glyphs are about 15 px tall and read cleanly, so nothing is illegible; in the roughly 900 px column the reckon page serves, they scale to about 10 px, below the tick and legend size the same rule sets for the page. The value is the figure's subject and is the one text size set smaller than the house floor."
+    }
+  ],
+  "notes": [
+    "Every verdict was formed from the one attached PNG (image-0.png, 1400x721); no SVG was opened, read, listed, searched, rendered or shown, and no other image was consulted.",
+    "The three findings the previous figure review raised against head 26540704f99d are all answered at this head. The blocking one - the base arm's values drawn in white inside its own bars, leaving ten of twelve unreadable - is gone: every one of the 24 values now renders in dark text past its bar's end. The grey-series contrast finding is gone: the base fill measures rgb(146,146,146), 3.11:1 against white, where it was rgb(178,178,178) at 2.12:1. The truncation finding is gone: the left axis label now reads 'the 12 costliest of the base arm's 104 passes' and the legend says 'whole wall' for each arm.",
+    "Mechanical checks run over the rendered PNG, each of which could have failed: 0 text pixels found inside any bar fill run; 0 near-white pixels found inside any grey bar (the exact shape of the previous defect); every detected bar band carries dark label ink within 45 px past its right end (13 of 13 grey, 8 of 8 blue).",
+    "Colour and contrast readings from the rendered PNG: base fill rgb(146,146,146) = 3.11:1 on white; head fill rgb(51,102,204) = 5.37:1; value and tick ink near-black at about 16:1.",
+    "The caption in docs/evidence/fragments/kernel-compile-barrier/bounded-jets-build.html names both arms, the base and head revisions, the device, the program and cell count, the cache state, which passes the axes show and how they are ordered; it does not repeat the figure's title, so it is not a finding.",
+    "Data fidelity checked on the render: the drawn values 159.9/88.9 (variadic-op-splitter) and 60.3/42.8 (multi_output_fusion) and the pair 353.6/218.9 match the evidence fragment's prose and the receipts it names, so the picture states the same numbers as the record it illustrates."
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261116T063204247832-review-of-bounded-jets-build-2dff9a824050-figure",
+  "reviewed_base_sha": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+  "reviewed_head_sha": "2dff9a82405067d8e39c368eadd70b5e062f4fab",
+  "reviewed_images": {
+    "image-0.png": "docs/figures/kernel-compile-barrier/bounded-jets-build/time-per-pass.svg"
+  },
+  "reviewed_run_id": "r-20261114T232501755703-bounded-jets-build",
+  "rubric": "figure",
+  "rubric_verdicts": {
+    "docs/figures/kernel-compile-barrier/bounded-jets-build/time-per-pass.svg": [
+      "RUBRIC legibility: passes - both panels read at a glance. Each of the twelve passes shows both arms as separate bars on one shared seconds axis, and all 24 values render in dark text at their bar ends: 159.9/88.9, 60.3/42.8, 13.3/5.0, 9.0/5.5, 5.6/4.8, 4.7/2.7, 4.7/2.9, 3.4/0.7, 3.0/1.5, 2.3/1.5, 2.2/1.3, 2.2/1.4. The right panel's four totals are labelled 340.7, 207.9, 353.6, 218.9. Nothing is cut, blurred or hidden.",
+      "RUBRIC data_ink: passes - every visible mark is a measurement: 24 solid bars, one shared axis, a single two-entry legend. The one reservation is recorded as a finding - the right panel's cold-compile pair repeats the two numbers the legend already states in text.",
+      "RUBRIC decoration: passes - white background on both panels, no gridlines, no shading, no frame, no gradient and no drop shadow; the top and right spines are absent from both panels and only the scales that carry a quantity are drawn.",
+      "RUBRIC contrast: passes - value and tick text is near-black on white at about 16:1; the head fill is rgb(51,102,204) at 5.37:1; the base fill is rgb(146,146,146) at 3.11:1, which clears the 3:1 floor the project sets for a grey that must still read as data. No text is drawn on a bar fill, so no text sits below that floor.",
+      "RUBRIC table_form: passes - the left panel is a ranked magnitude comparison over one shared time axis, which a bar chart carries better than a table, and its values are also printed so a reader can lift them. The right panel is a two-pair comparison of attributed against whole wall; it is not a table of rows.",
+      "RUBRIC label_collision: passes - no text is clipped, no two text artists overlap, and no label overlaps the data. Measured on the render: zero text pixels inside any bar fill, zero near-white pixels inside any grey bar, and dark label ink within 45 px past the right end of every bar detected. All ink lies inside the 1400x721 canvas, including the foot legend."
+    ]
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T06:53:57.326948+00:00",
+  "total": null
+}

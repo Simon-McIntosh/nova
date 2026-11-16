@@ -1453,4 +1453,67 @@
       A later fit may now spend its admitted three-seed portfolio; no fit or
       scaled-data control is claimed by this panel.</figcaption>
   </figure>
+  <h3 id="efit-comparison-tcv-fitted-replay">TCV: the fitted conductor state resolves the probe discrepancy</h3>
+  <p>With 29 fitted active circuit groups (overlapping physical members summed)
+    and 256 fitted passive currents, loop relative L2 is 0.169823% and probe
+    relative L2 is 0.190155%. Both pass 5%. The measured-conductor replay's
+    7.36029% probe disagreement falls to 0.190155% with the same probe positions,
+    angle convention, type metadata and area. The conductor state accounts
+    for the discrepancy; changing the probe projection or multiplying by area
+    makes the agreement worse.</p>
+  <table><thead><tr><th>Family</th><th>Rows</th><th>Nova − EFIT relative L2</th>
+    <th>Nova − EFIT whitened RMS</th><th>Nova − measured whitened RMS</th>
+    <th>EFIT − measured whitened RMS</th></tr></thead><tbody>
+    <tr><td>whole flux loops</td><td>38</td><td>0.169823%</td><td>0.093603856</td><td>0.55657651</td><td>0.54726687</td></tr>
+    <tr><td>poloidal probes</td><td>38</td><td>0.190155%</td><td>0.10439981</td><td>6.5491248</td><td>6.5137538</td></tr>
+  </tbody></table>
+  <p>The following rows are ranked by the absolute whitened Nova − EFIT
+    difference in the earlier measured-conductor replay. Every probe is ranked
+    in <code>tcv-row-replay.json:probe_audit.ranked_rows</code>; the eight
+    largest earlier errors are shown here. Differences and alternative
+    predictions are mT, area is cm², angles are IMAS clockwise radians.
+    All eight have unset type index/name and turn-count sentinels; those
+    sentinels are recorded, not interpreted as physical turn counts.</p>
+  <table><thead><tr><th>Probe</th><th>Earlier Δ [mT]</th><th>Earlier Δ/σ</th>
+    <th>Fitted-source Δ [mT]</th><th>Fitted-source Δ/σ</th><th>Angle [rad]</th>
+    <th>Area [cm²]</th><th>Counterclockwise prediction [mT]</th>
+    <th>Area-multiplied prediction [mT]</th></tr></thead><tbody>
+    <tr><td>probe:30:031</td><td>22.20822</td><td>22.20822</td><td>-0.3001174</td><td>-0.3001174</td><td>3.141593</td><td>93.16971</td><td>-21.48801</td><td>-0.200203</td></tr>
+    <tr><td>probe:31:032</td><td>26.76523</td><td>13.7875</td><td>-0.009457858</td><td>-0.004872001</td><td>-2.356194</td><td>91.14475</td><td>-138.5816</td><td>0.6366177</td></tr>
+    <tr><td>probe:29:030</td><td>9.483322</td><td>9.483322</td><td>-0.1292643</td><td>-0.1292643</td><td>3.141593</td><td>90.59925</td><td>-2.762243</td><td>-0.02502558</td></tr>
+    <tr><td>probe:7:008</td><td>-9.380807</td><td>-9.380807</td><td>-0.09354889</td><td>-0.09354889</td><td>-0.7853982</td><td>91.6056</td><td>-7.508341</td><td>0.46923</td></tr>
+    <tr><td>probe:32:033</td><td>-29.11177</td><td>-8.612493</td><td>0.9744135</td><td>0.2882727</td><td>-1.570796</td><td>91.32332</td><td>-197.0471</td><td>1.799499</td></tr>
+    <tr><td>probe:6:007</td><td>8.608795</td><td>8.608795</td><td>-0.0009130063</td><td>-0.0009130063</td><td>-1.570796</td><td>91.55223</td><td>-28.30273</td><td>0.2591178</td></tr>
+    <tr><td>probe:11:012</td><td>8.456833</td><td>8.456833</td><td>-0.08662087</td><td>-0.08662087</td><td>-0</td><td>91.49669</td><td>8.364105</td><td>0.07652879</td></tr>
+    <tr><td>probe:8:009</td><td>-7.192639</td><td>-7.192639</td><td>-0.05226546</td><td>-0.05226546</td><td>-0</td><td>90.58104</td><td>19.60982</td><td>0.1776278</td></tr>
+  </tbody></table>
+  <table><thead><tr><th>Same fitted-source field, probe hypothesis</th>
+    <th>Relative L2 versus stored EFIT probe rows</th><th>Whitened RMS</th>
+    <th>Opposite-sign rows</th></tr></thead><tbody>
+    <tr><td>clockwise</td><td>0.1901553%</td><td>0.1043998</td><td>0</td></tr>
+    <tr><td>counterclockwise</td><td>201.689%</td><td>85.43692</td><td>30</td></tr>
+    <tr><td>perpendicular</td><td>113.3672%</td><td>66.0776</td><td>15</td></tr>
+    <tr><td>area_multiplied</td><td>99.08507%</td><td>41.35725</td><td>0</td></tr>
+  </tbody></table>
+  <p><code>src/imas.cpp:721</code> negates the IMAS clockwise angle for EFIT's
+    counterclockwise field projection. Nova uses that same normal.
+    <code>src/responseFunctions.cpp:2057</code> passes position, orientation,
+    length and dLength to the field response; type, area and turns are not
+    multiplicative factors in that Tesla-valued response. Type may affect
+    selection and weights, but the same 38 stored active rows are compared
+    in every alternative. The area-multiplied column deliberately tests a
+    miscalibration hypothesis; it is not a physically accepted Tesla response.
+    The complete 29+256 fitted-current binding, including every signed member
+    contribution, is retained in <code>tcv-fitted-current-map.json</code>.</p>
+  <figure id="efit-comparison-tcv-fitted-replay-panel">
+    <img src="/nova/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/tcv-row-replay.svg" alt="TCV fitted-current blue replay contours closely overlay grey imas-efit contours inside the vessel" />
+    <figcaption>TCV workshop, 0.4 s: stored-density plus fitted-current kernel
+      replay (blue, narrow) and imas-efit (grey, wide) on shared levels, with
+      both stationary-point sets and wall. Zero equilibrium solves;
+      residual/converged qualification is not applicable. Full rectangular-map
+      relative L2 is 0.455088%. PNG rendered and inspected; receipt before
+      native EXIT=0. Native pytest: 1 passed in 95.38s (0:01:35). Function wall
+      89.261 s, process wall 107.111 s, titan P100 only. This admits one later
+      fit with at most three public seed candidates; it is not a fit result.</figcaption>
+  </figure>
 </section>

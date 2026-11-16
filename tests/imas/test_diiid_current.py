@@ -219,6 +219,24 @@ def _shipped_vector() -> np.ndarray:
     return np.asarray([shipped[name] for name in POLOIDAL_CONDUCTORS])
 
 
+@pytest.mark.parametrize("changed", [False, True])
+def test_shipped_comparison_is_exact_and_matches_conductor_names(changed) -> None:
+    shipped = _shipped()
+    names = tuple(reversed(POLOIDAL_CONDUCTORS)) + CIRCUIT_DRIVEN_CONDUCTORS
+    installed = np.asarray([shipped.get(name, -1.0) for name in names])
+    built = _shipped_vector()
+    if changed:
+        built[0] = np.nextafter(built[0], np.inf)
+        with pytest.raises(ValueError, match="disagrees.*F1A"):
+            diiid_current._refuse_silent_shipped_current_replacement(
+                built, installed, names, POLOIDAL_CONDUCTORS
+            )
+    else:
+        diiid_current._refuse_silent_shipped_current_replacement(
+            built, installed, names, POLOIDAL_CONDUCTORS
+        )
+
+
 def test_complete_adapter_preserves_response_order(monkeypatch) -> None:
     shipped_count = len(POLOIDAL_CONDUCTORS)
     profile = Profile(
@@ -366,12 +384,17 @@ def test_complete_adapter_refuses_a_build_time_current_it_would_replace(
         == shipped[BUILD_SEAM_CONDUCTOR] + BUILD_SEAM_SHIFT_A_TURN
     )
 
-    with pytest.raises(ValueError, match=BUILD_SEAM_CONDUCTOR):
+    with pytest.raises(ValueError, match="disagrees.*" + BUILD_SEAM_CONDUCTOR) as error:
         diiid_current.complete_profile_current_adapter(
             patched_profile,
             shipped_names=POLOIDAL_CONDUCTORS,
             shipped_current_a=shipped,
         )
+    assert (
+        f"build {shipped[BUILD_SEAM_CONDUCTOR] + BUILD_SEAM_SHIFT_A_TURN:.6f} A"
+        in str(error.value)
+    )
+    assert f"resolved {shipped[BUILD_SEAM_CONDUCTOR]:.6f} A" in str(error.value)
 
 
 def test_complete_adapter_refuses_a_build_current_of_the_wrong_width(

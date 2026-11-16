@@ -53,18 +53,19 @@ def permeability(root, source, out):
     )
     norm = matplotlib.colors.Normalize(vmin=1, vmax=high)
     cmap = matplotlib.colormaps["viridis"]
+    levels = np.linspace(1.0, high, 7)
     for index, (name, _, _, label) in enumerate(MODELS):
         axis = fig.add_axes([0.02 + 0.49 * index, 0.08, 0.46, 0.84])
-        with (root / f"west-{name}-{fine:g}-polygons.pkl").open("rb") as stream:
-            polygons = pickle.load(stream)
-        values = np.load(root / f"west-{name}-{fine:g}.npz")["permeability_relative"]
-        axis.add_collection(
-            PolyCollection(
-                polygons,
-                facecolors=cmap(norm(values)),
-                edgecolors="none",
-                zorder=2,
-            )
+        arrays = np.load(root / f"west-{name}-{fine:g}.npz")
+        axis.tricontour(
+            arrays["centroids"][:, 0],
+            arrays["centroids"][:, 1],
+            arrays["permeability_relative"],
+            levels=levels,
+            cmap=cmap,
+            norm=norm,
+            linewidths=0.7,
+            zorder=2,
         )
         draw_machine(axis, source)
         axis.set_xlim(-0.1, 6.2)

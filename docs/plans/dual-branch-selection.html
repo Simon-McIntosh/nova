@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8,a9ea090c">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,benchmarks/fork_arming_economics.py,benchmarks/two_branch_batch_cost.py,nova/equilibrium/branch_selection.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/figures/dual-branch-selection/fork-arming-economics.json,docs/figures/dual-branch-selection/two-branch-batch-cost.json,docs/evidence/archive/dual-branch-selection-landed.html">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-modified" content="2026-11-16">
 <meta name="plan-section-declarations" content="{&quot;coreachability&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;descoped&quot;,&quot;s7&quot;:&quot;done&quot;}">
 <meta name="plan-descope-reasons" content="{&quot;s6&quot;:&quot;the fork this section would have priced on catalog frames was retired by the co-reachability measurement; the pricing framework and the two-branch cost measurement it produced stay as evidence&quot;}">
@@ -322,7 +322,14 @@
 
     <h2 id="s5">§5 — The traced selection seam</h2>
 
-    <p>Promote the class decision to one public, traced, batched seam consuming two qualified branch
+    <p><strong>What this section builds now.</strong> One deliverable: the cold seed for the single
+    selected branch as a traced array kernel, measured by the done-when in the last paragraph of
+    this section. The traced selector and its state have landed, and the co-reachability
+    measurement in the next section retired the fork, so nothing below asks a builder for a
+    two-branch selector, a seed for a two-branch portfolio, or fork-arming economics. The
+    paragraphs between this one and the last are the record of how the section was first posed and
+    what landed under it.</p>
+    <p><strong>As first posed.</strong> Promote the class decision to one public, traced, batched seam consuming two qualified branch
     receipts: <code>p_diverted</code> carries the smooth selection weight (gradients flow through
     it), <code>class_margin</code> carries the exact signed comparator for reporting and gates, and
     neither substitutes for the other silently. Selection semantics must be explicit about the
@@ -484,8 +491,9 @@
     traced seed with its existing tests passing unchanged. A currency check on 2026-11-15 found the
     cold seed portfolio still built on the host with NumPy, and found no host admitted-state bootstrap
     left to port: the previous admitted state already travels as a device array and the solve request
-    carries no admission ladder. The continuity claim at saddle-operand emergence stays blocked on
-    whether the shadow rejection is correct.</p>
+    carries no admission ladder. The continuity of the selection weight at saddle-operand emergence is
+    not claimed and is not carried: it mattered only to a selector blending two qualified branches,
+    which the fork's retirement removed.</p>
 
     <h2 id="coreachability">§ Is the fork load bearing? Measured: no</h2>
 

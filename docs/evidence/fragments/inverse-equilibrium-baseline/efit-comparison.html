@@ -1343,4 +1343,82 @@
     vertical-offset comparison, the fit/forward split and the 1.10 scaled-fit
     control remain unmeasured. The kernel replay and strict JSON check do not
     substitute for the declared physical negative control.</p>
+  <h3 id="efit-comparison-fitted-source-binding">Bind the stored fitted currents before judging the solver</h3>
+  <p>The input-first replay uses the per-slice <code>reconstructed</code>
+    current constraints, with measured currents retained only as an independent
+    identity witness. In imas-efit source
+    <code>5d89dc7d8a94e92a99cffec80e85d821c12d68fb</code>,
+    <code>src/imas.cpp:1989</code>–<code>:2070</code> filters no-data active
+    circuits and then appends sampled passive loops. The writer at
+    <code>:4960</code>–<code>:4978</code> splits this filtered vector using the
+    unfiltered serial-circuit count. For MAST-U that split places the first
+    passive current in <code>pf_current[13]</code>. Flattening both arrays
+    restores the original 13 active + 20 passive source order. The maximum
+    mismatch between the inferred source's measured input and the stored
+    constraint's measured value is 2.84217e-14 A over all 33 entries. All
+    currents below are kA; member signs multiply the fitted circuit current.</p>
+  <table><thead><tr><th>Stored output entry (zero based)</th><th>Source kind</th>
+    <th>Nova physical member(s), signed</th><th>Measured [kA]</th>
+    <th>Fitted [kA]</th></tr></thead><tbody>
+    <tr><td><code>pf_current[0]</code></td><td>active</td><td>+PF_COIL_1, +PF_COIL_2</td><td>5.7341278</td><td>5.97811354</td></tr>
+    <tr><td><code>pf_current[1]</code></td><td>active</td><td>+PF_COIL_3, +PF_COIL_4</td><td>5.82894959</td><td>6.13604758</td></tr>
+    <tr><td><code>pf_current[2]</code></td><td>active</td><td>+PF_COIL_5, +PF_COIL_6</td><td>1.22007553</td><td>1.41220502</td></tr>
+    <tr><td><code>pf_current[3]</code></td><td>active</td><td>+PF_COIL_7, +PF_COIL_8</td><td>-3.80423234</td><td>-3.60720255</td></tr>
+    <tr><td><code>pf_current[4]</code></td><td>active</td><td>+PF_COIL_9, +PF_COIL_10</td><td>-0.0161216298</td><td>0.127619804</td></tr>
+    <tr><td><code>pf_current[5]</code></td><td>active</td><td>+PF_COIL_11, +PF_COIL_12</td><td>0.0108851296</td><td>0.0620141562</td></tr>
+    <tr><td><code>pf_current[6]</code></td><td>active</td><td>+PF_COIL_13, +PF_COIL_14</td><td>0.115624352</td><td>0.168373866</td></tr>
+    <tr><td><code>pf_current[7]</code></td><td>active</td><td>+PF_COIL_18, +PF_COIL_19</td><td>2.51142736</td><td>2.62009405</td></tr>
+    <tr><td><code>pf_current[8]</code></td><td>active</td><td>+PF_COIL_20, +PF_COIL_21</td><td>-3.64498566</td><td>-3.06202069</td></tr>
+    <tr><td><code>pf_current[9]</code></td><td>active</td><td>+PF_COIL_22, +PF_COIL_23</td><td>-4.58248168</td><td>-4.48617868</td></tr>
+    <tr><td><code>pf_current[10]</code></td><td>active</td><td>+PF_COIL_24, −PF_COIL_25</td><td>-0.0743182477</td><td>-0.0839376684</td></tr>
+    <tr><td><code>pf_current[11]</code></td><td>active</td><td>+PF_COIL_15</td><td>0.996204205</td><td>1.04766422</td></tr>
+    <tr><td><code>pf_current[12]</code></td><td>active</td><td>+PF_COIL_16</td><td>0.996204205</td><td>1.04766449</td></tr>
+    <tr><td><code>pf_current[13]</code></td><td>passive</td><td>+d1_case_lower</td><td>1.75353063</td><td>1.75353063</td></tr>
+    <tr><td><code>pf_passive_current[0]</code></td><td>passive</td><td>+d1_case_upper</td><td>0.826447733</td><td>0.826447733</td></tr>
+    <tr><td><code>pf_passive_current[1]</code></td><td>passive</td><td>+d2_case_lower</td><td>1.07103007</td><td>1.07103007</td></tr>
+    <tr><td><code>pf_passive_current[2]</code></td><td>passive</td><td>+d2_case_upper</td><td>1.07103007</td><td>1.07103007</td></tr>
+    <tr><td><code>pf_passive_current[3]</code></td><td>passive</td><td>+d3_case_lower</td><td>0.790819244</td><td>0.790819244</td></tr>
+    <tr><td><code>pf_passive_current[4]</code></td><td>passive</td><td>+d3_case_upper</td><td>0.790819244</td><td>0.790819244</td></tr>
+    <tr><td><code>pf_passive_current[5]</code></td><td>passive</td><td>+d5_case_lower</td><td>0.00656042716</td><td>0.00656042716</td></tr>
+    <tr><td><code>pf_passive_current[6]</code></td><td>passive</td><td>+d5_case_upper</td><td>0.00656042716</td><td>0.00656042716</td></tr>
+    <tr><td><code>pf_passive_current[7]</code></td><td>passive</td><td>+d6_case_lower</td><td>0.104870048</td><td>0.104870048</td></tr>
+    <tr><td><code>pf_passive_current[8]</code></td><td>passive</td><td>+d6_case_upper</td><td>0.104870048</td><td>0.104870048</td></tr>
+    <tr><td><code>pf_passive_current[9]</code></td><td>passive</td><td>+d7_case_lower</td><td>0.212729738</td><td>0.212729738</td></tr>
+    <tr><td><code>pf_passive_current[10]</code></td><td>passive</td><td>+d7_case_upper</td><td>0.212729738</td><td>0.212729738</td></tr>
+    <tr><td><code>pf_passive_current[11]</code></td><td>passive</td><td>+dp_case_lower</td><td>0.234799808</td><td>0.234799808</td></tr>
+    <tr><td><code>pf_passive_current[12]</code></td><td>passive</td><td>+dp_case_upper</td><td>0.234799808</td><td>0.234799808</td></tr>
+    <tr><td><code>pf_passive_current[13]</code></td><td>passive</td><td>+p4_case_lower</td><td>0.315488617</td><td>0.315488617</td></tr>
+    <tr><td><code>pf_passive_current[14]</code></td><td>passive</td><td>+p4_case_upper</td><td>0.720584966</td><td>0.720584966</td></tr>
+    <tr><td><code>pf_passive_current[15]</code></td><td>passive</td><td>+p5_case_lower</td><td>1.27963593</td><td>1.27963593</td></tr>
+    <tr><td><code>pf_passive_current[16]</code></td><td>passive</td><td>+p5_case_upper</td><td>1.64266653</td><td>1.64266653</td></tr>
+    <tr><td><code>pf_passive_current[17]</code></td><td>passive</td><td>+p6_case_lower</td><td>0.689597778</td><td>0.689597778</td></tr>
+    <tr><td><code>pf_passive_current[18]</code></td><td>passive</td><td>+p6_case_upper</td><td>-0.674010361</td><td>-0.674010361</td></tr>
+  </tbody></table>
+  <p><strong>Explicit zero passive turns remain zero.</strong> The source does
+    not interpret zero as one turn. <code>src/imas.cpp:951</code> copies the
+    passive element's signed turns; <code>src/efitCircuit.cpp:414</code>
+    multiplies that value by the circuit polarity product; and
+    <code>src/EFUND/efund_field_functions.f90:767</code> multiplies the
+    quadrature response weight by that turn count. The corresponding oblique
+    branches at <code>:783</code> and <code>:799</code> do likewise. No
+    zero-to-one replacement occurs along that source path. Thus the sampled
+    MAST-U passive loops have fitted currents but zero field in both readers.
+    A focused test preserves this working rule and rejects nonfinite turns;
+    no vessel-current prior is invented.</p>
+  <p>TCV's stored 29 active rows reproduce the unjoined shared-node pair order
+    and singleton append order, while the joined 20-group hypothesis fails
+    the stored measured-value witness by up to 74.4575 kA. Shared physical
+    coils receive the sum of every contributing fitted circuit current with
+    the relative member polarity, as in
+    <code>src/efitCircuit.cpp:392</code>. The reader requires exactly one
+    topology candidate whose entire measured vector matches the native
+    output. The focused test forces a wrong passive witness and records
+    <code>CIRCUIT_WITNESS_GUARD_REFUSED stored circuit identities lack a unique
+    measured-row witness: 0</code>. The file records
+    <code>25 passed, 4 deselected in 76.38s (0:01:16)</code>.</p>
+  <p>Native fitted-current maps, family residuals and case receipts are
+    persisted separately under <code>fitted-observation-replay-1318855/</code>
+    in the run directory. The batch calls no equilibrium solve. Each later
+    fit requires every nonzero-reference sensor family to pass 5% relative
+    L2 in this fitted-source replay first.</p>
 </section>

@@ -199,6 +199,7 @@ def main():
 
     payload = {
         "device": device,
+        "gated": bool(config.get("gated", True)),
         "receipts": [str(path) for path in receipts],
         "base_rows": args.base_rows,
         "rows": result,

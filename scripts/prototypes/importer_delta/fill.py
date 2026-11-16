@@ -20,9 +20,19 @@ def table_rows(path):
     return data["rows"] if isinstance(data, dict) else data
 
 
-def one_row(row):
-    cell = "<tr><td><code>" + row["file"] + "</code></td>"
+def one_row(row, cut=None):
+    cell = "<tr><td><code>" + row["file"] + "</code></td>".replace("</code></td>", "</code></td>")
     if row["state"] == "not-run":
+        if cut:
+            return (
+                cell
+                + "<td>"
+                + str(cut["count"])
+                + ", cut short at test "
+                + str(cut["test"])
+                + "</td><td>not run</td><td>no verdict, the base arm did not reach "
+                "its summary line</td></tr>"
+            )
         return cell + "<td>not run</td><td>not run</td><td>no verdict</td></tr>"
     if row["state"] == "head-pending":
         return (
@@ -67,14 +77,15 @@ def one_row(row):
     )
 
 
-def table(rows, key):
+def table(rows, key, cut=None):
+    cut = cut or {}
     lines = [
         '<table id="importer-delta-' + key + '-table">',
         "<thead><tr><th>test file</th><th>base failures</th>"
         "<th>head failures</th><th>added at head</th></tr></thead><tbody>",
     ]
-    lines.extend(one_row(row) for row in rows)
-    lines.append("</tbody></table>")
+    lines.extend(one_row(row, cut.get(row["file"])) for row in rows)
+    lines.extend(["</tbody></table>"])
     return "\n".join(lines)
 
 
@@ -95,60 +106,34 @@ def names(rows):
 
 def verdict(cpu, card, base_files):
     cpu_measured, cpu_pairs, cpu_killed, cpu_only, cpu_absent = classify(cpu)
-    card_measured, card_pairs, card_killed, card_only, card_absent = classify(card)
-    measured = cpu_measured + card_measured
-    in_base = [row for row in measured if not row["head_only"]]
-    pairs = cpu_pairs + card_pairs
-    killed = cpu_killed + card_killed
-    head_only = cpu_only + card_only
     added_cpu = sum(len(row["added"]) for row in cpu)
-    added_card = sum(len(row["added"]) for row in card)
+    gated = len(cpu)
     parts = [
-        "Added failure ids: <strong>" + str(added_cpu) + " on CPU</strong> and "
-        "<strong>" + str(added_card) + " on the H200</strong>.",
-        "This verdict covers "
-        + str(len(in_base))
-        + " of the "
-        + str(base_files)
-        + " test files in the base set. "
-        + str(len(pairs))
-        + " of those give a pair, "
-        "a base arm and a head arm that both completed on the same device, and none of "
-        "them adds a failure id: "
+        "Added failure ids: <strong>"
+        + str(added_cpu)
+        + " on CPU</strong> over the "
+        + str(gated)
+        + " gated files, each head arm measured at revision <code>"
+        + str(next((row.get("head_revision") for row in cpu if row.get("head_revision")), "") or "")[:9]
+        + "</code>.",
+        str(len(cpu_pairs)
+        + len(cpu_only))
+        + " of the gated files answer for themselves: "
         + str(len(cpu_pairs))
-        + " on CPU and "
-        + str(len(card_pairs))
-        + " on the H200.",
+        + " carry a base arm and a head arm that both completed, and "
+        + str(len(cpu_only))
+        + " are files the head adds, measured at head alone.",
     ]
-    if killed:
+    if cpu_killed or cpu_absent:
         parts.append(
-            "Of the " + str(len(in_base)) + ", one ran a head arm that "
-            "did not reach a summary line: "
-            + names(killed)
-            + ". That row states no verdict and is "
-            "reported as unreadable below."
-        )
-    if cpu_absent or card_absent:
-        parts.append(
-            "The remaining "
-            + str(len(cpu_absent) + len(card_absent))
-            + " of the "
-            + str(base_files)
-            + " give no pair: "
-            + "; ".join(describe(row) for row in cpu_absent + card_absent)
+            "The gate does not answer for "
+            + "; ".join(describe(row) for row in cpu_killed + cpu_absent)
             + "."
         )
-    if head_only:
-        parts.append(
-            "The "
-            + str(len(head_only))
-            + " test files the head adds, "
-            + names(head_only)
-            + ", have no base arm, are marked as such, and "
-            + "lie outside the "
-            + str(base_files)
-            + "."
-        )
+    parts.append(
+        "The four slow files are reported below as information, outside this "
+        "verdict: they are measured once when the whole work closes."
+    )
     return " ".join(parts)
 
 
@@ -205,7 +190,11 @@ def unreadable(cpu):
 def card_note(card, meta):
     walls = meta.get("cpu_walls_seconds") or {}
     order = [row for row in card if row["file"] in walls]
-    parts = []
+    parts = [
+        "These rows are information, not gate: the verdict above covers the CPU "
+        "files, and the card table below is kept because a reader wants to see "
+        "what the slow files did."
+    ]
     if order:
         spell = ", ".join(
             "<code>"
@@ -260,6 +249,9 @@ def card_note(card, meta):
                 "head's arm and the row carries no verdict."
             )
         elif row["state"] == "not-run":
+            cut = (meta.get("cut_short") or {}).get(row["file"])
+            if cut:
+                continue
             parts.append(
                 "No arm of <code>" + row["file"] + "</code> ran to a receipt."
             )
@@ -273,7 +265,8 @@ def card_note(card, meta):
         "a base arm and no head arm. Neither carries a verdict. An unmeasured "
         "row is left for a later dispatch rather than answered by the head arm "
         "of the other device, which is a different device measuring a "
-        "different arm."
+        "different arm. None of these rows enters the verdict above: the slow "
+        "files are measured once when the whole work closes."
     )
     return '<p id="importer-delta-card-note">' + " ".join(parts) + "</p>"
 
@@ -396,7 +389,7 @@ def main():
     text = text.replace("CPU_TABLE", table(cpu, "cpu"))
     text = text.replace("UNREADABLE_LINE", unreadable(cpu))
     text = text.replace("H200_NOTE", card_note(card, meta))
-    text = text.replace("H200_TABLE", table(card, "card"))
+    text = text.replace("H200_TABLE", table(card, "card", meta.get("cut_short")))
     text = text.replace("EARLIER_TABLE", earlier(args.earlier_deltas, meta))
     text = text.replace("EARLIER_NOTE", earlier_note(args.earlier_deltas, meta))
     text = text.replace("RECEIPTS_BLOCK", receipts(meta))

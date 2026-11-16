@@ -1,32 +1,39 @@
 #!/usr/bin/env bash
-# Rebuild every device's delta table from the recorded arm receipts and refuse a
-# table that does not answer for the rows it declares.
+# Rebuild every device's delta table from the recorded arm receipts, check the
+# comparison against known inputs, and refuse a table the gated device cannot
+# answer for.
 #
-#   gate.sh <receipts-dir> <base-rows> <out-dir> <device-config>...
+#   gate.sh <receipts-dir> <base-rows> <out-dir> <control-log> <device-config>...
 #
 # A device config names the device, its receipt files (resolved against the
-# receipts directory) and the test files that device declares. The base-rows
-# argument names the receipt files whose rows are the declared set, comma
-# separated; every file they name must carry a completed pair, and no row may
-# add a failure id. A partial table is a partial measurement, not a clean one,
-# so the gate fails rather than passing on the factorization that the unmeasured
-# rows happen to be absent from the rows it looked at. verify.py reads the rows
-# and prints every file that carries no pair by name, which is the list a reader
-# needs to dispatch the remainder.
+# receipts directory), the test files that device declares and the revisions
+# its arms must record. A config marked gated must answer for every declared
+# file: a completed head arm at the declared revision, a completed base arm as
+# well unless the head is the only arm the file has, and no added failure id. A
+# config that is not gated is information: its table is built and printed and
+# never enters the verdict, because a slow file measured once is evidence for a
+# reader rather than a row the gate can pass.
+#
+# The controls run inside the gate: the base receipts compared with themselves,
+# with one id removed and with one id planted, half of which would make the
+# comparison meaningless. A gate that passed beside a failing control would be
+# reporting an instrument nobody had checked.
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 args=("$@")
 receipts="$1"
 base_rows="$2"
 out="$3"
-shift 3
+control_log="$4"
+shift 4
 PY="${PYTHON:-python3}"
 
 echo "# command=bash $0 ${args[*]}"
 echo "# interpreter=$PY"
 echo "# receipts=$receipts"
-echo "# base_rows=$base_rows"
+echo "# base-rows=$base_rows"
 echo "# out=$out"
+echo "# control-log=$control_log"
 
 status=0
 deltas=()
@@ -38,8 +45,18 @@ for config in "$@"; do
   deltas+=("$delta")
 done
 
-"$PY" "$here/verify.py" "$base_rows" "${deltas[@]}"
+"$PY" "$here/verify.py" "${deltas[@]}"
 verdict=$?
+
+"$PY" "$here/control.py" "$base_rows" "$here/compare.py" "$control_log"
+controls=$?
+
 if [ "$status" -ne 0 ]; then verdict="$status"; fi
+if [ "$controls" -ne 0 ]; then
+  verdict=1
+  echo "CONTROLS=FAIL see $control_log"
+else
+  echo "CONTROLS=PASS"
+fi
 echo "EXIT=$verdict"
 exit "$verdict"

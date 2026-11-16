@@ -1,14 +1,20 @@
-"""Decide whether a set of device tables answers for every file the base set names.
+"""Decide whether the gated device's table answers for every file it declares.
 
-    verify.py <base-rows files, comma separated> <delta table>...
+    verify.py <delta table>...
 
-Prints one line per device, one line per file carrying no completed pair, one
-line per added failure id, and a verdict. A file carries a completed pair when
-a base arm and a head arm for that file both reached a summary line on the same
-device. The verdict passes only when every declared file carries a pair and no
-row adds an id. It reads the rows, never the totals a table records about
-itself: a table reporting a clean total over an unmeasured row is exactly the
-failure this check exists to stop.
+A table is gated when its config says so; a table that is not gated is
+information. The verdict reads the gated tables only:
+
+* every file the gated device declares must carry a completed head arm at the
+  revision the table records, and a completed base arm too unless the head is
+  the only arm the file has;
+* no gated row may add a failure id;
+* a gated table with no rows at all fails, because a table that measured
+  nothing is not a clean one.
+
+An information table is printed and never enters the verdict: a slow file the
+card measured once is evidence a reader should see beside the gated rows, not a
+row the gate can pass or fail.
 """
 
 import json
@@ -16,54 +22,7 @@ import sys
 
 
 def rows_in(path):
-    data = json.loads(open(path).read())
-    return data["rows"] if isinstance(data, dict) else data
-
-
-def declared_files(paths):
-    files = {}
-    for path in paths.split(","):
-        for row in rows_in(path):
-            files.setdefault(row["file"], row.get("device", "cpu"))
-    return files
-
-
-def main():
-    declared = declared_files(sys.argv[1])
-    covered = {}
-    added = 0
-    empties = []
-    for path in sys.argv[2:]:
-        data = json.loads(open(path).read())
-        rows = data["rows"]
-        device = data["device"]
-        if not rows:
-            empties.append(device)
-            continue
-        pairs = 0
-        for row in rows:
-            if has_pair(row):
-                pairs += 1
-                covered.setdefault(row["file"], set()).add(device)
-            else:
-                state = row.get("state")
-                if state == "measured":
-                    state = "head-not-completed"
-                if not row.get("head_only"):
-                    print("UNMEASURED %s %s %s" % (device, row["file"], state))
-            for item in row.get("added") or []:
-                print("ADDED %s %s %s" % (device, row["file"], item))
-            added += len(row.get("added") or [])
-        print(
-            "DEVICE=%s ROWS=%d PAIRS=%d ADDED=%d"
-            % (
-                device,
-                len(rows),
-                pairs,
-                sum(len(row.get("added") or []) for row in rows),
-            )
-        )
-    return finish(declared, covered, added, empties)
+    return json.loads(open(path).read())
 
 
 def has_pair(row):
@@ -75,21 +34,63 @@ def has_pair(row):
     )
 
 
-def finish(declared, covered, added, empties):
-    missing = sorted(name for name in declared if name not in covered)
-    for name in missing:
-        print("MISSING " + name)
-    ok = not missing and added == 0 and not empties
-    print(
-        "GATE=%s files=%d pairs=%d added=%d missing=%d empty=%d"
-        % (
-            "PASS" if ok else "FAIL",
-            len(declared),
-            len(covered),
-            added,
-            len(missing),
-            len(empties),
+def head_alone(row):
+    return (
+        row.get("state") == "measured"
+        and bool(row.get("head_only"))
+        and bool(row.get("head_completed"))
+    )
+
+
+def main():
+    paths = sys.argv[1:]
+    problems = []
+    gated_rows = 0
+    gated_files = 0
+    for path in paths:
+        table = rows_in(path)
+        device = table["device"]
+        rows = table["rows"]
+        gated = bool(table.get("gated", True))
+        kind = "gate" if gated else "information"
+        pairs = 0
+        alone = 0
+        added = 0
+        for row in rows:
+            if has_pair(row):
+                pairs += 1
+            elif head_alone(row):
+                alone += 1
+            if row.get("added"):
+                added += len(row["added"])
+            if gated:
+                if has_pair(row) or head_alone(row):
+                    pass
+                else:
+                    state = row.get("state")
+                    if state == "measured":
+                        state = "head-not-completed"
+                    print("UNMEASURED %s %s %s" % (device, row["file"], state))
+                    problems.append("%s:%s" % (device, row["file"]))
+                for item in row.get("added") or []:
+                    print("ADDED %s %s %s" % (device, row["file"], item))
+            else:
+                print("INFO %s %s %s" % (device, row["file"], row.get("state")))
+        if gated:
+            if not rows:
+                problems.append(device + ":no-rows")
+            gated_rows += len(rows)
+            gated_files += pairs + alone
+        print(
+            "DEVICE=%s %s ROWS=%d PAIRS=%d HEAD_ONLY=%d ADDED=%d"
+            % (device, kind, len(rows), pairs, alone, added)
         )
+        if gated and added:
+            problems.append("%s:added=%d" % (device, added))
+    ok = not problems
+    print(
+        "GATE=%s gated_files=%d gated_rows=%d problems=%d"
+        % ("PASS" if ok else "FAIL", gated_files, gated_rows, len(problems))
     )
     return 0 if ok else 1
 

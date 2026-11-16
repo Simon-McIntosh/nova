@@ -1552,11 +1552,11 @@
     8,4,7,21,35,18. The terminal public read reports no qualified axis.</p>
   <table><thead><tr><th>Original ITER stored-field outer trip</th>
     <th>Relative residual</th><th>Changed mask entries</th></tr></thead><tbody>
-    <tr><td>1</td><td>0.13785725831985474</td><td>8</td></tr>
-    <tr><td>2</td><td>0.265921026468277</td><td>4</td></tr>
-    <tr><td>3</td><td>0.5150688290596008</td><td>7</td></tr>
-    <tr><td>4</td><td>1.468691349029541</td><td>21</td></tr>
-    <tr><td>5</td><td>0.7962149381637573</td><td>35</td></tr>
+    <tr><td>1</td><td>0.1378572588580656</td><td>8</td></tr>
+    <tr><td>2</td><td>0.2659210122642718</td><td>4</td></tr>
+    <tr><td>3</td><td>0.5150688100765629</td><td>7</td></tr>
+    <tr><td>4</td><td>1.4686913820871088</td><td>21</td></tr>
+    <tr><td>5</td><td>0.7962149154917425</td><td>35</td></tr>
     <tr><td>6</td><td>NaN</td><td>18</td></tr>
   </tbody></table>
   <p>The one authorised diagnostic evaluation of the original stored-field
@@ -1570,7 +1570,10 @@
     arithmetic needed to locate its first scalar NaN. No second diagnostic
     evaluation or new public ITER seed has been spent. ITER remains stopped
     on that forward-path attribution limit; neither forward nor topology
-    source is edited. Full stage finiteness and original trip audit are
+    source is edited. The history audit now reads the pickled arrays with x64
+    enabled before unpickling; its earlier float32 metadata reading is retained
+    separately. This changes the last digits above but not the sixth-trip
+    location. Full stage finiteness and original trip audit are
     <code>fitted-observation-replay-1318855/iter-diagnostic/iter-first-map-diagnostic.json</code>
     and <code>iter-original-trip-audit.json</code> in the run directory.</p>
 </section>
@@ -1591,9 +1594,9 @@
       <td>false</td><td>1; finite receipt, residual above public qualification
       limit 1e-10</td></tr>
     <tr><td>Limited cold seed</td><td>NaN</td><td>false</td><td>false</td>
-      <td>3; NoQualifiedAxisError after 3 outer trips</td></tr>
+      <td>3; NoQualifiedAxisError on outer trip 4; 3 preceding finite residual entries</td></tr>
     <tr><td>Diverted cold seed</td><td>NaN</td><td>false</td><td>false</td>
-      <td>3; NoQualifiedAxisError after 3 outer trips</td></tr>
+      <td>3; NoQualifiedAxisError on outer trip 4; 3 preceding finite residual entries</td></tr>
   </tbody></table>
   <p>The first seed carries finite flux, cell currents, moments and
     conservation arrays, with no terminal constraints. Its public guard
@@ -1607,7 +1610,11 @@
     receipts into <code>converged=false</code> and omit the termination reason.
     Its focused reproduction failed before the reporting repair; the focused
     checks then report <code>27 passed, 4 deselected in 12.59s</code>. Native
-    per-seed receipts remain the authority. Neither the forward solver nor
+    per-seed receipts remain the authority. The cold-seed summaries counted
+    three finite residual entries as three trips. The saved histories record
+    four attempted outer trips; that count is corrected in the table. The
+    reporting helper now carries both attempted trips and finite entries,
+    after a focused reproduction showed <code>assert 3 == 4</code>. Neither the forward solver nor
     its qualification threshold changed. An x64 read of the first pickle
     confirms the residual above; the earlier float32 metadata inspection is
     preserved separately in the run directory.</p>

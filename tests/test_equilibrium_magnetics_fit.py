@@ -81,6 +81,25 @@ def test_unqualified_forward_receipt_preserves_convergence(tmp_path, monkeypatch
     assert result["residual"] == 4.86e-10
 
 
+def test_failed_forward_history_counts_nonfinite_outer_trip(tmp_path):
+    from nova.equilibrium.fixed_point import FixedPointResult
+
+    history = FixedPointResult(
+        state=np.array([1.0]),
+        residual=float("nan"),
+        trace=np.array([float("nan")]),
+        active_set_iterations=4,
+        active_set_residuals=np.array([1.0, 2.0, 3.0, float("nan")]),
+    )
+    try:
+        raise RuntimeError("terminal topology refuses the fourth reconciliation")
+    except RuntimeError as error:
+        _persist_forward_failure(error, tmp_path, "refused")
+    result = json.loads((tmp_path / "refused-generating-failure.json").read_text())
+    assert result["trips"] == history.active_set_iterations
+    assert result["finite_residual_entries"] == 3
+
+
 def test_fitted_replay_family_guard_refuses_before_public_seeds():
     from tests.test_magnetics_fit_efit_comparison import _require_replay_agreement
 
@@ -915,7 +934,8 @@ def _persist_forward_failure(error, output, name):
             residual=float(history.residual),
             converged=bool(history.converged),
             termination_reason=int(history.termination_reason),
-            trips=int(
+            trips=int(history.active_set_iterations),
+            finite_residual_entries=int(
                 np.count_nonzero(np.isfinite(np.asarray(history.active_set_residuals)))
             ),
             history_path=str(destination),

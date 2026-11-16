@@ -1794,13 +1794,85 @@
       inspected before the CPU render gate's EXIT=0. This is a forward
       continuation; inverse-fit bands are not inferred from the image.</figcaption>
   </figure>
-  <p>The existing <code>MagneticsFit</code> now proceeds from this qualified
-    state in the same titan job. Its completed fit, physical bands, vertical
-    rows, disagreement split and actual scaled-data control remain pending.
+  <p>The existing <code>MagneticsFit</code> proceeded from this qualified
+    state in the same titan job. It subsequently stopped on an unqualified
+    public forward trial during its line search; see the
+    <a href="#efit-comparison-terminal-verdict">terminal comparison outcome</a>.
+    No completed inverse fit, physical band table or scaled-fit receipt resulted.
     Banked continuation receipts are under
     <code>terminal-state-followup-1319019/physical-mastu/</code>. The image
     was rendered separately from the saved receipt using a verified machine
     cache hit in <code>continuation-panel-1319047/</code>, with zero solves
     and zero field evaluations. Its 48.118533 s CPU rendering wall is
     separate from all P100 physics measurements; no CPU suite arm was rerun.</p>
+</section>
+
+<section id="efit-comparison-terminal-verdict">
+  <h3>Terminal comparison outcome: blocked on numerical nonqualification</h3>
+  <p>Job 1319019 completed its driver and ended FAILED after 01:00:59 with
+    scheduler exit 1:0. The fleet replacement lost the wait notification;
+    it did not terminate this measurement. The MAST-U continuation qualified,
+    then the inverse fit reached a line-search candidate whose typed public
+    forward receipt was unqualified. No reader, plotting or comparison
+    exception prevented the fit from running.</p>
+  <pre>MagneticsFit.fit, magnetics_fit.py:360
+    trial, prediction = self._evaluate(candidate, seed)
+MagneticsFit._evaluate, magnetics_fit.py:217
+    raise error
+RuntimeError: the forward evaluation did not qualify</pre>
+  <p>This is the observed numerical refusal in the code under test, not a
+    scaffolding failure. It does not establish that no equilibrium exists
+    for those parameters. The latest authority allowed one resubmission only
+    for scaffolding failure, so no resubmission, new public seed or further
+    diagnostic evaluation was made. Forward and topology source remain unchanged.</p>
+  <table><thead><tr><th>Machine</th><th>Fitted-source sensor replay</th>
+    <th>Measured physical outcome</th><th>Inverse bands / split / scaled control</th></tr></thead><tbody>
+    <tr><td>MAST-U</td><td>Loop 0.126410%, probe 0.102526% relative L2</td>
+      <td>Continuation qualified at 5.307643379157493e-16, then an inverse
+        line-search trial returned qualified=false and aborted the fit.</td>
+      <td>Not produced: fit did not return a receipt; scaled fit was not entered.</td></tr>
+    <tr><td>TCV</td><td>Loop 0.169823%, probe 0.190155% relative L2</td>
+      <td>Three public candidates exhausted. Stored-field residual
+        0.030364200526436996, ACTIVE_SET_STEP_REFUSED; both cold seeds
+        NoQualifiedAxisError with nonfinite terminal residuals.</td>
+      <td>Not produced: no generating public receipt qualified.</td></tr>
+    <tr><td>ITER</td><td>Loop 0.724262%, probe 0.0839521% relative L2</td>
+      <td>Original public candidates refused qualification. Three authorised
+        diagnostics identify the vacuum-like later state and the explicit
+        NaN O-selection refusal when both reads have zero qualified candidates.</td>
+      <td>Not produced: no qualified inverse fit; same magnetics rows but
+        different pressure/q0-prior constraint sets, with count-age caveat retained.</td></tr>
+  </tbody></table>
+  <p>The completed MAST-U pytest stage reports
+    <code>1 failed in 3481.17s (0:58:01)</code>, native EXIT=1; its complete
+    case wall is 3508.560784 s on titan P100, including compilation and setup.
+    The banked continuation remains qualified, converged and finite at
+    5.307643379157493e-16. That value belongs to the continuation, not to
+    the rejected inverse trial.</p>
+  <p>The exception carried its trial receipt in memory, but the measurement
+    harness did not persist that receipt. The rejected trial's scalar
+    residual, termination code, line-search fraction and total fit evaluation
+    count are unavailable. They are not inferred from the continuation or
+    entered as zero. The native stack proves that the fit passed setup,
+    reached its line-search evaluation and refused an unqualified public
+    result. The durable directory contains the continuation JSON/history/pickle,
+    input/profile/current-map records and native gate log, but no
+    <code>mastu-fit.pkl</code>, <code>mastu-scaled-fit.pkl</code> or
+    <code>mastu-result.json</code>. The known-present continuation files were
+    read before the missing completed-fit receipts were reported.</p>
+  <p>The inspected MAST-U image above is explicitly the qualified banked
+    continuation. No image is invented for the lost rejected-trial receipt.
+    TCV and ITER's inspected terminal panels and all three passing input
+    replay panels remain in this record. No completed physical scaled-fit
+    receipt exists, so the declared 1.10 control remains unrun; the API-gap
+    probe and recorder calibration are not adopted as that control.</p>
+  <p>Native evidence is
+    <code>terminal-state-followup-1319019/physical-mastu/gate.log</code>,
+    <code>terminal-state-followup-1319019/measurement-index.json</code> and
+    <code>terminal-failure-assessment-1319019.json</code> in the run directory.
+    The final focused GPU forward/unit log at
+    <code>682f5a90f5018e1dc3b895a3289df67175633f79</code> reports
+    <code>1 failed, 65 passed, 10 deselected in 51.67s</code> with native EXIT=1.
+    The original cut-short CPU base and unrun CPU after records are preserved
+    as incomplete, without rerun or fabricated native status.</p>
 </section>

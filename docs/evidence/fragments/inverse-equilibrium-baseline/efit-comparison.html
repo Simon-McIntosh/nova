@@ -1421,4 +1421,36 @@
     in the run directory. The batch calls no equilibrium solve. Each later
     fit requires every nonzero-reference sensor family to pass 5% relative
     L2 in this fitted-source replay first.</p>
+  <h3 id="efit-comparison-mastu-fitted-replay">MAST-U fitted-current replay passes the input gate</h3>
+  <p>Using the explicit fitted-current source map above with the stored density,
+    the loop relative L2 error falls from 28.4319% to 0.126410%, and the probe
+    error from 6.84865% to 0.102526%. The measured-current and fitted-current
+    evaluations use the same observation geometry and stored plasma density;
+    the conductor state accounts for the large difference. Both nonzero
+    reference families pass the unchanged 5% admission threshold.</p>
+  <table><thead><tr><th>Family</th><th>Active rows</th><th>Nova − EFIT relative L2</th>
+    <th>Nova − EFIT whitened RMS</th><th>Nova − measured whitened RMS</th>
+    <th>EFIT − measured whitened RMS</th></tr></thead><tbody>
+    <tr><td>whole flux loops</td><td>91</td><td>0.12641%</td><td>0.17233558</td><td>5.164861</td><td>5.1648857</td></tr>
+    <tr><td>zero-extent flux paths</td><td>65</td><td>undefined: zero reference</td><td>0</td><td>48.58592</td><td>48.58592</td></tr>
+    <tr><td>poloidal probes</td><td>208</td><td>0.102526%</td><td>0.047154822</td><td>8.3229203</td><td>8.3196863</td></tr>
+  </tbody></table>
+  <p>The 65 zero-extent paths remain in the residual vector. Nova and EFIT both
+    predict zero there, so their zero difference is an exact zero-reference
+    check, not a relative-error pass. Their measured-data whitened RMS remains
+    48.5859 in both codes. The density-current positive control remains
+    760951.7255892474 A versus stored 760951.7255892473 A, and both plasma and
+    conductor probe images are nonzero.</p>
+  <figure id="efit-comparison-mastu-fitted-replay-panel">
+    <img src="/nova/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/mastu-row-replay.svg" alt="MAST-U fitted-current kernel replay blue contours overlay grey imas-efit contours inside the vessel" />
+    <figcaption>MAST-U 45272, 0.2 s: Nova stored-density plus fitted-current
+      kernel replay (blue, narrow) over imas-efit (grey, wide), shared levels,
+      both stationary-point sets and wall. This calls zero equilibrium solves:
+      residual/converged qualification is not applicable. Full rectangular-map
+      relative L2 error is 0.236460%. PNG rendered and inspected; receipt is
+      before native EXIT=0. Native pytest: 1 passed in 966.34s (0:16:06).
+      Replay function wall 959.807 s, total process 988.343 s, titan P100 only.
+      A later fit may now spend its admitted three-seed portfolio; no fit or
+      scaled-data control is claimed by this panel.</figcaption>
+  </figure>
 </section>

@@ -200,9 +200,10 @@ def comparisons(fields, sizes, groups):
         if not coarser:
             continue
         for name in (*groups, "all"):
-            access = (lambda values: values) if name == "all" else (
-                lambda values, key=name: values[key]
-            )
+            def access(values, key=name):
+                if key == "all":
+                    return np.concatenate([values[key] for key in groups])
+                return values[key]
             fine = {key: access(fields[key][size]) for key in fields}
             coarse = {key: access(fields[key][coarser[0]]) for key in fields}
             model = float(
@@ -227,6 +228,26 @@ def comparisons(fields, sizes, groups):
                 )
             )
     return rows
+
+
+def compare_only(directory):
+    """Recompute one finished run's comparison rows from its stored fields."""
+    directory = Path(directory)
+    record = json.loads((directory / "summary.json").read_text())
+    groups = {
+        name: np.asarray(points) for name, points in record["probe_groups"].items()
+    }
+    sizes = record["sizes_m"]
+    fields = {
+        key: {
+            size: group_fields(np.load(directory / f"west-{key}-{size:g}.npz")["field"], groups)
+            for size in sizes
+        }
+        for key in ("true", "stored")
+    }
+    record["west_comparison"] = comparisons(fields, sizes, groups)
+    (directory / "summary.json").write_text(json.dumps(record, indent=2) + "\n")
+    return record["west_comparison"]
 
 
 def fill_one_arm(record, output, source, external, b_field, permeability, groups, fields, points):

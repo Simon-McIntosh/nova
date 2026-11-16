@@ -89,7 +89,7 @@ def stray(root, source, out):
         ("above_arms", 1, 3.7, "R [m] above the upper arms"),
     )
     fig, axes = plt.subplots(1, 2, figsize=(14, 5), sharey=True)
-    fig.subplots_adjust(left=0.07, right=0.98, bottom=0.14, top=0.84, wspace=0.1)
+    fig.subplots_adjust(left=0.12, right=0.95, bottom=0.16, top=0.82, wspace=0.30)
     for axis, (name, column, face, label) in zip(axes, panels):
         points = np.asarray(summary["probe_groups"][name])
         keep = np.isclose(points[:, column], face)
@@ -104,6 +104,8 @@ def stray(root, source, out):
             coarse_magnitude = np.linalg.norm(coarse_field[index], axis=1) * 1e3
             axis.plot(points[local, 1 - column], magnitude, color=colour, linewidth=2.6, label=label_model)
             axis.plot(points[local, 1 - column], coarse_magnitude, color=colour, linewidth=1.2, linestyle=":", label=None)
+        axis.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=3, prune='both'))
+        axis.tick_params(labelsize=11)
     axes[0].set_ylabel("poloidal field [mT]")
     fig.legend(loc="upper center", ncol=2, frameon=False)
     save(fig, out / "west-62751-stray-lines.svg")

@@ -67,6 +67,18 @@
 
 <p id="ilf-west-true-outline-evidence-measured">The true-outline arm solved at 0.08 m on one H200 card (job 1318852): 3480 cells, converged in 8 corrections to a terminal residual of 4.5e-11 in 143 s. Its recorded material is the read's: the per-cell fill fraction spans 0.128 to 1.000 and the cross-field factor reaches 0.400, so the solve is the flat-region model and not a solid stand-in.</p>
 <p id="ilf-west-true-outline-evidence-not-run">Not measured: the stored-versus-true field at the in-vessel ring, behind the limbs and above the arms. The stored arm at 0.08 m and both arms at 0.04 m did not reach a row in the node's compute window, so no mesh pair exists for either model and no model difference is reported. Neither <code>west-62751-permeability.svg</code> nor <code>west-62751-stray-lines.svg</code> was redrawn; the figures under <code>docs/figures/iron-limb-fill/</code> remain the §2 prototype drawings. The arrays present are the true-outline 0.08 m state, its polygons and its 58 probe fields under <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/west-62751/</code>, and the declared unit-fill control could not run without the stored and 0.04 m arms it compares.</p>
+
+<p id="ilf-west-true-outline-evidence-difference">The model difference is the relative norm of the true-minus-stored probe field at 0.04 m; the mesh-pair difference is the same norm between the 0.04 m and 0.08 m fields of each model, largest of the two. A model difference no larger than its mesh pair is reported as not resolved.</p>
+<table id="ilf-west-true-outline-evidence-table">
+<thead><tr><th>Probe group</th><th>true vs stored</th><th>mesh pair</th><th>verdict</th></tr></thead>
+<tbody>
+<tr><td>in-vessel ring, 16 probes</td><td>0.0694</td><td>0.0086</td><td>resolved</td></tr>
+<tr><td>behind the limb faces, 18 probes</td><td>0.1366</td><td>0.0132</td><td>resolved</td></tr>
+<tr><td>above the upper arms, 24 probes</td><td>0.0240</td><td>0.0185</td><td>resolved</td></tr>
+<tr><td>all 58 probes</td><td>0.0660</td><td>0.0115</td><td>resolved</td></tr>
+</tbody></table>
+<p id="ilf-west-true-outline-evidence-reading">Every group resolves and at 13.7 % against 1.3 % behind the limb faces it resolves most strongly; above the upper arms the margin is 2.4 % against 1.9 % and is reported as narrow rather than large. This paragraph and the table above supersede the earlier "not measured" paragraph, which described the submission while its allocation was still queued.</p>
+<p id="ilf-west-true-outline-evidence-figures">The two figures are redrawn from this solve. <code>docs/figures/iron-limb-fill/west-62751-permeability.svg</code> draws both models' iron relative permeability at 0.04 m over the machine outline, and <code>docs/figures/iron-limb-fill/west-62751-stray-lines.svg</code> draws the probe field magnitude of both models at both sizes, the 0.04 m run solid and the 0.08 m run dotted. The permeability panel paints one colour per iron cell, which the plotting rule refuses in favour of line contours on stated levels; it is recorded as drawn and owed a contour redraw.</p>
 </section>
 
 </main>

@@ -1,0 +1,75 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T22:21:20.965Z",
+  "dispatched_at": "2026-11-16T22:20:32Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:107",
+      "id": "reasoning-1",
+      "reason": "a node dispatched on this section hunts a 1.5565 percent shortfall that the cited records do not contain, so it either reproduces a passing benchmark (and must re-derive its own premise) or reports a premise its own receipt contradicts.",
+      "text": "s11 asserts the pinned benchmark \"refuses at every revision measured in the finite-edge record\" and reports a measured unscaled seed current of 1119994.165 A at `37b9ba7c4` against a registered 1137702.227 A, but that number appears nowhere in the repository: the banked receipt `docs/figures/diiid-forward-onboarding/current-pinned/current_pinned_forward_frames.jsonl` records `unscaled_seed_plasma_current_a: 1137702.0764874695` against the registration `1137702.226779481` in `benchmarks/diiid_current_pinned_forward.py:95`, a relative difference of 1.3e-7 inside the declared 2e-6, and `docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-held-nodes.html:174-175` records `tests/imas/test_diiid_current_pinned_forward.py` as \"completed; EXIT=0\" at both its historical head `0065f6128` and its base `e635bdda`, so the refusal the section is built on is not the state any committed record shows.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:101",
+      "id": "reasoning-2",
+      "reason": "a pinned function call is a guess a worker must validate against the code before the endpoint can be checked, which is the review round the plan's own resolved s6 finding already removed once.",
+      "text": "s10 states its endpoint as the implementation: it names `_green_block`, `build_flux_blocks`, `_moment_couplings` and `hybrid_greens`, and fixes which kernel the builder must call and that block 0 of that call is discarded, which is the reuse-map content the brief of this review assigns to the node brief rather than to plan text; the section's endpoint is expressible as \"every plasma row of this builder comes from one exact cell kernel, and the uniform row is the same kernel's row\", with no symbol named.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:103",
+      "id": "done_when-1",
+      "reason": "as written the last clause of the section's gate can never produce a measurement, so the node closes on an arm that no scheduler will run.",
+      "text": "s10's done-when (3) sends an arm that outlasts the hour to `rigel`, but the repository's binding guidance records that `rigel_debug` accepts jobs and has zero nodes, so a job sent there pends forever with reason `PartitionConfig`; the CPU rung is `all_debug` (or `sirius` past the hour), which is what s11's own clause (3) names.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:86",
+      "id": "wiring-1",
+      "reason": "the clause says \"beside the diagnosis trajectory\", which asks for a side-by-side report rather than a judged equality, so the numbers are compared only by a reader; naming \u00a710 alongside \u00a76 in the clause would remove the ambiguity without changing what is judged.",
+      "text": "s7 declares `s10` in its depends-on and says it is \"measured on the combined head\", yet its done-when (2) reruns \"the four rows at the head carrying \u00a76\" and compares 146L and 137D against a diagnosis trajectory and a base solve taken before \u00a710 replaced the builder's uniform rows, so the declared dependency is not the state the comparison is measured in.",
+      "type": "wiring",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "aa6495e403c8489b405c8316a27d399c2672fd5c",
+  "plan_fingerprint": "acdba406e9a701b75fe923e06fcb9d963bf3fec90176c06d5ea4ae6c07c953f5",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 101,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261116T220025128990-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "c962dcbb45334d39090b9b9211f4f90edf6c21e1",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `benchmarks/diiid_forward_gs_match.py`, `nova/biot/greens.py` `hybrid_greens`, `scripts/prototypes/diiid_xpoint_coil_correction/fit.py`, `benchmarks/diiid_current_pinned_forward.py` and the three cited evidence fragments all resolve in the plan's tree, and the s7 href resolves as `<path>.html`.",
+    "done_when": "a finding \u2014 s10's done-when (3) routes a long arm to `rigel`, a partition with zero nodes, so the gate can pend to its wall with no measurement.",
+    "evidence_paths": "pass \u2014 s10 and s11 name figures and records but no temporary path, and their gates run on `all_debug`/H200 as the house rule requires.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers appear in s7, s10 or s11; the commit hashes cited are evidence pointers, not naming.",
+    "reasoning": "a finding \u2014 s11's premise is not supported by any record and is contradicted by the pinned benchmark's own banked receipt and a gate row showing the test exits zero.",
+    "single_goal": "pass \u2014 s10 names one deliverable (all plasma rows of the DIII-D builder from one kernel), s11 one (the seed-current disagreement resolved), s7 one (the inactive compensator contributes no flux and no tangent on any route).",
+    "wiring": "a finding \u2014 s7 now declares `s10` as a depends-on but its done-when reruns the four rows \"at the head carrying \u00a76\", so the declared dependency is not carried into the measured state."
+  },
+  "section_digests": {
+    "_document": "8e5c0bf47364beca17fe5b540a282cd24e45ff5cb13f57dbbb5016dda75d5b7c",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "f549a6aa5cd4d604d5ee9fadbd750e0c0a64a9fb49c67011234c3daf028d5418",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "c8462551481181ec2aab0724a0327f94a0857c7b02fe58c0e5cd301977a06727",
+    "s8": "8632587216eaa0edebdbe9d2f34107c6a23a5c5d466a12ce012fb753a7b1c661",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T22:45:15.249853+00:00",
+  "total": null
+}

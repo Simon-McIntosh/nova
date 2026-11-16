@@ -17,7 +17,40 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 28,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b87c8a4fe3bb59bd6d6205e609b2aa1cc7983f03",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The clause now rests the honesty test on the 32 full nonlinear fits alone, with their own interval, and restates the 256 linearised realisations as a check that the receipt covariance is the operator inverse, not as evidence of honesty.",
+      "reason": "",
+      "when": "2026-11-16T19:55:27.972381+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b87c8a4fe3bb59bd6d6205e609b2aa1cc7983f03",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The clause now rests the honesty test on the 32 full nonlinear fits alone, with their own interval, and restates the 256 linearised realisations as a check that the receipt covariance is the operator inverse, not as evidence of honesty.",
+      "reason": "",
+      "when": "2026-11-16T19:55:40.545372+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b87c8a4fe3bb59bd6d6205e609b2aa1cc7983f03",
+      "commit_basis": "edit",
+      "note": "The clause now rests the honesty test on the 32 full nonlinear fits alone, with their own interval, and restates the 256 linearised realisations as a check that the receipt covariance is the operator inverse, not as evidence of honesty.",
+      "reason": "",
+      "when": "2026-11-16T19:55:40.545372+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261116T193539164293-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261116T193539164293-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "2312ec21af27e86f1f6c4a1d7563a09c969d803d",
   "rubric": "content",

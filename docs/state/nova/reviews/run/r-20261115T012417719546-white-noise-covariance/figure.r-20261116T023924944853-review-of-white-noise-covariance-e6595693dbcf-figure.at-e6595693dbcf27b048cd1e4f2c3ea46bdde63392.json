@@ -1,0 +1,104 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "checks_that_could_have_failed": "Three measurements, each with a control. (1) Faithfulness of the plotted values: pixel positions of all six stated-sd discs and all six doubled-noise rings were converted through each panel's own tick rows and compared with the record's tables; worst disagreement 0.004 (ITER direction 1, 0.896 measured against 0.898 tabulated), which is the pixel quantisation of the marker centre, and the band edges render at 0.744-1.307 against a stated 0.7447-1.3017. (2) The 99% circle: its radius measures 3.04-3.05 stated sd in all three renders (221.5 px at 72.9 px/unit on ITER, 213 px at 70.0 on MAST, 215 px at 70.7 on Solov'ev) and its centre lands on the zero crosshair to within 0.5 px, against the analytic sqrt(chi2.ppf(0.99,2)) = 3.0349 -- so the drawn interval is the interval the caption claims. (3) Label collision: the gap measure was shown to fire by dragging one text row 10 px into another in a copy of image-0, which moved the measured inter-band gap from 13 px to 3 px; an earlier version of the same check merged overlapping text into one oversized component and silently dropped it, reporting a clean result it could not have supported, so the band-gap form was used instead. A first attempt at the collision control also failed to fire because it moved a row in the wrong direction; that too is recorded rather than hidden. Nothing in the pixels contradicted the record: every ratio lies inside the band as the fragment states, and every control ratio lies outside it.",
+  "completed_at": "2026-11-16T03:01:02.619Z",
+  "dispatched_at": "2026-11-16T02:40:32Z",
+  "findings": [
+    {
+      "disposition": "folded: redraw the three figures with the population at full opacity (#929292, 3.1:1) and re-render; no other change to the plot is needed",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "id": "ff1325c19b7",
+      "line": 385,
+      "severity": "non-blocking",
+      "summary": "The 256-point population is drawn as #929292 (full_study.py:372) at alpha 0.55 (line 385, composite of 146*0.55 + 255*0.45), so every dot renders at rgb(195,195,195), a contrast of 1.76:1 on white. Measured on all three rendered PNGs: the modal non-white luminance in each left panel is 195, with 1019-1067 pixels at exactly that value. That is below the 3:1 the project's plot style sets for a population grey (#929292 would reach 3.1:1 at full opacity) and lighter than the #B0B0B0 at 2.0:1 the lead rejected as too light. At reading size the 256 points merge into a pale field and the cloud's own extremes are harder to pick out than its density warrants; the marks are visible, so this does not hold the node. A correction to the record at head f0cd75cbf, which listed the grey marks at rgb(146,146,146) and 3.1:1: that value is the full-opacity dotted crosshair at lines 398-399, not the dots."
+    },
+    {
+      "disposition": "folded: set the ratio panel's floor near the band (or draw the band on its own inset panel) so the distances to both edges are readable, in the same redraw as finding 1",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "id": "f691cced187",
+      "line": 439,
+      "severity": "non-blocking",
+      "summary": "The right panel's limits are set as set_ylim(0.0, upper * 1.15) with upper taken from the largest value drawn, so the axis floor is zero and the ceiling is driven by the twice-stated-sd control near 4: measured ceilings are 5.24 on ITER, 5.45 on MAST and 4.83 on Solov'ev. The acceptance band 0.7447 to 1.3017 therefore occupies 10.9, 10.5 and 12.0 per cent of the panel height (55, 53 and 59 px of 504, 504 and 493 px), while the markers themselves are 13-14 px across, a quarter of the band's height. The ITER direction-1 ratio of 0.898 sits 0.151 above the lower edge -- 27 per cent of the band -- yet only about one marker radius (8 px) clear of it, so a comfortable pass reads as marginal and a genuine near-threshold failure would be difficult to tell from a pass. How far inside each direction sits, which the record reports (0.898 to 1.259), cannot be read off the panel. This finding was recorded for these same figures at head f0cd75cbf and persists unchanged at this head, because the figures have not been redrawn; the plotted values, the mark colours and the inside/outside verdict are all correct."
+    },
+    {
+      "disposition": "folded: give the two panels a fixed equal-aspect box (shared limits across the three states) in the same redraw as finding 1",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "id": "fe23c29c623",
+      "line": 400,
+      "severity": "non-blocking",
+      "summary": "left.set_aspect(\"equal\") re-fits and centres the left axes box, so in the Solov'ev render that panel occupies rows 120-613 (493 px) against rows 115-619 (504 px) in the ITER and MAST renders, while the right panel stays 504 px in all three. Within the Solov'ev image the left panel's x-axis baseline therefore sits 5 px above the right panel's, and the figure's leftmost ink begins at x=51 against x=66 on ITER and x=78 on MAST. A reader comparing the three figures in sequence sees left panels of two different scales whose horizontal position shifts by up to 27 px, and inside the Solov'ev figure two panels whose baselines do not line up. No label is clipped and nothing is unreadable, which is why this does not hold the node; a shared x/y limit or a fixed gridspec width would align the panels without changing the aspect rule that the circle requires."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass for every text element, measured on the rendered pixels: legend and axis-label glyph cores are rgb(11,11,11) at 19.7:1 on white and tick labels rgb(80,80,80) at 8.1:1, both clearing WCAG AA. The data marks do not clear 3:1 -- the population grey renders at rgb(195,195,195), 1.76:1 -- which is recorded as finding 1 rather than as a text-contrast failure, because the rubric's contrast item is about text and the text here is unambiguous.",
+    "data_ink": "pass on all three: the ink is the data. The left panel carries 256 grey points, one dashed circle of radius 3.04 stated sd and a dotted zero crosshair; the right panel carries two filled blue discs, two hollow rings, one dotted unity line and the acceptance band. No gridlines and no top or right spines: the only long ink columns in each image are the two left spines (x=154/166/139 and x=837) and the only long ink rows are the two bottom spines.",
+    "decoration": "pass on all three: pure white covers 94.4, 94.4 and 94.2 per cent of the canvas; there is no gradient, no texture and no themed background. The single fill is the right panel acceptance band, whose extent is the measured interval -- 0.7447 to 1.3017 by construction, rendered as 0.744-1.307, 0.744-1.306 and 0.745-1.302 by pixel measurement -- and the caption names it, so its area carries information rather than decoration.",
+    "label_collision": "pass on all three, checked at native resolution: the outer two pixel rows and columns of every image are pure white, so nothing is clipped at the canvas edge; ink margins are 17 px top, 41/41/47 px bottom, 66/78/51 px left and 15 px right; the smallest vertical gap between adjacent text bands is 6 px in the ITER and MAST figures and 5 px in the Solov'ev figure; the two legend columns are 47 px apart and the two legend rows 13 px apart. The measure was shown to be sensitive: dragging the second legend row 10 px up in a copy of image-0 reduced the inter-band gap from 13 px to 3 px.",
+    "legibility": "pass on all three, with a recorded caveat (finding 1): 1399x720 canvas, 16 pt axis labels naming quantity and unit (\"principal 1 [stated sd]\", \"principal 2 [stated sd]\", \"realised / stated variance\"), 14 pt tick and legend text, two panels that read at a glance. The dashed 99% circle, the dotted zero crosshair, the filled blue discs and the hollow grey rings separate by shape as well as colour. The caveat: the 256-point population renders at rgb(195,195,195), 1.76:1 on white, so the cloud is legible at native resolution but its centre merges into a pale field at reading size; the individual extremes and the circle remain visible, which is why this is non-blocking.",
+    "table_form": "pass on all three: the left panel is a two-dimensional scatter against a reference contour, a spatial relationship no table carries; the right panel puts four numbers against a shaded interval so that inside and outside are visible without arithmetic. The same six ratios also appear in the record's tables, but the two panels add the scatter and the band comparison, neither of which is a table."
+  },
+  "notes": "Read-only figure review of the three rendered PNGs named in the review brief. No SVG, no preview image and no image other than those three was opened, rendered or git-shown, and no file was edited, redrawn, relabelled, moved or reformatted. Read alongside the PNGs: the evidence fragment at docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html (captions, tables and provenance) and the drawing script the fragment names, study/full_study.py, used only to anchor findings 1-3 to lines and to confirm the scatter and y-limit specification. Image-to-state mapping was read off the rendered pictures (marker heights against each right panel's tick rows) and cross-checked against the record.",
+  "project": "nova",
+  "review_run_id": "r-20261116T023924944853-review-of-white-noise-covariance-e6595693dbcf-figure",
+  "reviewed_base_sha": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+  "reviewed_commits": [
+    "b15155f8d0361efce262ded60fd0b54a95133cf4",
+    "f0cd75cbf01ac4af6f497d543edc033df1309dd1",
+    "e6595693dbcf27b048cd1e4f2c3ea46bdde63392"
+  ],
+  "reviewed_figures": [
+    {
+      "drawing_script": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T023924944853-review-of-white-noise-covariance-e6595693dbcf-figure/image-0.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/white-noise-covariance/iter.svg",
+      "state": "ITER reference case",
+      "state_identified_by": "the two blue stated-sd discs sit at 0.896 and 1.094 and the two hollow twice-stated-sd rings at 4.203 and 4.557, read off the rendered PNG against the right panel's tick rows; that pair is ITER's row in the record's variance-ratio table (0.898, 1.098) and negative-control table (4.205, 4.559)"
+    },
+    {
+      "drawing_script": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T023924944853-review-of-white-noise-covariance-e6595693dbcf-figure/image-1.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/white-noise-covariance/mast.svg",
+      "state": "MAST shot 22086 slice 43",
+      "state_identified_by": "the blue discs read 0.971 and 1.057 and the hollow rings 3.648 and 4.735 on the rendered PNG, which is MAST's row in the record's variance-ratio table (0.971, 1.059) and negative-control table (3.650, 4.739)"
+    },
+    {
+      "drawing_script": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T023924944853-review-of-white-noise-covariance-e6595693dbcf-figure/image-2.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/white-noise-covariance/solovev.svg",
+      "state": "Solov'ev analytic certificate",
+      "state_identified_by": "the blue discs read 1.129 and 1.258 and the hollow rings 4.197 and 3.986 on the rendered PNG, which is Solov'ev's row in the record's variance-ratio table (1.129, 1.259) and negative-control table (4.202, 3.991)"
+    }
+  ],
+  "reviewed_head_sha": "e6595693dbcf27b048cd1e4f2c3ea46bdde63392",
+  "reviewed_run_id": "r-20261115T012417719546-white-noise-covariance",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: [iter.svg via image-0.png] pass with the population-grey caveat in finding 1 -- 16 pt axis labels, 14 pt ticks and legend, both panels read at a glance, the circle and the four markers distinguishable by shape and colour, but the 256-point cloud at rgb(195,195,195) is faint at reading size.",
+    "RUBRIC data_ink: [iter.svg via image-0.png] pass -- 256 data points, one dashed 99% circle at radius 3.04 stated sd, a dotted crosshair, two blue discs and two hollow rings; no gridlines, no top or right spines, no gradient.",
+    "RUBRIC decoration: [iter.svg via image-0.png] pass -- white covers 94.4 per cent of the canvas; the only fill is the acceptance band, whose extent is the measured interval and which the caption names.",
+    "RUBRIC contrast: [iter.svg via image-0.png] pass for text -- legend and axis labels rgb(11,11,11) at 19.7:1, tick labels rgb(80,80,80) at 8.1:1; the population marks at rgb(195,195,195) are 1.76:1 and are carried as finding 1 rather than as a text-contrast defect.",
+    "RUBRIC table_form: [iter.svg via image-0.png] pass -- a 2-D scatter against a reference contour on the left and four ratios against an interval on the right; neither panel depicts a table.",
+    "RUBRIC label_collision: [iter.svg via image-0.png] pass -- no ink in the outer 2 px border; margins 17/41/66/15 px; minimum gap between text bands 6 px; legend columns 47 px apart; the gap measure drops from 13 px to 3 px under a 10 px synthetic drag, so it can fail.",
+    "RUBRIC legibility: [mast.svg via image-1.png] pass with the population-grey caveat in finding 1 -- the same canvas, type sizes and marker vocabulary; the faintest element is again the 256-point cloud, and the two arms still separate by shape (discs against rings).",
+    "RUBRIC data_ink: [mast.svg via image-1.png] pass -- the ink is the data; the circle, crosshair, four markers and band are the whole content and the panels carry no furniture beyond the two spines.",
+    "RUBRIC decoration: [mast.svg via image-1.png] pass -- white covers 94.4 per cent of the canvas; the only fill is the acceptance band, rendered 0.744 to 1.306, which is the stated interval.",
+    "RUBRIC contrast: [mast.svg via image-1.png] pass for text -- glyph cores rgb(11,11,11) at 19.7:1 and tick labels rgb(80,80,80) at 8.1:1; the population grey again renders at 1.76:1 and is carried as finding 1.",
+    "RUBRIC table_form: [mast.svg via image-1.png] pass -- scatter against a reference contour, and ratios against an interval; no information is rendered that a table carries better.",
+    "RUBRIC label_collision: [mast.svg via image-1.png] pass -- no ink in the outer 2 px border; margins 17/41/78/15 px; the four legend entries sit in clear space above both panels and the smallest text-band gap is 6 px.",
+    "RUBRIC legibility: [solovev.svg via image-2.png] pass with two caveats -- the population-grey caveat in finding 1, and finding 3, that this figure's left panel is 493 px tall against the right panel's 504 px so the two baselines differ by 5 px; every label still reads and nothing is clipped.",
+    "RUBRIC data_ink: [solovev.svg via image-2.png] pass -- the same minimal vocabulary; the right panel's axis carries one tick row fewer than the other two renders (top tick 4 rather than 5) because the control values here top out at 4.197, so the panel adds no empty headroom.",
+    "RUBRIC decoration: [solovev.svg via image-2.png] pass -- white covers 94.2 per cent of the canvas; the only fill is the acceptance band, rendered 0.745 to 1.302.",
+    "RUBRIC contrast: [solovev.svg via image-2.png] pass for text -- glyph cores rgb(11,11,11) at 19.7:1 and tick labels rgb(80,80,80) at 8.1:1; the population grey renders at 1.76:1 and is carried as finding 1.",
+    "RUBRIC table_form: [solovev.svg via image-2.png] pass -- a scatter against a contour and ratios against an interval; the two control points near 4.2 are placed against the same band, which no table row shows.",
+    "RUBRIC label_collision: [solovev.svg via image-2.png] pass -- no ink in the outer 2 px border; the tightest text-band gap in the set is here at 5 px, still clear of collision, and the leftmost ink at x=51 leaves a 51 px margin."
+  ],
+  "scores_omitted": "a figure review carries no scores and no suite-delta measurement",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T03:10:00Z",
+  "total": null
+}

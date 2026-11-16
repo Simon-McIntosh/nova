@@ -25,7 +25,7 @@
   <title>Iron Limb Fill Fraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="30">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -343,6 +343,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261116T202325498884-review-of-ilf-west-outline-figures-and-control-7de35616721c-figure" data-who="reckon-build" data-when="2026-11-16T20:38:54.185Z">
     <div class="r-comment-body"><p>figure review for r-20261116T193643238807-ilf-west-outline-figures-and-control at 7de356167: both attached pictures pass the six-item rubric with no blocking finding; three non-blocking findings on scripts/iron_limb_production/figure.py — the stray canvas is forced to 31.1111cm x 16cm while drawn at 15 x 5.8 in so the render letterboxes 134 of 541 rows, the permeability contours are 0.8 pt with a yellow-green top level at about 1.7:1 on white, and the above-the-arms curves cannot be attributed to a probe row.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261116T193643238807-ilf-west-outline-figures-and-control" data-who="reckon-build" data-when="2026-11-16T19:42:57.059Z">
+    <div class="r-comment-body"><p>ilf-west-outline-figures-and-control landed: both WEST 62751 SVGs redrawn (per-region masked contours, grey region outlines, one shared level array, colour bar and extent; three labelled stray panels with a closed in-vessel ring, separated upper/lower segments and one legend) and the unit-fill control fixed to one stated definition, 0.0834 = ||B(unit fill, 0.04)[0:16] - B(true, 0.04)[0:16]|| / ||B(true, 0.04)[0:16]|| against mesh pair 0.0081, pinned by a 1.5 kB fixture and a --compare-only entry.</p></div>
 </div>
 </section>
 </main>

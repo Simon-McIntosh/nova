@@ -1516,4 +1516,61 @@
       89.261 s, process wall 107.111 s, titan P100 only. This admits one later
       fit with at most three public seed candidates; it is not a fit result.</figcaption>
   </figure>
+  <h3 id="efit-comparison-iter-fitted-replay">ITER fitted-source replay and the original failure location</h3>
+  <p>The 12 fitted active circuit groups and 103 fitted passive currents bind
+    exactly to the stored measured-current witness (maximum error 0 A).
+    The stored-density integral is −15.544546676453656 MA, against stored
+    −15.544546676453630 MA. Both current-bearing source images are nonzero.
+    The 5% kernel agreement gate passes on every nonzero-reference family.</p>
+  <table><thead><tr><th>Family</th><th>Rows</th><th>Nova − EFIT relative L2</th>
+    <th>Nova − EFIT whitened RMS</th><th>Nova − measured whitened RMS</th>
+    <th>EFIT − measured whitened RMS</th></tr></thead><tbody>
+    <tr><td>whole flux loops</td><td>257</td><td>0.7242618%</td><td>0.47521485</td><td>26.192022</td><td>26.184335</td></tr>
+    <tr><td>zero-extent flux paths</td><td>4</td><td>undefined: zero reference</td><td>0</td><td>0.14429311</td><td>0.14429311</td></tr>
+    <tr><td>poloidal probes</td><td>915</td><td>0.08395208%</td><td>0.1110942</td><td>8.7493602</td><td>8.7552592</td></tr>
+  </tbody></table>
+  <figure id="efit-comparison-iter-fitted-replay-panel">
+    <img src="/nova/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/iter-row-replay.svg" alt="ITER fitted-current blue replay contours closely overlay the grey imas-efit contours and wall" />
+    <figcaption>ITER 135013, 75 s: stored-density plus fitted-current kernel
+      replay (blue, narrow) over imas-efit (grey, wide), shared levels, both
+      stationary-point sets and wall. Zero equilibrium solves; residual and
+      convergence qualification are not applicable to this replay. Full-map
+      relative L2 is 0.427846%. Rendered PNG inspected; receipt before native
+      EXIT=0. Native pytest: 1 passed in 402.23s (0:06:42). Function wall396.967 s,
+      process wall413.492 s, titan P100 only. Same magnetics rows; different
+      constraint sets: under the generating-configuration assumption EFIT used
+      synthesised pressure and q0 priors, and Nova's fit adds neither. Live
+      counts1/2 follow today's selector; stored outputs may predate the ITER
+      priors added after2026-06-23, pending per-slice confirmation.</figcaption>
+  </figure>
+  <p><strong>The original history does not become nonfinite on its first
+    outer trip.</strong> Its six attempted outer trips have residuals below;
+    five are finite. The earlier evidence's “5 trips” counted only finite
+    residual entries and omitted the failing sixth attempt. That counter is
+    corrected here without changing the saved native history. The first NaN
+    is recorded at the sixth reconciliation, after support-mask differences
+    8,4,7,21,35,18. The terminal public read reports no qualified axis.</p>
+  <table><thead><tr><th>Original ITER stored-field outer trip</th>
+    <th>Relative residual</th><th>Changed mask entries</th></tr></thead><tbody>
+    <tr><td>1</td><td>0.13785725831985474</td><td>8</td></tr>
+    <tr><td>2</td><td>0.265921026468277</td><td>4</td></tr>
+    <tr><td>3</td><td>0.5150688290596008</td><td>7</td></tr>
+    <tr><td>4</td><td>1.468691349029541</td><td>21</td></tr>
+    <tr><td>5</td><td>0.7962149381637573</td><td>35</td></tr>
+    <tr><td>6</td><td>NaN</td><td>18</td></tr>
+  </tbody></table>
+  <p>The one authorised diagnostic evaluation of the original stored-field
+    seed is finite: all1568 seed values,341 current moments,1568 plasma-image
+    values,1568 vacuum-image values and1568 raw residual values are finite.
+    The raw residual ranges from −14.9619943 to −2.2227410 Wb; initial topology
+    axis/boundary fluxes are −129.381311/−49.0648255 Wb. This falsifies an
+    initial-input NaN. The support read records zero refused cells. The stored
+    histories identify later loss of axis qualification and a nonfinite
+    sixth reconciliation, but do not retain the intermediate sixth-trip
+    arithmetic needed to locate its first scalar NaN. No second diagnostic
+    evaluation or new public ITER seed has been spent. ITER remains stopped
+    on that forward-path attribution limit; neither forward nor topology
+    source is edited. Full stage finiteness and original trip audit are
+    <code>fitted-observation-replay-1318855/iter-diagnostic/iter-first-map-diagnostic.json</code>
+    and <code>iter-original-trip-audit.json</code> in the run directory.</p>
 </section>

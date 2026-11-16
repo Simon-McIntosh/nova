@@ -340,6 +340,101 @@ def test_coefficient_updates_issue_only_typed_source_requests(linear_fit):
     )
 
 
+def _refuse_large_fit_steps(fitter, limit):
+    solve = fitter.profile.solve
+
+    def bounded(request):
+        receipt = solve(request)
+        delta = float(
+            np.max(np.abs(receipt.terminal_state.flux - request.seed_policy.state))
+        )
+        return replace(
+            receipt,
+            qualified=delta <= limit,
+            termination_reason=12 if delta > limit else 1,
+            terminal_state=SimpleNamespace(
+                **vars(receipt.terminal_state),
+                fixed_point=SimpleNamespace(residual=delta, converged=delta <= limit),
+            ),
+        )
+
+    fitter.profile.solve = bounded
+
+
+def test_unqualified_fit_trial_backtracks_to_a_qualified_step(linear_fit):
+    fitter, measurement, truth, calls = linear_fit
+    # The initial public request uses a different seed from subsequent trials.
+    fitter.request = replace(
+        fitter.request, seed_policy=magnetics_fit.ExplicitSolveSeed(fitter._initial)
+    )
+    _refuse_large_fit_steps(fitter, 0.08)
+    receipt = fitter.fit(measurement, plasma_current_scale=1.0)
+    assert receipt.converged
+    np.testing.assert_allclose(receipt.coefficients, truth, atol=1e-8)
+    assert receipt.forward_evaluations == len(calls)
+    assert receipt.rejected_trials
+    rejected = receipt.rejected_trials[0]
+    assert rejected["fraction"] == 1.0
+    assert rejected["termination_reason"] == 12
+    assert rejected["residual"] > 0.08
+    assert rejected["forward"].qualified is False
+
+
+def test_unqualified_fit_trials_exhaust_the_backtracking_floor(linear_fit):
+    fitter, measurement, _, calls = linear_fit
+    fitter.request = replace(
+        fitter.request, seed_policy=magnetics_fit.ExplicitSolveSeed(fitter._initial)
+    )
+    _refuse_large_fit_steps(fitter, 0.001)
+    with pytest.raises(RuntimeError, match="line search.*12") as refusal:
+        fitter.fit(measurement, plasma_current_scale=1.0, max_backtracks=4)
+    receipt = refusal.value.fit_receipt
+    assert not receipt.converged
+    assert receipt.forward.qualified
+    assert receipt.forward_evaluations == len(calls)
+    assert [row["fraction"] for row in receipt.rejected_trials] == [
+        1.0,
+        0.5,
+        0.25,
+        0.125,
+        0.0625,
+    ]
+    assert all(row["termination_reason"] == 12 for row in receipt.rejected_trials)
+    assert all(row["residual"] > 0.001 for row in receipt.rejected_trials)
+    np.testing.assert_array_equal(receipt.coefficients, fitter._initial)
+    print(f"UNQUALIFIED_TRIAL_FLOOR_REFUSED {refusal.value}")
+
+
+def test_unqualified_fit_start_is_not_backtracked(linear_fit):
+    fitter, measurement, _, calls = linear_fit
+    solve = fitter.profile.solve
+    fitter.profile.solve = lambda request: replace(solve(request), qualified=False)
+    with pytest.raises(
+        RuntimeError, match="forward evaluation did not qualify"
+    ) as refusal:
+        fitter.fit(measurement, plasma_current_scale=1.0)
+    assert len(calls) == 1
+    assert not refusal.value.receipt.qualified
+
+
+def test_fit_does_not_swallow_unrelated_trial_errors(linear_fit, monkeypatch):
+    fitter, measurement, _, _ = linear_fit
+    evaluate = fitter._evaluate
+    calls = 0
+
+    def broken(coefficients, seed):
+        nonlocal calls
+        calls += 1
+        if calls == 8:
+            raise RuntimeError("observation source is unavailable")
+        return evaluate(coefficients, seed)
+
+    monkeypatch.setattr(fitter, "_evaluate", broken)
+    with pytest.raises(RuntimeError, match="observation source is unavailable"):
+        fitter.fit(measurement, plasma_current_scale=1.0)
+    assert calls == 8
+
+
 def test_zero_extent_flux_row_retains_residual_and_fractional_response(linear_fit):
     fitter, measurement, _, _ = linear_fit
     fitter.magnetics = replace(

@@ -67,6 +67,7 @@ class MagneticsFitReceipt:
     conductor_currents: np.ndarray
     wall_seconds: float
     device: str
+    rejected_trials: tuple[dict[str, object], ...] = ()
 
 
 class MagneticsFit:
@@ -253,6 +254,7 @@ class MagneticsFit:
         ridge: float = 0.0,
         penalty: np.ndarray | None = None,
         rcond: float = 1.0e-8,
+        max_backtracks: int = 12,
     ) -> MagneticsFitReceipt:
         """Return the terminal fit without changing the forward problem.
 
@@ -264,6 +266,12 @@ class MagneticsFit:
         Convergence means either an exact data fit or a stationary least-squares
         objective: the column-normalised data gradient is below ``tolerance``.
         Nonzero sensor residuals therefore remain visible on a converged fit.
+        Unqualified line-search trials are rejected and halved, through
+        ``2**(-max_backtracks)`` inclusive (13 attempts by default). Exhaustion
+        raises with the last accepted fit in ``error.fit_receipt``; that receipt
+        records every qualification rejection, its public forward receipt,
+        residual and termination reason. The starting state and response
+        evaluations still require qualification.
         """
         started = perf_counter()
         if (
@@ -274,6 +282,8 @@ class MagneticsFit:
             or ridge < 0.0
             or not 0.0 <= rcond < 1.0
             or max_iterations < 0
+            or not isinstance(max_backtracks, int)
+            or not 0 <= max_backtracks <= 52
         ):
             raise ValueError("fit scales and budgets must be finite and positive")
         size = self.magnetics.number
@@ -320,6 +330,33 @@ class MagneticsFit:
         forward, values = self._evaluate(coefficients, None)
         evaluations = 1
         iterations = 0
+        rejected_trials = []
+
+        def fit_receipt():
+            undetermined = np.any(np.abs(null) > rcond, axis=0)
+            return MagneticsFitReceipt(
+                coefficients=coefficients.copy(),
+                coefficient_names=self._names,
+                source_profile=self._source(coefficients),
+                forward=forward,
+                iterations=iterations,
+                singular_values=spectrum,
+                undetermined_coefficients=tuple(
+                    name
+                    for name, unknown in zip(self._names, undetermined, strict=True)
+                    if unknown
+                ),
+                null_directions=null,
+                whitened_residuals=residual,
+                covariance=covariance,
+                converged=converged,
+                forward_evaluations=evaluations,
+                conductor_currents=coefficients[self._profile_count :].copy(),
+                wall_seconds=perf_counter() - started,
+                device=str(jax.devices()[0]),
+                rejected_trials=tuple(rejected_trials),
+            )
+
         while True:
             residual = (values - target) * weight
             columns = []
@@ -355,36 +392,46 @@ class MagneticsFit:
                 break
             merit = np.linalg.norm(residual)
             accepted = False
-            for fraction in (1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125):
+            last_refusal = None
+            for backtrack in range(max_backtracks + 1):
+                fraction = 0.5**backtrack
                 candidate = coefficients + fraction * correction
-                trial, prediction = self._evaluate(candidate, seed)
                 evaluations += 1
+                try:
+                    trial, prediction = self._evaluate(candidate, seed)
+                except RuntimeError as error:
+                    refused = getattr(error, "receipt", None)
+                    if not isinstance(refused, ForwardSolveReceipt) or bool(
+                        refused.qualified
+                    ):
+                        raise
+                    fixed_point = getattr(refused.terminal_state, "fixed_point", None)
+                    rejected_trials.append(
+                        dict(
+                            iteration=iterations,
+                            fraction=fraction,
+                            coefficients=candidate.copy(),
+                            residual=getattr(fixed_point, "residual", None),
+                            termination_reason=refused.termination_reason,
+                            forward=refused,
+                        )
+                    )
+                    last_refusal = error
+                    continue
                 if np.linalg.norm((prediction - target) * weight) < merit:
                     coefficients, forward, values = candidate, trial, prediction
                     iterations += 1
                     accepted = True
                     break
             if not accepted:
+                if last_refusal is not None:
+                    reason = rejected_trials[-1]["termination_reason"]
+                    error = RuntimeError(
+                        f"line search exhausted at fraction {0.5**max_backtracks:g}; "
+                        f"last unqualified trial termination reason {reason}"
+                    )
+                    error.fit_receipt = fit_receipt()
+                    error.receipt = rejected_trials[-1]["forward"]
+                    raise error from last_refusal
                 break
-        undetermined = np.any(np.abs(null) > rcond, axis=0)
-        return MagneticsFitReceipt(
-            coefficients=coefficients,
-            coefficient_names=self._names,
-            source_profile=self._source(coefficients),
-            forward=forward,
-            iterations=iterations,
-            singular_values=spectrum,
-            undetermined_coefficients=tuple(
-                name
-                for name, unknown in zip(self._names, undetermined, strict=True)
-                if unknown
-            ),
-            null_directions=null,
-            whitened_residuals=residual,
-            covariance=covariance,
-            converged=converged,
-            forward_evaluations=evaluations,
-            conductor_currents=coefficients[self._profile_count :].copy(),
-            wall_seconds=perf_counter() - started,
-            device=str(jax.devices()[0]),
-        )
+        return fit_receipt()

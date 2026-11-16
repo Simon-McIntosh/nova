@@ -20,7 +20,13 @@
     "source_manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/manifest.md",
     "source_stream": null
   },
-  "finding_dispositions": {},
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-white-noise-covariance-e6595693dbcf",
+      "recorded_at": "2026-11-16T03:28:27.950755+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",

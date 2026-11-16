@@ -17,7 +17,30 @@
   "plan_slug": "kernel-compile-barrier",
   "plan_version": 83,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "a234b8c28f23b45b1b631b38a28d576eddcda9b2",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "node (b) attributes only lowered size on CPU; the instruction count is read only from the H200-compiled stubs, and stub visibility is judged per device on what that device can measure",
+      "reason": "",
+      "when": "2026-11-16T22:33:30.234091+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "a234b8c28f23b45b1b631b38a28d576eddcda9b2",
+      "commit_basis": "edit",
+      "note": "node (b) attributes only lowered size on CPU; the instruction count is read only from the H200-compiled stubs, and stub visibility is judged per device on what that device can measure",
+      "reason": "",
+      "when": "2026-11-16T22:33:30.234091+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261116T212822387868-plan-review-of-kernel-compile-barrier.json",
   "review_run_id": "r-20261116T212822387868-plan-review-of-kernel-compile-barrier",
   "reviewed_blob_sha": "1d9dc292eadc8692bc9f7a1ae4faf40dbb5a7d00",
   "rubric": "content",

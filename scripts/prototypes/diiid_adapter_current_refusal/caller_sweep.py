@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import ast
 import importlib
+import sys
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -122,9 +123,14 @@ def _entries(bench, row, path, profile, time_ms):
         "benchmarks.diiid_circuit_driven_forward_validation"
     )
     fidelity = importlib.import_module("scripts.diiid_map_fidelity.measure")
-    convergence = importlib.import_module(
-        "scripts.prototypes.diiid_forward_convergence.measure_branches"
-    )
+    script_directory = ROOT / "scripts/prototypes/diiid_forward_convergence"
+    sys.path.insert(0, str(script_directory))
+    try:
+        convergence = importlib.import_module(
+            "scripts.prototypes.diiid_forward_convergence.measure_branches"
+        )
+    finally:
+        sys.path.pop(0)
     propagation = importlib.import_module(
         "scripts.prototypes.diiid_external_current_propagation.measure"
     )

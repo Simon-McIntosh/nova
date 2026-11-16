@@ -1197,6 +1197,46 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "d8d8d05df6e57802e8bc00ec7c8344f038280fc6",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261116T202325498884-review-of-ilf-west-outline-figures-and-control-7de35616721c-figure",
+    "scratch_bytes": 0,
+    "scratch_host": "98dci4-clu-3026.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261116T202325498884-review-of-ilf-west-outline-figures-and-control-7de35616721c-figure",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261116T202325498884-review-of-ilf-west-outline-figures-and-control-7de35616721c-figure"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/1a120e31-d8a6-4944-87b2-145a639763ba/review-of-ilf-west-outline-figures-and-control-7de35616721c-figure",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/_trash/r-20261116T202325498884-review-of-ilf-west-outline-figures-and-control-7de35616721c-figure-20261116T203936784536Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

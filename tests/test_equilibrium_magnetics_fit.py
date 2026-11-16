@@ -50,6 +50,37 @@ def test_passive_zero_turns_remain_zero_response_weights():
         _passive_signed_turns(float("nan"))
 
 
+def test_unqualified_forward_receipt_preserves_convergence(tmp_path, monkeypatch):
+    from tests import test_magnetics_fit_efit_comparison as comparison
+
+    configure_dtypes()
+    history = SimpleNamespace(residual=4.86e-10, converged=True)
+    receipt = SimpleNamespace(
+        qualified=False,
+        termination_reason=1,
+        terminal_state=SimpleNamespace(flux=np.array([1.0]), fixed_point=history),
+    )
+    data = dict(
+        name="case",
+        profile=SimpleNamespace(solve=lambda request: receipt),
+        constraint_context={},
+    )
+    monkeypatch.setenv("NOVA_EFIT_COMPARISON_OUTPUT", str(tmp_path))
+    monkeypatch.setattr(
+        __import__(__name__, fromlist=["_persist_forward"]),
+        "_persist_forward",
+        lambda *args: None,
+    )
+    monkeypatch.setattr(comparison, "_panel", lambda *args, **kwargs: None)
+    assert comparison._attempt(data, None, "seed") is None
+    comparison._record_forward_refusal(data)
+    result = json.loads((tmp_path / "case-result.json").read_text())
+    assert result["qualified"] is False
+    assert result["converged"] is True
+    assert result["termination_reason"] == 1
+    assert result["residual"] == 4.86e-10
+
+
 def test_fitted_replay_family_guard_refuses_before_public_seeds():
     from tests.test_magnetics_fit_efit_comparison import _require_replay_agreement
 

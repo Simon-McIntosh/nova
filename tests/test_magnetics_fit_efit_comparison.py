@@ -835,6 +835,8 @@ def _attempt(data, request, label):
     )
 
     started = perf_counter()
+    data["terminal_converged"] = False
+    data["terminal_termination_reason"] = None
     try:
         receipt = data["profile"].solve(request)
     except (ValueError, RuntimeError) as error:
@@ -848,6 +850,7 @@ def _attempt(data, request, label):
         if histories:
             data["terminal_flux"] = np.asarray(histories[-1].state)
             data["terminal_residual"] = float(histories[-1].residual)
+            data["terminal_converged"] = bool(histories[-1].converged)
             data["terminal_termination_reason"] = int(histories[-1].termination_reason)
         print(
             "PUBLIC_FORWARD_REFUSAL",
@@ -860,6 +863,8 @@ def _attempt(data, request, label):
     _persist_forward(receipt, _output() / f"{label}-receipt.pkl")
     data["terminal_flux"] = np.asarray(receipt.terminal_state.flux)
     data["terminal_residual"] = float(receipt.terminal_state.fixed_point.residual)
+    data["terminal_converged"] = bool(receipt.terminal_state.fixed_point.converged)
+    data["terminal_termination_reason"] = int(receipt.termination_reason)
     _write(
         _output() / f"{label}-receipt.json",
         dict(
@@ -897,7 +902,7 @@ def _record_forward_refusal(data):
         status="forward-failed",
         attempts=3,
         qualified=False,
-        converged=False,
+        converged=bool(data.get("terminal_converged", False)),
         **_residual_fields(data.get("terminal_residual")),
         termination_reason=data.get("terminal_termination_reason"),
         device=str(jax.devices()[0]),

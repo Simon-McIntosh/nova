@@ -12,7 +12,6 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.biot.polygonanalytic import packed_analytic_moments
 from nova.database.content_store import (
     ContentStoreError,
     MANIFEST_FILENAME,
@@ -26,6 +25,7 @@ from nova.database.content_store import (
 )
 from nova.database.filepath import operand_cache_root
 from nova.equilibrium import topology
+from nova.equilibrium.fixed_points import _source_jets
 
 JETS_KIND = "jets"
 VALUES_KIND = "values"
@@ -224,65 +224,6 @@ def operand_matrix(
             matrix_bytes=int(host.nbytes),
         )
     return matrix, directory
-
-
-def _source_jets(point, coupling):
-    """Value, gradient and symmetric Hessian for each booked moment basis."""
-
-    def value_gradient(target):
-        rows = packed_analytic_moments(
-            jnp,
-            jnp.broadcast_to(target[0], coupling.norm.shape),
-            jnp.broadcast_to(target[1], coupling.norm.shape),
-            coupling.edge,
-            coupling.weight,
-            coupling.norm,
-            coupling.centre.T,
-            coupling.centre.T,
-            coupling.reflection_axis,
-            coupling.reflection_partner,
-        )
-        value = jnp.stack(rows[:3], axis=-1)
-        gradient = (
-            2
-            * jnp.pi
-            * target[0]
-            * jnp.stack(
-                (jnp.stack(rows[6:9], axis=-1), -jnp.stack(rows[3:6], axis=-1)),
-                axis=-1,
-            )
-        )
-        return value, gradient
-
-    value, gradient = value_gradient(point)
-    hessian = jax.jacfwd(lambda target: value_gradient(target)[1])(point)
-    coefficients = jnp.concatenate(
-        (
-            value[..., None],
-            gradient,
-            hessian[..., 0, 0, None],
-            hessian[..., 0, 1, None],
-            hessian[..., 1, 1, None],
-        ),
-        axis=-1,
-    )
-    inverse = coupling.inverse_second_moment
-    transform = jnp.stack(
-        (
-            jnp.stack(
-                (jnp.ones(len(value)), jnp.zeros(len(value)), jnp.zeros(len(value))),
-                axis=-1,
-            ),
-            jnp.stack(
-                (jnp.zeros(len(value)), inverse[:, 0, 0], inverse[:, 0, 1]), axis=-1
-            ),
-            jnp.stack(
-                (jnp.zeros(len(value)), inverse[:, 1, 0], inverse[:, 1, 1]), axis=-1
-            ),
-        ),
-        axis=1,
-    )
-    return jnp.einsum("cbq,cbm->cmq", coefficients, transform)
 
 
 def build_jet_matrix(

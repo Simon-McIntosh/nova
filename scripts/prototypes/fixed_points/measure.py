@@ -149,7 +149,7 @@ def membership(values, indices, geometry, fixed, sigma, radius, diverted):
 def membership_measure(
     args, geometry, analytic, oracle, reference, moments, nodes, indices, fixed
 ):
-    from scripts.prototypes.read_route.jets import _source_jets
+    from nova.equilibrium.fixed_points import _source_jets
 
     start = perf_counter()
     evaluate = jax.jit(

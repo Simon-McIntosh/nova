@@ -11,7 +11,7 @@ import numpy as np
 from nova.equilibrium import topology
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.prototypes.read_route.bell import BellMesh, field_from_jets
-from scripts.prototypes.read_route.jets import _source_jets
+from nova.equilibrium.fixed_points import _source_jets
 
 
 @jax.tree_util.register_dataclass

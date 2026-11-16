@@ -14,7 +14,7 @@ import numpy as np
 from nova.biot.greens import MU0
 from nova.equilibrium.topology import BiotMomentCoupling
 from scripts.prototypes.bank_hessian_diagnosis.measure import ROOT, reference
-from scripts.prototypes.read_route.jets import _source_jets
+from nova.equilibrium.fixed_points import _source_jets
 
 
 def boundary(point, polygon, digits):

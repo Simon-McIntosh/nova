@@ -30,6 +30,6 @@
 
 <section id="bounded-jets-build-suite">
 <h3>Suite arms</h3>
-<p>The baseline arm ran at <code>7479bb0b5d21fa399c83954490e59d2f1df5be57</code> in an extracted tree at <code>base-tree</code> under the output root, with the module reported as that tree's <code>nova/equilibrium/fixed_points.py</code> and <code>19 passed in 30.20s</code>, <code>EXIT=0</code>. Two earlier submissions of this arm are retained as invalid instruments: the first could not resolve its tree from the fleet node's node-local <code>$TMPDIR</code>, and the second expanded an empty variable into <code>/base-tree</code>; both ran the worktree and neither is an arm.</p>
+<p>The base arm ran at <code>7479bb0b5d21fa399c83954490e59d2f1df5be57</code> in an extracted tree under the output root, with <code>tests/test_fixed_points.py</code> alone: <code>19 passed in 30.20s</code>, <code>EXIT=0</code>, and the module reported from that tree rather than the worktree. The head arm adds the budget test, which exists only at the head, so its command names both files: <code>20 passed in 37.46s</code>, <code>EXIT=0</code>. Each arm's log header records its own revision, tree, module and command. Two earlier submissions of the base arm are retained as invalid instruments: the first could not resolve its tree from the fleet node's node-local <code>$TMPDIR</code>, and the second expanded an empty variable into <code>/base-tree</code>; both ran the worktree and neither is an arm.</p>
 </section>
 </article>

@@ -2,7 +2,7 @@
 # Run one CPU arm of the node's suite, recording revision, tree, module and command.
 #
 # usage: run_suite_arm.sh <tree> <name>
-# Env: OUT (log root), MEM, TIME (sbatch limits).
+# Env: OUT (log root), TESTS (space-separated test paths), MEM, TIME (sbatch limits).
 set -u
 
 tree=${1:?tree}
@@ -10,7 +10,8 @@ name=${2:?name}
 rev=${REV:-}
 out=${OUT:-/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/bounded-jets-build}
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
-command="PYTHONPATH=. JAX_PLATFORMS=cpu $python -m pytest -p no:cacheprovider -q tests/test_fixed_points.py"
+tests=${TESTS:-tests/test_fixed_points.py}
+command="PYTHONPATH=. JAX_PLATFORMS=cpu $python -m pytest -p no:cacheprovider -q $tests"
 
 mkdir -p "$out"
 

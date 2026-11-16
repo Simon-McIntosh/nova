@@ -88,6 +88,53 @@ def main():
     )
     saved_gradient = read_array(original, "gradient")
     saved_hessian = read_array(original, "hessian")
+    decomposition = []
+    for index, row in enumerate(candidate["rows"]):
+        residual = np.asarray(row["residual"])
+        radial_change = hessian[index, :, 0, 0] - saved_hessian[index, :, 0, 0]
+        height_change = hessian[index, :, 1, 1] - saved_hessian[index, :, 1, 1]
+        prefactor_change = (
+            -(gradient[index, :, 0] - saved_gradient[index, :, 0]) / points[:, 0]
+        )
+        revised = residual + radial_change + height_change + prefactor_change
+        for name, value in (
+            ("candidate_residual", residual),
+            ("radial_change", radial_change),
+            ("height_change", height_change),
+            ("prefactor_change", prefactor_change),
+            ("revised_residual", revised),
+        ):
+            print(
+                "ARRAY",
+                row["state"],
+                name,
+                "shape",
+                value.shape,
+                "finite",
+                bool(np.isfinite(value).all()),
+            )
+            assert np.isfinite(value).all()
+        np.testing.assert_allclose(
+            revised,
+            diagnostic["states"][index]["trace"]["residual"],
+            rtol=1e-6,
+            atol=1e-13,
+        )
+        decomposition.append(
+            dict(
+                state=row["state"],
+                target_index=4,
+                candidate_residual=float(residual[4]),
+                scratch_residual=float(revised[4]),
+                radial_change=float(radial_change[4]),
+                height_change=float(height_change[4]),
+                prefactor_change=float(prefactor_change[4]),
+                radial_change_norm=float(np.linalg.norm(radial_change)),
+                height_change_norm=float(np.linalg.norm(height_change)),
+                prefactor_change_norm=float(np.linalg.norm(prefactor_change)),
+            )
+        )
+    result["decomposition"] = decomposition
     result["probe_maximum_hessian_difference"] = float(
         np.max(abs(probe_hessian - saved_hessian[:, :1]))
     )

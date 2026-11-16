@@ -1,0 +1,29 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-16T22:28:41Z",
+  "figures": {
+    "docs/figures/iron-core-magnetisation/icm-west-linear-h200/probe-fields-vs-unknowns.svg": {
+      "contrast": "pass - near-black text on white; the constant series measured #929292 at 3.11:1 and the linear series #2e6fb7 at 5.15:1 against white, both clearing the 3:1 line floor the run's brief set.",
+      "data_ink": "pass - the four series (grey constant uniform line, grey constant graded squares, blue linear uniform line, blue linear graded squares) are the only drawn ink besides axes, tick labels and one figure-level legend; nothing competes with them.",
+      "decoration": "pass - white background, no gridlines, no shading or bands; top and right spines are absent, leaving only the left and bottom scale axes.",
+      "label_collision": "pass - no ink reaches any canvas edge (0 edge pixels), so no label is clipped; no blue marker pixel appears in any panel title or tick-label box.",
+      "legibility": "pass - three probe panels labelled +1 m, +2 m and +4 m; every y tick is labelled (234-246 by 2, 160-200 by 10, 70-100 by 5) and each x axis carries 3k, 10k, 30k, 90k with the axis named 'magnetic unknowns'. The series separate at a glance: the constant basis falls 200.6 to 174.6 uT at +2 m while the linear basis stays flat near 163 uT.",
+      "note": "The linear graded marker at the 35184-unknown mesh sits immediately beside (touching, about 12 px centre to centre) the linear uniform endpoint at 35184-39792 unknowns in each panel. The two are distinguishable, one hollow square and one filled dot, and both read; this is a crowded but legible comparison, not an occlusion.",
+      "table_form": "pass - three scatter/line panels show the refinement of probe field against unknown count, on a log x axis; the relationship between meshes is the datum and a table would not show it."
+    }
+  },
+  "findings": [],
+  "method": "The attached PNG (image-0.png, 1400x721) was opened and read as a rendered image. The readings were then confirmed against the PNG's own pixels: ink extents against the canvas edge (no ink in the outer 2 px on any side; content bbox x 12-1386, y 32-679 of 1400x721), modal series colours (#929292 grey at 3.11:1 on white, #2e6fb7 blue at 5.15:1), scan of every label box for intruding marker pixels (blue pixels: 0 in each panel title and each tick-label column), and connected-component analysis of the marker clusters to test hollow-square versus filled-dot overlap. No SVG and no other image was opened. The figure was supplied as a PNG only; no caption accompanied it in this review, so caption repetition could not be judged.",
+  "project": "nova",
+  "review_run_id": "r-20261116T222625944601-review-of-icm-west-linear-h200-5f1a3eb15e5c-figure",
+  "reviewed_base_sha": "17c8e25635b9bc9658fe2f953977c01d3a041c45",
+  "reviewed_head_sha": "5f1a3eb15e5c7a4f5ae02cc6a2263879e6f92b69",
+  "reviewed_run_id": "r-20261115T075315275505-icm-west-linear-h200",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T22:47:16.196192+00:00",
+  "total": null
+}

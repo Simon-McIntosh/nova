@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 7,
+  "call_sites": [
+    "scripts/iron_graded_refinement/measure.py:160",
+    "scripts/iron_graded_refinement/measure.py:193",
+    "scripts/iron_limb_production/measure.py:57",
+    "scripts/iron_linear_magnetisation/measure.py:115",
+    "scripts/west_iron_galerkin_pair/measure.py:167",
+    "scripts/west_iron_linear/measure.py:256",
+    "scripts/west_iron_linear/prepare.py:126"
+  ],
+  "completed_at": "2026-11-16T22:21:38.141Z",
+  "dispatched_at": "2026-11-16T22:21:16Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-west-linear-h200.html",
+      "line": "101",
+      "severity": "non-blocking",
+      "text": "non-blocking: the strict fresh-process replay recorded bit_identical=false (replay.json:87, 8.673617379884035e-18 T), so done_when clause (2)'s bit-for-bit is unmet; reported plainly under the resume-6 roundoff disposition."
+    },
+    {
+      "file": "tests/test_magnetisation.py",
+      "line": "1314",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert loaded.geometry_digest == stored.geometry_digest compares two outputs of the same computation, so a mesh-insensitive digest stays green; only the refusal case at :1347 reddens."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-west-linear-h200.html",
+      "line": "27",
+      "severity": "non-blocking",
+      "text": "non-blocking: the three meshes come from H200 jobs 1316958 and its continuation 1317867, not the single job the done_when names."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit; 14 files, 1972 insertions inside the declared scope.",
+    "done_when": "clause (1) carried by the three west-h200 receipts, clause (2) met except the bit-for-bit clause under the resume-6 ruling, clause (3) carried by the fragment and inspected SVG.",
+    "goal": "the node goal is the WEST 62751 affine-basis H200 measurement plus the paid-once interaction; docs/evidence/fragments_placeholder.",
+    "manifest": "read; 19 commits, baseline 63 passed EXIT=0, after 67 passed EXIT=0, geometry-mutant.log 2 failed EXIT=1.",
+    "write_paths": "all 14 paths in git diff 17c8e256..5f1a3eb fall inside the five declared paths."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:1299-1371 reddens on reassembly and on a removed digest refusal, but no test covers the fresh-process bit-identity clause.",
+    "evidence": "the receipts exist with the recorded numbers, but replay.json:87 asserts bit_identical false and the meshes span two jobs.",
+    "fit": "nova/biot/magnetisation.py:264-330 follows the module's private-helper, frozen-dataclass and ValueError idiom.",
+    "goal_fidelity": "docs/evidence/fragments/iron-core-magnetisation/icm-west-linear-h200.html:3-12 states the three converged meshes, the reduced movement and the persisted-operator half-drive.",
+    "reuse": "scripts/west_iron_linear/measure.py:22-30 imports west_inputs and Evaluators instead of copying them; _geometry_digest sits beside digest helpers owned by nova/equilibrium/forward_operator.py and nova/database/content_store.py:46.",
+    "scope_discipline": "every path in git diff 17c8e256..5f1a3eb is inside the five declared paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is the WEST 62751 affine-basis H200 measurement plus the paid-once interaction; docs/evidence/fragments/iron-core-magnetisation/icm-west-linear-h200.html:3-12 reports all three required meshes converged and the persisted-operator second slice, and half-drive.json records completed true with assembly_calls 0.\nVERDICT done_when: clause (1) is carried by the three receipts under linear-magnetisation/west-h200/ (cells, unknowns, compile/execute/host assembly split, operator bytes, full-drive residual history, +1/+2/+4 m fields and quoted constant values); clause (2) is met for reload-without-reassembly, half drive and the wrong-mesh refusal but its bit-for-bit clause is not met (replay.json:87 bit_identical false) under the coordinator's resume-6 ruling; clause (3) is carried by the fragment and the inspected probe-fields-vs-unknowns.svg with the 11708-cell projection.\nVERDICT write_paths: the manifest declares nova/biot/magnetisation.py, tests/test_magnetisation.py, scripts/west_iron_linear, the evidence fragment and the figure directory; all 14 paths in git diff 17c8e256..5f1a3eb fall inside them.\nVERDICT manifest: read; it records 19 commits ending at 5f1a3eb, baseline 63 passed in 7479.50s and final after 67 passed in 7558.40s both EXIT=0 with zero failures, and geometry-mutant.log at 2 failed 65 deselected EXIT=1.\nVERDICT diff: read commit by commit from 17c8e256 to 5f1a3eb; magnetisation.py adds MagnetisationInteraction, _geometry_digest, save/load_magnetisation_interaction and an optional interaction argument on solve_magnetisation, tests add four parametrised cases, and the rest is the WEST measurement drivers plus the fragment and SVG.\nCALL_SITES: scripts/iron_graded_refinement/measure.py:160, scripts/iron_graded_refinement/measure.py:193, scripts/iron_limb_production/measure.py:57, scripts/iron_linear_magnetisation/measure.py:115, scripts/west_iron_galerkin_pair/measure.py:167, scripts/west_iron_linear/measure.py:256, scripts/west_iron_linear/prepare.py:126\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/iron-core-magnetisation/icm-west-linear-h200.html:3-12 states the three converged meshes, the reduced 0.7575%/1.1735% movement and the persisted-operator half-drive.\nSCORE evidence: 15\nJUSTIFICATION evidence: the receipts cited at docs/evidence/fragments/iron-core-magnetisation/icm-west-linear-h200.html:44-70 exist with the recorded numbers, but replay.json:87 asserts bit_identical false and the meshes span two jobs.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 17c8e256..5f1a3eb is inside the five declared paths.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_magnetisation.py:1299-1371 reddens on reassembly and on a removed digest refusal (geometry-mutant.log), but no test covers the fresh-process bit-identity clause.\nSCORE fit: 18\nJUSTIFICATION fit: nova/biot/magnetisation.py:264-330 follows the module's private-helper, frozen-dataclass and ValueError idiom.\nSCORE reuse: 17\nJUSTIFICATION reuse: scripts/west_iron_linear/measure.py:22-30 imports west_inputs and Evaluators instead of copying them, while _geometry_digest at nova/biot/magnetisation.py:264 sits beside digest helpers owned by nova/equilibrium/forward_operator.py and nova/database/content_store.py:46.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-west-linear-h200.html:101 non-blocking: the strict replay records bit_identical=false at 8.673617379884035e-18 T, so done_when (2)'s bit-for-bit clause is unmet and is reported under the coordinator's resume-6 roundoff disposition.\nFINDING tests/test_magnetisation.py:1314 non-blocking: the digest-equality assertion compares two outputs of the same computation and stays green on a mesh-insensitive digest; only the refusal case reddens.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-west-linear-h200.html:27 non-blocking: the three meshes come from H200 jobs 1316958 and its continuation 1317867, not the single job the done_when names.",
+  "review_run_id": "r-20261116T220429590219-review-of-icm-west-linear-h200-5f1a3eb15e5c",
+  "reviewed_base_sha": "17c8e25635b9bc9658fe2f953977c01d3a041c45",
+  "reviewed_head_sha": "5f1a3eb15e5c7a4f5ae02cc6a2263879e6f92b69",
+  "reviewed_run_id": "r-20261115T075315275505-icm-west-linear-h200",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T22:53:45.750264+00:00",
+  "total": 103
+}

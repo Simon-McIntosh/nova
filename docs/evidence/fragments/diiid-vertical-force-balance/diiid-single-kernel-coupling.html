@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="diiid-single-kernel-coupling">
+<meta name="plan-title" content="DIII-D plasma coupling from one polygon evaluation">
+<meta name="plan-summary" content="Uniform and moment rows share one polygon evaluation; paired terminal solves measure its effect.">
+<meta name="plan-evidence-for" content="diiid-vertical-force-balance">
+<meta name="plan-verifies" content="diiid-vertical-force-balance#s10">
+<meta name="plan-commits" content="e252f00a5c4ed26e2ed474b90c2d9ffa9972a74d,4ec23b91542dbe4a70bdbdb5213b89f912d46f5f">
+<meta name="plan-tags" content="equilibrium,diii-d,convergence">
+<title>DIII-D plasma coupling from one polygon evaluation | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>DIII-D plasma coupling from one polygon evaluation</h1>
+<p>The builder now attaches block 0 of each <code>build_flux_blocks</code> evaluation as the uniform plasma response, alongside that evaluation's radial and vertical moments. This applies to the grid, physical wall and sampling vertices. Conductor responses, solver guards and tolerances are unchanged. The regression check passes; the paired terminal measurements are still in progress.</p></header>
+
+<section id="diiid-single-kernel-coupling-check">
+<h2>The check detects the mixed kernels</h2>
+<p>At base <code>3b05ffb6a28c84da912bbea33035be558e714234</code>, the public-builder test fails separately on the grid, wall and sample uniform responses: <strong>3 failed, 1 passed</strong>. The passing positive control establishes that the synthetic geometry distinguishes the hybrid and polygon kernels. The repaired head gives <strong>4 passed</strong>. Restoring all three hybrid uniform rows in an extracted head gives <strong>3 failed, 1 passed</strong> again, with the same three target test ids. Equality is exact, and the test records the actual three polygon evaluations used by the builder.</p>
+<p>The numerical measurement reads the builder's attached arrays too: on the real base geometry, all three equal the hybrid arrays exactly and differ from polygon block 0. No argument about function names substitutes for that array comparison.</p>
+</section>
+
+<section id="diiid-single-kernel-coupling-differences">
+<h2>The uniform response differs at every source cell</h2>
+<p>For each source cell <var>c</var>, the plotted value is <code>norm(hybrid[:, c] − polygon[:, c]) / norm(polygon[:, c])</code>, taking the Euclidean norm over the target coordinates in the named family. There are 1,089 source cells, 1,089 grid targets, 84 wall targets and 1,156 sampling targets. These are relative response-column norms; they are not a relative error in the terminal plasma flux or a fitted-current change.</p>
+<table><thead><tr><th>Target family</th><th>Minimum</th><th>Median</th><th>Maximum</th><th>Whole-block relative norm</th></tr></thead><tbody>
+<tr><td>Grid</td><td>0.041618%</td><td>0.052900%</td><td>0.071437%</td><td>0.051420%</td></tr>
+<tr><td>Wall</td><td>0.011696%</td><td>0.046353%</td><td>0.145575%</td><td>0.047904%</td></tr>
+<tr><td>Sampling nodes</td><td>0.036628%</td><td>0.046240%</td><td>0.064224%</td><td>0.044611%</td></tr>
+</tbody></table>
+<figure><img src="/nova/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/uniform-response-difference.svg" alt="Line contours of the relative hybrid-to-polygon uniform response difference over source cells, for grid, wall and sampling targets, with the physical wall.">
+<figcaption>The base builder's 137D geometry on an H200. The grey outline is the governed physical wall. Blue contours show 0.04%, 0.05%, 0.06%, 0.08% and 0.12%, with the same line-style key in all panels. Source cells outside the wall remain visible because the interaction blocks contain the whole lattice. Minima, medians and maxima describe all source cells. The map passed the text-clipping, text-overlap and label-over-data checks and was visually inspected.</figcaption></figure>
+</section>
+
+<section id="diiid-single-kernel-coupling-terminal">
+<h2>Paired terminal measurements</h2>
+<p>Pending: 137D, 146D, 146L and 179L at the base and at the repaired head. One H200 allocation runs the existing governed-wall branch cohort and its lower-saddle reader against extracted committed revisions. Each completed row persists its terminal state and receipt before the next begins. Kernel consistency alone does not establish convergence or improved agreement with EFIT.</p>
+</section>
+
+<section id="diiid-single-kernel-coupling-provenance">
+<h2>Reproduction inputs and logs</h2>
+<p>The product change is in <code>benchmarks/diiid_forward_gs_match.py</code>; the regression is <code>tests/equilibrium/test_diiid_single_kernel_coupling.py</code>. The committed paired measurement is under <code>scripts/prototypes/diiid_single_kernel_coupling/</code>. The base and head are <code>3b05ffb6a28c84da912bbea33035be558e714234</code> and <code>4ec23b91542dbe4a70bdbdb5213b89f912d46f5f</code>.</p>
+<p>Durable run directory: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T224846811324-diiid-single-kernel-coupling</code>. The reproduction is <code>reproduction-couplings.log</code>, the unmutated scoped gate is <code>tests/scoped-head.log</code>, and the negative control is <code>tests/negative-control.log</code>. Raw response norms and their definition are in <code>gpu/base/frame-137-diverted/coupling-differences.json</code> and <code>coupling-differences.npz</code>. Per-row logs print the imported product module and resolved working directory. The focused regression comparison is in progress.</p>
+</section>
+</main></body></html>

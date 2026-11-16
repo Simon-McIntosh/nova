@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-15T23:18:18.907Z",
+  "dispatched_at": "2026-11-15T23:17:58Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-iron-field-source",
+      "recorded_at": "2026-11-15T23:56:31.891165+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "by design: the coordinator ruled the batching pin compares crossing and non-crossing owner calls in one process, because a stored 1e-12 reference is CPU-family bound (8.5e-12 Gold vs Broadwell); the compact arm against the stored control pins changes common to both paths",
+      "recorded_at": "2026-11-15T23:56:51.605018+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_imas_iron_read.py",
+      "id": "f0ff568bd76",
+      "line": 156,
+      "severity": "non-blocking",
+      "text": "The census assertion was changed from the independent constant 1696 to len(actual) == len(expected) > 0, and both sides now call the same production _mesh on the same outlines, so any change in cell count or polygon partition moves both sides together and the test cannot see it."
+    },
+    {
+      "file": "tests/test_magnetisation.py",
+      "id": "f042e1f4903",
+      "line": 1238,
+      "severity": "non-blocking",
+      "text": "The batch-edges expected value is a second call to iron.linear_galerkin_cell_interaction in the same process, so that arm guards batching-only regressions only; it cannot detect a change common to both quadrature paths, which the separate compact arm against the stored control is what pins."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit (28d1e14, b781cbb, 5972072, 89f7b98, 7d8a5c8): the test cleanup, the two page splices, the fragment and the evidence-only batching record, 169 insertions and 49 deletions, all within the declared paths.",
+    "done_when": "All three clauses are asserted: the flush and tile skip at tests/test_magnetisation.py:1213-1234, the production import and single shared wrapper at tests/sheet_fixtures.py:1-24 with the run gate at both arms, and the two in-place page splices; the measured gate is same-cpu-gate/{baseline,after}_gate.log, 785 and 786 passed, EXIT=0, one all_debug job 1318355.",
+    "goal": "The node goal is to fold the iron-core review findings on tests and evidence pages into landed work without changing an operator or a number; the diff at f0e4031..7d8a5c8 adds a batch-edges case to tests/test_magnetisation.py:1185, moves tests/test_imas_iron_read.py:15 onto nova.biot.magnetisation, adds tests/sheet_fixtures.py, and renames one column and corrects two-per-cell counts in the two evidence pages, with no nova/ file touched.",
+    "manifest": "Read; status complete, five commits, gate receipt 786 passed at head and 785 at base, baseline_suite 799 passed/1 error and after_suite 800 passed/1 error on the same sheet-tile setup timeout, and added_failure_count 0 read back from those logs.",
+    "write_paths": "The declared paths are the four test files plus sheet_fixtures, the two cumulative pages, the new fragment and the figures directory; git diff --stat f0e4031 7d8a5c8 lists exactly 8 files and every one is inside them."
+  },
+  "justifications": {
+    "durability": "The batch-edges case reddens at 3.66e-4 under a production tiledassembly.py flush mutation (same-cpu-rigel/negative-control.log) while compact stays green, but tests/test_magnetisation.py:1238's expected side is a second call to the same owner and tests/test_imas_iron_read.py:156 dropped the only independent cell-count pin.",
+    "evidence": "same-cpu-gate/baseline_gate.log ends \"785 passed, 16 deselected in 724.49s\" and after_gate.log \"786 passed, 16 deselected in 722.45s\" with EXIT=0 at the delivered head, and probe/negative-control.log ends \"1 failed, 1 passed in 55.69s\" EXIT=1 with test_linear_shell_operator_pin[batch-edges] the only red id.",
+    "fit": "tests/sheet_fixtures.py:1-24 follows the surrounding tests/ idiom of calling configure_dtypes at import and asserting x64, and the names packed_field, axis_pair and axis_pair_jacobian carry no forbidden wording.",
+    "goal_fidelity": "tests/test_imas_iron_read.py:15 now imports _fit_law and _mesh from nova/biot/magnetisation.py and tests/sheet_fixtures.py:17 supplies the one compiled wrapper both sheet files use, so all five findings are folded without an operator or receipt change.",
+    "reuse": "tests/sheet_fixtures.py:17 wraps the existing owner nova/biot/sheet.py:1780 packed_sheet_field rather than reimplementing it, and a search over tests/ found no earlier shared fixture module; the remaining jit lambdas in scripts/sheet_tile_cpu_gate/ predate this node and lie outside its fence.",
+    "scope_discipline": "git diff --stat f0e4031 7d8a5c8 touches only the eight declared paths, and the authorized nova/biot/tiledassembly.py and nova/biot/magnetisation.py extension was not used at all."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to fold the iron-core review findings on tests and evidence pages into landed work without changing an operator or a number; the diff at f0e4031..7d8a5c8 adds a batch-edges case to tests/test_magnetisation.py:1185, moves tests/test_imas_iron_read.py:15 onto nova.biot.magnetisation, adds tests/sheet_fixtures.py, and renames one column and corrects two-per-cell counts in the two evidence pages, with no nova/ file touched.\nVERDICT done_when: All three clauses are asserted: the flush and tile skip at tests/test_magnetisation.py:1213-1234, the production import and single shared wrapper at tests/sheet_fixtures.py:1-24 with the gate at both arms, and the two in-place page splices; the measured gate is same-cpu-gate/{baseline,after}_gate.log, 785 and 786 passed, EXIT=0, one all_debug job 1318355.\nVERDICT write_paths: The declared paths are the four test files plus sheet_fixtures, the two cumulative pages, the new fragment and the figures directory; git diff --stat f0e4031 7d8a5c8 lists exactly 8 files and every one is inside them.\nVERDICT manifest: Read; status complete, five commits, gate receipt 786 passed at head and 785 at base, baseline_suite 799 passed/1 error and after_suite 800 passed/1 error on the same sheet-tile setup timeout, and added_failure_count 0 read back from those logs.\nVERDICT diff: Read commit by commit (28d1e14, b781cbb, 5972072, 89f7b98, 7d8a5c8); the test cleanup, the two page splices, the fragment and the evidence-only batching record, 169 insertions and 49 deletions, all within the declared paths.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/test_imas_iron_read.py:15 now imports _fit_law and _mesh from nova/biot/magnetisation.py and tests/sheet_fixtures.py:17 supplies the one compiled wrapper both sheet files use, so all five findings are folded without an operator or receipt change.\nSCORE evidence: 17\nJUSTIFICATION evidence: same-cpu-gate/baseline_gate.log ends \"785 passed, 16 deselected in 724.49s\" and after_gate.log \"786 passed ... EXIT=0\" at the delivered head, and probe/negative-control.log ends \"1 failed, 1 passed ... EXIT=1\" with test_linear_shell_operator_pin[batch-edges] the only red id, though clause 1's stored-control comparison applies to the compact arm and the batch arm uses the coordinator-authorized same-process comparison recorded in the manifest.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat f0e4031 7d8a5c8 touches only the eight declared paths, and the authorized nova/biot/tiledassembly.py and nova/biot/magnetisation.py extension was not used at all.\nSCORE durability: 16\nJUSTIFICATION durability: the batch-edges case reddens at 3.66e-4 under a production tiledassembly.py flush mutation (same-cpu-rigel/negative-control.log) while compact stays green, but tests/test_magnetisation.py:1238's expected side is a second call to the same owner and tests/test_imas_iron_read.py:156 dropped the only independent cell-count pin.\nSCORE fit: 18\nJUSTIFICATION fit: tests/sheet_fixtures.py:1-24 follows the surrounding tests/ idiom of calling configure_dtypes at import and asserting x64, and the declarative names packed_field, axis_pair and axis_pair_jacobian carry no forbidden wording.\nSCORE reuse: 18\nJUSTIFICATION reuse: tests/sheet_fixtures.py:17 wraps the existing owner nova/biot/sheet.py:1780 packed_sheet_field rather than reimplementing it, and a search over tests/ found no earlier shared fixture module; the remaining jit lambdas in scripts/sheet_tile_cpu_gate/ predate this node and lie outside its fence.\nFINDING tests/test_imas_iron_read.py:156 non-blocking: the census assertion was changed from the independent constant 1696 to len(actual) == len(expected) > 0, and both sides now call the same production _mesh on the same outlines, so any change in cell count or polygon partition moves both sides together and the test cannot see it.\nFINDING tests/test_magnetisation.py:1238 non-blocking: the batch-edges expected value is a second call to iron.linear_galerkin_cell_interaction in the same process, so that arm guards batching-only regressions only; it cannot detect a change common to both quadrature paths, which the separate compact arm against the stored control is what pins.\n",
+  "review_run_id": "r-20261115T231712982084-review-of-icm-scripts-cleanup-7d8a5c85cc1a",
+  "reviewed_base_sha": "f0e4031deef40395e729e2623867bb4d114be9df",
+  "reviewed_head_sha": "7d8a5c85cc1af54753b670381e92917ebdaf95e2",
+  "reviewed_run_id": "r-20261115T081846316772-icm-scripts-cleanup",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T23:40:48Z",
+  "total": 107
+}

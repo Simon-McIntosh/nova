@@ -1,0 +1,75 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T22:48:44.304Z",
+  "dispatched_at": "2026-11-16T22:48:31Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:108",
+      "id": "reasoning-1",
+      "reason": "a node given those three channels searches a seam the plan has already declared identical, and spends its one H200 cohort run on the wrong comparison.",
+      "text": "the section states the probe \"reproduces `solve_frame`'s qualification sequence through the current adapter with 24 conductor columns\", which is exactly the benchmark's own path (`solve_frame` \u2192 `description_driven_currents` \u2192 `complete_profile_current_adapter`, record field `poloidal_conductor_count: 24` at benchmarks/diiid_current_pinned_forward.py:801), and then directs the node to explain the divergence by \"its conductor count, its adapter path or its route\"; two of the three named channels are excluded by the section's own description of the probe, while the candidates the plan leaves latent (the corpus/data input, the frame's time slice, the topology class the seed current is summed over) go unlisted",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:109",
+      "id": "done_when-1",
+      "reason": "without a demonstration clause the section's passing outcome is narrative, so its close certifies nothing about which reading was wrong.",
+      "text": "done-when (2)'s passing branch closes on \"the record names the difference that produced the probe's reading\"; nothing requires the named difference to reproduce 1119994.165 A, so the node can close on an assertion that no check can falsify, and the section's only measurable clause (1) is satisfied by either outcome of the benchmark run",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:108",
+      "id": "evidence_paths-1",
+      "reason": "a run with defaults rewrites banked evidence the plan's own comparison and the module's test depend on, and \u00a711's own record then has no declared durable path a later reader can open.",
+      "text": "the section instructs the node to run the benchmark at the head but names no directory for that run, while the entry point opens with `checkpoint = output / CHECKPOINT_NAME; checkpoint.write_text(\"\")` (benchmarks/diiid_current_pinned_forward.py:1051-1052) and defaults `--output` to `docs/figures/current-constrained-forward-solve/pinned-cohort`, the committed five-row receipt that `tests/imas/test_diiid_current_pinned_forward.py:248-252` reads",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:107",
+      "id": "anchors_resolve-1",
+      "reason": "the pointer resolves and holds the quoted value, so the plan's action is unchanged even though a sharper citation would name the five-row receipt and its revision.",
+      "text": "the cited baseline, `docs/figures/diiid-forward-onboarding/current-pinned/current_pinned_forward_frames.jsonl`, is described as \"the benchmark's own banked receipt\" but is a 7.8 kB one-row partial copy committed 2026-08-21 (\"preserve partial current-pinning evidence\"), while the benchmark's own receipt is the 107 kB five-row file under `docs/figures/current-constrained-forward-solve/pinned-cohort`; both record 1137702.0764874695 for frame 102 and the receipt's producing revision is not stated",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "efc4056cae459023108d512032293f46a1fb64e4",
+  "plan_fingerprint": "6b7dfe7175a8b5438b701230ded89fe8f267fc25d234b931a793f4317ee655ec",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 103,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261116T224759294993-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "2a1f19573d91ac8f76795b37a99fc304272428e0",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 every named target resolves: `benchmarks/diiid_current_pinned_forward.py:95` carries `unscaled_source_ip_a: 1137702.226779481`, revision `37b9ba7c4` exists, and `docs/figures/diiid-forward-onboarding/current-pinned/current_pinned_forward_frames.jsonl` records frame 102 with `unscaled_seed_plasma_current_a: 1137702.0764874695`; the citation is nonetheless to a one-row partial copy, not the benchmark's own five-row receipt.",
+    "done_when": "a finding \u2014 \u00a711 done-when (2)'s passing branch requires only that the record \"name the difference\", with nothing that must reproduce the probe's reading.",
+    "evidence_paths": "a finding \u2014 \u00a711 fixes no directory for the head run, while the benchmark's entry point truncates and rewrites its checkpoint at `output/CHECKPOINT_NAME` (benchmarks/diiid_current_pinned_forward.py:1051-1052) and its default output is the committed receipt directory `docs/figures/current-constrained-forward-solve/pinned-cohort`.",
+    "naming": "pass \u2014 \u00a711 introduces no symbol, filename or comment carrying a plan label, stage name or ticket number into code.",
+    "reasoning": "a finding \u2014 \u00a711 says the probe reproduces `solve_frame`'s qualification through the current adapter with 24 conductor columns, then lists the probe's conductor count and adapter path as the differences to explain.",
+    "single_goal": "pass \u2014 \u00a711 carries one deliverable, the reconciliation of one frame's seed current with its registration, and the refusal branch is the same goal's alternative outcome.",
+    "wiring": "pass \u2014 \u00a711 declares no depends-on and needs none: the pinned benchmark imports `build_profile` from `benchmarks/diiid_forward_gs_match.py`, but the quantity \u00a711 compares (`seed_unscaled` from `profile.operator.cell_current`, benchmarks/diiid_current_pinned_forward.py:755) is built from the clipped-cell moments, not from the `plasma_to_grid`/`plasma_to_wall`/`plasma_to_sample` uniform rows \u00a710 replaces (benchmarks/diiid_forward_gs_match.py:1284-1294), and \u00a78's adapter check compares the 19 shipped entries, which match on the benchmark's own build path."
+  },
+  "section_digests": {
+    "_document": "8e5c0bf47364beca17fe5b540a282cd24e45ff5cb13f57dbbb5016dda75d5b7c",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "1c4b79aea697c8cbf7933b3f668346c18914da733a93b6ea8462db3f3f4041a8",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "3dc57bc53014ca0924803e72edad5a80c9db8d8548f1484de73c21e0193d0ae3",
+    "s8": "8632587216eaa0edebdbe9d2f34107c6a23a5c5d466a12ce012fb753a7b1c661",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:12:35.531652+00:00",
+  "total": null
+}

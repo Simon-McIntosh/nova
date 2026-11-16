@@ -17,7 +17,24 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 32,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The reviewer itself finds the undecided branch unreachable at 1 and 2 percent noise; if a control state did come back not measured the record would say so and the control would stand on the states that were measured, so the clause needs no new sentence.",
+      "when": "2026-11-16T20:21:08.463642+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The reviewer itself finds the undecided branch unreachable at 1 and 2 percent noise; if a control state did come back not measured the record would say so and the control would stand on the states that were measured, so the clause needs no new sentence.",
+      "when": "2026-11-16T20:21:08.463642+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261116T195647338529-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261116T195647338529-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "f54ce0149481e670180a7966d3f3ed154816e9e3",
   "rubric": "content",

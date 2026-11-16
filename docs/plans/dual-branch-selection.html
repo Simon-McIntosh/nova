@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8,a9ea090c">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,benchmarks/fork_arming_economics.py,benchmarks/two_branch_batch_cost.py,nova/equilibrium/branch_selection.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/figures/dual-branch-selection/fork-arming-economics.json,docs/figures/dual-branch-selection/two-branch-batch-cost.json,docs/evidence/archive/dual-branch-selection-landed.html">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 <meta name="plan-modified" content="2026-11-17">
 <meta name="plan-section-declarations" content="{&quot;coreachability&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;descoped&quot;,&quot;s7&quot;:&quot;done&quot;}">
 <meta name="plan-descope-reasons" content="{&quot;s6&quot;:&quot;the fork this section would have priced on catalog frames was retired by the co-reachability measurement; the pricing framework and the two-branch cost measurement it produced stay as evidence&quot;}">
@@ -326,8 +326,10 @@
     selected branch as a traced array kernel, measured by the done-when in the last paragraph of
     this section. The traced selector and its state have landed, and the co-reachability
     measurement in the next section retired the fork, so nothing below asks a builder for a
-    second solve branch or fork-arming economics. The landed selector stays in service, and the
-    smooth weight and the exact margin keep the roles the selection-observable decision gives them. The
+    second solve branch or fork-arming economics. With one solved branch per slice the published
+    class is read after the solve, from connectivity and the exact margin. The smooth weight stays
+    available as a differentiable class indicator for consumers that need gradients; it selects
+    between no branches, because only one is solved. The
     paragraphs between this one and the last are the record of how the section was first posed and
     what landed under it.</p>
     <p><strong>As first posed.</strong> Promote the class decision to one public, traced, batched seam consuming two qualified branch
@@ -350,7 +352,8 @@
     record: <a href="/nova/evidence/archive/dual-branch-selection-landed#s5-seam">§5 seam
     landed</a>.</p>
 
-    <p>Implementation follows the capability map's composition list: seed construction becomes an
+    <p><strong>As first posed, since overtaken.</strong> The selector state below has landed and no
+    host admitted-state bootstrap remains, so only the seed item is still work. Implementation was to follow the capability map's composition list: seed construction becomes an
     array-only kernel (or precomputed batch tensors) so the portfolio sits under an outer catalog
     <code>vmap</code>; the selector state (selected class, pending class and count, availability,
     admissibility) becomes integer and boolean arrays advanced by <code>lax.scan</code> where a time
@@ -490,12 +493,16 @@
     the host seed on the existing cold-seed cases to 1e-12 relative, compared in one process, and
     that test fails when the host seed is perturbed; and the production solve request builds its one selected cold seed through the
     traced kernel behind the entry point it calls today, keeping the seed provenance it records, so
-    the request's existing cold-seed tests pass unchanged. A currency check on 2026-11-15 found the
+    the request's existing cold-seed tests pass unchanged, and a new test builds the request's cold
+    seed inside <code>jit</code> and fails when the seed construction leaves the trace, which is
+    what it does on the host path today. A currency check on 2026-11-15 found the
     cold seed portfolio still built on the host with NumPy, and found no host admitted-state bootstrap
     left to port: the previous admitted state already travels as a device array and the solve request
     carries no admission ladder. The continuity of the selection weight at saddle-operand emergence is
-    not claimed and no node carries it: with one solved branch per slice the class is read after
-    the solve, so no result depends on the weight being continuous there.</p>
+    not claimed and no node carries it. The published class does not depend on it, because the
+    class is read after the solve. A consumer that differentiates the smooth weight through an
+    emerging saddle still meets that jump; it is a known limit of the weight as an indicator, not
+    work this section owns.</p>
 
     <h2 id="coreachability">§ Is the fork load bearing? Measured: no</h2>
 

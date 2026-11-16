@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run records its baseline_suite as NOT EXECUTED (a detached worktree at d7676e478 cannot be created because the main checkout's .git is read-only, reproduced in its manifest) and its after_suite only as prose naming tests/test_artifacts_carry_no_worktree_paths.py with no log on disk, so neither arm is a readable suite pair. The gate's own predicate was re-run at both revisions here instead: git grep -F reckon-worktrees returns 2336 paths at e6595693dbcf27b048cd1e4f2c3ea46bdde63392 and 2336 at 7ef7424513cb16aab82e15908db6207ced873d22, of which 0 lie outside the exempt set (docs/state, docs/plans, docs/research, nova/database/filepath.py) at either revision, and the reviewed fragment adds no occurrence of that string. The reviewed commit edits one HTML fragment, which cannot add a test failure, so the added-failure count is 0 derived from that gate predicate rather than from a suite summary line.",
+  "assertion_audit": "The commit adds no assertion, so there is no added assertion whose two sides move together to name. The only gate the reviewed run names is tests/test_artifacts_carry_no_worktree_paths.py, whose positive control fails if its candidate enumeration returns nothing it is known to hold and whose offender assertion fails on any tracked file naming a worktree path; it cannot fail on a wrong job date, a wrong job-to-arm mapping, a wrong failure cause or a false seed claim, so it is no guard on the content this commit changed.",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "evidence-only node: its write scope is one fragment and a figure directory, with no source or test file, so no assertion can pin the reported numbers; the rows are kept as JSONL receipts and the path-hygiene test covers the committed artefacts",
+      "recorded_at": "2026-11-16T19:38:31.122792+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-16T03:37:10Z",
+  "failure_delta_evidence": {
+    "after_suite": null,
+    "baseline_suite": null,
+    "baseline_summary": "not executed by the reviewed run; derived here by running the gate's own predicate at e6595693dbcf27b048cd1e4f2c3ea46bdde63392, which yields 2336 candidates and 0 non-exempt offenders",
+    "head_summary": "the reviewed manifest records 1 passed in 18.06s for tests/test_artifacts_carry_no_worktree_paths.py at e6595693d; the same predicate at 7ef7424513cb16aab82e15908db6207ced873d22 yields 2336 candidates and 0 non-exempt offenders, so the gate asserts the same verdict there",
+    "measured": true,
+    "source_manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/manifest.md",
+    "source_stream": null
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "id": "full-fit-seed-claim",
+      "line": "42",
+      "severity": "non-blocking",
+      "text": "The paragraph says \"A full-fit row records the seed it was drawn with\", but the 14 full-fit rows in study/results/solovev-verify-main.jsonl, solovev-verify-control.jsonl and the two Solov'ev scaling files carry no seed key (keys: arm, coefficients, converged, covariance, flux_rms, forward_evaluations, iterations, realisation, reduced_chi_square, surrogate), so the claim holds for only 10 of the 24 linearised full fit rows the record tabulates and 10 of the 28 attempted; a reader opening the Solov'ev receipts for the seed the sentence promises finds none, though the seed remains derivable from arm and realisation index through study/hybrid_study.py:121."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "Read the single commit 7ef742451 against base e6595693d, one file at +2/-2: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 rewrites the job split arm by arm and corrects the FAILED cause, and docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:42 rewrites the seed sentence; the arm split, the 20:18 receipt write times and the traceback at study/study-titan-20261115T132451Z.log:78-96 were each checked against the receipts and agree, while the full-fit seed claim does not.",
+    "done_when": "Read the three clauses of the done_when in the same dispatch record; the reviewed manifest names tests/test_artifacts_carry_no_worktree_paths.py as its after arm (1 passed at e6595693d) and NOT EXECUTED as its base arm, and that test asserts only that no tracked file names a reckon worktree path, so it cannot fail on the variance band, the three reduced chi-square values, the negative control or the job-to-arm mapping the done_when measures.",
+    "goal": "Read the node goal in dispatch-detail.json (admit_request.node.goal), which requires every heavy run on the H200 lane; docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 still places the whole study on one titan P100 and says no number in the record was measured on the H200, so the landed change reports that gap rather than closing it.",
+    "manifest": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/manifest.md: status complete, 'acted f4177ac44ac: 7ef742451' and 'declined dimension-durability' each stated with a reason, and its baseline arm recorded as NOT EXECUTED with the read-only-.git reproduction rather than claimed as a pass.",
+    "write_paths": "Read the declared scope in manifest.md:3 and resume-7-advice.txt; git diff --name-only e6595693dbcf27b048cd1e4f2c3ea46bdde63392 7ef7424513cb16aab82e15908db6207ced873d22 returns only docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html, inside it."
+  },
+  "justifications": {
+    "durability": "The commit adds no assertion, and no test in the repository pins any number or job attribution at docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41.",
+    "evidence": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41's arm-by-arm job mapping agrees with study/results/mast-main.jsonl (written 20:18:33) and the NOVA_LANE_END at study/study-titan-20261115T132451Z.log:98, but :42's claim that a full-fit row records its seed is contradicted by study/results/solovev-verify-main.jsonl, whose rows carry no seed field.",
+    "fit": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 and :42 follow the fragment's provenance-section idiom and introduce no plan, stage, version, ticket or author name.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 still reports every measured number as a titan P100 measurement while the goal requires the H200 lane.",
+    "reuse": "The commit adds no function, class or module, and a search over docs/evidence/fragments and nova/ found no existing job-to-arm provenance mechanism that this change could have duplicated.",
+    "scope_discipline": "git diff --name-only e6595693dbcf27b048cd1e4f2c3ea46bdde63392 7ef7424513cb16aab82e15908db6207ced873d22 returns only docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html, inside the declared write scope."
+  },
+  "production_call_site_search": "Searched for any runtime or page consumer of the changed fragment: grep over nova/ and tests/ returns no reference to white-noise-covariance, docs/evidence/archive/inverse-equilibrium-baseline-landed.html contains no link to it, and the only code touch points on docs/evidence/fragments are tests for other plans' fragments. The fragment is a static page with no production caller.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read the node goal in dispatch-detail.json (admit_request.node.goal), which requires every heavy run on the H200 lane; docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 still places the whole study on one titan P100 and says no number in the record was measured on the H200, so the landed change reports that gap rather than closing it.\nVERDICT done_when: Read the three clauses of the done_when in the same dispatch record; the reviewed manifest names tests/test_artifacts_carry_no_worktree_paths.py as its after arm (1 passed at e6595693d) and NOT EXECUTED as its base arm, and that test asserts only that no tracked file names a reckon worktree path, so it cannot fail on the variance band, the three reduced chi-square values, the negative control or the job-to-arm mapping the done_when measures.\nVERDICT write_paths: Read the declared scope in manifest.md:3 and resume-7-advice.txt; git diff --name-only e6595693dbcf27b048cd1e4f2c3ea46bdde63392 7ef7424513cb16aab82e15908db6207ced873d22 returns only docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html, inside it.\nVERDICT manifest: Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/manifest.md: status complete, 'acted f4177ac44ac: 7ef742451' and 'declined dimension-durability' each stated with a reason, and its baseline arm recorded as NOT EXECUTED with the read-only-.git reproduction rather than claimed as a pass.\nVERDICT diff: Read the single commit 7ef742451 against base e6595693d, one file at +2/-2: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 rewrites the job split arm by arm and corrects the FAILED cause, and docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:42 rewrites the seed sentence; the arm split, the 20:18 receipt write times and the traceback at study/study-titan-20261115T132451Z.log:78-96 were each checked against the receipts and agree, while the full-fit seed claim does not.\nCALL_SITES: none\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 still reports every measured number as a titan P100 measurement while the goal requires the H200 lane.\nSCORE evidence: 15\nJUSTIFICATION evidence: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41's arm-by-arm job mapping agrees with study/results/mast-main.jsonl (written 20:18:33) and the NOVA_LANE_END at study/study-titan-20261115T132451Z.log:98, but :42's claim that a full-fit row records its seed is contradicted by study/results/solovev-verify-main.jsonl, whose rows carry no seed field.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only e6595693dbcf27b048cd1e4f2c3ea46bdde63392 7ef7424513cb16aab82e15908db6207ced873d22 returns only docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html, inside the declared write scope.\nSCORE durability: 4\nJUSTIFICATION durability: The commit adds no assertion, and no test in the repository pins any number or job attribution at docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 and :42 follow the fragment's provenance-section idiom and introduce no plan, stage, version, ticket or author name.\nSCORE reuse: 20\nJUSTIFICATION reuse: The commit adds no function, class or module, and a search over docs/evidence/fragments and nova/ found no existing job-to-arm provenance mechanism that this change could have duplicated.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:42 non-blocking: The paragraph says \"A full-fit row records the seed it was drawn with\", but the 14 full-fit rows in study/results/solovev-verify-main.jsonl, solovev-verify-control.jsonl and the two Solov'ev scaling files carry no seed key (keys: arm, coefficients, converged, covariance, flux_rms, forward_evaluations, iterations, realisation, reduced_chi_square, surrogate), so the claim holds for only 10 of the 24 linearised full fit rows the record tabulates and 10 of the 28 attempted; a reader opening the Solov'ev receipts for the seed the sentence promises finds none, though the seed remains derivable from arm and realisation index through study/hybrid_study.py:121.",
+  "review_run_id": "r-20261116T033458404990-review-of-white-noise-covariance-7ef7424513cb",
+  "reviewed_base_sha": "e6595693dbcf27b048cd1e4f2c3ea46bdde63392",
+  "reviewed_head_sha": "7ef7424513cb16aab82e15908db6207ced873d22",
+  "reviewed_run_id": "r-20261115T012417719546-white-noise-covariance",
+  "scores": {
+    "durability": 4,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T03:56:51.170168+00:00",
+  "total": 91
+}

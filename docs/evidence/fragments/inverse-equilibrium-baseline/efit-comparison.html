@@ -1876,3 +1876,31 @@ RuntimeError: the forward evaluation did not qualify</pre>
     The original cut-short CPU base and unrun CPU after records are preserved
     as incomplete, without rerun or fabricated native status.</p>
 </section>
+
+<section id="efit-comparison-backtracking-followup">
+<h2>Inverse trial backtracking</h2>
+<p>The qualified MAST-U starting state from job 1319019 is retained. Its inverse
+fit aborted when an unqualified line-search trial raised
+<code>RuntimeError: the forward evaluation did not qualify</code>. A focused
+algebraic reproduction reached the same refusal before the fitter was changed:
+<code>2 failed, 32 deselected in 10.32s</code>.</p>
+<p>The existing fitter now halves unqualified trial steps while preserving its
+accepted state. The default bound is 12 halvings, 13 attempts including the full
+step, with a minimum fraction of 1/4096. The public qualification threshold is
+unchanged. Each rejected trial carries its candidate coefficients, step fraction,
+iteration, public forward receipt, residual and termination reason on the fit
+receipt. Exhaustion raises with that partial fit receipt; an unqualified starting
+state and unrelated errors still raise immediately.</p>
+<p>The focused fitter checks report <code>32 passed, 4 deselected in 5.27s</code>.
+The recovery stub refuses steps above 0.08 and the fit backtracks and converges.
+The exhaustion control refuses every trial down to fraction 0.0625 with a four
+halving budget, raises with reason 12, and retains all five trial records and the
+qualified accepted state. This unit control is separate from the declared
+physical 1.10-scaled control.</p>
+<p>One further MAST-U titan P100 batch is prepared, seeded from the saved
+qualified continuation receipt (residual 5.307643379157493e-16). It will persist
+unscaled scores, the fit/forward split, per-sensor residuals and the fit panel
+before the scaled fit, and bank complete partial receipts on exhaustion. Physical
+results remain pending. TCV and ITER stay stopped with their measured causes;
+no additional seeds or diagnostics are scheduled for them.</p>
+</section>

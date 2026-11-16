@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures": [],
+  "added_failures_note": "Derived with reckon.crew.review.added_failures_from_gate_logs over the reviewed run's own arms: gate/baseline.log (revision 70c2026ce3f4745b42718f6f68f0a0630bd016ae, 6 passed in 48.02s, EXIT=0) and reuse-repair/after.log (revision 454b4b2b150d21ca787211faff2ca0260487bd71, 41 passed in 73.22s, EXIT=0); it returns (0, []).",
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/equilibrium/constraint.py:2116",
+    "nova/equilibrium/reduced_newton.py:2396"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-16T13:22:26Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "id": "fa4a3d36e06",
+      "line": "538",
+      "severity": "non-blocking",
+      "text": "in the active branch image and control_image are two evaluations of the same binding.payload=True value, because control is built at line 533 from the payload the pair already carries, so both sides move together and the equality stays green under any payload-handling regression; the load-bearing guard is the nonzero control at line 535 and this equality adds no independent check."
+    },
+    {
+      "file": "scripts/prototypes/diiid_inactive_compensator/gate.py",
+      "id": "fd886f852fc",
+      "line": "20",
+      "severity": "non-blocking",
+      "text": "FOCUSED includes tests/test_reduced_newton_constraints.py, whose baseline and after arms both abort in native compilation with EXIT=-6 and completed=false in the reviewed run's own receipts (reuse-repair/isolated-baseline-reduced.json, reuse-repair/isolated-after-reduced.json and repair_incomplete_baseline_focused/repair_incomplete_after_focused), so the completion assertion at gate.py:145-148 can never hold and the committed gate script cannot print its final receipt at this head even though the recorded 41-pass pin arm is green."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all three commits against base 7bf27cfc4: 454b4b2b150d21ca787211faff2ca0260487bd71 adds ConstraintPair.flux_delta and reduces both map callers to it while adding the reduced/shadow/delegation tests and the four refusal controls, 1a811b8d1c2e4b4ecb4c15c94016132150621bb8 updates the evidence fragment, and 4aebf5c4430e650318f5ac5f46a0925b91ab1cca adds the matched-cohort driver and the figure legend keys.",
+    "done_when": "the node's done_when is section 7's three clauses; the landed gate at scripts/prototypes/diiid_inactive_compensator/gate.py:24-128 adds independent radial, circuit, false-shadow and reversed-change controls over tests/equilibrium/test_solve_vertical_pin.py, and the manifest records the pin arms and the focused delta with the reduced consumer file declared incomplete rather than green.",
+    "goal": "the reviewed node's goal is to keep an inactive compensator's flux image and tangent at zero in every proposal route; at the reviewed head nova/equilibrium/constraint.py:291-305 puts the mask on ConstraintPair.flux_delta and nova/equilibrium/reduced_newton.py:2396 routes the reduced reconstruction through it, which closes the reduced-route leak the base review recorded at the same line.",
+    "manifest": "read; it records baseline_suite gate/baseline.log 6 passed in 48.02s at 70c2026, after_suite reuse-repair/after.log 41 passed in 73.22s at 454b4b2b1, the radial/circuit/shadow/reversed refusal receipts, and status waiting on H200 job 1319912 and all_debug job 1319920, so the run is not complete and the pending matched 137D comparison is outside this review.",
+    "write_paths": "the node's declared paths are nova/equilibrium/constraint.py, nova/equilibrium/fixed_point.py, nova/equilibrium/reduced_newton.py, tests/equilibrium/test_solve_vertical_pin.py, scripts/prototypes/diiid_inactive_compensator, docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html and the two docs figure directories; git diff --name-status 7bf27cfc406824415e9cb87958e5a8733238029c 4aebf5c4430e650318f5ac5f46a0925b91ab1cca lists seven files and every one is beneath those paths."
+  },
+  "justifications": {
+    "durability": "reuse-repair/negative-circuit.log records '9 failed, 26 passed' including test_reduced_compensator_image_and_tangent[False] while the head arm passes 41, but tests/equilibrium/test_solve_vertical_pin.py:538 compares two evaluations of the same payload=True binding and stays green under a payload regression.",
+    "evidence": "gate/baseline.log ends '6 passed in 48.02s' and reuse-repair/after.log ends '41 passed, EXIT=0', and the four refusal logs end EXIT=1 with the documented counts, but scripts/prototypes/diiid_inactive_compensator/gate.py:20 includes a fixture that aborts in both arms, so the committed gate cannot reach its receipt.",
+    "fit": "nova/equilibrium/constraint.py:291-305 names the pair-level application flux_delta to match the unknown-level flux_delta it wraps, and no forbidden name such as 'new' or a plan identifier appears in the diff.",
+    "goal_fidelity": "nova/equilibrium/constraint.py:291-305 masks the bound centroid source once and nova/equilibrium/reduced_newton.py:2396 now calls that owner from the reduced reconstruction, so the image and its JVP vanish on both map routes.",
+    "reuse": "the duplicated arm runner named by the base review is gone (scripts/prototypes/diiid_inactive_compensator/gate.py:12 imports the owner at scripts/prototypes/diiid_core_hold/regressions.py:21), the new compare.py:14 reuses that owner's extract, and the ConstraintPair.flux_delta addition extends nova/equilibrium/constraint.py rather than duplicating a capability.",
+    "scope_discipline": "the only files changed outside the goal's five named files are scripts/prototypes/diiid_inactive_compensator/compare.py and render.py, both beneath a declared write path, and no plan or state file is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed node's goal is to keep an inactive compensator's flux image and tangent at zero in every proposal route; at the reviewed head nova/equilibrium/constraint.py:291-305 puts the mask on ConstraintPair.flux_delta and nova/equilibrium/reduced_newton.py:2396 routes the reduced reconstruction through it, which closes the reduced-route leak the base review recorded at the same line.\nVERDICT done_when: the node's done_when is section 7's three clauses; the landed gate at scripts/prototypes/diiid_inactive_compensator/gate.py:24-128 adds independent radial, circuit, false-shadow and reversed-change controls over tests/equilibrium/test_solve_vertical_pin.py, and the manifest records the pin arms and the focused delta with the reduced consumer file declared incomplete rather than green.\nVERDICT write_paths: the node's declared paths are nova/equilibrium/constraint.py, nova/equilibrium/fixed_point.py, nova/equilibrium/reduced_newton.py, tests/equilibrium/test_solve_vertical_pin.py, scripts/prototypes/diiid_inactive_compensator, docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html and the two docs figure directories; git diff --name-status 7bf27cfc406824415e9cb87958e5a8733238029c 4aebf5c4430e650318f5ac5f46a0925b91ab1cca lists seven files and every one is beneath those paths.\nVERDICT manifest: read; it records baseline_suite gate/baseline.log 6 passed in 48.02s at 70c2026, after_suite reuse-repair/after.log 41 passed in 73.22s at 454b4b2b1, the radial/circuit/shadow/reversed refusal receipts, and status waiting on H200 job 1319912 and all_debug job 1319920, so the run is not complete and the pending matched 137D comparison is outside this review.\nVERDICT diff: read all three commits against base 7bf27cfc4: 454b4b2b150d21ca787211faff2ca0260487bd71 adds ConstraintPair.flux_delta and reduces both map callers to it while adding the reduced/shadow/delegation tests and the four refusal controls, 1a811b8d1c2e4b4ecb4c15c94016132150621bb8 updates the evidence fragment, and 4aebf5c4430e650318f5ac5f46a0925b91ab1cca adds the matched-cohort driver and the figure legend keys.\nCALL_SITES: nova/equilibrium/constraint.py:2116, nova/equilibrium/reduced_newton.py:2396\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/constraint.py:291-305 masks the bound centroid source once and nova/equilibrium/reduced_newton.py:2396 now calls that owner from the reduced reconstruction, so the image and its JVP vanish on both map routes.\nSCORE evidence: 13\nJUSTIFICATION evidence: gate/baseline.log ends '6 passed in 48.02s' and reuse-repair/after.log ends '41 passed, EXIT=0', and the four refusal logs end EXIT=1 with the documented counts, but scripts/prototypes/diiid_inactive_compensator/gate.py:20 includes a fixture that aborts in both arms, so the committed gate cannot reach its receipt.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the only files changed outside the goal's five named files are scripts/prototypes/diiid_inactive_compensator/compare.py and render.py, both beneath a declared write path, and no plan or state file is touched.\nSCORE durability: 17\nJUSTIFICATION durability: reuse-repair/negative-circuit.log records '9 failed, 26 passed' including test_reduced_compensator_image_and_tangent[False] while the head arm passes 41, but tests/equilibrium/test_solve_vertical_pin.py:538 compares two evaluations of the same payload=True binding and stays green under a payload regression.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/constraint.py:291-305 names the pair-level application flux_delta to match the unknown-level flux_delta it wraps, and no forbidden name such as 'new' or a plan identifier appears in the diff.\nSCORE reuse: 20\nJUSTIFICATION reuse: the duplicated arm runner named by the base review is gone (scripts/prototypes/diiid_inactive_compensator/gate.py:12 imports the owner at scripts/prototypes/diiid_core_hold/regressions.py:21), the new compare.py reuses that owner's extract, and the ConstraintPair.flux_delta addition extends nova/equilibrium/constraint.py rather than duplicating a capability.\nFINDING tests/equilibrium/test_solve_vertical_pin.py:538 non-blocking: in the active branch image and control_image are two evaluations of the same binding.payload=True value, because control is built at line 533 from the payload the pair already carries, so both sides move together and the equality stays green under any payload-handling regression; the load-bearing guard is the nonzero control at line 535 and this equality adds no independent check.\nFINDING scripts/prototypes/diiid_inactive_compensator/gate.py:20 non-blocking: FOCUSED includes tests/test_reduced_newton_constraints.py whose baseline and after arms both abort in native compilation with EXIT=-6 and completed=false in the reviewed run's own receipts, so the completion assertion at gate.py:145-148 can never hold and the committed gate script cannot print its final receipt at this head even though the recorded 41-pass pin arm is green.",
+  "review_run_id": "r-20261116T121150765892-review-of-diiid-inactive-compensator-recovery-1a811b8d1c2e",
+  "reviewed_base_sha": "7bf27cfc406824415e9cb87958e5a8733238029c",
+  "reviewed_head_sha": "4aebf5c4430e650318f5ac5f46a0925b91ab1cca",
+  "reviewed_run_id": "r-20261114T205813832530-diiid-inactive-compensator-recovery",
+  "rubric": "review",
+  "scores": {
+    "durability": 17,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T13:44:19.401687+00:00",
+  "total": 105
+}

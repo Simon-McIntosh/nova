@@ -14,13 +14,14 @@ echo "# revision $REVISION tree $WORKTREE"
 echo "# command: $PY refusal_arms.py --phase callers --output $OUTPUT/callers"
 "$PY" -u "$WORKTREE/scripts/prototypes/diiid_adapter_current_refusal/refusal_arms.py" \
   --phase callers --output "$OUTPUT/callers" 2>&1
-echo "CALLERS_EXIT=$?"
+callers=$?
+echo "CALLERS_EXIT=$callers"
 echo "# command: $PY refusal_arms.py --phase solve --base-module $BASE --output $OUTPUT/solve"
 "$PY" -u "$WORKTREE/scripts/prototypes/diiid_adapter_current_refusal/refusal_arms.py" \
   --phase solve --base-module "$BASE" --output "$OUTPUT/solve" 2>&1
 solve=$?
 echo "SOLVE_EXIT=$solve"
-if [ "$solve" -ne 0 ]; then
+if [ "$callers" -ne 0 ] || [ "$solve" -ne 0 ]; then
   echo "EXIT=1"
   exit 1
 fi

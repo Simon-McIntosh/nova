@@ -44,6 +44,11 @@ def main():
         }
         arms[arm + "_total"] = receipt["compile_seconds"]
         arms[arm + "_attributed"] = receipt["attributed_seconds"]
+        arms[arm + "_label"] = "%s %s, %.1f s" % (
+            arm,
+            receipt["revision"][:9],
+            receipt["compile_seconds"],
+        )
 
     order = sorted(
         (label for label in arms["base"] if label in arms["head"]),
@@ -144,8 +149,8 @@ def main():
 
     figure.legend(
         handles=[
-            Patch(color=BASE_COLOUR, label="base receipt"),
-            Patch(color=HEAD_COLOUR, label="head receipt"),
+            Patch(color=BASE_COLOUR, label=arms["base_label"]),
+            Patch(color=HEAD_COLOUR, label=arms["head_label"]),
         ],
         loc="lower center",
         ncol=2,
@@ -153,7 +158,9 @@ def main():
     )
     figure.tight_layout(rect=(0, 0.05, 1, 1))
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(args.output, format="svg", metadata={"Date": None})
+    figure.savefig(
+        args.output, format=args.output.suffix.lstrip("."), metadata={"Date": None}
+    )
     print("wrote %s" % args.output)
 
 

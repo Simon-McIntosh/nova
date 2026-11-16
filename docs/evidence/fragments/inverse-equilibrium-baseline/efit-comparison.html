@@ -1682,3 +1682,72 @@
     No completed scaled-fit receipt exists, so no physical negative-control
     log is adopted.</p>
 </section>
+
+<section id="efit-comparison-iter-first-nonfinite">
+  <h3>ITER: first nonfinite value on the rejected live-map path</h3>
+  <p>All three further diagnostic evaluations are complete, with zero
+    equilibrium solves and no new public seed. They read the original saved
+    first-seed history, SHA256
+    <code>45aa971e52bdbf2370dacaa4bf2bb60e8475e13e6173a28e74a7dee2cd936247</code>.
+    Its sixth live reconciliation retains a finite flux state whose maximum
+    absolute difference from the finite conductor-only vacuum field is
+    3.410605131648481e-13 Wb. The plasma contribution has collapsed before
+    this rejected read; this is not a nonfinite input current or vacuum map.</p>
+  <table><thead><tr><th>Recorded stage</th><th>Finite / total</th>
+    <th>Measured values</th></tr></thead><tbody>
+    <tr><td>Saved flux</td><td>1568 / 1568</td><td>19.685094393 to 170.898670102 Wb</td></tr>
+    <tr><td>Vacuum image</td><td>1568 / 1568</td><td>19.685094393 to 170.898670102 Wb</td></tr>
+    <tr><td>Sampled flux</td><td>1059 / 1059</td><td>finite before axis normalization</td></tr>
+    <tr><td>Selected axis data</td><td>0 / 4</td><td>explicit NaN refusal value; axis admitted=false</td></tr>
+    <tr><td>Boundary flux</td><td>1 / 1</td><td>22.494722855 Wb</td></tr>
+    <tr><td>Normalized sample flux</td><td>0 / 1059</td><td>nonfinite axis anchor propagates through division</td></tr>
+    <tr><td>Each current-moment component</td><td>0 / 341</td><td>current, radial moment and vertical moment nonfinite</td></tr>
+    <tr><td>Map image and residual, each</td><td>0 / 1568</td><td>nonfinite plasma path; vacuum remains finite</td></tr>
+  </tbody></table>
+  <p>The first nonfinite operation on the active axis/residual path is
+    <code>Topology.o_point_qualification</code> in
+    <code>nova/equilibrium/topology.py:532</code>:
+    <code>jnp.where(admitted, vmap_o[index], jnp.full_like(vmap_o[0], jnp.nan))</code>.
+    No O candidate qualifies, so the selection publishes the intentional NaN
+    refusal sentinel. The traced map carries that invalid axis into normalized
+    flux and current moments; the host terminal read raises
+    <code>NoQualifiedAxisError</code>. This names a measured forward/topology
+    nonqualification, not an input-wiring repair. Neither source file changed.</p>
+  <table><thead><tr><th>Axis read</th><th>Candidate slots</th><th>Finite O candidates</th>
+    <th>Qualified O candidates</th><th>Material cells</th><th>Connection floor</th>
+    <th>Governed component sizes</th><th>Axis admitted</th></tr></thead><tbody>
+    <tr><td>Initial material</td><td>30</td><td>0</td><td>0</td><td>341</td><td>3</td><td>all 0</td><td>false</td></tr>
+    <tr><td>Rescue material</td><td>30</td><td>0</td><td>0</td><td>341</td><td>3</td><td>all 0</td><td>false</td></tr>
+    <tr><td>Recorder control</td><td>1</td><td>1</td><td>1 supplied</td><td>not applicable</td>
+      <td>not applicable</td><td>selection-only control</td><td>true; data [6.2, 0, 1]</td></tr>
+  </tbody></table>
+  <p>The second diagnostic's empty hook lists were an instrument failure:
+    a cached JIT body bypassed Python capture. Those original results remain
+    intact and support no candidate-absence claim. The third diagnostic
+    exposes the same owner's JIT wrapper for observation, retains its original
+    numerical methods, captures both actual passes, verifies their output
+    matches the original read, and admits the known-present recorder control.
+    No additional diagnostic evaluation remains authorised.</p>
+  <figure>
+    <img src="/nova/figures/inverse-equilibrium-baseline/efit-comparison/terminal-state/iter-later-state.svg"
+      alt="ITER finite vacuum-like saved state against grey imas-efit plasma contours; Nova has no contours on the shared negative levels and no admitted magnetic axis" />
+    <figcaption>ITER saved state at the sixth rejected reconciliation.
+      imas-efit is grey and wide, with its magnetic axis; nova is blue and
+      narrow on shared physical levels, with no blue contour visible because
+      this vacuum-like state's flux is positive while those levels are
+      negative. Nova's axis read refuses qualification. The unit-faithful wall
+      is shown, with no axes and one frameless legend, 14 × 7.2 in. Original
+      public residual NaN; converged=false; qualified=false. This diagnostic
+      calls zero equilibrium solves. Same magnetics rows, different constraint
+      sets: EFIT carried synthesized pressure and q0 priors, nova neither.
+      Counts follow current selector code; the stored baseline may predate
+      those priors. PNG inspected and receipt precedes native EXIT=0.</figcaption>
+  </figure>
+  <p>Native receipts are
+    <code>terminal-state-followup-1319019/iter-diagnostic/</code> (first two
+    diagnostics, 83.747862 s titan P100) and
+    <code>iter-selection-diagnostic-1319034/</code> (final diagnostic,
+    50.284759 s titan P100). Both native logs end EXIT=0. Full intermediate
+    fields and selection/polish scalars remain in those directories. ITER
+    stays stopped at its original public-seed cap; no extra prior was added.</p>
+</section>

@@ -200,6 +200,7 @@ def trajectory(root, diagnosis, output, previews):
                 color=color,
                 ls=dash,
                 lw=3.0 if label == "inactive image masked" else 2.6,
+                zorder=3 if label == "inactive image masked" else 2,
                 marker="o",
                 label=label,
             )

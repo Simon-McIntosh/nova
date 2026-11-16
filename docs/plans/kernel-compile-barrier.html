@@ -25,7 +25,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="72">
+<meta name="plan-version" content="73">
 <meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
@@ -206,6 +206,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261114T214523563698-importer-delta" data-who="reckon-build" data-when="2026-11-16T00:34:07Z">
     <div class="r-comment-body"><p>fragments/kernel-compile-barrier/importer-delta.html — 0 added failure ids over the twenty-two gated CPU files (twenty base-and-head pairs and two head-only files at 35fad5250); the four slow files on the card are unmeasured as a set and are reported there as information only.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20261116T033210501101" data-who="reckon-build" data-when="">
+    <div class="r-comment-body"><p><strong>Importer comparison landed on main</strong> (reviewed head <code>9e3baf64e</code>). What the closing gate over the four slow files must allow for: card job 1317509 was cancelled at 8 h 08 min because the base arm of <code>tests/test_biottiledbackend.py</code> at <code>00ec05512</code> passed eleven tests and then stopped in a device computation the per-test timeout could not interrupt. That job must bound each file at the job level and identify the twelfth test first. As information, on the H200 at head <code>35fad5250</code>: edge tangents 2 failure ids, both at base; vertex tangents none; the tiled backend has no arm and the forward reference no head arm. Six non-blocking review notes are carried, not repaired: the two completed card pairs sit outside the verdict; a superseded table remains in the fragment; the gate's refusal probes left no log; a receipt row with no revision pairs as the head's; nothing checks the fragment against its renderer; the failure-id set difference is inlined again with no shared owner. <a href="/nova/evidence/fragments/kernel-compile-barrier/importer-delta.html">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261020-coarse-tie-run-phase" data-who="reckon-build" data-when="2026-10-20T07:03:00Z">
     <div class="r-comment-body"><p>From crew run <code>r-20261019T223150157038-coarse-tie-census-memory</code>, landed as evidence at merge <code>19a02ca16</code> (failed, correct refusal): a second provisioning job (sirius 1290676, 450G, 5 h) reproduced the cold compile at 7,013 s and about 378 GB, then held that memory for a further ~11,000 s in the 533-batch node loop without publishing the operand. So the jets build's cost is not only its compile: the batch loop after it also outlasts a five-hour wall at 2,132 nodes. §3's done-when (1) bounds the compile; the node that builds §3 should also report the loop's wall per batch, so a bounded compile is not followed by an unbounded run. The 500-cell coarse-tie census test stays a known failure until §3 lands. <a href="/nova/evidence/fragments/converged-forward-solve/coarse-tie-census-memory.html">evidence</a></p></div>

@@ -41,7 +41,24 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 101,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "The symbols are the defect's location, read from the code at HEAD today (the uniform row at diiid_forward_gs_match.py:1284 from _green_block, moments from build_flux_blocks with block 0 discarded), and the lead chose the polygon kernel explicitly; naming them is the decision, not a guess",
+      "when": "2026-11-16T22:46:40.699910+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The symbols are the defect's location, read from the code at HEAD today (the uniform row at diiid_forward_gs_match.py:1284 from _green_block, moments from build_flux_blocks with block 0 discarded), and the lead chose the polygon kernel explicitly; naming them is the decision, not a guess",
+      "when": "2026-11-16T22:46:40.699910+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261116T220025128990-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261116T220025128990-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "c962dcbb45334d39090b9b9211f4f90edf6c21e1",
   "rubric": "content",

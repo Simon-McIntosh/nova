@@ -190,9 +190,13 @@ baseline passed <code>63 passed in 7479.50s</code>; the earlier after arm at
 <code>353d2cfe364fce7158867d278f584b4f329de524</code> passed
 <code>67 passed in 7528.96s</code>, both with <code>EXIT=0</code>. Those arms
 use Git context for the reference owner; the original missing-context failures
-are preserved. The required after arm at
-<code>7a4ca25ebe2d2357a7ee18afe36a7327b6c2b029</code> is running separately in
-rigel job <code>1318885</code>, without repeating the completed baseline.</p>
+are preserved. The after arm at
+<code>7a4ca25ebe2d2357a7ee18afe36a7327b6c2b029</code> completed in rigel job
+<code>1318885</code>: <code>67 passed in 7530.17s</code>, <code>EXIT=0</code>,
+with zero failures, against 63 passing tests at the base. Its record names the
+revision actually tested. The latest suite fence names
+<code>b182456c5ea7ac71ae444e805a2fb614a2c0dacc</code>; that after arm has not
+run and the completed earlier arm is not relabelled.</p>
 <p>All large operators and measurement JSON remain under
 <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/west-h200/</code>.
 Uniform receipts record revision <code>353d2cfe364fce7158867d278f584b4f329de524</code>

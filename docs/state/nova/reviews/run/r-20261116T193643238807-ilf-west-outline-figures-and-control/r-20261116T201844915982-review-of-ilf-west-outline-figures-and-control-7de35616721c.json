@@ -19,6 +19,11 @@
       "kind": "exempted",
       "reason": "A script-level figure helper for two plan figures; folding its region mask into nova.media is a library change outside this plan and is named to the lead as optional",
       "recorded_at": "2026-11-16T23:31:45.407294+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Manifest bookkeeping only; the two node-scoped figure copies and the fixture are in the reviewed diff and the coordinator audited them against the write paths",
+      "recorded_at": "2026-11-16T23:31:51.662142+00:00"
     }
   },
   "findings": [

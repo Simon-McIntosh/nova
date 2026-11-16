@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T22:21:20.966Z",
+  "dispatched_at": "2026-11-16T22:20:32Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/dual-branch-selection.html:325",
+      "id": "reasoning-1",
+      "reason": "the section's stated deliverable and its stated retirement are incompatible, and the headline is the sentence a dispatcher reads first, so the narrowing reaches the done-when but not the instruction.",
+      "text": "\u00a75 still opens by requiring a promoted two-branch seam \"consuming two qualified branch receipts\" and its composition paragraph still aims the seed kernel at \"the portfolio\" under an outer catalog `vmap`, while the new paragraph at :475-481 states the fork was retired and \"this section no longer promotes a two-branch seam to a production API\"; a build node reading the section's headline implements a selector over two branch receipts for a fork the same section says no longer exists",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dual-branch-selection.html:475",
+      "id": "single_goal-1",
+      "reason": "whichever endpoint \u00a75 is closed on, a reader cannot tell what the section's single deliverable is, and the blocked-continuity item is the only surviving fork-dependent claim with no carrier.",
+      "text": "\u00a75's declared done-when closes on the traced cold seed alone, but the section body still carries the public seam promotion at :325 and, at :487-488, a continuity claim it explicitly leaves \"blocked on whether the shadow rejection is correct\"; one verdict cannot close all three, so the section either closes with its headline unmeasured or leaves the blocked continuity item untracked by any done-when",
+      "type": "single_goal",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "4053d7e88f04c27cffd805237c07b893511d6b8b",
+  "plan_fingerprint": "8ec3d33bac9596438866d6bd39ad88b53fd556ea8cc8fdda177bbdfd902aa87e",
+  "plan_slug": "dual-branch-selection",
+  "plan_version": 21,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261116T215857870487-plan-review-of-dual-branch-selection",
+  "reviewed_blob_sha": "640cea1190adb551e3f41131bb5ce0eefde53bdb",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited path resolves: class-coreachability.json, the four pricing/contrast receipts, branch_selection.py, the four benchmarks and the landed-evidence archive all exist; the archive's #s4-contrast and #s5-seam anchors are present in it; all seven `plan-commits` values resolve as commits in /home/ITER/mcintos/Code/nova; the new followup's \"section 5's done-when\" and \u00a75's \"co-reachability measurement below\" both resolve to the `id=\"coreachability\"` section.",
+    "done_when": "pass \u2014 \u00a75's new done-when (docs/plans/dual-branch-selection.html:479-486) names three measurable clauses (a jit/vmap transform over at least three distinct slices, seed parity to 1e-12 relative, the production solve request's existing tests passing unchanged) and one declared negative control, \"that test fails when the host seed is perturbed\", and the new followup f-dbs-traced-cold-seed repeats it without drift.",
+    "evidence_paths": "pass \u2014 the plan's measurements point at present files under docs/figures/dual-branch-selection/ (all four cited receipts plus class-coreachability.json exist) and at docs/evidence/archive/dual-branch-selection-landed.html, a tracked durable record; the new seed-parity proof names tests rather than an artifact pointer, which is weaker than this plan's other sections but misdirects no reader.",
+    "naming": "pass \u2014 the new followup id `f-dbs-traced-cold-seed` and the narrowed section prose carry no ticket number, stage tag or version marker into what a worker would name.",
+    "reasoning": "a finding \u2014 \u00a75's own opening still declares the two-branch seam promotion and a portfolio-wide `vmap` that the new paragraph two screens below retires.",
+    "single_goal": "a finding \u2014 \u00a75 keeps the public two-branch seam promotion as its opening deliverable and a continuity claim it states is blocked, while its declared done-when measures only the traced cold seed.",
+    "wiring": "pass \u2014 the reviewed `_document` change adds no relationship: it declares \u00a76 descoped with a `plan-descope-reasons` entry at docs/plans/dual-branch-selection.html:32 naming the co-reachability measurement as the cause, so the descope is attributable rather than silent; the earlier finding that `plan-depends-on` is empty against \u00a77's \"consumes both answers\" describes text this change did not touch and stands unanswered."
+  },
+  "section_digests": {
+    "_document": "5f64895e67456f93c7725e3dbf68ac4cf9320121d542d9f1e8870011f4d650fe",
+    "coreachability": "117a9e74256c7f96cae20f3b0e48a7dbc12b4ce1a25113546b64e7dc580bc9b2",
+    "s1": "ab958297d5115ba98c1491df47c092fa00665ecba9e761e09d1f8579f598ca6b",
+    "s2": "1a228a4fa41055367c393c8212fcb0475c077587709ba8ab88bdbd3fec9e5afa",
+    "s3": "1dfc8415f0eb283ab99a9c7fe4047f2e374485a66c6f10eb623e7f01b4cf932a",
+    "s4": "206da393c7d08cc1b1ed5006efaf8b1b13a6781e8e6f992a4fd102e8668e749f",
+    "s5": "edd1306e56cc667a636194af4b60766857f5d8a952d8d30bd74d0b42520c8904",
+    "s6": "506dd18c70eaf1f72fa702ef3a5745f40175a460a2f1f6523d5cc90aacd1bd4e",
+    "s7": "283b73b8886f4928b2cb4bc16990fdda4881fcaab201e3b8add052cd18688461"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T22:43:36.039403+00:00",
+  "total": null
+}

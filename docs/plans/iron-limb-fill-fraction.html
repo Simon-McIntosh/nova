@@ -20,13 +20,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="biot,iron-core,machine-description,efit">
   <meta name="plan-after" content="iron-core-magnetisation">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;iron-limb-fill-fraction#s1&quot;],&quot;s3&quot;:[&quot;iron-limb-fill-fraction#s2&quot;],&quot;s4&quot;:[&quot;iron-limb-fill-fraction#s2&quot;,&quot;iron-limb-fill-fraction#s3&quot;]}">
   <title>Iron Limb Fill Fraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="28">
-<meta name="plan-modified" content="2026-11-16">
+<meta name="plan-version" content="29">
+<meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
   <main class="plan-doc">
@@ -232,7 +232,7 @@
     </p>
 
     <h2 id="s4">§4 — WEST 62751 on the true outline</h2>
-<section data-reckon="section" data-id="s4" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s4" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>
       The evidence that the change matters on a real pulse, at the mesh pair the stored
       outline was measured on.
@@ -304,6 +304,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-s4-measurement-landed" data-who="reckon-build" data-when="2026-11-16T19:40:00Z">
     <div class="r-comment-body"><p>The §4 measurement is on the primary branch: WEST 62751 solves from the machine-description outline, and the stored and true outlines differ by 6.9 % on the in-vessel ring, 13.7 % behind the limbs and 2.4 % above the arms at 0.04 m, against mesh-pair differences of 0.9 %, 1.3 % and 1.9 %. The true outline converged in 8 and 12 corrections. <a href="/nova/evidence/archive/iron-limb-fill-fraction-landed.html#west-62751">evidence</a></p><p>The section stays open. Both redrawn figures are defective as rendered and are owed again: the permeability contours cross regions with no iron and draw no iron outline, and the stray-field chart repeats its legend, leaves its panels unlabelled and omits one probe group. The review also found that the recorded unit-fill displacement of 0.0834 recomputes as 0.0787 from the saved arrays (the control passes either way against 0.0081), that its test skips silently away from the receipt, and that the comparison recompute has no command-line entry.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-close-s4" data-who="reckon-build" data-when="2026-11-16T23:40:00Z">
+    <div class="r-comment-body"><p>§4 landed: WEST 62751 solved from the machine-description outline at 0.08 and 0.04 m. The stored flared outline differs from the true flat one by 6.9 % on the in-vessel ring, 13.7 % behind the limbs and 2.4 % above the arms, against mesh-pair differences of 0.9 %, 1.3 % and 1.9 %. Setting the fill fraction to 1 on the true outline moves the in-vessel field by 8.3 % against a 0.8 % mesh pair. Both figures are redrawn. <a href="/nova/evidence/archive/iron-limb-fill-fraction-landed.html#west-62751">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261114T125919926224-review-of-ilf-six-limb-reference-9a541f9a37b2" data-who="reckon-build" data-when="2026-11-14T13:13:46.062Z">
     <div class="r-comment-body"><p>Independent review of r-20261114T074150540287-ilf-six-limb-reference at 9a541f9a stored at review-records/r-20261114T074150540287-ilf-six-limb-reference.at-9a541f9a37b2dff0b3fc74180e4cd8a9a5532517.json: scores goal_fidelity 17, evidence 15, scope_discipline 20, durability 16, fit 18, reuse 17; added_failure_count 0; two non-blocking findings (the fragment claims the convergence clause is met while the receipt's steps are 0.43%/1.41%/9.00%/1.05% and shrink nowhere, and the declared negative control mutates the comparator rather than the landed solver).</p></div>

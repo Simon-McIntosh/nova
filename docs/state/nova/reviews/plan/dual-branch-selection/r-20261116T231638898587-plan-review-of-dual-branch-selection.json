@@ -53,9 +53,28 @@
       "note": "The composition paragraph is marked as first posed and since overtaken, stating that the selector state landed and no host bootstrap remains, so only the seed item is still work.",
       "reason": "",
       "when": "2026-11-16T23:49:05.561756+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2ae375b43d1fcdd97421a5c891a5cb55b0ebb846",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The production clause adds a test that builds the request's cold seed inside jit and fails when seed construction leaves the trace, which is what the host path does today.",
+      "reason": "",
+      "when": "2026-11-16T23:49:21.819622+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2ae375b43d1fcdd97421a5c891a5cb55b0ebb846",
+      "commit_basis": "edit",
+      "note": "The production clause adds a test that builds the request's cold seed inside jit and fails when seed construction leaves the trace, which is what the host path does today.",
+      "reason": "",
+      "when": "2026-11-16T23:49:21.819622+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",

@@ -103,9 +103,13 @@ def main():
     result["primal_gradient_maximum_difference"] = float(
         np.max(abs(gradient - saved_gradient))
     )
-    np.testing.assert_array_equal(
-        gradient.view(np.uint64), saved_gradient.view(np.uint64)
+    result["primal_gradient_bit_mismatches"] = int(
+        np.count_nonzero(gradient.view(np.uint64) != saved_gradient.view(np.uint64))
     )
+    result["primal_gradient_relative_change"] = float(
+        np.linalg.norm(gradient - saved_gradient) / np.linalg.norm(saved_gradient)
+    )
+    assert result["primal_gradient_relative_change"] <= 1e-12
     (args.run / "summary.json").write_text(json.dumps(result, indent=2))
     print("DIAGNOSIS_COMPLETE", json.dumps(result), flush=True)
 

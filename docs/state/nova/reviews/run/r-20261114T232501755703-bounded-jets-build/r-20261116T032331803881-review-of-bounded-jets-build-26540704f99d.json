@@ -2,7 +2,7 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "call_sites": "scripts/prototypes/read_route/jets.py:262, scripts/prototypes/fixed_points/solve.py:121, scripts/prototypes/kernel_compile_census/row.py:113, scripts/prototypes/bank_hessian_diagnosis/terms.py:81, scripts/prototypes/bank_hessian_diagnosis/cell.py:105, scripts/prototypes/iter_bank/measure.py:429 via the read_route/jets.py:28 re-export, scripts/prototypes/saddle_expansion/expansion.py:39 via the same re-export, nova/equilibrium/fixed_points.py:524",
-  "completed_at": "",
+  "completed_at": "2026-11-16T03:40:31.867Z",
   "dimension_dispositions": {
     "evidence": {
       "kind": "folded",
@@ -14,35 +14,30 @@
   "findings": [
     {
       "file": "docs/evidence/fragments/kernel-compile-barrier/bounded-jets-build.html",
-      "id": "ffc9a5d5f37",
       "line": 8,
       "severity": "non-blocking",
       "text": "The cutover's identity proof covers two cells and two points (72 entries, 0 byte differences), not done_when clause (2), which requires the built jet rows to match at every node of the 282-cell arm and at a fixed 64-node subset of the 2,132-node arm; a 4-value fixture is filed against a 2,132-node build."
     },
     {
       "file": "docs/evidence/fragments/kernel-compile-barrier/bounded-jets-build.html",
-      "id": "ff35791e477",
       "line": 33,
       "severity": "non-blocking",
       "text": "The suite section records two arms over tests/test_fixed_points.py plus the new budget test and nothing about done_when clause (3), the 500-cell census test the done_when itself calls the binding measure: no run, no 900 s timeout result and no --mem=64G receipt is recorded, so the record presents a partial measure as the node's evidence."
     },
     {
       "file": "tests/equilibrium/test_bounded_point_program.py",
-      "id": "f92a0d3734a",
       "line": 7,
       "severity": "non-blocking",
       "text": "The docstring claims 'a reduced cell count measures the same graph the production rows compile', but the node's own receipt lowered-size-summary.json measures production_point_batch at 8 cells at 8,408,375 StableHLO bytes against this fixture's 5,442,157, so the 6,000,000 ceiling sits below the production graph it is said to stand for and the guard is calibrated on a different program instance."
     },
     {
       "file": "scripts/prototypes/membership/measure.py",
-      "id": "fa09c3281ff",
       "line": 64,
       "severity": "non-blocking",
       "text": "The landed cutover deleted the _source_jets definition this prototype parses out of read_route/jets.py to key its cache, so that check now fails; the worker recorded it under outside_scope rather than editing it, but the node's change is what makes the failure reachable and no test covers the prototype."
     },
     {
       "file": "docs/evidence/fragments/kernel-compile-barrier/bounded-jets-build.html",
-      "id": "f3f990e2c2b",
       "line": 28,
       "severity": "non-blocking",
       "text": "The negative control actually run (unrolling the moment evaluation to 27,479,507 bytes) falsifies the graph-budget test, not the control the node declared ('restoring the base point program in fixed_points.py makes the 60 s compile bound at the 282-cell arm fail'); the declared control is neither run nor shown unattainable, so the guard that was proved and the guard that was declared are different guards."
@@ -71,7 +66,7 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-16T04:41:17.040656+00:00",
+  "timestamp": "2026-11-16T06:18:31.897943+00:00",
   "total": 87,
   "verdicts": {
     "diff": "VERDICT diff: read commit by commit from base 7479bb0b5 to head 26540704f9; 278e96f35 and fdcdcb039 carry the cutover, 0e522e45c adds tests/equilibrium/test_bounded_point_program.py and the two job scripts, aa0344c6a/cf6bb21fc/26540704f carry the evidence fragment and the per-pass figure, and the docs/plans and review-records files in the raw diff arrive through the merge commit bf241750b from main rather than being authored here.",

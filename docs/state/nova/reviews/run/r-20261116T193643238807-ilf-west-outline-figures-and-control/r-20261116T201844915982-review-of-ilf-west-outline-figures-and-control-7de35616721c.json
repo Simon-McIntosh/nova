@@ -14,6 +14,13 @@
   ],
   "completed_at": "2026-11-16T20:23:30.794Z",
   "dispatched_at": "2026-11-16T20:21:01Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "A script-level figure helper for two plan figures; folding its region mask into nova.media is a library change outside this plan and is named to the lead as optional",
+      "recorded_at": "2026-11-16T23:31:45.407294+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/iron_limb_production/figure.py",

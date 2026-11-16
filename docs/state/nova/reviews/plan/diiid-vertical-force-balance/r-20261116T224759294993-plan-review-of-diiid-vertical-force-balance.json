@@ -71,9 +71,28 @@
       "note": "Done-when (1) and the body put the head run's --output under the node's evidence directory and forbid the committed receipt directory",
       "reason": "",
       "when": "2026-11-16T23:13:55.210309+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7519b1082e481b16a1363ce35d17064a0691b290",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "\u00a711 now cites the five-row receipt under docs/figures/current-constrained-forward-solve/pinned-cohort",
+      "reason": "",
+      "when": "2026-11-16T23:14:05.873519+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7519b1082e481b16a1363ce35d17064a0691b290",
+      "commit_basis": "edit",
+      "note": "\u00a711 now cites the five-row receipt under docs/figures/current-constrained-forward-solve/pinned-cohort",
+      "reason": "",
+      "when": "2026-11-16T23:14:05.873519+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "",

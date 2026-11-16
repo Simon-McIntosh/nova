@@ -1,0 +1,130 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "assertion_audit": "No assertions added in the commit; no self-referential added assertion exists. Existing path-hygiene test can fail on a tracked worktree path but cannot detect covariance regression.",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-white-noise-covariance-b15155f8d036",
+      "recorded_at": "2026-11-16T01:43:53.944468+00:00"
+    },
+    "evidence": {
+      "kind": "folded",
+      "node": "repair-of-white-noise-covariance-b15155f8d036",
+      "recorded_at": "2026-11-16T01:43:53.663069+00:00"
+    },
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "repair-of-white-noise-covariance-b15155f8d036",
+      "recorded_at": "2026-11-16T01:43:53.480361+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-15T23:50:31Z",
+  "failure_delta_evidence": {
+    "after_suite": null,
+    "baseline_suite": null,
+    "baseline_summary": "worktree creation failed; pytest never executed",
+    "baseline_tool_result_id": "call_d80f778da66b4ccbaff6af7f",
+    "head_summary": "1 passed in 4.92s",
+    "head_tool_result_id": "call_23761a33d6c84f8ebc1342a0",
+    "measured": false,
+    "source_manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/manifest.md",
+    "source_stream": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/resume-4.jsonl"
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-white-noise-covariance-b15155f8d036",
+      "recorded_at": "2026-11-16T01:43:52.882691+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "repair-of-white-noise-covariance-b15155f8d036",
+      "recorded_at": "2026-11-16T01:43:53.076717+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "repair-of-white-noise-covariance-b15155f8d036",
+      "recorded_at": "2026-11-16T01:43:53.203715+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "repair-of-white-noise-covariance-b15155f8d036",
+      "recorded_at": "2026-11-16T01:43:53.328888+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "id": "f6141262fd4",
+      "line": "9",
+      "severity": "blocking",
+      "text": "blocking: The 256-realistion variance test exercises a fixed linearised response rather than the actual MagneticsFit estimator; the full-fit arm has only 6, 3 and 3 main attempts and MAST is explicitly not measured, so this evidence cannot close the live plan's 256 repeated-fit covariance clause without an explicit plan-scope decision or the missing experiment."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/manifest.md",
+      "id": "f4b61a0ab5a",
+      "line": "13",
+      "severity": "blocking",
+      "text": "blocking: The claimed passing baseline did not execute: resume-4.jsonl tool result call_d80f778da66b4ccbaff6af7f says the scratch-worktree creation failed with a read-only filesystem and cd then failed; baseline_suite and after_suite structured receipts and gate logs are absent, so an added-failure count cannot be derived honestly."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "id": "f39c6d56c3e",
+      "line": "37",
+      "severity": "blocking",
+      "text": "blocking: The statement that the whole three-state study ran in job 1318468 is contradicted by study-titan-20261115T194711Z.log, whose command runs only mast and iter; Solovev's FAST and VERIFY rows are in study-titan-20261115T132451Z.log under job 1317749, so the provenance must name both jobs and the retained results."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "id": "fef57b1e0c6",
+      "line": "26",
+      "severity": "blocking",
+      "text": "blocking: The relative covariance-gap column is described as full-fit versus closed-form covariance, but study/hybrid_study.py:189 sets stated to good[0]['covariance'], a full-fit covariance, and compares the full-fit mean to it rather than to the surrogate covariance; the claimed agreement between arms is not measured by that column."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read the sole commit b15155f8d0361efce262ded60fd0b54a95133cf4 against d7676e478fc8701b036ec717f80d403c3ead86f5; it adds one 39-line fragment and three SVGs, all rendered and visually inspected, with no runtime definitions or test assertions added.",
+    "done_when": "Read canonical docs/plans/inverse-equilibrium-baseline.html section s6; the joint band and negative control are reported, but the repeated-fit covariance measure is not established by the handful of nonlinear fits described at white-noise-covariance.html:26.",
+    "goal": "Read dispatch-detail.json admit_request.node.goal and resume-1-advice.txt; titan was expressly authorised, but docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:9 measures a linearised estimator rather than 256 repeated MagneticsFit fits per state.",
+    "manifest": "Read source manifest.md:13-15; its claimed passing baseline is contradicted by resume-4.jsonl tool result call_d80f778da66b4ccbaff6af7f, which reports failed scratch-worktree creation and no pytest execution.",
+    "write_paths": "Read source manifest.md:3 and dispatch-detail.json capability inputs; the four added files are inside the declared evidence-fragment and figure-directory scopes."
+  },
+  "justifications": {
+    "durability": "The commit adds no test assertion and source manifest.md:14 names only tests/test_artifacts_carry_no_worktree_paths.py, which cannot fail if the reported covariance, sample counts or numerical conclusions regress.",
+    "evidence": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:17 honestly records MAST as not measured, but source manifest.md:13 claims a baseline pass where resume-4.jsonl records no executed baseline test.",
+    "fit": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:30-34 uses project-absolute figure links and its three rendered SVGs have readable, unclipped labels, though the scatter population is faint.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:9 explicitly substitutes 256 linearised draws and only a handful of full fits for the plan's repeated-fit covariance experiment.",
+    "reuse": "The diff adds no function, class or module, and the uncommitted study's linear solve calls the existing owner nova/equilibrium/measurement.py:92 whitened_solve also used by nova/equilibrium/magnetics_fit.py:254.",
+    "scope_discipline": "The four paths in git diff --name-only d7676e478fc8701b036ec717f80d403c3ead86f5 b15155f8d0361efce262ded60fd0b54a95133cf4 fall entirely within source manifest.md:3's two declared grants."
+  },
+  "production_call_site_search": "Searched nova/ and scripts/ for white-noise-covariance and MagneticsFit(; no production consumer of the added static fragment or figures exists. MagneticsFit.fit and whitened_solve were opened as the runtime owners the study exercises, not as callers of the added artefacts.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read dispatch-detail.json admit_request.node.goal and resume-1-advice.txt; titan was expressly authorised, but docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:9 measures a linearised estimator rather than 256 repeated MagneticsFit fits per state.\nVERDICT done_when: Read canonical docs/plans/inverse-equilibrium-baseline.html section s6; the joint band and negative control are reported, but the repeated-fit covariance measure is not established by the handful of nonlinear fits described at white-noise-covariance.html:26.\nVERDICT write_paths: Read source manifest.md:3 and dispatch-detail.json capability inputs; the four added files are inside the declared evidence-fragment and figure-directory scopes.\nVERDICT manifest: Read source manifest.md:13-15; its claimed passing baseline is contradicted by resume-4.jsonl tool result call_d80f778da66b4ccbaff6af7f, which reports failed scratch-worktree creation and no pytest execution.\nVERDICT diff: Read the sole commit b15155f8d0361efce262ded60fd0b54a95133cf4 against d7676e478fc8701b036ec717f80d403c3ead86f5; it adds one 39-line fragment and three SVGs, all rendered and visually inspected, with no runtime definitions or test assertions added.\nCALL_SITES: none\nSCORE goal_fidelity: 8\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:9 explicitly substitutes 256 linearised draws and only a handful of full fits for the plan's repeated-fit covariance experiment.\nSCORE evidence: 6\nJUSTIFICATION evidence: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:17 honestly records MAST as not measured, but source manifest.md:13 claims a baseline pass where resume-4.jsonl records no executed baseline test.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The four paths in git diff --name-only d7676e478fc8701b036ec717f80d403c3ead86f5 b15155f8d0361efce262ded60fd0b54a95133cf4 fall entirely within source manifest.md:3's two declared grants.\nSCORE durability: 2\nJUSTIFICATION durability: The commit adds no test assertion and source manifest.md:14 names only tests/test_artifacts_carry_no_worktree_paths.py, which cannot fail if the reported covariance, sample counts or numerical conclusions regress.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:30-34 uses project-absolute figure links and its three rendered SVGs have readable, unclipped labels, though the scatter population is faint.\nSCORE reuse: 20\nJUSTIFICATION reuse: The diff adds no function, class or module, and the uncommitted study's linear solve calls the existing owner nova/equilibrium/measurement.py:92 whitened_solve also used by nova/equilibrium/magnetics_fit.py:254.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:9 blocking: The 256-realistion variance test exercises a fixed linearised response rather than the actual MagneticsFit estimator; the full-fit arm has only 6, 3 and 3 main attempts and MAST is explicitly not measured, so this evidence cannot close the live plan's 256 repeated-fit covariance clause without an explicit plan-scope decision or the missing experiment.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/manifest.md:13 blocking: The claimed passing baseline did not execute: resume-4.jsonl tool result call_d80f778da66b4ccbaff6af7f says the scratch-worktree creation failed with a read-only filesystem and cd then failed; baseline_suite and after_suite structured receipts and gate logs are absent, so an added-failure count cannot be derived honestly.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:37 blocking: The statement that the whole three-state study ran in job 1318468 is contradicted by study-titan-20261115T194711Z.log, whose command runs only mast and iter; Solovev's FAST and VERIFY rows are in study-titan-20261115T132451Z.log under job 1317749, so the provenance must name both jobs and the retained results.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:26 blocking: The relative covariance-gap column is described as full-fit versus closed-form covariance, but study/hybrid_study.py:189 sets stated to good[0]['covariance'], a full-fit covariance, and compares the full-fit mean to it rather than to the surrogate covariance; the claimed agreement between arms is not measured by that column.\n",
+  "review_run_id": "r-20261115T234945556003-review-of-white-noise-covariance-b15155f8d036",
+  "reviewed_base_sha": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+  "reviewed_head_sha": "b15155f8d0361efce262ded60fd0b54a95133cf4",
+  "reviewed_run_id": "r-20261115T012417719546-white-noise-covariance",
+  "scores": {
+    "durability": 2,
+    "evidence": 6,
+    "fit": 18,
+    "goal_fidelity": 8,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T00:06:09.433854+00:00",
+  "total": 74
+}

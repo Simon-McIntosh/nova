@@ -1,0 +1,85 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-16T01:50:51Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "id": "f691cced187",
+      "line": 439,
+      "severity": "non-blocking",
+      "summary": "The right panel puts the twice-stated-sd control (3.65 to 4.74) and the stated-sd ratios (0.90 to 1.26) on one linear axis whose upper limit is set from the largest value drawn (full_study.py:438-439, `upper = max(...)` then `set_ylim(0.0, upper * 1.15)`), so the acceptance band 0.7447 to 1.3017 occupies 9.8, 10.4 and 11.1 per cent of the panel height in the MAST, ITER and Solov'ev renders. The primary result -- every ratio inside the band -- is still visible, but the reader cannot see how far inside each direction sits, which is exactly the quantity the fragment reports (0.898 to 1.259) and the discrimination the negative control is drawn to establish. The band also carries no in-figure key: the shared legend names the left panel's dashed \"stated 99% interval\" but not the right panel's grey band, so the band is identified only by the caption. A log y axis, a second panel, or a legend entry for the band would recover the reading. The claim, the mark colours and the inside/outside verdict all remain correct, so this does not hold the node."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass on all three, measured on the rendered pixels: axis and legend text glyph cores are rgb(11,11,11) at 19.7:1 on white, tick labels rgb(78,78,78) at 8.3:1, the grey data marks rgb(146,146,146) at 3.1:1 and the blue marks rgb(51,102,204) at 5.4:1, every mark clearing the 3:1 floor and every text element clearing WCAG AA.",
+    "data_ink": "pass on all three: the ink is the data. The left panel carries 256 grey points (#929292 at alpha 0.55, 6 pt squared), one dashed circle at radius 3.035 and a dotted zero crosshair; the right panel carries two filled blue discs (#3366cc), two hollow grey rings, one dotted unity line and the light acceptance band. No gradient, no texture and no decorative fill appears in any of the three images.",
+    "decoration": "pass on all three: pure white (255,255,255) covers 94.4, 94.4 and 94.2 per cent of the canvas, the top and right spines are absent from both panels, and there are no gridlines. The only shaded region is the right panel acceptance band, whose extent IS the measured interval 0.7447 to 1.3017, and it is named in the caption rather than used as a background wash.",
+    "label_collision": "pass on all three: no label is clipped, overlapping another label, or overlapping the data. Measured on the rendered PNGs, the outer three pixel rows and columns of each image are pure white (minimum luminance 255) on all four borders, so no text reaches the canvas edge, and the four legend entries sit in clear space above both panels. Checked at native resolution, because a downscaled view makes the light grey legend swatch look like a crescent; at 1x it is a complete circle, so that appearance is a resampling artefact and not a clipped marker.",
+    "legibility": "pass on all three (image-0 iter, image-1 mast, image-2 solovev): the canvas is 1399x720 two-panel canvas with 16 pt axis labels \"principal 1 [stated sd]\", \"principal 2 [stated sd]\" and \"realised / stated variance\" and 14 pt tick and legend text; the 256-point cloud, the dashed 99% circle and the four ratio markers read at a glance, and the two arms in the right panel separate by shape as well as colour (filled blue disc against hollow grey ring), so the comparison survives a colour-blind reader.",
+    "table_form": "pass on all three: the left panel is a two-dimensional scatter with a reference contour, a spatial relationship no table carries, and the right panel puts four numbers against a shaded interval so that \"inside\" and \"outside\" are visible without arithmetic. The four right-panel values also appear in the record's twice-stated-sd table, but the band comparison is what the panel adds and it is not a table restatement."
+  },
+  "notes": "Read-only figure review. The only images opened were the three PNGs named in this review and crops of them; no SVG, no preview PNG and no other image was read, and no file was edited, redrawn, relabelled or moved. image-0 is ITER, image-1 MAST and image-2 Solov'ev, identified by the negative-control marker heights against each state's twice-stated-sd row. Check that could have failed, and did fail in its first form: a grey-pixel blob count over the left panel put 11 to 16 per cent of blobs outside the drawn circle, which would have meant the picture contradicts its own interval. Recomputing the whitened coordinates from the study's saved rows (the covariance and truth in solovev-analysis.json against solovev-main.jsonl, radius sqrt(chi2.ppf(0.99,2)) = 3.0349) gives 7 of 256 outside on Solov'ev, 2 of 256 on MAST and 3 of 256 on ITER, 0.8 to 2.7 per cent against the 1 per cent a 99 per cent circle should leave out, so the render is faithful and the blob count was contaminated by the antialiasing of the dashed ring and its crosshair. That measurement is recorded as an instrument failure, not as a finding. Six rubric items are answered for each of the three figures and one non-blocking finding is recorded, so the record is parsed.",
+  "project": "nova",
+  "review_run_id": "r-20261116T014915301076-review-of-white-noise-covariance-f0cd75cbf01a-figure",
+  "reviewed_base_sha": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+  "reviewed_commits": [
+    "b15155f8d0361efce262ded60fd0b54a95133cf4",
+    "f0cd75cbf01ac4af6f497d543edc033df1309dd1"
+  ],
+  "reviewed_figures": [
+    {
+      "drawing_script": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T014915301076-review-of-white-noise-covariance-f0cd75cbf01a-figure/image-0.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/white-noise-covariance/iter.svg",
+      "state": "ITER reference case",
+      "state_identified_by": "the hollow twice-stated-sd markers in the right panel sit at 4.205 and 4.559, which is the negative-control row this state carries in the record; the image-to-state mapping is read off the picture and cross-checked against the record rather than assumed"
+    },
+    {
+      "drawing_script": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T014915301076-review-of-white-noise-covariance-f0cd75cbf01a-figure/image-1.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/white-noise-covariance/mast.svg",
+      "state": "MAST shot 22086 slice 43",
+      "state_identified_by": "the hollow twice-stated-sd markers in the right panel sit at 3.650 and 4.739, which is the negative-control row this state carries in the record; the image-to-state mapping is read off the picture and cross-checked against the record rather than assumed"
+    },
+    {
+      "drawing_script": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T014915301076-review-of-white-noise-covariance-f0cd75cbf01a-figure/image-2.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/white-noise-covariance/solovev.svg",
+      "state": "Solov'ev analytic certificate",
+      "state_identified_by": "the hollow twice-stated-sd markers in the right panel sit at 4.202 and 3.991, which is the negative-control row this state carries in the record; the image-to-state mapping is read off the picture and cross-checked against the record rather than assumed"
+    }
+  ],
+  "reviewed_head_sha": "f0cd75cbf01ac4af6f497d543edc033df1309dd1",
+  "reviewed_run_id": "r-20261115T012417719546-white-noise-covariance",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility [iter.svg via image-0.png]: the canvas is 1399x720 two-panel canvas with 16 pt axis labels \"principal 1 [stated sd]\", \"principal 2 [stated sd]\" and \"realised / stated variance\" and 14 pt tick and legend text; the 256-point cloud, the dashed 99% circle and the four ratio markers read at a glance, and the two arms in the right panel separate by shape as well as colour (filled blue disc against hollow grey ring), so the comparison survives a colour-blind reader.",
+    "RUBRIC data_ink [iter.svg via image-0.png]: the ink is the data. The left panel carries 256 grey points (#929292 at alpha 0.55, 6 pt squared), one dashed circle at radius 3.035 and a dotted zero crosshair; the right panel carries two filled blue discs (#3366cc), two hollow grey rings, one dotted unity line and the light acceptance band. No gradient, no texture and no decorative fill appears in any of the three images.",
+    "RUBRIC decoration [iter.svg via image-0.png]: pure white (255,255,255) covers 94.4, 94.4 and 94.2 per cent of the canvas, the top and right spines are absent from both panels, and there are no gridlines. The only shaded region is the right panel acceptance band, whose extent IS the measured interval 0.7447 to 1.3017, and it is named in the caption rather than used as a background wash.",
+    "RUBRIC contrast [iter.svg via image-0.png]: axis and legend text glyph cores are rgb(11,11,11) at 19.7:1 on white, tick labels rgb(78,78,78) at 8.3:1, the grey data marks rgb(146,146,146) at 3.1:1 and the blue marks rgb(51,102,204) at 5.4:1, every mark clearing the 3:1 floor and every text element clearing WCAG AA.",
+    "RUBRIC table_form [iter.svg via image-0.png]: the left panel is a two-dimensional scatter with a reference contour, a spatial relationship no table carries, and the right panel puts four numbers against a shaded interval so that \"inside\" and \"outside\" are visible without arithmetic. The four right-panel values also appear in the record's twice-stated-sd table, but the band comparison is what the panel adds and it is not a table restatement.",
+    "RUBRIC label_collision [iter.svg via image-0.png]: no label is clipped, overlapping another label, or overlapping the data. Measured on the rendered PNGs, the outer three pixel rows and columns of each image are pure white (minimum luminance 255) on all four borders, so no text reaches the canvas edge, and the four legend entries sit in clear space above both panels. Checked at native resolution, because a downscaled view makes the light grey legend swatch look like a crescent; at 1x it is a complete circle, so that appearance is a resampling artefact and not a clipped marker.",
+    "RUBRIC legibility [mast.svg via image-1.png]: the canvas is 1399x720 two-panel canvas with 16 pt axis labels \"principal 1 [stated sd]\", \"principal 2 [stated sd]\" and \"realised / stated variance\" and 14 pt tick and legend text; the 256-point cloud, the dashed 99% circle and the four ratio markers read at a glance, and the two arms in the right panel separate by shape as well as colour (filled blue disc against hollow grey ring), so the comparison survives a colour-blind reader.",
+    "RUBRIC data_ink [mast.svg via image-1.png]: the ink is the data. The left panel carries 256 grey points (#929292 at alpha 0.55, 6 pt squared), one dashed circle at radius 3.035 and a dotted zero crosshair; the right panel carries two filled blue discs (#3366cc), two hollow grey rings, one dotted unity line and the light acceptance band. No gradient, no texture and no decorative fill appears in any of the three images.",
+    "RUBRIC decoration [mast.svg via image-1.png]: pure white (255,255,255) covers 94.4, 94.4 and 94.2 per cent of the canvas, the top and right spines are absent from both panels, and there are no gridlines. The only shaded region is the right panel acceptance band, whose extent IS the measured interval 0.7447 to 1.3017, and it is named in the caption rather than used as a background wash.",
+    "RUBRIC contrast [mast.svg via image-1.png]: axis and legend text glyph cores are rgb(11,11,11) at 19.7:1 on white, tick labels rgb(78,78,78) at 8.3:1, the grey data marks rgb(146,146,146) at 3.1:1 and the blue marks rgb(51,102,204) at 5.4:1, every mark clearing the 3:1 floor and every text element clearing WCAG AA.",
+    "RUBRIC table_form [mast.svg via image-1.png]: the left panel is a two-dimensional scatter with a reference contour, a spatial relationship no table carries, and the right panel puts four numbers against a shaded interval so that \"inside\" and \"outside\" are visible without arithmetic. The four right-panel values also appear in the record's twice-stated-sd table, but the band comparison is what the panel adds and it is not a table restatement.",
+    "RUBRIC label_collision [mast.svg via image-1.png]: no label is clipped, overlapping another label, or overlapping the data. Measured on the rendered PNGs, the outer three pixel rows and columns of each image are pure white (minimum luminance 255) on all four borders, so no text reaches the canvas edge, and the four legend entries sit in clear space above both panels. Checked at native resolution, because a downscaled view makes the light grey legend swatch look like a crescent; at 1x it is a complete circle, so that appearance is a resampling artefact and not a clipped marker.",
+    "RUBRIC legibility [solovev.svg via image-2.png]: the canvas is 1399x720 two-panel canvas with 16 pt axis labels \"principal 1 [stated sd]\", \"principal 2 [stated sd]\" and \"realised / stated variance\" and 14 pt tick and legend text; the 256-point cloud, the dashed 99% circle and the four ratio markers read at a glance, and the two arms in the right panel separate by shape as well as colour (filled blue disc against hollow grey ring), so the comparison survives a colour-blind reader.",
+    "RUBRIC data_ink [solovev.svg via image-2.png]: the ink is the data. The left panel carries 256 grey points (#929292 at alpha 0.55, 6 pt squared), one dashed circle at radius 3.035 and a dotted zero crosshair; the right panel carries two filled blue discs (#3366cc), two hollow grey rings, one dotted unity line and the light acceptance band. No gradient, no texture and no decorative fill appears in any of the three images.",
+    "RUBRIC decoration [solovev.svg via image-2.png]: pure white (255,255,255) covers 94.4, 94.4 and 94.2 per cent of the canvas, the top and right spines are absent from both panels, and there are no gridlines. The only shaded region is the right panel acceptance band, whose extent IS the measured interval 0.7447 to 1.3017, and it is named in the caption rather than used as a background wash.",
+    "RUBRIC contrast [solovev.svg via image-2.png]: axis and legend text glyph cores are rgb(11,11,11) at 19.7:1 on white, tick labels rgb(78,78,78) at 8.3:1, the grey data marks rgb(146,146,146) at 3.1:1 and the blue marks rgb(51,102,204) at 5.4:1, every mark clearing the 3:1 floor and every text element clearing WCAG AA.",
+    "RUBRIC table_form [solovev.svg via image-2.png]: the left panel is a two-dimensional scatter with a reference contour, a spatial relationship no table carries, and the right panel puts four numbers against a shaded interval so that \"inside\" and \"outside\" are visible without arithmetic. The four right-panel values also appear in the record's twice-stated-sd table, but the band comparison is what the panel adds and it is not a table restatement.",
+    "RUBRIC label_collision [solovev.svg via image-2.png]: no label is clipped, overlapping another label, or overlapping the data. Measured on the rendered PNGs, the outer three pixel rows and columns of each image are pure white (minimum luminance 255) on all four borders, so no text reaches the canvas edge, and the four legend entries sit in clear space above both panels. Checked at native resolution, because a downscaled view makes the light grey legend swatch look like a crescent; at 1x it is a complete circle, so that appearance is a resampling artefact and not a clipped marker."
+  ],
+  "scores_omitted": "a figure review carries no scores and no suite-delta measurement",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T02:04:00Z",
+  "total": null
+}

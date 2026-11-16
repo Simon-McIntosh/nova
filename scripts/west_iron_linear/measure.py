@@ -178,7 +178,9 @@ def main():
     parser.add_argument("--revision", required=True)
     parser.add_argument("--blob", required=True)
     parser.add_argument("--mesh", required=True)
-    parser.add_argument("--replay", action="store_true")
+    replay_mode = parser.add_mutually_exclusive_group()
+    replay_mode.add_argument("--replay", action="store_true")
+    replay_mode.add_argument("--half-drive-only", action="store_true")
     args = parser.parse_args()
     assert jax.config.jax_enable_x64
     jax.config.update("jax_enable_compilation_cache", False)
@@ -205,20 +207,25 @@ def main():
         constant=constant_reference(args.mesh),
     )
     assert row["constant"]["cells"] == count, "constant receipt names another mesh"
-    if args.replay:
-        original = json.loads(path.read_text())
+    if args.replay or args.half_drive_only:
         started = time.monotonic()
         interaction = iron.load_magnetisation_interaction(
             operator_path, region=inputs["region"], cell_size=size, basis="linear"
         )
         row["load_seconds"] = time.monotonic() - started
-        row["full_drive"] = solve(inputs, size, interaction)
-        row["bit_identical"] = (
-            np.asarray(row["full_drive"]["field_T"], dtype=np.float64).tobytes()
-            == np.asarray(original["full_drive"]["field_T"], dtype=np.float64).tobytes()
-        )
-        save(args.output / "replay.json", row)
-        assert row["bit_identical"], "fresh-process probe fields changed"
+        row["geometry_digest"] = interaction.geometry_digest
+        row["operator_path"] = str(operator_path)
+        if args.replay:
+            original = json.loads(path.read_text())
+            row["full_drive"] = solve(inputs, size, interaction)
+            row["bit_identical"] = (
+                np.asarray(row["full_drive"]["field_T"], dtype=np.float64).tobytes()
+                == np.asarray(
+                    original["full_drive"]["field_T"], dtype=np.float64
+                ).tobytes()
+            )
+            save(args.output / "replay.json", row)
+            assert row["bit_identical"], "fresh-process probe fields changed"
         with SOURCE.open("rb") as stream:
             data = copy.deepcopy(pickle.load(stream))
         for key in data["currents"]:
@@ -239,8 +246,11 @@ def main():
             raise AssertionError("different-mesh interaction was accepted")
         row["assembly_calls"] = 0
         row["completed"] = True
-        save(args.output / "replay.json", row)
-        assert row["full_drive"]["converged"] and row["half_coil_drive"]["converged"]
+        receipt = "half-drive.json" if args.half_drive_only else "replay.json"
+        save(args.output / receipt, row)
+        assert row["half_coil_drive"]["converged"]
+        if args.replay:
+            assert row["full_drive"]["converged"]
         print(json.dumps(row), flush=True)
         return
     save(path, row)

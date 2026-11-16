@@ -24,6 +24,11 @@
       "kind": "exempted",
       "reason": "Manifest bookkeeping only; the two node-scoped figure copies and the fixture are in the reviewed diff and the coordinator audited them against the write paths",
       "recorded_at": "2026-11-16T23:31:51.662142+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The coordinator re-ran the focused gate at the reviewed head 7de356167 (9 passed, exit 0, logs/gate-head.log); the later commit only adds figure copies",
+      "recorded_at": "2026-11-16T23:31:58.399321+00:00"
     }
   },
   "findings": [

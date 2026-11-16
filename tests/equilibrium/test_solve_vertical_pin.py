@@ -20,7 +20,7 @@ from nova.equilibrium.constraint import (
     assemble_augmented_system,
     uniform_radial_field_jet,
 )
-from nova.equilibrium import fixed_point
+from nova.equilibrium import fixed_point, reduced_newton
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.forward_operator import PrescribedCurrentField
 from nova.equilibrium.observation import CurrentMomentObservation, MomentIntegralSupport
@@ -374,17 +374,20 @@ def test_compensator_image_and_tangent_on_every_proposal_route(
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
     profile = _profile()
+    profile.operator.grid.coordinate = profile.operator.grid.coordinate.at[4, 1].set(
+        -1.0 / (4 * jnp.pi)
+    )
     direction = None
     if source == "circuit":
         profile.operator.prescribed_current_field = PrescribedCurrentField(
-            response=jnp.asarray([[0.0, 0.0]] * 5 + [[0.0, 1.0]]),
+            response=jnp.asarray([[0.0, 0.0]] * 4 + [[0.0, 0.5], [0.0, 1.0]]),
             current=jnp.zeros(2),
         )
         direction = np.asarray([0.0, 1.0])
     pair = VerticalPositionPin(
         0.7, active=active, coil_direction=direction, initial_unknown=0.25
     ).pair(profile.operator)
-    target = jnp.asarray([1.0, 0.8, 0.3, 1.0, 1.2, 0.9])
+    target = jnp.asarray([1.0, 0.8, 0.3, 1.0, 1.4, 0.9])
 
     def base_map(flux):
         return target
@@ -400,7 +403,7 @@ def test_compensator_image_and_tangent_on_every_proposal_route(
         requested_class=None,
         target_current=None,
     )
-    images, tangents = [], []
+    images, tangents, frozen_changes = [], [], []
     original_image = type(pair.unknown).flux_delta
 
     def observed_image(*args):
@@ -415,12 +418,18 @@ def test_compensator_image_and_tangent_on_every_proposal_route(
         def raw_map(state):
             if shadowed:
                 return system.shadowed_map_fn(
-                    state, jnp.zeros_like(state, dtype=bool), (runtime_pair,)
+                    state,
+                    jnp.zeros_like(state, dtype=bool).at[4].set(True),
+                    (runtime_pair,),
                 )
             return system.map_fn(state, (runtime_pair,))
 
         def observed_map(state):
             mapped = raw_map(state)
+            jax.debug.callback(
+                lambda value: frozen_changes.append(np.asarray(value)),
+                mapped[4] - state[4],
+            )
             unknown_direction = jnp.zeros_like(state).at[-1].set(1.0)
             tangent = jax.jvp(raw_map, (state,), (unknown_direction,))[1]
             jax.debug.callback(
@@ -449,7 +458,10 @@ def test_compensator_image_and_tangent_on_every_proposal_route(
                 observed_map, state, residual, merit, False
             )
         jacobian = jax.vmap(tangent)(jnp.eye(state.size)).T
-        step = jnp.linalg.solve(jnp.eye(state.size) - jacobian, mapped - state)
+        # Frozen flux coordinates have zero residual and a null Newton row.
+        step = jnp.linalg.lstsq(
+            jnp.eye(state.size) - jacobian, mapped - state, rcond=None
+        )[0]
 
         def model(candidate):
             return mapped + tangent(candidate - state)
@@ -475,9 +487,79 @@ def test_compensator_image_and_tangent_on_every_proposal_route(
         assert bool(proposal.recovery_activated) == (route == "continuation")
     assert len(images) > 1 and len(tangents) > 1, "candidate evaluations must run"
     images, tangents = np.stack(images), np.stack(tangents)
+    if shadowed:
+        np.testing.assert_allclose(frozen_changes, 0.0, rtol=0, atol=1e-15)
+        np.testing.assert_array_equal(tangents[:, 4], 0.0)
+    else:
+        assert np.any(np.abs(frozen_changes) > 1e-3), "live coordinate must move"
     if active:
         assert np.any(images != 0), "active source is the known-present control"
         assert np.any(tangents != 0), "active tangent is the known-present control"
     else:
         np.testing.assert_array_equal(images, np.zeros_like(images))
         np.testing.assert_array_equal(tangents, np.zeros_like(tangents))
+
+
+@pytest.mark.parametrize("active", [False, True])
+def test_reduced_compensator_image_and_tangent(active):
+    """The reduced reconstruction obeys the runtime binding off the root."""
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    profile = _profile()
+    profile.operator.prescribed_current_field = PrescribedCurrentField(
+        response=jnp.asarray([[0.0, 0.0]] * 5 + [[0.0, 1.0]]),
+        current=jnp.zeros(2),
+    )
+    pair = VerticalPositionPin(
+        0.7, active=active, coil_direction=np.asarray([0.0, 1.0])
+    ).pair(profile.operator)
+    augmentation = reduced_newton._RowAugmentation(
+        profile, (pair,), (slice(0, 1),), 1, jnp.asarray(1.0), None, None
+    )
+
+    @jax.jit
+    def evaluate(runtime_pair, unknown):
+        image, tangent = jax.jvp(
+            lambda value: augmentation.flux_delta(value, (runtime_pair,)),
+            (unknown,),
+            (jnp.ones_like(unknown),),
+        )
+        row = augmentation.rows(jnp.asarray(SEED), unknown, None, (runtime_pair,), None)
+        return image, tangent, row
+
+    # Both bindings go through the same compiled program and nonzero unknown.
+    unknown = jnp.asarray([0.25])
+    image, tangent, row = evaluate(pair, unknown)
+    control = replace(pair, binding=replace(pair.binding, payload=jnp.asarray(True)))
+    control_image, control_tangent, _ = evaluate(control, unknown)
+    assert np.any(np.asarray(control_image) != 0)
+    assert np.any(np.asarray(control_tangent) != 0)
+    if active:
+        np.testing.assert_array_equal(image, control_image)
+        np.testing.assert_array_equal(tangent, control_tangent)
+    else:
+        np.testing.assert_array_equal(image, np.zeros_like(image))
+        np.testing.assert_array_equal(tangent, np.zeros_like(tangent))
+        np.testing.assert_array_equal(row, unknown)
+
+
+def test_compensator_gate_delegates_to_shared_arm_runner(monkeypatch, tmp_path):
+    """One owner executes CPU arms and decides whether their receipts completed."""
+    from scripts.prototypes.diiid_core_hold.regressions import gate as shared_gate
+    from scripts.prototypes.diiid_inactive_compensator import gate as gates
+
+    assert getattr(gates, "core_gate", None) is shared_gate
+    calls = []
+
+    class RunnerReached(Exception):
+        pass
+
+    def observe(*args):
+        calls.append(args)
+        raise RunnerReached
+
+    monkeypatch.setattr(gates, "core_gate", observe)
+    with pytest.raises(RunnerReached):
+        gates.arm(tmp_path, "revision", tmp_path, "arm", gates.PIN)
+    assert len(calls) == 1
+    assert calls[0][:3] == (tmp_path, "revision", gates.PIN)

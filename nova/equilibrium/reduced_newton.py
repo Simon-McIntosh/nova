@@ -2393,13 +2393,7 @@ class _RowAugmentation:
         """Return the flux every compensating unknown drives at this state."""
         delta = 0.0
         for pair, row_slice in zip(pairs, self.row_slices, strict=True):
-            delta = delta + pair.unknown.flux_delta(
-                self.profile,
-                None,
-                pair.functional,
-                pair.binding.payload,
-                unknowns[row_slice],
-            )
+            delta = delta + pair.flux_delta(self.profile, None, unknowns[row_slice])
         return delta
 
     def rows(self, flux, unknowns, shadow, pairs, target_current) -> jax.Array:

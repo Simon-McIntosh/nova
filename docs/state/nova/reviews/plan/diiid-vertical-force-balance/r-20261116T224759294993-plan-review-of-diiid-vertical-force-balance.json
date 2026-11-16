@@ -41,7 +41,49 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 103,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7519b1082e481b16a1363ce35d17064a0691b290",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a711 now says the probe follows the benchmark's own adapter path with 24 conductors, and lists corpus input, time slice, conductor currents, cell-current rule and topology class as the candidates",
+      "reason": "",
+      "when": "2026-11-16T23:13:26.117325+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7519b1082e481b16a1363ce35d17064a0691b290",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Done-when (2) now requires the named cause to be demonstrated: undoing it at the head restores the registered value within 2e-6, or applying it alone reproduces 1119994.165 A",
+      "reason": "",
+      "when": "2026-11-16T23:13:38.890197+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7519b1082e481b16a1363ce35d17064a0691b290",
+      "commit_basis": "edit",
+      "note": "Done-when (2) now requires the named cause to be demonstrated: undoing it at the head restores the registered value within 2e-6, or applying it alone reproduces 1119994.165 A",
+      "reason": "",
+      "when": "2026-11-16T23:13:38.890197+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7519b1082e481b16a1363ce35d17064a0691b290",
+      "commit_basis": "edit",
+      "note": "\u00a711 now says the probe follows the benchmark's own adapter path with 24 conductors, and lists corpus input, time slice, conductor currents, cell-current rule and topology class as the candidates",
+      "reason": "",
+      "when": "2026-11-16T23:13:26.117325+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261116T224759294993-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261116T224759294993-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "2a1f19573d91ac8f76795b37a99fc304272428e0",
   "rubric": "content",

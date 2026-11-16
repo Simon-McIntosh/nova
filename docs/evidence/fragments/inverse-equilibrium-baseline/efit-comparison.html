@@ -1574,3 +1574,58 @@
     <code>fitted-observation-replay-1318855/iter-diagnostic/iter-first-map-diagnostic.json</code>
     and <code>iter-original-trip-audit.json</code> in the run directory.</p>
 </section>
+
+<section id="efit-comparison-fitted-mastu-physical">
+  <h3>MAST-U public solve after fitted-current input verification</h3>
+  <p>The observation replay passes the admission limit: loop relative L2
+    0.126410% and probe relative L2 0.102526% against EFIT reconstructed
+    rows. One new public portfolio uses the stored fitted conductor-current
+    vector as its initial guess, with measured-current observations and their
+    original uncertainties unchanged. The Bernstein profile dimensions are
+    pp/FF-prime ndeg=2/2, live=1/1. Every evaluation uses the public forward
+    request. All three public seed candidates are now exhausted; no inverse
+    fit or scaled-data fit was entered.</p>
+  <table><thead><tr><th>Seed</th><th>Relative terminal residual</th>
+    <th>Converged</th><th>Qualified</th><th>Termination</th></tr></thead><tbody>
+    <tr><td>Stored field</td><td>4.864113698736961e-10</td><td>true</td>
+      <td>false</td><td>1; finite receipt, residual above public qualification
+      limit 1e-10</td></tr>
+    <tr><td>Limited cold seed</td><td>NaN</td><td>false</td><td>false</td>
+      <td>3; NoQualifiedAxisError after 3 outer trips</td></tr>
+    <tr><td>Diverted cold seed</td><td>NaN</td><td>false</td><td>false</td>
+      <td>3; NoQualifiedAxisError after 3 outer trips</td></tr>
+  </tbody></table>
+  <p>The first seed carries finite flux, cell currents, moments and
+    conservation arrays, with no terminal constraints. Its public guard
+    refuses it because 4.8641e-10 exceeds the unchanged qualification limit,
+    despite the kernel reporting convergence. The initial receipt took
+    716.732490 s on titan P100, including cold compilation. The complete
+    case took 1132.799690 s on titan P100. Native pytest reports
+    <code>1 failed in 1114.26s (0:18:34)</code>; this is a measured public
+    nonqualification after verified input rows, not a reader exception.</p>
+  <p>The separate case reporter was found to flatten converged-but-unqualified
+    receipts into <code>converged=false</code> and omit the termination reason.
+    Its focused reproduction failed before the reporting repair; the focused
+    checks then report <code>27 passed, 4 deselected in 12.59s</code>. Native
+    per-seed receipts remain the authority. Neither the forward solver nor
+    its qualification threshold changed. An x64 read of the first pickle
+    confirms the residual above; the earlier float32 metadata inspection is
+    preserved separately in the run directory.</p>
+  <figure>
+    <img src="/nova/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/mastu.svg"
+      alt="MAST-U exhausted third public seed on shared physical levels; grey EFIT contours visible and no blue terminal contours visible inside the wall" />
+    <figcaption>MAST-U final third-seed state after fitted-current input
+      verification. Grey wide contours, magnetic axis and X-point belong to
+      imas-efit; blue narrow contours would show nova on the same physical
+      levels, but none are visible on this level array. The terminal Nova
+      null read refuses qualification, so no Nova axis is invented. The
+      unit-faithful wall is drawn. Residual NaN; qualified=false;
+      converged=false. Both states use magnetics-only constraints. Canvas
+      14 × 7.2 in; PNG inspected and receipt inserted before native EXIT=1.</figcaption>
+  </figure>
+  <p>Receipts and the inspected preview are under
+    <code>fitted-physical-measurement-1318907/physical-mastu/</code> in the run
+    directory. The three-seed cap leaves MAST-U stopped. Physical band rows,
+    fit/forward disagreement split and physical scaled-data control remain
+    unavailable because no public receipt qualified for the inverse fit.</p>
+</section>

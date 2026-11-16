@@ -65,6 +65,7 @@ def main():
     parser.add_argument("--head", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--focused-only", action="store_true")
+    parser.add_argument("--targets", nargs="+", default=TESTS)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     results = {}
@@ -89,6 +90,7 @@ def main():
                     "tests",
                     "pyproject.toml",
                     "docs/figures/diiid-forward-onboarding/current-pinned",
+                    "docs/figures/current-constrained-forward-solve/pinned-cohort",
                     "docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py",
                 ],
                 text=True,
@@ -107,7 +109,7 @@ def main():
                 )
                 assert archive.wait() == 0
             results[arm] = run(
-                tree, revision, TESTS, args.output / f"focused-{arm}.log"
+                tree, revision, args.targets, args.output / f"focused-{arm}.log"
             )
             if arm == "head" and not args.focused_only:
                 results["scoped-head"] = run(

@@ -14,7 +14,11 @@ scratch=$(mktemp -d "$TMPDIR/west-linear-suites-${SLURM_JOB_ID}-XXXX")
 trap 'rm -rfv "$scratch"' EXIT
 export TMPDIR="$scratch"
 mkdir -p "$out"
-for arm in baseline after; do
+arms=("${@:4}")
+if [ "${#arms[@]}" -eq 0 ]; then
+    arms=(baseline after)
+fi
+for arm in "${arms[@]}"; do
     revision=$base
     if [ "$arm" = after ]; then
         if [ -n "$after_revision" ]; then

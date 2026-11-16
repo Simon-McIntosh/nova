@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T21:02:36.844Z",
+  "dispatched_at": "2026-11-16T21:02:21Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:65",
+      "id": "reasoning-1",
+      "reason": "the author would restate the sentence against the one-program four-point lowering (or the hexagon control) and correct 6,088,067 to the 132-cell CPU figure, which is the basis for calling the scan lever unpromising and for the node (b) control it targets.",
+      "text": "the paragraph states the lowered program at \"8,408,375 bytes at 8 cells in the census fixture, 6,088,067 at 132 in the production row program\", but the cited `docs/evidence/fragments/kernel-compile-barrier/bounded-jets-build.html:13` reports those as one program lowered on CPU at four cell counts \u2014 \"lowering `production_point_batch` on CPU gives 8,408,375 StableHLO bytes at 8 cells, 7,482,936 at 16, 6,461,067 at 64 and 6,088,070 at 132\" \u2014 and no fragment places 8,408,375 in the census fixture; 6,088,067 is the H200 head receipt (`bounded-jets-build.html:22`, `ordered-sharing.html:15`), three bytes off the 132-cell CPU lowering. As written the pair compares two fixtures, so it shows nothing about cell scaling, while the sentence concludes from it that \"the program is not unrolled per cell\" \u2014 the premise that makes the fixed-capacity scan lever unpromising \u2014 and the plan loses the evidence that actually carries it, the one-program sweep plus the one-hexagon/eight-hexagon +0.03% control.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:66",
+      "id": "done_when-1",
+      "reason": "without a required stub-visible delta the node can deliver a plausible zero for any block (the section's own \u00a75 evidence is that graph share does not predict wall), and node (c)'s lever would be chosen off an instrument the plan never showed to see the stub.",
+      "text": "node (b)'s third clause orders \"one H200 cold compile of the program with the regular Hessian at corner heights stubbed\" and takes its seconds as \"the compile seconds that block holds\", but nothing in the clause requires the stubbed lowering to show it changed the program (a size or instruction-count delta against the 6,088,067-byte, 267,438-instruction unstubbed form), and the plan's own fragment records why that check is needed: `bounded-jets-build.html` reports that of two earlier mutations of the same file, \"a duplicated moment body was removed by the compiler (test still passed)\" \u2014 a stub the compiler erases compiles in the same wall and would be reported as a block holding no compile time, which is exactly the reading node (c)'s lever choice would be made from.",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "438b3a0a53fc330fb76125a6f8f21cada1d09e53",
+  "plan_fingerprint": "a0817c3f56e943cbe4f69c7e86c993d628cb55502a0e0d057a2690634b78ea5b",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 82,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261116T210103087851-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "271bc617f4e9f7ab3deedc63c160649e1451f39b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every citation resolves on main at 438b3a0a5: `nova/equilibrium/fixed_points.py:323` is `def _source_jets`, `:546` is `def maintain_rows`, `:611` is the `_row_program(...)` call, `scripts/prototypes/read_route/jets.py:262`, `scripts/prototypes/fixed_points/solve.py:121` and `scripts/prototypes/kernel_compile_census/row.py:115` each hold the cited `jax.vmap(_source_jets, ...)`, `scripts/prototypes/compile_pass_profile/` and the three named test files exist, `/nova/evidence/fragments/kernel-compile-barrier/ordered-sharing.html` exists (served as `ordered-sharing.html`), and commits `da28fc4e5`, `00ec05512` and `0b5972bfd` are in the object store.",
+    "done_when": "a finding \u2014 node (b)'s third clause reads the seconds of a stubbed cold compile as the compile time \"that block holds\" without requiring that the stub change the program the compiler sees, and the plan's own cited evidence records a source mutation the compiler silently removed.",
+    "evidence_paths": "pass \u2014 node (b)'s record and figure paths are repository evidence paths and its receipts sit under a named persistent directory; that receipts location is unchanged since an earlier review accepted it as this node's evidence path, so no finding is re-raised here.",
+    "naming": "pass \u2014 the new wording introduces no symbol, file or stage name, and the two node labels (a)/(b)/(c) are section prose, not names carried into code.",
+    "reasoning": "a finding \u2014 the cell-invariance premise the paragraph draws on is stated against two different fixtures and two different devices, which is not what the cited lowering shows, so the premise cannot support the conclusion the sentence takes from it.",
+    "single_goal": "pass \u2014 node (b) is one deliverable (an attribution of the 218.9 s wall to blocks and to the term order), node (c) is one deliverable (the bounded form), and node (a) is closed.",
+    "wiring": "pass \u2014 s3 declares links to section s2 (the variadic split it builds on) and s5 (the compile attribution that names the lever), both of which resolve in the snapshot, and its node (b) -> (c) ordering is stated in the section body rather than left to a node table."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "b465cef1e2cc13170ec112ecc51774aeedecf0105d30a3902a7c0ecc0a762197",
+    "s3": "78207c42401d68329d14b67914fc541a80c9462ebf056e3802516b4cc7bfd0b3",
+    "s4": "b4c3eef27a064692dbf419c8ce536674acaafb04413c9c58789ff1b0a6338bcc",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T21:08:39.704876+00:00",
+  "total": null
+}

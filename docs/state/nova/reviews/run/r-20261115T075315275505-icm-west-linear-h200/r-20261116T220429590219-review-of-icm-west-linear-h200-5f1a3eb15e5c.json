@@ -24,6 +24,11 @@
       "kind": "exempted",
       "reason": "the equality line is a consistency check; the discriminating checks are the translated-geometry refusal tests, whose digest-removal mutant fails both cases, and the WEST wrong-mesh refusal on the H200",
       "recorded_at": "2026-11-16T23:20:10.504352+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the uniform rows completed in job 1316958 and were kept rather than reassembled; continuation 1317867 ran only the graded rows and the replay after the first job failed on a script keyword, so the receipts are sequential and none is duplicated",
+      "recorded_at": "2026-11-16T23:20:22.324976+00:00"
     }
   },
   "findings": [

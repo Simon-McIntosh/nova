@@ -1,0 +1,79 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T19:36:09.669Z",
+  "dispatched_at": "2026-11-16T19:35:47Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:65",
+      "id": "reasoning-1",
+      "reason": "the stated mechanism is the opposite of the measurement the section cites, so a worker can read the scan as a live lever with a stated payoff and spend an H200 compile job re-deriving its inertness.",
+      "text": "the paragraph names a fixed-capacity scan over the term order and states its effect as \"so the compiler receives one term body instead of every term\", while the partial-result comment it cites (s3, 2026-11-16) records the lowered program at 8,408,375 bytes at 8 cells and 6,088,070 at 132 \u2014 already one body, cell-invariant \u2014 and concludes \"A scan over the term order has nothing to fold\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:65",
+      "id": "reasoning-2",
+      "reason": "the section forecloses a lever on evidence that does not measure it and calls the foreclosure a measurement, while node (b) is then dispatched to produce the number the section says already exists.",
+      "text": "the same paragraph declares that \"both\" named levers \"have since been measured as unable to reach the bound\", but the only figure the cited evidence gives for the regular-Hessian lever is its 28.8% share of the lowered graph (5,990,537 of 8,408,375 bytes), a size share and not a cold-compile wall; the plan's own \u00a75 record shows graph share does not track the wall (4.04% fewer expanded equations moved 82.43 s to 82.36 s), and node (b)'s third clause exists to obtain the cold compile of exactly that stubbed block",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:68",
+      "id": "done_when-1",
+      "reason": "a control that must fail is what separates a form that meets the bound from a measurement that cannot distinguish it, and the plan text currently leaves the control out of the only node that delivers the form.",
+      "text": "node (c)'s done-when is three measured positives (60 s and 64 GB at both arms, bit-identical rows and 1e-9 tangents, and the 500-cell test passing in 900 s) and names no form that must fail; the section's own comment records \"The declared negative control was not run, because the bound is unmet at head as well\", so the delivered form carries no control showing the guard rejects an unbounded one",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:64",
+      "id": "anchors_resolve-1",
+      "reason": "the section's description of its own starting state (\"defined twice today\", the caller at :608) is contradicted by the head it starts from, so a worker resolving those anchors reads unrelated code and cannot tell which duplicate the section expects to delete.",
+      "text": "after node (a) landed, that paragraph's line references no longer name what the section says: `nova/equilibrium/fixed_points.py:543` and `:608` are a stray `)` and a `chunk = nodes[...]` line with no call to `maintain_rows` left in the module (its definition is now :546), `scripts/prototypes/read_route/jets.py:229` is `def build_jet_matrix(` with the copy deleted, `:321` is not the prototype jets-build jit (now :262), and `scripts/prototypes/kernel_compile_census/row.py:113` sits one line past the `prototype_point_batch` branch at :112",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:66",
+      "id": "evidence_paths-1",
+      "reason": "without a named path the record that (c) and its review depend on can land in a run scratch directory, leaving the next node with nothing a later reader can open.",
+      "text": "node (b) is a measurement whose entire deliverable is the attribution record (per-pass times, per-block StableHLO and instruction shares, and one stubbed cold compile), and the section names no durable path for it even though node (c)'s lever \"is written into this section from (b)'s result and reviewed before it is dispatched\"",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "92cdf6247fc6378bd08b6e0ba090a78fb652b164",
+  "plan_fingerprint": "840c621a5be8b1ac60d6e69b0bcc72b754d7ba0920c6bbaac28aca0730bc5b63",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 80,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261116T193513228307-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "ec694c5b6b391d1f87e89b9c82d01751b4bcd01c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 s3's starting-state line references in `nova/equilibrium/fixed_points.py`, `scripts/prototypes/read_route/jets.py` and `scripts/prototypes/kernel_compile_census/row.py` no longer name the entities the section cites, because node (a) landed.",
+    "done_when": "a finding \u2014 node (c)'s done-when (line 68) states three measured positives and declares no negative control that must fail.",
+    "evidence_paths": "a finding \u2014 node (b) is a measurement whose deliverable is a record, and no durable path is named for it, though (c) is written from that record and reviewed before dispatch.",
+    "naming": "pass \u2014 the changed text introduces no plan label, stage name, ticket number or version tag into a symbol, file or comment.",
+    "reasoning": "findings \u2014 the scan lever's stated mechanism contradicts the cited measurement, and the Hessian lever is called \"measured\" on a graph-share figure that is not a compile wall.",
+    "single_goal": "pass \u2014 s3 now declares three nodes with separate verdicts: (a) consolidation (landed), (b) attribution, (c) bounded form; (c) explicitly waits on (b).",
+    "wiring": "pass \u2014 s3's declared links (`kernel-compile-barrier#s2`, `kernel-compile-barrier#s5`) both resolve to sections that exist, and the new (c)-waits-on-(b) hold is internal to the section and stated in its Nodes paragraph."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "b465cef1e2cc13170ec112ecc51774aeedecf0105d30a3902a7c0ecc0a762197",
+    "s3": "9371fed200ee3727883b78306b214d9d169a6c83165f636f6298b5710dccc683",
+    "s4": "b4c3eef27a064692dbf419c8ce536674acaafb04413c9c58789ff1b0a6338bcc",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T19:42:04.473524+00:00",
+  "total": null
+}

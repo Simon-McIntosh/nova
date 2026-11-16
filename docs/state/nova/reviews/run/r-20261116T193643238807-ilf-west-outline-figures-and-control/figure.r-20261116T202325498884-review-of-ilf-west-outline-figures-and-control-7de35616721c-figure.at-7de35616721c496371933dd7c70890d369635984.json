@@ -1,0 +1,64 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachments_read": [
+    "image-0.png (1400x721) and image-2.png (byte-identical, md5 e53d8e57be217c4f797c19bdada1ffb5) = docs/figures/iron-limb-fill/west-62751-permeability.svg",
+    "image-1.png (1052x541) and image-3.png (byte-identical, md5 15ebccfff2a95ff2113e15c24e8bb84e) = docs/figures/iron-limb-fill/west-62751-stray-lines.svg"
+  ],
+  "completed_at": "2026-11-16T20:38:54.185Z",
+  "dispatched_at": "2026-11-16T20:25:46Z",
+  "figures": {
+    "docs/figures/iron-limb-fill/west-62751-permeability.svg": {
+      "contrast": "Defect: the darkest contour is a readable blue and the mid levels teal and green, but the highest level renders yellow-green (about #90d743, roughly 1.7:1 against white) and is the faintest mark in the figure precisely where permeability is highest. The grey region outlines (#929292, about 3:1) read, but only just, and are the same grey as the machine outline, so a reader cannot tell the two apart.",
+      "data_ink": "Passes: the contours are thin coloured lines with no fill, no marker clutter and no shading; the ink is the permeability field and the two grey outlines that give it a frame.",
+      "decoration": "Passes: white background, no grid, no panel frames, no shading. The only gradient is the colour bar, which is the scalar legend the seven contour levels are read against.",
+      "label_collision": "Passes: no contour value labels are drawn, and the two panel captions sit in clear space below the panels with nothing overlapping them or the data. The small hollow-square null markers near the plasma are marks, not text, and do not collide with any label.",
+      "legibility": "The two-panel layout reads at a glance: each panel carries its own caption below it ('stored tapered outline, unit fill', 'true flat outline, fill fraction'), the shared colour bar is labelled in words, and the contours sit inside the grey iron-region outlines in both panels. Defect: the contours are 0.8 pt strokes (figure.py:91), about 1.1 px in the 1400 px render, so at the roughly 900 px column width the loops thin to hairlines and the outer levels are hard to follow.",
+      "table_form": "Passes: this is a spatial field over a poloidal cross-section; the relationship it shows is positional and could not be carried by a table."
+    },
+    "docs/figures/iron-limb-fill/west-62751-stray-lines.svg": {
+      "contrast": "Passes: tick and axis text is dark on white; the grey dotted 0.08 m trace is distinguishable from the solid stored and true traces in all three panels.",
+      "data_ink": "Passes: solid model traces at 2.4 pt and the coarse-mesh comparison as a grey dotted trace of the same shape; nothing else is drawn inside the axes.",
+      "decoration": "Passes: no gridlines, no background fill, top and right spines removed, legend frameless, nothing shaded.",
+      "label_collision": "Passes: the legend sits above the panels and the panel titles sit below it with a clear gap; no tick label is clipped at a panel edge and no label overlaps data.",
+      "legibility": "Three panels, one per probe group, each titled ('in-vessel ring', 'behind the limbs', 'above the arms') and each carrying its own x label ('poloidal angle [deg]', 'Z [m]', 'R [m]'), one figure-level legend with exactly three entries, and a shared y label 'poloidal field [mT]' on the left panel. The in-vessel ring closes on itself (the stored and true traces start and end within 1 px of the same value at 0 and 360 deg). Defect: the 'above the arms' panel draws four upper and four lower curves per model in the same two colours with no per-Z distinction and they cross between R about 1.2 and 2.4 m, so no curve can be attributed to a probe row.",
+      "table_form": "Passes: three wave/probe profiles against their own abscissae, which is a plotted relationship and not tabular."
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/iron_limb_production/figure.py",
+      "line": 42,
+      "severity": "non-blocking",
+      "summary": "The stray-field figure is laid out on a 15 x 5.8 in canvas (figure.py:177) but save() rewrites every SVG's width and height to 31.1111cm x 16cm, which is the 14 x 7.2 slide ratio. The rendered PNG therefore letterboxes: its 541 px are only 407 px of content (rows 67-473), the rest is empty transparent margin above and below, so a quarter of the figure's height is spent on nothing and the three panels are sized for a canvas they no longer match."
+    },
+    {
+      "file": "scripts/iron_limb_production/figure.py",
+      "line": 91,
+      "severity": "non-blocking",
+      "summary": "The permeability contours are stroked at linewidths=0.8, about 1.1 px in the 1400 px render and below the 2.6 pt data-series weight the house style sets. At the roughly 900 px column width the loops thin to sub-pixel hairlines, and the top level is viridis yellow-green (about #90d743, roughly 1.7:1 on white), so the highest-permeability contour is the least visible line in the figure."
+    },
+    {
+      "file": "scripts/iron_limb_production/figure.py",
+      "line": 202,
+      "severity": "non-blocking",
+      "summary": "The 'above the arms' panel draws four upper and four lower curves per model in the same two colours, with no marker, dash or direct label tying a curve to its Z or to upper versus lower, and the curves cross between R about 1.2 and 2.4 m. A reader can see that stored and true differ but cannot attribute any curve to a probe row, so the panel does not deliver the per-Z reading its name promises."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: both panels readable at a glance with a caption under each and a labelled shared colour bar; contours at 0.8 pt read as hairlines at column width.\nRUBRIC data_ink: thin coloured line contours, no fills or markers; the field carries the weight.\nRUBRIC decoration: white background, no grid, no frames; the colour bar is the scalar legend, not decoration.\nRUBRIC contrast: darkest and mid levels read cleanly, the top yellow-green level (about 1.7:1) and the grey region outlines (about 3:1) are the weakest marks.\nRUBRIC table_form: pass, a spatial field over a cross-section.\nRUBRIC label_collision: pass, no contour labels, panel captions in clear space below the panels, nothing overlaps data.\nRUBRIC legibility: three titled panels with their own x labels, one three-entry legend, closed in-vessel ring and separated upper/lower limb segments; the above-arms curves cannot be attributed individually.\nRUBRIC data_ink: two solid model traces plus one grey dotted coarse-mesh trace, nothing else inside the axes.\nRUBRIC decoration: no gridlines, no fill, top and right spines removed, frameless legend.\nRUBRIC contrast: dark text on white; grey dotted trace distinguishable from both solid traces.\nRUBRIC table_form: pass, three profiles against their own abscissae.\nRUBRIC label_collision: pass, legend above the panels, titles clear of it, no clipped or overlapping tick labels.\nFINDING scripts/iron_limb_production/figure.py:42: non-blocking: the stray figure is laid out at 15 x 5.8 in but its canvas is forced to 31.1111cm x 16cm, so the render is letterboxed with 134 of 541 rows empty.\nFINDING scripts/iron_limb_production/figure.py:91: non-blocking: permeability contours at 0.8 pt and a yellow-green top level of about 1.7:1 on white make the highest-permeability contour the faintest mark.\nFINDING scripts/iron_limb_production/figure.py:202: non-blocking: above-the-arms curves are not attributable to a probe row and cross between R about 1.2 and 2.4 m.\n",
+  "review_run_id": "r-20261116T202325498884-review-of-ilf-west-outline-figures-and-control-7de35616721c-figure",
+  "reviewed_base_sha": "0f87e800a7ddcd6d0b521c7043e3fe0eef3b20b2",
+  "reviewed_figure_paths": [
+    "docs/figures/iron-limb-fill/west-62751-permeability.svg",
+    "docs/figures/iron-limb-fill/west-62751-stray-lines.svg"
+  ],
+  "reviewed_head_sha": "7de35616721c496371933dd7c70890d369635984",
+  "reviewed_run_id": "r-20261116T193643238807-ilf-west-outline-figures-and-control",
+  "rubric": "figure",
+  "status": "parsed",
+  "suite_note": "A figure review runs no suite, so added_failure_count is 0 with an empty id list rather than a measurement.",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T20:39:25.850215+00:00",
+  "total": null
+}

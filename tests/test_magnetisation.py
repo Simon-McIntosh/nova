@@ -1242,11 +1242,42 @@ def test_control_receipt_refuses_a_solid_arm_resembling_the_filled_solve(tmp_pat
         validate_control_receipt(changed, _CONTROL_REVISION)
 
 
+def test_comparisons_whole_set_row_concatenates_the_groups():
+    """The whole-set row is one field over every group, not a map subtraction."""
+    from scripts.iron_limb_production.outline import comparisons
+
+    groups = {"a": np.zeros((2, 1)), "b": np.zeros((2, 1))}
+    fields = {
+        "true": {
+            0.04: {"a": np.array([[1.0], [2.0]]), "b": np.array([[3.0], [4.0]])},
+            0.08: {"a": np.array([[1.5], [2.0]]), "b": np.array([[3.0], [4.0]])},
+        },
+        "stored": {
+            0.04: {"a": np.array([[1.0], [2.0]]), "b": np.array([[3.0], [1.0]])},
+            0.08: {"a": np.array([[1.0], [2.0]]), "b": np.array([[3.0], [1.0]])},
+        },
+    }
+    rows = {
+        (row["group"], row["size_m"]): row
+        for row in comparisons(fields, [0.08, 0.04], groups)
+    }
+    whole = rows[("all", 0.04)]
+    expected = np.linalg.norm(np.array([0.0, 0.0, 0.0, 3.0])) / np.linalg.norm(
+        np.array([1.0, 2.0, 3.0, 1.0])
+    )
+    assert whole["model_difference"] == pytest.approx(expected)
+    assert rows[("a", 0.04)]["model_difference"] == 0.0
+    assert whole["mesh_pair_difference"] == pytest.approx(
+        np.linalg.norm(np.array([0.5, 0.0, 0.0, 0.0]))
+        / np.linalg.norm(np.array([1.0, 2.0, 3.0, 4.0]))
+    )
+
+
 def test_true_outline_fill_fraction_exceeds_its_mesh_pair_difference():
     """Unit fill is refused as a stand-in: it moves the in-vessel field."""
     import os
 
-    from scripts.iron_limb_production.outline import fill_one_displacement
+    from scripts.iron_limb_production.outline import mutation_result
 
     directory = Path(
         os.environ.get(
@@ -1254,7 +1285,11 @@ def test_true_outline_fill_fraction_exceeds_its_mesh_pair_difference():
             "/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/west-62751",
         )
     )
-    measured = fill_one_displacement(directory)
+    if not (directory / "summary.json").is_file() or not list(
+        directory.glob("west-true-fill-one-*.npz")
+    ):
+        pytest.skip("the unit-fill arm is not on this host")
+    measured = mutation_result(directory)
     assert measured["displacement"] > measured["mesh_pair_difference"], measured
     assert measured["exceeds"], measured
 

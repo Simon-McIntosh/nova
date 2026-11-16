@@ -138,9 +138,7 @@ def section_accounting(source):
     measures away from.
     """
     true_arm = sum(
-        item.section_per_radian()
-        for item in source.regions
-        if item.kind == "arm"
+        item.section_per_radian() for item in source.regions if item.kind == "arm"
     )
     stored_arm = sum(
         section.stored
@@ -149,10 +147,7 @@ def section_accounting(source):
     )
     prototype = (
         PROTOTYPE_ARM["depth"]
-        * (
-            PROTOTYPE_ARM["outer_radius"] ** 2
-            - PROTOTYPE_ARM["inner_radius"] ** 2
-        )
+        * (PROTOTYPE_ARM["outer_radius"] ** 2 - PROTOTYPE_ARM["inner_radius"] ** 2)
         / 2
     )
     return dict(
@@ -200,10 +195,12 @@ def comparisons(fields, sizes, groups):
         if not coarser:
             continue
         for name in (*groups, "all"):
+
             def access(values, key=name):
                 if key == "all":
                     return np.concatenate([values[key] for key in groups])
                 return values[key]
+
             fine = {key: access(fields[key][size]) for key in fields}
             coarse = {key: access(fields[key][coarser[0]]) for key in fields}
             model = float(
@@ -240,7 +237,9 @@ def compare_only(directory):
     sizes = record["sizes_m"]
     fields = {
         key: {
-            size: group_fields(np.load(directory / f"west-{key}-{size:g}.npz")["field"], groups)
+            size: group_fields(
+                np.load(directory / f"west-{key}-{size:g}.npz")["field"], groups
+            )
             for size in sizes
         }
         for key in ("true", "stored")
@@ -248,55 +247,6 @@ def compare_only(directory):
     record["west_comparison"] = comparisons(fields, sizes, groups)
     (directory / "summary.json").write_text(json.dumps(record, indent=2) + "\n")
     return record["west_comparison"]
-
-
-def fill_one_arm(record, output, source, external, b_field, permeability, groups, fields, points):
-    """Evaluate the true model with fill fraction 1 at the coarsest mesh.
-
-    This is the declared negative control: unit fill makes the flat model
-    solid, so its in-vessel field sits nearer the stored solid arm. The
-    displacement it moves and the true model's own mesh-pair difference are
-    recorded side by side.
-    """
-    coarse = max(record["sizes_m"])
-    model = dict(models(source)["true"], fill_fraction=1.0)
-    solution, seconds = solve(
-        model,
-        external,
-        b_field,
-        permeability,
-        coarse,
-        record["max_iterations"],
-        record["tolerance"],
-    )
-    field = solution.field(points)
-    true = fields["true"][coarse]
-    in_vessel = slice(0, len(groups["in_vessel"]))
-    displacement = float(
-        np.linalg.norm(field[in_vessel] - true[in_vessel])
-        / max(float(np.linalg.norm(true[in_vessel])), 1e-30)
-    )
-    mesh = float(
-        np.linalg.norm(true[in_vessel] - fields["true"][min(record["sizes_m"])][in_vessel])
-        / max(float(np.linalg.norm(fields["true"][min(record["sizes_m"])][in_vessel])), 1e-30)
-    ) if len(record["sizes_m"]) > 1 else float("nan")
-    row = dict(
-        size_m=coarse,
-        fill_fraction=1.0,
-        cells=solution.cell_count,
-        converged=solution.converged,
-        iterations=solution.iterations,
-        residual_history=solution.residual_history,
-        seconds=seconds,
-        in_vessel_displacement=displacement,
-        mesh_pair_difference=mesh,
-        exceeds_mesh_pair=bool(displacement > mesh),
-    )
-    np.savez(output / "west-true-fill-one.npz", points=points, field=field)
-    print("MUTATION " + json.dumps(row), flush=True)
-    del solution
-    jax.clear_caches()
-    return row
 
 
 def measure(record, output):
@@ -378,8 +328,10 @@ def measure(record, output):
             del solution
             jax.clear_caches()
     record["west_comparison"] = comparisons(
-        {key: {size: group_fields(value, groups) for size, value in rows.items()}
-         for key, rows in fields.items()},
+        {
+            key: {size: group_fields(value, groups) for size, value in rows.items()}
+            for key, rows in fields.items()
+        },
         record["sizes_m"],
         groups,
     )
@@ -389,34 +341,96 @@ def measure(record, output):
         and row["residual_history"][-1] <= record["tolerance"]
         for row in record["west"]
     )
-    record["mutation"] = fill_one_arm(
-        record, output, source, external, b_field, permeability, groups, fields, points
+    record["mutation"] = mutation_arm(
+        record, output, source, external, b_field, permeability, groups, points
     )
     save(output / "summary.json", record)
     for row in record["west_comparison"]:
         print("COMPARE " + json.dumps(row, sort_keys=True), flush=True)
 
 
-def fill_one_displacement(directory):
-    """Return the unit-fill displacement of the in-vessel field.
+def mutation_arm(
+    record, output, source, external, b_field, permeability, groups, points
+):
+    """Solve the true outline at unit fill at every recorded size.
 
-    ``directory`` holds the measurement: the true model's fields at both
-    sizes and the unit-fill arm at the coarse size. The displacement the
-    declared mutation moves is compared with the true model's own mesh-pair
-    difference at the same probes.
+    This is the declared negative control: unit fill makes the flat model
+    solid, so its in-vessel field must move further than the true model's
+    own mesh pair moves the same probes. Both sizes cost one solve each and
+    run in the same allocation.
     """
+    ring = slice(0, len(groups["in_vessel"]))
+    accepted = {
+        size: np.load(output / f"west-true-{size:g}.npz")["field"]
+        for size in record["sizes_m"]
+    }
+    fine = min(record["sizes_m"])
+    rows = []
+    for size in record["sizes_m"]:
+        model = dict(models(source)["true"], fill_fraction=1.0)
+        solution, seconds = solve(
+            model,
+            external,
+            b_field,
+            permeability,
+            size,
+            record["max_iterations"],
+            record["tolerance"],
+        )
+        field = solution.field(points)
+        reference = accepted[size][ring]
+        row = dict(
+            size_m=size,
+            fill_fraction=1.0,
+            cells=solution.cell_count,
+            converged=solution.converged,
+            iterations=solution.iterations,
+            residual_history=solution.residual_history,
+            seconds=seconds,
+            in_vessel_displacement=float(
+                np.linalg.norm(field[ring] - reference)
+                / max(float(np.linalg.norm(reference)), 1e-30)
+            ),
+        )
+        rows.append(row)
+        np.savez(
+            output / f"west-true-fill-one-{size:g}.npz", points=points, field=field
+        )
+        print("MUTATION " + json.dumps(row), flush=True)
+        del solution
+        jax.clear_caches()
+    coarse = max(record["sizes_m"])
+    mesh = float(
+        np.linalg.norm(accepted[coarse][ring] - accepted[fine][ring])
+        / max(float(np.linalg.norm(accepted[fine][ring])), 1e-30)
+    )
+    displacement = next(
+        row["in_vessel_displacement"] for row in rows if row["size_m"] == fine
+    )
+    return dict(
+        fill_fraction=1.0,
+        size_m=fine,
+        mesh_pair_size_m=fine,
+        mesh_pair_against_m=coarse,
+        arms=rows,
+        in_vessel_displacement=displacement,
+        mesh_pair_difference=mesh,
+        exceeds_mesh_pair=bool(displacement > mesh),
+    )
+
+
+def mutation_result(directory):
+    """Recompute the unit-fill displacement from a measurement's arrays."""
     directory = Path(directory)
     summary = json.loads((directory / "summary.json").read_text())
     sizes = summary["sizes_m"]
-    coarse, fine = max(sizes), min(sizes)
-    ring = len(summary["probe_groups"]["in_vessel"])
-    index = slice(0, ring)
-    true_coarse = np.load(directory / f"west-true-{coarse:g}.npz")["field"][index]
-    true_fine = np.load(directory / f"west-true-{fine:g}.npz")["field"][index]
-    mutation = np.load(directory / "west-true-fill-one.npz")["field"][index]
+    fine, coarse = min(sizes), max(sizes)
+    ring = slice(0, len(summary["probe_groups"]["in_vessel"]))
+    true_fine = np.load(directory / f"west-true-{fine:g}.npz")["field"][ring]
+    true_coarse = np.load(directory / f"west-true-{coarse:g}.npz")["field"][ring]
+    solid = np.load(directory / f"west-true-fill-one-{fine:g}.npz")["field"][ring]
     displacement = float(
-        np.linalg.norm(mutation - true_coarse)
-        / max(float(np.linalg.norm(true_coarse)), 1e-30)
+        np.linalg.norm(solid - true_fine) / max(float(np.linalg.norm(true_fine)), 1e-30)
     )
     mesh = float(
         np.linalg.norm(true_coarse - true_fine)
@@ -435,13 +449,16 @@ def main():
     parser.add_argument("--sizes", nargs="+", type=float, default=list(SIZES))
     parser.add_argument("--max-iterations", type=int, default=15)
     parser.add_argument("--tolerance", type=float, default=1e-8)
+    parser.add_argument(
+        "--mutation-only",
+        action="store_true",
+        help="add the unit-fill control to a finished measurement",
+    )
     args = parser.parse_args()
     assert jax.config.jax_enable_x64
     device = jax.devices()[0]
     assert device.platform == "gpu", device
-    revision = subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], text=True
-    ).strip()
+    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     assert not subprocess.check_output(
         ["git", "status", "--porcelain", "--untracked-files=no"], text=True
     ).strip(), "the outline measurement requires a clean committed tree"
@@ -463,6 +480,35 @@ def main():
         west_time_s=time,
     )
     args.output.mkdir(parents=True, exist_ok=True)
+    if args.mutation_only:
+        measured = json.loads((args.output / "summary.json").read_text())
+        with SOURCE.open("rb") as stream:
+            data = pickle.load(stream)
+        external = source_field(data)
+        source = outline()
+        b_field, permeability = material(source)
+        groups = probe_groups()
+        points = np.concatenate(list(groups.values()))
+        measured["mutation"] = mutation_arm(
+            measured,
+            args.output,
+            source,
+            external,
+            b_field,
+            permeability,
+            groups,
+            points,
+        )
+        measured["mutation_revision"] = revision
+        save(args.output / "summary.json", measured)
+        row = measured["mutation"]
+        print(
+            f"SUMMARY mutation displacement={row['in_vessel_displacement']:.6f} "
+            f"mesh_pair={row['mesh_pair_difference']:.6f} "
+            f"exceeds={row['exceeds_mesh_pair']}",
+            flush=True,
+        )
+        raise SystemExit(0 if row["exceeds_mesh_pair"] else 1)
     save(args.output / "summary.json", record)
     print("PROVENANCE " + json.dumps(record), flush=True)
     measure(record, args.output)

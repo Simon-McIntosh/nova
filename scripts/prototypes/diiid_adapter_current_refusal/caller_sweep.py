@@ -176,7 +176,11 @@ def _entries(bench, row, path, profile, time_ms):
         (circuit, "solve_frame", lambda: circuit.solve_frame(selected)),
         (bench, "prepare_diiid", lambda: fidelity.prepare_diiid(FRAME)),
         (bench, "_prepare_frame", lambda: convergence._prepare_frame(FRAME)),
-        (bench, "_adapted", lambda: propagation._adapted(bench, row, expansion)),
+        (
+            importlib.import_module("nova.imas.diiid_current"),
+            "_adapted",
+            lambda: propagation._adapted(bench, row, expansion),
+        ),
         (bench, "probe", lambda: _operator_reader(bench, row, path)),
     ]
 

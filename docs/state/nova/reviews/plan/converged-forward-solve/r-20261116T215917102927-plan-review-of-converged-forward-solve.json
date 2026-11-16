@@ -35,6 +35,13 @@
       "note": "The clause no longer credits the resolved followup with routing the solve: it states what landed, the banked support read booking through the current booking, says the production map and solve still run on the legacy support partition, and names the open followup f-cfs-legacy-read-migration under section 6 as the owner of that routing.",
       "reason": "",
       "when": "2026-11-16T23:14:21.360708+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "The symbol and file names are in section text that twelve attempts have already built against and whose booking has landed; rewriting it to an endpoint-only form would edit the done-when of a landed section for no change in what any node builds. The clause the reviewer shows contradicted by the tree is corrected under reasoning-1.",
+      "when": "2026-11-16T23:14:36.261864+00:00"
     }
   ],
   "responses": {
@@ -46,6 +53,12 @@
       "note": "The clause no longer credits the resolved followup with routing the solve: it states what landed, the banked support read booking through the current booking, says the production map and solve still run on the legacy support partition, and names the open followup f-cfs-legacy-read-migration under section 6 as the owner of that routing.",
       "reason": "",
       "when": "2026-11-16T23:14:21.360708+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The symbol and file names are in section text that twelve attempts have already built against and whose booking has landed; rewriting it to an endpoint-only form would edit the done-when of a landed section for no change in what any node builds. The clause the reviewer shows contradicted by the tree is corrected under reasoning-1.",
+      "when": "2026-11-16T23:14:36.261864+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/converged-forward-solve/r-20261116T215917102927-plan-review-of-converged-forward-solve.json",

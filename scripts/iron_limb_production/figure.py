@@ -27,6 +27,7 @@ MODELS = (
     ("true", "true", TRUE, "true flat outline, fill fraction"),
 )
 SIZES = (0.08, 0.04)
+STYLE = "scripts/magnetisation_high_permeability/data-ink.mplstyle"
 
 
 def save(fig, path):
@@ -93,16 +94,16 @@ def stray(root, source, out):
         points = np.asarray(summary["probe_groups"][name])
         keep = np.isclose(points[:, column], face)
         order = np.argsort(points[keep, 1 - column])
-        for key, colour, label_model, _ in MODELS:
+        for key, _, colour, label_model in MODELS:
             fine_field = np.load(root / f"west-{key}-{fine:g}.npz")["field"]
             coarse_field = np.load(root / f"west-{key}-{coarse:g}.npz")["field"]
             offsets = summary["group_offsets"][name]
-            index = offsets + np.flatnonzero(keep)[order]
+            local = np.flatnonzero(keep)[order]
+            index = offsets + local
             magnitude = np.linalg.norm(fine_field[index], axis=1) * 1e3
             coarse_magnitude = np.linalg.norm(coarse_field[index], axis=1) * 1e3
-            axis.plot(points[index, 1 - column], magnitude, color=colour, linewidth=2.6, label=label_model)
-            axis.plot(points[index, 1 - column], coarse_magnitude, color=colour, linewidth=1.2, linestyle=":", label=None)
-        axis.set_xlabel(label)
+            axis.plot(points[local, 1 - column], magnitude, color=colour, linewidth=2.6, label=label_model)
+            axis.plot(points[local, 1 - column], coarse_magnitude, color=colour, linewidth=1.2, linestyle=":", label=None)
     axes[0].set_ylabel("poloidal field [mT]")
     fig.legend(loc="upper center", ncol=2, frameon=False)
     save(fig, out / "west-62751-stray-lines.svg")
@@ -113,10 +114,12 @@ def main():
     root, source_path, out = (Path(argument) for argument in sys.argv[1:4])
     with source_path.open("rb") as stream:
         source = pickle.load(stream)
-    plt.style.use("data-ink")
+    style = Path(__file__).resolve().parents[2] / STYLE
+    if style.is_file():
+        plt.style.use(style)
     plt.rcParams.update({"svg.fonttype": "none"})
     permeability(root, source, out)
-    stray(root, out)
+    stray(root, source, out)
 
 
 if __name__ == "__main__":

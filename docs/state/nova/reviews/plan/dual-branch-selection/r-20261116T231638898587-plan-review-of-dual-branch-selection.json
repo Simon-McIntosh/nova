@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T23:30:10.975Z",
+  "dispatched_at": "2026-11-16T23:29:44Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/dual-branch-selection/r-20261116T231638898587-plan-review-of-dual-branch-selection/plan.html:330",
+      "id": "reasoning-1",
+      "reason": "the answer decides which observable yields a single branch's published class and whether the emergence jump is admissible or a repair the section must carry.",
+      "text": "the head says \"the smooth weight and the exact margin keep the roles the selection-observable decision gives them\" (smooth weight for selection and gradients, decision at plan.html:582), while the last paragraph says \"with one solved branch per slice the class is read after the solve, so no result depends on the weight being continuous there\"; with one branch the class is in fact read post-solve from flood-filled connectivity (plan.html:521-527), so the smooth weight selects nothing and the restored role is empty, and if instead it does decide the published class then the admitted jump at saddle-operand emergence flips that class and the gradients the decision's rationale says flow through it, so results do depend on continuity there",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/dual-branch-selection/r-20261116T231638898587-plan-review-of-dual-branch-selection/plan.html:353",
+      "id": "reasoning-2",
+      "reason": "a brief composed from \u00a75 carries a bootstrap ladder that does not exist and two mechanisms already landed, so the endpoint rule is violated and the node's reuse map would be wrong.",
+      "text": "the composition paragraph still prescribes implementation in the present tense (seed construction \"becomes an array-only kernel (or precomputed batch tensors)\", selector state \"becomes integer and boolean arrays advanced by lax.scan\", \"the admitted-state bootstrap becomes a fixed ladder with device selection\") although the head declares one deliverable and the done-when's own currency check records that no host admitted-state bootstrap is left to port and the selector state has landed",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/dual-branch-selection/r-20261116T231638898587-plan-review-of-dual-branch-selection/plan.html:491",
+      "id": "done_when-1",
+      "reason": "without a measure that fails on the unfixed code the node's gate cannot show the traced kernel is on the production path, and the unrelated perturbed-host control at plan.html:490 guards only the kernel-level agreement test.",
+      "text": "the production clause's only named evidence is that the request's existing cold-seed tests pass unchanged, and those tests monkeypatch the seed entry point entirely (tests/test_forward_solve_request.py:192-227), so they pass whether the request builds its seed on the host with NumPy or through the traced kernel; no stated control fails when the traced kernel is not the builder",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "4da2b2a3a87cb59c21450168a3aed436cbb7c02a",
+  "plan_fingerprint": "1e08345de0840fcd660c6e3cb1f3280fefa1ae96110343113daf70067eb6f0ad",
+  "plan_slug": "dual-branch-selection",
+  "plan_version": 23,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261116T231638898587-plan-review-of-dual-branch-selection",
+  "reviewed_blob_sha": "9cd2f4cb5aa6ab9dff6bfed4c66fe2e7547ec90b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 each path \u00a75 names resolves in the checkout (four evidence files, nova/equilibrium/branch_selection.py, commit ids present in `plan-commits`); the inline line-number self-reference in the resolved f-dbs-currency followup is stale but unchanged since the earlier raise and is not re-raised here.",
+    "done_when": "a finding \u2014 \u00a75's production clause (plan.html:491) is evidenced only by \"the request's existing cold-seed tests pass unchanged\", which pass on the unfixed code.",
+    "evidence_paths": "pass \u2014 every artifact \u00a75 cites is a durable repository path and all resolve: docs/figures/dual-branch-selection/{fork-arming-economics,two-branch-batch-cost,class-coreachability}.json and docs/evidence/archive/dual-branch-selection-landed.html.",
+    "naming": "pass \u2014 \u00a75's names are mechanisms (cold seed, seed provenance, smooth weight, exact margin), with commit hashes and module paths as evidence, and no plan label or ticket number reaches a symbol.",
+    "reasoning": "a finding \u2014 plan.html:330 restores the smooth weight's selection role while plan.html:496-497 declares nothing depends on its continuity because the class is read after the solve; those two cannot both hold.",
+    "single_goal": "pass \u2014 \u00a75 declares one deliverable at its head (plan.html:325-327) and its done-when measures that deliverable; the section's remaining prose is labelled record by the head sentence.",
+    "wiring": "pass \u2014 `plan-depends-on` is empty, and the two answers \u00a77 says this plan consumes have both reported (`discrete-operator-analytic-error` \u00a74 per the `unqualified-branch-semantics` rationale, `primary-xpoint-evidence` carried there), so no ordering edge is owed; the previously raised empty-depends-on gap is discharged by the landed reports rather than pending."
+  },
+  "section_digests": {
+    "_document": "5f64895e67456f93c7725e3dbf68ac4cf9320121d542d9f1e8870011f4d650fe",
+    "coreachability": "117a9e74256c7f96cae20f3b0e48a7dbc12b4ce1a25113546b64e7dc580bc9b2",
+    "s1": "ab958297d5115ba98c1491df47c092fa00665ecba9e761e09d1f8579f598ca6b",
+    "s2": "1a228a4fa41055367c393c8212fcb0475c077587709ba8ab88bdbd3fec9e5afa",
+    "s3": "1dfc8415f0eb283ab99a9c7fe4047f2e374485a66c6f10eb623e7f01b4cf932a",
+    "s4": "206da393c7d08cc1b1ed5006efaf8b1b13a6781e8e6f992a4fd102e8668e749f",
+    "s5": "036c993d39fac30dac63a331fde15f3c9ff5075a028420e841f87eb8a1d0f345",
+    "s6": "506dd18c70eaf1f72fa702ef3a5745f40175a460a2f1f6523d5cc90aacd1bd4e",
+    "s7": "283b73b8886f4928b2cb4bc16990fdda4881fcaab201e3b8add052cd18688461"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:44:16.426133+00:00",
+  "total": null
+}

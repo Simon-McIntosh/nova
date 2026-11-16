@@ -1158,10 +1158,11 @@ def test_control_receipt_enforces_permeability_specific_bounds(tmp_path, mu, lim
     """A fine-grid receipt passes and a value beyond either bound is refused."""
     from scripts.iron_limb_production.gate import (
         _CONTROL_RECEIPT,
+        _CONTROL_REVISION,
         validate_control_receipt,
     )
 
-    result = validate_control_receipt(_CONTROL_RECEIPT)
+    result = validate_control_receipt(_CONTROL_RECEIPT, _CONTROL_REVISION)
     assert result["passed"] and result["size_m"] == 0.032
     row = next(row for row in result["acceptance"] if row["mu"] == mu)
     assert row["limit"] == limit
@@ -1175,12 +1176,13 @@ def test_control_receipt_enforces_permeability_specific_bounds(tmp_path, mu, lim
     changed = tmp_path / "control.json"
     changed.write_text(json.dumps(source))
     with pytest.raises(AssertionError, match=f"mu={mu:g}.*bound {limit}"):
-        validate_control_receipt(changed)
+        validate_control_receipt(changed, _CONTROL_REVISION)
 
 
 def test_control_receipt_preserves_smear_reduction(tmp_path):
     from scripts.iron_limb_production.gate import (
         _CONTROL_RECEIPT,
+        _CONTROL_REVISION,
         validate_control_receipt,
     )
 
@@ -1194,7 +1196,102 @@ def test_control_receipt_preserves_smear_reduction(tmp_path):
     changed = tmp_path / "control.json"
     changed.write_text(json.dumps(source))
     with pytest.raises(AssertionError, match="smear ratio"):
-        validate_control_receipt(changed)
+        validate_control_receipt(changed, _CONTROL_REVISION)
+
+
+def test_control_receipt_refuses_a_revision_it_was_not_told_to_expect(tmp_path):
+    """A receipt measured at another revision is refused naming both revisions."""
+    from scripts.iron_limb_production.gate import (
+        _CONTROL_RECEIPT,
+        _CONTROL_REVISION,
+        validate_control_receipt,
+    )
+
+    source = json.loads(_CONTROL_RECEIPT.read_text())
+    assert source["revision"] == _CONTROL_REVISION
+    source["revision"] = "0" * 40
+    changed = tmp_path / "control.json"
+    changed.write_text(json.dumps(source))
+    with pytest.raises(AssertionError) as raised:
+        validate_control_receipt(changed, _CONTROL_REVISION)
+    assert "0" * 40 in str(raised.value)
+    assert _CONTROL_REVISION in str(raised.value)
+
+
+def test_control_receipt_refuses_a_solid_arm_resembling_the_filled_solve(tmp_path):
+    """The solid-outline control must stay beyond 100 % of the reference."""
+    from scripts.iron_limb_production.gate import (
+        _CONTROL_RECEIPT,
+        _CONTROL_REVISION,
+        validate_control_receipt,
+    )
+
+    source = json.loads(_CONTROL_RECEIPT.read_text())
+    origin = json.loads(Path(source["source_receipt"]).read_text())
+    rows = [row for row in origin["control"] if row["model"] == "solid"]
+    assert rows and all(row["vessel_relative_rms"] > 1 for row in rows)
+    for row in rows:
+        row["vessel_relative_rms"] /= 10
+    changed_origin = tmp_path / "material.json"
+    changed_origin.write_text(json.dumps(origin))
+    source["source_receipt"] = str(changed_origin)
+    source["source_sha256"] = hashlib.sha256(changed_origin.read_bytes()).hexdigest()
+    changed = tmp_path / "control.json"
+    changed.write_text(json.dumps(source))
+    with pytest.raises(AssertionError, match="solid arm must exceed 100"):
+        validate_control_receipt(changed, _CONTROL_REVISION)
+
+
+def test_comparisons_whole_set_row_concatenates_the_groups():
+    """The whole-set row is one field over every group, not a map subtraction."""
+    from scripts.iron_limb_production.outline import comparisons
+
+    groups = {"a": np.zeros((2, 1)), "b": np.zeros((2, 1))}
+    fields = {
+        "true": {
+            0.04: {"a": np.array([[1.0], [2.0]]), "b": np.array([[3.0], [4.0]])},
+            0.08: {"a": np.array([[1.5], [2.0]]), "b": np.array([[3.0], [4.0]])},
+        },
+        "stored": {
+            0.04: {"a": np.array([[1.0], [2.0]]), "b": np.array([[3.0], [1.0]])},
+            0.08: {"a": np.array([[1.0], [2.0]]), "b": np.array([[3.0], [1.0]])},
+        },
+    }
+    rows = {
+        (row["group"], row["size_m"]): row
+        for row in comparisons(fields, [0.08, 0.04], groups)
+    }
+    whole = rows[("all", 0.04)]
+    expected = np.linalg.norm(np.array([0.0, 0.0, 0.0, 3.0])) / np.linalg.norm(
+        np.array([1.0, 2.0, 3.0, 1.0])
+    )
+    assert whole["model_difference"] == pytest.approx(expected)
+    assert rows[("a", 0.04)]["model_difference"] == 0.0
+    assert whole["mesh_pair_difference"] == pytest.approx(
+        np.linalg.norm(np.array([0.5, 0.0, 0.0, 0.0]))
+        / np.linalg.norm(np.array([1.0, 2.0, 3.0, 4.0]))
+    )
+
+
+def test_true_outline_fill_fraction_exceeds_its_mesh_pair_difference():
+    """Unit fill is refused as a stand-in: it moves the in-vessel field."""
+    import os
+
+    from scripts.iron_limb_production.outline import mutation_result
+
+    directory = Path(
+        os.environ.get(
+            "NOVA_WEST_OUTLINE_RECEIPT",
+            "/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/west-62751",
+        )
+    )
+    if not (directory / "summary.json").is_file() or not list(
+        directory.glob("west-true-fill-one-*.npz")
+    ):
+        pytest.skip("the unit-fill arm is not on this host")
+    measured = mutation_result(directory)
+    assert measured["displacement"] > measured["mesh_pair_difference"], measured
+    assert measured["exceeds"], measured
 
 
 @pytest.mark.slow

@@ -35,6 +35,16 @@
       "note": "Done-when (2) now names a measured control: re-solved from the converged unmasked state with the inactive image held at zero, the state must leave (residual above 1e-8 or lower null moving more than 1 mm)",
       "reason": "",
       "when": "2026-11-16T21:59:34.366387+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "aa6495e403c8489b405c8316a27d399c2672fd5c",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The paragraph now says 146D converged at the masked head and in the earlier booked-source run, and that the matched job reran 137D only",
+      "reason": "",
+      "when": "2026-11-16T21:59:43.479872+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "Done-when (2) now names a measured control: re-solved from the converged unmasked state with the inactive image held at zero, the state must leave (residual above 1e-8 or lower null moving more than 1 mm)",
       "reason": "",
       "when": "2026-11-16T21:59:34.366387+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "aa6495e403c8489b405c8316a27d399c2672fd5c",
+      "commit_basis": "edit",
+      "note": "The paragraph now says 146D converged at the masked head and in the earlier booked-source run, and that the matched job reran 137D only",
+      "reason": "",
+      "when": "2026-11-16T21:59:43.479872+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261116T211526668302-plan-review-of-diiid-vertical-force-balance.json",

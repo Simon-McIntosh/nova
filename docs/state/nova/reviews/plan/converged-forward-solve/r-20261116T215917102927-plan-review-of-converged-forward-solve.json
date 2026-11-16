@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T22:46:20.927Z",
+  "dispatched_at": "2026-11-16T22:45:43Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/converged-forward-solve.html:57",
+      "id": "reasoning-1",
+      "reason": "as written a worker checks the cited followup, finds it resolved and skips the wiring, so the plan would certify a booking that is still off the production path; naming the open owner (or stating the map support-partition call as this section's own clause, with the current legacy read shown as the failing control) changes what the node must land.",
+      "text": "the added clause \"the forward map's support partition calls current.book on topology.read membership (followup f-cfs-wire-current-book), so the solve route books through current.book\" cites a followup that is data-status=\"resolved\", and that record's outcome says \"Partly landed at merge 7c9d86bd4 \u2026 The production support partition (ForwardFluxOperator._support_partition, which calls the legacy fixed-design read) still drives the map and the solve \u2026 Routing the solve needs the moment-space formulation, so it moved to f-cfs-moment-space-newton\", whose own outcome records supersession and archive/moment-space-newton; the live tree agrees (nova/equilibrium/forward_operator.py:3341 _support_partition calls self._fixed_design_read, and nova/equilibrium/forward.py:670 still constructs ForwardFluxOperator for the production solve), so the clause reads as an already-delivered precondition while no open node owns it \u2014 a \u00a73 node can therefore pass on booking identity and never touch the solve route",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/converged-forward-solve.html:56",
+      "id": "reasoning-2",
+      "reason": "stripping the module and symbol names costs the plan no information (the reuse map belongs to the node brief) and removes a wrong guess about the change radius that a reviewer would otherwise have to test against the code.",
+      "text": "the section still prescribes implementation: it names the function to write (current.book), the file whose definition it \"replaces\" (clipped_support_current_moments in clip_quadrature.py) and the call site to change (the support partition in forward_operator.py) instead of stating the quantity booked, its tolerance and its reference, so the plan carries a method rather than the endpoint; the tree already contradicts the prescription in the direction that matters, since nova/equilibrium/current.py:459 defines current.book and its line 498 books through clipped_support_current_moments, so \"replaces \u2026 in clip_quadrature.py\" would delete the integrator the booking currently calls",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "4053d7e88f04c27cffd805237c07b893511d6b8b",
+  "plan_fingerprint": "2dc72898236e27e3428e31d0c677d6027720cb34dd11cf900eb68ce4aaa32ddb",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 623,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261116T215917102927-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "c30c3dad4b83d71cfeeb711dfea31e66c7fe4cdc",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 clip_quadrature.py, forward_operator.py, forward_operator._support_partition, nova/equilibrium/current.py book, the design document docs/research/converged-forward-solve-design.html (which carries the moment-map stages list) and followup f-cfs-wire-current-book all resolve in /home/ITER/mcintos/Code/nova; the followup id resolves even though its content is the finding under reasoning.",
+    "done_when": "pass \u2014 s3's done-when carries measurable bounds (budget C\u00b7(h/R\u2080)\u1d56 per case, saddle cells budgeted separately, private-flux booking zero, net current at 1e-12 relative, JVP against central differences) and a declared negative control: a level-test membership that is not axis-connected must book nonzero private-flux current, failing by test id with the booked current printed.",
+    "evidence_paths": "pass \u2014 s3 names no gate or log path at all, so nothing it states points at a scratch pad or a node-local temporary directory.",
+    "naming": "pass \u2014 current.book, topology.read, clipped_support_current_moments and gs.apply are mechanism names; no plan label, stage name, ticket number or version tag enters them.",
+    "reasoning": "a finding \u2014 the changed clause attributes the production routing to a resolved followup whose recorded outcome says the routing was not done there.",
+    "single_goal": "pass \u2014 s3 has one deliverable, the booking over the read's membership, and the production-caller clause is that booking landing on the live path rather than a second endpoint.",
+    "wiring": "pass \u2014 s3 declares no section-level edge, its deferral names \u00a76's retirement, and the \u00a76-tagged owner of that deletion (f-cfs-legacy-read-migration) is open; the live ruling c-s21-moment-space-superseded explicitly releases the claims that followup was waiting on."
+  },
+  "section_digests": {
+    "_document": "ef067675ca0c9c560f57c90b277f11418fdce9119c6bddf32f5d0799f46c8f78",
+    "s0": "66bed59341ceddd2b2d61465f1233d35c4d59c22234d867f09b1e4a337b0b482",
+    "s1": "e3926ed31983268b83ff4f7fe6feb947700172eb86a0d601549966b9cd8f4e20",
+    "s2": "c9f5762cc802fb29d61de64d4b8a76c79a8c6ef89b6510286a607ad1008d573f",
+    "s3": "d6147fb5b0b1030dec74a7b8cee71d05e034a11977b9b8899a3aef25ebdb93a1",
+    "s4": "f48dcef6449234059e50c5560ea5f8e3349b9ddb03e3e9f489413caf3c0fb97e",
+    "s5": "f7d3490fcbb733657b77630d0bca8b2479c5276d6fb0e84e8a1463c0d8861dde",
+    "s6": "0e2ff1f96d712c9555368bd267bfb5bc5835c2a288401d4d0b7d124f5b8785db"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:12:59.566066+00:00",
+  "total": null
+}

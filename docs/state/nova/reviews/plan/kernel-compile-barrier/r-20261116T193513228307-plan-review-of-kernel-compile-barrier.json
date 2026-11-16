@@ -49,7 +49,30 @@
   "plan_slug": "kernel-compile-barrier",
   "plan_version": 80,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "92cdf6247fc6378bd08b6e0ba090a78fb652b164",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "s3 restated: lever claims match the measurement, node (c) names a control that must fail, anchors refreshed to main, node (b) has a named evidence path",
+      "reason": "",
+      "when": "2026-11-16T20:49:30.432505+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "92cdf6247fc6378bd08b6e0ba090a78fb652b164",
+      "commit_basis": "edit",
+      "note": "s3 restated: lever claims match the measurement, node (c) names a control that must fail, anchors refreshed to main, node (b) has a named evidence path",
+      "reason": "",
+      "when": "2026-11-16T20:49:30.432505+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261116T193513228307-plan-review-of-kernel-compile-barrier.json",
   "review_run_id": "r-20261116T193513228307-plan-review-of-kernel-compile-barrier",
   "reviewed_blob_sha": "ec694c5b6b391d1f87e89b9c82d01751b4bcd01c",
   "rubric": "content",

@@ -61,6 +61,16 @@
       "note": "Done-when (2) now requires the named cause to be demonstrated: undoing it at the head restores the registered value within 2e-6, or applying it alone reproduces 1119994.165 A",
       "reason": "",
       "when": "2026-11-16T23:13:38.890197+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7519b1082e481b16a1363ce35d17064a0691b290",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "Done-when (1) and the body put the head run's --output under the node's evidence directory and forbid the committed receipt directory",
+      "reason": "",
+      "when": "2026-11-16T23:13:55.210309+00:00"
     }
   ],
   "responses": {
@@ -72,6 +82,15 @@
       "note": "Done-when (2) now requires the named cause to be demonstrated: undoing it at the head restores the registered value within 2e-6, or applying it alone reproduces 1119994.165 A",
       "reason": "",
       "when": "2026-11-16T23:13:38.890197+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7519b1082e481b16a1363ce35d17064a0691b290",
+      "commit_basis": "edit",
+      "note": "Done-when (1) and the body put the head run's --output under the node's evidence directory and forbid the committed receipt directory",
+      "reason": "",
+      "when": "2026-11-16T23:13:55.210309+00:00"
     },
     "reasoning-1": {
       "action": "acted",

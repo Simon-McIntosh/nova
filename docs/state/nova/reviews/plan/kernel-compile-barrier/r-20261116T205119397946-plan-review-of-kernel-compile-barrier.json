@@ -68,9 +68,28 @@
       "finding": "reasoning-3",
       "reason": "the owner, the deleted copy and the importers define what this section delivers and were reviewed in earlier rounds; stubbing blocks in turn is the definition of the attribution measure, not a reuse map",
       "when": "2026-11-16T21:00:12.416019+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "0350792600b5df65c7825c40751f8cea8c6f0f35",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "the control target is one number with a tolerance: within 0.01 percent of 6,088,067 bytes",
+      "reason": "",
+      "when": "2026-11-16T21:00:20.610281+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "0350792600b5df65c7825c40751f8cea8c6f0f35",
+      "commit_basis": "edit",
+      "note": "the control target is one number with a tolerance: within 0.01 percent of 6,088,067 bytes",
+      "reason": "",
+      "when": "2026-11-16T21:00:20.610281+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",

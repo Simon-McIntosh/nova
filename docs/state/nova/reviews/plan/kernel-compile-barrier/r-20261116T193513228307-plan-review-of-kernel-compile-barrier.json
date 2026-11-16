@@ -89,6 +89,16 @@
       "note": "s3 restated: lever claims match the measurement, node (c) names a control that must fail, anchors refreshed to main, node (b) has a named evidence path",
       "reason": "",
       "when": "2026-11-16T20:50:04.308285+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "92cdf6247fc6378bd08b6e0ba090a78fb652b164",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "s3 restated: lever claims match the measurement, node (c) names a control that must fail, anchors refreshed to main, node (b) has a named evidence path",
+      "reason": "",
+      "when": "2026-11-16T20:50:16.590988+00:00"
     }
   ],
   "responses": {
@@ -109,6 +119,15 @@
       "note": "s3 restated: lever claims match the measurement, node (c) names a control that must fail, anchors refreshed to main, node (b) has a named evidence path",
       "reason": "",
       "when": "2026-11-16T20:49:55.180911+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "92cdf6247fc6378bd08b6e0ba090a78fb652b164",
+      "commit_basis": "edit",
+      "note": "s3 restated: lever claims match the measurement, node (c) names a control that must fail, anchors refreshed to main, node (b) has a named evidence path",
+      "reason": "",
+      "when": "2026-11-16T20:50:16.590988+00:00"
     },
     "reasoning-1": {
       "action": "acted",

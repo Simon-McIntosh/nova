@@ -22,7 +22,7 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="93">
+<meta name="plan-version" content="94">
 <meta name="plan-modified" content="2026-11-16">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
@@ -322,6 +322,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261116T142502702313-review-of-diiid-inactive-compensator-recovery-b1c38587906d-figure" data-who="reckon-build" data-when="2026-11-16T15:04:29.893Z">
     <div class="r-comment-body"><p>no code landing — this node produced a review record only</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261114T205813832530-diiid-inactive-compensator-recovery" data-who="reckon-build" data-when="2026-11-16T14:20:22Z">
+    <div class="r-comment-body"><p>Matched H200 control proves the inactive-image mask causes 137D convergence loss: unmasked base70 converges at 1.0451022610746365e-11 (CONVERGED, lower X 10.4798913313 mm); masked head4aebf cycles at 0.0024574153456490525 (ACTIVE_SET_CYCLE_DETECTED, lower X 7.5254723398 mm), with identical seed/source inputs and unchanged cohort observer. Solver work stopped; no guard/tolerance changes. Five legend/tick-corrected SVGs inspected and committed; exact required head4aebf pin arm 41 passed. Full control table and explicit unrepaired regression: docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html#diiid-inactive-compensator-recovery-137d-outcome.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

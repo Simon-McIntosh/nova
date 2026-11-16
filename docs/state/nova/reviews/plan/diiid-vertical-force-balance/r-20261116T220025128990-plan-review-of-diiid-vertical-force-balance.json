@@ -48,9 +48,22 @@
       "finding": "reasoning-2",
       "reason": "The symbols are the defect's location, read from the code at HEAD today (the uniform row at diiid_forward_gs_match.py:1284 from _green_block, moments from build_flux_blocks with block 0 discarded), and the lead chose the polygon kernel explicitly; naming them is the decision, not a guess",
       "when": "2026-11-16T22:46:40.699910+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "rigel is not rigel_debug: AGENTS lists rigel as the CPU partition with no time limit and usually idle; rigel_debug is the one with zero nodes",
+      "when": "2026-11-16T22:46:52.234405+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "rigel is not rigel_debug: AGENTS lists rigel as the CPU partition with no time limit and usually idle; rigel_debug is the one with zero nodes",
+      "when": "2026-11-16T22:46:52.234405+00:00"
+    },
     "reasoning-2": {
       "action": "declined",
       "by": "",

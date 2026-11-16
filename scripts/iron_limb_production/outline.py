@@ -376,9 +376,42 @@ def measure(record, output):
         print("COMPARE " + json.dumps(row, sort_keys=True), flush=True)
 
 
+def fill_one_displacement(directory):
+    """Return the unit-fill displacement of the in-vessel field.
+
+    ``directory`` holds the measurement: the true model's fields at both
+    sizes and the unit-fill arm at the coarse size. The displacement the
+    declared mutation moves is compared with the true model's own mesh-pair
+    difference at the same probes.
+    """
+    directory = Path(directory)
+    summary = json.loads((directory / "summary.json").read_text())
+    sizes = summary["sizes_m"]
+    coarse, fine = max(sizes), min(sizes)
+    ring = len(summary["probe_groups"]["in_vessel"])
+    index = slice(0, ring)
+    true_coarse = np.load(directory / f"west-true-{coarse:g}.npz")["field"][index]
+    true_fine = np.load(directory / f"west-true-{fine:g}.npz")["field"][index]
+    mutation = np.load(directory / "west-true-fill-one.npz")["field"][index]
+    displacement = float(
+        np.linalg.norm(mutation - true_coarse)
+        / max(float(np.linalg.norm(true_coarse)), 1e-30)
+    )
+    mesh = float(
+        np.linalg.norm(true_coarse - true_fine)
+        / max(float(np.linalg.norm(true_fine)), 1e-30)
+    )
+    return dict(
+        displacement=displacement,
+        mesh_pair_difference=mesh,
+        exceeds=bool(displacement > mesh),
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--sizes", nargs="+", type=float, default=list(SIZES))
     parser.add_argument("--max-iterations", type=int, default=15)
     parser.add_argument("--tolerance", type=float, default=1e-8)
     args = parser.parse_args()
@@ -412,36 +445,9 @@ def main():
     save(args.output / "summary.json", record)
     print("PROVENANCE " + json.dumps(record), flush=True)
     measure(record, args.output)
-    print(f"SUMMARY west_passed={record["west_passed"]}", flush=True)
+    print(f"SUMMARY west_passed={record['west_passed']}", flush=True)
     raise SystemExit(0 if record["west_passed"] else 1)
 
-def fill_one_displacement(directory):
-    """Return the unit-fill displacement of the in-vessel field.
 
-    ``directory`` holds the measurement: the true model's fields at both
-    sizes and the unit-fill arm at the coarse size. The displacement the
-    declared mutation moves is compared with the true model's own mesh-pair
-    difference at the same probes.
-    """
-    directory = Path(directory)
-    summary = json.loads((directory / "summary.json").read_text())
-    sizes = summary["sizes_m"]
-    coarse, fine = max(sizes), min(sizes)
-    ring = len(summary["probe_groups"]["in_vessel"])
-    index = slice(0, ring)
-    true_coarse = np.load(directory / f"west-true-{coarse:g}.npz")["field"][index]
-    true_fine = np.load(directory / f"west-true-{fine:g}.npz")["field"][index]
-    mutation = np.load(directory / "west-true-fill-one.npz")["field"][index]
-    displacement = float(
-        np.linalg.norm(mutation - true_coarse)
-        / max(float(np.linalg.norm(true_coarse)), 1e-30)
-    )
-    mesh = float(
-        np.linalg.norm(true_coarse - true_fine)
-        / max(float(np.linalg.norm(true_fine)), 1e-30)
-    )
-    return dict(
-        displacement=displacement,
-        mesh_pair_difference=mesh,
-        exceeds=bool(displacement > mesh),
-    )
+if __name__ == "__main__":
+    main()

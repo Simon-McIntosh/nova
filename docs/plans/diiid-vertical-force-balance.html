@@ -22,7 +22,7 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="97">
+<meta name="plan-version" content="98">
 <meta name="plan-modified" content="2026-11-16">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
@@ -332,6 +332,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261116T121339704947-review-of-diiid-inactive-compensator-recovery-1a811b8d1c2e-figure" data-who="reckon-build" data-when="2026-11-16T13:31:40.585Z">
     <div class="r-comment-body"><p>Read-only figure review at reviewed head 4aebf5c and base 1a811b8d1c2e: the five rendered PNGs attached to r-20261114T205813832530 were inspected, 30 of 30 rubric lines pass (6 dimensions x 5 figures), no blocking or non-blocking finding survives, and the two findings recorded against the previous head (unkeyed EFIT-axis and unadmitted-saddle marks at render.py:132-147, and an axis-height panel whose range carried no negative tick) are answered in the rendered images; no file was edited, redrawn, relabelled, moved, created or deleted.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261116T142241224490-review-of-diiid-inactive-compensator-recovery-b1c38587906d" data-who="reckon-build" data-when="2026-11-16T14:45:21.183Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261114T205813832530-diiid-inactive-compensator-recovery 4aebf5c4430e..b1c38587906d: scores goal_fidelity 17, evidence 15, scope_discipline 20, durability 11, fit 16, reuse 18; three non-blocking findings (render.py:135 marker-glyph duplication, test_solve_vertical_pin.py:538 dependent assertion, inspections.json:8 boilerplate result text); added_failure_count 0.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

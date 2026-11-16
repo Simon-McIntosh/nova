@@ -27,8 +27,9 @@
 <meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8,a9ea090c">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,benchmarks/fork_arming_economics.py,benchmarks/two_branch_batch_cost.py,nova/equilibrium/branch_selection.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/figures/dual-branch-selection/fork-arming-economics.json,docs/figures/dual-branch-selection/two-branch-batch-cost.json,docs/evidence/archive/dual-branch-selection-landed.html">
 <meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="17">
-<meta name="plan-modified" content="2026-11-15">
+<meta name="plan-version" content="19">
+<meta name="plan-modified" content="2026-11-16">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;coreachability&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;done&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -471,9 +472,11 @@
     emergence, and no private-attribute access was introduced: it consumes the public
     <code>connectivity_grid_axes</code> contract.</p>
 
-    <p><strong>What remains in §5.</strong> Two of the three host islands — array-only seed construction
-    so the portfolio sits under an outer catalog <code>vmap</code>, and the admitted-state bootstrap as a
-    fixed ladder with device selection. The continuity claim at saddle-operand emergence stays blocked on
+    <p><strong>What remains in §5.</strong> One host island: array-only seed construction, so the
+    portfolio sits under an outer catalog <code>vmap</code>. A currency check on 2026-11-15 found the
+    cold seed portfolio still built on the host with NumPy, and found no host admitted-state bootstrap
+    left to port: the previous admitted state already travels as a device array and the solve request
+    carries no admission ladder. The continuity claim at saddle-operand emergence stays blocked on
     whether the shadow rejection is correct.</p>
 
     <h2 id="coreachability">§ Is the fork load bearing? Measured: no</h2>

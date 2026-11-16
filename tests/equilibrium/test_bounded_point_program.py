@@ -1,10 +1,13 @@
 """The shared point program stays one bounded graph.
 
 The row window, the jets build and the operator bank all evaluate
-``fixed_points._source_jets``. Its lowered graph is what a cold compile pays
-for, and an unrolled per-term form is the failure this budget records: the
-program's size is set by the kernel expression, not by the number of cells, so
-a reduced cell count measures the same graph the production rows compile.
+``fixed_points._source_jets``, and an unrolled term order is the failure this
+budget records: one moment body per term multiplies the graph. The fixture here
+is a hexagon coupling with its translated copies, which measures the point-jet
+evaluation path the three readers share, not the production row program: the
+same module lowers to 8,408,375 bytes for the census row fixture at eight cells
+against 5,442,157 here, so the ceiling bounds this program's own form and is
+not a production row budget.
 """
 
 # ruff: noqa: E402
@@ -34,9 +37,9 @@ HEXAGON = np.asarray(
 POINTS = np.asarray(((5.02, 0.01), (5.03, -0.02), (4.99, 0.03)))
 CELLS = 8
 
-# Measured 2026-11-15 at the shared form with eight cells: 5,442,157 bytes; one
-# cell gives 5,440,521, so the program is cell-invariant and cells are not the
-# unrolled axis. The ceiling allows the constant folding a JAX patch level
+# Measured 2026-11-15 on this hexagon fixture with eight cells: 5,442,157 bytes;
+# one cell gives 5,440,521, so the program is cell-invariant and cells are not
+# the unrolled axis. The ceiling allows the constant folding a JAX patch level
 # changes and refuses a form that unrolls the term order again, which
 # multiplies the graph once per term.
 STABLEHLO_CEILING = 6_000_000

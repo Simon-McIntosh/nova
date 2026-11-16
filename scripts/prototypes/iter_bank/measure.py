@@ -28,7 +28,8 @@ from shapely.geometry import Polygon
 from nova.equilibrium import support_read, topology
 from nova.imas.machine import CrossSection, ImasGeometryReader
 from scripts.prototypes.iter_bank.inspect import DD, SOURCE
-from scripts.prototypes.read_route.jets import _source_jets, build_jet_matrix
+from nova.equilibrium.fixed_points import _source_jets
+from scripts.prototypes.read_route.jets import build_jet_matrix
 
 assert jax.config.jax_enable_x64 is True
 

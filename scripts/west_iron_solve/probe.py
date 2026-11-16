@@ -37,9 +37,9 @@ def main():
     control = material._mesh(shapely.box(1.0, 0.0, 1.25, 0.25), 0.125)
     assert len(control.polygons) == 4
     record["positive_control_cells"] = len(control.polygons)
-    machine = StaticMachineDescription.read_iron_core(
+    machine = StaticMachineDescription.read_west_iron_outline(
         f"imas:hdf5?path={MACHINE}", dd_version="4.1.0"
-    )
+    ).description
     assert len(machine.iron_segments) == 6
     region = shapely.union_all(
         [

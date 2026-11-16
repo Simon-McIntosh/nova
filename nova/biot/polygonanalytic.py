@@ -192,6 +192,7 @@ from nova.biot.polygon import _held_edge, _packed_topology, pack_section
 from nova.biot.rangefunction import (
     _across_the_range_tangent,
     _array_program,
+    _is_staged,
     _contract_tangent,
     _product_range_tangent,
     _product_tangent,
@@ -2857,6 +2858,7 @@ def _packed_analytic_moments_primal(
     reflection_partner,
     *,
     nodes: int = _NODES,
+    negative_field_scale=None,
 ):
     """Return all nine exact section rows from one static packed reduction.
 
@@ -3022,7 +3024,9 @@ def _packed_analytic_moments_primal(
     sign = xp.sign(signed)
     uniform_radial = norm / (4.0 * np.pi) * sign * field_contour[1]
     uniform_vertical = norm / (4.0 * np.pi) * field_contour[2]
-    radial_central = -norm / (4.0 * np.pi) * sign * boundary_vertical[1]
+    if negative_field_scale is None:
+        negative_field_scale = -norm / (4.0 * np.pi)
+    radial_central = negative_field_scale * sign * boundary_vertical[1]
     vertical_central = (
         sign
         * (-scale * boundary_vertical[2] - uniform_flux)
@@ -3104,10 +3108,21 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
     only the affected field derivative uses two centred differences.
     """
 
+    staged = any(_is_staged(value) for value in jax.tree.leaves(primals))
+    if staged:
+        scale, d_scale = jax.jvp(
+            lambda value: -value / (4.0 * np.pi), (primals[4],), (tangents[4],)
+        )
+        primals = (*primals, scale)
+        tangents = (*tangents, d_scale)
+
     def evaluate(*arguments):
+        if staged:
+            return _packed_analytic_moments_primal(
+                jnp, *arguments[:9], nodes=nodes, negative_field_scale=arguments[9]
+            )
         return _packed_analytic_moments_primal(jnp, *arguments, nodes=nodes)
 
-    value, ordinary = jax.jvp(evaluate, primals, tangents)
     target_z = primals[1]
     edge = primals[2]
     nearest = jnp.minimum(
@@ -3115,17 +3130,42 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
         jnp.min(jnp.abs(edge[:, 3] - target_z), axis=0),
     )
     near_corner = nearest <= 1e-7
-    without_height = (*tangents[:1], jnp.zeros_like(target_z), *tangents[2:])
-    _, other = jax.jvp(evaluate, primals, without_height)
 
-    def difference(step):
-        shift = jnp.asarray(step, dtype=target_z.dtype)
-        upper = evaluate(primals[0], target_z + shift, *primals[2:])
-        lower = evaluate(primals[0], target_z - shift, *primals[2:])
-        return tuple((a - b) / (2.0 * shift) for a, b in zip(upper, lower, strict=True))
+    def directional(include_height):
+        direction = (
+            *tangents[:1],
+            jnp.where(include_height, tangents[1], jnp.zeros_like(target_z)),
+            *tangents[2:],
+        )
+        return jax.jvp(evaluate, primals, direction)
 
-    coarse = difference(1e-5)
-    fine = difference(5e-6)
+    def ordered_direction(carry, include_height):
+        return carry, directional(include_height)
+
+    if staged:
+        _, (values, derivatives) = jax.lax.scan(
+            ordered_direction, None, jnp.asarray((True, False)), unroll=2
+        )
+        value = tuple(row[0] for row in values)
+        ordinary = tuple(row[0] for row in derivatives)
+        other = tuple(row[1] for row in derivatives)
+    else:
+        value, ordinary = jax.jvp(evaluate, primals, tangents)
+        without_height = (*tangents[:1], jnp.zeros_like(target_z), *tangents[2:])
+        _, other = jax.jvp(evaluate, primals, without_height)
+
+    shifts = jnp.asarray((1e-5, -1e-5, 5e-6, -5e-6), dtype=target_z.dtype)
+    if staged:
+        shifted = jax.lax.map(
+            lambda shift: evaluate(primals[0], target_z + shift, *primals[2:]), shifts
+        )
+    else:
+        samples = tuple(
+            evaluate(primals[0], target_z + shift, *primals[2:]) for shift in shifts
+        )
+        shifted = tuple(jnp.stack(rows) for rows in zip(*samples, strict=True))
+    coarse = tuple((row[0] - row[1]) / (2.0 * shifts[0]) for row in shifted)
+    fine = tuple((row[2] - row[3]) / (2.0 * shifts[2]) for row in shifted)
     stable = tuple((4.0 * a - b) / 3.0 for a, b in zip(fine, coarse, strict=True))
     result = tuple(
         jnp.where(

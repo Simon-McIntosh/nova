@@ -21,11 +21,11 @@
   <meta name="plan-tags" content="equilibrium,grad-shafranov,jax,h200,throughput">
   <meta name="plan-after" content="converged-forward-solve">
   <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sub-millisecond-forward-path#s1&quot;,&quot;sub-millisecond-forward-path#s7&quot;],&quot;s3&quot;:[&quot;sub-millisecond-forward-path#s1&quot;,&quot;sub-millisecond-forward-path#s7&quot;],&quot;s4&quot;:[&quot;sub-millisecond-forward-path#s2&quot;,&quot;sub-millisecond-forward-path#s3&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sub-millisecond-forward-path#s1&quot;,&quot;sub-millisecond-forward-path#s7&quot;],&quot;s3&quot;:[&quot;sub-millisecond-forward-path#s1&quot;,&quot;sub-millisecond-forward-path#s7&quot;],&quot;s4&quot;:[&quot;sub-millisecond-forward-path#s2&quot;,&quot;sub-millisecond-forward-path#s3&quot;],&quot;s5&quot;:[&quot;sub-millisecond-forward-path#s2&quot;,&quot;sub-millisecond-forward-path#s3&quot;],&quot;s6&quot;:[&quot;sub-millisecond-forward-path#s7&quot;]}">
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="369">
+<meta name="plan-version" content="377">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -1097,7 +1097,22 @@
     <div class="r-comment-body"><p>nova/equilibrium/topology.py records the carrier each read was built on and adds _same_carrier_geometry to _fragment_reuse_mask, so a cell whose vertices, count, centre or pitch moved refreshes even with equal signed coefficients; the moved-cell case now chooses a cell and a displacement that provably change its fragment area before asserting the refresh; four cases fail at base 13312a9bf and under the coefficients-only mask, and three per-file arms show 0 added failures.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261115T042542823666-review-of-carried-read-mask-geometry-b098fc16dbc0" data-who="reckon-build" data-when="2026-11-15T04:55:37.062Z">
-    <div class="r-comment-body"><p>review of r-20261114T211406516739-carried-read-mask-geometry at base 5d2ac4f563d0 and head b098fc16dbc0 stores a parsed record scoring goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20 (117/120) with 0 added failures from the reviewed run&#x27;s base and head gate logs and no findings; the delta is bcf1af59c (tests, 71 insertions/23 deletions) and b098fc16d (evidence, 17/9), both inside declared write paths.</p></div>
+    <div class="r-comment-body"><p>review of r-20261114T211406516739-carried-read-mask-geometry at base 5d2ac4f563d0 and head b098fc16dbc0 stores a parsed record scoring goal_fidelity 20, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20 (117/120) with 0 added failures from the reviewed run's base and head gate logs and no findings; the delta is bcf1af59c (tests, 71 insertions/23 deletions) and b098fc16d (evidence, 17/9), both inside declared write paths.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T114051931671-review-of-fused-booking-none-quadrature-d6af4a5c20e9" data-who="reckon-build" data-when="2026-11-15T12:37:57.981Z">
+    <div class="r-comment-body"><p>Reviewed r-20261115T104904487312-fused-booking-none-quadrature at base 7244dcc3c1b8fe8c3a38476214d66a024fbf4d14 and head d6af4a5c20e9faf82d4c19e90d8ace6b172677b1: the node settled the fixture side, tests/test_bank_lane_drive.py:392 now passes current.Quadrature() while support_read.py:1355 is untouched, the original fixture re-fails with the same TypeError under the negative control, and the three fresh-process file arms record zero added failures; scores goal 19, evidence 18, scope 20, durability 16, reuse 20, fit 18, no findings.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T104904487312-fused-booking-none-quadrature" data-who="reckon-build" data-when="2026-11-15T11:18:17Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-none-quadrature.html#fused-booking-none-quadrature-landing — repaired the toy lane-factor fixture with a real Quadrature and profile-aware fused booking; one rigel job measures base 42 passed/1 failed to head 43 passed across three fresh-process files, zero added failures; original-fixture negative control reproduces the same TypeError.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T150620387682-review-of-geometry-reuse-cc5175d495b8-figure" data-who="reckon-build" data-when="2026-11-15T15:20:52.118Z">
+    <div class="r-comment-body"><p>figure review of geometry-reuse at cc5175d49: no findings; per-slice-wall.svg calibrated against the H200 receipt within 0.4-1.3 percent; the prior overlapping-marker finding is resolved at this head</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T150207034820-review-of-geometry-reuse-cc5175d495b8" data-who="reckon-build" data-when="2026-11-15T15:09:37.610Z">
+    <div class="r-comment-body"><p>Review of run r-20261114T144226749384-geometry-reuse at head cc5175d495b8f493631ca54dc40e10e46682e2e9 from base 975f3e98cfa2b2976d2bbe1b94ead37f8623b529: parsed, six dimensions scored goal_fidelity 18, evidence 17, scope_discipline 20, durability 19, fit 19, reuse 17; the prior blocking reuse finding at topology.py:3096 is resolved because no _refresh_fragment_cells remains at the head.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261114T144226749384-geometry-reuse" data-who="reckon-build" data-when="2026-11-15T14:59:03Z">
+    <div class="r-comment-body"><p>[Clipped geometry reuse](/nova/evidence/fragments/sub-millisecond-forward-path/geometry-reuse.html#geometry-reuse-landing): currentmain7244dcc3 carrier certification and canonical _refresh_fragments survive with unifiedreuse_geometry. PairedH2001317358 at3ae11c51a: width1 32.7737→37.0465ms/off; width16 7.2595→6.6242ms/8.75%reduction/on; width64 5.8369→5.1138ms/12.39%reduction/on. Allmargins3%,maxspread1.607%,precision/inertcontrolpass. Combined24CPUtests pass; forcedreuse4fail9pass. Updatedprovenance/inspectedSVG committedcc5175d495b8f493631ca54dc40e10e46682e2e9. Final committed-head focusedgate13passed424.66s EXIT0; workercomplete.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T100140560751-review-of-bank-traced-inputs-7ce819dfc048" data-who="reckon-build" data-when="2026-11-14T10:26:14.839Z">
     <div class="r-comment-body"><p>two review records under review-records/ of run r-20261113T165201745905-bank-traced-inputs, one plain and one pinned at the reviewed head; this node's suite fence is unarmed so no pytest gate exists for it and none ran.</p></div>
@@ -1161,6 +1176,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261114T171121699975-dina-flattop-scenario" data-who="reckon-build" data-when="2026-11-14T21:22:08Z">
     <div class="r-comment-body"><p>[DINA flattop evidence](/nova/evidence/fragments/sub-millisecond-forward-path/dina-flattop-scenario.html#dina-flattop-scenario-record): twenty consecutive H200 slices129-148 returned in each of three width1 processes;16/20=80% converged, failed131/132/134/136 named. Measured medians296.786/298.219ms differ0.483%;20 post-first helper compilations. Width16 refused216.76GiB allocation before a slice. Twenty inspected SVG panels,20-frame GIF and contact sheet with all failures committed; numerical goal remains unmet.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261114T075414565081-bank-hessian-reference" data-who="reckon-build" data-when="2026-11-14T09:30:54Z">
+    <div class="r-comment-body"><p>[Independent Hessian evidence](/nova/evidence/fragments/sub-millisecond-forward-path/bank-hessian-reference.html#bank-hessian-reference-result): both routes share order-one errors at 156 sampled nodes per state; independent envelope 1.9e-9 to 4.2e-9; strict coil control fails at 4.38e-12 and plasma perturbation remains unresolved; inspected SVG and receipts committed.</p></div>
 </div>
 </section>
 </main>

@@ -20,13 +20,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="biot,iron-core,machine-description,efit">
   <meta name="plan-after" content="iron-core-magnetisation">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;iron-limb-fill-fraction#s1&quot;],&quot;s3&quot;:[&quot;iron-limb-fill-fraction#s2&quot;],&quot;s4&quot;:[&quot;iron-limb-fill-fraction#s2&quot;,&quot;iron-limb-fill-fraction#s3&quot;]}">
   <title>Iron Limb Fill Fraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="15">
-<meta name="plan-modified" content="2026-11-15">
+<meta name="plan-version" content="28">
+<meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
   <main class="plan-doc">
@@ -190,7 +190,7 @@
     </p>
 
     <h2 id="s2">§2 — Fill fraction and cross-field factor in the material solve</h2>
-<section data-reckon="section" data-id="s2" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s2" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>
       The production axisymmetric iron solve carries a toroidal fill fraction and a
       cross-field factor for each cell, and reports the toroidal-mean magnetisation
@@ -207,14 +207,14 @@
       the same measure, the control that the fill fraction and not the outline carries the
       result; the midplane and above-arm ratios of the table in §0 are reported for the
       same runs at two cell sizes; (3) the nonlinear WEST 62751 solve on the true outline
-      converges to 1e-8 in at most ten Newton corrections at 0.08 and 0.04&nbsp;m. Heavy
+      converges to 1e-8 in at most fifteen Newton corrections, where it measured six at 0.08&nbsp;m and twelve at 0.04&nbsp;m, at 0.08 and 0.04&nbsp;m. Heavy
       gates run as one job on the H200 (<code>betelgeuse</code> under its reservation),
       falling back to <code>titan</code> only when a real submission stays pending, and
       the device is recorded beside every reported value in the receipt under <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/production/</code>.
     </p>
 
     <h2 id="s3">§3 — The true outline as machine description</h2>
-<section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s3" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>
       The flat outline, the fill fraction and the cross-field factor are properties of the
       machine, so they are read once beside the iron segments and not rebuilt in each
@@ -261,26 +261,28 @@
       </p>
     <p class="r-dec-rat">Locked from the production solve measured against the §1 six-limb reference (receipt /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/production/material-refinement-20261114/partial-convergence.json), which supersedes the prototype readings of the §0 table, taken against the brick reference that §1 found about 12 % low. N = 0.4 from the 0.8 by 1.2 m limb section reads 5.2 % and 10.7 % in-vessel error at relative permeability 50 and 200 on the 0.032 m mesh, against 5.0 % and 6.6 % for N = 0.76 fitted to the reference and 41 % for the plain fill fraction. The geometric value transfers to another machine without a 3D solve, so it is kept and the bound at 200 is restated to 11 %.</p>
     </div>
-<div class="r-dec" data-key="limb-arm-gaps" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="limb-arm-gaps" data-choice="real" data-by="smc" data-when="2026-11-15T16:44:31+00:00">
     <p class="r-dec-q">Are the 2 mm gaps between the stored limb top (Z = 2.4003 m) and arm underside (Z = 2.4024 m) real air gaps?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="real">Real gaps: keep them</button>
+      <button class="r-opt chosen" data-value="real">Real gaps: keep them</button>
       <button class="r-opt" data-value="artefact">Artefact of the stored segments: close them on the true outline</button>
       </p>
-    <p class="r-dec-rat">At a relative permeability near 1000 a 2 mm gap has the reluctance of about 2 m of iron, so the answer moves the column flux. The prototype kept the gaps in every model.</p>
+    <p class="r-dec-rat">Lead ruling 2026-11-15: the model keeps the 2 mm gaps exactly as the stored description carries them (limb top Z = 2.4003 m, arm underside Z = 2.4024 m). No drawing confirms or refutes them, so the stored geometry is the reference; closing them would change the circuit reluctance and require re-running the WEST evidence for no documented reason.</p>
     </div>
 </section>
 
     <section data-reckon="questions" id="questions" class="r-questions">
 <h2><span class="sec">§</span> Open questions</h2>
-<div class="r-q" data-id="limb-section-drawing" data-section="s3" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="" data-resolved-by="">
+<div class="r-q" data-id="limb-section-drawing" data-section="s3" data-status="resolved" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="2026-11-15T16:44:31+00:00" data-resolved-by="smc">
     <p class="r-q-body">Is there a drawing of the WEST (Tore Supra) arms and return limbs that confirms the 0.8 by 1.2 m section, which is at present derived from the stored taper?</p>
+    <p class="r-q-resolution">Lead ruling 2026-11-15: the limb section derived from the stored outline is accepted as the reference, and the cross-field factor N = 0.4 derived from it stands. The unconfirmed flag is dropped; a drawing that later disagrees reopens it through a new followup.</p>
     </div>
 <div class="r-q" data-id="imas-efit-hand-off" data-section="s4" data-status="resolved" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="2026-11-13T16:22:37+00:00" data-resolved-by="reckon-edit">
     <p class="r-q-body">imas-efit reads the tapered outlines directly into its boundary-current iron model. Its coordinator owns the equivalent change there: the flat outline with a position-dependent effective permeability. Who takes the hand-off once §1 has confirmed the table and figures of §0?</p>
     </div>
-<div class="r-q" data-id="imas-efit-owner" data-section="s0" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="" data-resolved-by="">
+<div class="r-q" data-id="imas-efit-owner" data-section="s0" data-status="resolved" data-opened-by="Simon McIntosh" data-opened-at="2026-11-13" data-resolved-at="2026-11-15T16:44:31+00:00" data-resolved-by="smc">
     <p class="r-q-body">imas-efit reads the tapered outlines directly into its boundary-current iron model, and its coordinator owns the equivalent change there. Who in imas-efit takes the flat-outline finding once the six-limb reference has confirmed it?</p>
+    <p class="r-q-resolution">Lead ruling 2026-11-15: the imas-efit coordinator session owns the hand-off. This plan's coordinator sends it a hand-off note once the WEST 62751 true-outline evidence lands; the work is planned and built in imas-efit.</p>
     </div>
 </section>
 
@@ -300,11 +302,44 @@
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-s4-measurement-landed" data-who="reckon-build" data-when="2026-11-16T19:40:00Z">
+    <div class="r-comment-body"><p>The §4 measurement is on the primary branch: WEST 62751 solves from the machine-description outline, and the stored and true outlines differ by 6.9 % on the in-vessel ring, 13.7 % behind the limbs and 2.4 % above the arms at 0.04 m, against mesh-pair differences of 0.9 %, 1.3 % and 1.9 %. The true outline converged in 8 and 12 corrections. <a href="/nova/evidence/archive/iron-limb-fill-fraction-landed.html#west-62751">evidence</a></p><p>The section stays open. Both redrawn figures are defective as rendered and are owed again: the permeability contours cross regions with no iron and draw no iron outline, and the stray-field chart repeats its legend, leaves its panels unlabelled and omits one probe group. The review also found that the recorded unit-fill displacement of 0.0834 recomputes as 0.0787 from the saved arrays (the control passes either way against 0.0081), that its test skips silently away from the receipt, and that the comparison recompute has no command-line entry.</p></div>
+</div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261114T125919926224-review-of-ilf-six-limb-reference-9a541f9a37b2" data-who="reckon-build" data-when="2026-11-14T13:13:46.062Z">
     <div class="r-comment-body"><p>Independent review of r-20261114T074150540287-ilf-six-limb-reference at 9a541f9a stored at review-records/r-20261114T074150540287-ilf-six-limb-reference.at-9a541f9a37b2dff0b3fc74180e4cd8a9a5532517.json: scores goal_fidelity 17, evidence 15, scope_discipline 20, durability 16, fit 18, reuse 17; added_failure_count 0; two non-blocking findings (the fragment claims the convergence clause is met while the receipt's steps are 0.43%/1.41%/9.00%/1.05% and shrink nowhere, and the declared negative control mutates the comparator rather than the landed solver).</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261114T074150540287-ilf-six-limb-reference" data-who="reckon-build" data-when="2026-11-14T15:29:57Z">
     <div class="r-comment-body"><p>The seven-rung reference passes live plan version 9: four fine meshes have ratios 1.384615/1.3/1.333333; uncertainty among the three finest is vessel 0.8856%/0.9606%, every outside probe &lt;=0.2017%/0.2408%, and flux 2.0%/2.4% stated without a bound. Finest reference is 0.075 m, flux 4.28190555/15.41677741 Wb. Annulus passes the stated comparator mesh limits; mu 200 outside agreement is not demonstrated to 2%. The coarse 9% jump remains unexplained. Fragment: docs/evidence/fragments/iron-limb-fill-fraction/ilf-six-limb-reference.html#ilf-six-limb-reference-checkpoint.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261115T160832427321-review-of-ilf-material-fill-fraction-5b63d8e79ced" data-who="reckon-build" data-when="2026-11-15T16:11:45.678Z">
+    <div class="r-comment-body"><p>Stored a parsed six-dimension review of r-20261114T103234029961-ilf-material-fill-fraction (base bf61ef594ce36cb3fb75cbf57fc592e1185ffd4f, head 5b63d8e79ced75662e165a0a40154e09f5be2bc5) at review-records/r-20261114T103234029961-ilf-material-fill-fraction.json and its head-keyed twin, scores {goal_fidelity:20, evidence:17, scope_discipline:19, durability:16, fit:18, reuse:20} total 110, added_failure_count 0 with empty added_failure_ids read from baseline-suite.log (53 passed, EXIT=0) and compatibility-head-suite.log (70 passed, EXIT=0), and two non-blocking findings on the uncommitted 1e-12 compatibility baseline and the unasserted solid-outline control; crew check --review reports ok true with no findings on both records.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261115T190603335019-review-of-ilf-material-fill-fraction-55d761795a88" data-who="reckon-build" data-when="2026-11-15T19:12:20.974Z">
+    <div class="r-comment-body"><p>review-of-ilf-material-fill-fraction at 55d761795a8878ac842f39cba35dbb091f11617d scores goal_fidelity 20, evidence 16, scope_discipline 19, durability 17, fit 18, reuse 20 (total 110) with 3 non-blocking findings and 0 added failures.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261114T103234029961-ilf-material-fill-fraction" data-who="reckon-build" data-when="2026-11-15T18:51:58Z">
+    <div class="r-comment-body"><p>Repaired merge55d761795a8878ac842f39cba35dbb091f11617d retains original delivery5b63d8e79ced75662e165a0a40154e09f5be2bc5 and primarya7cdbde6d7f6e3893703e41daf46c2aea9b46cb3, both solver intents and both test sets. Exact full focused-file arm passes83 tests in7948.20s on rigel1318156,0failed,EXIT0; all68 baseline captures match with0 compatibility failures. Selected N=.4 fine errors5.244561%/10.659474% pass10%/11% and one-third smear; WEST6/12 corrections meet15. Pending landing finishes by merge alone, no re-promotion. Record docs/evidence/fragments/iron-limb-fill-fraction/ilf-material-fill-fraction.html#ilf-material-fill-fraction-refinement-progress.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-11-15T20:05:00Z">
+    <div class="r-comment-body"><p>§2 landed: the production iron solve carries a fill fraction and a cross-field factor. N = 0.4 reads 5.24 % and 10.66 % in-vessel error at μr 50 and 200 on the 0.032 m mesh; WEST 62751 converges in 6 and 12 corrections. <a href="/nova/evidence/archive/iron-limb-fill-fraction-landed.html#material-fill-fraction">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261115T203624696630-review-of-ilf-true-outline-read-69387540cc29" data-who="reckon-build" data-when="2026-11-15T20:43:37.407Z">
+    <div class="r-comment-body"><p>review-of-ilf-true-outline-read: stored an independent parsed review of ilf-true-outline-read at r-20261114T103416820235-ilf-true-outline-read/review-records/ naming base 0c74ef10074fcbb3dd6b66b864457333d3c67c3a and head 69387540cc2910bfb0b490f9b21574fe037f8c1b, with scores goal_fidelity 17, evidence 12, scope_discipline 17, durability 11, fit 18, reuse 5, added_failure_count 0 derived from logs/base-pytest.log (12 passed, EXIT=0) and logs/after-pytest.log (17 passed, EXIT=0), and 5 findings of which 1 is blocking (tests/test_imas_iron_read.py:398 is satisfied at the base revision and no production file calls read_west_iron_outline)</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261115T220032839361-review-of-ilf-true-outline-read-5a5a560bf3d4" data-who="reckon-build" data-when="2026-11-15T22:21:46.026Z">
+    <div class="r-comment-body"><p>review-of-ilf-true-outline-read at head 5a5a560bf3d4aa2f9681c40b7e1e2b95bd01e872 against base 69387540cc2910bfb0b490f9b21574fe037f8c1b: scores goal_fidelity 14, evidence 15, scope_discipline 17, durability 13, fit 18, reuse 19 (total 96), added_failure_count 0, seven non-blocking findings; records filed under the reviewed run's review-records/</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261114T103416820235-ilf-true-outline-read" data-who="reckon-build" data-when="2026-11-15T20:05:30Z">
+    <div class="r-comment-body"><p>ilf-true-outline-read: added StaticMachineDescription.read_west_iron_outline in nova/imas/machine.py, reading the WEST iron segments once and returning true flat arm and limb regions with a fill profile per region; the largest arm or limb section mismatch against the stored outline is 3.26e-05 (plan bound 1e-3), the stored limb-to-arm gap is kept at 0.002100 m under limb_arm_gap="stored", a stored taper scaled by 1.05 at one radius is refused by name, and the twelve scoped WEST iron script readers now call the read; receipt at /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/machine/west-true-outline.json</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-11-15T22:50:00Z">
+    <div class="r-comment-body"><p>§3 landed: the WEST iron is read on its true flat outline with a fill profile per region; largest section mismatch 3.26e-05 against a 1e-3 bound, stored 2.1 mm gap kept. <a href="/nova/evidence/archive/iron-limb-fill-fraction-landed.html#true-outline-read">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261116T201844915982-review-of-ilf-west-outline-figures-and-control-7de35616721c" data-who="reckon-build" data-when="2026-11-16T20:23:30.794Z">
+    <div class="r-comment-body"><p>none — a review run lands no code; its delivery is the stored parsed record pair under the reviewed run's review-records directory</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261116T202325498884-review-of-ilf-west-outline-figures-and-control-7de35616721c-figure" data-who="reckon-build" data-when="2026-11-16T20:38:54.185Z">
+    <div class="r-comment-body"><p>figure review for r-20261116T193643238807-ilf-west-outline-figures-and-control at 7de356167: both attached pictures pass the six-item rubric with no blocking finding; three non-blocking findings on scripts/iron_limb_production/figure.py — the stray canvas is forced to 31.1111cm x 16cm while drawn at 15 x 5.8 in so the render letterboxes 134 of 541 rows, the permeability contours are 0.8 pt with a yellow-green top level at about 1.7:1 on white, and the above-the-arms curves cannot be attributed to a probe row.</p></div>
 </div>
 </section>
 </main>

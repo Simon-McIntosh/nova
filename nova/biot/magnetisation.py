@@ -522,14 +522,19 @@ def _coefficient(magnitude, knots, coefficients, end_values):
 
 
 def _residual(state, operands):
-    gram, external, knots, coefficients, ends = operands
+    gram, external, knots, coefficients, ends = operands[:5]
     total = (external + gram @ state).reshape(2, -1)
+    if len(operands) == 7:
+        fill, gain = operands[5:]
+        total = total + _MU0 * gain * state.reshape(2, -1)
     # A safe norm keeps the derivative finite at a demagnetised cell. The
     # coefficient there is exactly the origin value, independently of direction.
     squared = jnp.sum(total**2, axis=0)
     magnitude = jnp.sqrt(jnp.where(squared > 0, squared, 1.0))
     magnitude = jnp.where(squared > 0, magnitude, 0.0)
     coefficient = _coefficient(magnitude, knots, coefficients, ends)
+    if len(operands) == 7:
+        coefficient = fill * coefficient
     return state - (coefficient * total).reshape(-1)
 
 
@@ -552,14 +557,18 @@ def _update(state, operands, factor, scale):
 
 def _linear_residual(state, operands):
     """Apply the material law at volume nodes before testing in the affine basis."""
-    gram, external, knots, coefficients, ends, basis, project, owners = operands
+    gram, external, knots, coefficients, ends, basis, project, owners = operands[:8]
     total = (external + gram @ state).reshape(2, -1, 3)
+    if len(operands) == 10:
+        total = total + _MU0 * operands[9][:, :, None] * state.reshape(2, -1, 3)
     values = jnp.einsum("cqi,qi->cq", total[:, owners], basis)
     squared = jnp.sum(values**2, axis=0)
     magnitude = jnp.where(
         squared > 0, jnp.sqrt(jnp.where(squared > 0, squared, 1.0)), 0.0
     )
     material = values * _coefficient(magnitude, knots, coefficients, ends)
+    if len(operands) == 10:
+        material = material * operands[8][owners]
     tested = (
         jnp.zeros_like(total).at[:, owners, :].add(material[:, :, None] * project[None])
     )
@@ -569,9 +578,14 @@ def _linear_residual(state, operands):
 @jax.jit
 def _linear_factor(state, operands, regularisation=0.0):
     """Contract local quadrature tangents before applying the dense B map."""
-    gram, external, knots, coefficients, ends, basis, project, owners = operands
+    gram, external, knots, coefficients, ends, basis, project, owners = operands[:8]
     count = state.size // 6
     total = (external + gram @ state).reshape(2, count, 3)
+    response = gram
+    if len(operands) == 10:
+        gain = operands[9]
+        total = total + _MU0 * gain[:, :, None] * state.reshape(2, count, 3)
+        response = gram + jnp.diag(jnp.repeat(_MU0 * gain.reshape(-1), 3))
     values = jnp.einsum("cqi,qi->qc", total[:, owners], basis)
 
     def material(value):
@@ -582,9 +596,11 @@ def _linear_factor(state, operands, regularisation=0.0):
         return value * _coefficient(magnitude, knots, coefficients, ends)
 
     tangent = jax.vmap(jax.jacfwd(material))(values)
+    if len(operands) == 10:
+        tangent = tangent * operands[8][owners, None, None]
     integrand = jnp.einsum("qi,qab,qj->qaibj", project, tangent, basis)
     local = jnp.zeros((count, 2, 3, 2, 3), dtype=state.dtype).at[owners].add(integrand)
-    response = gram.reshape(2, count, 3, -1)
+    response = response.reshape(2, count, 3, -1)
     jacobian = -jnp.einsum("caibj,bcjk->acik", local, response).reshape(
         state.size, state.size
     )
@@ -603,7 +619,9 @@ def _linear_update(state, operands, factor, scale):
 class MagnetisationSolution:
     """Solved cell magnetisation and its convergence receipt.
 
-    ``magnetisation`` is (cells, 2) [A/m], ``permeability_relative`` is (cells,).
+    ``magnetisation`` is the toroidal mean (cells, 2) [A/m].
+    ``permeability_relative`` is the iron's own secant permeability (cells,),
+    evaluated at its internal field rather than the toroidal-mean field.
     ``residual_history`` is the relative material residual, including the seed;
     ``iterations`` counts accepted corrections. ``regularisation_history``,
     ``reduction_ratios`` and ``step_types`` describe each accepted step beside
@@ -624,6 +642,13 @@ class MagnetisationSolution:
     reduction_ratios: tuple[float, ...] = ()
     step_types: tuple[str, ...] = ()
     linear_coefficients: np.ndarray | None = field(default=None, repr=False)
+    fill_fraction: np.ndarray = field(default_factory=lambda: np.ones(0))
+    cross_field_factor: np.ndarray = field(default_factory=lambda: np.zeros((0, 2)))
+
+    @property
+    def iron_magnetisation(self) -> np.ndarray:
+        """Return the magnetisation within the iron itself [A/m]."""
+        return self.magnetisation / self.fill_fraction[:, None]
 
     @property
     def iterations(self) -> int:
@@ -659,6 +684,22 @@ def _points(points):
     return points
 
 
+def _cell_material(value, cells, name, components=False):
+    """Resolve a scalar, cell array or centroid callback to a material field."""
+    value = value(cells.centroids) if callable(value) else value
+    array = np.asarray(value, dtype=np.float64)
+    shape = (len(cells.centroids), 2) if components else (len(cells.centroids),)
+    if array.ndim == 0:
+        array = np.full(shape, array)
+    if array.shape != shape or not np.isfinite(array).all():
+        raise ValueError(f"{name} must be finite with shape {shape} or a scalar")
+    minimum = array.min()
+    if array.max() > 1 or minimum < 0 or (not components and minimum == 0):
+        interval = "[0, 1]" if components else "(0, 1]"
+        raise ValueError(f"{name} must lie in {interval}")
+    return array.copy()
+
+
 def solve_magnetisation(
     region,
     external_field: Callable[[np.ndarray], np.ndarray],
@@ -670,6 +711,8 @@ def solve_magnetisation(
     max_iterations: int = 60,
     tile_plan: TilePlan = _PLAN,
     initial_magnetisation: np.ndarray | None = None,
+    fill_fraction=1.0,
+    cross_field_factor=0.0,
     basis: str = "constant",
     interaction: MagnetisationInteraction | None = None,
 ) -> MagnetisationSolution:
@@ -689,6 +732,16 @@ def solve_magnetisation(
     multiply coordinates divided by the square root of each cell area.
     ``interaction`` accepts a persisted response loaded for this mesh and basis;
     its geometry digest is checked before any source evaluation or assembly.
+
+    ``fill_fraction`` is the toroidal iron fraction f in (0, 1], supplied as a
+    scalar, a (cells,) array, or a callback of (cells, 2) centroids [m].
+    ``cross_field_factor`` is the demagnetising factor N in [0, 1], a scalar,
+    (cells, 2) array in (R, Z) order, or a centroid callback. Use N = 0 along
+    a limb and its section-derived factor across it. The state is M_mean,
+    with B_iron = B_mean + mu0 (1-f)/f (1-N) M_mean and
+    M_mean = f c(|B_iron|) B_iron. The affine basis applies the same cellwise
+    fill and gain at its material quadrature nodes before projection. Unit
+    fill uses the solid-iron residual in either basis.
 
     Try exact Newton first, then adapt a diagonal regularisation lambda.
     The shifted equation F(M + p) + lambda*p = 0 is an implicit pseudo-time
@@ -712,6 +765,8 @@ def solve_magnetisation(
     cells = _mesh(region, cell_size)
     if interaction is not None:
         interaction.validate(cells, basis)
+    fill = _cell_material(fill_fraction, cells, "fill_fraction")
+    cross = _cell_material(cross_field_factor, cells, "cross_field_factor", True)
     if basis == "linear":
         geometry = linear_magnetisation_geometry(cells.polygons)
         values = np.asarray(external_field(geometry["points"]), dtype=np.float64)
@@ -738,7 +793,8 @@ def solve_magnetisation(
         )
     else:
         external = _average_external(cells, external_field)
-    if not np.all(np.isfinite(external)):
+    expected_shape = (len(cells.centroids), 6 if basis == "linear" else 2)
+    if external.shape != expected_shape or not np.all(np.isfinite(external)):
         raise ValueError(
             "the averaged external field must be finite (cells, 2) components"
         )
@@ -772,6 +828,9 @@ def solve_magnetisation(
             _linear_factor,
             _linear_update,
         )
+    if np.any(fill != 1):
+        gain = ((1 - fill) / fill)[None, :] * (1 - cross.T)
+        operands += (jnp.asarray(fill), jnp.asarray(gain))
     state = jnp.zeros(external.size, dtype=jnp.float64)
     if initial_magnetisation is not None:
         initial = np.asarray(initial_magnetisation, dtype=np.float64)
@@ -826,10 +885,15 @@ def solve_magnetisation(
             termination = "regularisation-refused"
             break
     total = (operands[1] + operands[0] @ state).reshape(2, -1)
+    if len(operands) == 7:
+        total = total + _MU0 * operands[6] * state.reshape(2, -1)
     linear_coefficients = None
     if basis == "linear":
         linear_coefficients = np.asarray(state).reshape(2, -1, 3)
-        total = total.reshape(2, -1, 3)[:, :, 0]
+        total = total.reshape(2, -1, 3)
+        if len(operands) == 10:
+            total = total + _MU0 * operands[9][:, :, None] * linear_coefficients
+        total = total[:, :, 0]
     magnitude = jnp.linalg.norm(total, axis=0)
     coefficient = _coefficient(magnitude, *operands[2:5])
     mu = 1 / (1 - _MU0 * coefficient)
@@ -849,5 +913,7 @@ def solve_magnetisation(
         tuple(regularisations),
         tuple(ratios),
         tuple(step_types),
-        linear_coefficients,
+        fill_fraction=fill,
+        cross_field_factor=cross,
+        linear_coefficients=linear_coefficients,
     )

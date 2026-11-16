@@ -1,0 +1,126 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T19:40:34.898Z",
+  "dispatched_at": "2026-11-15T19:39:40Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T193830501969-plan-review-of-inverse-equilibrium-baseline/plan.html:188",
+      "id": "reasoning-1",
+      "reason": "the node's whole done-when is unachievable as written unless the plan requires imas-efit's fit functions to contain the generating profiles (as \u00a71 requires of the nova fit) or declares the basis-mismatch offset as a measured quantity read before the bands.",
+      "text": "\u00a78 requires imas-efit's reconstruction of the \u00a71 ITER state to agree with the generating state within 0.02 m on the axis, 2 % of the flux span and 0.1 on q95, but \u00a71's known-answer recovery holds only because its fitted basis \"contains the generating profiles\" (snapshot:89), and the configuration the plan records for imas-efit's ITER case is monomial with one live p' and two live FF' functions (snapshot:266). \u00a78 names the priors it disables and the machine description it supplies, and reference to the generating profiles' representability in imas-efit's basis appears nowhere, so a correct convergence sits at a systematic basis-mismatch offset and clause (2) refuses a sound run \u2014 or the worker widens the bands to absorb the mismatch, which this plan forbids. Corroborating the mismatch: the ITER reference state's profiles are tabulated arrays (`profiles.dpressure_dpsi`, `profiles.f_df_dpsi` in `tests/test_equilibrium_forward_reference.py:736-737`), not two-monomial functions",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T193830501969-plan-review-of-inverse-equilibrium-baseline/plan.html:188",
+      "id": "reasoning-2",
+      "reason": "stating magnitude-with-sign-reported for q95 and reading each state's flux sign is a one-sentence fix that stops the gate refusing a correct run on a convention the plan already knows differs between the codes.",
+      "text": "\u00a78 clause (2) compares `q95` within 0.1 and boundary and axis flux within 2 % of the span as signed quantities against the generating state with no convention statement, while \u00a72 \u2014 this plan's own rule for comparing the same two codes \u2014 bands the magnitude of q95 and reports the sign each state stores (snapshot:120-121) because the stored imas-efit states carry a negative q95. A converged imas-efit run whose output follows that stored convention fails the q95 band by roughly twice q95 and can fail the flux bands on sign alone, with nothing wrong in the reconstruction",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T193830501969-plan-review-of-inverse-equilibrium-baseline/plan.html:202",
+      "id": "wiring-1",
+      "reason": "\u00a77's text and the dependency map already name \u00a78, so a reader reaches the right section and no node's work depends on the decision's section list.",
+      "text": "the locked decision `efit-on-synthetic-rows` carries `data-sections=\"s7\"` and does not name \u00a78, the section that now builds and runs imas-efit, so the decision's own pointer names the consumer rather than the deliverer",
+      "type": "wiring",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "8d01e88436a6351e819b514197319efd387e0c2d",
+  "plan_fingerprint": "5b1ef425f674c74e13203b29cf698578a72759540aa079e0aae17605b419c943",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 21,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8d01e88436a6351e819b514197319efd387e0c2d",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The section now generates its state from profiles that are members of the basis imas-efit resolves for the run, with the nova fit given the same functions, so both codes' fit functions contain the generating profiles and the bands test wiring, not basis mismatch.",
+      "reason": "",
+      "when": "2026-11-15T20:08:57.438601+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8d01e88436a6351e819b514197319efd387e0c2d",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The comparison now bands the magnitude of q95 with the sign each state stores reported beside it, and compares fluxes after reading each state's stored flux sign, as the EFIT comparison section does.",
+      "reason": "",
+      "when": "2026-11-15T20:09:12.252523+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8d01e88436a6351e819b514197319efd387e0c2d",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The decision on who runs imas-efit now lists the section that delivers the run beside the one that consumes it.",
+      "reason": "",
+      "when": "2026-11-15T20:09:24.082650+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8d01e88436a6351e819b514197319efd387e0c2d",
+      "commit_basis": "edit",
+      "note": "The section now generates its state from profiles that are members of the basis imas-efit resolves for the run, with the nova fit given the same functions, so both codes' fit functions contain the generating profiles and the bands test wiring, not basis mismatch.",
+      "reason": "",
+      "when": "2026-11-15T20:08:57.438601+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "8d01e88436a6351e819b514197319efd387e0c2d",
+      "commit_basis": "edit",
+      "note": "The comparison now bands the magnitude of q95 with the sign each state stores reported beside it, and compares fluxes after reading each state's stored flux sign, as the EFIT comparison section does.",
+      "reason": "",
+      "when": "2026-11-15T20:09:12.252523+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8d01e88436a6351e819b514197319efd387e0c2d",
+      "commit_basis": "edit",
+      "note": "The decision on who runs imas-efit now lists the section that delivers the run beside the one that consumes it.",
+      "reason": "",
+      "when": "2026-11-15T20:09:24.082650+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261115T193830501969-plan-review-of-inverse-equilibrium-baseline.json",
+  "review_run_id": "r-20261115T193830501969-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "28544461434e21da6c197bbd7ad595c3a811bdda",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a71, \u00a77, the \u00a72 label and the decision key `efit-on-synthetic-rows` cited in \u00a78 all resolve in the snapshot; s8 cites no href whose target is missing.",
+    "done_when": "a finding \u2014 \u00a78 clause (2)'s bands (axis 0.02 m, q95 0.1) are measurable and clause (3) carries a declared control, but the bands are judged against a generating state imas-efit is nowhere shown able to represent, so the gate can refuse a correct run.",
+    "evidence_paths": "pass \u2014 the plan's record `docs/evidence/archive/inverse-equilibrium-baseline-landed.html` exists and is the durable carrier for the run, its tables and its flux panel.",
+    "naming": "pass \u2014 \u00a78 names no symbol, file, ticket or version tag in code terms; its measures are physical quantities and its decision key already exists.",
+    "reasoning": "a finding \u2014 clause (2) compares imas-efit's reconstruction against the generating state inside 0.02 m and 0.1 q95, while \u00a71 guarantees basis containment only for the nova fit and \u00a78 names no such requirement for imas-efit's monomial configuration.",
+    "single_goal": "pass \u2014 \u00a78 delivers one thing: the imas-efit run on rows written by nova, with its comparison against the \u00a71 generating state.",
+    "wiring": "a finding \u2014 `s7` declares its dependency on `s8` and the contract table repeats it, but the locked decision `efit-on-synthetic-rows` still names only `s7` in its `data-sections`, so the decision points at the section that consumes the run rather than the one that delivers it."
+  },
+  "section_digests": {
+    "_document": "1a9005d5bd7bd2c4ec9cab70385056cbbe8ba4309dc5aa4f3a8339c5b150d6b8",
+    "s0": "18fa4b3820d8a53b8b11be7cc05c1e0e3838163b619eac989edfed114e1e0b7b",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "869fae9b37d5960c1ec034e608f17f0bda580b5851fa4c12723a067ed80b3da1",
+    "s3": "aabab320c034e5a6720e0b3877958935e6c3b63577de3674cd6e87f6120889ba",
+    "s4": "a8f5721b1827357df497c97788c8bc9c5bb1266579ca0d04f61045c915138730",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "0978908aa460ff2860214bf8e82c9b00ca29f895ece725317c79cb738cef9b01",
+    "s7": "5c750c79d813b34b96a3b3b418cd41dd92a06de78455a410a3cfd366c1aeabee",
+    "s8": "a5cb20e4e693fbd6a067cc87d657909987a36d0257b73c78918daa89f5d9d327"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T20:08:27.609235+00:00",
+  "total": null
+}

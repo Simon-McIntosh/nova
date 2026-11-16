@@ -223,9 +223,9 @@ def main():
         original_interaction,
         original_external,
     )
-    machine = StaticMachineDescription.read_iron_core(
+    machine = StaticMachineDescription.read_west_iron_outline(
         "imas:hdf5?path=" + receipt["machine"], dd_version=receipt["dd_version"]
-    )
+    ).description
     region = shapely.union_all(
         [
             shapely.Polygon(np.column_stack((s.outline.r, s.outline.z)))

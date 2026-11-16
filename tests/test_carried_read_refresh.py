@@ -248,7 +248,7 @@ def test_support_read_defaults_to_full_refresh(carried_case, monkeypatch):
     original = topology.refresh_at_stationary_points
 
     def observed(*values, **kwargs):
-        calls.append(kwargs.get("reuse", False))
+        calls.append(bool(kwargs.get("reuse_geometry", False)))
         return original(*values, **kwargs)
 
     monkeypatch.setattr(topology, "refresh_at_stationary_points", observed)

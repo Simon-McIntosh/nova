@@ -1,0 +1,119 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T21:17:11.066Z",
+  "dispatched_at": "2026-11-16T21:16:55Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:86",
+      "id": "done_when-1",
+      "reason": "the arm must name what magnitude or contrast makes the image load-bearing (its share of 137D's terminal residual, or a device-matched zero-image contrast), otherwise the branch closes 137D's convergence loss without measuring dependence.",
+      "text": "done-when (2) lets the node close with \"the record shows that the unmasked convergence carries a nonzero inactive-compensator field and states its magnitude\", but \"nonzero\" is not a threshold: a terminal field at roundoff satisfies it, while the same section judges the effect in physical units (10\u201328 mT on 146L, lower-null agreement in mm against EFIT). A worker can report a nonzero reading, declare the earlier 137D \"not a valid equilibrium\", and land a mask that costs a row its convergence \u2014 closing a real regression on a number that is nonzero whenever the inactive image is applied at all, which the section's opening paragraph asserts it is.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:85",
+      "id": "reasoning-1",
+      "reason": "clause (2) already reruns the four rows at the head and so supplies 146D there; the overstatement invites a citation of a nonexistent matched arm but does not redirect the node's work.",
+      "text": "the paragraph reads \"146D converged in both\", but the matched job it describes (record job 1319912) re-ran 137D only: the base arm has no matched 146D, which appears solely as an earlier booked-source reading at 9c102cbae while 146D at the combined head is the masked arm's own row, so \"both\" credits a matched control that does not exist.",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "9fc6a91127768df298e4b7892569dc105e97ec1e",
+  "plan_fingerprint": "0e2dca35051c5116a14ef26755a1d21610088283e1f253374fa107e62211a164",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 95,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "aa6495e403c8489b405c8316a27d399c2672fd5c",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Done-when (2) now names a measured control: re-solved from the converged unmasked state with the inactive image held at zero, the state must leave (residual above 1e-8 or lower null moving more than 1 mm)",
+      "reason": "",
+      "when": "2026-11-16T21:59:34.366387+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "aa6495e403c8489b405c8316a27d399c2672fd5c",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The paragraph now says 146D converged at the masked head and in the earlier booked-source run, and that the matched job reran 137D only",
+      "reason": "",
+      "when": "2026-11-16T21:59:43.479872+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "aa6495e403c8489b405c8316a27d399c2672fd5c",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Done-when (2) now names a measured control: re-solved from the converged unmasked state with the inactive image held at zero, the state must leave it (residual above 1e-8 or lower null moving more than 1 mm)",
+      "reason": "",
+      "when": "2026-11-16T21:59:58.055505+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "aa6495e403c8489b405c8316a27d399c2672fd5c",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The paragraph now says 146D converged at the masked head and in the earlier booked-source run, and that the matched job reran 137D only",
+      "reason": "",
+      "when": "2026-11-16T22:00:09.986520+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "aa6495e403c8489b405c8316a27d399c2672fd5c",
+      "commit_basis": "edit",
+      "note": "Done-when (2) now names a measured control: re-solved from the converged unmasked state with the inactive image held at zero, the state must leave it (residual above 1e-8 or lower null moving more than 1 mm)",
+      "reason": "",
+      "when": "2026-11-16T21:59:58.055505+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "aa6495e403c8489b405c8316a27d399c2672fd5c",
+      "commit_basis": "edit",
+      "note": "The paragraph now says 146D converged at the masked head and in the earlier booked-source run, and that the matched job reran 137D only",
+      "reason": "",
+      "when": "2026-11-16T22:00:09.986520+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261116T211526668302-plan-review-of-diiid-vertical-force-balance.json",
+  "review_run_id": "r-20261116T211526668302-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "107ebf067c9f696b862ec6e135237d50de4e57ac",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the recovery fragment resolves at `/nova/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery` \u2192 `.html` (file present), both cited commits exist and are ancestors of HEAD, and the named targets exist (`nova/equilibrium/constraint.py:479` `VerticalPositionPin`, `:185` `flux_delta`; `nova/equilibrium/fixed_point.py:1637` `_rebuilt_model_promotion`).",
+    "done_when": "a finding \u2014 the disjunctive second arm of s7's done-when (2) is satisfied by any nonzero compensator field, with no threshold, so it cannot distinguish a load-bearing image from an inert one.",
+    "evidence_paths": "pass \u2014 s7's records and flux-contour panels land in the plan's committed evidence fragments (the recovered attempt already sits at `docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html`), never a session scratchpad.",
+    "naming": "pass \u2014 the added paragraph names past commits and a site in prose only; no plan label, stage name or ticket number is carried into a symbol or a file it asks for.",
+    "reasoning": "pass \u2014 the new paragraph's numbers match the cited record (unmasked base 1.0451022610746365e-11 against masked head 0.002457415345 with `ACTIVE_SET_CYCLE_DETECTED`, lower X 10.4798913313 mm, 146L 277 cells at Z = \u22125.695 cm), the mask-to-137D attribution is the record's own isolated finding, and the paragraph's endpoint is reachable through arms the record already ran in one H200 job; the discriminator weakness is filed under done_when rather than here.",
+    "single_goal": "pass \u2014 s7 carries one deliverable, the inactive-compensator rule holding in every proposal route without losing the convergence the section is measured on.",
+    "wiring": "pass \u2014 s7 declares `data-links=\"diiid-vertical-force-balance#s6\"`, that anchor resolves at `plan.html:78`, and the one dependent that consumes s7 (`s9`, `data-links=\u2026#s7,\u2026#s8`, `plan.html:94`) declares it."
+  },
+  "section_digests": {
+    "_document": "3f7773e8dc84f9f7857984a8a118b5f84a217ae4f4641f6df572ddc2b6ba7656",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "874ca52d4a08b8144e29bf22cd14988affabe01d006401761c85a3cb900028d9",
+    "s8": "8632587216eaa0edebdbe9d2f34107c6a23a5c5d466a12ce012fb753a7b1c661",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T21:58:57.958615+00:00",
+  "total": null
+}

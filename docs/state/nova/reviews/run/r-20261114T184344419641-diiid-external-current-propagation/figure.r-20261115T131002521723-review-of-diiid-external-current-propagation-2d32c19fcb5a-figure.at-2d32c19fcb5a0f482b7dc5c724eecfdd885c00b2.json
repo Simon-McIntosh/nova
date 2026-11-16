@@ -1,0 +1,67 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_judgement": "the caption is substantive, not a restatement of the title: it names both arms (the measured conductor currents and the same row with every shipped poloidal conductor channel scaled by 1.1), states that the level set is shared and inside the vessel, gives the null vocabulary (filled triangle = magnetic axis, filled cross = the arm's own lower X-point, hollow cross = the base arm's), gives the displacement scaling the currents produces (6.7 cm and 1.20 Wb) against the build-time-seam arm (0.0006 cm and 0.00002 Wb), and discloses that both arms are solved on the registered pseudo-wall and neither qualifies a diverted root, so the panel is not evidence of wall closure. No caption finding is recorded.",
+  "completed_at": "2026-11-15T13:36:44.495Z",
+  "dispatched_at": "2026-11-15T13:13:00Z",
+  "figure_reviewed": {
+    "artifact": "docs/figures/diiid-external-current-propagation/frame-137-terminal-base-versus-scaled.svg",
+    "caption_source": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html",
+    "drawing_script": "scripts/prototypes/diiid_external_current_propagation/render.py",
+    "embedding": "fragment figure img src /nova/figures/diiid-external-current-propagation/frame-137-terminal-base-versus-scaled.svg",
+    "method": "judged only the attached rendered PNG; no SVG and no other image was opened, read, listed, searched, rendered or shown; the drawing script and its style module were read for anchoring only",
+    "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T131002521723-review-of-diiid-external-current-propagation-2d32c19fcb5a-figure/image-0.png",
+    "rendered_size_px": [
+      1399,
+      720
+    ]
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Acted on: the coordinator resumed the same run (turn 3) to size each panel to its equal-aspect content and anchor the labels to it; the redrawn figure is reviewed again at the new head.",
+      "recorded_at": "2026-11-15T13:39:05.754392+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Acted on: the resume of the same run widens the view so the whole DIII-D wall closes. The coordinator also requires the EFIT reference null, the boundary where the corpus carries it and each arm's separatrix; the redrawn figure is reviewed again at the new head.",
+      "recorded_at": "2026-11-15T13:39:12.656210+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_external_current_propagation/render.py",
+      "id": "f33b80f40c6",
+      "line": 44,
+      "severity": "non-blocking",
+      "summary": "COLUMN_WIDTH = 0.36 gives each panel an axes box 504 px wide on the 14 in canvas, but with set_aspect('equal') over a 1.78 m by 3.28 m domain the plotted content is only about 300 px wide, so roughly 100 px of blank box lies on each side of each panel: on the render the left panel's data span x 185-486, the right panel's x 885-1185, and the two states the figure exists to compare are separated by about 400 px of white, with the pair occupying 42% of the canvas width while the rest is margin. The panel titles (line 124) and the offset captions (line 129) are placed at the axes-box left rather than at the visible data region, so each label hangs about 100 px to the left of the picture it names (title band starts x 85 and x 784; panel borders at x 185 and x 885). It does not stop a reader reading the figure, but the side-by-side comparison is spread across a mostly empty canvas."
+    },
+    {
+      "file": "scripts/prototypes/diiid_external_current_propagation/render.py",
+      "id": "fde1ee6665f",
+      "line": 120,
+      "severity": "non-blocking",
+      "summary": "The view limits pad the flux grid by 0.04 m in each direction (lines 119-120), but the drawn wall extends 0.034 m past the grid in R and 0.064 m in Z (wall R 0.806-2.574, Z -1.664-1.664 against grid R 0.840-2.540, Z -1.600-1.600), so only the wall's two near-vertical legs fall inside the view and its top and bottom close just outside the ylim and are clipped away. On the render the vessel the caption says is drawn reads as two full-height #929292 vertical rules at the panel borders (x 185 and 486 left, x 885 and 1185 right, spanning y 100-658 with no horizontal segment anywhere), indistinguishable from a plot frame. Because the axis furniture is deliberately off, those two rules are the only machine-geometry reference in the panel, so a reader has no visible scale in R or Z; the flux topology and both null sets remain visible, so this does not hold the node."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass: every element is #3366cc or #333333 on white, at 5.4:1 and 12.6:1; the 1.2 pt contour lines and the wall at 3.1:1 clear the 3:1 graphical threshold, so no mark or label is washed out.",
+    "data_ink": "pass: the ink is entirely data (contour strokes, the wall, the null markers) plus four short labels; there is no gradient, fill, band or reference rule, and the strongest weight is the contour set at 1.2 pt with the markers on top. Caveat recorded as a finding: the panels occupy only 42% of the canvas width, so the comparison is spread across a largely empty page.",
+    "decoration": "pass: white ground, no gridlines, no background fill, no spines or ticks (axis off), no legend furniture or drop styling.",
+    "label_collision": "pass: text bands are disjoint and inside the canvas - titles y 20-35 (x 85-266 and 784-1018), panel ink y 100-658, offset captions y 685-699 (x 85-646 and 784-1352); the whole ink bounding box is x 85-1351 by y 20-699 in 1399x720, at least 21 px clear on every edge, and the guard's clipping/overlap/over-data checks agree with the render. The right panel's two red glyph clusters at x 959-975 sit 12 px apart at their centres (filled cross ends y 570, hollow cross begins y 571), so neither hides the other.",
+    "legibility": "pass: two poloidal panels at 300x558 px each carry one blue contour set on 20 shared levels, a filled triangle at the magnetic axis and a filled cross at the lower X-point in both, plus the hollow base-arm cross on the right; the arm name sits above each panel and its offset/residual numbers below, so the lower-null movement (12 px up and 6 px inboard between arms) is readable at a glance. Caveat recorded as a finding: the vessel is visible only as two vertical rules, so there is no printed scale.",
+    "table_form": "pass: the image is two spatial flux maps whose reading is the contour topology and the displacement of a null, a spatial relationship the contour set carries at a glance; the exact offsets and residuals are given as short annotations rather than a table standing in for the picture."
+  },
+  "notes": "read-only figure review: no figure, script, caption or other file was edited, created, moved, deleted, redrawn, relabelled or reformatted; the only files written are this record, the pinned copy of it at the reviewed head, and the review run's manifest. No suite was run, so added_failure_count is 0 with an empty failure-id list. Positions, colour values and ink bounding boxes were measured on the named rendered PNG's pixels only.",
+  "project": "nova",
+  "raw_text": "RUBRIC legibility: pass - two poloidal panels at 300x558 px carry one blue contour set on 20 shared levels, the magnetic axis as a filled triangle and the lower X-point as a filled cross on both panels, plus the hollow base-arm cross on the right; the arm name sits above each panel and the offset/residual numbers below, so the lower-null movement of 12 px up and 6 px inboard between arms is readable at a glance. Caveat: the vessel is visible only as two vertical rules, so no scale is printed.\nRUBRIC data_ink: pass - the ink is entirely data (contour strokes, wall, four short labels); no gradient, fill, band or reference rule; the contour set at 1.2 pt carries the weight with the markers on top. Caveat recorded as a finding: the panels occupy 42% of the canvas width.\nRUBRIC decoration: pass - white ground, no gridlines, no background fill, no spines or ticks, no legend or drop styling.\nRUBRIC contrast: pass - #3366cc at 5.4:1 and #333333 at 12.6:1 on white; the wall at 3.1:1 clears the graphical threshold.\nRUBRIC table_form: pass - two spatial flux maps whose reading is contour topology and the displacement of a null; the exact offsets are short annotations, not a table in image form.\nRUBRIC label_collision: pass - titles y 20-35, panel ink y 100-658 and captions y 685-699 are disjoint and inside 1399x720 with at least 21 px margin; the right panel's two red glyph clusters are 12 px apart at their centres and neither hides the other.\nFINDING scripts/prototypes/diiid_external_current_propagation/render.py 44 non-blocking: COLUMN_WIDTH 0.36 makes a 504 px axes box while equal aspect draws only about 300 px of content, so about 100 px of blank box flanks each panel, the two panels' data are 400 px apart across a mostly empty canvas, and the titles and captions anchored to the box left hang 100 px left of the picture they name.\nFINDING scripts/prototypes/diiid_external_current_propagation/render.py 120 non-blocking: the 0.04 m view padding clips the wall's top and bottom close, leaving the vessel as two full-height vertical rules indistinguishable from a frame while the caption says the vessel is drawn.",
+  "review_run_id": "r-20261115T131002521723-review-of-diiid-external-current-propagation-2d32c19fcb5a-figure",
+  "reviewed_base_sha": "93a93c4a7ede437e9a51beeed9fae20c914a5501",
+  "reviewed_head_sha": "2d32c19fcb5a0f482b7dc5c724eecfdd885c00b2",
+  "reviewed_run_id": "r-20261114T184344419641-diiid-external-current-propagation",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T13:38:20.571107+00:00",
+  "total": null
+}

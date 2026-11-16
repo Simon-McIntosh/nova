@@ -1,0 +1,166 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures": [],
+  "added_failures_note": "Derived from the reviewed run's own gate arms. gate6/base.log line 2 names 37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241 and its summary is '4 failed, 133 passed, 6 skipped, 1 deselected, 16 errors in 1478.64s (0:24:38)' ending in a bare EXIT=1; gate6/head-final.log line 2 names dc8001e5f and its summary is '4 failed, 141 passed, 6 skipped, 1 deselected, 1 warning, 16 errors in 2012.22s (0:33:32)' ending in a bare EXIT=1. A diff of the FAILED/ERROR id sets over the two logs is empty (20 rows each, identical line for line), so the added failure count is a measured 0 with an empty id list; the 8 extra passes at the head are the 8 cases of tests/equilibrium/test_finite_edge_booking.py.",
+  "call_sites": [
+    "benchmarks/diiid_forward_gs_match.py:1548 build_profile -> _build_profile -> _booked_profile",
+    "benchmarks/diiid_forward_gs_match.py:2603 solve_frame",
+    "benchmarks/diiid_forward_gs_match.py:4718 _build_profile ladder arm",
+    "benchmarks/diiid_forward_gs_match.py:2471 complete_profile_current_adapter",
+    "benchmarks/diiid_forward_gs_match.py:4591 complete_profile_current_adapter",
+    "benchmarks/diiid_current_pinned_forward.py:345 complete_profile_current_adapter",
+    "benchmarks/diiid_diverted_root_full_currents.py:316 complete_profile_current_adapter",
+    "benchmarks/diiid_constrained_cold_start.py:181 complete_profile_current_adapter",
+    "benchmarks/strict_exit_incidence.py:639 complete_profile_current_adapter",
+    "benchmarks/diiid_circuit_driven_forward_validation.py:811 complete_profile_current_adapter",
+    "nova/equilibrium/forward_operator.py:3538 _point_current_moments -> point_route_current",
+    "nova/equilibrium/support_read.py:880 book_tangent (linear-moment path)"
+  ],
+  "completed_at": "2026-11-15T22:25:30.511Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "exempted",
+      "reason": "The scope score reflects the adapter and its test written outside the declared paths; both are ratified at landing with --accept-path, and no other path left the scope",
+      "recorded_at": "2026-11-15T23:00:55.091946+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-15T22:24:54Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Ratified at landing: the coordinator passes --accept-path for nova/imas/diiid_current.py and tests/imas/test_diiid_current.py under the shared-file ruling; the completion belongs in the adapter's owner, as the earlier review asked, and the gate arms over both files add no failure",
+      "recorded_at": "2026-11-15T22:59:20.601276+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Recorded for the operator owner, not this node: the booked first-moment rows come from the analytic polygon kernel while the kept uniform row is the hybrid Green block; the docstring overstates their consistency. Reported to the lead with the landing",
+      "recorded_at": "2026-11-15T22:59:30.530341+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The declared control reddens the public-builder route assertion, which is the consumer-level check the control targets; the continuity case is a fixture contract by design and the route assertion is what catches the restored value-only route",
+      "recorded_at": "2026-11-15T22:59:39.174653+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "The independent check is the public-builder assertion at :426, which the reviewer names; the pass-through assertion is redundant but harmless",
+      "recorded_at": "2026-11-15T22:59:47.647992+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "Coordinator amends the landed fragment to name 9c102cbae as the row revision and say the later commits moved the completion without changing the operator values",
+      "recorded_at": "2026-11-15T22:59:59.953746+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "Carried from the earlier round: the coil-correction re-solve re-banks these rows against the diagnosis numbers in one table, which is where that comparison is owed",
+      "recorded_at": "2026-11-15T23:00:10.606673+00:00"
+    },
+    "6": {
+      "kind": "exempted",
+      "reason": "Coordinator amends the landed fragment's gate table to the final arms at 37b9ba7c4 and dc8001e5f (20 identical failure rows, 133 against 141 passed, eight contract cases)",
+      "recorded_at": "2026-11-15T23:00:19.302848+00:00"
+    },
+    "7": {
+      "kind": "exempted",
+      "reason": "Non-blocking coupling to two private names of nova.equilibrium.forward; left for the operator owner's next pass",
+      "recorded_at": "2026-11-15T23:00:31.548779+00:00"
+    },
+    "8": {
+      "kind": "exempted",
+      "reason": "Non-blocking: the duplicate geometry agrees today by construction from the same cells; a coordinate check belongs to the operator owner",
+      "recorded_at": "2026-11-15T23:00:43.099085+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/imas/diiid_current.py",
+      "line": "203",
+      "severity": "blocking",
+      "text": "The landed diff edits nova/imas/diiid_current.py (_completed_target at :203 and the sample-target completion in complete_profile_current_adapter) and tests/imas/test_diiid_current.py at :196, and neither path is among the source node's declared write paths in dispatch-detail.json admit_request.node.write_paths, whose eight entries are nova/equilibrium/current.py, nova/equilibrium/forward_operator.py, nova/equilibrium/source.py, benchmarks/diiid_forward_gs_match.py, tests/equilibrium/test_finite_edge_booking.py, scripts/prototypes/diiid_finite_edge_booking, docs/figures/diiid-finite-edge-booking and docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html, plus the granted docs/figures/diiid-vertical-force-balance/diiid-finite-edge-booking. The reviewed run's manifest replaces its own orientation_write_paths with 11 entries that include both extra files, which records what was done rather than a grant, and over_fence_reason is empty. The adapter change is load-bearing (without it every consumer whose booked operator carries a sampling target contracts a 19-column target against a 24-value current vector), so this needs a coordinator fence widening rather than a repair the node can make inside its scope."
+    },
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "1191",
+      "severity": "non-blocking",
+      "text": "The _moment_couplings docstring says the radial and vertical rows are 'the moments of the same kernel that carries its uniform row', but the uniform row the operator keeps is plasma_to_grid from _green_block at :1284 (nova/biot/greens.py:1299 hybrid_greens, a cylinder near field with a point-filament far field), while grid_moments[1] and grid_moments[2] attached at :1415-1416 are derivatives of the exact analytic polygon kernel returned by scripts/analytic_oracle_fixtures/coupling_build.py:33. The analytic uniform row (block index 0) is computed and discarded, so the booked route's first-moment expansion is not the linearisation of the row it multiplies, and the docstring asserts a consistency the landed code does not have."
+    },
+    {
+      "file": "tests/equilibrium/test_finite_edge_booking.py",
+      "line": "435",
+      "severity": "non-blocking",
+      "text": "The declared negative control in dispatch-detail.json admit_request.node.negative_control is 'restore the value-only point-current route (_point_current_moments) for the finite-edge profile in the DIII-D consumer; the continuity test must fail on the finite step'. The recorded control is controls/builder-mutation.log, and the id that reddens there is :412 in test_the_public_builder_books_the_route_it_runs, not the continuity case: test_the_finite_edge_integral_takes_no_step at :435 calls book() on fixture geometry and never reads the consumer's operator, so reintroducing _point_current_moments in the DIII-D builder leaves the assertion at :443 green. The regression is caught by the route-selection assertion, but not by the test the declared control names, and the record presents the control as satisfying that clause of the done_when."
+    },
+    {
+      "file": "tests/equilibrium/test_finite_edge_booking.py",
+      "line": "369",
+      "severity": "non-blocking",
+      "text": "This assertion is not independent of the value under test: both sides derive from the test's own `conductors` variable, because _booked_profile passes source_to_sample straight through as sample.source_target and ForwardProfile.from_lattice passes source_to_grid through as grid.source_target, so source_target.shape[1] == grid.source_target.shape[1] holds whatever either width is. The assertion at :426 in the public-builder test is the independent version of the same check and the one that can fail."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html",
+      "line": "47",
+      "severity": "non-blocking",
+      "text": "The four-row table names no revision and no log pointer, and the runs behind it are at 9c102cbae6b7c70421a867973540cfbfb5066227 (x/results.json 'revision' and the row logs' own headers), one source commit before the reviewed head, which moves the sampling-node completion into nova/imas/diiid_current.py at 3fea105c8. The terminal states and the figure therefore predate the landed adapter, and a reader of the fragment cannot tell that the rows were not rerun at dc8001e5f."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "Clause 3 asks the per-row report to sit 'beside the diagnosis numbers' and it does not: the table carries convergence, terminal residual, X offset, discriminator, raw current and pin amplitude for the rerun only, while the diagnosis fragment publishes per-row termination (137D ACTIVE_SET_STEP_REFUSED, 146L ACTIVE_SET_CYCLE_DETECTED, 179L ACTIVE_SET_STEP_REFUSED) and live residuals (4.61e-4, 2.33e-2, 1.71e-2) that a reader cannot compare against these rows; only the 1.875 kA cut-cell numbers appear, in prose at :59. This was raised in the f4bf6f5e4 review and is still open at the reviewed head."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html",
+      "line": "43",
+      "severity": "non-blocking",
+      "text": "The gate table reports the after arm at 9c102cbae with 3 failed, 16 errors and 125 passed and says 'the same command runs all seven tests', while the run's final head arm is gate6/head-final.log at dc8001e5f with 4 failed, 16 errors, 141 passed, and the contract file collects eight cases: the table is stale against the final gate and its 'seven' contradicts the eight added passes the manifest records."
+    },
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "89",
+      "severity": "non-blocking",
+      "text": "The builder now imports the private names _lattice_cells and hex_stencil from nova.equilibrium.forward into runtime benchmark code, coupling a production benchmark to another module's underscores; the owner exposes neither, and no surrounding benchmark imports them, so the private import is avoidable."
+    },
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "1200",
+      "severity": "non-blocking",
+      "text": "MomentGeometry.from_cells is constructed a second time here over inputs identical to the geometry ForwardProfile.from_lattice builds at nova/equilibrium/forward.py:696, so the builder holds two geometries whose sampling node coordinates must agree; the operator checks only node_number (nova/equilibrium/forward_operator.py:2553), not the coordinates, so a future change to from_lattice's sampling vertices would leave the sample blocks evaluated at vertices the operator does not clip on with no test failing."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read all 27 commits of 37b9ba7c4..dc8001e5f commit by commit and the 17-file diffstat: the production surface is benchmarks/diiid_forward_gs_match.py:1179,1385, :1516, nova/equilibrium/forward_operator.py:2320, nova/equilibrium/current.py:701 and nova/imas/diiid_current.py:203, with the contract file, the terminal-states figure and the prototype drivers beside them.",
+    "done_when": "Read the three clauses against their artefacts: clause 1 in tests/equilibrium/test_finite_edge_booking.py:443 (booked step against 1% of scale on cut-cell and sector), :454 (value-only route steps by more than 100x) and :492 (booked tangent against a central difference at rtol 1e-6); clause 2 in gate6/base.log and gate6/head-final.log, whose 20-row failure sets are identical; clause 3 in the fragment's four-row table and docs/figures/diiid-finite-edge-booking/terminal-states.svg, whose labels reproduce the table's residual, X-offset and discriminator values from x/edge/*/finite-edge.json.",
+    "goal": "Read the goal in dispatch-detail.json ('Route the DIII-D finite-edge source through the clipped-current booking so the source integral and its tangent stay continuous as a sample crosses the plasma boundary') against the head: benchmarks/diiid_forward_gs_match.py:1385 _booked_profile attaches the linear-moment blocks and sampling target and _build_profile:1503 calls it, and :1516 extends the seed by the sample rows, so the builder's own profile is on nova/equilibrium/current.py's booked route with no second integration path and no new public option.",
+    "manifest": "Read the reviewed run's manifest.md; status complete, negative_control_log controls/builder-mutation.log, baseline_suite and after_suite both completed true with 20 failure ids each and added_failure_count 0, the pinned consumer measured at both revisions, and orientation_write_paths widened to 11 entries that include the two files outside the dispatch fence.",
+    "write_paths": "Read dispatch-detail.json admit_request.node.write_paths (8 paths) plus the prompt's granted docs/figures path; 15 of the diff's 17 files are inside them, and nova/imas/diiid_current.py and tests/imas/test_diiid_current.py are outside with over_fence_reason empty."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_finite_edge_booking.py:443 reddens if book() stops integrating the clipped polygon and :412 reddens on the recorded builder mutation, but :369 compares two widths both taken from the test's own `conductors`, :435 never reads the consumer's operator, so the declared point-route control did not redden the continuity case.",
+    "evidence": "gate6/base.log:2 and gate6/head-final.log:2 name 37b9ba7c4 and dc8001e5f and both end EXIT=1 with identical 20-row failure sets, yet the head arm ran on partition rigel (host 98dci4-clu-2008) rather than the all_debug job the done_when names and the fragment's gate table at :43 is stale at 9c102cbae.",
+    "fit": "benchmarks/diiid_forward_gs_match.py:1200 follows the from_cells idiom of benchmarks/two_branch_batch_cost.py:146, while :89 imports the private _lattice_cells and hex_stencil from nova.equilibrium.forward, which no surrounding benchmark imports.",
+    "goal_fidelity": "benchmarks/diiid_forward_gs_match.py:1385 attaches the booked route's moment blocks and sampling target and :1516 extends the seed by the sample rows, so every DIII-D row built there is solved on the clipped integral rather than the value-only route.",
+    "reuse": "The change extends its owners: nova/equilibrium/current.py:589 book_tangent is called through nova/equilibrium/support_read.py:880 on the linear-moment path, the flux blocks come from scripts/analytic_oracle_fixtures/coupling_build.py:33 as benchmarks/two_branch_batch_cost.py:148 uses them, and the grid and wall completion is consolidated at nova/imas/diiid_current.py:203 rather than copied a third time.",
+    "scope_discipline": "nova/imas/diiid_current.py:203 and tests/imas/test_diiid_current.py:196 are edited outside the eight write paths at dispatch-detail.json admit_request.node.write_paths, and the manifest records them only by rewriting its own orientation list."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read dispatch-detail.json's goal against benchmarks/diiid_forward_gs_match.py:1385, where _booked_profile attaches the linear-moment blocks and sampling target and _build_profile:1503 calls it, so the builder's profile is on the booked route with no second integration path.\nVERDICT done_when: Read the three clauses: clause 1 at tests/equilibrium/test_finite_edge_booking.py:443, :454 and :492; clause 2 in gate6/base.log and gate6/head-final.log with identical 20-row failure sets; clause 3 in the fragment's four-row table and docs/figures/diiid-finite-edge-booking/terminal-states.svg, whose labels reproduce the table's values.\nVERDICT write_paths: Read dispatch-detail.json admit_request.node.write_paths (8 paths) plus the granted docs/figures path; 15 of the 17 changed files are inside them and nova/imas/diiid_current.py and tests/imas/test_diiid_current.py are outside with over_fence_reason empty.\nVERDICT manifest: Read the reviewed run's manifest.md; both arms are recorded completed with 20 failure ids each and added_failure_count 0, controls/builder-mutation.log is the control, and orientation_write_paths lists 11 entries including the two files the dispatch fence does not grant.\nVERDICT diff: Read all 27 commits of 37b9ba7c4..dc8001e5f commit by commit and the 17-file diffstat; the production surface is benchmarks/diiid_forward_gs_match.py:1179,1385,1516, nova/equilibrium/forward_operator.py:2320, nova/equilibrium/current.py:701 and nova/imas/diiid_current.py:203, with the contract file, the figure and the prototype drivers beside them.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py:1548 (build_profile -> _build_profile -> _booked_profile), benchmarks/diiid_forward_gs_match.py:2603 (solve_frame), benchmarks/diiid_forward_gs_match.py:4718 (_build_profile ladder arm), benchmarks/diiid_forward_gs_match.py:2471,4591 (complete_profile_current_adapter), benchmarks/diiid_current_pinned_forward.py:345, benchmarks/diiid_diverted_root_full_currents.py:316, benchmarks/diiid_constrained_cold_start.py:181, benchmarks/strict_exit_incidence.py:639, benchmarks/diiid_circuit_driven_forward_validation.py:811, nova/equilibrium/forward_operator.py:3538 (_point_current_moments -> point_route_current), nova/equilibrium/support_read.py:880 (book_tangent)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: benchmarks/diiid_forward_gs_match.py:1385 attaches the moment blocks and sampling target and :1516 extends the seed by the sample rows, so each built DIII-D row is solved on the clipped integral.\nSCORE evidence: 14\nJUSTIFICATION evidence: gate6/base.log and gate6/head-final.log record identical 20-row failure sets at 37b9ba7c4 and dc8001e5f, but the head arm ran on rigel rather than the all_debug job the done_when names and the fragment's gate table at :43 is stale at 9c102cbae.\nSCORE scope_discipline: 10\nJUSTIFICATION scope_discipline: nova/imas/diiid_current.py:203 and tests/imas/test_diiid_current.py:196 are edited outside the eight write paths dispatch-detail.json declares.\nSCORE durability: 13\nJUSTIFICATION durability: tests/equilibrium/test_finite_edge_booking.py:443 reddens when book() stops clipping and :412 reddens on the recorded mutation, but :369 compares two widths both supplied by the test and :435 never reads the consumer's operator, so the declared point-route control did not redden the continuity case.\nSCORE fit: 15\nJUSTIFICATION fit: benchmarks/diiid_forward_gs_match.py:1200 follows the from_cells idiom of benchmarks/two_branch_batch_cost.py:146, while :89 imports the private _lattice_cells and hex_stencil from nova.equilibrium.forward.\nSCORE reuse: 16\nJUSTIFICATION reuse: nova/imas/diiid_current.py:203 consolidates the grid and wall completion into one owner and the blocks reuse scripts/analytic_oracle_fixtures/coupling_build.py:33, though benchmarks/diiid_forward_gs_match.py:1200 rebuilds a geometry nova/equilibrium/forward.py:696 already owns.\nFINDING nova/imas/diiid_current.py:203 blocking: the sample-target completion and its test edit two files outside the source node's declared write paths, and the manifest widens its own orientation list instead of recording a grant.\nFINDING benchmarks/diiid_forward_gs_match.py:1191 non-blocking: the docstring says the moment rows share the uniform row's kernel, but the uniform row is _green_block's hybrid_greens at :1284 and the moments are the analytic polygon kernel, so the expansion is not the linearisation of the row it multiplies.\nFINDING tests/equilibrium/test_finite_edge_booking.py:435 non-blocking: the declared negative control reddens :412 rather than the continuity case, because the continuity case calls book() directly and never reads the consumer's operator.\nFINDING tests/equilibrium/test_finite_edge_booking.py:369 non-blocking: the assertion compares two widths both derived from the test's own `conductors` variable, so it holds whatever the code does.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html:47 non-blocking: the four-row table names no revision or log pointer and its runs are at 9c102cbae, one source commit before the landed head.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html:49 non-blocking: the per-row diagnosis numbers clause 3 asks for are absent beside the rerun's, only the 1.875 kA prose at :59 carries them.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html:43 non-blocking: the gate table's after arm is 9c102cbae with 125 passed and 'seven tests', while the run's final head arm is dc8001e5f with 141 passed and eight contract cases.\nFINDING benchmarks/diiid_forward_gs_match.py:89 non-blocking: the runtime benchmark imports the private _lattice_cells and hex_stencil from nova.equilibrium.forward.\nFINDING benchmarks/diiid_forward_gs_match.py:1200 non-blocking: a second MomentGeometry.from_cells is built over the inputs from_lattice uses at nova/equilibrium\n",
+  "review_run_id": "r-20261115T222322798046-review-of-diiid-finite-edge-booking-dc8001e5ff3e",
+  "reviewed_base_sha": "37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241",
+  "reviewed_head_sha": "dc8001e5ff3e82a2f2848118127158ca3ecb82c9",
+  "reviewed_run_id": "r-20261114T210059239602-diiid-finite-edge-booking",
+  "rubric": "review",
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 16,
+    "scope_discipline": 10
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T22:57:21.864035+00:00",
+  "total": 85
+}

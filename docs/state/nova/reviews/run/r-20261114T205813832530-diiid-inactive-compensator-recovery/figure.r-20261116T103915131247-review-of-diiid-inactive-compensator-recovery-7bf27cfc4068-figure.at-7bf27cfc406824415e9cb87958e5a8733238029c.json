@@ -1,0 +1,177 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-16T10:50:11.633Z",
+  "dispatched_at": "2026-11-16T10:39:56Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-inactive-compensator-recovery",
+      "recorded_at": "2026-11-16T11:03:31.842704+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "diiid-inactive-compensator-recovery",
+      "recorded_at": "2026-11-16T11:03:38.487742+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_inactive_compensator/render.py",
+      "id": "f8d49624d6a",
+      "line": 137,
+      "severity": "non-blocking",
+      "summary": "F1: the shared flux legend keys six items but the panels draw two marker kinds it does not key. The handles list at render.py:132-147 has 'solved axis' (filled triangle) and 'solved saddle' (solid X) but no entry for the open inverted triangle that marks the EFIT magnetic axis, drawn a few pixels from every solved axis in all four panels, and no entry for the hollow blue cross that marks unadmitted solved saddles, which appear in every panel and five times in frame-179-limited. Both meanings are carried only by the prose caption above the figures, so a reader meeting the figure without its caption sees two adjacent triangles and cannot tell which is which, and sees hollow crosses with no key at all. Adding two handles, or making the EFIT axis a keyed pair with the solved one, closes it."
+    },
+    {
+      "file": "scripts/prototypes/diiid_inactive_compensator/render.py",
+      "id": "fa485c1a8b0",
+      "line": 214,
+      "severity": "non-blocking",
+      "summary": "F2: the axis-height panel of the trajectory figure has no tick below zero, and the recovery series it exists to show lies entirely below zero. Measured on image-4: y ticks fall at 56.6 px per 10 cm with the lowest at y=542 ('0'), the panel floor is y=597, and the blue markers centre at y=575, i.e. about -5.8 cm in a 55 px band that carries no tick and no label. The caption's 'near minus six centimetres' is then the only quantitative anchor for the figure's headline result, and a reader cannot read the value, or its variation across trips (-5.78 to -5.70), off the axis at all. The left panel has the same shape but harmless because its series sits between printed ticks. An explicit tick at the axis minimum, or a y-limit with a labelled negative tick, closes it."
+    }
+  ],
+  "notes": "Read-only figure review. Only the five PNGs named in this review were opened; no SVG was read, no other image was read, and no file was edited, redrawn, relabelled, moved, created or deleted. Two scratch crops per figure were rendered from those same PNGs into the run's scratch directory for close inspection and are not deliverables; the figure identification was re-derived from pixel measurements after a first visual reading of image-3 mistook converging EFIT contour dashes for black markers, which the zoom corrected. Images 0-4 map to frame-137-diverted, frame-146-diverted, frame-146-limited, frame-179-limited and limited-trajectory, established from the reviewed manifest's figures order and confirmed independently by the solved-to-EFIT saddle-marker separations, which order 7.5 / 16.3 / 43.6 / 20.2 mm exactly as the rendered gaps do, and by 146L's 277 cells and -5.8 cm appearing in both image-2 and image-4. Six rubric items are answered for each of the five figures, all pass; two non-blocking findings are recorded and neither holds the node, so the record is parsed. The figure captions in the evidence fragment are substantive (residual, converged flag, cell count, axis Z, saddle offset per row, and an explicit warning that an unconverged panel is a terminal iterate), so no caption repeats only a title. Marker colours, stroke widths, text colours and tick positions quoted above were read off the rendered PNG pixels; contrast ratios use the WCAG relative-luminance formula against white.",
+  "project": "nova",
+  "review_run_id": "r-20261116T103915131247-review-of-diiid-inactive-compensator-recovery-7bf27cfc4068-figure",
+  "reviewed_base_sha": "70c2026ce3f4745b42718f6f68f0a0630bd016ae",
+  "reviewed_figures": [
+    {
+      "drawing_script": "scripts/prototypes/diiid_inactive_compensator/render.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T103915131247-review-of-diiid-inactive-compensator-recovery-7bf27cfc4068-figure/image-0.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-recovery/frame-137-diverted.svg",
+      "state": "row 137D (diverted, unconverged)",
+      "state_identified_by": "the gap between the solved saddle marker and the EFIT saddle square in the lower-saddle zoom is visibly the smallest of the four flux panels, matching the 7.53 mm offset in its caption; the solved axis triangle sits on the EFIT axis triangle, matching axis Z = 0.109 cm. Row matches the first entry of the reviewed manifest's figures list.",
+      "stated_values": {
+        "axis_z_cm": 0.10947186815907516,
+        "connected_cells": 339,
+        "converged": false,
+        "lower_saddle_offset_mm": 7.525472339801535,
+        "residual": 0.002457415345648794
+      }
+    },
+    {
+      "drawing_script": "scripts/prototypes/diiid_inactive_compensator/render.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T103915131247-review-of-diiid-inactive-compensator-recovery-7bf27cfc4068-figure/image-1.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-recovery/frame-146-diverted.svg",
+      "state": "row 146D (diverted, converged)",
+      "state_identified_by": "the solved and EFIT contours run closest together of the four panels and the saddle-marker gap is about twice image-0's, matching 16.29 mm against 7.53 mm; the row is the only one its manifest reports converged, and this is the only panel whose solved contours track the reference along their whole length.",
+      "stated_values": {
+        "axis_z_cm": -0.19896132392708796,
+        "connected_cells": 336,
+        "converged": true,
+        "lower_saddle_offset_mm": 16.287404038612923,
+        "residual": 4.1653600277891774e-12
+      }
+    },
+    {
+      "drawing_script": "scripts/prototypes/diiid_inactive_compensator/render.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T103915131247-review-of-diiid-inactive-compensator-recovery-7bf27cfc4068-figure/image-2.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-recovery/frame-146-limited.svg",
+      "state": "row 146L (limited, unconverged)",
+      "state_identified_by": "widest solved-to-EFIT saddle-marker separation of the four panels, matching 43.56 mm, and the largest downward offset of the solved axis triangle from the EFIT one, matching axis Z = -5.695 cm; the same 277-cell and -5.8 cm values are what image-4's blue series plots.",
+      "stated_values": {
+        "axis_z_cm": -5.695004907542689,
+        "connected_cells": 277,
+        "converged": false,
+        "lower_saddle_offset_mm": 43.55504518801956,
+        "residual": 0.0021559261475598006
+      }
+    },
+    {
+      "drawing_script": "scripts/prototypes/diiid_inactive_compensator/render.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T103915131247-review-of-diiid-inactive-compensator-recovery-7bf27cfc4068-figure/image-3.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-recovery/frame-179-limited.svg",
+      "state": "row 179L (limited, unconverged)",
+      "state_identified_by": "the saddle-marker separation is roughly half image-2's, matching 20.17 mm against 43.56 mm (measured about 30 px against 65 px in the zoom), and the solved axis offset is smaller than image-2's, matching -4.197 cm against -5.695 cm; this is also the only panel whose hollow unadmitted solved saddles appear outside the vessel on the inboard side.",
+      "stated_values": {
+        "axis_z_cm": -4.19650243578207,
+        "connected_cells": 225,
+        "converged": false,
+        "lower_saddle_offset_mm": 20.167314500797463,
+        "residual": 0.01678086426433039
+      }
+    },
+    {
+      "drawing_script": "scripts/prototypes/diiid_inactive_compensator/render.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T103915131247-review-of-diiid-inactive-compensator-recovery-7bf27cfc4068-figure/image-4.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-recovery/limited-trajectory.svg",
+      "state": "146L per-trip trajectory, diagnosis against masked-image recovery",
+      "state_identified_by": "the blue series is flat at about 277 cells and about -5.8 cm over four trips, which is 146L's returned set in the manifest; the grey dashed series runs to six trips and ends near 36 cells and 70.5 cm, the published diagnosis trajectory.",
+      "stated_values": {
+        "diagnosis_axis_z_cm": [
+          13.4,
+          32.9,
+          54.6,
+          60.2,
+          67.4,
+          70.51
+        ],
+        "diagnosis_cells": [
+          334,
+          232,
+          137,
+          76,
+          50,
+          36
+        ],
+        "returned_axis_z_cm": [
+          -5.78,
+          -5.82,
+          -5.695,
+          -5.695
+        ],
+        "returned_cells": [
+          278,
+          278,
+          277,
+          277
+        ]
+      }
+    }
+  ],
+  "reviewed_head_sha": "7bf27cfc406824415e9cb87958e5a8733238029c",
+  "reviewed_run_id": "r-20261114T205813832530-diiid-inactive-compensator-recovery",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility [frame-137-diverted.svg via image-0.png]: pass. Both panels read at a glance: the full vessel shows nested solved contours closing around a single axis, and the zoom separates the four contour branches that meet at the lower saddle. The legend sits in clear space above the panels and the two panel captions name their halves. Each panel is small relative to the canvas (the vessel spans about 200 px of 1399) because the R-Z field is tall and narrow, but the zoom panel carries the detail that the vessel cannot.",
+    "RUBRIC data_ink [frame-137-diverted.svg via image-0.png]: pass. The ink is the data: contour lines, the first wall, and six marker classes. Measured on the PNG, solved flux is a single flat colour rgb(51,102,204) and EFIT flux rgb(51,51,51); no gradient, texture, fill or drop shadow appears anywhere.",
+    "RUBRIC decoration [frame-137-diverted.svg via image-0.png]: pass. White background throughout, axes off as the poloidal rule requires, no gridlines, no shading and no frame. The only non-data stroke is the legend key itself.",
+    "RUBRIC contrast [frame-137-diverted.svg via image-0.png]: pass, measured on the rendered pixels: legend and caption text rgb(11,11,11) at 19.7:1 on white, the first wall rgb(146,146,146) at 3.1:1, solved flux rgb(51,102,204) at 5.4:1 and EFIT flux rgb(51,51,51) at 12.6:1. Every text and mark clears its background.",
+    "RUBRIC table_form [frame-137-diverted.svg via image-0.png]: pass. The figure is a spatial comparison of two flux fields and their nulls on the machine cross-section, which no table carries; the numbers behind it are already stated in the figure caption and the evidence table.",
+    "RUBRIC label_collision [frame-137-diverted.svg via image-0.png]: pass, measured on the PNG. All four canvas borders are pure white; inked content spans rows 24-665 of 720 and columns 242-1287 of 1399, so nothing is clipped. No text touches text or data, and the legend entries are separated and clear of both panels. The solved saddle asterisk overlaps the top edge of the EFIT saddle square in the zoom, but both markers keep their own shape and colour and stay distinguishable, so a reader is not shown one mark where there are two.",
+    "RUBRIC legibility [frame-146-diverted.svg via image-1.png]: pass. This is the converged row and the picture shows it: the solved contours track the EFIT contours around the whole polytope and through the lower saddle, and the two saddle markers nearly coincide. Full vessel and zoom both read at a glance with the same legend and panel captions as image-0.",
+    "RUBRIC data_ink [frame-146-diverted.svg via image-1.png]: pass. Contours, wall and nulls only; solved flux rgb(51,102,204), EFIT flux rgb(51,51,51), wall rgb(146,146,146). No fill, gradient or decorative texture.",
+    "RUBRIC decoration [frame-146-diverted.svg via image-1.png]: pass. Axes off, no gridlines, no background shading, no frame; the comparison is carried by line style and colour alone.",
+    "RUBRIC contrast [frame-146-diverted.svg via image-1.png]: pass, measured: text rgb(11,11,11) at 19.7:1, solved flux 5.4:1, EFIT flux 12.6:1, wall 3.1:1 on white.",
+    "RUBRIC table_form [frame-146-diverted.svg via image-1.png]: pass. A spatial field and null comparison against the machine cross-section; the tabulated numbers already appear in the caption and the record's row table.",
+    "RUBRIC label_collision [frame-146-diverted.svg via image-1.png]: pass, measured: all four borders pure white, content rows 24-665 and columns 242-1287 of 1399, no clipped text, no text over data, legend clear. The solved and EFIT axis triangles stand within a few pixels of each other but do not touch, and each is legible.",
+    "RUBRIC legibility [frame-146-limited.svg via image-2.png]: pass. The vessel panel reads: solved and EFIT contour families, the dashed reference inside the solved near the edge, and the solved axis triangle about 6 cm below the EFIT one. In the lower-saddle zoom the solved field reduces to two near-straight contours and the two saddle markers 65 px apart, which is what a limited, unconverged state looks like; the panel still lets a reader see the separation the caption states as 43.56 mm.",
+    "RUBRIC data_ink [frame-146-limited.svg via image-2.png]: pass. Contours, wall and nulls carry all the ink. Stroke widths measured on scanlines are 2-7 px for solved and 1-5 px for EFIT, comparable to each other; no filled region or gradient.",
+    "RUBRIC decoration [frame-146-limited.svg via image-2.png]: pass. Axes off, white ground, no gridlines, no shading. The single extra contour level the limited row adds is a data level, not decoration.",
+    "RUBRIC contrast [frame-146-limited.svg via image-2.png]: pass, measured: text rgb(11,11,11) at 19.7:1, solved flux 5.4:1, EFIT flux 12.6:1, wall 3.1:1.",
+    "RUBRIC table_form [frame-146-limited.svg via image-2.png]: pass. A spatial field comparison on the cross-section; nothing here is naturally tabular.",
+    "RUBRIC label_collision [frame-146-limited.svg via image-2.png]: pass, measured: borders pure white, content rows 24-665 and columns 242-1287, no clipped or overlapping text, legend clear of the panels.",
+    "RUBRIC legibility [frame-179-limited.svg via image-3.png]: pass. The vessel panel reads at a glance: solved contours displaced outboard and upward relative to EFIT, the axis triangles separated by about 4 cm, and four hollow unadmitted saddles including two outside the vessel and two below it. The zoom shows a near-linear solved field crossing at the solved saddle with the EFIT saddle 20 mm to its left. The wall appears in the zoom as a bottom edge, a left diagonal and a short isolated vertical stroke at the panel's right edge; the stroke is the same rgb(146,146,146) first wall clipped by the zoom window, and it is the only element whose identity a reader must infer from the other panels.",
+    "RUBRIC data_ink [frame-179-limited.svg via image-3.png]: pass. Ink is contours, wall and nulls; solved flux 5.4:1, EFIT flux 12.6:1. Dense EFIT levels bunch into a near-solid dark knot at the top edge of the vessel, which is level bunching in the drawn field rather than a decorative weight, and the same region is resolved in the zoom.",
+    "RUBRIC decoration [frame-179-limited.svg via image-3.png]: pass. Axes off, no gridlines, no fills, no frame.",
+    "RUBRIC contrast [frame-179-limited.svg via image-3.png]: pass, measured: text rgb(11,11,11) at 19.7:1, solved flux 5.4:1, EFIT flux 12.6:1, wall 3.1:1.",
+    "RUBRIC table_form [frame-179-limited.svg via image-3.png]: pass. Spatial field and null comparison; the row's numbers live in the caption and the table.",
+    "RUBRIC label_collision [frame-179-limited.svg via image-3.png]: pass, measured: borders pure white, content rows 24-665 and columns 212-1287 of 1399, no clipped or overlapping text. In the top-left corner a hollow blue solved saddle is drawn across the outline of the EFIT saddle square; both keep their shape and colour and are readable as two marks.",
+    "RUBRIC legibility [limited-trajectory.svg via image-4.png]: pass with one reservation carried as finding F2. Both panels read at a glance: the diagnosis collapse from 334 to 36 cells against a flat blue 277, and axis height rising to 70.5 cm against a flat blue -5.8 cm. Axis labels 16 pt (rgb(11,11,11)) and tick labels 14 pt (rgb(81,81,81)) are sharp at 1399 px. The reservation is that the right panel's y ticks stop at 0 while the blue series sits below them.",
+    "RUBRIC data_ink [frame-146-limited.svg via image-4.png]: pass. Two series per panel, one marker per measured trip, no fill, no band, no grid. The blue recovery line is drawn above the grey diagnosis line (zorder 3 against 2) and at 3.0 pt against 2.6, and where the two cross in the left panel the blue passes uninterrupted over the grey.",
+    "RUBRIC decoration [frame-146-limited.svg via image-4.png]: pass. White ground, top and right spines absent, no gridlines, frameless legend above both panels, one legend for the two shared colours.",
+    "RUBRIC contrast [frame-146-limited.svg via image-4.png]: pass, measured: axis labels rgb(11,11,11) at 19.7:1, tick labels rgb(81,81,81) at 7.9:1, blue series rgb(51,102,204) at 5.4:1, grey diagnosis series rgb(146,146,146) at 3.1:1, which is the population grey the style calls for and still reads as data.",
+    "RUBRIC table_form [frame-146-limited.svg via image-4.png]: pass. The point of the figure is the shape of two trajectories across six trips, including where the blue one stops; the endpoint values are already tabulated in the caption and the evidence table.",
+    "RUBRIC label_collision [frame-146-limited.svg via image-4.png]: pass, measured: borders pure white, content rows 24-656 and columns 62-1344 of 1399, no label clipped, no two labels touching, no label over a data mark, and the legend clear of both panels."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T10:47:48Z",
+  "total": null
+}

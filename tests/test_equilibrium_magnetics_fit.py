@@ -1021,21 +1021,25 @@ def _draw_recovery_panels(name, case, fitted):
         )
     )[1:-1]
     grey, blue = "#929292", DEFAULT_INK.flux_color
+    # Both maps share one panel and one level array: the generating map is the
+    # wide line underneath and the recovered map the narrow line on top, so
+    # agreement reads as a narrow line centred in a wide one and any
+    # disagreement as the two lines parting.
+    wide, narrow = 3.6, 1.1
     original_style = DEFAULT_INK.variant(
-        axis_color=grey, xpoint_color=grey, axis_markersize=9.0, xpoint_markersize=10.0
+        axis_color=grey, xpoint_color=grey, axis_markersize=15.0, xpoint_markersize=16.0
     )
-    recovered_style = DEFAULT_INK.variant(axis_color=blue, xpoint_color=blue)
-    figure, axes = plt.subplots(1, 2, figsize=(14.0, 7.2), dpi=100)
-    figure.subplots_adjust(left=0.03, right=0.97, bottom=0.06, top=0.84, wspace=0.12)
+    recovered_style = DEFAULT_INK.variant(
+        axis_color=blue, xpoint_color=blue, axis_markersize=7.0, xpoint_markersize=8.0
+    )
+    figure, axis = plt.subplots(1, 1, figsize=(14.0, 7.2), dpi=100)
+    figure.subplots_adjust(left=0.03, right=0.97, bottom=0.03, top=0.90)
     coordinate = case["coordinate"]
-    for axis, state, color, label in zip(
-        axes,
-        (generated, recovered),
-        (grey, blue),
-        ("generating", "recovered"),
-        strict=True,
+    poloidal_axes(axis)
+    for state, color, linewidth, landmark_style in (
+        (generated, grey, wide, original_style),
+        (recovered, blue, narrow, recovered_style),
     ):
-        poloidal_axes(axis)
         poloidal.draw_scattered_contours(
             axis,
             coordinate[:, 0],
@@ -1044,25 +1048,21 @@ def _draw_recovery_panels(name, case, fitted):
             levels,
             case["wall"],
             color=color,
-            linewidth=1.2,
+            linewidth=linewidth,
         )
-        poloidal.draw_wall(axis, units=case["wall"])
-        for landmarks, style in (
-            (generated.topology, original_style),
-            (recovered.topology, recovered_style),
-        ):
-            diverted = bool(landmarks.diverted)
-            poloidal.draw_nulls(
-                axis,
-                magnetic_axis=np.asarray(landmarks.axis),
-                x_points=np.asarray(landmarks.x_point) if diverted else None,
-                other_x_points=np.asarray(landmarks.x_point) if not diverted else None,
-                contain=case["wall"],
-                style=style,
-            )
-        axis.text(0.5, 1.02, label, ha="center", transform=axis.transAxes, fontsize=16)
+        landmarks = state.topology
+        diverted = bool(landmarks.diverted)
+        poloidal.draw_nulls(
+            axis,
+            magnetic_axis=np.asarray(landmarks.axis),
+            x_points=np.asarray(landmarks.x_point) if diverted else None,
+            other_x_points=np.asarray(landmarks.x_point) if not diverted else None,
+            contain=case["wall"],
+            style=landmark_style,
+        )
+    poloidal.draw_wall(axis, units=case["wall"])
     legend = figure.legend(
-        [Line2D([], [], color=grey, lw=2.6), Line2D([], [], color=blue, lw=3.0)],
+        [Line2D([], [], color=grey, lw=wide), Line2D([], [], color=blue, lw=narrow)],
         ["generating", "recovered"],
         loc="upper center",
         ncol=2,
@@ -1071,11 +1071,7 @@ def _draw_recovery_panels(name, case, fitted):
     )
     figure.canvas.draw()
     renderer = figure.canvas.get_renderer()
-    texts = [
-        *figure.texts,
-        *legend.get_texts(),
-        *(text for axis in axes for text in axis.texts),
-    ]
+    texts = [*figure.texts, *legend.get_texts(), *axis.texts]
     boxes = [(text.get_text(), text.get_window_extent(renderer)) for text in texts]
     for label, box in boxes:
         if not figure.bbox.contains(box.x0, box.y0) or not figure.bbox.contains(

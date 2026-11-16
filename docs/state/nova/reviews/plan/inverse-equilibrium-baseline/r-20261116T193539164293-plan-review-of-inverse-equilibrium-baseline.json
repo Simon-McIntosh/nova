@@ -1,0 +1,85 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T19:38:32.006Z",
+  "dispatched_at": "2026-11-16T19:37:30Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:180",
+      "id": "done_when-1",
+      "reason": "the clause counts 256 construction-identical realisations as half the evidence for honesty, so a node and a reader treat a self-consistency identity as validation; dropping the arm, or restating it as a check that the receipt's covariance is the operator's inverse with the honesty claim rested on the 32 full fits alone (whose joint 99 % band over six directions is 0.386 to 1.99, the only falsifiable measure in the clause), changes what the node must produce and what the record may claim.",
+      "text": "clause (1)'s linearised arm propagates each noise realisation through \"the fit's linearised least-squares operator\" and divides the resulting variance by the receipt covariance, but that covariance is the same operator's Gram inverse, so the ratio is identically one whatever the covariance claims; measured on an arbitrary 40x2 response with propagation at the stated per-row scale, the empirical variance along the covariance's principal directions was 1.0036 and 1.0045 at 20,000 draws \u2014 the arm can only reveal that two implementations disagree, not whether the reported uncertainty is honest, and it is reported as one of the two arms that answer the section's question",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c303b198a06d237bce92a5ab9e1e7e362892d767",
+  "plan_fingerprint": "e76932eacdeb1636939bf997f003dfcde3e3db81823f271f9421e3b6c99948eb",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 28,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b87c8a4fe3bb59bd6d6205e609b2aa1cc7983f03",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The clause now rests the honesty test on the 32 full nonlinear fits alone, with their own interval, and restates the 256 linearised realisations as a check that the receipt covariance is the operator inverse, not as evidence of honesty.",
+      "reason": "",
+      "when": "2026-11-16T19:55:27.972381+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b87c8a4fe3bb59bd6d6205e609b2aa1cc7983f03",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The clause now rests the honesty test on the 32 full nonlinear fits alone, with their own interval, and restates the 256 linearised realisations as a check that the receipt covariance is the operator inverse, not as evidence of honesty.",
+      "reason": "",
+      "when": "2026-11-16T19:55:40.545372+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b87c8a4fe3bb59bd6d6205e609b2aa1cc7983f03",
+      "commit_basis": "edit",
+      "note": "The clause now rests the honesty test on the 32 full nonlinear fits alone, with their own interval, and restates the 256 linearised realisations as a check that the receipt covariance is the operator inverse, not as evidence of honesty.",
+      "reason": "",
+      "when": "2026-11-16T19:55:40.545372+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261116T193539164293-plan-review-of-inverse-equilibrium-baseline.json",
+  "review_run_id": "r-20261116T193539164293-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "2312ec21af27e86f1f6c4a1d7563a09c969d803d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/figures/inverse-equilibrium-baseline/inverse-seam.svg`, `spine-efit-parity` (resolved as `.html`), the landed record and `docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html` all resolve; s6 itself cites no anchor.",
+    "done_when": "a finding \u2014 the 256-realisation linearised arm of clause (1) propagates noise through the same operator whose Gram inverse is the receipt covariance, so its ratio is one by construction and cannot test the covariance's honesty (docs/plans/inverse-equilibrium-baseline.html:180).",
+    "evidence_paths": "pass \u2014 s6 names no scratch or node-local path, its records fall under the repository evidence convention, and the plan's record path is stated in \u00a70.",
+    "naming": "pass \u2014 s6 names no symbol, file or function and carries no plan label or ticket number into code.",
+    "reasoning": "pass \u2014 the stated root cause (a covariance that the \u00a71 record retains but never tests) matches `known-answer-recovery.html:7`, the endpoint is obtainable from the fit's public receipt, and the section prescribes no code path, step sequence, formula or function.",
+    "single_goal": "pass \u2014 \u00a76 delivers one covariance-honesty study; clause (2)'s flux-error scaling is a reported adjunct of that study, not a second deliverable.",
+    "wiring": "pass \u2014 s6 declares no depends-on, matching its three statements that \u00a71 has landed and is reused rather than awaited (contract table row, opening sentence, `plan-section-depends-on`), and s7 still declares s6 among its dependencies."
+  },
+  "section_digests": {
+    "_document": "6178db02b44e9ad3cff3cfe4fe6e5f90d4dc4fc328abed9922653dff8253e088",
+    "s0": "18fa4b3820d8a53b8b11be7cc05c1e0e3838163b619eac989edfed114e1e0b7b",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "869fae9b37d5960c1ec034e608f17f0bda580b5851fa4c12723a067ed80b3da1",
+    "s3": "aabab320c034e5a6720e0b3877958935e6c3b63577de3674cd6e87f6120889ba",
+    "s4": "a8f5721b1827357df497c97788c8bc9c5bb1266579ca0d04f61045c915138730",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "04b459bda20d402cb84826f105ac9bc09da228a6564024f7cce34867d298a5c6",
+    "s7": "5c750c79d813b34b96a3b3b418cd41dd92a06de78455a410a3cfd366c1aeabee",
+    "s8": "a609d17e17a1eb1b6e8ad1052d90547086b7bf3e11af31c024bfa48ada28ae0d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T19:54:29.306874+00:00",
+  "total": null,
+  "traced_units": [
+    "s6"
+  ]
+}

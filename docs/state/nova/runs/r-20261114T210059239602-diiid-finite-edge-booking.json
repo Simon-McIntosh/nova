@@ -1,0 +1,6140 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 6,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T210059239602-diiid-finite-edge-booking/brief.md",
+    "sha256": "17218721330292f319ff000c40dec22f2adb16b2b97260814586cc264c875ed1"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 60289016,
+      "input_tokens_cumulative": 60289016,
+      "output_tokens": 132027,
+      "output_tokens_cumulative": 132027,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 4447,
+    "files": 19,
+    "removed": 47
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 450,
+        "name": "preregistration",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 565
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "_fixture_summary",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 450,
+        "name": "preregistration",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 465
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 450,
+        "name": "preregistration",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 465
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "pulse_record",
+        "path": "tests/calibrate/test_sweep.py"
+      },
+      "run_function": {
+        "line": 450,
+        "name": "preregistration",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 490
+    },
+    {
+      "existing_function": {
+        "line": 10,
+        "name": "_source",
+        "path": "tests/imas/test_diiid_ids_machine_description.py"
+      },
+      "run_function": {
+        "line": 450,
+        "name": "preregistration",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 490
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 450,
+        "name": "preregistration",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 516
+    },
+    {
+      "existing_function": {
+        "line": 84,
+        "name": "test_banked_receipt_applies_constrained_map_once_at_reference",
+        "path": "tests/test_efit_parity_root_geometry.py"
+      },
+      "run_function": {
+        "line": 450,
+        "name": "preregistration",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 493
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "test_banked_receipt_uses_live_moment_normalisers",
+        "path": "tests/test_efit_parity_root_geometry.py"
+      },
+      "run_function": {
+        "line": 450,
+        "name": "preregistration",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 493
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "_pulse_evidence",
+        "path": "tests/test_filepath_data_roots.py"
+      },
+      "run_function": {
+        "line": 450,
+        "name": "preregistration",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 490
+    },
+    {
+      "existing_function": {
+        "line": 157,
+        "name": "measure_receipt",
+        "path": "tests/test_krylov_route_conditioning.py"
+      },
+      "run_function": {
+        "line": 450,
+        "name": "preregistration",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 494
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 450,
+        "name": "preregistration",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 589
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1252,
+        "name": "_couplings",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 1372
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2210
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2210
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "_population",
+        "path": "tests/test_booking_scalar_tile.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2210
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2210
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2203
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2210
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2210
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 2199,
+        "name": "_branch_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 2204
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "_population",
+        "path": "tests/test_booking_scalar_tile.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_stored_boundary_support_and_accuracy_floor_are_explicit",
+        "path": "tests/test_efit_parity_field_instrument.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "test_default_is_unchanged",
+        "path": "tests/test_filepath_data_roots.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3245
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3242
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 3224,
+        "name": "_frame_result_from_checkpoint",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3243
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 3503,
+        "name": "_displacement_summary",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 3503,
+        "name": "_displacement_summary",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3546
+    },
+    {
+      "existing_function": {
+        "line": 120,
+        "name": "main",
+        "path": "tests/measure_external_wall_correction.py"
+      },
+      "run_function": {
+        "line": 3503,
+        "name": "_displacement_summary",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3553
+    },
+    {
+      "existing_function": {
+        "line": 263,
+        "name": "measured",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "run_function": {
+        "line": 3503,
+        "name": "_displacement_summary",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3548
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 3570,
+        "name": "summarize",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3675
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 3570,
+        "name": "summarize",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3676
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "measure_production_receipt",
+        "path": "tests/test_conditioning_shrinkage.py"
+      },
+      "run_function": {
+        "line": 3570,
+        "name": "summarize",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 3672
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "_fixture_summary",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 4925,
+        "name": "run_wall_topology_surface",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5085
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 4925,
+        "name": "run_wall_topology_surface",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5083
+    },
+    {
+      "existing_function": {
+        "line": 234,
+        "name": "test_mesh_receipt_preserves_the_split_and_never_pools_residuals",
+        "path": "tests/test_efit_parity_tared_external_field.py"
+      },
+      "run_function": {
+        "line": 5144,
+        "name": "_run_sign_parity_check",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5160
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_metrics_stub",
+        "path": "tests/test_efit_parity_warm_neighbour.py"
+      },
+      "run_function": {
+        "line": 5144,
+        "name": "_run_sign_parity_check",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5160
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 5144,
+        "name": "_run_sign_parity_check",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5160
+    },
+    {
+      "existing_function": {
+        "line": 151,
+        "name": "_synthetic_fieldnull_capture",
+        "path": "tests/test_production_solver_receipt_trip_alignment.py"
+      },
+      "run_function": {
+        "line": 5144,
+        "name": "_run_sign_parity_check",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5161
+    },
+    {
+      "existing_function": {
+        "line": 224,
+        "name": "measure",
+        "path": "tests/test_factor_ladder_extension.py"
+      },
+      "run_function": {
+        "line": 5275,
+        "name": "_margin_arm_summary",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5302
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 120,
+        "name": "main",
+        "path": "tests/measure_external_wall_correction.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5443
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "_population",
+        "path": "tests/test_booking_scalar_tile.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5343
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 5317,
+        "name": "_merge_xpoint_diagnostics",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5336
+    },
+    {
+      "existing_function": {
+        "line": 157,
+        "name": "measure_receipt",
+        "path": "tests/test_krylov_route_conditioning.py"
+      },
+      "run_function": {
+        "line": 5574,
+        "name": "run_margin_frame_remeasure",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5680
+    },
+    {
+      "existing_function": {
+        "line": 228,
+        "name": "_solve_receipt",
+        "path": "tests/test_carrier_vertex_identity.py"
+      },
+      "run_function": {
+        "line": 5718,
+        "name": "_corrected_topology_mechanism",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5762
+    },
+    {
+      "existing_function": {
+        "line": 627,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 5718,
+        "name": "_corrected_topology_mechanism",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5761
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 5718,
+        "name": "_corrected_topology_mechanism",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5762
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 5718,
+        "name": "_corrected_topology_mechanism",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5762
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_treats_a_positionally_passed_wall_as_guarded",
+        "path": "tests/test_renderer_wall_scan.py"
+      },
+      "run_function": {
+        "line": 5718,
+        "name": "_corrected_topology_mechanism",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5762
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 5718,
+        "name": "_corrected_topology_mechanism",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 5762
+    },
+    {
+      "existing_function": {
+        "line": 224,
+        "name": "measure",
+        "path": "tests/test_factor_ladder_extension.py"
+      },
+      "run_function": {
+        "line": 6091,
+        "name": "run",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 6198
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "main",
+        "path": "tests/test_krylov_route_conditioning.py"
+      },
+      "run_function": {
+        "line": 6341,
+        "name": "main",
+        "path": "benchmarks/diiid_forward_gs_match.py"
+      },
+      "window_line": 6455
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "integrate",
+        "path": "tests/test_book_primal_buckets.py"
+      },
+      "run_function": {
+        "line": 489,
+        "name": "integrate",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 489
+    },
+    {
+      "existing_function": {
+        "line": 246,
+        "name": "integrate",
+        "path": "tests/test_current_book_vectorised.py"
+      },
+      "run_function": {
+        "line": 489,
+        "name": "integrate",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 491
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "booking_tangent",
+        "path": "tests/test_bank_newton_converge.py"
+      },
+      "run_function": {
+        "line": 585,
+        "name": "book_tangent",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 589
+    },
+    {
+      "existing_function": {
+        "line": 209,
+        "name": "book_tangent",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "run_function": {
+        "line": 585,
+        "name": "book_tangent",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 585
+    },
+    {
+      "existing_function": {
+        "line": 40,
+        "name": "reference_book",
+        "path": "tests/test_book_primal_buckets.py"
+      },
+      "run_function": {
+        "line": 585,
+        "name": "book_tangent",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 708
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "booking_tangent",
+        "path": "tests/test_bank_newton_converge.py"
+      },
+      "run_function": {
+        "line": 746,
+        "name": "book_tangent_channels",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 750
+    },
+    {
+      "existing_function": {
+        "line": 209,
+        "name": "book_tangent",
+        "path": "tests/test_bank_newton_step.py"
+      },
+      "run_function": {
+        "line": 746,
+        "name": "book_tangent_channels",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 747
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "conic",
+        "path": "tests/test_book_primal_buckets.py"
+      },
+      "run_function": {
+        "line": 872,
+        "name": "evaluate",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 873
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "conic",
+        "path": "tests/test_current_book_vectorised.py"
+      },
+      "run_function": {
+        "line": 872,
+        "name": "evaluate",
+        "path": "nova/equilibrium/current.py"
+      },
+      "window_line": 874
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1666
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1666
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "_population",
+        "path": "tests/test_booking_scalar_tile.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1666
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1666
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1666
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1666
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 1654,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 1657
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_seeding_leaves_the_physical_configuration_identical",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2639
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_each_family_resolves_at_its_own_key_width",
+        "path": "tests/test_mast_saddle_voltage_reach.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2639
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 2600,
+        "name": "_compute_geometry_identity",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2628
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_certified_limited_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_certified_diverted_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_certified_diverted_2000_carrier_converges",
+        "path": "tests/equilibrium/test_certificate_550_convergence.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_first_diverted_correction_is_finite",
+        "path": "tests/equilibrium/test_read_correction_path.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 260,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_critical_node_capacity_overflow_is_jittable_and_visible",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_cold_and_cached_plants_are_identical",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_the_cache_is_written_by_the_circuit_tier_serialisers",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_machine_passive_layers_change_screening_and_preserve_one_layer",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 823,
+        "name": "test_dina_case_through_the_generic_source_is_unchanged",
+        "path": "tests/test_coupled_plant.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 2726,
+        "name": "tree_flatten",
+        "path": "nova/equilibrium/forward_operator.py"
+      },
+      "window_line": 2739
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_circuit_bypass_exposes_three_prior_driven_diagnostic_slots",
+        "path": "tests/imas/test_diiid_current.py"
+      },
+      "run_function": {
+        "line": 274,
+        "name": "test_outer_loop_updates_only_three_circuit_bypass_prior_slots",
+        "path": "tests/imas/test_diiid_current.py"
+      },
+      "window_line": 275
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "b5aa09151cc69fba22a2812f13eeee319a4d7bdc",
+    "02f26665604992d1625a9525279e4197ed38b5ed",
+    "8209a55d20ecc911adc6f25d7e82d08443cb4d04",
+    "e6f7c6245e467e94107247b79fca4ff93991b1c3",
+    "4b9a50a3217988b2fa0720c57379626e3400f1d9",
+    "84597ada98463e1444fad1de0f33ac5a7fbafbbd",
+    "46cff16946f19cca06db07625030da8077c92148",
+    "24a331d4018568bbf441d55d363d1c3f86c6bffd",
+    "cc9b43fbae905dd38571361a37a99cf9b3c269a9",
+    "fbe7065aa5fd1a526f6d0f3fd6bbe3d84a43246f",
+    "e168d6d03dadf151979213b6fae152eb45e273b3",
+    "ebeba958b3b4c50029e0ee58f183414561382bed",
+    "9c102cbae6b7c70421a867973540cfbfb5066227",
+    "99dcee51071660d1acef117c5222ffeeba0ad48d",
+    "37d74cc9be7147bf9e57303893c8cfb5cbaaff3f",
+    "232d6cd7f9394981ed095f7349c83627a4cf5dee",
+    "9db42ffa06fd996f76dce99de5131c80ffc88e4b",
+    "83dfabd108f58f76adc8a4172fd9884bd3f932cb",
+    "22facfe54eb60760c99c9030e28e94af49091753",
+    "6ee5be9b4a4a042f5b6363dd7787f50e75a87308",
+    "fb76e1fbf635c57e32cf02b74e9bdfad40b4beb8",
+    "3c9422fc2db36ca7103cf34d68f847e14c1567a5",
+    "3fea105c8183f876011e2a1a64f6fc895439d449",
+    "02180da226345cb2676923ec0041dabdd36c9fda",
+    "62b1fd39191fcc5ad492a880f71c1db1945f1d47",
+    "f4bf6f5e43adfad899663295f103f03bf9f89d6c",
+    "f851ffff2a5124289a4e1c1a17a50fcbab3b1120",
+    "e17681d6c0e21e2c00e1e2848d769ff542c71c40",
+    "eba5cca15672bb173d908775d31a38c6a2ce4d61",
+    "dc8001e5ff3e82a2f2848118127158ca3ecb82c9"
+  ],
+  "completed_at": "2026-11-15T22:20:13Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-14T23:26:53Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q --deselect tests/test_equilibrium_forward_solve.py::test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap  tests/test_current_book_fragments.py tests/test_current_book_vectorised.py tests/test_booking_scalar_tile.py tests/test_equilibrium_forward_solve.py tests/test_equilibrium_forward.py tests/equilibrium/test_finite_edge_booking.py tests/imas/test_diiid_current.py tests/imas/test_diiid_current_pinned_forward.py",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T210059239602-diiid-finite-edge-booking/gate6/head-final.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.6666666666666666,
+    "plan": "diiid-vertical-force-balance",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-15T11:25:29.777916+00:00",
+    "horizon_seconds": 43200,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-14T23:25:29Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 1,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 12,
+    "headroom": -11,
+    "mean_context": 116667,
+    "observed_at": "2026-11-14T23:25:32Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 1,
+      "aggregate_tokens_per_second": 341.521,
+      "detail": "",
+      "mean_tokens_per_second": 29.958,
+      "observed_at": "2026-11-14T23:25:32Z",
+      "runs": 11.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-15T22:20:13Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T210059239602-diiid-finite-edge-booking/manifest.md",
+  "member": "disposable-r-20261114T210059239602-diiid-finite-edge-booking",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/equilibrium/test_finite_edge_booking.py::test_the_public_builder_books_the_route_it_runs"
+    ],
+    "baseline_failure_ids": [
+      "tests/imas/test_diiid_current.py::test_banked_circuit_receipt_matches_runtime_calibration",
+      "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find",
+      "tests/test_equilibrium_forward_solve.py::test_a_terminal_class_contradiction_stays_in_its_branch_receipt",
+      "tests/test_equilibrium_forward_solve.py::test_an_externally_supplied_flux_map_is_qualified_by_the_same_receipt",
+      "tests/test_equilibrium_forward_solve.py::test_current_uses_profile_support_and_pointwise_open_selection",
+      "tests/test_equilibrium_forward_solve.py::test_the_accelerated_solve_reaches_its_fixed_point",
+      "tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point",
+      "tests/test_equilibrium_forward_solve.py::test_the_batched_ensemble_solve_matches_the_per_slice_solve",
+      "tests/test_equilibrium_forward_solve.py::test_the_conservation_receipt_meets_its_registered_tolerances",
+      "tests/test_equilibrium_forward_solve.py::test_the_host_iteration_exits_early_on_the_shared_residual",
+      "tests/test_equilibrium_forward_solve.py::test_the_host_iteration_reproduces_the_traced_ladder",
+      "tests/test_equilibrium_forward_solve.py::test_the_host_root_find_holds_the_equilibrium_it_is_seeded_on",
+      "tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences",
+      "tests/test_equilibrium_forward_solve.py::test_the_plasma_current_is_differentiable_in_the_conductor_current",
+      "tests/test_equilibrium_forward_solve.py::test_the_receipt_records_an_untouched_absolute_source",
+      "tests/test_equilibrium_forward_solve.py::test_the_relaxed_iteration_floors_at_the_flux_resolution",
+      "tests/test_equilibrium_forward_solve.py::test_the_solve_is_differentiable_in_the_conductor_current",
+      "tests/test_equilibrium_forward_solve.py::test_the_solve_reaches_one_equilibrium_from_several_seeds",
+      "tests/test_equilibrium_forward_solve.py::test_the_solve_refuses_to_enforce_a_moment",
+      "tests/test_equilibrium_forward_solve.py::test_the_topology_read_publishes_every_domain"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/equilibrium/test_finite_edge_booking.py::test_the_public_builder_books_the_route_it_runs"
+    ],
+    "control_log_source": "manifest",
+    "control_run_failed": true,
+    "declaration": "Restore the value-only point-current route (_point_current_moments) for the finite-edge profile in the DIII-D consumer; the continuity test must fail on the finite step as a sample crosses psi_N=1",
+    "head_failure_ids": [
+      "tests/imas/test_diiid_current.py::test_banked_circuit_receipt_matches_runtime_calibration",
+      "tests/test_equilibrium_forward.py::test_the_solve_defaults_to_the_root_find",
+      "tests/test_equilibrium_forward_solve.py::test_a_terminal_class_contradiction_stays_in_its_branch_receipt",
+      "tests/test_equilibrium_forward_solve.py::test_an_externally_supplied_flux_map_is_qualified_by_the_same_receipt",
+      "tests/test_equilibrium_forward_solve.py::test_current_uses_profile_support_and_pointwise_open_selection",
+      "tests/test_equilibrium_forward_solve.py::test_the_accelerated_solve_reaches_its_fixed_point",
+      "tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point",
+      "tests/test_equilibrium_forward_solve.py::test_the_batched_ensemble_solve_matches_the_per_slice_solve",
+      "tests/test_equilibrium_forward_solve.py::test_the_conservation_receipt_meets_its_registered_tolerances",
+      "tests/test_equilibrium_forward_solve.py::test_the_host_iteration_exits_early_on_the_shared_residual",
+      "tests/test_equilibrium_forward_solve.py::test_the_host_iteration_reproduces_the_traced_ladder",
+      "tests/test_equilibrium_forward_solve.py::test_the_host_root_find_holds_the_equilibrium_it_is_seeded_on",
+      "tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences",
+      "tests/test_equilibrium_forward_solve.py::test_the_plasma_current_is_differentiable_in_the_conductor_current",
+      "tests/test_equilibrium_forward_solve.py::test_the_receipt_records_an_untouched_absolute_source",
+      "tests/test_equilibrium_forward_solve.py::test_the_relaxed_iteration_floors_at_the_flux_resolution",
+      "tests/test_equilibrium_forward_solve.py::test_the_solve_is_differentiable_in_the_conductor_current",
+      "tests/test_equilibrium_forward_solve.py::test_the_solve_reaches_one_equilibrium_from_several_seeds",
+      "tests/test_equilibrium_forward_solve.py::test_the_solve_refuses_to_enforce_a_moment",
+      "tests/test_equilibrium_forward_solve.py::test_the_topology_read_publishes_every_domain"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T210059239602-diiid-finite-edge-booking/controls/builder-mutation.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T210059239602-diiid-finite-edge-booking/controls/builder-mutation.log",
+    "test_paths": [
+      "tests/equilibrium/test_finite_edge_booking.py",
+      "tests/imas/test_diiid_current.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "diiid-finite-edge-booking",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T210059239602-diiid-finite-edge-booking/steering.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T210059239602-diiid-finite-edge-booking/brief.md",
+    "brief_sha256": "17218721330292f319ff000c40dec22f2adb16b2b97260814586cc264c875ed1",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 331,
+          "cached_input_tokens": 168690,
+          "input_tokens": 169023,
+          "output_tokens": 117,
+          "reasoning_output_tokens": 48,
+          "total_tokens": 169140,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+      "session_id": "35a66cc6-f4f1-4358-8dbb-99c9333c7249"
+    },
+    "done_when": "Section s6's three done-when clauses: continuity and tangent test with a point-route negative control; DIII-D consumer selects the booked route with focused tests adding no failure on all_debug; four-row rerun in one H200 job (titan only if betelgeuse pends) with the per-row table and flux-contour panels",
+    "estimated_hours": 8.0,
+    "goal": "Route the DIII-D finite-edge source through the clipped-current booking so the source integral and its tangent stay continuous as a sample crosses the plasma boundary",
+    "id": "diiid-finite-edge-booking",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-14T23:25:29Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 1,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 12,
+      "headroom": -11,
+      "mean_context": 116667,
+      "observed_at": "2026-11-14T23:25:32Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 1,
+        "aggregate_tokens_per_second": 341.521,
+        "detail": "",
+        "mean_tokens_per_second": 29.958,
+        "observed_at": "2026-11-14T23:25:32Z",
+        "runs": 11.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T210059239602-diiid-finite-edge-booking/manifest.md",
+    "negative_control": "Restore the value-only point-current route (_point_current_moments) for the finite-edge profile in the DIII-D consumer; the continuity test must fail on the finite step as a sample crosses psi_N=1",
+    "over_fence_note": "",
+    "over_fence_reason": "",
+    "peer_scopes": {
+      "bank-hessian-reference": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-reference.html",
+        "docs/figures/sub-millisecond-forward-path/bank-hessian-reference",
+        "scripts/prototypes/bank_hessian_reference"
+      ],
+      "bank-width-probe": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html",
+        "docs/figures/sub-millisecond-forward-path/bank-width-probe",
+        "scripts/prototypes/bank_h200_slice_profile/run.py",
+        "scripts/prototypes/bank_width_probe"
+      ],
+      "carried-read-mask-geometry": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/carried-read-mask-geometry.html",
+        "nova/equilibrium/topology.py",
+        "tests/test_carried_read_refresh.py"
+      ],
+      "diiid-edge-current-refusal": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal.html",
+        "docs/figures/diiid-edge-current-refusal",
+        "docs/figures/diiid-edge-current-refusal/frame-137-diverted.svg",
+        "docs/figures/diiid-edge-current-refusal/frame-146-limited.svg",
+        "docs/figures/diiid-edge-current-refusal/frame-179-limited.svg",
+        "scripts/prototypes/diiid_edge_current_refusal"
+      ],
+      "diiid-external-current-propagation": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html",
+        "docs/figures/diiid-external-current-propagation",
+        "scripts/prototypes/diiid_external_current_propagation"
+      ],
+      "diiid-inactive-compensator-recovery": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html",
+        "docs/figures/diiid-inactive-compensator",
+        "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-recovery",
+        "nova/equilibrium/constraint.py",
+        "nova/equilibrium/fixed_point.py",
+        "nova/equilibrium/reduced_newton.py",
+        "scripts/prototypes/diiid_inactive_compensator",
+        "tests/equilibrium/test_solve_vertical_pin.py"
+      ],
+      "dina-flattop-scenario": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/dina-flattop-scenario.html",
+        "docs/figures/sub-millisecond-forward-path/dina-flattop-scenario",
+        "scripts/prototypes/dina_flattop_scenario"
+      ],
+      "efit-comparison": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html",
+        "docs/figures/inverse-equilibrium-baseline/efit-comparison",
+        "nova/equilibrium/magnetics_fit.py",
+        "nova/equilibrium/measurement.py",
+        "nova/imas/mast_efit_referee.py",
+        "nova/imas/parity_tolerances.py",
+        "tests/test_equilibrium_forward.py",
+        "tests/test_equilibrium_magnetics_fit.py",
+        "tests/test_magnetics_fit_efit_comparison.py"
+      ],
+      "estimator-scoreboard": [
+        "benchmarks/estimator_scoreboard.py",
+        "docs/evidence/fragments/inverse-equilibrium-baseline/estimator-scoreboard.html",
+        "nova/imas/mast_efit_referee.py",
+        "nova/imas/parity_tolerances.py",
+        "tests/test_estimator_scoreboard.py"
+      ],
+      "fused-booking-named-moments": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-named-moments.html",
+        "docs/figures/sub-millisecond-forward-path/fused-booking-named-moments",
+        "nova/equilibrium/current.py",
+        "nova/equilibrium/support_read.py",
+        "tests/test_fused_booking_assembly.py"
+      ],
+      "geometry-reuse": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/geometry-reuse.html",
+        "docs/figures/sub-millisecond-forward-path/geometry-reuse",
+        "nova/equilibrium/support_read.py",
+        "nova/equilibrium/topology.py",
+        "scripts/prototypes/geometry_reuse",
+        "tests/test_geometry_reuse.py"
+      ],
+      "icm-linear-assembly-cost": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-linear-assembly-cost.html",
+        "docs/figures/iron-core-magnetisation/icm-linear-assembly-cost",
+        "nova/biot/magnetisation.py",
+        "nova/biot/tiledassembly.py",
+        "scripts/iron_linear_magnetisation",
+        "tests/test_magnetisation.py"
+      ],
+      "ilf-material-fill-fraction": [
+        "docs/evidence/fragments/iron-limb-fill-fraction",
+        "docs/evidence/fragments/iron-limb-fill-fraction/ilf-material-fill-fraction.html",
+        "docs/figures/iron-limb-fill-fraction/ilf-material-fill-fraction",
+        "nova/biot/magnetisation.py",
+        "scripts/iron_limb_production",
+        "tests/test_magnetisation.py"
+      ],
+      "ilf-true-outline-read": [
+        "docs/evidence/fragments/iron-limb-fill-fraction",
+        "docs/evidence/fragments/iron-limb-fill-fraction/ilf-true-outline-read.html",
+        "docs/figures/iron-limb-fill-fraction/ilf-true-outline-read",
+        "nova/imas/machine.py",
+        "scripts/iron_graded_refinement",
+        "scripts/magnetisation_law",
+        "scripts/sheet_tile_census",
+        "scripts/west_iron_galerkin",
+        "scripts/west_iron_galerkin_pair",
+        "scripts/west_iron_solve",
+        "scripts/west_picard_control",
+        "scripts/west_root_branch",
+        "scripts/west_stray_field",
+        "tests/test_imas_iron_read.py"
+      ],
+      "ilf-west-true-outline-evidence": [
+        "docs/evidence/archive/iron-limb-fill-fraction-landed.html",
+        "docs/evidence/fragments/iron-limb-fill-fraction",
+        "docs/evidence/fragments/iron-limb-fill-fraction/ilf-west-true-outline-evidence.html",
+        "docs/figures/iron-limb-fill",
+        "docs/figures/iron-limb-fill-fraction/ilf-west-true-outline-evidence",
+        "scripts/iron_limb_production"
+      ],
+      "importer-delta": [
+        "docs/evidence/fragments/kernel-compile-barrier/importer-delta.html",
+        "docs/figures/kernel-compile-barrier/importer-delta"
+      ],
+      "iter-bank-figure-redraw": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-figure-redraw.html",
+        "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank.html",
+        "docs/figures/sub-millisecond-forward-path/iter-bank",
+        "docs/figures/sub-millisecond-forward-path/iter-bank-figure-redraw",
+        "scripts/prototypes/iter_bank/render.py"
+      ],
+      "iter-bank-recertify": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+        "docs/figures/sub-millisecond-forward-path/iter-bank",
+        "scripts/prototypes/iter_bank",
+        "tests/test_iter_bank.py"
+      ],
+      "known-answer-recovery": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+        "docs/figures/inverse-equilibrium-baseline",
+        "docs/figures/inverse-equilibrium-baseline/known-answer-recovery",
+        "nova/equilibrium/__init__.py",
+        "nova/equilibrium/magnetics_fit.py",
+        "nova/equilibrium/measurement.py",
+        "nova/equilibrium/observation_kernels.py",
+        "tests/test_equilibrium_forward.py",
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "ordered-sharing": [
+        "docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html",
+        "docs/figures/kernel-compile-barrier/ordered-sharing",
+        "nova/biot/polygonanalytic.py",
+        "nova/equilibrium/fixed_points.py",
+        "tests/biot"
+      ],
+      "polygon-tangent-repair": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/polygon-tangent-repair.html",
+        "nova/biot/polygonanalytic.py",
+        "scripts/prototypes/polygon_tangent_repair",
+        "tests/biot/test_polygon_edge_line_tangent.py"
+      ],
+      "reconstruction-cost": [
+        "benchmarks/reconstruction_cost.py",
+        "docs/evidence/fragments/inverse-equilibrium-baseline/reconstruction-cost.html",
+        "tests/test_reconstruction_cost.py"
+      ],
+      "titan-lane-sizing": [
+        "docs/evidence/fragments/titan-lane-sizing.html",
+        "scripts/nova_lane/run.sh",
+        "tests/test_nova_lane_launcher.py"
+      ]
+    },
+    "plan": "diiid-vertical-force-balance",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "exact",
+    "time_budget": "12h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_grants": [
+      {
+        "at": "2026-11-15T16:35:57Z",
+        "path": "scripts/prototypes/diiid_finite_edge_booking/render.py",
+        "reason": "f8cbb9fcc6a",
+        "source": "repair-round"
+      }
+    ],
+    "write_paths": [
+      "nova/equilibrium/current.py",
+      "nova/equilibrium/forward_operator.py",
+      "nova/equilibrium/source.py",
+      "benchmarks/diiid_forward_gs_match.py",
+      "tests/equilibrium/test_finite_edge_booking.py",
+      "scripts/prototypes/diiid_finite_edge_booking",
+      "docs/figures/diiid-finite-edge-booking",
+      "docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html",
+      "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-booking",
+      "scripts/prototypes/diiid_finite_edge_booking/render.py",
+      "nova/imas/diiid_current.py",
+      "tests/imas/test_diiid_current.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 10498216.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "diiid-finite-edge-booking",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-14T23:26:12.366095+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.463,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.6666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "dc8001e5ff3e82a2f2848118127158ca3ecb82c9",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 1549613473,
+    "scratch_host": "98dci4-clu-2001.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261114T210059239602-diiid-finite-edge-booking",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 1549613473,
+        "path": "/tmp/reckon-crew-scratch/r-20261114T210059239602-diiid-finite-edge-booking"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/diiid-finite-edge-booking",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241",
+    "reviewed_head_sha": "dc8001e5ff3e82a2f2848118127158ca3ecb82c9",
+    "scores": {
+      "durability": 13,
+      "evidence": 14,
+      "fit": 15,
+      "goal_fidelity": 17,
+      "reuse": 16,
+      "scope_discipline": 10
+    },
+    "status": "parsed",
+    "total": 85
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261114T210059239602-diiid-finite-edge-booking",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+  "session_harness": "claude",
+  "session_id": "21a70ade-d21b-48b5-a23a-97421f1c1d5a",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/equilibrium/test_finite_edge_booking.py tests/imas/test_diiid_current.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T210059239602-diiid-finite-edge-booking/landing-measure/armed/armed-after.log",
+      "revision": "dc8001e5ff3e82a2f2848118127158ca3ecb82c9"
+    },
+    "baseline_measured_nothing": true,
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/equilibrium/test_finite_edge_booking.py tests/imas/test_diiid_current.py",
+      "completed": true,
+      "exit_status": 2,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/equilibrium/test_finite_edge_booking.py"
+      ],
+      "log_digest": null,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T210059239602-diiid-finite-edge-booking/landing-measure/armed/armed-baseline.log",
+      "revision": "37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241"
+    },
+    "failure_attribution": {},
+    "measured_by": "landing",
+    "status": "clean",
+    "suite_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/equilibrium/test_finite_edge_booking.py tests/imas/test_diiid_current.py",
+    "waived_arms": null,
+    "waiver_covered_fields": [],
+    "waiver_reason": null
+  },
+  "tests_added": 9,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 180865935,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 11555.633,
+    "generated_tokens": 634148,
+    "generation_seconds": 4249.078,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 85.6,
+    "machine_seconds": 7306.555,
+    "peak_input_tokens": 197114,
+    "tokens_per_second": 149.24,
+    "wall_tokens_per_second": 54.88
+  },
+  "time_budget": "12h",
+  "tool_steps": 556.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 82400,
+  "watch_override": {
+    "arming_line": "reckon crew watch --project nova",
+    "attach_line": "/home/ITER/mcintos/Code/reckon/.venv/bin/reckon crew follow --project nova --session 35a66cc6-f4f1-4358-8dbb-99c9333c7249",
+    "requested": true,
+    "session_attached": true,
+    "watcher_live": true
+  },
+  "worker_exit": {
+    "attempt": 6,
+    "ended_during": "working",
+    "ended_pids": [
+      2701736
+    ],
+    "exit_code": 0,
+    "exited_at": "2026-11-15T22:20:40Z",
+    "forced_exit": {
+      "phase": "complete",
+      "reason": "terminal-run",
+      "signalled_at": "2026-11-15T22:20:36Z"
+    },
+    "last_record_type": "system",
+    "launched_at": "2026-11-15T22:08:11Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261114T210059239602-diiid-finite-edge-booking",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 143382,
+    "worker_pid": 2701477
+  },
+  "worker_seconds": 74126,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

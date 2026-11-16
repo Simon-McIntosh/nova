@@ -1,0 +1,105 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "baseline_suite at 37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241 reports 3 failed, 16 errors, 117 passed (gate/base-job.log, EXIT=1, 19 failure ids in gate/base-failures.txt); after_suite at 9c102cbae6b7c70421a867973540cfbfb5066227 reports 3 failed, 16 errors, 125 passed (gate2/head-job.log, EXIT=1, the same 19 ids in gate2/head-failures.txt, byte-identical to the base list), so the added set is empty; the 8 extra passes are the finite-edge contract.",
+  "call_site_count": 7,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:804",
+    "nova/equilibrium/support_read.py:2403",
+    "benchmarks/diiid_current_pinned_forward.py:345",
+    "benchmarks/diiid_residual_decomposition.py:152",
+    "benchmarks/diiid_diverted_root_full_currents.py:316",
+    "benchmarks/diiid_forward_gs_match.py:2661",
+    "benchmarks/efit_forward_parity_slice.py:551"
+  ],
+  "completed_at": "2026-11-15T16:30:56.782Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "The reuse score rested on the duplicated column completion in the benchmark. It moved into the adapter's owner, nova/imas/diiid_current.py, at 3fea105c8, and the re-review at f4bf6f5e4 re-scores it.",
+      "recorded_at": "2026-11-15T17:32:51.387686+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-15T16:21:14Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Repaired in this run's repair round at 3fea105c8. The sampling-node conductor target is now completed in nova/imas/diiid_current.py, where the adapter completes the grid and wall targets, so every build_profile consumer gets 24 columns. The re-review at f4bf6f5e4 checks it.",
+      "recorded_at": "2026-11-15T17:32:08.032801+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Repaired at 02180da22: the negative control now drives the production point route through the operator it tests, rather than a copy of the stencil.",
+      "recorded_at": "2026-11-15T17:32:17.559116+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "Addressed in the repair round (02180da22, f4bf6f5e4). The route-selection claim is re-checked by the re-review at f4bf6f5e4.",
+      "recorded_at": "2026-11-15T17:32:34.058784+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "The point/booked switch exists only to drive the declared negative control against the production route. The repair round re-states the route wording (f4bf6f5e4), and the re-review judges whether it stays.",
+      "recorded_at": "2026-11-15T17:32:44.071530+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "1533",
+      "severity": "blocking",
+      "text": "extend_sample_current_response duplicates the column completion owned by nova/imas/diiid_current.py:203 and is invoked only from scripts/prototypes/diiid_finite_edge_booking/{measure,smoke,discriminate}.py, so every other consumer of build_profile followed by complete_profile_current_adapter - benchmarks/diiid_current_pinned_forward.py:345, benchmarks/diiid_residual_decomposition.py:152, benchmarks/diiid_diverted_root_full_currents.py:316, benchmarks/strict_exit_incidence.py:639, benchmarks/efit_forward_parity_slice.py:551 - now builds an operator whose sample.source_target keeps the 19 shipped columns while grid and wall are widened to 24 by the adapter (the seam guard at :1328 compares the sample target against source_to_grid, which is also 19 at that moment, so the mismatch passes), and the solve then contracts 19 against the 24-entry conductor vector: this is the same dot_general failure the worker recorded for job 1316894, relocated from the row driver to every benchmark that builds a DIII-D profile."
+    },
+    {
+      "file": "tests/equilibrium/test_finite_edge_booking.py",
+      "line": "231",
+      "severity": "non-blocking",
+      "text": "the helper _point restates the five-node 5/6 + 1/24 cell-average rule in the test file instead of driving the production point route at nova/equilibrium/forward_operator.py:3511, so the declared negative control proves that a copy of the stencil steps, not that the route the DIII-D builder would otherwise select steps, and a repair to the production point route would leave the control asserting a jump that no longer exists."
+    },
+    {
+      "file": "tests/equilibrium/test_finite_edge_booking.py",
+      "line": "255",
+      "severity": "non-blocking",
+      "text": "test_the_diiiid_builder_books_a_finite_edge asserts only that the module constant FINITE_EDGE_MOMENT_ROUTE equals \"booked\" and deletes its parametrised kind argument, so it would stay green if benchmarks/diiid_forward_gs_match.py:1294 stopped supplying the moment blocks or the sample target while the constant was unchanged; the route-selection clause of the done_when therefore rests on the uncommitted seam smoke rather than on this test."
+    },
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "178",
+      "severity": "non-blocking",
+      "text": "FINITE_EDGE_MOMENT_ROUTE is a two-valued route switch on the DIII-D builder with a \"point\" branch at :1308 that sets every moment block to None, which is a new selection option on the builder contrary to the brief's \"add no second integration path and no new public option\"; the switch exists to drive the negative control and is otherwise dead in production."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all 22 commits against 37b9ba7c4: one production line in nova/equilibrium/current.py:708, 192 lines in benchmarks/diiid_forward_gs_match.py (moment couplings, the sample FluxTarget and extend_sample_current_response), 322 lines of test, 12 prototype scripts and the evidence fragment plus figure.",
+    "done_when": "the done_when's three clauses each have a recorded measure - the analytic continuity/tangent contract in tests/equilibrium/test_finite_edge_booking.py, the two-arm focused gate in gate/base-job.log and gate2/head-job.log, and the four-row cohort with its discriminators in x/edge/frame-*/finite-edge.json - though the clause-2 selection is asserted by a module constant rather than by a built profile.",
+    "goal": "the node goal is that the finite-edge source integral follows the moving boundary; benchmarks/diiid_forward_gs_match.py:1294 now supplies the four moment blocks so ForwardProfile.from_lattice (nova/equilibrium/forward.py:703) selects the booked route, and tests/equilibrium/test_finite_edge_booking.py exercises book/book_tangent on an analytic cut cell and X-point sector.",
+    "manifest": "read; it records status complete, the two gate arms at 37b9ba7c4 (3 failed, 16 errors, 117 passed) and 9c102cbae (3 failed, 16 errors, 125 passed), the negative control at negative-control.log (4 failed, EXIT=1), and leaves baseline_suite/after_suite null while citing both arm logs in test_logs.",
+    "write_paths": "read the manifest's nine declared paths; every path in git diff 37b9ba7c4..3c9422fc2 is inside them (nova/equilibrium/current.py, benchmarks/diiid_forward_gs_match.py, tests/equilibrium/test_finite_edge_booking.py, scripts/prototypes/diiid_finite_edge_booking/, docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html, docs/figures/diiid-finite-edge-booking/)."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_finite_edge_booking.py:272 and :322 fail on a stepped or tangent-inconsistent booking, but :257 asserts only the builder constant and :231 re-implements the point route, so no test fails if the consumer stops supplying moment blocks while the constant stays \"booked\".",
+    "evidence": "gate2/head-job.log ends 3 failed, 125 passed, 16 errors at 9c102cbae with the base arm's 19 failure ids identical line for line (gate/base-failures.txt vs gate2/head-failures.txt), and read-179b.log reconciles with the fragment's row table, but the declared negative control exercises a test-local point route rather than the production point route; no production call site reaches the change except support_read.py:804.",
+    "fit": "benchmarks/diiid_forward_gs_match.py:1483 builds the sample target with the same FluxTarget/Null1D vocabulary as the grid and wall targets, and the prototype renderer at scripts/prototypes/diiid_finite_edge_booking/render.py:97 uses the nova.media poloidal_axes/draw_flux_contours/draw_nulls vocabulary with no plan or ticket label in any added name.",
+    "goal_fidelity": "benchmarks/diiid_forward_gs_match.py:1294 supplies the moment blocks and :1483 builds the sample FluxTarget, so the booked route is selected, but the profile it produces is left five conductor columns short of the vector it is contracted against until a prototype call site patches it.",
+    "reuse": "benchmarks/diiid_forward_gs_match.py:1533 extend_sample_current_response re-implements the circuit-column completion that nova/imas/diiid_current.py:203 complete_profile_current_adapter already owns, appends the columns at a prototype call site instead of extending the owner, and the test at tests/equilibrium/test_finite_edge_booking.py:231 restates the stencil that nova/equilibrium/forward_operator.py:3511 owns.",
+    "scope_discipline": "every changed path in git diff 37b9ba7c4..3c9422fc2 lies inside the manifest's nine declared write paths, and the only addition beyond the brief's reuse map is the module switch at benchmarks/diiid_forward_gs_match.py:178."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is that the finite-edge source integral follows the moving boundary; benchmarks/diiid_forward_gs_match.py:1294 now supplies the four moment blocks so ForwardProfile.from_lattice (nova/equilibrium/forward.py:703) selects the booked route, and tests/equilibrium/test_finite_edge_booking.py exercises book/book_tangent on an analytic cut cell and X-point sector.\nVERDICT done_when: the done_when's three clauses each have a recorded measure - the analytic continuity/tangent contract in tests/equilibrium/test_finite_edge_booking.py, the two-arm focused gate in gate/base-job.log and gate2/head-job.log, and the four-row cohort with its discriminators in x/edge/frame-*/finite-edge.json - though the clause-2 selection is asserted by a module constant rather than by a built profile.\nVERDICT write_paths: read the manifest's nine declared paths; every path in git diff 37b9ba7c4..3c9422fc2 is inside them (nova/equilibrium/current.py, benchmarks/diiid_forward_gs_match.py, tests/equilibrium/test_finite_edge_booking.py, scripts/prototypes/diiid_finite_edge_booking/, docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html, docs/figures/diiid-finite-edge-booking/).\nVERDICT manifest: read; it records status complete, the two gate arms at 37b9ba7c4 (3 failed, 16 errors, 117 passed) and 9c102cbae (3 failed, 16 errors, 125 passed), the negative control at negative-control.log (4 failed, EXIT=1), and leaves baseline_suite/after_suite null while citing both arm logs in test_logs.\nVERDICT diff: read all 22 commits against 37b9ba7c4: one production line in nova/equilibrium/current.py:708, 192 lines in benchmarks/diiid_forward_gs_match.py (moment couplings, the sample FluxTarget and extend_sample_current_response), 322 lines of test, 12 prototype scripts and the evidence fragment plus figure.\nCALL_SITES: nova/equilibrium/support_read.py:804, nova/equilibrium/support_read.py:2403, benchmarks/diiid_current_pinned_forward.py:345, benchmarks/diiid_residual_decomposition.py:152, benchmarks/diiid_diverted_root_full_currents.py:316, benchmarks/diiid_forward_gs_match.py:2661, benchmarks/efit_forward_parity_slice.py:551\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: benchmarks/diiid_forward_gs_match.py:1294 supplies the moment blocks and :1483 builds the sample FluxTarget, so the booked route is selected, but the profile it produces is left five conductor columns short of the vector it is contracted against until a prototype call site patches it.\nSCORE evidence: 15\nJUSTIFICATION evidence: gate2/head-job.log ends 3 failed, 125 passed, 16 errors at 9c102cbae with the base arm's 19 failure ids identical line for line (gate/base-failures.txt vs gate2/head-failures.txt), and read-179b.log reconciles with the fragment's row table, but the declared negative control exercises a test-local point route rather than the production point route; no production call site reaches the change except support_read.py:804.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: every changed path in git diff 37b9ba7c4..3c9422fc2 lies inside the manifest's nine declared write paths, and the only addition beyond the brief's reuse map is the module switch at benchmarks/diiid_forward_gs_match.py:178.\nSCORE durability: 10\nJUSTIFICATION durability: tests/equilibrium/test_finite_edge_booking.py:272 and :322 fail on a stepped or tangent-inconsistent booking, but :257 asserts only the builder constant and :231 re-implements the point route, so no test fails if the consumer stops supplying moment blocks while the constant stays \"booked\".\nSCORE fit: 16\nJUSTIFICATION fit: benchmarks/diiid_forward_gs_match.py:1483 builds the sample target with the same FluxTarget/Null1D vocabulary as the grid and wall targets, and the prototype renderer at scripts/prototypes/diiid_finite_edge_booking/render.py:97 uses the nova.media poloidal_axes/draw_flux_contours/draw_nulls vocabulary with no plan or ticket label in any added name.\nSCORE reuse: 4\nJUSTIFICATION reuse: benchmarks/diiid_forward_gs_match.py:1533 extend_sample_current_response re-implements the circuit-column completion that nova/imas/diiid_current.py:203 complete_profile_current_adapter already owns, appends the columns at a prototype call site instead of extending the owner, and the test at tests/equilibrium/test_finite_edge_booking.py:231 restates the stencil that nova/equilibrium/forward_operator.py:3511 owns.\nFINDING benchmarks/diiid_forward_gs_match.py:1533 blocking: extend_sample_current_response duplicates the column completion owned by nova/imas/diiid_current.py:203 and is invoked only from scripts/prototypes/diiid_finite_edge_booking/{measure,smoke,discriminate}.py, so every other consumer of build_profile followed by complete_profile_current_adapter - benchmarks/diiid_current_pinned_forward.py:345, benchmarks/diiid_residual_decomposition.py:152, benchmarks/diiid_diverted_root_full_currents.py:316, benchmarks/strict_exit_incidence.py:639, benchmarks/efit_forward_parity_slice.py:551 - now builds an operator whose sample.source_target keeps the 19 shipped columns while grid and wall are widened to 24 by the adapter (the seam guard at :1328 compares the sample target against source_to_grid, which is also 19 at that moment, so the mismatch passes), and the solve then contracts 19 against the 24-entry conductor vector: this is the same dot_general failure the worker recorded for job 1316894, relocated from the row driver to every benchmark that builds a DIII-D profile.\nFINDING tests/equilibrium/test_finite_edge_booking.py:231 non-blocking: the helper _point restates the five-node 5/6 + 1/24 cell-average rule in the test file instead of driving the production point route at nova/equilibrium/forward_operator.py:3511, so the declared negative control proves that a copy of the stencil steps, not that the route the DIII-D builder would otherwise select steps, and a repair to the production point route would leave the control asserting a jump that no longer exists.\nFINDING tests/equilibrium/test_finite_edge_booking.py:255 non-blocking: test_the_diiiid_builder_books_a_finite_edge asserts only that the module constant FINITE_EDGE_MOMENT_ROUTE equals \"booked\" and deletes its parametrised kind argument, so it would stay green if benchmarks/diiid_forward_gs_match.py:1294 stopped supplying the moment blocks or the sample target while the constant was unchanged; the route-selection clause of the done_when therefore rests on the uncommitted seam smoke rather than on this test.\nFINDING benchmarks/diiid_forward_gs_match.py:178 non-blocking: FINITE_EDGE_MOMENT_ROUTE is a two-valued route switch on the DIII-D builder with a \"point\" branch at :1308 that sets every moment block to None, which is a new selection option on the builder contrary to the brief's \"add no second integration path and no new public option\"; the switch exists to drive the negative control and is otherwise dead in production.\n",
+  "review_run_id": "r-20261115T162013855761-review-of-diiid-finite-edge-booking-3c9422fc2db3",
+  "reviewed_base_sha": "37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241",
+  "reviewed_head_sha": "3c9422fc2db36ca7103cf34d68f847e14c1567a5",
+  "reviewed_run_id": "r-20261114T210059239602-diiid-finite-edge-booking",
+  "scores": {
+    "durability": 10,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 14,
+    "reuse": 4,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T16:31:57.537656+00:00",
+  "total": 76
+}

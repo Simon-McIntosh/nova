@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T17:59:48.354Z",
+  "dispatched_at": "2026-11-15T17:52:22Z",
+  "figures": [
+    {
+      "judged_from_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T175047424328-review-of-diiid-finite-edge-booking-f4bf6f5e43ad-figure/image-0.png",
+      "path": "docs/figures/diiid-finite-edge-booking/terminal-states.svg",
+      "png_dimensions": "1399x720"
+    }
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Acted in resume turn 4: the caption describes the markers as rendered and the limited-panel legend names the contact.",
+      "recorded_at": "2026-11-15T18:05:17.789377+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Acted in resume turn 4: the caption describes the markers as rendered and the limited-panel legend names the contact.",
+      "recorded_at": "2026-11-15T18:05:25.297483+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "Acted in resume turn 4: the caption describes the markers as rendered and the limited-panel legend names the contact.",
+      "recorded_at": "2026-11-15T18:05:29.936987+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html",
+      "id": "f974914e76e",
+      "line": 62,
+      "severity": "non-blocking",
+      "summary": "The caption calls the solved lower null 'the hollow blue cross', but the PNG renders it as a solid filled blue X (ms 9, mew 1.6, drawn by draw_nulls in the solved colour). A reader told to look for a hollow cross finds a solid one, while the only hollow mark in the figure is EFIT's ring. The sentence exists to settle which mark is which, so its wording should match what is drawn."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html",
+      "id": "f974914e76e",
+      "line": 62,
+      "severity": "non-blocking",
+      "summary": "The caption calls EFIT's null 'the open grey ring', but the ring renders near-black (#333333), which is the darkest mark in the figure after the text; the only grey the reader can see is the first-wall trace (#929292). 'Grey' therefore points a reader at the wrong ink in a figure whose ring-versus-wall colours are what the caption is describing."
+    },
+    {
+      "file": "scripts/prototypes/diiid_finite_edge_booking/render.py",
+      "id": "f98558833c1",
+      "line": 212,
+      "severity": "non-blocking",
+      "summary": "The legend labels the lower-null markers 'solved X-point' and 'EFIT X-point' on every panel, but on 146 limited and 179 limited the marks are limiter contacts low in the vessel rather than X-points. The caption carries the distinction, so a reader who reads the caption is not misled; a reader scanning the legend alone is told the mark in the limited panels is an X-point."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261115T175047424328-review-of-diiid-finite-edge-booking-f4bf6f5e43ad-figure",
+  "reviewed_base_sha": "37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241",
+  "reviewed_head_sha": "f4bf6f5e43adfad899663295f103f03bf9f89d6c",
+  "reviewed_run_id": "r-20261114T210059239602-diiid-finite-edge-booking",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: passes; four poloidal panels read at a glance, and the repair round's ring-versus-cross pair is now distinguishable on all four rows. On 137 diverted and 146 diverted the near-black open ring sits around the solid blue cross at the separatrix crossing, so the achieved null is visible instead of hidden behind EFIT's marker; on 146 limited and 179 limited the ring and the cross stand apart with the dashed leader between them (179 limited: cross inside the ring's right side, ring stroke intact, both shapes legible).",
+    "RUBRIC data_ink: passes; contours, one thick clipped level, the first-wall trace and the topology markers carry all the visual weight on plain white, with three annotation lines per panel.",
+    "RUBRIC decoration: passes; axes off, no grid, frame, background fill, title or suptitle; one unframed six-entry legend row at the top, and nothing else that is not data or a panel note.",
+    "RUBRIC contrast: passes; annotation and legend text render at #0b0b0b on white, and the first-wall trace at #929292 reads as a receding reference at full size.",
+    "RUBRIC table_form: passes; the image is a spatial poloidal flux map of four terminal states, and the three numeric lines under each panel annotate that panel rather than depicting a table as an image.",
+    "RUBRIC label_collision: passes; no text label is clipped or overlapping, the rightmost note line under 179 limited ends well inside the canvas, and the legend row clears the panels. Marker-on-marker overlap on 179 limited is the intended eccentricity the caption describes, not a collision."
+  ],
+  "rubric_verdicts": {
+    "contrast": "All text renders at #0b0b0b on white and clears any contrast floor. The first-wall trace at #929292 is the receding reference the style rule asks for and reads acceptably at full size.",
+    "data_ink": "The data carry the weight: blue contour lines, one thicker clipped level, a grey wall trace, one triangle and one ring/cross pair per panel on white. The only non-data ink is the single legend row and the three note lines per panel.",
+    "decoration": "No decorative ink: axes off, no grid, no frame, no background fill or gridlines, no title or suptitle, and the legend is frameless.",
+    "label_collision": "No text label is clipped, overlapping another, or over the data: the panel notes sit in the figure margin below their panels and the legend row sits above them. Measured on the PNG, the rightmost note ends inside the canvas.",
+    "legibility": "The figure reads at a glance as four terminal flux states: one magnetic-axis triangle inside the closed contours of every panel, thin blue contour fans, one thick blue clipped level, a grey first-wall trace, and three lines under each panel giving the residual, the convergence flag and the lower-null offset in cm and the band in kA. The defect the previous round reported - EFIT's marker painted over the solved one, hiding the achieved null - is repaired in the render: the solved null is a solid blue cross and EFIT's is an open near-black ring, and the pair is separable on all four rows.",
+    "table_form": "The four per-panel numbers are annotations of the plotted state, not a table rendered as an image; the spatial flux map is the natural form for this data."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T18:03:44.913026+00:00",
+  "total": null
+}

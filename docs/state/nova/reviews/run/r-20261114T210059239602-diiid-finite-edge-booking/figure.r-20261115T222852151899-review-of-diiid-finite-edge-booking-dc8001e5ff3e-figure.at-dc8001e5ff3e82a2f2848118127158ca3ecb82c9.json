@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T22:46:54.422Z",
+  "dispatched_at": "2026-11-15T22:29:46Z",
+  "figures": [
+    {
+      "caption": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html line 62",
+      "drawing_script": "scripts/prototypes/diiid_finite_edge_booking/render.py",
+      "judged_from_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T222852151899-review-of-diiid-finite-edge-booking-dc8001e5ff3e-figure/image-0.png",
+      "path": "docs/figures/diiid-finite-edge-booking/terminal-states.svg",
+      "rendered_size": [
+        1399,
+        720
+      ]
+    }
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Non-blocking: the 12 pt panel notes stay legible (16 px cap height on the 1400 px canvas); the coil-correction re-solve redraws these rows with the shared painter, where one text size applies",
+      "recorded_at": "2026-11-15T22:51:48.899617+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Non-blocking: 'band' is defined in the record's table caption directly above the figure; the coil-correction re-solve's panels use the full discriminator name",
+      "recorded_at": "2026-11-15T22:51:23.215757+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "Non-blocking: the reviewer confirms both nulls stay distinguishable, the near-black EFIT ring beneath the cross and the stated offset carry the comparison; the earlier blocking merge is repaired",
+      "recorded_at": "2026-11-15T22:51:33.412976+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_finite_edge_booking/render.py",
+      "id": "f2d73a2ddd1",
+      "line": 204,
+      "severity": "non-blocking",
+      "summary": "The four panel notes are drawn at fontsize=12 while the figure-level legend is drawn at the style's font.size of 14 (set at line 164). The plot-style rule for a multi-panel figure permits dropping to 13 pt and asks for one text size throughout, so the notes sit below that floor as well as at a second size within the same figure. They remain legible on the 1399x720 canvas, where the note cap height measures about 16 px, so this does not stop a reader. The fix is to set the notes at the legend size, or at the 13 pt multi-panel size if 14 pt crowds the four columns."
+    },
+    {
+      "file": "scripts/prototypes/diiid_finite_edge_booking/render.py",
+      "id": "f72a221bc27",
+      "line": 154,
+      "severity": "non-blocking",
+      "summary": "The third note line under every panel reads 'lower X 1.0 cm; band 1.33 kA' and neither the figure nor its figcaption defines the term 'band'. It is the discriminator: the largest per-cell difference between the booked and the value-only cell current across the cells within 2 % of the boundary, defined only in the caption of the table that precedes the figure in the record. A reader who meets the figure first reads 'band' as an unlabelled quantity with no way to resolve it from the figure. Naming it in the note ('discriminator 1.33 kA') or in the figcaption's sentence about the panel notes would close it."
+    },
+    {
+      "file": "scripts/prototypes/diiid_finite_edge_booking/render.py",
+      "id": "f5493882a0d",
+      "line": 140,
+      "severity": "non-blocking",
+      "summary": "On the two diverted rows the solved lower null is a solid blue cross (xpoint_markersize 9.0) placed at the point where the 3.0 pt clipped-level contour passes, and both are the same solved colour, so the cross's four arms merge into that contour. Measured on the PNG the cross is about 12 px across against a roughly 4 px contour, leaving about 4 px of each arm clear of the solved mark; the reader sees a blue star-shaped thickening of the contour rather than a distinct cross. Both nulls remain distinguishable from each other because the near-black ring sits underneath and the note states the offset, so the earlier blocking defect is repaired and nothing is hidden; the residual cost is that the solved mark itself only resolves on zoom."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261115T222852151899-review-of-diiid-finite-edge-booking-dc8001e5ff3e-figure",
+  "reviewed_base_sha": "37b9ba7c4abcff06d2a5055d6d547c5a6ffaa241",
+  "reviewed_head_sha": "dc8001e5ff3e82a2f2848118127158ca3ecb82c9",
+  "reviewed_run_id": "r-20261114T210059239602-diiid-finite-edge-booking",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass - four panels readable at a glance, both lower-null marks distinguishable on every row (ring under cross on all four, offsets 1.0/1.6/5.5/2.0 cm), each panel labelled and annotated below.",
+    "RUBRIC data_ink: pass - blue contour lines, one thick clipped level, grey wall and three topology marks carry the figure; no fills, shadows or shaded bands.",
+    "RUBRIC decoration: pass - axis and grid off, no frame, no background fill, no gradient, no title, frameless single legend.",
+    "RUBRIC contrast: pass - text renders #0b0b0b on white (~19:1); the grey wall is a line, not a text mark, and the EFIT ring is near-black.",
+    "RUBRIC table_form: pass - four poloidal flux maps show a spatial state; the panel notes only identify each panel.",
+    "RUBRIC label_collision: pass - caption groups separated by 63-73 px, 39 px below the last text row to the canvas edge, 74 px from the data, legend columns 200 px apart and clear of the panels."
+  ],
+  "rubric_verdicts": {
+    "contrast": "All text renders near-black (#0b0b0b measured on the PNG) on white, about 19:1. The legend and note text is the same near-black, not a mid grey. The first wall is grey (#929292), the intended receding reference for a line rather than a text mark, and the EFIT ring is near-black so it does not disappear against the wall.",
+    "data_ink": "The data carry the visual weight: 1.2 pt blue flux contours, one 3.0 pt clipped level, a 1.5 pt grey wall trace, one filled axis triangle and one ring/cross pair per panel, on plain white. The only non-data ink is the single frameless legend row at the top and three short note lines under each panel.",
+    "decoration": "No decorative ink is present: poloidal_axes turns the axis and grid off, there is no frame, no background fill, no gradient, no shading band and no title or suptitle, and the figure-level legend is unframed.",
+    "label_collision": "No label is clipped, overlapping another label or overlapping the data. Measured on the 1399x720 PNG: the four caption text groups occupy x 61-317, 389-660, 733-1016 and 1079-1341, leaving 63 to 73 px between neighbours, and the lowest text row ends at y=681, 39 px above the canvas edge. The notes start at y=595 while the lowest plotted data reach y=521, so the labels sit in the margin 74 px clear of the data. The legend's three columns are separated by at least 66 px and clear of the panels by 100 px.",
+    "legibility": "Readable at a glance: four labelled poloidal panels on one shared window and one shared normalised level array, each showing the wall, the closed contours, the thick psi_N=1 clipped level, the magnetic axis and both lower-null marks. The solved and EFIT marks are distinguishable on all four panels: an open near-black ring of 16 pt with the 9 pt solid blue cross inside it on the diverted rows (1.0 cm and 1.6 cm offsets, so the cross reads as an eccentricity inside the ring) and clearly separate on the limited rows (5.5 cm and 2.0 cm). The panel notes give residual, converged flag, lower-X distance and band discriminator below each panel.",
+    "table_form": "The image is four poloidal flux maps, a spatial relationship that a table cannot carry. The numeric notes under each panel identify that panel's terminal state (residual, converged, lower-X offset, band) under each of the four states; the record's own table carries the same numbers in tabular form, so the figure is not substituting for a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T22:50:31.162994+00:00",
+  "total": null
+}

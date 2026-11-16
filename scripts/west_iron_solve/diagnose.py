@@ -189,9 +189,9 @@ def main():
     ) * offset + coefficients[2, indices]
     derivative = np.where(magnitude >= knots[-1], ends[1], derivative)
     differential_mu = 1 / (MU0 * derivative)
-    machine = StaticMachineDescription.read_iron_core(
+    machine = StaticMachineDescription.read_west_iron_outline(
         f"imas:hdf5?path={MACHINE}", dd_version="4.1.0"
-    )
+    ).description
     regions = [
         shapely.Polygon(np.column_stack((s.outline.r, s.outline.z)))
         for s in machine.iron_segments

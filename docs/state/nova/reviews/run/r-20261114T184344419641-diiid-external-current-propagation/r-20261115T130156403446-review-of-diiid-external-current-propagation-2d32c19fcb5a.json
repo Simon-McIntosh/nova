@@ -1,0 +1,108 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "Derived from the reviewed run's own gate logs: it ran no suite arm. Its manifest's suite_arms line records that base 93a93c4a7ede437e9a51beeed9fae20c914a5501 and after 2d32c19fcb5a0f482b7dc5c724eecfdd885c00b2 both resolve node_test_files to an empty list; I confirmed with git ls-tree over the three declared write paths that neither revision carries a test file there, so no baseline_suite or after_suite log exists to difference. Its actual gates are the job logs under ~/.config/reckon/crew/runs/r-20261114T184344419641-diiid-external-current-propagation: prototype/slurm-1315842.log (TIMEOUT at 2h, base and physical), prototype2/slurm-1315878.log (COLD_EXIT=0, WARM_EXIT=0, EXIT=0, base and row cold and warm), prototype3/slurm-1315908.log (COLD_EXIT=1 on the cohort control IndexError, WARM_EXIT=0, EXIT=1), prototype4/slurm-1316940.log (TIMEOUT at 5h, prototype4/cold empty, no arm) and prototype5/slurm-1316942.log (COLD_EXIT=0, WARM_EXIT=0, EXIT=0, seam arm); none is a pytest arm. Zero added failures, empty id list.",
+  "call_sites": [
+    "scripts/prototypes/diiid_external_current_propagation/job.sh:20 (invokes measure.py for the cold arms)",
+    "scripts/prototypes/diiid_external_current_propagation/job.sh:26 (second process against the populated cache root)",
+    "benchmarks/diiid_forward_gs_match.py:2462 (shipped_current_at; the second conductor-current read the record names)",
+    "nova/imas/diiid_current.py:258 (complete_profile_current_adapter replacing the operator's external_current before the solve)"
+  ],
+  "completed_at": "2026-11-15T13:02:47.019Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "This run is a read-only diagnosis whose scope forbade product and test edits. The guard the reviewer asks for is the proposed adapter refusal in complete_profile_current_adapter, a product change that goes to the lead as a decision and, once chosen, is built as its own node with a test.",
+      "recorded_at": "2026-11-15T13:28:38.474158+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-15T13:02:29Z",
+  "emissions": [
+    "VERDICT goal: The goal is to name the mechanism by which the DIII-D terminal forward state is invariant when the external coil currents change, and to state whether each banked X-point offset was solved with the coil field its inputs name; the landed fragment names the double conductor-current read at benchmarks/diiid_forward_gs_match.py:1356 against :2462/:2471 with the overwrite at nova/imas/diiid_current.py:258 and audits exactly the four named offsets in docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html:40-45.",
+    "VERDICT done_when: The three clauses are a per-hypothesis discriminating measurement with cold and warm cache states, the offset audit plus a proposed product change with no product edit, and one paired flux-contour panel; the fragment's arm table records the arms and their measurements, its banked-offset table records the audit, and docs/figures/diiid-external-current-propagation/frame-137-terminal-base-versus-scaled.svg is the panel, but the fourth instrument-check bullet concedes the requested warm cache state was never produced.",
+    "VERDICT write_paths: The declared scope is scripts/prototypes/diiid_external_current_propagation/, docs/figures/diiid-external-current-propagation/ and docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html; git diff --name-status 93a93c4a7 2d32c19fc lists five added files, every one inside those three paths, and no nova/ or tests/ file.",
+    "VERDICT manifest: The manifest records status complete, six commits 4049d17..2d32c19f, the five changed paths, job outcomes including two timeouts (1315842, 1316940) and one failure (1315908), and a suite_arms line explaining that both arms resolve an empty node_test_files list so no pytest arm ran.",
+    "VERDICT diff: Read all six commits against base 93a93c4a7: 4049d17 adds measure.py, job.sh and render.py; 4c4ff87a points the launcher at NOVA_FORWARD_COMPILATION_CACHE_ROOT and prints the platform; c3fde816 adds the cohort control arm and the termination and convergence fields; 7b078b52f moves the panel notes out of the axes; 548c2d9a changes 1000.0 to 100.0 in the centimetre conversion; 2d32c19fc adds the evidence fragment and re-registers the SVG with offsets read from the stored metre coordinates.",
+    "CALL_SITES: scripts/prototypes/diiid_external_current_propagation/job.sh:20 (invokes measure.py for the cold arms), scripts/prototypes/diiid_external_current_propagation/job.sh:26 (second process against the populated cache root), benchmarks/diiid_forward_gs_match.py:2462 (shipped_current_at; the second conductor-current read the record names), nova/imas/diiid_current.py:258 (complete_profile_current_adapter replacing the operator's external_current before the solve)",
+    "SCORE goal_fidelity: 18",
+    "JUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html:2 states the mechanism and :40-45 audits the four named offsets, while :35 records that the warm cache state clause 1 asks for could not be produced rather than claiming it.",
+    "SCORE evidence: 14",
+    "JUSTIFICATION evidence: The arm table at docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html:20 records each arm's operator and null readings, but measure.py computes no arm-to-arm difference, so the max|dpsi| column the done-when names is regenerated by no landed code and the warm state at :35 was never produced.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: git diff --name-status 93a93c4a7 2d32c19fc shows five added files, each inside the three declared write paths, and no product or test file.",
+    "SCORE durability: 8",
+    "JUSTIFICATION durability: No assertion guards the claim: measure.py:299 asserts only jax_enable_x64 and measure.py:95 refuses a bad corpus-row selection, so restoring the discarded build-time current at nova/imas/diiid_current.py:258 would leave every check green.",
+    "SCORE fit: 18",
+    "JUSTIFICATION fit: render.py:34-44 follows scripts/prototypes/diiid_xpoint_offset/render.py in importing the shared style module and the nova.media.poloidal painters, and no forbidden name (new, refactored, enhanced) is introduced.",
+    "SCORE reuse: 17",
+    "JUSTIFICATION reuse: The painters at nova/media/poloidal.py:29, :138 and :540 and the cohort builders at benchmarks/diiid_forward_gs_match.py are extended rather than forked; only render.py:57 _levels re-spans a map where nova/media/poloidal.py:748 contour_levels owns that capability, and the sibling scripts/prototypes/diiid_xpoint_offset/render.py also computes levels locally.",
+    "FINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html:35 non-blocking: The fourth instrument check says the 'warm' arm is a second process against the same root and that in-process program reuse is what the same-program comparison rests on, but the in-process warm arm never ran: prototype5/warm/records.json is {} with no arm-warm-*.json in any prototype directory, and the 4.1e-13 warm agreement quoted in the manifest is prototype2/warm/arm-row.npz against prototype2/cold/arm-row.npz, two separate processes; the same bullet's KeyError shows no warm persistent cache existed either, so the cache hypothesis is refuted by the row arm and the cited program key lines, not by the measurement the sentence names.",
+    "FINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html:23 non-blocking: The seam row's max|dpsi| 2.009e-05 is differenced against prototype/cold/arm-base.npz, not the prototype2/cold base the row and warm-base rows use (that pair gives 2.902e-05), and no landed script computes the column, so the table silently mixes three jobs and four base arm files and a reader cannot reconstruct which base each row was measured against; both seam values remain four orders below the 1.2045 Wb positive control, so the conclusion is unaffected."
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The cache hypothesis stands refuted by the row arm (a warm re-solve of a changed current reproduces the cold solve to 4.1e-13 Wb across processes) and by the program key at forward.py:2112, which carries no current value. The wording that over-names the in-process warm arm does not change the verdict, and the landing appends a correction note to the fragment.",
+      "recorded_at": "2026-11-15T13:28:18.276014+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Both seam differences (2.0e-5 and 2.9e-5 Wb) sit four orders below the 1.2045 Wb positive control, so the conclusion holds against either base. The landing appends a note naming the base each row was differenced against.",
+      "recorded_at": "2026-11-15T13:28:26.387327+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html",
+      "line": 35,
+      "severity": "non-blocking",
+      "summary": "The fourth instrument check says the 'warm' arm is a second process against the same root and that in-process program reuse is what the same-program comparison rests on, but the in-process warm arm never ran: prototype5/warm/records.json is {} with no arm-warm-*.json in any prototype directory, and the 4.1e-13 warm agreement quoted in the manifest is prototype2/warm/arm-row.npz against prototype2/cold/arm-row.npz, two separate processes; the same bullet's KeyError shows no warm persistent cache existed either, so the cache hypothesis is refuted by the row arm and the cited program key lines, not by the measurement the sentence names."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html",
+      "line": 23,
+      "severity": "non-blocking",
+      "summary": "The seam row's max|dpsi| 2.009e-05 is differenced against prototype/cold/arm-base.npz, not the prototype2/cold base the row and warm-base rows use (that pair gives 2.902e-05), and no landed script computes the column, so the table silently mixes three jobs and four base arm files and a reader cannot reconstruct which base each row was measured against; both seam values remain four orders below the 1.2045 Wb positive control, so the conclusion is unaffected."
+    }
+  ],
+  "justifications": {
+    "durability": "No assertion guards the claim: measure.py:299 asserts only jax_enable_x64 and measure.py:95 refuses a bad corpus-row selection, so restoring the discarded build-time current at nova/imas/diiid_current.py:258 would leave every check green.",
+    "evidence": "The arm table at docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html:20 records each arm's operator and null readings, but measure.py computes no arm-to-arm difference, so the max|dpsi| column the done-when names is regenerated by no landed code and the warm state at :35 was never produced.",
+    "fit": "render.py:34-44 follows scripts/prototypes/diiid_xpoint_offset/render.py in importing the shared style module and the nova.media.poloidal painters, and no forbidden name (new, refactored, enhanced) is introduced.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html:2 states the mechanism and :40-45 audits the four named offsets, while :35 records that the warm cache state clause 1 asks for could not be produced rather than claiming it.",
+    "reuse": "The painters at nova/media/poloidal.py:29, :138 and :540 and the cohort builders at benchmarks/diiid_forward_gs_match.py are extended rather than forked; only render.py:57 _levels re-spans a map where nova/media/poloidal.py:748 contour_levels owns that capability, and the sibling scripts/prototypes/diiid_xpoint_offset/render.py also computes levels locally.",
+    "scope_discipline": "git diff --name-status 93a93c4a7 2d32c19fc shows five added files, each inside the three declared write paths, and no product or test file."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261115T130156403446-review-of-diiid-external-current-propagation-2d32c19fcb5a",
+  "reviewed_base_sha": "93a93c4a7ede437e9a51beeed9fae20c914a5501",
+  "reviewed_head_sha": "2d32c19fcb5a0f482b7dc5c724eecfdd885c00b2",
+  "reviewed_run_id": "r-20261114T184344419641-diiid-external-current-propagation",
+  "rubric_lines": [
+    "rubric.goal_fidelity: answered",
+    "rubric.evidence: answered",
+    "rubric.scope_discipline: answered",
+    "rubric.durability: answered",
+    "rubric.fit: answered",
+    "rubric.reuse: answered"
+  ],
+  "scores": {
+    "durability": 8,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T14:20:00.000000+00:00",
+  "total": 95,
+  "verdicts": {
+    "diff": "Read all six commits against base 93a93c4a7: 4049d17 adds measure.py, job.sh and render.py; 4c4ff87a points the launcher at NOVA_FORWARD_COMPILATION_CACHE_ROOT and prints the platform; c3fde816 adds the cohort control arm and the termination and convergence fields; 7b078b52f moves the panel notes out of the axes; 548c2d9a changes 1000.0 to 100.0 in the centimetre conversion; 2d32c19fc adds the evidence fragment and re-registers the SVG with offsets read from the stored metre coordinates.",
+    "done_when": "The three clauses are a per-hypothesis discriminating measurement with cold and warm cache states, the offset audit plus a proposed product change with no product edit, and one paired flux-contour panel; the fragment's arm table records the arms and their measurements, its banked-offset table records the audit, and docs/figures/diiid-external-current-propagation/frame-137-terminal-base-versus-scaled.svg is the panel, but the fourth instrument-check bullet concedes the requested warm cache state was never produced.",
+    "goal": "The goal is to name the mechanism by which the DIII-D terminal forward state is invariant when the external coil currents change, and to state whether each banked X-point offset was solved with the coil field its inputs name; the landed fragment names the double conductor-current read at benchmarks/diiid_forward_gs_match.py:1356 against :2462/:2471 with the overwrite at nova/imas/diiid_current.py:258 and audits exactly the four named offsets in docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html:40-45.",
+    "manifest": "The manifest records status complete, six commits 4049d17..2d32c19f, the five changed paths, job outcomes including two timeouts (1315842, 1316940) and one failure (1315908), and a suite_arms line explaining that both arms resolve an empty node_test_files list so no pytest arm ran.",
+    "write_paths": "The declared scope is scripts/prototypes/diiid_external_current_propagation/, docs/figures/diiid-external-current-propagation/ and docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html; git diff --name-status 93a93c4a7 2d32c19fc lists five added files, every one inside those three paths, and no nova/ or tests/ file."
+  }
+}

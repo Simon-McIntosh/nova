@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run records its baseline_suite as NOT EXECUTED (a detached worktree at d7676e4 cannot be created because the main checkout's .git is read-only, reproduced in its manifest) and its after_suite only as prose naming tests/test_artifacts_carry_no_worktree_paths.py, with no log file on disk, so neither arm is a readable suite pair. The gate's own predicate was re-run at three revisions instead: `git grep -F reckon-worktrees` returns 2336 paths at d7676e478fc8701b036ec717f80d403c3ead86f5, f0cd75cbf01ac4af6f497d543edc033df1309dd1 and e6595693dbcf27b048cd1e4f2c3ea46bdde63392, with 0 outside the exempt set (docs/state, docs/plans, docs/research, nova/database/filepath.py) at every one. The reviewed commit edits one HTML fragment, which cannot add a test failure, so the added-failure count is 0 derived from that gate predicate rather than from a suite summary line.",
+  "assertion_audit": "The commit adds no assertion, so there is no added assertion whose two sides move together to name. The only gate named by the reviewed run is tests/test_artifacts_carry_no_worktree_paths.py, whose positive control fails if its candidate enumeration returns nothing it is known to hold and whose offender assertion fails on any tracked file naming a worktree path; it cannot fail on a wrong job date, a wrong job-to-row attribution or a false claim about the receipt schema, so it is no guard on the content this commit changed.",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-16T02:51:19.914Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-white-noise-covariance-e6595693dbcf",
+      "recorded_at": "2026-11-16T03:28:42.626753+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-16T02:38:54Z",
+  "failure_delta_evidence": {
+    "after_suite": null,
+    "baseline_suite": null,
+    "baseline_summary": "not executed by the reviewed run; the base arm is derived here by running the gate's own predicate at d7676e478fc8701b036ec717f80d403c3ead86f5, which yields 2336 candidates and 0 non-exempt offenders",
+    "head_summary": "the reviewed manifest records 1 passed in 18.06s for tests/test_artifacts_carry_no_worktree_paths.py at head e6595693d; the same predicate at that head yields 2336 candidates and 0 non-exempt offenders, so the gate asserts the same verdict there",
+    "measured": true,
+    "source_manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/manifest.md",
+    "source_stream": null
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-white-noise-covariance-e6595693dbcf",
+      "recorded_at": "2026-11-16T03:28:27.950755+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "id": "mast-linearised-rows-attributed-to-wrong-job",
+      "line": "41",
+      "severity": "blocking",
+      "text": "The provenance says job 1318468 \"wrote MAST's and ITER's rows, linearised and full-fit alike\", but study/results/mast-main.jsonl, mast-control.jsonl and both MAST scaling files were last written 2026-11-15T20:18:33-20:18:34, inside job 1317749's span (14:24:53-20:19:41), and study/study-titan-20261115T132451Z.log records \"FAST main case=mast rows=256\" before that job ends; only the mast-verify-*.jsonl files (20:59-21:02) belong to 1318468, so an auditor following the receipts finds the linearised MAST rows produced by the other job and cannot trust the job-to-row mapping this repair round exists to establish."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "id": "job-1317749-failure-cause",
+      "line": "41",
+      "severity": "non-blocking",
+      "text": "The sentence says sacct records job 1317749 as FAILED \"because its figure drawing raised\", but that log's terminal traceback is a RuntimeError \"the forward evaluation did not qualify\" raised from hybrid_study.py:233 in verify_arm(mast, main) at study/study-titan-20261115T132451Z.log:78-96, while the figure-drawing ValueError was caught and logged as \"STATE-FAILED solovev\" with the job continuing to the MAST work, so the stated cause is contradicted by the log it cites."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "id": "realisation-seed-claim",
+      "line": "42",
+      "severity": "non-blocking",
+      "text": "\"Every realisation row carries its own seed\" is false for the receipts it names: all 768 linearised rows (for example study/results/solovev-main.jsonl, whose keys are coefficients, covariance, reduced_chi_square, iterations, forward_evaluations, converged, flux_rms and realisation) carry no seed field, and neither do the 14 Solov'ev full-fit rows; only the MAST and ITER verify rows carry seed, so a reader trying to reproduce a linearised realisation by its seed finds none and must instead reconstruct it from the arm seed plus the realisation index in study/hybrid_study.py:97-107."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site: the diff edits a static evidence fragment that no module, test or landed archive page reads (grep over nova/, tests/ and docs/evidence/archive/ returns no reference to this fragment).",
+    "diff": "Read the single commit e6595693d against base f0cd75cbf, one file at +3/-2: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:6 reframes the 256-draw arm as an internal-consistency check, docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 rewrites the provenance dates from both jobs' own lane headers, and docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:42 adds the run-directory receipt list.",
+    "done_when": "Read the three clauses of the done_when in the same dispatch record; docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:4 and docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:17-:29, unchanged by this commit, report the six-direction band 0.7447 to 1.3017, the mean reduced chi-square 1.007, 1.015, 1.015, the 2.07-standard-error worst mean deviation and the negative control 3.650 to 4.739.",
+    "goal": "Read the node goal in dispatch-detail.json (admit_request.node.goal, asking for the fit's reported covariance to be tested against the scatter of repeated noise-driven fits, with every heavy run on the H200 lane); docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 still states that no number in the record was measured on the H200, a deviation from that goal left in place by commit e6595693d, which edits provenance prose only.",
+    "manifest": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/manifest.md: status complete, 'acted fced4eb9781: e6595693d' and 'declined dimension-durability' each stated with a reason, and its baseline arm recorded as NOT EXECUTED with the read-only-.git reproduction rather than claimed as a pass.",
+    "write_paths": "This repair round's declared scope is docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html and docs/figures/inverse-equilibrium-baseline/white-noise-covariance (resume-6-advice.txt); `git diff --name-only f0cd75cbf01ac4af6f497d543edc033df1309dd1 e6595693dbcf27b048cd1e4f2c3ea46bdde63392` returns only docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html."
+  },
+  "justifications": {
+    "durability": "the commit adds no assertion, and no test in the repository pins any number or job attribution at docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41.",
+    "evidence": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 attributes MAST's linearised rows to job 1318468, but study/results/mast-main.jsonl was last written 2026-11-15T20:18:33, inside job 1317749's own span, so the job-to-row mapping the paragraph exists to establish is wrong for one of the three states.",
+    "fit": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:6 and docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:42 follow the fragment's own section and id vocabulary and introduce no plan, ticket, version or author name.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 keeps the record's own admission that no number was measured on the H200 the goal names, so the landed change reports that gap rather than closing it.",
+    "reuse": "the commit adds no function, class or module, so no capability is forked; a search of docs/evidence/fragments and nova/ found the sibling known-answer-recovery fragment already carrying the run-directory provenance convention this commit adopts.",
+    "scope_discipline": "`git diff --name-only f0cd75cbf01ac4af6f497d543edc033df1309dd1 e6595693dbcf27b048cd1e4f2c3ea46bdde63392` returns only docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html, inside this round's declared write scope."
+  },
+  "production_call_site_search": "Searched for any runtime or page consumer of the changed fragment: grep over nova/ and tests/ returns no reference to white-noise-covariance, docs/evidence/archive/inverse-equilibrium-baseline-landed.html contains no link to it (0 matches), and the only code touch points on docs/evidence/fragments are tests for other plans' fragments (tests/test_outboard_census_receipt_consistency.py:26, tests/test_outboard_hole_census_gate.py:125). The fragment is served as a static page once a landed archive links it and has no production caller.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read the node goal in dispatch-detail.json (admit_request.node.goal, asking for the fit's reported covariance to be tested against the scatter of repeated noise-driven fits, with every heavy run on the H200 lane); docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 still states that no number in the record was measured on the H200, a deviation from that goal left in place by commit e6595693d, which edits provenance prose only.\nVERDICT done_when: Read the three clauses of the done_when in the same dispatch record; docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:4 and docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:17-:29, unchanged by this commit, report the six-direction band 0.7447 to 1.3017, the mean reduced chi-square 1.007, 1.015, 1.015, the 2.07-standard-error worst mean deviation and the negative control 3.650 to 4.739.\nVERDICT write_paths: This repair round's declared scope is docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html and docs/figures/inverse-equilibrium-baseline/white-noise-covariance (resume-6-advice.txt); `git diff --name-only f0cd75cbf01ac4af6f497d543edc033df1309dd1 e6595693dbcf27b048cd1e4f2c3ea46bdde63392` returns only docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html.\nVERDICT manifest: Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/manifest.md: status complete, 'acted fced4eb9781: e6595693d' and 'declined dimension-durability' each stated with a reason, and its baseline arm recorded as NOT EXECUTED with the read-only-.git reproduction rather than claimed as a pass.\nVERDICT diff: Read the single commit e6595693d against base f0cd75cbf, one file at +3/-2: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:6 reframes the 256-draw arm as an internal-consistency check, docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 rewrites the provenance dates from both jobs' own lane headers, and docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:42 adds the run-directory receipt list.\nCALL_SITES: none\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 keeps the record's own admission that no number was measured on the H200 the goal names, so the landed change reports that gap rather than closing it.\nSCORE evidence: 11\nJUSTIFICATION evidence: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 attributes MAST's linearised rows to job 1318468, but study/results/mast-main.jsonl was last written 2026-11-15T20:18:33, inside job 1317749's own span, so the job-to-row mapping the paragraph exists to establish is wrong for one of the three states.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --name-only f0cd75cbf01ac4af6f497d543edc033df1309dd1 e6595693dbcf27b048cd1e4f2c3ea46bdde63392` returns only docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html, inside this round's declared write scope.\nSCORE durability: 4\nJUSTIFICATION durability: the commit adds no assertion, and no test in the repository pins any number or job attribution at docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:6 and docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:42 follow the fragment's own section and id vocabulary and introduce no plan, ticket, version or author name.\nSCORE reuse: 20\nJUSTIFICATION reuse: the commit adds no function, class or module, so no capability is forked; a search of docs/evidence/fragments and nova/ found the sibling known-answer-recovery fragment already carrying the run-directory provenance convention this commit adopts.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 blocking: The provenance says job 1318468 \"wrote MAST's and ITER's rows, linearised and full-fit alike\", but study/results/mast-main.jsonl, mast-control.jsonl and both MAST scaling files were last written 2026-11-15T20:18:33-20:18:34, inside job 1317749's span (14:24:53-20:19:41), and study/study-titan-20261115T132451Z.log records \"FAST main case=mast rows=256\" before that job ends; only the mast-verify-*.jsonl files (20:59-21:02) belong to 1318468, so an auditor following the receipts finds the linearised MAST rows produced by the other job and cannot trust the job-to-row mapping this repair round exists to establish.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:41 non-blocking: The sentence says sacct records job 1317749 as FAILED \"because its figure drawing raised\", but that log's terminal traceback is a RuntimeError \"the forward evaluation did not qualify\" raised from hybrid_study.py:233 in verify_arm(mast, main) at study/study-titan-20261115T132451Z.log:78-96, while the figure-drawing ValueError was caught and logged as \"STATE-FAILED solovev\" with the job continuing to the MAST work, so the stated cause is contradicted by the log it cites.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:42 non-blocking: \"Every realisation row carries its own seed\" is false for the receipts it names: all 768 linearised rows (for example study/results/solovev-main.jsonl, whose keys are coefficients, covariance, reduced_chi_square, iterations, forward_evaluations, converged, flux_rms and realisation) carry no seed field, and neither do the 14 Solov'ev full-fit rows; only the MAST and ITER verify rows carry seed, so a reader trying to reproduce a linearised realisation by its seed finds none and must instead reconstruct it from the arm seed plus the realisation index in study/hybrid_study.py:97-107.",
+  "review_run_id": "r-20261116T023740857620-review-of-white-noise-covariance-e6595693dbcf",
+  "reviewed_base_sha": "f0cd75cbf01ac4af6f497d543edc033df1309dd1",
+  "reviewed_head_sha": "e6595693dbcf27b048cd1e4f2c3ea46bdde63392",
+  "reviewed_run_id": "r-20261115T012417719546-white-noise-covariance",
+  "scores": {
+    "durability": 4,
+    "evidence": 11,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T02:49:56.359939+00:00",
+  "total": 87
+}

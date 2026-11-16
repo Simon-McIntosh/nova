@@ -1,0 +1,125 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T17:12:52.500Z",
+  "dispatched_at": "2026-11-15T17:12:30Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T171128549105-plan-review-of-inverse-equilibrium-baseline/plan.html:24",
+      "id": "wiring-1",
+      "reason": "the machine-read wait fields are what a node brief is composed from, so restoring \u00a71 there (or deleting the wait sentences in the same change) is a plan edit either way.",
+      "text": "`s2` and `s6` now declare no dependency although \u00a76's own opening line reads \"Waits on \u00a71, whose three known states and fit it reuses\" (snapshot:179), the \u00a70 contract table gives \u00a72 and \u00a76 \"\u00a71\" under \"Waits on\" (snapshot:72-77), and followup f-ieb-001 reads \"\u00a72 waits only on \u00a71\"; sibling plans keep completed-section dependencies in this field (dd-cocos-ingest `s2:[s1]`, iron-limb-fill-fraction `s2:[s1]`), so the metadata now denies a dependency the plan's own text states and a dispatch composed from the metadata would start \u00a76 without the states and fit \u00a71 delivers",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T171128549105-plan-review-of-inverse-equilibrium-baseline/plan.html:117",
+      "id": "reasoning-1",
+      "reason": "without the label and the gap-first ordering in the section's own clauses, the ITER row's verdict measures the constraint difference the ruling says it will not measure.",
+      "text": "the ITER ruling added as comment `c-s2-iter-priors` (snapshot:259) says imas-efit's ITER reconstruction carries a synthesised on-axis pressure point and a q0 prior that nova's fit does not, and that the gap is read before any prior is added, but \u00a72's body still asserts the class and imas-efit \"answer the same question from the same inputs\" (snapshot:106) and clause (1) judges the ITER row against the same unqualified axis, q95 and flux bands with no label and no ordering rule, so a worker satisfying the section as written reads imas-efit's prior-driven offset as a fit or forward defect, or closes it by adding a prior",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261115T171128549105-plan-review-of-inverse-equilibrium-baseline/plan.html:187",
+      "id": "reasoning-2",
+      "reason": "\u00a77's done-when must gain the spectral-index and corner-frequency sweep rows, otherwise the deferred section is dispatched to deliver a size sweep only and the lock is silently unimplemented.",
+      "text": "the `drift-noise-model` lock records that \"the study sweeps spectral index and corner frequency\", but \u00a77's body fixes the exponent at 1/f \"between two stated frequencies\" and its done-when (3) sweeps only the noise size upward (snapshot:183), so the locked option's own deliverable \u2014 the swept range, not just the size \u2014 has no clause and the record cannot show it was produced",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+  "plan_fingerprint": "4d61d7a819543a56eced2bbcd8ecd94c293e976438870b5f1faffdee30759e81",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 15,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The contract table rows for the EFIT comparison and the white-noise section, the white-noise section's opening sentence and the first followup now say the recovery section has landed and no longer holds them, matching the emptied wait fields; the drifting-sensor row no longer counts the locked noise-model decision.",
+      "reason": "",
+      "when": "2026-11-15T17:52:51.510532+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The EFIT comparison section's body and first clause now state that the ITER row shares magnetics rows but not the constraint set, is reported with that label outside the pass bands, and that the size of the gap is read before any prior is added.",
+      "reason": "",
+      "when": "2026-11-15T17:53:03.548822+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The drifting-sensor section's body and done-when now sweep the spectral index and the corner frequency as well as the noise size, with the swept ranges reported in the record.",
+      "reason": "",
+      "when": "2026-11-15T17:53:13.777539+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+      "commit_basis": "edit",
+      "note": "The EFIT comparison section's body and first clause now state that the ITER row shares magnetics rows but not the constraint set, is reported with that label outside the pass bands, and that the size of the gap is read before any prior is added.",
+      "reason": "",
+      "when": "2026-11-15T17:53:03.548822+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+      "commit_basis": "edit",
+      "note": "The drifting-sensor section's body and done-when now sweep the spectral index and the corner frequency as well as the noise size, with the swept ranges reported in the record.",
+      "reason": "",
+      "when": "2026-11-15T17:53:13.777539+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+      "commit_basis": "edit",
+      "note": "The contract table rows for the EFIT comparison and the white-noise section, the white-noise section's opening sentence and the first followup now say the recovery section has landed and no longer holds them, matching the emptied wait fields; the drifting-sensor row no longer counts the locked noise-model decision.",
+      "reason": "",
+      "when": "2026-11-15T17:52:51.510532+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261115T171128549105-plan-review-of-inverse-equilibrium-baseline.json",
+  "review_run_id": "r-20261115T171128549105-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "46b971bac97b22a9e2bf0496ae61d940f071e906",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/figures/inverse-equilibrium-baseline/inverse-seam.svg`, `docs/evidence/archive/inverse-equilibrium-baseline-landed.html` and the extensionless `/nova/spine-efit-parity` href (as `docs/plans/spine-efit-parity.html`) all exist.",
+    "done_when": "pass \u2014 \u00a71 (3), \u00a72 (3), \u00a73 (2), \u00a74 (2, with its forced-cost control), \u00a75 (a/b with the reason to be measured) and \u00a76 (3) each declare a constructed control that must fail; the gap found on \u00a72 is in \u00a77.",
+    "evidence_paths": "pass \u2014 \u00a70 names `docs/evidence/archive/inverse-equilibrium-baseline-landed.html` and \u00a74/\u00a76 name one named H200 job each; no clause points at a node-local temporary path.",
+    "naming": "pass \u2014 the changed decision and comment introduce no plan label, ticket number or version tag into a symbol or delivered name.",
+    "reasoning": "a finding \u2014 the newly locked `drift-noise-model` requires a sweep of spectral index and corner frequency that \u00a77's done-when does not deliver, and the new ITER-prior ruling is recorded only in a comment although \u00a72's body still claims the same question from the same inputs.",
+    "single_goal": "pass \u2014 each of \u00a71\u2013\u00a77 names one deliverable (recovery, EFIT comparison, scoreboard, cost, reconstruction disposition, covariance honesty, drift beside EFIT).",
+    "wiring": "a finding \u2014 the changed `plan-section-depends-on` (snapshot:24) drops \u00a71 from `s2` and `s6` while the \u00a70 contract table, \u00a76's opening sentence (snapshot:179) and followup f-ieb-001 still declare that wait, and the \u00a77 row still counts \"two decisions\" although `drift-noise-model` is now locked."
+  },
+  "section_digests": {
+    "_document": "ea3e0ef9bcc143610e75cee1725c2a2e1f7075159291e86ada0403fa0410b44d",
+    "s0": "ef011e12e2f7a31af5be2aa25358b4a19900ac1b35d2d4d12eaa6cd83bc68f42",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "3078bb263c0d7680a56c9f385b77e02965283d27f7ff3e1bf628d2b08cda0995",
+    "s3": "aabab320c034e5a6720e0b3877958935e6c3b63577de3674cd6e87f6120889ba",
+    "s4": "a8f5721b1827357df497c97788c8bc9c5bb1266579ca0d04f61045c915138730",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "bdc9d075127100e7f9b765c97cb1be401aaa337b6a0c75ae175d8a766093ade9",
+    "s7": "df11956dff30b1fac6d6e8f3761cdc1fb00dfa118d2a17183781716dd3633d51"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T17:23:56.789641+00:00",
+  "total": null
+}

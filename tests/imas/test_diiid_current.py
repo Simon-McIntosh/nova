@@ -194,9 +194,17 @@ class Target:
 
 @dataclass(frozen=True)
 class Operator:
+    """The operator surface the adapter reads.
+
+    The sampling target is present on every operator and is ``None`` until the
+    booked current route attaches one, so a stand-in for the operator carries
+    the field even where the case under test has no sampling nodes.
+    """
+
     grid: Target
     wall: Target
     external_current: np.ndarray
+    sample: Target | None = None
 
 
 @dataclass(frozen=True)

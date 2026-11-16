@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T19:58:02.772Z",
+  "dispatched_at": "2026-11-16T19:57:44Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/inverse-equilibrium-baseline.html:180",
+      "id": "done_when-1",
+      "reason": "at 1 % and 2 % of each row family's RMS signal the fit is nowhere near the qualification cliff that \u00a71 measured (2\u20133 accepted corrections from an initial map error of 3e-2 of span), so the undecided branch is not reachable in practice and the section needs no new sentence.",
+      "text": "clause (3) requires the doubled-noise study to \"fail clause (1)\"; but clause (1) grants a state the verdict \"not measured, with its count\" whenever more than half the full fits fail forward qualification, so a control that lands there is neither passing nor failing the clause it is meant to falsify, and the plan gives the node no rule for that outcome",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "d8842d75066e4b71fa9aa6ef4fb5ce7cecf9bb6d",
+  "plan_fingerprint": "3bed7257fc7804c975d79f9b502633a383dd9d5d2ad837affa28f299a4f4c8cb",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 32,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The reviewer itself finds the undecided branch unreachable at 1 and 2 percent noise; if a control state did come back not measured the record would say so and the control would stand on the states that were measured, so the clause needs no new sentence.",
+      "when": "2026-11-16T20:21:08.463642+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The reviewer itself finds the undecided branch unreachable at 1 and 2 percent noise; if a control state did come back not measured the record would say so and the control would stand on the states that were measured, so the clause needs no new sentence.",
+      "when": "2026-11-16T20:21:08.463642+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261116T195647338529-plan-review-of-inverse-equilibrium-baseline.json",
+  "review_run_id": "r-20261116T195647338529-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "f54ce0149481e670180a7966d3f3ed154816e9e3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a76's only references are \u00a71 (resolves in the snapshot, and its landed fragment `docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html` exists) and the plan record named at \u00a70, which resolves.",
+    "done_when": "a finding \u2014 clause (3)'s control is read against the interval of clause (1), while clause (1) also admits a \"not measured\" verdict that the control's own wording does not cover (snapshot:180).",
+    "evidence_paths": "pass \u2014 \u00a76 names no scratch or node-local path; its record is the plan record at `docs/evidence/archive/inverse-equilibrium-baseline-landed.html` (exists), with the study's job logs under the run tree.",
+    "naming": "pass \u2014 \u00a76 names no symbol, module or ticket; its wording is physical (variance ratio, principal direction, reduced chi-square).",
+    "reasoning": "pass \u2014 the premise matches the landed \u00a71 receipt (found in the fragment: it retains \"covariance, null directions and every whitened row residual\" untested), and the arithmetic of the section holds: 32 fits give 31 degrees of freedom, the receipt's covariance is the design inverse only (`nova/equilibrium/measurement.py:151`, `pinv(gram)/outer(column_norm,column_norm)`, verified not residual-scaled), so doubling the drawn noise while telling the control's fit the nominal scale leaves the stated variance unchanged and the sample variance at about four times it, which the clause (1) band excludes.",
+    "single_goal": "pass \u2014 \u00a76 asks one question (is the covariance the fit reports the scatter the fits actually show) and clause (2) is the noise-scaling half of that same answer.",
+    "wiring": "pass \u2014 `plan-section-depends-on` gives `s7:[s6,s3,s8]`, and \u00a76's own inputs (the three known states and the fit) are the landed \u00a71, which the section states has landed; no relationship points at a node that does not exist."
+  },
+  "section_digests": {
+    "_document": "6178db02b44e9ad3cff3cfe4fe6e5f90d4dc4fc328abed9922653dff8253e088",
+    "s0": "18fa4b3820d8a53b8b11be7cc05c1e0e3838163b619eac989edfed114e1e0b7b",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "869fae9b37d5960c1ec034e608f17f0bda580b5851fa4c12723a067ed80b3da1",
+    "s3": "aabab320c034e5a6720e0b3877958935e6c3b63577de3674cd6e87f6120889ba",
+    "s4": "a8f5721b1827357df497c97788c8bc9c5bb1266579ca0d04f61045c915138730",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "cadfba00a23e3a3b6ea0fbee46a46eb276970d776c456bd1a53931456d6f8e09",
+    "s7": "5c750c79d813b34b96a3b3b418cd41dd92a06de78455a410a3cfd366c1aeabee",
+    "s8": "a609d17e17a1eb1b6e8ad1052d90547086b7bf3e11af31c024bfa48ada28ae0d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T20:10:41.096380+00:00",
+  "total": null,
+  "traced_units": [
+    "s6"
+  ]
+}

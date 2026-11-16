@@ -1,0 +1,88 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/equilibrium/constraint.py:2116",
+    "nova/equilibrium/reduced_newton.py:2396"
+  ],
+  "completed_at": "2026-11-16T14:45:21.183Z",
+  "dispatched_at": "2026-11-16T14:45:03Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-16T15:21:46.093439+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261114T205813832530-diiid-inactive-compensator-recovery"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-16T15:21:46.093439+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261114T205813832530-diiid-inactive-compensator-recovery"
+    },
+    "2": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-16T15:21:46.093439+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261114T205813832530-diiid-inactive-compensator-recovery"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_inactive_compensator/render.py",
+      "id": "f6dd5368837",
+      "line": "135",
+      "severity": "non-blocking",
+      "text": "the legend handle list hardcodes marker glyphs and colours that DEFAULT_INK owns at nova/media/ink.py:82-86, so the legend can drift from draw_nulls' markers and the gained commit corrected the rendered SVGs instead of removing the coupling."
+    },
+    {
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "id": "fc744910b36",
+      "line": "538",
+      "severity": "non-blocking",
+      "text": "image and control_image are two evaluations of the same payload=True binding because control at line 533 re-sets the payload the pair already carries, so the equality holds under any payload-handling regression."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T205813832530-diiid-inactive-compensator-recovery/figure-review-repair/inspections.json",
+      "id": "f67d243b759",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "the result string is identical on all five entries at lines 8, 16, 24, 32 and 40, so the per-figure record does not say what was inspected in each panel even though the digests bind the artefacts."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "two commits: da6a63105 rewrites the five SVGs with four marker keys per legend and a -10 cm tick, and b1c385879 adds the matched-control table and figure-repair paragraph to the fragment; no code or test is touched.",
+    "done_when": "three section-7 clauses; the matched 137D pair is in job 1319912 (137d-comparison/comparison.json) and the pin arms are gate/baseline.log 6 passed against final-head-gate/after.log 41 passed, both EXIT=0, deriving zero added failures.",
+    "goal": "plan section 7; the gained commits 4aebf5c4..b1c385879 add the matched 137D attribution at docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html:3 and regenerated legends in five SVGs.",
+    "manifest": "read; it records status complete, baseline_suite 6 passed in 48.02s and after_suite 41 passed in 80.16s both EXIT=0, four negative controls each EXIT=1, job 1319912, and the regression declared unrepaired.",
+    "write_paths": "the manifest declares the two docs trees, the evidence fragment, nova/equilibrium/constraint.py, fixed_point.py, reduced_newton.py, tests/equilibrium/test_solve_vertical_pin.py and scripts/prototypes/diiid_inactive_compensator; all 17 files of git diff 70c2026..b1c385879 sit beneath them."
+  },
+  "justifications": {
+    "durability": "the gained commits add no assertion and tests/equilibrium/test_solve_vertical_pin.py:538 compares image with control_image rebuilt at line 533 from the payload the pair already carries.",
+    "evidence": "137d-comparison/comparison.json records base 1.0451022610746365e-11 CONVERGED against head 0.0024574153456490525 ACTIVE_SET_CYCLE_DETECTED with identical seed and source hashes, and inspections.json's five svg_sha256 values equal the committed SVGs, but gate.py:20 still includes tests/test_reduced_newton_constraints.py, whose arms abort exit -6.",
+    "fit": "the added paragraphs keep the fragment's paragraph-id shape at diiid-inactive-compensator-recovery.html:3 and both commits carry conventional subjects with bodies, though render.py:135 re-declares marker glyphs the ink owner defines.",
+    "goal_fidelity": "diiid-inactive-compensator-recovery.html:3 states the matched attribution and the next line keeps the convergence regression explicitly unrepaired, which is the goal as directed.",
+    "reuse": "the gained commits add no definition, the null markers come from nova/media/poloidal.py:540, and a search over nova/media for a legend builder returned only draw_nulls.",
+    "scope_discipline": "git diff --name-status 70c2026..b1c385879 lists only files beneath the manifest's orientation_write_paths and no plan or state file."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261116T142241224490-review-of-diiid-inactive-compensator-recovery-b1c38587906d",
+  "reviewed_base_sha": "4aebf5c4430e650318f5ac5f46a0925b91ab1cca",
+  "reviewed_head_sha": "b1c38587906d974dad12cec9d2e32e30e03ea43e",
+  "reviewed_run_id": "r-20261114T205813832530-diiid-inactive-compensator-recovery",
+  "rubric": "review",
+  "scores": {
+    "durability": 11,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T15:10:10.245079+00:00",
+  "total": 97
+}

@@ -22,7 +22,7 @@ import nova
 
 from benchmarks import solovev_certificate as certificate
 from nova.biot import polygonanalytic
-from nova.equilibrium import current, topology
+from nova.equilibrium import current, fixed_points, topology
 from nova.equilibrium.clip_quadrature import ClippedCurrentMoments
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures.measure import analytic_profile
@@ -33,7 +33,6 @@ from scripts.prototypes.fixed_points.solve import (
 )
 from scripts.prototypes.fixed_points.measure import membership as straight_membership
 from scripts.prototypes.membership.hybrid import membership, patch_membership
-from scripts.prototypes.read_route import jets as jet_module
 from scripts.prototypes.read_route.bell import build_mesh, field_from_jets, read_bell
 from scripts.prototypes.read_route.check_element import stack_jet
 from scripts.prototypes.read_route.measure import sample_field
@@ -53,7 +52,7 @@ def cached_matrix(nodes, coupling, cache_revision):
     for operand in jax.tree_util.tree_leaves(coupling):
         digest.update(np.asarray(operand).tobytes())
     source = subprocess.check_output(
-        ["git", "show", f"{cache_revision}:scripts/prototypes/read_route/jets.py"]
+        ["git", "show", f"{cache_revision}:nova/equilibrium/fixed_points.py"]
     )
 
     def kernel_ast(text):
@@ -65,7 +64,7 @@ def cached_matrix(nodes, coupling, cache_revision):
         )
         return ast.dump(function)
 
-    assert kernel_ast(source) == kernel_ast(Path(jet_module.__file__).read_bytes())
+    assert kernel_ast(source) == kernel_ast(Path(fixed_points.__file__).read_bytes())
     digest.update(source)
     digest.update(Path(polygonanalytic.__file__).read_bytes())
     directory = (

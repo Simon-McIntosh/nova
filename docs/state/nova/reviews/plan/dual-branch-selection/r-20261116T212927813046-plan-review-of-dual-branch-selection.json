@@ -1,0 +1,80 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T21:30:59.544Z",
+  "dispatched_at": "2026-11-16T21:30:44Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/dual-branch-selection.html:482",
+      "id": "reasoning-1",
+      "reason": "the only actionable followup and the only section still marked implementable both send a builder at a two-branch fork the plan's own measurement retired, and the `fork-arming` decision that closed it as superseded never propagated into the text a builder reads.",
+      "text": "the plan's own landed measurement (class-coreachability, a9ea090c: 0 of 2 frames admit qualified roots of two classes; 22086/43's 16 converged terminals all classify DIVERTED, requested-LIMITED terminals fail topology consistency) makes post-hoc classification sufficient, so a selector that composes two qualified branch receipts has no frame on which to select; yet \u00a75 stays declared `implementable` (line 32), \u00a76 still asks to \"measure the armed fraction on real catalog frames before locking the policy\" (line 536), and open followup f-dbs-001 (line 597) instructs `/reckon-build` to promote the seam to a production API and measure fork-arming economics \u2014 a node dispatched from either text builds the mechanism the plan's own evidence says is not load-bearing",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dual-branch-selection.html:22",
+      "id": "wiring-1",
+      "reason": "with no declared dependency the scheduler may dispatch this plan's build before the answer it consumes, and the rate question \u00a71 hands off is still open in `discrete-operator-analytic-error` (its \u00a74/\u00a75 exist at lines 102/123 but the plan is the authority for whether that answer has landed).",
+      "text": "`plan-depends-on` is empty while \u00a77 (line 583) states this plan \"consumes both answers\" from `discrete-operator-analytic-error` \u00a74 and `primary-xpoint-evidence`, and the `unqualified-branch-semantics` decision was gated on the former's \u00a74 report; \u00a71 (line 76) also leaves the contraction-rate question explicitly owned there",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dual-branch-selection.html:597",
+      "id": "done_when-1",
+      "reason": "three build-recruited followups have no endpoint a node can be closed on, and one of them cannot distinguish a completed re-expression from the state that already exists.",
+      "text": "f-dbs-001's body names no measurable terminal state and no negative control (\"promote the seam \u2026 measure the fork-arming economics on catalog frames\"), and f-dbs-currency-2026-10-01 (line 607) ends \"impl is restated from section outcomes with the reasoning recorded in a comment\", which no check can fail; f-dbs-margin-in-signed-webers' \"Done when\" repeats the 53-case receipt already passing (line 605), so its gate passes on unfixed code",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dual-branch-selection.html:46",
+      "id": "anchors_resolve-1",
+      "reason": "the citing sentences identify the mechanism correctly and the targets exist in the repository, so the drift costs a reader one lookup rather than sending any node down a wrong path.",
+      "text": "\u00a71 cites `nova/equilibrium/forward.py:936-937` for `operator.read(flux, requested_class)`, but those lines are `self._clip_consistent_seed(flux, float(prediction.plasma_current), TopologyClass.LIMITED)`; the named read call sits at forward.py:985/1217/1377 \u2014 and \u00a73 cites `nova/equilibrium/connectivity_boundary.py:877-886` for `p_diverted`, which is at line 2243 inside `traced_smooth_boundary_read` (2116), while 877-886 is wall-polyline sampling",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/dual-branch-selection.html:609",
+      "id": "anchors_resolve-2",
+      "reason": "the stale pointer and the stale decision state are inside a followup whose substantive scope (impl restatement, two host islands) is unchanged by either correction.",
+      "text": "f-dbs-currency-2026-10-01 anchors the \"0.25\" impl figure at `docs/plans/dual-branch-selection.html:603`, but line 603 is the f-dbs-001 `/reckon-build` prompt; the 0.25 figure lives in the session drain comment `c-drain-20260825T0755` \u2014 and the same followup still states `unqualified-branch-semantics` \"stays open behind S16's stall outcome\" when that decision is recorded answered 2026-11-15 (degrade-with-recorded-stall)",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "11356ade07a0ccbd2f9f413e55bdf96a2d8416b9",
+  "plan_fingerprint": "bfdf214cef6af4ee64c7a3cf5da50de270642254ef784202d0b164b3399b52ee",
+  "plan_slug": "dual-branch-selection",
+  "plan_version": 19,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261116T212927813046-plan-review-of-dual-branch-selection",
+  "reviewed_blob_sha": "8aa280c3ee855ededf13215ddc1549ce7076e6f6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 three line-level anchors are stale (\u00a71's `forward.py:936-937`, \u00a73's `connectivity_boundary.py:877-886`, f-dbs-currency's `docs/plans/dual-branch-selection.html:603`), though every file, section, commit and href resolves.",
+    "done_when": "a finding \u2014 the two open followups that recommend `/reckon-build` (f-dbs-001, f-dbs-currency-2026-10-01) carry no measurable endpoint and no negative control, and f-dbs-margin-in-signed-webers' done-when repeats a receipt that already passed.",
+    "evidence_paths": "pass \u2014 every landed receipt cited sits under `docs/figures/dual-branch-selection/` and `docs/evidence/archive/dual-branch-selection-landed.html`, all present in the tree; no scratchpad or node-local path is named.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags are carried into any named symbol; the prose names provenance nodes as plan history only.",
+    "reasoning": "a finding \u2014 the plan's own co-reachability measurement refutes the fork, yet \u00a75 remains declared `implementable` and the open f-dbs-001 still directs a builder to promote the two-branch seam and measure the fork-arming economics.",
+    "single_goal": "pass \u2014 each authored section names one deliverable (seam, fork policy, excluded work) and the section-declaration map assigns one state per section, so the plan presents no node carrying two goals.",
+    "wiring": "a finding \u2014 `plan-depends-on` is empty at docs/plans/dual-branch-selection.html:22 while \u00a77 (line 583) and the `unqualified-branch-semantics` decision both declare this plan consumes `discrete-operator-analytic-error` \u00a74/\u00a75 and `primary-xpoint-evidence`."
+  },
+  "section_digests": {
+    "_document": "92d6f4fa420ef604b4d7dd7232edfb29a206ff26add21170a8101a3199e4e467",
+    "coreachability": "117a9e74256c7f96cae20f3b0e48a7dbc12b4ce1a25113546b64e7dc580bc9b2",
+    "s1": "484d6037132ed3f8541c226df6771d6e8effc725d74fd664bdcf89182b8cc567",
+    "s2": "1a228a4fa41055367c393c8212fcb0475c077587709ba8ab88bdbd3fec9e5afa",
+    "s3": "bff03960df75b89689ce42d62666ba034c8dcde5026fd6477227ef25f6acca72",
+    "s4": "206da393c7d08cc1b1ed5006efaf8b1b13a6781e8e6f992a4fd102e8668e749f",
+    "s5": "816c6bc2f03801fc8bdbdbe3af1990f3650c4bca1b49b0ee1cd63570d3e9d569",
+    "s6": "506dd18c70eaf1f72fa702ef3a5745f40175a460a2f1f6523d5cc90aacd1bd4e",
+    "s7": "283b73b8886f4928b2cb4bc16990fdda4881fcaab201e3b8add052cd18688461"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T21:49:52.334427+00:00",
+  "total": null
+}

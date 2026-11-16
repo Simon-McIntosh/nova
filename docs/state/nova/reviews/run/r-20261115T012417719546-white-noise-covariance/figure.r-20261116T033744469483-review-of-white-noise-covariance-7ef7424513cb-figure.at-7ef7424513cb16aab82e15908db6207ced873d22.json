@@ -1,0 +1,117 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-16T04:13:45.563Z",
+  "dispatched_at": "2026-11-16T03:40:26Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "id": "ff1325c19b7",
+      "line": 385,
+      "severity": "non-blocking",
+      "summary": "F1: the left-panel scatter is drawn in #929292 at alpha 0.55 (full_study.py:372 and 380-388), which renders every point at rgb(195,195,195), 1.76:1 on white. That is below the 3:1 a data mark should hold and at the level a grey near 2:1 reads as faded, and in the dense centre of all three clouds the overlapping marks merge into a light haze rather than a countable population. The cloud is still visible and the 99 per cent circle still reads against it, so nothing is hidden; raising the alpha or dropping it gives the population the weight the left panel exists to show."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "id": "f8ce077f6d3",
+      "line": 442,
+      "severity": "non-blocking",
+      "summary": "F2: the shared legend's first handle, 'recovered, noise at the stated sd', is drawn with color=grey and no alpha (full_study.py:442), so the swatch renders at rgb(146,146,146) (3.1:1) while the marks it explains render at rgb(195,195,195) (1.76:1) from the alpha at line 385. Measured on all three PNGs, the key is visibly darker than the cloud it names; a reader matching swatch to data is given a miscoloured sample of the series."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "id": "f691cced187",
+      "line": 439,
+      "severity": "non-blocking",
+      "summary": "F3: the right-panel upper limit is taken from the largest value drawn (full_study.py:438-439), giving 0 to 5.243 on ITER, 0 to 5.450 on MAST and 0 to 4.832 on Solov'ev. All three start at zero, so the numbers stay comparable when the panels are read, but the acceptance band occupies 10.6, 10.2 and 11.5 per cent of the panel height and the twice-stated-sd control lands at a different height in each render. The three figures are read as one set in the evidence record, and the result they carry - every stated-sd disc inside the band, every twice-stated-sd ring outside it - is squeezed into the bottom tenth of each panel. A shared limit across the three states would let a reader compare them by eye, which cannot be done now."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "id": "fd34bd59f0c",
+      "line": 409,
+      "severity": "non-blocking",
+      "summary": "F4: the acceptance band is a fill only (#e6e6e6, 1.25:1 on white) with no edge line and no legend entry, so inside the picture alone a reader cannot tell what the shaded region is or exactly where its limits fall, while the other three marks are all keyed. The caption names it as the acceptance band, so the fragment is not ambiguous, but a figure read without its caption does not carry its own key. Drawing the two band edges or adding a fourth legend entry closes it. Measured on the three PNGs the band spans 0.740 to 1.302, 0.730 to 1.303 and 0.740 to 1.298 in the ITER, MAST and Solov'ev renders against the stated 0.7447 to 1.3017, so the region drawn is the right one."
+    }
+  ],
+  "notes": "Read-only figure review. Only the three PNGs named in this review were opened; no SVG and no other image was read, and no file was edited, redrawn, relabelled or moved. image-0 is ITER, image-1 MAST and image-2 Solov'ev, established from the marker heights inside each render rather than assumed from file order. Six rubric items are answered for each of the three figures and four non-blocking findings are recorded, none of them blocking, so the record is parsed.",
+  "project": "nova",
+  "review_run_id": "r-20261116T033744469483-review-of-white-noise-covariance-7ef7424513cb-figure",
+  "reviewed_base_sha": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+  "reviewed_figures": [
+    {
+      "drawing_script": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T033744469483-review-of-white-noise-covariance-7ef7424513cb-figure/image-0.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/white-noise-covariance/iter.svg",
+      "state": "ITER reference case",
+      "state_identified_by": "read off the picture and cross-checked against the rendered pixels: the right-panel discs sit at 0.898 and 1.098 and the rings at 4.205 and 4.559, which is the ITER reference case row set in the twice-stated-sd table",
+      "stated_sd_discs": [
+        0.898,
+        1.098
+      ],
+      "twice_stated_sd_rings": [
+        4.205,
+        4.559
+      ]
+    },
+    {
+      "drawing_script": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T033744469483-review-of-white-noise-covariance-7ef7424513cb-figure/image-1.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/white-noise-covariance/mast.svg",
+      "state": "MAST shot 22086 slice 43",
+      "state_identified_by": "read off the picture and cross-checked against the rendered pixels: the right-panel discs sit at 0.971 and 1.059 and the rings at 3.65 and 4.739, which is the MAST shot 22086 slice 43 row set in the twice-stated-sd table",
+      "stated_sd_discs": [
+        0.971,
+        1.059
+      ],
+      "twice_stated_sd_rings": [
+        3.65,
+        4.739
+      ]
+    },
+    {
+      "drawing_script": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/study/full_study.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T033744469483-review-of-white-noise-covariance-7ef7424513cb-figure/image-2.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/white-noise-covariance/solovev.svg",
+      "state": "Solov'ev analytic certificate",
+      "state_identified_by": "read off the picture and cross-checked against the rendered pixels: the right-panel discs sit at 1.129 and 1.259 and the rings at 4.202 and 3.991, which is the Solov'ev analytic certificate row set in the twice-stated-sd table",
+      "stated_sd_discs": [
+        1.129,
+        1.259
+      ],
+      "twice_stated_sd_rings": [
+        4.202,
+        3.991
+      ]
+    }
+  ],
+  "reviewed_head_sha": "7ef7424513cb16aab82e15908db6207ced873d22",
+  "reviewed_run_id": "r-20261115T012417719546-white-noise-covariance",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility [iter.svg via image-0.png]: pass. Both panels read at a glance: the 256-point cloud, the dashed circle at 3.03 stated sd, and the four ratio markers; blue discs at 0.898 and 1.098 sit inside the grey band and grey rings at 4.205 and 4.559 sit well above it, with 16 pt axis labels and 14 pt ticks and legend.",
+    "RUBRIC data_ink [iter.svg via image-0.png]: pass. The ink is the data: the recovered cloud, the one dashed 99 per cent circle and the dotted zero crosshair on the left; two discs, two rings, one dotted unity line and the acceptance band on the right. No gradient, texture or decorative fill anywhere.",
+    "RUBRIC decoration [iter.svg via image-0.png]: pass. White background throughout, top and right spines absent from both panels, no gridlines; the one shaded region is the acceptance band, whose extent is the stated 0.7447 to 1.3017 interval (measured off the pixels as 0.740 to 1.302 against printed values) rather than a decorative wash.",
+    "RUBRIC contrast [iter.svg via image-0.png]: pass for text, measured on the rendered pixels: axis labels rgb(11,11,11) at 19.6:1 on white and tick labels rgb(81,81,81) at 7.9:1, both well clear of WCAG AA. The data marks are the faint element and are reported as finding F1: the scatter renders at rgb(195,195,195), 1.76:1, and the right-panel band fill at rgb(230,230,230), 1.25:1.",
+    "RUBRIC table_form [iter.svg via image-0.png]: pass. The left panel is a two-dimensional scatter against a reference circle, a spatial relationship no table carries, and the right panel places four numbers against the band so inside and outside are visible without arithmetic; the band comparison is what the panel adds, not a restatement of the record's table.",
+    "RUBRIC label_collision [iter.svg via image-0.png]: pass. Measured on the PNG: all four canvas borders are pure white (minimum 255), the lowest inked row is 678 of 720, no label touches another or the data, and the four legend entries sit in clear space above both panels.",
+    "RUBRIC legibility [mast.svg via image-1.png]: pass. Both panels read at a glance; blue discs at 0.971 and 1.059 lie inside the grey band and grey rings at 3.650 and 4.739 lie far above it, the 4.739 ring stopping well short of the top of the panel, with 16 pt axis labels and 14 pt ticks and legend.",
+    "RUBRIC data_ink [mast.svg via image-1.png]: pass. The ink is the data: the recovered cloud, the one dashed 99 per cent circle and the dotted zero crosshair on the left; two discs, two rings, one dotted unity line and the acceptance band on the right. No gradient, texture or decorative fill anywhere.",
+    "RUBRIC decoration [mast.svg via image-1.png]: pass. White background, top and right spines absent, no gridlines, and the only shaded region is the acceptance band whose extent is the stated 0.7447 to 1.3017 interval; the band is not a background wash.",
+    "RUBRIC contrast [mast.svg via image-1.png]: pass for text: axis labels rgb(11,11,11) at 19.6:1 and tick labels rgb(81,81,81) at 7.9:1 on white. The scatter marks render at rgb(195,195,195), 1.76:1, and the band fill at rgb(230,230,230), 1.25:1; that is finding F1, recorded as a mark-contrast defect, not a text defect.",
+    "RUBRIC table_form [mast.svg via image-1.png]: pass. The left panel is a scatter against a reference circle, a spatial relationship a table cannot carry, and the right panel's point is the position of four numbers against the band, which is not a table restatement.",
+    "RUBRIC label_collision [mast.svg via image-1.png]: pass. All four borders pure white, the lowest inked row 678 of 720, no label overlaps another label or the data, and the legend sits clear of both panels.",
+    "RUBRIC legibility [solovev.svg via image-2.png]: pass. Both panels read at a glance; blue discs at 1.129 and 1.259 sit inside the grey band and grey rings at 4.202 and 3.991 sit above it, both inside this render's shorter upper limit, with 16 pt axis labels and 14 pt ticks and legend.",
+    "RUBRIC data_ink [solovev.svg via image-2.png]: pass. The ink is the data: the recovered cloud, the one dashed 99 per cent circle and the dotted zero crosshair on the left; two discs, two rings, one dotted unity line and the acceptance band on the right. No gradient, texture or decorative fill anywhere.",
+    "RUBRIC decoration [solovev.svg via image-2.png]: pass. White background, top and right spines absent, no gridlines; the only shaded region is the acceptance band, whose extent is the stated 0.7447 to 1.3017 interval rather than a decorative wash.",
+    "RUBRIC contrast [solovev.svg via image-2.png]: pass for text: axis labels rgb(11,11,11) at 19.6:1 and tick labels rgb(81,81,81) at 7.9:1. The scatter marks render at rgb(195,195,195), 1.76:1; that is finding F1.",
+    "RUBRIC table_form [solovev.svg via image-2.png]: pass. The left panel is a scatter against a reference circle, a spatial relationship a table cannot carry, and the right panel's point is the position of four numbers against the band, not a table restatement.",
+    "RUBRIC label_collision [solovev.svg via image-2.png]: pass. All four borders pure white, the lowest inked row 672 of 720, no label overlaps another label or the data, and the legend sits clear of both panels."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T04:15:00Z",
+  "total": null
+}

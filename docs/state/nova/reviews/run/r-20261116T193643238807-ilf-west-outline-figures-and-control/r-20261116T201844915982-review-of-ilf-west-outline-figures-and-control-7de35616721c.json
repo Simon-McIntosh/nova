@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's readable head gate log logs/gate.log at ac296ea14, which records 9 passed and no FAILED or ERROR line with EXIT=0; the reviewed manifest records baseline_suite and after_suite as not run on its brief's instruction, so no base arm exists and the zero is a head-read count rather than a set difference over two arms.",
+  "call_site_count": 5,
+  "call_sites": [
+    "scripts/iron_limb_production/measure.py:22 import of outline.measure reaching mutation_arm",
+    "scripts/iron_limb_production/outline.py:344 production mutation_arm call in measure",
+    "scripts/iron_limb_production/outline.py:522 production mutation_arm call in the add-control path",
+    "scripts/iron_limb_production/outline.py:484 --compare-only CLI entry in main()",
+    "scripts/iron_limb_production/figure.py main() script entry (no importer)"
+  ],
+  "completed_at": "2026-11-16T20:23:30.794Z",
+  "dispatched_at": "2026-11-16T20:21:01Z",
+  "findings": [
+    {
+      "file": "scripts/iron_limb_production/figure.py",
+      "line": "75",
+      "severity": "non-blocking",
+      "text": "non-blocking: region_contours builds its own Triangulation/set_mask/tricontour path, duplicating the masked-scattered-contour capability owned by nova/media/poloidal.py:228 draw_scattered_contours; that owner masks only by wall units, so extending it with a mask predicate would have served both callers and kept one implementation of the masking rule."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T193643238807-ilf-west-outline-figures-and-control/manifest.md",
+      "line": "9",
+      "severity": "non-blocking",
+      "text": "non-blocking: changed_paths omits docs/figures/iron-limb-fill-fraction/ilf-west-outline-figures-and-control/west-62751-permeability.svg and west-62751-stray-lines.svg, both landed at 7de356167, and carries no scope_note for tests/data/west-62751-control.npz as the brief's unit-fill section asked, so the report understates what the run shipped."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T193643238807-ilf-west-outline-figures-and-control/manifest.md",
+      "line": "27",
+      "severity": "non-blocking",
+      "text": "non-blocking: the rubric line says the gate ran at head, but logs/gate.log:1 records revision ac296ea14464bf9701096edb8bfc1e959ef4f351, one commit behind the reviewed head 7de356167; the later commit adds only the node-scoped SVG copies, so the gap is documentary rather than measured."
+    },
+    {
+      "file": "scripts/iron_limb_production/figure.py",
+      "line": "50",
+      "severity": "non-blocking",
+      "text": "non-blocking: the structural claims the done_when relies on for the figures (0 of 1628 stored and 0 of 5654 true contour vertices outside iron, identical panel extents, one 3-entry legend, no line across the Z gap) exist only as manifest prose and PNG inspection, with no committed assertion, so a regression in iron_regions or probe_segments would ship silently."
+    }
+  ],
+  "item_aggregate": 6,
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:1296-1298 pin 0.083399 and 0.0081199 against a committed fixture, so reinstating the unit-fill denominator at scripts/iron_limb_production/outline.py:428 (0.0787) reddens the test, and logs/negative-control.log shows the assertion firing at displacement 0.0 EXIT=1; the figure.py region masks have no committed assertion.",
+    "evidence": "logs/gate.log:4 records 9 passed, 80 deselected with EXIT=0 and its -k expression collects both changed tests, while the figure claims at manifest.md:25 are recorded as prose and PNG inspection rather than by any committed measurement, and summary.json still carries the 0.0834 the control definition names.",
+    "fit": "scripts/iron_limb_production/figure.py:19-23 reuses save_checked and draw_machine from sibling scripts, keeps the module's print-progress and assert idiom, and introduces no name the repository rules forbid.",
+    "goal_fidelity": "docs/figures/iron-limb-fill/west-62751-permeability.svg and west-62751-stray-lines.svg are regenerated from scripts/iron_limb_production/figure.py:50-311, and the control's single definition is scripts/iron_limb_production/outline.py:428-449, matching summary.json's in_vessel_displacement 0.08339878.",
+    "reuse": "displacement() extends the capability that mutation_result already owned at scripts/iron_limb_production/outline.py:453, but region_contours at scripts/iron_limb_production/figure.py:75 re-implements masked scattered contouring whose owner is nova/media/poloidal.py:228 draw_scattered_contours (wall-mask only) without extending it.",
+    "scope_discipline": "every one of the ten paths in git diff 0f87e800a..7de356167 is inside the fence at prompt.txt:185-192, and the only change the goal does not imply is the node-scoped SVG copy at docs/figures/iron-limb-fill-fraction/ilf-west-outline-figures-and-control/, which the fence explicitly grants."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to redraw the two WEST 62751 figures and reconcile the unit-fill control with its saved arrays; both SVGs under docs/figures/iron-limb-fill/ are rewritten from per-region triangulations (scripts/iron_limb_production/figure.py:50-141) and the control now computes one stated definition at scripts/iron_limb_production/outline.py:428, reading 0.08339878 from the saved arrays.\nVERDICT done_when: prompt.txt:226 names figures redrawn and described as rendered, the displacement equal to the recomputed value under one stated definition with its test running without the receipt path, and --compare-only with a fast test; manifest.md records all three and logs/gate.log:4 reads 9 passed, 80 deselected EXIT=0.\nVERDICT write_paths: prompt.txt:185-192 fences scripts/iron_limb_production, tests/test_magnetisation.py, tests/data, docs/figures/iron-limb-fill, the archive page, the fragment directory and the node figure directory; all ten paths in git diff 0f87e800a..7de356167 lie inside that fence.\nVERDICT manifest: read manifest.md; it names four commits, the gate command, the 1.5 kB fixture, a red negative control (displacement 0.0 against 0.0834, EXIT=1) and both suite arms as not run per its brief, but changed_paths at :9 omits the two node-scoped SVG copies added at 7de356167.\nVERDICT diff: read all four commits and the full ten-file diff 0f87e800a..7de356167: figure.py replaces the single all-cell triangulation with per-region masked ones and three labelled stray panels, outline.py extracts displacement() and adds --compare-only, tests/test_magnetisation.py:1276-1334 replaces the skipping test with a pinned fixture test plus a compare-only test, and the archive splice changes exactly three replaced lines.\nCALL_SITES: scripts/iron_limb_production/measure.py:22 import of outline.measure reaching mutation_arm, scripts/iron_limb_production/outline.py:344 production mutation_arm call in measure, scripts/iron_limb_production/outline.py:522 production mutation_arm call in the add-control path, scripts/iron_limb_production/outline.py:484 --compare-only CLI entry in main(), scripts/iron_limb_production/figure.py main() script entry (no importer)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/figures/iron-limb-fill/west-62751-permeability.svg and west-62751-stray-lines.svg are regenerated from scripts/iron_limb_production/figure.py:50-311, and the control's single definition is scripts/iron_limb_production/outline.py:428-449, matching summary.json's in_vessel_displacement 0.08339878.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/gate.log:4 records 9 passed, 80 deselected with EXIT=0 and its -k expression collects both changed tests, while the figure claims at manifest.md:25 are recorded as prose and PNG inspection rather than by any committed measurement, and summary.json still carries the 0.0834 the control definition names.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every one of the ten paths in git diff 0f87e800a..7de356167 is inside the fence at prompt.txt:185-192, and the only change the goal does not imply is the node-scoped SVG copy at docs/figures/iron-limb-fill-fraction/ilf-west-outline-figures-and-control/, which the fence explicitly grants.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_magnetisation.py:1296-1298 pin 0.083399 and 0.0081199 against a committed fixture, so reinstating the unit-fill denominator at scripts/iron_limb_production/outline.py:428 (0.0787) reddens the test, and logs/negative-control.log shows the assertion firing at displacement 0.0 EXIT=1; the figure.py region masks have no committed assertion.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/iron_limb_production/figure.py:19-23 reuses save_checked and draw_machine from sibling scripts, keeps the module's print-progress and assert idiom, and introduces no name the repository rules forbid.\nSCORE reuse: 12\nJUSTIFICATION reuse: displacement() extends the capability that mutation_result already owned at scripts/iron_limb_production/outline.py:453, but region_contours at scripts/iron_limb_production/figure.py:75 re-implements masked scattered contouring whose owner is nova/media/poloidal.py:228 draw_scattered_contours (wall-mask only) without extending it.\nFINDING scripts/iron_limb_production/figure.py:75 non-blocking: region_contours builds its own Triangulation/set_mask/tricontour path, duplicating the masked-scattered-contour capability owned by nova/media/poloidal.py:228 draw_scattered_contours; that owner masks only by wall units, so extending it with a mask predicate would have served both callers and kept one implementation of the masking rule.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T193643238807-ilf-west-outline-figures-and-control/manifest.md:9 non-blocking: changed_paths omits docs/figures/iron-limb-fill-fraction/ilf-west-outline-figures-and-control/west-62751-permeability.svg and west-62751-stray-lines.svg, both landed at 7de356167, and carries no scope_note for tests/data/west-62751-control.npz as the brief's unit-fill section asked, so the report understates what the run shipped.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T193643238807-ilf-west-outline-figures-and-control/manifest.md:27 non-blocking: the rubric line says the gate ran at head, but logs/gate.log:1 records revision ac296ea14464bf9701096edb8bfc1e959ef4f351, one commit behind the reviewed head 7de356167; the later commit adds only the node-scoped SVG copies, so the gap is documentary rather than measured.\nFINDING scripts/iron_limb_production/figure.py:50 non-blocking: the structural claims the done_when relies on for the figures (0 of 1628 stored and 0 of 5654 true contour vertices outside iron, identical panel extents, one 3-entry legend, no line across the Z gap) exist only as manifest prose and PNG inspection, with no committed assertion, so a regression in iron_regions or probe_segments would ship silently.",
+  "review_run_id": "r-20261116T201844915982-review-of-ilf-west-outline-figures-and-control-7de35616721c",
+  "reviewed_base_sha": "0f87e800a7ddcd6d0b521c7043e3fe0eef3b20b2",
+  "reviewed_figure_paths": [
+    "docs/figures/iron-limb-fill/west-62751-permeability.svg",
+    "docs/figures/iron-limb-fill/west-62751-stray-lines.svg"
+  ],
+  "reviewed_head_sha": "7de35616721c496371933dd7c70890d369635984",
+  "reviewed_run_id": "r-20261116T193643238807-ilf-west-outline-figures-and-control",
+  "reviewer": {
+    "backend": "omp-local",
+    "effort": "high",
+    "model": "local/deepseek-v4.1-flash",
+    "reviewed_run_id": "r-20261116T193643238807-ilf-west-outline-figures-and-control",
+    "reviewer_run_id": "r-20261116T201844915982-review-of-ilf-west-outline-figures-and-control-7de35616721c"
+  },
+  "reviewer_run_id": "r-20261116T201844915982-review-of-ilf-west-outline-figures-and-control-7de35616721c",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 12,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T20:35:25.768352+00:00",
+  "total": 100,
+  "verdicts": {
+    "call_sites": "scripts/iron_limb_production/measure.py:22 imports outline.measure, reaching mutation_arm; scripts/iron_limb_production/outline.py:344 and :522 call mutation_arm from the production measurement, and :484 is the added --compare-only CLI entry; scripts/iron_limb_production/figure.py main() has no importer and runs only as a script.",
+    "diff": "read all four commits and the full ten-file diff 0f87e800a..7de356167: figure.py replaces the single all-cell triangulation with per-region masked ones and three labelled stray panels, outline.py extracts displacement() and adds --compare-only, tests/test_magnetisation.py:1276-1334 replaces the skipping test with a pinned fixture test plus a compare-only test, and the archive splice changes exactly three replaced lines.",
+    "done_when": "prompt.txt:226 names figures redrawn and described as rendered, the displacement equal to the recomputed value under one stated definition with its test running without the receipt path, and --compare-only with a fast test; manifest.md records all three and logs/gate.log:4 reads 9 passed, 80 deselected, EXIT=0.",
+    "goal": "the node's goal is to redraw the two WEST 62751 figures and reconcile the unit-fill control with its saved arrays; both SVGs under docs/figures/iron-limb-fill/ are rewritten from per-region triangulations (scripts/iron_limb_production/figure.py:50-141) and the control now computes one stated definition at scripts/iron_limb_production/outline.py:428, reading 0.08339878 from the saved arrays.",
+    "manifest": "read manifest.md; it names four commits, the gate command, the 1.5 kB fixture, a red negative control (displacement 0.0 against 0.0834, EXIT=1) and both suite arms as not run per its brief, but changed_paths at :9 omits the two node-scoped SVG copies added at 7de356167.",
+    "write_paths": "prompt.txt:185-192 fences scripts/iron_limb_production, tests/test_magnetisation.py, tests/data, docs/figures/iron-limb-fill, the archive page, the fragment directory and the node figure directory; all ten paths in git diff 0f87e800a..7de356167 lie inside that fence."
+  }
+}

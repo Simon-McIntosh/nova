@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/drive_continuation.py:advance_drive",
+    "nova/equilibrium/support_read.py:solve_batch",
+    "nova/equilibrium/support_read.py:read_batch",
+    "nova/equilibrium/support_read.py:read",
+    "nova/equilibrium/support_read.py:_rebuilt_reading",
+    "nova/equilibrium/topology.py:refresh_at_stationary_points",
+    "nova/equilibrium/topology.py:read_at_stationary_points"
+  ],
+  "completed_at": "2026-11-15T15:09:37.610Z",
+  "dispatched_at": "2026-11-15T15:08:36Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "line 199 is a vacuous restatement, but the test's discriminating guard is the tracking-not-None assertion at line 170; no behaviour rests on line 199",
+      "recorded_at": "2026-11-15T16:43:04.621442+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the manifest's summary pair names different files, but the real paired arms (consolidated-base 975f3e98 against consolidated-head db1c4ab, and the carrier-delivery arms at cc5175d49) cover the same files; the only failure, tests/test_bank_lane_drive.py, also failed on main and was repaired separately by fused-booking-none-quadrature",
+      "recorded_at": "2026-11-15T16:43:11.749141+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_geometry_reuse.py",
+      "line": 199,
+      "severity": "non-blocking",
+      "summary": "test_solve_accepts_support_through_continuation_options asserts np.testing.assert_array_equal(seen[0].reading.membership, support.reading.membership), but both sides come from the same toy read the test supplied as initial_support (the monkeypatched read_batch ignores the tracking it receives), so the assertion holds whatever the code does; the discriminating guard is assert tracking is not None at line 170, and the durability score does not rest on line 199."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144226749384-geometry-reuse/manifest.md",
+      "line": 21,
+      "severity": "non-blocking",
+      "summary": "baseline_suite runs tests/test_bank_drive_continuation.py (10 passed) while after_suite runs tests/test_geometry_reuse.py (13 passed), so the pair compares different test files and the added_failure set derived from it is vacuous; the real paired arms are consolidated-base (975f3e98) against consolidated-head (db1c4ab), where every common file is unchanged except tests/test_bank_lane_drive.py, whose one failure also fails at imported main 7d8ca007."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the 12 non-merge commits and the two merge commits (ef61975b1, 499b731fc) against base 975f3e98cfa2b2976d2bbe1b94ead37f8623b529; the second merge imports main 7244dcc3 and reconciles nova/equilibrium/topology.py by adding the carrier fields, _same_carrier_geometry and the _fragment_reuse_mask conjunct, while the pre-merge _refresh_fragment_cells duplicate is absent at cc5175d49 (grep count 0) and both paths execute _refresh_fragments.",
+    "done_when": "The done_when asks per-slice wall at widths 1, 16 and 64 over a sequential slice march with reuse off/on in one H200 job, unchanged bank-continuation tolerances, a test proving reuse and rebuild with a forced-reuse negative control; the worker's gate is the focused CPU run at cc5175d49 (carrier-delivery-head/test_geometry_reuse.log: 13 passed in 424.66s, EXIT=0) and does not assert the timing measure, which is recorded separately in h200-carrier/summary.json (job 1317358, verdicts off/on/on at 3% margin).",
+    "goal": "The node goal is to carry clipped cell geometry between sequential slices and rebuild only cells whose support membership or clip changed inside the compiled program; at cc5175d49 it is implemented by nova/equilibrium/topology.py:_refresh_fragments (line 3822), which selects cells through _fragment_reuse_mask (line 3757) and _same_carrier_geometry (line 3741) inside a lax.fori_loop dynamic_slice scatter, reached from nova/equilibrium/support_read.py:_rebuilt_reading (line 479) and enabled per width by solve_batch/read_batch at support_read.py:2101 and 530.",
+    "manifest": "Read; it reports the 13-test focused gate at cc5175d49 (13 passed in 424.66s, EXIT=0, carrier-delivery-head/test_geometry_reuse.log), a negative control at 3ae11c51a failing 4 of 13 selectivity tests (carrier-mutation/test_geometry_reuse.log: 4 failed, 9 passed, EXIT=1), H200 job 1317358 with verdicts off/on/on at widths 1/16/64, and an out-of-scope lane failure it attributes to imported main.",
+    "write_paths": "The manifest declares 14 write paths covering nova/equilibrium/support_read.py, nova/equilibrium/topology.py, tests/test_geometry_reuse.py, scripts/prototypes/geometry_reuse, the geometry-reuse evidence fragment and figure, scripts/prototypes/carried_read_refresh/measure.py and tests/test_carried_read_refresh.py; every path by which cc5175d49 differs from imported main 7244dcc3 (git diff --name-only 7244dcc3 cc5175d49 -- nova tests scripts: 12 files) lies inside them."
+  },
+  "justifications": {
+    "durability": "carrier-mutation/suite.json records 4 failed ids at 3ae11c51a under the forced-reuse mutation that all pass at cc5175d49, and tests/test_geometry_reuse.py:90/110/132/160 compare execution counters and change masks against an independent reuse_geometry=False reference, with the single non-independent assertion at line 199 named as a finding.",
+    "evidence": "h200-carrier/summary.json declares complete with two fresh measured processes per arm at widths 1/16/64, spreads 0.040-1.607% against a 0.03 margin, and program_change proving the lowered program differs; the manifest's declared baseline_suite/after_suite pair names different test files, so the material failure evidence is the consolidated pair rather than that field.",
+    "fit": "The landed symbols (_refresh_fragments, _fragment_reuse_mask, _same_carrier_geometry, reuse_geometry, initial_support) follow the module's private-helper and keyword conventions of nova/equilibrium/topology.py:3757 and carry no plan, ticket or version identifier.",
+    "goal_fidelity": "topology.py:_refresh_fragments (line 3822) rebuilds only the cells its change mask selects and returns the retained records otherwise, and support_read.py:2101 keys the default on pulse width so the 13% width-1 regression measured in the evidence fragment is not taken by default.",
+    "reuse": "The prior blocking fork is resolved: _refresh_fragment_cells is gone at cc5175d49, topology.py:_fragments_at_level:3160 delegates its cached path to _refresh_fragments, and the timing harness extends scripts/prototypes/bank_h200_slice_profile (scripts/prototypes/geometry_reuse/measure.py:6, run.py:13); the only overlap left is topology.py:_fragment_changes:3102 against main's _same_carrier_geometry:3741 for the four carrier fields, which differ in dead-slot masking and so are not a fork of one contract.",
+    "scope_discipline": "git diff --name-only 7244dcc3 cc5175d49 -- nova tests scripts lists 12 files, every one inside the manifest's 14 declared write paths, and the 12 node commits touch nothing else."
+  },
+  "notes": "Read at reviewed head cc5175d49, which is not an ancestor of this review worktree's HEAD c53d418cb; the diff and head files were read from the commit objects with git show, and the reuse ownership comparison was made against imported main 7244dcc3 and the base 975f3e98. No code was modified and no suite was re-run; gate and H200 results were read from the reviewed run's own logs and receipts. The prior review at aabf917c scored reuse 5 with a blocking finding against topology.py:3096; that mechanism is absent at the head and this review records the resolution.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to carry clipped cell geometry between sequential slices and rebuild only cells whose support membership or clip changed inside the compiled program; at cc5175d49 it is implemented by nova/equilibrium/topology.py:_refresh_fragments (line 3822) selecting cells through _fragment_reuse_mask (line 3757) and _same_carrier_geometry (line 3741), reached from nova/equilibrium/support_read.py:_rebuilt_reading (line 479) and enabled per width at support_read.py:2101.\nVERDICT done_when: the done_when asks per-slice wall at widths 1, 16 and 64 over a sequential slice march with reuse off/on in one H200 job; the worker's gate is the focused CPU run at cc5175d49 (carrier-delivery-head/test_geometry_reuse.log: 13 passed in 424.66s, EXIT=0), and the timing measure is recorded separately in h200-carrier/summary.json for job 1317358 with verdicts off/on/on at a 3% margin.\nVERDICT write_paths: read the manifest's 14 declared write paths; every file by which cc5175d49 differs from imported main 7244dcc3 (12 files under nova, tests and scripts) lies inside them.\nVERDICT manifest: read; it states the 13-test focused gate passed at cc5175d49, a 4-of-13-failure negative control at 3ae11c51a, H200 job 1317358 off/on/on, and one out-of-scope lane failure attributed to imported main.\nVERDICT diff: read commit by commit against base 975f3e98cfa2b2976d2bbe1b94ead37f8623b529; twelve node commits plus two merges, with the reconciliation confined to nova/equilibrium/topology.py, nova/equilibrium/support_read.py, tests and scripts/prototypes/geometry_reuse, and _refresh_fragment_cells gone at the head.\nCALL_SITES: nova/equilibrium/drive_continuation.py:advance_drive, nova/equilibrium/support_read.py:solve_batch, nova/equilibrium/support_read.py:read_batch, nova/equilibrium/support_read.py:read, nova/equilibrium/support_read.py:_rebuilt_reading, nova/equilibrium/topology.py:refresh_at_stationary_points, nova/equilibrium/topology.py:read_at_stationary_points\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/topology.py:_refresh_fragments (line 3822) rebuilds only the cells its change mask selects, and support_read.py:2101 keys the default on pulse width so the measured width-1 regression is not taken by default.\nSCORE evidence: 17\nJUSTIFICATION evidence: h200-carrier/summary.json is complete with two fresh processes per arm at widths 1/16/64 and a program-change receipt, while the manifest's baseline_suite and after_suite name different test files so that field's added-failure set is vacuous.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 7244dcc3 cc5175d49 -- nova tests scripts lists 12 files, all inside the manifest's declared write paths, and the node commits touch nothing else.\nSCORE durability: 19\nJUSTIFICATION durability: carrier-mutation/suite.json records 4 failed ids under forced reuse that pass at cc5175d49, and tests/test_geometry_reuse.py:90 and :110 assert execution counts and per-cell masks against an independent reuse_geometry=False reference, with line 199 named as non-independent.\nSCORE fit: 19\nJUSTIFICATION fit: the landed symbols at nova/equilibrium/topology.py:3757 and support_read.py:500 follow the module's private-helper and keyword conventions with no plan, ticket or version identifier.\nSCORE reuse: 17\nJUSTIFICATION reuse: the prior blocking duplicate _refresh_fragment_cells is gone and _fragments_at_level:3160 delegates to _refresh_fragments, leaving only the partial overlap of _fragment_changes:3102 with main's _same_carrier_geometry:3741.\nFINDING tests/test_geometry_reuse.py:199 non-blocking: the assertion compares seen[0].reading.membership against the same initial_support the test supplied through a monkeypatched read_batch, so it holds whatever the code does and cannot catch a regression; the discriminating guard is assert tracking is not None at line 170.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144226749384-geometry-reuse/manifest.md:21 non-blocking: baseline_suite runs tests/test_bank_drive_continuation.py while after_suite runs tests/test_geometry_reuse.py, so the added-failure derivation is vacuous and the real paired evidence is consolidated-base against consolidated-head.\n",
+  "review_run_id": "r-20261115T150207034820-review-of-geometry-reuse-cc5175d495b8",
+  "reviewed_base_sha": "975f3e98cfa2b2976d2bbe1b94ead37f8623b529",
+  "reviewed_head_sha": "cc5175d495b8f493631ca54dc40e10e46682e2e9",
+  "reviewed_run_id": "r-20261114T144226749384-geometry-reuse",
+  "rubric": "code",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T15:30:52.812470+00:00",
+  "total": 110
+}

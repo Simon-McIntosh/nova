@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "scripts/prototypes/read_route/jets.py:262, scripts/prototypes/fixed_points/solve.py:121, scripts/prototypes/kernel_compile_census/row.py:113, scripts/prototypes/bank_hessian_diagnosis/terms.py:81, scripts/prototypes/bank_hessian_diagnosis/cell.py:105, scripts/prototypes/iter_bank/measure.py:429 via the read_route/jets.py:28 re-export, scripts/prototypes/saddle_expansion/expansion.py:39 via the same re-export, nova/equilibrium/fixed_points.py:524",
+  "completed_at": "2026-11-16T03:40:31.867Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "bounded-jets-build",
+      "recorded_at": "2026-11-16T04:28:35.638480+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-16T03:39:48Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/bounded-jets-build.html",
+      "line": 8,
+      "severity": "non-blocking",
+      "text": "The cutover's identity proof covers two cells and two points (72 entries, 0 byte differences), not done_when clause (2), which requires the built jet rows to match at every node of the 282-cell arm and at a fixed 64-node subset of the 2,132-node arm; a 4-value fixture is filed against a 2,132-node build."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/bounded-jets-build.html",
+      "line": 33,
+      "severity": "non-blocking",
+      "text": "The suite section records two arms over tests/test_fixed_points.py plus the new budget test and nothing about done_when clause (3), the 500-cell census test the done_when itself calls the binding measure: no run, no 900 s timeout result and no --mem=64G receipt is recorded, so the record presents a partial measure as the node's evidence."
+    },
+    {
+      "file": "tests/equilibrium/test_bounded_point_program.py",
+      "line": 7,
+      "severity": "non-blocking",
+      "text": "The docstring claims 'a reduced cell count measures the same graph the production rows compile', but the node's own receipt lowered-size-summary.json measures production_point_batch at 8 cells at 8,408,375 StableHLO bytes against this fixture's 5,442,157, so the 6,000,000 ceiling sits below the production graph it is said to stand for and the guard is calibrated on a different program instance."
+    },
+    {
+      "file": "scripts/prototypes/membership/measure.py",
+      "line": 64,
+      "severity": "non-blocking",
+      "text": "The landed cutover deleted the _source_jets definition this prototype parses out of read_route/jets.py to key its cache, so that check now fails; the worker recorded it under outside_scope rather than editing it, but the node's change is what makes the failure reachable and no test covers the prototype."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/bounded-jets-build.html",
+      "line": 28,
+      "severity": "non-blocking",
+      "text": "The negative control actually run (unrolling the moment evaluation to 27,479,507 bytes) falsifies the graph-budget test, not the control the node declared ('restoring the base point program in fixed_points.py makes the 60 s compile bound at the 282-cell arm fail'); the declared control is neither run nor shown unattainable, so the guard that was proved and the guard that was declared are different guards."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/equilibrium/test_bounded_point_program.py:53 compares the lowered byte count produced by fixed_points._source_jets against the independent literal 6,000,000 and negative-control-unrolled-term.log shows it red at 27,479,507, but the test is marked slow so the default lane excludes it and no assertion fails if the deleted prototype copy is reinstated.",
+    "evidence": "the gate recorded in the manifest's tests line (pytest over tests/equilibrium/test_bounded_point_program.py and tests/test_fixed_points.py) asserts a 6,000,000-byte lowering budget, not the 60 s wall, the 282-cell / 64-node row identity or the 500-cell census clause of the done_when, and the one done_when gate that is red lives outside the suite in production-row-1318301.log.",
+    "fit": "the new test follows the configure_dtypes-before-array preamble with a '# ruff: noqa: E402' header that other nova test modules use, and the new figure script takes its palette and axis helpers from nova/media/ink.py rather than defining its own.",
+    "goal_fidelity": "scripts/prototypes/read_route/jets.py imports fixed_points._source_jets at line 28 and its call at line 262 now evaluates the owner, so the row window, jets build and operator bank share one definition, but the 'bounded' half of the goal stays unmet at a measured 218.880 s, 3.6 times the declared 60 s bound.",
+    "reuse": "the change is itself a de-duplication: the copy at scripts/prototypes/read_route/jets.py:229 is deleted in favour of the owner at nova/equilibrium/fixed_points.py:323; the only capability it restates is the len(lowered.as_text().encode()) byte count that scripts/prototypes/compile_pass_profile/lowered_size.py:69 owns, and its inline form matches the existing test idiom at tests/equilibrium/test_topology_read.py:2710.",
+    "scope_discipline": "every path authored in git diff 7479bb0b5..26540704f9 (the fragment, the SVG figure, four bank_hessian_diagnosis modules, three bounded_jets_build files, fixed_points/measure.py, the census row, read_route/jets.py and the new test) is one of the twelve granted write paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261116T032331803881-review-of-bounded-jets-build-26540704f99d",
+  "reviewed_base_sha": "7479bb0b5d21fa399c83954490e59d2f1df5be57",
+  "reviewed_head_sha": "26540704f99de89ec4ba9fff8114f48a0df82981",
+  "reviewed_run_id": "r-20261114T232501755703-bounded-jets-build",
+  "scores": {
+    "durability": 12,
+    "evidence": 9,
+    "fit": 16,
+    "goal_fidelity": 14,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T06:18:31.897943+00:00",
+  "total": 87,
+  "verdicts": {
+    "diff": "VERDICT diff: read commit by commit from base 7479bb0b5 to head 26540704f9; 278e96f35 and fdcdcb039 carry the cutover, 0e522e45c adds tests/equilibrium/test_bounded_point_program.py and the two job scripts, aa0344c6a/cf6bb21fc/26540704f carry the evidence fragment and the per-pass figure, and the docs/plans and review-records files in the raw diff arrive through the merge commit bf241750b from main rather than being authored here.",
+    "done_when": "VERDICT done_when: the done_when asks for a 60 s H200 cold compile at two arms, row identity at 282 cells and a 64-node subset, and the 500-cell census test inside 900 s at --mem=64G; the head receipt head-132/profile.json measures 218.880 s and 7,624,544 KiB peak host memory, so the 64 GB clause holds and the 60 s clause is red, while clauses (2) and (3) were never run.",
+    "goal": "VERDICT goal: the goal is one point program in nova/equilibrium/fixed_points.py serving the row window, the jets build and the operator bank with the prototype copy deleted; commits 278e96f35 and fdcdcb039 delete the 57-line copy and rebind the call sites to fixed_points._source_jets, with two downstream importers still reaching it through the scripts/prototypes/read_route/jets.py:28 re-export.",
+    "manifest": "VERDICT manifest: read at r-20261114T232501755703-bounded-jets-build/manifest.md; it states the base arm 19 passed in 30.20 s and the head arm 20 passed in 37.46 s, names both log paths, the negative-control log and the production-row log with its 2 failed / 1 passed, and its blockers line names only the 60 s compile clause.",
+    "write_paths": "VERDICT write_paths: the granted list is nova/equilibrium/fixed_points.py, nova/biot/polygonanalytic.py, scripts/prototypes/bank_hessian_diagnosis, scripts/prototypes/bounded_jets_build, scripts/prototypes/fixed_points, scripts/prototypes/kernel_compile_census/row.py, scripts/prototypes/read_route/jets.py, tests/biot, tests/equilibrium/test_bounded_point_program.py, tests/test_fixed_points.py and the two docs paths; every path the node authored in the diff lies inside the granted list."
+  }
+}

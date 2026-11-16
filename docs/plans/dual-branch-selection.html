@@ -26,9 +26,10 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8,a9ea090c">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,benchmarks/fork_arming_economics.py,benchmarks/two_branch_batch_cost.py,nova/equilibrium/branch_selection.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/figures/dual-branch-selection/fork-arming-economics.json,docs/figures/dual-branch-selection/two-branch-batch-cost.json,docs/evidence/archive/dual-branch-selection-landed.html">
-<meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="16">
-<meta name="plan-modified" content="2026-11-13">
+<meta name="plan-version" content="22">
+<meta name="plan-modified" content="2026-11-16">
+<meta name="plan-section-declarations" content="{&quot;coreachability&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;descoped&quot;,&quot;s7&quot;:&quot;done&quot;}">
+<meta name="plan-descope-reasons" content="{&quot;s6&quot;:&quot;the fork this section would have priced on catalog frames was retired by the co-reachability measurement; the pricing framework and the two-branch cost measurement it produced stay as evidence&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -42,7 +43,7 @@
     requested and <strong>7 of 10</strong> wrong-class proposals <em>reducing</em> the residual while
     closing nothing. The branch-pure arm is no better: the label-seeded lane pins the class into the
     flux map itself (<code>operator.read(flux, requested_class)</code>,
-    <code>nova/equilibrium/forward.py:936-937</code>; route
+    <code>nova/equilibrium/forward.py</code>; route
     <code>ForwardProfile.solve_branch newton_krylov</code>,
     <code>benchmarks/label_seed_residual_field.py:441,468,492</code>) and stalls at
     <strong>4.585e-3 to 7.425e-3</strong> on five of six diverted references, contracting only
@@ -122,7 +123,7 @@
 
     <p><strong>The differentiable transition quantity the design needs already ships.</strong>
     <code>p_diverted</code> — a softmax saddle weight inside
-    <code>traced_smooth_boundary_read</code> (<code>nova/equilibrium/connectivity_boundary.py:877-886</code>)
+    <code>traced_smooth_boundary_read</code> (<code>nova/equilibrium/connectivity_boundary.py</code>)
     — is jitted, batched, produced on the production smooth read, and consumed by the profile
     basis; it has simply never been promoted to a branch-selection API. Three host-Python islands
     block a compiled catalog verdict: <code>cold_seed_portfolio</code> builds seeds with host NumPy
@@ -321,7 +322,14 @@
 
     <h2 id="s5">§5 — The traced selection seam</h2>
 
-    <p>Promote the class decision to one public, traced, batched seam consuming two qualified branch
+    <p><strong>What this section builds now.</strong> One deliverable: the cold seed for the single
+    selected branch as a traced array kernel, measured by the done-when in the last paragraph of
+    this section. The traced selector and its state have landed, and the co-reachability
+    measurement in the next section retired the fork, so nothing below asks a builder for a
+    two-branch selector, a seed for a two-branch portfolio, or fork-arming economics. The
+    paragraphs between this one and the last are the record of how the section was first posed and
+    what landed under it.</p>
+    <p><strong>As first posed.</strong> Promote the class decision to one public, traced, batched seam consuming two qualified branch
     receipts: <code>p_diverted</code> carries the smooth selection weight (gradients flow through
     it), <code>class_margin</code> carries the exact signed comparator for reporting and gates, and
     neither substitutes for the other silently. Selection semantics must be explicit about the
@@ -471,10 +479,21 @@
     emergence, and no private-attribute access was introduced: it consumes the public
     <code>connectivity_grid_axes</code> contract.</p>
 
-    <p><strong>What remains in §5.</strong> Two of the three host islands — array-only seed construction
-    so the portfolio sits under an outer catalog <code>vmap</code>, and the admitted-state bootstrap as a
-    fixed ladder with device selection. The continuity claim at saddle-operand emergence stays blocked on
-    whether the shadow rejection is correct.</p>
+    <p><strong>What remains in §5.</strong> One host island: array-only seed construction for the
+    single selected cold branch, so a catalog <code>vmap</code> can enclose the solve. The
+    co-reachability measurement below retired the fork, so this section no longer promotes a
+    two-branch seam to a production API and no longer measures fork arming on catalog frames.
+    <strong>Done when:</strong> the cold seed for one selected branch is built by a traced array
+    kernel with no host array library on its path, shown by a test that runs
+    <code>jit(vmap(...))</code> over at least three distinct slices; the traced seed agrees with
+    the host seed on the existing cold-seed cases to 1e-12 relative, compared in one process, and
+    that test fails when the host seed is perturbed; and the production solve request consumes the
+    traced seed with its existing tests passing unchanged. A currency check on 2026-11-15 found the
+    cold seed portfolio still built on the host with NumPy, and found no host admitted-state bootstrap
+    left to port: the previous admitted state already travels as a device array and the solve request
+    carries no admission ladder. The continuity of the selection weight at saddle-operand emergence is
+    not claimed and is not carried: it mattered only to a selector blending two qualified branches,
+    which the fork's retirement removed.</p>
 
     <h2 id="coreachability">§ Is the fork load bearing? Measured: no</h2>
 
@@ -572,7 +591,7 @@
       </p>
     <p class="r-dec-rat">Lead decision 2026-10-01, from the traced-selection receipt this decision asked for: 53/53 exact-class agreement, both 257-point rails continuous (max adjacent step 3.5255e-4), and p_diverted against sigmoid(class_margin/0.01) agreeing to 2.2e-16. Each observable does one job: the smooth weight carries selection and gradients, and the exact signed margin carries reporting and gates. A gate reading only the smooth weight judges a softened quantity. Using only the exact margin leaves no gradient through branch selection. Accepted cost: two observables must stay consistent, which the receipt&#x27;s agreement check enforces. The margin&#x27;s definition moves to signed webers under contour-tree-topology-authority; the roles are unchanged by that.</p>
     </div>
-<div class="r-dec" data-key="unqualified-branch-semantics" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="unqualified-branch-semantics" data-choice="degrade-with-recorded-stall" data-by="lead" data-when="2026-11-15T17:15:15+00:00">
     <p class="r-dec-q">What does the published label carry when the diverted arm never
         qualifies — degrade to the limited root with the diverted stall recorded, publish a
         two-state receipt with no single class, or withhold the label? On present evidence this is
@@ -581,30 +600,38 @@
         the pure map does not contract; deciding earlier would encode today&#x27;s stall as a permanent
         semantic.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="degrade-with-recorded-stall">degrade-with-recorded-stall</button>
+      <button class="r-opt chosen" data-value="degrade-with-recorded-stall">degrade-with-recorded-stall</button>
       <button class="r-opt" data-value="two-state-receipt">two-state-receipt</button>
       <button class="r-opt" data-value="withhold-label">withhold-label</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Publish the limited root with the diverted stall recorded on the receipt, one class per label. Answered by the lead on 2026-11-15 at about 17:30Z through the decision census and relayed by the reckon coordinator session. The prerequisite study has reported: a diverted root exists (22086/43 converged to 3.6e-16, class diverted) and the pure map contracts slowly (ratio 0.96-0.98), so the stall is a rate problem and the limited root is the honest published state when the diverted arm does not qualify.</p>
     </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-dbs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-25" data-recommends-skill="/reckon-build dual-branch-selection" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dbs-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-25" data-recommends-skill="/reckon-build dual-branch-selection" data-resolved-at="2026-11-16T21:56:55+00:00" data-resolved-by="lead">
     <h4 class="r-fu-title">Implement the traced selection seam and fork policy</h4>
     <div class="r-fu-body">The selection-seam prototype is landed and passing (commit 632a4396; 53/53 exact-class agreement, continuous rails, exact degrade semantics). Next: promote the seam to a production API consuming the connectivity-localization repair, close the three host islands (array-only seed construction, lax.scan selector state, fixed-ladder bootstrap), and measure the fork-arming economics on catalog frames. The pinned-branch-contrast receipt and discrete-operator-analytic-error section 4 feed the open decisions.</div>
     <pre class="r-fu-prompt">/reckon-build dual-branch-selection</pre>
+    <p class="r-fu-outcome">Superseded by the narrowed section 5: the selector state landed under lax.scan, the fork was retired by the co-reachability measurement, and the one remaining island is carried by f-dbs-traced-cold-seed.</p>
     </article>
-<article class="r-fu" data-id="f-dbs-margin-in-signed-webers" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build dual-branch-selection" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dbs-margin-in-signed-webers" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build dual-branch-selection" data-resolved-at="2026-11-16T21:56:55+00:00" data-resolved-by="lead">
     <h4 class="r-fu-title">Re-express the selection margin and the smooth weight&#x27;s temperature in signed webers</h4>
     <div class="r-fu-body"><p>Under contour-tree-topology-authority the class margin is a signed flux difference in webers, oriented by the plasma-current sign, not a difference of normalised flux. The current normalisation divides by the extreme flux at the grid edge, so the margin depends on the size of the solve box. Once that plan's §4 lands, re-express <code>class_margin</code> here in webers, restate the smooth weight's temperature (today 0.01 in normalised units) in webers, and re-run the traced-selection receipt.</p><p><strong>Done when:</strong> the receipt shows exact-class agreement and continuous rails on the webers margin over the same 53 cases, with the temperature stated in Wb and its choice justified against the rail's step; and no normalised-flux quantity remains in the selection path.</p></div>
     <pre class="r-fu-prompt">/reckon-build dual-branch-selection</pre>
+    <p class="r-fu-outcome">Closed without building, lead decision 2026-11-16: its precondition was section 4 of contour-tree-topology-authority, which is superseded and will not land as written, and its done-when repeated a receipt that already passes.</p>
     </article>
-<article class="r-fu" data-id="f-dbs-currency-2026-10-01" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build dual-branch-selection" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dbs-currency-2026-10-01" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build dual-branch-selection" data-resolved-at="2026-11-16T21:56:55+00:00" data-resolved-by="lead">
     <h4 class="r-fu-title">Reconcile impl 0.7 against the last recorded 0.25, then close f-dbs-001&#x27;s two islands</h4>
     <div class="r-fu-body">Currency audit 2026-10-01 (plan-currency-and-depth-b.md, dual-branch-selection row): the code supports the seam having landed and being reached, but the meta impl of 0.7 has no recalibration note behind it; the plan's last recorded figure is 0.25 (2026-08-25 drain, docs/plans/dual-branch-selection.html:603). selection-observable is locked (both-explicit-roles); unqualified-branch-semantics stays open behind S16's stall outcome; f-dbs-margin-in-signed-webers is open. Done when: impl is restated from section outcomes with the reasoning recorded in a comment, and f-dbs-001's two remaining islands land (the plan prices them at about 3.6 h).</div>
     <pre class="r-fu-prompt">/reckon-build dual-branch-selection</pre>
+    <p class="r-fu-outcome">Done by the 2026-11-15 currency review and the 2026-11-16 section declarations: every section carries a declaration, the remaining work is one island not two, and it is carried by f-dbs-traced-cold-seed.</p>
+    </article>
+<article class="r-fu" data-id="f-dbs-traced-cold-seed" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-edit" data-written-at="2026-11-16" data-recommends-skill="/reckon-build dual-branch-selection s5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the cold seed as a traced array kernel</h4>
+    <div class="r-fu-body">One host island remains in section 5: the cold seed for the single selected branch is still built on the host. Done when section 5's done-when holds: a traced seed kernel proven under jit and vmap over at least three distinct slices, agreement with the host seed to 1e-12 relative with a perturbed-seed control that fails, and the production solve request consuming the traced seed with its tests unchanged.</div>
+    <pre class="r-fu-prompt">/reckon-build dual-branch-selection §5</pre>
     </article>
 </section>
 

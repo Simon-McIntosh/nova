@@ -15,7 +15,7 @@ from scripts.prototypes.fast_map_production import program
 from scripts.prototypes.fast_map_production.kernel import read
 from scripts.prototypes.fast_read.ordinary_cut import bell_moments
 from scripts.prototypes.lean_map.quadrature import interior_moments
-from scripts.prototypes.read_route.jets import _source_jets
+from nova.equilibrium.fixed_points import _source_jets
 from scripts.prototypes.xpoint_cell_owner.conic_integral import _quadratic
 
 

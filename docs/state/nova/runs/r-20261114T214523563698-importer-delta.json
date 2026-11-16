@@ -1,0 +1,695 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 6,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "cf87218b61ddb37e0b7c19e359d7da55bbfb24a1",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/brief.md",
+    "sha256": "e84aebaae13e027edd226881acb1c682da76f9927a5eb79df006d85469043754"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 8238062,
+      "input_tokens_cumulative": 8238062,
+      "output_tokens": 32061,
+      "output_tokens_cumulative": 32061,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1088,
+    "files": 8,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 228,
+        "name": "_solve_receipt",
+        "path": "tests/test_carrier_vertex_identity.py"
+      },
+      "run_function": {
+        "line": 190,
+        "name": "card_note",
+        "path": "scripts/prototypes/importer_delta/fill.py"
+      },
+      "window_line": 263
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 190,
+        "name": "card_note",
+        "path": "scripts/prototypes/importer_delta/fill.py"
+      },
+      "window_line": 263
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 190,
+        "name": "card_note",
+        "path": "scripts/prototypes/importer_delta/fill.py"
+      },
+      "window_line": 263
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_treats_a_positionally_passed_wall_as_guarded",
+        "path": "tests/test_renderer_wall_scan.py"
+      },
+      "run_function": {
+        "line": 190,
+        "name": "card_note",
+        "path": "scripts/prototypes/importer_delta/fill.py"
+      },
+      "window_line": 263
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 190,
+        "name": "card_note",
+        "path": "scripts/prototypes/importer_delta/fill.py"
+      },
+      "window_line": 263
+    },
+    {
+      "existing_function": {
+        "line": 559,
+        "name": "test_mast_efm_geometry_matches_host_contour_route",
+        "path": "tests/test_transport_geometry_reference.py"
+      },
+      "run_function": {
+        "line": 190,
+        "name": "card_note",
+        "path": "scripts/prototypes/importer_delta/fill.py"
+      },
+      "window_line": 265
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "91170a685c06a319f8f8ad97161795de38b2fbee",
+    "14b4e3321be8d3ea10ba8ded14abfa71a016dbb3",
+    "338514b20d81bfc0610dadb45b4b9e984ff559b2",
+    "b1c085c2c447d629b5f258b1930bb691f0e17ffd",
+    "0db6e05b2feff7d4f4ac6ba5d57a4049190d582d",
+    "a75cf9e9142994cde20684e252fa01407aa6d64d",
+    "3cdc4542d2114614cdb21cf49afdc2c53932f6a7",
+    "790cfd6f557db310527a713a12c93240c4c162b4",
+    "72d79f236ae9266a1d8fdf4bf659645516859346",
+    "9e3baf64ed48ac04e5a15cc326360f4ade20a74d"
+  ],
+  "completed_at": "2026-11-16T00:34:07Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-14T22:29:51Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "bash /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/importer-delta/scripts/prototypes/importer_delta/gate.sh /home/ITER/mcintos/.cache/nova-kernel-compile-barrier/importer-delta /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/base-rows.json /home/ITER/mcintos/.cache/nova-kernel-compile-barrier/importer-delta /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/negative-control.log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/cpu-config.json /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/h200-config.json",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/suite-after-composite.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.33640552995391704,
+    "plan": "kernel-compile-barrier",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-15T08:29:24.912839+00:00",
+    "horizon_seconds": 36000,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-14T22:29:24Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 16,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 12,
+    "headroom": -1,
+    "mean_context": 149091,
+    "observed_at": "2026-11-14T22:29:08Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 16,
+      "aggregate_tokens_per_second": 391.447,
+      "detail": "",
+      "mean_tokens_per_second": 35.586,
+      "observed_at": "2026-11-14T22:29:08Z",
+      "runs": 11.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-16T00:34:07Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/manifest.md",
+  "member": "disposable-r-20261114T214523563698-importer-delta",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "importer-delta",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/steering.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/brief.md",
+    "brief_sha256": "e84aebaae13e027edd226881acb1c682da76f9927a5eb79df006d85469043754",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "0f4fa699-2444-4d93-b978-9931302ff6f8"
+    },
+    "done_when": "(1) one H200 job gives base and head receipts for the four slow files; (2) one sirius CPU job gives head receipts for the other twenty, compared with job 1314800 base receipts; (3) the fragment tables added failure ids per file and device",
+    "estimated_hours": 1.5,
+    "goal": "Failure-id delta of the twenty-four importer files between 00ec05512 and the ordered-sharing head, by device",
+    "id": "importer-delta",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-14T22:29:24Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 16,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 12,
+      "headroom": -1,
+      "mean_context": 149091,
+      "observed_at": "2026-11-14T22:29:08Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 16,
+        "aggregate_tokens_per_second": 391.447,
+        "detail": "",
+        "mean_tokens_per_second": 35.586,
+        "observed_at": "2026-11-14T22:29:08Z",
+        "runs": 11.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T214523563698-importer-delta/manifest.md",
+    "negative_control": "a copy of the base receipts with one failure id removed is compared as head and must report exactly that id as added",
+    "over_fence_note": "",
+    "over_fence_reason": "",
+    "peer_scopes": {
+      "bank-hessian-reference": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-reference.html",
+        "docs/figures/sub-millisecond-forward-path/bank-hessian-reference",
+        "scripts/prototypes/bank_hessian_reference"
+      ],
+      "bank-width-probe": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html",
+        "docs/figures/sub-millisecond-forward-path/bank-width-probe",
+        "scripts/prototypes/bank_h200_slice_profile/run.py",
+        "scripts/prototypes/bank_width_probe"
+      ],
+      "carried-read-mask-geometry": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/carried-read-mask-geometry.html",
+        "nova/equilibrium/topology.py",
+        "tests/test_carried_read_refresh.py"
+      ],
+      "diiid-edge-current-refusal": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-edge-current-refusal.html",
+        "docs/figures/diiid-edge-current-refusal",
+        "docs/figures/diiid-edge-current-refusal/frame-137-diverted.svg",
+        "docs/figures/diiid-edge-current-refusal/frame-146-limited.svg",
+        "docs/figures/diiid-edge-current-refusal/frame-179-limited.svg",
+        "scripts/prototypes/diiid_edge_current_refusal"
+      ],
+      "diiid-external-current-propagation": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-external-current-propagation.html",
+        "docs/figures/diiid-external-current-propagation",
+        "scripts/prototypes/diiid_external_current_propagation"
+      ],
+      "diiid-finite-edge-booking": [
+        "benchmarks/diiid_forward_gs_match.py",
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-booking.html",
+        "docs/figures/diiid-finite-edge-booking",
+        "nova/equilibrium/current.py",
+        "nova/equilibrium/forward_operator.py",
+        "nova/equilibrium/source.py",
+        "scripts/prototypes/diiid_finite_edge_booking",
+        "tests/equilibrium/test_finite_edge_booking.py"
+      ],
+      "diiid-inactive-compensator-recovery": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html",
+        "docs/figures/diiid-inactive-compensator",
+        "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-recovery",
+        "nova/equilibrium/constraint.py",
+        "nova/equilibrium/fixed_point.py",
+        "nova/equilibrium/reduced_newton.py",
+        "scripts/prototypes/diiid_inactive_compensator",
+        "tests/equilibrium/test_solve_vertical_pin.py"
+      ],
+      "dina-flattop-scenario": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/dina-flattop-scenario.html",
+        "docs/figures/sub-millisecond-forward-path/dina-flattop-scenario",
+        "scripts/prototypes/dina_flattop_scenario"
+      ],
+      "efit-comparison": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html",
+        "docs/figures/inverse-equilibrium-baseline/efit-comparison",
+        "nova/equilibrium/magnetics_fit.py",
+        "nova/equilibrium/measurement.py",
+        "nova/imas/mast_efit_referee.py",
+        "nova/imas/parity_tolerances.py",
+        "tests/test_equilibrium_forward.py",
+        "tests/test_equilibrium_magnetics_fit.py",
+        "tests/test_magnetics_fit_efit_comparison.py"
+      ],
+      "estimator-scoreboard": [
+        "benchmarks/estimator_scoreboard.py",
+        "docs/evidence/fragments/inverse-equilibrium-baseline/estimator-scoreboard.html",
+        "nova/imas/mast_efit_referee.py",
+        "nova/imas/parity_tolerances.py",
+        "tests/test_estimator_scoreboard.py"
+      ],
+      "fused-booking-named-moments": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/fused-booking-named-moments.html",
+        "nova/equilibrium/current.py",
+        "nova/equilibrium/support_read.py",
+        "tests/test_fused_booking_assembly.py"
+      ],
+      "geometry-reuse": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/geometry-reuse.html",
+        "docs/figures/sub-millisecond-forward-path/geometry-reuse",
+        "nova/equilibrium/support_read.py",
+        "nova/equilibrium/topology.py",
+        "scripts/prototypes/geometry_reuse",
+        "tests/test_geometry_reuse.py"
+      ],
+      "icm-linear-assembly-cost": [
+        "docs/evidence/fragments/iron-core-magnetisation/icm-linear-assembly-cost.html",
+        "docs/figures/iron-core-magnetisation/icm-linear-assembly-cost",
+        "nova/biot/magnetisation.py",
+        "nova/biot/tiledassembly.py",
+        "scripts/iron_linear_magnetisation",
+        "tests/test_magnetisation.py"
+      ],
+      "ilf-material-fill-fraction": [
+        "docs/evidence/fragments/iron-limb-fill-fraction",
+        "docs/evidence/fragments/iron-limb-fill-fraction/ilf-material-fill-fraction.html",
+        "docs/figures/iron-limb-fill-fraction/ilf-material-fill-fraction",
+        "nova/biot/magnetisation.py",
+        "scripts/iron_limb_production",
+        "tests/test_magnetisation.py"
+      ],
+      "ilf-true-outline-read": [
+        "docs/evidence/fragments/iron-limb-fill-fraction",
+        "docs/evidence/fragments/iron-limb-fill-fraction/ilf-true-outline-read.html",
+        "docs/figures/iron-limb-fill-fraction/ilf-true-outline-read",
+        "nova/imas/machine.py",
+        "scripts/iron_graded_refinement",
+        "scripts/magnetisation_law",
+        "scripts/sheet_tile_census",
+        "scripts/west_iron_galerkin",
+        "scripts/west_iron_galerkin_pair",
+        "scripts/west_iron_solve",
+        "scripts/west_picard_control",
+        "scripts/west_root_branch",
+        "scripts/west_stray_field",
+        "tests/test_imas_iron_read.py"
+      ],
+      "ilf-west-true-outline-evidence": [
+        "docs/evidence/archive/iron-limb-fill-fraction-landed.html",
+        "docs/evidence/fragments/iron-limb-fill-fraction",
+        "docs/evidence/fragments/iron-limb-fill-fraction/ilf-west-true-outline-evidence.html",
+        "docs/figures/iron-limb-fill",
+        "docs/figures/iron-limb-fill-fraction/ilf-west-true-outline-evidence",
+        "scripts/iron_limb_production"
+      ],
+      "iter-bank-figure-redraw": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-figure-redraw.html",
+        "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank.html",
+        "docs/figures/sub-millisecond-forward-path/iter-bank",
+        "docs/figures/sub-millisecond-forward-path/iter-bank-figure-redraw",
+        "scripts/prototypes/iter_bank/render.py"
+      ],
+      "iter-bank-recertify": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+        "docs/figures/sub-millisecond-forward-path/iter-bank",
+        "scripts/prototypes/iter_bank",
+        "tests/test_iter_bank.py"
+      ],
+      "known-answer-recovery": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html",
+        "docs/figures/inverse-equilibrium-baseline",
+        "docs/figures/inverse-equilibrium-baseline/known-answer-recovery",
+        "nova/equilibrium/__init__.py",
+        "nova/equilibrium/magnetics_fit.py",
+        "nova/equilibrium/measurement.py",
+        "nova/equilibrium/observation_kernels.py",
+        "tests/test_equilibrium_forward.py",
+        "tests/test_equilibrium_magnetics_fit.py"
+      ],
+      "ordered-sharing": [
+        "docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html",
+        "docs/figures/kernel-compile-barrier/ordered-sharing",
+        "nova/biot/polygonanalytic.py",
+        "nova/equilibrium/fixed_points.py",
+        "tests/biot"
+      ],
+      "polygon-tangent-repair": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/polygon-tangent-repair.html",
+        "nova/biot/polygonanalytic.py",
+        "scripts/prototypes/polygon_tangent_repair",
+        "tests/biot/test_polygon_edge_line_tangent.py"
+      ],
+      "reconstruction-cost": [
+        "benchmarks/reconstruction_cost.py",
+        "docs/evidence/fragments/inverse-equilibrium-baseline/reconstruction-cost.html",
+        "tests/test_reconstruction_cost.py"
+      ],
+      "titan-lane-sizing": [
+        "docs/evidence/fragments/titan-lane-sizing.html",
+        "scripts/nova_lane/run.sh",
+        "tests/test_nova_lane_launcher.py"
+      ]
+    },
+    "plan": "kernel-compile-barrier",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "10h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "docs/evidence/fragments/kernel-compile-barrier/importer-delta.html",
+      "docs/figures/kernel-compile-barrier/importer-delta"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 18358870.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "importer-delta",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-14T22:29:36.258492+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Local lane named because the codex lane refused at its admitted-cores bound; measurement only, no source change",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.553,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.33640552995391704,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "9e3baf64ed48ac04e5a15cc326360f4ade20a74d",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_absent": true,
+    "scratch_bytes": null,
+    "scratch_host": "98dci4-clu-2001.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261114T214523563698-importer-delta",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/importer-delta",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a75cf9e9142994cde20684e252fa01407aa6d64d",
+    "reviewed_head_sha": "9e3baf64ed48ac04e5a15cc326360f4ade20a74d",
+    "scores": {
+      "durability": 12,
+      "evidence": 15,
+      "fit": 15,
+      "goal_fidelity": 16,
+      "reuse": 12,
+      "scope_discipline": 16
+    },
+    "status": "parsed",
+    "total": 86
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261114T214523563698-importer-delta",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+  "session_harness": "claude",
+  "session_id": "4f97befd-1b81-4490-ae09-49f7b1522fc9",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 98414092,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2128.082,
+    "generated_tokens": 374391,
+    "generation_seconds": 1343.06,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 85.6,
+    "machine_seconds": 785.022,
+    "peak_input_tokens": 196972,
+    "tokens_per_second": 278.76,
+    "wall_tokens_per_second": 175.93
+  },
+  "time_budget": "10h",
+  "tool_steps": 271.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 93856,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 6,
+    "ended_during": "working",
+    "ended_pids": [
+      3825913,
+      3981455,
+      3981459
+    ],
+    "exit_code": 0,
+    "exited_at": "2026-11-16T00:34:11Z",
+    "forced_exit": {
+      "phase": "complete",
+      "reason": "terminal-run",
+      "signalled_at": "2026-11-16T00:34:07Z"
+    },
+    "last_record_type": "user",
+    "launched_at": "2026-11-16T00:12:00Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261114T214523563698-importer-delta",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 69178,
+    "worker_pid": 3823877
+  },
+  "worker_seconds": 68769,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

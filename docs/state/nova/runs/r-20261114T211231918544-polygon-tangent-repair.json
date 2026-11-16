@@ -10909,6 +10909,51 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "bf9964e4caab435a75e03265aa6af94f0a88cd8f",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_withheld": "run retained for recovery",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "unintegrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "bf9964e4caab435a75e03265aa6af94f0a88cd8f",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/c042a637-16e6-44bd-9cd2-b340a6f891dc/polygon-tangent-repair",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-11-16T22:55:57Z",
+            "session_id": "01a1dcaa-4064-7721-b43e-7e73f20de33c",
+            "session_source": "pointer",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/c042a637-16e6-44bd-9cd2-b340a6f891dc/polygon-tangent-repair"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a1dcaa-4064-7721-b43e-7e73f20de33c"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": {
     "reason": "lead ruled 2026-11-17: close this run and diagnose the 64-node trace miss in a fresh investigation node; no further candidate from this session",
     "session_id": "01a1dcaa-4064-7721-b43e-7e73f20de33c",

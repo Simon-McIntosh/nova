@@ -1,0 +1,13 @@
+<section id="west-62751" data-evidence-origin="append">
+<h2>§4 — WEST 62751 on the stored and the true outline</h2>
+<p id="ilf-west-true-outline-evidence-models">The production measurement builds both geometry models from the machine description. <code>StaticMachineDescription.read_west_iron_outline</code> supplies the true flat arm and limb regions with their per-region fill profile, the section-derived cross-field factor 0.4 and the stored 2.10 mm limb-to-arm gap; the stored model is the union of the stored tapered segments at unit fill with no cross-field factor. <code>scripts/iron_limb_production/measure.py::measure_west</code> now delegates to <code>scripts/iron_limb_production/outline.py</code>, so no production solve consumes <code>west_regions</code>, <code>flat_fill</code> or <code>WEST_JOIN</code>.</p>
+<table id="ilf-west-true-outline-evidence-sections">
+<thead><tr><th>Arm section per radian</th><th>m²/rad</th></tr></thead>
+<tbody>
+<tr><td>Stored tapered arm</td><td>8.5349</td></tr>
+<tr><td>True flat arm, fill fraction</td><td>8.5349</td></tr>
+<tr><td>Superseded prototype flat arm: box from R = 0.05 m to 6.0 m, 1.2035 m deep</td><td>21.6615</td></tr>
+</tbody></table>
+<p id="ilf-west-true-outline-evidence-gate">Two assertions were added to <code>validate_control_receipt</code>. The receipt's <code>revision</code> must be the one the gate is told to expect and the refusal names both; the solid-outline control, read from the receipt's own rows or from the source receipt it names and hashes, must stay above 100 % of the in-vessel reference. Both are covered by fast tests in <code>tests/test_magnetisation.py</code>; the gate selection reads 5 passed at the head, and removing the solid test's assertion leaves 1 failed, 4 passed.</p>
+<p id="ilf-west-true-outline-evidence-measure-not-run">Not measured: the stored-versus-true field at the in-vessel ring, behind the limbs and above the arms. The measurement was submitted as one H200 job (job 1318813, betelgeuse reservation <code>gpu_0003_grpA</code>, one card, 64 GB) and stayed <code>PENDING (Priority)</code> for the whole run while the node read <code>AllocTRES gres/gpu=8</code> of <code>CfgTRES gres/gpu=8</code>. No arrays were written under <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/west-62751/</code>, so there is no model difference, no mesh-pair difference and no resolution verdict, and neither <code>west-62751-permeability.svg</code> nor <code>west-62751-stray-lines.svg</code> was redrawn. The figures under <code>docs/figures/iron-limb-fill/</code> remain the §2 prototype drawings.</p>
+</section>

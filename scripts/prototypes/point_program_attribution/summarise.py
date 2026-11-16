@@ -64,7 +64,9 @@ def block_rows(cpu, control_bytes):
                 "graph_share": erased / control_bytes,
                 "erased": erased == 0,
                 "replaced": receipt["replaced"],
-                "probe_bytes": load(probe)["stablehlo_bytes"] if probe.exists() else None,
+                "probe_bytes": load(probe)["stablehlo_bytes"]
+                if probe.exists()
+                else None,
             }
         )
     return rows
@@ -92,7 +94,13 @@ def arm_rows(device):
                 "instructions_entry": splitter["entry"],
                 "instructions_after_splitter": splitter["after"],
                 "attributed_seconds": attribution.get("attributed_seconds"),
-                "coverage": attribution.get("coverage"),
+                "coverage": attribution.get("coverage_of_compile"),
+                "distinct_passes": attribution.get("distinct_passes"),
+                "instructions_peak": attribution.get("instructions_peak"),
+                "seconds_before_first_dump": attribution.get(
+                    "seconds_before_first_dump"
+                ),
+                "seconds_after_last_dump": attribution.get("seconds_after_last_dump"),
                 "table": attribution.get("table"),
             }
         )

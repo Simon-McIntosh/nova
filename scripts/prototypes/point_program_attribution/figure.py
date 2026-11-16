@@ -26,22 +26,24 @@ plt.style.use(str(_STYLE) if _STYLE.exists() else "data-ink")
 STYLE = DEFAULT_INK.variant(label_fontsize=14.0)
 
 
-def draw_share(panel, blocks):
+def draw_share(panel, blocks, control_bytes):
     blocks = [block for block in blocks if block["block"] != "identity"]
     blocks = sorted(blocks, key=lambda block: -block["graph_share"])
     positions = list(range(len(blocks)))
     panel.barh(
         positions,
         [100.0 * block["graph_share"] for block in blocks],
-        color=[DEFAULT_INK.flux_color if block["erased"] else DEFAULT_INK.contour_color
-               for block in blocks],
+        color=[
+            DEFAULT_INK.flux_color if block["erased"] else DEFAULT_INK.contour_color
+            for block in blocks
+        ],
         height=0.68,
         zorder=4,
     )
     panel.set_yticks(positions)
     panel.set_yticklabels([block["label"] for block in blocks])
     panel.invert_yaxis()
-    panel.set_xlabel("lowered graph removed [% of 6,088,067 bytes]")
+    panel.set_xlabel(f"lowered graph removed [% of {control_bytes:,} bytes]")
     widest = max(100.0 * block["graph_share"] for block in blocks)
     panel.set_xlim(0.0, widest * 1.22)
     for position, block in zip(positions, blocks):
@@ -63,7 +65,11 @@ def draw_compile(panel, arms):
     panel.bar(
         positions,
         seconds,
-        color=[DEFAULT_INK.contour_color, DEFAULT_INK.flux_color, DEFAULT_INK.flux_color],
+        color=[
+            DEFAULT_INK.contour_color,
+            DEFAULT_INK.flux_color,
+            DEFAULT_INK.flux_color,
+        ],
         width=0.56,
         zorder=4,
     )
@@ -115,7 +121,7 @@ def main():
     )
     left = trace_axes(left, STYLE)
     right = trace_axes(right, STYLE)
-    draw_share(left, receipt["blocks"])
+    draw_share(left, receipt["blocks"], receipt["control_bytes"])
     draw_compile(right, receipt["arms"])
     figure.legend(
         handles=[

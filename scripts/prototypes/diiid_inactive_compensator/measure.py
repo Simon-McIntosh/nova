@@ -9,10 +9,24 @@ import jax.numpy as jnp
 import numpy as np
 
 from scripts.prototypes.diiid_finite_edge_booking import measure as booked
+from nova.equilibrium.solve_request import ForwardSolveReceipt
 
 branch = booked.extent.held_measure.core.branch_measure
 original_load = branch.original_load
 captures = []
+
+
+def capture_solve(original):
+    """Retain the equilibrium carried by the public solve receipt."""
+
+    def solve(profile, *args, **kwargs):
+        result = original(profile, *args, **kwargs)
+        booked.SOLVED["value"] = (
+            result.equilibrium if isinstance(result, ForwardSolveReceipt) else result
+        )
+        return result
+
+    return solve
 
 
 def observed_load(name, path):
@@ -64,6 +78,7 @@ def trip_read(capture):
             admitted=bool(admitted),
         ),
         trips=[],
+        cohort_topology_reads=json.loads((output / "trips.json").read_text()),
     )
     assert capture.counts["inner"] == len(capture.inner) > 0
     for index, metrics in enumerate(capture.inner):
@@ -82,6 +97,7 @@ def trip_read(capture):
 
 def main():
     branch.original_load = observed_load
+    booked.capture_solve = capture_solve
     booked.main()
     assert len(captures) == 1, "the production operand capture must execute"
     trip_read(captures[0])

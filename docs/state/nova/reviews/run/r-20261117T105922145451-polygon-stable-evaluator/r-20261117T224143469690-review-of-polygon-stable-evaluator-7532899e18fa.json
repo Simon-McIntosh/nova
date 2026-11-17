@@ -25,10 +25,9 @@
       "recorded_at": "2026-11-17T23:27:17.242044+00:00"
     },
     "2": {
-      "kind": "deferred",
-      "recorded_at": "2026-11-17T23:26:23.777176+00:00",
-      "rule": "landing-defers-non-blocking-findings",
-      "run": "r-20261117T105922145451-polygon-stable-evaluator"
+      "kind": "exempted",
+      "reason": "the integrated 64-node accuracy run takes about 4.5 h on rigel and cannot run in the default lane; the receipt-gated cases are the designed contract, and the live accuracy is re-checked by iter-bank-recertify, which holds psi_RZ and psi_ZZ to 1e-8 at the same nodes",
+      "recorded_at": "2026-11-17T23:27:32.928407+00:00"
     }
   },
   "findings": [

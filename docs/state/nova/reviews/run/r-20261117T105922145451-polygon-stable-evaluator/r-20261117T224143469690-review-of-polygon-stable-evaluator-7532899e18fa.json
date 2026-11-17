@@ -14,10 +14,9 @@
   "dispatched_at": "2026-11-17T22:43:03Z",
   "finding_dispositions": {
     "0": {
-      "kind": "deferred",
-      "recorded_at": "2026-11-17T23:26:23.777176+00:00",
-      "rule": "landing-defers-non-blocking-findings",
-      "run": "r-20261117T105922145451-polygon-stable-evaluator"
+      "kind": "folded",
+      "node": "kernel-compile-barrier-s3-one-traced-body",
+      "recorded_at": "2026-11-17T23:27:56.675091+00:00"
     },
     "1": {
       "kind": "folded",

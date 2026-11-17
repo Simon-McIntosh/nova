@@ -2,7 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-17T14:13:30.421Z",
-  "dimension_dispositions": {},
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-point-program-attribution-ccc984ff0945",
+      "recorded_at": "2026-11-17T14:57:23.934729+00:00"
+    }
+  },
   "dispatched_at": "2026-11-17T14:13:02Z",
   "findings": [
     {

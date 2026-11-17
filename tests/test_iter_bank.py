@@ -13,7 +13,9 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
+from nova.biot import polygonanalytic as kernel
 from nova.equilibrium import support_read, topology
+from nova.equilibrium.fixed_points import _source_jets
 from scripts.prototypes.iter_bank.measure import (
     PLASMA_JET_TOLERANCE,
     ZeroField,
@@ -204,6 +206,7 @@ def test_map_check_refuses_nonfinite_and_missing_coils():
         assert_accuracy(expected, np.zeros_like(expected))
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("sample", range(3))
 def test_iter_nodal_jets_match_analytic_map(iter_bank, sample):
     """Check the live plasma contraction alone and with runtime coil currents."""
@@ -248,6 +251,7 @@ def test_reentrant_wall_mesh_keeps_all_clipped_fragments():
     assert all(p.difference(vessel).area < 1e-12 for p in cells)
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("sample", range(3))
 def test_iter_coil_jets_match_analytic_map(iter_bank, sample):
     """Qualify every driven jet entry against the direct analytic kernels."""
@@ -258,3 +262,74 @@ def test_iter_coil_jets_match_analytic_map(iter_bank, sample):
     errors = assert_accuracy(actual[:active], expected[sample, 1])
     np.testing.assert_array_equal(actual[active:], 0.0)
     print("coil", errors)
+
+
+def extended_line_source():
+    """A plasma cell and a target 1e-12 m from one edge's extended line."""
+    angle = np.pi / 6
+    rotation = np.array(
+        [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]
+    )
+    polygon = np.array([[-0.5, -0.6], [0.5, -0.6], [0.5, 0.6], [-0.5, 0.6]])
+    polygon = polygon @ rotation.T + [6, 0]
+    edge = polygon[2] - polygon[1]
+    normal = np.array([edge[1], -edge[0]]) / np.linalg.norm(edge)
+    point = polygon[1] + 2 * edge + 1e-12 * normal
+    return polygon, point
+
+
+def primal_gradient(point, coupling):
+    """Evaluate the analytic gradient without invoking any tangent rule."""
+    rows = kernel.packed_analytic_moments(
+        np,
+        np.asarray([point[0]]),
+        np.asarray([point[1]]),
+        np.asarray(coupling.edge),
+        np.asarray(coupling.weight),
+        np.asarray(coupling.norm),
+        np.asarray(coupling.centre.T),
+        np.asarray(coupling.centre.T),
+        np.asarray(coupling.reflection_axis),
+        np.asarray(coupling.reflection_partner),
+    )
+    stacked = np.stack((np.stack(rows[6:9]), -np.stack(rows[3:6])), axis=-1)
+    return 2 * np.pi * point[0] * stacked[:, 0]
+
+
+def test_plasma_row_hessian_matches_source_gradient_reference():
+    """The bank's plasma row carries a Hessian this edge line does not damage.
+
+    The reference differences the primal analytic gradient at three steps and
+    Richardson-extrapolates it, so it never reads the polygon tangent the row
+    is built from.
+    """
+    polygon, point = extended_line_source()
+    coupling = topology.BiotMomentCoupling.from_polygons((polygon,))
+    moments = np.array([[240000.0, 0.0, 0.0]])
+    row = np.asarray(_source_jets(jnp.asarray(point), coupling))
+    actual = np.einsum("cm,cmq->q", moments, row)
+    estimates = []
+    for step in (0.001, 0.0005, 0.00025):
+        columns = []
+        for direction in np.eye(2):
+            offset = step * direction
+            columns.append(
+                (
+                    primal_gradient(point + offset, coupling)
+                    - primal_gradient(point - offset, coupling)
+                )
+                / (2 * step)
+            )
+        estimates.append(np.stack(columns, axis=-1))
+    fourth = [
+        (4 * estimates[1] - estimates[0]) / 3,
+        (4 * estimates[2] - estimates[1]) / 3,
+    ]
+    sixth = (16 * fourth[1] - fourth[0]) / 15
+    reference = np.einsum("c,cab->ab", moments[0], sixth)
+    mixed, vertical = reference[0, 1], reference[1, 1]
+    errors = np.array(
+        [abs(actual[4] - mixed) / abs(mixed), abs(actual[5] - vertical) / abs(vertical)]
+    )
+    print("plasma_row_hessian", actual[[4, 5]].tolist(), errors.tolist())
+    assert np.all(errors <= 1e-8), f"plasma-row Hessian errors {errors.tolist()}"

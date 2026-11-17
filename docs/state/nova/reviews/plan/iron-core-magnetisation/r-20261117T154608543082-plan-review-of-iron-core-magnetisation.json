@@ -25,7 +25,30 @@
   "plan_slug": "iron-core-magnetisation",
   "plan_version": 117,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "29981307f5481442f553f0786f758d7e57af07a1",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "s11 now places the limit where the H200 record measured it: the operator fits (39.5 GB), and the dense factorisation's temporaries take the live peak to 158 GB against 151 GB of card memory",
+      "reason": "",
+      "when": "2026-11-17T16:12:47.717988+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "29981307f5481442f553f0786f758d7e57af07a1",
+      "commit_basis": "edit",
+      "note": "s11 now places the limit where the H200 record measured it: the operator fits (39.5 GB), and the dense factorisation's temporaries take the live peak to 158 GB against 151 GB of card memory",
+      "reason": "",
+      "when": "2026-11-17T16:12:47.717988+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261117T154608543082-plan-review-of-iron-core-magnetisation.json",
   "review_run_id": "r-20261117T154608543082-plan-review-of-iron-core-magnetisation",
   "reviewed_blob_sha": "694f60f4d236cd731f799e3a184002ecb6772fe3",
   "rubric": "content",

@@ -25,8 +25,8 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="381">
-<meta name="plan-modified" content="2026-11-17">
+<meta name="plan-version" content="382">
+<meta name="plan-modified" content="2026-11-18">
 </head>
 <body>
   <main class="plan-doc">
@@ -1191,6 +1191,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261117T224143469690-review-of-polygon-stable-evaluator-7532899e18fa" data-who="reckon-build" data-when="2026-11-17T22:43:24.058Z">
     <div class="r-comment-body"><p>Independent review of 02997905193b245dcc099a238fea6c22d8817671..7532899e18fa8e56b465215727b6706813c90502 scores goal_fidelity 19, evidence 19, scope_discipline 17, durability 15, fit 18, reuse 18, with zero added failures and three non-blocking findings; no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261117T105922145451-polygon-stable-evaluator" data-who="reckon-build" data-when="2026-11-17T22:40:22Z">
+    <div class="r-comment-body"><p>One shared stable pole derivative evaluator with six height samples preserves primal bits and meets the integrated64-node trace at7.424e-10/9.150e-10/6.982e-10, with every interior component against both references&lt;=6.919e-9. H200 cost1.565208x instructions/1.871670x cold compile passes2.3x budgets. Authorized10000000-byte ceiling covers9351538 bytes; per-file base10passed versus head16passed7skipped gives zero added failures. Evidence: /nova/evidence/fragments/sub-millisecond-forward-path/polygon-stable-evaluator.html#polygon-stable-evaluator-result.</p></div>
 </div>
 </section>
 </main>

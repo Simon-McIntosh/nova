@@ -8,6 +8,13 @@
   "call_sites": [],
   "completed_at": "2026-11-17T16:38:40.211Z",
   "dispatched_at": "2026-11-17T16:37:55Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the second file, test_artifacts_carry_no_worktree_paths.py, ran green in the scoped gate log at both revisions; the node touched only test_imas_iron_read.py, so the narrower arm pair measures everything the diff can reach",
+      "recorded_at": "2026-11-17T17:02:01.301661+00:00"
+    }
+  },
   "findings": [
     {
       "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T154836812474-icm-census-count-pin/manifest.md",

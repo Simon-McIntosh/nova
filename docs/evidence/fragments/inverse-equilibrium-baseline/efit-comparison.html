@@ -1951,4 +1951,22 @@ The completed focused GPU checks report <code>1 failed, 69 passed, 10 deselected
 in 44.79s</code>, with a total stage wall of 52.964153 s on titan P100. The
 predeclared failure is preserved in the manifest. No forward or topology source
 was changed and no further physical run was submitted.</p>
+<figure id="efit-comparison-response-refusal-panel">
+<img src="/nova/figures/inverse-equilibrium-baseline/efit-comparison/backtracking/mastu-response-refused.svg" alt="MAST-U saved refused response evaluation overlaid on imas-efit on shared flux levels, with both null sets and wall">
+<figcaption>MAST-U lower central-difference response perturbation from the banked
+public receipt: residual 0.0001237999574577207, qualified=false, converged=false,
+reason 12 (ACTIVE_SET_STEP_REFUSED). imas-efit is grey (#929292, wide) underneath;
+nova is blue (narrow) on top, on one shared physical flux level array. Both axis
+triangles and both null sets are drawn in their own styles; the reference saddle
+is above the plasma and nova's saddle is below. The wall is unit-faithful. The
+plasma remains at the midplane with nearby contours despite failing numerical
+qualification; this is a response perturbation, not a completed inverse fit.
+Bernstein ndeg=2/2, one live function each; same magnetics-only constraint set.
+The 14 × 7.2 in SVG and its PNG preview were rendered from the saved float64
+receipt on all_debug, with a machine cache hit, zero equilibrium solves and zero
+field evaluations. CPU render wall 16.391678 s is separate from all titan P100
+solver timings. The PNG was visually inspected; legend and contours are clear,
+no axes, no clipped or overlapping text. Inspection receipts precede the native
+EXIT lines in the render and physical-case gate logs.</figcaption>
+</figure>
 </section>

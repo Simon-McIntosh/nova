@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="biot,iron-core,machine-description,jax,efit">
   <meta name="plan-after" content="kernel-compile-barrier">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;deferred&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;,&quot;iron-core-magnetisation#s3&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;,&quot;iron-core-magnetisation#s5&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s1&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;iron-core-magnetisation#s8&quot;,&quot;iron-core-magnetisation#s10&quot;],&quot;s10&quot;:[&quot;iron-core-magnetisation#s5&quot;]}">
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="117">
+<meta name="plan-version" content="119">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -416,28 +416,24 @@
     </p>
 
     <h2 id="s10">§6b — The imas-efit closed-shell control</h2>
-<section data-reckon="section" data-id="s10" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="deferred" data-links=""></section>
+<section data-reckon="section" data-id="s10" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
       Run the closed-shell control through imas-efit's iron model and report the result to the
-      imas-efit owners. imas-efit reads its iron geometry through <code>IronCoreBuilder</code> from the
-      iron_core IDS, with its B-H curve (<code>src/ironCoreBuilder.cpp</code>), and falls back to an
-      XML <code>ironBoundaries</code> element only when the IDS carries no iron core
-      (<code>src/tokamakData.cpp</code>); WEST's <code>configuration/machines/WEST/iron.xml</code> holds only
-      a constant <code>relativePermeability</code> and no boundary. So the shell geometry is authored as one
-      new iron-boundary element: imas-efit's <code>IronBoundary</code> is a single closed iron-air path in
-      (R, Z) with R &ge; 0 (<code>src/ironBoundary.h</code>), and a spherical shell's poloidal section is a
-      half-annulus with no hole, closed along the axis, so its contour runs the outer arc, the axis
-      segment, the inner arc reversed and the other axis segment, as the §1 prototype builds it
-      (<code>scripts/prototypes/iron_magnetisation/shell.py</code>); a contour along the outer arc alone would
-      be a solid iron sphere. The permeability the boundary selects must be 1000: with the IDS withheld,
-      imas-efit reads <code>magneticPermeabilities</code> from the same XML document, and WEST's
-      <code>iron.xml</code> defines only id 1 at 215, so the configuration adds an entry at 1000 and points the
-      boundary's material at it. The element's required fields (<code>geometry/category</code>, the
-      <code>knotSet</code> and the <code>observationPoints</code> blocks) are those
-      <code>checkData</code> in imas-efit <code>src/ironBoundary.cpp</code> enforces, since no instance exists
-      under <code>configuration/</code> to copy; the iron_core IDS is withheld, and the permeability is
-      constant: the exact shielding factor S of §1 is a linear-&mu; result, and a run with a B-H table
-      would be compared against the wrong reference. imas-efit's own iron solve is converged before
+      imas-efit owners. The case is an IMAS pulse, not XML: the imas-efit lead ruled on 2026-11-17
+      that machine and pulse facts reach imas-efit only through the IMAS interface, and the XML
+      machine layer is being retired, so the XML <code>&lt;pfCircuits&gt;</code> read that a first attempt
+      found disabled (landed record at merge 3abe74daf) will not return. The pulse carries
+      <code>pf_active</code> with one source circuit and its coil geometry, <code>iron_core</code> for the
+      shell, <code>wall</code>, and <code>magnetics</code> for the field points; only solver options stay in
+      <code>efitOptions.xml</code>. A spherical shell's poloidal section is a half-annulus closed along the
+      axis, so its contour runs the outer arc, the axis segment, the inner arc reversed and the other
+      axis segment, as the §1 prototype builds it (<code>scripts/prototypes/iron_magnetisation/shell.py</code>);
+      a contour along the outer arc alone would be a solid iron sphere. The permeability is a
+      constant 1000, written as a flat B-H table in <code>iron_core</code>: the exact shielding factor S of §1 is a
+      linear-&mu; result, and a nonlinear table would be compared against the wrong reference. Grid
+      radii stay positive (rMin = 0.001&nbsp;m) until imas-efit's cold-seed guard is fixed. Any IDS
+      field imas-efit fails to read is sent to the imas-efit session with its path and error, and
+      imas-efit develops the reader on its side. imas-efit's own iron solve is converged before
       any verdict is drawn. Its <code>relativeError</code> (1e-2 in
       <code>configuration/machines/_common/solver/iron-solver.xml</code>) is an absolute threshold on the
       squared change of the summed boundary currents (<code>usermanual/xml/ironModel.xml</code>), capped by
@@ -623,6 +619,9 @@ number is reported for either ratio.</p></div>
 </div>
 <div class="r-comment" data-section="s10" data-id="c-s10-deferred-on-imas-efit-xml" data-who="reckon-build" data-when="">
     <div class="r-comment-body"><p>§6b is deferred until imas-efit can drive a source from XML input, or a pulse supplies pf_active circuits this machine description can use. On develop, <code>src/pfSystems.cpp</code> leaves the machine &lt;pfCircuits&gt; read commented out, so the control cannot run (landed record at merge 3abe74daf). The question went to the imas-efit session on 2026-11-17. A rerun is a fresh node using the case builder under <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/closed-shell/</code>. §9 reads this section's verdict, so it waits too.</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-s10-imas-pulse-route" data-who="reckon-build" data-when="">
+    <div class="r-comment-body"><p>The imas-efit lead answered on 2026-11-17: XML circuit input will not return, and the control is built as an IMAS pulse (pf_active, iron_core, wall, magnetics), with imas-efit developing any missing IDS reader. The prose now says so, and the section is implementable again. This supersedes the deferral comment above.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T222130291065-review-of-icm-strip-error-sweep-43dc514d920c-figure" data-who="reckon-build" data-when="2026-11-06T22:32:39.513Z">
     <div class="r-comment-body"><p>Figure review of run r-20261106T212311176377-icm-strip-error-sweep at head 43dc514d9 is parsed with no blocking finding: the strip-error curve figure renders clean (zero ink in the outer 8 px frame, ink bbox x 35..1365 y 86..690, one frameless legend row, the 1e-10 direct label in clear space), and one non-blocking finding records that the two lightest curve stops measure 2.61:1 and 1.93:1 against white, below the 3:1 a plotted line is required to hold, so the coincident right-hand branch is drawn in the palest trace.</p></div>

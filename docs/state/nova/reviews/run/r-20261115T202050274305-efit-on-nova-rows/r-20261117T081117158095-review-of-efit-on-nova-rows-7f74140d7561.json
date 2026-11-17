@@ -1,0 +1,93 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T08:15:34.749Z",
+  "dispatched_at": "2026-11-17T08:13:27Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html",
+      "id": "f3041b0b9c2",
+      "line": "81",
+      "severity": "non-blocking",
+      "text": "non-blocking: The consequence paragraph now reads '... so four of the five are met and the gate as a whole is not The cause is visible ...' \u2014 the terminator that ended the sentence at base 86b64c13 ('|q95| is 0.148 low. The cause is visible') was lost when the clause was extended, so the gate verdict has no closing word and two sentences run together."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/test_fragment_receipt.py",
+      "id": "f42ce970e07",
+      "line": "158",
+      "severity": "non-blocking",
+      "text": "non-blocking: The module docstring promises a recomputation of every derived figure, but test_the_record_quotes_the_bands_it_measured:158-161 reads the axis offset and both flux fractions verbatim from receipt['band_rows'] instead of re-deriving them from receipt['efit'] and receipt['generating'] (derived() at :78 recomputes only the current fractions and the span ratio), so a receipt whose derived rows disagree with its own raw states would still pass; the profile_amplitudes and solver strings receipt.json:184-204 carries are likewise hand-typed literals in the uncommitted write_receipt.py rather than reads from a record."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/test_fragment_receipt.py",
+      "id": "f2ae799a67c",
+      "line": "288",
+      "severity": "non-blocking",
+      "text": "non-blocking: The panel pin is a raw sha256 of the committed SVG (:288-291), the pin tests/test_figure_panel_pin.py:1-15 documents as unusable on these files because the vector text carries a wall-clock dc:date, the Matplotlib version token and generated element ids \u2014 so a legitimate re-render reddens the check and it cannot tell a moved drawing from a library upgrade."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/test_fragment_receipt.py",
+      "id": "fe5c73daaac",
+      "line": "326",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_the_record_carries_no_worktree_path asserts the absence of 'reckon-worktrees', which tests/test_artifacts_carry_no_worktree_paths.py and the pre-commit 'filepath relativize --check' already enforce over every tracked file including this fragment, so the line is a second copy of a rule the repository owns."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/test_fragment_receipt.py",
+      "id": "f05df2c3542",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "non-blocking: The guard lives under docs/figures and pyproject.toml:289-295 sets testpaths to tests plus six nova modules, so a default 'uv run pytest' never collects it and the check fires only when a reader types the command quoted at efit-on-nova-rows.html:88-90; the repository's precedent for reconciling a committed receipt with an evidence fragment is a test under tests/ (tests/test_outboard_census_receipt_consistency.py:1-12)."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T202050274305-efit-on-nova-rows/manifest.md",
+      "id": "f445b01ea69",
+      "line": "11",
+      "severity": "non-blocking",
+      "text": "non-blocking: The tests line still reads 'none - the node changes no source or test file; its only repository artifacts are the evidence fragment and two figures' and changed_paths still lists only the fragment and the two SVGs, while 7f74140d commits docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json and test_fragment_receipt.py; a reader reconciling the manifest against the diff finds two committed files and the gate command unlisted."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html",
+      "id": "f1cf089dec7",
+      "line": "89",
+      "severity": "non-blocking",
+      "text": "non-blocking: The provenance paragraph is closed at '</p>' before the durability <pre>, then 'Jobs of record: ...' is emitted directly after '</pre>' with no opening paragraph element and one stray '</p>' at the end of :90, so the served fragment carries invalid block markup; the added structural check cannot see it because test_fragment_receipt.py:305-311 clamps its depth at zero instead of failing on a close with no open and does not count 'p' among its balanced containers."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none \u2014 the change is an evidence fragment and a pytest module under docs/figures, and pyproject.toml:289-295 sets testpaths to tests plus six nova modules, so nothing at runtime reaches either.",
+    "diff": "One commit against base 86b64c13, three files, +544/-9: the basis paragraph now quotes DYNAMIC_NDEG and DESIGN_RANK and separates the configuration reads, the axis-flux fraction, control fraction, control ratio and control percentage are corrected, the nova-fit pre is renamed, and receipt.json plus test_fragment_receipt.py are added.",
+    "done_when": "The done_when's three items sit in the record at efit-on-nova-rows.html:46-54 (the five bands) and :76-77 (the 1.10 control); the added gate at docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/test_fragment_receipt.py:101-326 asserts the record quotes those figures from receipt.json and states the q95 miss, and I re-ran the command it names at head: 12 passed.",
+    "goal": "The goal is the section-8 exchange \u2014 imas-efit with its pressure and q0 priors disabled on nova-written noise-free ITER rows, compared with the generating state and with the nova fit; the commit under review is the repair round on docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:1-3, whose deliverable is a committed guard on that record plus its four numeric fixes.",
+    "manifest": "The manifest reads status complete and names 7f74140d in commits, but its tests line at :11 says the node changes no source or test file and its changed_paths lists only the fragment and the two SVGs, so it still describes the pre-repair landing while test_logs at :12 is empty.",
+    "write_paths": "The declared write paths are docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html and docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows; git diff 86b64c13..7f74140d changes exactly three files, all inside them."
+  },
+  "justifications": {
+    "durability": "Each assertion names the string it requires, so reinstating 0.42 %, 1.6e-4, 14.995, the duplicate id or the stale panel bytes reddens :152, :176-177, :223-224, :269 or :289 \u2014 but the check can still admit a new false sentence, reads three band figures from a derived sub-dict at :158-161, and is collected by no lane (pyproject.toml:289-295).",
+    "evidence": "The 12-passed head result is recorded only as prose at manifest.md:25 with test_logs empty at :12 and no log on disk, so I re-ran the named command at 7f74140d and reproduced 12 passed, while the base arm at :24 reaches only pytest exit 4 because the test file does not exist at base.",
+    "fit": "The test module follows the repository's test prose and the fragment keeps its node-prefixed ids, but the fragment's markup regresses at efit-on-nova-rows.html:81 (lost sentence terminator) and :89-90 (paragraph closed before a pre, tail text and a stray closing tag after it).",
+    "goal_fidelity": "The commit answers the review round it was dispatched for \u2014 test_fragment_receipt.py:101-326 fails when a quoted number, a duplicate id or a rewritten panel changes, and the corrections land at efit-on-nova-rows.html:3, :22, :76-77 and :81.",
+    "reuse": "The raw-SVG sha256 pin at :288 re-implements in the form that owner warns against the pin owned by tests/test_figure_panel_pin.py:1-15, and :326 duplicates tests/test_artifacts_carry_no_worktree_paths.py, while the receipt-to-fragment reconciliation itself only extends the pattern owned in tests/test_outboard_census_receipt_consistency.py:1-12.",
+    "scope_discipline": "git diff 7f74140d's parent 86b64c13..7f74140d touches only docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html and two files under docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/, both inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal is the section-8 exchange \u2014 imas-efit with priors disabled on nova-written noise-free ITER rows compared with the generating state and the nova fit; the commit under review is the repair round on docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:1-3, whose deliverable is a committed guard on that record plus its four numeric fixes.\nVERDICT done_when: The five bands and the 1.10 control sit at efit-on-nova-rows.html:46-54 and :76-77, and the added gate at docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/test_fragment_receipt.py:101-326 asserts the record quotes those figures from receipt.json; re-run at head it gave 12 passed.\nVERDICT write_paths: The declared paths are the fragment and docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows, and git diff 86b64c13..7f74140d touches exactly the three files inside them.\nVERDICT manifest: Read; status complete with 7f74140d named in commits, but docs/evidence/... manifest.md:11 still says the node changes no test file and its changed_paths omits receipt.json and test_fragment_receipt.py.\nVERDICT diff: Read commit by commit against base 86b64c13: one commit, +544/-9 over the fragment, receipt.json and test_fragment_receipt.py, correcting four numbers, renaming the nova-fit pre and separating log-resolved counts from configuration reads.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: The commit answers the review round it was dispatched for \u2014 test_fragment_receipt.py:101-326 fails when a quoted number, a duplicate id or a rewritten panel changes, and the corrections land at efit-on-nova-rows.html:3, :22, :76-77 and :81.\nSCORE evidence: 14\nJUSTIFICATION evidence: The 12-passed head result is recorded only as prose at manifest.md:25 with test_logs empty at :12 and no log on disk, so I re-ran the named command at 7f74140d and reproduced 12 passed, while the base arm at :24 reaches only pytest exit 4 because the test file does not exist at base.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 86b64c13..7f74140d touches only docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html and two files under docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/, both inside the declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: Each assertion names the string it requires, so reinstating 0.42 %, 1.6e-4, 14.995, the duplicate id or the stale panel bytes reddens :152, :176-177, :223-224, :269 or :289 \u2014 but the check can still admit a new false sentence, reads three band figures from a derived sub-dict at :158-161, and is collected by no lane (pyproject.toml:289-295).\nSCORE fit: 14\nJUSTIFICATION fit: The test module follows the repository's test prose and the fragment keeps its node-prefixed ids, but the fragment's markup regresses at efit-on-nova-rows.html:81 (lost sentence terminator) and :89-90 (paragraph closed before a pre, tail text and a stray closing tag after it).\nSCORE reuse: 5\nJUSTIFICATION reuse: The raw-SVG sha256 pin at :288 re-implements in the form it warns against the pin tests/test_figure_panel_pin.py:1-15 owns, and :326 duplicates tests/test_artifacts_carry_no_worktree_paths.py, while the receipt-to-fragment reconciliation itself only extends the pattern owned in tests/test_outboard_census_receipt_consistency.py:1-12.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:81 non-blocking: the sentence terminator was lost, so the gate verdict has no closing word and the next sentence runs into it.\nFINDING docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/test_fragment_receipt.py:158 non-blocking: three band figures are read verbatim from receipt['band_rows'] rather than recomputed from the raw states, and receipt.json's profile amplitudes and solver strings are hand-typed literals in the uncommitted writer.\nFINDING docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/test_fragment_receipt.py:288 non-blocking: the panel pin is a raw SVG file digest, which tests/test_figure_panel_pin.py:1-15 documents as unable to separate a drawing move from a library upgrade.\nFINDING docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/test_fragment_receipt.py:326 non-blocking: the worktree-path assertion duplicates tests/test_artifacts_carry_no_worktree_paths.py and the pre-commit filepath check.\nFINDING docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/test_fragment_receipt.py:18 non-blocking: the check is outside every testpath, so the default pytest lane never collects it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T202050274305-efit-on-nova-rows/manifest.md:11 non-blocking: the tests line and changed_paths still describe the pre-repair landing, omitting receipt.json and the test file 7f74140d commits.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:89 non-blocking: the provenance block emits tail text after a pre with no opening paragraph and a stray closing tag, and no added check sees it.\n",
+  "review_run_id": "r-20261117T081117158095-review-of-efit-on-nova-rows-7f74140d7561",
+  "reviewed_base_sha": "86b64c13475d0d589ff836eaec44affff1ca7d56",
+  "reviewed_head_sha": "7f74140d7561e412fd7a5e3cde5c7c6c66f09dc5",
+  "reviewed_run_id": "r-20261115T202050274305-efit-on-nova-rows",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 14,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T08:28:31.351787+00:00",
+  "total": 85
+}

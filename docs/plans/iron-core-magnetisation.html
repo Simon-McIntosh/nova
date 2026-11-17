@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="121">
+<meta name="plan-version" content="122">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -538,14 +538,17 @@
       temporaries) against 151&nbsp;GB of card memory (<code>icm-west-linear-h200</code>). The section needs
       that mesh assembled and solved on the card, with values unchanged from the existing route.
       It does not gate §6: the field source and the forward solve consume the basis, not this number.
+      The WEST refinement (clauses 1 and 2) and the shell arm (clause 3) are separate nodes, each
+      landing on its own review.
     </p>
     <p>
       Done when (1) the graded 8/40&nbsp;mm WEST linear solve on the H200 reports the midplane field
       at 1, 2 and 4&nbsp;m, and its change against graded 16/80&nbsp;mm is under 1&nbsp;% at every probe; a
       larger change ends the section blocked with the measured change rather than met;
       (2) whatever route fits the 8/40&nbsp;mm solve on the card reproduces the existing route's
-      interaction and probe fields on the uniform 80&nbsp;mm WEST mesh to 1e-12 relative in one
-      process, so the route changes no value;
+      interaction and probe fields on the graded 16/80&nbsp;mm WEST mesh (35&nbsp;184 unknowns, the
+      largest the existing route solves on the card, grading boundary included) to 1e-12 relative
+      in one process, so the route changes no value;
       (3) a linear shell arm at 80&nbsp;mm on the &mu;<sub>r</sub> = 1000 shell is measured against the
       dipole reference, and if it still meets 0.5&nbsp;% the next coarser spacing is measured until
       one misses, so the shell criterion is shown to be able to fail for the linear basis.

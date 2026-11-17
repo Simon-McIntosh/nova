@@ -67,6 +67,16 @@
       "note": "The exact count leaves the plan: the cleanup run's read probe measured 1694 for the test's census construction, while the solve region meshes to 1695, so the pin moves to its own brief-carried node that measures the count it pins",
       "reason": "",
       "when": "2026-11-17T15:42:17.731989+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b07d3d39134f6c914331bf5987a42d3d443eec3a",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "The census pin is removed from s6 and dispatched as a separate small node on tests/test_imas_iron_read.py, so the field-source seam closes on its own verdict",
+      "reason": "",
+      "when": "2026-11-17T15:42:40.721935+00:00"
     }
   ],
   "responses": {
@@ -78,6 +88,15 @@
       "note": "The exact count leaves the plan: the cleanup run's read probe measured 1694 for the test's census construction, while the solve region meshes to 1695, so the pin moves to its own brief-carried node that measures the count it pins",
       "reason": "",
       "when": "2026-11-17T15:42:17.731989+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b07d3d39134f6c914331bf5987a42d3d443eec3a",
+      "commit_basis": "edit",
+      "note": "The census pin is removed from s6 and dispatched as a separate small node on tests/test_imas_iron_read.py, so the field-source seam closes on its own verdict",
+      "reason": "",
+      "when": "2026-11-17T15:42:40.721935+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261117T114422897195-plan-review-of-iron-core-magnetisation.json",

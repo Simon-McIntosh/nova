@@ -8,6 +8,13 @@
   ],
   "completed_at": "2026-11-17T17:14:50.122Z",
   "dispatched_at": "2026-11-17T17:14:27Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The colour constant belongs in nova/media/ink.py InkStyle, outside this node's grant; recorded for a palette pass, it does not change any measured value",
+      "recorded_at": "2026-11-17T20:43:52.984105+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_single_kernel_coupling/render.py",

@@ -105,6 +105,36 @@
       "note": "The new section now states why its flux update differs from the solves that refused: it is one linear update from a current the data has just fixed, not a converged free-boundary solve at a proposed state, and clause (2) reports the flux-update residual beside the fit misfit so a failure can be attributed.",
       "reason": "",
       "when": "2026-11-17T10:55:08.994228+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0e1225744155050cdae4508028f6dbcbfbd63b31",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The evidence clause now names one batch job that runs the cases in sequence inside its allocation.",
+      "reason": "",
+      "when": "2026-11-17T10:55:18.818373+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0e1225744155050cdae4508028f6dbcbfbd63b31",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Clause (3) of the cost section now quotes the imas-efit wall read from the log of its run on the nova-written rows, with its hardware, in place of a stored per-slice wall that does not exist for that case.",
+      "reason": "",
+      "when": "2026-11-17T10:55:25.080420+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0e1225744155050cdae4508028f6dbcbfbd63b31",
+      "commit_basis": "edit",
+      "finding": "reasoning-3",
+      "note": "The sentence now says the comparison section measured where the nested form breaks, not what it costs.",
+      "reason": "",
+      "when": "2026-11-17T10:55:31.041951+00:00"
     }
   ],
   "responses": {
@@ -117,6 +147,15 @@
       "reason": "",
       "when": "2026-11-17T10:54:36.099615+00:00"
     },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "0e1225744155050cdae4508028f6dbcbfbd63b31",
+      "commit_basis": "edit",
+      "note": "Clause (3) of the cost section now quotes the imas-efit wall read from the log of its run on the nova-written rows, with its hardware, in place of a stored per-slice wall that does not exist for that case.",
+      "reason": "",
+      "when": "2026-11-17T10:55:25.080420+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
@@ -125,6 +164,24 @@
       "note": "The new section now states why its flux update differs from the solves that refused: it is one linear update from a current the data has just fixed, not a converged free-boundary solve at a proposed state, and clause (2) reports the flux-update residual beside the fit misfit so a failure can be attributed.",
       "reason": "",
       "when": "2026-11-17T10:55:08.994228+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "0e1225744155050cdae4508028f6dbcbfbd63b31",
+      "commit_basis": "edit",
+      "note": "The evidence clause now names one batch job that runs the cases in sequence inside its allocation.",
+      "reason": "",
+      "when": "2026-11-17T10:55:18.818373+00:00"
+    },
+    "reasoning-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "0e1225744155050cdae4508028f6dbcbfbd63b31",
+      "commit_basis": "edit",
+      "note": "The sentence now says the comparison section measured where the nested form breaks, not what it costs.",
+      "reason": "",
+      "when": "2026-11-17T10:55:31.041951+00:00"
     },
     "wiring-1": {
       "action": "acted",

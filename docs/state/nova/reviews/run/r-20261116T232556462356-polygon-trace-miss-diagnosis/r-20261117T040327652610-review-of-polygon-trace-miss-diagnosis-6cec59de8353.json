@@ -1,0 +1,124 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "failure_condition": "Replacing the retained bank archive or its point ordering makes np.testing.assert_array_equal(data['points'], points) fail, and a zero or emptied archive makes the hessian-norm guard fail; both establish that the reproduction instrument sees a non-empty, correctly ordered archive.",
+      "lines": "diagnose.py:106-107"
+    },
+    {
+      "failure_condition": "The historical control assertion fails if head-eager/receipt.json stops meeting 1e-8, and the >0.07 assertion fails if the candidate archive stops reproducing the recorded 7-8 percent miss, so the instrument distinguishes a pass from the known-present failure.",
+      "lines": "diagnose.py:122-123"
+    },
+    {
+      "failure_condition": "Restoring a calibration that compares the measured column with itself, or an insensitive budget.",
+      "lines": "height_stencil.py:53-54"
+    },
+    {
+      "failure_condition": "The assertion fails if the independent node-N.npz reference stops meeting the trace identity or if the reconstructed forcing is wrong, since stored forcing is separately compared at rtol/atol 1e-13 at line 88.",
+      "lines": "reference_comparison.py:100"
+    },
+    {
+      "failure_condition": "Replacing the sixth-order height column with the four-sample column, or failing to replace the height column at all, reddens this line; small-step-refusal.log records that exact reinstatement refusing at 3.773492043042928e-8 with EXIT=1.",
+      "lines": "report.py:189"
+    },
+    {
+      "failure_condition": "The assertion fails if non-corner targets carry the residual, which reddens if the corner mask or the routing attribution is wrong; the measured fractions are 2.5e-22 and below.",
+      "lines": "report.py:188"
+    },
+    {
+      "failure_condition": "The census receipt's stored rows disagree with a fresh recomputation from the archived bank, or the archive sha256 no longer matches the stop record at report.py:167-169; this is a receipt-integrity check, not an independent measurement.",
+      "lines": "report.py:180-186"
+    },
+    {
+      "failure_condition": "The candidate kernel begins routing any corner height sample or the non-height JVP through the stable product: the observed {original JVPTracer 2, stable JVPTracer 1, original ArrayImpl 4} profile and the six-samples-per-height-JVP relation both redden.",
+      "lines": "report.py:196-205"
+    },
+    {
+      "failure_condition": "The scratch intervention changes the primal gradient: assert_allclose against the retained bank and the <=1e-12 relative-change guard fail; the measured change is 5.3e-13 and 384 differing entries, so the guard is close to its observed value.",
+      "lines": "report.py:211-216"
+    }
+  ],
+  "assertion_independence": "No added assertion compares a value with the same variable the run passed in. The closest pair is report.py:180-186, where reproduced['relative'] and candidate['rows'][index]['relative'] both derive from the same retained archive through the same owner trace function; that comparison is a receipt-integrity check and would survive a wrong formula, so it is not counted as coverage of the metric. The measured sixth-order column is compared with node-N.npz reference derivatives and with the physical forcing magnitude, both independent of the diagnostic computation.",
+  "call_site_note": "No production module imports scripts/prototypes/polygon_trace_miss; the landed change is evidence and scratch instrumentation. The two listed production entry points are what the instruments read (diagnose.py:24, measure.py:28, height_stencil.py:44), not callers of the landed change.",
+  "call_sites": [
+    "nova/biot/polygonanalytic.py:_packed_moments_height_tangent",
+    "nova/equilibrium/topology.py:BiotMomentCoupling.value_gradient"
+  ],
+  "completed_at": "2026-11-17T04:05:31.966Z",
+  "dispatched_at": "2026-11-17T04:05:04Z",
+  "findings": [
+    {
+      "disposition": "folded",
+      "disposition_node": "a future polygon kernel repair node that owns the shared measurement helpers",
+      "file": "scripts/prototypes/polygon_trace_miss/reference_comparison.py",
+      "line": "24",
+      "severity": "non-blocking",
+      "text": "non-blocking: trace_metric re-derives the Grad-Shafranov trace residual and normalization already owned by scripts/prototypes/bank_hessian_diagnosis/report.py:175 trace, which this node imports elsewhere; the copy duplicates the formula and only adds per-state longdouble normalization, so a later metric correction must be made twice."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_note": "The ratio is quoted from the previously accepted tangent-only budget record named in the brief; the gate's job was the fragment's own done-when markers, and the recorded evidence is the scope-gate log.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T232556462356-polygon-trace-miss-diagnosis/scope-gate.py",
+      "line": "38",
+      "severity": "non-blocking",
+      "text": "non-blocking: The gate asserts the fragment's instruction-ratio sentence only by substring presence ('1.32x main', 'about 1.8x main') and prints INSTRUCTION_RATIO from a literal at line 53 instead of reading 1.3183578998 from the production-budget.json receipt, so a stale or misquoted ratio in the fragment still passes."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_note": "The result is recorded with its revision header and EXIT=0, and this review re-derived the same facts from the shared object store by sha in its own worktree.",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T232556462356-polygon-trace-miss-diagnosis/scope-gate.py",
+      "line": "10",
+      "severity": "non-blocking",
+      "text": "non-blocking: The gate hardcodes ROOT to the worker's detached worktree, which the repository policy removes after promotion, so the tests command recorded in the manifest cannot be re-run against the reviewed revision once that tree is gone; the recorded result survives only in scope-gate.log."
+    }
+  ],
+  "gate_evidence": {
+    "after_suite": null,
+    "baseline_suite": null,
+    "final_validation": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T232556462356-polygon-trace-miss-diagnosis/final-validation.log",
+    "final_validation_summary": "candidate-refusal-final.log EXIT=1 EXPECTED=1, small-step-refusal.log EXIT=1 EXPECTED=1, final-report.log EXIT=0, reference-small-step.log EXIT=0, reference-sixth-order.log EXIT=0, FINAL_VALIDATION_COMPLETE",
+    "reviewed_gate": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T232556462356-polygon-trace-miss-diagnosis/scope-gate.log",
+    "reviewed_gate_summary": "SCOPE_GATE_PASS at head 6cec59de8353c711221afe78f26a17b9c8b928bb: CHANGED_PATHS of seven files, PRODUCT_PATHS_CHANGED 0, INSTRUCTION_RATIO measured_candidate=1.3183578998 estimated_repair=1.8 estimated_range=1.5:2.3, COMMIT_RECORDS_VERIFIED 11, EXIT=0",
+    "suite_note": "The reviewed node is unarmed: prompt.txt FENCE-SUITE reads 'unarmed for this node' and manifest.md carries no baseline_suite or after_suite keys; `ls` of the run directory shows no suite log. added_failure_count 0 and added_failure_ids [] are therefore the measured absence of any suite pair, not a shortened gate (contrast the five arm logs whose EXIT lines are recorded above).",
+    "summary_rows": "summary.json completed=true, three rows of 64, stable_sixth_order_relative 7.491499586410128e-10 / 9.202871076025978e-10 / 7.014760773759957e-10, small_step_passed=false"
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Searched the tree for importers of scripts/prototypes/polygon_trace_miss: production code does not import the landed scripts, since the instrumentation instead reads nova/biot/polygonanalytic.py:_packed_moments_height_tangent and nova/equilibrium/topology.py:BiotMomentCoupling.value_gradient.",
+    "diff": "Read all eleven commits against acd5fa2f; the 1,102 added lines are one 65-line fragment and six prototype scripts, the last commit c23028e4 changes only the fragment, and no commit touches nova/.",
+    "done_when": "Read the reviewed manifest's tests line and scope-gate.log; FENCE-EVIDENCE required no path under nova/ and an estimate beside the measured 1.32x, and scope-gate.py:29-38 asserts exactly those two facts, printing PRODUCT_PATHS_CHANGED 0, INSTRUCTION_RATIO measured_candidate=1.3183578998 estimated_repair=1.8 and EXIT=0.",
+    "goal": "Read prompt.txt GOAL and plan section 7 at docs/plans/sub-millisecond-forward-path.html:127; the fragment at polygon-trace-miss-diagnosis.html:22 explains that a corner-selected target uses 'other + tangent_z * stable_height' with both terms on the original pole product (1,501 of 35,712 pairs, 58 of 64 targets) and :49 recommends one shared stable derivative evaluator with a sixth-order height stencil.",
+    "manifest": "Read manifest.md; it records status complete, eleven commit shas, the scope-gate command and log, final-validation.log plus four arm logs with EXIT lines, and candidate-refusal-final.log and small-step-refusal.log as the negative controls.",
+    "write_paths": "Read manifest.md orientation_write_paths and the diff; the seven changed paths are the one fragment and six files under scripts/prototypes/polygon_trace_miss/, the two declared worktree scopes, with no nova/ path and no figure directory written."
+  },
+  "justifications": {
+    "durability": "report.py:189 asserts the assembled trace is at most 1e-8 and height_stencil.py:54 asserts a 1e-6 perturbation is detected, but these are uncollected prototype guards and nothing committed reddens if the fragment's table at polygon-trace-miss-diagnosis.html:23 drifts.",
+    "evidence": "scope-gate.log ends SCOPE_GATE_PASS/EXIT=0 with PRODUCT_PATHS_CHANGED 0 and the fragment markers, and final-validation.log records each arm's EXIT beside summary.json rows whose stable_sixth_order_relative values are 7.49e-10, 9.20e-10 and 7.01e-10.",
+    "fit": "The six scripts follow scripts/prototypes/bank_hessian_diagnosis/measure.py:1-20 (configure_dtypes before jax import, '# ruff: noqa: E402', ARRAY/MEASUREMENT_COMPLETE prints, np.savez checkpoints) and reuse its established BiotMomentCoupling.value_gradient.__wrapped__ idiom seen at bank_hessian_diagnosis/cell.py:157.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/polygon-trace-miss-diagnosis.html:22 names the corner-branch mechanism and :49 names the smallest structural change with a 1.5-2.3x estimate beside the measured 1.32x.",
+    "reuse": "diagnose.py:16, report.py:15-16 and height_stencil.py:18 reuse ROOT, STATES, reference, density, jet and trace from scripts/prototypes/bank_hessian_diagnosis, but reference_comparison.py:24 re-derives the trace residual/normalization that owner defines at bank_hessian_diagnosis/report.py:175, adding only per-state longdouble normalization.",
+    "scope_discipline": "git diff --name-only acd5fa2fb11fb97746a2aa3714eb63c4b7e7dad5 6cec59de8353c711221afe78f26a17b9c8b928bb lists only the fragment and scripts/prototypes/polygon_trace_miss/*, both inside the manifest's declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read prompt.txt and plan section 7 (docs/plans/sub-millisecond-forward-path.html:127); the landed fragment docs/evidence/fragments/sub-millisecond-forward-path/polygon-trace-miss-diagnosis.html:22 names the mechanism (the corner branch reuses the original pole product for 1,501 of 35,712 target-cell pairs) and :49 names the smallest structural change with a 1.5-2.3x estimate.\nVERDICT done_when: read the reviewed manifest's tests line and scope-gate.log; the run's FENCE-EVIDENCE measure (no nova/ path in the diff, an estimate beside the measured 1.32x) is asserted by scope-gate.py:29-38 and returns SCOPE_GATE_PASS with PRODUCT_PATHS_CHANGED 0 and EXIT=0.\nVERDICT write_paths: read manifest.md orientation_write_paths and git diff --name-only acd5fa2f 6cec59de8; all seven changed paths are the one fragment and six files under scripts/prototypes/polygon_trace_miss/, both declared scopes, with no nova/ path.\nVERDICT manifest: read manifest.md; it records status complete, eleven commits, the scope-gate command and log, five arm logs plus final-validation.log with EXIT lines, and candidate-refusal-final.log and small-step-refusal.log as negative controls.\nVERDICT diff: read all eleven commits against acd5fa2f; 1,102 added lines are the 65-line fragment and six prototype scripts, the final commit c23028e4 changes only the fragment, and no commit touches nova/.\nCALL_SITES: nova/biot/polygonanalytic.py:_packed_moments_height_tangent, nova/equilibrium/topology.py:BiotMomentCoupling.value_gradient\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: polygon-trace-miss-diagnosis.html:22 names the corner-branch mechanism and :49 names the smallest structural change with a 1.5-2.3x estimate beside the measured 1.32x.\nSCORE evidence: 16\nJUSTIFICATION evidence: scope-gate.log records SCOPE_GATE_PASS and EXIT=0 and final-validation.log records each arm's EXIT beside summary.json rows at 7.49e-10, 9.20e-10 and 7.01e-10, but the gate proves the 1.32x claim by substring presence at scope-gate.py:38 rather than from the budget receipt.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff is the fragment or a file under scripts/prototypes/polygon_trace_miss/, as the manifest declares, and git diff shows no nova/ path.\nSCORE durability: 13\nJUSTIFICATION durability: report.py:189 and height_stencil.py:54 are genuine falsifiable guards (the four-sample reinstatement reddens at 3.77e-8), but they are uncollected prototype assertions and nothing committed guards the fragment table at polygon-trace-miss-diagnosis.html:23.\nSCORE fit: 18\nJUSTIFICATION fit: the scripts follow scripts/prototypes/bank_hessian_diagnosis/measure.py:1-20 and reuse its value_gradient.__wrapped__ idiom at bank_hessian_diagnosis/cell.py:157, with no forbidden name.\nSCORE reuse: 12\nJUSTIFICATION reuse: diagnose.py:16, report.py:15-16 and height_stencil.py:18 reuse the bank_hessian_diagnosis owners, but reference_comparison.py:24 duplicates the trace metric owned at bank_hessian_diagnosis/report.py:175 with only per-state longdouble normalization added.\nFINDING scripts/prototypes/polygon_trace_miss/reference_comparison.py:24 non-blocking: trace_metric re-derives the trace residual and normalization already owned by scripts/prototypes/bank_hessian_diagnosis/report.py:175 trace, which this node imports elsewhere, so a later metric correction must be made in two places.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T232556462356-polygon-trace-miss-diagnosis/scope-gate.py:38 non-blocking: the gate checks the fragment's instruction-ratio sentence by substring presence and prints INSTRUCTION_RATIO from a literal at line 53, never reading 1.3183578998 from the production-budget.json receipt, so a stale quote still passes.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T232556462356-polygon-trace-miss-diagnosis/scope-gate.py:10 non-blocking: the gate hardcodes ROOT to the worker worktree, which policy removes after promotion, so the recorded tests command cannot be re-run against the reviewed revision and the result survives only in scope-gate.log.",
+  "review_run_id": "r-20261117T040327652610-review-of-polygon-trace-miss-diagnosis-6cec59de8353",
+  "review_scope": "Full review of the eleven commits from acd5fa2fb11fb97746a2aa3714eb63c4b7e7dad5 to 6cec59de8353c711221afe78f26a17b9c8b928bb, read from the shared object store in the reviewer's own worktree; no experiment was run and no suite was re-run.",
+  "reviewed_base_sha": "acd5fa2fb11fb97746a2aa3714eb63c4b7e7dad5",
+  "reviewed_head_sha": "6cec59de8353c711221afe78f26a17b9c8b928bb",
+  "reviewed_run_id": "r-20261116T232556462356-polygon-trace-miss-diagnosis",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 12,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T04:14:58.270734+00:00",
+  "total": 97
+}

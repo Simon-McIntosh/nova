@@ -28,6 +28,11 @@
       "kind": "exempted",
       "reason": "The reviewer names the independent halves: the resolved-current assertion at :397 and the raises-and-names-conductor assertion at :387, which reddens when the comparison is removed",
       "recorded_at": "2026-11-17T22:57:29.031372+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Prototype measurement scaffolding under scripts/prototypes; it does not ship",
+      "recorded_at": "2026-11-17T22:57:40.648816+00:00"
     }
   },
   "findings": [

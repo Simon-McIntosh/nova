@@ -102,7 +102,8 @@ def main():
         command = [
             "/home/ITER/mcintos/Code/nova/.venv/bin/python",
             "-m",
-            "scripts.prototypes.polygon_trace_miss.diagnose",
+            "scripts.prototypes.polygon_trace_miss."
+            + ("height_stencil" if args.mode == "height-stencil" else "diagnose"),
             "--mode",
             args.mode,
             "--output",
@@ -114,7 +115,7 @@ def main():
         print("# command:", " ".join(command), flush=True)
         batches = (
             (64 + args.point_budget - 1) // args.point_budget
-            if args.mode == "stable-corner" and args.point_budget
+            if args.mode in ("stable-corner", "height-stencil") and args.point_budget
             else 1
         )
         for batch in range(batches):

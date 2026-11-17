@@ -48,13 +48,25 @@ def build(name, size):
     return row.program(name, size)
 
 
+DEVICE = jax.devices()[0]
+DEVICE_KIND = getattr(DEVICE, "device_kind", str(DEVICE))
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--program", required=True)
     parser.add_argument("--size", type=int, required=True)
     parser.add_argument("--block", default="control")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--expect-device", default="H200")
     args = parser.parse_args()
+    if args.expect_device not in DEVICE_KIND:
+        raise SystemExit(
+            "refusing to measure %r: device %r does not name %r, so this run\n"
+            "would record another backend's wall against the card's.  Set the\n"
+            "platform before the interpreter starts (JAX_PLATFORMS=cuda,cpu)."
+            % (" ".join(sys.argv), DEVICE_KIND, args.expect_device)
+        )
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(
         f"revision={revision} tree={Path.cwd().resolve()} "
@@ -70,13 +82,14 @@ def main():
         "revision": revision,
         "tree": str(Path.cwd().resolve()),
         "nova_file": nova.__file__,
-        "device": getattr(jax.devices()[0], "device_kind", str(jax.devices()[0])),
+        "device": DEVICE_KIND,
         "cache_enabled": bool(jax.config.jax_enable_compilation_cache),
     }
 
     def checkpoint(phase):
         receipt["phase"] = phase
-        receipt["peak_host_rss_kib"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        usage = resource.getrusage(resource.RUSAGE_SELF)
+        receipt["peak_host_rss_kib"] = usage.ru_maxrss
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(receipt, indent=2, default=str) + "\n")
         print("PHASE " + phase, flush=True)

@@ -16,8 +16,14 @@ interpreter=/home/ITER/mcintos/Code/nova/.venv/bin/python
 arms=(control hessian-height gradient)
 status=0
 
+# The platform is set here and nowhere else: a launcher that inherits
+# JAX_PLATFORMS=cpu from the submit shell would otherwise compile this program on
+# the host inside a card allocation, which is a different measurement and, at 132
+# cells, an out-of-memory one.
+unset JAX_PLATFORM_NAME UV_NO_SYNC UV_RUN_RECURSION_DEPTH
 export TMPDIR=/tmp
 export PYTHONPATH="$repo"
+export JAX_PLATFORMS=cuda,cpu
 export JAX_ENABLE_COMPILATION_CACHE=false
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 
@@ -34,7 +40,7 @@ for arm in "${arms[@]}"; do
   printf 'arm=%s xla_flags=%s\n' "$arm" "$XLA_FLAGS"
   "$interpreter" -u "$repo/scripts/prototypes/point_program_attribution/profile_arm.py" \
     --program production_point_batch --size 132 --block "$arm" \
-    --output "$out/$arm/profile.json"
+    --expect-device H200 --output "$out/$arm/profile.json"
   code=$?
   printf 'profile_exit=%s arm=%s\n' "$code" "$arm"
   [[ "$code" -eq 0 ]] || status="$code"

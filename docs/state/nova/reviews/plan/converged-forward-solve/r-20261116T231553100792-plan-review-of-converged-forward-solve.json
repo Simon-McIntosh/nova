@@ -70,6 +70,13 @@
       "finding": "anchors_resolve-1",
       "reason": "Section 2 citation: This round reviewed a change to section 3's done-when only, and this session builds section 3 only. The finding is on a section this session does not build and is reported to the lead as open for whoever builds that section; it does not change section 3.",
       "when": "2026-11-17T00:13:55.026403+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "Section 6 retirement control: This round reviewed a change to section 3's done-when only, and this session builds section 3 only. The finding is on a section this session does not build and is reported to the lead as open for whoever builds that section; it does not change section 3.",
+      "when": "2026-11-17T00:14:08.541770+00:00"
     }
   ],
   "responses": {
@@ -78,6 +85,12 @@
       "by": "",
       "reason": "Section 2 citation: This round reviewed a change to section 3's done-when only, and this session builds section 3 only. The finding is on a section this session does not build and is reported to the lead as open for whoever builds that section; it does not change section 3.",
       "when": "2026-11-17T00:13:55.026403+00:00"
+    },
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Section 6 retirement control: This round reviewed a change to section 3's done-when only, and this session builds section 3 only. The finding is on a section this session does not build and is reported to the lead as open for whoever builds that section; it does not change section 3.",
+      "when": "2026-11-17T00:14:08.541770+00:00"
     },
     "reasoning-1": {
       "action": "declined",

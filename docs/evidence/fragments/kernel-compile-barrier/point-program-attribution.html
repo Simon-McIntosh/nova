@@ -38,6 +38,18 @@
 
 
 
+<table id="point-program-attribution-graph-table">
+<thead><tr><th>source block stubbed</th><th>lowered bytes</th><th>bytes removed</th><th>share of 6,088,067 bytes</th><th>verdict</th></tr></thead>
+<tbody>
+<tr><td>value path</td><td>51,778</td><td>6,036,289</td><td>99.15%</td><td>removed</td></tr>
+<tr><td>gradient</td><td>1,980,103</td><td>4,107,964</td><td>67.48%</td><td>removed</td></tr>
+<tr><td>regular Hessian at corner heights</td><td>4,176,042</td><td>1,912,025</td><td>31.41%</td><td>removed</td></tr>
+<tr><td>near-corner weighted residual tangents</td><td>6,088,067</td><td>0</td><td>0.00%</td><td>erased, no share</td></tr>
+<tr><td>elliptic terms</td><td>5,040,870</td><td>1,047,197</td><td>17.20%</td><td>removed</td></tr>
+<tr><td>identity stub (control)</td><td>6,088,067</td><td>0</td><td>0.00%</td><td>erased (control)</td></tr>
+</tbody>
+</table>
+
 <p id="point-program-attribution-erased">Two rows are erased and are credited with nothing. The identity stub wraps the primal moment program without changing what it computes, and the near-corner weighted residual tangents are <em>never reached</em>: substituting stubs that raise when called lowers the program to the same <code>6,088,067</code> bytes, while the same probe on the corner-height block refuses with <code>REACHED nova.biot.polygonanalytic._packed_moments_with_stable_height</code>. The probe fires where a block is reached and stays silent where it is not, so this is reachability rather than folding. The gradient arm is deterministic across processes: two runs against the committed stub give <code>1,980,103</code> bytes and byte-identical StableHLO text (sha256 <code>520de555f77273c2c6318079ce39dea2480993c02cdac4f7e3bc230076015f65</code>).</p>
 
 <p id="point-program-attribution-repeated"><strong>Repeated per-term bodies.</strong> The lowered module carries <code>53,007</code> operations in <code>662</code> outlined functions. Those functions are inlined the same way at every call site, so the repeated-body count is the call-site count: <code>4,744</code> call sites, <code>380</code> of the 662 bodies called more than once, and <code>246</code> call sites of one body — <code>_pole_backward_step</code>, with <code>240</code> of <code>_pole_forward_step</code> beside it. Erasing operand identities (the same body re-emitted with different broadcast names) leaves <code>419</code> distinct bodies of which <code>111</code> are emitted more than once, one of them <code>23</code> times; <code>6,512</code> of <code>24,550</code> exact expression classes repeat. <strong>The term order is therefore unrolled inside one point's evaluation</strong>, not already folded: the per-cell axis carries one body, and the pole and harmonic recursions are re-expanded per term within it. §5's measurement says what that means for the scan lever: inlining the top-ranked repeated term, <code>_harmonic_pair_step</code>, cut the expanded equation count by 4.04% and moved the point jet's cold compile from 82.43 s to 82.36 s, so a fixed-capacity scan over these bodies is not a compile lever on this program.</p>
@@ -64,7 +76,7 @@
 
 <p id="point-program-attribution-what-reads-off">Read together, the two measures answer §3's three questions. Where the 218.9 s goes: <code>84.8%</code> of it to the moment rows' derivative instantiations and <code>53.3%</code> to the regular Hessian at corner heights, with the two XLA passes that walk the expanded graph taking <code>61.9%</code> of the whole wall. Which block is worth attacking first: the derivative tower, by both graph and seconds, and a form of it that keeps the emitted tangent is the lever §3 (c) should be written around. Whether the term order is unrolled: yes — <code>246</code> call sites of one outlined body inside a single lowered point program — but §5 already measured that inlining such bodies does not move the compile, so the unrolling is a symptom of the derivative expansion and not a lever of its own.</p>
 
-<p id="point-program-attribution-receipts">Reproduce: <code>scripts/prototypes/point_program_attribution/cpu_arms.sh &lt;repo&gt; &lt;out&gt;</code> for the lowering arms, probes and body count; <code>scripts/prototypes/point_program_attribution/attribution_job.sh &lt;repo&gt; &lt;out&gt;</code> inside one card allocation for the three compiled arms; <code>scripts/prototypes/point_program_attribution/summarise.py</code> to assemble <code>attribution.json</code> from both, and <code>figure.py</code> to draw the figure.</p>
+<p id="point-program-attribution-receipts">Reproduce: <code>scripts/prototypes/point_program_attribution/cpu_arms.sh &lt;repo&gt; &lt;out&gt;</code> for the lowering arms, <code>scripts/prototypes/point_program_attribution/attribution_job.sh &lt;repo&gt; &lt;out&gt;</code> in one card allocation for the three compiled arms, and <code>scripts/prototypes/point_program_attribution/summarise.py</code> to assemble <code>attribution.json</code> from both, with <code>figure.py</code> to draw the figure.</p>
 
 <h4>Per-pass tables</h4>
 <p id="point-program-attribution-pass-tables-text">Each table is <code>attribution.json</code>'s per-pass grouping for that arm: seconds between consecutive dumps, the share of the arm's attributed seconds, the number of dumps under the pass, and the HLO instruction count at the pass's last dump. The passes whose dumps are written at pipeline start report the module as the pipeline handed them in, which is why <code>variadic-op-splitter</code> reads <code>720</code> instructions for the control: its output is the next HLO dump, <code>after_priority-fusion/cse</code>, at <code>267,438</code> for the control, <code>128,250</code> for the corner-height arm and <code>45,471</code> for the derivative arm. The <code>priority_fusion_dump.txt</code> between them is a codegen artifact and reports no count.</p>
@@ -407,6 +419,8 @@
 </table>
 </details>
 </div>
+
+<p id="point-program-attribution-durability">The card receipts sit under <code>~/.cache</code>, which a later reader may not have, so the numbers this record carries are also committed beside the figure as <code>docs/figures/kernel-compile-barrier/point-program-attribution/attribution-receipt.json</code> — six blocks, three arms, all 312 per-pass rows and the repeated-body counts, 60 kB — and <code>scripts/prototypes/point_program_attribution/check.py</code> compares the record and the figure against that copy. It reads no cache and compiles nothing, and it refuses when a number in the record or the figure has moved away from the receipt, when an arm's device stops naming the H200, when a stubbed arm stops changing the instruction count after the splitter, when an erased block's raising probe changes the lowering, when the figure paints red, or when the receipt is absent; it prints <code>attribution check passed: 6 blocks, 3 arms and 312 pass rows agree with attribution-receipt.json</code>. A record that cannot be checked without the cache is not evidence, so this one is checked without it.</p>
 
 <p id="point-program-attribution-closing">No product source, no test and no tolerance changed. The figure and this record are the node's whole output.</p>
 </section>

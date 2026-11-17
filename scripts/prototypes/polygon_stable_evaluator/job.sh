@@ -10,7 +10,7 @@ export TMPDIR=/tmp JAX_PLATFORMS=cpu JAX_ENABLE_COMPILATION_CACHE=false
 scratch=$(mktemp -d "$TMPDIR/polygon-evaluator-${SLURM_JOB_ID:-$$}-XXXX")
 trap 'rm -rvf "$scratch"' EXIT
 mkdir -p "$scratch/source" "$out"
-git -C "$repo" archive "$revision" nova scripts tests pyproject.toml | tar -x -C "$scratch/source" || exit 1
+git -C "$repo" archive "$revision" nova scripts tests pyproject.toml conftest.py | tar -x -C "$scratch/source" || exit 1
 tree="$scratch/source"
 export PYTHONPATH="$tree:$tree/tests/biot"
 cd "$tree" || exit 1
@@ -79,6 +79,8 @@ elif [[ "$mode" == suite ]]; then
   command="PYTHONPATH=. JAX_PLATFORMS=cpu $python -m pytest -p no:cacheprovider -q ${files[*]}"
   printf '%s\n' "$command" > "$out/command.txt"
   run suite bash -c "$command" || status=1
+elif [[ "$mode" == per-file-suite ]]; then
+  "$python" "$repo/scripts/prototypes/polygon_stable_evaluator/suite_files.py" "$revision" "$out" "$tree" || status=1
 elif [[ "$mode" == retained-summary ]]; then
   cp "$5" "$out/plasma-partial.npz"
   if run summary "$python" -m scripts.prototypes.polygon_stable_evaluator.measure --output "$out" --summarise; then

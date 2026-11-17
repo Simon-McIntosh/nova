@@ -106,6 +106,10 @@ PY
   else
     status=1
   fi
+elif [[ "$mode" == production-receipts ]]; then
+  export NOVA_PRODUCTION_COMPILE_BASE="$5/base"
+  export NOVA_PRODUCTION_COMPILE_HEAD="$5/$6"
+  run production-receipts "$python" -m pytest -p no:cacheprovider tests/biot/test_production_row_compile.py -vv -s || status=1
 fi
 printf 'EXIT=%s\n' "$status"
 exit "$status"

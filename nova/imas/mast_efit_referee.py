@@ -427,9 +427,17 @@ def _score_imas_equilibrium(
         profile = item.profiles_1d
         flux = np.asarray(profile.psi, dtype=float)
         q = np.asarray(profile.q, dtype=float)
-        if flux.size < 2 or q.shape != flux.shape or flux[-1] == flux[0]:
+        axis_flux = float(item.global_quantities.psi_axis)
+        flux_span = float(item.global_quantities.psi_boundary) - axis_flux
+        if (
+            flux.size < 2
+            or q.shape != flux.shape
+            or flux[-1] == flux[0]
+            or not np.isfinite(flux_span)
+            or flux_span == 0
+        ):
             return float("nan")
-        coordinate = (flux - flux[0]) / (flux[-1] - flux[0])
+        coordinate = (flux - axis_flux) / flux_span
         return float(np.interp(0.95, coordinate, q))
 
     actual, expected = solved.global_quantities, reference.global_quantities

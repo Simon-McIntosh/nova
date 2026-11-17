@@ -1975,3 +1975,47 @@ def test_supplied_equilibrium_reports_vertical_offset_and_physical_bands():
     assert score["bands"]["magnetic_axis_distance_m"] is False
     assert score["bands"]["plasma_current_relative_error"] is False
     assert score["bands"]["q95_magnitude_error"] is True
+
+
+@pytest.mark.parametrize("axis_flux,boundary_flux", [(2.0, 1.0), (-3.0, 5.0)])
+@pytest.mark.parametrize("q_scale", [1.0, -100.0])
+def test_q95_uses_physical_flux_span_for_truncated_profiles(
+    axis_flux, boundary_flux, q_scale
+):
+    from nova.imas.mast_efit_referee import score_with_efit_referee
+
+    def state(edge):
+        coordinate = np.linspace(0.0, edge, 33)
+        return SimpleNamespace(
+            time_slice=[
+                SimpleNamespace(
+                    global_quantities=SimpleNamespace(
+                        ip=1.0,
+                        psi_axis=axis_flux,
+                        psi_boundary=boundary_flux,
+                        magnetic_axis=SimpleNamespace(r=1.5, z=0.0),
+                    ),
+                    boundary=SimpleNamespace(
+                        outline=SimpleNamespace(
+                            r=np.array([1.0, 2.0, 2.0, 1.0, 1.0]),
+                            z=np.array([-1.0, -1.0, 1.0, 1.0, -1.0]),
+                        )
+                    ),
+                    profiles_1d=SimpleNamespace(
+                        psi=axis_flux + coordinate * (boundary_flux - axis_flux),
+                        q=q_scale * coordinate,
+                    ),
+                )
+            ]
+        )
+
+    score = score_with_efit_referee(state(0.97), state(1.0))
+    print(
+        f"PHYSICAL_Q95 actual={score['q95']} expected={0.95 * q_scale} "
+        f"magnitude_error={score['q95_magnitude_error']} "
+        f"band={score['bands']['q95_magnitude_error']}"
+    )
+    assert score["q95"] == pytest.approx(0.95 * q_scale)
+    assert score["reference_q95"] == pytest.approx(0.95 * q_scale)
+    assert score["q95_magnitude_error"] == pytest.approx(0.0, abs=1e-12)
+    assert score["bands"]["q95_magnitude_error"] is True

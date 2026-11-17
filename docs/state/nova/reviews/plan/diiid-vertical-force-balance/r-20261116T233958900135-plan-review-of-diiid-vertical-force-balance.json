@@ -25,7 +25,30 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 104,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "27bff094f2dc844363465b4b2509964c22ccb92f",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The passing branch now reproduces 1119994.165 A within 2e-6, the tolerance the refusing branch uses",
+      "reason": "",
+      "when": "2026-11-17T00:42:52.271580+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "27bff094f2dc844363465b4b2509964c22ccb92f",
+      "commit_basis": "edit",
+      "note": "The passing branch now reproduces 1119994.165 A within 2e-6, the tolerance the refusing branch uses",
+      "reason": "",
+      "when": "2026-11-17T00:42:52.271580+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261116T233958900135-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261116T233958900135-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "03e0576ec543181e35294d25c14ecff148e95535",
   "rubric": "content",

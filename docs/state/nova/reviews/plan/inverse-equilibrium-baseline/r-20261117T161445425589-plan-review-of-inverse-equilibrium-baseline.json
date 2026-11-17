@@ -25,7 +25,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 47,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0eb4a76487a8bbaaef323ac9be76265f81189343",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The row-exchange section now requires the imas-efit wall of its run and the hardware to be recorded, so the cost section reads a delivered measurement.",
+      "reason": "",
+      "when": "2026-11-17T16:54:06.892631+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0eb4a76487a8bbaaef323ac9be76265f81189343",
+      "commit_basis": "edit",
+      "note": "The row-exchange section now requires the imas-efit wall of its run and the hardware to be recorded, so the cost section reads a delivered measurement.",
+      "reason": "",
+      "when": "2026-11-17T16:54:06.892631+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261117T161445425589-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261117T161445425589-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "a1eee7f27d2d8f4c22d3b45c4426b1d0fbd785ed",
   "rubric": "content",

@@ -77,7 +77,12 @@ def _known_case(name, factory):
 
     case = study.physical_cases.__wrapped__(factory)(name)
     initial = case["initial"]
-    flux = np.asarray(initial.seed_policy.flux, dtype=np.float64)
+    seed_policy = initial.seed_policy
+    if not hasattr(seed_policy, "state"):
+        raise TypeError(
+            "the known state's starting field must be an explicit solve seed"
+        )
+    flux = np.asarray(seed_policy.state, dtype=np.float64)
     profile = case["profile"]._with_source(initial.source_profile)
     rows = _CellRows(case["source"].biot, case["sensors"], study._physical_sensor_rows)
     return dict(
@@ -323,6 +328,9 @@ def main(argv=None):
     os.environ["NOVA_MAGNETICS_FIT_FIGURES"] = str(Path(args.figures).resolve())
     os.environ["NOVA_EFIT_COMPARISON_FIGURES"] = str(Path(args.figures).resolve())
     os.environ["NOVA_MAGNETICS_FIT_EVIDENCE"] = str(output / "known-state-evidence")
+    os.environ["NOVA_EFIT_COMPARISON_OUTPUT"] = str(
+        output / "stored-case-evidence"
+    )
     if args.generating_receipts:
         os.environ["NOVA_MAGNETICS_FIT_GENERATING_RECEIPTS"] = str(
             Path(args.generating_receipts).resolve()

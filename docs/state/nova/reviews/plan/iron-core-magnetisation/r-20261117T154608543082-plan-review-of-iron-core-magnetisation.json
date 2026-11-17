@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T15:47:04.014Z",
+  "dispatched_at": "2026-11-17T15:46:47Z",
+  "findings": [
+    {
+      "anchor": "plan.html:539-541",
+      "id": "reasoning-1",
+      "reason": "a brief written from this sentence sets the requirement at building the interaction in card memory, which already fits, while the peak that blocks clause (1)'s solve is the factorisation's, so the node would optimise the wrong operand and still run out of memory.",
+      "text": "the paragraph says the 39.5 GB interaction cannot be held \"beside the compiled assembly's temporaries\", but the record that measured the wall (docs/evidence/fragments/iron-core-magnetisation/icm-west-linear-h200.html:38-41) puts the 157.962 GB live peak in the compiled factor analysis of the solve \u2014 39.527 GB arguments, 39.479 GB output and 78.957 GB temporaries against 150.755 GB of physical device memory \u2014 and reports no assembly memory at all, so the 39.478 GB operator alone fits and the overflow that stops the 8/40 solve is in the factorisation",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:549-550",
+      "id": "reasoning-2",
+      "reason": "the done-when cannot be met by a legitimate non-blocked route, so the clause has to be restated as the endpoint equality or it silently mandates row blocking.",
+      "text": "clause (2) still requires \"the block-assembled interaction\" and \"the blocking changes no entry\", while the rewritten paragraph names no route and states the endpoint as the interaction \"built within the card's memory, unchanged in value\"; the section therefore prescribes a mechanism its own text no longer requires, and a worker that fits the 8/40 solve in card memory by any other construction has no clause to satisfy",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "9b016126111a5acaebca064c07432042b5a2628c",
+  "plan_fingerprint": "be6137537f07212ddb61e24d51f816c6fee95d8fa1556699fce0918e67b29a4a",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 117,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T154608543082-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "694f60f4d236cd731f799e3a184002ecb6772fe3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 icm-west-linear-h200 resolves to a fragment on disk, and the section's other references are to \u00a75, \u00a76 and the formulation decision, all present at snapshot lines 360, 387 and 556.",
+    "done_when": "pass \u2014 clause (1) now carries a 1 % acceptance at every probe with a stated blocked terminal, and clause (3) is the declared negative control that shows the shell criterion can fail; clause (2) is an equality against the landed single-program assembly, which fails if the new route drops or alters an entry.",
+    "evidence_paths": "pass \u2014 the only record the section cites, the icm-west-linear-h200 measurement, resolves at docs/evidence/fragments/iron-core-magnetisation/icm-west-linear-h200.html.",
+    "naming": "pass \u2014 the changed text adds no plan label, ticket or changelog prose; the section heading and identifiers stay plan-internal.",
+    "reasoning": "two findings \u2014 the capacity wall is attributed to assembly temporaries the cited record does not measure (plan.html:539-541), and clause (2) still fixes a blocking route the rewritten paragraph dropped (plan.html:549-550).",
+    "single_goal": "pass \u2014 one goal, refinement evidence for the piecewise-linear basis on WEST, with the shell falsification carried as its control, as \u00a75 states when it moves those two checks here.",
+    "wiring": "pass \u2014 s11 still declares no depends-on entry, which the earlier review declined as order-neutral (its parents s4 and s5 are done), and nothing in the tree declares a dependency on s11; the changed text adds no new parent."
+  },
+  "section_digests": {
+    "_document": "1141c1abfa62daa5fedd0175f738e2d823584a4d08b639e480205c525f99ca95",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "bf0049ee8c924773ea67dcbe093fb860584392de2ea9a0789d0fabc79578a462",
+    "s11": "8cbd8f0128758932ada030c9b22915f9819bc6861d33c3180f5003e706ad7ce1",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "9d9575a3a830059f2eefb6ac953213be0aa858329aaeec3fae422fb48313a0d3",
+    "s5": "36bad4819e31bb149a73ded355cde8eca817e860913fbdafdc22dbf119126f1e",
+    "s6": "2532f33b84d4401c4f99a4c5d4c48b277171f9e129307bc0ce0c66545cc0e73d",
+    "s7": "1555dc4a428fc5ed84d96b31b0da13217072c683c765f3ad1d7e897ba1bfbdbf",
+    "s8": "6f09879ace82774a03c887b980857ea52573826045f08365978f3645df7df635",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T15:57:02.178091+00:00",
+  "total": null
+}

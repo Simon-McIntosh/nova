@@ -87,6 +87,16 @@
       "note": "s6 now states the endpoint: a frame whose field equals MagnetisationSolution.field to round-off, and a persisted per-mesh coil response equal to direct evaluation at 1e-12 and refused for another mesh. Module routes and persistence layout move to the node brief; the bound-current decomposition stays as the physics the frame must carry",
       "reason": "",
       "when": "2026-11-17T15:42:55.605197+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b07d3d39134f6c914331bf5987a42d3d443eec3a",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "s11 drops the row-block recipe and states the endpoint: a graded 8/40 interaction the H200 can solve, equal to the single-program assembly at 1e-12 on the 80 mm mesh",
+      "reason": "",
+      "when": "2026-11-17T15:43:10.539481+00:00"
     }
   ],
   "responses": {
@@ -107,6 +117,15 @@
       "note": "s6 now states the endpoint: a frame whose field equals MagnetisationSolution.field to round-off, and a persisted per-mesh coil response equal to direct evaluation at 1e-12 and refused for another mesh. Module routes and persistence layout move to the node brief; the bound-current decomposition stays as the physics the frame must carry",
       "reason": "",
       "when": "2026-11-17T15:42:55.605197+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "b07d3d39134f6c914331bf5987a42d3d443eec3a",
+      "commit_basis": "edit",
+      "note": "s11 drops the row-block recipe and states the endpoint: a graded 8/40 interaction the H200 can solve, equal to the single-program assembly at 1e-12 on the 80 mm mesh",
+      "reason": "",
+      "when": "2026-11-17T15:43:10.539481+00:00"
     },
     "single_goal-1": {
       "action": "acted",

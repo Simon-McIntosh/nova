@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
 # Run one imas-efit closed-shell arm on an IMAS pulse.
 #
-#   run_case.sh <efit-binary> <pulse-dir> <output-dir> <options-dir> <log>
+#   run_case.sh <srcdir> <efit-binary> <pulse-dir> <output-dir> <options-dir> <log>
 #
 # imas-efit is invoked in unified mode: --pulse carries every IDS (pf_active,
 # iron_core, wall, magnetics, tf) and --options-dir the solver XML only.
 set -uo pipefail
 
-efit=$1
-pulse=$2
-out=$3
+src=$1
+efit=$2
+pulse=$3
 opts=$4
-log=$5
+out=$5
+log=$6
 
+# shellcheck source=/dev/null
+source "$(dirname "${BASH_SOURCE[0]}")/_env.sh" "${src}"
 export TMPDIR=${TMPDIR:-/tmp}
 mkdir -p "$(dirname "${log}")"
 {

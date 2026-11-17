@@ -10,12 +10,8 @@ set -euo pipefail
 src=$1
 build=$2
 
-if ! type module >/dev/null 2>&1; then
-  # shellcheck source=/dev/null
-  source /usr/share/lmod/lmod/init/bash
-fi
 # shellcheck source=/dev/null
-source "${src}/configuration/sdcc/setup.sh" >/dev/null 2>&1
+source "$(dirname "${BASH_SOURCE[0]}")/_env.sh" "${src}"
 export TMPDIR=${TMPDIR:-/tmp}
 
 cmake -S "${src}" -B "${build}" -G Ninja \

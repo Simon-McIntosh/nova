@@ -13,6 +13,11 @@
       "kind": "exempted",
       "reason": "The colour constant belongs in nova/media/ink.py InkStyle, outside this node's grant; recorded for a palette pass, it does not change any measured value",
       "recorded_at": "2026-11-17T20:43:52.984105+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The reviewer names the independent guard itself: the row comparison at test lines 81-85 fails if the builder reverts to the hybrid kernel, and the negative control confirms it (3 failed)",
+      "recorded_at": "2026-11-17T20:44:16.678131+00:00"
     }
   },
   "findings": [

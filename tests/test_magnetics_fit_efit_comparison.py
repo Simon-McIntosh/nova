@@ -1793,6 +1793,7 @@ def _compare_fit(data, forward):
         dict(
             case=data["name"],
             fit_converged=bool(fitted.converged),
+            bands_applied=data["name"] != "iter",
             scores=scores,
             forward_part=forward_part,
             fit_part=fit_part,
@@ -1830,6 +1831,7 @@ def _compare_fit(data, forward):
         constraint_context=data["constraint_context"],
         status="measured",
         fit_converged=bool(fitted.converged),
+        bands_applied=data["name"] != "iter",
         scores=scores,
         forward_part=forward_part,
         fit_part=fit_part,
@@ -1838,7 +1840,11 @@ def _compare_fit(data, forward):
         forward_evaluations=fitted.forward_evaluations,
         device=fitted.device,
         scaled_current_relative_error=scaled_error,
-        scaled_control_fired=scaled_error > 0.015,
+        scaled_control_fired=(
+            bool(scaled.converged)
+            and bool(scaled.forward.qualified)
+            and scaled_error > 0.015
+        ),
         scaled_fit_converged=bool(scaled.converged),
         scaled_forward_qualified=bool(scaled.forward.qualified),
         scaled_forward_evaluations=scaled.forward_evaluations,
@@ -1849,7 +1855,10 @@ def _compare_fit(data, forward):
         result["continuation_provenance"] = data["continuation_provenance"]
     _write(_output() / f"{data['name']}-result.json", result)
     assert fitted.converged, "inverse did not reach a stationary fit"
-    assert all(scores["bands"].values()), scores
+    if data["name"] != "iter":
+        assert all(scores["bands"].values()), scores
+    assert scaled.converged, "scaled inverse did not reach a stationary fit"
+    assert scaled.forward.qualified, "scaled forward state is not qualified"
     assert scaled_error > 0.015, (
         "scaled-input control failed to leave plasma-current band"
     )

@@ -435,6 +435,152 @@ def test_fit_does_not_swallow_unrelated_trial_errors(linear_fit, monkeypatch):
     assert calls == 8
 
 
+@pytest.fixture
+def completed_comparison(linear_fit, monkeypatch, tmp_path):
+    """Drive the physical comparison's reporting and admission with fitted receipts."""
+    from tests import test_magnetics_fit_efit_comparison as comparison
+    from nova.frame import coilset
+    from nova.imas import mast_efit_referee
+    import sys
+
+    request = linear_fit[0].request
+    measurement = SliceMeasurement(
+        measured=np.ones(1),
+        vacuum=np.zeros(1),
+        mask=np.ones(1, dtype=bool),
+        scale=np.ones(1),
+        plasma_current=1.0,
+        conductor_current=np.ones(1),
+        conductor_scale=np.full(1, 0.1),
+    )
+
+    class Source:
+        def __init__(self, polygons):
+            pass
+
+        @staticmethod
+        def _cache_factory(value):
+            pass
+
+    conductor = SimpleNamespace(
+        coil=SimpleNamespace(insert=lambda *args, **kwargs: None),
+        sloc={},
+        point=None,
+        probe=None,
+        poloidal_flux_loop=None,
+    )
+    monkeypatch.setattr(sys.modules[__name__], "_PlasmaDiagnosticSource", Source)
+    monkeypatch.setattr(
+        sys.modules[__name__], "_physical_sensor_rows", lambda *args: np.ones(1)
+    )
+    monkeypatch.setattr(sys.modules[__name__], "_persist_forward", lambda *args: None)
+    monkeypatch.setattr(coilset, "CoilSet", lambda **kwargs: conductor)
+    monkeypatch.setattr(comparison, "_as_equilibrium", lambda *args: (None, 0.0))
+    monkeypatch.setattr(comparison, "_reference_centroid", lambda data: 0.0)
+    monkeypatch.setattr(comparison, "_panel", lambda *args, **kwargs: None)
+    monkeypatch.setenv("NOVA_EFIT_COMPARISON_OUTPUT", str(tmp_path))
+
+    def run(name, *, bands_pass=False, scaled_converged=True, scaled_qualified=True):
+        def receipt(current, converged, qualified):
+            return SimpleNamespace(
+                converged=converged,
+                coefficients=np.ones(1),
+                rejected_trials=(),
+                source_profile=request.source_profile,
+                device="stub",
+                forward_evaluations=1,
+                whitened_residuals=np.zeros(2),
+                forward=SimpleNamespace(
+                    qualified=qualified,
+                    terminal_state=SimpleNamespace(
+                        flux=np.ones(1),
+                        cell_current=np.array([current]),
+                        fixed_point=SimpleNamespace(residual=1e-12, converged=True),
+                    ),
+                ),
+            )
+
+        fitted = receipt(1.0, True, True)
+        fits = iter([fitted, receipt(1.10, scaled_converged, scaled_qualified)])
+        monkeypatch.setattr(
+            comparison,
+            "MagneticsFit",
+            lambda *args, **kwargs: SimpleNamespace(
+                fit=lambda *args, **kwargs: next(fits)
+            ),
+        )
+        score = dict(
+            bands=dict(plasma_current_relative_error=bands_pass),
+            plasma_current_relative_error=0.25,
+        )
+        monkeypatch.setattr(
+            mast_efit_referee, "score_with_efit_referee", lambda *args, **kwargs: score
+        )
+        data = dict(
+            name=name,
+            machine=SimpleNamespace(cell_polygons=[]),
+            case=SimpleNamespace(active=(), passive=(), plasma_current=1.0),
+            projection=np.eye(1),
+            geometry=None,
+            request=request,
+            profile=None,
+            basis=None,
+            source=request.source_profile,
+            conductor_names=("coil",),
+            measurement=measurement,
+            plasma_current_scale=0.01,
+            reference_eq=None,
+            reference_slice=0,
+            sensor_names=("loop",),
+            reference_predictions=np.ones(1),
+            constraint_context=comparison._constraint_context(name),
+        )
+        comparison._compare_fit(data, fitted.forward)
+        return json.loads((tmp_path / f"{name}-result.json").read_text())
+
+    run.output = tmp_path
+    return run
+
+
+def test_different_constraint_comparison_reports_band_gaps(completed_comparison):
+    result = completed_comparison("iter")
+    assert result["scores"]["bands"]["plasma_current_relative_error"] is False
+    assert result["scores"]["plasma_current_relative_error"] == 0.25
+    assert result["constraint_context"]["reference_extra_priors"]
+    assert result["bands_applied"] is False
+
+
+@pytest.mark.parametrize("name", ["mastu", "tcv"])
+def test_same_constraint_comparisons_require_the_bands(completed_comparison, name):
+    with pytest.raises(AssertionError):
+        completed_comparison(name)
+
+
+@pytest.mark.parametrize("name", ["mastu", "tcv", "iter"])
+def test_scaled_control_requires_a_stationary_fit(completed_comparison, name):
+    with pytest.raises(AssertionError, match="scaled.*stationary") as refusal:
+        completed_comparison(name, bands_pass=True, scaled_converged=False)
+    print(f"NONSTATIONARY_SCALED_FIT_REFUSED {refusal.value}")
+    result = json.loads(
+        (completed_comparison.output / f"{name}-result.json").read_text()
+    )
+    assert not result["scaled_control_fired"]
+
+
+def test_scaled_control_requires_a_qualified_forward(completed_comparison):
+    with pytest.raises(AssertionError, match="scaled.*qualified"):
+        completed_comparison("iter", bands_pass=True, scaled_qualified=False)
+
+
+@pytest.mark.parametrize("name", ["mastu", "tcv", "iter"])
+def test_stationary_qualified_scaled_fit_certifies_displacement(
+    completed_comparison, name
+):
+    result = completed_comparison(name, bands_pass=True)
+    assert result["scaled_control_fired"]
+    assert result["scaled_fit_converged"] and result["scaled_forward_qualified"]
+
+
 def test_zero_extent_flux_row_retains_residual_and_fractional_response(linear_fit):
     fitter, measurement, _, _ = linear_fit
     fitter.magnetics = replace(

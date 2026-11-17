@@ -1900,7 +1900,55 @@ physical 1.10-scaled control.</p>
 <p>One further MAST-U titan P100 batch is prepared, seeded from the saved
 qualified continuation receipt (residual 5.307643379157493e-16). It will persist
 unscaled scores, the fit/forward split, per-sensor residuals and the fit panel
-before the scaled fit, and bank complete partial receipts on exhaustion. Physical
-results remain pending. TCV and ITER stay stopped with their measured causes;
+before the scaled fit, and bank complete partial receipts on exhaustion. The physical rerun ended in a response-column refusal, recorded below. TCV and ITER stay stopped with their measured causes;
 no additional seeds or diagnostics are scheduled for them.</p>
+</section>
+
+<section id="efit-comparison-response-refusal">
+<h2>MAST-U response evaluation refusal</h2>
+<p>The single authorised rerun, titan P100 job 1320459 at revision
+<code>24f72a6d2e95e1c91d906156ea3500bc65a9d13c</code>, completed with scheduler
+<code>FAILED</code>, exit 1, after 02:08:51. Its physical case took
+7677.947464 s including setup and compilation; pytest reported
+<code>1 failed in 7643.56s (2:07:23)</code>. The native stack ends at
+<code>_, lower = self._evaluate(coefficients - direction, seed)</code> in the
+central-difference response construction, followed by
+<code>RuntimeError: the forward evaluation did not qualify</code>.</p>
+<p>This is a public forward numerical refusal during a response perturbation,
+not line-search exhaustion or reader scaffolding. The complete public receipt is
+banked as <code>backtracking-fit-1320459/physical-mastu/mastu-fit-forward-refused.pkl</code>
+under the run evidence directory. Its strict-JSON audit is
+<code>backtracking-refusal-audit.json</code> there. It was read with float64 enabled
+and no equilibrium solve or field evaluation. All 2011 flux values and all 367
+cell-current values are finite. The unchanged qualification tolerance is 1e-10.</p>
+<table><thead><tr><th>Persisted MAST-U state</th><th>Qualified / converged</th><th>Residual</th><th>Termination reason</th><th>P100 public call [s]</th></tr></thead><tbody>
+<tr><td>Reused qualified continuation</td><td>true / true</td><td>5.307643379157493e-16</td><td>1</td><td>213.338199</td></tr>
+<tr><td>Refused lower response perturbation</td><td>false / false</td><td>0.0001237999574577207</td><td>12: ACTIVE_SET_STEP_REFUSED</td><td>200.421520</td></tr>
+</tbody></table>
+<p>The refused receipt reports three attempted outer reconciliations, each with
+stored frozen residual 0.0007790222624214112. The remaining 61 history slots are
+NaN padding, not 61 further attempted reconciliations. Its terminal residual above
+is separate from that frozen history. The receipt records 64 attempted and 13
+accepted Newton promotions; these counters are retained as written, not inferred
+from the history slots.</p>
+<p>The persisted inventory contains the known-present qualified continuation
+receipt and the refused response receipt, but no complete fit, partial fit,
+fit-trials JSON, scaled-fit receipt or final score JSON. Consequently the number
+and scalars of any preceding rejected line-search trials, the accepted fit
+iteration and the response-column identity are unavailable. No absence of
+rejected trials is claimed. The loss of accumulated fit telemetry on a response
+failure is an evidence limitation; no run or repair is authorised here.</p>
+<table><thead><tr><th>Machine</th><th>Latest outcome</th><th>Qualified inverse / bands / split / scaled control</th></tr></thead><tbody>
+<tr><td>MAST-U</td><td>Lower response perturbation refused; residual 1.237999574577207e-4, reason 12</td><td>Not completed</td></tr>
+<tr><td>TCV</td><td>Stored-field residual 0.030364200526436996, reason 12; two cold seeds failed axis qualification; three public seeds exhausted</td><td>Not completed; remains stopped</td></tr>
+<tr><td>ITER</td><td>No qualified O point at the saved later read; explicit NaN refusal propagates to normalised flux and current residual; diagnostic allowance exhausted</td><td>Not completed; remains stopped</td></tr>
+</tbody></table>
+<p>The passing fitted-source input replays below 1% on all three machines remain
+valid. ITER's different pressure/q0-prior constraint set and selector-age caveats
+remain unchanged. No physical scaled-control log was emitted; the declared
+1.10 control is unrun. The unit exhaustion control is not substituted for it.
+The completed focused GPU checks report <code>1 failed, 69 passed, 10 deselected
+in 44.79s</code>, with a total stage wall of 52.964153 s on titan P100. The
+predeclared failure is preserved in the manifest. No forward or topology source
+was changed and no further physical run was submitted.</p>
 </section>

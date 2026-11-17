@@ -40,6 +40,13 @@
       "finding": "done_when-1",
       "reason": "Lead decision: the \u00a77 retry waits on \u00a712, and its 137D clause is restated against \u00a712's measured mechanism before it runs; \u00a77 cannot start until \u00a712 lands, so no node closes on the current branches",
       "when": "2026-11-17T16:54:50.304521+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "\u00a73 is done; the eleven-row receipt refresh it records belongs to millisecond-converged-solve \u00a72, not to a section of this plan, and a plan-level depends-on would report this whole plan blocked, which is false",
+      "when": "2026-11-17T16:54:58.463076+00:00"
     }
   ],
   "responses": {
@@ -48,6 +55,12 @@
       "by": "",
       "reason": "Lead decision: the \u00a77 retry waits on \u00a712, and its 137D clause is restated against \u00a712's measured mechanism before it runs; \u00a77 cannot start until \u00a712 lands, so no node closes on the current branches",
       "when": "2026-11-17T16:54:50.304521+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a73 is done; the eleven-row receipt refresh it records belongs to millisecond-converged-solve \u00a72, not to a section of this plan, and a plan-level depends-on would report this whole plan blocked, which is false",
+      "when": "2026-11-17T16:54:58.463076+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261117T163337806401-plan-review-of-diiid-vertical-force-balance.json",

@@ -14,6 +14,15 @@ build=$2
 source "$(dirname "${BASH_SOURCE[0]}")/_env.sh" "${src}"
 export TMPDIR=${TMPDIR:-/tmp}
 
+# imas-efit stamps its binary by running git in the source directory.  The
+# extracted tree has no .git of its own, so without a ceiling git walks up to
+# whatever repository contains the build root and stamps that repository's
+# HEAD instead — here the home directory's repository.  The ceiling stops the
+# walk, so a stale stamp cannot name a commit this binary was not built from;
+# the caller records the extracted commit in the receipt.
+export GIT_CEILING_DIRECTORIES
+GIT_CEILING_DIRECTORIES=$(dirname "$(realpath -m "${src}")")
+
 cmake -S "${src}" -B "${build}" -G Ninja \
       -DCMAKE_BUILD_TYPE=Release -DEFIT_USE_IMAS=ON
 ninja -C "${build}"

@@ -15,9 +15,11 @@ from pathlib import Path
 TOLERANCE = 0.02
 CONVERGENCE_TOLERANCE = 0.005
 
-EXACT = {0.9: 61.101838, 0.5: 195.1}
+# exact_shielding from make_pulse.py; the plan rounds the 0.5 case to 195.1
+EXACT = {0.9: 61.101838, 0.5: 195.055750}
 # Probes shared with the section 1 prototype: (2,0) and (3,1) are outside the
-# shell; (1.2,0) and (1.5,0) are inside it.
+# shell, where the shielding reduces the coil flux; (1.2,0) and (0.5,0) are
+# inside it, where the shell does not shield and the ratio is a control.
 PROBE_ORDER = [(2.0, 0.0), (3.0, 1.0), (1.2, 0.0), (0.5, 0.0)]
 
 

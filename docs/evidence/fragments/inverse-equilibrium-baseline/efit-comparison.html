@@ -2081,3 +2081,30 @@ only <code>docs</code> from the source snapshot and avoids that node, and no sol
 failure is attributed to that extraction error. The original three aborted CPU
 suite receipts and both unavailable failure-set deltas remain unchanged.</p>
 </section>
+
+<section id="efit-comparison-cache-diagnostic-result">
+<h2>Cache-disabled diagnostic completed</h2>
+<p>CPU diagnostic 1322785 completed with EXIT=0. Its isolated
+<code>test_known_state_recovery[solovev]</code> recorded <code>1 passed in 2687.02s
+(0:44:47)</code>, with 2704.107705 s total CPU stage wall. The plugin asserted
+float64 capability and <code>cache_enabled=False</code> before collection, and
+asserted the cache remained disabled at session finish. The generating,
+recovered and independent re-solve receipts are retained outside git.</p>
+<p>The reverse-answering-commit control recorded <code>1 failed, 46 deselected
+in 3.58s</code>. It reached the new detector with zero owner calls and the separate
+fixed pending receipt lost. The repaired focused checks instead reach the actual
+durable owner and preserve that receipt. The shared JSON owner remains unchanged.</p>
+<p>This successful isolated diagnostic does not establish a complete full-suite
+failure set or prove that caching alone caused the earlier aborts: it also ran
+on a different node and without concurrent suite processes. It is retained as
+cache-versus-program evidence, not relabelled as either required suite arm.</p>
+<p>The next measurement uses the normal cache guidance: cache enable/root
+variables are unset and the effective default cache-enable flag is checked before
+each process. One CPU allocation runs the original base, the repair base and the
+current dispatch head serially on the same node, with four cores throughout.
+Each arm keeps its exact requested command and all collected tests. The long CPU
+partition provides enough scheduler time for serial execution without shortening
+the suite or changing its test budgets. Old aborted receipts remain preserved;
+regression admission stays pending until native summaries provide both failure
+sets.</p>
+</section>

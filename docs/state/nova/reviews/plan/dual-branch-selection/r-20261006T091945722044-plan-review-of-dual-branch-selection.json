@@ -40,7 +40,24 @@
   "plan_slug": "dual-branch-selection",
   "plan_version": 15,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "deep_module-1",
+      "reason": "Section 5 no longer consolidates the selector: it builds only the traced cold seed. The five selector entry points are landed and consumed by the coupled transport window; collapsing them is not work this section carries, and the seed node's write paths exclude the selector module.",
+      "when": "2026-11-17T01:04:14.108689+00:00"
+    }
+  ],
+  "responses": {
+    "deep_module-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Section 5 no longer consolidates the selector: it builds only the traced cold seed. The five selector entry points are landed and consumed by the coupled transport window; collapsing them is not work this section carries, and the seed node's write paths exclude the selector module.",
+      "when": "2026-11-17T01:04:14.108689+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/dual-branch-selection/r-20261006T091945722044-plan-review-of-dual-branch-selection.json",
   "review_run_id": "r-20261006T091945722044-plan-review-of-dual-branch-selection",
   "reviewed_blob_sha": "e25446cc4702a55311231df29d5043993ac2aebd",
   "rubric": "design",

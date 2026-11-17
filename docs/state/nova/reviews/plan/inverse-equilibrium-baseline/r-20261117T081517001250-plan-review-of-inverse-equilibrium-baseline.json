@@ -65,7 +65,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 37,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0e1225744155050cdae4508028f6dbcbfbd63b31",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Clause (3) of the comparison section now carries a control on the measure it delivers when no case converges: the row replay with every row scaled by 1.10 must leave the 5 percent band on every sensor family.",
+      "reason": "",
+      "when": "2026-11-17T10:54:36.099615+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0e1225744155050cdae4508028f6dbcbfbd63b31",
+      "commit_basis": "edit",
+      "note": "Clause (3) of the comparison section now carries a control on the measure it delivers when no case converges: the row replay with every row scaled by 1.10 must leave the 5 percent band on every sensor family.",
+      "reason": "",
+      "when": "2026-11-17T10:54:36.099615+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261117T081517001250-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261117T081517001250-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "c4fc6bb4d72f02df805aac50fef64eda8aceb3b6",
   "rubric": "content",

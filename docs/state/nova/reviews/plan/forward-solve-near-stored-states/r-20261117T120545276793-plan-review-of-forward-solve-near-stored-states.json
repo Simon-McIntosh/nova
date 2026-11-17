@@ -35,6 +35,16 @@
       "note": "The first section now waits on the inverse baseline comparison section, whose landing brings the cited fragment and the stored-case reader onto the branch.",
       "reason": "",
       "when": "2026-11-17T16:03:59.198462+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "86c1a52f8d9d7552de0aa3c2a434757dbc70e2c9",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The verdict now needs a witness that does not depend on the solve converging: the residual of the stored imas-efit map under the forward operator at the stored coefficients, evaluated without iteration, and the conditioning of the linearised operator there.",
+      "reason": "",
+      "when": "2026-11-17T16:04:12.536009+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The first section now waits on the inverse baseline comparison section, whose landing brings the cited fragment and the stored-case reader onto the branch.",
       "reason": "",
       "when": "2026-11-17T16:03:59.198462+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "86c1a52f8d9d7552de0aa3c2a434757dbc70e2c9",
+      "commit_basis": "edit",
+      "note": "The verdict now needs a witness that does not depend on the solve converging: the residual of the stored imas-efit map under the forward operator at the stored coefficients, evaluated without iteration, and the conditioning of the linearised operator there.",
+      "reason": "",
+      "when": "2026-11-17T16:04:12.536009+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261117T120545276793-plan-review-of-forward-solve-near-stored-states.json",

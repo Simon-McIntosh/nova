@@ -1,0 +1,113 @@
+<section class="r-evidence" id="icm-efit-closed-shell-imas">
+  <h3>imas-efit closed-shell control from an IMAS pulse: S is reproduced to 1.1 % and
+    0.8 % once the iron outline is refined</h3>
+
+  <p><strong>Verdict.</strong> The section 10 control now runs end to end on a pulse
+    with no XML machine file, and it reproduces the exact closed-shell shielding
+    factor at both radius ratios: <strong>S = 60.42</strong> at a/b = 0.9 (exact
+    61.101838, −1.12 %) and <strong>S = 193.49</strong> at a/b = 0.5 (exact
+    195.055750, −0.81 %), both inside the 2 % gate. The equilibrium slices report
+    <code>CONVERGENCE_SUMMARY: status= 2 iterations= 1 cerror= 0.000E+000</code> and
+    the iron relaxation reaches <code>relErr = 1.1E-06</code>; the flux scale is
+    fully linear (<code>IRON_BMOD Bmax = 3.0897E-07</code> T, four orders below any
+    saturation). The number is only reproduced at a refined outline: the
+    twenty-vertex half-arc a naive case produces over-shields by <strong>20 %</strong>,
+    and the reason is a hard 500-knot ceiling in the dependency.</p>
+
+  <h4>The case, as IDSs</h4>
+  <p>A spherical shell (inner radius a, outer b = 1 m, μ<sub>r</sub> = 1000) with a
+    one-turn coil of radius 0.03 m at 10<sup>4</sup> A inside it, and no plasma: the
+    pulse constrains <code>magnetics/ip</code> to 0, so the reconstruction is the
+    vacuum poloidal flux of the coil in the iron's presence — exactly the quantity
+    S is defined for. <code>make_pulse.py</code> writes five IDSs at DD 4.1.0:
+    <code>pf_active</code> (one rectangular coil, one supply, one circuit whose
+    connections make the coil its own single-coil circuit), <code>iron_core</code>
+    (the shell's poloidal half-annulus as one closed polygon plus a flat B–H table,
+    <code>b_field = [0, 10³]</code>, <code>permeability_relative = [1000, 1000]</code>),
+    <code>wall</code>, <code>magnetics</code> (four probes, σ = 10 T) and
+    <code>tf</code>. imas-efit logs <code>Iron source: IMAS iron_core IDS
+    (preferred)</code> and builds the boundary itself; the solver XML carries only
+    solver settings and the data-selection attributes.</p>
+
+  <h4>The measurement, and its resolution dependence</h4>
+  <p>S is ψ(with iron)/ψ(without iron) at three exterior probes; for a dipole source
+    inside a spherical shell every exterior point must give the same S, so their
+    spread is the internal check.</p>
+  <table>
+    <tr><th>outline vertices per half-arc</th><th>knots</th><th>a/b = 0.9: S (mean)</th>
+      <th>Δ</th><th>a/b = 0.5: S (mean)</th><th>Δ</th></tr>
+    <tr><td>20 (420 knots)</td><td>420</td><td>73.37</td><td>+20.08 %</td>
+      <td>184.83</td><td>−5.24 %</td></tr>
+    <tr><td>40</td><td>500</td><td>58.25</td><td>−4.68 %</td><td>180.18</td><td>−7.63 %</td></tr>
+    <tr><td>80</td><td>500</td><td>55.15</td><td>−9.74 %</td><td>192.40</td><td>−1.36 %</td></tr>
+    <tr><td>160</td><td>500</td><td>60.01</td><td>−1.79 %</td><td>196.42</td><td>+0.70 %</td></tr>
+    <tr><td>320</td><td>500</td><td>60.61</td><td>−0.80 %</td><td>193.49</td><td>−0.81 %</td></tr>
+    <tr><td>640</td><td>500</td><td>60.42</td><td>−1.12 %</td><td>—</td><td>—</td></tr>
+  </table>
+  <p>The 20- and 40-vertex rows each appear twice in the full table, once at
+    <code>relativeError</code> 1e-2 (<code>e2</code>, <code>fine</code>) and once at
+    1e-4 (<code>e4</code>, <code>v40</code>): the pairs differ by 0.16 % and 0.20 %
+    at a/b = 0.9 and by 0.50 % and 0.52 % at a/b = 0.5, so the solver tolerance is not
+    the lever and the outline resolution is. The last step moves the answer by 0.32 %
+    (a/b = 0.9) and 1.50 % (a/b = 0.5), and the probe spread at the finest outline is
+    0.40 % and 0.84 %. The series is not monotone: at a fixed knot count the uniform
+    knot grid aliases against the polygon's corners, so S reads 55.15 at 80 vertices
+    and 60.01 at 160 on the same 500 knots.</p>
+  <p>The interior probes separate the two effects. Their flux ratio is the shielded
+    interior field, and it is flat across the whole outline series — 0.9219 to 0.9221
+    at a/b = 0.9 and 0.6732 to 0.6750 at a/b = 0.5, a range of 0.03 % and 0.27 % —
+    while S ranges over 55.15 to 73.52 and 180.18 to 196.42 on the same arms. The reconstruction's interior solution is therefore
+    stable and the exterior variance is the polygon's flux at the probe positions
+    (the knot aliasing above), not a global field error that a larger solve would fix.</p>
+
+  <h4>Finding for the owners: the iron outline's resolution is unreachable from a pulse</h4>
+  <p><code>IronCoreBuilder</code> derives <code>nBP = max(nVertices·10, 50)</code> and
+    caps it at <code>maxBreakpoints = 500</code>
+    (<code>src/ironCoreBuilder.h:20</code>). The only lever a pulse has is the number
+    of vertices, which changes the answer — by 20 % at a/b = 0.9 — and no pulse can
+    ask for more than 500 knots or for a corner-aware knot distribution. The ask is
+    a pulse-level breakpoint count (or an exposed cap), so resolution is a stated
+    input rather than an accident of the outline's vertex count.</p>
+
+  <h4>Findings for the owners: the options must declare the probe selection, and a plasma breaks the fit</h4>
+  <p>In unified IMAS mode the probes come from <code>magnetics</code>, but their data
+    selection must still exist in <code>efitOptions</code>: without
+    <code>&lt;magneticProbes interpolationMethod=…/&gt;</code> (and the same for
+    <code>&lt;efitCircuits&gt;</code> and <code>&lt;bVacRadiusProduct&gt;</code>) every
+    slice dies at <code>DataSelection::getValue: invalid interpolationMethod=0</code>.
+    Probes at weight 0 leave the fit rank-deficient and <code>cerror</code> never
+    leaves its plateau; weight 1 with σ = 10 T fixes that without pulling the field.
+    With <code>ip</code> = 100 A the same case never converges: chi2 = 2.03 × 10<sup>−20</sup>
+    yet <code>cerror</code> plateaus at 7.079 × 10<sup>−3</sup>, 70 times the 1.0e-4
+    tolerance, and the slice ends <code>status= -1 iterations= 80</code> with
+    <code>PLATEAU_REJECTED_BY_CEILING</code> on every late iteration. Scaling every
+    current by 10<sup>4</sup> and constraining the probes both left that plateau at
+    the same value; pinning Ip to zero is what converged, and it is also the correct
+    setting for a shielding measurement.</p>
+
+  <h4>Verdict, one-directionally</h4>
+  <p>This is positive evidence and only positive: an independent code, reading the
+    same geometry as a polygonal <code>iron_core</code> and solving for a linear
+    μ<sub>r</sub> = 1000 shell, agrees with the exact exterior shielding factor to
+    1.1 % at a/b = 0.9 and 0.8 % at a/b = 0.5, and thus corroborates the closed-shell
+    representation and nova's own prototype reading (60.4 against 61.1). It does not
+    test §9's WEST pulse-57410 probe comparison, which stays open: no WEST data was
+    read here, and the case has no plasma. It also does not clear imas-efit's
+    saturation path — the B–H table carries no curvature, so nothing about
+    μ<sub>r</sub>(B) was exercised.</p>
+
+  <h4>Receipts</h4>
+  <p><code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/closed-shell/imas/</code>
+    — <code>report.html</code> (case, both tables, convergence evidence),
+    <code>summary.json</code> (machine-readable per-arm S, spread and deltas),
+    <code>scores/</code> (ψ at every probe, every arm), <code>pulses/</code> (case
+    descriptors), <code>convergence-lines.txt</code> (the
+    <code>IRON_*</code> and <code>CONVERGENCE_SUMMARY</code> lines),
+    <code>owners-message.txt</code>, <code>log.txt</code> (every command and job id).
+    Case builder: <code>scripts/imas_efit_closed_shell/</code> in the worktree.
+    imas-efit commit <code>d5eac87ae310499cc54398e8ce406b887b481153</code>, extracted
+    with <code>git archive</code> (sha256 <code>4869dfe9…000693b</code>), built with
+    <code>-DEFIT_USE_IMAS=ON</code> outside the read-only checkout. No figure: the
+    reconciled state is a vacuum flux map, which a contour panel would draw as the
+    coil's own dipole — the diagnostic content is the table.</p>
+</section>

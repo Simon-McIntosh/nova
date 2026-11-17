@@ -31,9 +31,7 @@ def parse_args(argv: list[str]) -> tuple[Path, Path | None, list[tuple[float, fl
         del rest[index : index + 2]
     if len(rest) % 2:
         raise SystemExit(f"points must be R Z pairs, got {rest}")
-    points = [
-        (float(rest[i]), float(rest[i + 1])) for i in range(0, len(rest), 2)
-    ]
+    points = [(float(rest[i]), float(rest[i + 1])) for i in range(0, len(rest), 2)]
     return run, out, points or list(DEFAULT_POINTS)
 
 
@@ -82,7 +80,9 @@ def read_run(run: Path, points: list[tuple[float, float]]) -> dict:
     grid_z = np.asarray(p2.grid.dim2, dtype=float)
     psi = np.asarray(p2.psi, dtype=float)
     if psi.ndim != 2 or psi.shape != (grid_r.size, grid_z.size):
-        result["error"] = f"psi shape {psi.shape} against grid {grid_r.size}x{grid_z.size}"
+        result["error"] = (
+            f"psi shape {psi.shape} against grid {grid_r.size}x{grid_z.size}"
+        )
         return result
     result["grid"] = {
         "r": [float(grid_r[0]), float(grid_r[-1]), int(grid_r.size)],

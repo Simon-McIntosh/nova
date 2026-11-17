@@ -69,7 +69,7 @@ def draw(axes, data):
         color="#444444",
     )
     upper.set_title(
-        "WEST 62751 outboard stray field, uniform-40 mm iron",
+        "WEST 62751 outboard stray field, uniform-80 mm iron",
         fontsize=style.label_fontsize + 1,
         loc="left",
     )

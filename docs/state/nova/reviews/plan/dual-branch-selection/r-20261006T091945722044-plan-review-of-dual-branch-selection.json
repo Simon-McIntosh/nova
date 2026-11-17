@@ -57,6 +57,16 @@
       "note": "The followup that would have re-derived the webers margin in the selection path is closed without building, so no second owner of the class margin is created.",
       "reason": "",
       "when": "2026-11-17T04:12:24.314177+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "eca66f8f5d1a4869c218fbd40a37989654c17cd2",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "Section 5 is narrowed to the traced cold seed and adds no public selection surface: the kernel sits behind the seed entry point the solve request already calls.",
+      "reason": "",
+      "when": "2026-11-17T04:13:03.729485+00:00"
     }
   ],
   "responses": {
@@ -74,6 +84,15 @@
       "note": "The followup that would have re-derived the webers margin in the selection path is closed without building, so no second owner of the class margin is created.",
       "reason": "",
       "when": "2026-11-17T04:12:24.314177+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "eca66f8f5d1a4869c218fbd40a37989654c17cd2",
+      "commit_basis": "edit",
+      "note": "Section 5 is narrowed to the traced cold seed and adds no public selection surface: the kernel sits behind the seed entry point the solve request already calls.",
+      "reason": "",
+      "when": "2026-11-17T04:13:03.729485+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/dual-branch-selection/r-20261006T091945722044-plan-review-of-dual-branch-selection.json",

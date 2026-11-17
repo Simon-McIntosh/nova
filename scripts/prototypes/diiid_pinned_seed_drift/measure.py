@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import hashlib
 import json
 from pathlib import Path
@@ -31,9 +32,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--frame", type=int, default=102)
+    parser.add_argument("--revision")
+    parser.add_argument("--measure-only", action="store_true")
+    parser.add_argument("--undo-average", action="store_true")
+    parser.add_argument("--point-current", action="store_true")
     arguments = parser.parse_args()
     assert jax.config.jax_enable_x64 is True
-    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    revision = (
+        arguments.revision
+        or subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    )
     print(f"REVISION={revision} MODULE={pinned.__file__} CWD={Path.cwd()}", flush=True)
     print(f"DEVICES={jax.devices()} X64={jax.config.jax_enable_x64}", flush=True)
     declared = next(
@@ -63,6 +71,14 @@ def main():
     profile, shipped, current, authority = pinned.description_driven_currents(
         row, profile, time_ms
     )
+    if arguments.point_current:
+        profile = replace(
+            profile, operator=replace(profile.operator, use_linear_moments=False)
+        )
+    if arguments.undo_average:
+        profile = replace(
+            profile, operator=replace(profile.operator, cell_average_stencil=None)
+        )
     target = pinned._target_current(row, time_ms)
     moments = profile.operator.cell_current(seed, pinned.TopologyClass.DIVERTED)
     unscaled = float(np.sum(np.asarray(moments)))
@@ -89,6 +105,8 @@ def main():
         "source_path": str(path),
         "source_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         "use_linear_moments": bool(profile.operator.use_linear_moments),
+        "undo_average": arguments.undo_average,
+        "point_current": arguments.point_current,
         "reliable_surfaces": reliable,
         "wall_statement": statement,
         "relative_registration_error": unscaled / declared["unscaled_source_ip_a"]
@@ -98,6 +116,8 @@ def main():
     arguments.output.parent.mkdir(parents=True, exist_ok=True)
     arguments.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     print(json.dumps(result, sort_keys=True), flush=True)
+    if arguments.measure_only:
+        return
     # Reuse the constructed inputs so the benchmark's own qualification executes.
     pinned.build_profile = lambda *args, **kwargs: (
         profile,

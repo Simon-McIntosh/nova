@@ -1970,3 +1970,38 @@ no axes, no clipped or overlapping text. Inspection receipts precede the native
 EXIT lines in the render and physical-case gate logs.</figcaption>
 </figure>
 </section>
+
+<section id="efit-comparison-review-admission-repair">
+<h2>Comparison admission repairs</h2>
+<p>The canonical live section exempts ITER from band admission because its
+reference reconstruction carries pressure and q0 priors absent from nova. The
+worktree's plan copy predates that amendment; the current canonical section was
+read before this repair. ITER now keeps all physical scores and failed-band
+flags in its result, with <code>bands_applied=false</code>. MAST-U and TCV retain
+band enforcement. No numerical band or public qualification threshold changed.</p>
+<p>The scaled-data control now requires a stationary scaled inverse fit and a
+qualified scaled forward state as well as a plasma-current displacement beyond
+1.5%. A nonstationary or unqualified result cannot set
+<code>scaled_control_fired=true</code>. Its result is still persisted before
+admission is refused, so its displacement and convergence remain inspectable.</p>
+<table><thead><tr><th>Deliberate reporting input</th><th>Before repair</th><th>After repair</th></tr></thead><tbody>
+<tr><td>Converged ITER fit with a reported 25% current gap</td><td>Unconditional band assertion fails</td><td>Gap retained; bands reported without admission</td></tr>
+<tr><td>MAST-U or TCV with the same failed band</td><td>Refused</td><td>Still refused</td></tr>
+<tr><td>Scaled current displaced by 10%, scaled fit nonstationary</td><td>Accepted as a fired control</td><td>Refused for all three machines; control flag false</td></tr>
+<tr><td>Scaled fit stationary but forward unqualified</td><td>Accepted</td><td>Refused; control flag false</td></tr>
+<tr><td>Scaled fit stationary, forward qualified, current displaced by 10%</td><td>Accepted</td><td>Accepted for all three machines</td></tr>
+</tbody></table>
+<p>The reporting-path reproduction recorded <code>5 failed, 2 passed,
+36 deselected in 5.80s</code>. Repaired focused fitter checks recorded
+<code>42 passed, 4 deselected in 6.05s</code>. In CPU batch 1322248 the answering
+commit's comparison-harness change was reversed in scratch while retaining its
+new regression tests as the detector: <code>5 failed, 41 deselected in 6.28s</code>.
+That is a repair mutation control, not the unrun physical scaled-fit control.</p>
+<p>One CPU allocation measures immutable snapshots of the fenced original base,
+the repair base and the repaired head. The original base resolves to its two
+existing test files; the repair base and head run the exact three-file command.
+This preserves both requested baselines, and will report both added-failure
+counts from native summaries. Old incomplete CPU receipts remain preserved.
+The three exact suite arms are running; no completed paired result is yet claimed.
+No additional MAST-U, TCV or ITER comparison seed was submitted for this repair.</p>
+</section>

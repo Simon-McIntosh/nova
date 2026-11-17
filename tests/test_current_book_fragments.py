@@ -69,7 +69,7 @@ def test_disconnected_polygons_and_holes(polynomial):
     np.testing.assert_allclose(result.vertical_moment, [0], atol=2e-13)
 
 
-def _split_cell(level=0.0, axis=1.0, shift=0.0, slope=0.2):
+def _split_cell(level=0.0, axis=1.0, shift=0.0, slope=0.2, membership="axis-connected"):
     vertices = jnp.asarray([[1.0, -1.0], [3.0, -1.0], [3.0, 1.0], [1.0, 1.0]])
     centre = jnp.asarray([2.0, 0.0])
     points = jnp.asarray(
@@ -81,8 +81,12 @@ def _split_cell(level=0.0, axis=1.0, shift=0.0, slope=0.2):
     fragment = topology.quadratic_cell_fragments(
         vertices - centre, jnp.asarray(4), coefficients.at[0].add(-level)
     )
+    assert membership in {"axis-connected", "level"}, membership
     selected = jnp.asarray([[False, True]])
-    if os.environ.get("NOVA_BOOK_LEVEL_MEMBERSHIP") == "1":
+    if membership == "level":
+        # A level test that is not axis-connected: every fragment above the
+        # boundary level is booked, including the private strip below the
+        # separatrix that no path from the axis reaches.
         selected = fragment.area[None] > 0
     read = SimpleNamespace(
         field_coefficients=coefficients[None],
@@ -121,15 +125,52 @@ def _split_cell(level=0.0, axis=1.0, shift=0.0, slope=0.2):
     )
 
 
+def _private_flux_current(result):
+    """Return the current booked in the private strip of the split cell."""
+    return float((result.cell_current[0] - result.vertical_moment[0] / 0.6) / 2)
+
+
+def _assert_private_flux_current_is_zero(result):
+    """The private-flux clause: an axis-connected cell books no private current."""
+    private_current = _private_flux_current(result)
+    print(f"PRIVATE_FLUX_CURRENT={private_current:.17g}", flush=True)
+    assert abs(private_current) < 1e-12, f"private current {private_current}"
+    return private_current
+
+
 def test_private_fragment_current_is_zero():
     result = jax.jit(lambda: _split_cell(slope=0.0))()
     # The upper strip's exact moment identifies its membership, even when the
     # lower private strip shares the same cell and signed flux level.
-    private_current = (result.cell_current[0] - result.vertical_moment[0] / 0.6) / 2
-    print(f"PRIVATE_FLUX_CURRENT={float(private_current):.17g}", flush=True)
-    assert abs(float(private_current)) < 1e-12, f"private current {private_current}"
+    _assert_private_flux_current_is_zero(result)
     np.testing.assert_allclose(result.cell_current, [1.6], atol=1e-12)
     np.testing.assert_allclose(result.vertical_moment, [0.96], atol=1e-12)
+
+
+def test_level_membership_books_private_current():
+    """A level-test membership puts plasma current in the private-flux cells.
+
+    The booking books whatever membership it is given; only the read's
+    axis-connected membership keeps the private strip out. This is the
+    standing negative control for the clause above: under the level test the
+    private strip is booked, and ``_assert_private_flux_current_is_zero`` —
+    the assertion ``test_private_fragment_current_is_zero`` makes — refuses
+    the same booked state.
+    """
+    connected = jax.jit(lambda: _split_cell(slope=0.0))()
+    level = jax.jit(lambda: _split_cell(slope=0.0, membership="level"))()
+    connected_current = _private_flux_current(connected)
+    level_current = _private_flux_current(level)
+    print(f"PRIVATE_FLUX_CURRENT_AXIS_CONNECTED={connected_current:.17g}", flush=True)
+    print(f"PRIVATE_FLUX_CURRENT_LEVEL_MEMBERSHIP={level_current:.17g}", flush=True)
+    print(f"LEVEL_BOOKED_CELL_CURRENT={float(level.cell_current[0]):.17g}", flush=True)
+    assert abs(connected_current) < 1e-12
+    assert abs(level_current) > 1.0, (
+        "the level-test membership booked no private-flux current, so this "
+        f"control cannot fail the private-flux clause (current {level_current})"
+    )
+    with pytest.raises(AssertionError, match="private current"):
+        _assert_private_flux_current_is_zero(level)
 
 
 @pytest.mark.parametrize("stage", ["smooth", "axis", "boundary", "support"])

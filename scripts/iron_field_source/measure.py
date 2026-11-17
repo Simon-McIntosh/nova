@@ -221,16 +221,23 @@ def stage_state():
     points = np.asarray(geometry["points"], dtype=np.float64)
     mesh_digest = iron._geometry_digest(mesh, "linear")
     coil_rows, plasma_rows = quadrature(data)
+    coil_started = perf_counter()
     coil_values, reused = persist_coil_field(
         points, coil_rows, mesh_digest, coil_set_key(data)
     )
+    coil_seconds = perf_counter() - coil_started
+    direct_started = perf_counter()
     direct_coil = field_at(points, coil_rows)
+    direct_coil_seconds = perf_counter() - direct_started
     coil_relative = float(
         np.max(
             np.abs(coil_values - direct_coil) / np.maximum(np.abs(direct_coil), 1e-30)
         )
     )
-    external_values = coil_values + field_at(points, plasma_rows)
+    plasma_started = perf_counter()
+    plasma_values = field_at(points, plasma_rows)
+    plasma_seconds = perf_counter() - plasma_started
+    external_values = coil_values + plasma_values
     direct_external = np.asarray(inputs["external"](points), dtype=np.float64)
     external_relative = float(
         np.max(
@@ -271,6 +278,32 @@ def stage_state():
         max_iterations=60,
     )
     solve_seconds = perf_counter() - started
+
+    # The slice wall with the persisted response against the same solve with the
+    # coils evaluated on the slice: the persisted term must not change the state,
+    # so this comparison is both the wall the plan asks for and its identity check.
+    direct_started = perf_counter()
+    direct_result = iron.solve_magnetisation(
+        region,
+        inputs["external"],
+        table_b,
+        table_mu,
+        cell_size=CELL_SIZE,
+        basis="linear",
+        interaction=interaction,
+        tolerance=1e-8,
+        max_iterations=60,
+    )
+    direct_solve_seconds = perf_counter() - direct_started
+    state_relative = float(
+        np.max(
+            np.abs(
+                np.asarray(direct_result.linear_coefficients)
+                - np.asarray(result.linear_coefficients)
+            )
+            / np.maximum(np.abs(np.asarray(direct_result.linear_coefficients)), 1e-30)
+        )
+    )
     bound = result.bound_currents()
     with bound_path().open("wb") as stream:
         pickle.dump(bound, stream)
@@ -294,6 +327,12 @@ def stage_state():
         mu_min=float(result.permeability_relative.min()),
         mu_max=float(result.permeability_relative.max()),
         solve_seconds=solve_seconds,
+        slice_seconds_with_response=solve_seconds,
+        slice_seconds_without_response=direct_solve_seconds,
+        coil_field_seconds_persisted=coil_seconds,
+        coil_field_seconds_direct=direct_coil_seconds,
+        plasma_field_seconds=plasma_seconds,
+        state_relative_without_response=state_relative,
         air_drift=inputs["air_drift"],
         coil_response_reused=bool(reused),
         coil_response_points=int(len(points)),

@@ -58,22 +58,27 @@ def difference_panels(args):
     assert wall.ndim == 2 and wall.shape[1] == 2
     figure = plt.figure(figsize=CANVAS, dpi=100)
     levels = (0.04, 0.05, 0.06, 0.08, 0.12)
-    styles = ("solid", (0, (6, 2)), (0, (2, 2)), "dotted", "dashdot")
+    styles = ("solid", (0, (6, 2)), (0, (2, 2)), "dotted", "solid")
+    widths = (2.6, 2.6, 2.6, 2.6, 3.0)
     figure.legend(
         handles=[
             Line2D(
                 [],
                 [],
                 color=SOLVED,
-                linewidth=2.6,
+                linewidth=width,
                 linestyle=style,
+                marker="o" if level == levels[-1] else None,
+                markersize=5.5,
+                markerfacecolor="white",
                 label=f"{level:.2f}%",
             )
-            for level, style in zip(levels, styles, strict=True)
+            for level, style, width in zip(levels, styles, widths, strict=True)
         ],
         loc="upper center",
         ncol=5,
         frameon=False,
+        handlelength=4.4,
     )
     axes, notes, levels_record = [], [], {}
     for index, name in enumerate(("grid", "wall", "sample")):
@@ -81,15 +86,27 @@ def difference_panels(args):
         ax = panel(figure, left, 0.28, wall)
         axes.append(ax)
         values = 100.0 * data[name]
-        ax.contour(
+        contours = ax.contour(
             data["radius"],
             data["height"],
             values.T,
             levels=levels,
             colors=SOLVED,
-            linewidths=2.6,
+            linewidths=widths,
             linestyles=styles,
         )
+        for segment in contours.allsegs[-1]:
+            ax.plot(
+                segment[:, 0],
+                segment[:, 1],
+                linestyle="none",
+                marker="o",
+                markersize=5.5,
+                markevery=4,
+                color=SOLVED,
+                markerfacecolor="white",
+                zorder=3,
+            )
         levels_record[name] = list(levels)
         notes.append(figure.text(left + 0.14, 0.89, f"{name} targets", ha="center"))
         metric = records["targets"][name]

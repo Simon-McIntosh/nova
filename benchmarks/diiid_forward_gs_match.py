@@ -1865,15 +1865,13 @@ def _publish_accumulated_response(targets: _ConductorTargets) -> dict[str, Any]:
 def _display_coupling(
     profile: ForwardProfile, machine
 ) -> tuple[DisplayCoupling, _ConductorTargets]:
-    """Return the target-point coupling the frame's own solve was built from.
+    """Return the display's target-point plasma and conductor coupling.
 
-    The plasma columns are the same uniform ``hybrid_greens`` block the solve
-    lattice consumes, evaluated at whatever points the panel asks for; the
-    operator carries no radial or vertical plasma moment matrices here, so
-    those columns are zero exactly as the solve's own raster image is.  The
-    conductor flux is the response matrix contracted with the operator's own
-    current vector, and its targets are the points the display map evaluates
-    on, so the map's grid is the grid the response is built for.
+    The display evaluates uniform ``hybrid_greens`` plasma columns at the
+    requested panel points and supplies zero radial and vertical columns.
+    This display approximation differs from the solve's exact polygon
+    uniform, radial and vertical blocks. The conductor flux contracts the
+    target-point response matrix with the operator's external-current vector.
     """
 
     lattice = profile.lattice

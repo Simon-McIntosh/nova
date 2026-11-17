@@ -107,6 +107,13 @@
       "note": "s11 clause (1) now passes only when the change against graded 16/80 is under 1 % at every probe, and otherwise ends blocked with the measured change",
       "reason": "",
       "when": "2026-11-17T15:43:25.440573+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "both parents (s4, s5) are declared done, so the entry changes no dispatch order, as the finding itself states; the head meta is not writable through the plan text tools",
+      "when": "2026-11-17T15:43:42.161724+00:00"
     }
   ],
   "responses": {
@@ -154,6 +161,12 @@
       "note": "The census pin is removed from s6 and dispatched as a separate small node on tests/test_imas_iron_read.py, so the field-source seam closes on its own verdict",
       "reason": "",
       "when": "2026-11-17T15:42:40.721935+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "both parents (s4, s5) are declared done, so the entry changes no dispatch order, as the finding itself states; the head meta is not writable through the plan text tools",
+      "when": "2026-11-17T15:43:42.161724+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261117T114422897195-plan-review-of-iron-core-magnetisation.json",

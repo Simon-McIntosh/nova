@@ -1,0 +1,271 @@
+<section id="icm-west-linear-h200-state">
+<h3>WEST affine iron on the H200: three meshes converge; strict replay bytes differ</h3>
+<p>All three required meshes converge from M = 0 at full drive on an NVIDIA H200
+NVL. The linear basis reduces the uniform-pair movement from 13.1% to 0.7575%
+at +2 m and from 17.2% to 1.1735% at +4 m. The +4 m uniform-pair result still
+misses the 1% criterion. The graded 16/80 mm result agrees with uniform 40 mm
+to 0.3304% at +2 m and 0.6182% at +4 m; these two layouts are not a nested
+refinement pair. The 8/40 mm affine factor exceeds physical card capacity.</p>
+<p>The persisted 40 mm interaction reloads and reaches the same converged
+solution numerically, but the requested byte-identity assertion fails. Its
+largest probe-component difference is 8.673617379884035e-18 T. The persisted operator bytes are identical; this is measured H200 run-to-run
+roundoff, not a byte-identity pass. The assertion and criterion remain unchanged.
+The half-coil-drive slice also converged from M = 0 using that persisted
+operator with zero reassembly; the different-mesh loader refusal fired.</p>
+
+<h4>Assembly walls, measured on the H200</h4>
+<table><thead><tr><th>mesh</th><th>cells</th><th>unknowns</th><th>operator [GB]</th><th>compile [s]</th><th>device execute [s]</th><th>host remainder [s]</th><th>wall [s]</th></tr></thead><tbody>
+<tr><td>uniform 80 mm</td><td>1695</td><td>10170</td><td>0.827431</td><td>5.638979</td><td>202.436517</td><td>186.717996</td><td>394.793492</td></tr>
+<tr><td>uniform 40 mm</td><td>6632</td><td>39792</td><td>12.667226</td><td>5.587231</td><td>2663.774200</td><td>3833.127367</td><td>6502.488799</td></tr>
+<tr><td>graded 16/80 mm</td><td>5864</td><td>35184</td><td>9.903311</td><td>5.595393</td><td>2115.262949</td><td>2813.190622</td><td>4934.048964</td></tr>
+</tbody></table>
+<p>At uniform 40 mm, <strong>58.95% of the 6502.489 s assembly wall is host
+remainder</strong>. The measured rate is 0.000147839532 s per cell pair. Scaling
+by (11 708 / 6632)² projects <strong>20 265 s = 5.629 h: 3.318 h host,
+2.306 h device execution and 0.00484 h compile</strong>. The independent graded
+16/80 mm rate projects 5.464 h at the same count. These are pair-rate
+projections, not a measured 11 708-cell assembly. Host remainder is wall minus
+timed evaluator compilation and device execution; its constituent work has not
+been separately profiled.</p>
+<p>Uniform meshes were measured in H200 job <code>1316958</code>; the job failed
+before graded assembly on a driver keyword error. That call was repaired
+against the existing graded owner and checked on CPU: 5864 cells at 16/80 mm,
+11 708 at 8/40 mm. Continuation <code>1317867</code> assembled only the graded
+16/80 mm mesh; both uniform operators were retained.</p>
+
+<h4>Capacity: the finest graded mesh does not fit</h4>
+<p>The 11 708-cell mesh has 70 248 affine unknowns. Its operator alone is
+39.478 GB. The compiled factor analysis reports <strong>157.962 GB live peak
+against 150.755 GB physical device memory</strong>: 39.527 GB arguments,
+39.479 GB output and 78.957 GB temporaries. It exceeds physical capacity even
+without the launcher's 10% reserve, so no interaction or Newton solve was
+executed on that mesh. This is a card-memory limit, not a scheduling choice.
+The executed 6632-cell factor peak was 50.697 GB, and the graded 5864-cell
+peak was 39.638 GB. All GB values here are decimal bytes / 1e9.</p>
+
+<h4>Full-drive material solves</h4>
+<table><thead><tr><th>mesh</th><th>Newton corrections</th><th>terminal residual</th><th>returned μr range</th><th>preparation [s]</th><th>Newton loop [s]</th><th>solve wall [s]</th></tr></thead><tbody>
+<tr><td>uniform 80 mm</td><td>6</td><td>2.09443e-13</td><td>218.292957–1692.487392</td><td>49.830905</td><td>3.136854</td><td>54.081906</td></tr>
+<tr><td>uniform 40 mm</td><td>7</td><td>5.71975e-15</td><td>216.661383–1692.254918</td><td>190.768186</td><td>11.501026</td><td>203.403846</td></tr>
+<tr><td>graded 16/80 mm</td><td>8</td><td>8.28715e-16</td><td>215.880875–1692.470077</td><td>159.391899</td><td>9.932354</td><td>170.356506</td></tr>
+</tbody></table>
+<p>Every accepted correction is unregularised Newton at full drive. The
+permeability range is the solver's returned cell value, evaluated from the
+constant affine field coefficient; the nonlinear residual is tested at volume
+quadrature nodes. Preparation includes geometry checks and the external-field
+projection. This driver caches G but rebuilds that projection for each slice,
+so the measured cached path still has preparation work in addition to Newton.</p>
+<table><thead><tr><th>correction</th><th>uniform 80 mm residual</th><th>uniform 40 mm residual</th><th>graded 16/80 mm residual</th></tr></thead><tbody>
+<tr><td>0</td><td>0.997774577537</td><td>0.997739238644</td><td>0.997803994243</td></tr>
+<tr><td>1</td><td>0.00119812860803</td><td>0.00120881354487</td><td>0.00134256719205</td></tr>
+<tr><td>2</td><td>7.8657372037e-05</td><td>0.000123285240721</td><td>0.000495488698732</td></tr>
+<tr><td>3</td><td>1.06283081972e-05</td><td>4.44226609014e-05</td><td>7.63443951103e-05</td></tr>
+<tr><td>4</td><td>5.42502242536e-07</td><td>1.00248160861e-05</td><td>2.61747731048e-05</td></tr>
+<tr><td>5</td><td>3.6901722103e-09</td><td>4.46253931579e-07</td><td>5.10478533201e-06</td></tr>
+<tr><td>6</td><td>2.09442827733e-13</td><td>1.02322889379e-09</td><td>2.16569264179e-07</td></tr>
+<tr><td>7</td><td>—</td><td>5.71974871335e-15</td><td>3.06121856902e-10</td></tr>
+<tr><td>8</td><td>—</td><td>—</td><td>8.28715277932e-16</td></tr>
+</tbody></table>
+
+<h4>Probe fields and refinement</h4>
+<table><thead><tr><th>linear mesh</th><th>+1 m [µT]</th><th>+2 m [µT]</th><th>+4 m [µT]</th></tr></thead><tbody>
+<tr><td>uniform 80 mm</td><td>244.487432606</td><td>164.057049648</td><td>73.148024075</td></tr>
+<tr><td>uniform 40 mm</td><td>243.756996308</td><td>162.814339896</td><td>72.289647538</td></tr>
+<tr><td>graded 16/80 mm</td><td>243.786835650</td><td>163.354014208</td><td>72.739339042</td></tr>
+<tr><td>uniform 40 / 80 mm − 1 [%]</td><td>−0.298762</td><td>−0.757486</td><td>−1.173479</td></tr>
+<tr><td>uniform 40 / graded 16/80 mm − 1 [%]</td><td>−0.012240</td><td>−0.330371</td><td>−0.618223</td></tr>
+</tbody></table>
+<p>The +2 m field has flattened below a 1% change over the uniform refinement.
+The +4 m field is much less mesh-sensitive than with the constant basis, but
+has not stopped moving within the declared 1% test on that pair. Agreement
+between the two finest available layouts is useful evidence, and cannot stand
+in for the unmeasured further graded refinement.</p>
+<figure><img src="/nova/figures/iron-core-magnetisation/icm-west-linear-h200/probe-fields-vs-unknowns.svg" alt="WEST probe field against magnetic unknowns at +1, +2 and +4 metres for constant and affine magnetisation"><figcaption>WEST 62751, full drive. Constant magnetisation is grey; affine magnetisation
+uses the shell study's blue. Filled circles joined by lines are the uniform
+80/40 mm pair; open squares are graded layouts. Constant values are quoted
+from their pinned receipts, including the finest graded result. The affine
+8/40 mm result is absent because the compiled factor exceeds physical H200
+memory. At +2 and +4 m the three affine points sit much closer together than
+the constant points; the explicit refinement percentages above retain the
+remaining +4 m movement. Every major tick is labelled. The checked save
+accepts all 50 text artists, and the producer inspected the rendered PNG with
+no clipped or colliding text.</figcaption></figure>
+
+<h4>WEST persisted replay: strict byte test failed</h4>
+<p>The largest completed operator is uniform 40 mm, 6632 cells and 39 792
+unknowns. Its geometry digest is
+<code>d16678432b45074ee19df1dc9d3793c650a1040742183da256adcdefe7864b25</code>.
+A fresh process loaded it in 15.965576 s, then converged in seven corrections:
+202.311310 s total solve wall, comprising 189.143524 s preparation and
+12.178905 s measured Newton loop, with terminal residual
+5.707730396529406e-15. The solve used the loaded interaction with the assembly
+owner replaced by a refusal.</p>
+<p><strong>The fields are not bit-identical to the first solve.</strong> The
+maximum absolute component difference is 8.673617379884035e-18 T, the maximum
+component-relative difference is 1.202186679034494e-13, and the maximum
+magnitude-relative difference is 5.562217353372034e-14. These small differences
+do not satisfy a byte equality requirement. The relative Frobenius difference is
+3.565720001176963e-14, while the persisted operator bytes are identical. The
+result is recorded as measured H200 run-to-run roundoff, not a strict replay
+pass; no tolerance or operator was changed to accept it. Separate
+<code>replay-notes.json</code> records this disposition and the SHA-256 of the
+unmodified raw receipt. The
+original <code>replay.json</code> records <code>completed=false</code> and
+<code>bit_identical=false</code>; an as-delivered copy is preserved at
+<code>replay-failed-as-delivered.json</code> in the run directory. Job
+<code>1317867</code> exited at that assertion, before the half-drive and WEST
+wrong-mesh control. The CPU wrong-mesh controls below remain valid separately.</p>
+<h4>Second slice: half coil drive, unchanged plasma</h4>
+<p>H200 job <code>1320444</code> completed successfully in a fresh process using
+<code>--half-drive-only</code> on the persisted uniform 40 mm operator. The
+separate <code>half-drive.json</code> records <code>completed=true</code>,
+<code>plasma_unchanged=true</code> and <code>assembly_calls=0</code>, with the
+assembly owner replaced by a refusal. Only the coil-current dictionary was
+scaled by 0.5; the prescribed plasma currents were retained. The operator
+loaded in <strong>15.871703 s</strong>. From M = 0, the material solve took
+<strong>239.518108 s</strong>: 195.672285 s preparation, 42.766639 s measured
+Newton loop and 1.079184 s remaining result construction. Probe evaluation is
+outside this solve wall. Load plus material solve was 255.389811 s.</p>
+<p>The half-drive solve converged in 15 accepted corrections to relative
+residual <strong>1.0591807540383918e-12</strong>, with returned cell μr range
+8.712516–1692.488633. Nine accepted corrections used diagonal regularisation,
+followed by six unregularised Newton corrections. The full residual and
+regularisation histories are in the receipt. Halving coils while retaining
+plasma does not halve the total field or its nonlinear material response.</p>
+<table><thead><tr><th>half-drive probe</th><th>B<sub>R</sub> [µT]</th><th>B<sub>Z</sub> [µT]</th><th>|B| [µT]</th></tr></thead><tbody>
+<tr><td>+1 m</td><td>-10.693227430636</td><td>437.396520792777</td><td>437.527212313143</td></tr>
+<tr><td>+2 m</td><td>-6.521253827744</td><td>327.244912505586</td><td>327.309883004278</td></tr>
+<tr><td>+4 m</td><td>-2.176087856932</td><td>162.733586264152</td><td>162.748135033104</td></tr>
+</tbody></table>
+<p>The WEST negative control handed the actual uniform 80 mm persisted operator
+to the uniform 40 mm loader. Its recorded refusal was
+<code>interaction geometry digest does not match the mesh</code>. This control
+executed after the half-drive solve and is independent of the failed strict
+full-drive replay assertion.</p>
+
+<h4>What the roughly 190 s preparation contains</h4>
+<p>The timing split below is measured inside the production solve during the
+half-drive continuation. Its 195.672285 s total is comparable to the original
+190.768186 s full-drive preparation and 189.143524 s replay preparation;
+those earlier walls were not separately instrumented.</p>
+<table><thead><tr><th>preparation component</th><th>wall [s]</th><th>work included</th></tr></thead><tbody>
+<tr><td>material-law fit</td><td>0.001011</td><td>B-H interpolation coefficients</td></tr>
+<tr><td>mesh construction</td><td>6.572215</td><td>region clipping, cell polygons and mesh measures</td></tr>
+<tr><td>interaction validation</td><td>1.145172</td><td>ordered geometry digest, basis, shape, dtype and finite matrix entries</td></tr>
+<tr><td>linear geometry</td><td>3.118750</td><td>quadrature nodes, basis, Gram blocks and bound-current incidence</td></tr>
+<tr><td>external-field evaluation</td><td>178.766231</td><td>coil quadrature and prescribed plasma contributions at every volume-quadrature node</td></tr>
+<tr><td>projection, checks and device setup</td><td>6.068906</td><td>remaining interval: inverse Gram projection and accumulation, another matrix finiteness scan, JAX operand construction and synchronized device transfers</td></tr>
+</tbody></table>
+<p><strong>External-field evaluation accounts for 91.36% of preparation.</strong>
+The source callback imported from <code>scripts/west_iron_galerkin_pair/measure.py</code>
+evaluates the ring Green functions in 256-target blocks and contracts them with
+coil and plasma currents. The production solve then projects those samples
+onto the affine cell basis. The measurement synchronizes operands before the
+first residual, so pending transfers are charged to preparation rather than
+Newton. The six disjoint intervals sum to the preparation wall.</p>
+<p><strong>The interaction is paid once per mesh.</strong> The persisted response
+served the full-drive replay and a different nonlinear time slice with
+assembly forbidden. The current cached path still repeats mesh/geometry work,
+source evaluation, projection, validation and device setup. It does not yet
+persist the coil-to-cell or cell-to-probe maps, so the measured slice cost is
+not just the 42.77 s Newton loop. Geometry-derived source and observation maps
+are candidates for further reuse; this measurement does not claim that reuse
+has been implemented. The full-drive convergence figure above stays at full
+drive; the separate table reports the changed-drive probes.</p>
+
+<h4>Constant-basis comparison inputs, quoted without recomputation</h4>
+<table>
+<thead><tr><th>mesh</th><th>cells</th><th>constant unknowns</th><th>+1 m [µT]</th><th>+2 m [µT]</th><th>+4 m [µT]</th></tr></thead>
+<tbody>
+<tr><td>uniform 80 mm</td><td>1695</td><td>3390</td><td>242.651092807</td><td>200.369378227</td><td>96.325592194</td></tr>
+<tr><td>uniform 40 mm</td><td>6632</td><td>13264</td><td>242.644735631</td><td>174.104623884</td><td>79.769382215</td></tr>
+<tr><td>graded 16/80 mm</td><td>5864</td><td>11728</td><td>234.327197120</td><td>177.585819226</td><td>81.772254905</td></tr>
+<tr><td>graded 8/40 mm</td><td>11708</td><td>23416</td><td>242.454626259</td><td>168.339521069</td><td>75.920212698</td></tr>
+</tbody>
+</table>
+<p>The uniform pair is quoted from
+<code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/mesh-pair/measurement.json</code>,
+SHA-256 <code>b1b178c34a9c695a7b35b27fb6a865960ab5d1b5721a66199e70c842c71dff03</code>.
+The graded pair is quoted from
+<code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/graded-refinement/west-cpu/measurement.json</code>,
+SHA-256 <code>7e478b3ef0c447a5d2796ae83532f3fdbd81208fcf8d21b3dce5a819283310c9</code>.
+The CPU preparation writes these references, their row keys and their full-precision
+fields to <code>linear-magnetisation/west-h200/cpu-preparation/constant-references.json</code>
+beneath the same iron-core evidence root.</p>
+
+<h4>Interaction persistence and controls</h4>
+<p><code>solve_magnetisation</code> accepts an optional persisted interaction;
+its default assembly route is unchanged. The response is stored as float64 NPY
+with a sidecar identity containing the basis and SHA-256 digest of the ordered
+mesh vertices. Both loading and solving verify the geometry, component layout,
+shape and finite float64 entries before using the response. Currents, the B-H
+law and time are excluded from the geometry identity.</p>
+<p>The focused control passes four tests, including bit-identical constant and
+linear solutions with reassembly forbidden. A translated mesh has the same cell
+count and matrix shape but a different digest. Removing the two digest checks
+fails both refusal cases with <code>DID NOT RAISE ValueError</code>:
+<code>2 failed, 65 deselected in 3.72s</code>, <code>EXIT=1</code>.
+The all_debug control reuses the full 40 mm spherical-shell interaction from
+its existing P100 assembly receipt, verifying operator SHA-256
+<code>1591ad0d2c980ee54e950d14c104d5ce88f3d6f40ed283146dc2847f6d6a2c56</code>
+before attaching the geometry identity. This is a CPU persistence control,
+not a WEST H200 measurement.</p>
+<table>
+<thead><tr><th>shell persistence quantity</th><th>result</th></tr></thead>
+<tbody>
+<tr><td>cells / unknowns</td><td>228 / 1368</td></tr>
+<tr><td>operator bytes</td><td>14 971 392</td></tr>
+<tr><td>verified source-operator read [s]</td><td>0.044767</td></tr>
+<tr><td>fresh-process validated reload [s]</td><td>0.299923</td></tr>
+<tr><td>first / fresh-process material solve [s]</td><td>4.029562 / 3.978289</td></tr>
+<tr><td>Newton corrections, both solves</td><td>1</td></tr>
+<tr><td>relative residual, seed → terminal</td><td>0.9990000000000002 → 1.3304054436616638e-15</td></tr>
+<tr><td>fresh-process assembly calls</td><td>0, with assembly forbidden</td></tr>
+<tr><td>probe field identity</td><td>all float64 bytes identical</td></tr>
+<tr><td>another shell mesh, 80 mm</td><td>refused: interaction geometry digest does not match the mesh</td></tr>
+</tbody>
+</table>
+<p>The total B<sub>Z</sub> at shell probes (2, 0) and (0, 2) m is
+−1.607523272703 pT and 3.212479029987 pT in both processes; the comparison
+covers both components at all three probes, including the third probe (3, 1) m.
+Solve walls include geometry and external-field preparation plus Newton, and
+exclude the separate probe-field evaluation. Receipts
+<code>cpu-preparation/shell-preparation.json</code> and
+<code>cpu-preparation/shell-reload.json</code> under
+<code>linear-magnetisation/west-h200/</code> both record completion at
+<code>1b79e5d8213d2094a47a4a8c78ba11422bb06dde</code>; all_debug job
+<code>1317018</code> completed successfully.</p>
+
+<h4>Validation and receipts</h4>
+<p>The filtered gate passed at base
+<code>17c8e25635b9bc9658fe2f953977c01d3a041c45</code>
+(<code>67 passed, 9 deselected in 272.56s</code>) and product head
+<code>97c17d8ddcc3e04070e46f7734c2adad67d786ce</code>
+(<code>71 passed, 9 deselected in 300.60s</code>). The corrected unfiltered
+baseline passed <code>63 passed in 7479.50s</code>; the earlier after arm at
+<code>353d2cfe364fce7158867d278f584b4f329de524</code> passed
+<code>67 passed in 7528.96s</code>, both with <code>EXIT=0</code>. Those arms
+use Git context for the reference owner; the original missing-context failures
+are preserved. The after arm at
+<code>7a4ca25ebe2d2357a7ee18afe36a7327b6c2b029</code> completed in rigel job
+<code>1318885</code>: <code>67 passed in 7530.17s</code>, <code>EXIT=0</code>,
+with zero failures, against 63 passing tests at the base. Its record names the
+revision actually tested. The final delivered-head after suite will be recorded
+separately in the manifest; completed earlier arms are not relabelled.</p>
+<p>All large operators and measurement JSON remain under
+<code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/west-h200/</code>.
+Uniform receipts record revision <code>353d2cfe364fce7158867d278f584b4f329de524</code>
+and script blob <code>72d5b452ff101780456d657e08204c8db10182de</code>.
+Graded and replay receipts record revision
+<code>7a4ca25ebe2d2357a7ee18afe36a7327b6c2b029</code> and script blob
+<code>9d41f9d955b973b23e8f6eaed475b56a329c7e53</code>. Every required mesh
+has its own completed receipt, unknown count, operator size, full Newton
+history, returned permeability range and +1/+2/+4 m field. The optional finest
+mesh has a capacity receipt explaining its omission. The half-drive receipt
+records revision <code>d414956a192347e935e7d0259f110534a028f54e</code> and
+script blob <code>4853ec5d4572b3b58a42b1dcc70bc2ec822659d4</code>. The
+strict replay assertion remains failed and is explicitly reported as measured
+H200 roundoff under the accepted disposition; it is not a byte-identity pass.
+The final-head suite result belongs to the manifest. No formulation decision
+is taken here.</p>
+</section>

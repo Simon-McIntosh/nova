@@ -1667,6 +1667,82 @@ def test_polygon_current_routes_share_the_warm_tile_owner():
         assert evaluator.components == ("Psi",)
 
 
+@pytest.mark.parametrize("basis", ["constant", "linear"])
+def test_persisted_interaction_reuses_operator_bit_identically(
+    tmp_path, monkeypatch, basis
+):
+    region = shapely.box(1, 0, 1.2, 0.2)
+    size = 0.2
+    cells = iron._mesh(region, size)
+    matrix = iron._galerkin_interaction(cells, basis=basis)
+    path = tmp_path / "interaction.npy"
+    stored = iron.save_magnetisation_interaction(
+        path, matrix, region=region, cell_size=size, basis=basis
+    )
+    loaded = iron.load_magnetisation_interaction(
+        path, region=region, cell_size=size, basis=basis
+    )
+    np.testing.assert_array_equal(loaded.matrix, matrix)
+    assert loaded.geometry_digest == stored.geometry_digest
+
+    def external(points):
+        return np.column_stack((0.02 + points[:, 0] * 0.001, points[:, 1] * 0.01))
+
+    arguments = dict(cell_size=size, basis=basis, tolerance=1e-12)
+    expected = iron.solve_magnetisation(region, external, [0, 1], [2, 2], **arguments)
+
+    def refuse(*args, **kwargs):
+        pytest.fail("reassembly called despite a prebuilt interaction")
+
+    monkeypatch.setattr(iron, "_galerkin_interaction", refuse)
+    actual = iron.solve_magnetisation(
+        region, external, [0, 1], [2, 2], interaction=loaded, **arguments
+    )
+    assert expected.converged and actual.converged
+    np.testing.assert_array_equal(actual.magnetisation, expected.magnetisation)
+    np.testing.assert_array_equal(actual.residual_history, expected.residual_history)
+    points = np.array([[2.0, 0.3], [3.0, 0.0]])
+    np.testing.assert_array_equal(actual.field(points), expected.field(points))
+    half = iron.solve_magnetisation(
+        region,
+        lambda p: 0.5 * external(p),
+        [0, 1],
+        [2, 2],
+        interaction=loaded,
+        **arguments,
+    )
+    assert half.converged
+    assert np.linalg.norm(half.magnetisation) < np.linalg.norm(actual.magnetisation)
+
+
+@pytest.mark.parametrize("basis", ["constant", "linear"])
+def test_persisted_interaction_refuses_different_mesh(tmp_path, basis):
+    region = shapely.box(1, 0, 1.2, 0.2)
+    size = 0.2
+    cells = iron._mesh(region, size)
+    width = len(cells.polygons) * (6 if basis == "linear" else 2)
+    path = tmp_path / "interaction.npy"
+    stored = iron.save_magnetisation_interaction(
+        path, np.zeros((width, width)), region=region, cell_size=size, basis=basis
+    )
+    # Equal cell counts and matrix shapes cannot identify translated geometry.
+    other = shapely.box(2, 0, 2.2, 0.2)
+    with pytest.raises(ValueError, match="geometry digest"):
+        iron.load_magnetisation_interaction(
+            path, region=other, cell_size=size, basis=basis
+        )
+    with pytest.raises(ValueError, match="geometry digest"):
+        iron.solve_magnetisation(
+            other,
+            lambda p: np.zeros_like(p),
+            [0, 1],
+            [2, 2],
+            cell_size=size,
+            basis=basis,
+            interaction=stored,
+        )
+
+
 @pytest.mark.parametrize("fill", [1.0, 0.2])
 def test_linear_fill_and_cross_field_match_affine_tensor(monkeypatch, fill):
     """Affine spatial variation retains the per-cell iron constitutive tensor."""

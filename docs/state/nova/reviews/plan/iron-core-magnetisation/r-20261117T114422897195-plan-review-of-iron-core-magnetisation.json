@@ -1,0 +1,92 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T12:02:38.342Z",
+  "dispatched_at": "2026-11-17T12:02:06Z",
+  "findings": [
+    {
+      "anchor": "plan.html:409",
+      "id": "done_when-1",
+      "reason": "a pin restored at 1694 fails on the first run, and the node then either relaxes the pin again or \"fixes\" the test to the wrong number, which is exactly the defect the clause exists to close.",
+      "text": "s6 requires the restored pin on \"the production WEST census mesh cell count (1694 cells at 0.08 m)\", but the plan's own landed records for that same mesh read 1695: \u00a74's landing comment at plan.html:832 (\"1695 cells, 4 exact Newton corrections\"), the assembly row at plan.html:871 (\"assembly 395 s at 0.08 m (1695 cells)\") and the mesh comment at plan.html:757 (\"0.08/0.057/0.04 m with 1695/3333/6632 cells\"), corroborated by docs/evidence/fragments/iron-core-magnetisation/icm-west-picard-control.html:40,61; 1694 appears nowhere except in the two copies of this sentence, and the 1696 in \u00a71/\u00a73 is the prototype mesh, not the census mesh",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:407-411",
+      "id": "single_goal-1",
+      "reason": "the pin is a self-contained read-module repair that also unblocks nothing in the seam, and splitting it lets it be corrected and gated without holding the field source.",
+      "text": "s6 carries the field-source seam, the per-mesh coil-response cache with the probe table and slice walls (clause 2), and a restoration of an independent cell-count pin in `tests/test_imas_iron_read.py`, a machine-read test whose owner, module and gate share nothing with the seam; the pin is also the clause that is wrong (see the done_when finding), so one verdict cannot close the section",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:389-402",
+      "id": "reasoning-1",
+      "reason": "the whole point of the endpoint rule is that each named mechanism is a guess the implementing node must instead verify against the code, and one wrong guess in this block (a route that does not in fact reproduce the solution field, a digest that does not cover the coil set) sends the seam node down a path the plan has already declared correct.",
+      "text": "s6 states the endpoint nowhere and the mechanism everywhere: it fixes the bound-current decomposition per cell and edge, names the modules and classes to go through (`nova/biot/tiledassembly.py`, \"the Part II sheet section of `nova/biot/sheet.py`\"), fixes equality against `MagnetisationSolution.field` as the internal contract, and fixes the cache design (per-mesh Galerkin projection of each coil's unit-current field, persisted \"beside the interaction under the same geometry digest\", consumed as \"one matrix product\"); the reuse map and the persistence layout belong to the node brief composed from this review, not to plan text",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:546-549",
+      "id": "reasoning-2",
+      "reason": "the row-block route is the one design choice the node must establish against the 39.5 GB ceiling, and writing it into the plan fixes a mechanism whose failure the fragment then has to be argued around.",
+      "text": "s11 likewise prescribes: \"Assemble it in row blocks streamed to host memory through the existing tiled owners in `nova/biot/tiledassembly.py`, persist it with the geometry digest that `save_magnetisation_interaction` already writes\" is a step sequence and two named entry points, while the endpoint the section actually needs is an interaction equal to the single-program assembly at 1e-12 and a graded 8/40 solve; \u00a75b is not landed, so this is a live guess rather than a description of existing code",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:553-554",
+      "id": "done_when-2",
+      "reason": "with no pass/fail the node closes on a number it was told not to judge, so either the refinement continues unprompted or a non-converged basis is recorded as meeting \u00a75b.",
+      "text": "s11 clause (1) requires the graded 8/40 solve to \"report the midplane field at 1, 2 and 4 m and its change against graded 16/80 mm, stated plainly against 1 %\" and names no acceptance: a 7 % change reported plainly satisfies the sentence as written, so the clause cannot fail and gives the node no verdict on whether the basis is converged",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:541",
+      "id": "wiring-1",
+      "reason": "both candidate parents (s4, s5) are declared done, so the omission changes no dispatch order and only weakens the declaration map for a later reader.",
+      "text": "s11 has no entry in `plan-section-depends-on` although its clause (2) compares against the \u00a74 single-program Galerkin assembly and its premise is the \u00a75 linear basis; the map holds every other section",
+      "type": "wiring",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "154c44c958e2ee4f6613940605cb14547e683215",
+  "plan_fingerprint": "a99f58855a6884482d83055a8f637f467896c3de334bdad9403b51379da3f05f",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 114,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T114422897195-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "c59e5a9c3946512311a24f7d6c72a4880ebf50dd",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/biot/tiledassembly.py`, `nova/biot/sheet.py`, `tests/test_imas_iron_read.py`, `MagnetisationSolution.field` (nova/biot/magnetisation.py:619), `save_magnetisation_interaction` (nova/biot/magnetisation.py:300) and the cited fragments `icm-west-linear-h200`, `icm-graded-refinement` all resolve.",
+    "done_when": "a finding \u2014 s6's restored mesh pin states 1694 cells where every landed production read of the same 0.08 m census mesh states 1695.",
+    "evidence_paths": "pass \u2014 the figure lands in `docs/figures/west-stray-field/` (tracked, exists) and the remaining records fall to the node fragment under `docs/evidence/fragments/iron-core-magnetisation/`, the house convention this plan already uses at \u00a74 and \u00a75.",
+    "naming": "pass \u2014 s6 and s11 carry no stage labels or ticket identifiers into the symbols and files they name.",
+    "reasoning": "a finding \u2014 both changed sections prescribe the implementation (named modules to extend, the bound-current formula, the persistence key) rather than an endpoint.",
+    "single_goal": "a finding \u2014 s6 binds a machine-read test pin to a field-source seam.",
+    "wiring": "a finding \u2014 s11 (\u00a75b) declares no `plan-section-depends-on` entry although it runs on the \u00a74 Galerkin interaction and the \u00a75 linear basis."
+  },
+  "section_digests": {
+    "_document": "1141c1abfa62daa5fedd0175f738e2d823584a4d08b639e480205c525f99ca95",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "bf0049ee8c924773ea67dcbe093fb860584392de2ea9a0789d0fabc79578a462",
+    "s11": "ac21c29416195a1c8ece2a8381558376b6df0e460baa785b47fc25472e3ad654",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "9d9575a3a830059f2eefb6ac953213be0aa858329aaeec3fae422fb48313a0d3",
+    "s5": "36bad4819e31bb149a73ded355cde8eca817e860913fbdafdc22dbf119126f1e",
+    "s6": "8b72c046d4fe4387e5fb752e61f822d3a58bd5749fe01e38e589e36071efba5a",
+    "s7": "1555dc4a428fc5ed84d96b31b0da13217072c683c765f3ad1d7e897ba1bfbdbf",
+    "s8": "6f09879ace82774a03c887b980857ea52573826045f08365978f3645df7df635",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T12:07:41.736031+00:00",
+  "total": null
+}

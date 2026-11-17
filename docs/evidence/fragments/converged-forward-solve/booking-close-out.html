@@ -20,7 +20,7 @@
 <h1 id="booking-close-out-landing">Booking close-out: each current-booking clause at the head</h1>
 <p id="booking-close-out-summary">The current booking's done-when reads as six clauses. Each is named here against the test id that carries it at revision <code>b56aa188be0dd1c615d694ba2c2cb2a27e777647</code>. Four clauses measure on the CPU lane and pass there; the two analytic-certificate clauses (<code>test_analytic_certificate_moments</code>, one id per kind and cell count) are GPU-lane rows that skip by design off the GPU lane, and their measured pass is the H200 receipt this record cites. The private-flux clause gained a standing control: the fixture takes its membership as an explicit argument, and a suite test books the same cell under a level test that is not axis-connected, printing the current that membership puts in the private strip and showing the clause helper refuse the same state.</p>
 
-<section id="booking-close-out-clauses"><h2>Clauses against test ids</h2>
+<section id="booking-close-out-fragment-clauses"><h2>Clauses against test ids</h2>
 <table>
 <tr><th>Clause (plan §3)</th><th>Test id</th><th>Head outcome</th></tr>
 <tr><td>Booked cell moments reproduce the analytic moments within budget, saddle-neighbourhood cells budgeted separately</td><td><code>tests/test_current_book_fragments.py::test_analytic_certificate_moments[limited-550]</code>, <code>[limited-2000]</code>, <code>[limited-5000]</code>, <code>[diverted-550]</code>, <code>[diverted-2000]</code>, <code>[diverted-5000]</code></td><td>GPU lane only; six skips on CPU with <code>certificate rows require the GPU measurement lane</code>, all six pass on the H200 receipt below</td></tr>
@@ -38,7 +38,7 @@
 <p id="booking-close-out-mutation">Declared mutation: the private-flux zero-current assertion fails when the membership is a level test that is not axis-connected. Applied by making the fixture's membership default <code>level</code>, the run fails exactly <code>tests/test_current_book_fragments.py::test_private_fragment_current_is_zero</code> with <code>AssertionError: private current 1.6</code> and <code>1 failed</code>, exit 1, after printing <code>PRIVATE_FLUX_CURRENT=1.6</code>. The mutation was reverted and the revert verified by a fresh run at the head revision, <code>logs/post-revert-check.log</code>, where the helper prints <code>PRIVATE_FLUX_CURRENT=0</code> and the test passes.</p>
 </section>
 
-<section id="booking-close-out-arms"><h2>Suite arms</h2>
+<section id="booking-close-out-fragment-arms"><h2>Suite arms</h2>
 <table>
 <tr><th>Arm</th><th>Revision</th><th>Command</th><th>Outcome</th><th>Exit</th></tr>
 <tr><td>base</td><td><code>022636d5050045e811809d9479e7bbe8cd3d357b</code></td><td><code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_current_book_fragments.py</code></td><td>10 passed, 6 skipped in 60.75 s</td><td>0</td></tr>

@@ -1,0 +1,100 @@
+{
+  "cases": [
+    {
+      "id": "mastu-45272",
+      "machine": "MAST-U",
+      "wall": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/MASTU/45272",
+      "reference": {
+        "source": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/MASTU/45272/regression/magnetics",
+        "time_index": 7
+      },
+      "estimators": [
+        {
+          "name": "imas-efit",
+          "source": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/MASTU/45272/regression/magnetics",
+          "time_index": 7
+        },
+        {
+          "name": "nova-inverse-class",
+          "source": "not-supplied"
+        },
+        {
+          "name": "perturbed-copy",
+          "perturbed_of": "reference",
+          "out": "mastu-45272/perturbed",
+          "perturb": {
+            "current_scale": 1.06,
+            "radial_shift_m": 0.03,
+            "flux_fraction": 0.03,
+            "q_scale": 0.05
+          },
+          "time_index": 7
+        }
+      ]
+    },
+    {
+      "id": "tcv-77549",
+      "machine": "TCV",
+      "wall": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/TCV/77549",
+      "reference": {
+        "source": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/TCV/77549",
+        "time_index": 39
+      },
+      "estimators": [
+        {
+          "name": "imas-efit",
+          "source": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/TCV/77549",
+          "time_index": 39
+        },
+        {
+          "name": "nova-inverse-class",
+          "source": "not-supplied"
+        },
+        {
+          "name": "perturbed-copy",
+          "perturbed_of": "reference",
+          "out": "tcv-77549/perturbed",
+          "perturb": {
+            "current_scale": 1.06,
+            "radial_shift_m": 0.03,
+            "flux_fraction": 0.03,
+            "q_scale": 0.05
+          },
+          "time_index": 39
+        }
+      ]
+    },
+    {
+      "id": "iter-135013",
+      "machine": "ITER",
+      "wall": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/ITER/135013-fp",
+      "reference": {
+        "source": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/ITER/135013-fp",
+        "time_index": 21
+      },
+      "estimators": [
+        {
+          "name": "imas-efit",
+          "source": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/ITER/135013-fp",
+          "time_index": 21
+        },
+        {
+          "name": "nova-inverse-class",
+          "source": "not-supplied"
+        },
+        {
+          "name": "perturbed-copy",
+          "perturbed_of": "reference",
+          "out": "iter-135013/perturbed",
+          "perturb": {
+            "current_scale": 1.06,
+            "radial_shift_m": 0.03,
+            "flux_fraction": 0.03,
+            "q_scale": 0.05
+          },
+          "time_index": 21
+        }
+      ]
+    }
+  ]
+}

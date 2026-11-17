@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="379">
+<meta name="plan-version" content="380">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -1185,6 +1185,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261117T040327652610-review-of-polygon-trace-miss-diagnosis-6cec59de8353" data-who="reckon-build" data-when="2026-11-17T04:05:31.966Z">
     <div class="r-comment-body"><p>Independent review of r-20261116T232556462356-polygon-trace-miss-diagnosis at head 6cec59de8353c711221afe78f26a17b9c8b928bb (base acd5fa2fb11fb97746a2aa3714eb63c4b7e7dad5) is stored as a parsed record: goal_fidelity 19, evidence 16, scope_discipline 19, durability 13, fit 18, reuse 12, added_failure_count 0, three non-blocking findings (reference_comparison trace-metric duplication, substring-only ratio assertion, gate bound to the removable worktree); no blocker.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261116T232556462356-polygon-trace-miss-diagnosis" data-who="reckon-build" data-when="2026-11-17T03:58:10Z">
+    <div class="r-comment-body"><p>Corner routing retained the original non-height JVP for 1501/35712 pairs (58/64 targets), causing the 7–8% trace miss. Stable radial routing plus six height samples gives 64-node relative traces 7.491499586e-10/9.202871076e-10/7.014760774e-10; stable routing with four samples still fails near 3.8e-8. Recommended shared stable derivative evaluator with a sixth-order height-only stencil has estimated instructions about 1.8x main (range 1.5–2.3x), beside measured tangent-only 1.32x. &lt;a href=&quot;/nova/evidence/fragments/sub-millisecond-forward-path/polygon-trace-miss-diagnosis.html#polygon-trace-miss-diagnosis-result&quot;&gt;Diagnosis, split-column qualification limit and historical control correction&lt;/a&gt;.</p></div>
 </div>
 </section>
 </main>

@@ -95,6 +95,16 @@
       "note": "The contract table gains a row for the fit inside the iteration, and its hours now sum to the declared 47.",
       "reason": "",
       "when": "2026-11-17T10:54:58.179504+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0e1225744155050cdae4508028f6dbcbfbd63b31",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The new section now states why its flux update differs from the solves that refused: it is one linear update from a current the data has just fixed, not a converged free-boundary solve at a proposed state, and clause (2) reports the flux-update residual beside the fit misfit so a failure can be attributed.",
+      "reason": "",
+      "when": "2026-11-17T10:55:08.994228+00:00"
     }
   ],
   "responses": {
@@ -106,6 +116,15 @@
       "note": "Clause (3) of the comparison section now carries a control on the measure it delivers when no case converges: the row replay with every row scaled by 1.10 must leave the 5 percent band on every sensor family.",
       "reason": "",
       "when": "2026-11-17T10:54:36.099615+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0e1225744155050cdae4508028f6dbcbfbd63b31",
+      "commit_basis": "edit",
+      "note": "The new section now states why its flux update differs from the solves that refused: it is one linear update from a current the data has just fixed, not a converged free-boundary solve at a proposed state, and clause (2) reports the flux-update residual beside the fit misfit so a failure can be attributed.",
+      "reason": "",
+      "when": "2026-11-17T10:55:08.994228+00:00"
     },
     "wiring-1": {
       "action": "acted",

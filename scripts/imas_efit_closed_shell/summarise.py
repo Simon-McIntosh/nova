@@ -110,7 +110,15 @@ def main() -> None:
             name: {
                 key: value
                 for key, value in arm.items()
-                if key in ("output_flag", "psi_axis", "psi_boundary", "ip", "error")
+                if key
+                in (
+                    "iterations",
+                    "gs_deviation",
+                    "psi_axis",
+                    "psi_boundary",
+                    "ip",
+                    "error",
+                )
             }
             for name, arm in arms.items()
         },

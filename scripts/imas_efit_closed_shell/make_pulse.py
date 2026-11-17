@@ -74,8 +74,16 @@ def exact_shielding(ratio: float, mu_r: float = MU_R) -> float:
     return ((2 * mu_r + 1) * (mu_r + 2) - 2 * (mu_r - 1) ** 2 * ratio**3) / (9 * mu_r)
 
 
-def build(ratio: float, n_arc: int, with_iron: bool):
+def build(
+    ratio: float,
+    n_arc: int,
+    with_iron: bool,
+    current_scale: float = 1.0,
+    plasma_scale: float = 1.0,
+):
     a = B_OUTER * ratio
+    coil_current = COIL_I * current_scale
+    plasma_current = PLASMA_IP * current_scale * plasma_scale
     factory = imas.IDSFactory(DD_VERSION)
     ids = factory.new("pf_active")
     ids.ids_properties.homogeneous_time = 1
@@ -92,7 +100,7 @@ def build(ratio: float, n_arc: int, with_iron: bool):
     el.geometry.rectangle.width = COIL_DR
     el.geometry.rectangle.height = COIL_DZ
     el.turns_with_sign = 1.0
-    coil.current.data = [COIL_I]
+    coil.current.data = [coil_current]
     coil.current.time = [0.0]
     coil.current.data_error_upper = [1.0e-6]
     # One circuit carrying the coil.  A supply element sits in the same node
@@ -100,7 +108,7 @@ def build(ratio: float, n_arc: int, with_iron: bool):
     # coil as its own single-coil circuit (positive polarity).
     ids.supply.resize(1)
     ids.supply[0].name = "DIP_SUPPLY"
-    ids.supply[0].current.data = [COIL_I]
+    ids.supply[0].current.data = [coil_current]
     ids.supply[0].current.time = [0.0]
     ids.supply[0].current.data_error_upper = [1.0e-6]
     ids.circuit.resize(1)
@@ -128,7 +136,7 @@ def build(ratio: float, n_arc: int, with_iron: bool):
         probe.field.time = [0.0]
         probe.field.data_error_upper = [10.0]
     magnetics.ip.resize(1)
-    magnetics.ip[0].data = [PLASMA_IP]
+    magnetics.ip[0].data = [plasma_current]
     magnetics.ip[0].time = [0.0]
     magnetics.ip[0].data_error_upper = [1.0]
 
@@ -166,11 +174,20 @@ def build(ratio: float, n_arc: int, with_iron: bool):
     return ids, magnetics, wall, tf, iron
 
 
-def write_pulse(outdir: Path, ratio: float, n_arc: int, with_iron: bool) -> dict:
+def write_pulse(
+    outdir: Path,
+    ratio: float,
+    n_arc: int,
+    with_iron: bool,
+    current_scale: float = 1.0,
+    plasma_scale: float = 1.0,
+) -> dict:
     outdir.mkdir(parents=True, exist_ok=True)
     uri = f"imas:hdf5?path={outdir}"
     entry = imas.DBEntry(uri, "w", dd_version=DD_VERSION)
-    pf, magnetics, wall, tf, iron = build(ratio, n_arc, with_iron)
+    pf, magnetics, wall, tf, iron = build(
+        ratio, n_arc, with_iron, current_scale, plasma_scale
+    )
     entry.put(pf)
     entry.put(magnetics)
     entry.put(wall)
@@ -197,9 +214,30 @@ def main() -> None:
     parser.add_argument("--ratio", type=float, default=0.9)
     parser.add_argument("--arc-vertices", type=int, default=20)
     parser.add_argument("--no-iron", action="store_true")
+    parser.add_argument(
+        "--current-scale",
+        type=float,
+        default=1.0,
+        help="multiply the coil and plasma currents; the case is linear in the "
+        "currents and the flux scale only matters for solver conditioning",
+    )
+    parser.add_argument(
+        "--plasma-scale",
+        type=float,
+        default=1.0,
+        help="multiply the plasma current alone, to make the coil the dominant "
+        "source of the flux at the probes",
+    )
     args = parser.parse_args()
     out = Path(args.outdir)
-    case = write_pulse(out, args.ratio, args.arc_vertices, not args.no_iron)
+    case = write_pulse(
+        out,
+        args.ratio,
+        args.arc_vertices,
+        not args.no_iron,
+        args.current_scale,
+        args.plasma_scale,
+    )
     (out.parent / (out.name + ".json")).write_text(json.dumps(case, indent=1))
     print(f"wrote {out} exact S={case['exact_S']:.6f}")
 

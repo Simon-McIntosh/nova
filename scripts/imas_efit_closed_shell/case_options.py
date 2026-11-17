@@ -71,6 +71,7 @@ def efit_options(
      zero so it constrains nothing. -->
 <efitCircuits interpolationMethod="1" timeWindow="0" timeMargin="0"
               deselectWhenNoData="false"/>
+<magneticProbes interpolationMethod="1" timeWindow="0" timeMargin="0"/>
 <bVacRadiusProduct interpolationMethod="1" timeWindow="1" timeMargin="0" weights="0"/>
 
 <plasmaCurrent interpolationMethod="1" timeWindow="0" timeMargin="0" weights="1"/>
@@ -86,7 +87,14 @@ def efit_options(
 """
 
 
-def magnetic_probes_xml(names: list[str], weight: float = 0.0) -> str:
+def magnetic_probes_xml(names: list[str], weight: float = 1.0) -> str:
+    """Per-probe weights for the four shell probes.
+
+    The probes are constrained, not deselected.  Their sigma is 10 T against a
+    signal of order 1e-4 T, so the pull is negligible, but a zero weight would
+    remove their rows from the fit's Jacobian and leave the reconstruction
+    rank-deficient: imas-efit then never drives cerror below its tolerance.
+    """
     entries = "\n".join(
         f'  <magneticProbe idsIdentifier="{name}" weights="{weight}"/>'
         for name in names

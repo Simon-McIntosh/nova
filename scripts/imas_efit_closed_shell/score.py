@@ -60,10 +60,15 @@ def read_run(run: Path, points: list[tuple[float, float]]) -> dict:
     if len(eq.time_slice) == 0:
         return {"error": "no equilibrium time_slice written"}
     s = eq.time_slice[0]
+    # DD 4.1.0 carries the iteration count and the Grad-Shafranov deviation in
+    # time_slice/convergence; the solver's own accept/reject verdict is in the
+    # run log's CONVERGENCE_SUMMARY line.
+    convergence = s.convergence
     result: dict = {
         "time": float(eq.time[0]) if len(eq.time) else None,
-        "output_flag": int(s.code.output_flag[0])
-        if len(s.code.output_flag)
+        "iterations": int(convergence.iterations_n),
+        "gs_deviation": float(convergence.grad_shafranov_deviation_value)
+        if convergence.has_value
         else None,
         "psi_axis": float(s.global_quantities.psi_axis),
         "psi_boundary": float(s.global_quantities.psi_boundary),

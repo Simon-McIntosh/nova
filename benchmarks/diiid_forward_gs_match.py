@@ -1279,21 +1279,17 @@ def _couplings(
     names, response = vacuum_response(machine.physical, radius, height)
     source_to_grid = np.stack([plane.T.ravel() for plane in response], axis=1)
     source_to_wall = _wall_source_response(machine.physical, names, wall)
-    width = float(np.diff(radius).mean())
-    vertical_extent = float(np.diff(height).mean())
-    plasma_to_grid = _green_block(coordinate, coordinate, width, vertical_extent)
-    plasma_to_wall = _green_block(wall, coordinate, width, vertical_extent)
     grid_moments, wall_moments, sample_coordinate, sample_moments = _moment_couplings(
         lattice, wall
     )
+    plasma_to_grid = grid_moments[0]
+    plasma_to_wall = wall_moments[0]
+    plasma_to_sample = sample_moments[0]
     # The sampling nodes are solved rows too, so they carry the same conductor
     # population the grid carries, evaluated at the vertices with the polygon
     # kernel the wall target uses. A target built from zeros would hold a flux
     # of zero at the nodes the boundary is clipped on.
     source_to_sample = _wall_source_response(machine.physical, names, sample_coordinate)
-    plasma_to_sample = _green_block(
-        sample_coordinate, coordinate, width, vertical_extent
-    )
     grid_rows = lattice.node_count
     wall_rows = len(wall)
     same_grid_seam = (
@@ -1869,15 +1865,13 @@ def _publish_accumulated_response(targets: _ConductorTargets) -> dict[str, Any]:
 def _display_coupling(
     profile: ForwardProfile, machine
 ) -> tuple[DisplayCoupling, _ConductorTargets]:
-    """Return the target-point coupling the frame's own solve was built from.
+    """Return the display's target-point plasma and conductor coupling.
 
-    The plasma columns are the same uniform ``hybrid_greens`` block the solve
-    lattice consumes, evaluated at whatever points the panel asks for; the
-    operator carries no radial or vertical plasma moment matrices here, so
-    those columns are zero exactly as the solve's own raster image is.  The
-    conductor flux is the response matrix contracted with the operator's own
-    current vector, and its targets are the points the display map evaluates
-    on, so the map's grid is the grid the response is built for.
+    The display evaluates uniform ``hybrid_greens`` plasma columns at the
+    requested panel points and supplies zero radial and vertical columns.
+    This display approximation differs from the solve's exact polygon
+    uniform, radial and vertical blocks. The conductor flux contracts the
+    target-point response matrix with the operator's external-current vector.
     """
 
     lattice = profile.lattice

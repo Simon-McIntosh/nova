@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-17T01:36:12Z",
+  "findings": [
+    {
+      "file": "scripts/west_iron_linear/figure.py",
+      "id": "fca8a0c6e0a",
+      "line": 72,
+      "severity": "non-blocking",
+      "summary": "F1: the two finest affine marks in every panel are drawn 8 pt (about 11 px at 100 dpi) at unknowns 35 184 and 39 792, which puts their centres 11 to 12 px apart, so the open 'linear, graded' square and the filled 'linear, uniform' 0.04 m circle touch and merge into one blue mass. Measured in the rendered PNG: at +2 m the disc's left edge abuts the square's right edge with no gap (centres at x 811 and 823, y 537 and 542); at +4 m the disc overlaps the square's lower-right corner (centres 1278,536 and 1290,542); at +1 m they abut (344,216 and 355,217). Nothing is hidden, because the square's white interior and the disc both stay visible and the square's centre is resolvable, but a reader cannot see the two marks as separated points and may read the pair as one symbol, which matters because the caption's claim that the three affine points sit close together is the figure's headline. Separating them would need a smaller marker, a slight x offset, or distinct marker shapes between the graded and uniform arms."
+    },
+    {
+      "file": "docs/figures/iron-core-magnetisation/icm-west-linear-h200/probe-fields-vs-unknowns.svg",
+      "id": "f1979f55cc8",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "F2: at +4 m the grey 'constant, graded' open square for the 16/80 mm mesh sits on the 'constant, uniform' line rather than beside it. Its centre measures 81.8 \u00b5T at 11 728 unknowns, while the uniform segment between 3 390 unknowns (96.2 \u00b5T) and 13 264 unknowns (79.8 \u00b5T) passes through about 81.3 \u00b5T at that x, so the square's outline and the line touch and the line runs across the square's interior and out through its corner. The mark still reads as an open square and its centre is visible, so no value is lost, but at first glance the graded point can be taken for a point on the uniform series, which is the series the figure is contrasting it against. At +2 m the same square clears the line by about 1.1 \u00b5T and reads cleanly; only the +4 m panel has the collision."
+    }
+  ],
+  "notes": "Read-only figure review at the reviewed head 1398877a2cc3 has no suite of its own, so added_failure_count is 0 with an empty id list by construction, not by an unrun gate. The figure script and the evidence fragment are byte-identical between the earlier reviewed head 5f1a3eb1 and this head (git diff over scripts/west_iron_linear/ and docs/figures/iron-core-magnetisation/ at the two revisions is empty), so this review judges the same rendered picture at the newer head. Both findings are non-blocking: the figure is readable and its message gets through, so neither holds the node.",
+  "project": "nova",
+  "review_run_id": "r-20261117T013437219834-review-of-icm-west-linear-h200-1398877a2cc3-figure",
+  "reviewed_base_sha": "17c8e25635b9bc9658fe2f953977c01d3a041c45",
+  "reviewed_commits": [
+    "6cf266c52feea45b1753faacd085754898e5e456",
+    "747a7bbca841776a4796c4cf13b37bc1622e3846",
+    "97c17d8ddcc3e04070e46f7734c2adad67d786ce",
+    "a59f631a6da729402a94d42a720ccded13e8daa5",
+    "f437292cc422552f82df32b1426485d9cfaffad4",
+    "2f58f9a1e46d41caff8fe0614d00e95695f75210",
+    "4d96bd9606c63d48ff1584b25c784d429164a736",
+    "1b79e5d8213d2094a47a4a8c78ba11422bb06dde",
+    "353d2cfe364fce7158867d278f584b4f329de524",
+    "0609aaba3c5309c85d56b2853a167ce691765920",
+    "b6b75ebee35fdb77f6aff8b7ea1194acd59b150c",
+    "7a4ca25ebe2d2357a7ee18afe36a7327b6c2b029",
+    "b1a688167c946fbecd41a265e52d8ce7df4178b0",
+    "1feb9aa0a6b735cb5c5557c4bebef9f872ad11b9",
+    "0e0360d8dfda41325b7a1bf5fad5f647f3e96b35",
+    "b182456c5ea7ac71ae444e805a2fb614a2c0dacc",
+    "8cac7988b56c34c5771b09ffb680b041ceb1171f",
+    "d414956a192347e935e7d0259f110534a028f54e",
+    "5f1a3eb15e5c7a4f5ae02cc6a2263879e6f92b69",
+    "1398877a2cc34b58ea9ccbdb3e71e89c7d8f4ac7"
+  ],
+  "reviewed_figures": [
+    {
+      "drawing_script": "scripts/west_iron_linear/figure.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T013437219834-review-of-icm-west-linear-h200-1398877a2cc3-figure/image-0.png",
+      "judged_from": "the rendered PNG only; the SVG source was not opened, read or listed",
+      "pixels": "1400x721",
+      "rendered_from": "docs/figures/iron-core-magnetisation/icm-west-linear-h200/probe-fields-vs-unknowns.svg"
+    }
+  ],
+  "reviewed_head_sha": "1398877a2cc34b58ea9ccbdb3e71e89c7d8f4ac7",
+  "reviewed_run_id": "r-20261115T075315275505-icm-west-linear-h200",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility [probe-fields-vs-unknowns.svg via image-0.png]: pass. Three 14 in panels, one per probe, each with a named y axis 'probe |B| [\u00b5T]', a log x axis 'magnetic unknowns' ticked and labelled 3k/10k/30k/90k, and one shared four-entry legend above them. Read off the rendered pixels against the tick calibration: at +1 m the constant uniform pair sits flat at 242.6 \u00b5T where the affine trio sits at 244.5/243.8/243.7 \u00b5T; at +2 m the constant pair falls 200.2 to 174.0 \u00b5T where the affine trio sits at 163.9/163.2/162.7 \u00b5T; at +4 m the constant pair falls 96.2 to 79.8 \u00b5T where the affine trio sits at 73.1/72.7/72.3 \u00b5T. A reader sees at a glance that the affine series barely moves between meshes while the constant series moves 17 per cent at the far probe, which is the figure's purpose. The one readability cost is the touching pair of finest affine marks reported as F1.",
+    "RUBRIC data_ink [probe-fields-vs-unknowns.svg via image-0.png]: pass. The ink is the data and the minimum furniture to read it: twelve constant marks and twelve affine marks, three axes with their scales, and one shared four-entry legend. No gradient, texture, background wash or decorative fill anywhere on the 1400x721 canvas; the only non-white pixels are marks, text, spines and ticks.",
+    "RUBRIC decoration [probe-fields-vs-unknowns.svg via image-0.png]: pass. White background throughout; top and right spines absent from all three panels; no gridlines and no minor tick marks (minor locator is null, verified visually on the rendered image); no shaded band, no frame and no title competing with the caption.",
+    "RUBRIC contrast [probe-fields-vs-unknowns.svg via image-0.png]: pass. Measured on the rendered pixels: axis labels rgb(11,11,11) at 19.7:1 on white, tick labels rgb(82,81,78) at 7.9:1, the blue data marks rgb(46,111,183) at 5.2:1, and the grey #929292 constant marks at 3.1:1, which clears the 3:1 floor the data-mark rule sets. All text sits on plain white with no overlapping fill behind it.",
+    "RUBRIC table_form [probe-fields-vs-unknowns.svg via image-0.png]: pass. The image is a plotted field against unknown count with one panel per probe, which shows the convergence a reader would otherwise have to reconstruct by differencing a table; it is not a picture of tabular information.",
+    "RUBRIC label_collision [probe-fields-vs-unknowns.svg via image-0.png]: pass. Measured on the PNG: all four canvas borders are pure white (0 non-white pixels on the top, bottom, left and right edge rows and columns), the inked bounding box is x 12 to 1386 of 1400 and y 32 to 679 of 721, so no glyph is cut at the canvas edge; the '+1 m', '+2 m' and '+4 m' annotations sit in clear space inside the top-left of their panels and no two text artists touch or overlap. The collisions present in the picture are between marks, not labels, and are reported as F1 and F2."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T01:00:00Z",
+  "total": null
+}

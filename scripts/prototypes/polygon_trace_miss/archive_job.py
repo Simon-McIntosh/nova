@@ -112,19 +112,30 @@ def main():
             command += ["--point-budget", str(args.point_budget)]
         print("# tree:", root, flush=True)
         print("# command:", " ".join(command), flush=True)
-        batches = 16 if args.mode == "stable-corner" else 1
+        batches = (
+            (64 + args.point_budget - 1) // args.point_budget
+            if args.mode == "stable-corner" and args.point_budget
+            else 1
+        )
         for batch in range(batches):
             print("PROCESS_BATCH", batch, flush=True)
             result = subprocess.run(command, cwd=root, env=environment)
             if result.returncode:
                 break
             receipt = args.output / "receipt.json"
-            if receipt.exists() and json.loads(receipt.read_text()).get(
-                "completed"
-            ):
+            if receipt.exists() and json.loads(receipt.read_text()).get("completed"):
                 break
-        print("EXIT=" + str(result.returncode), flush=True)
-        raise SystemExit(result.returncode)
+        receipt = args.output / "receipt.json"
+        complete = (
+            receipt.exists()
+            and json.loads(receipt.read_text()).get("completed") is True
+        )
+        code = result.returncode
+        if code == 0 and not complete:
+            print("MEASUREMENT_INCOMPLETE: no completed receipt", flush=True)
+            code = 1
+        print("EXIT=" + str(code), flush=True)
+        raise SystemExit(code)
 
 
 if __name__ == "__main__":

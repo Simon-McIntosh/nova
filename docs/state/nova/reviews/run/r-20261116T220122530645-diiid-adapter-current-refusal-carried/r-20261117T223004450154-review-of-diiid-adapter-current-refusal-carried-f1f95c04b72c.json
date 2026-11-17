@@ -38,6 +38,11 @@
       "kind": "exempted",
       "reason": "The discovery repair's result is recorded in the caller-scope audit committed with the run; the inventory probe is a prototype, not a regression the suite must carry",
       "recorded_at": "2026-11-17T22:57:50.613420+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "The repository contract requires configure_dtypes before any array is built, and every measured caller does so; a profile built in single precision is itself a defect, so refusing it is correct",
+      "recorded_at": "2026-11-17T22:58:02.519601+00:00"
     }
   },
   "findings": [

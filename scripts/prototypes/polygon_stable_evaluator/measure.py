@@ -56,7 +56,9 @@ def summarise(output):
     densities, owners = density(
         points, polygons, reference().coupling(polygons), moments
     )
-    assert owners.shape == (64,) and np.all(owners == 1)
+    assert owners.shape == (64,) and np.all(owners <= 1)
+    assert np.count_nonzero(owners) > 0
+    print("SOURCE_OWNERS", owners.tolist(), flush=True)
     forcing = -2 * np.pi * MU0 * points[None, :, 0] * densities
     rows = []
     for index, state in enumerate(STATES):

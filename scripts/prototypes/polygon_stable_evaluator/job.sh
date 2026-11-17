@@ -35,9 +35,12 @@ run() {
 }
 if [[ "$mode" == reproduction ]]; then
   cp /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T211231918544-polygon-tangent-repair/accepted-base-bank/plasma-partial.npz "$out/plasma-partial.npz"
-  run summary "$python" -m scripts.prototypes.polygon_stable_evaluator.measure --output "$out" --summarise || status=1
-  export NOVA_POLYGON_INTEGRATED_RECEIPT="$out/receipt.json"
-  run negative-control "$python" -m pytest -p no:cacheprovider tests/biot/test_polygon_stable_evaluator.py -vv -s || status=1
+  if run summary "$python" -m scripts.prototypes.polygon_stable_evaluator.measure --output "$out" --summarise; then
+    export NOVA_POLYGON_INTEGRATED_RECEIPT="$out/receipt.json"
+    run negative-control "$python" -m pytest -p no:cacheprovider tests/biot/test_polygon_stable_evaluator.py -vv -s || status=1
+  else
+    status=1
+  fi
 elif [[ "$mode" == accuracy ]]; then
   for chunk in {0..15}; do
     run "points-$chunk" "$python" -m scripts.prototypes.polygon_stable_evaluator.measure --output "$out" --point-budget 4 || { status=1; break; }

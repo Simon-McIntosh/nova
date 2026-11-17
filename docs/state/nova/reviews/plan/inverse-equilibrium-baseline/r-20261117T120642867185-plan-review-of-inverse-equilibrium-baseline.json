@@ -51,6 +51,16 @@
       "note": "The cost ceiling is now stated against the measured forward-call count: the wall per reconstruction may exceed that count times the warm forward wall by at most a quarter, and the control adds forward calls.",
       "reason": "",
       "when": "2026-11-17T16:03:06.947815+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3ab72680615f289c36e398c1918f55b997ad1a4b",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "By lead ruling on 2026-11-17 the q95 band is judged with one calculator on both flux maps, and each code own stored value is reported beside it as a definition difference.",
+      "reason": "",
+      "when": "2026-11-17T16:03:19.410262+00:00"
     }
   ],
   "responses": {
@@ -62,6 +72,15 @@
       "note": "The cost ceiling is now stated against the measured forward-call count: the wall per reconstruction may exceed that count times the warm forward wall by at most a quarter, and the control adds forward calls.",
       "reason": "",
       "when": "2026-11-17T16:03:06.947815+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "3ab72680615f289c36e398c1918f55b997ad1a4b",
+      "commit_basis": "edit",
+      "note": "By lead ruling on 2026-11-17 the q95 band is judged with one calculator on both flux maps, and each code own stored value is reported beside it as a definition difference.",
+      "reason": "",
+      "when": "2026-11-17T16:03:19.410262+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261117T120642867185-plan-review-of-inverse-equilibrium-baseline.json",

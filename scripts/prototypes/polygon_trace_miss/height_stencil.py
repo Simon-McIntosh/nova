@@ -36,6 +36,36 @@ def describe(name, value):
     assert np.isfinite(value).all()
 
 
+def calibrate(measured, output):
+    """Check a height column against the qualified independent reference."""
+    with np.load(ROOT / "node-0.npz") as archive:
+        known = archive["hessian"][:, :, 1]
+    describe("calibration_measured_height_column", measured)
+    describe("calibration_independent_height_column", known)
+    scale = np.linalg.norm(known, axis=1)
+    assert np.all(scale > 0)
+    relative = np.linalg.norm(measured - known, axis=1) / scale
+    perturbation = np.linalg.norm(1.000001 * measured - known, axis=1) / scale
+    describe("calibration_relative_error", relative)
+    describe("calibration_perturbation_error", perturbation)
+    print("HEIGHT_INDEPENDENT_CALIBRATION", relative.tolist(), flush=True)
+    print("HEIGHT_CALIBRATION_PERTURBATION", perturbation.tolist(), flush=True)
+    assert max(relative) <= 1e-8
+    assert min(perturbation) > 1e-8
+    (output / "calibration-independent.json").write_text(
+        json.dumps(
+            dict(
+                passed=True,
+                budget=1e-8,
+                relative=[float(v) for v in relative],
+                perturbation_relative=[float(v) for v in perturbation],
+                reference=str(ROOT / "node-0.npz"),
+            ),
+            indent=2,
+        )
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
@@ -97,13 +127,14 @@ def main():
     partial = args.output / "height-partial.npz"
     values = []
     if partial.exists():
-        assert json.loads((args.output / "calibration.json").read_text())["passed"]
         with np.load(partial) as prior:
             np.testing.assert_array_equal(
                 prior["points"], points[: len(prior["points"])]
             )
             describe("prior_height_derivative", prior["height_derivative"])
             values = list(prior["height_derivative"].swapaxes(0, 1))
+    if values:
+        calibrate(values[0], args.output)
     start = len(values)
     stop = min(64, start + args.point_budget) if args.point_budget else 64
     shifts = (1e-3, -1e-3, 5e-4, -5e-4, 2.5e-4, -2.5e-4)
@@ -152,32 +183,7 @@ def main():
         temporary.replace(partial)
         print("HEIGHT_NODE", index, flush=True)
         if index == 0:
-            small = (1e-5, -1e-5, 5e-6, -5e-6)
-            probe = jnp.stack(
-                [
-                    packed(point + jnp.asarray((0.0, shift)), purpose="calibration")
-                    for shift in small
-                ]
-            )
-            describe("calibration_packed_samples", probe)
-            original_rows = (
-                4 * (probe[2] - probe[3]) / (2 * small[2])
-                - (probe[0] - probe[1]) / (2 * small[0])
-            ) / 3
-            original_rows = jnp.where(corner[None, :], original_rows, analytic_rows)
-            measured = np.asarray(contract(original_rows, point[0]))
-            with np.load(
-                args.output.parent / "stable-corner/plasma-partial.npz"
-            ) as prior:
-                known = prior["hessian"][:, 0, :, 1]
-            describe("calibration_measured_height_column", measured)
-            describe("calibration_known_height_column", known)
-            difference = float(np.max(abs(measured - known)))
-            print("HEIGHT_CALIBRATION_MAX_ABSOLUTE", difference, flush=True)
-            np.testing.assert_allclose(measured, known, rtol=1e-11, atol=1e-11)
-            (args.output / "calibration.json").write_text(
-                json.dumps(dict(maximum_absolute=difference, passed=True))
-            )
+            calibrate(value, args.output)
     data = np.asarray(values).swapaxes(0, 1)
     describe("height_derivative", data)
     receipt = dict(

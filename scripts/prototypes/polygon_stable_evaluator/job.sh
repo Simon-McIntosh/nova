@@ -71,6 +71,14 @@ elif [[ "$mode" == identity ]]; then
   export JAX_PLATFORMS=cuda NOVA_KERNEL_BASE_REVISION=02997905193b245dcc099a238fea6c22d8817671
   # The instrument is supplied by the caller; the program and tests are archived.
   run program-identity "$python" "$repo/scripts/prototypes/polygon_stable_evaluator/program_identity.py" "$out/program-identity.json" || status=1
+elif [[ "$mode" == suite ]]; then
+  files=()
+  for file in tests/biot/test_polygon_edge_line_tangent.py tests/biot/test_polygon_stable_evaluator.py tests/test_moment_field_hessian.py; do
+    [[ ! -f "$file" ]] || files+=("$file")
+  done
+  command="PYTHONPATH=. JAX_PLATFORMS=cpu $python -m pytest -p no:cacheprovider -q ${files[*]}"
+  printf '%s\n' "$command" > "$out/command.txt"
+  run suite bash -c "$command" || status=1
 fi
 printf 'EXIT=%s\n' "$status"
 exit "$status"

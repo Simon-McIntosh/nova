@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T10:59:57.260Z",
+  "dispatched_at": "2026-11-17T10:59:31Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/diiid-vertical-force-balance/r-20261117T105604834692-plan-review-of-diiid-vertical-force-balance/plan.html:115",
+      "id": "done_when-1",
+      "reason": "without a named target for the counterfactual (a residual or convergence level the section must reach, or a stated change in the accept/refuse sequence) the section's only falsifiable endpoint is absent and its verdict rests on the record's prose.",
+      "text": "done-when (2) requires a counterfactual that \"removes only that mechanism and changes 137D's outcome on the single kernel\", and \"changes the outcome\" is not a quantity: a residual move from 3.3e-4 to 3.2e-4, one more accepted proposal, or a different terminal reason all \"change the outcome\", so a node whose counterfactual only perturbs the trajectory closes as if it demonstrated the mechanism, and nothing in the clause can fail because any difference satisfies it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/diiid-vertical-force-balance/r-20261117T105604834692-plan-review-of-diiid-vertical-force-balance/plan.html:115",
+      "id": "evidence_paths-1",
+      "reason": "the section's whole output is that table and those panels, so an unnamed destination lets a node satisfy the text and lose the evidence.",
+      "text": "\u00a712 delivers a per-refused-proposal table plus two contour-panel arms but names no directory for either, so the record and figures land wherever the node chooses (a session scratchpad or a node-local path), and a later reader cannot open them; \u00a711 was repaired for exactly this shape after its entry point was found truncating a committed receipt directory",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/diiid-vertical-force-balance/r-20261117T105604834692-plan-review-of-diiid-vertical-force-balance/plan.html:113",
+      "id": "reasoning-1",
+      "reason": "done-when (1) instruments only solver internals, so if the mechanism is the polygon kernel's clipped-cell rows the node spends its allocation on tangent and merit checks that cannot show it and returns an unmechanised record.",
+      "text": "the step from the X-point offsets (2.31 cm mixed, 2.32 cm single kernel) to \"the geometry near the X-point is unchanged, and what fails is the solver's path\" does not follow from the cited evidence: those offsets are read from two terminal states, one of them the refused 3.3e-4 iterate, so a similar lower-null position is not a test of the operator near the X-point, and \u00a710 (plan.html:102) states the kernel mismatch \"is largest in the edge cells where the boundary is clipped and the X-point sits\"; the candidate list (active set, Newton tangent, merit function) therefore excludes the one candidate the plan itself located at the X-point, and \u00a710's own done-when (2) is where a per-cell column difference would be measured, not here",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "ac02a6369c8ece20a1075374763f632d5b367ec6",
+  "plan_fingerprint": "f9e8e789eeb5f000f0ffafc37fcf52d7d7a4be24087951c188e93c21974de51d",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 110,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T105604834692-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "22fdaf2f85a7ae41f7297c8bbcec48b85c2b6763",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a712's only references are the section links to \u00a710 and \u00a77 (plan.html:112 data-links, :114-:115 body), both of which resolve as s10 and s7; the termination-reason identifiers it quotes exist at nova/equilibrium/fixed_point.py:348 and :353.",
+    "done_when": "a finding \u2014 \u00a712 done-when (2) closes on a counterfactual that merely \"changes 137D's outcome\" (plan.html:115), with no threshold, so the node can close on a roundoff-sized outcome change; done-when (1) is measurable but is a record, not a control.",
+    "evidence_paths": "a finding \u2014 \u00a712's done-when names no durable path for the per-proposal record or for the two arms' contour panels (plan.html:115), unlike \u00a711 done-when (1), which puts its run's output under \"this node's evidence directory\".",
+    "naming": "pass \u2014 \u00a712 introduces no symbol, carries no plan label or ticket number, and the mechanism it names is stated as a mechanism rather than a tracker entry.",
+    "reasoning": "a finding \u2014 \u00a712 infers \"the geometry near the X-point is unchanged, and what fails is the solver's path to it\" from a terminal-state X-point offset comparison (plan.html:113), while the plan's own \u00a710 (plan.html:102) says the two kernels' mismatch \"is largest in the edge cells where the boundary is clipped and the X-point sits\"; the operator difference near the X-point is not what 2.31 vs 2.32 cm measures, so it stays a live candidate that the three-candidate list omits.",
+    "single_goal": "pass \u2014 \u00a712 carries one deliverable, the mechanism of 137D's sufficient-decrease refusals on the single-kernel coupling; repair is explicitly excluded from product code and the measurement is not widened into a fix.",
+    "wiring": "pass \u2014 plan-section-depends-on declares s12 \u2192 s10 and s7 \u2192 [s6, s10, s12]; s12 needs \u00a710's single-kernel head, and s7 (plan.html:84) states its open question as \"either the mask disturbs the solver at the cycling active set, or the unmasked base's convergence leaned on the inactive image\", which \u00a712 answers before s7's next attempt; plan-blocks is now empty and gs-absolute-accuracy-gates sits under plan-informs only."
+  },
+  "section_digests": {
+    "_document": "b00dd0575a27805b8e71f761a9ecda745a24fb4d3f7ac6602d7157d4e54313c1",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "8221264aa226d15c859f15d29e63bdc333dd055f1fa3f0ad1683edb6aba86e66",
+    "s12": "406db948e9d561d192b44cd66643f552eb1b1ad4bef0b8511398feb505cd9e5d",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "3dc57bc53014ca0924803e72edad5a80c9db8d8548f1484de73c21e0193d0ae3",
+    "s8": "215d43aeb53f0178ebb5fc13e5e78e73033f1c6329f30d95c799b7d7722d5c54",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T11:07:03.360692+00:00",
+  "total": null
+}

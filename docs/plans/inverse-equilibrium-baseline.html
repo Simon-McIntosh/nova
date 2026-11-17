@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="39">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -71,12 +71,13 @@
       <tbody>
         <tr><td>§1 Known-answer recovery</td><td>8</td><td>deep</td><td>moderate</td><td>—</td></tr>
         <tr><td>§2 The same inputs as EFIT</td><td>7</td><td>deep</td><td>elevated</td><td>§1 (landed)</td></tr>
-        <tr><td>§3 One scoreboard for every estimator</td><td>4</td><td>standard</td><td>low</td><td>§2</td></tr>
-        <tr><td>§4 Cost on the H200</td><td>3</td><td>standard</td><td>moderate</td><td>§2</td></tr>
+        <tr><td>§3 One scoreboard for every estimator</td><td>4</td><td>standard</td><td>low</td><td>§8</td></tr>
+        <tr><td>§4 Cost on the H200</td><td>3</td><td>standard</td><td>moderate</td><td>§8</td></tr>
         <tr><td>§5 The reduced-model reconstructions</td><td>3</td><td>standard</td><td>moderate</td><td>§3 and a decision</td></tr>
         <tr><td>§6 White sensor noise</td><td>4</td><td>standard</td><td>moderate</td><td>§1 (landed)</td></tr>
         <tr><td>§7 Drifting sensors beside EFIT</td><td>6</td><td>deep</td><td>elevated</td><td>§6, §3 and §8</td></tr>
         <tr><td>§8 imas-efit on rows written by nova</td><td>4</td><td>deep</td><td>elevated</td><td>§1 (landed)</td></tr>
+        <tr><td>§9 The fit inside the equilibrium iteration</td><td>8</td><td>deep</td><td>elevated</td><td>§1 (landed)</td></tr>
       </tbody>
     </table>
 
@@ -129,7 +130,7 @@
     nova-inverse against nova-forward separately. (3) Negative control, constructed to
     fire under either option of <code>fitted-unknowns</code>: the fit rerun with every magnetics row, the
     measured plasma current, and the measured conductor currents with their uncertainties all scaled by
-    1.10 leaves the 1.5 % plasma-current band on every case. The evidence record
+    1.10 leaves the 1.5 % plasma-current band on every case that converged. Where no case converges the control is stated on the measure the section delivers: the row replay with every row scaled by 1.10 leaves the 5 % band on every sensor family of every machine. The evidence record
     carries, per case, line-contour flux panels of the nova state beside the imas-efit state on shared
     levels, with both null sets and the wall, under the repository plotting rules.</p>
 
@@ -161,7 +162,7 @@
     width, both measured in that job with compile excluded. A larger figure fails this clause: the record
     then names the step responsible with its share of the wall, and the section stays open. Negative
     control: the same measurement with the reconstruction forced to at least eleven forward solves per
-    reconstruction exceeds the ceiling. (3) imas-efit's recorded per-slice wall for the same case is quoted
+    reconstruction exceeds the ceiling. (3) imas-efit's wall for the same case, read from the log of its §8 run on the nova-written rows, is quoted
     beside it with its hardware.</p>
 
     <h2 id="s5">§5 — The reduced-model reconstructions</h2>
@@ -190,7 +191,7 @@
 
     <h2 id="s9">§9 — The fit inside the equilibrium iteration</h2>
 <section data-reckon="section" data-id="s9" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
-<p>Reuses the measurement rows, the three known states and the bands of §1, which has landed, and the stored imas-efit cases and bands of §2. It waits on neither.</p><p>The class of §1 is nested: an outer least-squares loop proposes profile coefficients, and for every proposal a complete free-boundary forward solve is converged before the rows are compared. §2 measured what that costs on real machines. The stored MAST-U state qualifies at 5e-16, but the first perturbed forward solve the fit needs stalls at a residual of 1.2e-4, TCV stalls at 0.03, and the ITER state resolves no magnetic axis, so no stored case produced a fit. The nested form remains the long-term goal, because it is the one whose forward map can be differentiated and reused; it is much harder in practice than a fit.</p><p>This section adds the practical form beside it. The whole iteration is constrained by the misfit between measurement and model: on each pass the flux map is held, the profile coefficients (and the conductor currents, as the locked decision <code>fitted-unknowns</code> directs) are found by one linear least-squares solve against the measured rows, the plasma current that fit implies is laid down, and the flux map is updated from it; the passes repeat until the flux map stops changing. No forward solve is ever converged for coefficients the data did not choose. Its receipt carries the same quantities as the §1 class, so §3's scoreboard scores it as one more estimator with no change.</p><p><strong>Done when.</strong> (1) On the three §1 states with noise-free rows the iteration converges and recovers the generating flux map and coefficients inside the §1 bands, and the record states its passes and wall beside the nested class's forward solves and wall for the same state. (2) On the three stored imas-efit cases of §2 it is run with the same rows, the same number of profile coefficients and the same locked decisions, and each case either meets the §2 bands against imas-efit's stored state or is recorded with its terminal misfit, the pass at which the flux map stopped improving and its line-contour panel; the ITER row keeps the §2 label <em>same magnetics, different constraints</em>. (3) Negative control: with every magnetics row, the measured plasma current and the conductor currents scaled by 1.10, the reconstructed plasma current leaves the 1.5 % band on every case that converged. Evidence is one batch job per machine on the H200, falling back to titan, with a per-case table and overlaid line-contour panels on shared levels with both null sets and the wall.</p>
+<p>Reuses the measurement rows, the three known states and the bands of §1, which has landed, and the stored imas-efit cases and bands of §2. It waits on neither.</p><p>The class of §1 is nested: an outer least-squares loop proposes profile coefficients, and for every proposal a complete free-boundary forward solve is converged before the rows are compared. §2 measured where that breaks on real machines. The stored MAST-U state qualifies at 5e-16, but the first perturbed forward solve the fit needs stalls at a residual of 1.2e-4, TCV stalls at 0.03, and the ITER state resolves no magnetic axis, so no stored case produced a fit. The nested form remains the long-term goal, because it is the one whose forward map can be differentiated and reused; it is much harder in practice than a fit.</p><p>This section adds the practical form beside it. The whole iteration is constrained by the misfit between measurement and model: on each pass the flux map is held, the profile coefficients (and the conductor currents, as the locked decision <code>fitted-unknowns</code> directs) are found by one linear least-squares solve against the measured rows, the plasma current that fit implies is laid down, and the flux map is updated from it; the passes repeat until the flux map stops changing. No forward solve is ever converged for coefficients the data did not choose. The solves that refused in §2 were complete free-boundary solves at proposed coefficients, each of which had to find its own axis and boundary and pass qualification before one row was compared. A pass here is a single linear flux update from a current the measurements have just fixed in size and position, started from a flux map that already has an axis, so a wrong proposal is corrected by the next fit instead of being solved to the end. Its receipt carries the same quantities as the §1 class, so §3's scoreboard scores it as one more estimator with no change.</p><p><strong>Done when.</strong> (1) On the three §1 states with noise-free rows the iteration converges and recovers the generating flux map and coefficients inside the §1 bands, and the record states its passes and wall beside the nested class's forward solves and wall for the same state. (2) On the three stored imas-efit cases of §2 it is run with the same rows, the same number of profile coefficients and the same locked decisions, and each case either meets the §2 bands against imas-efit's stored state or is recorded with its terminal misfit, the pass at which the flux map stopped improving, the size of the last flux update beside that misfit so the failure can be laid to the fit or to the flux update, and its line-contour panel; the ITER row keeps the §2 label <em>same magnetics, different constraints</em>. (3) Negative control: with every magnetics row, the measured plasma current and the conductor currents scaled by 1.10, the reconstructed plasma current leaves the 1.5 % band on every case that converged. Evidence is one batch job on the H200, falling back to titan, that runs the cases in sequence inside its allocation, with a per-case table and overlaid line-contour panels on shared levels with both null sets and the wall.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

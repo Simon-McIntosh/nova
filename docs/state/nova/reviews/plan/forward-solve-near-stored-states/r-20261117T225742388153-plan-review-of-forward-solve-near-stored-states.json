@@ -107,6 +107,16 @@
       "note": "TCV and ITER, which refuse at the stored coefficients, now get their verdict from a stated set of starting routes, not from a displacement sequence.",
       "reason": "",
       "when": "2026-11-17T23:13:35.088526+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2492a70c603190859d6cae828039be8ae01256ed",
+      "commit_basis": "edit",
+      "finding": "done_when-3",
+      "note": "The search set is now stated: six halvings of the recorded displacement for MAST-U, and two named starting routes for TCV and ITER, so not reached is a property of the case within that set.",
+      "reason": "",
+      "when": "2026-11-17T23:14:24.946518+00:00"
     }
   ],
   "responses": {
@@ -127,6 +137,15 @@
       "note": "The outer-iteration quantity is removed for TCV and ITER; the clause keeps the terminal reason and residual per starting route.",
       "reason": "",
       "when": "2026-11-17T23:12:56.371173+00:00"
+    },
+    "done_when-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "2492a70c603190859d6cae828039be8ae01256ed",
+      "commit_basis": "edit",
+      "note": "The search set is now stated: six halvings of the recorded displacement for MAST-U, and two named starting routes for TCV and ITER, so not reached is a property of the case within that set.",
+      "reason": "",
+      "when": "2026-11-17T23:14:24.946518+00:00"
     },
     "reasoning-1": {
       "action": "acted",

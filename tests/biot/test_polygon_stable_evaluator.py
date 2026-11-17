@@ -7,6 +7,65 @@ from pathlib import Path
 import pytest
 
 
+@pytest.mark.parametrize("compiled", (False, True), ids=("eager", "compiled"))
+def test_stable_derivatives_keep_original_values(monkeypatch, compiled):
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    import jax
+    import jax.numpy as jnp
+    import numpy as np
+
+    from nova.biot import polygonanalytic as kernel
+
+    assert jax.config.jax_enable_x64 is True
+    calls = []
+
+    def expression(xp, radius, height, *arguments, stable_poles=False, **options):
+        calls.append(stable_poles)
+        # A fifth-degree height term separates fourth- and sixth-order stencils.
+        row = (
+            2 * radius + height + (height / 1e-3) ** 5
+            if stable_poles
+            else radius - height
+        )
+        return tuple((index + 1) * row for index in range(9))
+
+    monkeypatch.setattr(kernel, "_packed_analytic_moments_primal", expression)
+    edge = jnp.asarray([[[1.0], [0.0], [2.0], [1.0]]])
+    one = jnp.ones(1)
+    centre = jnp.zeros((2, 1))
+    zero = jnp.zeros(1, dtype=jnp.int32)
+
+    def program(point):
+        def rows(target):
+            return jnp.stack(
+                kernel.packed_analytic_moments(
+                    jnp,
+                    target[:1],
+                    target[1:],
+                    edge,
+                    one,
+                    one,
+                    centre,
+                    centre,
+                    zero,
+                    zero,
+                )
+            )
+
+        return jax.jvp(rows, (point,), (jnp.asarray((0.37, -0.81)),))
+
+    evaluate = jax.jit(program) if compiled else program
+    value, derivative = evaluate(jnp.asarray((2.0, 0.0)))
+    factors = np.arange(1, 10)[:, None]
+    np.testing.assert_array_equal(value, 2.0 * factors)
+    np.testing.assert_allclose(derivative, (2 * 0.37 - 0.81) * factors, atol=1e-11)
+    # One original expression supplies values; every derivative uses the stable one.
+    assert calls.count(False) == 1
+    assert calls.count(True) > 0
+
+
 @pytest.fixture(scope="module")
 def integrated_receipt():
     path = os.environ.get("NOVA_POLYGON_INTEGRATED_RECEIPT")

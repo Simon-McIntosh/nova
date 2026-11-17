@@ -11,6 +11,7 @@ import subprocess
 import time
 
 import jax
+import jax.numpy as jnp
 import numpy as np
 
 from nova.jax.config import configure_dtypes
@@ -37,6 +38,7 @@ def main():
     parser.add_argument("--undo-average", action="store_true")
     parser.add_argument("--point-current", action="store_true")
     parser.add_argument("--compare-integration", action="store_true")
+    parser.add_argument("--source-read-only", action="store_true")
     arguments = parser.parse_args()
     assert jax.config.jax_enable_x64 is True
     revision = (
@@ -69,9 +71,13 @@ def main():
     )
     print(f"BUILT seconds={time.monotonic() - started:.3f}", flush=True)
     time_ms = float(row["efit_times"][arguments.frame])
-    profile, shipped, current, authority = pinned.description_driven_currents(
-        row, profile, time_ms
-    )
+    if arguments.source_read_only:
+        shipped = current = profile.operator.external_current
+        authority = {"adapter_applied": False}
+    else:
+        profile, shipped, current, authority = pinned.description_driven_currents(
+            row, profile, time_ms
+        )
     if arguments.point_current:
         profile = replace(
             profile, operator=replace(profile.operator, use_linear_moments=False)
@@ -86,6 +92,8 @@ def main():
     amplitude = float(
         profile.operator.current_normalisation_amplitude(target, unscaled)
     )
+    masks, topology = profile.operator.read(seed, pinned.TopologyClass.DIVERTED)
+    samples = jnp.linspace(0.0, 1.0, 65, dtype=jnp.float64)
     result = {
         "revision": revision,
         "module": pinned.__file__,
@@ -108,6 +116,19 @@ def main():
         "use_linear_moments": bool(profile.operator.use_linear_moments),
         "undo_average": arguments.undo_average,
         "point_current": arguments.point_current,
+        "source_read_only": arguments.source_read_only,
+        "topology": {
+            key: np.asarray(getattr(topology, key)).tolist()
+            for key in ("axis", "axis_flux", "boundary_flux", "x_point", "diverted")
+        },
+        "normalised_flux_identity": identity(masks.psi_norm),
+        "core_cells": int(np.count_nonzero(np.asarray(masks.core))),
+        "source_samples": {
+            key: np.asarray(
+                getattr(profile.operator.source.core, key)(samples)
+            ).tolist()
+            for key in ("p_prime", "ff_prime")
+        },
         "reliable_surfaces": reliable,
         "wall_statement": statement,
         "relative_registration_error": unscaled / declared["unscaled_source_ip_a"]

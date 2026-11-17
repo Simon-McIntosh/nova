@@ -13,6 +13,7 @@ import tempfile
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--source-read-only", action="store_true")
     parser.add_argument("revisions", nargs="+")
     arguments = parser.parse_args()
     root = Path.cwd()
@@ -48,6 +49,8 @@ def main():
                 "--output",
                 str(arguments.output / f"{revision}.json"),
             ]
+            if arguments.source_read_only:
+                command.append("--source-read-only")
             environment = {**os.environ, "PYTHONPATH": str(tree)}
             log = arguments.output / f"{revision}.log"
             with log.open("w") as stream:

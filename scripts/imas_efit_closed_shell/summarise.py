@@ -65,6 +65,10 @@ def shielding(air: dict, iron: dict, points: list[tuple[float, float]]) -> dict:
         if a is None or b is None or b == 0:
             continue
         values.append({"probe": list(point), "psi_air": a, "psi_iron": b, "S": a / b})
+    if not values:
+        # Every exterior probe fell outside the grid: the arm carries no
+        # measurement, and the caller records it rather than dividing by zero.
+        return {"values": [], "mean_S": None}
     return {"values": values, "mean_S": sum(v["S"] for v in values) / len(values)}
 
 
@@ -93,7 +97,13 @@ def main() -> None:
                 refused.append({"arm": name, "reason": arm.get("error")})
                 continue
             outer = shielding(air, iron, EXTERIOR)
-            if not outer["values"]:
+            if outer["mean_S"] is None:
+                refused.append(
+                    {
+                        "arm": name,
+                        "reason": "no exterior probe lies inside the flux grid",
+                    }
+                )
                 continue
             series.append(
                 {
@@ -152,7 +162,7 @@ def main() -> None:
                 "steps": [[s["arm"], s["S_mean"]] for s in series],
                 "last_step_delta": round(last["S_mean"] / prev["S_mean"] - 1.0, 5),
                 "passed": abs(last["S_mean"] / prev["S_mean"] - 1.0)
-                < 10 * CONVERGENCE_TOLERANCE,
+                < CONVERGENCE_TOLERANCE,
             }
         )
 

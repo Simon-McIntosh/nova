@@ -49,14 +49,20 @@
     <code>relativeError</code> 1e-2 (<code>e2</code>, <code>fine</code>) and once at
     1e-4 (<code>e4</code>, <code>v40</code>): the pairs differ by 0.16 % and 0.20 %
     at a/b = 0.9 and by 0.50 % and 0.52 % at a/b = 0.5, so the solver tolerance is not
-    the lever and the outline resolution is. The last step moves the answer by 0.32 %
-    (a/b = 0.9) and 1.50 % (a/b = 0.5), and the probe spread at the finest outline is
-    0.40 % and 0.84 %. The series is not monotone: at a fixed knot count the uniform
+    the lever and the outline resolution is.</p>
+  <p>Against §6b's 0.5 % ceiling on a final boundary refinement, the two series differ
+    in kind: the a/b = 0.9 ladder converges (last step 0.32 %, <code>passed =
+    true</code>) and the a/b = 0.5 ladder does not (last step 1.49 %, <code>passed =
+    false</code>). The 1.49 % step at 0.5 is larger than the 0.80 % by which that arm
+    lands from the exact value, so its agreement is not a converged value — it is one
+    rung of a ladder that is still moving, and it is reported as inside the 2 % gate
+    rather than as resolved. The probe spread at the finest outline is 0.40 % and
+    0.84 %. The series is not monotone: at a fixed knot count the uniform
     knot grid aliases against the polygon's corners, so S reads 55.15 at 80 vertices
     and 60.01 at 160 on the same 500 knots.</p>
   <p>The interior probes separate the two effects. Their flux ratio is the shielded
-    interior field, and it is flat across the whole outline series — 0.9219 to 0.9221
-    at a/b = 0.9 and 0.6732 to 0.6750 at a/b = 0.5, a range of 0.03 % and 0.27 % —
+    interior field, and it is flat across the whole outline series — 0.9215 to 0.9221
+    at a/b = 0.9 and 0.6732 to 0.6750 at a/b = 0.5, a range of 0.07 % and 0.27 % —
     while S ranges over 55.15 to 73.52 and 180.18 to 196.42 on the same arms. The reconstruction's interior solution is therefore
     stable and the exterior variance is the polygon's flux at the probe positions
     (the knot aliasing above), not a global field error that a larger solve would fix.</p>

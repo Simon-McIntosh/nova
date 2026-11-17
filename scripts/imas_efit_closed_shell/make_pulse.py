@@ -5,7 +5,11 @@ toroidal-current coil inside a linear permeable spherical shell (inner radius
 a, outer radius b, relative permeability mu_r) whose exterior poloidal flux is
 reduced by the exact factor
 
-    S = ((2 mu + 1)(mu + 2) - 2 (mu - 1)^2 (a/b)^3) / (9 mu).
+    S = ((2 mu + 1)(mu + 2) - 2 (mu - 1)^2 (a/b)^3) / (9 mu),
+
+which is not restated here: it is
+``scripts.iron_linear_magnetisation.controls.exact_shielding``, the shared
+closed-shell control, called with this case's ratio and mu_r.
 
 Everything imas-efit needs arrives through IDSs, written with imas-python at
 the DD version imas-efit reads (4.1.0, its build default and the version its
@@ -28,9 +32,16 @@ import argparse
 import json
 import math
 from pathlib import Path
+import sys
 
 import imas
 import numpy as np
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.iron_linear_magnetisation.controls import exact_shielding  # noqa: E402
 
 DD_VERSION = "4.1.0"
 
@@ -68,10 +79,6 @@ def shell_outline(a: float, b: float, n_arc: int) -> tuple[list[float], list[flo
         r[k] = a * math.cos(theta)
         z[k] = a * math.sin(theta)
     return r, z
-
-
-def exact_shielding(ratio: float, mu_r: float = MU_R) -> float:
-    return ((2 * mu_r + 1) * (mu_r + 2) - 2 * (mu_r - 1) ** 2 * ratio**3) / (9 * mu_r)
 
 
 def build(
@@ -202,7 +209,7 @@ def write_pulse(
         n_arc=n_arc,
         vertices=2 * (n_arc + 1),
         with_iron=with_iron,
-        exact_S=exact_shielding(ratio),
+        exact_S=exact_shielding(ratio, MU_R),
         mu_r=MU_R,
         uri=uri,
     )

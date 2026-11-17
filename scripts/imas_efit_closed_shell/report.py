@@ -68,6 +68,36 @@ def main() -> None:
     fine = {tag: entries[tag]["finest"] for tag in entries}
     convergence = {c["tag"]: c for c in summary["convergence"]}
 
+    def final_sentence(tag: str) -> str:
+        """The closing line of a ratio's table, read from the summary."""
+        arm = fine[tag]
+        exact = entries[tag]["exact_S"]
+        return (
+            f"<p>Final S = {arm['S_mean']:.2f} from the {arm['arc_vertices']}-vertex"
+            f" outline, spread {arm['spread_over_mean'] * 100:.2f} % over the three"
+            f" exterior probes, against the exact {exact:.6f}:"
+            f" {arm['rel_error'] * 100:+.2f} %.</p>"
+        )
+
+    # The non-monotone series is described from the summary, not retyped: the
+    # refined arms, in vertex order, with the vertex list beside them.
+    refined = sorted(
+        (
+            arm
+            for arm in entries["r090"]["series"]
+            if "S_mean" in arm and arm["arc_vertices"] >= 40
+        ),
+        key=lambda arm: arm["arc_vertices"],
+    )
+    groups: dict[int, list[float]] = {}
+    for arm in refined:
+        groups.setdefault(arm["arc_vertices"], []).append(arm["S_mean"])
+    series_text = ", ".join(
+        "/".join(f"{value:.1f}" for value in groups[vertices])
+        for vertices in sorted(groups)
+    )
+    vertex_text = ", ".join(str(vertices) for vertices in sorted(groups))
+
     html = f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <title>imas-efit closed-shell shielding control from an IMAS pulse</title>
@@ -126,15 +156,11 @@ measurement.</p>
 
 <h3>a/b = 0.9</h3>
 {table(entries["r090"])}
-<p>Final S = {fine["r090"]["S_mean"]:.2f} from the 640-vertex outline, spread over the
-three exterior probes {fine["r090"]["spread_over_mean"] * 100:.2f} %, against the
-exact {entries["r090"]["exact_S"]:.6f}: {fine["r090"]["rel_error"] * 100:+.2f} %.</p>
+{final_sentence("r090")}
 
 <h3>a/b = 0.5</h3>
 {table(entries["r050"])}
-<p>Final S = {fine["r050"]["S_mean"]:.2f} from the 320-vertex outline, spread
-{fine["r050"]["spread_over_mean"] * 100:.2f} %, against the exact
-{entries["r050"]["exact_S"]:.6f}: {fine["r050"]["rel_error"] * 100:+.2f} %.</p>
+{final_sentence("r050")}
 
 <h2>Convergence evidence</h2>
 <p>Every arm's slice reports <code>CONVERGENCE_SUMMARY: status= 2 iterations= 1
@@ -149,7 +175,15 @@ iron responses. The iron's own Newton relaxation converges inside each arm —
 saturation scale, and the flat B–H table therefore has no curvature to resolve.</p>
 <p>The discretisation is the only thing still moving. Its last step is
 {convergence["r090"]["last_step_delta"] * 100:+.2f} % at a/b = 0.9 and
-{convergence["r050"]["last_step_delta"] * 100:+.2f} % at a/b = 0.5.</p>
+{convergence["r050"]["last_step_delta"] * 100:+.2f} % at a/b = 0.5, against the
+{summary["convergence_tolerance"] * 100:.1f} % that section 6b requires of a final
+boundary refinement. The a/b = 0.9 series is converged by that criterion
+(<code>passed = {str(convergence["r090"]["passed"]).lower()}</code>); the a/b = 0.5
+series is not (<code>passed = {str(convergence["r050"]["passed"]).lower()}</code>), and
+its {abs(convergence["r050"]["last_step_delta"]) * 100:.2f} % step is larger than the
+{fine["r050"]["rel_error"] * 100:+.2f} % it lands from the exact value, so that number
+is one rung of a ladder that has not stopped moving — read it as inside the 2 % gate,
+not as a converged value.</p>
 
 <h2>Two findings for the owners</h2>
 <h3>The outline resolution is derived from the vertex count and capped at 500 knots</h3>
@@ -160,8 +194,8 @@ can ask for a finer iron boundary than 500 knots, and the knot grid is uniform i
 boundary's normalised distance — it does not follow the polygon's corners. The
 consequence is in the tables: a 20-vertex half-arc (420 knots) gives
 {entries["r090"]["series"][0]["S_mean"]:.2f} at a/b = 0.9, 20 % above the exact value,
-and refining the outline at the 500-knot cap is not monotone (58.3, 55.2, 60.0, 60.6,
-60.4 for 40, 80, 160, 320, 640 vertices), because the knots alias against the corners.
+and refining the outline at the 500-knot cap is not monotone ({series_text} for
+{vertex_text} vertices), because the knots alias against the corners.
 A user cannot tell a converged case from a coincidental one without this ladder.</p>
 <h3>A plasma-filled version of the same case does not converge, and the iron is not
 the reason</h3>

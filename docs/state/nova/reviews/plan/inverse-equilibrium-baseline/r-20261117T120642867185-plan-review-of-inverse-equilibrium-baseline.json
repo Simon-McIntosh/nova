@@ -41,7 +41,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 44,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3ab72680615f289c36e398c1918f55b997ad1a4b",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The cost ceiling is now stated against the measured forward-call count: the wall per reconstruction may exceed that count times the warm forward wall by at most a quarter, and the control adds forward calls.",
+      "reason": "",
+      "when": "2026-11-17T16:03:06.947815+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3ab72680615f289c36e398c1918f55b997ad1a4b",
+      "commit_basis": "edit",
+      "note": "The cost ceiling is now stated against the measured forward-call count: the wall per reconstruction may exceed that count times the warm forward wall by at most a quarter, and the control adds forward calls.",
+      "reason": "",
+      "when": "2026-11-17T16:03:06.947815+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261117T120642867185-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261117T120642867185-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "03fda10f3ff7095e1e31411c2b084732aee48bdd",
   "rubric": "content",

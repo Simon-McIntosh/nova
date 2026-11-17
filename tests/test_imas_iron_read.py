@@ -1,6 +1,7 @@
 """Pinned WEST iron reads and preservation of the script inputs."""
 
 import ast
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -82,6 +83,15 @@ def _outlines(iron):
     ]
 
 
+def _vertex_digest(polygons):
+    """Digest of the ordered polygon vertices, independent of the mesher."""
+    return hashlib.sha256(
+        b"".join(
+            np.ascontiguousarray(polygon, dtype="<f8").tobytes() for polygon in polygons
+        )
+    ).hexdigest()
+
+
 def test_west_iron_segments_match_previous_reads(west):
     uri, dd_version, iron = west
     description = StaticMachineDescription.read_iron_core(uri, dd_version=dd_version)
@@ -153,7 +163,15 @@ def test_census_mesh_matches_previous_read(west):
         for polygon in mesh(shapely.Polygon(outline).buffer(0), 0.08).polygons
     ]
     actual = namespace["polygons"]
-    assert len(actual) == len(expected) > 0
+    # Measured 2026-11-17 from this construction at 0.08 m: six WEST segments
+    # mesh to 176, 242, 427, 180, 427 and 242 cells. Both sides below call the
+    # same production mesher, so these values are pinned here to keep a change
+    # in cell count, partition or vertex order visible to this read.
+    assert len(actual) == len(expected) == 1694
+    assert (
+        _vertex_digest(actual)
+        == "af8328273be3b2b1a64f9da4f7e70d88c9d35a31d8c6e10ecaf5f4b585c68f8f"
+    )
     for polygon, reference in zip(actual, expected, strict=True):
         np.testing.assert_array_equal(polygon, reference)
 

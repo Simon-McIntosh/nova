@@ -25,7 +25,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 40,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "cb31d425c257376739a74df849af8682a1d8862d",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Clause (1) now quotes the nested class forward-solve count from the landed known-answer record and says no nested wall is quoted because that record carries none.",
+      "reason": "",
+      "when": "2026-11-17T11:49:07.176207+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "cb31d425c257376739a74df849af8682a1d8862d",
+      "commit_basis": "edit",
+      "note": "Clause (1) now quotes the nested class forward-solve count from the landed known-answer record and says no nested wall is quoted because that record carries none.",
+      "reason": "",
+      "when": "2026-11-17T11:49:07.176207+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261117T110231852554-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261117T110231852554-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "0e4694da44a59d61b7d58320310a3e5166c9761e",
   "rubric": "content",

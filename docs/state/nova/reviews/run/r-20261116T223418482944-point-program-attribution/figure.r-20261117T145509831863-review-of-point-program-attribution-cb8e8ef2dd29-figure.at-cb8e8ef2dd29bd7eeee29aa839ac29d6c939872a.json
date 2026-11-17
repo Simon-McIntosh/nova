@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-17T15:01:59.860Z",
+  "dispatched_at": "2026-11-17T14:56:59Z",
+  "figures": {
+    "docs/figures/kernel-compile-barrier/point-program-attribution/block-attribution.svg": {
+      "contrast": "passes: dark near-black text on white for tick labels and values, mid-grey control bar and blue stubbed bars both well separated from white, and the grey span labels read against the white gaps they sit in",
+      "data_ink": "passes: one flat bar per block and per arm carries the ink, and the only further marks are two thin grey span arrows and their rotated labels; no gradient, no marker cloud, no second geometry",
+      "decoration": "passes: white ground in both panels, no gridline, no background fill or band, and only the left and bottom spines carry a scale",
+      "label_collision": "passes: no label is clipped at the canvas edge and no two labels meet \u2014 the rotated span labels sit in the inter-bar gaps beside the arrows, the value labels sit above or beyond their bars, and the erased row's text runs in otherwise empty space",
+      "legibility": "passes: at a glance the left panel ranks the blocks by share of the 6,088,067-byte lowered graph with dark value labels beyond each bar end, and the right panel shows the three compiled arms in cold H200 seconds, each labelled 223.7 / 104.5 / 34.1 above its bar; every axis is titled with its quantity and unit",
+      "table_form": "passes: both panels compare magnitudes, where relative size is the comparison itself; the categorical outcome of the erased block is stated in words on its own row rather than faked as a bar length"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/kernel-compile-barrier/point-program-attribution/block-attribution.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The left panel's four bars total 215.2 per cent (99.1 + 67.5 + 31.4 + 17.2) of the same 6,088,067 bytes, because each stub is lowered from the unstubbed program and the stubs overlap \u2014 the corner-height Hessian sits inside the derivative tower, and the value-path stub removes everything. Nothing on the panel or in the caption says the rows are independent measurements rather than a partition, so a reader who adds the bars, which the shared percentage axis invites, gets more than the whole. The head's new graph table in the evidence fragment gives the same rows as raw bytes and shares but also carries no additivity note."
+    },
+    {
+      "file": "scripts/prototypes/point_program_attribution/figure.py",
+      "line": 211,
+      "severity": "non-blocking",
+      "summary": "The legend's dotted swatch for the erased state denotes a mark that appears nowhere in the picture: the erased row's bar is drawn with zero length at the axis, so no dotted outline is rendered in either panel while the legend displays one. The legend's own words ('zero-length bar, marked in text, no share') and the row's text carry the meaning, which is why the reader is not stopped."
+    },
+    {
+      "file": "scripts/prototypes/point_program_attribution/figure.py",
+      "line": 196,
+      "severity": "non-blocking",
+      "summary": "The canvas is drawn 17.6 in wide, above the 14-in full-width canvas the project's figure style specifies. At the delivered 1400 px width the 14 pt labels render about 15.5 px tall instead of the calibrated 19.4 px, so this figure's text sits roughly 20 per cent smaller than every other nova figure on a page, and the rotated span labels (11.5 pt, figure.py:177) \u2014 which carry the 119.2 s and 189.6 s the record's prose quotes \u2014 are the smallest text in the set. All text is legible in the render, so this does not hold the node."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261117T145509831863-review-of-point-program-attribution-cb8e8ef2dd29-figure",
+  "reviewed_base_sha": "b0a2cde51b49c29bf4c642eebadd500af9b68ca0",
+  "reviewed_head_sha": "cb8e8ef2dd29bd7eeee29aa839ac29d6c939872a",
+  "reviewed_image": "image-0.png, the 1400x589 PNG attached to this review, rendered from docs/figures/kernel-compile-barrier/point-program-attribution/block-attribution.svg (unchanged since the previous figure review head ccc984ff0945)",
+  "reviewed_run_id": "r-20261116T223418482944-point-program-attribution",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: passes: left panel ranks five blocks by share of the 6,088,067-byte lowered graph with dark value labels beyond each bar end; right panel shows three compiled arms in cold H200 seconds labelled 223.7 / 104.5 / 34.1 above their bars; every axis titled with quantity and unit",
+    "RUBRIC data_ink: passes: one flat bar per block and per arm carries the ink; the only other marks are two thin grey span arrows and their rotated labels; no gradient or competing geometry",
+    "RUBRIC decoration: passes: white ground, no gridlines in either panel, no background fill or band, only the scale-bearing spines drawn",
+    "RUBRIC contrast: passes: near-black tick labels and values on white, mid-grey control bar, blue stubbed bars, grey span labels all clear of their background",
+    "RUBRIC table_form: passes: both panels compare magnitudes, where length is the comparison; the erased block's categorical outcome is stated in words on its row rather than drawn as a bar",
+    "RUBRIC label_collision: passes: no clipped or overlapping text; rotated span labels sit in the inter-bar gaps beside their arrows, value labels above or beyond their bars, erased-row text in empty space"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T15:03:04.349091+00:00",
+  "total": null
+}

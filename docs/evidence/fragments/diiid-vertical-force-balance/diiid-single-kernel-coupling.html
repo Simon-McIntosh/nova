@@ -18,7 +18,7 @@
 </head>
 <body><main class="plan-doc">
 <header><h1>DIII-D plasma coupling from one polygon evaluation</h1>
-<p>The builder now attaches block 0 of each <code>build_flux_blocks</code> evaluation as the uniform plasma response, alongside that evaluation's radial and vertical moments. This applies to the grid, physical wall and sampling vertices. Conductor responses, solver guards and tolerances are unchanged. The regression check passes; the paired terminal measurements are still in progress.</p></header>
+<p>The builder now attaches block 0 of each <code>build_flux_blocks</code> evaluation as the uniform plasma response, alongside that evaluation's radial and vertical moments. This applies to the grid, physical wall and sampling vertices. Conductor responses, solver guards and tolerances are unchanged. The regression check passes. The first terminal pair is negative for convergence: 137D converges at the base and stops unconverged at the head. The remaining three pairs are in progress.</p></header>
 
 <section id="diiid-single-kernel-coupling-check">
 <h2>The check detects the mixed kernels</h2>
@@ -29,7 +29,7 @@
 
 <section id="diiid-single-kernel-coupling-differences">
 <h2>The uniform response differs at every source cell</h2>
-<p>For each source cell <var>c</var>, the plotted value is <code>norm(hybrid[:, c] − polygon[:, c]) / norm(polygon[:, c])</code>, taking the Euclidean norm over the target coordinates in the named family. There are 1,089 source cells, 1,089 grid targets, 84 wall targets and 1,156 sampling targets. These are relative response-column norms; they are not a relative error in the terminal plasma flux or a fitted-current change.</p>
+<p>For each source cell <var>c</var> of the 137D builder, the plotted value is <code>norm(hybrid[:, c] − polygon[:, c]) / norm(polygon[:, c])</code>, taking the Euclidean norm over the target coordinates in the named family. There are 1,089 source cells, 1,089 grid targets, 84 wall targets and 1,156 sampling targets. These are relative response-column norms; they are not a relative error in the terminal plasma flux or a fitted-current change.</p>
 <table><thead><tr><th>Target family</th><th>Minimum</th><th>Median</th><th>Maximum</th><th>Whole-block relative norm</th></tr></thead><tbody>
 <tr><td>Grid</td><td>0.041618%</td><td>0.052900%</td><td>0.071437%</td><td>0.051420%</td></tr>
 <tr><td>Wall</td><td>0.011696%</td><td>0.046353%</td><td>0.145575%</td><td>0.047904%</td></tr>
@@ -41,7 +41,15 @@
 
 <section id="diiid-single-kernel-coupling-terminal">
 <h2>Paired terminal measurements</h2>
-<p>Pending: 137D, 146D, 146L and 179L at the base and at the repaired head. One H200 allocation runs the existing governed-wall branch cohort and its lower-saddle reader against extracted committed revisions. Each completed row persists its terminal state and receipt before the next begins. Kernel consistency alone does not establish convergence or improved agreement with EFIT.</p>
+<p>One H200 allocation runs the existing governed-wall branch cohort and its lower-saddle reader against extracted committed revisions. Each completed row persists its terminal state and receipt before the next begins. The EFIT reference lower saddle is polished on the registered strided EFIT grid. Signed offsets below are Nova minus EFIT; positive radial is outward and positive vertical is upward.</p>
+<table><thead><tr><th>Case</th><th>Uniform response</th><th>Converged</th><th>Terminal residual</th><th>Terminal reason</th><th>ΔR [cm]</th><th>ΔZ [cm]</th><th>Distance [cm]</th></tr></thead><tbody>
+<tr><td>137D</td><td>Hybrid (base)</td><td>True</td><td>1.80718 × 10<sup>−12</sup></td><td>CONVERGED (1)</td><td>+0.777790</td><td>+2.170629</td><td>2.305772</td></tr>
+<tr><td>137D</td><td>Polygon (head)</td><td><strong>False</strong></td><td>3.32806 × 10<sup>−4</sup></td><td>ACTIVE_SET_STEP_REFUSED (12)</td><td>+1.268792</td><td>+1.939189</td><td>2.317388</td></tr>
+</tbody></table>
+<p>The 137D arms use the identical label seed (SHA-256 <code>72739cd84b34a44e670b8a5b52aed32877b63d126ad95c72865377301287e178</code>). The head's radial offset increases by 0.491 cm and its vertical offset decreases by 0.231 cm, leaving the distance almost unchanged. Its three active-set passes each attempt 24 Newton proposals and end with sufficient-decrease refusal; they accept 9, 5 and 0 proposals. The outer receipt records <code>ACTIVE_SET_STEP_REFUSED</code>. The kernel tolerance remains 10<sup>−8</sup> and the qualification tolerance 10<sup>−5</sup>. This state is not a converged solution.</p>
+<figure><img src="/nova/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-137-diverted.svg" alt="Paired terminal 137D flux contours with the EFIT field, physical wall, and both solved and EFIT null sets; the polygon-uniform head is unconverged.">
+<figcaption>137D: hybrid uniform at left (converged, residual 1.80718 × 10<sup>−12</sup>); polygon uniform at right (unconverged, residual 3.32806 × 10<sup>−4</sup>). Blue is the solved field and its nulls; dark dashed contours and dark null markers are EFIT; grey is the physical wall. Both panels use the same 14 physical flux levels. Only an additive gauge, the median EFIT-minus-solved flux inside the wall, is removed for this display; the solve and its residual are unchanged. Larger dark reference markers remain visible beneath the blue markers when positions nearly coincide. The figure passed mechanical checks and visual inspection.</figcaption></figure>
+<p>Pending: paired 146D, 146L and 179L terminal records and panels. Kernel consistency alone does not establish convergence or improved agreement with EFIT.</p>
 </section>
 
 <section id="diiid-single-kernel-coupling-provenance">

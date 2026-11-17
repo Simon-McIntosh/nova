@@ -2002,6 +2002,52 @@ the repair base and the repaired head. The original base resolves to its two
 existing test files; the repair base and head run the exact three-file command.
 This preserves both requested baselines, and will report both added-failure
 counts from native summaries. Old incomplete CPU receipts remain preserved.
-The three exact suite arms are running; no completed paired result is yet claimed.
+All three exact suite arms aborted before a pytest summary; the incomplete receipts and unavailable failure-set deltas are recorded below.
 No additional MAST-U, TCV or ITER comparison seed was submitted for this repair.</p>
+</section>
+
+<section id="efit-comparison-review-suite-abort">
+<h2>Exact CPU suite attempts</h2>
+<p>CPU job 1322248 finished FAILED after 00:53:02, well before its eight-hour
+scheduler limit. Its controller finished and preserved every arm, but none of
+the three exact suite processes reached a pytest summary. Each exited with
+<code>EXIT=-6</code> (SIGABRT), with <code>Fatal Python error: Aborted</code>.
+Their Python stacks all end in JAX's <code>backend_compile_and_load</code>, called
+by <code>ForwardProfile._solve_accelerated</code> while constructing the physical
+case for <code>test_known_state_recovery</code>. The logs give no lower-level
+abort reason; no memory, cache-read or timeout cause is inferred.</p>
+<table><thead><tr><th>Arm and actual revision</th><th>Resolved files</th><th>CPU wall [s]</th><th>Progress markers before abort</th><th>Native exit / suite completed</th></tr></thead><tbody>
+<tr><td>Original base: d7676e478fc8701b036ec717f80d403c3ead86f5</td><td>forward, magnetics_fit</td><td>3144.963828</td><td>45 pass markers, 1 F</td><td>-6 / false</td></tr>
+<tr><td>Repair base: 77698bc5de094f64fbaf9f687c4c353428f82200</td><td>forward, magnetics_fit, comparison</td><td>2747.024341</td><td>67 pass markers, 1 F</td><td>-6 / false</td></tr>
+<tr><td>Measured repair head: 28458e75651b4ec1e263dbe76a711ccb837ab290</td><td>forward, magnetics_fit, comparison</td><td>2928.161324</td><td>77 pass markers, 1 F</td><td>-6 / false</td></tr>
+</tbody></table>
+<p>These are partial progress markers, not final pass/failure counts. The F
+markers cannot be assigned a test identity from these logs. The original-base
+and repair-base added-failure counts are both unavailable, not zero. The native
+receipts therefore retain <code>completed=false</code>, <code>summary=null</code>
+and <code>failure_count=null</code>; their empty failure-ID arrays mean IDs were
+not captured. Each gate log records its exact command, actual imported module,
+working directory, revision and bare native EXIT line. The original base ran the
+two files present at its revision; both repair snapshots ran the requested exact
+three-file command without a selector or shortened gate.</p>
+<p>The requested documentation head ee02bc413dc71e7e9fdf0c0172985c0ebb0f0313 was
+not measured by that full batch. Its suite-source bytes match the measured head
+28458e75651b4ec1e263dbe76a711ccb837ab290, but their identities remain distinct:
+no execution is relabelled as the newer revision. Old cut-short records and the
+new three native receipts remain preserved under the run evidence directory.</p>
+<p>The controller wrote <code>negative_control_admitted=true</code> by comparing
+the five mutation failures against the aborted head's empty failure-ID array.
+That flag is rejected: an empty capture from an aborted suite is not evidence
+that a test passed. The as-run controller and its native index are retained,
+and the helper's calculation now requires completed records. A separate focused
+run at the actual documentation head explicitly reported each of those same five
+test IDs PASSED: <code>5 passed, 41 deselected in 19.03s</code>, EXIT=0. This
+validates both admission-code repairs against their mutation detector. It does
+not substitute for the missing exact full-suite pair.</p>
+<p>The suite-pair review finding remains unresolved and is explicitly declined
+in the manifest: obtaining complete CPU executions requires the compilation
+abort to be resolved, outside this repair's authority to edit forward or backend
+code. No further full-suite or physical comparison run is submitted. The result
+of this repair is blocked, with two code findings answered and the incomplete
+suite evidence retained.</p>
 </section>

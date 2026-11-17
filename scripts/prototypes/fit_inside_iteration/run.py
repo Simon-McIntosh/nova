@@ -325,8 +325,10 @@ def main(argv=None):
     args = parser.parse_args(argv)
     output = Path(args.output).resolve()
     output.mkdir(parents=True, exist_ok=True)
-    os.environ["NOVA_MAGNETICS_FIT_FIGURES"] = str(Path(args.figures).resolve())
-    os.environ["NOVA_EFIT_COMPARISON_FIGURES"] = str(Path(args.figures).resolve())
+    figures = Path(args.figures).resolve()
+    # the known-state and stored-case painters both name a case "iter"
+    os.environ["NOVA_MAGNETICS_FIT_FIGURES"] = str(figures / "known-states")
+    os.environ["NOVA_EFIT_COMPARISON_FIGURES"] = str(figures / "stored-cases")
     os.environ["NOVA_MAGNETICS_FIT_EVIDENCE"] = str(output / "known-state-evidence")
     os.environ["NOVA_EFIT_COMPARISON_OUTPUT"] = str(
         output / "stored-case-evidence"

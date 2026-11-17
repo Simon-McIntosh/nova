@@ -33,6 +33,11 @@
       "kind": "exempted",
       "reason": "Prototype measurement scaffolding under scripts/prototypes; it does not ship",
       "recorded_at": "2026-11-17T22:57:40.648816+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The discovery repair's result is recorded in the caller-scope audit committed with the run; the inventory probe is a prototype, not a regression the suite must carry",
+      "recorded_at": "2026-11-17T22:57:50.613420+00:00"
     }
   },
   "findings": [

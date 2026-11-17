@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run one imas-efit closed-shell arm on an IMAS pulse.
 #
-#   run_case.sh <srcdir> <efit-binary> <pulse-dir> <output-dir> <options-dir> <log>
+#   run_case.sh <srcdir> <efit-binary> <pulse-dir> <options-dir> <output-dir> <log>
 #
 # imas-efit is invoked in unified mode: --pulse carries every IDS (pf_active,
 # iron_core, wall, magnetics, tf) and --options-dir the solver XML only.

@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T22:13:37.803Z",
+  "dispatched_at": "2026-11-17T22:12:59Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261117T221208113908-plan-review-of-inverse-equilibrium-baseline/plan.html:190",
+      "id": "reasoning-1",
+      "reason": "the operational instruction the sentence supports (nova sets the profile degrees explicitly rather than inheriting the selector) is unchanged by the stronger or weaker attribution, so only the wording of the reason would be edited.",
+      "text": "the new sentence states that in imas-efit's inherited basis \"no state with a magnetic axis exists\", while the run recorded for this section measures `NoQualifiedAxisError` on a source that ran to completion and a small qualified-axis failure at 120 cells, i.e. states that exist with an unqualified or misshapen axis",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "2492a70c603190859d6cae828039be8ae01256ed",
+  "plan_fingerprint": "e078ac48deca1df76276f346830bdad85e8605b3d9633cf8b8b3a55e29e80d6b",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 52,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T221208113908-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "abf8cc7b8da407b23a17b8357080756af46f29e8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every anchor resolves: `docs/evidence/archive/inverse-equilibrium-baseline-landed.html`, `docs/figures/inverse-equilibrium-baseline/inverse-seam.svg`, `docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html` and the decisions `efit-on-synthetic-rows` and `fitted-unknowns` all exist, and the extensionless `/nova/spine-efit-parity` resolves through `reckon.resources.resolve_route` to the single plan match `docs/plans/spine-efit-parity.html` (the docs server's untyped-slug route), so it is the house convention and not a dead citation; `equilibrium-fit-provenance` resolves at `~/Code/imas-efit/docs/plans/equilibrium-fit-provenance.html`.",
+    "done_when": "pass \u2014 s8's done-when carries measurable bands (1.5 % plasma current, 0.02 m axis, 2 % of span on the boundary flux, q95 magnitude 0.1 on one calculator) and an explicit clause (3) negative control that scales every row, the measured plasma current and every conductor current by 1.10; the landed \u00a78 run shows the control firing (imas-efit reconstructs \u221214.9974 MA against a \u221213.6340 MA generating current).",
+    "evidence_paths": "pass \u2014 s8's output lands in the plan's record `docs/evidence/archive/inverse-equilibrium-baseline-landed.html` with the section fragment under `docs/evidence/fragments/inverse-equilibrium-baseline/`, both durable repository paths, and the run it cites kept its log under the crew run directory.",
+    "naming": "pass \u2014 s8's added sentence names no file, symbol, stage or ticket, carrying only the configuration stance and its reason.",
+    "reasoning": "a finding \u2014 s8's added rationale says the automatic degree choice yields a basis in which \"no state with a magnetic axis exists\", which is stronger than the evidence in the section's own delivered record (`NoQualifiedAxisError` on a source that ran to completion, and a 120-cell terminal span of 0.164 Wb against an 81.26 Wb seed), so the supported claim is an unqualified axis rather than no axis.",
+    "single_goal": "pass \u2014 s8 delivers one thing, the imas-efit reconstruction of one noise-free ITER state written by nova and its comparison with that state; the basis, edge and wall statements are attributes of that one run.",
+    "wiring": "pass \u2014 s8 declares no dependency because \u00a71 has landed, and the three sections that consume it (s3, s4, s7 in `plan-section-depends-on`) each name \u00a78 as the provider of the nova-written rows and the imas-efit run."
+  },
+  "section_digests": {
+    "_document": "fb98dbb43fc2642534ec98e1fda5075ba9f6672c5bcad11683c8bf49cd31255d",
+    "s0": "9fe9f7777ce4e7201a722d96a20cbfd973e35283017a99e10585518af735b3ef",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "1d7c7611f002d7765b98531126cc095d6d244b387578c5d44d7284ff93c9e59c",
+    "s3": "ffe1ae40fdd119d382956b68d70b5ac439dfd6ba20fecc88ab8ca5d01fd2a8a5",
+    "s4": "d9ed8ee2d1feb4975b36a8edbb075492994edb9514fcaf73a6c1f921f2bf9736",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "cadfba00a23e3a3b6ea0fbee46a46eb276970d776c456bd1a53931456d6f8e09",
+    "s7": "5c750c79d813b34b96a3b3b418cd41dd92a06de78455a410a3cfd366c1aeabee",
+    "s8": "5f1a44b0fc4688ef69242b46b85666aefaf1d27e32404e14f4874b566bc15a1f",
+    "s9": "6b59708e5b47c987c440323356fb9dd0f2ec4438ce599455f755a5cf0772d5bb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T22:21:27.278840+00:00",
+  "total": null
+}

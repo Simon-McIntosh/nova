@@ -13,6 +13,11 @@
       "kind": "exempted",
       "reason": "the second file, test_artifacts_carry_no_worktree_paths.py, ran green in the scoped gate log at both revisions; the node touched only test_imas_iron_read.py, so the narrower arm pair measures everything the diff can reach",
       "recorded_at": "2026-11-17T17:02:01.301661+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "manifest bookkeeping only: the measurement_module field names a scratch tree rather than the landing tree, while every recorded gate and arm header names the tree that ran; no test or value depends on the field",
+      "recorded_at": "2026-11-17T17:02:11.599835+00:00"
     }
   },
   "findings": [

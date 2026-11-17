@@ -21,10 +21,12 @@
   <meta name="plan-tags" content="equilibrium,efit,grad-shafranov,convergence">
   <meta name="plan-after" content="converged-forward-solve">
   <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s1&quot;:[],&quot;s2&quot;:[&quot;forward-solve-near-stored-states#s1&quot;],&quot;s3&quot;:[&quot;forward-solve-near-stored-states#s2&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s1&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s2&quot;:[&quot;forward-solve-near-stored-states#s1&quot;],&quot;s3&quot;:[&quot;forward-solve-near-stored-states#s2&quot;]}">
   <title>Forward Solve Near Stored States | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
   <main class="plan-doc">
@@ -54,7 +56,7 @@
     <table>
       <thead><tr><th>Section</th><th>Hours</th><th>Reasoning</th><th>Risk</th><th>Waits on</th></tr></thead>
       <tbody>
-        <tr><td>§1 The three refusals as standing cases</td><td>3</td><td>standard</td><td>moderate</td><td>—</td></tr>
+        <tr><td>§1 The three refusals as standing cases</td><td>3</td><td>standard</td><td>moderate</td><td>inverse-equilibrium-baseline §2</td></tr>
         <tr><td>§2 Where each solve stops qualifying</td><td>3</td><td>deep</td><td>moderate</td><td>§1</td></tr>
         <tr><td>§3 The solves qualify</td><td>8</td><td>deep</td><td>elevated</td><td>§2</td></tr>
       </tbody>
@@ -62,6 +64,7 @@
 
     <h2 id="s1">§1 — The three refusals as standing cases</h2>
     <section data-reckon="section" data-id="s1" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>Waits on the inverse baseline's comparison section, whose landing brings the cited record and the stored-case reader onto the branch.</p>
     <p>The refusals were met inside a long comparison run. Before anything is changed they are made
     reproducible on their own, from stored inputs, without the inverse class: each machine's description,
     imas-efit's fitted conductor currents and profile coefficients, and the stored flux map used as the
@@ -88,7 +91,7 @@
     whether any state within 1 % of the stored coefficients qualifies when started from the stored flux map,
     and for each the stage at which qualification is first lost. (3) Each case is given one of two verdicts
     with the measurement that supports it: the requested state is not an equilibrium of the machine as
-    described, or it is and the solve does not reach it. Negative control: the same measurement on the §1
+    described, or it is and the solve does not reach it. The verdict rests on a witness that does not depend on the solve converging: the residual of the stored imas-efit flux map under the forward operator at the stored coefficients, evaluated once without iteration and stated as a fraction of the axis-to-boundary flux span, and the smallest singular value of the operator linearised there relative to its largest. A residual inside the 1 % row-replay agreement with a well-conditioned linearisation is a state that exists; a residual outside it is not an equilibrium of the machine as described. Negative control: the same measurement on the §1
     positive control reports a qualifying state at zero perturbation.</p>
 
     <h2 id="s3">§3 — The solves qualify</h2>
@@ -106,18 +109,16 @@
     §1 refusals. The record carries a line-contour panel per repaired case of the qualified displaced state
     on the stored imas-efit state, on shared levels, with both null sets and the wall.</p>
 
-    <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-    </section>
+    
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-fsn-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="coordinator" data-written-at="2026-11-17">
-        <h4 class="r-fu-title">Reproduce the three refusals as standing cases</h4>
-        <div class="r-fu-body"><p>The plan is drafted and awaits its content and design reviews. The first section makes the MAST-U, TCV and ITER refusals reproducible from stored inputs.</p></div>
-        <pre class="r-fu-prompt">/reckon-build forward-solve-near-stored-states §1</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-fsn-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="coordinator" data-written-at="2026-11-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Reproduce the three refusals as standing cases</h4>
+    <div class="r-fu-body"><p>The plan is drafted and awaits its content and design reviews. The first section makes the MAST-U, TCV and ITER refusals reproducible from stored inputs.</p></div>
+    <pre class="r-fu-prompt">/reckon-build forward-solve-near-stored-states §1</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

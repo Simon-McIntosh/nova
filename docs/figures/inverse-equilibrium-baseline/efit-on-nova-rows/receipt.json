@@ -509,6 +509,35 @@
    ]
   }
  },
+ "efit_run": {
+  "job": {
+   "cores": 2,
+   "end": "2026-11-17T03:41:30",
+   "exit": "0:0",
+   "id": "1321516",
+   "name": "efit-both",
+   "node": "98dci4-clu-3141",
+   "nodes": 1,
+   "partition": "sun_debug",
+   "start": "2026-11-17T03:41:13",
+   "wall_seconds": 17
+  },
+  "log": "case/efitboth-1321516.log",
+  "runs": {
+   "nominal": {
+    "first": "2026-11-17 03:41:26.687",
+    "last": "2026-11-17 03:41:28.873",
+    "pulse": 10,
+    "seconds": 2.186
+   },
+   "scaled": {
+    "first": "2026-11-17 03:41:29.067",
+    "last": "2026-11-17 03:41:30.443",
+    "pulse": 11,
+    "seconds": 1.376
+   }
+  }
+ },
  "fit": {
   "10": {
    "coefficients": [

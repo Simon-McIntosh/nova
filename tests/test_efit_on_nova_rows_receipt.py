@@ -363,6 +363,49 @@ def test_the_edge_constraint_is_shown_by_the_solver_not_the_config(record, recei
         assert ship(abs(off["profiles"][name][-1]), digits) in record
 
 
+def test_the_imas_efit_wall_and_hardware_are_stated_and_pinned(record, receipt):
+    """Clause 1 asks for the run's wall and hardware; the cost section reads it."""
+    efit_run = receipt["efit_run"]
+    job = efit_run["job"]
+    runs = efit_run["runs"]
+    for value in (job["partition"], job["node"], str(job["cores"]), job["id"]):
+        assert value in record, f"the record no longer names {value}"
+    assert job["nodes"] == 1
+    assert job["exit"] == "0:0"
+    # the job wall is a whole number of seconds and bounds both pulse walls
+    assert isinstance(job["wall_seconds"], int) and job["wall_seconds"] > 0
+    for name in ("nominal", "scaled"):
+        assert runs[name]["seconds"] > 0
+        assert runs[name]["seconds"] < job["wall_seconds"]
+        assert ship(runs[name]["seconds"], 2) in record, (
+            f"the record no longer quotes the {name} wall"
+        )
+    assert runs["nominal"]["pulse"] == 10 and runs["scaled"]["pulse"] == 11
+    # the stated figure is a duration, not a bare coincidence with another number
+    assert f"<code>{job['wall_seconds']} s</code>" in record
+    assert "sacct" in record
+
+
+def test_the_record_states_the_relations_it_names(record):
+    """Each wording fix states a measured relation, not a paraphrase."""
+    # the current is a difference from the generating value, not a ratio to it
+    assert (
+        "differs from the generating value by a fraction <code>8.7e-7</code>" in record
+    )
+    assert "is <code>8.7e-7</code> of the generating value" not in record
+    # the bands are read after the one additive gauge constant
+    assert "read after the one additive constant" in record
+    assert "<code>+0.3 Wb</code>" in record
+    # the profile sign follows the stated flux relation and the actual gradient
+    assert "<code>nova = +psi_DDv4</code>" in record
+    assert "<code>dp/d\u03c8</code>" in record and "<code>F dF/d\u03c8</code>" in record
+    assert "negated total flux" in record
+    assert "whose sign is opposite nova's" not in record
+    # the provenance cites the rerun that produced the recorded fit
+    assert "<code>1321531</code>" in record and "efit-fit2" in record
+    assert "StencilMesh" in record
+
+
 class _IdentifierCounter(HTMLParser):
     def __init__(self):
         super().__init__()

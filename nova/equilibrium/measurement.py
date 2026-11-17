@@ -23,26 +23,78 @@ class Magnetics:
 
     ``angle`` is the poloidal orientation of a field probe [deg]; flux-loop rows
     ignore it, so a facility that leaves it unset can pass zeros.
+    ``flux_loop_fraction`` is the signed toroidal span divided by 2 pi for a
+    loop at one poloidal location. Zero also represents a path whose segments
+    all have zero toroidal extent; its measured row is retained in the fit.
     """
 
     r: np.ndarray
     z: np.ndarray
     angle: np.ndarray
     flux_loop: np.ndarray
+    flux_loop_fraction: np.ndarray | None = None
+    flux_loop_segments: tuple[np.ndarray, ...] | None = None
+    """Optional per-row (R, Z, signed toroidal fraction) observation terms."""
+
+    @cached_property
+    def loop_fraction(self) -> np.ndarray:
+        """Return the finite signed toroidal fraction in sensor row order."""
+        value = (
+            np.ones(self.number)
+            if self.flux_loop_fraction is None
+            else np.asarray(self.flux_loop_fraction, dtype=float)
+        )
+        if value.shape != (self.number,) or not np.all(np.isfinite(value)):
+            raise ValueError("flux-loop fractions must be finite and sensor aligned")
+        return value
 
     @property
     def number(self) -> int:
         """Return the sensor count."""
         return int(np.asarray(self.r).size)
 
+    @cached_property
+    def loop_quadrature(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Return sample points, sensor-row indices and oriented loop weights."""
+        rows = np.flatnonzero(self.flux_loop)
+        if self.flux_loop_segments is None:
+            return (
+                np.column_stack((self.r, self.z))[rows],
+                rows,
+                self.loop_fraction[rows],
+            )
+        if len(self.flux_loop_segments) != self.number:
+            raise ValueError("loop segments must align with every sensor row")
+        points, indices, weights = [], [], []
+        for row in rows:
+            terms = np.asarray(self.flux_loop_segments[row], dtype=float)
+            if terms.ndim != 2 or terms.shape[1] != 3:
+                raise ValueError("loop segments must have columns R, Z and fraction")
+            if not np.all(np.isfinite(terms)) or np.any(terms[:, 0] <= 0):
+                raise ValueError("loop segments require finite positive-radius points")
+            points.extend(terms[:, :2])
+            indices.extend([row] * len(terms))
+            weights.extend(terms[:, 2])
+        return (
+            np.asarray(points, dtype=float).reshape(-1, 2),
+            np.asarray(indices, dtype=int),
+            np.asarray(weights, dtype=float),
+        )
+
     def project(self, psi: np.ndarray, br: np.ndarray, bz: np.ndarray) -> np.ndarray:
         """Return each sensor's reading of a per-ampere field: flux or field."""
+        if self.flux_loop_segments is not None:
+            raise ValueError("segmented loops require fields at loop_quadrature points")
         angle = np.deg2rad(np.asarray(self.angle, dtype=np.float64))
         flux_loop = np.asarray(self.flux_loop, dtype=bool)
+        fraction = self.loop_fraction
         if psi.ndim == 2:  # a column block: one row per sensor
             angle = angle[:, None]
             flux_loop = flux_loop[:, None]
-        return np.where(flux_loop, psi, br * np.cos(angle) + bz * np.sin(angle))
+            fraction = fraction[:, None]
+        return np.where(
+            flux_loop, psi * fraction, br * np.cos(angle) + bz * np.sin(angle)
+        )
 
 
 @dataclass(frozen=True)
@@ -65,6 +117,12 @@ class SliceMeasurement:
 
     vacuum_flux: np.ndarray | None = field(default=None, repr=False)
     """Known-conductor flux on the reconstruction grid [Wb], for a boundary push."""
+
+    conductor_current: np.ndarray | None = field(default=None, repr=False)
+    """Measured currents [A], in the fitted conductor response column order."""
+
+    conductor_scale: np.ndarray | None = field(default=None, repr=False)
+    """Positive current measurement uncertainties [A], in that same order."""
 
     @cached_property
     def weight(self) -> np.ndarray:

@@ -254,6 +254,17 @@ def registered_tolerances(
 
 PARITY_TOLERANCES = registered_tolerances()
 
+# Stored-equilibrium comparisons use physical distances and flux-span fractions.
+IMAS_COMPARISON_BANDS = MappingProxyType(
+    {
+        "magnetic_axis_distance_m": 0.20,
+        "plasma_current_relative_error": 0.015,
+        "axis_flux_span_error": 0.05,
+        "boundary_flux_span_error": 0.05,
+        "q95_magnitude_error": 2.0,
+    }
+)
+
 
 def validate_scorecard_fields(fields: Iterable[str]) -> None:
     """Reject a scorecard unless its fields exactly match the registry."""

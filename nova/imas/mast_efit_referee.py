@@ -26,7 +26,7 @@ from nova.imas.mast_parity_chain import (
     run_parity_chain,
 )
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
-from nova.imas.parity_tolerances import ScorecardField
+from nova.imas.parity_tolerances import IMAS_COMPARISON_BANDS, ScorecardField
 
 FROZEN_SHOTS = (21978, 21983, 21985, 21986, 21989, 22086)
 EFIT_GROUP = "efm"
@@ -370,12 +370,24 @@ def compare_reference_geometry(
 
 
 def score_with_efit_referee(
-    result: ParityChainResult,
-    referee: EfitReferee,
+    result: Any,
+    referee: Any,
     *,
     time_tolerance_s: float | None = None,
-) -> RefereedParityResult:
-    """Resolve reference metrics on an already-completed reconstruction result."""
+    slice_index: int = 0,
+    reference_slice_index: int = 0,
+    current_centroid_z_m: float | None = None,
+    reference_current_centroid_z_m: float | None = None,
+) -> RefereedParityResult | dict[str, Any]:
+    """Score completed parity results or supplied IMAS equilibrium slices."""
+
+    if hasattr(result, "time_slice") and hasattr(referee, "time_slice"):
+        return _score_imas_equilibrium(
+            result.time_slice[slice_index],
+            referee.time_slice[reference_slice_index],
+            current_centroid_z_m=current_centroid_z_m,
+            reference_current_centroid_z_m=reference_current_centroid_z_m,
+        )
 
     if int(result.scorecard.shot) != int(referee.shot):
         raise EfitRefereeError(
@@ -393,6 +405,85 @@ def score_with_efit_referee(
     scorecard = replace(result.scorecard, registered_metrics=metrics)
     chain = replace(result, scorecard=scorecard)
     return RefereedParityResult(chain, referee, geometry_scores)
+
+
+def _score_imas_equilibrium(
+    solved,
+    reference,
+    *,
+    current_centroid_z_m,
+    reference_current_centroid_z_m,
+):
+    """Score supplied IMAS slices without opening a store or changing a state."""
+
+    def axis(item):
+        point = item.global_quantities.magnetic_axis
+        return np.array([float(point.r), float(point.z)])
+
+    def boundary(item):
+        return np.column_stack((item.boundary.outline.r, item.boundary.outline.z))
+
+    def q95(item):
+        profile = item.profiles_1d
+        flux = np.asarray(profile.psi, dtype=float)
+        q = np.asarray(profile.q, dtype=float)
+        axis_flux = float(item.global_quantities.psi_axis)
+        flux_span = float(item.global_quantities.psi_boundary) - axis_flux
+        if (
+            flux.size < 2
+            or q.shape != flux.shape
+            or flux[-1] == flux[0]
+            or not np.isfinite(flux_span)
+            or flux_span == 0
+        ):
+            return float("nan")
+        coordinate = (flux - axis_flux) / flux_span
+        return float(np.interp(0.95, coordinate, q))
+
+    actual, expected = solved.global_quantities, reference.global_quantities
+    span = abs(float(expected.psi_boundary) - float(expected.psi_axis))
+    reference_current = float(expected.ip)
+    if span == 0 or reference_current == 0:
+        raise EfitRefereeError("reference flux span and plasma current must be nonzero")
+    solved_axis, reference_axis = axis(solved), axis(reference)
+    solved_boundary, reference_boundary = boundary(solved), boundary(reference)
+    actual_q, expected_q = q95(solved), q95(reference)
+    metrics = {
+        "magnetic_axis_distance_m": float(np.linalg.norm(solved_axis - reference_axis)),
+        "plasma_current_a": float(actual.ip),
+        "reference_plasma_current_a": reference_current,
+        "plasma_current_relative_error": abs(float(actual.ip) - reference_current)
+        / abs(reference_current),
+        "axis_flux_wb": float(actual.psi_axis),
+        "boundary_flux_wb": float(actual.psi_boundary),
+        "axis_flux_span_error": abs(float(actual.psi_axis) - float(expected.psi_axis))
+        / span,
+        "boundary_flux_span_error": abs(
+            float(actual.psi_boundary) - float(expected.psi_boundary)
+        )
+        / span,
+        "boundary_distance_mm": 1000
+        * _boundary_distance(solved_boundary, reference_boundary),
+        "q95": actual_q,
+        "reference_q95": expected_q,
+        "q95_magnitude_error": abs(abs(actual_q) - abs(expected_q)),
+    }
+    if current_centroid_z_m is not None and reference_current_centroid_z_m is not None:
+        offset = float(current_centroid_z_m - reference_current_centroid_z_m)
+        shift = np.array([0.0, offset])
+        metrics.update(
+            vertical_centroid_offset_m=offset,
+            aligned_magnetic_axis_distance_m=float(
+                np.linalg.norm(solved_axis - shift - reference_axis)
+            ),
+            aligned_boundary_distance_mm=1000
+            * _boundary_distance(solved_boundary - shift, reference_boundary),
+        )
+    metrics["bands"] = {
+        field: bool(np.isfinite(metrics[field]) and metrics[field] <= bound)
+        for field, bound in IMAS_COMPARISON_BANDS.items()
+    }
+    return metrics
 
 
 def run_refereed_parity_chain(

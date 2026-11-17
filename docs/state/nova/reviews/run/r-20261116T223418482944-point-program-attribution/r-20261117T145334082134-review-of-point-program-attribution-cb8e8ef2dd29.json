@@ -1,0 +1,49 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-17T14:55:15.120Z",
+  "dispatched_at": "2026-11-17T14:54:48Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/point-program-attribution.html",
+      "line": 41,
+      "severity": "non-blocking",
+      "summary": "The restored per-block table lists shares of 99.15%, 67.48%, 31.41% and 17.20% (215.24% in total) with no cue that the stubs nest, i.e. that stubbing the value path also removes the gradient and Hessian bodies that the narrower stubs remove. A reader who adds the column reads an impossible total, and the same presentation was already noted against the figure at ccc984ff0."
+    },
+    {
+      "file": "scripts/prototypes/point_program_attribution/check.py",
+      "line": 46,
+      "severity": "non-blocking",
+      "summary": "The erased-flag diagnostic swaps its two format arguments: the template names the block first and the flag second, while the tuple passes block['erased'] then block['block']. Reproduced against a receipt whose residual-tangents lowered_bytes is one byte short of control: the refusal prints 'True: erased flag residual-tangents disagrees with lowered bytes 6088066', naming the boolean as the block and the block as the flag. The refusal itself (exit 1) is correct; only the message a reader debugs from is wrong."
+    },
+    {
+      "file": "scripts/prototypes/point_program_attribution/check.py",
+      "line": 139,
+      "severity": "non-blocking",
+      "summary": "check_figure compares only text found in the SVG \u2014 arm bar labels, two span labels, the word 'erased' and the absence of #cc0000 \u2014 so a figure whose bar lengths were redrawn from other numbers while its labels stayed would pass, although the module docstring at line 9 claims a figure drawn from other data fails here. The figure's geometry is what carries the comparison; only its text is guarded."
+    },
+    {
+      "file": "scripts/prototypes/point_program_attribution/check.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "Nothing invokes the checker: no test imports or runs it, scripts/git-hooks/pre-commit runs only nova.database.scripts relativize --check, and no suite entry names it, so the record can drift from the committed receipt and only a reader who remembers to run the script learns of it. The worker demonstrated the four refusals by hand and the durability gate log records them, but the guard is manual."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261117T145334082134-review-of-point-program-attribution-cb8e8ef2dd29",
+  "reviewed_base_sha": "ccc984ff0945839f7e7eedaaf4fa58ddf144b768",
+  "reviewed_head_sha": "cb8e8ef2dd29bd7eeee29aa839ac29d6c939872a",
+  "reviewed_run_id": "r-20261116T223418482944-point-program-attribution",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T15:04:33.465036+00:00",
+  "total": 106
+}

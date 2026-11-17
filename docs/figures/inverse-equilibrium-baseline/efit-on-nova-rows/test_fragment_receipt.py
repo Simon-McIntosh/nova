@@ -8,10 +8,16 @@ this directory carries (written from the run's own records by
 generating state, the band verdicts, the amplitude trade, the control ratios —
 and requires the record to quote each one.
 
-It also holds the two structural claims the record makes about itself: that its
-element ids are unique, and that the basis and edge constraint it names are
-labelled as configuration reads where the solver log announces only the live
-counts.
+It follows the repository's receipt-reconciliation form
+(``tests/test_outboard_census_receipt_consistency.py``), takes the panel
+comparison from the module that owns that rule rather than restating it
+(``tests/test_figure_panel_pin._vector_content_digest``, because a raw file
+digest of an SVG moves with its wall-clock ``dc:date`` and generated ids), and
+leaves worktree-path refusal to ``tests/test_artifacts_carry_no_worktree_paths.py``
+and the commit hook, which own it.  The structural claims it does make are that
+the record's ids are unique, that its block markup balances, and that the basis
+and edge constraint it names are labelled as configuration reads where the
+solver log announces only the live counts.
 
 Run it as a node check::
 
@@ -21,14 +27,16 @@ Run it as a node check::
 
 from __future__ import annotations
 
-import hashlib
 import json
 import pathlib
 import re
 import xml.etree.ElementTree as ElementTree
 from html.parser import HTMLParser
 
+import numpy as np
 import pytest
+
+from tests.test_figure_panel_pin import _vector_content_digest
 
 HERE = pathlib.Path(__file__).resolve().parent
 FRAGMENT = (
@@ -76,25 +84,36 @@ def exponent(value: float) -> str:
 
 
 def derived(receipt):
-    """Return every figure the record quotes, computed from the receipt."""
+    """Return every figure the record quotes, computed from raw states."""
     generating = receipt["generating"]
     efit = receipt["efit"]
     fit = receipt["fit"]
     target = receipt["control_scale"] * generating["plasma_current"]
+    span = generating["plasma_span"]
     return dict(
         generating=generating,
         efit=efit,
         fit=fit,
         target=target,
+        axis_offset=float(
+            np.linalg.norm(
+                np.asarray(efit["10"]["axis"]) - np.asarray(generating["axis"])
+            )
+        ),
+        axis_flux_fraction=(efit["10"]["flux_axis"] - generating["flux_axis"]) / span,
+        boundary_flux_fraction=(
+            efit["10"]["flux_boundary"] - generating["flux_boundary"]
+        )
+        / span,
+        q95_gap=abs(efit["10"]["q95"]) - abs(generating["q95"]),
         nominal_current_fraction=(
-            efit["efit-10"]["plasma_current"] - generating["plasma_current"]
+            efit["10"]["plasma_current"] - generating["plasma_current"]
         )
         / abs(generating["plasma_current"]),
-        control_current_fraction=(efit["efit-11"]["plasma_current"] - target)
-        / abs(target),
+        control_current_fraction=(efit["11"]["plasma_current"] - target) / abs(target),
         control_fit_current_fraction=(fit["11"]["state"]["plasma_current"] - target)
         / abs(target),
-        span_ratio=efit["efit-11"]["flux_span"] / efit["efit-10"]["flux_span"],
+        span_ratio=efit["11"]["plasma_span"] / efit["10"]["plasma_span"],
     )
 
 
@@ -108,30 +127,30 @@ def test_the_record_quotes_every_state_it_tabulated(record, receipt):
         f"plasma_current={generating['plasma_current']!r}",
         f"flux_axis={generating['flux_axis']!r}",
         f"flux_boundary={generating['flux_boundary']!r}",
-        f"flux_span={generating['flux_span']!r}",
+        f"flux_span={generating['plasma_span']!r}",
         f"q95={generating['q95']!r}",
         f"edge_safety_factor={generating['edge_safety_factor']!r}",
         # table cells, four, three and two decimals
         ship(abs(generating["plasma_current"]) / 1e6, 4),
-        ship(abs(efit["efit-11"]["plasma_current"]) / 1e6, 4),
+        ship(abs(efit["11"]["plasma_current"]) / 1e6, 4),
         ship(generating["flux_axis"], 3),
-        ship(efit["efit-10"]["flux_axis"], 3),
-        ship(efit["efit-11"]["flux_axis"], 3),
+        ship(efit["10"]["flux_axis"], 3),
+        ship(efit["11"]["flux_axis"], 3),
         ship(generating["flux_boundary"], 3),
-        ship(efit["efit-10"]["flux_boundary"], 3),
-        ship(efit["efit-11"]["flux_boundary"], 3),
-        ship(generating["flux_span"], 3),
-        ship(efit["efit-10"]["flux_span"], 3),
-        ship(efit["efit-11"]["flux_span"], 3),
+        ship(efit["10"]["flux_boundary"], 3),
+        ship(efit["11"]["flux_boundary"], 3),
+        ship(generating["plasma_span"], 3),
+        ship(efit["10"]["plasma_span"], 3),
+        ship(efit["11"]["plasma_span"], 3),
         # axes and nulls
         "({}, {})".format(
             ship(generating["axis"][0], 5), ship(generating["axis"][1], 5)
         ),
         "({}, {})".format(
-            ship(efit["efit-10"]["axis"][0], 5), ship(efit["efit-10"]["axis"][1], 5)
+            ship(efit["10"]["axis"][0], 5), ship(efit["10"]["axis"][1], 5)
         ),
         "({}, {})".format(
-            ship(efit["efit-11"]["axis"][0], 5), ship(efit["efit-11"]["axis"][1], 5)
+            ship(efit["11"]["axis"][0], 5), ship(efit["11"]["axis"][1], 5)
         ),
         # safety factor with the stored sign it carries
         "{} ({})".format(
@@ -139,33 +158,29 @@ def test_the_record_quotes_every_state_it_tabulated(record, receipt):
             "-1" if generating["q95_sign"] < 0 else "+1",
         ),
         "{} ({})".format(
-            ship(abs(efit["efit-10"]["q95"]), 3),
-            "-1" if efit["efit-10"]["q95_sign"] < 0 else "+1",
+            ship(abs(efit["10"]["q95"]), 3),
+            "-1" if efit["10"]["q95_sign"] < 0 else "+1",
         ),
         "{} ({})".format(
-            ship(abs(efit["efit-11"]["q95"]), 3),
-            "-1" if efit["efit-11"]["q95_sign"] < 0 else "+1",
+            ship(abs(efit["11"]["q95"]), 3),
+            "-1" if efit["11"]["q95_sign"] < 0 else "+1",
         ),
-        ship(efit["efit-10"]["q_95_dd"], 3),
+        ship(efit["10"]["q_95_dd"], 3),
     ]
     missing = [value for value in expected if value not in record]
     assert not missing, f"the record no longer quotes {missing}"
 
 
 def test_the_record_quotes_the_bands_it_measured(record, receipt):
-    """Every band verdict and delta the record states is the measured one."""
+    """Every stated delta is recomputed from the receipt's raw states."""
     figures = derived(receipt)
-    axis_offset = receipt["band_rows"]["imas-efit"]["axis_offset_metres"]
-    axis_flux = receipt["band_rows"]["imas-efit"]["axis_flux_fraction_of_span"]
-    boundary_flux = receipt["band_rows"]["imas-efit"]["boundary_flux_fraction_of_span"]
-    q95_gap = abs(receipt["band_rows"]["imas-efit"]["q95_magnitude_difference"])
 
     expected = [
         exponent(abs(figures["nominal_current_fraction"])),
-        ship(axis_offset, 4),
-        ship(abs(axis_flux) * 100.0, 2),
-        ship(abs(boundary_flux) * 100.0, 2),
-        ship(q95_gap, 3),
+        ship(abs(figures["axis_offset"]), 4),
+        ship(abs(figures["axis_flux_fraction"]) * 100.0, 2),
+        ship(abs(figures["boundary_flux_fraction"]) * 100.0, 2),
+        ship(abs(figures["q95_gap"]), 3),
     ]
     missing = [value for value in expected if value not in record]
     assert not missing, f"the record no longer quotes {missing}"
@@ -173,30 +188,40 @@ def test_the_record_quotes_the_bands_it_measured(record, receipt):
     # the record must state the q95 band as missed, and never as a passed five
     assert "The q95 band is not met" in record
     assert "Four of the five" in record
+    assert "The cause is visible" in record
     assert "0.42 %" not in record
     assert "All five" not in record
     assert "five bands are met" not in record
-    assert receipt["band_rows"]["imas-efit"]["bands"]["q95"] is False
-    assert receipt["band_rows"]["nova fit"]["bands"]["q95"] is True
+    # every verdict is recomputed here against the receipt's own thresholds
+    bands = receipt["bands"]
+    assert abs(figures["q95_gap"]) > bands["q95"]
+    assert abs(figures["axis_offset"]) < bands["axis_metres"]
+    assert abs(figures["nominal_current_fraction"]) < bands["current_fraction"]
+    assert abs(figures["axis_flux_fraction"]) < bands["flux_fraction"]
+    assert abs(figures["boundary_flux_fraction"]) < bands["flux_fraction"]
 
 
 def test_the_record_quotes_the_amplitude_trade_it_attributed(record, receipt):
-    """The split attributed to imas-efit is what its profiles show."""
+    """The split is re-projected from the record's own p' and FF' arrays."""
     compact = record.replace(" ", "")
-    amplitudes = receipt["profile_amplitudes"]
-    pressure = (
-        abs(amplitudes["efit_pressure"]) / amplitudes["generating_pressure"] - 1.0
-    )
+    generating = receipt["generating"]
+    recovered = receipt["efit"]["10"]["profile"]
+    shape = np.asarray(recovered["shape"], dtype=float)
+    for name in ("pressure", "diamagnetic"):
+        values = np.asarray(recovered[f"{name}_values"], dtype=float)
+        projection = float(values @ shape / (shape @ shape))
+        assert projection == pytest.approx(recovered[name], rel=1e-12)
+    pressure = abs(recovered["pressure"]) / generating["pressure_amplitude"] - 1.0
     diamagnetic = (
-        1.0 - abs(amplitudes["efit_diamagnetic"]) / amplitudes["generating_diamagnetic"]
+        1.0 - abs(recovered["diamagnetic"]) / generating["diamagnetic_amplitude"]
     )
     expected = [
         ship(pressure * 100.0, 2),
         ship(diamagnetic * 100.0, 2),
-        ship(abs(amplitudes["efit_pressure"]), 1),
-        ship(abs(amplitudes["efit_diamagnetic"]), 5),
-        ship(amplitudes["generating_pressure"], 1),
-        ship(amplitudes["generating_diamagnetic"], 5),
+        ship(abs(recovered["pressure"]), 1),
+        ship(abs(recovered["diamagnetic"]), 5),
+        ship(generating["pressure_amplitude"], 1),
+        ship(generating["diamagnetic_amplitude"], 5),
     ]
     missing = [value for value in expected if value not in compact]
     assert not missing, f"the record no longer quotes {missing}"
@@ -285,10 +310,9 @@ def test_both_panels_parse_and_name_both_states(receipt):
         assert path.name in normalise(FRAGMENT.read_text()), (
             f"the record does not cite {path.name}"
         )
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
-        assert receipt["panels"][path.name] == digest, (
-            f"{path.name} was rewritten after the receipt recorded it"
-        )
+        assert receipt["panels"][path.name] == _vector_content_digest(
+            path.read_bytes()
+        ), f"{path.name} no longer draws what the receipt recorded"
 
 
 def test_the_record_cites_the_check_that_guards_it():
@@ -298,29 +322,24 @@ def test_the_record_cites_the_check_that_guards_it():
     assert "test_fragment_receipt.py" in text
 
 
-def test_no_paragraph_is_nested_in_another():
-    """A paragraph opened inside a paragraph closes the outer one silently."""
+def test_every_paragraph_opens_and_closes_in_order():
+    """A close with no open, or an open inside an open, is silent on the page."""
     text = FRAGMENT.read_text()
-    depth_of_open = 0
+    depth = 0
     for event in re.finditer(r"</?p\b[^>]*>", text):
         if event.group().startswith("</"):
-            depth_of_open = max(depth_of_open - 1, 0)
+            assert depth == 1, f"paragraph closed with none open at {event.start()}"
+            depth = 0
         else:
-            assert depth_of_open == 0, f"nested paragraph at offset {event.start()}"
-            depth_of_open += 1
-    assert depth_of_open == 0, "an unclosed paragraph"
+            assert depth == 0, f"nested paragraph at offset {event.start()}"
+            depth = 1
+    assert depth == 0, "an unclosed paragraph"
 
 
 def test_every_container_closes():
-    """Sections, tables, figures and pre blocks open and close in equal number."""
+    """Sections, paragraphs, tables, figures and pre blocks balance."""
     text = FRAGMENT.read_text()
-    for tag in ("section", "table", "figure", "pre", "tbody", "thead", "tr"):
+    for tag in ("section", "p", "table", "figure", "pre", "tbody", "thead", "tr"):
         opened = len(re.findall(rf"<{tag}\b", text))
         closed = len(re.findall(rf"</{tag}>", text))
-        assert opened == closed, f"{tag}: {opened} opened, {closed} closed"
-
-
-def test_the_record_carries_no_worktree_path():
-    """A committed path into a removed worktree never resolves again."""
-    text = FRAGMENT.read_text()
-    assert "reckon" + "-worktrees" not in text
+        assert opened == closed, f"{tag}: {closed} closed, {opened} opened"

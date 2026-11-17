@@ -79,6 +79,33 @@ elif [[ "$mode" == suite ]]; then
   command="PYTHONPATH=. JAX_PLATFORMS=cpu $python -m pytest -p no:cacheprovider -q ${files[*]}"
   printf '%s\n' "$command" > "$out/command.txt"
   run suite bash -c "$command" || status=1
+elif [[ "$mode" == retained-summary ]]; then
+  cp "$5" "$out/plasma-partial.npz"
+  if run summary "$python" -m scripts.prototypes.polygon_stable_evaluator.measure --output "$out" --summarise; then
+    "$python" - "$out" "$repo" "$6" <<'PY'
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+output, repository, revision = sys.argv[1:]
+output = Path(output)
+path = output / "receipt.json"
+receipt = json.loads(path.read_text())
+receipt["summary_kernel_sha256"] = receipt.pop("kernel_sha256")
+receipt["measurement_revision"] = revision
+receipt["measurement_kernel_sha256"] = hashlib.sha256(
+    subprocess.check_output(["git", "-C", repository, "show", f"{revision}:nova/biot/polygonanalytic.py"])
+).hexdigest()
+receipt["measurement_array_sha256"] = hashlib.sha256((output / "plasma-partial.npz").read_bytes()).hexdigest()
+path.write_text(json.dumps(receipt, indent=2) + "\n")
+PY
+    export NOVA_POLYGON_INTEGRATED_RECEIPT="$out/receipt.json"
+    run integrated "$python" -m pytest -p no:cacheprovider tests/biot/test_polygon_stable_evaluator.py -vv -s || status=1
+  else
+    status=1
+  fi
 fi
 printf 'EXIT=%s\n' "$status"
 exit "$status"

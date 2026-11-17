@@ -1,0 +1,87 @@
+<section class="r-evidence" id="icm-efit-closed-shell-completion">
+  <h3>imas-efit closed-shell control: the dependency refuses XML-only input, so no S exists</h3>
+
+  <p><strong>Verdict.</strong> No shielding factor was measured from imas-efit, and none
+    is reported. The control produced <em>no capability evidence</em>: on
+    imas-efit <code>develop</code>, a closed-shell case authored entirely in XML
+    cannot run a plasma slice at all, so imas-efit is neither implicated nor cleared
+    on the shell representation. The exact reference values this control was to be
+    scored against stand at S = 61.101838 (a/b = 0.9) and S = 195.1 (a/b = 0.5) at
+    μ<sub>r</sub> = 1000; the 2 % scoring rule was never reached.</p>
+
+  <h4>What the control did establish</h4>
+  <p>The annulus geometry is accepted and the iron boundary-element assembly runs on
+    it. A <code>ironBoundary.xml</code> carrying one closed half-annulus contour
+    (<code>polynomialOrder="1" breakpointContinuity="-1" boundaryType="2"</code>),
+    with <code>magneticPermeability relativePermeability="1000"</code> and no B–H
+    table, produces a populated iron response set. At 20 knots the assembly logs
+    <code>IRON_FORM: nObs=20 nBasis=20</code> and
+    <code>IRON_RANK: rank_dgelsd=20 cond=1.000000E+00</code>, and at 200 knots on the
+    same shell <code>IRON_FORM: nObs=200 nBasis=200</code>. The 40-knot assembly is
+    recorded in <code>responseFunctions.nc</code>: <code>/ironModelResponses</code>
+    holds <code>gridToIronNorm (40, 257, 257)</code> with max |·| = 8.753194 × 10<sup>−5</sup>,
+    <code>ironNormToIronCurr (40, 40)</code> with max |·| = 6.236109 × 10<sup>−7</sup>
+    and <code>ironCurrToGrid (40, 257, 257)</code>. The shell is therefore parsed and
+    its operator assembled; what is missing is a source, not a geometry.</p>
+
+  <h4>The blocker, traced to two lines of the dependency</h4>
+  <p>No circuit reaches the solver. <code>src/pfSystems.cpp</code> reads the machine
+    file's passive structures and coils and then stops:</p>
+  <pre><code>      passiveStructures.readXml(xmlDocument,"passiveStructures",pulseNumber);
+      pfCoils.readXml(xmlDocument,"pfCoils",pulseNumber);
+      //      pfCircuits.readXml(xmlDocument,"pfCircuits",pulseNumber);</code></pre>
+  <p>with <code>PfCircuits::readXml</code> called from nowhere else in <code>src/</code>.
+    Every run therefore logs <code>PFCURR_INIT(startup): ncircuits=   0
+    sum|pfcurr|=  0.0000E+00</code>, the <code>&lt;efitCircuits&gt;</code>
+    selection in <code>efitOptions.xml</code> binds against an empty machine circuit
+    list, and <code>responseFunctions.nc</code> carries
+    <code>circuitsToIronNorm (20, 0)</code> and <code>gridToCircuits (0, 257, 257)</code>.
+    With no active circuit there is no active coil geometry, and the axis
+    search refuses to choose one: <code>FINDAX: active coil geometry absent;
+    rejecting axis</code>, followed by
+    <code>CONVERGENCE_SUMMARY: status= -2 iterations=   0</code>. The slice never
+    reaches an iteration, so the iron step that runs at <code>call=0</code> carries
+    <code>sumAbsBrsp= 0.00000E+00</code> — a zero-source solve.</p>
+  <p>This is not a defect in the authored case. imas-efit's own
+    <code>tests/FTU/singleTimeTest</code>, run unmodified through the same binary in
+    XML mode, logs the same <code>ncircuits=0</code> and terminates on the stored
+    vacuum slice (<code>status= 2</code>). The circuit-bearing CI cases obtain their
+    circuits from a pulse, not from XML.</p>
+
+  <h4>Second finding: the cold seed rejects any grid whose first radius is zero</h4>
+  <p><code>seedWallCircle</code> (<code>src/EFIT/inicur.f90:110</code>) returns
+    <code>failed = .true.</code> before any containment test when
+    <code>any(radii &lt;= 0.d0)</code>. A <code>regularGrid</code> starting at
+    <code>rMin="0.0"</code> — the natural way to describe a machine whose wall
+    begins on the axis — therefore ends every slice at
+    <code>currnt: wall-bounded cold current seed has no interior support</code>.
+    <code>rMin="0.001"</code> clears the guard and the slice then advances to the
+    iron step and to the <code>FINDAX</code> refusal above. The guard is silent about
+    which condition failed, and the message names the wall rather than the grid.</p>
+
+  <h4>What would make the measurement possible</h4>
+  <p>Either of:</p>
+  <ul>
+    <li>a pulse supplying <code>pf_active</code> circuits and their coil geometry, so
+      <code>ncircuits &gt; 0</code> — the shell then becomes one more XML-authored
+      machine element beside an IMAS-described coil set, but the case is no longer
+      XML-only and its machine description is no longer the analytic annulus alone; or</li>
+    <li>an upstream change that reads machine <code>&lt;pfCircuits&gt;</code> in XML
+      mode (restoring the commented line), or that lets <code>FINDAX</code> fall back
+      to <code>strongestAdmissibleGridNode</code> when the coil list is empty.</li>
+  </ul>
+  <p>Both are imas-efit changes, not nova changes. No nova source, test or plan state
+    was altered by this control.</p>
+
+  <h4>Receipts</h4>
+  <p>Case generator and receipts:
+    <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/closed-shell/</code>
+    — <code>make_case.py</code>, <code>report.html</code>,
+    <code>owners-message.txt</code>, <code>log.txt</code> (every command, exit code
+    and the grep'd summary line). imas-efit was built from a
+    <code>develop</code> checkout into <code>/tmp/efit-build</code>; the repository's
+    installed <code>install/bin/efit++.exe</code> predates the iron cell work and
+    segfaults on <code>tests/ANALYTIC/circleTest</code>, so it was not used. There is
+    no terminal forward state, hence no poloidal flux contour panel: a figure here
+    would draw geometry only.</p>
+</section>

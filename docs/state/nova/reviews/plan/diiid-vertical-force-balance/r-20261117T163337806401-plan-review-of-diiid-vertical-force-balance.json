@@ -47,6 +47,13 @@
       "finding": "wiring-1",
       "reason": "\u00a73 is done; the eleven-row receipt refresh it records belongs to millisecond-converged-solve \u00a72, not to a section of this plan, and a plan-level depends-on would report this whole plan blocked, which is false",
       "when": "2026-11-17T16:54:58.463076+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "\u00a78's clause (2) is the check on that exactness claim: bit-identical adapter output across every corpus-built caller, now running as CPU job 1323696; the worker already measured identical adapter bytes and 24 identical currents",
+      "when": "2026-11-17T16:55:06.689148+00:00"
     }
   ],
   "responses": {
@@ -55,6 +62,12 @@
       "by": "",
       "reason": "Lead decision: the \u00a77 retry waits on \u00a712, and its 137D clause is restated against \u00a712's measured mechanism before it runs; \u00a77 cannot start until \u00a712 lands, so no node closes on the current branches",
       "when": "2026-11-17T16:54:50.304521+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a78's clause (2) is the check on that exactness claim: bit-identical adapter output across every corpus-built caller, now running as CPU job 1323696; the worker already measured identical adapter bytes and 24 identical currents",
+      "when": "2026-11-17T16:55:06.689148+00:00"
     },
     "wiring-1": {
       "action": "declined",

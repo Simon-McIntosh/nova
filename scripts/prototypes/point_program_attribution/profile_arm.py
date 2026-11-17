@@ -1,55 +1,43 @@
 """Profile one production program arm's cold compile with a source block stubbed.
 
-The cold-process setup, the program and the receipt fields are the pass profile
-harness's, so an unstubbed arm measures the program the H200 profile compiles and
-is directly comparable with its published cold compile.  ``--block`` replaces one
-source block's callables before the program is traced, using the stand-ins in
-``blocks``; the XLA compile is dumped pass by pass for the companion analysis.
+The cold-process measurement is the pass profile harness's own ``main``: this
+module calls it with the harness's ``build`` replaced by a hook that applies one
+source block's stub before the program is traced.  Only the hook and the device
+refusal live here, so an unstubbed arm measures exactly the program the H200
+profile compiles, and a stub that changes nothing is visible by its unchanged
+instruction count.
 """
 
 import argparse
-import json
-from pathlib import Path
-import resource
-import subprocess
 import sys
-import time
-from time import perf_counter
-
-from scripts.prototypes.kernel_compile_census import row
-from scripts.prototypes.point_program_attribution import blocks
+from pathlib import Path
 
 import jax
-import jax.numpy as jnp
-import nova
+
+from scripts.prototypes.compile_pass_profile import profile
+from scripts.prototypes.point_program_attribution import blocks
 
 assert jax.config.jax_enable_x64 is True
 assert not jax.config.jax_enable_compilation_cache
 
-
-def control(depth, size):
-    """A chain of elementwise work: compiles in seconds, touches no project code."""
-
-    def composed(value):
-        scale = jnp.asarray(1.0001)
-        bias = jnp.asarray(0.3)
-        decay = jnp.asarray(0.999)
-        for step in range(depth):
-            weight = jnp.asarray(1e-3 + 1e-9 * step)
-            value = jnp.tanh(value * scale + bias) * decay + jnp.sin(value) * weight
-        return jnp.sum(value)
-
-    return composed, (jnp.linspace(0.1, 0.2, size),)
-
-
-def build(name, size):
-    if name == "control":
-        return control(size, 64)
-    return row.program(name, size)
-
-
 DEVICE = jax.devices()[0]
 DEVICE_KIND = getattr(DEVICE, "device_kind", str(DEVICE))
+
+
+def stub_hook(block):
+    """Return a build stand-in that stubs one block before the program is traced."""
+    owner_build = profile.build
+
+    def build(name, size):
+        function, operands = owner_build(name, size)
+        if block == "elliptic":
+            replaced = blocks.apply_elliptic()
+        else:
+            replaced = blocks.apply(block)
+        print("block=%s replaced=%s" % (block, replaced))
+        return function, operands
+
+    return build
 
 
 def main():
@@ -62,79 +50,22 @@ def main():
     args = parser.parse_args()
     if args.expect_device not in DEVICE_KIND:
         raise SystemExit(
-            "refusing to measure %r: device %r does not name %r, so this run\n"
-            "would record another backend's wall against the card's.  Set the\n"
+            "refusing to measure %r: device %r does not name %r, so this run "
+            "would record another backend's wall against the card's.  Set the "
             "platform before the interpreter starts (JAX_PLATFORMS=cuda,cpu)."
             % (" ".join(sys.argv), DEVICE_KIND, args.expect_device)
         )
-    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
-    print(
-        f"revision={revision} tree={Path.cwd().resolve()} "
-        f"command={json.dumps(sys.argv)}"
-    )
-    print(f"nova={nova.__file__} module={__file__} device={jax.devices()[0]}")
-    print(f"cache_enabled={bool(jax.config.jax_enable_compilation_cache)}")
-    print(f"xla_flags={__import__('os').environ.get('XLA_FLAGS', '')}")
-    receipt = {
-        "program": args.program,
-        "size": args.size,
-        "block": args.block,
-        "revision": revision,
-        "tree": str(Path.cwd().resolve()),
-        "nova_file": nova.__file__,
-        "device": DEVICE_KIND,
-        "cache_enabled": bool(jax.config.jax_enable_compilation_cache),
-    }
-
-    def checkpoint(phase):
-        receipt["phase"] = phase
-        usage = resource.getrusage(resource.RUSAGE_SELF)
-        receipt["peak_host_rss_kib"] = usage.ru_maxrss
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(json.dumps(receipt, indent=2, default=str) + "\n")
-        print("PHASE " + phase, flush=True)
-
-    function, operands = build(args.program, args.size)
-    if args.block == "elliptic":
-        receipt["replaced"] = blocks.apply_elliptic()
-    else:
-        receipt["replaced"] = blocks.apply(args.block)
-    checkpoint("input-ready")
-    started = perf_counter()
-    graph = jax.make_jaxpr(function)(*operands)
-    receipt["trace_seconds"] = perf_counter() - started
-    receipt["jaxpr_text_bytes"] = len(graph.__str__().encode())
-    checkpoint("traced")
-
-    started = perf_counter()
-    lowered = jax.jit(function).lower(*operands)
-    receipt["lower_seconds"] = perf_counter() - started
-    receipt["stablehlo_bytes"] = len(lowered.as_text().encode())
-    checkpoint("lowered")
-
-    started = perf_counter()
-    compile_started = time.time()
-    compiled = lowered.compile()
-    receipt["compile_started_epoch"] = compile_started
-    receipt["compile_finished_epoch"] = time.time()
-    receipt["compile_seconds"] = perf_counter() - started
-    checkpoint("compiled")
-
-    runtime = compiled.runtime_executable()
-    receipt["executable_bytes"] = len(runtime.serialize())
-    ledger = row.cache_guard.ledger()
-    if not ledger.rows():
-        ledger.record(
-            f"uncached-{args.program}-{args.size}-{args.block}",
-            args.program,
-            receipt["compile_seconds"],
-            "miss",
-            persisted=False,
-        )
-    receipt["cache_guard_rows"] = ledger.rows()
-    receipt["cache_guard_misses"] = ledger.miss_count()
-    receipt["cache_guard_hits"] = ledger.hit_count()
-    checkpoint("done")
+    profile.build = stub_hook(args.block)
+    sys.argv = [
+        "profile.py",
+        "--program",
+        args.program,
+        "--size",
+        str(args.size),
+        "--output",
+        str(args.output),
+    ]
+    profile.main()
 
 
 if __name__ == "__main__":

@@ -26,7 +26,7 @@ from time import perf_counter
 import jax
 import nova
 
-from scripts.prototypes.kernel_compile_census import row
+from scripts.prototypes.compile_pass_profile import profile
 from scripts.prototypes.point_program_attribution import blocks
 
 assert jax.config.jax_enable_x64 is True
@@ -45,7 +45,8 @@ def main():
     args = parser.parse_args()
 
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
-    print(f"revision={revision} tree={Path.cwd().resolve()} command={json.dumps(sys.argv)}")
+    tree = Path.cwd().resolve()
+    print(f"revision={revision} tree={tree} command={json.dumps(sys.argv)}")
     print(f"nova={nova.__file__} module={__file__} device={jax.devices()[0]}")
     receipt = {
         "block": args.block,
@@ -58,7 +59,7 @@ def main():
         "cache_enabled": bool(jax.config.jax_enable_compilation_cache),
     }
 
-    function, operands = row.program(args.program, args.size)
+    function, operands = profile.build(args.program, args.size)
     if args.record_elliptic:
         blocks.record_elliptic()
         replaced = ["recorded"]
@@ -79,13 +80,17 @@ def main():
         args.text.parent.mkdir(parents=True, exist_ok=True)
         args.text.write_text(text)
         receipt["text"] = str(args.text)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(receipt, indent=2, default=str).replace("NaN", "null") + "\n")
     reached = sorted(set(blocks.REACHED))
     receipt["reached"] = reached
     print(f"reached={reached}")
-    args.output.write_text(json.dumps(receipt, indent=2, default=str).replace("NaN", "null") + "\n")
-    print(f"block={args.block} stablehlo_bytes={receipt['stablehlo_bytes']} lower_seconds={receipt['lower_seconds']:.3f}")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(
+        json.dumps(receipt, indent=2, default=str).replace("NaN", "null") + "\n"
+    )
+    print(
+        f"block={args.block} stablehlo_bytes={receipt['stablehlo_bytes']} "
+        f"lower_seconds={receipt['lower_seconds']:.3f}"
+    )
 
 
 def argparse_optional_path(value):

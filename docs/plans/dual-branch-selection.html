@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8,a9ea090c">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,benchmarks/fork_arming_economics.py,benchmarks/two_branch_batch_cost.py,nova/equilibrium/branch_selection.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/figures/dual-branch-selection/fork-arming-economics.json,docs/figures/dual-branch-selection/two-branch-batch-cost.json,docs/evidence/archive/dual-branch-selection-landed.html">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="25">
 <meta name="plan-modified" content="2026-11-17">
 <meta name="plan-section-declarations" content="{&quot;coreachability&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;descoped&quot;,&quot;s7&quot;:&quot;done&quot;}">
 <meta name="plan-descope-reasons" content="{&quot;s6&quot;:&quot;the fork this section would have priced on catalog frames was retired by the co-reachability measurement; the pricing framework and the two-branch cost measurement it produced stay as evidence&quot;}">
@@ -327,9 +327,10 @@
     this section. The traced selector and its state have landed, and the co-reachability
     measurement in the next section retired the fork, so nothing below asks a builder for a
     second solve branch or fork-arming economics. With one solved branch per slice the published
-    class is read after the solve, from connectivity and the exact margin. The smooth weight stays
-    available as a differentiable class indicator for consumers that need gradients; it selects
-    between no branches, because only one is solved. The
+    class is read after the solve from the state's own flood-filled connectivity, as the
+    co-reachability section measured. This section changes nothing in the landed selector: the
+    smooth weight and the exact margin keep the roles the selection-observable decision gives
+    them there, and a non-finite margin stays unclassified in its receipt. The
     paragraphs between this one and the last are the record of how the section was first posed and
     what landed under it.</p>
     <p><strong>As first posed.</strong> Promote the class decision to one public, traced, batched seam consuming two qualified branch

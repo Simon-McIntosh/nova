@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T23:59:08.465Z",
+  "dispatched_at": "2026-11-16T23:58:32Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/dual-branch-selection/r-20261116T234938115819-plan-review-of-dual-branch-selection/plan.html:330",
+      "id": "reasoning-1",
+      "reason": "as written the class-reading rule contradicts the measured post-hoc route it is replacing and would fail the plan's own recorded classification on the frames whose margin is absent.",
+      "text": "the head says the class is read after the solve \"from connectivity and the exact margin\", but the plan's own route and measurement use connectivity alone: \u00a76's fork decision records \"single pinned solve + post-hoc connectivity classification\", the co-reachability section classifies all 16 converged 22086/43 terminals DIVERTED \"by their own flood-filled connectivity\", and \u00a75 itself records that a non-finite margin makes the class \"explicitly unclassified\" while \u00a74 states the margin is \"undefined on two of six production references\" (one being 22086/43) \u2014 so a builder implementing the head's instrument returns unclassified on the very frame the plan records as 16/16 DIVERTED",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/dual-branch-selection/r-20261116T234938115819-plan-review-of-dual-branch-selection/plan.html:331",
+      "id": "reasoning-2",
+      "reason": "a builder reading the head will not keep the smooth weight as the selection observable against `class_margin`, which is the role the locked decision and the landed record both assign it.",
+      "text": "the head now says the smooth weight \"stays available as a differentiable class indicator for consumers that need gradients; it selects between no branches\", while the same section's landed record at :479 says \"p_diverted alone carries the smooth blend and has nonzero gradients\", \u00a74's consequence paragraph reasons that \"an observable that is absent on a third of the cohort cannot carry selection; one that is defined everywhere ... can\", and the lead's 2026-10-01 lock of `selection-observable` is both-explicit-roles (\"the smooth weight carries selection and gradients\") \u2014 the head therefore revokes the selection role of an observable the plan locks as the selection carrier without recording that decision as superseded",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "2ae375b43d1fcdd97421a5c891a5cb55b0ebb846",
+  "plan_fingerprint": "8800017259e34220241895f247739153f56bbaf05cb668ad18892c592b9769e7",
+  "plan_slug": "dual-branch-selection",
+  "plan_version": 24,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261116T234938115819-plan-review-of-dual-branch-selection",
+  "reviewed_blob_sha": "388c53c22dc05836408bce6349d59bd6d8dc818d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass for \u00a75 \u2014 `docs/evidence/archive/dual-branch-selection-landed.html` exists and carries the `s5-seam` section, the three cited artifacts exist, and commits 632a4396, 3387739f, 0bd3af3d, c64440e8, a9ea090c all resolve; the earlier anchors_resolve-1/-2 (\u00a71 forward.py line range, the 0.25 figure anchor) describe unchanged text and are not re-raised.",
+    "done_when": "pass \u2014 \u00a75's done-when names three measurable clauses and two declared controls; the new jit control was checked against today's code and does fail (TracerArrayConversionError), so it measures the change rather than restating a passing state.",
+    "evidence_paths": "pass \u2014 \u00a75's cited evidence is the archived landing record and three artifact files under `docs/figures/dual-branch-selection/`, all present in the tree; no gate writes to a scratch path are named.",
+    "naming": "pass \u2014 the changed prose introduces no plan label, ticket number or version tag, and keeps mechanism names (`p_diverted`, `class_margin`) that stand on their own.",
+    "reasoning": "a finding \u2014 the rewritten head at :330-331 states two things its own cited evidence does not support: the published class is read from \"connectivity and the exact margin\", and the smooth weight \"selects between no branches\".",
+    "single_goal": "pass \u2014 \u00a75 now declares one deliverable at its head (the traced cold seed for the single selected branch) and its done-when closes on that alone; the two-branch text is marked as superseded record.",
+    "wiring": "pass for \u00a75 \u2014 the changed unit adds no dependency edge; the earlier wiring-1 (:22, empty `plan-depends-on` against \u00a77's \"consumes both answers\") describes unchanged text and is not re-raised."
+  },
+  "section_digests": {
+    "_document": "5f64895e67456f93c7725e3dbf68ac4cf9320121d542d9f1e8870011f4d650fe",
+    "coreachability": "117a9e74256c7f96cae20f3b0e48a7dbc12b4ce1a25113546b64e7dc580bc9b2",
+    "s1": "ab958297d5115ba98c1491df47c092fa00665ecba9e761e09d1f8579f598ca6b",
+    "s2": "1a228a4fa41055367c393c8212fcb0475c077587709ba8ab88bdbd3fec9e5afa",
+    "s3": "1dfc8415f0eb283ab99a9c7fe4047f2e374485a66c6f10eb623e7f01b4cf932a",
+    "s4": "206da393c7d08cc1b1ed5006efaf8b1b13a6781e8e6f992a4fd102e8668e749f",
+    "s5": "30cb9f30eb2cbf09ea961ac1ac444e43350992784596e86436344d8c4cf95707",
+    "s6": "506dd18c70eaf1f72fa702ef3a5745f40175a460a2f1f6523d5cc90aacd1bd4e",
+    "s7": "283b73b8886f4928b2cb4bc16990fdda4881fcaab201e3b8add052cd18688461"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T00:08:00.939565+00:00",
+  "total": null
+}

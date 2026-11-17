@@ -64,6 +64,20 @@
       "finding": "reasoning-1",
       "reason": "\u00a78 is already running; its worker read the code and matched the conductors by name, as the adapter's resolution carries them, and its refusal test passes",
       "when": "2026-11-17T04:07:14.881805+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "Not a contradiction: the lead's 2026-09-08 decision is that q is a signed quantity in COCOS, and q-dvf-cocos-q95 (2026-09-10) says the corpus column efit_q95 stores its magnitude without sign; one concerns the quantity, the other the stored column",
+      "when": "2026-11-17T04:10:28.451490+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-3",
+      "reason": "The review itself judges it does not change the plan: the fitted vector's re-derivation is the endpoint and fit.py is its only instrument",
+      "when": "2026-11-17T04:12:02.399039+00:00"
     }
   ],
   "responses": {
@@ -72,6 +86,18 @@
       "by": "",
       "reason": "\u00a78 is already running; its worker read the code and matched the conductors by name, as the adapter's resolution carries them, and its refusal test passes",
       "when": "2026-11-17T04:07:14.881805+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "Not a contradiction: the lead's 2026-09-08 decision is that q is a signed quantity in COCOS, and q-dvf-cocos-q95 (2026-09-10) says the corpus column efit_q95 stores its magnitude without sign; one concerns the quantity, the other the stored column",
+      "when": "2026-11-17T04:10:28.451490+00:00"
+    },
+    "reasoning-3": {
+      "action": "declined",
+      "by": "",
+      "reason": "The review itself judges it does not change the plan: the fitted vector's re-derivation is the endpoint and fit.py is its only instrument",
+      "when": "2026-11-17T04:12:02.399039+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261117T004515363037-plan-review-of-diiid-vertical-force-balance.json",

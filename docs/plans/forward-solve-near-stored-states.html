@@ -25,7 +25,7 @@
   <title>Forward Solve Near Stored States | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -81,26 +81,25 @@
     <h2 id="s2">§2 — Where each solve stops qualifying</h2>
     <section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>Waits on §1, whose standing cases it measures.</p>
-    <p>A refusal beside a state that itself qualifies can mean two different things: the state the solve was
-    asked for does not exist as a free-boundary equilibrium of this machine, or it exists and the solve
-    cannot reach it. A repair is only owed for the second. This section separates them by measurement.</p>
+    <p>A refusal beside a state that itself qualifies does not say how far the solve is from succeeding. This
+    section measures that distance for each case, and says which displaced states can be reached at all by
+    the solve as it stands when it is led there in smaller steps. It makes no claim about whether an
+    unreached state exists.</p>
     <p><strong>Done when.</strong> (1) For MAST-U the record states, along the profile-coefficient direction
     the inverse class perturbs, the largest relative perturbation from the stored coefficients at which the
     solve still qualifies below 1e-10 and the smallest at which it does not, bracketed to within a factor of
     two, beside the perturbation size the class's response step uses. (2) For TCV and ITER the record states
     whether any state within 1 % of the stored coefficients qualifies when started from the stored flux map,
     and for each the stage at which qualification is first lost. (3) Each case is given one of two verdicts
-    with the measurement that supports it: the requested state is not an equilibrium of the machine as
-    described, or it is and the solve does not reach it. The verdict rests on a witness that does not depend on the solve converging: the residual of the stored imas-efit flux map under the forward operator at the stored coefficients, evaluated once without iteration and stated as a fraction of the axis-to-boundary flux span, and the smallest singular value of the operator linearised there relative to its largest. A residual inside the 1 % row-replay agreement with a well-conditioned linearisation is a state that exists; a residual outside it is not an equilibrium of the machine as described. Negative control: the same measurement on the §1
-    positive control reports a qualifying state at zero perturbation.</p>
+    on a measurement that can fail. <em>Reached</em>: the state displaced by the inverse class's response step qualifies below 1e-10 when approached from the stored state through intermediate solves, and the record lists the sequence that got there. <em>Not reached</em>: no sequence tried qualifies, and the record lists each sequence and where it stopped. Negative control: the direct solve of the displaced MAST-U state, with no intermediate solves, reproduces the refusal §1 recorded.</p>
 
     <h2 id="s3">§3 — The solves qualify</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
     <p>Waits on §2, which says which cases are owed a repair.</p>
-    <p>For every case §2 finds reachable in principle, the forward solve is repaired until the solves a
-    reconstruction asks for beside the stored state qualify. A case §2 finds is not an equilibrium of the
-    machine as described is not forced: its record stands as the answer.</p>
-    <p><strong>Done when.</strong> (1) On every case §2 marks as reachable, forward solves at the stored
+    <p>For every case §2 marks as reached, the forward solve is repaired until the solves a reconstruction
+    asks for beside the stored state qualify directly, without being led there. A case §2 marks as not
+    reached is not forced: its record stands, and it stays open against this plan.</p>
+    <p><strong>Done when.</strong> (1) On every case §2 marks as reached, forward solves at the stored
     coefficients and at the stored coefficients displaced by plus and minus the inverse class's response
     step, each started from the stored flux map, qualify below the unchanged 1e-10 threshold, measured in one
     batch job on the H200, falling back to titan. (2) Nothing already converging is lost: the forward gate

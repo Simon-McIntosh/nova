@@ -1242,6 +1242,58 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "740d0ffcc0e0f35d89491de69b7df888d99dec36",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_withheld": "run retained for recovery",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "740d0ffcc0e0f35d89491de69b7df888d99dec36",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/review-of-efit-comparison-766ac4cd1980",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-11-17T11:03:51Z",
+            "session_id": "01a1e924-86de-7df0-ac7e-5a6285d83859",
+            "session_source": "pointer",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/review-of-efit-comparison-766ac4cd1980"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a1e924-86de-7df0-ac7e-5a6285d83859"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-11-17T11:03:51Z",
+      "session_id": "01a1e924-86de-7df0-ac7e-5a6285d83859",
+      "session_source": "pointer",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/review-of-efit-comparison-766ac4cd1980"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 01a1e924-86de-7df0-ac7e-5a6285d83859"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

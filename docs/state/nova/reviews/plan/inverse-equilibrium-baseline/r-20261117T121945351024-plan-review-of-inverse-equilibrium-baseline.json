@@ -35,6 +35,16 @@
       "note": "The fallback no longer claims imas-efit records no edge constraint or points at a finished plan: the clause now takes the quantity from the output where the build records it and otherwise from the solver own behaviour under a changed setting.",
       "reason": "",
       "when": "2026-11-17T16:02:41.346140+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3ab72680615f289c36e398c1918f55b997ad1a4b",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The section now gives each clause its own starting field: the known states start as the known-answer study started them, and only the stored cases start from the stored imas-efit map.",
+      "reason": "",
+      "when": "2026-11-17T16:02:55.778791+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The fallback no longer claims imas-efit records no edge constraint or points at a finished plan: the clause now takes the quantity from the output where the build records it and otherwise from the solver own behaviour under a changed setting.",
       "reason": "",
       "when": "2026-11-17T16:02:41.346140+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "3ab72680615f289c36e398c1918f55b997ad1a4b",
+      "commit_basis": "edit",
+      "note": "The section now gives each clause its own starting field: the known states start as the known-answer study started them, and only the stored cases start from the stored imas-efit map.",
+      "reason": "",
+      "when": "2026-11-17T16:02:55.778791+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261117T121945351024-plan-review-of-inverse-equilibrium-baseline.json",

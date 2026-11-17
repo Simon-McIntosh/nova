@@ -13,6 +13,13 @@
       "table_form": "passes: both panels compare magnitudes, where the comparison itself is a length; a table would not show relative size, and the erased block states its categorical outcome in the word 'erased' rather than pretending to a bar length"
     }
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "point-program-attribution",
+      "recorded_at": "2026-11-17T14:00:06.661954+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/kernel-compile-barrier/point-program-attribution/block-attribution.svg",

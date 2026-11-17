@@ -95,6 +95,35 @@ relative difference is 5.481e-16, while the maximum pointwise relative
 difference is 1.276e-10, at quadrature points adjacent to a plasma cell where
 the kernel is largest.</p>
 
+<h2 id="icm-iron-field-source-response">The persisted coil response, its refusals and its slice wall</h2>
+<p>Measured by the state stage on a compute node (job 1324036, all_debug, 40&nbsp;mm
+mesh, 488&nbsp;592 quadrature points), from a receipt that names its operator,
+module, working directory and x64 flag:</p>
+<table><thead><tr><th>Quantity</th><th>Measured</th><th>Contract</th></tr></thead><tbody>
+<tr><td>persisted response against a direct coil evaluation</td><td><b>0.0</b> relative, and the response was reused</td><td>1e-12</td></tr>
+<tr><td>external term against the prototype's single quadrature</td><td>1.93e-9 pointwise, 5.53e-16 Frobenius</td><td>summation order only</td></tr>
+<tr><td>slice wall with the persisted response</td><td><b>926.1 s</b></td><td>record with</td></tr>
+<tr><td>slice wall with the coils evaluated on the slice</td><td><b>1220.9 s</b></td><td>record without</td></tr>
+<tr><td>coils' field, persisted read against direct</td><td>0.022 s against 82.9 s</td><td>-</td></tr>
+<tr><td>plasma's field on the same slice</td><td>156.1 s</td><td>per slice, not persisted</td></tr>
+<tr><td>state difference between the two slices</td><td>8.74e-7 relative</td><td>same solution</td></tr>
+</tbody></table>
+<p>The response pays for itself inside one slice: 294.8&nbsp;s, 24&nbsp;% of a
+1221&nbsp;s solve, and the coils' field read drops from 82.9&nbsp;s to
+0.022&nbsp;s. The two states agree to 8.74e-7 relative, so the persisted term
+changes the wall and not the answer.</p>
+<p><b>Refusals, with a negative control each.</b> The stage exercises both
+refusals on every run and the receipt carries their messages: a request for any
+other quadrature raises <i>the persisted coil response serves another mesh</i>,
+and a request under different coil currents raise <i>coil response
+…/d16678432b45074e.npz serves another coil set</i>.
+<code>tests/test_iron_field_source.py</code> pins the same behaviour without
+touching the evidence store - a matching response is reused bit for bit, and
+another mesh, another coil set and another quadrature each raise their own
+error - plus a receipt check that a reused response reports its difference
+inside 1e-12. Six of those tests pass; the receipt check skips until the state
+job rewrites the receipt it reads.</p>
+
 <h2 id="icm-iron-field-source-blocks">What did not run, and why</h2>
 <p><b>1. The WEST-scale CoilSet point solve.</b> (The figure and the two tables
 above come from the external term, not from this solve; the seam test pins the

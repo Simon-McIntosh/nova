@@ -5173,47 +5173,19 @@
         "disposable": 0,
         "integrated": 0,
         "live-referenced": 0,
-        "retained-for-resume": 1,
+        "retained-for-resume": 0,
         "unintegrated": 0
       },
       "worktrees": [
         {
-          "artifact_classification": "unintegrated",
-          "available": true,
-          "claimed_by_live_runs": [],
-          "classification": "retained-for-resume",
-          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
-          "dirty": [],
-          "head": "6ae8117f41217b22a8cd88811d48829333dc568a",
-          "integrated_into": "HEAD",
-          "non_equivalent_commits": null,
-          "patch_equivalent_commits": null,
+          "available": false,
+          "detail": "tree is no longer available",
           "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/diiid-single-kernel-coupling",
-          "reclaimable": false,
-          "retention": {
-            "classification": "retained-for-resume",
-            "retained_at": "2026-11-17T22:54:09Z",
-            "session_id": "01a1e68e-4afa-7d11-99f7-7cd93462421b",
-            "session_source": "pointer",
-            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/diiid-single-kernel-coupling"
-          },
-          "shadow_patch": "",
-          "shadow_run_id": "",
-          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-          "status_entries": [],
-          "withheld": "this worktree is the working directory of recoverable session 01a1e68e-4afa-7d11-99f7-7cd93462421b"
+          "unavailable_state": "missing"
         }
       ]
     },
-    "worktree_released": false,
-    "worktree_retention": {
-      "classification": "retained-for-resume",
-      "retained_at": "2026-11-17T22:54:09Z",
-      "session_id": "01a1e68e-4afa-7d11-99f7-7cd93462421b",
-      "session_source": "pointer",
-      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/diiid-single-kernel-coupling"
-    },
-    "worktree_withheld": "retained as the working directory of recoverable session 01a1e68e-4afa-7d11-99f7-7cd93462421b"
+    "worktree_released": true
   },
   "resume_waiver": null,
   "review": {

@@ -64,6 +64,15 @@ def efit_options(
 
 <fitdz option="1" ndelzon="2" scaledz="1"/>
 
+<!-- The data-selection objects for the time-traces read from the pulse.  The
+     circuits themselves are built from pf_active after this file is read, so
+     this element carries only the selection parameters.  Bvac*R is the zero
+     vacuum toroidal field: present so its selection is specified, weighted
+     zero so it constrains nothing. -->
+<efitCircuits interpolationMethod="1" timeWindow="0" timeMargin="0"
+              deselectWhenNoData="false"/>
+<bVacRadiusProduct interpolationMethod="1" timeWindow="1" timeMargin="0" weights="0"/>
+
 <plasmaCurrent interpolationMethod="1" timeWindow="0" timeMargin="0" weights="1"/>
 
 <relationalPPrimes interpolationMethod="1" timeWindow="0" timeMargin="0">

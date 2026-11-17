@@ -16,9 +16,11 @@ the outboard stray field, its contribution at all 110 in-vessel poloidal probes
 and at all 17 flux loops, all from the operand the frame carries. The sampled
 fields come from the pinned coil and plasma quadrature rather than a CoilSet
 point solve, because the plasma closed coupling costs minutes per solve here;
-the seam test pins the frame's contribution to that same operand. The field also
-reproduces the persisted H200 receipt to 4e-9 relative, which closes the factor
-of 28 this node first misread as a defect.</p>
+the seam test pins the frame's contribution to that same operand, and on the
+production CoilSet the zero-magnetisation frame moves the field by 6.9e-18 T
+while the solved frame reproduces <code>BoundCurrents</code> exactly at all 127
+diagnostics. The field also reproduces the persisted H200 receipt to 4e-9
+relative, which closes the factor of 28 this node first misread as a defect.</p>
 <p>Three further findings come with it: a plasma-coupling wall, a reload defect
 that is fixed and pinned by a test, and the 40&nbsp;mm factor this allocation
 could not build.</p>
@@ -61,6 +63,23 @@ coilset stored and reloaded from its cache:</p>
 <p>The zero state is exact because the added columns multiply a zero current
 vector: the air-core solution passes through unchanged to the last bit. That is
 the property a tiny epsilon would not have.</p>
+
+<h2 id="icm-iron-field-source-west-control">The zero control on the production WEST CoilSet</h2>
+<p>The bit-identical control above is measured on a fixture. On the production
+CoilSet - the 80&nbsp;mm frame inserted into the WEST 62751 coilset, 10&nbsp;170
+auxiliary rows, 18 plane targets - the zero-magnetisation frame moves the field
+by <b>6.94e-18&nbsp;T</b> and the flux by <b>2.22e-16&nbsp;Wb/rad</b>, against an
+air-core field of about 0.2&nbsp;T. The iron's own columns are exact zeros, so
+the residual is the last bit of the reassembly the subspace solve performs once
+the frame's rows exist, not an iron contribution: 3e-17 relative, one unit in the
+last place of the flux. The frame's <em>solved</em> contribution equals
+<code>BoundCurrents.field</code> and <code>.psi</code> <b>exactly</b> at the same
+targets - 0.0 difference at all 110 probes and all 17 loops
+(<code>west-62751-uniform-0.08-sampled-receipt.json</code>).</p>
+<p>This is the honest form of the clause: the fixture is bit-identical, the full
+CoilSet is identical to the last bit of its own reassembly, and no setting of
+the iron's current changes the air-core field by more than that last bit when the
+magnetisation is zero.</p>
 
 <h2 id="icm-iron-field-source-external">The external term from a persisted coil response</h2>
 <p>The coils' field at the iron's 127&nbsp;872 volume quadrature points is
@@ -317,6 +336,8 @@ rather than a constant the assertion could satisfy without reading the outlines.
 <tr><td>affine material solve, same stage, second run</td><td>27.1</td><td>CPU, coil response reused</td></tr>
 <tr><td>coil field at 127 872 quadrature points</td><td>persisted once</td><td>reused across slices</td></tr>
 <tr><td>air-core CoilSet point solve, 157 targets</td><td>515.7 per attribute, not completed</td><td>CPU, plasma closed coupling</td></tr>
+<tr><td>air-core CoilSet point solve, 18 targets</td><td>451.6</td><td>CPU, production WEST coilset</td></tr>
+<tr><td>zero-control CoilSet point solve, 18 targets</td><td>525.5</td><td>CPU, frame inserted</td></tr>
 <tr><td>stray field and 127 diagnostics from the external term</td><td>276.4</td><td>CPU, 120 plane points</td></tr>
 <tr><td>seam test, block fixture</td><td>≈50</td><td>CPU, includes JAX compilation</td></tr>
 </tbody></table>

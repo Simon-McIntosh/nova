@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence-fragment">
+  <title>Census mesh cell count pinned by value</title>
+</head>
+<body>
+<main>
+<h1 id="icm-census-count-pin-state">The census read pins the production mesher's count</h1>
+<p><code>tests/test_imas_iron_read.py::test_census_mesh_matches_previous_read</code>
+builds its own census polygons by executing
+<code>scripts/sheet_tile_census/measure.py</code>'s
+<code>description.iron_segments</code> loop against the WEST dictionary pin, then
+meshes each raw <code>iron_core</code> outline with the production
+<code>nova.biot.magnetisation._mesh</code>. Both the script path and the
+comparison oracle call that same mesher, so the previous
+<code>len(actual) == len(expected) &gt; 0</code> could not see a change in cell
+count or partition. The test now asserts the measured count, the per-segment
+partition in a comment, and a SHA-256 digest over the ordered polygon vertices.</p>
+<table>
+<thead><tr><th>Quantity</th><th>Measured 2026-11-17</th></tr></thead>
+<tbody>
+<tr><td>Census mesh cells at 0.08 m</td><td>1694</td></tr>
+<tr><td>Cells per segment</td><td>176, 242, 427, 180, 427, 242</td></tr>
+<tr><td>Ordered-vertex SHA-256 (little-endian float64)</td><td><code>af8328273be3b2b1a64f9da4f7e70d88c9d35a31d8c6e10ecaf5f4b585c68f8f</code></td></tr>
+</tbody>
+</table>
+<h2 id="icm-census-count-pin-1694">Why 1694, not the 1696 of the earlier fragment</h2>
+<p>The same six outlines at the same spacing give 1696 cells through
+<code>scripts/prototypes/iron_magnetisation/magnetisation.py::mesh</code> and
+1694 through <code>nova.biot.magnetisation._mesh</code>: the counts differ only
+in the sixth segment (244 against 242). The census script still imports the
+prototype mesh, so its own <code>assert count == {0.08: 1696}</code> is a
+prototype-mesher pin; the read test substitutes the production mesher, so its
+pin is 1694. This is not a regression and no mesher is changed here.</p>
+<h2 id="icm-census-count-pin-negative-control">Negative control</h2>
+<p>Changing the test's own spacing from 0.08 m to 0.07 m on both sides leaves
+the script polygons and the oracle in agreement but meshes 2135 cells, so the
+restored pin fails while the unmutated test passes: 17 passed, 1 failed with
+<code>assert 2135 == 1694</code>, <code>EXIT=1</code>. The mutant was reverted
+before the delivered commit. Unmutated, the module passes 18 tests and the
+scoped gate over it plus
+<code>tests/test_artifacts_carry_no_worktree_paths.py</code> passes 19.</p>
+</main>
+</body>
+</html>

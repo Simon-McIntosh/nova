@@ -75,6 +75,16 @@
       "note": "Clause (3) of the comparison section now carries a control on the measure it delivers when no case converges: the row replay with every row scaled by 1.10 must leave the 5 percent band on every sensor family.",
       "reason": "",
       "when": "2026-11-17T10:54:36.099615+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0e1225744155050cdae4508028f6dbcbfbd63b31",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The contract table rows for the scoreboard and cost sections now name the nova-written-rows section under Waits on.",
+      "reason": "",
+      "when": "2026-11-17T10:54:46.686559+00:00"
     }
   ],
   "responses": {
@@ -86,6 +96,15 @@
       "note": "Clause (3) of the comparison section now carries a control on the measure it delivers when no case converges: the row replay with every row scaled by 1.10 must leave the 5 percent band on every sensor family.",
       "reason": "",
       "when": "2026-11-17T10:54:36.099615+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0e1225744155050cdae4508028f6dbcbfbd63b31",
+      "commit_basis": "edit",
+      "note": "The contract table rows for the scoreboard and cost sections now name the nova-written-rows section under Waits on.",
+      "reason": "",
+      "when": "2026-11-17T10:54:46.686559+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261117T081517001250-plan-review-of-inverse-equilibrium-baseline.json",

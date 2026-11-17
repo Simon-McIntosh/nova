@@ -34,6 +34,11 @@
       "kind": "exempted",
       "reason": "The fragment's later paragraph names both the measurement head 4ec23b91 and the gated head 843063ef1, and the all_debug rerun at 843063ef1 is the landing gate",
       "recorded_at": "2026-11-17T22:53:20.055179+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "The base-versus-head evidence is the five-file focused pair on all_debug job 1323964, 97 passed at each arm with zero added; the scoped test does not exist at base",
+      "recorded_at": "2026-11-17T22:53:31.305555+00:00"
     }
   },
   "findings": [

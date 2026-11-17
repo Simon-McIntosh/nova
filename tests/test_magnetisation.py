@@ -1863,3 +1863,71 @@ def test_frame_carries_the_bound_currents_exactly():
     frame_psi = np.asarray(coilset.point.psi) - air_psi
     assert np.max(np.abs(frame_psi - direct_psi)) <= 1e-12 * np.max(np.abs(direct_psi))
     assert np.max(np.abs(contribution)) > 1e-6 * np.max(np.abs(air))
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(900)
+def test_reloaded_coilset_accepts_the_iron_frame(tmp_path):
+    """A CoilSet reloaded from its cache takes the frame with the same contract.
+
+    A reloaded frame keeps attributes in its metaframe's ``additional`` table
+    without carrying their defaults, and the rows the insert appends are filled
+    from that table, so the insert raised ``KeyError`` on a stored CoilSet while
+    passing on one built in process. The zero control must still be bitwise and
+    the solved frame must still equal :meth:`BoundCurrents.field`.
+    """
+    from nova.frame.coilset import CoilSet
+    from nova.frame.iron import insert_iron, set_iron_currents
+
+    region = shapely.box(2.0, -0.1, 2.2, 0.1)
+    table_b = np.array([0.0, 0.5, 1.0, 1.5, 2.0])
+    table_mu = np.array([215.0, 1038.0, 1692.0, 175.0, 57.0])
+
+    def external(points):
+        points = np.asarray(points)
+        return np.column_stack((5e-4 * np.ones(len(points)), -1e-4 * points[:, 0]))
+
+    result = iron.solve_magnetisation(
+        region,
+        external,
+        table_b,
+        table_mu,
+        cell_size=0.1,
+        basis="linear",
+        tolerance=1e-8,
+        max_iterations=30,
+    )
+    bound = result.bound_currents()
+    coilset = CoilSet(dcoil=0.05, tplasma="hex", filename="probe", dirname=tmp_path)
+    coilset.coil.insert(3.5, 0.0, 0.2, 0.2, nturn=10.0, name="A", part="pf")
+    coilset.firstwall.insert(
+        [[2.4, 2.4, 3.4, 3.4, 2.4], [-1.0, 1.0, 1.0, -1.0, -1.0]], turn="hex"
+    )
+    targets = np.array([[2.1, 0.0], [3.0, 0.3]])
+    coilset.sloc["A", "Ic"] = 1e5
+    coilset.point.solve(targets)
+    coilset.store()
+
+    reloaded = CoilSet(filename="probe", dirname=tmp_path).load()
+    reloaded.sloc["A", "Ic"] = 1e5
+    reloaded.point.solve(targets)
+    air = np.column_stack(
+        (np.asarray(reloaded.point.br), np.asarray(reloaded.point.bz))
+    )
+
+    insert_iron(reloaded, bound.zero())
+    reloaded.point.solve(targets)
+    zero = np.column_stack(
+        (np.asarray(reloaded.point.br), np.asarray(reloaded.point.bz))
+    )
+    np.testing.assert_array_equal(zero, air)
+
+    set_iron_currents(reloaded, bound)
+    reloaded.point.solve(targets)
+    with_iron = np.column_stack(
+        (np.asarray(reloaded.point.br), np.asarray(reloaded.point.bz))
+    )
+    direct = bound.field(targets)
+    contribution = with_iron - air
+    assert np.max(np.abs(contribution - direct)) <= 1e-12 * np.max(np.abs(direct))
+    assert np.max(np.abs(contribution)) > 1e-6 * np.max(np.abs(air))

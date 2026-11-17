@@ -14,7 +14,7 @@ from pathlib import Path
 
 import numpy as np
 
-FIELD = Path(
+DEFAULT_FIELD = Path(
     "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/"
     "field-source/west-62751-uniform-0.08-field.npz"
 )
@@ -30,8 +30,8 @@ def rows(data):
         yield index, r, z, dr, dz, br, bz
 
 
-def probes_table():
-    data = np.load(FIELD)
+def probes_table(path=None):
+    data = np.load(path or DEFAULT_FIELD)
     out = [
         "<table><thead><tr><th>Probe</th><th>R [m]</th><th>Z [m]</th>"
         "<th>dBr [mT]</th><th>dBz [mT]</th><th>|dB| [mT]</th>"
@@ -49,8 +49,8 @@ def probes_table():
     print("\n".join(out))
 
 
-def loops_table():
-    data = np.load(FIELD)
+def loops_table(path=None):
+    data = np.load(path or DEFAULT_FIELD)
     loops = data["loops"]
     contribution = data["frame_loop"]
     out = [
@@ -69,11 +69,12 @@ def loops_table():
 
 
 def main():
+    path = Path(sys.argv[2]) if len(sys.argv) > 2 else None
     match sys.argv[1:2]:
         case ["probes"]:
-            probes_table()
+            probes_table(path)
         case ["loops"]:
-            loops_table()
+            loops_table(path)
         case _:
             raise SystemExit("usage: table.py probes | loops")
 

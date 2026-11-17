@@ -38,6 +38,16 @@ def insert_iron(coilset, solution, label: str = "iron"):
     if label in np.asarray(coilset.frame.index):
         raise ValueError(f"frame {label!r} already exists in this coilset")
     count = source.unknowns
+    for metaframe, owner in (
+        (coilset.frame.metaframe, coilset),
+        (coilset.subframe.metaframe, coilset),
+    ):
+        for attr in metaframe.additional:
+            if attr not in metaframe.default:
+                # a frame reloaded from its stored cache keeps the attribute in
+                # ``additional`` without carrying its default, and the rows this
+                # call appends are filled from that table
+                metaframe.default[attr] = getattr(owner, attr, "")
     centre = np.mean(source.atoms.reshape(-1, 2), axis=0)
     before = np.asarray(coilset.saloc["Ic"], dtype=np.float64).copy()
     coilset.frame.insert(

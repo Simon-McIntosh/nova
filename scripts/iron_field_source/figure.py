@@ -1,6 +1,6 @@
 """Draw the iron's share of the WEST 62751 stray field and diagnostics.
 
-Reads the uniform-80 mm ``field.npz`` written by :mod:`scripts.iron_field_source.measure`
+Reads the uniform-80 mm ``field.npz`` written by the ``measure`` stage
 and draws three one-dimensional panels in the imas-ink style: the outboard
 stray field on the three sampling planes with and without the iron, the iron's
 relative contribution to it, and the iron contribution at every in-vessel
@@ -23,7 +23,7 @@ import numpy as np  # noqa: E402
 
 from nova.media.ink import DEFAULT_INK, trace_axes  # noqa: E402
 
-FIELD = Path(
+DEFAULT_FIELD = Path(
     "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/"
     "field-source/west-62751-uniform-0.08-field.npz"
 )
@@ -121,6 +121,8 @@ def draw(axes, data):
 
 def main():
     output = Path(sys.argv[1])
+    global FIELD
+    FIELD = Path(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_FIELD
     output.parent.mkdir(parents=True, exist_ok=True)
     data = np.load(FIELD)
     figure, axes = plt.subplots(

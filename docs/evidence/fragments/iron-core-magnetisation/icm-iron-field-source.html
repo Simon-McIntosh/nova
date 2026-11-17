@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence"><title>Iron as a field source</title>
+<link rel="stylesheet" href="/_shared/foundation.css"></head><body><main>
+<h1 id="icm-iron-field-source-state">The solved iron as one passive frame</h1>
+<p>The seam this node was for is landed and pinned: the affine magnetisation is
+inserted into the CoilSet as one passive frame whose currents the material solve
+writes, and <code>Solve.include_iron</code> adds the frame's field and flux to
+every target set the solve builds, through the same reduction a kernel batch's
+matrix uses. On a block fixture the zero state reproduces the air-core field bit
+for bit, the solved state's added field and flux equal
+<code>BoundCurrents.field</code> and <code>.psi</code> within 1e-12 relative, and
+the solved state moves the field.</p>
+<p>The WEST-scale measurement this node was also for is <b>incomplete</b>, and
+this document reports why rather than presenting numbers it could not finish:
+the CoilSet-stage run that draws the figure and the tables did not complete in
+this allocation. The field values it would draw are verified against the pinned
+receipt to 4e-9 relative. Three further findings - a plasma-coupling wall, a
+reload defect that is fixed, and the 40 mm factor this allocation could not
+build - come with it.</p>
+
+<h2 id="icm-iron-field-source-seam">One seam, and why it is a frame</h2>
+<p>Cell magnetisation is a bound current distribution, and Nova already turns a
+current distribution into every operator it builds: a source column set.
+<code>BoundCurrents</code> in <code>nova.biot.magnetisation</code> holds the
+affine state and exposes <code>field_matrix</code>, <code>psi_matrix</code>,
+<code>field</code> and <code>psi</code>. The field of a uniform sheet on an edge
+atom uses the closed-form <code>sheet_edge_field</code>, whose closure is fixed
+under refinement; the flux uses ring quadrature through
+<code>traced_filament_greens</code>, because no closed-form flux tile exists for
+a sheet current. <code>MagnetisationSolution.field</code> delegates to the same
+call on the linear basis, so the frame and the material solve cannot drift
+apart.</p>
+<p><code>nova.frame.iron.insert_iron</code> inserts that set as one passive
+frame labelled <code>iron</code>: a frame row with <code>part="iron"</code> and
+<code>segment="iron"</code>, and one subframe row per affine unknown carrying
+<code>Ic</code>. The physics of those rows is an in-memory source column,
+<code>iron_source</code>, holding the <code>BoundCurrents</code>, so the CoilSet
+stores 10&nbsp;170 currents at 80&nbsp;mm rather than 10&nbsp;170 polygons.
+<code>Solve.include_iron</code> reads that column, builds the per-target matrix
+in blocks of <code>IRON_TARGET_BLOCK</code>, and adds it where a kernel batch's
+matrix is added; <code>check_segments</code> skips the iron segment, so no kernel
+is launched for it. The frame's <code>Ic</code> is a bound-current amplitude, not
+an ampere-turn, and <code>set_iron_currents</code> is its writer.</p>
+
+<h2 id="icm-iron-field-source-proof">The frame carries the iron, not the air-core field</h2>
+<p>Measured by <code>tests/test_magnetisation.py::test_frame_carries_the_bound_currents_exactly</code>
+on a four-cell block inside an energised coil, and by the same construction on a
+coilset stored and reloaded from its cache:</p>
+<table><thead><tr><th>Check</th><th>Measured</th><th>Bound</th></tr></thead><tbody>
+<tr><td>zero state against air-core, field</td><td>0.0 T (bit-identical)</td><td>exact</td></tr>
+<tr><td>zero state against air-core, flux</td><td>0.0 Wb/rad (bit-identical)</td><td>exact</td></tr>
+<tr><td>frame contribution against <code>BoundCurrents.field</code></td><td>2.28e-17 T (6.2e-12 of the contribution)</td><td>1e-12 relative</td></tr>
+<tr><td>frame contribution against <code>BoundCurrents.psi</code></td><td>bit-identical</td><td>1e-12 relative</td></tr>
+<tr><td>solved state's change to the field</td><td>2.06e-4 T on a 0.25 T air field</td><td>non-zero</td></tr>
+</tbody></table>
+<p>The zero state is exact because the added columns multiply a zero current
+vector: the air-core solution passes through unchanged to the last bit. That is
+the property a tiny epsilon would not have.</p>
+
+<h2 id="icm-iron-field-source-external">The external term from a persisted coil response</h2>
+<p>The coils' field at the iron's 127&nbsp;872 volume quadrature points is
+written once per mesh and per coil set and reused across slices. A second run of
+the same stage reports <code>coil_response_reused=true</code> with a maximum
+relative difference of 0.0 against a fresh direct evaluation, i.e. the stored
+response round-trips bit for bit, inside the plan's 1e-12 bar. A request naming
+another mesh raises <code>the persisted coil response serves another mesh</code>;
+one naming another coil set raises <code>coil response …npz serves another coil
+set</code>. Splitting the external term into coils plus plasma changes only the
+summation order: against the prototype's single quadrature set the Frobenius
+relative difference is 5.481e-16, while the maximum pointwise relative
+difference is 1.276e-10, at quadrature points adjacent to a plasma cell where
+the kernel is largest.</p>
+
+<h2 id="icm-iron-field-source-blocks">What did not run, and why</h2>
+<p><b>1. The WEST-scale CoilSet point solve.</b> A point solve assembles the
+plasma closed coupling for its whole target set on every call, and on this CPU
+that assembly costs about 3.3&nbsp;s per target per attribute. At 157 targets one
+attribute took 515.7&nbsp;s (the progress receipt reads
+<code>2/6 [17:11&lt;34:22]</code>), so a single solve is about fifty minutes and
+the three the measurement wants are hours; at 247 targets one attribute did not
+finish in 28 minutes. The planes and diagnostics were therefore computed from the
+same external term the material solve consumes (the prototype coil and plasma
+quadrature pinned by <code>west_inputs</code>, air drift 0.0) plus
+<code>BoundCurrents</code>.</p>
+<p><b>2. The frame on a reloaded CoilSet.</b> Inserting the frame into the
+coilset reloaded from its stored cache raised
+<code>KeyError: 'polysection_policy'</code>: a reloaded frame keeps attributes in
+its metaframe's <code>additional</code> table without carrying their defaults,
+and the rows the insert appends are filled from that table. The first repair
+seeded the subframe's metaframe only, and the reload still raised at
+<code>framelink._build_additional</code>, because the failing link is built from
+the CoilSet's <em>frame</em> metaframe. Seeding both closes it:
+<code>test_reloaded_coilset_accepts_the_iron_frame</code> stores a coilset, loads
+it, inserts the frame, and gets the bitwise zero control and the 1e-12 frame
+contract (1 passed in 252.89&nbsp;s).</p>
+<p><b>3. The 40 mm state.</b> The 39&nbsp;792-square dense factor (a 12.67&nbsp;GB
+operator) could not be built in this allocation; the solver process was killed
+twice before the Newton iteration started, at a resident size of 13.0&nbsp;GB.
+The 80&nbsp;mm state solved instead: 1&nbsp;695 cells, 10&nbsp;170 unknowns,
+five Newton corrections in 27.1&nbsp;s, mu_r 218.29 to 1692.49.</p>
+
+<h2 id="icm-iron-field-source-disagreement">The apparent factor of 28 was a comparison error, and it is closed</h2>
+<p>This node first read its own iron field (6.780, 4.233 and 1.727&nbsp;mT at the
+coilset's three probe radii) against 0.2438, 0.1628 and 0.0723&nbsp;mT, which is
+the persisted 40&nbsp;mm receipt's <code>field_T</code>, and reported a factor of
+27.9 as a defect. It is not one: those receipt entries are the <b>total</b> field,
+<code>air + iron</code>, not the iron's contribution. The receipts store
+<code>field_T = total</code> (see <code>scripts/west_iron_linear/measure.py</code>
+line&nbsp;193, <code>air = external(probes)</code>, then
+<code>total = air + result.field(...)</code>).</p>
+<p>Checked against the pinned state directly: on the 80&nbsp;mm state whose
+residual history reproduces the pinned solve step for step
+(0.9977745775, 0.0011981286, 7.865737e-05, …, 3.690e-09), the seam's
+<code>field</code> plus the drive reproduces the pinned
+<code>field_T</code> to <b>4.04e-9 relative</b>, and the drive minus the iron
+field matches nothing (a 55.9 relative residual). The two vectors are almost
+equal and opposite at those probes - a 7.02&nbsp;mT drive against a 6.78&nbsp;mT
+iron contribution - so the total is the 0.244&nbsp;mT the receipt records. The
+iron shields at these radii; that is the physics the §4 record states as
+242.6&nbsp;µT against a 7024&nbsp;µT air-core.</p>
+<p>Two other evaluators were run on the same persisted state before the
+comparison error was found. <code>tiledassembly.linear_cell_interaction</code>
+(the untouched reference implementation) returns 6.77986, 4.23324 and 1.72697
+mT, ratio 1.000 to the seam's matrix; the centroid kernel
+<code>_interaction(mesh, points, plan) @ magnetisation</code> returns
+6.7898, 4.2338 and 1.7269&nbsp;mT. So the seam's field is the value the package
+already computed, to four digits.</p>
+<p>Residual honesty: the with-iron separation curve and the probe and flux-loop
+tables are still not published, because the CoilSet-stage run that draws them
+did not complete in this allocation (the plasma closed-coupling wall below). The
+field <em>values</em> are now verified; the figure and the tables are the next
+run's work, not a correctness question.</p>
+<h2 id="icm-iron-field-source-census">The census count pinned independently</h2>
+<p><code>tests/test_imas_iron_read.py::test_census_mesh_matches_previous_read</code>
+compared two counts that both came from the production <code>_mesh</code>, so a
+change in the reader moved both sides together unseen. It now pins the
+production count itself (<code>CENSUS_CELLS = 1694</code> at 0.08&nbsp;m) and
+carries a negative control: the same reader on the same six outlines at
+0.04&nbsp;m returns a different count, so the pin is a measurement of that mesh
+rather than a constant the assertion could satisfy without reading the outlines.</p>
+
+<h2 id="icm-iron-field-source-walls">Walls</h2>
+<table><thead><tr><th>Step</th><th>Wall [s]</th><th>Where</th></tr></thead><tbody>
+<tr><td>affine material solve, 10 170 unknowns</td><td>27.1</td><td>CPU, 80 mm operator loaded</td></tr>
+<tr><td>affine material solve, same stage, second run</td><td>27.1</td><td>CPU, coil response reused</td></tr>
+<tr><td>coil field at 127 872 quadrature points</td><td>persisted once</td><td>reused across slices</td></tr>
+<tr><td>air-core CoilSet point solve, 157 targets</td><td>515.7 per attribute, not completed</td><td>CPU, plasma closed coupling</td></tr>
+<tr><td>stray field and 127 diagnostics from the external term</td><td>276.4</td><td>CPU, 120 plane points</td></tr>
+<tr><td>seam test, block fixture</td><td>≈50</td><td>CPU, includes JAX compilation</td></tr>
+</tbody></table>
+<p>CPU walls here include JAX compilation of the closed-form tile kernels, a
+fixed per-process cost of several minutes on this backend; later solves in the
+same process are much cheaper per target than the first.</p>
+
+<h2 id="icm-iron-field-source-suite">Tests</h2>
+<p><code>tests/test_magnetisation.py::test_frame_carries_the_bound_currents_exactly</code>
+is the new seam contract and
+<code>::test_reloaded_coilset_accepts_the_iron_frame</code> is the same contract
+on a stored and reloaded coilset; <code>tests/test_imas_iron_read.py</code>
+carries the corrected census pin. The seam and iron-read tests return 19 passed
+in 51.36&nbsp;s on the CPU lane, and the reloaded-frame test returns 1 passed in
+252.89&nbsp;s. The full <code>tests/test_magnetisation.py</code> file was not run
+to completion in this allocation; it is not claimed as a green suite arm here.</p>
+
+<h2 id="icm-iron-field-source-receipts">Receipts</h2>
+<ul>
+<li><code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/field-source/west-62751-uniform-0.08-state-receipt.json</code></li>
+<li><code>.../west-62751-uniform-0.08-field-receipt.json</code> (the external-term measurement)</li>
+<li><code>.../west-62751-uniform-0.08-field.npz</code> (its arrays, unpublished as the iron's contribution)</li>
+<li><code>.../coil-response/9d2194829695172c.npz</code> (the persisted coil field)</li>
+<li><code>.../linear-magnetisation/west-h200/uniform-0.04.json</code> (the 40 mm H200 solve this node's 80 mm state disagrees with)</li>
+</ul>
+</main></body></html>

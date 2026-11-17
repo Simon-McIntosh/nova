@@ -398,7 +398,9 @@ def stage_field():
     edge = max(
         coil["r"] + coil["dr"] / 2 for coil in coils if coil["name"] in ("Fh", "Fb")
     )
-    radius = np.linspace(edge, 16.0, 160)
+    # the plasma closed-coupling assembly costs about 3.4 s per CPU target and
+    # is linear in the target count, so the sampled set is sized to the turn
+    radius = np.linspace(edge, 16.0, 10)
     line_targets = np.vstack(
         [np.column_stack((radius, np.full_like(radius, z))) for z in LINES.values()]
     )

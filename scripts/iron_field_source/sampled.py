@@ -73,11 +73,13 @@ def main():
     contribution_probe = bound.field(probes)
     contribution_loop = bound.psi(loops)
     nline = len(line_targets)
-    with_iron_lines = air_lines + bound.field(line_targets)
+    contribution_lines = bound.field(line_targets)
+    with_iron_lines = air_lines + contribution_lines
     bmag_air = np.hypot(*air_lines.T).reshape(len(measure.LINES), -1)
     bmag_iron = np.hypot(*with_iron_lines.T).reshape(len(measure.LINES), -1)
+    stem = f"west-62751-{MESH}-sampled"
     np.savez(
-        measure.field_path(),
+        measure.EVIDENCE / f"{stem}.npz",
         radius=radius,
         line_names=np.asarray(list(measure.LINES)),
         lines=np.asarray(list(measure.LINES.values())),
@@ -90,7 +92,7 @@ def main():
         direct_probe=air_diagnostic[: len(probes)],
         frame_loop=contribution_loop,
         direct_loop=air_diagnostic[len(probes) :],
-        contribution=np.zeros((nline, 2)),
+        contribution=contribution_lines,
         air=air_lines,
         with_iron=with_iron_lines,
     )
@@ -116,7 +118,9 @@ def main():
         iron_from="BoundCurrents, the operand the passive frame carries",
         completed=True,
     )
-    measure.receipt_path().write_text(json.dumps(receipt, indent=2) + "\n")
+    (measure.EVIDENCE / f"{stem}-receipt.json").write_text(
+        json.dumps(receipt, indent=2) + "\n"
+    )
     print(json.dumps(receipt), flush=True)
 
 

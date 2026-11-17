@@ -14,7 +14,9 @@
 #     scripts/iron_field_source/run_arms.sh
 set -euo pipefail
 
-root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+# SLURM copies the batch script into its spool directory, so the script cannot
+# find the checkout from its own path; the submitter names the checkout.
+root=${ICM_ROOT:?export ICM_ROOT with the checkout path before submitting}
 base=9b016126111a5acaebca064c07432042b5a2628c
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 out=/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/arms

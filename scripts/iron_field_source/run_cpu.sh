@@ -16,7 +16,9 @@
 set -euo pipefail
 
 stage=${1:-state}
-root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+# SLURM copies the batch script into its spool directory, so the script cannot
+# find the checkout from its own path; the submitter names the checkout.
+root=${ICM_ROOT:?export ICM_ROOT with the checkout path before submitting}
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 figure=${2:-$root/docs/figures/west-stray-field/west-62751-iron-stray-field.png}
 

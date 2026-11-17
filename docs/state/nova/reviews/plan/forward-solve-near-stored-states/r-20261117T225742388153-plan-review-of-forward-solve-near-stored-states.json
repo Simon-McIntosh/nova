@@ -67,6 +67,16 @@
       "note": "The first section now states each MAST-U arm with its starting field and solver policy: the stored-field solve under the default policy, which ends at 4.9e-10, the continuation that qualifies at 5.3e-16 under its recorded policy, and the displaced solve that refuses; the bracket starts from the continuation.",
       "reason": "",
       "when": "2026-11-17T23:10:46.506855+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2492a70c603190859d6cae828039be8ae01256ed",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The first section now requires the record to state the displaced coefficient vector, its coordinate and its sign, so later sections name a recorded state.",
+      "reason": "",
+      "when": "2026-11-17T23:11:35.964800+00:00"
     }
   ],
   "responses": {
@@ -78,6 +88,15 @@
       "note": "The first section now states each MAST-U arm with its starting field and solver policy: the stored-field solve under the default policy, which ends at 4.9e-10, the continuation that qualifies at 5.3e-16 under its recorded policy, and the displaced solve that refuses; the bracket starts from the continuation.",
       "reason": "",
       "when": "2026-11-17T23:10:46.506855+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "2492a70c603190859d6cae828039be8ae01256ed",
+      "commit_basis": "edit",
+      "note": "The first section now requires the record to state the displaced coefficient vector, its coordinate and its sign, so later sections name a recorded state.",
+      "reason": "",
+      "when": "2026-11-17T23:11:35.964800+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261117T225742388153-plan-review-of-forward-solve-near-stored-states.json",

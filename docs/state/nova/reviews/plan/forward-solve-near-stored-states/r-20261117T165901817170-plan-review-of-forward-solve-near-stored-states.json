@@ -35,9 +35,28 @@
       "note": "The displacement is no longer called a response step: every clause now refers to the displaced coefficients at which the first section recorded the refusal, a recorded per-case quantity.",
       "reason": "",
       "when": "2026-11-17T21:59:20.335781+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5c235a20fbf95405de3bd097e8440e2771235d47",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The neighbourhood search is removed: for TCV and ITER the clause now asks for the terminal reason and residual of the solve at the stored coefficients and the outer iteration at which qualification was lost.",
+      "reason": "",
+      "when": "2026-11-17T22:00:02.633295+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "5c235a20fbf95405de3bd097e8440e2771235d47",
+      "commit_basis": "edit",
+      "note": "The neighbourhood search is removed: for TCV and ITER the clause now asks for the terminal reason and residual of the solve at the stored coefficients and the outer iteration at which qualification was lost.",
+      "reason": "",
+      "when": "2026-11-17T22:00:02.633295+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",

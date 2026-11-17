@@ -3,6 +3,18 @@
   "added_failure_ids": [],
   "completed_at": "",
   "dispatched_at": "2026-11-17T01:36:12Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "the two finest affine marks sit at 35184 and 39792 unknowns, nearly equal on a log axis; both centres and the values stay readable, and the review found nothing hidden",
+      "recorded_at": "2026-11-17T04:03:05.039592+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the graded constant point lies on the uniform constant line because its value matches that line at that unknown count; the open square stays legible and no value is lost",
+      "recorded_at": "2026-11-17T04:03:11.662040+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/west_iron_linear/figure.py",

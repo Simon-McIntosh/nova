@@ -6,7 +6,7 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="polygon-stable-evaluator">
 <meta name="plan-title" content="A shared stable polygon derivative evaluator">
-<meta name="plan-summary" content="Compile budget and primal identity pass; integrated head accuracy and the requested head suite remain in progress">
+<meta name="plan-summary" content="Compile budget and primal identity pass; integrated head accuracy remains in progress, with one added combined-suite failure">
 <meta name="plan-evidence-for" content="sub-millisecond-forward-path">
 <meta name="plan-verifies" content="sub-millisecond-forward-path#s7">
 <meta name="plan-commits" content="27b4418b75265aab0313ff4ce402c6f8b55cbf46">
@@ -18,7 +18,7 @@
 </head><body><main class="plan-doc">
 <article id="polygon-stable-evaluator-result">
 <h1>One stable evaluator supplies every packed polygon derivative</h1>
-<p><strong>The integrated implementation passes its compile-cost and primal-identity checks.</strong> The production row uses 1.565208 times main's post-splitter instructions and 1.871670 times its cold compile wall, within both unchanged 2.3 limits. Every packed primal row, and every production value and gradient row, is bit-identical over the compiled 10,000-point identity population. The full 64-node head accuracy and requested combined head suite are still running. The existing bounded-point graph check has an added failure at 9,351,538 bytes against its unchanged 6,000,000-byte ceiling.</p>
+<p><strong>The integrated implementation passes its compile-cost and primal-identity checks.</strong> The production row uses 1.565208 times main's post-splitter instructions and 1.871670 times its cold compile wall, within both unchanged 2.3 limits. Every packed primal row, and every production value and gradient row, is bit-identical over the compiled 10,000-point identity population. The full 64-node head accuracy is still running. The requested combined head suite completes with one added compiler-memory failure, 14 passes and seven skips. The existing bounded-point graph check has an added failure at 9,351,538 bytes against its unchanged 6,000,000-byte ceiling.</p>
 
 <section id="polygon-stable-evaluator-mechanism">
 <h2>The derivative routes share one expression</h2>
@@ -54,6 +54,17 @@
 <tr><td>ψRZ</td><td>0.04974989011403869</td></tr>
 <tr><td>ψZZ</td><td>0.051788559472716954</td></tr>
 </tbody></table>
+<table><thead><tr><th>Packed row</th><th>Primal bit differences</th><th>Maximum directional-derivative relative departure from main</th></tr></thead><tbody>
+<tr><td><code>psi</code></td><td>0</td><td>1.248129227831926e-15</td></tr>
+<tr><td><code>psi_radial_moment</code></td><td>0</td><td>0</td></tr>
+<tr><td><code>psi_vertical_moment</code></td><td>0</td><td>0</td></tr>
+<tr><td><code>Br</code></td><td>0</td><td>2.1181888470145996e-08</td></tr>
+<tr><td><code>Br_radial_moment</code></td><td>0</td><td>0.00059298115637026235</td></tr>
+<tr><td><code>Br_vertical_moment</code></td><td>0</td><td>0.012005003411959973</td></tr>
+<tr><td><code>Bz</code></td><td>0</td><td>6.0548227874520933e-05</td></tr>
+<tr><td><code>Bz_radial_moment</code></td><td>0</td><td>0.099702247186188753</td></tr>
+<tr><td><code>Bz_vertical_moment</code></td><td>0</td><td>0.34511851330379334</td></tr>
+</tbody></table>
 <p>The packed directional derivatives change most in the Bz vertical-moment row (0.34511851330379334 maximum elementwise relative departure). The three packed flux-moment tangent departures are 1.248129227831926e-15, 0 and 0. The production Hessian's point-scaled maximum departure is 2.2418641349101266e-5. These are changes from the defective kernel, not independent accuracy errors. Both historical derivative-identity assertions fail and are retained with <code>EXIT=1</code>; value and gradient identity pass. Independent accuracy is judged below.</p>
 </section>
 
@@ -85,9 +96,9 @@
 <h2>Coverage arms and retained process failure</h2>
 <p>The baseline coverage arm at <code>02997905193b245dcc099a238fea6c22d8817671</code> completes with <strong>nine passed in 880.53 s, EXIT=0</strong>. The command in that revision's archive is:</p>
 <pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_moment_field_hessian.py</pre>
-<p>The requested head coverage at <code>d841d41f6d6c79b8b9a3067f14bfb69c3bd00d5c</code> is running with:</p>
+<p>The requested head coverage at <code>d841d41f6d6c79b8b9a3067f14bfb69c3bd00d5c</code> completes with <strong>one failed, 14 passed, seven skipped in 2107.77 s, EXIT=1</strong>, using:</p>
 <pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/biot/test_polygon_edge_line_tangent.py tests/biot/test_polygon_stable_evaluator.py tests/test_moment_field_hessian.py</pre>
-<p>The automatic suite runner refused the empty base command before executing tests because both added regression files are absent at base. The separately measured pair therefore includes the existing moment-Hessian coverage at both revisions and the added files only at head. Its seven receipt-backed accuracy cases run in their dedicated numerical gate. The focused head moment-Hessian file completes separately with nine passed in 1977.85 s. An earlier combined head arm at <code>1d7d1d056bde170dc6642fe89e7fabbca923099b</code> aborts inside the JAX compiler with <code>EXIT=134</code> before a pytest summary; its cause remains unknown and it is not counted as a completed arm.</p>
+<p>The automatic suite runner refused the empty base command before executing tests because both added regression files are absent at base. The separately measured pair therefore includes the existing moment-Hessian coverage at both revisions and the added files only at head. Its seven receipt-backed accuracy cases run in their dedicated numerical gate. The added failure is <code>tests/test_moment_field_hessian.py::test_height_sweep[0.0001]</code>: JAX reports failure to materialize <code>select_divide_fusion</code>, with stderr stating <q>LLVM compilation error: Cannot allocate memory</q>. This is a completed red arm; it does not meet the zero-added-failure requirement. No further combined rerun is attempted. The focused head moment-Hessian file completes separately with nine passed in 1977.85 s. An earlier combined head arm at <code>1d7d1d056bde170dc6642fe89e7fabbca923099b</code> aborts inside the JAX compiler with <code>EXIT=134</code> before a pytest summary; its cause remains unknown and it is not counted as a completed arm.</p>
 </section>
 
 <section id="polygon-stable-evaluator-receipts">
@@ -104,6 +115,6 @@
 <li>Graph size: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/bounded-selected/bounded-point.log</code>; production CPU lowering: <code>head-extras/lowered-size.json</code>.</li>
 <li>Base-known production assertions: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/base-production-tests/production-receipts.log</code> and <code>head-production-tests/production-receipts.log</code>.</li>
 </ul>
-<p>The source implementation and completed side controls are retained. Full head numerical accuracy and the completed requested head coverage arm remain necessary for delivery. The bounded-point ceiling failure is reported for the coordinator's decision.</p>
+<p>The source implementation and completed side controls are retained. Full head numerical accuracy remains necessary for delivery. The completed requested head coverage arm has one added compiler-memory failure; the separately passing focused arm does not erase it. The bounded-point ceiling failure is reported for the coordinator's decision.</p>
 </section>
 </article></main></body></html>

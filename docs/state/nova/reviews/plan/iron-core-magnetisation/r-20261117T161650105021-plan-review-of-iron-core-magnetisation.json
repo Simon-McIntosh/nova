@@ -35,6 +35,16 @@
       "note": "clause (2) now compares the new route against the existing one on graded 16/80 mm (35 184 unknowns), the largest mesh the existing route solves on the card and one that carries the grading boundary",
       "reason": "",
       "when": "2026-11-17T20:46:11.134435+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "664140fd6eb3849f6f1d59967a4a28cc9ea487be",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "the section is dispatched as two nodes: the H200 8/40 refinement with its route check (clauses 1 and 2), and the shell negative arm (clause 3), each landing on its own review",
+      "reason": "",
+      "when": "2026-11-17T20:46:37.138046+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "clause (2) now compares the new route against the existing one on graded 16/80 mm (35 184 unknowns), the largest mesh the existing route solves on the card and one that carries the grading boundary",
       "reason": "",
       "when": "2026-11-17T20:46:11.134435+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "664140fd6eb3849f6f1d59967a4a28cc9ea487be",
+      "commit_basis": "edit",
+      "note": "the section is dispatched as two nodes: the H200 8/40 refinement with its route check (clauses 1 and 2), and the shell negative arm (clause 3), each landing on its own review",
+      "reason": "",
+      "when": "2026-11-17T20:46:37.138046+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261117T161650105021-plan-review-of-iron-core-magnetisation.json",

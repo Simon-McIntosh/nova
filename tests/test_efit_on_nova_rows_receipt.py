@@ -3,10 +3,11 @@
 ``docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html``
 states measured quantities, and nothing else in the repository would fail if one
 of them were rewritten.  This module fails in that case.  It reads the receipt
-this directory carries (written from the run's own records by
-``write_receipt.py``), recomputes every derived figure — the deltas against the
-generating state, the band verdicts, the amplitude trade, the control ratios —
-and requires the record to quote each one.
+committed beside the figures
+(``docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json``,
+written from the run's own records by ``write_receipt.py``), recomputes every
+derived figure — the deltas against the generating state, the band verdicts, the
+amplitude trade, the control ratios — and requires the record to quote each one.
 
 It follows the repository's receipt-reconciliation form
 (``tests/test_outboard_census_receipt_consistency.py``), takes the panel
@@ -22,7 +23,7 @@ solver log announces only the live counts.
 Run it as a node check::
 
     PYTHONPATH=. JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider -q \
-      docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/test_fragment_receipt.py
+      tests/test_efit_on_nova_rows_receipt.py
 """
 
 from __future__ import annotations
@@ -38,9 +39,13 @@ import pytest
 
 from tests.test_figure_panel_pin import _vector_content_digest
 
-HERE = pathlib.Path(__file__).resolve().parent
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+FIGURES = (
+    ROOT / "docs" / "figures" / "inverse-equilibrium-baseline" / "efit-on-nova-rows"
+)
 FRAGMENT = (
-    HERE.parents[2]
+    ROOT
+    / "docs"
     / "evidence"
     / "fragments"
     / "inverse-equilibrium-baseline"
@@ -48,8 +53,8 @@ FRAGMENT = (
 )
 FRAGMENT_ID = "efit-on-nova-rows"
 PANELS = {
-    "nominal": HERE / "efit-generating-overlay-10.svg",
-    "control": HERE / "efit-generating-overlay-11.svg",
+    "nominal": FIGURES / "efit-generating-overlay-10.svg",
+    "control": FIGURES / "efit-generating-overlay-11.svg",
 }
 
 
@@ -65,7 +70,7 @@ def normalise(text: str) -> str:
 
 @pytest.fixture(scope="module")
 def receipt():
-    return json.loads((HERE / "receipt.json").read_text())
+    return json.loads((FIGURES / "receipt.json").read_text())
 
 
 @pytest.fixture(scope="module")
@@ -319,7 +324,7 @@ def test_the_record_cites_the_check_that_guards_it():
     """The record names the receipt and the check, so a reader can rerun them."""
     text = normalise(FRAGMENT.read_text())
     assert "receipt.json" in text
-    assert "test_fragment_receipt.py" in text
+    assert "tests/test_efit_on_nova_rows_receipt.py" in text
 
 
 def test_every_paragraph_opens_and_closes_in_order():

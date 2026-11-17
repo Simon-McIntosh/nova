@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="biot,iron-core,machine-description,jax,efit">
   <meta name="plan-after" content="kernel-compile-barrier">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;deferred&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;,&quot;iron-core-magnetisation#s3&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;,&quot;iron-core-magnetisation#s5&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s1&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;iron-core-magnetisation#s8&quot;,&quot;iron-core-magnetisation#s10&quot;],&quot;s10&quot;:[&quot;iron-core-magnetisation#s5&quot;]}">
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="115">
+<meta name="plan-version" content="117">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -393,22 +393,16 @@
       and any probe read include the iron with no change to a solve path. The formulation decision
       chose the piecewise-linear basis, so in each cell the affine magnetisation carries a uniform
       azimuthal bound volume current over the polygon section and a bound sheet current on each
-      edge that varies linearly along it. The frame evaluates them through the same tiled polygon
-      and edge routes the solve's interaction uses (<code>nova/biot/tiledassembly.py</code>, with the
-      Part II sheet section of <code>nova/biot/sheet.py</code>), so its field equals
-      <code>MagnetisationSolution.field</code> to round-off. Regenerate the WEST stray-field figure
-      with iron beside the air-core curve.
+      edge that varies linearly along it. The frame's field must equal
+      <code>MagnetisationSolution.field</code> to round-off at every grid and probe point.
+      Regenerate the WEST stray-field figure with iron beside the air-core curve.
     </p>
     <p>
       A time slice must not re-evaluate the coils on the iron. On WEST, 179&nbsp;s of a 4-minute slice
       is the coil field evaluated at the cell quadrature points, and that field is linear in the coil
-      currents. So build, per mesh, the Galerkin projection of each coil's unit-current field onto
-      the basis, persist it beside the interaction under the same geometry digest, and form a
-      slice's external term as one matrix product with the coil currents; the plasma's contribution
-      is evaluated per slice. The loader refuses a response whose digest or coil set does not match.
-      Also restore an independent pin on the production WEST census mesh cell count (1694 cells at
-      0.08&nbsp;m) in <code>tests/test_imas_iron_read.py</code>, which the cleanup run relaxed, with a
-      negative control that changes the mesh spacing.
+      currents. So the coils' contribution to the external term is persisted per mesh and per coil
+      set and reused across slices, while the plasma's contribution is evaluated per slice; a
+      persisted response is refused for any other mesh or coil set.
     </p>
     <p>
       Done when (1) <code>docs/figures/west-stray-field/</code> carries a with-iron figure whose
@@ -422,7 +416,7 @@
     </p>
 
     <h2 id="s10">§6b — The imas-efit closed-shell control</h2>
-<section data-reckon="section" data-id="s10" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s10" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="deferred" data-links=""></section>
     <p>
       Run the closed-shell control through imas-efit's iron model and report the result to the
       imas-efit owners. imas-efit reads its iron geometry through <code>IronCoreBuilder</code> from the
@@ -543,15 +537,15 @@
       The WEST H200 measurement (<code>icm-west-linear-h200</code>) left the +4&nbsp;m field moving 1.17&nbsp;%
       between uniform 80 and 40&nbsp;mm, while graded 16/80&nbsp;mm agrees with uniform 40&nbsp;mm to 0.62&nbsp;%.
       The next refinement, graded 8/40&nbsp;mm (11&nbsp;708 cells, 70&nbsp;248 unknowns), has a 39.5&nbsp;GB dense
-      interaction that the H200 cannot hold beside the compiled assembly's temporaries. Assemble it
-      in row blocks streamed to host memory through the existing tiled owners in
-      <code>nova/biot/tiledassembly.py</code>, persist it with the geometry digest that
-      <code>save_magnetisation_interaction</code> already writes, and solve on the card. This section
-      does not gate §6: the field source and the forward solve consume the basis, not this number.
+      interaction that the H200 cannot hold beside the compiled assembly's temporaries as the
+      assembly runs today. The section needs that interaction built within the card's memory,
+      unchanged in value, and solved on the card. It does not gate §6: the field source and the
+      forward solve consume the basis, not this number.
     </p>
     <p>
       Done when (1) the graded 8/40&nbsp;mm WEST linear solve on the H200 reports the midplane field
-      at 1, 2 and 4&nbsp;m and its change against graded 16/80&nbsp;mm, stated plainly against 1&nbsp;%;
+      at 1, 2 and 4&nbsp;m, and its change against graded 16/80&nbsp;mm is under 1&nbsp;% at every probe; a
+      larger change ends the section blocked with the measured change rather than met;
       (2) the block-assembled interaction equals the existing single-program assembly on the
       uniform 80&nbsp;mm WEST mesh to 1e-12 relative in one process, so the blocking changes no entry;
       (3) a linear shell arm at 80&nbsp;mm on the &mu;<sub>r</sub> = 1000 shell is measured against the
@@ -617,6 +611,18 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-s5-graded-measured" data-who="nova-coordinator" data-when="">
     <div class="r-comment-body"><p>Graded refinement, the first §5 candidate, is measured, merged in commit 7a44dd216 and promoted. The evidence is in fragment <code>icm-graded-refinement</code>. It does not meet §5:</p><ul><li><strong>Closed shell, μ<sub>r</sub> = 1000:</strong> at equal cell count, grading gives no accuracy gain over a uniform mesh. Both families follow one error-versus-cells curve. The pinned graded arm reaches 0.397 % worst-probe at 13 410 cells, where the uniform arm would need about 9 500, and its doubled arm misses at 1.052 %.</li><li><strong>WEST 62751, graded 16/80 mm → 8/40 mm:</strong> the field moves +3.47 % at +1 m, −5.21 % at +2 m and −7.16 % at +4 m, so clause (2) is missed at every probe.</li><li><strong>Lane:</strong> the graded arms ran on CPU, because the P100 cannot hold the dense factor above about 11k cells.</li></ul><p>The piecewise-constant cell route is therefore not converged at the far probes at affordable cell counts. The remaining candidates are piecewise-linear magnetisation and the surface scalar formulation; the formulation decision is with the lead. The run's non-blocking review findings go to the deferred scripts-cleanup node.</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261114T144521862249-icm-efit-closed-shell" data-who="reckon-build" data-when="2026-11-17T12:11:30.092Z">
+    <div class="r-comment-body"><p>The imas-efit closed-shell control produced no shielding factor: on develop the
+dependency refuses XML-only input (machine &lt;pfCircuits&gt; unread, so no circuit,
+no active coil geometry, no axis), so imas-efit is NEITHER implicated NOR
+cleared on the closed-shell representation. One-directional: this is no
+evidence either way, not evidence against the exact S = 61.101838 (a/b = 0.9,
+mu_r = 1000) that nova measures. No 2 percent scoring was possible, and no
+number is reported for either ratio.</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-s10-deferred-on-imas-efit-xml" data-who="reckon-build" data-when="">
+    <div class="r-comment-body"><p>§6b is deferred until imas-efit can drive a source from XML input, or a pulse supplies pf_active circuits this machine description can use. On develop, <code>src/pfSystems.cpp</code> leaves the machine &lt;pfCircuits&gt; read commented out, so the control cannot run (landed record at merge 3abe74daf). The question went to the imas-efit session on 2026-11-17. A rerun is a fresh node using the case builder under <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/closed-shell/</code>. §9 reads this section's verdict, so it waits too.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T222130291065-review-of-icm-strip-error-sweep-43dc514d920c-figure" data-who="reckon-build" data-when="2026-11-06T22:32:39.513Z">
     <div class="r-comment-body"><p>Figure review of run r-20261106T212311176377-icm-strip-error-sweep at head 43dc514d9 is parsed with no blocking finding: the strip-error curve figure renders clean (zero ink in the outer 8 px frame, ink bbox x 35..1365 y 86..690, one frameless legend row, the 1e-10 direct label in clear space), and one non-blocking finding records that the two lightest curve stops measure 2.61:1 and 1.93:1 against white, below the 3:1 a plotted line is required to hold, so the coincident right-hand branch is drawn in the palest trace.</p></div>
@@ -893,15 +899,6 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-folded-census-count-pin" data-who="reckon-build" data-when="">
     <div class="r-comment-body"><p>A review finding was folded into this section's node (<code>icm-iron-field-source</code>) from the landed cleanup run r-20261115T081846316772. <code>tests/test_imas_iron_read.py::test_census_mesh_matches_previous_read</code> now asserts <code>len(actual) == len(expected) &gt; 0</code>, and both sides call the production <code>_mesh</code>, so a change in cell count or partition moves both together unseen. Restore an independent pin on the production count (1694 cells at 0.08 m), with a negative control that changes the mesh spacing. Add this to the brief when the contract is edited after the §5 decision.</p></div>
-</div>
-<div class="r-comment" data-section="s10" data-id="c-run-r-20261114T144521862249-icm-efit-closed-shell" data-who="reckon-build" data-when="2026-11-17T12:11:30.092Z">
-    <div class="r-comment-body"><p>The imas-efit closed-shell control produced no shielding factor: on develop the
-dependency refuses XML-only input (machine &lt;pfCircuits&gt; unread, so no circuit,
-no active coil geometry, no axis), so imas-efit is NEITHER implicated NOR
-cleared on the closed-shell representation. One-directional: this is no
-evidence either way, not evidence against the exact S = 61.101838 (a/b = 0.9,
-mu_r = 1000) that nova measures. No 2 percent scoring was possible, and no
-number is reported for either ratio.</p></div>
 </div>
 </section>
 </main>

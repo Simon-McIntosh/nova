@@ -35,9 +35,28 @@
       "note": "The section now says nova sets imas-efit degrees explicitly for this run and why: its automatic choice resolves no pressure coefficient on magnetics-only ITER rows, where no state with an axis exists.",
       "reason": "",
       "when": "2026-11-17T21:56:18.674108+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "43ea8ffb492d430c8f3da575148b680c18aac659",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The flux band is now on the boundary flux after the axis flux is aligned, which is the flux span, and the clause says so; the axis flux is no longer banded.",
+      "reason": "",
+      "when": "2026-11-17T21:58:42.534195+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "43ea8ffb492d430c8f3da575148b680c18aac659",
+      "commit_basis": "edit",
+      "note": "The flux band is now on the boundary flux after the axis flux is aligned, which is the flux span, and the clause says so; the axis flux is no longer banded.",
+      "reason": "",
+      "when": "2026-11-17T21:58:42.534195+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",

@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T23:31:15.769Z",
+  "dispatched_at": "2026-11-17T23:31:03Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:66",
+      "id": "reasoning-1",
+      "reason": "a node carrying this reading would report the fixture's size as this row's lowered graph and would compare the ceiling test's number against the wrong program's control.",
+      "text": "the sentence attaches \"lowers to 9,351,538 bytes (polygon stable evaluator)\" to the repaired 132-cell production row, immediately after that row's 1.565\u00d7 instruction and 1.872\u00d7 compile ratios, but the cited fragment records 9,351,538 as the separate eight-cell bounded-point fixture's size (main 5,442,157 there) and records the production-row CPU lowering at 10,251,815 bytes at 132 cells, with the explicit note \"These are different programs\"; the section's own fixture comments date from its 6,088,070-byte reading",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:66",
+      "id": "reasoning-2",
+      "reason": "the identity arm's four-hour job would be cut short after its compile, losing the only base rows clause (2) can compare against.",
+      "text": "clause (2) budgets the base build as \"about 7,044 s and 381 GB\" in \"one sirius job at --mem=450G and --time=04:00:00\" while the same paragraph declares the repaired kernel at 681a6ecd2 \"this node's one base\" for clause (2)'s identity measure; the repair multiplies this row's cold compile by 1.872 (216.513 s \u2192 405.241 s) and its lowered graph by 1.68 (6,088,070 \u2192 10,251,815 bytes at 132), so the budget describes the pre-repair program and the base job is under-sized for the base it is declared to carry",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:66",
+      "id": "done_when-1",
+      "reason": "moving a test's baseline onto the head is exactly how a moved-tangent failure becomes invisible, and with no clause the node's one verdict does not cover it.",
+      "text": "the re-basing of the revision `tests/biot/test_moment_program_identity.py` compares against is written as an action with a rationale (\"two of its rows fail on the H200 against the older base only because the repair moved tangents\"), and neither the clauses nor a separate clause require those two rows to pass at 681a6ecd2, so a node can move a test's reference revision and return with those rows still red",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:66",
+      "id": "evidence_paths-1",
+      "reason": "without a declared path a multi-hour card arm's compile seconds and per-pass table land wherever the worker puts them and cannot be reopened against the clause they measure.",
+      "text": "node (c) is the section's measurement node (two cold H200 arms at 132, the 282-cell and 2,132-node compile walls, and a per-pass table on the partial-result path) and it names no record path, while node (b) beside it names `docs/evidence/fragments/kernel-compile-barrier/point-program-attribution.html`, its figures under `docs/figures/` and its receipts under `~/.cache/nova-kernel-compile-barrier/`",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "8b17d6b3f7927884283e3433a5a8d6eb85094c68",
+  "plan_fingerprint": "5792a322d41f554e80cffc36d86c36f4297fca88158ccfc59a3dc9138d62138f",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 94,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T233035253935-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "07eaf13820cef0ea6ee104acdeadd8b158deaf5d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited file, directory, commit and line resolves at 8b17d6b3f (`fixed_points.py:323` `def _source_jets(`, `:546` `def maintain_rows(`, `:611` `_row_program(...)` call, `read_route/jets.py:262`, `solve.py:121`, `row.py:115`), commits da28fc4e5, 00ec05512, 0b5972bfd and 681a6ecd2 exist, and the extensionless hrefs resolve as `<path>.html`.",
+    "done_when": "a finding \u2014 node (c) states it re-bases the revision that `tests/biot/test_moment_program_identity.py` compares against onto 681a6ecd2, and no clause requires the two rows that fail today to pass at that base.",
+    "evidence_paths": "a finding \u2014 node (c)'s two-arm H200 measurement and its partial-result per-pass table have no declared durable path, while node (b) in the same section names a fragment, a figure directory and a receipt root.",
+    "naming": "pass \u2014 the section's new prose carries no plan label into a symbol; the one new figure, merge `681a6ecd2`, is a revision a reader can open, not a tracker id.",
+    "reasoning": "a finding \u2014 two quantities in s3 are attributed to the wrong program: the 9,351,538-byte lowering is the eight-cell bounded-point fixture, not this row, and clause (2)'s base-build budget is the pre-repair program's even though the section now names the repaired kernel as the one base.",
+    "single_goal": "pass \u2014 node (c)'s deliverable is one bounded form meeting clause (1) with clauses (2) and (3) measuring that same form; the test re-bases no verdict of its own.",
+    "wiring": "pass \u2014 s3's declared links (s2, s5) cover its inputs; node (c)'s base is now the repair landed on main at 681a6ecd2 (git: ancestor of 8b17d6b3f), so the former wait on peer \u00a77 is no longer a missing dependency."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "b465cef1e2cc13170ec112ecc51774aeedecf0105d30a3902a7c0ecc0a762197",
+    "s3": "51c589c3ed14d5d3c14f8ded7a2448431393ac543fbc217f519d6d6518064c9f",
+    "s4": "b4c3eef27a064692dbf419c8ce536674acaafb04413c9c58789ff1b0a6338bcc",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T23:41:34.648677+00:00",
+  "total": null
+}

@@ -42,7 +42,9 @@ CELLS = 8
 # the unrolled axis. The ceiling allows the constant folding a JAX patch level
 # changes and refuses a form that unrolls the term order again, which
 # multiplies the graph once per term.
-STABLEHLO_CEILING = 6_000_000
+# The stable derivative evaluator with six height samples enlarges the
+# corner-height Hessian block: this fixture measures 9,351,538 bytes.
+STABLEHLO_CEILING = 10_000_000
 
 
 @pytest.mark.slow

@@ -174,8 +174,10 @@ from nova.biot.gradedresidual import (
     _weight_remainder,
     graded_residual,
 )
+from nova.biot.completeelliptic import _descent, _finite_part
 from nova.biot.momentchannel import (
     POLE_CEILING,
+    POLE_SWITCH,
     Channel,
     _across_tangent,
     _channel_split_tangent,
@@ -185,9 +187,11 @@ from nova.biot.pairedfloat import add as paired_add
 from nova.biot.pairedfloat import divide as paired_divide
 from nova.biot.pairedfloat import multiply as paired_multiply
 from nova.biot.pairedfloat import scale as paired_scale
+from nova.biot.pairedfloat import square_root as paired_square_root
 from nova.biot.pairedfloat import subtract as paired_subtract
 from nova.biot.pairedfloat import value as paired_value
 from nova.biot.pairedfloat import wrap as paired_wrap
+from nova.biot.pairedfloat import where as paired_where
 from nova.biot.polygon import _held_edge, _packed_topology, pack_section
 from nova.biot.rangefunction import (
     _across_the_range_tangent,
@@ -203,6 +207,9 @@ from nova.biot.rangefunction import (
     _tangent_sum,
     _tangent_difference,
     across_the_range,
+    contract,
+    deflate,
+    harmonic_multiply,
     paired_across_the_range,
     paired_product,
     paired_range_function,
@@ -582,9 +589,20 @@ class _Vertex:
     """
 
     def __init__(
-        self, r, z, corner_r, corner_z, nodes, *, residual: bool, paired=False, xp=np
+        self,
+        r,
+        z,
+        corner_r,
+        corner_z,
+        nodes,
+        *,
+        residual: bool,
+        paired=False,
+        xp=np,
+        stable_poles=False,
     ):
         self.xp = xp
+        self.stable_poles = stable_poles
         self.nodes = nodes
         r = xp.asarray(r)
         z = xp.asarray(z)
@@ -592,6 +610,8 @@ class _Vertex:
         # geometry rather than from r' less r: r' collapses to this corner's radius
         # at this limit, exactly.
         self.level = u = corner_z - z
+        if stable_poles:
+            self.level_pair = paired_subtract(paired_wrap(corner_z), paired_wrap(z))
         self.offset = offset = corner_r - r
         self.radius = r
         rp = offset + r
@@ -737,6 +757,15 @@ class _Vertex:
 
     def across(self, numerator: tuple, split: tuple):
         """Return ``integral numerator/(denominator Delta) da``."""
+        if self.stable_poles and split is self.ring:
+            ratio = 1.0 / (
+                2.0
+                * self.radius
+                * (self.radius + self.xp.hypot(self.radius, self.level))
+            )
+            return _regular_across(
+                self, numerator, split, (self.level, self.level), (ratio, ratio)
+            )
         return self.channel.across(numerator, split)
 
     def across_paired(self, numerator: tuple, split: tuple):
@@ -943,6 +972,261 @@ class _Vertex:
         )
 
 
+@_array_program
+def _plane_pole_factor(radius, level, offset, slope, count, *, xp=np, weighting=None):
+    """Factor the arctangent pole numerator with compensated fp64 products.
+
+    At the plane root, ``N/h = u + 2 R rho h (2 b R (1+s) - u)``.
+    Its two terms can nearly cancel away from the line, so the geometric root
+    and this coefficient retain their product and summation residues together.
+    """
+    r, h, b = (paired_wrap(v) for v in (radius, offset, slope))
+    one = paired_wrap(1.0 + 0.0 * radius)
+    r1 = paired_add(r, h)
+    b2 = paired_multiply(b, b)
+    leading = paired_scale(paired_multiply(b2, paired_multiply(r, r)), 4.0)
+    curved = paired_value(leading) != 0.0
+    held = paired_where(curved, leading, one, xp)
+    near = paired_divide(paired_multiply(h, h), held)
+    radius_sum = paired_add(r1, r)
+    far = paired_divide(paired_multiply(radius_sum, radius_sum), held)
+    pivot = paired_subtract(paired_add(one, far), near)
+    radical = paired_square_root(
+        paired_add(paired_multiply(pivot, pivot), paired_scale(near, 4.0)), xp
+    )
+    ratio = paired_divide(
+        paired_scale(one, 2.0), paired_multiply(held, paired_add(pivot, radical))
+    )
+    linear_radius = paired_where(curved, one, r1, xp)
+    linear = paired_divide(one, paired_scale(paired_multiply(r, linear_radius), 4.0))
+    ratio = paired_where(curved, ratio, linear, xp)
+    shift = paired_multiply(paired_multiply(h, h), ratio)
+    span = paired_add(one, shift)
+    lever = paired_scale(paired_multiply(paired_multiply(r, ratio), h), 2.0)
+    coefficient = paired_add(
+        level,
+        paired_multiply(
+            lever,
+            paired_subtract(
+                paired_scale(paired_multiply(paired_multiply(b, r), span), 2.0), level
+            ),
+        ),
+    )
+    derivative = paired_scale(
+        paired_add(
+            r1,
+            paired_multiply(
+                paired_multiply(b2, r), paired_add(one, paired_scale(shift, 2.0))
+            ),
+        ),
+        -4.0,
+    )
+    weight = one
+    t = paired_scale(paired_add(one, paired_scale(shift, 2.0)), -1.0)
+    if weighting is None:
+        for _ in range(count):
+            weight = paired_multiply(weight, t)
+    else:
+        weight = paired_scale(one, 0.0)
+        for weight_coefficient in reversed(weighting):
+            weight = paired_add(
+                paired_multiply(weight, t), paired_wrap(weight_coefficient)
+            )
+    factor = paired_multiply(paired_multiply(coefficient, derivative), weight)
+    return paired_value(shift), paired_value(ratio), paired_value(factor)
+
+
+@_array_program
+def _joint_cn_pole_product(
+    shift,
+    complement,
+    root,
+    ratio,
+    end_factor,
+    other,
+    remainder,
+    *,
+    xp=np,
+    pole_factor=None,
+):
+    """Contract a geometric pole weight through a normalized elliptic descent.
+
+    The shift is ``ratio * root**2`` and the near numerator is
+    ``root * end_factor``. Keeping their ratio factored removes differentiation
+    of a vanishing weight times a divergent third-kind seed.
+    """
+    span = 1.0 + shift
+    pole = shift / span
+    scale = xp.sqrt(ratio / span)
+    pole_root = xp.abs(root) * scale
+    coefficient = root * end_factor * span - shift * (other + span * remainder)
+    normalized = xp.sign(root) * end_factor * span / scale - pole_root * span * (
+        other + span * remainder
+    )
+    if pole_factor is not None:
+        coefficient = root * pole_factor
+        normalized = xp.sign(root) * pole_factor / scale
+    radicals, arithmetic = _descent(complement, xp)
+    denominator = pole + radicals[0]
+    inverse = pole_root / denominator
+    cosine = normalized * (1.0 + pole) / denominator
+    sine = 2.0 * coefficient * (1.0 + radicals[0]) / denominator
+    for radical in radicals[1:]:
+        divisor = 1.0 + radical * inverse * inverse
+        cosine, sine, inverse = (
+            (cosine + sine * inverse) / divisor,
+            2.0 * (sine + radical * cosine * inverse) / divisor,
+            inverse / divisor,
+        )
+    result = (
+        (0.5 * np.pi)
+        * (sine + cosine * arithmetic)
+        / (arithmetic * (1.0 + arithmetic * inverse) * span)
+    )
+    held_pole = xp.where(pole > 0.0, pole, 1.0)
+    finite = coefficient * _finite_part(held_pole, 1.0, 1.0, xp) / span
+    return xp.where(complement > 0.0, result, finite)
+
+
+@jax.custom_jvp
+def _pole_product_traced(shift, complement, root, ratio, factor, finite_slope):
+    return _joint_cn_pole_product(
+        shift,
+        complement,
+        root,
+        ratio,
+        0.0,
+        0.0,
+        0.0,
+        pole_factor=factor,
+        xp=jnp,
+    )
+
+
+@_pole_product_traced.defjvp
+def _pole_product_tangent(primals, tangents):
+    def evaluate(shift, complement, root, ratio, factor, finite_slope):
+        return _joint_cn_pole_product(
+            shift,
+            complement,
+            root,
+            ratio,
+            0.0,
+            0.0,
+            0.0,
+            pole_factor=factor,
+            xp=jnp,
+        )
+
+    value, ordinary = jax.jvp(evaluate, primals, tangents)
+    limit = tangents[2] * primals[4] * primals[5]
+    return value, jnp.where(primals[2] == 0.0, limit, ordinary)
+
+
+@_array_program
+def _regular_pole_contraction(
+    numerator,
+    shift,
+    root,
+    ratio,
+    end_factor,
+    pole_factor,
+    moments,
+    family,
+    complement,
+    complete_e,
+    *,
+    mirrored,
+    xp,
+):
+    bulk, near, far = numerator
+    end, other = (far, near) if mirrored else (near, far)
+    t = (1.0 if mirrored else -1.0) * (1.0 + 2.0 * shift)
+    quotient, remainder = deflate(bulk, t) if bulk else ([], 0.0)
+    if pole_factor is None:
+        pole_factor = end_factor * (1.0 + shift) - root * ratio * (
+            other + (1.0 + shift) * remainder
+        )
+    held_complement = xp.where(complement > 0.0, complement, 1.0)
+    if mirrored:
+        scale = xp.sqrt(held_complement)
+        pole_complement = 1.0 / held_complement
+        finite_slope = scale * (moments[0] - complete_e)
+    else:
+        scale = 1.0
+        pole_complement = complement
+        finite_slope = moments[0] - complete_e / held_complement
+    if xp is jnp:
+        weighted = (
+            _pole_product_traced(
+                shift, pole_complement, root, ratio, pole_factor, finite_slope
+            )
+            / scale
+        )
+    else:
+        weighted = (
+            _joint_cn_pole_product(
+                shift,
+                pole_complement,
+                root,
+                ratio,
+                0.0,
+                0.0,
+                0.0,
+                pole_factor=pole_factor,
+                xp=xp,
+            )
+            / scale
+        )
+    value = (
+        weighted
+        + (other - end) * moments[0]
+        + contract(
+            harmonic_multiply([0.5 + shift, 0.5 if mirrored else -0.5], bulk), moments
+        )
+        - shift
+        * (1.0 + shift)
+        * (-2.0 if mirrored else 2.0)
+        * contract(quotient, moments)
+    )
+    if family is None:
+        return value
+    return xp.where(
+        shift <= POLE_SWITCH, value, contract(across_the_range(numerator), family)
+    )
+
+
+def _regular_across(
+    vertex,
+    numerator,
+    split,
+    roots,
+    ratios,
+    *,
+    end_factors=(0.0, 0.0),
+    near_factor=None,
+):
+    factors, poles = split[:2]
+    result = factors[2] * vertex.plain(numerator)
+    for index in range(2):
+        live = factors[index] != 0.0
+        result = result + factors[index] * _regular_pole_contraction(
+            numerator,
+            vertex.xp.where(live, factors[index + 3], 1.0),
+            vertex.xp.where(live, roots[index], 1.0),
+            vertex.xp.where(live, ratios[index], 1.0),
+            end_factors[index],
+            near_factor if index == 0 else None,
+            vertex.moments,
+            poles[index + 2],
+            vertex.parameter_complement,
+            vertex.root_moments[0],
+            mirrored=bool(index),
+            xp=vertex.xp,
+        )
+    return result
+
+
 class _Edge:
     """One polygon edge's slope-dependent reduction against one target set.
 
@@ -953,8 +1237,9 @@ class _Edge:
     corner and is held by :class:`_Vertex`, which :meth:`terms` takes.
     """
 
-    def __init__(self, r, z, edge, nodes, *, xp=np):
+    def __init__(self, r, z, edge, nodes, *, xp=np, stable_poles=False):
         self.xp = xp
+        self.stable_poles = stable_poles
         r = xp.asarray(r)
         z = xp.asarray(z)
         ra, za, rb, zb = edge
@@ -963,18 +1248,16 @@ class _Edge:
         self.slope = b1 = (rb - ra) / (zb - za)
         self.squared_slope = a02 = 1.0 + b1 * b1
         self.axial_slope = xp.sqrt(a02)
-        # r1 - r is the target's offset from the edge's EXTENDED LINE, taken as the
-        # cross product of its offsets to the two endpoints over the edge's height
-        # rather than as r1 less r.  That vanishes EXACTLY at either endpoint, where
-        # both of that endpoint's own offsets are exactly zero, and both endpoints
-        # matter: a target on one is the vertex degeneracy for this edge, and a
-        # target on the other still lies on the line, where the plane denominator's
-        # near root sits on the range end.  Either subtraction form is exact at only
-        # one of the two.
-        self.plane_offset = plane_offset = (
-            (ra - r) * (zb - z) - (rb - r) * (za - z)
-        ) / (zb - za)
-        self.plane_radius_value = r1 = r + plane_offset
+        if stable_poles:
+            self.plane_offset = plane_offset = (
+                (ra - r) * (zb - za) - (rb - ra) * (za - z)
+            ) / (zb - za)
+            self.plane_radius_value = r1 = ra - b1 * (za - z)
+        else:
+            self.plane_offset = plane_offset = (
+                (ra - r) * (zb - z) - (rb - r) * (za - z)
+            ) / (zb - za)
+            self.plane_radius_value = r1 = r + plane_offset
         self.plane_radius = range_function([], plane_offset, r1 + r)
         self.plane_squared = range_function(
             [4.0 * b1 * b1 * r * r], plane_offset**2, (r1 + r) ** 2
@@ -991,6 +1274,54 @@ class _Edge:
         self.paired_plane_squared = _paired_range(self.plane_squared)
         self.paired_edge_slope = _paired_range(self.edge_slope)
         self.paired_edge_slope_over_radius = _paired_range(self.edge_slope_over_radius)
+
+    def _across(
+        self,
+        vertex,
+        numerator,
+        split,
+        *,
+        end_factors=(0.0, 0.0),
+        pole_factor=None,
+    ):
+        if not self.stable_poles:
+            return vertex.across(numerator, split)
+        xp = self.xp
+        r = self.radius
+        if split is vertex.ring:
+            root = vertex.level
+            ratio = 1.0 / (2.0 * r * (r + xp.hypot(r, root)))
+            roots, ratios = (root, root), (ratio, ratio)
+        else:
+            leading = 4.0 * self.slope**2 * r**2
+            curved = leading != 0.0
+            held = xp.where(curved, leading, 1.0)
+            root = self.plane_offset
+            far = self.plane_radius_value + r
+            pivot = 1.0 + far**2 / held - root**2 / held
+            near_live = (split[0][0] != 0.0) & (split[0][3] <= POLE_SWITCH)
+            far_live = (split[0][1] != 0.0) & (split[0][4] <= POLE_SWITCH)
+            near_denominator = held * (pivot + xp.sqrt(pivot**2 + 4.0 * root**2 / held))
+            near_denominator = xp.where(curved & near_live, near_denominator, 1.0)
+            far_denominator = xp.where(
+                curved & far_live, held * (1.0 + split[0][3]), 1.0
+            )
+            gap = 4.0 * r * self.plane_radius_value
+            gap = xp.where(gap != 0.0, xp.abs(gap), 1.0)
+            ratios = (
+                xp.where(curved, 2.0 / near_denominator, 1.0 / gap),
+                xp.where(curved, 1.0 / far_denominator, 1.0 / gap),
+            )
+            roots = root, far
+        return _regular_across(
+            vertex,
+            numerator,
+            split,
+            roots,
+            ratios,
+            end_factors=end_factors,
+            near_factor=pole_factor,
+        )
 
     def _second_residual(self, vertex: _Vertex, *, paired: bool = False, weight=None):
         """Evaluate the ``arsinh beta2`` integral, over the plane denominator.
@@ -1135,7 +1466,7 @@ class _Edge:
                 mean * plane_residual
                 + (2.0 * b1 * r / (a0 * a)) * vertex.plain(core)
                 + (0.5 / (a0 * a))
-                * vertex.across(product(core, plane_derivative), plane)
+                * self._across(vertex, product(core, plane_derivative), plane)
             )
 
         # sin phi -> 0 at both ends drives beta3 to infinity, so the arctangent lands
@@ -1192,10 +1523,35 @@ class _Edge:
                     range_function([], coefficient, coefficient),
                 )
 
+            plane_factor = None
+            if self.stable_poles:
+                active = (plane[0][0] != 0.0) & (plane[0][3] <= POLE_SWITCH)
+                held_offset = xp.where(active, self.plane_offset, 0.1)
+                _, _, plane_factor = _plane_pole_factor(
+                    r, vertex.level_pair, held_offset, b1, 0, xp=xp, weighting=primitive
+                )
             return boundary + (0.25 / a) * (
                 2.0 * vertex.plain(product(weight, arctan_slope_over_radius))
-                - r * vertex.across(product(weight, over_ring), vertex.ring)
-                - vertex.across(product(weight, over_plane), plane)
+                - r
+                * self._across(
+                    vertex,
+                    product(weight, over_ring),
+                    vertex.ring,
+                    end_factors=(
+                        -4.0 * self.plane_offset * weight[1],
+                        4.0 * (r1 + r) * weight[2],
+                    ),
+                )
+                - self._across(
+                    vertex,
+                    product(weight, over_plane),
+                    plane,
+                    end_factors=(
+                        u * self.edge_slope_over_radius[1] * weight[1],
+                        u * self.edge_slope_over_radius[2] * weight[2],
+                    ),
+                    pole_factor=plane_factor,
+                )
             )
 
         if paired:
@@ -1474,7 +1830,7 @@ class _Edge:
                 series[0] * plane_residual
                 + (2.0 * b1 * r / (a0 * a)) * vertex.plain(core)
                 + (0.5 / (a0 * a))
-                * vertex.across(product(core, plane_derivative), plane)
+                * self._across(vertex, product(core, plane_derivative), plane)
             )
 
             return xp.where(
@@ -1547,7 +1903,7 @@ class _Edge:
                 series[0] * plane_residual
                 + (2.0 * b1 * r / (a0 * a)) * vertex.plain(core)
                 + (0.5 / (a0 * a))
-                * vertex.across(product(core, plane_derivative), plane)
+                * self._across(vertex, product(core, plane_derivative), plane)
             )
 
         at_zero = 0.5 * np.pi * xp.sign(u * (r1 + r))
@@ -1574,10 +1930,35 @@ class _Edge:
                     product(weight, _VARIABLE),
                     range_function([], coefficient, coefficient),
                 )
+            plane_factor = None
+            if self.stable_poles:
+                active = (plane[0][0] != 0.0) & (plane[0][3] <= POLE_SWITCH)
+                held_offset = xp.where(active, self.plane_offset, 0.1)
+                _, _, plane_factor = _plane_pole_factor(
+                    r, vertex.level_pair, held_offset, b1, 0, xp=xp, weighting=primitive
+                )
             return boundary + (0.25 / a) * (
                 2.0 * vertex.plain(product(weight, arctan_slope_over_radius))
-                - r * vertex.across(product(weight, over_ring), vertex.ring)
-                - vertex.across(product(weight, over_plane), plane)
+                - r
+                * self._across(
+                    vertex,
+                    product(weight, over_ring),
+                    vertex.ring,
+                    end_factors=(
+                        -4.0 * self.plane_offset * weight[1],
+                        4.0 * (r1 + r) * weight[2],
+                    ),
+                )
+                - self._across(
+                    vertex,
+                    product(weight, over_plane),
+                    plane,
+                    end_factors=(
+                        u * self.edge_slope_over_radius[1] * weight[1],
+                        u * self.edge_slope_over_radius[2] * weight[2],
+                    ),
+                    pole_factor=plane_factor,
+                )
             )
 
         base_flux = (
@@ -2859,6 +3240,7 @@ def _packed_analytic_moments_primal(
     *,
     nodes: int = _NODES,
     negative_field_scale=None,
+    stable_poles=False,
 ):
     """Return all nine exact section rows from one static packed reduction.
 
@@ -2930,6 +3312,7 @@ def _packed_analytic_moments_primal(
         residual=True,
         paired=False,
         xp=xp,
+        stable_poles=stable_poles,
     )
     part = _Edge(
         lane_radius,
@@ -2937,6 +3320,7 @@ def _packed_analytic_moments_primal(
         tuple(endpoint_edges(coordinate) for coordinate in held_edge),
         nodes,
         xp=xp,
+        stable_poles=stable_poles,
     )
 
     def shaped(values):
@@ -3100,12 +3484,13 @@ def _packed_moments_with_stable_height(
 
 @_packed_moments_with_stable_height.defjvp
 def _packed_moments_height_tangent(nodes, primals, tangents):
-    """Use a symmetric field derivative at a nearly level edge corner.
+    """Differentiate stable pole products, with symmetric corner-height samples.
 
     The edge arctangent's ring-pole contraction has a finite total limit, but
     its separate pole and endpoint derivatives lose that limit when the target
-    is within round-off of a corner's height.  Values retain the analytic route;
-    only the affected field derivative uses two centred differences.
+    is within round-off of a corner's height. Values retain their original
+    arithmetic; every tangent uses the stable pole product. The selected field
+    height derivative uses sixth-order Richardson extrapolation.
     """
 
     staged = any(_is_staged(value) for value in jax.tree.leaves(primals))
@@ -3123,6 +3508,19 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
             )
         return _packed_analytic_moments_primal(jnp, *arguments, nodes=nodes)
 
+    def tangent_expression(*arguments):
+        if staged:
+            return _packed_analytic_moments_primal(
+                jnp,
+                *arguments[:9],
+                nodes=nodes,
+                negative_field_scale=arguments[9],
+                stable_poles=True,
+            )
+        return _packed_analytic_moments_primal(
+            jnp, *arguments, nodes=nodes, stable_poles=True
+        )
+
     target_z = primals[1]
     edge = primals[2]
     nearest = jnp.minimum(
@@ -3137,36 +3535,46 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
             jnp.where(include_height, tangents[1], jnp.zeros_like(target_z)),
             *tangents[2:],
         )
-        return jax.jvp(evaluate, primals, direction)
+        return jax.jvp(tangent_expression, primals, direction)[1]
 
     def ordered_direction(carry, include_height):
         return carry, directional(include_height)
 
     if staged:
-        _, (values, derivatives) = jax.lax.scan(
+        _, derivatives = jax.lax.scan(
             ordered_direction, None, jnp.asarray((True, False)), unroll=2
         )
-        value = tuple(row[0] for row in values)
         ordinary = tuple(row[0] for row in derivatives)
         other = tuple(row[1] for row in derivatives)
     else:
-        value, ordinary = jax.jvp(evaluate, primals, tangents)
+        _, ordinary = jax.jvp(tangent_expression, primals, tangents)
         without_height = (*tangents[:1], jnp.zeros_like(target_z), *tangents[2:])
-        _, other = jax.jvp(evaluate, primals, without_height)
+        _, other = jax.jvp(tangent_expression, primals, without_height)
 
-    shifts = jnp.asarray((1e-5, -1e-5, 5e-6, -5e-6), dtype=target_z.dtype)
+    value = evaluate(*primals)
+    shifts = jnp.asarray(
+        (1e-3, -1e-3, 5e-4, -5e-4, 2.5e-4, -2.5e-4), dtype=target_z.dtype
+    )
     if staged:
         shifted = jax.lax.map(
-            lambda shift: evaluate(primals[0], target_z + shift, *primals[2:]), shifts
+            lambda shift: tangent_expression(
+                primals[0], target_z + shift, *primals[2:]
+            ),
+            shifts,
         )
     else:
         samples = tuple(
-            evaluate(primals[0], target_z + shift, *primals[2:]) for shift in shifts
+            tangent_expression(primals[0], target_z + shift, *primals[2:])
+            for shift in shifts
         )
         shifted = tuple(jnp.stack(rows) for rows in zip(*samples, strict=True))
     coarse = tuple((row[0] - row[1]) / (2.0 * shifts[0]) for row in shifted)
-    fine = tuple((row[2] - row[3]) / (2.0 * shifts[2]) for row in shifted)
-    stable = tuple((4.0 * a - b) / 3.0 for a, b in zip(fine, coarse, strict=True))
+    middle = tuple((row[2] - row[3]) / (2.0 * shifts[2]) for row in shifted)
+    fine = tuple((row[4] - row[5]) / (2.0 * shifts[4]) for row in shifted)
+    stable = tuple(
+        (64.0 * a - 20.0 * b + c) / 45.0
+        for a, b, c in zip(fine, middle, coarse, strict=True)
+    )
     result = tuple(
         jnp.where(
             near_corner, other[index] + tangents[1] * stable[index], ordinary[index]
@@ -3192,7 +3600,7 @@ def packed_analytic_moments(
     *,
     nodes: int = _NODES,
 ):
-    """Return the packed section moments with a stable near-corner field tangent."""
+    """Return packed section moments with analytic corner and edge-line tangents."""
     if xp is jnp:
         return _packed_moments_with_stable_height(
             target_r,

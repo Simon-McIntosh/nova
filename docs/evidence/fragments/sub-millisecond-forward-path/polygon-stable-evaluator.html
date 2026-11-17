@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="polygon-stable-evaluator">
+<meta name="plan-title" content="A shared stable polygon derivative evaluator">
+<meta name="plan-summary" content="Integrated accuracy, primal identity and compile budget pass; authorized graph ceiling passes and fresh per-file suite arms have zero added failures">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s7">
+<meta name="plan-commits" content="27b4418b75265aab0313ff4ce402c6f8b55cbf46">
+<meta name="plan-recorded-at" content="2026-11-17">
+<meta name="plan-environment" content="rigel CPU x64 accuracy; NVIDIA H200 NVL cold production compile and program identity">
+<title>Shared stable polygon derivatives | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<article id="polygon-stable-evaluator-result">
+<h1>One stable evaluator supplies every packed polygon derivative</h1>
+<p><strong>The integrated stable evaluator meets the accuracy and compile targets, preserves primal bits and has zero added failures in the required per-file suite comparison.</strong> At all 64 retained targets, the three trace errors are 7.424e-10, 9.150e-10 and 6.982e-10. The largest component error is 6.919e-9 across both independent references. The production row uses 1.565208 times main's post-splitter instructions and 1.871670 times its cold compile wall, within both unchanged 2.3 limits. Every packed primal row, and every production value and gradient row, is bit-identical over the compiled 10,000-point identity population. Base passes 10 tests; head passes 16 with seven receipt-dependent skips, whose dedicated full-node gate separately passes all nine cases. The bounded-point graph measures 9,351,538 bytes and passes the authorized 10,000,000-byte ceiling. The earlier combined-process compiler failure does not recur with a fresh Python process per file; its logs remain recorded below.</p>
+
+<section id="polygon-stable-evaluator-mechanism">
+<h2>The derivative routes share one expression</h2>
+<p>Commit <code>27b4418b75265aab0313ff4ce402c6f8b55cbf46</code> extends the stable pole product from <code>ff92ac8f63e3088b4950104a0d146f37dcdc1842</code> in <code>nova/biot/polygonanalytic.py</code>. Ordinary directions, directions with height held fixed, and every corner-height sample use <code>stable_poles=True</code>. A separate original evaluator supplies the primal. The ordered direction pass supplies the ordinary tangent directly, removing the overwritten ordinary JVP. Eager tangents retain their path outside the shared direction and sample scans.</p>
+<p>The corner selection remains the nearest endpoint-height distance at most 1e-7 m. The height derivative uses six samples at ±1 mm, ±0.5 mm and ±0.25 mm. For centred differences <code>D(h)</code>, its extrapolation is <code>(64 D(h/4) − 20 D(h/2) + D(h)) / 45</code>, with <code>h = 1 mm</code>. The public packed interface is unchanged. Eager and compiled controls both pass with deliberately different primal and derivative expressions and a fifth-degree height term that distinguishes fourth- from sixth-order extrapolation.</p>
+<p>The <a href="/nova/evidence/fragments/sub-millisecond-forward-path/polygon-trace-miss-diagnosis.html#polygon-trace-miss-diagnosis-result">landed routing diagnosis</a> motivated this change. Its six-sample estimate assembled separately measured columns; the full-node head arm here measures the integrated kernel.</p>
+</section>
+
+<section id="polygon-stable-evaluator-compile">
+<h2>Cold production-row compile stays inside the budget</h2>
+<table><thead><tr><th>Variant</th><th>Post-splitter instructions</th><th>Instruction ratio</th><th>Cold XLA compile [s]</th><th>Compile ratio</th></tr></thead><tbody>
+<tr><td>Main, measured pair</td><td>267,438</td><td>1.000000</td><td>216.513138</td><td>1.000000</td></tr>
+<tr><td>Tangent-only, retained earlier measurement</td><td>352,579</td><td>1.32</td><td>earlier receipt</td><td>1.56</td></tr>
+<tr><td>Diagnosis planning estimate</td><td>unmeasured</td><td>about 1.8 (range 1.5–2.3)</td><td>unmeasured</td><td>unmeasured</td></tr>
+<tr><td>Shared stable evaluator, measured pair</td><td>418,596</td><td>1.5652076369102372</td><td>405.241137</td><td>1.871669962266276</td></tr>
+</tbody></table>
+<p>Job <code>1322727</code> ran both 132-cell <code>production_point_batch</code> arms on an NVIDIA H200 NVL through the existing <code>compile_pass_profile</code> instrument. Both receipts finish at <code>phase=done</code>, with compilation cache disabled, one miss and zero hits. The instruction count is the first HLO program after the variadic-op splitter, skipping fusion diagnostics. The main revision is <code>02997905193b245dcc099a238fea6c22d8817671</code>; the measured head is <code>153819139073bd15522ca79faa40874f7c37861c</code>. Its product source is byte-identical to the implementation commit and subsequent measured heads. The 1.8 estimate concerned instructions; it was not a measured cold-wall estimate.</p>
+<p>The separate eight-cell bounded-point fixture lowers to <strong>9,351,538 bytes</strong> and failed its 6,000,000-byte ceiling. Main's recorded size is 5,442,157 bytes. The lead ruling of 2026-11-17 authorizes a <strong>10,000,000-byte ceiling</strong>, leaving 648,462 bytes (6.93% of the measured graph) of margin. Commit <code>764da60c2982957744315f541112ff80849df362</code> changes only that ceiling and its mechanism comment. A separate compile-cost follow-up owns reducing the graph; this evaluator is unchanged. The explicit graph test passes in the new per-file arms: one passed at base in 15.72 s and one passed at head in 23.74 s, both with <code>EXIT=0</code>. The production-row CPU lowering instrument separately records 10,251,815 bytes at 132 cells. These are different programs.</p>
+<p>The existing production compile-savings tests retain their stricter targets. Both <code>test_production_row_splitter_instruction_budget</code> and <code>test_production_row_cold_compile_savings</code> fail at main and head; the splitter-counter helper passes in both, giving two failed and one passed per arm. Their cold-wall bound is 85.211538 s, and the instruction target is half main. These base-known failures remain visible.</p>
+</section>
+
+<section id="polygon-stable-evaluator-identity">
+<h2>Values and gradients retain their bits; Hessians change</h2>
+<table><thead><tr><th>Population and execution</th><th>Rows compared</th><th>Bit differences</th></tr></thead><tbody>
+<tr><td>4,096 retained random geometries, NumPy</td><td>all nine packed rows</td><td>0</td></tr>
+<tr><td>4,096 retained random geometries, JAX CPU</td><td>all nine packed rows</td><td>0</td></tr>
+<tr><td>10,000-point compiled H200 population</td><td>all nine packed rows</td><td>0 in every row</td></tr>
+<tr><td>10,000-point compiled production program</td><td>ψ, ψR, ψZ</td><td>0 in every row</td></tr>
+</tbody></table>
+<p>The standalone comparison covers 73,728 entries. Each backend's deliberate one-bit comparator control detects exactly one changed entry. The compiled measurements reuse <code>tests/biot/test_moment_program_identity.py</code> with main as the base and report row-level results without altering its assertions.</p>
+<table><thead><tr><th>Production Hessian row</th><th>Maximum elementwise relative departure from main</th></tr></thead><tbody>
+<tr><td>ψRR</td><td>0.3474027446456059</td></tr>
+<tr><td>ψRZ</td><td>0.04974989011403869</td></tr>
+<tr><td>ψZZ</td><td>0.051788559472716954</td></tr>
+</tbody></table>
+<table><thead><tr><th>Packed row</th><th>Primal bit differences</th><th>Maximum directional-derivative relative departure from main</th></tr></thead><tbody>
+<tr><td><code>psi</code></td><td>0</td><td>1.248129227831926e-15</td></tr>
+<tr><td><code>psi_radial_moment</code></td><td>0</td><td>0</td></tr>
+<tr><td><code>psi_vertical_moment</code></td><td>0</td><td>0</td></tr>
+<tr><td><code>Br</code></td><td>0</td><td>2.1181888470145996e-08</td></tr>
+<tr><td><code>Br_radial_moment</code></td><td>0</td><td>0.00059298115637026235</td></tr>
+<tr><td><code>Br_vertical_moment</code></td><td>0</td><td>0.012005003411959973</td></tr>
+<tr><td><code>Bz</code></td><td>0</td><td>6.0548227874520933e-05</td></tr>
+<tr><td><code>Bz_radial_moment</code></td><td>0</td><td>0.099702247186188753</td></tr>
+<tr><td><code>Bz_vertical_moment</code></td><td>0</td><td>0.34511851330379334</td></tr>
+</tbody></table>
+<p>The packed directional derivatives change most in the Bz vertical-moment row (0.34511851330379334 maximum elementwise relative departure). The three packed flux-moment tangent departures are 1.248129227831926e-15, 0 and 0. The production Hessian's point-scaled maximum departure is 2.2418641349101266e-5. These are changes from the defective kernel, not independent accuracy errors. Both historical derivative-identity assertions fail and are retained with <code>EXIT=1</code>; value and gradient identity pass. Independent accuracy is judged below.</p>
+</section>
+
+<section id="polygon-stable-evaluator-controls">
+<h2>Independent rectangle and production coils retain their controls</h2>
+<p>The uniform rectangle is checked at (6.15, 0.17) m and (7.2, 0.33) m against the retained independent ring-boundary integral, using the existing point evaluator. The relative errors for ψR, ψZ, ψRR, ψRZ and ψZZ are respectively <code>1.092913843492056e-13</code>, <code>2.0402633428091017e-14</code>, <code>6.605576844156397e-15</code>, <code>1.0683698075377489e-13</code> and <code>3.9522630715971076e-15</code>, below the unchanged 1e-12 bound. A deliberate 1 ppm perturbation exceeds that bound in every component.</p>
+<p>The 14 production coils are evaluated at all 64 retained targets for states 220, 333 and 336. Coil values and gradients have zero bit differences against main, with relative gradient changes <code>[0, 0, 0]</code>. The 1 ppm perturbation controls measure approximately 1e-6 in every state and are detected. Job <code>1323392</code> completes both controls with <code>EXIT=0</code>.</p>
+<table><thead><tr><th>Pinned H200 row</th><th>Main</th><th>Shared evaluator</th><th>Departure</th></tr></thead><tbody>
+<tr><td>edge_construction</td><td>passed</td><td>passed</td><td>none beyond existing bound</td></tr>
+<tr><td>second_residual</td><td>passed</td><td>passed</td><td>none beyond existing bound</td></tr>
+<tr><td>channel_split</td><td>passed</td><td>passed</td><td>none beyond existing bound</td></tr>
+<tr><td>flux_line_moments</td><td>passed</td><td>passed</td><td>none beyond existing bound</td></tr>
+</tbody></table>
+<p>The same H200 production-pair job runs these four rows against the unchanged <code>716d859f0b501797e28849ec8878f0243de80cb1</code> reference. The four extended-edge CPU regressions separately move from four failures at main to four passes at head, including the independent 50-digit rotated-rectangle boundary-integral check.</p>
+</section>
+
+<section id="polygon-stable-evaluator-accuracy">
+<h2>The integrated kernel closes the full retained interior set</h2>
+<p>Rigel CPU job <code>1322724</code> completes the expensive integrated kernel evaluation at source commit <code>27b4418b75265aab0313ff4ce402c6f8b55cbf46</code>, in 4 h 45 min. The set contains the same 64 targets at least 8 mm from every source edge, 558 source cells and states 220, 333 and 336. Job <code>1322837</code> re-summarises the persisted array using helper revision <code>1d7d1d056bde170dc6642fe89e7fabbca923099b</code> in a fresh rigel process, including the original boundary reference, without evaluating the kernel again. Both receipts declare <code>completed=true</code> and <code>count=64</code>; the dedicated current-helper physical gate reports <strong>nine passed in 2.16 s, EXIT=0</strong>.</p>
+<table><thead><tr><th>State</th><th>Main trace relative error</th><th>Integrated head trace relative error</th><th>Independent reference trace error</th></tr></thead><tbody>
+<tr><td>220</td><td>0.25412326933888046</td><td>7.4240536524935572e-10</td><td>6.2514134712609604e-11</td></tr>
+<tr><td>333</td><td>0.23071814856964029</td><td>9.1497503856245306e-10</td><td>6.0023352590869638e-11</td></tr>
+<tr><td>336</td><td>0.18477194395234264</td><td>6.9823995030967289e-10</td><td>5.9507539614231783e-11</td></tr>
+</tbody></table>
+<p>The trace is <code>ψRR + ψZZ − ψR/R = −2π μ0 R J</code> with the unchanged normalization owned by <code>scripts/prototypes/bank_hessian_diagnosis/report.py:trace</code>. The independent trace is nonzero and at most 6.252e-11. Reference component norms and source forcing are checked as nonzero, and the source-owner instrument sees targets inside source cells as well as vacuum targets. The tests use the unchanged 1e-8 relative limit.</p>
+<h3>All four components against the refined independent jets</h3>
+<table><thead><tr><th>State</th><th>Component</th><th>Main relative error</th><th>Head relative error</th><th>Relative reference bound</th></tr></thead><tbody>
+<tr><td>220</td><td>psi_RR</td><td>0.424647739</td><td>3.73743766e-10</td><td>2.61281946e-12</td></tr>
+<tr><td>220</td><td>psi_RZ</td><td>0.9380019</td><td>6.85957568e-09</td><td>9.267038e-12</td></tr>
+<tr><td>220</td><td>psi_ZR</td><td>0.236198018</td><td>3.52407132e-10</td><td>1.976417e-11</td></tr>
+<tr><td>220</td><td>psi_ZZ</td><td>0.148485663</td><td>1.68249733e-09</td><td>1.37549809e-11</td></tr>
+<tr><td>333</td><td>psi_RR</td><td>0.404478042</td><td>3.84786328e-10</td><td>2.67477999e-12</td></tr>
+<tr><td>333</td><td>psi_RZ</td><td>0.936200939</td><td>6.73331511e-09</td><td>7.76327768e-12</td></tr>
+<tr><td>333</td><td>psi_ZR</td><td>0.580081482</td><td>3.73136932e-10</td><td>1.56587607e-11</td></tr>
+<tr><td>333</td><td>psi_ZZ</td><td>0.175394508</td><td>1.89541313e-09</td><td>1.26975259e-11</td></tr>
+<tr><td>336</td><td>psi_RR</td><td>0.297655887</td><td>3.76216613e-10</td><td>2.56005402e-12</td></tr>
+<tr><td>336</td><td>psi_RZ</td><td>0.776204329</td><td>6.46285246e-09</td><td>7.82491262e-12</td></tr>
+<tr><td>336</td><td>psi_ZR</td><td>0.323224787</td><td>3.44743064e-10</td><td>1.52595634e-11</td></tr>
+<tr><td>336</td><td>psi_ZZ</td><td>0.127969028</td><td>1.43143249e-09</td><td>1.27241854e-11</td></tr>
+</tbody></table>
+<h3>Mixed and vertical components against the original Richardson reference</h3>
+<table><thead><tr><th>State</th><th>Component</th><th>Main relative error</th><th>Head relative error</th><th>Relative reference bound</th></tr></thead><tbody>
+<tr><td>220</td><td>psi_RZ</td><td>0.9380019</td><td>6.91862452e-09</td><td>2.23646081e-09</td></tr>
+<tr><td>220</td><td>psi_ZZ</td><td>0.148485663</td><td>2.56824175e-09</td><td>3.45477078e-09</td></tr>
+<tr><td>333</td><td>psi_RZ</td><td>0.936200939</td><td>6.66032463e-09</td><td>1.81035773e-09</td></tr>
+<tr><td>333</td><td>psi_ZZ</td><td>0.175394508</td><td>2.71299938e-09</td><td>3.18399664e-09</td></tr>
+<tr><td>336</td><td>psi_RZ</td><td>0.776204329</td><td>6.4610305e-09</td><td>1.88588556e-09</td></tr>
+<tr><td>336</td><td>psi_ZZ</td><td>0.127969028</td><td>2.20003354e-09</td><td>3.1635016e-09</td></tr>
+</tbody></table>
+<p>These component comparisons use plasma-only normalization; the earlier boundary diagnosis quoted total fields including coils. The original <code>measurement/qualified-reference.npz</code> supplies RZ and ZZ only. The refined <code>node-*.npz</code> jets supply all four components. Their error bounds are reported beside the observed errors and are not added to the acceptance limit. The head closes both references below 1e-8, including the less accurate RZ height direction; trace cancellation alone does not account for the pass.</p>
+<h3>The fresh main-kernel mutation is refused</h3>
+<p>The fresh main-kernel arm supplies the declared restore-to-main negative control. Its complete 64-node array has SHA256 <code>1af597ae420d81c73ed4106b424d29b2a92897f96b0f1b4b8f3979f563501b21</code>, exactly reproducing the archived main array. Its product kernel is identical to the requested main revision, though the measurement runner was committed at <code>888c7966ad75db9a81a2b55698471fb24569d83a</code>. Its initial summary encountered two subsequently repaired helper defects, after persisting all points; those original logs remain intact. A fresh current-helper summary performs no kernel reevaluation.</p>
+<p>The physical main check records <strong>seven failed, two passed, EXIT=1</strong>: <code>test_integrated_plasma_trace[220]</code>, <code>[333]</code>, <code>[336]</code> and <code>test_interior_hessian_reference[psi_RR]</code>, <code>[psi_RZ]</code>, <code>[psi_ZR]</code>, <code>[psi_ZZ]</code>. Every one passes in the head-summary gate. Main's state-220 trace error is <code>0.25412326933888046</code>, directly reproducing the declared approximately 0.25 defect.</p>
+<p>The head array SHA256 is <code>90cac3d1f6af7ddea1c668c03cb732fe82baa8b9192ef31548ed14329a11dcdd</code>, identical in the original accuracy and re-summary directories. The measured kernel and summary kernel both hash to <code>0f3e7a38a365d573706c8c8eeb210f3575dda9223051514419bebd8200488e6f</code>; the receipt separately retains measurement revision, kernel hash and array hash. That kernel hash is also identical at the production-profile revision, completed-suite revision and documentation head. No product source changed after the measured implementation.</p>
+</section>
+
+<section id="polygon-stable-evaluator-suites">
+<h2>Fresh processes per file give zero added failures</h2>
+<p>Rigel jobs <code>1324177</code> and <code>1324178</code> complete at base <code>02997905193b245dcc099a238fea6c22d8817671</code> and final source/test head <code>1b208ee751a71417f5808588f6ef6b76ea35323a</code>. Each arm is one sbatch allocation with 96 GB and two CPUs, running one fresh Python process per test file. All per-file logs reach their pytest summary and end <code>EXIT=0</code>. Aggregate receipts declare <code>completed=true</code>, <code>failure_count=0</code> and <code>failure_ids=[]</code>: <strong>10 passed at base; 16 passed, seven skipped at head; zero added failures</strong>.</p>
+<table><thead><tr><th>Test file</th><th>Base result</th><th>Head result</th></tr></thead><tbody>
+<tr><td><code>test_bounded_point_program.py</code></td><td>1 passed in 15.72s</td><td>1 passed in 23.74s</td></tr>
+<tr><td><code>test_polygon_edge_line_tangent.py</code></td><td>absent at base</td><td>4 passed in 147.19s (0:02:27)</td></tr>
+<tr><td><code>test_polygon_stable_evaluator.py</code></td><td>absent at base</td><td>2 passed, 7 skipped in 4.12s</td></tr>
+<tr><td><code>test_moment_field_hessian.py</code></td><td>9 passed in 883.01s (0:14:43)</td><td>9 passed in 1969.70s (0:32:49)</td></tr>
+</tbody></table>
+<p>The head moment-Hessian file passes all nine tests, including <code>tests/test_moment_field_hessian.py::test_height_sweep[0.0001]</code>; the combined-process compiler-memory refusal is not an added failure in this comparison. The seven skips require <code>NOVA_POLYGON_INTEGRATED_RECEIPT</code>, intentionally unset in the general suite. All seven physical receipt cases and both routing cases pass in the dedicated nine-test full-64-node gate.</p>
+<p>The archive includes the revision's root <code>conftest.py</code>, which admits slow tests explicitly named by path. No marker override is added to these literal commands. The fenced command, run in a fresh process at both revisions, is:</p>
+<pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/equilibrium/test_bounded_point_program.py</pre>
+<p>The remaining literal per-file commands are recorded independently, with the two new regression files present only at head:</p>
+<pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/biot/test_polygon_edge_line_tangent.py
+PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/biot/test_polygon_stable_evaluator.py
+PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_moment_field_hessian.py</pre>
+<p>The flat suite record retains the fenced graph-test command; its <code>per_file</code> array carries every additional covering command, per-file completion, failure IDs and log path. Aggregate wall times are 918.07 s at base and 2178.44 s at head. Receipts and aggregate logs are <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/base-per-file/suite.json</code>, <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/base-per-file/suite.log</code>, <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/head-per-file/suite.json</code> and <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/head-per-file/suite.log</code>. Each directory also retains <code>test_bounded_point_program.log</code> and <code>test_moment_field_hessian.log</code>; head additionally retains <code>test_polygon_edge_line_tangent.log</code> and <code>test_polygon_stable_evaluator.log</code>. The product kernel and tests have not changed after this measured head; the final evidence edit records these results.</p>
+<h3>Earlier suite attempts remain visible</h3>
+<p>The retained earlier baseline coverage arm at <code>02997905193b245dcc099a238fea6c22d8817671</code> completes with <strong>nine passed in 880.53 s, EXIT=0</strong>. The command in that revision's archive is:</p>
+<pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_moment_field_hessian.py</pre>
+<p>The retained combined-process head coverage at <code>d841d41f6d6c79b8b9a3067f14bfb69c3bd00d5c</code> completes with <strong>one failed, 14 passed, seven skipped in 2107.77 s, EXIT=1</strong>, using:</p>
+<pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/biot/test_polygon_edge_line_tangent.py tests/biot/test_polygon_stable_evaluator.py tests/test_moment_field_hessian.py</pre>
+<p>The automatic suite runner refused the empty base command before executing tests because both added regression files are absent at base. The separately measured pair therefore includes the existing moment-Hessian coverage at both revisions and the added files only at head. Its seven receipt-backed accuracy cases run in their dedicated numerical gate. Its recorded failure is <code>tests/test_moment_field_hessian.py::test_height_sweep[0.0001]</code>: JAX reports failure to materialize <code>select_divide_fusion</code>, with stderr stating <q>LLVM compilation error: Cannot allocate memory</q>. This is a completed red combined-process arm. The lead ruling of 2026-11-17 requires fresh Python processes per test file, matching the suite lanes; the completed per-file rerun passes all nine moment-Hessian tests, including <code>test_height_sweep[0.0001]</code>. This ID is therefore not an added failure in the required per-file comparison. No further combined-process rerun is attempted. The focused head moment-Hessian file completes separately with nine passed in 1977.85 s. An earlier combined head arm at <code>1d7d1d056bde170dc6642fe89e7fabbca923099b</code> aborts inside the JAX compiler with <code>EXIT=134</code> before a pytest summary; its cause remains unknown and it is not counted as a completed arm.</p>
+<p>The preceding flat arm records are retained in <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/combined-suite-history.json</code>. They are not relabelled as fresh-process results.</p>
+</section>
+
+<section id="polygon-stable-evaluator-receipts">
+<h2>Durable receipts and delivery</h2>
+<p>All following paths are on GPFS under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/</code>. Each gate log records its revision, archive tree, literal command, imported kernel module and working directory, then ends in a bare exit line. Numerical re-summaries retain the original measurement revision, kernel SHA256 and input-array SHA256 separately from the summary instrument.</p>
+<ul>
+<li>Compile pair: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/production/production-budget.json</code>; each arm retains <code>profile.json</code>, <code>attribution.json</code>, <code>function-instructions.json</code>, <code>profile.log</code> and <code>pinned-rows.log</code>.</li>
+<li>Primal identity: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/head-extras/primal.json</code>.</li>
+<li>Compiled row identity: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/program-identity/program-identity.json</code> and <code>program-identity.log</code>.</li>
+<li>Rectangle and coils: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/controls/receipt.json</code> and <code>controls.log</code>.</li>
+<li>Fresh main accuracy and negative control: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/base-summary/receipt.json</code> and <code>integrated.log</code>. Original point logs remain in <code>base-accuracy/</code>.</li>
+<li>Head accuracy: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/head-accuracy/</code>; current-helper results are <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/head-summary/receipt.json</code> and <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/head-summary/integrated.log</code>. Original point logs and arrays are preserved.</li>
+<li>Coverage: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/baseline-suite/suite.log</code>, <code>after-suite-required-head/suite.log</code>, and the retained aborted <code>after-suite/suite.log</code>. Literal commands are retained in each arm's <code>command.txt</code>.</li>
+<li>Graph size: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/bounded-selected/bounded-point.log</code>; production CPU lowering: <code>head-extras/lowered-size.json</code>.</li>
+<li>Base-known production assertions: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T105922145451-polygon-stable-evaluator/base-production-tests/production-receipts.log</code> and <code>head-production-tests/production-receipts.log</code>.</li>
+</ul>
+<p>The source implementation and full numerical evidence are retained. The authorized ceiling change and fresh per-file suite pair are complete, with zero added failures. The earlier compiler-memory failure and graph refusal are preserved. The node verdict is complete; promotion and merged-head verification remain the coordinator's work. The separate compile-cost follow-up owns reducing the graph. No second evaluator design, compile reduction, re-pin or other assertion relaxation was attempted.</p>
+</section>
+</article></main></body></html>

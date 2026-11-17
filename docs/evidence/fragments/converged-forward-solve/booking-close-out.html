@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="booking-close-out">
+<meta name="plan-title" content="Booking close-out: each current-booking clause at the head, with a standing private-flux control">
+<meta name="plan-summary" content="Each clause of the current-booking done-when is named against the test id that carries it at the head; the private-flux clause now has a standing level-membership control in the suite instead of an environment-variable switch.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s3">
+<meta name="plan-recorded-at" content="2026-11-17">
+<meta name="plan-verdict" content="confirmed">
+<title>Booking close-out | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="booking-close-out-landing">Booking close-out: each current-booking clause at the head</h1>
+<p id="booking-close-out-summary">The current booking's done-when reads as six clauses. Each is named here against the test id that carries it at revision <code>b56aa188be0dd1c615d694ba2c2cb2a27e777647</code>. Four clauses measure on the CPU lane and pass there; the two analytic-certificate clauses (<code>test_analytic_certificate_moments</code>, one id per kind and cell count) are GPU-lane rows that skip by design off the GPU lane, and their measured pass is the H200 receipt this record cites. The private-flux clause gained a standing control: the fixture takes its membership as an explicit argument, and a suite test books the same cell under a level test that is not axis-connected, printing the current that membership puts in the private strip and showing the clause helper refuse the same state.</p>
+
+<section id="booking-close-out-clauses"><h2>Clauses against test ids</h2>
+<table>
+<tr><th>Clause (plan §3)</th><th>Test id</th><th>Head outcome</th></tr>
+<tr><td>Booked cell moments reproduce the analytic moments within budget, saddle-neighbourhood cells budgeted separately</td><td><code>tests/test_current_book_fragments.py::test_analytic_certificate_moments[limited-550]</code>, <code>[limited-2000]</code>, <code>[limited-5000]</code>, <code>[diverted-550]</code>, <code>[diverted-2000]</code>, <code>[diverted-5000]</code></td><td>GPU lane only; six skips on CPU with <code>certificate rows require the GPU measurement lane</code>, all six pass on the H200 receipt below</td></tr>
+<tr><td>Private-flux cells book zero plasma current</td><td><code>tests/test_current_book_fragments.py::test_private_fragment_current_is_zero</code></td><td>pass; printed <code>PRIVATE_FLUX_CURRENT=0</code></td></tr>
+<tr><td>Net current matches the analytic total to 1e-12 relative</td><td>the six <code>test_analytic_certificate_moments</code> rows</td><td>GPU lane only; worst net relative error 2.2204e-16 on the H200 receipt</td></tr>
+<tr><td>The booking is differentiable in psi with its JVP matching central differences over the four stages</td><td><code>tests/test_current_book_fragments.py::test_booking_jvp_matches_central_difference[smooth|axis|boundary|support]</code></td><td>4 passed; relative error at the finest step 5.1e-12 (smooth), 9.2e-12 (axis), 8.0e-9 (boundary), 2.0e-11 (support)</td></tr>
+<tr><td>Negative control: a membership that is a level test and not axis-connected books nonzero private-flux current, failing by test id with the booked current printed</td><td><code>tests/test_current_book_fragments.py::test_level_membership_books_private_current</code>, with the zero-current id above red under the mutation</td><td>pass; printed <code>PRIVATE_FLUX_CURRENT_LEVEL_MEMBERSHIP=1.6</code> into a cell whose connected booking is 1.6 A. Under the mutation <code>test_private_fragment_current_is_zero</code> fails with <code>private current 1.6</code></td></tr>
+<tr><td>The support read that carries topology.read membership books its current through <code>current.book</code></td><td><code>tests/test_support_read.py::test_booked_current_is_the_selected_area_for_unit_density</code> (landed under the wiring followup)</td><td>unchanged by this node; its behaviour is not in this node's diff</td></tr>
+</table>
+<p>The split cell is the fixture that makes the private strip visible: a 2x2 cell whose upper strip lies above the boundary level and whose lower strip shares that level but is also the booked region's neighbour below the separatrix. Under the read's axis-connected membership only the upper strip is selected, so the cell books 1.6 A with a vertical moment of 0.96; the identity <code>(cell_current - vertical_moment / 0.6) / 2</code> isolates the private strip and reads 0. Under the level test both strips are selected and the cell books 3.2 A, of which 1.6 A is private.</p>
+</section>
+
+<section id="booking-close-out-control"><h2>The control this node replaces</h2>
+<p id="booking-close-out-control-body">Before this node the membership was switched by the process environment variable <code>NOVA_BOOK_LEVEL_MEMBERSHIP</code> inside the fixture builder. The mutation therefore never stood in the suite: a run without the variable set exercised the axis-connected path only, and the refusal was reachable only by whoever remembered the variable. The fixture now takes <code>membership</code> as an argument with the axis-connected default, and <code>test_level_membership_books_private_current</code> builds both memberships in one process, prints both booked values, and asserts that the clause helper <code>_assert_private_flux_current_is_zero</code> raises on the level-membership state. The zero-current test calls the same helper, so the two ids cannot drift apart: the control and the clause share one assertion.</p>
+<p id="booking-close-out-mutation">Declared mutation: the private-flux zero-current assertion fails when the membership is a level test that is not axis-connected. Applied by making the fixture's membership default <code>level</code>, the run fails exactly <code>tests/test_current_book_fragments.py::test_private_fragment_current_is_zero</code> with <code>AssertionError: private current 1.6</code> and <code>1 failed</code>, exit 1, after printing <code>PRIVATE_FLUX_CURRENT=1.6</code>. The mutation was reverted and the revert verified by a fresh run at the head revision, <code>logs/post-revert-check.log</code>, where the helper prints <code>PRIVATE_FLUX_CURRENT=0</code> and the test passes.</p>
+</section>
+
+<section id="booking-close-out-arms"><h2>Suite arms</h2>
+<table>
+<tr><th>Arm</th><th>Revision</th><th>Command</th><th>Outcome</th><th>Exit</th></tr>
+<tr><td>base</td><td><code>022636d5050045e811809d9479e7bbe8cd3d357b</code></td><td><code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_current_book_fragments.py</code></td><td>10 passed, 6 skipped in 60.75 s</td><td>0</td></tr>
+<tr><td>head</td><td><code>b56aa188be0dd1c615d694ba2c2cb2a27e777647</code></td><td>same command</td><td>11 passed, 6 skipped in 65.05 s</td><td>0</td></tr>
+<tr><td>head, both done-when files</td><td><code>022636d5050045e811809d9479e7bbe8cd3d357b</code> plus the working-tree change</td><td><code>... pytest -p no:cacheprovider -q tests/test_current_book_fragments.py tests/test_current_book_vectorised.py</code></td><td>17 passed, 6 skipped in 113.50 s</td><td>0</td></tr>
+<tr><td>negative control</td><td>head plus the declared mutation</td><td><code>... -q -s tests/test_current_book_fragments.py::test_private_fragment_current_is_zero</code></td><td>1 failed</td><td>1</td></tr>
+</table>
+<p>The base arm ran in a scratch extraction of the base revision under <code>$TMPDIR</code> so its own tree carried the pre-change file; the head arm ran in place in the worktree. Both arms skip the same six GPU-lane rows, so no row changes state between them and the only changed test count is the new standing control.</p>
+<p id="booking-close-out-gpu-limit">The analytic-certificate rows are not measured by this node on a GPU. The submission to the H200 reservation (job <code>1321297</code>, one card, 4 cores, 32 GB, 18-minute wall) was still <code>PENDING (Priority)</code> when this node closed, so nothing is claimed from it. The six rows' measured pass is the 2026-10-19 receipt <a href="/nova/evidence/fragments/converged-forward-solve/analytic-moment-rows.html">analytic-moment-rows</a>: every row passes with net relative error at most 2.2204e-16 and private current exactly 0, on that fragment's own carrier identity. This node's change touches only the test file, so a staleness in that receipt would not be a defect of this node, and re-measuring it belongs to the separately dispatched test node.</p>
+</section>
+
+<section id="booking-close-out-receipts"><h2>Receipts</h2>
+<p>Run directory <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001527547857-booking-close-out</code>. Logs: <code>logs/head-gate.log</code> (both files), <code>logs/after-arm.log</code>, <code>logs/baseline-arm.log</code>, <code>logs/negative-control-level-membership.log</code>. Commit <code>b56aa188be0dd1c615d694ba2c2cb2a27e777647</code> carries the standing control; changes are limited to <code>tests/test_current_book_fragments.py</code>.</p>
+</section>
+</main></body></html>

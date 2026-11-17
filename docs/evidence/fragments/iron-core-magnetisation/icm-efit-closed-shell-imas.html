@@ -30,9 +30,10 @@
     solver settings and the data-selection attributes.</p>
 
   <h4>The measurement, and its resolution dependence</h4>
-  <p>S is ψ(with iron)/ψ(without iron) at three exterior probes; for a dipole source
-    inside a spherical shell every exterior point must give the same S, so their
-    spread is the internal check.</p>
+  <p>S is ψ without iron over ψ with iron — the factor by which the shell reduces the
+    coil's flux — at three exterior probes; for a dipole source inside a spherical
+    shell every exterior point must give the same S, so their spread is the internal
+    check.</p>
   <table>
     <tr><th>outline vertices per half-arc</th><th>knots</th><th>a/b = 0.9: S (mean)</th>
       <th>Δ</th><th>a/b = 0.5: S (mean)</th><th>Δ</th></tr>
@@ -75,8 +76,8 @@
     <code>&lt;magneticProbes interpolationMethod=…/&gt;</code> (and the same for
     <code>&lt;efitCircuits&gt;</code> and <code>&lt;bVacRadiusProduct&gt;</code>) every
     slice dies at <code>DataSelection::getValue: invalid interpolationMethod=0</code>.
-    Probes at weight 0 leave the fit rank-deficient and <code>cerror</code> never
-    leaves its plateau; weight 1 with σ = 10 T fixes that without pulling the field.</p>
+    The probes themselves are constrained at weight 1 with σ = 10 T, so their pull on
+    the solution is negligible while their rows stay in the Jacobian.</p>
 
   <h4>Findings for the owners: a plasma-filled variant of this case is refused, and
     the iron is not the cause</h4>

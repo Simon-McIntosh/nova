@@ -91,9 +91,8 @@ def magnetic_probes_xml(names: list[str], weight: float = 1.0) -> str:
     """Per-probe weights for the four shell probes.
 
     The probes are constrained, not deselected.  Their sigma is 10 T against a
-    signal of order 1e-4 T, so the pull is negligible, but a zero weight would
-    remove their rows from the fit's Jacobian and leave the reconstruction
-    rank-deficient: imas-efit then never drives cerror below its tolerance.
+    signal of order 1e-4 T, so their pull on the solution is negligible, while
+    their rows stay in the fit's Jacobian.
     """
     entries = "\n".join(
         f'  <magneticProbe idsIdentifier="{name}" weights="{weight}"/>'

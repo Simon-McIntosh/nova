@@ -113,13 +113,13 @@ machine file: <code>make_pulse.py</code> writes five IDSs at DD 4.1.0 —</p>
 then the vacuum poloidal flux of the coil in the iron's presence, which is exactly
 the quantity S is defined for; it also makes the slice trivially converged. The
 probes are constrained at weight 1 with σ = 10 T against a signal of order
-10<sup>−4</sup> T: their pull is nil, but a zero weight removes their rows from the
-Jacobian and the reconstruction never drives <code>cerror</code> below its tolerance
-(measured: four earlier arms ended at <code>cerror = 7.079E-03</code> against a
-1.0e-4 tolerance).</p>
+10<sup>−4</sup> T: their pull on the solution is nil at that ratio, and weight 1 keeps
+their rows in the fit rather than deleting them from the Jacobian.</p>
 
 <h2>Measurement</h2>
-<p>S is the ratio of ψ at a probe with iron to ψ at the same probe without iron.
+<p>S is the ratio of ψ at a probe <em>without</em> iron to ψ at the same probe with it —
+the factor by which the shell reduces the coil's flux — and the formula of section 1
+is that ratio.
 For a dipole source inside a spherical shell every exterior point must give the same
 S, so the spread over the three exterior probes is the internal check on the
 measurement.</p>

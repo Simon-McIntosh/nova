@@ -76,6 +76,7 @@ def main() -> None:
     }
 
     table = []
+    refused = []
     for tag, ratio in TAGS:
         air = psi_map(arms.get(f"{tag}-air", {}))
         if air is None:
@@ -87,7 +88,9 @@ def main() -> None:
                 continue
             iron = psi_map(arm)
             if iron is None:
-                series.append({"arm": name, "error": arm.get("error")})
+                # A slice the reconstruction refused has no profiles_2d and so can
+                # carry no measurement; it is recorded, never scored.
+                refused.append({"arm": name, "reason": arm.get("error")})
                 continue
             outer = shielding(air, iron, EXTERIOR)
             if not outer["values"]:
@@ -161,6 +164,7 @@ def main() -> None:
                 "exterior_probes": [list(p) for p in EXTERIOR],
                 "interior_probes": [list(p) for p in INTERIOR],
                 "table": table,
+                "refused": refused,
                 "convergence": convergence,
             },
             indent=1,

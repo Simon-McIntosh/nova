@@ -1,0 +1,74 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T11:41:37.646Z",
+  "dispatched_at": "2026-11-17T11:41:04Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:119",
+      "id": "reasoning-1",
+      "reason": "a dispatched \u00a72 node cannot tell whether to rerun the comparison or to write up the measured failure, and the artefacts the done-when names exist nowhere, so the section is neither open nor closed.",
+      "text": "the outcome paragraph states the lead ruled \u00a72 \"land as that measured result\", yet the section stays data-status=\"implementable\" and the record it points at carries no \u00a72 result section: its last entry is dated 2026-11-16 and reads \"EFIT comparison: inputs repaired before any fit is retried\", with no row-replay table, no per-case terminal refusal reason and residual, and no line-contour panels that the \u00a72 done-when requires",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:119-120",
+      "id": "wiring-1",
+      "reason": "an unnamed handoff has no owner, so the stalls \u00a72 measured at 1.2e-4 and 0.03 are dropped, and \u00a79 only routes around them rather than repairing them.",
+      "text": "\u00a72 hands \"the forward-solve refusals it met near the stored states\" to \"a plan of their own\" that the plan never names and no depends-on or informs relationship carries, and no plan under docs/plans covers a stalled forward solve near a stored state",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:160-161",
+      "id": "reasoning-2",
+      "reason": "the 64-wide batch, and the per-slice wall and forward-solves-per-reconstruction it reports, cannot be obtained from \u00a74's declared dependency, so the cost measurement needs its case source named or its depends-on corrected to \u00a77.",
+      "text": "\u00a74 times \"the \u00a78 ITER case at batch widths 1, 16 and 64\" and reports a warm wall per slice, but \u00a78 delivers one noise-free ITER state on one slice, and the only source of an ITER slice sequence in the plan is \u00a77, which depends on \u00a78 and \u00a73 rather than delivering to \u00a74",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:169-177",
+      "id": "done_when-1",
+      "reason": "the deferred node's whole gate reduces to a presence check that cannot fail, so a retained reconstruction's standing is asserted by its column's existence rather than measured; a control naming a degraded reconstruction that must rank worse would restore a measure that can fail.",
+      "text": "\u00a75 declares no negative control, and under the \"keep\" branch its only measure is that the \u00a73 table \"carries one column group per retained reconstruction\", which holds however badly a retained reconstruction performs",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "714dc5ac6e6e148c2ec807ffc07d2c91ec3e5245",
+  "plan_fingerprint": "d9ba79aca74a8009e96cfdca720d999c97c9713abf1dd356b01cd52743734acd",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 40,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T111935927815-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "0e4694da44a59d61b7d58320310a3e5166c9761e",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 docs/evidence/archive/inverse-equilibrium-baseline-landed.html, docs/figures/inverse-equilibrium-baseline/inverse-seam.svg, docs/plans/spine-efit-parity.html and docs/plans/converged-forward-solve.html all resolve, merge 814f91c4b exists, and spine-efit-parity does record ten of twelve metrics failing with zero converged fraction.",
+    "done_when": "a finding \u2014 \u00a71, \u00a72 and \u00a76 to \u00a79 each declare a control that can fire. \u00a75 declares none and its \"keep\" branch reduces to a presence check.",
+    "evidence_paths": "pass \u2014 the record docs/evidence/archive/inverse-equilibrium-baseline-landed.html resolves and every gate is written to it or to a named H200/titan job, not to a scratchpad.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a symbol; sections name quantities and bands only, and where a mechanism is implied (\u00a79's linear flux update, \u00a76's chi-square interval) it is stated as the quantity to be measured rather than as code to write.",
+    "reasoning": "findings \u2014 \u00a72 asserts a landed measured outcome its own declaration and record contradict, and \u00a74 times a batch of ITER slices no declared dependency delivers; the chi-square interval stated in \u00a76 was checked and holds (31 dof, six directions, 99% joint coverage: 0.386 to 1.992, matching the stated 0.39 to 1.99).",
+    "single_goal": "pass \u2014 each of \u00a71 to \u00a79 carries one deliverable (recovery, EFIT comparison, scoreboard, H200 cost, disposition of three reconstructions, covariance honesty, drift, imas-efit on nova rows, iterative fit).",
+    "wiring": "a finding \u2014 every depends-on in the node table resolves and matches the section prose (\u00a73, \u00a74 wait on \u00a78; \u00a75 on \u00a73; \u00a77 on \u00a76+\u00a73+\u00a78; \u00a79 on neither), but \u00a72 hands its measured forward-solve refusals to a plan that is never named and never wired."
+  },
+  "section_digests": {
+    "_document": "fb98dbb43fc2642534ec98e1fda5075ba9f6672c5bcad11683c8bf49cd31255d",
+    "s0": "33859d65872ac01128e940e5f27d36e4da7f90e929344c535e87d2362eaf1d1e",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "f9bd1700237efb9b78f32eeceab4342f7e5362bf72536175a471f4885f60521e",
+    "s3": "ffe1ae40fdd119d382956b68d70b5ac439dfd6ba20fecc88ab8ca5d01fd2a8a5",
+    "s4": "6da31bb0da50f96f8f71bf17b7a3148b593a65eb45db7b169f95eb3a3918f494",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "cadfba00a23e3a3b6ea0fbee46a46eb276970d776c456bd1a53931456d6f8e09",
+    "s7": "5c750c79d813b34b96a3b3b418cd41dd92a06de78455a410a3cfd366c1aeabee",
+    "s8": "a609d17e17a1eb1b6e8ad1052d90547086b7bf3e11af31c024bfa48ada28ae0d",
+    "s9": "c54565d9b6966f56d4926f245fc8162452c78f2b2334f7f458d82fe7f3a8ac95"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T11:57:24.235096+00:00",
+  "total": null
+}

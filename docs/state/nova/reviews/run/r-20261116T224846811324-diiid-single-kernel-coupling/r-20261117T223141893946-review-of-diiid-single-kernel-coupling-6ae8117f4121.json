@@ -11,6 +11,13 @@
     "scripts/prototypes/diiid_single_kernel_coupling/measure.py:37 wraps bench._couplings"
   ],
   "completed_at": "2026-11-17T22:33:06.402Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "The low reuse score comes only from the measurement scaffolding under scripts/prototypes, which re-implements a sibling prototype's gate and extract helpers; the product change reuses the existing polygon evaluation and adds no duplicate machinery",
+      "recorded_at": "2026-11-17T22:52:49.337634+00:00"
+    }
+  },
   "dispatched_at": "2026-11-17T22:32:37Z",
   "findings": [
     {

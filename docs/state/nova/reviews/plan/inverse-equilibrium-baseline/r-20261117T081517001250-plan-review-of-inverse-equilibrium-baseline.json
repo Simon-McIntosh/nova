@@ -1,0 +1,98 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T08:16:40.000Z",
+  "dispatched_at": "2026-11-17T08:16:24Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261117T081517001250-plan-review-of-inverse-equilibrium-baseline/plan.html:129",
+      "id": "done_when-1",
+      "reason": "a section landing as a non-convergence measurement has no control at all, so nothing in \u00a72 can show that its guard fires, and the node needs a control stated on the measure the section now delivers (the refusal record or the row replay).",
+      "text": "\u00a72's clause (3) control reruns the fit and requires the reconstructed plasma current to leave the 1.5 % band \"on every case\", but the outcome paragraph added at plan.html:118 records that on none of the three stored cases did the class reach a fit, so there is no reconstructed plasma current on any case for the control to compare and the section's only negative control cannot be run",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261117T081517001250-plan-review-of-inverse-equilibrium-baseline/plan.html:74",
+      "id": "wiring-1",
+      "reason": "a coordinator composing the \u00a74 node from the table would gate it on \u00a72, which by the plan's own outcome delivered no fit, and dispatch the cost measurement against a section that cannot supply the case it times.",
+      "text": "the \u00a70 contract table gives \u00a73 and \u00a74 \"\u00a72\" under \"Waits on\", while plan.html:138 (\"Waits on \u00a78, whose nova-written ITER rows and two reconstructed states it scores\") and plan.html:154 (\"Waits on \u00a78, the case on which the class has a fit to time\") and the declared `plan-section-depends-on` all name \u00a78",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261117T081517001250-plan-review-of-inverse-equilibrium-baseline/plan.html:72",
+      "id": "wiring-2",
+      "reason": "a reader who sizes or orders the work from the contract table never learns \u00a79 exists, and the two stated effort figures disagree by exactly the section that was added.",
+      "text": "the \u00a70 contract table still ends at \u00a78, so the newly declared \u00a79 (in `plan-section-declarations` and `plan-section-depends-on`) has no row, and the table's hours sum to 39 against the declared `plan-effort-hours` of 47",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261117T081517001250-plan-review-of-inverse-equilibrium-baseline/plan.html:193",
+      "id": "reasoning-1",
+      "reason": "as written, a worker runs three cases whose stated failure mode is exactly the solve its iteration performs, and clause (2) will record non-convergence for every case with no reading available to say whether the estimator or the forward solve failed.",
+      "text": "\u00a79's stated root cause is that the nested class fails because the forward solve it needs near the stored states does not converge (\"stalls at a residual of 1.2e-4\", \"TCV stalls at 0.03\", \"the ITER state resolves no magnetic axis\"), yet its remedy is a pass loop that every iteration updates the flux map from the plasma current the fit implies, which is itself a free-boundary solve at a state chosen by the data rather than by a proposal; the section nowhere states why that solve converges where the cited solves did not, so the endpoint that clause (2) asserts against these three cases rests on the very mechanism its evidence reports as refusing",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261117T081517001250-plan-review-of-inverse-equilibrium-baseline/plan.html:193",
+      "id": "reasoning-2",
+      "reason": "a worker following the section as written submits three jobs for one receipt, which the lead's one-measurement-one-job rule forbids, so the section's evidence clause has to name one allocation that runs the cases in sequence or as a few workers in it.",
+      "text": "\u00a79 fixes its evidence as \"one batch job per machine on the H200\", that is one scheduler job per case for a single receipt, while the repository's binding measurement rule requires one measurement over many rows to be one job that shards its rows inside the allocation",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261117T081517001250-plan-review-of-inverse-equilibrium-baseline/plan.html:164",
+      "id": "done_when-2",
+      "reason": "the clause swaps a stored-case wall that existed for a synthetic-case wall that does not, and the node has either to measure imas-efit's wall itself (a deliverable the section does not declare) or to lose the comparison it was added for.",
+      "text": "\u00a74's clause (3) asks for \"imas-efit's recorded per-slice wall for the same case\", but the same case is now the \u00a78 ITER case, a run that \u00a78 creates for the first time from nova-written rows and whose own done-when records no imas-efit timing, so no recorded per-slice wall exists for it to quote",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261117T081517001250-plan-review-of-inverse-equilibrium-baseline/plan.html:193",
+      "id": "reasoning-3",
+      "reason": "the citation is misdirected rather than wrong in substance \u2014 the cost measurement exists in the plan, at \u00a74 \u2014 so only a sentence moves and no node's endpoint changes.",
+      "text": "\u00a79 asserts \"\u00a72 measured what that costs on real machines\", but \u00a72's done-when (plan.html:119-134) reports no wall, cost or forward-solve count, and the plan gives cost to \u00a74",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "47d0f1dc6d2b7c71cb17fa251f108ad2661b67a4",
+  "plan_fingerprint": "b339cc7c7163dea997e79acd5fae2f4b3c54543b5bc7e57ba23533653460ef6f",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 37,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T081517001250-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "c4fc6bb4d72f02df805aac50fef64eda8aceb3b6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a72, \u00a74 and \u00a79 cite only section ids that exist in the document (\u00a71, \u00a72, \u00a73, \u00a78 all present), the figure at docs/figures/inverse-equilibrium-baseline/inverse-seam.svg exists, and the record path docs/evidence/archive/inverse-equilibrium-baseline-landed.html exists.",
+    "done_when": "findings \u2014 \u00a72's only negative control now requires a converged fit that the section's own outcome paragraph says it never obtained, and \u00a74's clause (3) quotes a recorded imas-efit wall for a case that has never been run.",
+    "evidence_paths": "pass \u2014 every in-scope section names its record under the repository evidence tree (\u00a72's panels and table into the section record, \u00a79's per-case table and panels likewise); no unit names a session scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 the new \u00a79 carries no plan label, stage name, ticket number or version tag into anything a worker would name; its text speaks of passes, misfit and flux-map updates, and names sections rather than symbols.",
+    "reasoning": "findings \u2014 \u00a79's cited evidence is the free-boundary solve refusing to converge at states adjacent to the data, and the section never shows why its own flux-map update is not that same refusing solve; \u00a79 also fixes its evidence as three separate jobs for one receipt.",
+    "single_goal": "pass \u2014 \u00a79 names one deliverable, an estimator's states and receipt on the \u00a71 and \u00a72 cases, with the \u00a73 column a consumption of that receipt rather than a second product; \u00a72's replay clause is the recorded form of the same measured result.",
+    "wiring": "a finding \u2014 the section contract table at plan.html:74-79 still gives \u00a73 and \u00a74 \"waits on \u00a72\" while their own bodies (plan.html:138, plan.html:154) and the declared depends-on name \u00a78, and the table carries no \u00a79 row at all."
+  },
+  "section_digests": {
+    "_document": "fb98dbb43fc2642534ec98e1fda5075ba9f6672c5bcad11683c8bf49cd31255d",
+    "s0": "18fa4b3820d8a53b8b11be7cc05c1e0e3838163b619eac989edfed114e1e0b7b",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "bb0000a589648f28ed7d63f267e275a6fed5002e3ed5b81fb8291b3006c6a662",
+    "s3": "ffe1ae40fdd119d382956b68d70b5ac439dfd6ba20fecc88ab8ca5d01fd2a8a5",
+    "s4": "917802f6d94ce671357fa85547d4fc7141c5b274176e789787b2187b5633e5d8",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "cadfba00a23e3a3b6ea0fbee46a46eb276970d776c456bd1a53931456d6f8e09",
+    "s7": "5c750c79d813b34b96a3b3b418cd41dd92a06de78455a410a3cfd366c1aeabee",
+    "s8": "a609d17e17a1eb1b6e8ad1052d90547086b7bf3e11af31c024bfa48ada28ae0d",
+    "s9": "af032a5a5a6599a0b08ba8b1dffcd2071e5af1e7c0e4feec94c310065284177f"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T08:23:46.522282+00:00",
+  "total": null
+}

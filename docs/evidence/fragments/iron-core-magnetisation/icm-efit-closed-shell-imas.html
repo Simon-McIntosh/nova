@@ -127,6 +127,12 @@
     descriptors), <code>convergence-lines.txt</code> (the
     <code>IRON_*</code> and <code>CONVERGENCE_SUMMARY</code> lines),
     <code>owners-message.txt</code>, <code>log.txt</code> (every command and job id).
+    The node's gate is <code>logs/gates.sh</code> in the run directory: six gates, each
+    logging its literal command and an <code>EXIT=</code> line, and the last of them
+    re-solves the four arms the headline S is computed from (SLURM 1323923) and
+    requires the fresh ψ at every probe to match the receipt to
+    <code>rtol</code> 1e-12 and S to three decimals — it returns 60.420 and 193.485
+    again, so the number is a property of the case rather than of one solve.
     Case builder: <code>scripts/imas_efit_closed_shell/</code> in the worktree.
     imas-efit commit <code>d5eac87ae310499cc54398e8ce406b887b481153</code>, extracted
     with <code>git archive</code> (sha256 <code>4869dfe9…000693b</code>), built with

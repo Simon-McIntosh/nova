@@ -33,7 +33,30 @@
   "plan_slug": "kernel-compile-barrier",
   "plan_version": 93,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "10dea379167b6586e6ad10d20ab5f52ca1e6d6f0",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "the repair has since landed on main (merge 681a6ecd2), so s3 states it as the base that exists, not as a wait",
+      "reason": "",
+      "when": "2026-11-17T23:29:34.772374+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "10dea379167b6586e6ad10d20ab5f52ca1e6d6f0",
+      "commit_basis": "edit",
+      "note": "the repair has since landed on main (merge 681a6ecd2), so s3 states it as the base that exists, not as a wait",
+      "reason": "",
+      "when": "2026-11-17T23:29:34.772374+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261117T222759086931-plan-review-of-kernel-compile-barrier.json",
   "review_run_id": "r-20261117T222759086931-plan-review-of-kernel-compile-barrier",
   "reviewed_blob_sha": "caeb914a521787a0a3b651d16c3e4d63f00e394b",
   "rubric": "content",

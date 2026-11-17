@@ -23,7 +23,13 @@
   "completed_at": "2026-11-17T22:31:26.093Z",
   "dispatched_at": "2026-11-17T22:30:59Z",
   "evidence_inputs": "The reviewed run's baseline_suite was measured at 01725351a9c7fddfe74ba25268d61972c3981c50 (verified-suite-base.log header: revision 01725351a, tree /tmp/adapter-gates-1320741-E1lF/base), not at the declared reviewed base 70c2026ce; that baseline already contains beb133f9e, so the suite pair measures only the tests added afterwards. The base-restoration evidence is repository_build_measure.py's assertion that build-base-diiid-current.py equals git show 70c2026ce:nova/imas/diiid_current.py, and the negative-control mutation at 23fb2827+comparison-removed. Clause (2)'s 169 comparisons are exact np.array_equal over external_current plus every grid/wall/sample target array and the recursive prescribed_field, with a one-ULP comparator control.",
-  "finding_dispositions": {},
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The reviewer names the independent halves: the resolved-current assertion at :397 and the raises-and-names-conductor assertion at :387, which reddens when the comparison is removed",
+      "recorded_at": "2026-11-17T22:57:29.031372+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/imas/test_diiid_current.py",

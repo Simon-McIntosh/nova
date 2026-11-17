@@ -79,6 +79,16 @@ def arm_rows(device):
     for name, label in ARMS:
         directory = device / name
         profile = load(directory / "profile.json")
+        if "H200" not in profile["device"]:
+            raise SystemExit(
+                "refusing the %s receipt: device %r is not the H200, so its wall is "
+                "another backend's" % (name, profile["device"])
+            )
+        if profile.get("phase") != "done":
+            raise SystemExit(
+                "refusing the %s receipt: it stopped at phase %r"
+                % (name, profile.get("phase"))
+            )
         attribution = load(directory / "attribution.json")
         splitter = splitter_instructions(attribution)
         rows.append(

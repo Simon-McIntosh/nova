@@ -61,6 +61,13 @@
       "note": "By lead ruling on 2026-11-17 the q95 band is judged with one calculator on both flux maps, and each code own stored value is reported beside it as a definition difference.",
       "reason": "",
       "when": "2026-11-17T16:03:19.410262+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "The form of this estimator is the deliverable the lead asked for on 2026-11-17, a fit solved inside the equilibrium iteration, so stating that form is the endpoint and not a method left to the worker; how each pass is computed is not prescribed.",
+      "when": "2026-11-17T16:03:33.210763+00:00"
     }
   ],
   "responses": {
@@ -81,6 +88,12 @@
       "note": "By lead ruling on 2026-11-17 the q95 band is judged with one calculator on both flux maps, and each code own stored value is reported beside it as a definition difference.",
       "reason": "",
       "when": "2026-11-17T16:03:19.410262+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The form of this estimator is the deliverable the lead asked for on 2026-11-17, a fit solved inside the equilibrium iteration, so stating that form is the endpoint and not a method left to the worker; how each pass is computed is not prescribed.",
+      "when": "2026-11-17T16:03:33.210763+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261117T120642867185-plan-review-of-inverse-equilibrium-baseline.json",

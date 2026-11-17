@@ -65,6 +65,12 @@ elif [[ "$mode" == summary ]]; then
   else
     status=1
   fi
+elif [[ "$mode" == bounded ]]; then
+  run bounded-point "$python" -m pytest -p no:cacheprovider tests/equilibrium/test_bounded_point_program.py -m 'slow or not slow' -vv -s || status=1
+elif [[ "$mode" == identity ]]; then
+  export JAX_PLATFORMS=cuda NOVA_KERNEL_BASE_REVISION=02997905193b245dcc099a238fea6c22d8817671
+  # The instrument is supplied by the caller; the program and tests are archived.
+  run program-identity "$python" "$repo/scripts/prototypes/polygon_stable_evaluator/program_identity.py" "$out/program-identity.json" || status=1
 fi
 printf 'EXIT=%s\n' "$status"
 exit "$status"

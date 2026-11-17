@@ -57,7 +57,30 @@
   "plan_slug": "iron-core-magnetisation",
   "plan_version": 114,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b07d3d39134f6c914331bf5987a42d3d443eec3a",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The exact count leaves the plan: the cleanup run's read probe measured 1694 for the test's census construction, while the solve region meshes to 1695, so the pin moves to its own brief-carried node that measures the count it pins",
+      "reason": "",
+      "when": "2026-11-17T15:42:17.731989+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b07d3d39134f6c914331bf5987a42d3d443eec3a",
+      "commit_basis": "edit",
+      "note": "The exact count leaves the plan: the cleanup run's read probe measured 1694 for the test's census construction, while the solve region meshes to 1695, so the pin moves to its own brief-carried node that measures the count it pins",
+      "reason": "",
+      "when": "2026-11-17T15:42:17.731989+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261117T114422897195-plan-review-of-iron-core-magnetisation.json",
   "review_run_id": "r-20261117T114422897195-plan-review-of-iron-core-magnetisation",
   "reviewed_blob_sha": "c59e5a9c3946512311a24f7d6c72a4880ebf50dd",
   "rubric": "content",

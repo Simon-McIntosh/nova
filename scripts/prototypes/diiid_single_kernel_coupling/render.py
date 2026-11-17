@@ -168,7 +168,7 @@ def flux_panels(args, frame, branch):
             label.T,
             levels,
             color=REFERENCE,
-            linewidth=1.4,
+            linewidth=2.6,
             wall=wall,
             zorder=2,
         )
@@ -180,7 +180,7 @@ def flux_panels(args, frame, branch):
             (current["flux"] + gauge).T,
             levels,
             color=SOLVED,
-            linewidth=1.6,
+            linewidth=3.0,
             wall=wall,
             zorder=3,
         )
@@ -251,17 +251,31 @@ def main():
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--previews", type=Path, required=True)
-    parser.add_argument("--differences-only", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--differences-only", action="store_true")
+    mode.add_argument("--flux-only", action="store_true")
+    parser.add_argument(
+        "--rows",
+        nargs="+",
+        choices=[f"{frame}-{branch}" for frame, branch in ROWS],
+    )
     args = parser.parse_args()
     plt.style.use(Path.home() / ".config/matplotlib/stylelib/data-ink.mplstyle")
     plt.rcParams.update({"svg.fonttype": "none", "font.size": 14})
-    metadata = dict(difference_levels_percent=difference_panels(args), flux={})
+    metadata_path = args.previews / "render-metadata.json"
+    metadata = (
+        json.loads(metadata_path.read_text())
+        if metadata_path.exists()
+        else dict(flux={})
+    )
+    if not args.flux_only:
+        metadata["difference_levels_percent"] = difference_panels(args)
     if not args.differences_only:
         for frame, branch in ROWS:
-            metadata["flux"][f"{frame}-{branch}"] = flux_panels(args, frame, branch)
-    (args.previews / "render-metadata.json").write_text(
-        json.dumps(metadata, indent=2) + "\n"
-    )
+            name = f"{frame}-{branch}"
+            if args.rows is None or name in args.rows:
+                metadata["flux"][name] = flux_panels(args, frame, branch)
+    metadata_path.write_text(json.dumps(metadata, indent=2) + "\n")
 
 
 if __name__ == "__main__":

@@ -57,7 +57,24 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 107,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "\u00a78 is already running; its worker read the code and matched the conductors by name, as the adapter's resolution carries them, and its refusal test passes",
+      "when": "2026-11-17T04:07:14.881805+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a78 is already running; its worker read the code and matched the conductors by name, as the adapter's resolution carries them, and its refusal test passes",
+      "when": "2026-11-17T04:07:14.881805+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261117T004515363037-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261117T004515363037-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "b134e302e2b529f737bffaa3ff6855e94a6acf1d",
   "rubric": "content",

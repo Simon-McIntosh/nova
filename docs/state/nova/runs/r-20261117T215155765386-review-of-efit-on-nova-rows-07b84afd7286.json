@@ -1242,6 +1242,40 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "91ea768b895404c6d82c377c2c730fea659d33c6",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": null,
+    "scratch_host": "98dci4-clu-2004.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261117T215155765386-review-of-efit-on-nova-rows-07b84afd7286",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch path is not the directory this run owns",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/review-of-efit-on-nova-rows-07b84afd7286",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/_trash/r-20261117T215155765386-review-of-efit-on-nova-rows-07b84afd7286-20261117T215914554572Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-17T13:49:18.996Z",
+  "dispatched_at": "2026-11-17T13:39:03Z",
+  "figures": {
+    "docs/figures/kernel-compile-barrier/point-program-attribution/block-attribution.svg": {
+      "contrast": "passes: tick labels and value labels are near-black on white, and both series fills, grey #999999 and blue #3366cc, separate clearly from the ground they sit on",
+      "data_ink": "passes: flat bar fills are the only large ink, one bar per block and per arm, and no gradient, marker cloud or second geometry competes with them",
+      "decoration": "passes: white ground, no gridlines, no background bands or fills, and both panels keep only the spines that carry a scale (left and bottom)",
+      "label_collision": "fails: the annotation arrow is placed at the stubbed arm's centre, the same x as that arm's value label, and its shaft runs from 104.5 s to 223.7 s through the '104.5' glyphs, so the value renders with a line across it",
+      "legibility": "readable at a glance: the left panel ranks five source blocks by the share of the 6,088,067-byte lowered graph their stub removes, and the right panel shows three compiled arms in cold H200 seconds, each with a dark value label; the one mark a reader cannot read cleanly is the stubbed arm's value label, struck through by the annotation arrow and recorded under label_collision",
+      "table_form": "passes: both panels compare magnitudes, where the comparison itself is a length; a table would not show relative size, and the erased block states its categorical outcome in the word 'erased' rather than pretending to a bar length"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/kernel-compile-barrier/point-program-attribution/block-attribution.svg",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The one legend contradicts the data it explains. Its blue swatch is labelled 'stub removed nothing (erased)', and blue is the fill of the two stubbed arms in the right panel, at 104.5 s and 34.1 s. A reader who uses the legend concludes that neither stub removed anything, when the left panel records the corner-height Hessian removing 31.4% of the lowered graph and the right panel shows that same block holding 119.2 s of the compile. The left panel's actually-erased block has a zero-length bar, so no blue is drawn where 'erased' is true, and every blue mark in the picture carries the opposite of the legend's claim. The grey swatch is stretched the same way: on the left it means a share of the graph, on the right it means the unchanged program's whole compile time, which is not a share of anything. A reader who trusts the legend reads the figure backwards."
+    },
+    {
+      "file": "docs/figures/kernel-compile-barrier/point-program-attribution/block-attribution.svg",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The arrow that marks the 119.2 s span is drawn through the value label of the bar it starts on. The label '104.5' is centred on its bar and the double-headed arrow rises from that same bar top, so the shaft crosses the digits at their middle; in the rendered PNG the number reads with a horizontal rule through it, like a struck-through or retracted value. That label is the only quantity the stubbed arm contributes, so the collision removes the number the arm exists to show."
+    },
+    {
+      "file": "scripts/prototypes/point_program_attribution/figure.py",
+      "line": 68,
+      "severity": "non-blocking",
+      "summary": "The compile bars' colours are a hardcoded positional list (contour, flux, flux) rather than being read from each arm's own erased state, which is why the picture's encoding cannot mean what its legend says: the list paints the two stub arms in the colour the legend reserves for 'removed nothing'. It is also fragile by construction: any change to the arm order or count re-colours the bars silently, with no check to catch it."
+    },
+    {
+      "file": "scripts/prototypes/point_program_attribution/figure.py",
+      "line": 96,
+      "severity": "non-blocking",
+      "summary": "The delta arrow runs from the corner-height arm to the control arm, so the span it marks is the 119.2 s that block holds; the larger drop from the control to the fully stubbed arm, 189.6 s and the 84.8% share the fragment's headline states, is left unmarked. The arrow therefore draws the eye to the smaller of the two effects the figure measures, and a reader who does not go on to the caption takes 119.2 s as the whole story."
+    },
+    {
+      "file": "scripts/prototypes/point_program_attribution/figure.py",
+      "line": 100,
+      "severity": "non-blocking",
+      "summary": "The span annotation is drawn in the ink role's axis colour, #cc0000, a saturated red, on a plot that carries no limit or threshold. Red is the repository's colour for a limit being broken, so the arrow reads as a warning about a bound the figure does not have, rather than as a measurement of a gap."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261117T133759189727-review-of-point-program-attribution-abfe563fe179-figure",
+  "reviewed_base_sha": "b0a2cde51b49c29bf4c642eebadd500af9b68ca0",
+  "reviewed_head_sha": "abfe563fe1792927caf79a1bc551c2915d756b33",
+  "reviewed_image": "image-0.png, a 1400x673 PNG attached to this review, rendered from docs/figures/kernel-compile-barrier/point-program-attribution/block-attribution.svg",
+  "reviewed_run_id": "r-20261116T223418482944-point-program-attribution",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T13:51:38.471002+00:00",
+  "total": null
+}

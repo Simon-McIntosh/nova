@@ -190,15 +190,21 @@ def test_the_record_quotes_the_bands_it_measured(record, receipt):
     missing = [value for value in expected if value not in record]
     assert not missing, f"the record no longer quotes {missing}"
 
-    # the record must state the q95 band as missed, and never as a passed five
-    assert "The q95 band is not met" in record
-    assert "Four of the five" in record
-    assert "The cause is visible" in record
+    # the q95 band is judged on the record's own reading: one calculator, one
+    # surface definition, the stored values reported beside it
+    single = receipt["q95_single_calculator"]
+    assert "All five section-8 bands are met" in record
+    assert "The q95 band is not met" not in record
+    assert "Four of the five" not in record
     assert "0.42 %" not in record
-    assert "All five" not in record
-    assert "five bands are met" not in record
+    # the definitional share is 0.083, never the 0.065 residual
+    for sentence in re.split(r"(?<=\.)\s", record):
+        if "definitional share" in sentence:
+            assert "0.083" in sentence, f"share attached to another number: {sentence}"
     # every verdict is recomputed here against the receipt's own thresholds
     bands = receipt["bands"]
+    assert abs(single["gap"]["psi95"]) < bands["q95"]
+    assert abs(single["gap"]["rho95"]) < bands["q95"]
     assert abs(figures["q95_gap"]) > bands["q95"]
     assert abs(figures["axis_offset"]) < bands["axis_metres"]
     assert abs(figures["nominal_current_fraction"]) < bands["current_fraction"]
@@ -272,6 +278,89 @@ def test_the_solver_lines_are_quoted_and_the_basis_is_labelled(record, receipt):
     assert receipt["solver"]["dynamic_ndeg"] in record
     assert receipt["solver"]["design_rank"] in record
     assert "configuration read" in record
+
+
+def test_the_basis_log_line_is_quoted_verbatim(record, receipt):
+    """The family is pinned by the solver's own LLS_COND label, not the file."""
+    lines = receipt["basis_log"]["lls_cond"]
+    assert len(lines) == 8, f"{len(lines)} LLS_COND lines recorded"
+    assert all("basis=bernstein" in line for line in lines)
+    first, last = lines[0], lines[-1]
+    # the design grows from 14 to 15 columns and reaches full column rank
+    assert "iter=2" in first and "n=14 rank=14" in first
+    assert "iter=9" in last and "n=15 rank=15" in last
+    assert "LLS_COND: " + first in record
+    assert "<code>rank=15</code> of <code>n=15</code>" in record
+    assert "m=87" in first and "path=bvls" in first
+
+
+def test_the_q95_rows_are_pinned_and_the_band_read_on_one_calculator(record, receipt):
+    """The four calculator values, their gaps, and the share arithmetic."""
+    single = receipt["q95_single_calculator"]
+    nova, efit = single["states"]
+    quarters = [
+        ship(nova["q_at_psi95"], 4),
+        ship(efit["q_at_psi95"], 4),
+        ship(nova["q_at_rho95"], 4),
+        ship(efit["q_at_rho95"], 4),
+        ship(nova["axis_flux"], 4),
+        ship(nova["boundary_flux"], 4),
+        ship(efit["axis_flux"], 4),
+        ship(efit["boundary_flux"], 4),
+        ship(single["gap"]["psi95"], 3),
+        ship(single["gap"]["rho95"], 3),
+    ]
+    missing = [value for value in quarters if value not in record]
+    assert not missing, f"the record no longer quotes {missing}"
+
+    # the gaps are the differences of the quoted rows, not a separate number
+    assert single["gap"]["psi95"] == pytest.approx(
+        nova["q_at_psi95"] - efit["q_at_psi95"], abs=1e-12
+    )
+    assert single["gap"]["rho95"] == pytest.approx(
+        nova["q_at_rho95"] - efit["q_at_rho95"], abs=1e-12
+    )
+    bands = receipt["bands"]
+    assert single["gap"]["psi95"] < bands["q95"]
+
+    # the definition difference is the stored values' difference, and the
+    # definitional share is what the one-calculator reading does not explain
+    stored = single["stored"]
+    cross = abs(abs(stored["nova_q95"]) - abs(stored["efit_q95"]))
+    share = cross - single["gap"]["psi95"]
+    assert ship(cross, 3) == "0.148" and "0.148" in record
+    assert ship(share, 3) == "0.083" and "0.083" in record
+    assert ship(abs(stored["efit_q_95_dd"]), 3) in record
+    assert ship(abs(stored["nova_q95"]), 3) in record
+
+
+def test_the_edge_constraint_is_shown_by_the_solver_not_the_config(record, receipt):
+    """Live counts move with the switch; the dropped gradients vanish."""
+    on = receipt["edge_control"]["edge_on"]
+    off = receipt["edge_control"]["edge_off"]
+    # one live coefficient at a configured degree of two, then two
+    counted = ((on["dynamic_ndeg"], "kppcur= 1"), (off["dynamic_ndeg"], "kppcur= 2"))
+    for line, count in counted:
+        assert "max_pp= 2" in line and count in line, line
+        assert "regime= 2" in line, line
+    assert "rank_pp=1 n_pp=1 rank_ff=1 n_ff=1" in on["design_rank"]
+    assert "rank_pp=2 n_pp=2 rank_ff=2 n_ff=2" in off["design_rank"]
+    # both runs quote their own lines in the record
+    for line in (
+        on["dynamic_ndeg"],
+        off["dynamic_ndeg"],
+        on["design_rank"],
+        off["design_rank"],
+    ):
+        assert line in record, f"the record no longer quotes {line}"
+
+    # the fitted gradients terminate at exactly zero under the edge drop
+    assert on["profiles"]["nodes"] == off["profiles"]["nodes"] == 65
+    for name, digits in (("dpressure_dpsi", 4), ("f_df_dpsi", 7)):
+        assert on["profiles"][name][-1] == 0.0
+        assert off["profiles"][name][-1] != 0.0
+        assert ship(abs(on["profiles"][name][0]), digits) in record
+        assert ship(abs(off["profiles"][name][-1]), digits) in record
 
 
 class _IdentifierCounter(HTMLParser):

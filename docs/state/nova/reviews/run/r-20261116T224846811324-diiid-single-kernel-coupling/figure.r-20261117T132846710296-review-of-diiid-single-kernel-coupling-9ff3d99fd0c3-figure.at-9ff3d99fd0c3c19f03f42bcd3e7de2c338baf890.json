@@ -45,6 +45,13 @@
       "table_form": "pass \u2014 the finding is where the per-cell difference concentrates, which is spatial"
     }
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-single-kernel-coupling",
+      "recorded_at": "2026-11-17T16:37:14.845978+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/uniform-response-difference.svg",

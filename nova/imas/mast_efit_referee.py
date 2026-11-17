@@ -538,9 +538,24 @@ def _equilibrium_q95(equilibrium, index: int) -> float:
 
 
 def read_equilibrium_wall(source: Path | str) -> tuple[np.ndarray, ...]:
-    """Read the vessel or limiter rings a machine description carries."""
+    """Read the vessel or limiter rings a machine description carries.
+
+    A ``.npz`` source is read as one ring stored under the key ``wall``, which
+    is how a machine description written beside a flux map carries its first
+    wall when no wall IDS was written.
+    """
 
     import imas
+
+    if str(source).endswith(".npz"):
+        with np.load(Path(source).expanduser(), allow_pickle=False) as stored:
+            if "wall" not in stored.files:
+                raise EfitRefereeError(f"the wall array at {source} carries no 'wall'")
+            points = np.asarray(stored["wall"], dtype=float)
+        points = points[_valid_points(points)]
+        if points.shape[0] < 3:
+            raise EfitRefereeError(f"the wall array at {source} carries no ring")
+        return (_readonly(points),)
 
     entry = imas.DBEntry(_imas_uri(source), "r")
     try:
@@ -576,13 +591,17 @@ def read_equilibrium_state(
     time_index: int | None = None,
     time_s: float | None = None,
     wall_source: Path | str | None = None,
+    q95: float | None = None,
 ) -> EquilibriumState:
     """Read one reconstructed state from any IMAS equilibrium.
 
     The entry is opened without a data dictionary version so that imas-python
     selects the version the dataset was written at; that version is recorded on
     the returned state and named by its digest.  A frame carrying sentinel fill
-    is refused rather than scored.
+    is refused rather than scored.  ``q95`` supplies the safety factor from the
+    state's own record where the stored equilibrium carries no q profile, which
+    is the case for a state written from a scalar topology record; the digest
+    then names the supplied value.
     """
 
     import imas
@@ -641,7 +660,7 @@ def read_equilibrium_state(
         flux_axis=_scalar(quantities.psi_axis),
         flux_boundary=_scalar(quantities.psi_boundary),
         plasma_current_a=_scalar(quantities.ip),
-        q95=_equilibrium_q95(equilibrium, index),
+        q95=_equilibrium_q95(equilibrium, index) if q95 is None else float(q95),
         wall_loops=wall_loops,
     )
     return state

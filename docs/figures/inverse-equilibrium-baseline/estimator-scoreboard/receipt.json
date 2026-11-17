@@ -33,23 +33,24 @@
  },
  "cases": [
   {
-   "case": "mastu-45272",
+   "case": "iter-row-exchange-nominal",
    "estimators": [
     {
-     "gauge_wb": 0.0,
-     "lcfs_distance_m": 0.0,
+     "gauge_wb": 0.31671172612655596,
+     "lcfs_distance_m": 0.04236352945503373,
      "metrics": {
-      "axis_flux_fraction": 0.0,
-      "boundary_flux_fraction": 0.0,
-      "magnetic_axis_distance_m": 0.0,
-      "plasma_current_fraction": 0.0,
-      "q95_difference": 0.0
+      "axis_flux_fraction": 0.0041473049781818585,
+      "boundary_flux_fraction": 0.0050102967905711745,
+      "magnetic_axis_distance_m": 0.015171676182269448,
+      "plasma_current_fraction": 8.66935929319592e-07,
+      "q95_difference": 0.14804376410079234
      },
      "name": "imas-efit",
+     "note": "imas-efit's reconstruction of the nominal nova-written pulse, read back through IMAS at the version it was written at",
      "reference_free": {
       "axis_inside_boundary": true,
       "axis_inside_wall": true,
-      "boundary_area_fraction": 0.7414474838706301
+      "boundary_area_fraction": 0.7355363786497701
      },
      "reference_free_verdicts": {
       "axis_inside_boundary": true,
@@ -57,20 +58,68 @@
       "boundary_area_fraction": true
      },
      "state": {
-      "boundary_points": 361,
+      "boundary_points": 212,
       "dd_version": "4.1.0",
-      "digest": "sha256:a38a915a56d4b144704e1f6ceed323bacfaa1af7e2976dc29e8d86d7c5e6ae5c",
-      "flux_axis": 0.06613590428985372,
-      "flux_boundary": -0.49081388762080747,
-      "flux_span": 0.5569497919106612,
+      "digest": "sha256:d3d36ac0d68d1f837e8c28775baed6c1b191571a704db6ad5e030bcdc58c7ede",
+      "flux_axis": -73.52817897700832,
+      "flux_boundary": 3.2201063663674483,
+      "flux_span": 76.74828534337577,
       "magnetic_axis_m": [
-       0.9489294757659993,
-       -0.009513427344107359
+       6.304585611400429,
+       0.49440519486374757
       ],
-      "plasma_current_a": 778923.7355142743,
-      "q95": -5.691967884651814,
-      "source": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/MASTU/45272/regression/magnetics",
-      "time_s": 1.1,
+      "plasma_current_a": -13633999.738707324,
+      "q95": 2.906980587231803,
+      "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/efit-on-nova-rows-case/efit-out-10",
+      "time_s": 338.9275978120551,
+      "wall_rings": 1
+     },
+     "status": "scored",
+     "verdicts": {
+      "axis_flux_fraction": true,
+      "boundary_flux_fraction": true,
+      "magnetic_axis_distance_m": true,
+      "plasma_current_fraction": true,
+      "q95_difference": false
+     }
+    },
+    {
+     "gauge_wb": 1.2789769243681803e-13,
+     "lcfs_distance_m": 3.767600078857637e-15,
+     "metrics": {
+      "axis_flux_fraction": 1.6748061179434542e-15,
+      "boundary_flux_fraction": 1.0641997207765697e-15,
+      "magnetic_axis_distance_m": 1.2042849684860158e-14,
+      "plasma_current_fraction": 1.3661754218381376e-16,
+      "q95_difference": 8.881784197001252e-16
+     },
+     "name": "nova-inverse-class",
+     "note": "the nova inverse class's result on the same rows: its axis, fluxes, current and safety factor from nova-fit-10.json; its bounding surface traced on the stored flux map at the same edge fraction, on the map the fit recovered (its coefficients are 1.0 and its terminal residual 8.2e-16)",
+     "reference_free": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": 0.7482308247632418
+     },
+     "reference_free_verdicts": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": true
+     },
+     "state": {
+      "boundary_points": 227,
+      "dd_version": "4.1.0",
+      "digest": "sha256:af5362c532bb114dbde8fc82da47922de5a8ac01875a0d06bdf733128edd1ee8",
+      "flux_axis": -73.2114672508819,
+      "flux_boundary": 3.154203417832682,
+      "flux_span": 76.36567066871457,
+      "magnetic_axis_m": [
+       6.289868237209092,
+       0.4980901175347843
+      ],
+      "plasma_current_a": -13634011.558521807,
+      "q95": -3.0550243513325945,
+      "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T143301237025-estimator-scoreboard/states/nova-inverse-class",
+      "time_s": 0.0,
       "wall_rings": 1
      },
      "status": "scored",
@@ -83,25 +132,21 @@
      }
     },
     {
-     "name": "nova-inverse-class",
-     "reason": "no state supplied for this case",
-     "status": "absent"
-    },
-    {
-     "gauge_wb": -0.016708493757319837,
-     "lcfs_distance_m": 0.025264980755098414,
+     "gauge_wb": 1.527313413374415,
+     "lcfs_distance_m": 0.029014791187919383,
      "metrics": {
-      "axis_flux_fraction": 0.030000000000000002,
-      "boundary_flux_fraction": 0.0600000000000001,
-      "magnetic_axis_distance_m": 0.030000000000000027,
-      "plasma_current_fraction": 0.06000000000000008,
-      "q95_difference": 5.4073694904192235
+      "axis_flux_fraction": 0.020000000000001638,
+      "boundary_flux_fraction": 0.04000000000000105,
+      "magnetic_axis_distance_m": 0.030000000000010907,
+      "plasma_current_fraction": 0.06000000000000019,
+      "q95_difference": 0.15275121756662902
      },
      "name": "perturbed-copy",
+     "note": "a deliberately defective copy of the nova inverse-class state: current scaled by 1.06, boundary and axis shifted 0.03 m radially, flux span grown 2% at each end; the safety factor scaled by 1.05 in the column's own value, because a state written from a scalar record carries its safety factor beside the dataset rather than in a profile",
      "reference_free": {
       "axis_inside_boundary": true,
       "axis_inside_wall": true,
-      "boundary_area_fraction": 0.7414474838706352
+      "boundary_area_fraction": 0.7482308247632342
      },
      "reference_free_verdicts": {
       "axis_inside_boundary": true,
@@ -109,264 +154,20 @@
       "boundary_area_fraction": true
      },
      "state": {
-      "boundary_points": 361,
+      "boundary_points": 227,
       "dd_version": "4.1.0",
-      "digest": "sha256:a8f99a783d8f508c0e53b4b31b4152dd812b57be0e95b102a512d70ab6fda79f",
-      "flux_axis": 0.08284439804717356,
-      "flux_boundary": -0.5075223813781273,
-      "flux_span": 0.5903667794253009,
+      "digest": "sha256:16f0c7f51e16c81f385d36c325638fbeb9b6c7fc4677b62acd13088a3313b5e1",
+      "flux_axis": -74.73878066425618,
+      "flux_boundary": 4.681516831206974,
+      "flux_span": 79.42029749546316,
       "magnetic_axis_m": [
-       0.9789294757659993,
-       -0.009513427344107359
+       6.319868237209092,
+       0.4980901175347843
       ],
-      "plasma_current_a": 825659.1596451309,
-      "q95": -0.2845983942325907,
-      "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T143301237025-estimator-scoreboard/states/mastu-45272/perturbed",
-      "time_s": 1.1,
-      "wall_rings": 1
-     },
-     "status": "scored",
-     "verdicts": {
-      "axis_flux_fraction": false,
-      "boundary_flux_fraction": false,
-      "magnetic_axis_distance_m": false,
-      "plasma_current_fraction": false,
-      "q95_difference": false
-     }
-    }
-   ],
-   "machine": "MAST-U",
-   "reference": {
-    "boundary_points": 361,
-    "dd_version": "4.1.0",
-    "digest": "sha256:a38a915a56d4b144704e1f6ceed323bacfaa1af7e2976dc29e8d86d7c5e6ae5c",
-    "flux_axis": 0.06613590428985372,
-    "flux_boundary": -0.49081388762080747,
-    "flux_span": 0.5569497919106612,
-    "magnetic_axis_m": [
-     0.9489294757659993,
-     -0.009513427344107359
-    ],
-    "plasma_current_a": 778923.7355142743,
-    "q95": -5.691967884651814,
-    "source": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/MASTU/45272/regression/magnetics",
-    "time_s": 1.1,
-    "wall_rings": 1
-   }
-  },
-  {
-   "case": "tcv-77549",
-   "estimators": [
-    {
-     "gauge_wb": NaN,
-     "lcfs_distance_m": 0.0,
-     "metrics": {
-      "axis_flux_fraction": NaN,
-      "boundary_flux_fraction": NaN,
-      "magnetic_axis_distance_m": 0.0,
-      "plasma_current_fraction": 0.0,
-      "q95_difference": 0.0
-     },
-     "name": "imas-efit",
-     "reference_free": {
-      "axis_inside_boundary": true,
-      "axis_inside_wall": true,
-      "boundary_area_fraction": 0.7564070489408757
-     },
-     "reference_free_verdicts": {
-      "axis_inside_boundary": true,
-      "axis_inside_wall": true,
-      "boundary_area_fraction": true
-     },
-     "state": {
-      "boundary_points": 129,
-      "dd_version": "4.1.0",
-      "digest": "sha256:dd9e24f934fae0cbea2b795873f68899e6375444713f911755ed726a6b7946aa",
-      "flux_axis": NaN,
-      "flux_boundary": 0.9191185832023621,
-      "flux_span": NaN,
-      "magnetic_axis_m": [
-       0.9118880033493042,
-       -0.033594682812690735
-      ],
-      "plasma_current_a": -239673.984375,
-      "q95": 3.64729725997703,
-      "source": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/TCV/77549",
-      "time_s": 1.6180000305175781,
-      "wall_rings": 1
-     },
-     "status": "scored",
-     "verdicts": {
-      "axis_flux_fraction": false,
-      "boundary_flux_fraction": false,
-      "magnetic_axis_distance_m": true,
-      "plasma_current_fraction": true,
-      "q95_difference": true
-     }
-    },
-    {
-     "name": "nova-inverse-class",
-     "reason": "no state supplied for this case",
-     "status": "absent"
-    },
-    {
-     "gauge_wb": NaN,
-     "lcfs_distance_m": 0.025158963438819258,
-     "metrics": {
-      "axis_flux_fraction": NaN,
-      "boundary_flux_fraction": NaN,
-      "magnetic_axis_distance_m": 0.030000000000000027,
-      "plasma_current_fraction": 0.060000000000000095,
-      "q95_difference": 3.4649323969781785
-     },
-     "name": "perturbed-copy",
-     "reference_free": {
-      "axis_inside_boundary": true,
-      "axis_inside_wall": true,
-      "boundary_area_fraction": 0.7564070489408782
-     },
-     "reference_free_verdicts": {
-      "axis_inside_boundary": true,
-      "axis_inside_wall": true,
-      "boundary_area_fraction": true
-     },
-     "state": {
-      "boundary_points": 129,
-      "dd_version": "4.1.0",
-      "digest": "sha256:738d7bfea3d123f7b64e98a527362db2f8b4a8cc755e9befd87b02e58f2d5881",
-      "flux_axis": NaN,
-      "flux_boundary": 0.9191185832023621,
-      "flux_span": NaN,
-      "magnetic_axis_m": [
-       0.9418880033493042,
-       -0.033594682812690735
-      ],
-      "plasma_current_a": -254054.42343750002,
-      "q95": 0.18236486299885152,
-      "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T143301237025-estimator-scoreboard/states/tcv-77549/perturbed",
-      "time_s": 1.6180000305175781,
-      "wall_rings": 1
-     },
-     "status": "scored",
-     "verdicts": {
-      "axis_flux_fraction": false,
-      "boundary_flux_fraction": false,
-      "magnetic_axis_distance_m": false,
-      "plasma_current_fraction": false,
-      "q95_difference": false
-     }
-    }
-   ],
-   "machine": "TCV",
-   "reference": {
-    "boundary_points": 129,
-    "dd_version": "4.1.0",
-    "digest": "sha256:dd9e24f934fae0cbea2b795873f68899e6375444713f911755ed726a6b7946aa",
-    "flux_axis": NaN,
-    "flux_boundary": 0.9191185832023621,
-    "flux_span": NaN,
-    "magnetic_axis_m": [
-     0.9118880033493042,
-     -0.033594682812690735
-    ],
-    "plasma_current_a": -239673.984375,
-    "q95": 3.64729725997703,
-    "source": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/TCV/77549",
-    "time_s": 1.6180000305175781,
-    "wall_rings": 1
-   }
-  },
-  {
-   "case": "iter-135013",
-   "estimators": [
-    {
-     "gauge_wb": 0.0,
-     "lcfs_distance_m": 0.0,
-     "metrics": {
-      "axis_flux_fraction": 0.0,
-      "boundary_flux_fraction": 0.0,
-      "magnetic_axis_distance_m": 0.0,
-      "plasma_current_fraction": 0.0,
-      "q95_difference": 0.0
-     },
-     "name": "imas-efit",
-     "reference_free": {
-      "axis_inside_boundary": true,
-      "axis_inside_wall": true,
-      "boundary_area_fraction": 0.7177291803716861
-     },
-     "reference_free_verdicts": {
-      "axis_inside_boundary": true,
-      "axis_inside_wall": true,
-      "boundary_area_fraction": true
-     },
-     "state": {
-      "boundary_points": 361,
-      "dd_version": "4.1.0",
-      "digest": "sha256:e41ea855ad121b91bfe317f3986948454707f03787acf479c3574051aae8c7fe",
-      "flux_axis": -57.00037729250495,
-      "flux_boundary": 13.674898881844822,
-      "flux_span": 70.67527617434978,
-      "magnetic_axis_m": [
-       6.350262321473726,
-       0.4870295760753925
-      ],
-      "plasma_current_a": -13886514.385152737,
-      "q95": 3.2791333084966614,
-      "source": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/ITER/135013-fp",
-      "time_s": 520.9275978120552,
-      "wall_rings": 1
-     },
-     "status": "scored",
-     "verdicts": {
-      "axis_flux_fraction": true,
-      "boundary_flux_fraction": true,
-      "magnetic_axis_distance_m": true,
-      "plasma_current_fraction": true,
-      "q95_difference": true
-     }
-    },
-    {
-     "name": "nova-inverse-class",
-     "reason": "no state supplied for this case",
-     "status": "absent"
-    },
-    {
-     "gauge_wb": 2.1202582852304914,
-     "lcfs_distance_m": 0.02948089738711231,
-     "metrics": {
-      "axis_flux_fraction": 0.029999999999999975,
-      "boundary_flux_fraction": 0.06,
-      "magnetic_axis_distance_m": 0.03000000000000025,
-      "plasma_current_fraction": 0.060000000000000116,
-      "q95_difference": 3.115176643071828
-     },
-     "name": "perturbed-copy",
-     "reference_free": {
-      "axis_inside_boundary": true,
-      "axis_inside_wall": true,
-      "boundary_area_fraction": 0.7177291803716863
-     },
-     "reference_free_verdicts": {
-      "axis_inside_boundary": true,
-      "axis_inside_wall": true,
-      "boundary_area_fraction": true
-     },
-     "state": {
-      "boundary_points": 361,
-      "dd_version": "4.1.0",
-      "digest": "sha256:f6a61a61bffce2601b2c9a4d98e4f6f77f1bfb31b1b5ec3778be78d96bef4daa",
-      "flux_axis": -59.12063557773544,
-      "flux_boundary": 15.795157167075315,
-      "flux_span": 74.91579274481076,
-      "magnetic_axis_m": [
-       6.380262321473726,
-       0.4870295760753925
-      ],
-      "plasma_current_a": -14719705.248261902,
-      "q95": 0.1639566654248331,
-      "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T143301237025-estimator-scoreboard/states/iter-135013/perturbed",
-      "time_s": 520.9275978120552,
+      "plasma_current_a": -14452052.252033116,
+      "q95": -3.2077755688992244,
+      "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T143301237025-estimator-scoreboard/states/perturbed-copy",
+      "time_s": 0.0,
       "wall_rings": 1
      },
      "status": "scored",
@@ -381,20 +182,21 @@
    ],
    "machine": "ITER",
    "reference": {
-    "boundary_points": 361,
+    "boundary_points": 227,
     "dd_version": "4.1.0",
-    "digest": "sha256:e41ea855ad121b91bfe317f3986948454707f03787acf479c3574051aae8c7fe",
-    "flux_axis": -57.00037729250495,
-    "flux_boundary": 13.674898881844822,
-    "flux_span": 70.67527617434978,
+    "digest": "sha256:011af8d211eb95251c7670eaebbbce3963480b73107f12bb9627baaa23f62e63",
+    "flux_axis": -73.21146725088177,
+    "flux_boundary": 3.1542034178327287,
+    "flux_span": 76.3656706687145,
     "magnetic_axis_m": [
-     6.350262321473726,
-     0.4870295760753925
+     6.289868237209081,
+     0.4980901175347787
     ],
-    "plasma_current_a": -13886514.385152737,
-    "q95": 3.2791333084966614,
-    "source": "/home/ITER/mcintos/Code/imas-efit/tests/data/imas/ITER/135013-fp",
-    "time_s": 520.9275978120552,
+    "note": "the generating state of the row-exchange case: its axis, fluxes, current and safety factor from record-10.json, its bounding surface traced on the stored 65 by 129 flux map half a percent of the span inside the recorded boundary flux, where the flux-surface record takes its outermost surface, because the contour exactly at that flux joins the divertor legs",
+    "plasma_current_a": -13634011.558521805,
+    "q95": -3.0550243513325954,
+    "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T143301237025-estimator-scoreboard/states/reference",
+    "time_s": 338.9275978120551,
     "wall_rings": 1
    }
   }

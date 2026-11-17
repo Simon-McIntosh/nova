@@ -9,19 +9,19 @@ reference state.  The comparator and the reference-free checks are the ones in
 A new estimator joins by adding a column to the case manifest.  When that
 estimator's states do not exist on disk yet, the manifest may declare a
 perturbation of an existing state -- a deliberate defect the scoreboard must
-rank worse -- and ``--emit-perturbed`` materialises it as its own IMAS
-equilibrium before scoring, so the scoring path never sees a state that was not
-supplied as one.
+rank worse -- or a derivation from a stored topology record and flux map, and
+``--emit-states`` materialises either as its own IMAS equilibrium before
+scoring, so the scoring path never sees a state that was not supplied as one.
 
 Run the table and its receipt::
 
     python benchmarks/estimator_scoreboard.py --manifest cases.json \
         --html <fragment>.html --receipt <receipt>.json
 
-Materialise declared perturbed states first::
+Materialise the declared states first::
 
     python benchmarks/estimator_scoreboard.py --manifest cases.json \
-        --state-dir <run directory>/states --emit-perturbed
+        --state-dir <run directory>/states --emit-states
 """
 
 from __future__ import annotations
@@ -63,6 +63,8 @@ def load_manifest(path: Path | str) -> dict[str, Any]:
     for case in manifest["cases"]:
         if "id" not in case or "reference" not in case or "wall" not in case:
             raise ValueError(f"case {case!r} must name an id, a reference and a wall")
+        if "source" not in case["reference"] and "out" not in case["reference"]:
+            raise ValueError(f"case {case['id']} names no reference state")
         names = [entry["name"] for entry in case.get("estimators", [])]
         if len(set(names)) != len(names):
             raise ValueError(f"case {case['id']} names an estimator twice")
@@ -134,6 +136,112 @@ def perturb_state(
     return out
 
 
+def _loop_area(points: np.ndarray) -> float:
+    """Return the signed area enclosed by one closed polygon."""
+
+    radius = points[:, 0]
+    height = points[:, 1]
+    return 0.5 * float(
+        np.sum(radius * np.roll(height, -1) - np.roll(radius, -1) * height)
+    )
+
+
+def map_boundary(flux_map: Path | str, level: float) -> np.ndarray:
+    """Return the closed contour of a stored flux map at one flux level.
+
+    The map carries ``radius`` and ``height`` axes and a ``flux`` array indexed
+    by them.  The contour at ``level`` is traced by marching squares, and the
+    closed loop enclosing the largest area is returned, so a level crossed by
+    the separatrix returns the bounding surface rather than a private lobe.
+    """
+
+    stored = np.load(Path(flux_map).expanduser(), allow_pickle=False)
+    radius = np.asarray(stored["radius"], dtype=float)
+    height = np.asarray(stored["height"], dtype=float)
+    flux = np.asarray(stored["flux"], dtype=float)
+    if flux.shape != (radius.size, height.size):
+        raise ValueError(
+            f"the flux map carries shape {flux.shape}; the axes index "
+            f"{(radius.size, height.size)}"
+        )
+    import contourpy
+
+    generator = contourpy.contour_generator(
+        x=radius,
+        y=height,
+        z=flux.T,
+        name="serial",
+        line_type=contourpy.LineType.Separate,
+    )
+    lines = [np.asarray(line, dtype=float) for line in generator.lines(float(level))]
+    closed = [
+        line for line in lines if line.shape[0] > 3 and np.allclose(line[0], line[-1])
+    ]
+    candidates = closed or [line for line in lines if line.shape[0] > 3]
+    if not candidates:
+        raise ValueError(f"the flux map at {flux_map} crosses no level {level}")
+    return max(candidates, key=lambda line: abs(_loop_area(line)))
+
+
+def state_from_record(
+    record: Path | str,
+    flux_map: Path | str,
+    destination: Path | str,
+    *,
+    section: str = "state",
+    dd_version: str = "4.1.0",
+    edge_psi_norm: float = 0.995,
+) -> Path:
+    """Write one state from a stored topology record and flux map.
+
+    The record holds the state's magnetic axis, flux axis and boundary, plasma
+    current and time; the flux map holds the poloidal flux on a uniform grid
+    from which the bounding surface is traced.  The outline is taken at
+    ``edge_psi_norm`` of the recorded span for the reason the flux-surface
+    geometry record takes its outermost surface there: the contour exactly at
+    the boundary flux of a diverted state joins the divertor legs, so the
+    polygon spans the whole grid rather than the plasma.  Nothing is solved:
+    the written state is the scalars the record carries and the outline the map
+    crosses just inside its recorded boundary.  A state whose record carries no
+    profile leaves the q profile empty, and the manifest supplies its safety
+    factor to the reader.
+    """
+
+    import imas
+    from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
+
+    stored_record = json.loads(Path(record).read_text())
+    if section not in stored_record:
+        raise ValueError(f"the record at {record} carries no {section!r} state")
+    state = stored_record[section]
+    span = float(state["flux_boundary"]) - float(state["flux_axis"])
+    level = float(state["flux_axis"]) + float(edge_psi_norm) * span
+    outline = map_boundary(flux_map, level)
+    if not np.allclose(outline[0], outline[-1]):
+        outline = np.vstack([outline, outline[0]])
+
+    equilibrium = imas.IDSFactory().equilibrium()
+    equilibrium.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    equilibrium.time = np.array([float(stored_record.get("time", 0.0))])
+    equilibrium.time_slice.resize(1)
+    frame = equilibrium.time_slice[0]
+    frame.boundary.outline.r = outline[:, 0]
+    frame.boundary.outline.z = outline[:, 1]
+    frame.boundary.type = 1
+    quantities = frame.global_quantities
+    quantities.magnetic_axis.r = float(state["axis"][0])
+    quantities.magnetic_axis.z = float(state["axis"][1])
+    quantities.psi_axis = float(state["flux_axis"])
+    quantities.psi_boundary = float(state["flux_boundary"])
+    quantities.ip = float(state["plasma_current"])
+    out = Path(destination)
+    out.mkdir(parents=True, exist_ok=True)
+    writer = imas.DBEntry(f"imas:hdf5?path={out.resolve()}", "w", dd_version=dd_version)
+    writer.put(equilibrium)
+    writer.close()
+    return out
+
+
 def emit_perturbed_states(
     manifest: dict[str, Any], state_dir: Path | str
 ) -> list[Path]:
@@ -142,18 +250,23 @@ def emit_perturbed_states(
     written: list[Path] = []
     for case in manifest["cases"]:
         for entry in case.get("estimators", []):
-            if "out" not in entry:
+            if "out" not in entry or "from_record" in entry:
                 continue
+            if state_dir is None:
+                raise ValueError(
+                    f"case {case['id']} declares a generated state but no "
+                    "--state-dir was supplied"
+                )
             perturbation = dict(DEFAULT_PERTURBATION)
             perturbation.update(entry.get("perturb", {}))
             origin = entry.get("perturbed_of", "reference")
             if origin == "reference":
-                source = case["reference"]["source"]
+                source = _state_source(case["reference"], state_dir)
             else:
                 matches = [e for e in case["estimators"] if e["name"] == origin]
-                if not matches or "source" not in matches[0]:
-                    raise ValueError(f"case {case['id']} cannot perturb {origin!r}")
-                source = matches[0]["source"]
+                source = _state_source(matches[0], state_dir) if matches else None
+            if source is None:
+                raise ValueError(f"case {case['id']} cannot perturb {origin!r}")
             written.append(
                 perturb_state(
                     source,
@@ -165,15 +278,48 @@ def emit_perturbed_states(
     return written
 
 
+def emit_declared_states(manifest: dict[str, Any], state_dir: Path | str) -> list[Path]:
+    """Materialise every manifest column that declares its state.
+
+    A column is materialised either as a perturbation of an existing state or
+    from a stored topology record and flux map; both are written as their own
+    IMAS datasets so the scoring path reads only IMAS equilibria.
+    """
+
+    written: list[Path] = []
+    for case in manifest["cases"]:
+        derived_entries = [case["reference"]]
+        derived_entries.extend(case.get("estimators", []))
+        for entry in derived_entries:
+            if "out" not in entry or "from_record" not in entry:
+                continue
+            derived = entry["from_record"]
+            written.append(
+                state_from_record(
+                    derived["record"],
+                    derived["map"],
+                    Path(state_dir) / entry["out"],
+                    section=derived.get("section", "state"),
+                    dd_version=str(derived.get("dd_version", "4.1.0")),
+                )
+            )
+    written.extend(emit_perturbed_states(manifest, state_dir))
+    return written
+
+
 def score_case(case: dict[str, Any], state_dir: Path | None) -> dict[str, Any]:
     """Score every column of one case against its reference state."""
 
+    reference_source = _state_source(case["reference"], state_dir)
+    if reference_source is None:
+        raise ValueError(f"case {case['id']} names no reference state")
     reference = read_equilibrium_state(
-        case["reference"]["source"],
+        reference_source,
         occurrence=int(case["reference"].get("occurrence", 0)),
         time_index=case["reference"].get("time_index"),
         time_s=case["reference"].get("time_s"),
         wall_source=case["wall"],
+        q95=case["reference"].get("q95"),
     )
     record: dict[str, Any] = {
         "case": case["id"],
@@ -186,13 +332,14 @@ def score_case(case: dict[str, Any], state_dir: Path | None) -> dict[str, Any]:
         if source is None or (
             not source.startswith("imas:") and not Path(source).exists()
         ):
-            record["estimators"].append(
-                {
-                    "name": entry["name"],
-                    "status": "absent",
-                    "reason": "no state supplied for this case",
-                }
-            )
+            absent = {
+                "name": entry["name"],
+                "status": "absent",
+                "reason": "no state supplied for this case",
+            }
+            if "note" in entry:
+                absent["note"] = entry["note"]
+            record["estimators"].append(absent)
             continue
         state = read_equilibrium_state(
             source,
@@ -200,22 +347,26 @@ def score_case(case: dict[str, Any], state_dir: Path | None) -> dict[str, Any]:
             time_index=entry.get("time_index"),
             time_s=entry.get("time_s"),
             wall_source=case["wall"],
+            q95=entry.get("q95"),
         )
         comparison = compare_states(reference, state)
         checks = reference_free_checks(state)
-        record["estimators"].append(
-            {
-                "name": entry["name"],
-                "status": "scored",
-                "state": _state_record(state),
-                "gauge_wb": comparison.gauge_wb,
-                "metrics": comparison.metrics,
-                "verdicts": dict(comparison.verdicts()),
-                "reference_free": checks.values,
-                "reference_free_verdicts": dict(checks.verdicts()),
-                "lcfs_distance_m": comparison.lcfs_distance_m,
-            }
-        )
+        scored = {
+            "name": entry["name"],
+            "status": "scored",
+            "state": _state_record(state),
+            "gauge_wb": comparison.gauge_wb,
+            "metrics": comparison.metrics,
+            "verdicts": dict(comparison.verdicts()),
+            "reference_free": checks.values,
+            "reference_free_verdicts": dict(checks.verdicts()),
+            "lcfs_distance_m": comparison.lcfs_distance_m,
+        }
+        if "note" in entry:
+            scored["note"] = entry["note"]
+        record["estimators"].append(scored)
+    if "note" in case.get("reference", {}):
+        record["reference"]["note"] = case["reference"]["note"]
     return record
 
 
@@ -281,10 +432,11 @@ def render_table(records: list[dict[str, Any]]) -> str:
         "digest printed in its last cell. Values are the state's distance from the "
         "case reference, marked pass or FAIL against the registered bands; the "
         "reference-free checks are reported beside them for every column, including "
-        "where the reference comparison passes. A declared perturbed copy of the "
-        "reference is scored as a third estimator from its own IMAS dataset, and a "
-        "column whose states are not on disk reads <em>not supplied</em> rather than "
-        "showing a zero.</p>",
+        "where the reference comparison passes. A declared perturbation is scored as "
+        "its own column from its own IMAS dataset, and a column whose state is not on "
+        "disk reads <em>not supplied</em> rather than showing a zero. The list below "
+        "names, for each column, the state it reads and how that state was formed; the "
+        "receipt beside this table carries each state's digest.</p>",
         '<table id="estimator-scoreboard-table">',
         "<thead>",
         '<tr><th rowspan="2">case</th>'
@@ -328,7 +480,18 @@ def render_table(records: list[dict[str, Any]]) -> str:
                 f"<small>dd {entry['state']['dd_version']}</small></td>"
             )
         lines.append("<tr>" + "".join(cells) + "</tr>")
-    lines += ["</tbody>", "</table>", "</section>"]
+    lines += ["</tbody>", "</table>"]
+    notes = [("reference", records[0]["reference"].get("note"))]
+    notes.extend(
+        (entry["name"], entry.get("note")) for entry in records[0]["estimators"]
+    )
+    described = [(name, note) for name, note in notes if note]
+    if described:
+        lines.append('<dl class="state-sources">')
+        for name, note in described:
+            lines.append(f"<dt>{name}</dt><dd>{note}</dd>")
+        lines.append("</dl>")
+    lines.append("</section>")
     return "\n".join(lines)
 
 
@@ -341,16 +504,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--receipt", type=Path)
     parser.add_argument("--state-dir", type=Path)
     parser.add_argument(
+        "--emit-states",
         "--emit-perturbed",
+        dest="emit_states",
         action="store_true",
-        help="materialise declared perturbed states instead of scoring",
+        help="materialise the declared states instead of scoring",
     )
     arguments = parser.parse_args(argv)
     manifest = load_manifest(arguments.manifest)
-    if arguments.emit_perturbed:
+    if arguments.emit_states:
         if arguments.state_dir is None:
-            parser.error("--emit-perturbed requires --state-dir")
-        written = emit_perturbed_states(manifest, arguments.state_dir)
+            parser.error("--emit-states requires --state-dir")
+        written = emit_declared_states(manifest, arguments.state_dir)
         for path in written:
             print(path)
         return 0

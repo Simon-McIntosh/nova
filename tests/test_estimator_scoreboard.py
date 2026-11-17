@@ -22,12 +22,15 @@ from benchmarks.estimator_scoreboard import (
     DEFAULT_PERTURBATION,
     emit_perturbed_states,
     main,
+    map_boundary,
     perturb_state,
+    state_from_record,
 )
 from nova.imas.mast_efit_referee import (
     EfitRefereeError,
     compare_states,
     read_equilibrium_state,
+    read_equilibrium_wall,
     reference_free_checks,
 )
 from nova.imas.parity_tolerances import (
@@ -312,3 +315,71 @@ def test_a_column_group_is_added_without_a_scoring_change(corpus):
     assert published.count("<th colspan=") == 3
     assert "not supplied" in published
     assert reference.digest()[7:19] in published
+
+
+def write_flux_map(path: Path) -> Path:
+    """Write a paraboloid flux map whose boundary level is a circle."""
+
+    radius = np.linspace(0.0, 2.0, 81)
+    height = np.linspace(-1.0, 1.0, 81)
+    rr, zz = np.meshgrid(radius, height, indexing="ij")
+    flux = (rr - 1.0) ** 2 + zz**2
+    np.savez(
+        path,
+        radius=radius,
+        height=height,
+        flux=-flux,
+        wall=np.array([(0.2, -1.2), (2.2, -1.2), (2.2, 1.2), (0.2, 1.2), (0.2, -1.2)]),
+    )
+    return path
+
+
+def test_a_state_is_written_from_a_topology_record_and_flux_map(tmp_path):
+    flux_map = write_flux_map(tmp_path / "map.npz")
+    record = tmp_path / "record.json"
+    record.write_text(
+        json.dumps(
+            {
+                "time": 7.5,
+                "state": {
+                    "axis": [1.0, 0.0],
+                    "flux_axis": -1.0,
+                    "flux_boundary": 0.0,
+                    "plasma_current": 2.0e6,
+                },
+            }
+        )
+    )
+    written = state_from_record(
+        record, flux_map, tmp_path / "state", section="state", edge_psi_norm=0.99
+    )
+    state = read_equilibrium_state(written, wall_source=flux_map, q95=-1.5)
+
+    assert state.time_s == 7.5
+    assert state.boundary_m.shape[1] == 2
+    assert state.boundary_m.shape[0] >= 3
+    assert np.allclose(state.magnetic_axis_m, [1.0, 0.0])
+    assert state.plasma_current_a == 2.0e6
+    assert state.q95 == -1.5
+    assert len(state.wall_loops) == 1
+    checks = reference_free_checks(state)
+    assert checks.values["axis_inside_wall"] is True
+    assert checks.values["axis_inside_boundary"] is True
+    assert checks.values["boundary_area_fraction"] > 0.5
+
+
+def test_the_outline_is_traced_inside_the_separatrix(tmp_path):
+    flux_map = write_flux_map(tmp_path / "map.npz")
+    ring = map_boundary(flux_map, -0.05)
+    radius = ring[:, 0]
+
+    assert np.allclose(ring[0], ring[-1])
+    assert radius.max() - radius.min() == pytest.approx(2.0 * np.sqrt(0.05), rel=0.05)
+
+
+def test_a_stored_ring_is_read_as_the_wall(tmp_path):
+    flux_map = write_flux_map(tmp_path / "map.npz")
+    rings = read_equilibrium_wall(flux_map)
+
+    assert len(rings) == 1
+    assert rings[0].shape == (5, 2)

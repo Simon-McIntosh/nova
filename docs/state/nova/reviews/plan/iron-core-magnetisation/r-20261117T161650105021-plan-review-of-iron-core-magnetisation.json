@@ -25,7 +25,30 @@
   "plan_slug": "iron-core-magnetisation",
   "plan_version": 120,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "664140fd6eb3849f6f1d59967a4a28cc9ea487be",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "clause (2) now compares the new route against the existing one on graded 16/80 mm (35 184 unknowns), the largest mesh the existing route solves on the card and one that carries the grading boundary",
+      "reason": "",
+      "when": "2026-11-17T20:46:11.134435+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "664140fd6eb3849f6f1d59967a4a28cc9ea487be",
+      "commit_basis": "edit",
+      "note": "clause (2) now compares the new route against the existing one on graded 16/80 mm (35 184 unknowns), the largest mesh the existing route solves on the card and one that carries the grading boundary",
+      "reason": "",
+      "when": "2026-11-17T20:46:11.134435+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261117T161650105021-plan-review-of-iron-core-magnetisation.json",
   "review_run_id": "r-20261117T161650105021-plan-review-of-iron-core-magnetisation",
   "reviewed_blob_sha": "df57df362c354f66ac3dd237faab21380607d2f3",
   "rubric": "content",

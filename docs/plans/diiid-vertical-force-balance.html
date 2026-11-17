@@ -22,7 +22,7 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="121">
+<meta name="plan-version" content="122">
 <meta name="plan-modified" content="2026-11-17">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
@@ -371,6 +371,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261117T181148491733-review-of-diiid-adapter-current-refusal-carried-4edca23a248c" data-who="reckon-build" data-when="2026-11-17T18:14:22.145Z">
     <div class="r-comment-body"><p>Review of r-20261116T220122530645-diiid-adapter-current-refusal-carried at head 4edca23a: scores goal_fidelity 13, evidence 13, scope_discipline 20, durability 18, fit 18, reuse 17; added_failure_count 0; one blocking finding (the caller inventory scans only benchmarks/ and scripts/, omitting the corpus caller docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py:225 from clause 2) and one non-blocking finding (tests/imas/test_diiid_current.py:394 compares the build-current diagnostic against the value the test itself injected).</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261117T223004450154-review-of-diiid-adapter-current-refusal-carried-f1f95c04b72c" data-who="reckon-build" data-when="2026-11-17T22:31:26.093Z">
+    <div class="r-comment-body"><p>Independent review of r-20261116T220122530645-diiid-adapter-current-refusal-carried at f1f95c04b against base 70c2026ce recorded as parsed: scores goal_fidelity 19, evidence 17, scope_discipline 19, durability 15, fit 18, reuse 16; added_failure_count 0 with no added ids (baseline 01725351a 9 passed, after f1f95c04b 11 passed, both EXIT=0); four non-blocking findings (echoed build value at test line 393, duplicated prototype loaders in probe.py:32, uncollected inventory_probe.py guard, and float32-build refusal at diiid_current.py:260).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

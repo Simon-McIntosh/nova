@@ -77,6 +77,31 @@ def main():
     probe = json.loads((args.run / "candidate/receipt.json").read_text())
     assert probe["completed"]
     result["candidate_expression_entries"] = probe["expression_entries"]
+    expected_entries = (
+        (
+            probe["expression_entries"],
+            {
+                ("evaluate", "False", "JVPTracer"): 2,
+                ("tangent_expression", "True", "JVPTracer"): 1,
+                ("evaluate", "False", "ArrayImpl"): 4,
+            },
+        ),
+        (
+            diagnostic["expression_entries"],
+            {
+                ("evaluate", "False", "JVPTracer"): 4,
+                ("tangent_expression", "True", "JVPTracer"): 8,
+                ("tangent_expression", "True", "ArrayImpl"): 16,
+                ("evaluate", "False", "ArrayImpl"): 4,
+            },
+        ),
+    )
+    for entries, expected in expected_entries:
+        observed = {
+            (entry["caller"], entry["stable_poles"], entry["tracer"]): entry["count"]
+            for entry in entries
+        }
+        assert observed == expected, (observed, expected)
     probe_path = args.run / "candidate/plasma-partial.npz"
     probe_gradient = read_array(probe_path, "gradient")
     probe_hessian = read_array(probe_path, "hessian")

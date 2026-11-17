@@ -47,6 +47,16 @@
       "finding": "deep_module-1",
       "reason": "Section 5 no longer consolidates the selector: it builds only the traced cold seed. The five selector entry points are landed and consumed by the coupled transport window; collapsing them is not work this section carries, and the seed node's write paths exclude the selector module.",
       "when": "2026-11-17T01:04:14.108689+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "eca66f8f5d1a4869c218fbd40a37989654c17cd2",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "The followup that would have re-derived the webers margin in the selection path is closed without building, so no second owner of the class margin is created.",
+      "reason": "",
+      "when": "2026-11-17T04:12:24.314177+00:00"
     }
   ],
   "responses": {
@@ -55,6 +65,15 @@
       "by": "",
       "reason": "Section 5 no longer consolidates the selector: it builds only the traced cold seed. The five selector entry points are landed and consumed by the coupled transport window; collapsing them is not work this section carries, and the seed node's write paths exclude the selector module.",
       "when": "2026-11-17T01:04:14.108689+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "eca66f8f5d1a4869c218fbd40a37989654c17cd2",
+      "commit_basis": "edit",
+      "note": "The followup that would have re-derived the webers margin in the selection path is closed without building, so no second owner of the class margin is created.",
+      "reason": "",
+      "when": "2026-11-17T04:12:24.314177+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/dual-branch-selection/r-20261006T091945722044-plan-review-of-dual-branch-selection.json",

@@ -1,0 +1,98 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived by set difference of failures in the reviewed run baseline_suite and after_suite log case/suite-arms3.log: BASE 12 passed in 5.44s, BASE_EXIT=0; HEAD 12 passed in 5.67s, HEAD_EXIT=0; both completed, no failed ids, so [] minus [] is [] and count 0. These are focused consistency gates for the latest repair against 9063017f6eb4f81aeff26a32847404e6397785aa, not a full-suite comparison against the original reviewed diff base; the head log names the working tree rather than an immutable head SHA.",
+  "assertion_audit": {
+    "test_both_panels_parse_and_name_both_states": "A missing, tiny, malformed, non-SVG or unlabelled panel fails its corresponding assertion; removing a panel citation fails document membership; moving drawing coordinates without updating the independently stored panel digest fails content equality, while volatile date rewrites should remain accepted by the imported owner.",
+    "test_every_container_closes": "Dropping a closing section/p/table/figure/pre/tbody/thead/tr tag fails the corresponding opening/closing count; equal counts do not prove arbitrary correct nesting.",
+    "test_every_element_identifier_is_unique": "Reintroducing the duplicate nova-fit section/pre id fails the duplicate-set assertion.",
+    "test_every_paragraph_opens_and_closes_in_order": "Reintroducing a nested paragraph, orphan closing tag or unclosed paragraph fails the depth assertions.",
+    "test_the_record_cites_the_check_that_guards_it": "Deleting receipt.json or the new tests/ path from the fragment fails the citation assertions.",
+    "test_the_record_quotes_every_state_it_tabulated": "Changing or removing a required formatted state value without updating the independent committed receipt makes the missing-value assertion fail; the check is global text membership and does not bind a value to a particular table cell.",
+    "test_the_record_quotes_the_amplitude_trade_it_attributed": "A changed pressure/diamagnetic array inconsistent with its separately stored amplitude fails projection equality; missing or altered projected amplitude/percentage text fails the document comparison.",
+    "test_the_record_quotes_the_bands_it_measured": "Reinstating 0.42 instead of the independently recomputed 0.41 percent fails the expected-string and forbidden-string assertions; deleting the failure wording or claiming all five bands pass fails literal guards; changing raw states enough to cross any stored band threshold fails the numerical inequalities.",
+    "test_the_record_quotes_the_control_ratios": "Reinstating the old control-current fraction or span ratio in the record fails comparison with values independently recomputed from raw currents/spans; there is no direct assertion that the control departs from the original current by more than 1.5 percent.",
+    "test_the_record_quotes_the_nova_fit_it_measured": "Omitting nominal coefficients, singular values, residuals or state text fails membership; a control receipt reporting convergence or document claiming convergence without the required false string fails the convergence guards; the former incorrect control-target strings are explicitly forbidden.",
+    "test_the_solver_lines_are_quoted_and_the_basis_is_labelled": "Deleting either older solver line or all configuration-read language fails, but deleting the new LLS_COND block does not; the latter is the recorded durability finding."
+  },
+  "assertion_independence": "No assertion compares a runtime result against the same variable the test supplied to that runtime call. The tests primarily compare two independent static artifacts (receipt and fragment), recompute derived quantities from raw receipt state fields, or enforce fragment structure; they do not rerun or guard the physical solvers. The projection and panel digest compare computed results against separately stored values, not the inputs themselves.",
+  "call_site_count": 0,
+  "call_site_search": "git grep at the reviewed head for test_efit_on_nova_rows_receipt and efit-on-nova-rows/receipt.json under nova scripts benchmarks found no production references; the same search under the changed test and fragment returned their real references as a positive control.",
+  "call_sites": [],
+  "completed_at": "2026-11-17T10:59:48Z",
+  "dispatched_at": "2026-11-17T10:52:59Z",
+  "figure_review": "Rendered both exact-head SVG blobs with ImageMagick to delivery-directory panel-10.png and panel-11.png and inspected both: legends readable, no clipped or colliding text; both maps, axes/null markers and wall visible; no blocking figure finding.",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html",
+      "line": 96,
+      "severity": "blocking",
+      "text": "The conclusion still attributes the failed 0.148 q95 comparison to solver weighting and says it is not a convention fault, and :97 says the 0.1 target is not recovered, although :84-91 now establishes different surface definitions and gaps of only 0.065/0.064 on matching definitions; reconcile these conclusions with the new evidence and distinguish the unchanged cross-definition gate result from a physical reconstruction error."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html",
+      "line": 25,
+      "severity": "blocking",
+      "text": "The text says the edge-constraint clause is met by a configuration read alone, but the live plan and source done_when require the resolved edge constraint from output or a run log; the record explicitly reports neither, so this acceptance clause needs solver-owned evidence or an explicit coordinator/lead change to the acceptance contract before the node is accepted as complete."
+    },
+    {
+      "file": "tests/test_efit_on_nova_rows_receipt.py",
+      "line": 281,
+      "severity": "non-blocking",
+      "text": "The solver-provenance check asserts only the older DYNAMIC_NDEG/DESIGN_RANK strings and a configuration-read phrase; neither receipt.json nor any added assertion carries LLS_COND or the new single-calculator q95 rows/gaps, so deleting or corrupting the new evidence at fragment :23 and :83-92 leaves this guard green; fold these fields and their checks into efit-on-nova-rows if retained, or record an explicit exemption."
+    }
+  ],
+  "gate_evidence": {
+    "after_exit_status": 0,
+    "after_failure_ids": [],
+    "after_summary": "12 passed in 5.67s",
+    "baseline_exit_status": 0,
+    "baseline_failure_ids": [],
+    "baseline_revision": "9063017f6eb4f81aeff26a32847404e6397785aa",
+    "baseline_summary": "12 passed in 5.44s",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T202050274305-efit-on-nova-rows/case/suite-arms3.log"
+  },
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read the six-commit range 1f788362e8e1ca19bb5691fff8b31d25ed825f0e..13ac097713c505a8c7f221092937606cf73944f2, the final receipt and all added assertions; the final delta contains one fragment, two SVGs, receipt.json and tests/test_efit_on_nova_rows_receipt.py, with no product source change.",
+    "done_when": "Read prompt.txt FENCE EVIDENCE and live section s8; docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:25 lacks output-resolved edge provenance and :96 records the 0.148 q95 miss against 0.1, while case/suite-arms3.log measures document consistency rather than either missing scientific condition.",
+    "goal": "Read the source prompt.txt GOAL and live plan section s8; docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:43-80 demonstrates the priors-disabled ITER exchange, nominal nova comparison and scaled control, while :25 and :96 leave parts of the acceptance contract unmet.",
+    "manifest": "Read the complete source manifest.md; it names all six commits and case/suite-arms3.log, whose base and head summaries both show 12 passed and exit 0, although baseline_suite and after_suite remain prose rather than the contract JSON.",
+    "write_paths": "Read prompt.txt scope and manifest.md:1-4; the five final changed paths are within the fragment and figure roots plus tests/test_efit_on_nova_rows_receipt.py, whose exception is explicitly recorded as coordinator-accepted in scope_note."
+  },
+  "justifications": {
+    "durability": "tests/test_efit_on_nova_rows_receipt.py:179-209 and :316-318 fail on inconsistent quoted deltas, band verdicts or altered drawings, but the new q95 and LLS_COND evidence in docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:23,88-92 is absent from both the committed receipt and assertions.",
+    "evidence": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:23 and case/efitboth-1321516.log:1663 supply real solver receipts and case/suite-arms3.log records two green arms, but docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:96-97 retains a causal conclusion contradicted by :91.",
+    "fit": "tests/test_efit_on_nova_rows_receipt.py:40 reuses the panel digest and the test now lives in the default tests directory, while its docstrings at :281-282 still describe the basis family as a configuration read despite docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:23 logging it.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:43-80 proves the exchange and 1.10 control, but :25 and :96 explicitly fall short of the required provenance and q95 band.",
+    "reuse": "tests/test_efit_on_nova_rows_receipt.py:40 wraps the existing digest owner in tests/test_figure_panel_pin.py:57 and follows tests/test_outboard_census_receipt_consistency.py:90; capability searches for receipt reconciliation, HTML ids, paragraph balance and typography found no reusable owner for this case-specific arithmetic or fragment validation.",
+    "scope_discipline": "The final five paths match manifest.md:1-4 including its recorded coordinator exception for tests/test_efit_on_nova_rows_receipt.py, and the range adds no product source."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read the source prompt.txt GOAL and live plan section s8; docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:43-80 demonstrates the priors-disabled ITER exchange, nominal nova comparison and scaled control, while :25 and :96 leave parts of the acceptance contract unmet.\nVERDICT done_when: Read prompt.txt FENCE EVIDENCE and live section s8; docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:25 lacks output-resolved edge provenance and :96 records the 0.148 q95 miss against 0.1, while case/suite-arms3.log measures document consistency rather than either missing scientific condition.\nVERDICT write_paths: Read prompt.txt scope and manifest.md:1-4; the five final changed paths are within the fragment and figure roots plus tests/test_efit_on_nova_rows_receipt.py, whose exception is explicitly recorded as coordinator-accepted in scope_note.\nVERDICT manifest: Read the complete source manifest.md; it names all six commits and case/suite-arms3.log, whose base and head summaries both show 12 passed and exit 0, although baseline_suite and after_suite remain prose rather than the contract JSON.\nVERDICT diff: Read the six-commit range 1f788362e8e1ca19bb5691fff8b31d25ed825f0e..13ac097713c505a8c7f221092937606cf73944f2, the final receipt and all added assertions; the final delta contains one fragment, two SVGs, receipt.json and tests/test_efit_on_nova_rows_receipt.py, with no product source change.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:43-80 proves the exchange and 1.10 control, but :25 and :96 explicitly fall short of the required provenance and q95 band.\nSCORE evidence: 15\nJUSTIFICATION evidence: docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:23 and case/efitboth-1321516.log:1663 supply real solver receipts and case/suite-arms3.log records two green arms, but docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:96-97 retains a causal conclusion contradicted by :91.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The final five paths match manifest.md:1-4 including its recorded coordinator exception for tests/test_efit_on_nova_rows_receipt.py, and the range adds no product source.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_efit_on_nova_rows_receipt.py:179-209 and :316-318 fail on inconsistent quoted deltas, band verdicts or altered drawings, but the new q95 and LLS_COND evidence in docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:23,88-92 is absent from both the committed receipt and assertions.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_efit_on_nova_rows_receipt.py:40 reuses the panel digest and the test now lives in the default tests directory, while its docstrings at :281-282 still describe the basis family as a configuration read despite docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:23 logging it.\nSCORE reuse: 20\nJUSTIFICATION reuse: tests/test_efit_on_nova_rows_receipt.py:40 wraps the existing digest owner in tests/test_figure_panel_pin.py:57 and follows tests/test_outboard_census_receipt_consistency.py:90; capability searches for receipt reconciliation, HTML ids, paragraph balance and typography found no reusable owner for this case-specific arithmetic or fragment validation.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:96 blocking: The conclusion still attributes the failed 0.148 q95 comparison to solver weighting and says it is not a convention fault, and :97 says the 0.1 target is not recovered, although :84-91 now establishes different surface definitions and gaps of only 0.065/0.064 on matching definitions; reconcile these conclusions with the new evidence and distinguish the unchanged cross-definition gate result from a physical reconstruction error.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:25 blocking: The text says the edge-constraint clause is met by a configuration read alone, but the live plan and source done_when require the resolved edge constraint from output or a run log; the record explicitly reports neither, so this acceptance clause needs solver-owned evidence or an explicit coordinator/lead change to the acceptance contract before the node is accepted as complete.\nFINDING tests/test_efit_on_nova_rows_receipt.py:281 non-blocking: The solver-provenance check asserts only the older DYNAMIC_NDEG/DESIGN_RANK strings and a configuration-read phrase; neither receipt.json nor any added assertion carries LLS_COND or the new single-calculator q95 rows/gaps, so deleting or corrupting the new evidence at fragment :23 and :83-92 leaves this guard green; fold these fields and their checks into efit-on-nova-rows if retained, or record an explicit exemption.\n",
+  "review_completion": "Complete independent review; two blocking findings and one non-blocking finding; no repository mutation, no suite rerun.",
+  "review_run_id": "r-20261117T105217775599-review-of-efit-on-nova-rows-13ac097713c5",
+  "reviewed_base_sha": "1f788362e8e1ca19bb5691fff8b31d25ed825f0e",
+  "reviewed_commits": [
+    "7a2d1aa1bf2e3c42504d3bac666b43341dbac345",
+    "470f34b29bb9a51f60f1311d9968e49f679ce841",
+    "86b64c13475d0d589ff836eaec44affff1ca7d56",
+    "7f74140d7561e412fd7a5e3cde5c7c6c66f09dc5",
+    "9063017f6eb4f81aeff26a32847404e6397785aa",
+    "13ac097713c505a8c7f221092937606cf73944f2"
+  ],
+  "reviewed_head_sha": "13ac097713c505a8c7f221092937606cf73944f2",
+  "reviewed_run_id": "r-20261115T202050274305-efit-on-nova-rows",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T11:01:32.817502+00:00",
+  "total": 104
+}

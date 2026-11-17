@@ -610,41 +610,6 @@
 <div class="r-comment" data-section="_top" data-id="c-s5-graded-measured" data-who="nova-coordinator" data-when="">
     <div class="r-comment-body"><p>Graded refinement, the first §5 candidate, is measured, merged in commit 7a44dd216 and promoted. The evidence is in fragment <code>icm-graded-refinement</code>. It does not meet §5:</p><ul><li><strong>Closed shell, μ<sub>r</sub> = 1000:</strong> at equal cell count, grading gives no accuracy gain over a uniform mesh. Both families follow one error-versus-cells curve. The pinned graded arm reaches 0.397 % worst-probe at 13 410 cells, where the uniform arm would need about 9 500, and its doubled arm misses at 1.052 %.</li><li><strong>WEST 62751, graded 16/80 mm → 8/40 mm:</strong> the field moves +3.47 % at +1 m, −5.21 % at +2 m and −7.16 % at +4 m, so clause (2) is missed at every probe.</li><li><strong>Lane:</strong> the graded arms ran on CPU, because the P100 cannot hold the dense factor above about 11k cells.</li></ul><p>The piecewise-constant cell route is therefore not converged at the far probes at affordable cell counts. The remaining candidates are piecewise-linear magnetisation and the surface scalar formulation; the formulation decision is with the lead. The run's non-blocking review findings go to the deferred scripts-cleanup node.</p></div>
 </div>
-<div class="r-comment" data-section="s10" data-id="c-run-r-20261117T161745027288-icm-efit-closed-shell-imas" data-who="reckon-build" data-when="2026-11-17T19:10:00Z">
-    <div class="r-comment-body"><p>The imas-efit closed-shell control now runs from a pulse and reproduces the
-exact shielding factor at both ratios: <strong>S = 60.42</strong> at a/b = 0.9 (exact
-61.101838, −1.12 %) and <strong>S = 193.49</strong> at a/b = 0.5 (exact 195.055750,
-−0.81 %) at μ<sub>r</sub> = 1000, both inside the 2 % gate. imas-efit commit
-d5eac87ae, DD 4.1.0, unified IMAS mode: <code>pf_active</code> (one coil, one
-single-coil circuit), <code>iron_core</code> (the shell's half-annulus polygon plus a
-flat B–H table), <code>wall</code>, <code>magnetics</code>, <code>tf</code>. The slice
-converges exactly (status 2, 1 iteration, cerror 0) with <code>ip</code> pinned to
-zero, so the measurement is the coil's vacuum flux in the iron's presence; the iron
-relaxation reaches relErr 1.1e-6 and B stays at 3.1e-7 T, far inside the linear
-table.</p>
-<p>One direction only: this is positive evidence that an independent code, given the
-same polygonal <code>iron_core</code> and a linear μ<sub>r</sub>, agrees with the
-exact closed-shell factor to about 1 %, which corroborates nova's prototype reading
-(60.4 against 61.1) and the closed-shell representation behind it. It is not evidence
-against the analytic value and it says nothing about §9, which compares WEST pulse
-57410 probes against models and stays open; nor does it exercise saturation, because
-the B–H table has no curvature.</p>
-<p>Two findings go to the imas-efit owners (message in the receipt directory). First,
-the outline resolution is unreachable from a pulse: <code>IronCoreBuilder</code>
-derives ten knots per polygon vertex and caps at 500, and the answer moves by 20 %
-between a 20-vertex half-arc (420 knots, S = 73.37) and a refined one — non-monotonically,
-because the uniform knot grid aliases against the corners. Second, plasma-filled
-variants of the same case are refused, and the iron is not the cause: at ip = 10 A the
-slice dies before its first iteration (<code>FINDAX: no in-vessel, outside-coil
-extremum…</code> → status −2, cerror 1.798e308, <code>bad_failure</code> at cold start)
-and the identical case without the <code>iron_core</code> IDS fails on the same line,
-while at ip = 1 MA it iterates to 80 with chi2 = 2.0e-20, oscillates (osc = 37) and is
-refused at a 7.079e-3 cerror plateau against a 1.0e-4 tolerance, on a rank-deficient
-Jacobian. Pinning ip to zero is what converged, and it is the correct setting for a
-shielding measurement.</p>
-<p>Evidence: fragment <code>icm-efit-closed-shell-imas</code>; receipts under
-<code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/closed-shell/imas/</code>.</p></div>
-</div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261114T144521862249-icm-efit-closed-shell" data-who="reckon-build" data-when="2026-11-17T12:11:30.092Z">
     <div class="r-comment-body"><p>The imas-efit closed-shell control produced no shielding factor: on develop the
 dependency refuses XML-only input (machine &lt;pfCircuits&gt; unread, so no circuit,

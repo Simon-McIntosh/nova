@@ -1,0 +1,79 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T12:08:11.517Z",
+  "dispatched_at": "2026-11-17T12:07:56Z",
+  "findings": [
+    {
+      "anchor": "plan.html:158-165",
+      "id": "done_when-1",
+      "reason": "as written the section cannot close and its control cannot fire, so the ceiling must be stated against the measured forward-call count (or the cost measured on a prescribed-currents configuration), not against one forward solve.",
+      "text": "\u00a74 clause (2) requires the warm wall per reconstruction to be at or below ten times one warm forward solve's wall per slice, and its negative control forces \"at least eleven forward solves per reconstruction\" to exceed that ceiling; but the class to be timed already costs fifteen forward calls per reconstruction at two unknowns per the landed \u00a71 record (docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html, \"Fit updates / forward calls\": 3/20 Solov'ev, 2/15 MAST, 2/15 ITER), and the locked `fitted-unknowns` decision adds the conductor currents (9 circuits and 14 coils on the \u00a78 ITER case) on top of the profile coefficients, so the ratio the clause measures sits at or above fifteen however well the implementation performs, the clause can never be met, and the control is indistinguishable from the nominal run",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:190",
+      "id": "done_when-2",
+      "reason": "the band as written fails on a definitional difference rather than on a reconstruction defect and carries no record-the-refusal branch, so the section can neither close nor report honestly, and \u00a77's drift reading inherits a gate the plan has already shown it cannot meet.",
+      "text": "\u00a78 clause (1) requires imas-efit's reconstruction to agree with the generating state in \"the magnitude of q95 within 0.1\", with no statement of which calculator or surface definition q is evaluated on and no branch for a missed band; the \u00a78 run already delivered under this plan's decision reports the cross-code gap as 0.148 (0.083 of it definitional, q interpolated at psi_N by one code and at rho_tor by the other, 0.065 of it physical), so \"four of the five are met and the gate as a whole is not\" (docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html at commit 868d7d7e9), while \u00a77 depends on these bands sitting below the drift thresholds the plan reads later",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:194",
+      "id": "reasoning-1",
+      "reason": "an author-named mechanism is a guess the worker must test against code, and restating the section as its records and bands removes that guess without changing what counts as done.",
+      "text": "\u00a79's body prescribes the mechanism as a step sequence (\"on each pass the flux map is held, the profile coefficients ... are found by one linear least-squares solve ..., the plasma current that fit implies is laid down, and the flux map is updated from it; the passes repeat until the flux map stops changing\"), which is a formula-and-loop prescription; the endpoint (\u00a71 bands, \u00a72 bands, terminal misfit, last flux update, control) is stated without it",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:193-194",
+      "id": "wiring-1",
+      "reason": "dispatching \u00a79 before \u00a72 lands would push the stored-case reader into a node that is scoped to the iteration, which is exactly the missing dependency the wiring item asks about.",
+      "text": "\u00a79 declares no dependency (`plan-section-depends-on` s9:[]) and its body says \"It waits on neither\", while clause (2) runs \u00a72's stored imas-efit cases \"with the same rows\", the row construction and stored-case reader being \u00a72's deliverable and not present in the tree this snapshot was taken from",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "86c1a52f8d9d7552de0aa3c2a434757dbc70e2c9",
+  "plan_fingerprint": "fb53b15dfa8264694d826f63455afc0bbf10ce47b96d331302d5ac4eda8b4f2b",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 44,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T120642867185-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "03fda10f3ff7095e1e31411c2b084732aee48bdd",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 docs/plans/spine-efit-parity.html, docs/plans/forward-solve-near-stored-states.html, docs/figures/inverse-equilibrium-baseline/inverse-seam.svg and imas-efit's docs/plans/equilibrium-fit-provenance.html all resolve.",
+    "done_when": "a finding \u2014 \u00a74's ratio ceiling and its \"eleven forward solves\" control (snapshot:158-165) are unattainable and unfalsifiable against the forward-call count the landed \u00a71 record already reports.",
+    "evidence_paths": "pass \u2014 \u00a74 names one H200 job with the compilation-cache contract printed, \u00a79 one batch job on the H200 falling back to titan, \u00a78 a record under docs/evidence; no scratchpad or node-local path is named.",
+    "naming": "pass \u2014 no plan label, stage name or ticket number reaches a symbol, and no section names a symbol at all.",
+    "reasoning": "a finding \u2014 \u00a79 (snapshot:194) prescribes the pass loop as a step sequence, and \u00a78's q95 band (snapshot:190) states a threshold its own delivered run shows the comparison cannot meet.",
+    "single_goal": "pass \u2014 \u00a74 is a cost record, \u00a78 a wiring run on nova-written rows, \u00a79 an iteration-form section; each names one deliverable.",
+    "wiring": "a finding \u2014 \u00a79 declares no dependency and says it \"waits on neither\", while its clause (2) runs \"the stored imas-efit cases of \u00a72\" with \"the same rows\" that \u00a72's build constructs."
+  },
+  "section_digests": {
+    "_document": "fb98dbb43fc2642534ec98e1fda5075ba9f6672c5bcad11683c8bf49cd31255d",
+    "s0": "33859d65872ac01128e940e5f27d36e4da7f90e929344c535e87d2362eaf1d1e",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "1d7c7611f002d7765b98531126cc095d6d244b387578c5d44d7284ff93c9e59c",
+    "s3": "ffe1ae40fdd119d382956b68d70b5ac439dfd6ba20fecc88ab8ca5d01fd2a8a5",
+    "s4": "081479d27579b84e7dba6761b55ac8baa2d310577ab8cad8d818daefc28c9fa6",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "cadfba00a23e3a3b6ea0fbee46a46eb276970d776c456bd1a53931456d6f8e09",
+    "s7": "5c750c79d813b34b96a3b3b418cd41dd92a06de78455a410a3cfd366c1aeabee",
+    "s8": "91c5190342281fe0a073c4008d1a48f39fbcbd0bf168b873431fa1d564f1134a",
+    "s9": "d192a65bca69bd72046dc5775844191036f892420bc0dab53fbb8dbfcfbdbe77"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T12:20:25.930857+00:00",
+  "total": null,
+  "traced_units": [
+    "s4",
+    "s8",
+    "s9"
+  ]
+}

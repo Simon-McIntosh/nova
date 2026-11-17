@@ -23,7 +23,7 @@ mkdir -p "$(dirname "${log}")"
   "${efit}" --pulse "imas:hdf5?path=${pulse}" \
             --output "imas:hdf5?path=${out}" \
             --options-dir "${opts}" \
-            --tvals 0 --log-dir "$(dirname "${log}")/solver-logs" \
+            --tvals 0 --log-dir "${log%.log}-solver" \
             "${opts}/efitOptions.xml" -v
   echo "EXIT=$?"
 } 2>&1 | tee "${log}"

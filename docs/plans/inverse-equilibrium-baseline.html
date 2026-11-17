@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -116,7 +116,7 @@
     2026-11-14 so that a stored imas-efit equilibrium exists for every case. For each case the class fits the same number of profile coefficients imas-efit fitted,
     with the conductor currents treated as the locked decision <code>fitted-unknowns</code> directs, and
     the vertical position held as the locked decision <code>vertical-freedom</code> directs.</p>
-    <p>Outcome, 2026-11-17: on none of the three stored cases did the nested class reach a fit, and the lead ruled that the section land as that measured result. The forward-solve refusals it met near the stored states are carried to a plan of their own, and §9 runs the same cases with the fit inside the iteration.</p>
+    <p>Outcome, 2026-11-17: on none of the three stored cases did the nested class reach a fit, and the lead ruled that the section land as that measured result. The forward-solve refusals it met near the stored states are carried to the plan <code>forward-solve-near-stored-states</code>, and §9 runs the same cases with the fit inside the iteration.</p>
     <p><strong>Done when.</strong> (1) On every case where the class converges its reconstructed state is
     compared with imas-efit's stored equilibrium in physical units; a case on which it does not converge is recorded instead with the row replay from imas-efit's fitted currents inside 5 % on every sensor family, the terminal state's refusal reason and residual, and its line-contour panel. Where it converges: magnetic axis within 0.20 m, plasma
     current within 1.5 %, boundary and axis flux within 5 % of the axis-to-boundary flux span, the magnitude of q95
@@ -155,7 +155,7 @@
     <p>Waits on §8, the case on which the class has a fit to time; the locked fit decisions set the unknown count, and so the cost measured here.</p>
     <p>A baseline that cannot be run over a pulse is of little use for development. The cost of one
     reconstruction is measured where the forward solve's cost is decided, on the H200.</p>
-    <p><strong>Done when.</strong> (1) The record reports, for the §8 ITER case at batch widths 1, 16 and
+    <p><strong>Done when.</strong> (1) The record reports, for the §8 ITER case, replicated across the batch with independent white noise at the §6 level on each copy, at batch widths 1, 16 and
     64, the warm wall per slice, the forward solves per reconstruction and the cold compile wall, measured
     in one H200 job with the persistent compilation cache contract printed. (2) The warm wall per slice at
     width 16 is at or below ten times the warm forward solve's wall per slice at the same shape and batch

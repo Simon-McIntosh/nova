@@ -40,6 +40,7 @@ def trace_metric(gradient, hessian, points, forcing):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", type=Path, required=True)
+    parser.add_argument("--archive", type=Path)
     args = parser.parse_args()
     root = Path.home() / ".cache/nova-hessian-diagnosis"
     selected = [
@@ -48,10 +49,12 @@ def main():
         if row["interior"]
     ]
     assert len(selected) == 64
-    with np.load(args.run / "stable-corner/plasma-partial.npz") as archive:
+    archive_path = args.archive or args.run / "stable-corner/plasma-partial.npz"
+    with np.load(archive_path) as archive:
         gradient = archive["gradient"].astype(np.longdouble)
         hessian = archive["hessian"].astype(np.longdouble)
         points = archive["points"].astype(np.longdouble)
+        stored_forcing = archive["forcing"] if "forcing" in archive else None
     n = len(points)
     reference = []
     for node in selected[:n]:
@@ -84,6 +87,10 @@ def main():
         - prior_gradient[:, :, 0] / points[None, :, 0]
         - prior_residual
     )
+    if stored_forcing is not None:
+        describe("stored_independent_forcing", stored_forcing)
+        np.testing.assert_allclose(forcing, stored_forcing, rtol=1e-13, atol=1e-13)
+        forcing = stored_forcing
     error = hessian - reference_hessian
     for name, value in [
         ("gradient", gradient),
@@ -125,10 +132,9 @@ def main():
             row[label + "_reference_bound_norm"] = float(np.linalg.norm(bound))
         rows.append(row)
         print("REFERENCE_COMPARISON", json.dumps(row), flush=True)
-    result = dict(completed=n == 64, count=n, rows=rows)
-    (args.run / f"reference-comparison-{n}.json").write_text(
-        json.dumps(result, indent=2)
-    )
+    label = "sixth-order" if args.archive else "small-step"
+    result = dict(completed=n == 64, count=n, arm=label, rows=rows)
+    (args.run / f"reference-{label}-{n}.json").write_text(json.dumps(result, indent=2))
     print("REFERENCE_COMPARISON_COMPLETE", n, flush=True)
 
 

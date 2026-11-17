@@ -22,6 +22,11 @@
       "reason": "the jit-against-eager parity assertion is kept as a consistency check; correctness is carried by the independent host oracle test, as the reviewer notes",
       "recorded_at": "2026-11-17T08:09:43.399117+00:00"
     },
+    "2": {
+      "kind": "exempted",
+      "reason": "sharing one traced-value predicate across the transport, topology and contour-tree modules is a cross-module cleanup outside this node's write paths",
+      "recorded_at": "2026-11-17T08:09:55.442391+00:00"
+    },
     "3": {
       "kind": "folded",
       "node": "traced-cold-seed",

@@ -740,6 +740,9 @@ def solve_frame(
     row: dict[str, Any],
     frame_input: FrameInput,
     declared: dict[str, Any],
+    *,
+    preflight_only: bool = False,
+    preflight_output: Path | None = None,
 ) -> dict[str, Any]:
     """Run the circuit-driven inference arms from one identical branch seed."""
 
@@ -764,18 +767,41 @@ def solve_frame(
         float(declared["unscaled_source_ip_a"]),
         float(declared["seed_lambda"]),
     )
-    if not np.allclose(
-        measured,
-        registered,
-        rtol=COHORT_PREFLIGHT_RELATIVE_TOLERANCE,
-        atol=1.0e-9,
-    ):
+    qualified = bool(
+        np.allclose(
+            measured,
+            registered,
+            rtol=COHORT_PREFLIGHT_RELATIVE_TOLERANCE,
+            atol=1.0e-9,
+        )
+    )
+    preflight = {
+        "shot": frame_input.shot,
+        "frame": frame_input.frame,
+        "time_ms": time_ms,
+        "target_plasma_current_a": target,
+        "unscaled_seed_plasma_current_a": seed_unscaled,
+        "registered_unscaled_source_ip_a": registered[2],
+        "seed_profile_amplitude": seed_amplitude,
+        "registered_seed_lambda": registered[3],
+        "relative_tolerance": COHORT_PREFLIGHT_RELATIVE_TOLERANCE,
+        "qualified": qualified,
+        "inference_current_authority": current_receipt,
+    }
+    if preflight_output is not None:
+        preflight_output.mkdir(parents=True, exist_ok=True)
+        (preflight_output / "seed_preflight.json").write_text(
+            json.dumps(preflight, indent=2, sort_keys=True, allow_nan=False) + "\n"
+        )
+    if not qualified:
         raise RuntimeError(
             f"pre-solve cohort qualification drifted for {frame_input.shot}:"
             f"{frame_input.frame}: measured={measured}, registered={registered}"
         )
     if abs(target) < REPRESENTATIVE_CURRENT_FLOOR_A or target * seed_unscaled <= 0.0:
         raise RuntimeError("representative-current qualification failed before scoring")
+    if preflight_only:
+        return preflight
     shipped_unpinned = solve_unpinned(profile, seed, shipped_current, target)
     unpinned = solve_unpinned(profile, seed, current, target)
     eliminated = solve_constrained(profile, seed, current, target)
@@ -1136,7 +1162,45 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--preregister-only", action="store_true")
     parser.add_argument("--post-check-only", action="store_true")
+    parser.add_argument(
+        "--preflight-frame",
+        type=int,
+        choices=[item["frame"] for item in REPRESENTATIVE_COHORT],
+    )
     arguments = parser.parse_args()
+    if arguments.preflight_frame is not None:
+        if arguments.preregister_only or arguments.post_check_only:
+            parser.error("--preflight-frame cannot be combined with receipt-only modes")
+        if arguments.output.resolve() == DEFAULT_OUTPUT.resolve():
+            parser.error("--preflight-frame requires a separate --output directory")
+        configure_dtypes()
+        declared = next(
+            item
+            for item in REPRESENTATIVE_COHORT
+            if item["frame"] == arguments.preflight_frame
+        )
+        path = arguments.data / str(declared["shot"])
+        columns = tuple(
+            dict.fromkeys(
+                (
+                    *_LABEL_COLUMNS,
+                    *_CURRENT_COLUMNS,
+                    *_GEOMETRY_COLUMNS,
+                    *PLASMA_CURRENT_COLUMNS,
+                )
+            )
+        )
+        row = _read(path, columns)
+        row["_source_path"] = str(path)
+        result = solve_frame(
+            row,
+            FrameInput(str(declared["shot"]), int(declared["frame"])),
+            declared,
+            preflight_only=True,
+            preflight_output=arguments.output,
+        )
+        print(json.dumps(result, indent=2, sort_keys=True, allow_nan=False))
+        return
     if arguments.preregister_only and arguments.post_check_only:
         parser.error("--preregister-only and --post-check-only are mutually exclusive")
     if arguments.preregister_only:

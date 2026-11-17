@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="110">
+<meta name="plan-version" content="111">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -514,15 +514,15 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="formulation" data-choice="" data-by="" data-when="" data-sections="s6">
+<div class="r-dec" data-key="formulation" data-choice="piecewise-linear" data-by="lead" data-when="2026-11-17T10:53:54+00:00" data-sections="s6">
     <p class="r-dec-q">Which magnetisation formulation goes to production for thin high-permeability parts?</p>
     <p class="r-dec-ctx">Piecewise-constant cells converge slowly on the μ r = 1000 shell (2.8 % at 2 cm). §5 measures the candidates; decide after its table exists.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="graded-constant">Graded piecewise-constant cells</button>
-      <button class="r-opt" data-value="piecewise-linear">Piecewise-linear magnetisation</button>
+      <button class="r-opt chosen" data-value="piecewise-linear">Piecewise-linear magnetisation</button>
       <button class="r-opt" data-value="surface-scalar">Surface formulation in the reduced scalar potential</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">On WEST 62751 (H200, merge 5ce9d0048), the piecewise-linear basis moves at most 0.76 % at +2 m and 1.17 % at +4 m across uniform 80 mm, uniform 40 mm and graded 16/80 mm meshes (10 170 to 39 792 unknowns). Graded 16/80 agrees with uniform 40 mm to 0.62 %. The constant basis moves 13 % and 17 % between the uniform pair and reads 7–17 % above the linear field on every mesh. On the mu_r 1000 shell the linear basis reaches 0.05 % at 1368 unknowns, where the constant basis needs about 27 000 for 0.5 %. The interaction is geometry-only, so it is persisted per mesh with a geometry digest and reused across time slices. The lead also directed that §6 cache the coil-to-cell response per mesh, because coil-field evaluation is 179 s of a 4-minute slice.</p>
     </div>
 <div class="r-dec" data-key="limb-geometry" data-choice="constant-width-from-inboard-join" data-by="lead (constant toroidal width from the inboard join); coordinator derivation" data-when="2026-11-07T13:32:49+00:00" data-sections="s8">
     <p class="r-dec-q">What are the real dimensions of the six outer return limbs and of the horizontal arms?</p>

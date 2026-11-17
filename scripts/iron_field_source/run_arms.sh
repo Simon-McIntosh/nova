@@ -54,8 +54,19 @@ run_arm() {
         tee -a "$out/summary.tsv"
 }
 
-run_arm baseline "$scratch" baseline_arm
-run_arm after "$root" after_arm
+arm=${1:-both}
+case "$arm" in
+    baseline) run_arm baseline "$scratch" baseline_arm ;;
+    after) run_arm after "$root" after_arm ;;
+    both)
+        run_arm baseline "$scratch" baseline_arm
+        run_arm after "$root" after_arm
+        ;;
+    *)
+        echo "unknown arm: $arm" >&2
+        exit 2
+        ;;
+esac
 
 {
     printf '{\\n'

@@ -57,7 +57,7 @@ LINEAR = Path(
     "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/"
     "linear-magnetisation/west-h200"
 )
-DEFAULT_MESH = "uniform-0.04"
+DEFAULT_MESH = "uniform-0.08"
 MESH = DEFAULT_MESH
 CELL_SIZE = 0.04
 LINES = {"midplane": 0.0, "Fb plane": -0.637, "Fh plane": 0.637}

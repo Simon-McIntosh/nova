@@ -32,7 +32,7 @@ cd "$root"
 
 case "$stage" in
     state | field)
-        exec "$python" "$root/scripts/iron_field_source/measure.py" "$stage"
+        exec "$python" "$root/scripts/iron_field_source/measure.py" "$stage" "${2:-}"
         ;;
     diagnostics)
         exec "$python" "$root/scripts/iron_field_source/diagnostics.py"

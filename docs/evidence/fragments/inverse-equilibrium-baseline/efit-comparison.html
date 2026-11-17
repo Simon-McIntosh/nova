@@ -2258,3 +2258,36 @@ blocker; the incomplete native CPU arms remain recorded without a rerun.
 The worker delivers this repair as complete; plan-section closure remains
 with the coordinator.</p>
 </section>
+
+<section id="efit-comparison-q95-physical-span">
+<h2>q95 uses the physical axis-to-boundary flux span</h2>
+<p>The supplied-equilibrium referee now normalises each profile's flux with
+that state's <code>global_quantities.psi_axis</code> and
+<code>psi_boundary</code>. A profile sampled only through normalised flux 0.97
+still contains the physical 0.95 surface. Its last sampled point is not the
+plasma boundary. No q95 band or forward qualification threshold changed.</p>
+<table><thead><tr><th>Profile sampled through 0.97</th><th>Physical q95</th><th>Endpoint-normalised result</th><th>Physical-span result</th><th>Magnitude error before / after</th></tr></thead><tbody>
+<tr><td>q = normalised flux</td><td>0.95</td><td>0.9215</td><td>0.95</td><td>0.0285 / 0</td></tr>
+<tr><td>q = −100 × normalised flux</td><td>−95.0</td><td>−92.15</td><td>−95.0</td><td>2.85 / 0</td></tr>
+</tbody></table>
+<p>The regression scores the truncated profile against a full profile of the
+same physical q. Both increasing and decreasing physical flux spans are
+tested. The signed case exposes an actual admission error: endpoint
+normalisation rejects a physically identical q profile against the unchanged
+magnitude-error band of 2.0; physical-span normalisation admits it.</p>
+<p>The defect reproduced with <code>4 failed, 9 deselected in 7.35s</code>,
+native EXIT=1. The repaired referee and existing physical-band test recorded
+<code>5 passed, 8 deselected in 7.25s</code>, EXIT=0. Reversing the answering
+commit's referee change in an isolated temporary owner file while retaining
+the four regression variants produced <code>4 failed, 9 deselected, 1 warning
+in 3.46s</code>, EXIT=1, with all four truncated-profile test IDs named. The
+reversed owner bytes were checked against the parent revision before execution.</p>
+<p>These are lightweight referee checks with no data-store read or equilibrium
+solve. Their native logs are <code>q95-truncated-reproduction.log</code>,
+<code>q95-truncated-focused.log</code> and <code>q95-reverse-control.log</code>
+under the run directory. The new repair round requests exact CPU suite arms;
+one allocation measures immutable original-base, repair-base and repaired-head
+snapshots, preserving the original two-file command and the repair pair's
+three-file commands. The earlier suite waiver and incomplete receipts remain
+historical records and are not substituted for this new measurement.</p>
+</section>

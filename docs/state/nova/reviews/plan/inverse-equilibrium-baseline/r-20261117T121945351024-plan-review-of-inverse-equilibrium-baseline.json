@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T12:23:45.913Z",
+  "dispatched_at": "2026-11-17T12:22:16Z",
+  "findings": [
+    {
+      "anchor": "plan.html:190",
+      "id": "reasoning-1",
+      "reason": "the fallback decides what the record says about imas-efit's provenance, and as written it produces a false negative and a stale pointer instead of reading the edge flag from the output.",
+      "text": "\u00a78 clause (1) asserts \"Where imas-efit records one of these in neither place, as it does for the edge constraint \u2026 names imas-efit's plan equilibrium-fit-provenance as the work that will carry it\", but that plan is `data-status=\"done\"` and its landed record reads the edge constraint back out of the published equilibria (\"Bernstein selector 8 with the edge constraint on (flag 1, the last Bernstein function identically zero)\", eqfp-three-cases.html) and reports the resolved fit written into `equilibrium.code.parameters` (eqfp-fit-configuration.html), so a worker following the fallback would write into the \u00a78 record a claimed absence its own imas-efit output disproves and cite completed work as pending",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:193",
+      "id": "reasoning-2",
+      "reason": "the stored map's axis is the section's stated reason a pass differs from the refusals, so a worker must invent clause (1)'s starting map or apply the \u00a72 map to states that have none.",
+      "text": "\u00a79 says a pass is \"started on every case from the flux map imas-efit stored, which has an axis on all three\", but clause (1) runs on the three \u00a71 states (the Solov'ev certificate row, the MAST state and the ITER state), which are nova forward states with no stored imas-efit reconstruction, while the stored maps belong to \u00a72's MAST-U/TCV/ITER cases, so \"every case\" names a starting flux map that does not exist for two of clause (1)'s states",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "86c1a52f8d9d7552de0aa3c2a434757dbc70e2c9",
+  "plan_fingerprint": "fb53b15dfa8264694d826f63455afc0bbf10ce47b96d331302d5ac4eda8b4f2b",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 44,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T121945351024-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "03fda10f3ff7095e1e31411c2b084732aee48bdd",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `/nova/figures/inverse-equilibrium-baseline/inverse-seam.svg` exists, `/nova/spine-efit-parity` and `equilibrium-fit-provenance` resolve (the latter at imas-efit `docs/plans/equilibrium-fit-provenance.html`), and \u00a79's \"Fit updates / forward calls\" column is present in the \u00a71 fragment.",
+    "done_when": "pass \u2014 s4 clause (2) carries a control (force \u226511 forward solves, which exceeds the 10\u00d7 ceiling) that can fail, s8 clause (3) scaling rows, plasma current and conductor currents by 1.10 must leave the 1.5 % band, and s9 clause (3) scales the same inputs while clause (1) independently guarantees the \u00a71 states converge, so the control is never vacuous.",
+    "evidence_paths": "pass \u2014 the plan's record is the durable archive document `docs/evidence/archive/inverse-equilibrium-baseline-landed.html` (present), and \u00a74's H200 job and \u00a79's batch job are stated as receipts of that record with no node-local or scratch path named.",
+    "naming": "pass \u2014 the only labels are record vocabulary (\"same magnetics, different constraints\"), and no symbol, file or comment needs a tracker entry.",
+    "reasoning": "a finding \u2014 \u00a78 states imas-efit records the edge constraint \"in neither place\" and hands it to a plan that has already published it, and \u00a79 starts \"every case\" from a stored imas-efit flux map that two of its clause (1) states do not have.",
+    "single_goal": "pass \u2014 \u00a74 delivers one cost receipt, \u00a78 one imas-efit run on nova-written rows with its comparison against the generating state, \u00a79 one in-iteration estimator with its case table.",
+    "wiring": "pass \u2014 `plan-section-depends-on` gives s4 `[s8]`, s3 `[s8]` and s9 `[]`, and each resolves: \u00a74 times the \u00a78 ITER case, \u00a73 scores \u00a78's rows, and \u00a79's \u00a72 stored cases are imas-efit's own committed equilibria rather than a landed \u00a72 record, so \"it waits on neither\" holds."
+  },
+  "section_digests": {
+    "_document": "fb98dbb43fc2642534ec98e1fda5075ba9f6672c5bcad11683c8bf49cd31255d",
+    "s0": "33859d65872ac01128e940e5f27d36e4da7f90e929344c535e87d2362eaf1d1e",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "1d7c7611f002d7765b98531126cc095d6d244b387578c5d44d7284ff93c9e59c",
+    "s3": "ffe1ae40fdd119d382956b68d70b5ac439dfd6ba20fecc88ab8ca5d01fd2a8a5",
+    "s4": "081479d27579b84e7dba6761b55ac8baa2d310577ab8cad8d818daefc28c9fa6",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "cadfba00a23e3a3b6ea0fbee46a46eb276970d776c456bd1a53931456d6f8e09",
+    "s7": "5c750c79d813b34b96a3b3b418cd41dd92a06de78455a410a3cfd366c1aeabee",
+    "s8": "91c5190342281fe0a073c4008d1a48f39fbcbd0bf168b873431fa1d564f1134a",
+    "s9": "d192a65bca69bd72046dc5775844191036f892420bc0dab53fbb8dbfcfbdbe77"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T12:35:46.220940+00:00",
+  "total": null
+}

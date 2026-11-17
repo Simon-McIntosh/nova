@@ -116,7 +116,7 @@ def difference_panels(args):
 
 def flux_panels(args, frame, branch):
     case = f"frame-{frame}-{branch}"
-    folders = {arm: args.input / arm / case for arm in ("base", "head")}
+    folders = {arm: args.input / arm / case for arm in args.arms}
     data = {arm: load(path / "terminal.npz") for arm, path in folders.items()}
     receipts = {
         arm: json.loads((path / "receipt.json").read_text())
@@ -126,7 +126,7 @@ def flux_panels(args, frame, branch):
         arm: json.loads((path / "solve-receipt.json").read_text())
         for arm, path in folders.items()
     }
-    reference = data["base"]
+    reference = data[args.arms[0]]
     radius, height, wall = (reference[key] for key in ("radius", "height", "limiter"))
     rr, zz = np.meshgrid(radius, height, indexing="ij")
     inside = inside_wall_units(np.c_[rr.ravel(), zz.ravel()], wall).reshape(rr.shape)
@@ -153,8 +153,8 @@ def flux_panels(args, frame, branch):
         frameon=False,
     )
     axes, notes, gauges = [], [], {}
-    for index, arm in enumerate(("base", "head")):
-        left = 0.12 + index * 0.46
+    for index, arm in enumerate(args.arms):
+        left = 0.35 if len(args.arms) == 1 else 0.12 + index * 0.46
         current = data[arm]
         np.testing.assert_array_equal(current["label"], label)
         ax = panel(figure, left, 0.30, wall)
@@ -254,6 +254,9 @@ def main():
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--differences-only", action="store_true")
     mode.add_argument("--flux-only", action="store_true")
+    parser.add_argument(
+        "--arms", nargs="+", choices=("base", "head"), default=("base", "head")
+    )
     parser.add_argument(
         "--rows",
         nargs="+",

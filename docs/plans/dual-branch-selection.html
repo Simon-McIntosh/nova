@@ -26,9 +26,9 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-commits" content="632a4396,991d5d6e,5cdcaf72,3387739f,0bd3af3d,c64440e8,a9ea090c">
 <meta name="plan-artifacts" content="benchmarks/traced_selection_seam.py,benchmarks/pinned_branch_contrast.py,benchmarks/fork_arming_economics.py,benchmarks/two_branch_batch_cost.py,nova/equilibrium/branch_selection.py,docs/figures/dual-branch-selection/traced-selection-continuity.json,docs/figures/dual-branch-selection/pinned-branch-contrast.json,docs/figures/dual-branch-selection/fork-arming-economics.json,docs/figures/dual-branch-selection/two-branch-batch-cost.json,docs/evidence/archive/dual-branch-selection-landed.html">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 <meta name="plan-modified" content="2026-11-17">
-<meta name="plan-section-declarations" content="{&quot;coreachability&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;descoped&quot;,&quot;s7&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;coreachability&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;descoped&quot;,&quot;s7&quot;:&quot;done&quot;}">
 <meta name="plan-descope-reasons" content="{&quot;s6&quot;:&quot;the fork this section would have priced on catalog frames was retired by the co-reachability measurement; the pricing framework and the two-branch cost measurement it produced stay as evidence&quot;}">
 </head>
 <body>
@@ -638,10 +638,11 @@
     <pre class="r-fu-prompt">/reckon-build dual-branch-selection</pre>
     <p class="r-fu-outcome">Done by the 2026-11-15 currency review and the 2026-11-16 section declarations: every section carries a declaration, the remaining work is one island not two, and it is carried by f-dbs-traced-cold-seed.</p>
     </article>
-<article class="r-fu" data-id="f-dbs-traced-cold-seed" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-edit" data-written-at="2026-11-16" data-recommends-skill="/reckon-build dual-branch-selection s5" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dbs-traced-cold-seed" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-edit" data-written-at="2026-11-16" data-recommends-skill="/reckon-build dual-branch-selection s5" data-resolved-at="2026-11-17T08:35:39+00:00" data-resolved-by="nova-e9">
     <h4 class="r-fu-title">Build the cold seed as a traced array kernel</h4>
     <div class="r-fu-body">One host island remains in section 5: the cold seed for the single selected branch is still built on the host. Done when section 5's done-when holds: a traced seed kernel proven under jit and vmap over at least three distinct slices, agreement with the host seed to 1e-12 relative with a perturbed-seed control that fails, and the production solve request consuming the traced seed with its tests unchanged.</div>
     <pre class="r-fu-prompt">/reckon-build dual-branch-selection §5</pre>
+    <p class="r-fu-outcome">Landed: the cold seed is built by traced array kernels behind the existing seed entry point, bit-identical to the host construction on six branch and slice cases and under jit and vmap over three slices; the request control fails at the base revision and passes at the head; a 1e-9 perturbation of the host reference fails six parity tests.</p>
     </article>
 </section>
 
@@ -666,6 +667,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261117T051755274710-review-of-traced-cold-seed-e7c863048a1b" data-who="reckon-build" data-when="2026-11-17T05:19:52.316Z">
     <div class="r-comment-body"><p>Reviewed r-20261116T231506613229-traced-cold-seed at e7c863048 (base 18ee03d): goal_fidelity 18, evidence 13, scope_discipline 18, durability 9, fit 16, reuse 14; 1 blocking finding (tests/test_cold_seed_kernel.py:263 passes no traced value, so the request-side traced-kernel clause is unguarded, and measurement at base 18ee03d shows the same test shape passes on the host construction) and 3 non-blocking findings; added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-close-s5-traced-seed" data-who="nova-e9" data-when="2026-11-17T08:40:00Z">
+    <div class="r-comment-body"><p>§5 closed. The cold seed for the single selected branch is built by traced array kernels behind the existing seed entry point: bit-identical to the host construction on six branch and slice cases, and again under <code>jit(vmap(...))</code> over three slices. The first independent review found the request control passed on the old host code; the repair makes traced inputs reach the construction, and the control now fails at the base revision and passes at the head. Two limits are kept from the second review, both non-blocking and neither yet owned by a section: a batched construction whose disc supports fewer cells than the configured minimum is not refused by any host caller and proceeds with a zero-current seed, and the traced limiter-extent and uniform-disc kernels duplicate two host owners in the moment module, held in step only by the parity test. One failure exists at the base and is outside this section: the cold limited-branch recovery test reads a banked seed state that is stale against today's cold-seed construction.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20260825T084655542502-fork-arming-fraction" data-who="catalog-census" data-when="2026-08-25T08:54:07Z">
     <div class="r-comment-body"><p>Pricing framework banked and arithmetic verified. Four finite absolute margins span 0.00339536 to 0.0197108, median 0.00606505; two of six are non-finite and fall back conservatively to fork. Always-fork arms 6/6 at 2.000x the single-branch denominator; thresholds 0.0025, 0.005, 0.01 and 0.02 arm 2/6, 4/6, 5/6 and 6/6 at 1.333x, 1.667x, 1.833x and 2.000x. Solve cost is an explicit parameter at 1.0 solve-second per pinned branch, not a measurement, and 372.62 slices/s is recorded as the derived one-hour requirement rather than throughput. CRITICAL LIMIT the node stated itself: the cohort is the six frozen MAST references, not catalog frames, so with four finite margins it carries no representativeness or confidence claim and cannot support the policy decision. The decision also needs the accelerator two-branch batch cost, which is out of scope here.</p></div>

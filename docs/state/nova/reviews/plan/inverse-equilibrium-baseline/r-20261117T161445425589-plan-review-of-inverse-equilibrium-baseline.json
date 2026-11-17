@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T16:38:40.227Z",
+  "dispatched_at": "2026-11-17T16:37:57Z",
+  "findings": [
+    {
+      "anchor": "plan.html:166",
+      "id": "wiring-1",
+      "reason": "the dependency points at a section that does not promise the artifact the dependent reads, so \u00a74's third clause would be met by whichever log survives rather than by a delivered measurement.",
+      "text": "\u00a74 clause (3) requires \"imas-efit's wall for the same case, read from the log of its \u00a78 run on the nova-written rows\", but \u00a78's done-when (plan.html:190) requires only the code revision, the resolved basis/count/edge constraint and the state comparison, and never requires the imas-efit run's wall or log to be recorded, so an \u00a78 node can satisfy its own endpoint and leave \u00a74 with no source for clause (3)",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:190",
+      "id": "done_when-1",
+      "reason": "the measure as written is unsatisfiable for any state whose flux datum differs, and one clause naming the additive gauge removes a false failure that \u00a77 would otherwise inherit.",
+      "text": "\u00a78 clause (2) compares \"the boundary and axis flux within 2 % of the axis-to-boundary span after each state's stored flux sign is read\", which handles only the sign convention, while the delivered \u00a78 record had to gauge-align imas-efit's map to the generating axis flux by an additive constant (+0.3 Wb) before it could report the 0.09 % and 0.41 % flux agreements, so a converged run whose flux datum differs by any additive offset is refused on a band that says nothing about the reconstruction",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "dd9720038feace209ff472f69e3c3914e0d4c83a",
+  "plan_fingerprint": "efeebe8d45baf5d27d1c6c92d7e4163c0e69f42832b9400a592d30b9ad75f7d1",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 47,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T161445425589-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "a1eee7f27d2d8f4c22d3b45c4426b1d0fbd785ed",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `/nova/spine-efit-parity` resolves as `docs/plans/spine-efit-parity.html`, `forward-solve-near-stored-states` as `docs/plans/forward-solve-near-stored-states.html`, and `/nova/figures/inverse-equilibrium-baseline/inverse-seam.svg` exists on disk.",
+    "done_when": "a finding \u2014 \u00a78 clause (2) bands the axis and boundary flux after reading only each state's stored flux *sign*, while its own delivered record had to remove an additive gauge constant (+0.3 Wb) before the axis flux could be compared, so the stated measure can refuse a sound run.",
+    "evidence_paths": "pass \u2014 the plan's own record is `docs/evidence/archive/inverse-equilibrium-baseline-landed.html` (it exists on the primary checkout), and neither \u00a74 nor \u00a78 names a scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 neither section names a plan label, stage name or ticket number, and both stay at the level of records and bands.",
+    "reasoning": "pass \u2014 \u00a78's generating state is drawn from imas-efit's resolved basis, so the wiring claim is checkable, its bands can fail (the delivered run already fails the cross-code q95 band at 0.148), and \u00a74's ceiling is now arithmetic over a count measured in the same job rather than a fixed multiple.",
+    "single_goal": "pass \u2014 \u00a74 is one cost measurement of one reconstruction and \u00a78 is one run of imas-efit on nova-written rows; each section's clauses are the parts of that one verdict.",
+    "wiring": "a finding \u2014 \u00a74 clause (3) reads imas-efit's wall from \"the log of its \u00a78 run\", but \u00a78's done-when requires no imas-efit timing, so the dependent's input is not among its dependency's deliverables."
+  },
+  "section_digests": {
+    "_document": "fb98dbb43fc2642534ec98e1fda5075ba9f6672c5bcad11683c8bf49cd31255d",
+    "s0": "9fe9f7777ce4e7201a722d96a20cbfd973e35283017a99e10585518af735b3ef",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "1d7c7611f002d7765b98531126cc095d6d244b387578c5d44d7284ff93c9e59c",
+    "s3": "ffe1ae40fdd119d382956b68d70b5ac439dfd6ba20fecc88ab8ca5d01fd2a8a5",
+    "s4": "d9ed8ee2d1feb4975b36a8edbb075492994edb9514fcaf73a6c1f921f2bf9736",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "cadfba00a23e3a3b6ea0fbee46a46eb276970d776c456bd1a53931456d6f8e09",
+    "s7": "5c750c79d813b34b96a3b3b418cd41dd92a06de78455a410a3cfd366c1aeabee",
+    "s8": "8349c5ecee6e9647ef98bf61fc6fb2e65a59e0dcccc7e0bbe54eb0d7a1b75d2c",
+    "s9": "6b59708e5b47c987c440323356fb9dd0f2ec4438ce599455f755a5cf0772d5bb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:52:06.137820+00:00",
+  "total": null,
+  "traced_units": [
+    "s4",
+    "s8"
+  ]
+}

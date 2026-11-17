@@ -818,6 +818,30 @@ def test_row_agreement_exposes_a_reversed_current_sign_and_family_gain():
     assert doubled["relative_l2"] == 1 and doubled["signed_gain"] == 2
 
 
+def test_row_replay_control_keeps_zero_extent_rows_and_refuses_missing_scaling():
+    from tests.test_magnetics_fit_efit_comparison import (
+        _assert_row_replay_control,
+        _row_replay_control,
+    )
+
+    reference = np.array([1.0, 0.0, -2.0, 3.0])
+    measurement = SimpleNamespace(mask=np.ones(4, dtype=bool), scale=np.ones(4))
+    sensors = SimpleNamespace(flux_loop=np.array([True, True, False, False]))
+    control = _row_replay_control(reference, reference, measurement, sensors)
+    _assert_row_replay_control(control)
+    assert control["flux loops"]["unscaled"]["rows"] == 2
+    for scores in control.values():
+        assert scores["unscaled"]["relative_l2"] == 0
+        assert scores["scaled_reference"]["relative_l2"] == pytest.approx(1 / 11)
+    control["flux loops"]["scaled_reference"] = control["flux loops"]["unscaled"]
+    with pytest.raises(AssertionError, match="scaled-reference replay did not leave"):
+        _assert_row_replay_control(control)
+    control = _row_replay_control(1.10 * reference, reference, measurement, sensors)
+    with pytest.raises(AssertionError, match="unscaled replay outside") as refusal:
+        _assert_row_replay_control(control)
+    print(f"ROW_REPLAY_BAND_REFUSED {refusal.value}")
+
+
 def test_known_conductor_subtraction_changes_the_target(linear_fit):
     fitter, measurement, truth, _ = linear_fit
     vacuum = np.array([0.7, -0.4, 1.1, 0.2])

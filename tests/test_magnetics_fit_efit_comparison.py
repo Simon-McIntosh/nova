@@ -1080,6 +1080,39 @@ def _row_agreement(prediction, reference, scale):
     )
 
 
+def _row_replay_control(prediction, reference, measurement, sensors):
+    """Keep all active rows in their sensor family for both reference scales."""
+    families = {}
+    for label, family in (
+        ("flux loops", sensors.flux_loop),
+        ("poloidal probes", ~sensors.flux_loop),
+    ):
+        selected = measurement.mask & family
+        assert np.any(selected), f"{label}: no active rows"
+        families[label] = {
+            key: _row_agreement(
+                prediction[selected],
+                multiplier * reference[selected],
+                measurement.scale[selected],
+            )
+            for key, multiplier in (("unscaled", 1.0), ("scaled_reference", 1.10))
+        }
+    return families
+
+
+def _assert_row_replay_control(families):
+    for label, scores in families.items():
+        unscaled = scores["unscaled"]["relative_l2"]
+        scaled = scores["scaled_reference"]["relative_l2"]
+        assert unscaled is not None and np.isfinite(unscaled), (
+            f"{label}: unscaled reference must be finite and nonzero"
+        )
+        assert unscaled < 0.05, f"{label}: unscaled replay outside 5%: {unscaled}"
+        assert scaled is not None and np.isfinite(scaled) and scaled > 0.05, (
+            f"{label}: scaled-reference replay did not leave 5%: {scaled}"
+        )
+
+
 def _replay_nulls(radius, height, values, case):
     """Read display-map stationary points using the shared spline polish."""
     from nova.equilibrium.flux_surface_connectivity import polish_stationary_points
@@ -1191,17 +1224,14 @@ def _probe_response_audit(data, plasma, conductor, total):
 @pytest.mark.timeout(27000)
 @pytest.mark.parametrize("name", tuple(CASES))
 def test_shared_magnetics_reconstruction_observation_replay(name):
-    """Image a stored density with the actual conductor inputs, without solving."""
+    """Image stored plasma and fitted conductors, checking both reference scales."""
     from nova.frame.coilset import CoilSet
     from tests.test_equilibrium_magnetics_fit import _physical_sensor_rows
 
     configure_dtypes()
     assert jax.config.jax_enable_x64
     started = perf_counter()
-    data = _read_case(name)
-    fitted_currents = os.environ.get("NOVA_EFIT_REPLAY_FITTED_CURRENTS") == "1"
-    if fitted_currents:
-        data = _fitted_current_binding(data)
+    data = _fitted_current_binding(_read_case(name))
     case, sensors, measurement = data["case"], data["geometry"], data["measurement"]
     ts = data["reference_eq"].time_slice[data["reference_slice"]]
     density = np.asarray(ts.profiles_2d[0].j_phi)
@@ -1333,13 +1363,17 @@ def test_shared_magnetics_reconstruction_observation_replay(name):
         ),
         conductors=list(data["conductor_names"]),
         conductor_current_a=measurement.conductor_current.tolist(),
-        conductor_state="stored fitted" if fitted_currents else "measured inputs",
+        conductor_state="stored fitted",
         fitted_conductor_current_a=data.get(
             "fitted_conductor_current", np.array([])
         ).tolist(),
         fitted_current_map=data.get("fitted_current_map", []),
         inventory=inventory,
         families=families,
+        row_control=_row_replay_control(
+            total, data["reference_predictions"], measurement, sensors
+        ),
+        reference_multiplier=1.10,
         rows=rows,
         vacuum_reference=(
             "implied only: EFIT reconstructed total minus nova "
@@ -1356,6 +1390,14 @@ def test_shared_magnetics_reconstruction_observation_replay(name):
         "ROW_REPLAY " + json.dumps({k: v for k, v in report.items() if k != "rows"}),
         flush=True,
     )
+    _assert_row_replay_control(report["row_control"])
+    if os.environ.get("NOVA_EFIT_REPLAY_ROWS_ONLY") == "1":
+        report.update(wall_seconds=perf_counter() - started, row_control_passed=True)
+        _write(_output() / f"{name}-row-replay.json", report)
+        print(
+            "ROW_REPLAY_CONTROL_PASSED " + json.dumps(report["row_control"]), flush=True
+        )
+        return
     radius, height = case.grid_radius[::2], case.grid_height[::2]
     rr, zz = np.meshgrid(radius, height, indexing="ij")
     points = np.c_[rr.ravel(), zz.ravel()]

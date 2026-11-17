@@ -77,9 +77,28 @@
       "note": "The first section now requires the record to state the displaced coefficient vector, its coordinate and its sign, so later sections name a recorded state.",
       "reason": "",
       "when": "2026-11-17T23:11:35.964800+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2492a70c603190859d6cae828039be8ae01256ed",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The opposite-step arm is dropped: it already qualifies at the base revision. The repair is now measured on the solves the first section shows refused at base.",
+      "reason": "",
+      "when": "2026-11-17T23:12:15.004409+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2492a70c603190859d6cae828039be8ae01256ed",
+      "commit_basis": "edit",
+      "note": "The opposite-step arm is dropped: it already qualifies at the base revision. The repair is now measured on the solves the first section shows refused at base.",
+      "reason": "",
+      "when": "2026-11-17T23:12:15.004409+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",

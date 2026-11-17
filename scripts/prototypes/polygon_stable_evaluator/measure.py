@@ -87,14 +87,14 @@ def summarise(output):
             components=components,
         )
         rows.append(record)
-        print("INTEGRATED_STATE", json.dumps(record), flush=True)
+        print("INTEGRATED_STATE", json.dumps(record, default=float), flush=True)
     receipt = dict(
         completed=True,
         count=64,
         states=rows,
         kernel_sha256=hashlib.sha256(Path(kernel.__file__).read_bytes()).hexdigest(),
     )
-    (output / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+    (output / "receipt.json").write_text(json.dumps(receipt, indent=2, default=float) + "\n")
 
 
 def main():

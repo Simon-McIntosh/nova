@@ -2051,3 +2051,33 @@ code. No further full-suite or physical comparison run is submitted. The result
 of this repair is blocked, with two code findings answered and the incomplete
 suite evidence retained.</p>
 </section>
+
+<section id="efit-comparison-json-owner-repair">
+<h2>Durable receipt owner reuse</h2>
+<p>The comparison's receipt wrapper duplicated file replacement with one fixed
+<code>.pending</code> name. It now performs strict JSON validation first and
+delegates to <code>nova.io.json.write_atomic</code>, the existing owner of unique
+temporary files, file flush/fsync, atomic replacement, directory fsync and cleanup.
+The shared owner is unchanged; wrapping it keeps this repair inside its granted
+paths and preserves the comparison's indent, key order and trailing newline.</p>
+<p>The pre-repair check recorded <code>1 failed, 1 passed, 45 deselected in
+4.91s</code>: the existing invalid-JSON refusal already worked, while the new
+owner-delegation witness saw zero owner calls. After repair the focused fitter
+checks recorded <code>43 passed, 4 deselected in 6.86s</code>. A valid receipt
+reaches the actual durable owner; a separate fixed pending receipt is left
+untouched. A raw NaN is refused before the owner is called, leaving the previous
+destination unchanged. Invalid residuals continue to be represented explicitly
+by the existing residual adapter rather than written as nonstandard JSON.</p>
+<p>A separate CPU diagnostic is scheduled to answer the remaining regression
+evidence blocker. It reverses this answering change in scratch while retaining
+the new owner witness, then isolates <code>known_state_recovery[solovev]</code>
+with compilation caching disabled and the effective flag asserted. This follows
+the repository's cache-versus-program diagnostic guidance; it is not a full
+suite arm or a substitute for completed exact baseline/head commands.</p>
+<p>The first diagnostic allocation stopped in scaffolding before pytest:
+snapshot extraction hit <code>No space left on device</code> while copying
+unrelated generated figures. Its native failure is retained, the retry excludes
+only <code>docs</code> from the source snapshot and avoids that node, and no solver
+failure is attributed to that extraction error. The original three aborted CPU
+suite receipts and both unavailable failure-set deltas remain unchanged.</p>
+</section>

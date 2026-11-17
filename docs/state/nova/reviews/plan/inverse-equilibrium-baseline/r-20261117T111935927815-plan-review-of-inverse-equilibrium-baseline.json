@@ -65,6 +65,16 @@
       "note": "The cost section now names its batch: the one nova-written ITER state replicated across the batch width with independent white noise at the covariance section level, so widths 16 and 64 need no slice sequence.",
       "reason": "",
       "when": "2026-11-17T12:01:53.842933+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f2576c6994f664c82593c17b3e42dcf514183e1d",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The plan forward-solve-near-stored-states now exists in sprint S25 and the comparison section names it as the owner of the refusals.",
+      "reason": "",
+      "when": "2026-11-17T12:04:39.222608+00:00"
     }
   ],
   "responses": {
@@ -88,6 +98,15 @@
       "note": "The cost section now names its batch: the one nova-written ITER state replicated across the batch width with independent white noise at the covariance section level, so widths 16 and 64 need no slice sequence.",
       "reason": "",
       "when": "2026-11-17T12:01:53.842933+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f2576c6994f664c82593c17b3e42dcf514183e1d",
+      "commit_basis": "edit",
+      "note": "The plan forward-solve-near-stored-states now exists in sprint S25 and the comparison section names it as the owner of the refusals.",
+      "reason": "",
+      "when": "2026-11-17T12:04:39.222608+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261117T111935927815-plan-review-of-inverse-equilibrium-baseline.json",

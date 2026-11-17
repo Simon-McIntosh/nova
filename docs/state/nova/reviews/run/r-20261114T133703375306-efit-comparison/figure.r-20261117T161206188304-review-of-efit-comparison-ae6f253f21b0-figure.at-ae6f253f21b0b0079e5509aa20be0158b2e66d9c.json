@@ -1,0 +1,352 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "A figure review runs no suite; this record claims no suite delta.",
+  "attachments": [
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/mastu.svg",
+      "image": "image-0.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/terminal-state/mastu-continuation.svg",
+      "image": "image-1.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/terminal-state/iter-later-state.svg",
+      "image": "image-2.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/tcv.svg",
+      "image": "image-3.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/mastu.svg",
+      "image": "image-4.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/iter-row-replay.svg",
+      "image": "image-5.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/bound-inputs/tcv-row-replay.svg",
+      "image": "image-6.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/mastu-row-replay.svg",
+      "image": "image-7.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/iter.svg",
+      "image": "image-8.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/mastu-row-replay.svg",
+      "image": "image-9.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/tcv-row-replay.svg",
+      "image": "image-10.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/bound-inputs/mastu-row-replay.svg",
+      "image": "image-11.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/tcv-row-replay.svg",
+      "image": "image-12.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/tcv.svg",
+      "image": "image-13.png"
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/backtracking/mastu-response-refused.svg",
+      "image": "image-14.png"
+    }
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-15T08:08:57Z",
+  "findings": [
+    {
+      "disposition": "folded",
+      "file": "docs/figures/inverse-equilibrium-baseline/efit-comparison/mastu.svg",
+      "folded_into": "a layout correction for the efit-comparison figure family",
+      "id": "f5c4e95ceb7",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Every one of the fifteen panels spends well over half its canvas on empty margin. The vessel spans about 245 of 1399 px (17%) of the canvas width, leaving roughly 60% of the 14 x 7.2 in canvas blank on either side, while the twelve flux levels are packed into that narrow band. At the ~900 px column the published page uses, the plasma renders about 160 px wide with roughly 2 px between adjacent contours, so the level detail the panel exists to show is on the edge of merging. Cropping the panel to the vessel bounding box with a small pad would put the ink in the canvas instead of the margin. The finding applies to the whole family, not to this file alone."
+    },
+    {
+      "disposition": "folded",
+      "file": "docs/figures/inverse-equilibrium-baseline/efit-comparison/terminal-state/iter-later-state.svg",
+      "folded_into": "a legend-truthfulness correction for panels with an empty series",
+      "id": "f88bd783971",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The legend offers two series, 'imas-efit' in grey and 'nova' in blue, but no blue mark appears anywhere in this panel: every contour, the wall and the single axis triangle are grey. A reader who does not read the caption cannot tell whether nova is absent or exactly coincident. The caption does explain the absence (a positive-flux vacuum-like state against negative levels), so the panel is not misleading on the page, but the image alone is. Drop the empty series from the legend or label it 'no level in range'."
+    },
+    {
+      "disposition": "folded",
+      "file": "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/mastu.svg",
+      "folded_into": "a legend-truthfulness correction for panels with an empty series",
+      "id": "f3050a8be5b",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Same defect as the ITER terminal panel: a two-series legend over a panel in which only grey contours appear. The caption states that no blue contour is visible on this level array, so the figure is honest once its caption is read, but the rendered picture advertises a series it does not show."
+    },
+    {
+      "disposition": "folded",
+      "file": "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/tcv.svg",
+      "folded_into": "a legend-truthfulness correction for panels with an empty series",
+      "id": "fda57040235",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Two-series legend, single visible grey series, caption declaring that no nova contour reaches these levels. Same disposition as the MAST-U fitted-start panel."
+    },
+    {
+      "disposition": "folded",
+      "file": "docs/figures/inverse-equilibrium-baseline/efit-comparison/iter.svg",
+      "folded_into": "a boundary-closure and null-marker check for the comparison panels",
+      "id": "f159e74137d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The blue nova set is not a closed family inside the vessel: it runs as a narrow band along the inner wall for the full height and continues through the wall polygon into the lower divertor, ending in short stroke fragments outside the plasma region. The grey reference set is the closed nested family a reader expects. A comparison panel whose subject is how two flux maps agree cannot be read cleanly when one of them escapes the boundary it is meant to be bounded by, and the wall is drawn so the reader sees the crossing. The caption also says the panel is drawn 'with the wall and reference nulls', but no null marker of either set is drawn anywhere on this panel."
+    },
+    {
+      "disposition": "folded",
+      "file": "docs/figures/inverse-equilibrium-baseline/efit-comparison/tcv.svg",
+      "folded_into": "a coincident-null-marker correction for the comparison panels",
+      "id": "f60bcb73f28",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "At the lower stationary point the blue hollow saddle marker is drawn on top of the grey filled saddle marker, and the two occupy essentially the same point (about x=650, y=555), so neither style is readable there. The caption claims both null sets are drawn in their own styles and that those styles distinguish them; at this null they do not. Either offset a coincident pair or state that the two saddles coincide."
+    },
+    {
+      "disposition": "exempted",
+      "exempted_reason": "The marker is legible and the overlap is with a one-pixel wall stroke the reader can follow through it, so no data is hidden. Recorded so a later redraw can offset it; it does not justify a node of its own.",
+      "file": "docs/figures/inverse-equilibrium-baseline/efit-comparison/mastu-row-replay.svg",
+      "id": "f4c202a9d75",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "In one of the two MAST-U replay panels at the same stated relative L2, a blue hollow replay-saddle marker sits directly on the inner-wall stroke at the midplane (about x=610, y=347), where marker ink and wall ink coincide. The marker is still identifiable by shape, so this does not stop a reader, but a marker that overlaps the boundary it is measured against reads as a wall feature rather than a data feature."
+    },
+    {
+      "disposition": "folded",
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html",
+      "folded_into": "a caption-trim for the efit-comparison evidence fragment",
+      "id": "f537421c6c5",
+      "line": 1445,
+      "severity": "non-blocking",
+      "summary": "Reader-facing captions carry measurement and process text that belongs in the evidence record, not under a figure: the fitted-inputs panels state native pytest walls ('Native pytest: 1 passed in 966.34s (0:16:06)'), function and process walls, and the ordering of a receipt relative to a native exit code. These lines do not help a reader interpret the picture and they bury the numbers that do (relative L2, the level array, which states are compared). The same pattern repeats at lines 1445, 1509, 1533, 1622 and 1666."
+    },
+    {
+      "disposition": "folded",
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html",
+      "folded_into": "a figure-preview provenance record in the evidence fragment",
+      "id": "f1279952503",
+      "line": 164,
+      "severity": "non-blocking",
+      "summary": "The attachment set reaches a reviewer as image-0.png through image-14.png with no image-to-figure mapping recorded anywhere in the dispatch, so every finding in this record had to be matched to a figure by re-identifying the picture against the captions. Two MAST-U replay panels at the same stated 24.69% relative L2 cannot be separated that way at all. Recording the figure path beside each rendered preview at dispatch time would remove the ambiguity for every later figure review of this run."
+    }
+  ],
+  "mapping_basis": "The dispatch recorded no image-to-figure map, so each attachment was identified from the rendered PNG alone on three independent signals: (1) legend text, which reads 'nova current replay' on exactly the seven row-replay figures and 'nova' on the eight non-replay figures, matching the two counts exactly; (2) vessel geometry, which separates the MAST-U double-divertor box (7 panels), the TCV tall chamfered rectangle (5) and the ITER D (3), again matching the figure count per machine; (3) which series each caption declares visible, which separates the two ITER non-replay panels (grey-only versus grey-plus-blue) and both fitted-start panels (declared no visible blue). The row-replay panels of one machine are ordered by the contour separation visible in the PNG, which tracks the caption's stated full-map relative L2. image-7 and image-11, both carrying a 24.69% caption, are not separable from the picture; no finding below depends on which of that pair is which.",
+  "project": "nova",
+  "review_limitations": "Attachment identifiers carry no provenance; every mapping above is inferred from the rendered picture and the reviewed run's own captions, and one pair (image-7 / image-11, both MAST-U replays at the same 24.69% L2) cannot be separated visually. Verdicts rest on the 15 rendered PNGs only; no SVG was opened, read or rendered.",
+  "review_notes": "Judged from the 15 rendered PNGs only. No blocking finding survived: no label is clipped, no two labels overlap, no text falls below the contrast of its background, no panel uses a gradient, fill or decorative shading, and no panel depicts information that is naturally a table. The defects recorded are of three kinds: canvas layout that puts the ink in the minority of the panel, legends or captions that advertise a series or a marker the picture does not deliver, and boundary or marker coincidence that costs the reader part of the comparison. Each is non-blocking because the caption, or the picture's own remaining geometry, still lets a reader recover the comparison.",
+  "review_run_id": "r-20261117T161206188304-review-of-efit-comparison-ae6f253f21b0-figure",
+  "reviewed_base_sha": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+  "reviewed_head_sha": "ae6f253f21b0b0079e5509aa20be0158b2e66d9c",
+  "reviewed_run_id": "r-20261114T133703375306-efit-comparison",
+  "rubric": "figure",
+  "rubric_verdicts": [
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/mastu.svg",
+      "image": "image-0.png",
+      "verdicts": [
+        "RUBRIC legibility: pass - twelve blue nova contours resolve individually against the grey imas-efit set behind them; the two-entry legend reads at native size",
+        "RUBRIC data_ink: pass - the only ink is two contour families, the wall stroke, two null markers and one legend; no fills, no gradients, no shading",
+        "RUBRIC decoration: pass - white background throughout, no frame, grid or stylisation",
+        "RUBRIC contrast: pass - dark grey legend text on white clears normal-text contrast by a wide margin",
+        "RUBRIC table_form: pass - a poloidal flux overlay is a spatial comparison and is not tabular information drawn as a picture",
+        "RUBRIC label_collision: pass - the two legend entries do not touch each other, sit well inside the canvas, and no text overlaps plotted data"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/terminal-state/mastu-continuation.svg",
+      "image": "image-1.png",
+      "verdicts": [
+        "RUBRIC legibility: pass - the blue nova set and the grey reference set are both traceable along their whole length, which is the near-coincidence the caption's residual 5.3e-16 predicts",
+        "RUBRIC data_ink: pass - contours, wall and four stationary-point markers carry all the ink",
+        "RUBRIC decoration: pass - no gradient, fill or background wash",
+        "RUBRIC contrast: pass - legend text is dark on white",
+        "RUBRIC table_form: pass - no tabular content is depicted",
+        "RUBRIC label_collision: pass - no clipped or overlapping text; the upper-left saddle marker clears the wall and the legend"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/terminal-state/iter-later-state.svg",
+      "image": "image-2.png",
+      "verdicts": [
+        "RUBRIC legibility: defect - the legend offers a blue 'nova' series but no blue mark appears anywhere in the panel, so the panel reads as single-series while its legend claims two",
+        "RUBRIC data_ink: pass - grey contours, wall and one axis triangle only; no decorative ink",
+        "RUBRIC decoration: pass - white background, no frame or grid",
+        "RUBRIC contrast: pass - both legend entries read clearly on white",
+        "RUBRIC table_form: pass - this is a spatial field, not a table",
+        "RUBRIC label_collision: pass - legend text is unclipped and clear of the vessel"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/tcv.svg",
+      "image": "image-3.png",
+      "verdicts": [
+        "RUBRIC legibility: defect - the two-entry legend advertises blue nova against grey imas-efit, but the panel shows only grey contours, so the comparison the legend promises is absent from the picture",
+        "RUBRIC data_ink: pass - grey contours and wall only",
+        "RUBRIC decoration: pass - no fill, gradient or background",
+        "RUBRIC contrast: pass - legend text dark on white",
+        "RUBRIC table_form: pass - spatial field, not tabular",
+        "RUBRIC label_collision: pass - no text clipped or overlapping"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/mastu.svg",
+      "image": "image-4.png",
+      "verdicts": [
+        "RUBRIC legibility: defect - same two-series legend over a single visible grey series; a reader cannot tell whether nova is absent or exactly coincident",
+        "RUBRIC data_ink: pass - grey contours, wall and reference markers only",
+        "RUBRIC decoration: pass - no gradient or fill",
+        "RUBRIC contrast: pass - legend text clears white",
+        "RUBRIC table_form: pass - spatial field",
+        "RUBRIC label_collision: pass - legend unclipped, no overlap with data"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/iter-row-replay.svg",
+      "image": "image-5.png",
+      "verdicts": [
+        "RUBRIC legibility: pass - blue replay contours and the grey reference set are both readable, and the two axis triangles are distinguishable despite sitting close together",
+        "RUBRIC data_ink: pass - contour families, wall and four markers; no decorative ink",
+        "RUBRIC decoration: pass - plain white canvas, frameless legend",
+        "RUBRIC contrast: pass - legend text reads clearly",
+        "RUBRIC table_form: pass - spatial comparison",
+        "RUBRIC label_collision: pass - no text clipped or overlapping; markers clear of the legend"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/bound-inputs/tcv-row-replay.svg",
+      "image": "image-6.png",
+      "verdicts": [
+        "RUBRIC legibility: pass - blue replay and grey reference contours are separately traceable, with a small but visible axis offset",
+        "RUBRIC data_ink: pass - contours and markers only",
+        "RUBRIC decoration: pass - no fill, no gradient",
+        "RUBRIC contrast: pass - legend text dark on white",
+        "RUBRIC table_form: pass - spatial field",
+        "RUBRIC label_collision: pass - legend clear, no clipped text"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/mastu-row-replay.svg",
+      "image": "image-7.png",
+      "verdicts": [
+        "RUBRIC legibility: pass - blue replay contours sit clear of the grey reference set, which is the poor agreement its 24.69% caption reports",
+        "RUBRIC data_ink: pass - contour families, wall and the stationary-point markers",
+        "RUBRIC decoration: pass - no gradient, fill or frame",
+        "RUBRIC contrast: pass - legend text reads on white",
+        "RUBRIC table_form: pass - spatial comparison",
+        "RUBRIC label_collision: pass - no text clipped or overlapping; one marker touches the wall stroke, recorded as a finding"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/iter.svg",
+      "image": "image-8.png",
+      "verdicts": [
+        "RUBRIC legibility: defect - the blue nova set is a wall-hugging band that leaves the vessel in the lower divertor while the grey reference set is a closed nested family, so the reader cannot compare like with like",
+        "RUBRIC data_ink: pass - two contour sets and the wall only",
+        "RUBRIC decoration: pass - no fill, gradient or shading",
+        "RUBRIC contrast: pass - legend text is dark on white",
+        "RUBRIC table_form: pass - spatial field, not tabular",
+        "RUBRIC label_collision: pass - no text is clipped or overlapping"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/mastu-row-replay.svg",
+      "image": "image-9.png",
+      "verdicts": [
+        "RUBRIC legibility: pass - the two contour families nearly coincide, which is what a 0.236% relative L2 looks like; individual levels remain countable",
+        "RUBRIC data_ink: pass - contours, wall and markers only",
+        "RUBRIC decoration: pass - no gradient, fill or background",
+        "RUBRIC contrast: pass - legend readable on white",
+        "RUBRIC table_form: pass - spatial comparison",
+        "RUBRIC label_collision: pass - no clipped or overlapping text"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/tcv-row-replay.svg",
+      "image": "image-10.png",
+      "verdicts": [
+        "RUBRIC legibility: pass - blue replay contours overlay the grey reference set closely and the two axis triangles are separately visible",
+        "RUBRIC data_ink: pass - contour families and markers carry the ink",
+        "RUBRIC decoration: pass - no decorative fill or gradient",
+        "RUBRIC contrast: pass - legend text clears the white background",
+        "RUBRIC table_form: pass - spatial field",
+        "RUBRIC label_collision: pass - legend and markers clear of each other"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/bound-inputs/mastu-row-replay.svg",
+      "image": "image-11.png",
+      "verdicts": [
+        "RUBRIC legibility: pass - grey reference and blue replay remain separable along their whole length",
+        "RUBRIC data_ink: pass - no ink beyond contours, wall and markers",
+        "RUBRIC decoration: pass - plain canvas",
+        "RUBRIC contrast: pass - legend text dark on white",
+        "RUBRIC table_form: pass - spatial comparison",
+        "RUBRIC label_collision: pass - no clipped or overlapping text"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/tcv-row-replay.svg",
+      "image": "image-12.png",
+      "verdicts": [
+        "RUBRIC legibility: pass - the blue replay family is visibly outside the grey reference family, which is the disagreement the 4.52% caption reports; each family is traceable",
+        "RUBRIC data_ink: pass - contours and markers only",
+        "RUBRIC decoration: pass - no gradient or fill",
+        "RUBRIC contrast: pass - legend text reads clearly",
+        "RUBRIC table_form: pass - spatial field",
+        "RUBRIC label_collision: pass - no text clipped or overlapping"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/tcv.svg",
+      "image": "image-13.png",
+      "verdicts": [
+        "RUBRIC legibility: pass - both families resolve and the axis triangles are visible, though the blue set is the wider of the two on this panel",
+        "RUBRIC data_ink: pass - contour families and stationary-point markers carry the weight",
+        "RUBRIC decoration: pass - no fill, gradient or background",
+        "RUBRIC contrast: pass - legend text clears white",
+        "RUBRIC table_form: pass - spatial comparison",
+        "RUBRIC label_collision: defect - the blue hollow saddle marker is drawn on the grey filled saddle marker at the lower null (about x=650, y=555), so the two coincide and cannot be told apart"
+      ]
+    },
+    {
+      "figure": "docs/figures/inverse-equilibrium-baseline/efit-comparison/backtracking/mastu-response-refused.svg",
+      "image": "image-14.png",
+      "verdicts": [
+        "RUBRIC legibility: pass - the grey reference map dominates the midplane and the small blue nova response is confined to the lower region, which matches a refused perturbation that leaves the plasma at the midplane",
+        "RUBRIC data_ink: pass - contour families, wall and both null sets, nothing else",
+        "RUBRIC decoration: pass - no gradient, fill or frame",
+        "RUBRIC contrast: pass - legend text dark on white",
+        "RUBRIC table_form: pass - spatial field",
+        "RUBRIC label_collision: pass - the upper grey saddle and the lower blue saddle are both clear of text and of the wall"
+      ]
+    }
+  ],
+  "session": {
+    "orientation_base_sha": "29981307f5481442f553f0786f758d7e57af07a1",
+    "read_only": true,
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/review-of-efit-comparison-ae6f253f21b0-figure"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:36:23.273647+00:00",
+  "total": null
+}

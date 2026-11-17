@@ -35,6 +35,16 @@
       "note": "s11 now places the limit where the H200 record measured it: the operator fits (39.5 GB), and the dense factorisation's temporaries take the live peak to 158 GB against 151 GB of card memory",
       "reason": "",
       "when": "2026-11-17T16:12:47.717988+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "29981307f5481442f553f0786f758d7e57af07a1",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "clause (2) no longer names a mechanism: whatever route fits the 8/40 solve must reproduce the existing route's interaction and probe fields on the uniform 80 mm mesh to 1e-12 in one process",
+      "reason": "",
+      "when": "2026-11-17T16:15:00.280801+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "s11 now places the limit where the H200 record measured it: the operator fits (39.5 GB), and the dense factorisation's temporaries take the live peak to 158 GB against 151 GB of card memory",
       "reason": "",
       "when": "2026-11-17T16:12:47.717988+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "29981307f5481442f553f0786f758d7e57af07a1",
+      "commit_basis": "edit",
+      "note": "clause (2) no longer names a mechanism: whatever route fits the 8/40 solve must reproduce the existing route's interaction and probe fields on the uniform 80 mm mesh to 1e-12 in one process",
+      "reason": "",
+      "when": "2026-11-17T16:15:00.280801+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261117T154608543082-plan-review-of-iron-core-magnetisation.json",

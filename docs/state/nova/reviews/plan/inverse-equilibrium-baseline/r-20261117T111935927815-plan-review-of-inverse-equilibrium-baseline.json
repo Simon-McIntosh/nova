@@ -48,9 +48,22 @@
       "finding": "reasoning-1",
       "reason": "The landing is in flight, not missing: the comparison run holds the row-replay tables, refusal reasons and panels in its worktree fragment, its repair is with the reviewer, and the lead ruled on 2026-11-17 that it lands on the GPU gate; the section declaration moves to done and the record gains its section at that landing.",
       "when": "2026-11-17T11:58:48.365488+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "That section is deferred behind an unlocked lead decision and no node can be dispatched from it; its done-when is redrafted, with a control, when the decision is locked.",
+      "when": "2026-11-17T12:00:19.197247+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "That section is deferred behind an unlocked lead decision and no node can be dispatched from it; its done-when is redrafted, with a control, when the decision is locked.",
+      "when": "2026-11-17T12:00:19.197247+00:00"
+    },
     "reasoning-1": {
       "action": "declined",
       "by": "",

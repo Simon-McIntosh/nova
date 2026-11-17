@@ -233,9 +233,10 @@ class FluxIterationFit:
         values[: self.magnetics.number] = np.asarray(
             self.sensor_rows(cells), dtype=np.float64
         )
-        values[self.magnetics.number] = float(np.sum(cells))
         if self._conductor_count:
+            values[: self.magnetics.number] += self._conductor_response @ currents
             values[self.magnetics.number + 1 :] = currents
+        values[self.magnetics.number] = float(np.sum(cells))
         if not np.all(np.isfinite(values)):
             raise ValueError("the held-map observation contains non-finite values")
         return values
@@ -339,10 +340,25 @@ class FluxIterationFit:
         for index in range(max_passes):
             active = self._profile(coefficients)
             operator = active.operator
+            columns = []
             try:
                 cells = self._cell_current(active, flux)
                 sensor_evaluations += 1
                 values = self._rows(cells, coefficients[self._profile_count :])
+                for column in range(self._profile_count):
+                    direction = np.zeros_like(coefficients)
+                    direction[column] = 1.0
+                    stepped = self._cell_current(
+                        self._profile(coefficients + direction), flux
+                    )
+                    sensor_evaluations += 1
+                    difference = stepped - cells
+                    columns.append(
+                        np.r_[
+                            np.asarray(self.sensor_rows(difference), dtype=np.float64),
+                            float(np.sum(difference)),
+                        ]
+                    )
             except ValueError:
                 if index == 0:
                     raise
@@ -350,26 +366,16 @@ class FluxIterationFit:
                 break
             residual = (values - target) * weight
             misfit = float(np.max(np.abs(residual)))
-            columns = []
-            for column in range(coefficients.size):
-                direction = np.zeros_like(coefficients)
-                direction[column] = 1.0
-                stepped = self._cell_current(
-                    self._profile(coefficients + direction), flux
-                )
-                sensor_evaluations += 1
-                difference = stepped - cells
-                columns.append(
-                    np.r_[
-                        np.asarray(self.sensor_rows(difference), dtype=np.float64),
-                        float(np.sum(difference)),
-                    ]
-                )
             response = np.column_stack(columns)
             if self._conductor_count:
-                conductor = np.zeros((size + 1, self._conductor_count))
+                response = np.vstack(
+                    (response, np.zeros((self._conductor_count, response.shape[1])))
+                )
+                conductor = np.zeros(
+                    (size + 1 + self._conductor_count, self._conductor_count)
+                )
                 conductor[:size] = self._conductor_response
-                conductor[size + 1 :, :] = np.eye(self._conductor_count)
+                conductor[size + 1 :] = np.eye(self._conductor_count)
                 response = np.column_stack((response, conductor))
             correction, covariance, spectrum, null = whitened_solve(
                 response,
@@ -419,6 +425,7 @@ class FluxIterationFit:
             terminal_topology = None
         try:
             terminal_cells = self._cell_current(active, flux)
+            sensor_evaluations += 1
             terminal_values = self._rows(
                 terminal_cells, coefficients[self._profile_count :]
             )

@@ -12,6 +12,14 @@
   ],
   "completed_at": "2026-11-17T22:43:24.058Z",
   "dispatched_at": "2026-11-17T22:43:03Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-17T23:26:23.777176+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261117T105922145451-polygon-stable-evaluator"
+    }
+  },
   "findings": [
     {
       "file": "tests/biot/test_moment_program_identity.py",

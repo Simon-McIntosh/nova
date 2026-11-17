@@ -18,11 +18,18 @@ import json
 import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+
+from scripts.iron_linear_magnetisation.controls import exact_shielding  # noqa: E402
+
 TOLERANCE = 0.02
 CONVERGENCE_TOLERANCE = 0.005
 
-# exact_shielding from make_pulse.py; the plan rounds the 0.5 case to 195.1
-EXACT = {0.9: 61.101838, 0.5: 195.055750}
+# The exact factor comes from the same owner make_pulse.py writes the pulse
+# from, so a scorer cannot drift from the case it scores.
+MU_R = 1000.0
+EXACT = {ratio: round(exact_shielding(ratio, MU_R), 6) for ratio in (0.9, 0.5)}
 
 # Exterior probes score the shielding; the interior one is the control where the
 # shell must not shield.

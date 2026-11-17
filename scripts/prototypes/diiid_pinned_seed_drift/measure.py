@@ -40,6 +40,7 @@ def main():
     parser.add_argument("--compare-integration", action="store_true")
     parser.add_argument("--source-read-only", action="store_true")
     parser.add_argument("--normalisation-reference", type=Path)
+    parser.add_argument("--hold-profile-ends", action="store_true")
     arguments = parser.parse_args()
     assert jax.config.jax_enable_x64 is True
     revision = (
@@ -71,6 +72,19 @@ def main():
         row, arguments.frame, pinned.PSEUDO_WALL_EXPANSION
     )
     print(f"BUILT seconds={time.monotonic() - started:.3f}", flush=True)
+    if arguments.hold_profile_ends:
+        from benchmarks.diiid_forward_gs_match import _profile_function
+
+        source = profile.operator.source
+        functions = {
+            key: _profile_function(
+                getattr(source.core, key).coordinate,
+                getattr(source.core, key).values,
+            )
+            for key in ("p_prime", "ff_prime")
+        }
+        source = replace(source, core=replace(source.core, **functions))
+        profile = replace(profile, operator=replace(profile.operator, source=source))
     time_ms = float(row["efit_times"][arguments.frame])
     if arguments.source_read_only:
         shipped = current = profile.operator.external_current
@@ -118,6 +132,7 @@ def main():
         "undo_average": arguments.undo_average,
         "point_current": arguments.point_current,
         "source_read_only": arguments.source_read_only,
+        "hold_profile_ends": arguments.hold_profile_ends,
         "topology": {
             key: np.asarray(getattr(topology, key)).tolist()
             for key in ("axis", "axis_flux", "boundary_flux", "x_point", "diverted")

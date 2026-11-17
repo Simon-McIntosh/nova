@@ -35,6 +35,16 @@
       "note": "Clause (1) now quotes the nested class forward-solve count from the landed known-answer record and says no nested wall is quoted because that record carries none.",
       "reason": "",
       "when": "2026-11-17T11:49:07.176207+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "cb31d425c257376739a74df849af8682a1d8862d",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The section now says each case starts from the stored imas-efit flux map, which has an axis on all three, and that the ITER refusal was the nested forward solve losing the axis; clause (2) states what the ITER record must say if the iteration loses it too.",
+      "reason": "",
+      "when": "2026-11-17T11:49:15.132870+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "Clause (1) now quotes the nested class forward-solve count from the landed known-answer record and says no nested wall is quoted because that record carries none.",
       "reason": "",
       "when": "2026-11-17T11:49:07.176207+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "cb31d425c257376739a74df849af8682a1d8862d",
+      "commit_basis": "edit",
+      "note": "The section now says each case starts from the stored imas-efit flux map, which has an axis on all three, and that the ITER refusal was the nested forward solve losing the axis; clause (2) states what the ITER record must say if the iteration loses it too.",
+      "reason": "",
+      "when": "2026-11-17T11:49:15.132870+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261117T110231852554-plan-review-of-inverse-equilibrium-baseline.json",

@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T12:06:46.087Z",
+  "dispatched_at": "2026-11-17T12:06:31Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/forward-solve-near-stored-states.html:45",
+      "id": "anchors_resolve-1",
+      "reason": "the plan's sole evidence anchor is a file no reader of the branch can open, so either the fragment must land with this plan or the citation must move to what does resolve.",
+      "text": "the cited evidence fragment does not resolve at the reviewed commit or on main: `git cat-file -e 86c1a52f8:docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html` exits 128, and the tracked directory holds only `known-answer-recovery.html` at HEAD, main and origin/main; the blob exists only in commits no branch contains (`74833da9` \"docs: record durable receipt owner reuse checks\", `766ac4cd19`, `ee02bc413d`, where `git branch -a --contains 74833da9` prints nothing), so the file that carries every number \u00a71 measures against cannot be opened by a worker or a later reader \u2014 content confirmed present in that blob: \"MAST-U Lower response perturbation refused; residual 1.237999574577207e-4, reason 12\", \"TCV Stored-field residual 0.030364200526436996, reason 12 \u2026 two cold seeds failed axis qualification\", `ACTIVE_SET_STEP_REFUSED`, which is exactly what \u00a71 quotes",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/forward-solve-near-stored-states.html:89-91",
+      "id": "reasoning-1",
+      "reason": "without a discriminating measure \u00a72's verdict is a choice, and it decides whether \u00a73 owes a repair at all.",
+      "text": "\u00a72's done-when commits to naming, per case, one of \"the requested state is not an equilibrium of the machine as described\" or \"it is and the solve does not reach it\", yet its two measures are the largest qualifying step along the profile direction and the stage at which qualification is first lost, and both are properties of the forward solve whose failure is the thing in question: a solve that refuses at every perturbation inside 1 % supports either verdict, so the gate cannot fail for the reason \u00a72 names and \u00a73's scope (\"every case \u00a72 marks as reachable\") is set by an unfalsifiable verdict \u2014 the endpoint needs an existence-side witness independent of the solve (the nova Grad-Shafranov residual of the target state at its own fixed currents, or an explicit statement that an imas-efit-built state always counts as existing and the verdict is decided on a machine-description comparison)",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "86c1a52f8d9d7552de0aa3c2a434757dbc70e2c9",
+  "plan_fingerprint": "2e0bf4079783a34e0c91e370d8855d7f9183c12d8b8c137ff5361b7b2719fa40",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 0,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T120545276793-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "1e760e3b16a544025bf80e81cfc46898aa8221ce",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the measurements the plan \"starts from\" are cited at `docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html`, which is not in the tree the plan lands to.",
+    "done_when": "pass \u2014 \u00a71 names a positive control (the unperturbed MAST-U state below 1e-10) that fails if the harness cannot register a qualifying state, \u00a72's control fails if the bracketing instrument misreports the zero-perturbation point, and \u00a73 names a base-revision arm that must reproduce the \u00a71 refusals; \u00a73's \"the forward gate that passes at the base revision\" is left unnamed by design and belongs to the node brief.",
+    "evidence_paths": "pass \u2014 the only path the plan fixes for output is `docs/evidence/archive/forward-solve-near-stored-states-landed.html`, a durable record location in the house convention; per-job gate logs are left to the node.",
+    "naming": "pass \u2014 plan text carries \u00a7-labels only; no symbol, file or comment is asked to carry a plan label or a tracker id.",
+    "reasoning": "a finding \u2014 \u00a72 claims to separate \"not an equilibrium of the machine\" from \"the solve cannot reach it\" but every measurement it names is a property of the forward solve, so the discriminating quantity is not among them.",
+    "single_goal": "pass \u2014 \u00a71 delivers reproducible standing cases, \u00a72 a bracketed verdict per case, \u00a73 the repair, with the regression and base arms as guards rather than second deliverables.",
+    "wiring": "pass \u2014 `plan-section-depends-on` reads `s2:[\u2026#s1]`, `s3:[\u2026#s2]` and matches the Section contract's \"Waits on\" column; the cited upstream `converged-forward-solve` resolves (`docs/plans/converged-forward-solve.html`, `docs/evidence/archive/converged-forward-solve-landed.html`), and the plan needs no `informs` because inverse-equilibrium-baseline's own `\u00a79` line 194 states it \"waits on neither\"."
+  },
+  "section_digests": {
+    "_document": "9895bb348f263c92b2f814901edac43c580b128c76511f07830d01b8657777ff",
+    "s0": "a943ca5a65757bf03b737f3b8f9e4aa409dc831d0a00e3c93b3471bede6ec813",
+    "s1": "a787311b9419439998a576717b11ce1971e907aada15c0735a074c080d764435",
+    "s2": "86726d3081ca7db8f9e71fcff9fe2135c61fd12b7213003bbe5c28ae03322e03",
+    "s3": "4fc0dcf4eabe5e8cb66a7223032c802d1224e7c58d3c273f84d887ec826991df"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T12:22:23.580220+00:00",
+  "total": null
+}

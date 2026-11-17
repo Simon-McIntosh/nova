@@ -41,7 +41,81 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 44,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3ab72680615f289c36e398c1918f55b997ad1a4b",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The cost ceiling is now stated against the measured forward-call count: the wall per reconstruction may exceed that count times the warm forward wall by at most a quarter, and the control adds forward calls.",
+      "reason": "",
+      "when": "2026-11-17T16:03:06.947815+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3ab72680615f289c36e398c1918f55b997ad1a4b",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "By lead ruling on 2026-11-17 the q95 band is judged with one calculator on both flux maps, and each code own stored value is reported beside it as a definition difference.",
+      "reason": "",
+      "when": "2026-11-17T16:03:19.410262+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "The form of this estimator is the deliverable the lead asked for on 2026-11-17, a fit solved inside the equilibrium iteration, so stating that form is the endpoint and not a method left to the worker; how each pass is computed is not prescribed.",
+      "when": "2026-11-17T16:03:33.210763+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3ab72680615f289c36e398c1918f55b997ad1a4b",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The new section now waits on the comparison section, whose stored-case reader and row construction it runs on.",
+      "reason": "",
+      "when": "2026-11-17T16:03:44.283528+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3ab72680615f289c36e398c1918f55b997ad1a4b",
+      "commit_basis": "edit",
+      "note": "The cost ceiling is now stated against the measured forward-call count: the wall per reconstruction may exceed that count times the warm forward wall by at most a quarter, and the control adds forward calls.",
+      "reason": "",
+      "when": "2026-11-17T16:03:06.947815+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "3ab72680615f289c36e398c1918f55b997ad1a4b",
+      "commit_basis": "edit",
+      "note": "By lead ruling on 2026-11-17 the q95 band is judged with one calculator on both flux maps, and each code own stored value is reported beside it as a definition difference.",
+      "reason": "",
+      "when": "2026-11-17T16:03:19.410262+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The form of this estimator is the deliverable the lead asked for on 2026-11-17, a fit solved inside the equilibrium iteration, so stating that form is the endpoint and not a method left to the worker; how each pass is computed is not prescribed.",
+      "when": "2026-11-17T16:03:33.210763+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3ab72680615f289c36e398c1918f55b997ad1a4b",
+      "commit_basis": "edit",
+      "note": "The new section now waits on the comparison section, whose stored-case reader and row construction it runs on.",
+      "reason": "",
+      "when": "2026-11-17T16:03:44.283528+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261117T120642867185-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261117T120642867185-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "03fda10f3ff7095e1e31411c2b084732aee48bdd",
   "rubric": "content",

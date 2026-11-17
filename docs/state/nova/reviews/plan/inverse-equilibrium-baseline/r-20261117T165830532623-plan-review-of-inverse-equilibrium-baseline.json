@@ -1,0 +1,61 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T17:14:46.783Z",
+  "dispatched_at": "2026-11-17T17:14:17Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261117T165830532623-plan-review-of-inverse-equilibrium-baseline/plan.html:190",
+      "id": "reasoning-1",
+      "reason": "a worker who runs the shipped configuration gets live_pp=0 and cannot construct the generating state at all, so the section is unsatisfiable and \u00a77, which waits on it, never starts; stating the basis as a shared precondition of the run (as the section already does for the disabled priors) is what makes the endpoint reachable.",
+      "text": "\u00a78 makes the generating state's profiles \"members of the basis imas-efit resolves for this run\", but that basis is not a fact the worker chooses: configuration/machines/ITER/efitOptions.xml inherits the shared template's autoDegree, and src/timeSliceNumericalControls.cpp:applyAutoDegree initialises ppDeg=0 and only elevates a family that the regime row already raised, so a magnetics-only ITER slice resolves live_pp=0 (recorded AUTODEGREE line: regime=magnetics-only/large-aspect pp_ndeg=0 ff_ndeg=2 live_pp=0 live_ff=1), while the plan's own \u00a72 comment states ITER's resolved fit as \"one live p\u2032 and two live FF\u2032 functions\" \u2014 the basis a magnetics-only nova-configured run yields therefore contains only p\u2032\u22610, which the delivered \u00a78 run measured as raising NoQualifiedAxisError (job 1321000) and which the run only escaped by adding its own configuration naming both degrees \u2014 so \u00a78 as written asks for a generating state in a basis that, under the configuration the section describes (priors disabled), admits no qualified state, and its clause (1) demands convergence and bands with no branch for that outcome",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/inverse-equilibrium-baseline/r-20261117T165830532623-plan-review-of-inverse-equilibrium-baseline/plan.html:190",
+      "id": "done_when-1",
+      "reason": "a band that an arbitrary gauge constant satisfies cannot fail, so the node's flux check reduces to the span while the plan claims five bands; moving the band onto the flux span and reporting the gauge constant makes the band able to fail and makes it match the record it cites.",
+      "text": "\u00a78 clause (2) requires \"the boundary and axis flux within 2 % of the axis-to-boundary span after each state's stored flux sign is read and one additive constant, reported in the record, aligns the two maps' axis flux\"; once an additive constant is chosen to align the two axis fluxes the axis-flux difference is zero by construction, so that half of the band holds for any reconstruction however wrong, and only the flux span carries information \u2014 the delivered \u00a78 record shows what the informative measure looks like (axis flux \u221273.211 Wb against \u221273.528 Wb, span 76.366 Wb, a 0.317 Wb difference reported as 0.41 % of the span, with the +0.3 Wb constant used only for the overlay figure), so the clause as written describes a measurement that cannot fail, not the one the record delivers",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5c235a20fbf95405de3bd097e8440e2771235d47",
+  "plan_fingerprint": "f1f099c83d23f7aaa0317723537b423def8fcbc84b723053dff3aea517bfa236",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 49,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T165830532623-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "d55c949cccc852c779b3055a7d5cd4de474bdd24",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a78's references resolve: \u00a71 has landed (merge 814f91c4b is an ancestor of main, and docs/evidence/fragments/inverse-equilibrium-baseline/known-answer-recovery.html exists), \u00a77 exists in both the snapshot and the table, the decision `efit-on-synthetic-rows` exists with `data-sections=\"s7,s8\"`, and \u00a70's figure /nova/figures/inverse-equilibrium-baseline/inverse-seam.svg exists on disk.",
+    "done_when": "a finding \u2014 \u00a78 clause (2) bands the axis flux after an additive constant that aligns the two maps' axis flux (snapshot plan.html:190), which makes that band exact by construction.",
+    "evidence_paths": "pass \u2014 \u00a78 names no session or node-local path; its outputs follow the plan's declared record path (docs/evidence/archive/inverse-equilibrium-baseline-landed.html) and the figures convention under docs/figures/inverse-equilibrium-baseline/, which exists.",
+    "naming": "pass \u2014 \u00a78 carries no plan label, ticket number or stage name into a symbol or file name; it speaks of the generating state, the fit and the run.",
+    "reasoning": "a finding \u2014 \u00a78 requires the generating state's profiles to be \"members of the basis imas-efit resolves for this run\", but imas-efit's shipped ITER configuration resolves no live p' function on a magnetics-only slice, so the only state in the resolved basis is one that cannot qualify.",
+    "single_goal": "pass \u2014 \u00a78 delivers one thing, a converged imas-efit reconstruction of nova-written ITER rows measured against the generating state, with its bands, control and overlay panel.",
+    "wiring": "pass \u2014 \u00a78 declares no depends-on (it reuses the landed \u00a71 at merge 814f91c4b), the contract table's \"\u00a71 (landed)\" matches, the decision `efit-on-synthetic-rows` lists `data-sections=\"s7,s8\"`, and \u00a73, \u00a74 and \u00a77 all declare \u00a78 as the supplier they read."
+  },
+  "section_digests": {
+    "_document": "fb98dbb43fc2642534ec98e1fda5075ba9f6672c5bcad11683c8bf49cd31255d",
+    "s0": "9fe9f7777ce4e7201a722d96a20cbfd973e35283017a99e10585518af735b3ef",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "1d7c7611f002d7765b98531126cc095d6d244b387578c5d44d7284ff93c9e59c",
+    "s3": "ffe1ae40fdd119d382956b68d70b5ac439dfd6ba20fecc88ab8ca5d01fd2a8a5",
+    "s4": "d9ed8ee2d1feb4975b36a8edbb075492994edb9514fcaf73a6c1f921f2bf9736",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "cadfba00a23e3a3b6ea0fbee46a46eb276970d776c456bd1a53931456d6f8e09",
+    "s7": "5c750c79d813b34b96a3b3b418cd41dd92a06de78455a410a3cfd366c1aeabee",
+    "s8": "71cca4c1e9d10b72885eb3a954ae185794a456c149adaaa1825f7b0d58669a7a",
+    "s9": "6b59708e5b47c987c440323356fb9dd0f2ec4438ce599455f755a5cf0772d5bb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T17:23:57.738051+00:00",
+  "total": null,
+  "traced_units": [
+    "s8"
+  ]
+}

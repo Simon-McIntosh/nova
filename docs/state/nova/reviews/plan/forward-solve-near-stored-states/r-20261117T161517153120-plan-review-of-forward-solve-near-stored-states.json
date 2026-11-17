@@ -1,0 +1,178 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T16:38:39.627Z",
+  "dispatched_at": "2026-11-17T16:37:55Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:94",
+      "id": "reasoning-1",
+      "reason": "\u00a72's verdict would be decided by measuring a different state, and \u00a73's scope (\"every case \u00a72 marks as reachable\") follows from that verdict.",
+      "text": "the witness is \"the residual of the stored imas-efit flux map under the forward operator at the stored coefficients\", i.e. at zero perturbation, while \u00a71's MAST-U refusal and \u00a72(1)'s bracket live at the class's first perturbed solve; \u00a70 records the stored state itself qualifying at 5.3e-16, so this witness necessarily reports \"exists and the solve does not reach it\" for the state that already converges and says nothing about the displaced state \u00a73 must repair",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:94",
+      "id": "reasoning-2",
+      "reason": "the verdict's existence arm is what decides whether a repair is owed, so an inference that cannot distinguish \"this map is not a solution\" from \"no solution exists\" misroutes whole cases.",
+      "text": "\"A residual outside it is not an equilibrium of the machine as described\" does not follow: a non-zero residual at the stored map shows that map is not a pure fixed point of nova's operator at those coefficients, not that no free-boundary solution exists for those currents and profiles, since another psi could satisfy them, so a case can be recorded non-existent and dropped from \u00a73 on evidence that only shows imas-efit's map differs from nova's discretised operator",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:94",
+      "id": "reasoning-3",
+      "reason": "the rule as written admits a non-equilibrium as existing and sends it to repair, inverting \u00a72's purpose; the tolerance has to be argued in the residual's own units.",
+      "text": "the threshold \"inside the 1 % row-replay agreement\" imports a sensor-row agreement measured against imas-efit's fitted amplitudes into a bound on a Grad-Shafranov residual stated as a fraction of the axis-to-boundary flux span, a different quantity and scale; 1 % of the flux span is many orders looser than the 1e-10 qualification threshold the plan refuses to move, so a stored map that plainly fails the forward operator would be declared an equilibrium",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:95",
+      "id": "done_when-1",
+      "reason": "with no case that must be reported as not an equilibrium, the gate cannot show the witness ever fires the non-existence arm, so \u00a72's verdict could pass without discriminating anything.",
+      "text": "the declared control is \"the same measurement on the \u00a71 positive control reports a qualifying state at zero perturbation\", a state known to qualify with its outcome fixed in advance; it exercises only the existence arm and passes unchanged for a witness that always reports existence",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:94",
+      "id": "done_when-2",
+      "reason": "an undefined condition leaves cases with no admissible verdict and the node would invent its own threshold, which the plan cannot then audit.",
+      "text": "\"with a well-conditioned linearisation\" states no threshold for the smallest-to-largest singular value ratio, and the rule is silent on the residual-inside-but-ill-conditioned cell, so the verdict \u00a73 depends on is not computable from the record as specified",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "a6735bc455a411d4d194f70495ca8986e2866a94",
+  "plan_fingerprint": "fe1059ec092981fe04c790d26cf55082521977132e575f8fdf2bcb485d086b61",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 1,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a6735bc455a411d4d194f70495ca8986e2866a94",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The existence verdict and its witness are withdrawn. The section now gives each case a verdict on a measurement that can fail: reached, when the displaced state qualifies through a listed sequence of intermediate solves, or not reached, with the sequences tried; it makes no claim that an unreached state does not exist.",
+      "reason": "",
+      "when": "2026-11-17T16:55:26.260752+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a6735bc455a411d4d194f70495ca8986e2866a94",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The existence verdict and its witness are withdrawn. The section now gives each case a verdict on a measurement that can fail: reached, when the displaced state qualifies through a listed sequence of intermediate solves, or not reached, with the sequences tried; it makes no claim that an unreached state does not exist.",
+      "reason": "",
+      "when": "2026-11-17T16:55:38.440472+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a6735bc455a411d4d194f70495ca8986e2866a94",
+      "commit_basis": "edit",
+      "finding": "reasoning-3",
+      "note": "The existence verdict and its witness are withdrawn. The section now gives each case a verdict on a measurement that can fail: reached, when the displaced state qualifies through a listed sequence of intermediate solves, or not reached, with the sequences tried; it makes no claim that an unreached state does not exist.",
+      "reason": "",
+      "when": "2026-11-17T16:55:50.048394+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a6735bc455a411d4d194f70495ca8986e2866a94",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The existence verdict and its witness are withdrawn. The section now gives each case a verdict on a measurement that can fail: reached, when the displaced state qualifies through a listed sequence of intermediate solves, or not reached, with the sequences tried; it makes no claim that an unreached state does not exist.",
+      "reason": "",
+      "when": "2026-11-17T16:56:03.713040+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a6735bc455a411d4d194f70495ca8986e2866a94",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The control is now a case that must fail: the direct solve of the displaced MAST-U state with no intermediate solves reproduces the refusal the first section recorded.",
+      "reason": "",
+      "when": "2026-11-17T16:56:17.712695+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "a6735bc455a411d4d194f70495ca8986e2866a94",
+      "commit_basis": "edit",
+      "note": "The control is now a case that must fail: the direct solve of the displaced MAST-U state with no intermediate solves reproduces the refusal the first section recorded.",
+      "reason": "",
+      "when": "2026-11-17T16:56:17.712695+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "a6735bc455a411d4d194f70495ca8986e2866a94",
+      "commit_basis": "edit",
+      "note": "The existence verdict and its witness are withdrawn. The section now gives each case a verdict on a measurement that can fail: reached, when the displaced state qualifies through a listed sequence of intermediate solves, or not reached, with the sequences tried; it makes no claim that an unreached state does not exist.",
+      "reason": "",
+      "when": "2026-11-17T16:56:03.713040+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "a6735bc455a411d4d194f70495ca8986e2866a94",
+      "commit_basis": "edit",
+      "note": "The existence verdict and its witness are withdrawn. The section now gives each case a verdict on a measurement that can fail: reached, when the displaced state qualifies through a listed sequence of intermediate solves, or not reached, with the sequences tried; it makes no claim that an unreached state does not exist.",
+      "reason": "",
+      "when": "2026-11-17T16:55:26.260752+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "a6735bc455a411d4d194f70495ca8986e2866a94",
+      "commit_basis": "edit",
+      "note": "The existence verdict and its witness are withdrawn. The section now gives each case a verdict on a measurement that can fail: reached, when the displaced state qualifies through a listed sequence of intermediate solves, or not reached, with the sequences tried; it makes no claim that an unreached state does not exist.",
+      "reason": "",
+      "when": "2026-11-17T16:55:38.440472+00:00"
+    },
+    "reasoning-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "a6735bc455a411d4d194f70495ca8986e2866a94",
+      "commit_basis": "edit",
+      "note": "The existence verdict and its witness are withdrawn. The section now gives each case a verdict on a measurement that can fail: reached, when the displaced state qualifies through a listed sequence of intermediate solves, or not reached, with the sequences tried; it makes no claim that an unreached state does not exist.",
+      "reason": "",
+      "when": "2026-11-17T16:55:50.048394+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261117T161517153120-plan-review-of-forward-solve-near-stored-states.json",
+  "review_run_id": "r-20261117T161517153120-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "06f170aa1c1f60209aab4dff648153775511fe18",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 plan and section anchors resolve; \u00a70's cited fragment `docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html` is absent on this branch, which \u00a71 states is expected because that record arrives with the inverse baseline's comparison landing, so it is a declared future artifact rather than a dead pointer.",
+    "done_when": "a finding \u2014 \u00a72's only declared control is the \u00a71 positive control, a state already known to qualify, so the control cannot show the witness refusing a non-equilibrium, and the \"well-conditioned\" half of its verdict rule carries no threshold.",
+    "evidence_paths": "pass \u2014 the plan's record is `docs/evidence/archive/forward-solve-near-stored-states-landed.html` under the repository evidence tree, not a scratch path, and \u00a72 names no temporary location.",
+    "naming": "pass \u2014 \u00a72 introduces no symbol, file or ticket identifier into code and its prose carries no changelog labels.",
+    "reasoning": "a finding \u2014 the witness is taken at the stored coefficients and is then read as an existence proof; neither holds, since the state whose existence is in question for MAST-U is the displaced one, and a stored map's residual shows that map is not a solution, not that no solution exists.",
+    "single_goal": "pass \u2014 \u00a72's one deliverable is the per-case verdict separating non-existence from unreachability, and all three measurement items feed it.",
+    "wiring": "pass \u2014 `plan-section-depends-on` makes \u00a72 depend on `forward-solve-near-stored-states#s1`, that anchor exists (line 81), and \u00a73 depends on \u00a72, which is the order the narrative states."
+  },
+  "section_digests": {
+    "_document": "9895bb348f263c92b2f814901edac43c580b128c76511f07830d01b8657777ff",
+    "s0": "66c1d333dde62b6fc022136f37cc6884c840cb88f5daacc984d0009d39c7ea47",
+    "s1": "ee1c051cf970fa5e6714498026e0dfac4e0648979b39b6858da162a5ee6f3fad",
+    "s2": "870e0d0c5698422e68b6ef4646b4fd820b4a9327fa7bb6c90084f15d119790cc",
+    "s3": "4fc0dcf4eabe5e8cb66a7223032c802d1224e7c58d3c273f84d887ec826991df"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:46:52.981118+00:00",
+  "total": null,
+  "traced_units": [
+    "s2"
+  ]
+}

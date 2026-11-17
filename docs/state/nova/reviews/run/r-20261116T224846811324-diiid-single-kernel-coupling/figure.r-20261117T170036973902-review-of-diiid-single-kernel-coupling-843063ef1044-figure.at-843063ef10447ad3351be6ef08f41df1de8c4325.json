@@ -1,0 +1,122 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-17T17:22:22.660Z",
+  "dispatched_at": "2026-11-17T17:01:33Z",
+  "figures": {
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-137-diverted.svg": {
+      "contrast": "pass \u2014 blue 5.37:1, dark 12.63:1, grey 3.11:1, text 19.7:1.",
+      "data_ink": "pass \u2014 89.7% pure white; solved contours, EFIT dashes, wall, null markers and text only.",
+      "decoration": "pass \u2014 axes off, flat white ground, no shading or stylisation.",
+      "label_collision": "pass \u2014 no ink at any canvas border, no text over data, and the axis and saddle markers sit clear of the text blocks.",
+      "legibility": "pass \u2014 the paired diverted case reads at a glance: nearly coincident nested contours on the left with 'residual 1.807e-12 / converged True', and the unconverged right arm with 'residual 3.328e-04 / converged False'; both panels carry their lower X-point offset beneath.",
+      "table_form": "pass \u2014 a paired flux-contour comparison, not tabular information."
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-146-diverted.svg": {
+      "contrast": "pass \u2014 blue 5.37:1, dark 12.63:1, grey 3.11:1, text 19.7:1 on white.",
+      "data_ink": "pass \u2014 89.9% pure white; contours, wall, null markers and text are the only ink, with no fill or banding.",
+      "decoration": "pass \u2014 no axes furniture, no gridlines, no shading, no styled theme.",
+      "label_collision": "pass \u2014 no border ink and no text on or beside data; the two axis triangles overlap each other slightly at the core but stay individually readable, and no label is involved.",
+      "legibility": "pass \u2014 the converged pair reads cleanly: nested contours with the EFIT dashes visible between the blue strokes, a solid blue axis triangle beside the darker EFIT triangle at the core, and a footnote under each panel giving its residual and lower X-point offset.",
+      "table_form": "pass \u2014 paired flux contours; comparing two kernels' fields is the point of the figure and is not tabular information."
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-146-limited.svg": {
+      "contrast": "pass \u2014 the measured values match the other panels: blue 5.37:1, dark 12.63:1, grey 3.11:1, text 19.7:1.",
+      "data_ink": "pass \u2014 88.7% pure white; blue solved contours over dashed EFIT contours, a 1.5 pt grey wall, and marker glyphs, all as line work with no filled region.",
+      "decoration": "pass \u2014 axes off, one flat white ground, no gridline, frame, box or shading.",
+      "label_collision": "pass \u2014 no ink at the canvas border; legend, titles and footnotes all sit in clear space. The qualified lower-saddle crosses near the lower wall sit close together but remain separate, and no text is near them.",
+      "legibility": "pass \u2014 two arm panels with their own contour sets under the shared legend, each closed by its two-line footnote. The unconverged fields are visibly more distorted than the diverted pairs, which is what this figure exists to show, and each lobe and the wall beneath it remain traceable.",
+      "table_form": "pass \u2014 a paired flux-contour comparison, spatial by construction; the numbers it supports are already tabulated in the same section."
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-179-limited.svg": {
+      "contrast": "pass \u2014 solved blue at 5.37:1, EFIT dark rgb(51,51,51) at 12.63:1, wall grey at 3.11:1, and every title and footnote at rgb(11,11,11) 19.7:1 against white.",
+      "data_ink": "pass \u2014 89.3% of the canvas is pure white. The ink is line work only: blue solved contours at 3.0 pt drawn over dashed EFIT contours at 2.6 pt in rgb(51,51,51), the wall in grey at 1.5 pt, and five small marker glyphs. No fill, band or area shading appears anywhere.",
+      "decoration": "pass \u2014 axes off, so no spines, ticks or gridlines; flat white background, no gradient or stylisation competing with the contours.",
+      "label_collision": "pass \u2014 no ink on any canvas border, so nothing is clipped; the legend, the arm titles and the two footnote lines all sit in clear space outside the plotting region and none is over data. The visible overlap in this figure is between two data markers, not labels, and is recorded as a non-blocking finding.",
+      "legibility": "pass \u2014 two side-by-side panels titled 'hybrid uniform' and 'polygon uniform' under one shared three-entry legend; both arms' contours, both null sets and the wall resolve at 1399x720, and the two-line footnote under each panel states the terminal state and the lower X-point offset, so the paired comparison needs no cross-reading.",
+      "table_form": "pass \u2014 a poloidal flux-contour panel pair; the reader compares contour shape, field alignment and null position between two kernels, which is what a contour plot carries and a table does not."
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/uniform-response-difference.svg": {
+      "contrast": "pass \u2014 measured on the rendered PNG: contour blue rgb(51,102,204) at 5.37:1 on white, magenta highlight rgb(184,50,126) at 5.5:1, wall grey rgb(146,146,146) at 3.11:1, and the black titles, legend and metric text rgb(11,11,11) at 19.7:1.",
+      "data_ink": "pass \u2014 93.6% of the 1399x720 canvas is pure white (255,255,255). The ink is contour strokes only: four blue levels at rgb(51,102,204) and 2.6 pt, the highlighted level at rgb(184,50,126) and 3.0 pt, and the wall in grey rgb(146,146,146) at 1.5 pt. There is no filled region, band, scatter patch or area fill anywhere in the image.",
+      "decoration": "pass \u2014 the axes are off, so the image carries no spines, ticks, tick labels or gridlines; the background is one flat white with no gradient, panel shading, drop shadow or styled theme. The only non-data marks are the legend samples and the callout the caption explains.",
+      "label_collision": "pass \u2014 the outermost pixel row and column on all four borders carry no ink, so no text is clipped at the canvas edge. The magenta '0.12%' callout sits in the clear gap left of the wall panel with a 1.2 pt leader running into its loop, touching no contour, panel title, legend entry or metric line.",
+      "legibility": "pass \u2014 three panels titled 'grid targets', 'wall targets' and 'sample targets' under one 14 pt five-entry legend across the top, each panel closing with its own metric line. The grid panel reads in one glance as two long-dashed 0.05% curves tracking just inside and just outside the vessel, and the sample panel as one curve following the vessel outline. The wall panel is the dense one, carrying all four blue levels over 84 wall targets. Checked at the 900 px page width the five levels stay separable: the four blue styles differ categorically by stroke pattern, measured at that scale as a solid stroke, roughly 9 px long dashes, roughly 4.6 px short dashes and roughly 2.3 px dots, with the fifth level carried in magenta, so a reader following one loop can name its level. The magenta level also carries a direct '0.12%' callout, so the highest loop needs no dash reading at all.",
+      "table_form": "pass \u2014 the image is a relative-difference field plotted over source-cell position for three target families, a spatial relationship read as a pattern of level loops; the summary numbers it repeats already stand as a table in the same section, and the map supplies the location of the maxima, which the table cannot."
+    }
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Non-blocking; the reviewer confirms both 179L lower-null marks are individually traceable and the caption states their offset",
+      "recorded_at": "2026-11-17T20:44:37.148317+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-179-limited.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "In the left panel the EFIT lower null and the solved lower saddle are drawn about 6.4 px apart on the 1399 px canvas while their glyphs span roughly 10 to 14 px, so the filled dark cross and the blue hollow cross overlap and read as one clustered mark at a glance; the caption promises that the larger dark reference marker stays visible beneath the blue one, and both are individually traceable on inspection, so the reader can recover the two points. The numeric offsets this figure argues about are printed under the panels, so the overlap costs readability rather than the finding."
+    }
+  ],
+  "notes": "Read-only figure review of the five rendered PNGs named in this review. Only those PNGs were opened, plus crops and downscales of them for close inspection; no SVG and no other image was read, and no file was edited, created, moved, deleted, redrawn, relabelled or reformatted. Each PNG was matched to its figure path by the residual, convergence flag and lower-X-point offset printed under its panels, checked against the reviewed evidence table at docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html. The earlier figure review of this run at 9ff3d99fd0c3c19f03f42bcd3e7de2c338baf890 recorded one blocking finding: two of the five difference-map contour levels were not separable at the size the figure is read. That defect was re-checked at this head and is repaired \u2014 the level styles now read apart at 900 px, and the highest level is carried out of the blue ramp in magenta with a direct callout \u2014 so no blocking finding is carried forward. Verdicts and contrast figures were measured from the pixels: the ink bounding box of every image lies inside the canvas with a clear border on all four sides, and white covers 88.7 to 93.6 percent of each canvas. Captions in the pages describe the measurement, the display convention and the recovery provenance rather than repeating a figure title, so no caption finding is recorded. The one finding recorded is non-blocking and display-only. No suite runs for a figure review, so added_failure_count is 0 with an empty id list.",
+  "project": "nova",
+  "review_run_id": "r-20261117T170036973902-review-of-diiid-single-kernel-coupling-843063ef1044-figure",
+  "reviewed_base_sha": "3b05ffb6a28c84da912bbea33035be558e714234",
+  "reviewed_commits": [
+    "843063ef10447ad3351be6ef08f41df1de8c4325"
+  ],
+  "reviewed_figures": [
+    {
+      "drawing_script": "scripts/prototypes/diiid_single_kernel_coupling/render.py",
+      "identification": "three panels titled 'grid targets', 'wall targets', 'sample targets'; footnotes 'median 0.053% / maximum 0.071%', 'median 0.046% / maximum 0.146%', 'median 0.046% / maximum 0.064%'",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T170036973902-review-of-diiid-single-kernel-coupling-843063ef1044-figure/image-0.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/uniform-response-difference.svg"
+    },
+    {
+      "drawing_script": "scripts/prototypes/diiid_single_kernel_coupling/render.py",
+      "identification": "left arm 'residual 1.286e-02 / converged False' and 'lower X-point offset 2.583 cm'; right arm 'residual 2.583e-03 / converged False' and 'lower X-point offset 3.003 cm'",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T170036973902-review-of-diiid-single-kernel-coupling-843063ef1044-figure/image-1.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-179-limited.svg"
+    },
+    {
+      "drawing_script": "scripts/prototypes/diiid_single_kernel_coupling/render.py",
+      "identification": "left arm 'residual 4.174e-03 / converged False' and 'lower X-point offset 7.747 cm'; right arm 'residual 1.004e-02 / converged False' and 'lower X-point offset 10.089 cm'",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T170036973902-review-of-diiid-single-kernel-coupling-843063ef1044-figure/image-2.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-146-limited.svg"
+    },
+    {
+      "drawing_script": "scripts/prototypes/diiid_single_kernel_coupling/render.py",
+      "identification": "left arm 'residual 1.028e-11 / converged True' and 'lower X-point offset 2.936 cm'; right arm 'residual 1.610e-12 / converged True' and 'lower X-point offset 2.883 cm'",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T170036973902-review-of-diiid-single-kernel-coupling-843063ef1044-figure/image-3.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-146-diverted.svg"
+    },
+    {
+      "drawing_script": "scripts/prototypes/diiid_single_kernel_coupling/render.py",
+      "identification": "left arm 'residual 1.807e-12 / converged True' and 'lower X-point offset 2.306 cm'; right arm 'residual 3.328e-04 / converged False' and 'lower X-point offset 2.317 cm",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T170036973902-review-of-diiid-single-kernel-coupling-843063ef1044-figure/image-4.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-137-diverted.svg"
+    }
+  ],
+  "reviewed_head_sha": "843063ef10447ad3351be6ef08f41df1de8c4325",
+  "reviewed_run_id": "r-20261116T224846811324-diiid-single-kernel-coupling",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass \u2014 measured on the rendered PNGs: solved blue rgb(51,102,204) 5.37:1 on white, EFIT dark rgb(51,51,51) 12.63:1, wall grey rgb(146,146,146) 3.11:1, magenta highlight rgb(184,50,126) 5.5:1, and all text rgb(11,11,11) 19.7:1. Every value clears the 3:1 data-mark floor and the 4.5:1 text floor.",
+    "data_ink": "pass \u2014 measured on the rendered PNGs, pure white covers 93.6, 89.3, 88.7, 89.9 and 89.7 percent of the five canvases, and every mark is a stroke, a marker or a glyph; no filled contour band, area fill or scatter patch appears in any of the five images.",
+    "decoration": "pass \u2014 all five images have the axes switched off, so none carries a spine, tick, tick label or gridline; every background is one flat white with no gradient, panel shading, box or theme.",
+    "label_collision": "pass \u2014 measured on the rendered PNGs, the outermost pixel row and column on all four borders of all five images carry no ink, so no text is clipped at the canvas edge. Every title, legend and footnote sits outside the plotting region and no label is drawn over plotted data. The two marker coincidences visible (179L's lower-saddle crosses and the near-coincident axis triangles) are between data marks, not labels. No caption in the evidence fragment repeats only its figure's title.",
+    "legibility": "pass \u2014 all five rendered PNGs read at 1399x720 with a 14 pt legend and titles and 12 pt footnotes; the four flux pairs place both arms side by side with their residual and lower X-point offset printed under each panel, and the difference map names its three target families above each panel. The difference map's five contour levels were re-checked at the 900 px page width, the size the figure is read at: the solid, long-dash, short-dash and dotted blue styles stay separable by stroke pattern (about 9, 4.6 and 2.3 px of stroke at that scale) and the fifth level is carried in magenta with a direct callout.",
+    "table_form": "pass \u2014 two artifact kinds appear: a relative-difference field over source cells for three target families, and four paired poloidal flux-contour comparisons. Both are spatial relationships read as shape, alignment and location, and the numbers beside them are already tabulated in the reviewed evidence section."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T18:25:00Z",
+  "total": null
+}

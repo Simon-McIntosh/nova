@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Both arms ran to their summary lines: verified-suite-base.log reports 9 passed at 01725351 with EXIT=0 and final-revision-suite.log reports 11 passed at 4edca23a with EXIT=0, with no FAILED ids on either arm, so no failing test was added.",
+  "call_site_count": 12,
+  "call_sites": [
+    "benchmarks/diiid_circuit_driven_forward_validation.py:811",
+    "benchmarks/diiid_constrained_cold_start.py:181",
+    "benchmarks/diiid_current_pinned_forward.py:345",
+    "benchmarks/diiid_diverted_root_full_currents.py:316",
+    "benchmarks/diiid_forward_gs_match.py:2616",
+    "benchmarks/diiid_forward_gs_match.py:4736",
+    "benchmarks/diiid_repaired_solve_remeasure.py:159",
+    "benchmarks/strict_exit_incidence.py:639",
+    "scripts/diiid_map_fidelity/measure.py:77",
+    "scripts/prototypes/diiid_external_current_propagation/measure.py:115",
+    "scripts/prototypes/diiid_forward_convergence/measure_branches.py:214",
+    "scripts/prototypes/diiid_xpoint_attribution/operator_probe.py:44"
+  ],
+  "completed_at": "2026-11-17T18:14:22.145Z",
+  "dispatched_at": "2026-11-17T18:13:28Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_adapter_current_refusal/caller_sweep.py",
+      "line": "60",
+      "severity": "blocking",
+      "text": "blocking: the caller inventory scans only 'benchmarks' and 'scripts', so docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py:225 \u2014 a caller that builds its profile from the corpus row and passes shipped_current_at into complete_profile_current_adapter \u2014 is neither counted nor listed in caller-scope-audit.json's excluded set, leaving clause (2)'s every-in-repo-caller measure incomplete."
+    },
+    {
+      "file": "tests/imas/test_diiid_current.py",
+      "line": "394",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion that the message reports the build current compares against shipped[BUILD_SEAM_CONDUCTOR] + BUILD_SEAM_SHIFT_A_TURN, the same value the test injected through the monkeypatched build seam, so it cannot distinguish a diagnostic that echoes its input from one that reports the compared operand; the resolved-current assertion at :397 is the independent half."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "benchmarks/diiid_circuit_driven_forward_validation.py:811, benchmarks/diiid_constrained_cold_start.py:181, benchmarks/diiid_current_pinned_forward.py:345, benchmarks/diiid_diverted_root_full_currents.py:316, benchmarks/diiid_forward_gs_match.py:2616, benchmarks/diiid_forward_gs_match.py:4736, benchmarks/diiid_repaired_solve_remeasure.py:159, benchmarks/strict_exit_incidence.py:639, scripts/diiid_map_fidelity/measure.py:77, scripts/prototypes/diiid_external_current_propagation/measure.py:115, scripts/prototypes/diiid_forward_convergence/measure_branches.py:214, scripts/prototypes/diiid_xpoint_attribution/operator_probe.py:44",
+    "diff": "Read commit by commit 01725351..4edca23: six commits touch four files; 5eca58 pins the diagnostic assertions at tests/imas/test_diiid_current.py:223 and :387, 23fb282 adds the 332-line caller sweep, 981fe72/b4e95ae/ef9cc9e repair its import and precision plumbing, and 4edca23 patches the defining module for the local-import caller; no product source changes.",
+    "done_when": "Clause (1) is pinned by tests/imas/test_diiid_current.py:223-232 and :387-397 and reddened by negative-control.log ('DID NOT RAISE ValueError', EXIT=1); clause (2) is measured by build-output-rerun-results/summary.json (12 passed of 12, 156 exact array comparisons) as narrowed to corpus builds by resume-3-advice.txt; clause (3) is verified-suite-base.log ('9 passed', EXIT=0) against final-revision-suite.log ('11 passed', EXIT=0).",
+    "goal": "The goal is that complete_profile_current_adapter refuses a build-time conductor current differing from the resolution it installs; nova/imas/diiid_current.py:242-280 implements that refusal and nova/imas/diiid_current.py:309 calls it, but both are unchanged across this node's diff, which adds only tests at tests/imas/test_diiid_current.py:223 and :387 and the prototype sweep.",
+    "manifest": "The reviewed manifest.md records status complete, the literal pytest command per suite arm with 9 and 11 passed at EXIT=0, negative-control.log at EXIT=1, the 12-of-12 caller sweep, and states in its landing and evidence_inputs that the refusal was carried from the sibling node rather than re-implemented here.",
+    "write_paths": "The reviewed manifest declares seven paths; all four delivered paths (tests/imas/test_diiid_current.py, scripts/prototypes/diiid_adapter_current_refusal/caller_sweep.py, job_arms.sh, probe.py) lie inside them, and nothing outside them appears in the diff."
+  },
+  "justifications": {
+    "durability": "tests/imas/test_diiid_current.py:230-232 reddens when the comparison loses exactness (one-ulp change) or name alignment (reversed installed order), and negative-control.log shows the corpus test failing 'DID NOT RAISE ValueError' at EXIT=1 when the comparison call is removed.",
+    "evidence": "final-revision-suite.log ends '11 passed, 1 warning in 385.17s (0:06:25)' at revision 4edca23a with EXIT=0, and build-output-rerun-results/summary.json records 12 expected, 12 passed, 156 array comparisons and differing_fields {}; clause (2) was narrowed from solves to builds by resume-3-advice.txt.",
+    "fit": "caller_sweep.py:58-70 follows the sibling prototype idiom already in refusal_arms.py, and probe.py:126-130 calls configure_dtypes and asserts x64 before any array is built as nova requires.",
+    "goal_fidelity": "nova/imas/diiid_current.py:242 holds the refusal unchanged between 01725351 and 4edca23, so the node's diff contributes zero product lines to the behaviour its goal names and the mechanism rests on beb133f9e below the base.",
+    "reuse": "caller_sweep.py:20-25 imports FRAME, ROOT, _corpus_row, _digest, _module and _write from refusal_arms.py and calls bench._solve_registered at caller_sweep.py:215; a search of scripts/ and benchmarks/ by capability found only per-prototype AST scanners and no shared call-site inventory owner to extend.",
+    "scope_discipline": "every path in git diff 01725351..4edca23 is one of the reviewed manifest's declared paths: tests/imas/test_diiid_current.py and three files under scripts/prototypes/diiid_adapter_current_refusal."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is that complete_profile_current_adapter refuses a build-time conductor current differing from the resolution it installs; nova/imas/diiid_current.py:242-280 implements it and nova/imas/diiid_current.py:309 calls it, but both are unchanged across this node's diff, which adds tests and a prototype sweep only.\nVERDICT done_when: clause (1) is pinned by tests/imas/test_diiid_current.py:223-232 and :387-397 and reddened by negative-control.log (DID NOT RAISE ValueError, EXIT=1); clause (2) is measured by build-output-rerun-results/summary.json (12 passed of 12, 156 exact comparisons) as narrowed to builds by resume-3-advice.txt; clause (3) is verified-suite-base.log (9 passed, EXIT=0) against final-revision-suite.log (11 passed, EXIT=0).\nVERDICT write_paths: the manifest declares seven paths and every delivered path in git diff 01725351..4edca23 lies inside them.\nVERDICT manifest: read; it records status complete, both arm commands and results, the negative control at EXIT=1, the 12/12 caller sweep, and that the refusal was carried from the sibling node.\nVERDICT diff: read commit by commit over six commits; four files change, all test or prototype code, and no product source changes.\nCALL_SITES: benchmarks/diiid_circuit_driven_forward_validation.py:811, benchmarks/diiid_constrained_cold_start.py:181, benchmarks/diiid_current_pinned_forward.py:345, benchmarks/diiid_diverted_root_full_currents.py:316, benchmarks/diiid_forward_gs_match.py:2616, benchmarks/diiid_forward_gs_match.py:4736, benchmarks/diiid_repaired_solve_remeasure.py:159, benchmarks/strict_exit_incidence.py:639, scripts/diiid_map_fidelity/measure.py:77, scripts/prototypes/diiid_external_current_propagation/measure.py:115, scripts/prototypes/diiid_forward_convergence/measure_branches.py:214, scripts/prototypes/diiid_xpoint_attribution/operator_probe.py:44\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: nova/imas/diiid_current.py:242 holds the refusal unchanged between 01725351 and 4edca23, so the node's diff contributes zero product lines to the behaviour its goal names.\nSCORE evidence: 13\nJUSTIFICATION evidence: final-revision-suite.log records '11 passed' with EXIT=0 at 4edca23a and build-output-rerun-results/summary.json records 12 passed of 12 with 156 array comparisons and differing_fields {}.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 01725351..4edca23 is one of the declared write paths listed in the reviewed manifest.\nSCORE durability: 18\nJUSTIFICATION durability: tests/imas/test_diiid_current.py:230-232 reddens on a one-ulp change and on reversed installed order, and negative-control.log shows the corpus test failing DID NOT RAISE ValueError when the comparison is removed.\nSCORE fit: 18\nJUSTIFICATION fit: caller_sweep.py:58-70 follows the sibling prototype idiom of refusal_arms.py, and probe.py:126-130 applies configure_dtypes before array construction.\nSCORE reuse: 17\nJUSTIFICATION reuse: caller_sweep.py:20-25 delegates to refusal_arms.py helpers and bench._solve_registered at :215; no shared call-site inventory owner exists in scripts/ or benchmarks/.\nFINDING scripts/prototypes/diiid_adapter_current_refusal/caller_sweep.py:60 blocking: the inventory scans only benchmarks/ and scripts/, so the corpus caller docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py:225 is neither counted nor excluded and clause (2)'s every-in-repo-caller measure is incomplete.\nFINDING tests/imas/test_diiid_current.py:394 non-blocking: the build-current diagnostic assertion compares against the value the test itself injected, so only the resolved-current assertion at :397 is independent of the input.",
+  "review_run_id": "r-20261117T181148491733-review-of-diiid-adapter-current-refusal-carried-4edca23a248c",
+  "reviewed_base_sha": "01725351a9c7fddfe74ba25268d61972c3981c50",
+  "reviewed_head_sha": "4edca23a248c03ce51372ea65186608c5c431a21",
+  "reviewed_run_id": "r-20261116T220122530645-diiid-adapter-current-refusal-carried",
+  "scores": {
+    "durability": 18,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 13,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T18:19:52.126813+00:00",
+  "total": 99
+}

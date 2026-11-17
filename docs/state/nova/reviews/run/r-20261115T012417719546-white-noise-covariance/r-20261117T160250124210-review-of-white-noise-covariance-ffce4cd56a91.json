@@ -1,0 +1,108 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": "No assertion is added in any of the five commits. Existing path guard: candidate sentinel fails if the known owner is absent; offender assertion fails if tracked artifacts contain a forbidden worktree path. Reinstating a linearised-only verdict, changing a variance ratio or deleting fit rows would not redden that guard. No input/output self-comparison assertion is added.",
+  "authority_note": "Live plan section 6 and source resume-10-advice.txt supersede original prompt count/lane framing with 32 nonlinear attempts and titan evidence; no finding is made merely for the retired 256/H200 wording. The live plan still asks for four cards, but resume-10 explicitly accepts completed two-card job 1320722.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T16:09:49Z",
+  "dispatched_at": "2026-11-17T16:03:41Z",
+  "failure_delta_evidence": {
+    "after_suite": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/logs/head-gate-7ef7424513cb16aab82e15908db6207ced873d22.log"
+    },
+    "baseline_suite": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/logs/base-gate-d7676e478fc8701b036ec717f80d403c3ead86f5.log"
+    },
+    "note": "Derived from native source-run gate summaries and EXIT lines; after log revision is earlier than reviewed head, not silently relabelled."
+  },
+  "figure_review": "Extracted all three SVGs from reviewed_head_sha, converted each with ImageMagick at 140 density and 1400 px width, and opened every PNG: no text clipping or overlap; captions misstate the covariance used for whitening.",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "id": "nonlinear-control-and-scaling-missing",
+      "line": 30,
+      "severity": "blocking",
+      "text": "The doubled-noise control is explicitly linearised-only, and the flux scaling at line 34 likewise comes from that operator; neither can falsify an incorrect covariance or noise response in MagneticsFit.fit, while live plan section 6 requires the same repeated-fit study to fail under doubled hidden noise and report flux scaling. Supply nonlinear controls/scaling or obtain an explicit change to those remaining acceptance clauses."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "id": "mean-bias-unit-does-not-assert-limit",
+      "line": 13,
+      "severity": "non-blocking",
+      "text": "The full-fit bias column is in stated single-fit sigma rather than the standard errors required by the live plan; study/full_arm.py:195-209 omits the square-root sample-count factor. An independent recomputation from retained rows gives coefficient-wise maxima 1.0330, 2.9972 and 0.2659 standard errors for Solovev, MAST and ITER, so the check passes narrowly on MAST, but the reported 0.70 sigma obscures that proximity. Report the actual standard-error statistic."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/logs/head-gate-7ef7424513cb16aab82e15908db6207ced873d22.log",
+      "id": "after-gate-revision-unverified",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The receipt explicitly identifies revision 7ef7424513cb16aab82e15908db6207ced873d22 rather than reviewed head ffce4cd56a91258155d61c9ada6a5d1ddfb16d81; both logs prove zero added failures for their labelled arms but do not establish a revision-bound gate at the final commit."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "id": "figure-whitening-caption",
+      "line": 45,
+      "severity": "non-blocking",
+      "text": "All three captions say each coefficient set is whitened by its own fit covariance, but study/draw_full.py:37-39 averages those covariances and study/full_study.py:360-368 whitens every set by that common matrix; describe the ensemble-mean ellipse so the figures state what they actually plot."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "Read all five commits from d7676e478fc8701b036ec717f80d403c3ead86f5 to ffce4cd56a91258155d61c9ada6a5d1ddfb16d81; they add and refine one HTML fragment and three SVGs, with no production code or test assertion, and the final figures were extracted from the reviewed commit, rendered and visually inspected.",
+    "done_when": "Read the live three-clause measure; docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:12-13 records six full-fit ratios and residuals, while :30 and :34 deliver control and flux scaling only from the linearised arm, so those nonlinear-study clauses remain unproved.",
+    "goal": "Read prompt.txt:39 and the live plan at docs/plans/inverse-equilibrium-baseline.html#s6; docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:4,12 measures 32 nonlinear attempts on each known state under the amended plan, but :30 supplies the doubled-noise control only for the linearised operator.",
+    "manifest": "Read source manifest.md and both named gate logs; base reports 1 passed in 4.37s and after reports 1 passed in 2.55s, both EXIT=0, but the after log labels revision 7ef7424513cb16aab82e15908db6207ced873d22 rather than the reviewed head.",
+    "write_paths": "Read prompt.txt declared scope and git diff --name-only d7676e478fc8701b036ec717f80d403c3ead86f5 ffce4cd56a91258155d61c9ada6a5d1ddfb16d81; the fragment and three SVGs all lie inside its two declared paths."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:12 contains static statistical verdicts with no added assertion; tests/test_artifacts_carry_no_worktree_paths.py:31,39 fails only on a broken candidate scan or forbidden path text, and would stay green if the ratios or sample counts regressed.",
+    "evidence": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:12 agrees with study/results/full-summary.json and retained fit rows, but the recorded gate tests/test_artifacts_carry_no_worktree_paths.py:28 does not measure covariance honesty and the after log names an earlier revision.",
+    "fit": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:45-47 embeds readable project-absolute SVGs with unclipped labels, but its captions describe per-fit whitening whereas study/full_study.py:360-368 uses one ensemble-mean covariance.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:4,12 supplies the requested full-fit scatter on all three states, but :30 and :34 leave the negative control and flux scaling on the linearised operator.",
+    "reuse": "The diff adds no function, class or module; the existing covariance owner nova/equilibrium/measurement.py:92 whitened_solve is called by nova/equilibrium/magnetics_fit.py:254 and no competing implementation is committed.",
+    "scope_discipline": "All four paths in git diff --name-only d7676e478fc8701b036ec717f80d403c3ead86f5 ffce4cd56a91258155d61c9ada6a5d1ddfb16d81 are under the two paths declared in source prompt.txt."
+  },
+  "mean_bias_recomputation": {
+    "iter": [
+      0.23373334603927598,
+      0.26591949008208077
+    ],
+    "mast": [
+      2.653813624623248,
+      2.9971634216678655
+    ],
+    "solovev": [
+      0.7556538989726616,
+      1.0330205616026653
+    ]
+  },
+  "nonblocking_dispositions": "Coordinator must fold each non-blocking finding into a named node or exempt it with a reason; this reviewer does not invent coordinator dispositions.",
+  "production_call_site_search": "Exact rg search for white-noise-covariance over nova/, scripts/, benchmarks/ returned no references; positive control found whitened_solve at nova/equilibrium/measurement.py:92 and its call at nova/equilibrium/magnetics_fit.py:254. The delivered artifact is documentation with no runtime caller.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read prompt.txt:39 and the live plan at docs/plans/inverse-equilibrium-baseline.html#s6; docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:4,12 measures 32 nonlinear attempts on each known state under the amended plan, but :30 supplies the doubled-noise control only for the linearised operator.\nVERDICT done_when: Read the live three-clause measure; docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:12-13 records six full-fit ratios and residuals, while :30 and :34 deliver control and flux scaling only from the linearised arm, so those nonlinear-study clauses remain unproved.\nVERDICT write_paths: Read prompt.txt declared scope and git diff --name-only d7676e478fc8701b036ec717f80d403c3ead86f5 ffce4cd56a91258155d61c9ada6a5d1ddfb16d81; the fragment and three SVGs all lie inside its two declared paths.\nVERDICT manifest: Read source manifest.md and both named gate logs; base reports 1 passed in 4.37s and after reports 1 passed in 2.55s, both EXIT=0, but the after log labels revision 7ef7424513cb16aab82e15908db6207ced873d22 rather than the reviewed head.\nVERDICT diff: Read all five commits from d7676e478fc8701b036ec717f80d403c3ead86f5 to ffce4cd56a91258155d61c9ada6a5d1ddfb16d81; they add and refine one HTML fragment and three SVGs, with no production code or test assertion, and the final figures were extracted from the reviewed commit, rendered and visually inspected.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:4,12 supplies the requested full-fit scatter on all three states, but :30 and :34 leave the negative control and flux scaling on the linearised operator.\nSCORE evidence: 14\nJUSTIFICATION evidence: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:12 agrees with study/results/full-summary.json and retained fit rows, but the recorded gate tests/test_artifacts_carry_no_worktree_paths.py:28 does not measure covariance honesty and the after log names an earlier revision.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All four paths in git diff --name-only d7676e478fc8701b036ec717f80d403c3ead86f5 ffce4cd56a91258155d61c9ada6a5d1ddfb16d81 are under the two paths declared in source prompt.txt.\nSCORE durability: 4\nJUSTIFICATION durability: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:12 contains static statistical verdicts with no added assertion; tests/test_artifacts_carry_no_worktree_paths.py:31,39 fails only on a broken candidate scan or forbidden path text, and would stay green if the ratios or sample counts regressed.\nSCORE fit: 16\nJUSTIFICATION fit: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:45-47 embeds readable project-absolute SVGs with unclipped labels, but its captions describe per-fit whitening whereas study/full_study.py:360-368 uses one ensemble-mean covariance.\nSCORE reuse: 20\nJUSTIFICATION reuse: The diff adds no function, class or module; the existing covariance owner nova/equilibrium/measurement.py:92 whitened_solve is called by nova/equilibrium/magnetics_fit.py:254 and no competing implementation is committed.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:30 blocking: The doubled-noise control is explicitly linearised-only, and the flux scaling at line 34 likewise comes from that operator; neither can falsify an incorrect covariance or noise response in MagneticsFit.fit, while live plan section 6 requires the same repeated-fit study to fail under doubled hidden noise and report flux scaling. Supply nonlinear controls/scaling or obtain an explicit change to those remaining acceptance clauses.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:13 non-blocking: The full-fit bias column is in stated single-fit sigma rather than the standard errors required by the live plan; study/full_arm.py:195-209 omits the square-root sample-count factor. An independent recomputation from retained rows gives coefficient-wise maxima 1.0330, 2.9972 and 0.2659 standard errors for Solovev, MAST and ITER, so the check passes narrowly on MAST, but the reported 0.70 sigma obscures that proximity. Report the actual standard-error statistic.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/logs/head-gate-7ef7424513cb16aab82e15908db6207ced873d22.log:1 non-blocking: The receipt explicitly identifies revision 7ef7424513cb16aab82e15908db6207ced873d22 rather than reviewed head ffce4cd56a91258155d61c9ada6a5d1ddfb16d81; both logs prove zero added failures for their labelled arms but do not establish a revision-bound gate at the final commit.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:45 non-blocking: All three captions say each coefficient set is whitened by its own fit covariance, but study/draw_full.py:37-39 averages those covariances and study/full_study.py:360-368 whitens every set by that common matrix; describe the ensemble-mean ellipse so the figures state what they actually plot.\n",
+  "review_run_id": "r-20261117T160250124210-review-of-white-noise-covariance-ffce4cd56a91",
+  "reviewed_base_sha": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+  "reviewed_head_sha": "ffce4cd56a91258155d61c9ada6a5d1ddfb16d81",
+  "reviewed_run_id": "r-20261115T012417719546-white-noise-covariance",
+  "scores": {
+    "durability": 4,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:10:19.315128+00:00",
+  "total": 89
+}

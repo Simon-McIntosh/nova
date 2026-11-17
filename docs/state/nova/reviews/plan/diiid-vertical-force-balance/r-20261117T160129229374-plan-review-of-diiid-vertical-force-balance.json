@@ -1,0 +1,102 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T16:12:55.349Z",
+  "dispatched_at": "2026-11-17T16:12:37Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:91",
+      "id": "done_when-1",
+      "reason": "the quantifier has no stated domain (production callers, corpus-built profiles, or all call sites), so the node must invent an exclusion the plan does not state or edit a fixture the plan says is unchanged.",
+      "text": "clause (2) requires \"for every in-repo caller ... the adapter's output on frame 137D is bit-identical between the base and the head\", but in-repo callers do not share that input: `tests/imas/test_diiid_current.py:239` drives the adapter with a synthetic `external_current=np.arange(19)` against `_shipped()` values of 1000, 2000, \u2026 so the head's new exact comparison refuses where the base returned, and `docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py:225` builds its own frame; clause (1)'s disagreement test is itself a caller whose called output cannot be bit-identical at the head",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:91",
+      "id": "done_when-2",
+      "reason": "an unfalsifiable clause buys an H200 solve of frame 137D for a measure already implied by the clause above it; either drop it or replace it with a quantity that can differ.",
+      "text": "\"One caller's terminal-flux pair, solved on the H200, differs by no more than two identical base runs on the same device differ from each other\" cannot fail once clause (2)'s bit-identical adapter output holds: identical conductor currents and coupling blocks are the solved operator's whole input, so base and head differ exactly as two base runs do, and only one unnamed caller need be measured",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "e7814339764234ab963544b3be46a9f4a2dd141f",
+  "plan_fingerprint": "f2c4d13d94cb49bc07ccc778109f6fe4a8662bc76cfc7018189652dd14725c37",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 113,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "aa5ad71570f241ad8275ca9a6e83183ad48b811e",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Clause (2) now covers callers that build their profile from the corpus; tests and fixtures feeding synthetic currents are outside it, since clause (1) requires the head to refuse those",
+      "reason": "",
+      "when": "2026-11-17T16:26:37.376544+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "aa5ad71570f241ad8275ca9a6e83183ad48b811e",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The solve-pair clause is removed: with bit-identical adapter output the solver input is identical, so it could not fail",
+      "reason": "",
+      "when": "2026-11-17T16:28:24.485935+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "aa5ad71570f241ad8275ca9a6e83183ad48b811e",
+      "commit_basis": "edit",
+      "note": "Clause (2) now covers callers that build their profile from the corpus; tests and fixtures feeding synthetic currents are outside it, since clause (1) requires the head to refuse those",
+      "reason": "",
+      "when": "2026-11-17T16:26:37.376544+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "aa5ad71570f241ad8275ca9a6e83183ad48b811e",
+      "commit_basis": "edit",
+      "note": "The solve-pair clause is removed: with bit-identical adapter output the solver input is identical, so it could not fail",
+      "reason": "",
+      "when": "2026-11-17T16:28:24.485935+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-diiid-vertical-force-balance.v113.json",
+  "review_run_id": "r-20261117T160129229374-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "53263bd5b9cb56ce83eeb0af358e7219e64e737d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the propagation fragment, `nova/imas/diiid_current.py`, and `benchmarks/diiid_forward_gs_match.py:1487` (the `external_current=_source_current(` call) all resolve; the extension-resolved href rule was applied elsewhere in the plan.",
+    "done_when": "two findings \u2014 \u00a78's changed clause (2) quantifies over \"every in-repo caller\" while fixing the measured frame at 137D, and its H200 clause cannot fail while the same clause's bit-identity requirement holds.",
+    "evidence_paths": "pass \u2014 \u00a78's clause (1) lands a committed test, clause (3) a suite comparison; the H200 pair in clause (2) is the clause this review asks be removed, so naming a directory for it would be moot.",
+    "naming": "pass \u2014 \u00a78 carries no plan label, stage name, ticket number or version tag into code or evidence names.",
+    "reasoning": "pass \u2014 \u00a78's root cause (the adapter replaces the build-time `external_current` with a second read) matches the cited propagation trace and the code at `nova/imas/diiid_current.py:286`; the endpoint (a named refusal plus unchanged accepted output) is reachable and checkable; the implementation-prescription concern was raised and declined earlier and the changed text adds none.",
+    "single_goal": "pass \u2014 \u00a78 delivers one guard (the adapter refuses a conductor current it would replace) with its verification; the changed clause adds no second deliverable.",
+    "wiring": "pass \u2014 \u00a78 declares `diiid-vertical-force-balance#s6` in plan-section-depends-on and \u00a711 declares `#s8`; the only relationship the changed done-when adds is a base-versus-head comparison at the node's own base, which needs no new edge."
+  },
+  "section_digests": {
+    "_document": "b00dd0575a27805b8e71f761a9ecda745a24fb4d3f7ac6602d7157d4e54313c1",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "8221264aa226d15c859f15d29e63bdc333dd055f1fa3f0ad1683edb6aba86e66",
+    "s12": "406db948e9d561d192b44cd66643f552eb1b1ad4bef0b8511398feb505cd9e5d",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "3dc57bc53014ca0924803e72edad5a80c9db8d8548f1484de73c21e0193d0ae3",
+    "s8": "c96bb15dabdd71384b7b7aa251b5c36de88222d95c81460144c98a60fa71e6ed",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:22:09.554374+00:00",
+  "total": null
+}

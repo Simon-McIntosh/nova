@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T17:14:46.787Z",
+  "dispatched_at": "2026-11-17T17:14:17Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:91",
+      "id": "reasoning-1",
+      "reason": "the repair node's only quantitative target is this displacement; naming the probe step makes \u00a73(1) unfalsifiable at the base and naming the correction step makes its size a recorded per-case quantity, so the section must state which it means.",
+      "text": "\u00a72(1) brackets \"the perturbation size the class's response step uses\" and \u00a72(3)/\u00a73(1) displace by \"\u00b1the inverse class's response step\", but the inverse class (`MagneticsFit`) has two different step quantities and no \"response step\": a finite-difference probe of `difference_step = 1e-4` relative to `max(|coefficient|, 1)` (`nova/equilibrium/magnetics_fit.py:195,246`) and the data-dependent, line-searched Gauss\u2013Newton candidate `coefficients + fraction * correction` (`magnetics_fit.py:269`). The class refuses any forward evaluation that does not qualify (`magnetics_fit.py:163-170`), so the \u00b11e-4 probe states necessarily qualify at the base revision or the fit could not have produced the 1 % row replay \u00a70 cites; under that reading \u00a73(1)'s displaced arms pass unchanged on unfixed code and its repair has no endpoint to prove, while under the correction reading the displacement is set by the case's own data residual and must be recorded per case rather than cited as a class constant \u2014 the direction is equally unresolved, since the class probes along coordinate axes but takes one combined correction direction",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:92",
+      "id": "done_when-1",
+      "reason": "a worker cannot produce the TCV/ITER record without inventing the neighbourhood norm, the search set and the meaning of \"stage\", and an invented measure is not comparable to the \u00a72 verdict the plan prints beside it.",
+      "text": "\u00a72(2) asks the record to state \"whether any state within 1 % of the stored coefficients qualifies when started from the stored flux map\" and \"the stage at which qualification is first lost\", yet a 1 % ball in coefficient space is a continuum with no norm (relative sup, Euclidean, per-family) and no recorded search set, and \"stage\" names no scale (solve iteration, continuation displacement, coefficient index), so neither quantity is measurable as written and the answer recorded for TCV and ITER cannot be checked; this also contradicts \u00a72's own preamble at line 85-87 (\"It makes no claim about whether an unreached state exists\"), which is the same existential claim in another form",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5c235a20fbf95405de3bd097e8440e2771235d47",
+  "plan_fingerprint": "cf20ef6b6b2a6bbeddaa54d502bad853c5adc1aa7b9ce4fae236c0d6edf195fe",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 2,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T165901817170-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "2aaccd18a9c3bfa89ec935a6e9e3ee1cef8cb73b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/plans/inverse-equilibrium-baseline.html#s2` and `docs/plans/converged-forward-solve.html` resolve, and the backing code cited below (`nova/equilibrium/magnetics_fit.py` at the cited lines) resolves; `docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html` is not yet on the branch, but \u00a71 declares it as arriving with the inverse section's landing, so it is a stated wait rather than a broken pointer.",
+    "done_when": "a finding \u2014 \u00a72(2)'s TCV/ITER measure (\"whether any state within 1 % of the stored coefficients qualifies\") is an existential claim over an unbounded continuum with no norm or recorded search set, so no measurement can settle the yes/no the section asks for.",
+    "evidence_paths": "pass \u2014 \u00a72 and \u00a73 write into the plan's named record `docs/evidence/archive/forward-solve-near-stored-states-landed.html`, a durable repository path, and no evidence is sent to a scratchpad or node-local directory.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a symbol or a code comment; the plan names no symbol at all.",
+    "reasoning": "a finding \u2014 \u00a72 and \u00a73 make \"the inverse class's response step\" the displacement whose endpoints they measure and repair, but the class defines no such quantity; the finite-difference probe step it does define is a state the base solve already qualifies at, so the \u00a73 endpoint can pass with no repair.",
+    "single_goal": "pass \u2014 \u00a72 delivers one record (per-case distance to the qualification boundary, with a verdict) and \u00a73 one deliverable (repair on the reached cases plus a no-regression arm).",
+    "wiring": "pass \u2014 the section table's `depends-on` entries (\u00a72\u2190\u00a71, \u00a73\u2190\u00a72) and \u00a71's external dependency `inverse-equilibrium-baseline#s2` all resolve to existing sections, and `plan-after: converged-forward-solve` matches a plan that exists."
+  },
+  "section_digests": {
+    "_document": "9895bb348f263c92b2f814901edac43c580b128c76511f07830d01b8657777ff",
+    "s0": "66c1d333dde62b6fc022136f37cc6884c840cb88f5daacc984d0009d39c7ea47",
+    "s1": "ee1c051cf970fa5e6714498026e0dfac4e0648979b39b6858da162a5ee6f3fad",
+    "s2": "277297edc062d23a5bec99eeb079a1a8efdb644629ca5b6b33aa113232c757d4",
+    "s3": "183a25405bfb2bd00d54f07672316066a58eb160ad41e7fd52e6e4d5f3faf912"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T17:23:53.059892+00:00",
+  "total": null,
+  "traced_units": [
+    "s2",
+    "s3"
+  ]
+}

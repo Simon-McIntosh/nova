@@ -1,0 +1,102 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T16:34:29.776Z",
+  "dispatched_at": "2026-11-17T16:34:02Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261117T161650105021-plan-review-of-iron-core-magnetisation/plan.html:546-548",
+      "id": "done_when-1",
+      "reason": "the clause needs to name the largest mesh both routes already fit (graded 16/80 mm, 5 864 cells / 35 184 unknowns, measured factor peak 39.638 GB in the same record), where a 1e-12 agreement is available at the graded transition; a node briefed from the current clause would ship an 80 mm-only equality receipt and call the value question closed.",
+      "text": "clause (2) validates the new route only on the uniform 80 mm mesh (10 170 unknowns, 0.83 GB operator, peak well inside the card), while the target is a graded mesh at 70 248 unknowns whose compiled peak is 158 GB; a route that mishandles the 80\u219240 mm grading boundary, or whose streaming/blocking breaks at 3.5\u00d7\u20137\u00d7 the unknown count, reproduces the 80 mm mesh to 1e-12 and still changes the 8/40 value, so the endpoint's stated \"values unchanged from the existing route\" is asserted over a range the clause cannot probe",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261117T161650105021-plan-review-of-iron-core-magnetisation/plan.html:549-551",
+      "id": "single_goal-1",
+      "reason": "split, because this is the same two-deliverables shape the coordinator already acted on for \u00a76's census pin, and neither half can be reviewed on the other's verdict.",
+      "text": "clause (3) is a distinct deliverable: an 80 mm linear arm on the \u03bc_r = 1000 shell against the dipole reference, on a mesh family whose coarsening \u2014 the fragment's table runs 40/20/10 mm with 228 cells as the coarsest (icm-high-permeability-shell.html:49) \u2014 needs a spacing the study does not carry, and whose acceptance (miss 0.5 %) is the shell criterion rather than the WEST refinement; a node that lands the H200 8/40 route in clauses (1)+(2) still cannot close the section on clause (3), and clause (3) proves nothing about clause (1)'s 1 % measure",
+      "type": "single_goal",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "53c1b7dd53e0e0a164de394cd1887e4c7fa7327d",
+  "plan_fingerprint": "23c92ed36b2fc96263f10435367f9485ee7d891b72d32579409859c945431d5b",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 120,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "664140fd6eb3849f6f1d59967a4a28cc9ea487be",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "clause (2) now compares the new route against the existing one on graded 16/80 mm (35 184 unknowns), the largest mesh the existing route solves on the card and one that carries the grading boundary",
+      "reason": "",
+      "when": "2026-11-17T20:46:11.134435+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "664140fd6eb3849f6f1d59967a4a28cc9ea487be",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "the section is dispatched as two nodes: the H200 8/40 refinement with its route check (clauses 1 and 2), and the shell negative arm (clause 3), each landing on its own review",
+      "reason": "",
+      "when": "2026-11-17T20:46:37.138046+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "664140fd6eb3849f6f1d59967a4a28cc9ea487be",
+      "commit_basis": "edit",
+      "note": "clause (2) now compares the new route against the existing one on graded 16/80 mm (35 184 unknowns), the largest mesh the existing route solves on the card and one that carries the grading boundary",
+      "reason": "",
+      "when": "2026-11-17T20:46:11.134435+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "664140fd6eb3849f6f1d59967a4a28cc9ea487be",
+      "commit_basis": "edit",
+      "note": "the section is dispatched as two nodes: the H200 8/40 refinement with its route check (clauses 1 and 2), and the shell negative arm (clause 3), each landing on its own review",
+      "reason": "",
+      "when": "2026-11-17T20:46:37.138046+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261117T161650105021-plan-review-of-iron-core-magnetisation.json",
+  "review_run_id": "r-20261117T161650105021-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "df57df362c354f66ac3dd237faab21380607d2f3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `icm-west-linear-h200` resolves under docs/evidence/fragments/iron-core-magnetisation/, and the \u00a76 the text refers to is section s6 (\"\u00a76 \u2014 Iron as a field source\", plan.html:387).",
+    "done_when": "a finding \u2014 clause (2) at plan.html:546-548 places the value-preservation comparison on the uniform 80 mm mesh, so the endpoint's only fidelity guard never exercises the graded transition or the 70 248-unknown scale the route exists for.",
+    "evidence_paths": "pass \u2014 the cited record `icm-west-linear-h200` resolves to docs/evidence/fragments/iron-core-magnetisation/icm-west-linear-h200.html, and the section's own landing record follows the node-fragment convention the coordinator ruled for \u00a7\u00a75, 7, 8, 9.",
+    "naming": "pass \u2014 the rewritten paragraph and all three clauses name no module, class, function or step sequence; \"whatever route fits\" leaves the mechanism to the node brief.",
+    "reasoning": "pass \u2014 the rewritten capacity statement now reproduces its source exactly (icm-west-linear-h200.html:38-41 records 157.962 GB live peak = 39.527 GB arguments + 39.479 GB output + 78.957 GB temporaries against 150.755 GB of device memory), and the 1.17 % / 0.62 % refinement figures match the fragment's probe table (\u22121.173479 % and \u22120.618223 % at +4 m).",
+    "single_goal": "a finding \u2014 clause (3) at plan.html:549-551 is a shell-geometry convergence-falsification measurement that shares no mesh, reference, gate or verdict with the H200 8/40 route closed by clauses (1) and (2).",
+    "wiring": "pass \u2014 \u00a75b declares no `plan-section-depends-on` entry because both inputs (\u00a74 Galerkin assembly, with \u00a75 the linear basis) are declared done, and no relationship it states points at a wrong node; \u00a76 is named only to say the section does not gate it."
+  },
+  "section_digests": {
+    "_document": "1141c1abfa62daa5fedd0175f738e2d823584a4d08b639e480205c525f99ca95",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "17259ea3554b3882c54fad80b5d94c5142433ed6ee465ebe63c28b6d0520a690",
+    "s11": "152aaf7568a6fd9ac03733267718bb02f011cca4ff653986ebc07d1549f510c9",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "9d9575a3a830059f2eefb6ac953213be0aa858329aaeec3fae422fb48313a0d3",
+    "s5": "36bad4819e31bb149a73ded355cde8eca817e860913fbdafdc22dbf119126f1e",
+    "s6": "2532f33b84d4401c4f99a4c5d4c48b277171f9e129307bc0ce0c66545cc0e73d",
+    "s7": "1555dc4a428fc5ed84d96b31b0da13217072c683c765f3ad1d7e897ba1bfbdbf",
+    "s8": "6f09879ace82774a03c887b980857ea52573826045f08365978f3645df7df635",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:46:14.471308+00:00",
+  "total": null
+}

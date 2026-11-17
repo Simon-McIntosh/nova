@@ -1,6 +1,7 @@
 """Pinned WEST iron reads and preservation of the script inputs."""
 
 import ast
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -16,7 +17,6 @@ from nova.biot.magnetisation import _fit_law, _mesh as mesh
 from nova.imas.machine import ImasGeometryReader, StaticMachineDescription
 
 ROOT = Path(__file__).resolve().parents[1]
-CENSUS_CELLS = 1694
 CALLERS = (
     "scripts/prototypes/iron_magnetisation/west.py",
     "scripts/west_stray_field/solve.py",
@@ -45,15 +45,6 @@ def west():
         assert 0 in entry.list_all_occurrences("iron_core")
         iron = entry.get("iron_core", 0, lazy=False, autoconvert=False)
     return uri, row["dd_version"], iron
-
-
-def _census(iron, size):
-    """Return the census mesh of every authored iron outline at ``size``."""
-    return [
-        polygon
-        for outline in _outlines(iron)
-        for polygon in mesh(shapely.Polygon(outline).buffer(0), size).polygons
-    ]
 
 
 def _read_assignments(path, names, namespace):
@@ -90,6 +81,15 @@ def _outlines(iron):
         )
         for s in iron.segment
     ]
+
+
+def _vertex_digest(polygons):
+    """Digest of the ordered polygon vertices, independent of the mesher."""
+    return hashlib.sha256(
+        b"".join(
+            np.ascontiguousarray(polygon, dtype="<f8").tobytes() for polygon in polygons
+        )
+    ).hexdigest()
 
 
 def test_west_iron_segments_match_previous_reads(west):
@@ -157,19 +157,23 @@ def test_census_mesh_matches_previous_read(west):
     exec(
         compile(ast.Module(body=[loop], type_ignores=[]), CALLERS[2], "exec"), namespace
     )
-    expected = _census(west[2], 0.08)
+    expected = [
+        polygon
+        for outline in _outlines(west[2])
+        for polygon in mesh(shapely.Polygon(outline).buffer(0), 0.08).polygons
+    ]
     actual = namespace["polygons"]
-    # The pin is the production count itself: both sides run the production
-    # ``_mesh``, so an equality between them alone would follow the reader
-    # wherever it moved.
-    assert len(actual) == CENSUS_CELLS
-    assert len(expected) == CENSUS_CELLS
+    # Measured 2026-11-17 from this construction at 0.08 m: six WEST segments
+    # mesh to 176, 242, 427, 180, 427 and 242 cells. Both sides below call the
+    # same production mesher, so these values are pinned here to keep a change
+    # in cell count, partition or vertex order visible to this read.
+    assert len(actual) == len(expected) == 1694
+    assert (
+        _vertex_digest(actual)
+        == "af8328273be3b2b1a64f9da4f7e70d88c9d35a31d8c6e10ecaf5f4b585c68f8f"
+    )
     for polygon, reference in zip(actual, expected, strict=True):
         np.testing.assert_array_equal(polygon, reference)
-    # Negative control: the same reader on the same body at another spacing
-    # moves the count, so 1694 is a measurement of this mesh and not a
-    # constant the assertion could satisfy without reading the outlines.
-    assert len(_census(west[2], 0.04)) != CENSUS_CELLS
 
 
 def _iron():

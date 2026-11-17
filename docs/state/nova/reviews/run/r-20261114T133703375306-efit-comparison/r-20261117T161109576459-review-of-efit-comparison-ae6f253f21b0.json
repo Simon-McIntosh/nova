@@ -1,0 +1,132 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: both suite arms named in the reviewed manifest have completed=false and native EXIT=-6; neither log contains a pytest summary or identified failures. Empty IDs are unavailable captures, not a measured zero.",
+  "assertion_review": {
+    "JSON writing": "Restoring private fixed-pending replacement yields zero actual owner calls and destroys the separately authored pending receipt; accepting NaN fails raises and previous-byte preservation; residual mappings are compared to fixed JSON states.",
+    "backtracking": "Restoring immediate trial refusal breaks successful bounded-step recovery; removing exhaustion loses prescribed fractions and attached receipt; swallowing unrelated errors fails raises.",
+    "circuit and sensor readers": "Dropping overlapping group contributions breaks fixed [2,5,3,5]; accepting mismatched witness fails raises; changing zero turns or clockwise sign breaks fixed zero and [2,-3,-2] results; ignoring IDS homogeneous time breaks 15 A and 0.3 A interpolation; reverting fragment/count/basis rules breaks configured representability expectations.",
+    "comparison admission": "Unconditional ITER bands fail its gap-reporting positive test; removing same-constraint bands fails expected rejections; nonstationary/unqualified scaled states must raise and cannot set the control flag.",
+    "conductor fitting": "Restoring fixed-current fitting or dropping uncertainty rows changes the separately assembled weighted-design coefficients, residuals and covariance; omitting request current updates fails the nonzero typed-current witness.",
+    "failure reporting": "Writing qualified as convergence breaks expected True preservation; counting finite entries as trips returns three rather than the independently declared four.",
+    "independence": "No regression-bearing self-comparison found. Fixed-point history count is checked against the explicitly authored four-trip declaration, and its independent three-finite-entry assertion distinguishes the rejected implementation. Setup self-checks alone receive no durability credit.",
+    "loop projection": "Restoring whole-loop single-point projection breaks the fixed signed geometry/design results; removing the segmented-project refusal fails raises.",
+    "physical fit": "Nonconverged fit, failed applicable band, nonstationary/unqualified scaled fit or current gap within 1.5 percent fails explicit final assertions; no case completes this path.",
+    "physical replay": "Source-positive assertions fail if plasma or conductor image vanishes; schema/reference checks fail wrong identities. No assertion fails solely on a replay family exceeding five percent; no executed scaled replay control exists."
+  },
+  "call_site_count": 7,
+  "call_sites": [
+    "nova/equilibrium/harmonic.py:441",
+    "nova/equilibrium/moment.py:352",
+    "nova/equilibrium/moment.py:746",
+    "nova/equilibrium/profile.py:341",
+    "nova/equilibrium/profile.py:342",
+    "nova/imas/mast_efit_referee.py:495",
+    "nova/imas/mast_parity_gate.py:346"
+  ],
+  "completed_at": "2026-11-17T16:20:13Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "efit-comparison",
+      "recorded_at": "2026-11-17T16:23:16.105210+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-17T16:11:59Z",
+  "failure_evidence": {
+    "after_suite": {
+      "CPU_wall_seconds": 2263.2871103202924,
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_equilibrium_forward.py tests/test_equilibrium_magnetics_fit.py tests/test_magnetics_fit_efit_comparison.py",
+      "completed": false,
+      "exit_status": -6,
+      "failure_count": null,
+      "failure_ids": [],
+      "log_digest": "4cfc66e874772a185a3887fc9505f7d36c1320a59ad1aeacf9d0bc2c5f9db922",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/serial-normal-suite-1322997/head/gate.log",
+      "measurement_cwd": "/tmp/nova-serial-suite-1322997-38vpwifi/head/tree",
+      "measurement_module": "/tmp/nova-serial-suite-1322997-38vpwifi/head/tree/nova/equilibrium/magnetics_fit.py",
+      "mutation": null,
+      "review_verified_log_sha256": "4cfc66e874772a185a3887fc9505f7d36c1320a59ad1aeacf9d0bc2c5f9db922",
+      "revision": "74833da985d30006ef2607a10aafec5dc10744be",
+      "summary": null
+    },
+    "baseline_suite": {
+      "CPU_wall_seconds": 2541.3233725959435,
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_equilibrium_forward.py tests/test_equilibrium_magnetics_fit.py",
+      "completed": false,
+      "exit_status": -6,
+      "failure_count": null,
+      "failure_ids": [],
+      "log_digest": "ed8bfc18d9017379fca50fba7967b82ef9caf0a2cb576b4b2cbf56fad1a5d50f",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/serial-normal-suite-1322997/original-base/gate.log",
+      "measurement_cwd": "/tmp/nova-serial-suite-1322997-38vpwifi/original-base/tree",
+      "measurement_module": "/tmp/nova-serial-suite-1322997-38vpwifi/original-base/tree/nova/equilibrium/magnetics_fit.py",
+      "mutation": null,
+      "review_verified_log_sha256": "ed8bfc18d9017379fca50fba7967b82ef9caf0a2cb576b4b2cbf56fad1a5d50f",
+      "revision": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+      "summary": null
+    }
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "efit-comparison",
+      "recorded_at": "2026-11-17T20:41:27.096179+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": "1390",
+      "severity": "blocking",
+      "text": "blocking: The row-replay test writes its unscaled report without an all-family agreement assertion or any 1.10-scaled replay; no case converged, so the live plan's replacement negative control has no executed witness and a green replay test alone cannot certify the section's delivered measure."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html",
+      "line": "2143",
+      "severity": "blocking",
+      "text": "blocking: Both exact native suite arms aborted before their summaries, leaving failure counts and identities unavailable; the review cannot derive a regression delta from empty capture arrays, and the required added_failure_count must remain unknown until complete evidence or an explicit gate disposition exists."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 7 production call site(s)",
+    "diff": "Read the explicit d7676e478fc8701b036ec717f80d403c3ead86f5..ae6f253f21b0b0079e5509aa20be0158b2e66d9c cumulative code/test diff and the 46-commit path ledger; nova/equilibrium/magnetics_fit.py extends the existing fitter and the evidence fragment preserves the unsuccessful physical attempts.",
+    "done_when": "The live docs/plans/inverse-equilibrium-baseline.html section s2 requires a 1.10-scaled replay control when no fit converges; tests/test_magnetics_fit_efit_comparison.py:1390 records only unscaled replay and the native baseline/head suite logs both end EXIT=-6 without summaries.",
+    "goal": "The brief.md goal is a shared-input EFIT comparison; docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1941 records three nonconverging cases with fitted-source replay agreement, consistent with the live plan's measured-result endpoint except its missing replay control.",
+    "manifest": "The source manifest.md reports incomplete CPU suite arms and an unrun physical scaled control honestly, but its complete status does not establish the missing regression delta or the live plan's replacement replay control.",
+    "write_paths": "The source manifest's orientation_write_paths covers all 22 delivered paths, including the nested figure directory, and tests/test_equilibrium_forward.py remains unchanged."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_magnetics_fit.py:908 independently solves the weighted conductor design and its admission/backtracking tests reject concrete bad states, but tests/test_magnetics_fit_efit_comparison.py:1390 never asserts the replay bands or their scaled control.",
+    "evidence": "The native serial-normal-suite-1322997 original-base/head gate.log receipts verify EXIT=-6 and completed=false, while fitted-observation-replay-1318855 supplies three genuine unscaled replay receipts with EXIT=0.",
+    "fit": "nova/equilibrium/magnetics_fit.py:202 carries fitted currents through the existing ForwardSolveRequest and nova/equilibrium/measurement.py:57 owns the new loop geometry without adding a facility convention module.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1941 supplies the accepted nonconvergence result with replay and refusal panels, but the required scaled replay control is absent.",
+    "reuse": "nova/equilibrium/magnetics_fit.py extends MagneticsFit and whitened_solve, nova/imas/mast_efit_referee.py:410 extends the existing comparator, and tests/test_magnetics_fit_efit_comparison.py:106 wraps nova/io/json.py:12 after capability searches found no equivalent fitted-current witness or signed toroidal-loop binder.",
+    "scope_discipline": "All 22 paths in the explicit base/head diff fall inside source manifest.md orientation_write_paths and neither the forward seam nor its contract tests were weakened."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The brief.md goal is a shared-input EFIT comparison; docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1941 records three nonconverging cases with fitted-source replay agreement, consistent with the live plan's measured-result endpoint except its missing replay control.\nVERDICT done_when: The live docs/plans/inverse-equilibrium-baseline.html section s2 requires a 1.10-scaled replay control when no fit converges; tests/test_magnetics_fit_efit_comparison.py:1390 records only unscaled replay and the native baseline/head suite logs both end EXIT=-6 without summaries.\nVERDICT write_paths: The source manifest's orientation_write_paths covers all 22 delivered paths, including the nested figure directory, and tests/test_equilibrium_forward.py remains unchanged.\nVERDICT manifest: The source manifest.md reports incomplete CPU suite arms and an unrun physical scaled control honestly, but its complete status does not establish the missing regression delta or the live plan's replacement replay control.\nVERDICT diff: Read the explicit d7676e478fc8701b036ec717f80d403c3ead86f5..ae6f253f21b0b0079e5509aa20be0158b2e66d9c cumulative code/test diff and the 46-commit path ledger; nova/equilibrium/magnetics_fit.py extends the existing fitter and the evidence fragment preserves the unsuccessful physical attempts.\nCALL_SITES: nova/equilibrium/harmonic.py:441, nova/equilibrium/moment.py:352, nova/equilibrium/moment.py:746, nova/equilibrium/profile.py:341, nova/equilibrium/profile.py:342, nova/imas/mast_efit_referee.py:495, nova/imas/mast_parity_gate.py:346\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1941 supplies the accepted nonconvergence result with replay and refusal panels, but the required scaled replay control is absent.\nSCORE evidence: 9\nJUSTIFICATION evidence: The native serial-normal-suite-1322997 original-base/head gate.log receipts verify EXIT=-6 and completed=false, while fitted-observation-replay-1318855 supplies three genuine unscaled replay receipts with EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All 22 paths in the explicit base/head diff fall inside source manifest.md orientation_write_paths and neither the forward seam nor its contract tests were weakened.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_equilibrium_magnetics_fit.py:908 independently solves the weighted conductor design and its admission/backtracking tests reject concrete bad states, but tests/test_magnetics_fit_efit_comparison.py:1390 never asserts the replay bands or their scaled control.\nSCORE fit: 20\nJUSTIFICATION fit: nova/equilibrium/magnetics_fit.py:202 carries fitted currents through the existing ForwardSolveRequest and nova/equilibrium/measurement.py:57 owns the new loop geometry without adding a facility convention module.\nSCORE reuse: 20\nJUSTIFICATION reuse: nova/equilibrium/magnetics_fit.py extends MagneticsFit and whitened_solve, nova/imas/mast_efit_referee.py:410 extends the existing comparator, and tests/test_magnetics_fit_efit_comparison.py:106 wraps nova/io/json.py:12 after capability searches found no equivalent fitted-current witness or signed toroidal-loop binder.\nFINDING tests/test_magnetics_fit_efit_comparison.py:1390 blocking: The row-replay test writes its unscaled report without an all-family agreement assertion or any 1.10-scaled replay; no case converged, so the live plan's replacement negative control has no executed witness and a green replay test alone cannot certify the section's delivered measure.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:2143 blocking: Both exact native suite arms aborted before their summaries, leaving failure counts and identities unavailable; the review cannot derive a regression delta from empty capture arrays, and the required added_failure_count must remain unknown until complete evidence or an explicit gate disposition exists.\n",
+  "review_limitations": [
+    "All 16 SVG rerenders could not run: sandbox denied the separate all_debug sbatch submission with Operation not permitted / Unable to contact slurm controller. Independent visual approval remains outstanding.",
+    "Intermediate commits were inventoried for scope; implementation judgement rests on the explicit cumulative base/head diff."
+  ],
+  "review_run_id": "r-20261117T161109576459-review-of-efit-comparison-ae6f253f21b0",
+  "reviewed_base_sha": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+  "reviewed_head_sha": "ae6f253f21b0b0079e5509aa20be0158b2e66d9c",
+  "reviewed_run_id": "r-20261114T133703375306-efit-comparison",
+  "scores": {
+    "durability": 18,
+    "evidence": 9,
+    "fit": 20,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:58:46.015136+00:00",
+  "total": 103
+}

@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "3b05ffb6a28c84da912bbea33035be558e714234",
+  "call_site_count": 2,
+  "call_sites": [
+    "benchmarks/diiid_forward_gs_match.py:1461 _build_profile -> _couplings",
+    "benchmarks/forward_solve_memory_ledger.py:340 _couplings"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-16T22:49:58Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html",
+      "id": "f85d83f7f86",
+      "line": "27",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment now states the focused equilibrium and DIII-D comparison ran in the worker allocation (job 1319168, partition sun), but the node's done_when names all_debug, or rigel when an arm exceeds the hour, so done_when (3) is unmet as recorded; only the four-test scoped gate ran on all_debug (review-repair/scoped-head.log job 1323837 and highlight-repair/scoped-head.log job 1323855)."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html",
+      "id": "f39a15aaefd",
+      "line": "75",
+      "severity": "non-blocking",
+      "text": "non-blocking: the provenance cites the final scoped gate at 9ff3d99fd (review-repair/scoped-head.log) while the delivered head is 543fcfa87; the green head arm at highlight-repair/scoped-head.log (4 passed, job 1323855) is cited nowhere, so the fragment does not tie the gate to the landed revision."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T224846811324-diiid-single-kernel-coupling/manifest.md",
+      "id": "fbce6be0780",
+      "line": "22",
+      "severity": "non-blocking",
+      "text": "non-blocking: after_suite names revision 9ff3d99fd, its test_logs omit highlight-repair/scoped-head.log, and status still reads in-progress with a checkpoint naming unfinished work, so the run's own record does not show the delivered head 543fcfa87 was gated."
+    },
+    {
+      "file": "scripts/prototypes/diiid_single_kernel_coupling/render.py",
+      "id": "fd6aca34323",
+      "line": "110",
+      "severity": "non-blocking",
+      "text": "non-blocking: levels_record stores all five requested levels for every panel, so review-repair/render-metadata.json reports 0.12% for the grid and sample targets whose measured maxima are 0.071437% and 0.064224%; only the wall target (maximum 0.145575%) carries a 0.12 contour, so the shared legend and metadata read as a level present in panels that cannot contain it."
+    }
+  ],
+  "head_log_revision": "9ff3d99fd0c3c19f03f42bcd3e7de2c338baf890",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read all sixteen commits against 3b05ffb6; e252f00a5 is the ten-line product change replacing the three _green_block plasma rows, 4ec23b915 the regression test, 613cd9ac2 and 0129893bf the gates, 8d0f54acb and 1a9b64dbf the difference figure, f99051c59 through 9ff3d99fd the paired arms, recovery and fragment, and 9ff3d99fd and 543fcfa87 the fragment and display/docstring/figure repairs.",
+    "done_when": "clause (1) is asserted at tests/equilibrium/test_diiid_single_kernel_coupling.py:79-90 and reddens in tests/negative-control.log (3 failed, 1 passed; FAILED [grid-0], [wall-1], [sample-2]); clause (2) is recorded in docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html with the 137D per-cell difference map and the eight terminal arms with flux panels; clause (3) is recorded only on worker partition sun (job 1319168), not the all_debug or rigel host it names.",
+    "goal": "the node's goal is that every plasma coupling row of the DIII-D builder, uniform, radial and vertical, for the grid, wall and sampling nodes, comes from one exact polygon-kernel evaluation; benchmarks/diiid_forward_gs_match.py:1282-1287 attaches grid_moments[0], wall_moments[0] and sample_moments[0] from a single _moment_couplings call, so each target's three rows share one build_flux_blocks evaluation.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T224846811324-diiid-single-kernel-coupling/manifest.md; it reports the scoped check at 9ff3d99 as 4 passed and an after_suite at 9ff3d99, but remains status in-progress and does not record the 543fcfa arm at highlight-repair/scoped-head.log.",
+    "write_paths": "the declared fence was benchmarks/diiid_forward_gs_match.py, tests/equilibrium/test_diiid_single_kernel_coupling.py, scripts/prototypes/diiid_single_kernel_coupling, docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling and docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html; all twelve delivered paths lie inside it, and the transient scripts/prototypes/diiid_single_kernel_coupling/recover.py added at 56837fa2 is removed at 9ff3d99fd."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_diiid_single_kernel_coupling.py:79-85 fails when the hybrid uniform rows are restored (FAILED [grid-0], [wall-1], [sample-2] in tests/negative-control.log), while the coordinate assertion at :77 compares two builder-produced values and scripts/prototypes/diiid_single_kernel_coupling/render.py:86-111 has no test.",
+    "evidence": "tests/equilibrium/test_diiid_single_kernel_coupling.py is green at 4 passed in review-repair/scoped-head.log (9ff3d99, job 1323837) and highlight-repair/scoped-head.log (543fcfa, job 1323855), tests/negative-control.log reads '3 failed, 1 passed' EXIT=1, and docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html records the difference map and eight terminal rows, but the focused comparison's named all_debug host and the head arm's citation are not recorded.",
+    "fit": "scripts/prototypes/diiid_single_kernel_coupling/render.py:20-36 uses the committed nova.media.ink and nova.media.poloidal painters and the prototype style module scripts/prototypes/diiid_xpoint_offset/style.py, benchmarks/diiid_forward_gs_match.py:1865-1875 keeps the module's docstring and seam idiom, and no added name uses a forbidden word.",
+    "goal_fidelity": "benchmarks/diiid_forward_gs_match.py:1282-1287 supplies all three plasma rows of every target from one _moment_couplings call, and _display_coupling's hybrid path is documented as display-only at benchmarks/diiid_forward_gs_match.py:1868-1875.",
+    "reuse": "the added definitions extend existing owners: nova/media/poloidal.py draw_wall, draw_flux_contours and draw_nulls via scripts/prototypes/diiid_single_kernel_coupling/render.py:101-108, bench.build_flux_blocks and bench._green_block via scripts/prototypes/diiid_single_kernel_coupling/measure.py:57-70, and cohort.row in scripts/prototypes/diiid_diverted_branch/measure.py; a search of nova/media and scripts/prototypes found no existing paired-arm batch or uniform-response-difference renderer to extend.",
+    "scope_discipline": "every one of the twelve delivered paths under 3b05ffb6..543fcfa lies inside the five declared write paths, and the transient scripts/prototypes/diiid_single_kernel_coupling/recover.py added at 56837fa2 is removed again at 9ff3d99fd."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is that every plasma coupling row of the DIII-D builder, uniform, radial and vertical, for the grid, wall and sampling nodes, comes from one exact polygon-kernel evaluation; benchmarks/diiid_forward_gs_match.py:1282-1287 attaches grid_moments[0], wall_moments[0] and sample_moments[0] from a single _moment_couplings call, so each target's three rows share one build_flux_blocks evaluation.\nVERDICT done_when: clause (1) is asserted at tests/equilibrium/test_diiid_single_kernel_coupling.py:79-90 and reddens in tests/negative-control.log (3 failed, 1 passed; FAILED [grid-0], [wall-1], [sample-2]); clause (2) is recorded in docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html with the 137D per-cell difference map and the eight terminal arms with flux panels; clause (3) is recorded only on worker partition sun (job 1319168), not the all_debug or rigel host it names.\nVERDICT write_paths: the declared fence was benchmarks/diiid_forward_gs_match.py, tests/equilibrium/test_diiid_single_kernel_coupling.py, scripts/prototypes/diiid_single_kernel_coupling, docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling and docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html; all twelve delivered paths lie inside it, and the transient scripts/prototypes/diiid_single_kernel_coupling/recover.py added at 56837fa2 is removed at 9ff3d99fd.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T224846811324-diiid-single-kernel-coupling/manifest.md; it reports the scoped check at 9ff3d99 as 4 passed and an after_suite at 9ff3d99, but remains status in-progress and does not record the 543fcfa arm at highlight-repair/scoped-head.log.\nVERDICT diff: read all sixteen commits against 3b05ffb6; e252f00a5 is the ten-line product change replacing the three _green_block plasma rows, 4ec23b915 the regression test, 613cd9ac2 and 0129893bf the gates, 8d0f54acb and 1a9b64dbf the difference figure, f99051c59 through 9ff3d99fd the paired arms, recovery and fragment, and 9ff3d99fd and 543fcfa87 the fragment and display/docstring/figure repairs.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py:1461 _build_profile -> _couplings, benchmarks/forward_solve_memory_ledger.py:340 _couplings\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: benchmarks/diiid_forward_gs_match.py:1282-1287 supplies all three plasma rows of every target from one _moment_couplings call, and _display_coupling's hybrid path is documented as display-only at benchmarks/diiid_forward_gs_match.py:1868-1875.\nSCORE evidence: 15\nJUSTIFICATION evidence: tests/equilibrium/test_diiid_single_kernel_coupling.py is green at 4 passed in review-repair/scoped-head.log (9ff3d99, job 1323837) and highlight-repair/scoped-head.log (543fcfa, job 1323855), tests/negative-control.log reads '3 failed, 1 passed' EXIT=1, and docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html records the difference map and eight terminal rows, but the focused comparison's named all_debug host and the head arm's citation are not recorded.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every one of the twelve delivered paths under 3b05ffb6..543fcfa lies inside the five declared write paths, and the transient scripts/prototypes/diiid_single_kernel_coupling/recover.py added at 56837fa2 is removed again at 9ff3d99fd.\nSCORE durability: 16\nJUSTIFICATION durability: tests/equilibrium/test_diiid_single_kernel_coupling.py:79-85 fails when the hybrid uniform rows are restored (FAILED [grid-0], [wall-1], [sample-2] in tests/negative-control.log), while the coordinate assertion at :77 compares two builder-produced values and scripts/prototypes/diiid_single_kernel_coupling/render.py:86-111 has no test.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/diiid_single_kernel_coupling/render.py:20-36 uses the committed nova.media.ink and nova.media.poloidal painters and the prototype style module scripts/prototypes/diiid_xpoint_offset/style.py, benchmarks/diiid_forward_gs_match.py:1865-1875 keeps the module's docstring and seam idiom, and no added name uses a forbidden word.\nSCORE reuse: 18\nJUSTIFICATION reuse: the added definitions extend existing owners: nova/media/poloidal.py draw_wall, draw_flux_contours and draw_nulls via scripts/prototypes/diiid_single_kernel_coupling/render.py:101-108, bench.build_flux_blocks and bench._green_block via scripts/prototypes/diiid_single_kernel_coupling/measure.py:57-70, and cohort.row in scripts/prototypes/diiid_diverted_branch/measure.py; a search of nova/media and scripts/prototypes found no existing paired-arm batch or uniform-response-difference renderer to extend.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html:27 non-blocking: the fragment states the focused comparison ran on job 1319168 partition sun, while done_when (3) names all_debug (or rigel past the hour), so that clause is unmet as recorded.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html:75 non-blocking: the provenance cites the final scoped gate at 9ff3d99 rather than the delivered head 543fcfa, leaving the green 543fcfa arm at highlight-repair/scoped-head.log uncited.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T224846811324-diiid-single-kernel-coupling/manifest.md:22 non-blocking: the run manifest's after_suite still names 9ff3d99, its test_logs omit the 543fcfa head log, and status reads in-progress, so the record does not establish the delivered head was gated.\nFINDING scripts/prototypes/diiid_single_kernel_coupling/render.py:110 non-blocking: levels_record records 0.12% for the grid and sample panels whose maxima are 0.071437% and 0.064224%, so the metadata reports a contour level only the wall panel can carry.\n",
+  "review_run_id": "r-20261116T224846811324-diiid-single-kernel-coupling",
+  "reviewed_base_sha": "9ff3d99fd0c3c19f03f42bcd3e7de2c338baf890",
+  "reviewed_head_sha": "543fcfa879f99508646c976896fbab45c3ab19f1",
+  "reviewed_run_id": "r-20261116T224846811324-diiid-single-kernel-coupling",
+  "reviewer": {
+    "backend": "local",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T164836724246-review-of-diiid-single-kernel-coupling-543fcfa879f9"
+  },
+  "reviewer_run_id": "r-20261117T164836724246-review-of-diiid-single-kernel-coupling-543fcfa879f9",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T17:08:28.801413+00:00",
+  "total": 107
+}

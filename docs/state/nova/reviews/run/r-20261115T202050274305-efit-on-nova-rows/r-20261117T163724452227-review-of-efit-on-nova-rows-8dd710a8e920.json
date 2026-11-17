@@ -1,0 +1,196 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the actual labelled base and head sections of case/suite-arms5.log: both completed with zero failed/error summaries and no FAILED/ERROR ids; this is a focused pair, not a full-suite result.",
+  "assertion_audit": [
+    {
+      "failure_condition": "The missing-values assertion fails when a generating-state literal, tabulated current/flux/axis, stored q sign or q_95_dd number is deleted or changed independently of receipt data; it does not rerun generation.",
+      "lines": "125-176",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_the_record_quotes_every_state_it_tabulated"
+    },
+    {
+      "failure_condition": "The quote assertion fails on changed printed derived current, axis, flux or q gaps; verdict presence/absence assertions fail if the old four-of-five verdict returns or stale 0.42 percent returns; the sentence assertion fails on definitional-share prose lacking 0.083; q gap and four physical-band inequalities fail if receipt values cross their stated thresholds or the stored cross-definition gap ceases to exceed q95 tolerance.",
+      "lines": "179-212",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_the_record_quotes_the_bands_it_measured"
+    },
+    {
+      "failure_condition": "The projection assertion fails if a saved amplitude no longer equals the projection of raw profile samples; quote coverage fails if pressure/diamagnetic amplitudes or fractional trades change only in the fragment.",
+      "lines": "215-238",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_the_record_quotes_the_amplitude_trade_it_attributed"
+    },
+    {
+      "failure_condition": "Quote coverage fails for independently changed coefficients, singular values, residuals, axis or current; convergence assertions fail if the control is labelled converged in data or prose; stale-number exclusions fail if 1.6e-4 or 14.995 returns.",
+      "lines": "241-260",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_the_record_quotes_the_nova_fit_it_measured"
+    },
+    {
+      "failure_condition": "Fails if the published control-current fraction, fit-current fraction, flux-span ratio or control q no longer matches recomputation from raw receipt states; no direct independent solver replay is performed.",
+      "lines": "263-273",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_the_record_quotes_the_control_ratios"
+    },
+    {
+      "failure_condition": "Fails when live-count or design-rank receipt strings disappear from the fragment, or the generic configuration-read phrase disappears; the latter is a weak wording guard and does not establish solver provenance on its own.",
+      "lines": "276-280",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_the_solver_lines_are_quoted_and_the_basis_is_labelled"
+    },
+    {
+      "failure_condition": "Fails if the eight LLS records are absent or have another basis, first/final iterations or ranks change, the first full line or final rank is unquoted, or first design no longer has m=87/path=bvls; removing basis_log was observed red in the recorded control.",
+      "lines": "283-294",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_the_basis_log_line_is_quoted_verbatim"
+    },
+    {
+      "failure_condition": "Fails if any displayed calculator value, axis/boundary flux or gap is absent; differences fail if either cached gap disagrees with independent state rows; limit fails for gap above tolerance; cross/share assertions fail if arithmetic no longer rounds to 0.148/0.083 or those values disappear; stored-value quote assertions fail on missing stored q values. The inflated-gap control fails without changing the rows.",
+      "lines": "297-334",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_the_q95_rows_are_pinned_and_the_band_read_on_one_calculator"
+    },
+    {
+      "failure_condition": "Fails if configured degree/live count/regime or per-family design ranks lose their expected on/off values, any of four log lines is omitted, profile node count ceases to be 65, constrained endpoints become nonzero, unconstrained endpoints become zero, or axis/control endpoint values disappear; recorded count and endpoint mutations each fail.",
+      "lines": "337-363",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_the_edge_constraint_is_shown_by_the_solver_not_the_config"
+    },
+    {
+      "failure_condition": "Fails on repeated fragment HTML ids; reverting the unique nova-fit-output id recreates a duplicate.",
+      "lines": "377-388",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_every_element_identifier_is_unique"
+    },
+    {
+      "failure_condition": "Fails for missing/implausibly small/non-SVG panels, unlabelled generating or reconstructed state, a missing fragment image reference or a changed drawing digest; a volatile date-only edit is intentionally excluded by the owner digest.",
+      "lines": "391-409",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_both_panels_parse_and_name_both_states"
+    },
+    {
+      "failure_condition": "Fails if the fragment loses receipt.json or the named test path; it is a citation-presence guard, not evidence of execution.",
+      "lines": "412-416",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_the_record_cites_the_check_that_guards_it"
+    },
+    {
+      "failure_condition": "Fails on closing a paragraph without an open one, nested opening, or an unclosed final paragraph; reinstating the earlier orphan close reddens it.",
+      "lines": "419-430",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_every_paragraph_opens_and_closes_in_order"
+    },
+    {
+      "failure_condition": "Fails if any counted section/p/table/figure/pre/tbody/thead/tr opening and closing counts differ; balanced misnesting can still pass this counting check.",
+      "lines": "433-439",
+      "test": "tests/test_efit_on_nova_rows_receipt.py::test_every_container_closes"
+    }
+  ],
+  "assertion_independence": "No assertion compares a value to the same variable supplied to a production call: there is no production call under test. Fragment text and frozen receipt values are distinct inputs, and recomputed gaps/projections compare different fields. They protect evidence reconciliation, not the correctness of either future solver; jointly rewriting a receipt and its prose can preserve consistency and requires human review.",
+  "call_site_count": 0,
+  "call_site_search": "The complete net diff adds only HTML, two SVG panels, JSON receipt data and a test module; no nova/, scripts/, or benchmarks/ runtime definition is added or changed, so there is no production caller of added runtime code. The production solver usages named by the evidence are existing FluxSurfaceGeometry.from_flux_map and the inverse-class runner in the source run, not newly landed production definitions.",
+  "call_sites": [],
+  "completed_at": "2026-11-17T16:46:52Z",
+  "dispatched_at": "2026-11-17T16:38:16Z",
+  "figure_review": {
+    "inspected": true,
+    "rendered": [
+      "overlay-10.png",
+      "overlay-11.png"
+    ],
+    "renderer": "ImageMagick convert -background white -density 140 INPUT.svg -resize 1400x OUTPUT.png with granted TMPDIR and MAGICK_TEMPORARY_PATH",
+    "repository_rule": "AGENTS.md:267-286 explicitly requires no axes on poloidal panels, with shared physical levels, both null sets and vessel.",
+    "result": "Both panels legible with unclipped figure-level legends, grey generating contours and blue EFIT contours, both triangle/cross null sets visible and wall shown; nominal near-coincidence and control separation can be read; no blocking visual defect.",
+    "revision": "8dd710a8e920db7e851c6e4c7ef4749435683683"
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "non-blocking: The abstract says the reconstructed plasma current is 8.7e-7 of the generating value, but receipt.json gives -13.6339997 MA against -13.6340116 MA, a ratio near 1 and a relative error near 8.7e-7; say it differs by that fraction so the headline does not report a nearly zero reconstruction."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html",
+      "line": "66",
+      "severity": "non-blocking",
+      "text": "non-blocking: The profile-sign explanation says the stored flux is opposite nova's, contradicting line 55's explicit nova = +psi_DDv4 relation; identify the actual profile-gradient convention or conversion so readers can reproduce the sign handling without choosing between contradictory statements."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html",
+      "line": "111",
+      "severity": "non-blocking",
+      "text": "non-blocking: The provenance cites job 1321517 as the nova fit, but case/fit-1321517.log:39 ends in a geometry traceback after fitting; the complete nominal and scaled NOVA_STATE records are in case/fit2-1321531.log:39,50, so the evidence should cite the successful rerun as well."
+    }
+  ],
+  "gate_evidence": {
+    "after_suite": {
+      "command": "PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/efit-on-nova-rows JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_artifacts_carry_no_worktree_paths.py tests/test_efit_on_nova_rows_receipt.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "revision": "8dd710a8e920db7e851c6e4c7ef4749435683683",
+      "summary": "15 passed in 7.13s"
+    },
+    "baseline_suite": {
+      "command": "PYTHONPATH=/tmp/efit-arms-base5 JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_artifacts_carry_no_worktree_paths.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "revision": "1f788362e8e1ca19bb5691fff8b31d25ed825f0e",
+      "summary": "1 passed in 2.89s"
+    },
+    "command_source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T202050274305-efit-on-nova-rows/run_suite_arms5.sh",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T202050274305-efit-on-nova-rows/case/suite-arms5.log",
+    "log_sha256": "fb04d3e65077dfe017751890040c02994af20152b55164dc7276dbdb803ce02d",
+    "negative_control_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T202050274305-efit-on-nova-rows/case/negative-control-receipt.log",
+    "negative_control_summary": "cases=5 unexpected_passes=0",
+    "suite_scope": "No suite rerun by reviewer; source arms are focused evidence and the dispatch suite was unarmed."
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read the eight commits from 1f788362e8e1ca19bb5691fff8b31d25ed825f0e through 8dd710a8e920db7e851c6e4c7ef4749435683683, the final fragment, both SVGs, receipt.json and tests/test_efit_on_nova_rows_receipt.py; the diff adds evidence and reconciliation tests without changing production solver code.",
+    "done_when": "Read the live clause at docs/plans/inverse-equilibrium-baseline.html:190; the solver logs, receipt and docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:19-29,93-105 support the resolved basis, behavioural edge control, matched-definition q95 below 0.1 and current control outside 1.5 percent.",
+    "goal": "Read the source goal in dispatch-detail.json argv and live plan inverse-equilibrium-baseline.html:190; docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:12-104 records the priors-off ITER exchange, both fits, the five amended bands and the scaled control.",
+    "manifest": "Read source manifest.md including its eight commits and both suite arms; case/suite-arms5.log records base 1 passed and head 15 passed with both exits zero, although the manifest tests field mixes prose with its command.",
+    "write_paths": "Read the two dispatch roots and manifest.md:3-4; all five net paths are within them except tests/test_efit_on_nova_rows_receipt.py, which the source manifest explicitly records as a coordinator-accepted scope extension."
+  },
+  "justifications": {
+    "durability": "tests/test_efit_on_nova_rows_receipt.py:179-363 rejects changed numerical bands, missing basis evidence, inconsistent q95 differences and nonzero constrained endpoints, and source case/negative-control-receipt.log demonstrates five refusals, though these snapshot tests do not rerun either solver.",
+    "evidence": "Source case/suite-arms5.log records two completed green arms and case/negative-control-receipt.log records five expected refusals, while docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:111 cites the failed fit attempt rather than its completed rerun.",
+    "fit": "tests/test_efit_on_nova_rows_receipt.py:40 reuses the existing panel-digest owner and both SVGs follow AGENTS.md:267-286, while docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:3,55,66,111 retains inaccurate or conflicting explanations and provenance.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:12-104 delivers the priors-off comparison under the current clause, including a 0.064734 matched-definition q95 gap, with minor errors in the explanatory prose.",
+    "reuse": "tests/test_efit_on_nova_rows_receipt.py:40 wraps tests/test_figure_panel_pin.py:62 for SVG comparison and follows tests/test_outboard_census_receipt_consistency.py:80-115 for receipt reconciliation; capability searches over tests/ and nova/ found no owner for this exchange's arithmetic or fragment-specific HTML checks.",
+    "scope_discipline": "The five-path diff consists of the declared evidence fragment and figure directory plus tests/test_efit_on_nova_rows_receipt.py, whose collection-enabling extension is explicitly accepted in source manifest.md:4."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read the source goal in dispatch-detail.json argv and live plan inverse-equilibrium-baseline.html:190; docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:12-104 records the priors-off ITER exchange, both fits, the five amended bands and the scaled control.\nVERDICT done_when: Read the live clause at docs/plans/inverse-equilibrium-baseline.html:190; the solver logs, receipt and docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:19-29,93-105 support the resolved basis, behavioural edge control, matched-definition q95 below 0.1 and current control outside 1.5 percent.\nVERDICT write_paths: Read the two dispatch roots and manifest.md:3-4; all five net paths are within them except tests/test_efit_on_nova_rows_receipt.py, which the source manifest explicitly records as a coordinator-accepted scope extension.\nVERDICT manifest: Read source manifest.md including its eight commits and both suite arms; case/suite-arms5.log records base 1 passed and head 15 passed with both exits zero, although the manifest tests field mixes prose with its command.\nVERDICT diff: Read the eight commits from 1f788362e8e1ca19bb5691fff8b31d25ed825f0e through 8dd710a8e920db7e851c6e4c7ef4749435683683, the final fragment, both SVGs, receipt.json and tests/test_efit_on_nova_rows_receipt.py; the diff adds evidence and reconciliation tests without changing production solver code.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:12-104 delivers the priors-off comparison under the current clause, including a 0.064734 matched-definition q95 gap, with minor errors in the explanatory prose.\nSCORE evidence: 17\nJUSTIFICATION evidence: Source case/suite-arms5.log records two completed green arms and case/negative-control-receipt.log records five expected refusals, while docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:111 cites the failed fit attempt rather than its completed rerun.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The five-path diff consists of the declared evidence fragment and figure directory plus tests/test_efit_on_nova_rows_receipt.py, whose collection-enabling extension is explicitly accepted in source manifest.md:4.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_efit_on_nova_rows_receipt.py:179-363 rejects changed numerical bands, missing basis evidence, inconsistent q95 differences and nonzero constrained endpoints, and source case/negative-control-receipt.log demonstrates five refusals, though these snapshot tests do not rerun either solver.\nSCORE fit: 17\nJUSTIFICATION fit: tests/test_efit_on_nova_rows_receipt.py:40 reuses the existing panel-digest owner and both SVGs follow AGENTS.md:267-286, while docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:3,55,66,111 retains inaccurate or conflicting explanations and provenance.\nSCORE reuse: 20\nJUSTIFICATION reuse: tests/test_efit_on_nova_rows_receipt.py:40 wraps tests/test_figure_panel_pin.py:62 for SVG comparison and follows tests/test_outboard_census_receipt_consistency.py:80-115 for receipt reconciliation; capability searches over tests/ and nova/ found no owner for this exchange's arithmetic or fragment-specific HTML checks.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:3 non-blocking: The abstract says the reconstructed plasma current is 8.7e-7 of the generating value, but receipt.json gives -13.6339997 MA against -13.6340116 MA, a ratio near 1 and a relative error near 8.7e-7; say it differs by that fraction so the headline does not report a nearly zero reconstruction.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:66 non-blocking: The profile-sign explanation says the stored flux is opposite nova's, contradicting line 55's explicit nova = +psi_DDv4 relation; identify the actual profile-gradient convention or conversion so readers can reproduce the sign handling without choosing between contradictory statements.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:111 non-blocking: The provenance cites job 1321517 as the nova fit, but case/fit-1321517.log:39 ends in a geometry traceback after fitting; the complete nominal and scaled NOVA_STATE records are in case/fit2-1321531.log:39,50, so the evidence should cite the successful rerun as well.\n",
+  "reuse_audit": {
+    "_IdentifierCounter and markup tests": "Search for HTMLParser, duplicate ids, nested paragraph and unclosed markup over tests/ and nova/ found no existing HTML structural owner in the reviewed base.",
+    "all test definitions": "All fourteen added tests enforce the exchange fragment/receipt contract; searched related receipt tests and opened test_outboard_census_receipt_consistency.py as the existing pattern, not a generic capability owner to duplicate.",
+    "normalise, ship, exponent": "Formatting-specific searches over tests/ and nova/ found no shared owner for this fragment typography and precision; nearby _grouped in tests/test_outboard_census_receipt_consistency.py formats a different grouping convention and is not a shared formatter.",
+    "panel test": "Opened tests/test_figure_panel_pin.py:62-75; added check imports the owning digest instead of copying its volatile-field normalisation.",
+    "receipt, record fixtures and derived": "Existing receipt owner form opened at tests/test_outboard_census_receipt_consistency.py:30-115; exchange-specific state differences and control arithmetic have no shared owner in searched tests/; no second solver or comparator is introduced."
+  },
+  "review_completion": "Independent read-only review complete; three explicitly non-blocking documentation findings and no blocking finding; coordinator owns folded/exempted dispositions. No source changes or solver reruns.",
+  "review_run_id": "r-20261117T163724452227-review-of-efit-on-nova-rows-8dd710a8e920",
+  "reviewed_base_sha": "1f788362e8e1ca19bb5691fff8b31d25ed825f0e",
+  "reviewed_commits": [
+    "7a2d1aa1bf2e3c42504d3bac666b43341dbac345",
+    "470f34b29bb9a51f60f1311d9968e49f679ce841",
+    "86b64c13475d0d589ff836eaec44affff1ca7d56",
+    "7f74140d7561e412fd7a5e3cde5c7c6c66f09dc5",
+    "9063017f6eb4f81aeff26a32847404e6397785aa",
+    "13ac097713c505a8c7f221092937606cf73944f2",
+    "868d7d7e98d2a52dca0a6aecacc86c23572edbbb",
+    "8dd710a8e920db7e851c6e4c7ef4749435683683"
+  ],
+  "reviewed_head_sha": "8dd710a8e920db7e851c6e4c7ef4749435683683",
+  "reviewed_run_id": "r-20261115T202050274305-efit-on-nova-rows",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "source_manifest_limitations": "baseline_suite/after_suite are prose rather than armed-suite JSON; tests mixes explanation with the literal command; suite-arms5.log uses BASE_EXIT/HEAD_EXIT and lacks canonical measurement import headers. Actual arm completion and zero added failures were read from the log rather than inferred from those fields.",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:48:05.974742+00:00",
+  "total": 111
+}

@@ -1,0 +1,70 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/diiid_single_kernel_coupling/render.py:main -> difference_panels",
+    "benchmarks/forward_solve_memory_ledger.py:340",
+    "benchmarks/diiid_forward_gs_match.py:1210 _moment_couplings -> _couplings"
+  ],
+  "completed_at": "2026-11-17T17:14:50.122Z",
+  "dispatched_at": "2026-11-17T17:14:27Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The colour constant belongs in nova/media/ink.py InkStyle, outside this node's grant; recorded for a palette pass, it does not change any measured value",
+      "recorded_at": "2026-11-17T20:43:52.984105+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The reviewer names the independent guard itself: the row comparison at test lines 81-85 fails if the builder reverts to the hybrid kernel, and the negative control confirms it (3 failed)",
+      "recorded_at": "2026-11-17T20:44:16.678131+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_single_kernel_coupling/render.py",
+      "line": "34",
+      "severity": "non-blocking",
+      "text": "HIGHEST_DIFFERENCE_COLOR registers a figure hue as a bare hex literal in the prototype, while nova/media/ink.py:3 declares InkStyle the single place every visual constant lives, so this magenta can drift from the house palette with no test to catch it; the node's fence excluded nova/media/ink.py, so the repair is a separate node adding the constant to InkStyle and reading it here."
+    },
+    {
+      "file": "tests/equilibrium/test_diiid_single_kernel_coupling.py",
+      "line": "77",
+      "severity": "non-blocking",
+      "text": "assert_array_equal(target.coordinate, coordinate) compares the coordinate the builder handed to build_flux_blocks with the coordinate it attached to the same target, so both sides come from the code under test and move together; a builder that switched to the hybrid kernel while reusing that coordinate would still satisfy it, and only the row comparison at :81-85 is an independent guard."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read all 17 commits against 3b05ffb6 and the gained commit 843063ef1 in full: it changes 3 files (+1891/-1885), the renderer's level palette and callout block, the regenerated SVG, and 6 lines of the evidence fragment.",
+    "done_when": "Clause (1) is asserted at tests/equilibrium/test_diiid_single_kernel_coupling.py:71-90 and reddens in tests/negative-control.log (3 failed, 1 passed, EXIT=1); clause (2) is recorded in docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html with the difference map and the terminal table; clause (3) is recorded at the fragment's line 27 as the worker allocation sun, which a prior review recorded as a non-blocking finding against that clause.",
+    "goal": "The node's goal is that every plasma coupling row of benchmarks/diiid_forward_gs_match.py comes from one polygon evaluation; the gained commit leaves that landed change alone at benchmarks/diiid_forward_gs_match.py:1210-1213 and repairs the coupling-difference map's readability at scripts/prototypes/diiid_single_kernel_coupling/render.py:66-131.",
+    "manifest": "Read: manifest.md reads status complete with the scoped gate PYTHONPATH=. JAX_PLATFORMS=cpu pytest tests/equilibrium/test_diiid_single_kernel_coupling.py at 4 passed, after_suite at revision 543fcfa879f99508646c976896fbab45c3ab19f1, baseline_suite as the 3b05ffb6 presence inventory, and the fragment plus render logs for the figure.",
+    "write_paths": "The declared fence is benchmarks/diiid_forward_gs_match.py, tests/equilibrium/test_diiid_single_kernel_coupling.py, scripts/prototypes/diiid_single_kernel_coupling, docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling and docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html; all 12 delivered paths under 3b05ffb6..843063ef1 lie inside it, and the gained commit adds no path."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_diiid_single_kernel_coupling.py is green and its negative control reddens at the kernel change, but no committed test covers scripts/prototypes/diiid_single_kernel_coupling/render.py, so a reversion of the magenta hue or the direct callout would leave the suite green.",
+    "evidence": "highlight-repair/render.log records EXIT=0 with text clipping=0, overlaps=0, labels over data=0, its renderer sha256 9499d684 equals the committed scripts/prototypes/diiid_single_kernel_coupling/render.py and the committed SVG hashes to f771f2cf, matching highlight-repair/pixel-verification.json, but the after_suite arm runs at 543fcfa (highlight-repair/scoped-head.log) and no suite names the reviewed head.",
+    "fit": "scripts/prototypes/diiid_single_kernel_coupling/render.py:15-34 follows the module's existing painter and style imports and adds no prohibited name, with the one local departure being the palette value at line 34.",
+    "goal_fidelity": "benchmarks/diiid_forward_gs_match.py:1210-1213 attaches block 0 of each build_flux_blocks call as the uniform row, and the gained commit 843063ef1 repairs the difference map's readability at scripts/prototypes/diiid_single_kernel_coupling/render.py:66-131, leaving that kernel change untouched.",
+    "reuse": "nova/media/ink.py:3 claims the single home for visual constants and nova/media/poloidal.py:138 draw_flux_contours takes one colour only, so no owner covers per-level contour colouring or a leader-line callout, while the added hue constant itself bypasses the palette owner.",
+    "scope_discipline": "every path in 543fcfa87..843063ef1 (render.py, uniform-response-difference.svg, the evidence fragment) lies inside the five declared write paths, and nothing outside them changed."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261117T170232965443-review-of-diiid-single-kernel-coupling-843063ef1044",
+  "reviewed_base_sha": "543fcfa879f99508646c976896fbab45c3ab19f1",
+  "reviewed_head_sha": "843063ef10447ad3351be6ef08f41df1de8c4325",
+  "reviewed_run_id": "r-20261116T224846811324-diiid-single-kernel-coupling",
+  "reviewer_run_id": "r-20261117T170232965443-review-of-diiid-single-kernel-coupling-843063ef1044",
+  "scores": {
+    "durability": 11,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T17:28:47.989265+00:00",
+  "total": 100
+}

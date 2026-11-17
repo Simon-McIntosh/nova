@@ -53,6 +53,8 @@ def summarise(output):
     retained = [dict(np.load(ROOT / f"node-{i}.npz")) for i in indices]
     known = np.stack([row["hessian"] for row in retained], axis=1)
     bounds = np.stack([row["bound"] for row in retained], axis=1)
+    boundary = dict(np.load(ROOT / "measurement/qualified-reference.npz"))
+    selected = np.array([np.flatnonzero(boundary["indices"] == i)[0] for i in indices])
     densities, owners = density(
         points, polygons, reference().coupling(polygons), moments
     )
@@ -86,6 +88,18 @@ def summarise(output):
             ),
             components=components,
         )
+        record["boundary_reference"] = {}
+        for column, (name, a, b) in enumerate((("psi_RZ", 0, 1), ("psi_ZZ", 1, 1))):
+            truth = boundary["plasma"][index, selected, column]
+            scale = np.linalg.norm(truth)
+            assert scale > 0
+            record["boundary_reference"][name] = dict(
+                relative=float(np.linalg.norm(hessian[index, :, a, b] - truth) / scale),
+                reference_bound=float(
+                    np.linalg.norm(boundary["plasma_bound"][index, selected, column])
+                    / scale
+                ),
+            )
         rows.append(record)
         print("INTEGRATED_STATE", json.dumps(record, default=float), flush=True)
     receipt = dict(
@@ -94,7 +108,9 @@ def summarise(output):
         states=rows,
         kernel_sha256=hashlib.sha256(Path(kernel.__file__).read_bytes()).hexdigest(),
     )
-    (output / "receipt.json").write_text(json.dumps(receipt, indent=2, default=float) + "\n")
+    (output / "receipt.json").write_text(
+        json.dumps(receipt, indent=2, default=float) + "\n"
+    )
 
 
 def main():

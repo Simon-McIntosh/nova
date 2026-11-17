@@ -53,6 +53,18 @@ elif [[ "$mode" == accuracy ]]; then
 elif [[ "$mode" == focused ]]; then
   run edge "$python" -m pytest -p no:cacheprovider tests/biot/test_polygon_edge_line_tangent.py -vv -s || status=1
   run moment-hessian "$python" -m pytest -p no:cacheprovider tests/test_moment_field_hessian.py -vv -s || status=1
+elif [[ "$mode" == extras ]]; then
+  run routing "$python" -m pytest -p no:cacheprovider tests/biot/test_polygon_stable_evaluator.py -k stable_derivatives -vv -s || status=1
+  run primal "$python" -m scripts.prototypes.polygon_stable_evaluator.primal_identity --repository "$tree" --baseline 02997905193b245dcc099a238fea6c22d8817671 --output "$out/primal.json" || status=1
+  run bounded-point "$python" -m pytest -p no:cacheprovider tests/equilibrium/test_bounded_point_program.py -vv -s || status=1
+  run lowered-size "$python" -m scripts.prototypes.compile_pass_profile.lowered_size --program production_point_batch --size 132 --output "$out/lowered-size.json" || status=1
+elif [[ "$mode" == summary ]]; then
+  if run summary "$python" -m scripts.prototypes.polygon_stable_evaluator.measure --output "$out" --summarise; then
+    export NOVA_POLYGON_INTEGRATED_RECEIPT="$out/receipt.json"
+    run integrated "$python" -m pytest -p no:cacheprovider tests/biot/test_polygon_stable_evaluator.py -vv -s || status=1
+  else
+    status=1
+  fi
 fi
 printf 'EXIT=%s\n' "$status"
 exit "$status"

@@ -89,3 +89,5 @@ def test_interior_hessian_reference(integrated_receipt, component):
     for row in integrated_receipt["states"]:
         assert row["components"][component]["reference_bound"] < 1e-8
         assert row["components"][component]["relative"] <= 1e-8
+        if component in row["boundary_reference"]:
+            assert row["boundary_reference"][component]["relative"] <= 1e-8

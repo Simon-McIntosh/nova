@@ -27,7 +27,12 @@
     <code>wall</code>, <code>magnetics</code> (four probes, σ = 10 T) and
     <code>tf</code>. imas-efit logs <code>Iron source: IMAS iron_core IDS
     (preferred)</code> and builds the boundary itself; the solver XML carries only
-    solver settings and the data-selection attributes.</p>
+    solver settings and the data-selection attributes. The exact factor the two
+    numbers above are compared against is not restated here: <code>make_pulse.py</code>
+    imports <code>exact_shielding</code> from
+    <code>scripts/iron_linear_magnetisation/controls.py</code>, the repository's one
+    closed-shell formula, now taking the radius ratio and μ<sub>r</sub> as arguments
+    whose defaults are that module's own 0.9–1 m shell.</p>
 
   <h4>The measurement, and its resolution dependence</h4>
   <p>S is ψ without iron over ψ with iron — the factor by which the shell reduces the

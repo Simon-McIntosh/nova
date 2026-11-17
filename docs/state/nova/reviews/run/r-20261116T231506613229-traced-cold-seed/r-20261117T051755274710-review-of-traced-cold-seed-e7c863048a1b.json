@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/solve_request.py:539 ColdSeedPortfolio.resolve",
+    "scripts/prototypes/diiid_forward_convergence/measure_branches.py:232",
+    "scripts/prototypes/sub_millisecond/measure_production_seed.py:40"
+  ],
+  "completed_at": "2026-11-17T05:19:52.316Z",
+  "dispatched_at": "2026-11-17T05:19:41Z",
+  "findings": [
+    {
+      "file": "tests/test_cold_seed_kernel.py",
+      "line": "263",
+      "severity": "blocking",
+      "text": "blocking: `jax.jit(lambda _: request.seed_policy.resolve(profile))(jnp.zeros(()))` ignores its argument, so no traced value reaches the seed construction and the test passes on the pre-change host implementation -- measured in this worktree at base 18ee03d it returns a finite 145-node seed -- so nothing in the shipped gate fails if nova/equilibrium/forward.py:789 regresses to host NumPy, which is exactly the regression the plan's Done-when asks this test to catch."
+    },
+    {
+      "file": "tests/test_cold_seed_kernel.py",
+      "line": "273",
+      "severity": "non-blocking",
+      "text": "non-blocking: the parity assertion compares `request.seed_policy.resolve(profile)` against `profile.cold_seed_portfolio(...)`, two calls into the same landed code, so both sides move together and the assertion holds whatever the kernels compute; it proves jit/eager agreement, not correctness, and the independent host oracle at tests/test_cold_seed_kernel.py:186 is what carries correctness."
+    },
+    {
+      "file": "nova/equilibrium/cold_seed.py",
+      "line": "57",
+      "severity": "non-blocking",
+      "text": "non-blocking: `is_traced` duplicates the predicate `_is_traced` at nova/transport/evolved_state.py:52, and the same isinstance test is already inlined at nova/equilibrium/topology.py:243 and nova/equilibrium/contour_tree.py:177; a shared predicate would be the owner to extend."
+    },
+    {
+      "file": "nova/equilibrium/cold_seed.py",
+      "line": "190",
+      "severity": "non-blocking",
+      "text": "non-blocking: the `operator.moment_geometry is None` bypass returns the moments unchanged where nova/equilibrium/forward_operator.py:3303 refuses nonzero first moments with a ValueError, so a future caller handing nonzero moments to the public kernel gets a silently wrong image rather than that refusal; the branch is also unreachable from the tests, since `_lattice_profile` always builds a moment geometry."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against 18ee03d18e21b22ed52fc517a821a00497197640; one commit, three files, 551 insertions and 81 deletions -- the limiter extent, uniform disc, neutral moment flux and saddle normalisation move into nova/equilibrium/cold_seed.py, forward.py:763-860 calls them, and the host _saddle_geometry_seed definition is deleted from forward.py.",
+    "done_when": "the done_when names jit(vmap(...)) over three slices, 1e-12 parity against a host seed that fails when perturbed, and the request's seed through the traced kernel with tests/test_forward_solve_request.py unchanged; logs/after-suite-cold-seed-kernel.log records 6 passed and EXIT=0 at e7c863048 and logs/request-suite.log records 8 passed and EXIT=0, but tests/test_cold_seed_kernel.py:263 passes no traced value into the construction, so the request-side clause rests on a test that also passes at base 18ee03d.",
+    "goal": "the node goal is the traced cold seed behind the entry point the solve request calls today, and nova/equilibrium/forward.py:789-820 replaces the host construction with cold_seed.current_centroid_seed and cold_seed.saddle_geometry_seed, defined at nova/equilibrium/cold_seed.py:165 and :198.",
+    "manifest": "read; it names commit e7c863048, the after arm (6 passed, EXIT=0), the request arm (8 passed, EXIT=0), the baseline arm (2 collection errors, EXIT=2) and the negative control (5 failed, EXIT=1), and every log it names exists with the stated summary.",
+    "write_paths": "the dispatch granted six paths; `git diff --stat 18ee03d e7c863048` changes three of them -- nova/equilibrium/cold_seed.py, nova/equilibrium/forward.py and tests/test_cold_seed_kernel.py -- and nothing outside the grant."
+  },
+  "justifications": {
+    "durability": "tests/test_cold_seed_kernel.py:174 and :203 fail if the kernels diverge from the host oracle or stop tracing, but no assertion fails if nova/equilibrium/forward.py:789 reverts to the host NumPy path, because both sides of tests/test_cold_seed_kernel.py:273 move together.",
+    "evidence": "the 1e-12 parity and the perturbed-oracle control in logs/negative-control-perturbed-host-seed.log are real receipts, but the request clause's receipt at tests/test_cold_seed_kernel.py:263 is non-discriminating -- measured at base 18ee03d, `jax.jit(lambda _: policy.resolve(profile))(jnp.zeros(()))` succeeds on the host implementation, so the clause the plan asks that test to prove is unrecorded.",
+    "fit": "nova/equilibrium/cold_seed.py follows the module idiom of nova/equilibrium/forward.py -- NamedTuple receipt, module __all__, docstrings stating why the host island existed -- with the minor departures of an untyped `condition` parameter at cold_seed.py:67 and a wildcard Sphinx target `ForwardProfile._clip_*` at cold_seed.py:17.",
+    "goal_fidelity": "nova/equilibrium/forward.py:789 and :817 route both branches through the new kernels and the deleted host block leaves one implementation of each construction, though nova/equilibrium/forward.py:884 moment_seed keeps a second host cold-seed construction that no production path calls.",
+    "reuse": "the saddle construction is moved rather than duplicated and the traced limiter extent at cold_seed.py:102 is the necessary device counterpart of the host-only nova/equilibrium/moment.py:377, but cold_seed.py:57 re-implements the tracer predicate already owned privately at nova/transport/evolved_state.py:52 rather than extending a shared owner.",
+    "scope_discipline": "`git diff --stat 18ee03d e7c863048` lists only nova/equilibrium/cold_seed.py, nova/equilibrium/forward.py and tests/test_cold_seed_kernel.py, all inside the declared grant, and the one incidental addition (nova/equilibrium/cold_seed.py:190-193) exists only so the traced path skips a host-only guard at nova/equilibrium/forward_operator.py:3303."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is the traced cold seed behind the entry point the solve request calls today, and nova/equilibrium/forward.py:789-820 replaces the host construction with cold_seed.current_centroid_seed and cold_seed.saddle_geometry_seed, defined at nova/equilibrium/cold_seed.py:165 and :198.\nVERDICT done_when: the done_when names jit(vmap(...)) over three slices, 1e-12 parity against a host seed that fails when perturbed, and the request's seed through the traced kernel with tests/test_forward_solve_request.py unchanged; logs/after-suite-cold-seed-kernel.log records 6 passed and EXIT=0 at e7c863048 and logs/request-suite.log records 8 passed and EXIT=0, but tests/test_cold_seed_kernel.py:263 passes no traced value into the construction, so the request-side clause rests on a test that also passes at base 18ee03d.\nVERDICT write_paths: the dispatch granted six paths; `git diff --stat 18ee03d e7c863048` changes three of them -- nova/equilibrium/cold_seed.py, nova/equilibrium/forward.py and tests/test_cold_seed_kernel.py -- and nothing outside the grant.\nVERDICT manifest: read; it names commit e7c863048, the after arm (6 passed, EXIT=0), the request arm (8 passed, EXIT=0), the baseline arm (2 collection errors, EXIT=2) and the negative control (5 failed, EXIT=1), and every log it names exists with the stated summary.\nVERDICT diff: read commit by commit against 18ee03d18e21b22ed52fc517a821a00497197640; one commit, three files, 551 insertions and 81 deletions -- the limiter extent, uniform disc, neutral moment flux and saddle normalisation move into nova/equilibrium/cold_seed.py, forward.py:763-860 calls them, and the host _saddle_geometry_seed definition is deleted from forward.py.\nCALL_SITES: nova/equilibrium/solve_request.py:539 ColdSeedPortfolio.resolve, scripts/prototypes/diiid_forward_convergence/measure_branches.py:232, scripts/prototypes/sub_millisecond/measure_production_seed.py:40\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/forward.py:789 and :817 route both branches through the new kernels and the deleted host block leaves one implementation of each construction, though nova/equilibrium/forward.py:884 moment_seed keeps a second host cold-seed construction that no production path calls.\nSCORE evidence: 13\nJUSTIFICATION evidence: the 1e-12 parity and the perturbed-oracle control in logs/negative-control-perturbed-host-seed.log are real receipts, but the request clause's receipt at tests/test_cold_seed_kernel.py:263 is non-discriminating -- measured at base 18ee03d, `jax.jit(lambda _: policy.resolve(profile))(jnp.zeros(()))` succeeds on the host implementation, so the clause the plan asks that test to prove is unrecorded.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: `git diff --stat 18ee03d e7c863048` lists only nova/equilibrium/cold_seed.py, nova/equilibrium/forward.py and tests/test_cold_seed_kernel.py, all inside the declared grant, and the one incidental addition (nova/equilibrium/cold_seed.py:190-193) exists only so the traced path skips a host-only guard at nova/equilibrium/forward_operator.py:3303.\nSCORE durability: 9\nJUSTIFICATION durability: tests/test_cold_seed_kernel.py:174 and :203 fail if the kernels diverge from the host oracle or stop tracing, but no assertion fails if nova/equilibrium/forward.py:789 reverts to the host NumPy path, because both sides of tests/test_cold_seed_kernel.py:273 move together.\nSCORE fit: 16\nJUSTIFICATION fit: nova/equilibrium/cold_seed.py follows the module idiom of nova/equilibrium/forward.py -- NamedTuple receipt, module __all__, docstrings stating why the host island existed -- with the minor departures of an untyped `condition` parameter at cold_seed.py:67 and a wildcard Sphinx target `ForwardProfile._clip_*` at cold_seed.py:17.\nSCORE reuse: 14\nJUSTIFICATION reuse: the saddle construction is moved rather than duplicated and the traced limiter extent at cold_seed.py:102 is the necessary device counterpart of the host-only nova/equilibrium/moment.py:377, but cold_seed.py:57 re-implements the tracer predicate already owned privately at nova/transport/evolved_state.py:52 rather than extending a shared owner.\nFINDING tests/test_cold_seed_kernel.py:263 blocking: `jax.jit(lambda _: request.seed_policy.resolve(profile))(jnp.zeros(()))` ignores its argument, so no traced value reaches the seed construction and the test passes on the pre-change host implementation -- measured in this worktree at base 18ee03d it returns a finite 145-node seed -- so nothing in the shipped gate fails if nova/equilibrium/forward.py:789 regresses to host NumPy, which is exactly the regression the plan's Done-when asks this test to catch.\nFINDING tests/test_cold_seed_kernel.py:273 non-blocking: the parity assertion compares `request.seed_policy.resolve(profile)` against `profile.cold_seed_portfolio(...)`, two calls into the same landed code, so both sides move together and the assertion holds whatever the kernels compute; it proves jit/eager agreement, not correctness, and the independent host oracle at tests/test_cold_seed_kernel.py:186 is what carries correctness.\nFINDING nova/equilibrium/cold_seed.py:57 non-blocking: `is_traced` duplicates the predicate `_is_traced` at nova/transport/evolved_state.py:52, and the same isinstance test is already inlined at nova/equilibrium/topology.py:243 and nova/equilibrium/contour_tree.py:177; a shared predicate would be the owner to extend.\nFINDING nova/equilibrium/cold_seed.py:190 non-blocking: the `operator.moment_geometry is None` bypass returns the moments unchanged where nova/equilibrium/forward_operator.py:3303 refuses nonzero first moments with a ValueError, so a future caller handing nonzero moments to the public kernel gets a silently wrong image rather than that refusal; the branch is also unreachable from the tests, since `_lattice_profile` always builds a moment geometry.\n",
+  "review_run_id": "r-20261117T051755274710-review-of-traced-cold-seed-e7c863048a1b",
+  "reviewed_base_sha": "18ee03d18e21b22ed52fc517a821a00497197640",
+  "reviewed_head_sha": "e7c863048a1b70221c01541e87eabeda1280f916",
+  "reviewed_run_id": "r-20261116T231506613229-traced-cold-seed",
+  "scores": {
+    "durability": 9,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 14,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T05:25:38.679211+00:00",
+  "total": 88
+}

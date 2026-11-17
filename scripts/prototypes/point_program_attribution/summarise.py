@@ -35,11 +35,13 @@ def load(path):
 
 def splitter_instructions(attribution):
     """Return the instruction count before and after the variadic splitter."""
-    gaps = attribution["gaps"]
-    for index, entry in enumerate(gaps):
+    sequence = attribution["sequence"]
+    for index, entry in enumerate(sequence):
         if entry["pass"].endswith("/variadic-op-splitter"):
             following = next(
-                row for row in gaps[index + 1 :] if not row["pass"].endswith(DIAGNOSTIC)
+                row
+                for row in sequence[index + 1 :]
+                if not row["pass"].endswith(DIAGNOSTIC)
             )
             return {
                 "entry": entry["instructions"],

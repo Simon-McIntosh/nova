@@ -25,7 +25,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="90">
+<meta name="plan-version" content="91">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -252,6 +252,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261117T145334082134-review-of-point-program-attribution-cb8e8ef2dd29" data-who="reckon-build" data-when="2026-11-17T14:55:15.120Z">
     <div class="r-comment-body"><p>review of r-20261116T223418482944-point-program-attribution over ccc984ff0945839f7e7eedaaf4fa58ddf144b768..cb8e8ef2dd29bd7eeee29aa839ac29d6c939872a (one gained commit) scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 14, fit 17, reuse 20, with 0 added failures and 4 non-blocking findings; status parsed.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261116T223418482944-point-program-attribution" data-who="reckon-build" data-when="2026-11-16T22:46:48Z">
+    <div class="r-comment-body"><p>The consolidated production row program&#x27;s 223.7 s cold H200 compile is 189.6 s of moment-row derivative instantiations (84.8%, 83.0% of the post-splitter instructions) and 119.2 s of the regular Hessian at corner heights (53.3%), with the two XLA passes that walk the expanded graph still holding 61.9% of every arm; the value path is 99.15% of the lowered graph, the elliptic terms 17.20%, and the near-corner residual tangents are erased because a raising stub never reaches them.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T105213580367-review-of-compile-pass-profile-56097c60b0a9-figure" data-who="reckon-build" data-when="2026-10-27T11:08:08.882Z">
     <div class="r-comment-body"><p>Figure review of the point-jet time-per-pass figure is parsed with all six rubric items: legibility, data_ink, decoration, contrast and label_collision pass, table_form carries the one non-blocking defect; four non-blocking findings are recorded and none blocks — the right panel's three bars sum to 99.235 s against the 96.116 s compile wall its axis names, aggregate passes are drawn identically to single passes, control figures sit in prose, and the blue/grey key lives only in the caption.</p></div>

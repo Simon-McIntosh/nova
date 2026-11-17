@@ -83,8 +83,9 @@ ratios, once the iron outline is discretised finely enough:
 (exact {fine["r050"]["exact_S"]:.6f}, {fine["r050"]["rel_error"] * 100:+.2f} %),
 both inside the 2 % gate. The two deliverables the gate could not cover are the
 resolution rule (S is a function of the outline's vertex count, and the coarse
-outline a naive case produces misses by 20 %) and a plasma-filled variant of the
-same case, which does not converge at all.</p>
+outline a naive case produces misses by 20 %) and the plasma-filled variants, which
+the reconstruction refuses — one at a cold start, one on an oscillating null space —
+with and without the iron present.</p>
 
 <h2>Case</h2>
 <p>Empty space, a spherical shell of inner radius a and outer radius b = 1 m with
@@ -162,17 +163,33 @@ consequence is in the tables: a 20-vertex half-arc (420 knots) gives
 and refining the outline at the 500-knot cap is not monotone (58.3, 55.2, 60.0, 60.6,
 60.4 for 40, 80, 160, 320, 640 vertices), because the knots alias against the corners.
 A user cannot tell a converged case from a coincidental one without this ladder.</p>
-<h3>A plasma-filled version of the same case does not converge</h3>
-<p>With <code>ip</code> = 100 A and the same probes, the fit reaches
-<code>chi2 = 2.03E-020</code> — every measurement satisfied — yet <code>cerror</code>
-plateaus at 7.0 × 10<sup>−3</sup>, 70 times the configured 1.0e-4, and the slice ends
-<code>status= -1 iterations= 80</code> with
-<code>PLATEAU_REJECTED_BY_CEILING</code> on every late iteration. The log carries
-<code>matrix: SVD smallest singular value is zero</code> throughout. Neither raising
-the current scale (10⁴) nor constraining the probes to weight 1 changed the plateau;
-pinning Ip to zero is what made the slice converge, and it is also the physically
-correct setting for a shielding measurement.</p>
-
+<h3>A plasma-filled version of the same case does not converge, and the iron is not
+the reason</h3>
+<p>The measurement pins <code>ip</code> to zero, and it had to. Two plasma-filled
+variants of this case were run, and both are refused, in different ways.</p>
+<ul>
+<li>With <code>ip</code> = 10 A and the coil at 10<sup>4</sup> A, the slice dies before
+its first iteration: <code>FINDAX: no in-vessel, outside-coil extremum with
+grid-supported escape region</code>, then
+<code>CONVERGENCE_SUMMARY: status= -2 iterations= 0 cerror= 1.798E+308
+classification= -5</code> and <code>Fatal error … status=-2 from fit.f90
+bad_failure</code> at <code>startup=cold(full)</code>. The case with the
+<code>iron_core</code> IDS and the identical case without it fail on the same line,
+so the seeding failure is in the plasma start-up, not in the iron.</li>
+<li>With <code>ip</code> = 1 MA the slice iterates to 80 and satisfies every
+measurement — <code>chi2 = 2.03E-020</code> — while <code>cerror</code> oscillates
+(<code>RELAX … osc=37</code>) and ends at 7.079 × 10<sup>−3</sup> against the
+configured 1.0e-4, with <code>PLATEAU_REJECTED_BY_CEILING</code> on every late
+iteration and <code>status= -1 classification= -2</code>. The log carries
+<code>matrix: SVD smallest singular value is zero</code> throughout, so the
+magnetics-only constraint set does not determine the null space the iteration
+wanders in.</li>
+</ul>
+<p>Neither is a defect of this control: a shielding factor needs no plasma, and
+pinning <code>ip</code> to zero is the physically correct setting for one. Both are
+reported to the imas-efit owners, because a magnetics-only fit that cannot seed from
+a cold start at a small plasma current, and cannot close below 7 × 10<sup>−3</sup>
+at a large one, is a property of the reconstruction rather than of this case.</p>
 <h2>Provenance</h2>
 <p>imas-efit commit <code>{COMMIT}</code> on <code>develop</code>, extracted with
 <code>git archive</code> (sha256 <code>{ARCHIVE_SHA}</code>) and built in

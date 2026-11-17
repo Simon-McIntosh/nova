@@ -69,21 +69,43 @@
     a pulse-level breakpoint count (or an exposed cap), so resolution is a stated
     input rather than an accident of the outline's vertex count.</p>
 
-  <h4>Findings for the owners: the options must declare the probe selection, and a plasma breaks the fit</h4>
+  <h4>Findings for the owners: the options must declare the probe selection</h4>
   <p>In unified IMAS mode the probes come from <code>magnetics</code>, but their data
     selection must still exist in <code>efitOptions</code>: without
     <code>&lt;magneticProbes interpolationMethod=…/&gt;</code> (and the same for
     <code>&lt;efitCircuits&gt;</code> and <code>&lt;bVacRadiusProduct&gt;</code>) every
     slice dies at <code>DataSelection::getValue: invalid interpolationMethod=0</code>.
     Probes at weight 0 leave the fit rank-deficient and <code>cerror</code> never
-    leaves its plateau; weight 1 with σ = 10 T fixes that without pulling the field.
-    With <code>ip</code> = 100 A the same case never converges: chi2 = 2.03 × 10<sup>−20</sup>
-    yet <code>cerror</code> plateaus at 7.079 × 10<sup>−3</sup>, 70 times the 1.0e-4
-    tolerance, and the slice ends <code>status= -1 iterations= 80</code> with
-    <code>PLATEAU_REJECTED_BY_CEILING</code> on every late iteration. Scaling every
-    current by 10<sup>4</sup> and constraining the probes both left that plateau at
-    the same value; pinning Ip to zero is what converged, and it is also the correct
-    setting for a shielding measurement.</p>
+    leaves its plateau; weight 1 with σ = 10 T fixes that without pulling the field.</p>
+
+  <h4>Findings for the owners: a plasma-filled variant of this case is refused, and
+    the iron is not the cause</h4>
+  <p>The measurement pins <code>ip</code> to zero, and it had to. Two plasma-filled
+    variants fail, in two different ways, and neither failure is iron-dependent.</p>
+  <table>
+    <tr><th>plasma</th><th>outcome</th><th>the line that decides it</th></tr>
+    <tr><td><code>ip</code> = 10 A, coil at 10<sup>4</sup> A, with and without the
+      <code>iron_core</code> IDS</td>
+      <td>dies before the first iteration</td>
+      <td><code>FINDAX: no in-vessel, outside-coil extremum with grid-supported escape
+      region</code> → <code>status= -2 iterations= 0 cerror= 1.798E+308
+      classification= -5</code>, <code>bad_failure</code> at
+      <code>startup=cold(full)</code></td></tr>
+    <tr><td><code>ip</code> = 1 MA, coil at 1 A</td>
+      <td>80 iterations, every measurement satisfied, refused on the plateau test</td>
+      <td><code>chi2 = 2.03E-020</code>, <code>RELAX … osc=37</code>,
+      <code>PLATEAU_REJECTED_BY_CEILING: cerror= 7.079E-03 ceiling= 1.000E-03</code>,
+      <code>status= -1 classification= -2</code></td></tr>
+  </table>
+  <p>The air-core member of the first pair fails on exactly the same line, so cold
+    start seeding, not the iron, is what breaks there; the arm was re-solved on
+    2026-11-17 (SLURM 1323922) and reproduced the three lines. The second is a
+    magnetics-only constraint set — four poloidal probes plus the coil circuit —
+    whose Jacobian is rank-deficient (<code>matrix: SVD smallest singular value is
+    zero</code> on 474 records of the trial series), so the iteration oscillates and
+    the ceiling test correctly refuses it. Nothing on the shielding path needs a
+    plasma; both are reported because a pulse carrying only a coil and a few probes
+    is an ordinary case.</p>
 
   <h4>Verdict, one-directionally</h4>
   <p>This is positive evidence and only positive: an independent code, reading the

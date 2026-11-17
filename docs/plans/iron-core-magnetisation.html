@@ -633,11 +633,16 @@ the B–H table has no curvature.</p>
 the outline resolution is unreachable from a pulse: <code>IronCoreBuilder</code>
 derives ten knots per polygon vertex and caps at 500, and the answer moves by 20 %
 between a 20-vertex half-arc (420 knots, S = 73.37) and a refined one — non-monotonically,
-because the uniform knot grid aliases against the corners. Second, a plasma-filled
-variant of the same case does not converge: chi2 = 2.0e-20 with cerror plateaued at
-7.08e-3, 70× the tolerance, status −1 at 80 iterations, a rank-deficient Jacobian
-logged throughout, and neither a 1e4 current scale nor probe weights moved it.
-Evidence: fragment <code>icm-efit-closed-shell-imas</code>; receipts under
+because the uniform knot grid aliases against the corners. Second, plasma-filled
+variants of the same case are refused, and the iron is not the cause: at ip = 10 A the
+slice dies before its first iteration (<code>FINDAX: no in-vessel, outside-coil
+extremum…</code> → status −2, cerror 1.798e308, <code>bad_failure</code> at cold start)
+and the identical case without the <code>iron_core</code> IDS fails on the same line,
+while at ip = 1 MA it iterates to 80 with chi2 = 2.0e-20, oscillates (osc = 37) and is
+refused at a 7.079e-3 cerror plateau against a 1.0e-4 tolerance, on a rank-deficient
+Jacobian. Pinning ip to zero is what converged, and it is the correct setting for a
+shielding measurement.</p>
+<p>Evidence: fragment <code>icm-efit-closed-shell-imas</code>; receipts under
 <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/imas-efit/closed-shell/imas/</code>.</p></div>
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261114T144521862249-icm-efit-closed-shell" data-who="reckon-build" data-when="2026-11-17T12:11:30.092Z">

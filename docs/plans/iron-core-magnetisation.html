@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="119">
+<meta name="plan-version" content="120">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -532,18 +532,20 @@
 <p>
       The WEST H200 measurement (<code>icm-west-linear-h200</code>) left the +4&nbsp;m field moving 1.17&nbsp;%
       between uniform 80 and 40&nbsp;mm, while graded 16/80&nbsp;mm agrees with uniform 40&nbsp;mm to 0.62&nbsp;%.
-      The next refinement, graded 8/40&nbsp;mm (11&nbsp;708 cells, 70&nbsp;248 unknowns), has a 39.5&nbsp;GB dense
-      interaction that the H200 cannot hold beside the compiled assembly's temporaries as the
-      assembly runs today. The section needs that interaction built within the card's memory,
-      unchanged in value, and solved on the card. It does not gate §6: the field source and the
-      forward solve consume the basis, not this number.
+      The next refinement, graded 8/40&nbsp;mm (11&nbsp;708 cells, 70&nbsp;248 unknowns), was not run. Its
+      39.5&nbsp;GB dense interaction fits the H200, but the compiled solve's factor analysis
+      measured a 158&nbsp;GB live peak (39.5&nbsp;GB arguments, 39.5&nbsp;GB output and 79&nbsp;GB of
+      temporaries) against 151&nbsp;GB of card memory (<code>icm-west-linear-h200</code>). The section needs
+      that mesh assembled and solved on the card, with values unchanged from the existing route.
+      It does not gate §6: the field source and the forward solve consume the basis, not this number.
     </p>
     <p>
       Done when (1) the graded 8/40&nbsp;mm WEST linear solve on the H200 reports the midplane field
       at 1, 2 and 4&nbsp;m, and its change against graded 16/80&nbsp;mm is under 1&nbsp;% at every probe; a
       larger change ends the section blocked with the measured change rather than met;
-      (2) the block-assembled interaction equals the existing single-program assembly on the
-      uniform 80&nbsp;mm WEST mesh to 1e-12 relative in one process, so the blocking changes no entry;
+      (2) whatever route fits the 8/40&nbsp;mm solve on the card reproduces the existing route's
+      interaction and probe fields on the uniform 80&nbsp;mm WEST mesh to 1e-12 relative in one
+      process, so the route changes no value;
       (3) a linear shell arm at 80&nbsp;mm on the &mu;<sub>r</sub> = 1000 shell is measured against the
       dipole reference, and if it still meets 0.5&nbsp;% the next coarser spacing is measured until
       one misses, so the shell criterion is shown to be able to fail for the linear basis.

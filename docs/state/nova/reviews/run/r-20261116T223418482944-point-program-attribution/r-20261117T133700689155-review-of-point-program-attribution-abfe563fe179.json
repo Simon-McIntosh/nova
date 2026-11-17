@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-17T13:47:15.758Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "point-program-attribution",
+      "recorded_at": "2026-11-17T14:00:40.735845+00:00"
+    },
+    "reuse": {
+      "kind": "folded",
+      "node": "point-program-attribution",
+      "recorded_at": "2026-11-17T14:00:38.626681+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-17T13:47:01Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/point_program_attribution/profile_arm.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "Duplicates the capability owned by scripts/prototypes/compile_pass_profile/profile.py: the same control(), build(), checkpoint() sequence, the same receipt fields and the same cache_guard ledger, re-emitted as a copy rather than a parameterised variant of the owner. The only new behaviour is the --block stub hook and the --expect-device refusal, both of which fit the owner as arguments, so a fix to the cold-process or receipt logic now has two sites. The node's fence excluded compile_pass_profile/, so the extension could not be made from this node."
+    },
+    {
+      "file": "scripts/prototypes/point_program_attribution/lowering_arm.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "Duplicates the lowering-only measurement owned by scripts/prototypes/compile_pass_profile/lowered_size.py: the same configure_dtypes/cache-off preamble, the same make_jaxpr then lower steps and the same two receipt fields, re-emitted with a block patch. The capability owner is lowered_size.py, which would take the --block hook as an argument; the copy means a change to the lowering measurement is now maintained in two files."
+    },
+    {
+      "file": "scripts/prototypes/point_program_attribution/lowering_arm.py",
+      "line": 83,
+      "severity": "non-blocking",
+      "summary": "The receipt is written twice with no read or checkpoint between, so line 83's write is discarded by line 87's; only the second carries the 'reached' probe list. Harmless to the result but dead work in a script whose purpose is a durable receipt, and a reader cannot tell which write is authoritative."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T223418482944-point-program-attribution/manifest.md",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "The delivered manifest records neither baseline_suite nor after_suite nor test_logs, although the run executed a base and head arm (2 passed, 2 skipped in each). The only copies of those gate logs are under ~/.cache/nova-kernel-compile-barrier/point-program-attribution/suite/, so a coordinator reading the record alone cannot see that the pair ran or anything about it; the checkpoint line is the sole pointer."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261117T133700689155-review-of-point-program-attribution-abfe563fe179",
+  "reviewed_base_sha": "b0a2cde51b49c29bf4c642eebadd500af9b68ca0",
+  "reviewed_head_sha": "abfe563fe1792927caf79a1bc551c2915d756b33",
+  "reviewed_run_id": "r-20261116T223418482944-point-program-attribution",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T14:00:52.342430+00:00",
+  "total": 81
+}

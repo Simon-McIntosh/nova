@@ -239,6 +239,42 @@ def _completed_target(
     )
 
 
+def _refuse_silent_shipped_current_replacement(
+    build_current: Any,
+    installed: np.ndarray,
+    ordered_names: Sequence[str],
+    shipped_names: Sequence[str],
+) -> None:
+    """Refuse to replace a build-time conductor current the resolution changes.
+
+    The operator carries the 19 shipped channels in response-column order, and
+    the resolution installs the same entries assembled from the same corpus
+    columns and turn multipliers, so agreeing inputs agree exactly. Any shipped
+    entry that differs means the build seam put a current on the operator that
+    this adapter is about to discard; the caller has to state the override in the
+    corpus columns the adapter reads instead.
+    """
+
+    if build_current is None:
+        return
+    built = np.asarray(build_current, dtype=float)
+    if built.size != len(shipped_names):
+        raise ValueError(
+            f"build-time conductor current carries {built.size} entries, but the "
+            f"shipped response names {len(shipped_names)}"
+        )
+    positions = {name: index for index, name in enumerate(ordered_names)}
+    for index, name in enumerate(shipped_names):
+        resolved = float(installed[positions[name]])
+        if float(built[index]) != resolved:
+            raise ValueError(
+                "build-time conductor current disagrees with the shipped current "
+                f"resolution for {name}: build {float(built[index]):.6f} A, "
+                f"resolved {resolved:.6f} A; a conductor-current override belongs "
+                "in the corpus columns this adapter reads, not the build seam"
+            )
+
+
 def complete_profile_current_adapter(
     profile: ForwardProfile,
     *,
@@ -256,6 +292,10 @@ def complete_profile_current_adapter(
     when the booked current route is attached, and completing them here keeps
     the order in one place rather than at each call site that builds a booked
     operator.
+
+    A build-time ``external_current`` whose shipped entries disagree with the
+    resolution this adapter installs is refused, because installing over it
+    would discard a current the caller put on the operator.
     """
 
     names = tuple(str(name) for name in shipped_names)
@@ -264,6 +304,13 @@ def complete_profile_current_adapter(
         shipped_current_a,
         circuit_bypass_priors,
         use_circuit=use_circuit,
+    )
+    installed = np.asarray(resolution.current(resolution.prior_mean_a), dtype=float)
+    _refuse_silent_shipped_current_replacement(
+        profile.operator.external_current,
+        installed,
+        resolution.names,
+        names,
     )
     targets = {}
     receipts = {}
@@ -283,7 +330,7 @@ def complete_profile_current_adapter(
         )
     operator = replace(
         profile.operator,
-        external_current=jnp.asarray(resolution.current(resolution.prior_mean_a)),
+        external_current=jnp.asarray(installed),
         **targets,
     )
     return DiiidCurrentAdapter(

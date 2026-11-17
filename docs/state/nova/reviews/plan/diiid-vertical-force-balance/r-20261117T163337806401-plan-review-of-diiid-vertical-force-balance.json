@@ -33,7 +33,24 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 117,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "Lead decision: the \u00a77 retry waits on \u00a712, and its 137D clause is restated against \u00a712's measured mechanism before it runs; \u00a77 cannot start until \u00a712 lands, so no node closes on the current branches",
+      "when": "2026-11-17T16:54:50.304521+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Lead decision: the \u00a77 retry waits on \u00a712, and its 137D clause is restated against \u00a712's measured mechanism before it runs; \u00a77 cannot start until \u00a712 lands, so no node closes on the current branches",
+      "when": "2026-11-17T16:54:50.304521+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261117T163337806401-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261117T163337806401-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "9dac3845cb61ed42d8253d14c4dc66a5f449bb8c",
   "rubric": "content",

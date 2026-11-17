@@ -94,7 +94,7 @@ from nova.equilibrium.solve_request import (
 
 from nova.biot.null import Null1D, Null2D
 from nova.biot.target import FluxTarget
-from nova.equilibrium import fixed_point, support_read
+from nova.equilibrium import cold_seed, fixed_point, support_read
 from nova.equilibrium.connectivity_boundary import _points_inside_polygon
 from nova.equilibrium.conservation import (
     ConservationLedger,
@@ -763,11 +763,21 @@ class ForwardProfile:
         span come from the independent moment seed, never from a reference
         flux map. The receipt retains every anchor input and that independence
         statement beside the production topology read of the resulting state.
+
+        Both branches are constructed by the traced kernels in
+        :mod:`nova.equilibrium.cold_seed`, so the same path runs on the host
+        and inside ``jit``/``vmap``.  Validation of the centroid, the radius
+        and the disc support is concrete-only: a traced construction returns
+        its counts for the caller to refuse after the trace.
         """
 
-        centre = np.asarray(centroid, dtype=np.float64)
-        if centre.shape != (2,) or not np.all(np.isfinite(centre)):
+        centre = jnp.asarray(centroid, dtype=jnp.float64)
+        if centre.shape != (2,):
             raise ValueError("centroid must be a finite (radius, height) pair")
+        cold_seed.require_concrete(
+            jnp.all(jnp.isfinite(centre)),
+            "centroid must be a finite (radius, height) pair",
+        )
         config = MomentConfig(order=MomentOrder.CENTROID)
         fraction = (
             config.seed_radius_fraction
@@ -776,38 +786,20 @@ class ForwardProfile:
         )
         if not 0.0 < fraction <= 1.0:
             raise ValueError("radius_fraction must lie in (0, 1]")
-        coordinate = np.asarray(self.operator.grid.coordinate, dtype=np.float64)
-        wall = np.asarray(self.operator.wall.coordinate, dtype=np.float64)
-        inboard, outboard = limiter_radial_extent(wall[:, 0], wall[:, 1], centre[1])
-        supported_distance = min(centre[0] - inboard, outboard - centre[0])
-        if supported_distance <= 0.0:
-            raise ValueError("the current centroid lies outside the limiter")
-        radius = fraction * supported_distance
-        reconstruction = ReconstructMoment(
-            CurrentCells(
-                coordinate[:, 0],
-                coordinate[:, 1],
-                candidate=np.asarray(self.operator.inside_material, dtype=np.float64),
-            ),
-            major_radius=float(centre[0]),
-            config=config,
+        seed = cold_seed.current_centroid_seed(
+            self.operator,
+            centre,
+            plasma_current,
+            radius_fraction=fraction,
+            current=current,
         )
-        cell_current = reconstruction.uniform_disc(
-            float(centre[0]),
-            float(centre[1]),
-            radius,
-            float(plasma_current),
+        cold_seed.require_concrete(
+            seed.radius > 0.0, "the current centroid lies outside the limiter"
         )
-        uniform = jnp.asarray(cell_current, dtype=jnp.float64)
-        zero = jnp.zeros_like(uniform)
-        physical = CellCurrentMoments(uniform, zero, zero)
-        coefficients = self.operator.coupling_current_moments(physical)
-        neutral = self.operator.external(current) + self.operator.current_moment_image(
-            coefficients
-        )
+        cold_seed.require_supported_disc(seed, centre, int(config.min_cells))
         neutral = self._clip_consistent_seed(
-            neutral,
-            float(plasma_current),
+            seed.flux,
+            plasma_current,
             TopologyClass.LIMITED,
         )
         requested = jnp.asarray(
@@ -818,13 +810,15 @@ class ForwardProfile:
         limited_flux = neutral
         if diverted_geometry is None:
             diverted_flux = neutral
-            diverted_axis = np.full(2, np.nan)
-            diverted_boundary = np.full(2, np.nan)
+            diverted_axis = jnp.full(2, jnp.nan)
+            diverted_boundary = jnp.full(2, jnp.nan)
             diverted_construction = ColdSeedConstruction.CURRENT_CENTROID_DISC
         else:
-            diverted_flux = self._saddle_geometry_seed(neutral, diverted_geometry)
-            diverted_axis = np.asarray(diverted_geometry.axis)
-            diverted_boundary = np.asarray(diverted_geometry.saddle)
+            diverted_flux = cold_seed.saddle_geometry_seed(
+                self.operator, neutral, diverted_geometry
+            )
+            diverted_axis = jnp.asarray(diverted_geometry.axis, dtype=jnp.float64)
+            diverted_boundary = jnp.asarray(diverted_geometry.saddle, dtype=jnp.float64)
             diverted_construction = ColdSeedConstruction.AXIS_SADDLE_GEOMETRY
         flux = jnp.stack((limited_flux, diverted_flux))
 
@@ -848,13 +842,13 @@ class ForwardProfile:
                 anchor=anchors,
                 anchor_flux=anchor_flux,
                 anchor_available=anchor_available,
-                plasma_current=jnp.full(branch_count, float(plasma_current)),
+                plasma_current=jnp.broadcast_to(
+                    jnp.asarray(plasma_current, dtype=jnp.float64), (branch_count,)
+                ),
                 centroid=jnp.broadcast_to(jnp.asarray(centre), (branch_count, 2)),
-                radius=jnp.full(branch_count, radius),
-                supported_cells=jnp.full(
-                    branch_count,
-                    int(np.count_nonzero(cell_current)),
-                    dtype=jnp.int32,
+                radius=jnp.broadcast_to(seed.radius, (branch_count,)),
+                supported_cells=jnp.broadcast_to(
+                    jnp.asarray(seed.supported_cells, dtype=jnp.int32), (branch_count,)
                 ),
                 construction=jnp.asarray(
                     (
@@ -1102,44 +1096,6 @@ class ForwardProfile:
             "exact clip seed boundary solve missed unit amplitude: "
             f"a={amplitude:.8g}, level_fraction={level_fraction:.8g}"
         )
-
-    def _saddle_geometry_seed(
-        self,
-        moment_seed: jax.Array,
-        geometry: SaddleSeedGeometry,
-    ) -> jax.Array:
-        """Return a cold field normalized at declared axis and saddle points."""
-
-        axis = np.asarray(geometry.axis, dtype=np.float64)
-        saddle = np.asarray(geometry.saddle, dtype=np.float64)
-        displacement = saddle - axis
-        distance = float(np.linalg.norm(displacement))
-        along = displacement / distance
-        across = np.array((-along[1], along[0]))
-        coordinate_parts = [
-            np.asarray(self.operator.grid.coordinate, dtype=np.float64),
-            np.asarray(self.operator.wall.coordinate, dtype=np.float64),
-        ]
-        if self.operator.sample is not None:
-            coordinate_parts.append(
-                np.asarray(self.operator.sample.coordinate, dtype=np.float64)
-            )
-        coordinates = np.vstack(coordinate_parts)
-        grid = coordinate_parts[0]
-        axis_index = int(np.argmin(np.linalg.norm(grid - axis, axis=1)))
-        saddle_index = int(np.argmin(np.linalg.norm(grid - saddle, axis=1)))
-        neutral = np.asarray(moment_seed, dtype=np.float64)
-        polarity = float(self.operator.polarity)
-        flux_span = polarity * (neutral[axis_index] - neutral[saddle_index])
-        resolution = np.finfo(np.float64).eps * max(np.max(np.abs(neutral)), 1.0)
-        flux_span = max(float(flux_span), float(resolution))
-        local = coordinates - axis
-        axial = local @ along / distance
-        transverse = local @ across / distance
-        potential = -0.5 * axial**2 + axial**3 / 3.0 - 0.5 * transverse**2
-        normalized = 6.0 * (potential + 1.0 / 6.0)
-        saddle_flux = neutral[saddle_index]
-        return jnp.asarray(saddle_flux + polarity * flux_span * normalized)
 
     def observe(
         self,

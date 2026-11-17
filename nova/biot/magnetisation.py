@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from functools import partial
 import hashlib
 import json
 from pathlib import Path
@@ -576,7 +577,7 @@ def _linear_residual(state, operands):
 
 
 @jax.jit
-def _linear_factor(state, operands, regularisation=0.0):
+def _linear_jacobian(state, operands, regularisation=0.0):
     """Contract local quadrature tangents before applying the dense B map."""
     gram, external, knots, coefficients, ends, basis, project, owners = operands[:8]
     count = state.size // 6
@@ -605,7 +606,24 @@ def _linear_factor(state, operands, regularisation=0.0):
         state.size, state.size
     )
     jacobian += (1 + regularisation) * jnp.eye(state.size, dtype=state.dtype)
+    return jacobian
+
+
+@jax.jit
+def _linear_factor(state, operands, regularisation=0.0):
+    return jla.lu_factor(_linear_jacobian(state, operands, regularisation))
+
+
+@partial(jax.jit, donate_argnums=(0,))
+def _donated_lu(jacobian):
+    """Reuse the disposable Jacobian buffer for the dense LU factors."""
     return jla.lu_factor(jacobian)
+
+
+def _linear_split_factor(state, operands, regularisation=0.0):
+    """Separate contraction and LU so their dense temporaries cannot overlap."""
+    jacobian = _linear_jacobian(state, operands, regularisation)
+    return _donated_lu(jacobian)
 
 
 @jax.jit
@@ -715,6 +733,7 @@ def solve_magnetisation(
     cross_field_factor=0.0,
     basis: str = "constant",
     interaction: MagnetisationInteraction | None = None,
+    linear_factorisation: str = "combined",
 ) -> MagnetisationSolution:
     """Mesh iron and solve M = c(|B|) B for B = B_external + G M.
 
@@ -732,6 +751,9 @@ def solve_magnetisation(
     multiply coordinates divided by the square root of each cell area.
     ``interaction`` accepts a persisted response loaded for this mesh and basis;
     its geometry digest is checked before any source evaluation or assembly.
+    ``linear_factorisation="split"`` separates Jacobian construction from a
+    buffer-donating LU call to reduce peak device storage. Both routes use
+    the same affine Jacobian and Newton update; the default is ``"combined"``.
 
     ``fill_fraction`` is the toroidal iron fraction f in (0, 1], supplied as a
     scalar, a (cells,) array, or a callback of (cells, 2) centroids [m].
@@ -762,6 +784,10 @@ def solve_magnetisation(
     law = _fit_law(b_field, permeability_relative)
     if basis not in {"constant", "linear"}:
         raise ValueError("basis must be constant or linear")
+    if linear_factorisation not in {"combined", "split"}:
+        raise ValueError("linear_factorisation must be combined or split")
+    if basis != "linear" and linear_factorisation != "combined":
+        raise ValueError("split factorisation requires the linear basis")
     cells = _mesh(region, cell_size)
     if interaction is not None:
         interaction.validate(cells, basis)
@@ -825,7 +851,7 @@ def solve_magnetisation(
         )
         residual_function, factor_function, update_function = (
             _linear_residual,
-            _linear_factor,
+            _linear_split_factor if linear_factorisation == "split" else _linear_factor,
             _linear_update,
         )
     if np.any(fill != 1):
@@ -864,6 +890,8 @@ def solve_magnetisation(
             candidate, trial = update_function(
                 state, operands, factor, jnp.asarray(1.0)
             )
+            # The next factorisation must not retain the preceding dense LU.
+            del factor
             defect = trial + damping * (candidate - state)
             ratio = 1 - (float(jnp.linalg.norm(defect)) / norm) ** 2
             if ratio > 0.25 and bool(jnp.any(candidate != state)):

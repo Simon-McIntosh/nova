@@ -36,6 +36,20 @@ prepare(Path(tree), revision, Path(source))
 subprocess.run(['git', '-C', tree, 'update-ref', 'HEAD', revision], check=True)
 PY
 cd "$scratch/tree"
+if [ "${IRON_REFINEMENT:-0}" = 1 ]; then
+    /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -s \
+        tests/test_magnetisation.py -k test_linear_shell_operator_pin > "$out/h200-operator-pin.log" 2>&1
+    /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
+        --revision "$revision" --blob "$blob" --output "$out" \
+        --mesh graded-8-40 --refinement
+    for mesh in graded-16-80 uniform-0.04; do
+        /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
+            --revision "$revision" --blob "$blob" --output "$out" \
+            --mesh "$mesh" --compare-routes
+    done
+    echo EXIT=0
+    exit 0
+fi
 if [ "${IRON_HALF_DRIVE_ONLY:-0}" = 1 ]; then
     /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
         --revision "$revision" --blob "$blob" --output "$out" \

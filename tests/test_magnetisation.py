@@ -1799,3 +1799,141 @@ def test_linear_fill_and_cross_field_match_affine_tensor(monkeypatch, fill):
             np.testing.assert_array_equal(
                 getattr(result, name), getattr(implicit, name)
             )
+
+
+@pytest.mark.parametrize("fill", [1.0, 0.2])
+@pytest.mark.parametrize("damping", [0.0, 0.01])
+def test_split_linear_factor_preserves_differential_system(fill, damping):
+    cells = iron._mesh(shapely.box(1, 0, 2, 1), 0.5)
+    geometry = iron.linear_magnetisation_geometry(cells.polygons)
+    owners = geometry["owners"]
+    project = np.einsum(
+        "qij,qj,q->qi",
+        np.linalg.inv(geometry["gram"])[owners],
+        geometry["basis"],
+        geometry["weights"],
+    )
+    count = 6 * len(cells.polygons)
+    rng = np.random.default_rng(123)
+    operator = rng.normal(size=(count, count)) * 1e-10
+    external = rng.normal(size=count) * 0.05
+    operands = tuple(
+        map(
+            jnp.asarray,
+            (
+                operator,
+                external,
+                *iron._fit_law([0, 0.2, 1], [2, 4, 2]),
+                geometry["basis"],
+                project,
+                owners,
+            ),
+        )
+    )
+    if fill != 1:
+        operands += (
+            jnp.full(len(cells.polygons), fill),
+            jnp.full((2, len(cells.polygons)), (1 - fill) / fill),
+        )
+    state = jnp.arange(count, dtype=jnp.float64) * 10
+    expected = iron._linear_factor(state, operands, jnp.asarray(damping))
+    actual = iron._linear_split_factor(state, operands, jnp.asarray(damping))
+    rhs = jnp.asarray(rng.normal(size=count))
+    np.testing.assert_allclose(
+        iron.jla.lu_solve(actual, rhs),
+        iron.jla.lu_solve(expected, rhs),
+        rtol=1e-12,
+        atol=1e-14,
+    )
+    differential = jax.jacfwd(iron._linear_residual)(state, operands)
+    differential += damping * jnp.eye(count)
+    np.testing.assert_allclose(
+        differential @ iron.jla.lu_solve(actual, rhs), rhs, rtol=1e-12, atol=1e-14
+    )
+    np.testing.assert_array_equal(operands[0], operator)
+
+
+def test_split_linear_solve_preserves_nonlinear_probe_fields(monkeypatch):
+    region = shapely.box(1, 0, 2, 1)
+    cells = iron._mesh(region, 0.5)
+    matrix = np.eye(6 * len(cells.polygons)) * iron._MU0 * 0.3
+    interaction = iron.MagnetisationInteraction(
+        matrix, iron._geometry_digest(cells, "linear"), "linear"
+    )
+    monkeypatch.setattr(
+        iron, "_galerkin_interaction", lambda *a, **k: pytest.fail("assembly")
+    )
+
+    def external(points):
+        return np.column_stack((0.02 * points[:, 0], 0.03 + 0.01 * points[:, 1]))
+
+    results = [
+        iron.solve_magnetisation(
+            region,
+            external,
+            [0, 0.2, 1],
+            [2, 4, 2],
+            cell_size=0.5,
+            basis="linear",
+            interaction=interaction,
+            linear_factorisation=route,
+            tolerance=1e-10,
+        )
+        for route in ("combined", "split")
+    ]
+    assert all(result.converged for result in results)
+    assert results[0].iterations >= 2
+    probes = np.array([[3.0, 0.0], [4.0, 1.0], [6.0, 0.0]])
+    np.testing.assert_allclose(
+        results[1].field(probes), results[0].field(probes), rtol=1e-12, atol=1e-20
+    )
+    np.testing.assert_array_equal(interaction.matrix, matrix)
+
+
+def test_linear_factorisation_refuses_unknown_route_and_constant_basis():
+    for arguments in (
+        {"linear_factorisation": "other"},
+        {"linear_factorisation": "split"},
+    ):
+        with pytest.raises(ValueError, match="factorisation"):
+            iron.solve_magnetisation(
+                shapely.box(1, 0, 2, 1),
+                lambda points: np.zeros_like(points),
+                [0, 1],
+                [10, 10],
+                cell_size=1,
+                **arguments,
+            )
+
+
+def test_west_route_comparison_detects_perturbed_interaction():
+    from scripts.west_iron_linear.measure import interaction_agreement, probe_agreement
+
+    reference = np.diag([1.0, 2.0, 3.0])
+    assert interaction_agreement(reference, reference.copy())["entries"] == 9
+    altered = reference.copy()
+    altered[1, 0] = 1e-4
+    with pytest.raises(AssertionError):
+        interaction_agreement(reference, altered)
+    probes = np.arange(1, 7, dtype=float).reshape(3, 2)
+    assert probe_agreement(probes, probes.copy()) == [0.0, 0.0, 0.0]
+    with pytest.raises(AssertionError):
+        probe_agreement(probes, probes * 1.00001)
+
+
+@pytest.mark.parametrize(
+    "change, status",
+    [
+        (0.0099, "complete"),
+        (0.01, "blocked"),
+        (0.0101, "blocked"),
+        (-0.0101, "blocked"),
+    ],
+)
+def test_west_refinement_blocks_at_one_percent(change, status):
+    from scripts.west_iron_linear.measure import refinement_verdict
+
+    reference = np.ones(3)
+    candidate = reference.copy()
+    candidate[2] += change
+    assert refinement_verdict(reference, candidate)["status"] == status

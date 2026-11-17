@@ -39,6 +39,7 @@ __all__ = [
     "is_traced",
     "limiter_radial_extent",
     "limiter_supported_distance",
+    "moment_coefficients",
     "require_concrete",
     "require_supported_disc",
     "saddle_geometry_seed",
@@ -162,6 +163,32 @@ def uniform_disc_current(
     return jnp.where(inside, share, 0.0), supported_cells
 
 
+def moment_coefficients(
+    operator: ForwardFluxOperator,
+    moments: CellCurrentMoments,
+) -> CellCurrentMoments:
+    """Return the coefficients the operator's current image consumes.
+
+    A geometry-free operator carries no first-moment inversion, so it admits a
+    zeroth moment only; a nonzero radial or vertical moment is refused here
+    rather than returned unchanged and silently dropped by the image.  The
+    refusal is made on concrete values: a traced moment has no Python truth
+    value, and the kernels here construct a zero first moment, which is the only
+    admissible case on such an operator.
+    """
+
+    if operator.moment_geometry is not None:
+        return operator.coupling_current_moments(moments)
+    for moment in (moments.radial_moment, moments.vertical_moment):
+        if is_traced(moment):
+            continue
+        if bool(jnp.any(jnp.asarray(moment) != 0.0)):
+            raise ValueError(
+                "moment geometry is required for nonzero first current moments"
+            )
+    return moments
+
+
 def current_centroid_seed(
     operator: ForwardFluxOperator,
     centroid,
@@ -187,10 +214,7 @@ def current_centroid_seed(
     )
     zero = jnp.zeros_like(cell_current)
     moments = CellCurrentMoments(cell_current, zero, zero)
-    if operator.moment_geometry is None:
-        coefficients = moments
-    else:
-        coefficients = operator.coupling_current_moments(moments)
+    coefficients = moment_coefficients(operator, moments)
     flux = operator.external(current) + operator.current_moment_image(coefficients)
     return ColdSeedBranch(flux=flux, radius=radius, supported_cells=supported_cells)
 

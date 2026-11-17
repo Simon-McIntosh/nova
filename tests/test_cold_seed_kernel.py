@@ -32,6 +32,7 @@ from nova.equilibrium.solve_request import ColdSeedPortfolio, ForwardSolveReques
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.jax.config import configure_dtypes
+from tests.test_cold_seed_portfolio_raster import _raster_profile
 
 RELATIVE_TOLERANCE = 1.0e-12
 CENTROIDS = ((1.0, 0.0), (0.97, 0.06), (1.04, -0.05))
@@ -66,6 +67,14 @@ def _lattice_profile() -> ForwardProfile:
         wall_coordinate=np.c_[1.0 + 0.5 * np.cos(angle), 0.5 * np.sin(angle)],
         cubic_cell_average=False,
     )
+
+
+def _geometry_free_profile() -> ForwardProfile:
+    """Return the project's rectangular operator, which carries no moment geometry."""
+
+    profile = _raster_profile()
+    assert profile.operator.moment_geometry is None
+    return profile
 
 
 def _host_disc_current(profile: ForwardProfile, current: float, centroid) -> tuple:
@@ -144,14 +153,21 @@ def _host_saddle_seed(
     return neutral[saddle_index] + polarity * flux_span * normalized
 
 
-def _host_branch(profile: ForwardProfile, current: float, centroid, index: int):
+def _host_branch(
+    profile: ForwardProfile,
+    current: float,
+    centroid,
+    index: int,
+    diverted_geometry: SaddleSeedGeometry | None = None,
+):
     """Return the host seed of one selected branch, as the portfolio receipt did."""
 
     neutral = _host_neutral_flux(profile, current, centroid)
-    if index == int(ColdSeedConstruction.CURRENT_CENTROID_DISC):
+    if index == int(ColdSeedConstruction.CURRENT_CENTROID_DISC) or (
+        diverted_geometry is None
+    ):
         return neutral
-    geometry = SaddleSeedGeometry(AXIS, SADDLE)
-    return _host_saddle_seed(profile, neutral, geometry)
+    return _host_saddle_seed(profile, neutral, diverted_geometry)
 
 
 def _relative_difference(observed, reference) -> float:
@@ -183,7 +199,7 @@ def test_traced_seed_matches_the_host_construction(current, centroid) -> None:
     for index in (0, 1):
         _assert_seed_parity(
             np.asarray(portfolio.branches.flux[index]),
-            _host_branch(profile, current, centroid, index),
+            _host_branch(profile, current, centroid, index, geometry),
         )
 
 
@@ -230,7 +246,10 @@ def test_jit_vmap_cold_seed_kernel_runs_over_three_distinct_slices() -> None:
             limited[slice_index], _host_branch(profile, current, centroid, 0)
         )
         _assert_seed_parity(
-            diverted[slice_index], _host_branch(profile, current, centroid, 1)
+            diverted[slice_index],
+            _host_branch(
+                profile, current, centroid, index=1, diverted_geometry=geometry
+            ),
         )
 
     for left in range(len(CURRENTS)):
@@ -245,7 +264,7 @@ def test_jit_vmap_cold_seed_kernel_runs_over_three_distinct_slices() -> None:
 
 
 def test_request_cold_seed_builds_inside_jit() -> None:
-    """The production request's seed construction traces and keeps its provenance."""
+    """The request's seed construction takes traced per-slice inputs under jit."""
 
     profile = _lattice_profile()
     request = ForwardSolveRequest.from_defaults(
@@ -259,21 +278,52 @@ def test_request_cold_seed_builds_inside_jit() -> None:
     )
     policy = request.seed_policy
     assert isinstance(policy, ColdSeedPortfolio)
-
-    seed = jax.jit(lambda _: request.seed_policy.resolve(profile))(
-        jnp.zeros(())
-    ).block_until_ready()
-
     index = 0 if policy.requested_class == "limited" else 1
-    host = np.asarray(
-        profile.cold_seed_portfolio(
-            policy.plasma_current, policy.centroid
-        ).branches.flux[index]
+
+    def build(current, centroid):
+        return policy.resolve(profile, plasma_current=current, centroid=centroid)
+
+    seeds = jax.jit(jax.vmap(build))(
+        jnp.asarray(CURRENTS, dtype=jnp.float64),
+        jnp.asarray(CENTROIDS, dtype=jnp.float64),
     )
-    _assert_seed_parity(seed, host)
+
+    assert seeds.shape == (len(CURRENTS), profile.operator.node_number)
+    for slice_index, (current, centroid) in enumerate(zip(CURRENTS, CENTROIDS)):
+        _assert_seed_parity(
+            np.asarray(seeds[slice_index]),
+            _host_branch(profile, current, centroid, index),
+        )
+    assert not np.array_equal(np.asarray(seeds[0]), np.asarray(seeds[1]))
+
+    declaration = policy.resolve(profile)
+    _assert_seed_parity(
+        np.asarray(declaration),
+        _host_branch(profile, CURRENTS[1], CENTROIDS[1], index),
+    )
     assert policy.provenance().to_dict() == {
         "kind": "cold_seed_portfolio",
         "requested_class": "diverted",
         "plasma_current": CURRENTS[1],
         "centroid": CENTROIDS[1],
     }
+
+
+def test_geometry_free_operator_refuses_a_nonzero_first_moment() -> None:
+    """A zeroth-moment-only operator keeps its refusal through the kernel seam."""
+
+    operator = _geometry_free_profile().operator
+    node_count = operator.node_number
+    current = jnp.zeros(node_count)
+    zero = jnp.zeros(node_count)
+
+    admissible = cold_seed.moment_coefficients(
+        operator, CellCurrentMoments(current, zero, zero)
+    )
+    np.testing.assert_array_equal(admissible.cell_current, current)
+
+    skewed = CellCurrentMoments(current, zero.at[1].set(1.0), zero)
+    with pytest.raises(ValueError, match="nonzero first current moments"):
+        cold_seed.moment_coefficients(operator, skewed)
+    with pytest.raises(ValueError, match="nonzero first current moments"):
+        operator.coupling_current_moments(skewed)

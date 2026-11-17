@@ -25,8 +25,8 @@
     },
     "2": {
       "kind": "exempted",
-      "reason": "the integrated 64-node accuracy run takes about 4.5 h on rigel and cannot run in the default lane; the receipt-gated cases are the designed contract, and the live accuracy is re-checked by iter-bank-recertify, which holds psi_RZ and psi_ZZ to 1e-8 at the same nodes",
-      "recorded_at": "2026-11-17T23:27:32.928407+00:00"
+      "reason": "provenance of the negative-control array is recorded by measurement_array_sha256 in base-summary/receipt.json beside the log; a header wording change alone does not change the evidence",
+      "recorded_at": "2026-11-17T23:28:18.971856+00:00"
     }
   },
   "findings": [

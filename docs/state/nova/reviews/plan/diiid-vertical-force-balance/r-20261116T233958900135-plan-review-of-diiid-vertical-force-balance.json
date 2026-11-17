@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T00:09:32.108Z",
+  "dispatched_at": "2026-11-17T00:09:04Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:109",
+      "id": "done_when-1",
+      "reason": "one clause naming a relative tolerance (the section already uses 2e-6 for the refusing branch) turns the branch's only check from an opinion into a measure.",
+      "text": "the passing branch of done-when (2) requires \"a run with only the named difference applied that reproduces 1119994.165 A\", a number the repository holds nowhere (a repo-wide search finds it only in the plan and the review JSONs) and with no tolerance on the reproduction, so the one measurable clause in that branch cannot be judged met or unmet \u2014 a 0.5 A miss and a 0.001 A miss are indistinguishable",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:109",
+      "id": "reasoning-1",
+      "reason": "a node closing on the passing branch must either fail to satisfy (3) or re-register a correct value, and the fix is to scope (3) to the refusing branch and state that the passing branch leaves the registration unchanged.",
+      "text": "done-when (3) has no branch structure: it demands \"repairs the cause or re-registers with that reason\" even when the head run passes and the named difference is the probe's, in which case the registration is already correct at 1.3e-7 and re-registering it would write over a value the section's own premise vouches for, while \"repairing the cause\" has no repository referent because the probe is not committed code",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "7519b1082e481b16a1363ce35d17064a0691b290",
+  "plan_fingerprint": "e9d43f6a4a887f1cb9b0cee3d4da5f7edf8ec600b973fbc358ea69a328105a50",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 104,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261116T233958900135-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "03e0576ec543181e35294d25c14ecff148e95535",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the five-row receipt resolves at docs/figures/current-constrained-forward-solve/pinned-cohort/current_pinned_forward_frames.jsonl and holds frame 102 with 1137702.0764874697 at HEAD and at a60f18521; the registration 1137702.226779481 resolves at benchmarks/diiid_current_pinned_forward.py:95; 37b9ba7c4 exists; tests/imas/test_diiid_current_pinned_forward.py exists.",
+    "done_when": "a finding \u2014 \u00a711 done-when (2)'s passing branch requires a run to \"reproduce 1119994.165 A\" with no tolerance, while the same sentence states its refusing branch against 2e-6.",
+    "evidence_paths": "pass \u2014 the head run's `--output` is placed under the node's evidence directory and the committed receipt directory is excluded, which matches `DEFAULT_OUTPUT` at benchmarks/diiid_current_pinned_forward.py:60, the truncation at lines 1051-1052, and the test's read at tests/imas/test_diiid_current_pinned_forward.py:249.",
+    "naming": "pass \u2014 \u00a711 introduces no symbol, filename or comment carrying a plan label, stage name or ticket number into code.",
+    "reasoning": "a finding \u2014 done-when (3) requires the node to \"repair the cause or re-register with that reason\" unconditionally, but in the passing branch the section's own outcome is that the benchmark agrees with the registration, so no repository cause exists and a re-registration would overwrite a value the evidence confirms.",
+    "single_goal": "pass \u2014 one deliverable: the seed current either agrees with its registration or the record demonstrates in physical terms why it does not, with the tolerance unchanged.",
+    "wiring": "pass \u2014 \u00a711 declares depends-on s8 (`plan-section-depends-on`, live plan version 106), the section whose adapter refusal the seed-current read passes through; the composed snapshot (blob 03e0576, plan-version 104) predates its own answers, see the note below."
+  },
+  "section_digests": {
+    "_document": "8e5c0bf47364beca17fe5b540a282cd24e45ff5cb13f57dbbb5016dda75d5b7c",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "8eeeb64d9732d7de0a376a179c5d64bf4460bfcfd1c9aad80895c7d91ab6add5",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "3dc57bc53014ca0924803e72edad5a80c9db8d8548f1484de73c21e0193d0ae3",
+    "s8": "8632587216eaa0edebdbe9d2f34107c6a23a5c5d466a12ce012fb753a7b1c661",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T00:41:26.921471+00:00",
+  "total": null
+}

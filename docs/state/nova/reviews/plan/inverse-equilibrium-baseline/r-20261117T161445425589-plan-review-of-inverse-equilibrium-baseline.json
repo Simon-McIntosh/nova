@@ -35,9 +35,28 @@
       "note": "The row-exchange section now requires the imas-efit wall of its run and the hardware to be recorded, so the cost section reads a delivered measurement.",
       "reason": "",
       "when": "2026-11-17T16:54:06.892631+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0eb4a76487a8bbaaef323ac9be76265f81189343",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The flux band now names the additive gauge: the two maps are compared after an additive constant aligns their axis flux, and the constant is reported.",
+      "reason": "",
+      "when": "2026-11-17T16:55:17.586517+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0eb4a76487a8bbaaef323ac9be76265f81189343",
+      "commit_basis": "edit",
+      "note": "The flux band now names the additive gauge: the two maps are compared after an additive constant aligns their axis flux, and the constant is reported.",
+      "reason": "",
+      "when": "2026-11-17T16:55:17.586517+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",

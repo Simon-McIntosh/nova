@@ -11,7 +11,7 @@ stay inside this module. Fields and magnetisations use component order
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import hashlib
 import json
 from pathlib import Path
@@ -23,14 +23,16 @@ import numpy as np
 from scipy.interpolate import PchipInterpolator
 import shapely
 
+from nova.biot.greens import traced_filament_greens
 from nova.biot.sectionaverage import section_nodes
 from nova.biot.tiledassembly import (
     TilePlan,
+    _polygon_current_response,
     cell_interaction,
     galerkin_cell_interaction,
-    linear_cell_interaction,
     linear_galerkin_cell_interaction,
     linear_magnetisation_geometry,
+    sheet_edge_field,
 )
 from nova.jax.config import configure_dtypes
 
@@ -42,6 +44,8 @@ __all__ = [
     "save_magnetisation_interaction",
     "galerkin_spectrum",
     "graded_cell_size",
+    "BoundCurrents",
+    "bound_currents",
     "solve_magnetisation",
 ]
 
@@ -415,6 +419,92 @@ def _average_external(cells, external_field, order=6):
     return average / normalisation[:, None]
 
 
+def _ring_moments(atoms, points, order):
+    """Return the ring-quadrature pieces of one affine edge current.
+
+    A straight edge sheet is split into its uniform part and a zero-mean
+    remainder about the sheet's midpoint, the pairing the affine incidence of
+    :func:`linear_magnetisation_geometry` carries. The uniform sheet has a
+    closed-form field, so only ``psi`` needs it here; every piece travels
+    through the executable ring kernel at the Gauss nodes of the edge.
+    """
+    nodes, weights = np.polynomial.legendre.leggauss(order)
+    parameter, weights = (nodes + 1) / 2, weights / 2
+    source = atoms[:, :1] + parameter[None, :, None] * (atoms[:, 1:] - atoms[:, :1])
+    lengths = np.linalg.norm(atoms[:, 1] - atoms[:, 0], axis=-1)
+
+    @jax.jit
+    def integrate(target, source):
+        """Return uniform and zero-mean ``psi`` and the zero-mean field."""
+        psi, radial, height = traced_filament_greens(
+            jnp,
+            target[:, None, None, 0],
+            target[:, None, None, 1],
+            source[None, :, :, 0],
+            source[None, :, :, 1],
+        )
+        uniform = jnp.asarray(weights)
+        centred = jnp.asarray(weights * (parameter - 0.5))
+        return jnp.stack(
+            (
+                psi @ uniform,
+                psi @ centred,
+                radial @ centred,
+                height @ centred,
+            )
+        )
+
+    return (
+        np.asarray(integrate(jnp.asarray(points), jnp.asarray(source)))
+        * lengths[None, None]
+    )
+
+
+def _affine_sheet_field(atoms, points, plan, order=24):
+    """Return the ``(2, T, 2*A)`` field response of each affine edge current.
+
+    Column ``2*a`` is atom ``a``'s uniform sheet and ``2*a + 1`` its affine
+    remainder about the sheet's midpoint. The uniform part is the closed form
+    of :func:`sheet_edge_field`, the same kernel the Galerkin operator pairs
+    against; only the zero-mean remainder is integrated, so a straight edge's
+    affine current is exact at every target off the segment.
+    """
+    radial, height = sheet_edge_field(
+        points[:, 0],
+        points[:, 1],
+        atoms[:, 0, 0],
+        atoms[:, 0, 1],
+        atoms[:, 1, 0],
+        atoms[:, 1, 1],
+        plan=plan,
+    )
+    moments = _ring_moments(atoms, points, order)
+    return np.stack(
+        [
+            np.stack((constant, constant / 2 + rest), axis=-1).reshape(len(points), -1)
+            for constant, rest in (
+                (radial, moments[2]),
+                (height, moments[3]),
+            )
+        ]
+    )
+
+
+def _affine_sheet_flux(atoms, points, order=24):
+    """Return the ``(T, 2*A)`` poloidal flux of each affine edge current [Wb].
+
+    No closed-form flux tile exists for the edge sheet, so both columns ride the
+    ring kernel at the Gauss nodes of the edge: the uniform sheet as the plain
+    ``psi`` moment, its affine remainder as the same moment about the sheet's
+    midpoint. The pairing of the two columns is the one
+    :func:`_affine_sheet_field` uses.
+    """
+    moments = _ring_moments(atoms, points, order)
+    return np.stack((moments[0], moments[0] / 2 + moments[1]), axis=-1).reshape(
+        len(points), -1
+    )
+
+
 def _fit_law(b_field, permeability_relative):
     """Return piecewise polynomial H(B) with strictly positive, continuous dH/dB.
 
@@ -627,7 +717,9 @@ class MagnetisationSolution:
     ``reduction_ratios`` and ``step_types`` describe each accepted step beside
     ``step_scales``. The ratio measures reduction of the regularised local
     equation, so a regularised step can increase the unregularised residual.
-    ``field`` evaluates the iron contribution alone through the sheet tile.
+    ``field`` evaluates the iron contribution alone through the bound-current
+    seam :class:`BoundCurrents`, which is also what the CoilSet carries as one
+    passive frame, so the two cannot drift apart.
     """
 
     magnetisation: np.ndarray
@@ -644,6 +736,16 @@ class MagnetisationSolution:
     linear_coefficients: np.ndarray | None = field(default=None, repr=False)
     fill_fraction: np.ndarray = field(default_factory=lambda: np.ones(0))
     cross_field_factor: np.ndarray = field(default_factory=lambda: np.zeros((0, 2)))
+    linear_geometry: dict | None = field(default=None, repr=False)
+
+    def bound_currents(self) -> "BoundCurrents":
+        """Return the affine magnetisation as the CoilSet's passive sources."""
+        if self.linear_coefficients is None:
+            raise ValueError(
+                "bound currents need the piecewise-linear basis; the constant "
+                "basis field stays on the centroid interaction"
+            )
+        return bound_currents(self)
 
     @property
     def iron_magnetisation(self) -> np.ndarray:
@@ -664,10 +766,7 @@ class MagnetisationSolution:
         if not len(points):
             return np.empty((0, 2))
         if self.linear_coefficients is not None:
-            response = linear_cell_interaction(
-                self._mesh.polygons, points, plan=self._plan
-            )
-            return (response @ self.linear_coefficients.reshape(-1)).reshape(2, -1).T
+            return self.bound_currents().field(points)
         response = _interaction(self._mesh, points, self._plan)
         return (response @ self.magnetisation.T.reshape(-1)).reshape(2, -1).T
 
@@ -916,4 +1015,104 @@ def solve_magnetisation(
         fill_fraction=fill,
         cross_field_factor=cross,
         linear_coefficients=linear_coefficients,
+        linear_geometry=geometry if basis == "linear" else None,
+    )
+
+
+@dataclass(frozen=True)
+class BoundCurrents:
+    """The solved magnetisation as the bound currents a CoilSet carries.
+
+    ``atoms`` are the mesh's split edge segments [m]; ``edge`` is the
+    ``(unknowns, 2*atoms)`` incidence of a uniform sheet and an affine
+    remainder per atom, and ``volume`` the ``(unknowns, cells)`` incidence of
+    the uniform azimuthal bound volume current. ``currents`` is the affine
+    state the material solve writes, ordered by component, cell and basis, the
+    order ``MagnetisationSolution.linear_coefficients`` flattens to.
+
+    ``field`` and ``psi`` are the single evaluation the package uses: the
+    passive frame's field and :meth:`MagnetisationSolution.field` are the same
+    call on the same operands. A zero state returns exactly zero at every
+    target, so the air-core field passes through unchanged, and a solved state
+    adds the iron.
+    """
+
+    polygons: tuple
+    atoms: np.ndarray
+    edge: object
+    volume: object
+    plan: TilePlan
+    currents: np.ndarray
+    basis: str = "linear"
+
+    @property
+    def unknowns(self) -> int:
+        """Return the number of affine state components."""
+        return int(self.edge.shape[0])
+
+    def set_currents(self, currents) -> "BoundCurrents":
+        """Return the same geometry carrying a different affine state."""
+        currents = np.asarray(currents, dtype=np.float64)
+        if currents.shape != (self.unknowns,):
+            raise ValueError(f"currents must have shape ({self.unknowns},)")
+        return replace(self, currents=currents.copy())
+
+    def zero(self) -> "BoundCurrents":
+        """Return this source set with the magnetisation set to zero.
+
+        The control this node's measure uses: the frame stays in the CoilSet,
+        the sources stay in the source list, and the frame contributes exactly
+        zero, so the solve must reproduce the air-core field bit for bit.
+        """
+        return self.set_currents(np.zeros(self.unknowns))
+
+    def field_matrix(self, points: np.ndarray, order: int = 24) -> np.ndarray:
+        """Return the ``(2T, unknowns)`` field [T per unit state] at points."""
+        points = _points(points)
+        sheet = _affine_sheet_field(self.atoms, points, self.plan, order)
+        current = _polygon_current_response(self.polygons, points, self.plan)
+        rows = []
+        for component in range(2):
+            rows.append(
+                np.asarray(sheet[component] @ self.edge.T)
+                + np.asarray(current[component + 1] @ self.volume.T)
+            )
+        return np.concatenate(rows)
+
+    def psi_matrix(self, points: np.ndarray, order: int = 24) -> np.ndarray:
+        """Return the ``(T, unknowns)`` poloidal flux [Wb per unit state]."""
+        points = _points(points)
+        sheet = _affine_sheet_flux(self.atoms, points, order)
+        current = _polygon_current_response(
+            self.polygons, points, self.plan, flux_only=True
+        )
+        return np.asarray(sheet @ self.edge.T) + np.asarray(current[0] @ self.volume.T)
+
+    def field(self, points: np.ndarray, order: int = 24) -> np.ndarray:
+        """Return the iron's (B_R, B_Z) [T] at (R, Z) points [m]."""
+        points = _points(points)
+        if not len(points):
+            return np.empty((0, 2))
+        return (self.field_matrix(points, order) @ self.currents).reshape(2, -1).T
+
+    def psi(self, points: np.ndarray, order: int = 24) -> np.ndarray:
+        """Return the iron's poloidal flux [Wb] at (R, Z) points [m]."""
+        points = _points(points)
+        if not len(points):
+            return np.empty(0)
+        return self.psi_matrix(points, order) @ self.currents
+
+
+def bound_currents(solution: MagnetisationSolution) -> BoundCurrents:
+    """Return a solved affine magnetisation as bound-current sources."""
+    geometry = solution.linear_geometry
+    if geometry is None:
+        geometry = linear_magnetisation_geometry(solution._mesh.polygons)
+    return BoundCurrents(
+        polygons=solution._mesh.polygons,
+        atoms=np.asarray(geometry["atoms"]),
+        edge=geometry["edge_coefficient"],
+        volume=geometry["volume_coefficient"],
+        plan=solution._plan,
+        currents=np.asarray(solution.linear_coefficients, dtype=np.float64).reshape(-1),
     )

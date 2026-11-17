@@ -28,6 +28,15 @@ from nova.biot.groupset import GroupSet
 
 _PLASMA_MOMENT_ATTRIBUTES = frozenset({"PsiR", "PsiZ", "BrR", "BrZ", "BzR", "BzZ"})
 
+IRON_SEGMENT = "iron"
+"""Segment tag of a passive bound-current frame; it carries no kernel batch."""
+
+IRON_COLUMN = "iron_source"
+"""Source-frame column carrying the bound-current set the frame evaluates."""
+
+IRON_TARGET_BLOCK = 512
+"""Targets per bound-current matrix block, bounding one block's workspace."""
+
 
 @dataclass(frozen=True)
 class SourceBatch:
@@ -74,6 +83,7 @@ class Solve(GroupSet):
         self.check_segments()
         self.initialize()
         self.compose()
+        self.include_iron()
         # self.decompose()
 
     def check_segments(self):
@@ -94,6 +104,10 @@ class Solve(GroupSet):
         for position, (segment, plasma, policy_value) in enumerate(
             zip(segment_column, plasma_column, policy_column)
         ):
+            if segment == IRON_SEGMENT:
+                # bound currents carry no kernel batch: their per-unit-current
+                # matrix is a source-set property, added after the compose
+                continue
             if segment not in self.generator:
                 raise NotImplementedError(
                     f"segment <{segment}> not implemented "
@@ -365,6 +379,64 @@ class Solve(GroupSet):
                 )
             if np.prod(plasma_plasma.shape) > 0:
                 self.data[f"_{attr}_"].loc[:, plasma_index] += plasma_plasma
+
+    def iron_positions(self) -> np.ndarray:
+        """Return the source positions of the bound-current frame, if any."""
+        if "part" not in self.source:
+            return np.asarray([], dtype=int)
+        return np.flatnonzero(np.asarray(self.source["part"], dtype=object) == "iron")
+
+    def include_iron(self):
+        """Add the bound-current frame's field to every target set built here.
+
+        The frame's field is linear in its own ``Ic`` and independent of every
+        other source, so it enters exactly where a kernel batch's matrix does:
+        as raw source columns handed to ``_reduce_source_columns``. A zero
+        state adds exact zeros, which is what makes the air-core control
+        bit-identical rather than merely close.
+        """
+        positions = self.iron_positions()
+        if not len(positions):
+            return
+        column = (
+            np.asarray(self.source[IRON_COLUMN], dtype=object)
+            if IRON_COLUMN in self.source
+            else np.asarray([], dtype=object)
+        )
+        source = next((value for value in column[positions] if value is not None), None)
+        if source is None:
+            raise ValueError(
+                "an iron source frame needs its bound-current source column"
+            )
+        points = np.column_stack(
+            (
+                np.asarray(self.target["x"], dtype=np.float64),
+                np.asarray(self.target["z"], dtype=np.float64),
+            )
+        )
+        ntarget = len(self.get_index("target"))
+        for attr in self.attrs:
+            if attr not in {"Aphi", "Psi", "Br", "Bz"}:
+                continue
+            examples = []
+            for begin in range(0, len(points), IRON_TARGET_BLOCK):
+                block = points[begin : begin + IRON_TARGET_BLOCK]
+                if attr == "Psi":
+                    values = source.psi_matrix(block)
+                elif attr in {"Br", "Bz"}:
+                    component = 0 if attr == "Br" else 1
+                    values = source.field_matrix(block).reshape(2, len(block), -1)[
+                        component
+                    ]
+                else:  # Aphi = psi / (2 pi R)
+                    values = source.psi_matrix(block) / (2 * np.pi * block[:, :1])
+                if self.target_quadrature is not None:
+                    values = self.target_quadrature.collapse(values)
+                examples.append(values)
+            matrix = np.concatenate(examples, axis=0)
+            if matrix.shape[0] != ntarget:
+                raise ValueError("bound-current matrix does not match the targets")
+            self.data[attr].data += self._reduce_source_columns(matrix, positions)
 
     def decompose(self):
         """Compute plasma svd and update dataset."""

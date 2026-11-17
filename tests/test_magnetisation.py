@@ -1799,3 +1799,67 @@ def test_linear_fill_and_cross_field_match_affine_tensor(monkeypatch, fill):
             np.testing.assert_array_equal(
                 getattr(result, name), getattr(implicit, name)
             )
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(900)
+def test_frame_carries_the_bound_currents_exactly():
+    """The passive frame carries the iron, not the air-core field.
+
+    Three assertions, and each fails a distinct way of getting this wrong: a
+    zero magnetisation must reproduce the air-core field bit for bit, so the
+    frame cannot be passing the air-core columns through; the solved state's
+    added field and flux must equal :meth:`BoundCurrents.field` and
+    :meth:`BoundCurrents.psi` to round-off, so the frame and the material
+    solve cannot drift apart; and the solved state must move the field, so a
+    frame that silently contributes nothing fails.
+    """
+    from nova.frame.coilset import CoilSet
+    from nova.frame.iron import insert_iron, set_iron_currents
+
+    region = shapely.box(2.0, -0.1, 2.2, 0.1)
+    table_b = np.array([0.0, 0.5, 1.0, 1.5, 2.0])
+    table_mu = np.array([215.0, 1038.0, 1692.0, 175.0, 57.0])
+
+    def external(points):
+        points = np.asarray(points)
+        return np.column_stack((5e-4 * np.ones(len(points)), -1e-4 * points[:, 0]))
+
+    result = iron.solve_magnetisation(
+        region,
+        external,
+        table_b,
+        table_mu,
+        cell_size=0.1,
+        basis="linear",
+        tolerance=1e-8,
+        max_iterations=30,
+    )
+    bound = result.bound_currents()
+    coilset = CoilSet(dcoil=0.05, tplasma="hex")
+    coilset.coil.insert(3.5, 0.0, 0.2, 0.2, nturn=10.0, name="A", part="pf")
+    targets = np.array([[2.1, 0.0], [2.5, 0.3], [3.0, 0.0], [1.5, -0.4]])
+    coilset.sloc["A", "Ic"] = 1e5
+    coilset.point.solve(targets)
+    air = np.column_stack((np.asarray(coilset.point.br), np.asarray(coilset.point.bz)))
+    air_psi = np.asarray(coilset.point.psi).copy()
+
+    insert_iron(coilset, bound.zero())
+    coilset.point.solve(targets)
+    zero = np.column_stack((np.asarray(coilset.point.br), np.asarray(coilset.point.bz)))
+    zero_psi = np.asarray(coilset.point.psi).copy()
+    np.testing.assert_array_equal(zero, air)
+    np.testing.assert_array_equal(zero_psi, air_psi)
+
+    set_iron_currents(coilset, bound)
+    coilset.point.solve(targets)
+    with_iron = np.column_stack(
+        (np.asarray(coilset.point.br), np.asarray(coilset.point.bz))
+    )
+    contribution = with_iron - air
+    direct = bound.field(targets)
+    assert np.max(np.abs(contribution - direct)) <= 1e-12 * np.max(np.abs(direct))
+    direct_psi = bound.psi(targets)
+    frame_psi = np.asarray(coilset.point.psi) - air_psi
+    assert np.max(np.abs(frame_psi - direct_psi)) <= 1e-12 * np.max(np.abs(direct_psi))
+    assert np.max(np.abs(contribution)) > 1e-6 * np.max(np.abs(air))

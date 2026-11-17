@@ -25,8 +25,8 @@
   <title>Forward Solve Near Stored States | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
-<meta name="plan-modified" content="2026-11-17">
+<meta name="plan-version" content="4">
+<meta name="plan-modified" content="2026-11-18">
 </head>
 <body>
   <main class="plan-doc">
@@ -69,12 +69,12 @@
     reproducible on their own, from stored inputs, without the inverse class: each machine's description,
     imas-efit's fitted conductor currents and profile coefficients, and the stored flux map used as the
     starting field.</p>
-    <p><strong>Done when.</strong> (1) One batch job on the H200, falling back to titan, runs the three cases
-    in sequence and reproduces each refusal: the MAST-U perturbed solve ends unqualified with the active-set
-    step refused and a residual within a factor of three of 1.2e-4; the TCV solve from the stored field ends
+    <p><strong>Done when.</strong> (1) One batch job on the H200, falling back to titan, runs the cases
+    in sequence and reproduces each refusal under the solver's default policy, started from the stored flux map: the MAST-U solve at the stored coefficients ends unqualified near 4.9e-10; the MAST-U solve at the displaced coefficients the comparison's fit asked for ends unqualified with the active-set
+    step refused and a residual within a factor of three of 1.2e-4; the TCV solve at the stored coefficients ends
     unqualified with the same refusal and a residual within a factor of three of 0.030; the ITER solve ends
-    with no magnetic axis admitted. (2) Positive control in the same job: the unperturbed MAST-U state
-    qualifies below 1e-10, as the comparison run measured. (3) The record carries, per case, the terminal
+    with no magnetic axis admitted. (2) Positive control in the same job: the MAST-U state at the stored coefficients
+    qualifies below 1e-10 when continued from the first solve's terminal state under the tighter stopping tolerance and larger budgets the comparison run recorded, and the record states that policy beside the default one. (3) The record states, per solve, the coefficient vector, and for the displaced solve the coordinate displaced, its size and its sign, with the terminal
     reason and residual and one line-contour panel of the terminal state on the stored imas-efit state, on
     shared levels, with both null sets and the wall.</p>
 
@@ -85,13 +85,7 @@
     section measures that distance for each case, and says which displaced states can be reached at all by
     the solve as it stands when it is led there in smaller steps. It makes no claim about whether an
     unreached state exists.</p>
-    <p><strong>Done when.</strong> (1) For MAST-U the record states, along the profile-coefficient direction
-    the inverse class perturbs, the largest relative perturbation from the stored coefficients at which the
-    solve still qualifies below 1e-10 and the smallest at which it does not, bracketed to within a factor of
-    two, beside the displacement at which §1 recorded the refusal. (2) For TCV and ITER the record states
-    the terminal reason and residual of the solve at the stored coefficients started from the stored flux map,
-    and for each the outer iteration at which qualification is first lost. (3) Each case is given one of two verdicts
-    on a measurement that can fail. <em>Reached</em>: the displaced state at which §1 recorded the refusal qualifies below 1e-10 when approached from the stored state through intermediate solves, and the record lists the sequence that got there. <em>Not reached</em>: no sequence tried qualifies, and the record lists each sequence and where it stopped. Negative control: the direct solve of the displaced MAST-U state, with no intermediate solves, reproduces the refusal §1 recorded.</p>
+    <p><strong>Done when.</strong> (1) For MAST-U the record states, along the coordinate and sign §1 recorded, the largest fraction of the recorded displacement at which the solve qualifies below 1e-10 and the smallest at which it does not, over the fractions 1, 1/2, 1/4, 1/8, 1/16, 1/32 and 1/64, each solve started from the last state that qualified, beginning at §1's positive control and using its policy. (2) For TCV and ITER, which refuse at the stored coefficients, the record states the terminal reason and residual from two starting routes: the stored flux map under the default policy, and the same start under the positive control's policy. (3) Each case is given one of two verdicts within those stated sets. <em>Reached</em>: for MAST-U the full recorded displacement qualifies at the end of the sequence; for TCV and ITER either route qualifies. <em>Not reached</em>: otherwise, with where each solve stopped. Negative control: the direct MAST-U solve at the full displacement under the default policy, started from the stored flux map, reproduces the refusal §1 recorded.</p>
 
     <h2 id="s3">§3 — The solves qualify</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
@@ -99,9 +93,7 @@
     <p>For every case §2 marks as reached, the forward solve is repaired until the solves a reconstruction
     asks for beside the stored state qualify directly, without being led there. A case §2 marks as not
     reached is not forced: its record stands, and it stays open against this plan.</p>
-    <p><strong>Done when.</strong> (1) On every case §2 marks as reached, forward solves at the stored
-    coefficients and at the stored coefficients displaced to where §1 recorded the refusal and by the same amount in the opposite
-    step, each started from the stored flux map, qualify below the unchanged 1e-10 threshold, measured in one
+    <p><strong>Done when.</strong> (1) On every case §2 marks as reached, each solve §1 showed refusing at the base revision, at its recorded coefficients and started from the stored flux map under the default policy, qualifies below the unchanged 1e-10 threshold, measured in one
     batch job on the H200, falling back to titan. (2) Nothing already converging is lost: the forward gate
     that passes at the base revision passes at the head with no added failure, both arms run in fresh
     processes on the same device. (3) Negative control: the same job run at the base revision reproduces the

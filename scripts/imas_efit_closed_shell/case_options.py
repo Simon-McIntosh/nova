@@ -64,6 +64,8 @@ def efit_options(
 
 <fitdz option="1" ndelzon="2" scaledz="1"/>
 
+<plasmaCurrent interpolationMethod="1" timeWindow="0" timeMargin="0" weights="1"/>
+
 <relationalPPrimes interpolationMethod="1" timeWindow="0" timeMargin="0">
   <relationalPPrime weights="1" x="0" c="[[1e-2 1e-2]]"/>
 </relationalPPrimes>

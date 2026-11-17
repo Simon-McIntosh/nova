@@ -33,7 +33,30 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 110,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "911deb77f60dd59f377ccd819594a2145bb00f3a",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Done-when (2) now requires the counterfactual to converge 137D on the single kernel to a relative residual at or below 1e-10 with CONVERGED; one that falls short is recorded as not demonstrating the mechanism",
+      "reason": "",
+      "when": "2026-11-17T16:20:27.890311+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "911deb77f60dd59f377ccd819594a2145bb00f3a",
+      "commit_basis": "edit",
+      "note": "Done-when (2) now requires the counterfactual to converge 137D on the single kernel to a relative residual at or below 1e-10 with CONVERGED; one that falls short is recorded as not demonstrating the mechanism",
+      "reason": "",
+      "when": "2026-11-17T16:20:27.890311+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261117T105604834692-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261117T105604834692-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "22fdaf2f85a7ae41f7297c8bbcec48b85c2b6763",
   "rubric": "content",

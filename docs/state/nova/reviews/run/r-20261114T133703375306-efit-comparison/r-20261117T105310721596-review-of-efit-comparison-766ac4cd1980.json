@@ -1,0 +1,1296 @@
+{
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unavailable: both source suite arms aborted SIGABRT before summaries; empty IDs are not zero failures.",
+  "after_suite": {
+    "CPU_wall_seconds": 2928.1613244242035,
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_equilibrium_forward.py tests/test_equilibrium_magnetics_fit.py tests/test_magnetics_fit_efit_comparison.py",
+    "completed": false,
+    "exit_status": -6,
+    "failure_count": null,
+    "failure_ids": [],
+    "log_digest": "d70c285fbd1cf06b4c34cfb68b412cbe8e1b25e820215f81a13440e13c491d83",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/review-suite-1322248/head/gate.log",
+    "measurement_cwd": "/tmp/nova-review-1322248-kar8btqm/head/tree",
+    "measurement_module": "/tmp/nova-review-1322248-kar8btqm/head/tree/nova/equilibrium/magnetics_fit.py",
+    "mutation": null,
+    "note": "Actual measured revision28458e75651b4ec1e263dbe76a711ccb837ab290, not the requested current documentation head ee02bc413dc71e7e9fdf0c0172985c0ebb0f0313. All suite-source files are unchanged across that documentation commit, but no execution is attributed to ee. Native arm aborted before summary.",
+    "revision": "28458e75651b4ec1e263dbe76a711ccb837ab290",
+    "summary": null
+  },
+  "assertion_audit": [
+    {
+      "assertion": "_residual_fields(0.0) == dict(residual=0.0, residual_state='finite')",
+      "failure_condition": "The predicate is false: _residual_fields(0.0) == dict(residual=0.0, residual_state='finite')",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 35,
+      "regression_reading": "Reintroduce raw NaN/Infinity in JSON or replace the destination before encoding succeeds; this breaks the expected explicit state or preservation checks.",
+      "test": "test_refused_residuals_preserve_strict_json_receipts"
+    },
+    {
+      "assertion": "_residual_fields(None) == dict(residual=None, residual_state='unavailable')",
+      "failure_condition": "The predicate is false: _residual_fields(None) == dict(residual=None, residual_state='unavailable')",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 36,
+      "regression_reading": "Reintroduce raw NaN/Infinity in JSON or replace the destination before encoding succeeds; this breaks the expected explicit state or preservation checks.",
+      "test": "test_refused_residuals_preserve_strict_json_receipts"
+    },
+    {
+      "assertion": "path.read_bytes() == before",
+      "failure_condition": "The predicate is false: path.read_bytes() == before",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 41,
+      "regression_reading": "Reintroduce raw NaN/Infinity in JSON or replace the destination before encoding succeeds; this breaks the expected explicit state or preservation checks.",
+      "test": "test_refused_residuals_preserve_strict_json_receipts"
+    },
+    {
+      "assertion": "json.loads(path.read_text()) == dict(marker='refusal-recorded', residual=None, residual_state=state)",
+      "failure_condition": "The predicate is false: json.loads(path.read_text()) == dict(marker='refusal-recorded', residual=None, residual_state=state)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 32,
+      "regression_reading": "Reintroduce raw NaN/Infinity in JSON or replace the destination before encoding succeeds; this breaks the expected explicit state or preservation checks.",
+      "test": "test_refused_residuals_preserve_strict_json_receipts"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='not JSON compliant')",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 38,
+      "regression_reading": "Reintroduce raw NaN/Infinity in JSON or replace the destination before encoding succeeds; this breaks the expected explicit state or preservation checks.",
+      "test": "test_refused_residuals_preserve_strict_json_receipts"
+    },
+    {
+      "assertion": "_passive_signed_turns(0.0) == 0.0",
+      "failure_condition": "The predicate is false: _passive_signed_turns(0.0) == 0.0",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 47,
+      "regression_reading": "Map explicit zero turns to a unit-turn response or accept nonfinite turns.",
+      "test": "test_passive_zero_turns_remain_zero_response_weights"
+    },
+    {
+      "assertion": "_passive_signed_turns(-2.0) == -2.0",
+      "failure_condition": "The predicate is false: _passive_signed_turns(-2.0) == -2.0",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 48,
+      "regression_reading": "Map explicit zero turns to a unit-turn response or accept nonfinite turns.",
+      "test": "test_passive_zero_turns_remain_zero_response_weights"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='invalid passive')",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 49,
+      "regression_reading": "Map explicit zero turns to a unit-turn response or accept nonfinite turns.",
+      "test": "test_passive_zero_turns_remain_zero_response_weights"
+    },
+    {
+      "assertion": "comparison._attempt(data, None, 'seed') is None",
+      "failure_condition": "The predicate is false: comparison._attempt(data, None, 'seed') is None",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 75,
+      "regression_reading": "Overwrite converged with qualified when serializing an unqualified but converged receipt.",
+      "test": "test_unqualified_forward_receipt_preserves_convergence"
+    },
+    {
+      "assertion": "result['qualified'] is False",
+      "failure_condition": "The predicate is false: result['qualified'] is False",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 78,
+      "regression_reading": "Overwrite converged with qualified when serializing an unqualified but converged receipt.",
+      "test": "test_unqualified_forward_receipt_preserves_convergence"
+    },
+    {
+      "assertion": "result['converged'] is True",
+      "failure_condition": "The predicate is false: result['converged'] is True",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 79,
+      "regression_reading": "Overwrite converged with qualified when serializing an unqualified but converged receipt.",
+      "test": "test_unqualified_forward_receipt_preserves_convergence"
+    },
+    {
+      "assertion": "result['termination_reason'] == 1",
+      "failure_condition": "The predicate is false: result['termination_reason'] == 1",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 80,
+      "regression_reading": "Overwrite converged with qualified when serializing an unqualified but converged receipt.",
+      "test": "test_unqualified_forward_receipt_preserves_convergence"
+    },
+    {
+      "assertion": "result['residual'] == 4.86e-10",
+      "failure_condition": "The predicate is false: result['residual'] == 4.86e-10",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 81,
+      "regression_reading": "Overwrite converged with qualified when serializing an unqualified but converged receipt.",
+      "test": "test_unqualified_forward_receipt_preserves_convergence"
+    },
+    {
+      "assertion": "result['trips'] == history.active_set_iterations",
+      "failure_condition": "The predicate is false: result['trips'] == history.active_set_iterations",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 99,
+      "regression_reading": "Count only finite residuals instead of the declared outer-attempt counter.",
+      "test": "test_failed_forward_history_counts_nonfinite_outer_trip"
+    },
+    {
+      "assertion": "result['finite_residual_entries'] == 3",
+      "failure_condition": "The predicate is false: result['finite_residual_entries'] == 3",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 100,
+      "regression_reading": "Count only finite residuals instead of the declared outer-attempt counter.",
+      "test": "test_failed_forward_history_counts_nonfinite_outer_trip"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='physical fit refused')",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 118,
+      "regression_reading": "Remove the greater-than-5% family refusal.",
+      "test": "test_fitted_replay_family_guard_refuses_before_public_seeds"
+    },
+    {
+      "assertion": "result['fitted_current_map'][2]['source_kind'] == 'passive'",
+      "failure_condition": "The predicate is false: result['fitted_current_map'][2]['source_kind'] == 'passive'",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 189,
+      "regression_reading": "Split the stored current vector at the unfiltered active count or overwrite overlapping coil contributions instead of summing; skip the measured-row witness.",
+      "test": "test_fitted_circuit_binding_preserves_output_split_and_shared_members"
+    },
+    {
+      "assertion": "result['fitted_current_map'][2]['output'] == 'pf_current[2]'",
+      "failure_condition": "The predicate is false: result['fitted_current_map'][2]['output'] == 'pf_current[2]'",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 190,
+      "regression_reading": "Split the stored current vector at the unfiltered active count or overwrite overlapping coil contributions instead of summing; skip the measured-row witness.",
+      "test": "test_fitted_circuit_binding_preserves_output_split_and_shared_members"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(result['fitted_conductor_current'], [2.0, 5.0, 3.0, 5.0])",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 186,
+      "regression_reading": "Split the stored current vector at the unfiltered active count or overwrite overlapping coil contributions instead of summing; skip the measured-row witness.",
+      "test": "test_fitted_circuit_binding_preserves_output_split_and_shared_members"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='unique measured-row witness')",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 192,
+      "regression_reading": "Split the stored current vector at the unfiltered active count or overwrite overlapping coil contributions instead of summing; skip the measured-row witness.",
+      "test": "test_fitted_circuit_binding_preserves_output_split_and_shared_members"
+    },
+    {
+      "assertion": "receipt.converged",
+      "failure_condition": "The predicate is false: receipt.converged",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 372,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "receipt.forward_evaluations == len(calls)",
+      "failure_condition": "The predicate is false: receipt.forward_evaluations == len(calls)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 374,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "receipt.rejected_trials",
+      "failure_condition": "The predicate is false: receipt.rejected_trials",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 375,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "rejected['fraction'] == 1.0",
+      "failure_condition": "The predicate is false: rejected['fraction'] == 1.0",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 377,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "rejected['termination_reason'] == 12",
+      "failure_condition": "The predicate is false: rejected['termination_reason'] == 12",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 378,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "rejected['residual'] > 0.08",
+      "failure_condition": "The predicate is false: rejected['residual'] > 0.08",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 379,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "rejected['forward'].qualified is False",
+      "failure_condition": "The predicate is false: rejected['forward'].qualified is False",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 380,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(receipt.coefficients, truth, atol=1e-08)",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 373,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "not receipt.converged",
+      "failure_condition": "The predicate is false: not receipt.converged",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 392,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "receipt.forward.qualified",
+      "failure_condition": "The predicate is false: receipt.forward.qualified",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 393,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "receipt.forward_evaluations == len(calls)",
+      "failure_condition": "The predicate is false: receipt.forward_evaluations == len(calls)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 394,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "[row['fraction'] for row in receipt.rejected_trials] == [1.0, 0.5, 0.25, 0.125, 0.0625]",
+      "failure_condition": "The predicate is false: [row['fraction'] for row in receipt.rejected_trials] == [1.0, 0.5, 0.25, 0.125, 0.0625]",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 395,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "all((row['termination_reason'] == 12 for row in receipt.rejected_trials))",
+      "failure_condition": "The predicate is false: all((row['termination_reason'] == 12 for row in receipt.rejected_trials))",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 402,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "all((row['residual'] > 0.001 for row in receipt.rejected_trials))",
+      "failure_condition": "The predicate is false: all((row['residual'] > 0.001 for row in receipt.rejected_trials))",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 403,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(receipt.coefficients, fitter._initial)",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 404,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "pytest.raises(RuntimeError, match='line search.*12')",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 389,
+      "regression_reading": "Restore immediate propagation of unqualified line-search trials instead of halving and recording them.",
+      "test": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "len(calls) == 1",
+      "failure_condition": "The predicate is false: len(calls) == 1",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 416,
+      "regression_reading": "Allow an unqualified starting state to enter sensor evaluation.",
+      "test": "test_unqualified_fit_start_is_not_backtracked"
+    },
+    {
+      "assertion": "not refusal.value.receipt.qualified",
+      "failure_condition": "The predicate is false: not refusal.value.receipt.qualified",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 417,
+      "regression_reading": "Allow an unqualified starting state to enter sensor evaluation.",
+      "test": "test_unqualified_fit_start_is_not_backtracked"
+    },
+    {
+      "assertion": "pytest.raises(RuntimeError, match='forward evaluation did not qualify')",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 412,
+      "regression_reading": "Allow an unqualified starting state to enter sensor evaluation.",
+      "test": "test_unqualified_fit_start_is_not_backtracked"
+    },
+    {
+      "assertion": "calls == 8",
+      "failure_condition": "The predicate is false: calls == 8",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 435,
+      "regression_reading": "Catch unrelated RuntimeError as a numerical qualification refusal.",
+      "test": "test_fit_does_not_swallow_unrelated_trial_errors"
+    },
+    {
+      "assertion": "pytest.raises(RuntimeError, match='observation source is unavailable')",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 433,
+      "regression_reading": "Catch unrelated RuntimeError as a numerical qualification refusal.",
+      "test": "test_fit_does_not_swallow_unrelated_trial_errors"
+    },
+    {
+      "assertion": "result['scores']['bands']['plasma_current_relative_error'] is False",
+      "failure_condition": "The predicate is false: result['scores']['bands']['plasma_current_relative_error'] is False",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 547,
+      "regression_reading": "Restore unconditional band admission on ITER; it raises before the reported gap assertions can finish.",
+      "test": "test_different_constraint_comparison_reports_band_gaps"
+    },
+    {
+      "assertion": "result['scores']['plasma_current_relative_error'] == 0.25",
+      "failure_condition": "The predicate is false: result['scores']['plasma_current_relative_error'] == 0.25",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 548,
+      "regression_reading": "Restore unconditional band admission on ITER; it raises before the reported gap assertions can finish.",
+      "test": "test_different_constraint_comparison_reports_band_gaps"
+    },
+    {
+      "assertion": "result['constraint_context']['reference_extra_priors']",
+      "failure_condition": "The predicate is false: result['constraint_context']['reference_extra_priors']",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 549,
+      "regression_reading": "Restore unconditional band admission on ITER; it raises before the reported gap assertions can finish.",
+      "test": "test_different_constraint_comparison_reports_band_gaps"
+    },
+    {
+      "assertion": "result['bands_applied'] is False",
+      "failure_condition": "The predicate is false: result['bands_applied'] is False",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 550,
+      "regression_reading": "Restore unconditional band admission on ITER; it raises before the reported gap assertions can finish.",
+      "test": "test_different_constraint_comparison_reports_band_gaps"
+    },
+    {
+      "assertion": "pytest.raises(AssertionError)",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 555,
+      "regression_reading": "Remove MAST-U/TCV band admission; the expected AssertionError is absent.",
+      "test": "test_same_constraint_comparisons_require_the_bands"
+    },
+    {
+      "assertion": "not result['scaled_control_fired']",
+      "failure_condition": "The predicate is false: not result['scaled_control_fired']",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 567,
+      "regression_reading": "Restore current-displacement-only scaled admission; the nonstationary fitted receipt is wrongly accepted and its flag becomes true.",
+      "test": "test_scaled_control_requires_a_stationary_fit"
+    },
+    {
+      "assertion": "pytest.raises(AssertionError, match='scaled.*stationary')",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 561,
+      "regression_reading": "Restore current-displacement-only scaled admission; the nonstationary fitted receipt is wrongly accepted and its flag becomes true.",
+      "test": "test_scaled_control_requires_a_stationary_fit"
+    },
+    {
+      "assertion": "pytest.raises(AssertionError, match='scaled.*qualified')",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 571,
+      "regression_reading": "Drop the scaled forward qualification assertion; the deliberately unqualified receipt is wrongly accepted.",
+      "test": "test_scaled_control_requires_a_qualified_forward"
+    },
+    {
+      "assertion": "result['scaled_control_fired']",
+      "failure_condition": "The predicate is false: result['scaled_control_fired']",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 580,
+      "regression_reading": "Set control_fired without combining convergence, qualification and current displacement, or reject an admissible stationary qualified control.",
+      "test": "test_stationary_qualified_scaled_fit_certifies_displacement"
+    },
+    {
+      "assertion": "result['scaled_fit_converged'] and result['scaled_forward_qualified']",
+      "failure_condition": "The predicate is false: result['scaled_fit_converged'] and result['scaled_forward_qualified']",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 581,
+      "regression_reading": "Set control_fired without combining convergence, qualification and current displacement, or reject an admissible stationary qualified control.",
+      "test": "test_stationary_qualified_scaled_fit_certifies_displacement"
+    },
+    {
+      "assertion": "result.whitened_residuals[0] == pytest.approx(-measurement.measured[0] / measurement.scale[0])",
+      "failure_condition": "The predicate is false: result.whitened_residuals[0] == pytest.approx(-measurement.measured[0] / measurement.scale[0])",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 603,
+      "regression_reading": "Treat a zero-extent path as a whole loop or omit fractional weighting; the independent weighted design and fixed projection expectations disagree.",
+      "test": "test_zero_extent_flux_row_retains_residual_and_fractional_response"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(result.coefficients, expected, atol=1e-07)",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 602,
+      "regression_reading": "Treat a zero-extent path as a whole loop or omit fractional weighting; the independent weighted design and fixed projection expectations disagree.",
+      "test": "test_zero_extent_flux_row_retains_residual_and_fractional_response"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(fitter.magnetics.project(np.ones(4), np.ones(4), np.zeros(4)), [0.0, 1.0, 0.5, 1.0])",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 606,
+      "regression_reading": "Treat a zero-extent path as a whole loop or omit fractional weighting; the independent weighted design and fixed projection expectations disagree.",
+      "test": "test_zero_extent_flux_row_retains_residual_and_fractional_response"
+    },
+    {
+      "assertion": "_flux_loop_segments(SimpleNamespace(position=[point, point])).shape == (0, 3)",
+      "failure_condition": "The predicate is false: _flux_loop_segments(SimpleNamespace(position=[point, point])).shape == (0, 3)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 620,
+      "regression_reading": "Reverse SIGMA_BP, ignore signed toroidal legs, or accept a slanted leg as a point sample.",
+      "test": "test_loop_reader_preserves_polarity_and_integrates_toroidal_legs"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(_flux_loop_segments(SimpleNamespace(position=[point])), [[1.0, 0.0, SIGMA_BP]])",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 617,
+      "regression_reading": "Reverse SIGMA_BP, ignore signed toroidal legs, or accept a slanted leg as a point sample.",
+      "test": "test_loop_reader_preserves_polarity_and_integrates_toroidal_legs"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(terms, [[1.0, 0.4, SIGMA_BP * 0.5], [1.0, 0.0, -SIGMA_BP * 0.5]])",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 629,
+      "regression_reading": "Reverse SIGMA_BP, ignore signed toroidal legs, or accept a slanted leg as a point sample.",
+      "test": "test_loop_reader_preserves_polarity_and_integrates_toroidal_legs"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='distributed segment observations')",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 633,
+      "regression_reading": "Reverse SIGMA_BP, ignore signed toroidal legs, or accept a slanted leg as a point sample.",
+      "test": "test_loop_reader_preserves_polarity_and_integrates_toroidal_legs"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(result.coefficients, expected, atol=1e-07)",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 662,
+      "regression_reading": "Use a single location in place of signed segment summation; the independently assembled design disagrees.",
+      "test": "test_segmented_loop_fitter_uses_every_signed_observation_term"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='loop_quadrature')",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 663,
+      "regression_reading": "Use a single location in place of signed segment summation; the independently assembled design disagrees.",
+      "test": "test_segmented_loop_fitter_uses_every_signed_observation_term"
+    },
+    {
+      "assertion": "_sample_passive(loop, ids, 0.5) == 15.0",
+      "failure_condition": "The predicate is false: _sample_passive(loop, ids, 0.5) == 15.0",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 678,
+      "regression_reading": "Read the per-loop empty clock instead of homogeneous IDS time or read .data from a primitive current field.",
+      "test": "test_passive_current_uses_primitive_sigma_and_the_ids_clock"
+    },
+    {
+      "assertion": "_sample_passive(loop, ids, 0.5, 'current_error_upper') == pytest.approx(0.3)",
+      "failure_condition": "The predicate is false: _sample_passive(loop, ids, 0.5, 'current_error_upper') == pytest.approx(0.3)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 679,
+      "regression_reading": "Read the per-loop empty clock instead of homogeneous IDS time or read .data from a primitive current field.",
+      "test": "test_passive_current_uses_primitive_sigma_and_the_ids_clock"
+    },
+    {
+      "assertion": "_sample_passive(loop, ids, 0.5, 'current_error_upper') is None",
+      "failure_condition": "The predicate is false: _sample_passive(loop, ids, 0.5, 'current_error_upper') is None",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 681,
+      "regression_reading": "Read the per-loop empty clock instead of homogeneous IDS time or read .data from a primitive current field.",
+      "test": "test_passive_current_uses_primitive_sigma_and_the_ids_clock"
+    },
+    {
+      "assertion": "not _omit_empty_unconnected_coil(active, 0, True)",
+      "failure_condition": "The predicate is false: not _omit_empty_unconnected_coil(active, 0, True)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 695,
+      "regression_reading": "Omit a wired or data-bearing coil, or omit an empty coil without the explicit directive.",
+      "test": "test_empty_coil_is_omitted_only_with_explicit_deselection_and_no_connection"
+    },
+    {
+      "assertion": "not _omit_empty_unconnected_coil(active, 1, False)",
+      "failure_condition": "The predicate is false: not _omit_empty_unconnected_coil(active, 1, False)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 696,
+      "regression_reading": "Omit a wired or data-bearing coil, or omit an empty coil without the explicit directive.",
+      "test": "test_empty_coil_is_omitted_only_with_explicit_deselection_and_no_connection"
+    },
+    {
+      "assertion": "_omit_empty_unconnected_coil(active, 1, True)",
+      "failure_condition": "The predicate is false: _omit_empty_unconnected_coil(active, 1, True)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 697,
+      "regression_reading": "Omit a wired or data-bearing coil, or omit an empty coil without the explicit directive.",
+      "test": "test_empty_coil_is_omitted_only_with_explicit_deselection_and_no_connection"
+    },
+    {
+      "assertion": "not _omit_empty_unconnected_coil(active, 1, True)",
+      "failure_condition": "The predicate is false: not _omit_empty_unconnected_coil(active, 1, True)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 699,
+      "regression_reading": "Omit a wired or data-bearing coil, or omit an empty coil without the explicit directive.",
+      "test": "test_empty_coil_is_omitted_only_with_explicit_deselection_and_no_connection"
+    },
+    {
+      "assertion": "_deselect_missing_current(path)",
+      "failure_condition": "The predicate is false: _deselect_missing_current(path)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 711,
+      "regression_reading": "Parse concatenated XML fragments as one root or ignore the false directive.",
+      "test": "test_circuit_deselection_reads_multiple_xml_fragments"
+    },
+    {
+      "assertion": "not _deselect_missing_current(path)",
+      "failure_condition": "The predicate is false: not _deselect_missing_current(path)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 713,
+      "regression_reading": "Parse concatenated XML fragments as one root or ignore the false directive.",
+      "test": "test_circuit_deselection_reads_multiple_xml_fragments"
+    },
+    {
+      "assertion": "CASES['mastu'][-2:] == (2, 2)",
+      "failure_condition": "The predicate is false: CASES['mastu'][-2:] == (2, 2)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 723,
+      "regression_reading": "Restore obsolete profile counts; the fixed zero pressure and two-dimensional field basis checks disagree.",
+      "test": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "CASES['tcv'][-2:] == (0, 2)",
+      "failure_condition": "The predicate is false: CASES['tcv'][-2:] == (0, 2)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 724,
+      "regression_reading": "Restore obsolete profile counts; the fixed zero pressure and two-dimensional field basis checks disagree.",
+      "test": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "CASES['iter'][-2:] == (2, 3)",
+      "failure_condition": "The predicate is false: CASES['iter'][-2:] == (2, 3)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 725,
+      "regression_reading": "Restore obsolete profile counts; the fixed zero pressure and two-dimensional field basis checks disagree.",
+      "test": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "_profile_basis(0).shape == (1, 0)",
+      "failure_condition": "The predicate is false: _profile_basis(0).shape == (1, 0)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 726,
+      "regression_reading": "Restore obsolete profile counts; the fixed zero pressure and two-dimensional field basis checks disagree.",
+      "test": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "fixed['representable'] and fixed['live_coefficients'] == 0",
+      "failure_condition": "The predicate is false: fixed['representable'] and fixed['live_coefficients'] == 0",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 731,
+      "regression_reading": "Restore obsolete profile counts; the fixed zero pressure and two-dimensional field basis checks disagree.",
+      "test": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "not nonzero['representable']",
+      "failure_condition": "The predicate is false: not nonzero['representable']",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 732,
+      "regression_reading": "Restore obsolete profile counts; the fixed zero pressure and two-dimensional field basis checks disagree.",
+      "test": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "curved['representable'] and curved['live_coefficients'] == 2",
+      "failure_condition": "The predicate is false: curved['representable'] and curved['live_coefficients'] == 2",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 733,
+      "regression_reading": "Restore obsolete profile counts; the fixed zero pressure and two-dimensional field basis checks disagree.",
+      "test": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "curved['lowest_polynomial_degree'] == 2",
+      "failure_condition": "The predicate is false: curved['lowest_polynomial_degree'] == 2",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 734,
+      "regression_reading": "Restore obsolete profile counts; the fixed zero pressure and two-dimensional field basis checks disagree.",
+      "test": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "context['comparison_label'] == 'same magnetics rows; different constraint sets'",
+      "failure_condition": "The predicate is false: context['comparison_label'] == 'same magnetics rows; different constraint sets'",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 741,
+      "regression_reading": "Give ITER the magnetics-only label or silently add its pressure/q0 priors to the nova context.",
+      "test": "test_reference_prior_context_does_not_add_nova_priors"
+    },
+    {
+      "assertion": "context['reference_extra_priors'] == ['synthesised pressure prior', 'q0 prior']",
+      "failure_condition": "The predicate is false: context['reference_extra_priors'] == ['synthesised pressure prior', 'q0 prior']",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 744,
+      "regression_reading": "Give ITER the magnetics-only label or silently add its pressure/q0 priors to the nova context.",
+      "test": "test_reference_prior_context_does_not_add_nova_priors"
+    },
+    {
+      "assertion": "context['nova_extra_priors'] == []",
+      "failure_condition": "The predicate is false: context['nova_extra_priors'] == []",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 748,
+      "regression_reading": "Give ITER the magnetics-only label or silently add its pressure/q0 priors to the nova context.",
+      "test": "test_reference_prior_context_does_not_add_nova_priors"
+    },
+    {
+      "assertion": "'predate' in context['counts_caveat']",
+      "failure_condition": "The predicate is false: 'predate' in context['counts_caveat']",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 749,
+      "regression_reading": "Give ITER the magnetics-only label or silently add its pressure/q0 priors to the nova context.",
+      "test": "test_reference_prior_context_does_not_add_nova_priors"
+    },
+    {
+      "assertion": "'neither' in context['caption']",
+      "failure_condition": "The predicate is false: 'neither' in context['caption']",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 750,
+      "regression_reading": "Give ITER the magnetics-only label or silently add its pressure/q0 priors to the nova context.",
+      "test": "test_reference_prior_context_does_not_add_nova_priors"
+    },
+    {
+      "assertion": "_constraint_context('tcv')['reference_extra_priors'] == []",
+      "failure_condition": "The predicate is false: _constraint_context('tcv')['reference_extra_priors'] == []",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 751,
+      "regression_reading": "Give ITER the magnetics-only label or silently add its pressure/q0 priors to the nova context.",
+      "test": "test_reference_prior_context_does_not_add_nova_priors"
+    },
+    {
+      "assertion": "len(r) == len(z) == len(current) == 4",
+      "failure_condition": "The predicate is false: len(r) == len(z) == len(current) == 4",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 762,
+      "regression_reading": "Use trapezoid endpoint weights, absolute current, or silently accept a zero source in the uniform generator quadrature.",
+      "test": "test_stored_density_integral_keeps_sign_and_generator_cell_area"
+    },
+    {
+      "assertion": "dr == pytest.approx(0.2) and dz == pytest.approx(0.3)",
+      "failure_condition": "The predicate is false: dr == pytest.approx(0.2) and dz == pytest.approx(0.3)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 763,
+      "regression_reading": "Use trapezoid endpoint weights, absolute current, or silently accept a zero source in the uniform generator quadrature.",
+      "test": "test_stored_density_integral_keeps_sign_and_generator_cell_area"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(current.sum(), density.sum() * 0.2 * 0.3)",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 760,
+      "regression_reading": "Use trapezoid endpoint weights, absolute current, or silently accept a zero source in the uniform generator quadrature.",
+      "test": "test_stored_density_integral_keeps_sign_and_generator_cell_area"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(current < 0, density[density != 0] < 0)",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 761,
+      "regression_reading": "Use trapezoid endpoint weights, absolute current, or silently accept a zero source in the uniform generator quadrature.",
+      "test": "test_stored_density_integral_keeps_sign_and_generator_cell_area"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='nonzero')",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 764,
+      "regression_reading": "Use trapezoid endpoint weights, absolute current, or silently accept a zero source in the uniform generator quadrature.",
+      "test": "test_stored_density_integral_keeps_sign_and_generator_cell_area"
+    },
+    {
+      "assertion": "exact['whitened_rms'] == exact['relative_l2'] == 0",
+      "failure_condition": "The predicate is false: exact['whitened_rms'] == exact['relative_l2'] == 0",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 776,
+      "regression_reading": "Discard the signed gain, reverse error polarity, or report zero error for a reversed/doubled source.",
+      "test": "test_row_agreement_exposes_a_reversed_current_sign_and_family_gain"
+    },
+    {
+      "assertion": "reversed_rows['relative_l2'] == 2",
+      "failure_condition": "The predicate is false: reversed_rows['relative_l2'] == 2",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 777,
+      "regression_reading": "Discard the signed gain, reverse error polarity, or report zero error for a reversed/doubled source.",
+      "test": "test_row_agreement_exposes_a_reversed_current_sign_and_family_gain"
+    },
+    {
+      "assertion": "reversed_rows['signed_gain'] == -1",
+      "failure_condition": "The predicate is false: reversed_rows['signed_gain'] == -1",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 778,
+      "regression_reading": "Discard the signed gain, reverse error polarity, or report zero error for a reversed/doubled source.",
+      "test": "test_row_agreement_exposes_a_reversed_current_sign_and_family_gain"
+    },
+    {
+      "assertion": "reversed_rows['opposite_sign_rows'] == 3",
+      "failure_condition": "The predicate is false: reversed_rows['opposite_sign_rows'] == 3",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 779,
+      "regression_reading": "Discard the signed gain, reverse error polarity, or report zero error for a reversed/doubled source.",
+      "test": "test_row_agreement_exposes_a_reversed_current_sign_and_family_gain"
+    },
+    {
+      "assertion": "reversed_rows['whitened_rms'] > 50",
+      "failure_condition": "The predicate is false: reversed_rows['whitened_rms'] > 50",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 780,
+      "regression_reading": "Discard the signed gain, reverse error polarity, or report zero error for a reversed/doubled source.",
+      "test": "test_row_agreement_exposes_a_reversed_current_sign_and_family_gain"
+    },
+    {
+      "assertion": "doubled['relative_l2'] == 1 and doubled['signed_gain'] == 2",
+      "failure_condition": "The predicate is false: doubled['relative_l2'] == 1 and doubled['signed_gain'] == 2",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 781,
+      "regression_reading": "Discard the signed gain, reverse error polarity, or report zero error for a reversed/doubled source.",
+      "test": "test_row_agreement_exposes_a_reversed_current_sign_and_family_gain"
+    },
+    {
+      "assertion": "receipt.converged",
+      "failure_condition": "The predicate is false: receipt.converged",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 893,
+      "regression_reading": "Keep conductor currents fixed, ignore their distinct uncertainties, omit typed current updates, or omit current columns from the covariance; independent least-squares expectations fail.",
+      "test": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "np.max(np.abs(receipt.whitened_residuals)) > 0.01",
+      "failure_condition": "The predicate is false: np.max(np.abs(receipt.whitened_residuals)) > 0.01",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 894,
+      "regression_reading": "Keep conductor currents fixed, ignore their distinct uncertainties, omit typed current updates, or omit current columns from the covariance; independent least-squares expectations fail.",
+      "test": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "receipt.coefficient_names[-2:] == ('upper_coil', 'lower_coil')",
+      "failure_condition": "The predicate is false: receipt.coefficient_names[-2:] == ('upper_coil', 'lower_coil')",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 900,
+      "regression_reading": "Keep conductor currents fixed, ignore their distinct uncertainties, omit typed current updates, or omit current columns from the covariance; independent least-squares expectations fail.",
+      "test": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "receipt.covariance.shape == (5, 5)",
+      "failure_condition": "The predicate is false: receipt.covariance.shape == (5, 5)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 901,
+      "regression_reading": "Keep conductor currents fixed, ignore their distinct uncertainties, omit typed current updates, or omit current columns from the covariance; independent least-squares expectations fail.",
+      "test": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "receipt.forward_evaluations == len(calls)",
+      "failure_condition": "The predicate is false: receipt.forward_evaluations == len(calls)",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 902,
+      "regression_reading": "Keep conductor currents fixed, ignore their distinct uncertainties, omit typed current updates, or omit current columns from the covariance; independent least-squares expectations fail.",
+      "test": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "receipt.wall_seconds > 0",
+      "failure_condition": "The predicate is false: receipt.wall_seconds > 0",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 903,
+      "regression_reading": "Keep conductor currents fixed, ignore their distinct uncertainties, omit typed current updates, or omit current columns from the covariance; independent least-squares expectations fail.",
+      "test": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "receipt.device",
+      "failure_condition": "The predicate is false: receipt.device",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 904,
+      "regression_reading": "Keep conductor currents fixed, ignore their distinct uncertainties, omit typed current updates, or omit current columns from the covariance; independent least-squares expectations fail.",
+      "test": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "any((np.linalg.norm(call.current) > 0 for call in calls))",
+      "failure_condition": "The predicate is false: any((np.linalg.norm(call.current) > 0 for call in calls))",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 905,
+      "regression_reading": "Keep conductor currents fixed, ignore their distinct uncertainties, omit typed current updates, or omit current columns from the covariance; independent least-squares expectations fail.",
+      "test": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(receipt.coefficients, expected, atol=1e-10)",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 895,
+      "regression_reading": "Keep conductor currents fixed, ignore their distinct uncertainties, omit typed current updates, or omit current columns from the covariance; independent least-squares expectations fail.",
+      "test": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(receipt.conductor_currents, expected[-2:], atol=1e-10)",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 896,
+      "regression_reading": "Keep conductor currents fixed, ignore their distinct uncertainties, omit typed current updates, or omit current columns from the covariance; independent least-squares expectations fail.",
+      "test": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(receipt.whitened_residuals, (design @ expected - target) * weights, atol=1e-10)",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 897,
+      "regression_reading": "Keep conductor currents fixed, ignore their distinct uncertainties, omit typed current updates, or omit current columns from the covariance; independent least-squares expectations fail.",
+      "test": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(active.current, [0.0, 0.0])",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 906,
+      "regression_reading": "Keep conductor currents fixed, ignore their distinct uncertainties, omit typed current updates, or omit current columns from the covariance; independent least-squares expectations fail.",
+      "test": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='positive uncertainties')",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": 918,
+      "regression_reading": "Allow fitted current rows without aligned positive uncertainty.",
+      "test": "test_fitted_conductor_currents_refuse_missing_uncertainties"
+    },
+    {
+      "assertion": "str(eq.ids_properties.version_put.data_dictionary) == '4.1.0'",
+      "failure_condition": "The predicate is false: str(eq.ids_properties.version_put.data_dictionary) == '4.1.0'",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 437,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "_read_case"
+    },
+    {
+      "assertion": "int(eq.ids_properties.homogeneous_time) == 1",
+      "failure_condition": "The predicate is false: int(eq.ids_properties.homogeneous_time) == 1",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 438,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "_read_case"
+    },
+    {
+      "assertion": "int(eq.code.output_flag[index]) == 0",
+      "failure_condition": "The predicate is false: int(eq.code.output_flag[index]) == 0",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 441,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "_read_case"
+    },
+    {
+      "assertion": "sigma_ip is not None and sigma_ip > 0",
+      "failure_condition": "The predicate is false: sigma_ip is not None and sigma_ip > 0",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 676,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "_read_case"
+    },
+    {
+      "assertion": "len(channels) == len(constraints)",
+      "failure_condition": "The predicate is false: len(channels) == len(constraints)",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 485,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "_read_case"
+    },
+    {
+      "assertion": "np.max(distance) < 1e-12",
+      "failure_condition": "The predicate is false: np.max(distance) < 1e-12",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 785,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "_problem"
+    },
+    {
+      "assertion": "jax.config.jax_enable_x64 is True",
+      "failure_condition": "The predicate is false: jax.config.jax_enable_x64 is True",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 969,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "test_shared_magnetics_reconstruction"
+    },
+    {
+      "assertion": "jax.default_backend() == 'gpu'",
+      "failure_condition": "The predicate is false: jax.default_backend() == 'gpu'",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 970,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "test_shared_magnetics_reconstruction"
+    },
+    {
+      "assertion": "jax.config.jax_enable_x64",
+      "failure_condition": "The predicate is false: jax.config.jax_enable_x64",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1199,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "test_shared_magnetics_reconstruction_observation_replay"
+    },
+    {
+      "assertion": "np.any(np.abs(plasma_rows[keep & ~sensors.flux_loop]) > 0)",
+      "failure_condition": "The predicate is false: np.any(np.abs(plasma_rows[keep & ~sensors.flux_loop]) > 0)",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1321,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "test_shared_magnetics_reconstruction_observation_replay"
+    },
+    {
+      "assertion": "np.any(np.abs(vacuum[keep & ~sensors.flux_loop]) > 0)",
+      "failure_condition": "The predicate is false: np.any(np.abs(vacuum[keep & ~sensors.flux_loop]) > 0)",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1322,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "test_shared_magnetics_reconstruction_observation_replay"
+    },
+    {
+      "assertion": "fitted.converged",
+      "failure_condition": "The predicate is false: fitted.converged",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1857,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "_compare_fit"
+    },
+    {
+      "assertion": "scaled.converged",
+      "failure_condition": "The predicate is false: scaled.converged",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1860,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "_compare_fit"
+    },
+    {
+      "assertion": "scaled.forward.qualified",
+      "failure_condition": "The predicate is false: scaled.forward.qualified",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1861,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "_compare_fit"
+    },
+    {
+      "assertion": "scaled_error > 0.015",
+      "failure_condition": "The predicate is false: scaled_error > 0.015",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1862,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "_compare_fit"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(np.any(response != 0.0, axis=0), True)",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1680,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "_compare_fit"
+    },
+    {
+      "assertion": "all(scores['bands'].values())",
+      "failure_condition": "The predicate is false: all(scores['bands'].values())",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1859,
+      "regression_reading": "This is an input, fixture or serialized-field invariant, not an independent physical comparison; violating the stated predicate or removing its expected refusal fails it.",
+      "test": "_compare_fit"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(geometry.project(np.zeros(3), np.full(3, 2.0), np.full(3, 3.0)), [2.0, -3.0, -2.0])",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1874,
+      "regression_reading": "Use a counterclockwise sign for the IMAS clockwise normal; expected radial/vertical projections disagree.",
+      "test": "test_probe_normal_uses_clockwise_angle_from_outward_radius"
+    },
+    {
+      "assertion": "linear['representable'] and linear['live_coefficients'] == 1",
+      "failure_condition": "The predicate is false: linear['representable'] and linear['live_coefficients'] == 1",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1887,
+      "regression_reading": "Keep an endpoint degree of freedom or accept curvature in a linear configured profile space.",
+      "test": "test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature"
+    },
+    {
+      "assertion": "zero['representable'] and zero['identically_zero']",
+      "failure_condition": "The predicate is false: zero['representable'] and zero['identically_zero']",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1888,
+      "regression_reading": "Keep an endpoint degree of freedom or accept curvature in a linear configured profile space.",
+      "test": "test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature"
+    },
+    {
+      "assertion": "not curved['representable']",
+      "failure_condition": "The predicate is false: not curved['representable']",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1889,
+      "regression_reading": "Keep an endpoint degree of freedom or accept curvature in a linear configured profile space.",
+      "test": "test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature"
+    },
+    {
+      "assertion": "curved['lowest_polynomial_degree'] == 2",
+      "failure_condition": "The predicate is false: curved['lowest_polynomial_degree'] == 2",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1890,
+      "regression_reading": "Keep an endpoint degree of freedom or accept curvature in a linear configured profile space.",
+      "test": "test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature"
+    },
+    {
+      "assertion": "curved['configured_relative_sup_error'] > 0.1",
+      "failure_condition": "The predicate is false: curved['configured_relative_sup_error'] > 0.1",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1891,
+      "regression_reading": "Keep an endpoint degree of freedom or accept curvature in a linear configured profile space.",
+      "test": "test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(basis[:, 0], [1.0, -1.0])",
+      "failure_condition": "The asserted comparison disagrees with its explicit expected values, or the declared exception is not raised with its required type/message.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1883,
+      "regression_reading": "Keep an endpoint degree of freedom or accept curvature in a linear configured profile space.",
+      "test": "test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature"
+    },
+    {
+      "assertion": "score['magnetic_axis_distance_m'] == pytest.approx(0.3)",
+      "failure_condition": "The predicate is false: score['magnetic_axis_distance_m'] == pytest.approx(0.3)",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1928,
+      "regression_reading": "Apply vertical alignment before measured-band admission, discard q sign, or mis-normalize current error; fixed physical expectations disagree.",
+      "test": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['aligned_magnetic_axis_distance_m'] == pytest.approx(0.0)",
+      "failure_condition": "The predicate is false: score['aligned_magnetic_axis_distance_m'] == pytest.approx(0.0)",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1929,
+      "regression_reading": "Apply vertical alignment before measured-band admission, discard q sign, or mis-normalize current error; fixed physical expectations disagree.",
+      "test": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['aligned_boundary_distance_mm'] == pytest.approx(0.0)",
+      "failure_condition": "The predicate is false: score['aligned_boundary_distance_mm'] == pytest.approx(0.0)",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1930,
+      "regression_reading": "Apply vertical alignment before measured-band admission, discard q sign, or mis-normalize current error; fixed physical expectations disagree.",
+      "test": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['plasma_current_relative_error'] == pytest.approx(0.1)",
+      "failure_condition": "The predicate is false: score['plasma_current_relative_error'] == pytest.approx(0.1)",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1931,
+      "regression_reading": "Apply vertical alignment before measured-band admission, discard q sign, or mis-normalize current error; fixed physical expectations disagree.",
+      "test": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['q95'] == pytest.approx(-2.9)",
+      "failure_condition": "The predicate is false: score['q95'] == pytest.approx(-2.9)",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1932,
+      "regression_reading": "Apply vertical alignment before measured-band admission, discard q sign, or mis-normalize current error; fixed physical expectations disagree.",
+      "test": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['bands']['magnetic_axis_distance_m'] is False",
+      "failure_condition": "The predicate is false: score['bands']['magnetic_axis_distance_m'] is False",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1933,
+      "regression_reading": "Apply vertical alignment before measured-band admission, discard q sign, or mis-normalize current error; fixed physical expectations disagree.",
+      "test": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['bands']['plasma_current_relative_error'] is False",
+      "failure_condition": "The predicate is false: score['bands']['plasma_current_relative_error'] is False",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1934,
+      "regression_reading": "Apply vertical alignment before measured-band admission, discard q sign, or mis-normalize current error; fixed physical expectations disagree.",
+      "test": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['bands']['q95_magnitude_error'] is True",
+      "failure_condition": "The predicate is false: score['bands']['q95_magnitude_error'] is True",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": 1935,
+      "regression_reading": "Apply vertical alignment before measured-band admission, discard q sign, or mis-normalize current error; fixed physical expectations disagree.",
+      "test": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    }
+  ],
+  "baseline_suite": {
+    "CPU_wall_seconds": 3144.9638283560053,
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_equilibrium_forward.py tests/test_equilibrium_magnetics_fit.py",
+    "completed": false,
+    "exit_status": -6,
+    "failure_count": null,
+    "failure_ids": [],
+    "log_digest": "5b97df5432b503d4496b78aae9a6ff11b626f961e6c3fd5233b8c9cc86334d77",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/review-suite-1322248/original-base/gate.log",
+    "measurement_cwd": "/tmp/nova-review-1322248-kar8btqm/original-base/tree",
+    "measurement_module": "/tmp/nova-review-1322248-kar8btqm/original-base/tree/nova/equilibrium/magnetics_fit.py",
+    "mutation": null,
+    "revision": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+    "summary": null
+  },
+  "call_site_count": 6,
+  "call_sites": [
+    "nova/imas/mast_parity_gate.py:_score_completed_chain",
+    "nova/imas/mast_efit_referee.py:run_refereed_parity_chain",
+    "nova/equilibrium/harmonic.py:ReconstructHarmonic.build_sensor_matrix",
+    "nova/equilibrium/moment.py:sensor_coupling",
+    "nova/equilibrium/moment.py:ReconstructMoment.filament_signature",
+    "nova/equilibrium/profile.py:ReconstructProfile.from_geometry"
+  ],
+  "completed_at": "2026-11-17T11:03:51Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-efit-comparison-766ac4cd1980",
+      "recorded_at": "2026-11-17T11:30:30.968738+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-17T10:53:52Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-efit-comparison-766ac4cd1980",
+      "recorded_at": "2026-11-17T11:30:30.722600+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/manifest.md",
+      "line": "21",
+      "severity": "blocking",
+      "text": "blocking: Both baseline_suite and after_suite have completed=false and native EXIT=-6 before pytest summaries; no complete failure sets or added-failure count can be derived, so the required regression evidence remains unresolved at this reviewed revision."
+    },
+    {
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": "106",
+      "severity": "non-blocking",
+      "suggested_disposition": {
+        "kind": "folded",
+        "node": "efit-comparison",
+        "reason": "Consolidate the comparison receipt adapter with nova.io.json.write_atomic; retain strict non-finite refusal."
+      },
+      "text": "non-blocking: _write duplicates the atomic JSON replacement capability in nova/io/json.py:12 rather than extending or wrapping that owner; its fixed .pending path and lack of file/directory fsync also discard the existing owner's collision protection and durability, so fold strict-JSON validation into the owner when consolidating these receipt writes."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified the production consumers listed in CALL_SITES; no production call constructs the newly fitted-current mode.",
+    "diff": "The 42-commit sequence and resulting d7676e478fc8701b036ec717f80d403c3ead86f5..766ac4cd1980351d51097483ccfeb1ea274beeac diff extend the existing fitter, measurement and referee owners; tests/test_magnetics_fit_efit_comparison.py:1859-1863 repairs ITER admission and scaled-fit qualification, while :106 adds a separate atomic JSON writer.",
+    "done_when": "The source prompt.txt:203 requires bands, the fit/forward split and the 1.10 control; live section s2 permits refusal evidence, but source manifest.md:21-22 and the native review-suite-1322248 logs show both exact suite arms aborting before summaries, leaving the added-failure delta unavailable.",
+    "goal": "The original prompt.txt:43 requests the three-machine inverse/EFIT comparison; the live plan section s2 permits measured refusals, and docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1941 records all three honestly without inventing fitted states.",
+    "manifest": "The source manifest.md:5 reports blocked, :11-12 names commits and paths, and :21-22 preserves actual SIGABRT exits, incomplete summaries and the measured 28458e75651b4ec1e263dbe76a711ccb837ab290 head rather than relabelling it as the reviewed documentation head.",
+    "write_paths": "The original prompt.txt:160 and manifest.md:3 grant the four source files, comparison/fitter/forward tests, evidence fragment and figure directory; all 22 changed paths are inside those grants and no forward or topology implementation changed."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_magnetics_fit.py:545-581 fails when ITER is banded or a nonstationary/unqualified scaled fit is admitted, and :890-898 compares fitted currents and residuals with an independently solved weighted design rather than the inputs copied back.",
+    "evidence": "The native review-suite-1322248/original-base/gate.log and head/gate.log each end EXIT=-6 without a summary, so source manifest.md:21-22 cannot establish a complete regression delta despite the separate five-test mutation control.",
+    "fit": "nova/equilibrium/magnetics_fit.py:202 and :328 retain typed source requests and receipts, while tests/test_magnetics_fit_efit_comparison.py:1859-1863 now follows the live constraint-set policy without widening numerical bands.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1941-1949 satisfies the live refusal endpoint with sub-1% fitted-current row replays, while physical fitted comparisons and the scaled-data experiment remain unavailable.",
+    "reuse": "tests/test_magnetics_fit_efit_comparison.py:106 duplicates atomic JSON replacement already owned by nova/io/json.py:12 instead of wrapping or extending it, although the fitter, loop geometry and referee changes extend their existing owners.",
+    "scope_discipline": "The 22-path diff stays inside source manifest.md:3 grants and does not edit forward.py, forward_operator.py or topology.py."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The original prompt.txt:43 requests the three-machine inverse/EFIT comparison; the live plan section s2 permits measured refusals, and docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1941 records all three honestly without inventing fitted states.\nVERDICT done_when: The source prompt.txt:203 requires bands, the fit/forward split and the 1.10 control; live section s2 permits refusal evidence, but source manifest.md:21-22 and the native review-suite-1322248 logs show both exact suite arms aborting before summaries, leaving the added-failure delta unavailable.\nVERDICT write_paths: The original prompt.txt:160 and manifest.md:3 grant the four source files, comparison/fitter/forward tests, evidence fragment and figure directory; all 22 changed paths are inside those grants and no forward or topology implementation changed.\nVERDICT manifest: The source manifest.md:5 reports blocked, :11-12 names commits and paths, and :21-22 preserves actual SIGABRT exits, incomplete summaries and the measured 28458e75651b4ec1e263dbe76a711ccb837ab290 head rather than relabelling it as the reviewed documentation head.\nVERDICT diff: The 42-commit sequence and resulting d7676e478fc8701b036ec717f80d403c3ead86f5..766ac4cd1980351d51097483ccfeb1ea274beeac diff extend the existing fitter, measurement and referee owners; tests/test_magnetics_fit_efit_comparison.py:1859-1863 repairs ITER admission and scaled-fit qualification, while :106 adds a separate atomic JSON writer.\nCALL_SITES: nova/imas/mast_parity_gate.py:_score_completed_chain, nova/imas/mast_efit_referee.py:run_refereed_parity_chain, nova/equilibrium/harmonic.py:ReconstructHarmonic.build_sensor_matrix, nova/equilibrium/moment.py:sensor_coupling, nova/equilibrium/moment.py:ReconstructMoment.filament_signature, nova/equilibrium/profile.py:ReconstructProfile.from_geometry\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1941-1949 satisfies the live refusal endpoint with sub-1% fitted-current row replays, while physical fitted comparisons and the scaled-data experiment remain unavailable.\nSCORE evidence: 12\nJUSTIFICATION evidence: The native review-suite-1322248/original-base/gate.log and head/gate.log each end EXIT=-6 without a summary, so source manifest.md:21-22 cannot establish a complete regression delta despite the separate five-test mutation control.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The 22-path diff stays inside source manifest.md:3 grants and does not edit forward.py, forward_operator.py or topology.py.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_equilibrium_magnetics_fit.py:545-581 fails when ITER is banded or a nonstationary/unqualified scaled fit is admitted, and :890-898 compares fitted currents and residuals with an independently solved weighted design rather than the inputs copied back.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/magnetics_fit.py:202 and :328 retain typed source requests and receipts, while tests/test_magnetics_fit_efit_comparison.py:1859-1863 now follows the live constraint-set policy without widening numerical bands.\nSCORE reuse: 5\nJUSTIFICATION reuse: tests/test_magnetics_fit_efit_comparison.py:106 duplicates atomic JSON replacement already owned by nova/io/json.py:12 instead of wrapping or extending it, although the fitter, loop geometry and referee changes extend their existing owners.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/manifest.md:21 blocking: Both baseline_suite and after_suite have completed=false and native EXIT=-6 before pytest summaries; no complete failure sets or added-failure count can be derived, so the required regression evidence remains unresolved at this reviewed revision.\nFINDING tests/test_magnetics_fit_efit_comparison.py:106 non-blocking: _write duplicates the atomic JSON replacement capability in nova/io/json.py:12 rather than extending or wrapping that owner; its fixed .pending path and lack of file/directory fsync also discard the existing owner's collision protection and durability, so fold strict-JSON validation into the owner when consolidating these receipt writes.\n\nThe assigned read-only worktree HEAD is 740d0ffcc0e0f35d89491de69b7df888d99dec36; substantive source reads used git show/grep at the explicit reviewed head. No source files, tests, branch or shared index were changed. No suite was rerun.\n\nThe earlier ITER-admission and scaled-convergence defects are repaired. Native admission-negative-control/gate.log reports 5 failed, 41 deselected in 6.28s, EXIT=1. review-admission-current-head.log names exactly those five tests PASSED, 5 passed, 41 deselected in 19.03s, EXIT=0 at ee02bc413dc71e7e9fdf0c0172985c0ebb0f0313. The source files covered by the suite are byte-identical from the measured 28458e75651b4ec1e263dbe76a711ccb837ab290 through the reviewed head. Neither focused success nor byte identity supplies the missing complete suite result. The controller's negative_control_admitted=true based on an aborted head's empty IDs is explicitly rejected by the source evidence fragment:2038-2046.\n\nThe complete failure-set delta is unavailable: added_failure_count=null, added_failure_ids=[] means not captured, never zero added failures. Native baseline/head log hashes match the source manifest. Partial F progress markers are not assigned a test identity. The known earlier default-route failure is not inferred to be that unidentified marker.\n\nFitted-source row replay receipts were opened directly for MAST-U, TCV and ITER. Loop/probe relative L2 errors are respectively 0.0012641012612455412/0.0010252620601982304, 0.0016982263557521813/0.0019015528117356548, and 0.007242617899855864/0.0008395208013880012. Current-integral errors are below 1.8e-15 and the replay tests explicitly require nonzero plasma and vacuum probe responses before discussing zero families. Zero-reference families correctly retain null relative error. This supports the plan's 5% replay prerequisite, not successful inverse reconstruction.\n\nAssertion independence: no numerical assertion was found which remains true merely because both sides echo the same supplied value. The trip-count check compares the serialized result with a constructed four-attempt history while checking three finite entries separately; reinstating finite-only counting returns 3 and fails the attempt-count assertion. The conductor fit has independently built design and numpy.linalg.lstsq expected coefficients; dropping current priors or their unequal weights changes the expected solution. The stubbed comparison checks assert policy/reporting only and are not credited as a physical scaled-data experiment. Restoring unconditional ITER bands fails its different-constraints test; restoring displacement-only admission fails the three stationary-fit tests and qualified-forward test. The structured assertion audit lists added assertion predicates, their failure conditions, and regression mechanisms below.\n\nProduction reachability: no production constructor invokes the new conductor-fitting mode; public exports alone are not counted as calls. The existing referee and Magnetics.project consumers were opened at the reviewed revision; their default paths retain their previous behavior. Segmented loops explicitly refuse project() because its input lacks segment-sample fields; the fitter reads loop_quadrature instead.\n\nReuse search: searches covered weighted fitting, observation projection/quadrature, supplied-equilibrium metrics, coefficient conversion, case/source builders, stationary-point polish, contour painters and JSON receipts. MagneticsFit and whitened_solve remain owners of fitting; Magnetics owns sensor projection; _boundary_distance is reused inside its referee owner; _profile_basis converts endpoint-constrained Bernstein coefficients to powers, whereas nova/linalg/basis.py:78 and interpolant.py evaluate bases. Existing forward-reference builders, FluxSurfaceGeometry, observation_kernels, polish_stationary_points and nova.media painters are reused. A concrete duplicate was found in strict receipt writing: nova/io/json.py owns atomic durable replacement, while the new helper adds strict JSON encoding in a second replacement implementation. This is why reuse is capped at 5 under the rubric.\n\nFigure limitation: sixteen stored producer PNG previews were visually opened, including the three fitted-current replays, original and bound-input replays, original/refitted-start terminal panels, both later-state panels and the final response-refusal panel. Legends and text are legible and unclipped; contour gaps remain readable. Absence of blue shared-level contours on some refusal panels follows the reported refusal and is not interpreted as a matching field. These are existing producer previews, not a fresh independent render of the committed SVGs. The sandbox lacks rsvg-convert, and this bounded read-only review did not submit a new rendering job or run a figure batch on the fleet node. Fresh SVG rendering remains a validation limitation.\n",
+  "review_run_id": "r-20261117T105310721596-review-of-efit-comparison-766ac4cd1980",
+  "reviewed_base_sha": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+  "reviewed_head_sha": "766ac4cd1980351d51097483ccfeb1ea274beeac",
+  "reviewed_run_id": "r-20261114T133703375306-efit-comparison",
+  "scores": {
+    "durability": 19,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "source_changed_paths": [
+    "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/backtracking/mastu-response-refused.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/bound-inputs/mastu-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/bound-inputs/tcv-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/iter-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/mastu-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/tcv-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/mastu.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/tcv.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/iter.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/mastu-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/mastu.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/tcv-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/tcv.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/terminal-state/iter-later-state.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/terminal-state/mastu-continuation.svg",
+    "nova/equilibrium/magnetics_fit.py",
+    "nova/equilibrium/measurement.py",
+    "nova/imas/mast_efit_referee.py",
+    "nova/imas/parity_tolerances.py",
+    "tests/test_equilibrium_magnetics_fit.py",
+    "tests/test_magnetics_fit_efit_comparison.py"
+  ],
+  "source_commits": [
+    "771aa8f05262ec10e059920e0f95944c578e8d67",
+    "e17ef7e0907c1cfe4eefa99935fe1f24223dc78f",
+    "8077bbf96973fe7e698c7230595fdfdce4de9846",
+    "8400735f39c7f6b181acd8e551657ba63beeca1e",
+    "852bd8e23fd58969041d17888f5508493b3ff9de",
+    "344becea0fc99f38279aa4175b3cdc7d96ad1ab7",
+    "737243338fcc4ea64061ca801a18a965f1eaa243",
+    "58053a16c388f29a7d7ef4c5e4cbe21bc865b935",
+    "255233517ea381fa63747b72f230f01574183de7",
+    "b7301af12a3994d4a7d1561e8a63c99df86fc8ed",
+    "64de5ed08fa7f22ffa50144755f40349af7c627b",
+    "d653e5185c9db846422bead8001dd5d976ddea61",
+    "db5f21c361075d8ce2aedd026bbf755f3860adcc",
+    "31c2b3a00475e6f7a0a4d80fa04b7ebafb6e7d6f",
+    "c7214eff2045cdcbe08eca9c6e5c131a4cdeb236",
+    "edc8e9b68ee585889e5c163381f8f98b90749f3e",
+    "b7d5484bb40b8c13936f12b01f47a8f37712e046",
+    "69d5e571524465324d0dc6ef6e6a04a638587288",
+    "7811d7134ae51fb5b17e0475674e69e45fbf847e",
+    "c5bc66858d9525ed5c8507b9ca5a47acf954fc06",
+    "7a06f8b22469e10fce80f339e3b9c9fb8b0833aa",
+    "75352d4bb81b3b04750d900df194483f9c29a61c",
+    "ba6e96e531ebf00b76530fd3b4a637d4b58493c0",
+    "4ecffe82bd33ad1ca15972f7f31c38c4ab904779",
+    "2a7c7c08b76b031344d9853fb3e4f2c10ed05c5f",
+    "9047a3fe50708d6dd20ebe672d0dc22f40b0ae50",
+    "632a508508c881cfbdaaeaa36da41020c73636bd",
+    "982ab04474debe44f7865814b8b37e2d64557f33",
+    "e3fc81d28267036870d67225c762827683b09388",
+    "86b3a8e6fc3e1b38217795e5258729ace0a064be",
+    "1ff2b2111cfbb846f174016b6ae14549dc77dbb2",
+    "702c48199e60921f9a8355a98b0a2791f252c9b7",
+    "682f5a90f5018e1dc3b895a3289df67175633f79",
+    "d00d41a7f19eca893ad30a842804e9a4fbd025c0",
+    "181fdfd547b15a99d3707901947a14cb02fb320c",
+    "8fdb64745f1469f68ffcbffbc7d36c0a596f28ee",
+    "24f72a6d2e95e1c91d906156ea3500bc65a9d13c",
+    "5c8ad84b91db82cd572e963b4a74863384cbdf52",
+    "77698bc5de094f64fbaf9f687c4c353428f82200",
+    "28458e75651b4ec1e263dbe76a711ccb837ab290",
+    "ee02bc413dc71e7e9fdf0c0172985c0ebb0f0313",
+    "766ac4cd1980351d51097483ccfeb1ea274beeac"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T11:45:00.293405+00:00",
+  "total": 92
+}

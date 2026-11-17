@@ -1,0 +1,121 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: baseline_suite.completed=false with segmentation fault/no summary, and after_suite.started=false/completed=false with no command or log. Empty added_failure_ids means unavailable, not zero. No substitute suite or fabricated count was used.",
+  "after_suite_log": null,
+  "assertion_audit": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T081725700875-review-of-efit-comparison-77698bc5de09/assertion-audit.json",
+  "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/baseline-suite.log",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/imas/mast_parity_gate.py:_score_completed_chain",
+    "nova/imas/mast_efit_referee.py:run_refereed_parity_chain",
+    "nova/equilibrium/harmonic.py:ReconstructHarmonic.build_sensor_matrix",
+    "nova/equilibrium/moment.py:sensor_coupling",
+    "nova/equilibrium/profile.py:ReconstructProfile.from_geometry"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-15T08:08:57Z",
+  "figure_review_limitation": "Fresh all_debug render submission blocked by sandbox SLURM socket denial; four existing producer PNGs visually inspected; all-16 fresh render inspection remains open.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-efit-comparison-77698bc5de09",
+      "recorded_at": "2026-11-17T08:51:26.101324+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "repair-of-efit-comparison-77698bc5de09",
+      "recorded_at": "2026-11-17T08:51:26.699043+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "repair-of-efit-comparison-77698bc5de09",
+      "recorded_at": "2026-11-17T08:51:26.946453+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "id": "f5c84129ee6",
+      "line": "1852",
+      "severity": "blocking",
+      "text": "blocking: The unconditional all(scores['bands'].values()) assertion judges ITER against the bands even though live section s2 explicitly exempts its different constraint set; a converged and properly reported ITER result can therefore fail for an allowed gap."
+    },
+    {
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "id": "f1aa808ccde",
+      "line": "1853",
+      "severity": "blocking",
+      "text": "blocking: The scaled control asserts only current displacement; scaled.converged is recorded at :1842 but never required, so an exhausted nonstationary scaled fit with a qualified forward state can incorrectly certify that the fitted scaled-data control fired."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/manifest.md",
+      "id": "f1d7f39987c",
+      "line": "21",
+      "severity": "blocking",
+      "text": "blocking: baseline_suite.completed is false and after_suite has no executed command or log, so no added-failure count can be derived from the required suite pair; the focused P100 result is a different selector at an earlier revision and cannot substitute for that missing measurement."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read the 39-commit sequence and resulting source/test changes against d7676e478fc8701b036ec717f80d403c3ead86f5; the change extends MagneticsFit, measurement geometry and the existing referee, with refusal evidence and figures, but tests/test_magnetics_fit_efit_comparison.py:1852 still bands ITER and :1853 lacks scaled-fit convergence admission.",
+    "done_when": "The original dispatch-detail.json done_when requires bands, a fit/forward split and a scaled control; the live plan permits refusal evidence, and the fragment:1941 records all three outcomes honestly, but the source manifest:21-22 has an incomplete baseline_suite and an unrun after_suite, so added failures cannot be measured.",
+    "goal": "The goal in the reviewed run's dispatch-detail.json asks for a three-machine inverse/EFIT comparison; docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1907 records measured refusals rather than completed fits, which the live inverse-equilibrium-baseline.html section s2 now explicitly permits.",
+    "manifest": "The source manifest:6 reports blocked, names commits and receipt paths, and preserves missing fit/scaled results and unreadable suite arms instead of claiming success; its focused P100 gate log records 1 failed, 69 passed, 10 deselected in 44.79s with EXIT=1.",
+    "write_paths": "The nine declared path grants in dispatch-detail.json contain all 22 paths in the d7676e478fc8701b036ec717f80d403c3ead86f5..77698bc5de094f64fbaf9f687c4c353428f82200 diff, including the figure directory; no forward or topology implementation changed."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_magnetics_fit.py:364-435 would fail if unqualified trials again escaped instead of backtracking or unrelated errors were swallowed, and :711-760 checks an independent weighted least-squares solution, but tests/test_magnetics_fit_efit_comparison.py:1853 can pass an unconverged scaled fit.",
+    "evidence": "The source manifest:21-22 and baseline-suite.log show a cut-short baseline and no after arm, although backtracking-fit-1320459/physical-mastu/gate.log and the three fitted-observation-replay-1318855 gate logs support the reported numerical refusals and sub-5% replay admission.",
+    "fit": "nova/equilibrium/magnetics_fit.py extends the existing typed-request fitter and nova/imas/mast_efit_referee.py:408 extends its scoring owner, but tests/test_magnetics_fit_efit_comparison.py:1852 contradicts the live ITER band exemption.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1924-1949 supplies the non-convergence endpoint permitted by live section s2 with fitted-source replay below 1% for all three machines, while completed inverse scores remain unavailable.",
+    "reuse": "The changes extend MagneticsFit, Magnetics and score_with_efit_referee and reuse whitened_solve, _boundary_distance, forward-reference machine/conductor builders, FluxSurfaceGeometry and nova.media painters; searches found no existing owner for the EFIT flattened-current witness binding or edge-constrained Bernstein-to-power adapter, and nova/linalg/interpolant.py:39 evaluates a basis rather than converting its coefficients.",
+    "scope_discipline": "All 22 changed paths are within dispatch-detail.json's explicit source, test, evidence-fragment and figure-directory grants, with no forward.py, forward_operator.py or topology.py edit."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal in the reviewed run's dispatch-detail.json asks for a three-machine inverse/EFIT comparison; docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1907 records measured refusals rather than completed fits, which the live inverse-equilibrium-baseline.html section s2 now explicitly permits.\nVERDICT done_when: The original dispatch-detail.json done_when requires bands, a fit/forward split and a scaled control; the live plan permits refusal evidence, and the fragment:1941 records all three outcomes honestly, but the source manifest:21-22 has an incomplete baseline_suite and an unrun after_suite, so added failures cannot be measured.\nVERDICT write_paths: The nine declared path grants in dispatch-detail.json contain all 22 paths in the d7676e478fc8701b036ec717f80d403c3ead86f5..77698bc5de094f64fbaf9f687c4c353428f82200 diff, including the figure directory; no forward or topology implementation changed.\nVERDICT manifest: The source manifest:6 reports blocked, names commits and receipt paths, and preserves missing fit/scaled results and unreadable suite arms instead of claiming success; its focused P100 gate log records 1 failed, 69 passed, 10 deselected in 44.79s with EXIT=1.\nVERDICT diff: Read the 39-commit sequence and resulting source/test changes against d7676e478fc8701b036ec717f80d403c3ead86f5; the change extends MagneticsFit, measurement geometry and the existing referee, with refusal evidence and figures, but tests/test_magnetics_fit_efit_comparison.py:1852 still bands ITER and :1853 lacks scaled-fit convergence admission.\nCALL_SITES: nova/imas/mast_parity_gate.py:_score_completed_chain, nova/imas/mast_efit_referee.py:run_refereed_parity_chain, nova/equilibrium/harmonic.py:ReconstructHarmonic.build_sensor_matrix, nova/equilibrium/moment.py:sensor_coupling, nova/equilibrium/profile.py:ReconstructProfile.from_geometry\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1924-1949 supplies the non-convergence endpoint permitted by live section s2 with fitted-source replay below 1% for all three machines, while completed inverse scores remain unavailable.\nSCORE evidence: 12\nJUSTIFICATION evidence: The source manifest:21-22 and baseline-suite.log show a cut-short baseline and no after arm, although backtracking-fit-1320459/physical-mastu/gate.log and the three fitted-observation-replay-1318855 gate logs support the reported numerical refusals and sub-5% replay admission.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All 22 changed paths are within dispatch-detail.json's explicit source, test, evidence-fragment and figure-directory grants, with no forward.py, forward_operator.py or topology.py edit.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_equilibrium_magnetics_fit.py:364-435 would fail if unqualified trials again escaped instead of backtracking or unrelated errors were swallowed, and :711-760 checks an independent weighted least-squares solution, but tests/test_magnetics_fit_efit_comparison.py:1853 can pass an unconverged scaled fit.\nSCORE fit: 16\nJUSTIFICATION fit: nova/equilibrium/magnetics_fit.py extends the existing typed-request fitter and nova/imas/mast_efit_referee.py:408 extends its scoring owner, but tests/test_magnetics_fit_efit_comparison.py:1852 contradicts the live ITER band exemption.\nSCORE reuse: 20\nJUSTIFICATION reuse: The changes extend MagneticsFit, Magnetics and score_with_efit_referee and reuse whitened_solve, _boundary_distance, forward-reference machine/conductor builders, FluxSurfaceGeometry and nova.media painters; searches found no existing owner for the EFIT flattened-current witness binding or edge-constrained Bernstein-to-power adapter, and nova/linalg/interpolant.py:39 evaluates a basis rather than converting its coefficients.\nFINDING tests/test_magnetics_fit_efit_comparison.py:1852 blocking: The unconditional all(scores['bands'].values()) assertion judges ITER against the bands even though live section s2 explicitly exempts its different constraint set; a converged and properly reported ITER result can therefore fail for an allowed gap.\nFINDING tests/test_magnetics_fit_efit_comparison.py:1853 blocking: The scaled control asserts only current displacement; scaled.converged is recorded at :1842 but never required, so an exhausted nonstationary scaled fit with a qualified forward state can incorrectly certify that the fitted scaled-data control fired.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/manifest.md:21 blocking: baseline_suite.completed is false and after_suite has no executed command or log, so no added-failure count can be derived from the required suite pair; the focused P100 result is a different selector at an earlier revision and cannot substitute for that missing measurement.\n\nRevision read: reviewed_base_sha=d7676e478fc8701b036ec717f80d403c3ead86f5; reviewed_head_sha=77698bc5de094f64fbaf9f687c4c353428f82200. The assigned review tree HEAD is 47d0f1dc6d2b7c71cb17fa251f108ad2661b67a4; all substantive source/diff readings were explicitly from the reviewed revision, not the review tree's later content.\n\nEvidence limitation: no full suite was rerun. The baseline log has a segmentation fault and no summary/native exit, and the after arm was not executed. added_failure_count is null and added_failure_ids is empty as unavailable evidence, not a measured zero. The known predeclared root-route failure in the focused P100 log is not assigned to the unidentified baseline F marker.\n\nPhysical receipts read directly: fitted-observation-replay-1318855/{mastu,tcv,iter}/*-row-replay.json and gate.log each finish EXIT=0. MAST-U loop/probe relative L2 = 0.0012641012612455412 / 0.0010252620601982304; TCV = 0.0016982263557521813 / 0.0019015528117356548; ITER = 0.007242617899855864 / 0.0008395208013880012. Zero-reference families report null relative error, not a fictitious zero. The source-path and module-hash headers in the focused/physical gate logs bind those results to 24f72a6d2e95e1c91d906156ea3500bc65a9d13c, followed only by documentation/figure commits at the reviewed head.\n\nAssertion reading: no added assertion was found whose claimed numerical regression protection is tautological because both sides merely reuse the supplied value. Tests of metadata copying are narrower serialization checks, not proof of physical correctness. In particular result['trips'] == history.active_set_iterations at tests/test_equilibrium_magnetics_fit.py:99 is an independent expected count of 4 against a recorded result; reinstating the finite-entry count returns 3 and reddens it. The conductor-fit test independently builds its design and solves it with numpy.linalg.lstsq; restoring fixed conductor currents or ignoring their unequal uncertainty changes the expected coefficients and residuals. Assertion-level conditions are recorded in assertion-audit.json.\n\nProduction reachability: the new inverse class/current-fitting mode has no production constructor call outside tests at this revision; the public export does not itself count as a call site. Existing production consumers of Magnetics.project and score_with_efit_referee were read, and their default paths retain their prior behavior. Segmented geometry explicitly refuses on project() and is used by the new fitter rather than silently misprojected by those older consumers.\n\nFigure verification limitation: fresh rendering was attempted as a separate all_debug batch and refused before submission with 'Error creating slurm stream socket: Operation not permitted' / 'Unable to contact slurm controller (connect failure)'. No solver, field evaluation or figure batch ran on the fleet node. Existing producer PNGs for the latest refused response and all three fitted-source replays were visually inspected: legends are clear and text is readable; these inspections do not claim a fresh render of all 16 committed SVGs. The full independent figure-render requirement therefore remains open under this sandbox.\n",
+  "review_run_id": "r-20261117T081725700875-review-of-efit-comparison-77698bc5de09",
+  "reviewed_base_sha": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+  "reviewed_head_sha": "77698bc5de094f64fbaf9f687c4c353428f82200",
+  "reviewed_run_id": "r-20261114T133703375306-efit-comparison",
+  "scores": {
+    "durability": 15,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "source_changed_paths": [
+    "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/backtracking/mastu-response-refused.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/bound-inputs/mastu-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/bound-inputs/tcv-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/iter-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/mastu-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/tcv-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/mastu.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/tcv.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/iter.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/mastu-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/mastu.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/tcv-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/tcv.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/terminal-state/iter-later-state.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/terminal-state/mastu-continuation.svg",
+    "nova/equilibrium/magnetics_fit.py",
+    "nova/equilibrium/measurement.py",
+    "nova/imas/mast_efit_referee.py",
+    "nova/imas/parity_tolerances.py",
+    "tests/test_equilibrium_magnetics_fit.py",
+    "tests/test_magnetics_fit_efit_comparison.py"
+  ],
+  "source_commit_count": 39,
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T08:28:39.544305+00:00",
+  "total": 101
+}

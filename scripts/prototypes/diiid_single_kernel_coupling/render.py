@@ -12,6 +12,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib.patches import ConnectionPatch
 import numpy as np
 
 from nova.media.ink import DEFAULT_INK
@@ -29,6 +30,8 @@ from scripts.prototypes.diiid_xpoint_offset.style import (
     WALL,
     save,
 )
+
+HIGHEST_DIFFERENCE_COLOR = "#b8327e"
 
 
 def load(path):
@@ -60,20 +63,20 @@ def difference_panels(args):
     levels = (0.04, 0.05, 0.06, 0.08, 0.12)
     styles = ("solid", (0, (6, 2)), (0, (2, 2)), "dotted", "solid")
     widths = (2.6, 2.6, 2.6, 2.6, 3.0)
+    colors = (SOLVED,) * (len(levels) - 1) + (HIGHEST_DIFFERENCE_COLOR,)
     figure.legend(
         handles=[
             Line2D(
                 [],
                 [],
-                color=SOLVED,
+                color=color,
                 linewidth=width,
                 linestyle=style,
-                marker="o" if level == levels[-1] else None,
-                markersize=5.5,
-                markerfacecolor="white",
                 label=f"{level:.2f}%",
             )
-            for level, style, width in zip(levels, styles, widths, strict=True)
+            for level, style, width, color in zip(
+                levels, styles, widths, colors, strict=True
+            )
         ],
         loc="upper center",
         ncol=5,
@@ -84,6 +87,8 @@ def difference_panels(args):
     for index, name in enumerate(("grid", "wall", "sample")):
         left = 0.04 + index * 0.32
         ax = panel(figure, left, 0.28, wall)
+        ax.set_xlim(data["radius"][0] - 0.03, data["radius"][-1] + 0.03)
+        ax.set_ylim(data["height"][0] - 0.03, data["height"][-1] + 0.03)
         axes.append(ax)
         values = 100.0 * data[name]
         contours = ax.contour(
@@ -91,21 +96,38 @@ def difference_panels(args):
             data["height"],
             values.T,
             levels=levels,
-            colors=SOLVED,
+            colors=colors,
             linewidths=widths,
             linestyles=styles,
         )
+        figure.canvas.draw()
         for segment in contours.allsegs[-1]:
-            ax.plot(
-                segment[:, 0],
-                segment[:, 1],
-                linestyle="none",
-                marker="o",
-                markersize=5.5,
-                markevery=4,
-                color=SOLVED,
-                markerfacecolor="white",
-                zorder=3,
+            if not len(segment):
+                continue
+            point = segment[np.argmin(segment[:, 0])]
+            label_x = ax.get_position().x0 - 0.014
+            label_y = figure.transFigure.inverted().transform(
+                ax.transData.transform(point)
+            )[1]
+            notes.append(
+                figure.text(
+                    label_x,
+                    label_y,
+                    f"{levels[-1]:.2f}%",
+                    color=HIGHEST_DIFFERENCE_COLOR,
+                    ha="right",
+                    va="center",
+                )
+            )
+            figure.add_artist(
+                ConnectionPatch(
+                    xyA=(label_x + 0.006, label_y),
+                    coordsA=figure.transFigure,
+                    xyB=point,
+                    coordsB=ax.transData,
+                    color=HIGHEST_DIFFERENCE_COLOR,
+                    linewidth=1.2,
+                )
             )
         levels_record[name] = list(levels)
         notes.append(figure.text(left + 0.14, 0.89, f"{name} targets", ha="center"))

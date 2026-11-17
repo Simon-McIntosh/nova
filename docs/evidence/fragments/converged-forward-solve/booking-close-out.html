@@ -42,8 +42,8 @@
 <table>
 <tr><th>Arm</th><th>Revision</th><th>Command</th><th>Outcome</th><th>Exit</th></tr>
 <tr><td>base</td><td><code>022636d5050045e811809d9479e7bbe8cd3d357b</code></td><td><code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_current_book_fragments.py</code></td><td>10 passed, 6 skipped in 60.75 s</td><td>0</td></tr>
-<tr><td>head</td><td><code>b56aa188be0dd1c615d694ba2c2cb2a27e777647</code></td><td>same command</td><td>11 passed, 6 skipped in 65.05 s</td><td>0</td></tr>
-<tr><td>head, both done-when files</td><td><code>022636d5050045e811809d9479e7bbe8cd3d357b</code> plus the working-tree change</td><td><code>... pytest -p no:cacheprovider -q tests/test_current_book_fragments.py tests/test_current_book_vectorised.py</code></td><td>17 passed, 6 skipped in 113.50 s</td><td>0</td></tr>
+<tr><td>head</td><td><code>ea9e4756ffffe2541534454bffb3d99ba023058b</code></td><td>same command</td><td>11 passed, 6 skipped in 67.79 s</td><td>0</td></tr>
+<tr><td>head, both done-when files</td><td><code>ea9e4756ffffe2541534454bffb3d99ba023058b</code></td><td><code>... pytest -p no:cacheprovider -q tests/test_current_book_fragments.py tests/test_current_book_vectorised.py</code></td><td>17 passed, 6 skipped in 108.87 s</td><td>0</td></tr>
 <tr><td>negative control</td><td>head plus the declared mutation</td><td><code>... -q -s tests/test_current_book_fragments.py::test_private_fragment_current_is_zero</code></td><td>1 failed</td><td>1</td></tr>
 </table>
 <p>The base arm ran in a scratch extraction of the base revision under <code>$TMPDIR</code> so its own tree carried the pre-change file; the head arm ran in place in the worktree. Both arms skip the same six GPU-lane rows, so no row changes state between them and the only changed test count is the new standing control.</p>

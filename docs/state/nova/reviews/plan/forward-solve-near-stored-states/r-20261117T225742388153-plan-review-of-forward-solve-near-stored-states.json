@@ -97,6 +97,16 @@
       "note": "The outer-iteration quantity is removed for TCV and ITER; the clause keeps the terminal reason and residual per starting route.",
       "reason": "",
       "when": "2026-11-17T23:12:56.371173+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2492a70c603190859d6cae828039be8ae01256ed",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "TCV and ITER, which refuse at the stored coefficients, now get their verdict from a stated set of starting routes, not from a displacement sequence.",
+      "reason": "",
+      "when": "2026-11-17T23:13:35.088526+00:00"
     }
   ],
   "responses": {
@@ -135,6 +145,15 @@
       "note": "The first section now requires the record to state the displaced coefficient vector, its coordinate and its sign, so later sections name a recorded state.",
       "reason": "",
       "when": "2026-11-17T23:11:35.964800+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2492a70c603190859d6cae828039be8ae01256ed",
+      "commit_basis": "edit",
+      "note": "TCV and ITER, which refuse at the stored coefficients, now get their verdict from a stated set of starting routes, not from a displacement sequence.",
+      "reason": "",
+      "when": "2026-11-17T23:13:35.088526+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261117T225742388153-plan-review-of-forward-solve-near-stored-states.json",

@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import ast
 import importlib
+import os
 import sys
 from contextlib import contextmanager
 from pathlib import Path
@@ -21,6 +22,7 @@ from pathlib import Path
 import jax
 import numpy as np
 
+from nova.database.filepath import WORKTREE_ROOT
 from nova.jax.config import configure_dtypes
 from scripts.prototypes.diiid_adapter_current_refusal.refusal_arms import (
     FRAME,
@@ -55,31 +57,124 @@ def _patched(module):
         module.complete_profile_current_adapter = original
 
 
-def _inventory():
-    found = set()
-    for folder in ("benchmarks", "scripts"):
-        for path in (ROOT / folder).rglob("*.py"):
-            relative = path.relative_to(ROOT).as_posix()
-            if relative.startswith("scripts/prototypes/diiid_adapter_current_refusal/"):
+def _all_call_sites(root=ROOT):
+    """Discover adapter calls throughout the repository, including documentation."""
+    found = []
+    for directory, children, files in os.walk(root, followlinks=False):
+        kept = []
+        for child in children:
+            path = Path(directory) / child
+            if (
+                child in {".venv", "worktrees", ".worktrees"}
+                or child.lstrip(".") == WORKTREE_ROOT
+            ):
                 continue
+            marker = path / ".git"
+            if marker.is_file() and "worktrees" in marker.read_text().split("/"):
+                continue
+            kept.append(child)
+        children[:] = sorted(kept)
+        for name in sorted(files):
+            if not name.endswith(".py"):
+                continue
+            path = Path(directory) / name
+            relative = path.relative_to(root).as_posix()
             tree = ast.parse(path.read_text(), filename=relative)
-            for function in ast.walk(tree):
-                if not isinstance(function, ast.FunctionDef):
-                    continue
-                for call in ast.walk(function):
-                    if not isinstance(call, ast.Call):
-                        continue
-                    name = getattr(call.func, "id", getattr(call.func, "attr", ""))
-                    if name == "complete_profile_current_adapter":
-                        found.add((relative, function.name))
-    # This caller constructs synthetic targets and has no corpus or solve.
+            aliases = {"complete_profile_current_adapter"}
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ImportFrom):
+                    aliases.update(
+                        alias.asname or alias.name
+                        for alias in node.names
+                        if alias.name == "complete_profile_current_adapter"
+                    )
+
+            class Calls(ast.NodeVisitor):
+                def __init__(self):
+                    self.owners = []
+
+                def visit_FunctionDef(self, node):
+                    self.owners.append(node.name)
+                    self.generic_visit(node)
+                    self.owners.pop()
+
+                visit_AsyncFunctionDef = visit_FunctionDef
+                visit_ClassDef = visit_FunctionDef
+
+                def visit_Call(self, node):
+                    name = getattr(node.func, "id", getattr(node.func, "attr", ""))
+                    if name in aliases:
+                        found.append(
+                            {
+                                "path": relative,
+                                "function": ".".join(self.owners) or "<module>",
+                                "line": node.lineno,
+                            }
+                        )
+                    self.generic_visit(node)
+
+            Calls().visit(tree)
+    return found
+
+
+def _exclusion_reason(site):
+    """Classify discovered non-corpus tests and measurement wrappers explicitly."""
+    path = site["path"]
+    if path.startswith("tests/"):
+        return "test or fixture; synthetic inputs or clause-one refusal control"
+    if path.startswith("scripts/prototypes/diiid_adapter_current_refusal/"):
+        return "adapter measurement instrument, not an independent corpus driver"
+    if path == "scripts/prototypes/diiid_finite_edge_booking/seam_check.py":
+        return "synthetic targets, response stub and invented currents; no corpus"
+    return None
+
+
+def _inventory_record():
+    sites = _all_call_sites()
+    excluded = [
+        dict(site, reason=reason)
+        for site in sites
+        if (reason := _exclusion_reason(site)) is not None
+    ]
+    counted = [site for site in sites if _exclusion_reason(site) is None]
+    return {"call_sites": sites, "counted": counted, "excluded": excluded}
+
+
+def _inventory():
+    record = _inventory_record()
+    found = {(site["path"], site["function"]) for site in record["counted"]}
     synthetic = ("scripts/prototypes/diiid_finite_edge_booking/seam_check.py", "main")
-    if synthetic not in found:
+    if not any(
+        (site["path"], site["function"]) == synthetic for site in record["excluded"]
+    ):
         raise AssertionError("inventory missed the known-present synthetic caller")
-    found.remove(synthetic)
     if ("benchmarks/diiid_forward_gs_match.py", "solve_frame") not in found:
         raise AssertionError("inventory missed the known-present benchmark caller")
     return found, synthetic
+
+
+def _reachability_reader(bench, path):
+    """Execute the corpus builder through its adapter before plotting or solving."""
+    source = (
+        ROOT / "docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py"
+    )
+    tree = ast.parse(source.read_text())
+    function = next(
+        node for node in tree.body if getattr(node, "name", "") == "_diiid_state"
+    )
+    statements = []
+    for statement in function.body:
+        statements.append(statement)
+        targets = getattr(statement, "targets", [])
+        if targets and getattr(targets[0], "id", "") == "adapter":
+            break
+    else:
+        raise AssertionError("reachability reader's adapter prefix was not found")
+    namespace = dict(
+        vars(bench), DIIID_DATA=bench.DEFAULT_DATA, shot_name=path.name, frame=FRAME
+    )
+    prefix = ast.fix_missing_locations(ast.Module(body=statements, type_ignores=[]))
+    exec(compile(prefix, str(source), "exec"), namespace)
 
 
 def _operator_reader(bench, row, path):
@@ -182,12 +277,16 @@ def _entries(bench, row, path, profile, time_ms):
             lambda: propagation._adapted(bench, row, expansion),
         ),
         (bench, "probe", lambda: _operator_reader(bench, row, path)),
+        (bench, "_diiid_state", lambda: _reachability_reader(bench, path)),
     ]
 
 
 def _identity(module, function):
     # The function's owner can differ from the module holding its adapter alias.
     owners = {
+        "_diiid_state": (
+            "docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py"
+        ),
         "prepare_diiid": "scripts/diiid_map_fidelity/measure.py",
         "_adapted": "scripts/prototypes/diiid_external_current_propagation/measure.py",
         "probe": "scripts/prototypes/diiid_xpoint_attribution/operator_probe.py",

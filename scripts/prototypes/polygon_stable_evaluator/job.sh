@@ -110,6 +110,9 @@ elif [[ "$mode" == production-receipts ]]; then
   export NOVA_PRODUCTION_COMPILE_BASE="$5/base"
   export NOVA_PRODUCTION_COMPILE_HEAD="$5/$6"
   run production-receipts "$python" -m pytest -p no:cacheprovider tests/biot/test_production_row_compile.py -vv -s || status=1
+elif [[ "$mode" == controls ]]; then
+  export NOVA_KERNEL_BASE_REVISION=02997905193b245dcc099a238fea6c22d8817671
+  run controls "$python" "$repo/scripts/prototypes/polygon_stable_evaluator/controls.py" "$out" || status=1
 fi
 printf 'EXIT=%s\n' "$status"
 exit "$status"

@@ -1,0 +1,205 @@
+{
+ "band_rows": {
+  "imas-efit": {
+   "axis": [
+    6.304585611400429,
+    0.49440519486374757
+   ],
+   "axis_flux_fraction_of_span": -0.0041473049781818585,
+   "axis_offset_metres": 0.015171676182269448,
+   "bands": {
+    "axis": true,
+    "axis_flux": true,
+    "boundary_flux": true,
+    "plasma_current": true,
+    "q95": false
+   },
+   "boundary_flux_fraction_of_span": 0.0008629918123893161,
+   "flux_axis_nova": -73.52817897700832,
+   "flux_axis_stored": -73.52817897700832,
+   "flux_boundary_nova": 3.2201063663674483,
+   "flux_boundary_stored": 3.2201063663674483,
+   "label": "imas-efit",
+   "plasma_current": -13633999.738707324,
+   "plasma_current_fraction": 8.66935929319592e-07,
+   "q95": 2.906980587231803,
+   "q95_magnitude_difference": -0.14804376410079234,
+   "q95_sign": 1,
+   "span": 76.74828534337577,
+   "stored_flux_family": "DD 4.1.0 (COCOS-17); nova = +psi_DDv4"
+  },
+  "nova fit": {
+   "axis": [
+    6.289868237209092,
+    0.4980901175347843
+   ],
+   "axis_flux_fraction_of_span": -1.6748061179434542e-15,
+   "axis_offset_metres": 1.2042849684860158e-14,
+   "bands": {
+    "axis": true,
+    "axis_flux": true,
+    "boundary_flux": true,
+    "plasma_current": true,
+    "q95": true
+   },
+   "boundary_flux_fraction_of_span": -6.106063971668843e-16,
+   "flux_axis_nova": -73.2114672508819,
+   "flux_axis_stored": -73.2114672508819,
+   "flux_boundary_nova": 3.154203417832682,
+   "flux_boundary_stored": 3.154203417832682,
+   "label": "nova fit",
+   "plasma_current": -13634011.558521807,
+   "plasma_current_fraction": -1.3661754218381376e-16,
+   "q95": -3.0550243513325945,
+   "q95_magnitude_difference": -8.881784197001252e-16,
+   "q95_sign": -1,
+   "span": 76.36567066871457,
+   "stored_flux_family": "nova total poloidal flux [Wb]"
+  }
+ },
+ "bands": {
+  "axis_metres": 0.02,
+  "current_fraction": 0.015,
+  "flux_fraction": 0.02,
+  "q95": 0.1
+ },
+ "cells": -500,
+ "control_scale": 1.1,
+ "efit": {
+  "efit-10": {
+   "axis": [
+    6.304585611400429,
+    0.49440519486374757
+   ],
+   "flux_axis": -73.52817897700832,
+   "flux_boundary": 3.2201063663674483,
+   "flux_span": 76.74828534337577,
+   "plasma_current": -13633999.738707324,
+   "q95": 2.906980587231803,
+   "q95_sign": 1,
+   "q_95_dd": 2.885380870538705,
+   "q_edge": 10.436971157400924,
+   "radius": 6.15,
+   "x_point": [
+    [
+     5.053289451523661,
+     -3.1848972974301155
+    ]
+   ]
+  },
+  "efit-11": {
+   "axis": [
+    6.307370273292094,
+    0.4944236109100395
+   ],
+   "flux_axis": -80.93915674116894,
+   "flux_boundary": 3.5480365336602797,
+   "flux_span": 84.48719327482922,
+   "plasma_current": -14997396.1556062,
+   "q95": 2.6425400102384384,
+   "q95_sign": 1,
+   "q_95_dd": 2.6228900727866264,
+   "q_edge": 9.492456352497918,
+   "radius": 6.15,
+   "x_point": [
+    [
+     5.053541890301358,
+     -3.1845972265566282
+    ]
+   ]
+  }
+ },
+ "fit": {
+  "10": {
+   "coefficients": [
+    0.9999999999999998,
+    0.9999999999999998
+   ],
+   "converged": true,
+   "residual_sup": 8.196351776825464e-16,
+   "singular_values": [
+    1.4129925663095804,
+    0.05875378757039766
+   ],
+   "state": {
+    "axis": [
+     6.289868237209092,
+     0.4980901175347843
+    ],
+    "flux_axis": -73.2114672508819,
+    "flux_boundary": 3.154203417832682,
+    "flux_span": 76.36567066871457,
+    "plasma_current": -13634011.558521807,
+    "q95": -3.0550243513325945,
+    "q95_sign": -1
+   },
+   "terminal_residual": 1.5543589512715955e-15,
+   "undetermined": []
+  },
+  "11": {
+   "coefficients": [
+    0.6522031046788449,
+    1.5110512584435385
+   ],
+   "converged": false,
+   "residual_sup": 0.007881458161004141,
+   "singular_values": [
+    1.4136336274747296,
+    0.04049650938831032
+   ],
+   "state": {
+    "axis": [
+     6.302486866880288,
+     0.5043234157549401
+    ],
+    "flux_axis": -86.9285104763922,
+    "flux_boundary": -3.4537555609487764,
+    "flux_span": 83.47475491544343,
+    "plasma_current": -15007470.497684244,
+    "q95": -2.9772729654878076,
+    "q95_sign": -1
+   },
+   "terminal_residual": 1.1457450331186271e-15,
+   "undetermined": []
+  }
+ },
+ "generating": {
+  "axis": [
+   6.289868237209081,
+   0.4980901175347787
+  ],
+  "edge_safety_factor": -4.342231647622551,
+  "flux_axis": -73.21146725088177,
+  "flux_boundary": 3.1542034178327287,
+  "flux_span": 76.3656706687145,
+  "plasma_current": -13634011.558521805,
+  "q95": -3.0550243513325954,
+  "q95_sign": -1,
+  "reference_radius": 6.2
+ },
+ "panels": {
+  "efit-generating-overlay-10.svg": "343575be1ddab35ce34d79422ea41eb84a800e89be2c479384875201be5f4350",
+  "efit-generating-overlay-11.svg": "b758020cc0951b76a9d656033a1b5e03d18204d0803d90bf12f4d7ca515c7039"
+ },
+ "profile_amplitudes": {
+  "efit_diamagnetic": -0.79837695,
+  "efit_pressure": -28733.682110166486,
+  "generating_diamagnetic": 0.8725863200475624,
+  "generating_pressure": 27239.947556115367
+ },
+ "rows": {
+  "flux_loops": 24,
+  "probes": 48,
+  "subtraction_error": 6.399820099668326e-17,
+  "total": 72
+ },
+ "solve": {
+  "amplitude": 3.4903452801902497,
+  "residual": 1.165769213453697e-15,
+  "unit_current": -4295380.397363228
+ },
+ "solver": {
+  "design_rank": "rank_pp=1 n_pp=1 rank_ff=1 n_ff=1",
+  "dynamic_ndeg": "kppcur= 1 kffcur= 1 kwwcur= 0 max_pp= 2 max_ff= 2 max_ww= 0"
+ }
+}

@@ -53,6 +53,16 @@
       "note": "\u00a712 names docs/evidence/fragments/diiid-vertical-force-balance/diiid-137d-refusal.html for the record and docs/figures/diiid-vertical-force-balance/diiid-137d-refusal/ for the panels",
       "reason": "",
       "when": "2026-11-17T16:21:58.616488+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "911deb77f60dd59f377ccd819594a2145bb00f3a",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The unchanged-geometry inference is removed; the clipped X-point edge cells are now the first candidate, with an arm that takes only their uniform rows from the mixed coupling",
+      "reason": "",
+      "when": "2026-11-17T16:23:34.284259+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "\u00a712 names docs/evidence/fragments/diiid-vertical-force-balance/diiid-137d-refusal.html for the record and docs/figures/diiid-vertical-force-balance/diiid-137d-refusal/ for the panels",
       "reason": "",
       "when": "2026-11-17T16:21:58.616488+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "911deb77f60dd59f377ccd819594a2145bb00f3a",
+      "commit_basis": "edit",
+      "note": "The unchanged-geometry inference is removed; the clipped X-point edge cells are now the first candidate, with an arm that takes only their uniform rows from the mixed coupling",
+      "reason": "",
+      "when": "2026-11-17T16:23:34.284259+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261117T105604834692-plan-review-of-diiid-vertical-force-balance.json",

@@ -24,6 +24,11 @@
       "kind": "exempted",
       "reason": "Prototype measurement scaffolding, not product code; it does not ship and its receipts are recorded",
       "recorded_at": "2026-11-17T22:52:59.449820+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The display map is a drawing aid; its docstring now states it uses the hybrid kernel, and the solve targets use the polygon kernel",
+      "recorded_at": "2026-11-17T22:53:09.576417+00:00"
     }
   },
   "findings": [

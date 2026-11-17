@@ -36,6 +36,7 @@ def main():
     parser.add_argument("--measure-only", action="store_true")
     parser.add_argument("--undo-average", action="store_true")
     parser.add_argument("--point-current", action="store_true")
+    parser.add_argument("--compare-integration", action="store_true")
     arguments = parser.parse_args()
     assert jax.config.jax_enable_x64 is True
     revision = (
@@ -115,7 +116,36 @@ def main():
     }
     arguments.output.parent.mkdir(parents=True, exist_ok=True)
     arguments.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
-    print(json.dumps(result, sort_keys=True), flush=True)
+    print(f"CURRENT_A={unscaled:.12f} OUTPUT={arguments.output}", flush=True)
+    if arguments.compare_integration:
+        point = replace(profile.operator, use_linear_moments=False)
+        averaged = np.asarray(point.cell_current(seed, pinned.TopologyClass.DIVERTED))
+        centroid = np.asarray(
+            replace(point, cell_average_stencil=None).cell_current(
+                seed, pinned.TopologyClass.DIVERTED
+            )
+        )
+        comparison = {
+            "booked_current_a": unscaled,
+            "point_averaged_current_a": float(np.sum(averaged)),
+            "point_centroid_current_a": float(np.sum(centroid)),
+            "averaged_current": averaged.tolist(),
+            "centroid_current": centroid.tolist(),
+            "registered_seed_current_a": declared["unscaled_source_ip_a"],
+            "current_authority": authority,
+            "revision": revision,
+        }
+        comparison_path = arguments.output.with_name("integration-comparison.json")
+        comparison_path.write_text(
+            json.dumps(comparison, indent=2, sort_keys=True) + "\n"
+        )
+        print(
+            "INTEGRATION_COMPARISON "
+            + json.dumps(
+                {key: value for key, value in comparison.items() if key.endswith("_a")}
+            ),
+            flush=True,
+        )
     if arguments.measure_only:
         return
     # Reuse the constructed inputs so the benchmark's own qualification executes.

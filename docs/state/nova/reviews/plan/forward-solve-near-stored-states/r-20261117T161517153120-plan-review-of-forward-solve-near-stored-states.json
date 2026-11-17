@@ -89,9 +89,28 @@
       "note": "The existence verdict and its witness are withdrawn. The section now gives each case a verdict on a measurement that can fail: reached, when the displaced state qualifies through a listed sequence of intermediate solves, or not reached, with the sequences tried; it makes no claim that an unreached state does not exist.",
       "reason": "",
       "when": "2026-11-17T16:56:03.713040+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a6735bc455a411d4d194f70495ca8986e2866a94",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The control is now a case that must fail: the direct solve of the displaced MAST-U state with no intermediate solves reproduces the refusal the first section recorded.",
+      "reason": "",
+      "when": "2026-11-17T16:56:17.712695+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "a6735bc455a411d4d194f70495ca8986e2866a94",
+      "commit_basis": "edit",
+      "note": "The control is now a case that must fail: the direct solve of the displaced MAST-U state with no intermediate solves reproduces the refusal the first section recorded.",
+      "reason": "",
+      "when": "2026-11-17T16:56:17.712695+00:00"
+    },
     "done_when-2": {
       "action": "acted",
       "by": "",

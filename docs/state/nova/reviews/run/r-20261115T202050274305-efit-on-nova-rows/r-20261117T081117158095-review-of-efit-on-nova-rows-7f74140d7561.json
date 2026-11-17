@@ -4,6 +4,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-11-17T08:15:34.749Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-efit-on-nova-rows-7f74140d7561",
+      "recorded_at": "2026-11-17T08:44:01.773683+00:00"
+    }
+  },
   "dispatched_at": "2026-11-17T08:13:27Z",
   "findings": [
     {

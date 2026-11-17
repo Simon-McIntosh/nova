@@ -533,12 +533,25 @@ class ColdSeedPortfolio:
             raise ValueError("cold-seed class must be limited or diverted")
         object.__setattr__(self, "centroid", centroid)
 
-    def resolve(self, profile: object, *, current: object | None = None) -> object:
-        """Return the selected branch from the profile's cold portfolio."""
+    def resolve(
+        self,
+        profile: object,
+        *,
+        current: object | None = None,
+        plasma_current: object | None = None,
+        centroid: object | None = None,
+    ) -> object:
+        """Return the selected branch from the profile's cold portfolio.
+
+        ``plasma_current`` and ``centroid`` replace the frozen construction
+        inputs for one call, so a batched caller can hand the construction
+        traced per-slice values under ``jit``/``vmap``; omitting them keeps the
+        policy's own inputs, which are the values its provenance records.
+        """
 
         portfolio = profile.cold_seed_portfolio(
-            self.plasma_current,
-            self.centroid,
+            self.plasma_current if plasma_current is None else plasma_current,
+            self.centroid if centroid is None else centroid,
             current=current,
             radius_fraction=self.radius_fraction,
             diverted_geometry=self.diverted_geometry,

@@ -181,8 +181,28 @@ def check_scene(figure, expected_labels):
             f"coil geometry: expected {len(expected)}, observed {sections}, "
             f"detail {detail_coils}"
         )
+    metrics = scene_metrics(figure)
+    if metrics["median_contrast"] < 3:
+        raise ValueError(f"plasma contrast below 3:1: {metrics['median_contrast']}")
+    if metrics["ink_fraction"] <= 0.045:
+        raise ValueError(f"ink coverage below 4.5%: {metrics['ink_fraction']}")
+    reference_colours = [line.get_color() for ax in figure.axes for line in ax.lines]
+    reference_colours += [
+        c.get_edgecolors()[0, :3]
+        for ax in figure.axes
+        for c in ax.collections
+        if c.get_gid() == "coil-sections"
+    ]
+    if any(
+        float(contrast(to_rgb(colour))) >= metrics["median_contrast"]
+        for colour in reference_colours
+    ):
+        raise ValueError("reference geometry is darker than the plasma mesh")
     walls = [
-        line for ax in figure.axes for line in ax.lines if line.get_gid() == WALL_GID
+        line
+        for ax in figure.axes
+        for line in ax.lines
+        if (line.get_gid() or "").startswith(WALL_GID)
     ]
     cells = [
         collection
@@ -228,23 +248,6 @@ def check_scene(figure, expected_labels):
                 f"legend entry {handle.get_label()!r} does not carry its component's "
                 f"mark: {observed_mark} against {marks[handle.get_label()]}"
             )
-    metrics = scene_metrics(figure)
-    if metrics["median_contrast"] < 3:
-        raise ValueError(f"plasma contrast below 3:1: {metrics['median_contrast']}")
-    if metrics["ink_fraction"] <= 0.045:
-        raise ValueError(f"ink coverage below 4.5%: {metrics['ink_fraction']}")
-    reference_colours = [line.get_color() for ax in figure.axes for line in ax.lines]
-    reference_colours += [
-        c.get_edgecolors()[0, :3]
-        for ax in figure.axes
-        for c in ax.collections
-        if c.get_gid() == "coil-sections"
-    ]
-    if any(
-        float(contrast(to_rgb(colour))) >= metrics["median_contrast"]
-        for colour in reference_colours
-    ):
-        raise ValueError("reference geometry is darker than the plasma mesh")
     return {
         **metrics,
         "sections": sections,
@@ -311,7 +314,7 @@ def build_figure(geometry):
             units=(wall,),
             style=style,
             linestyle=WALL_LINESTYLE,
-            gid=WALL_GID,
+            gid=f"{WALL_GID}-{panel}",
         )
         draw_plasma_cells(
             ax, cells, style=style, facecolor="none", gid=f"plasma-cells-{panel}"

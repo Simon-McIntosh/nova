@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T04:38:15.860Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-efit-on-nova-rows-86b64c13475d",
+      "recorded_at": "2026-11-17T07:08:04.283387+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-17T04:37:15Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html",
+      "id": "fccbf020308",
+      "line": "20",
+      "severity": "non-blocking",
+      "text": "non-blocking: The resolved basis and edge constraint are asserted from the run's efitOptions-nova2.xml (func=8, edge=1, ndeg=2) and from the author's reading of the Bernstein truncation, while done_when item 1 asks for the basis, live coefficient count and edge constraint as resolved by the solver's output or run log; case/efitboth-1321516.log:1487 carries DYNAMIC_NDEG and DESIGN_RANK but no line naming the resolved edge constraint, so the edge claim is a configuration read presented as a resolution."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html",
+      "id": "fcd7d646c37",
+      "line": "59",
+      "severity": "non-blocking",
+      "text": "non-blocking: The section id efit-on-nova-rows-nova-fit is reused by the pre element at line 61, so the fragment carries two elements of one id and a link or composition step that anchors on the section resolves against the pre instead; rename the pre's id."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html",
+      "id": "f0c420437a4",
+      "line": "53",
+      "severity": "non-blocking",
+      "text": "non-blocking: done_when item 2 requires the magnitude of q95 within 0.1 for both codes and imas-efit measures 0.148 low (case/table-10.json bands.q95=false), so the node's own quantitative measure is not satisfied; the record discloses the miss and attributes it at :78, which is what makes it reportable, but it must not be read as a passed five-band gate."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T202050274305-efit-on-nova-rows/manifest.md",
+      "id": "f9d9f4b9aee",
+      "line": "7",
+      "severity": "non-blocking",
+      "text": "non-blocking: The commits field lists 470f34b2 and 86b64c13 only, while 7a2d1aa1b also lies between the recorded base 1f788362 and the head and is contained in the reviewed range; a reader reconciling the manifest against a base..head diff finds a commit the manifest does not name."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read commit by commit against base 1f788362: 7a2d1aa1b landed a 61-line blocker fragment, 470f34b2 rewrote it into the 119-line exchange and added both SVG panels, and 86b64c13 added the three-line control-arm paragraph; net 3 files and 8310 insertions, all inside the declared scope.",
+    "done_when": "The done_when's three items are asserted by the states table at docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:46-54, whose band booleans live in case/table-10.json (bands.q95=false), and by the 1.10 control at :73-75; q95 is 0.148 outside its 0.1 band and the fragment states that at :78.",
+    "goal": "The goal is to run imas-efit with its pressure and q0 priors disabled on noise-free ITER magnetics rows nova wrote from a generating state inside imas-efit's resolved basis, and compare its reconstruction and the nova fit with that state; docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:3-53 and case/efitboth-1321516.log carry both arms and the comparison.",
+    "manifest": "The manifest reads status complete with tests \"none\" (this node's suite fence is unarmed, and the diff touches no source or test file), names its run-directory scripts, logs and records, and lists commits 470f34b2 and 86b64c13 while 7a2d1aa1b also lies in the reviewed range.",
+    "write_paths": "The declared write paths are the fragment and docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows; git diff 1f788362..86b64c13 touches only docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html and the two SVGs under that figure directory, with nothing else changed."
+  },
+  "justifications": {
+    "durability": "The diff adds no assertion at all \u2014 no test, script or check is committed \u2014 so nothing in the repository fails if a number in docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html or a panel is rewritten; the node was dispatched unarmed, which explains the absence but does not guard it.",
+    "evidence": "The comparison's figures reconcile with the run logs and records I spot-checked (case/table-10.json, case/nova-fit-10.json, case/efitboth-1321516.log:1663 chi2=7.31E-002), and the record states the q95 band's failure rather than claiming it.",
+    "fit": "The fragment follows the sibling markup and node-prefixed element ids, but docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:59 and :61 carry the identical id efit-on-nova-rows-nova-fit, which breaks the one-anchor-per-element rule the fragment ids rest on.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:46-55 tabulates imas-efit's reconstruction and the nova fit against the generating state, which is the comparison the goal names.",
+    "reuse": "The diff adds no function, class or module to the repository, and the panels were rendered through the existing nova.media.poloidal.draw_wall/draw_flux_contours/draw_nulls and nova.media.ink owners (run-directory plot_overlay.py:48-104) rather than a new painter.",
+    "scope_discipline": "The base..head diff is exactly the fragment at docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html plus the two panels in its declared figure directory, and no source, test, evidence or plan file outside them changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal is to run imas-efit with its pressure and q0 priors disabled on noise-free ITER magnetics rows nova wrote from a generating state inside imas-efit's resolved basis, and compare its reconstruction and the nova fit with that state; docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:3-53 and case/efitboth-1321516.log carry both arms and the comparison.\nVERDICT done_when: The done_when's three items are asserted by the states table at docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:46-54, whose band booleans live in case/table-10.json (bands.q95=false), and by the 1.10 control at :73-75; q95 is 0.148 outside its 0.1 band and the fragment states that at :78.\nVERDICT write_paths: The declared write paths are the fragment and docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows; git diff 1f788362..86b64c13 touches only docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html and the two SVGs under that figure directory, with nothing else changed.\nVERDICT manifest: The manifest reads status complete with tests \"none\" (this node's suite fence is unarmed, and the diff touches no source or test file), names its run-directory scripts, logs and records, and lists commits 470f34b2 and 86b64c13 while 7a2d1aa1b also lies in the reviewed range.\nVERDICT diff: Read commit by commit against base 1f788362: 7a2d1aa1b landed a 61-line blocker fragment, 470f34b2 rewrote it into the 119-line exchange and added both SVG panels, and 86b64c13 added the three-line control-arm paragraph; net 3 files and 8310 insertions, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:46-55 tabulates imas-efit's reconstruction and the nova fit against the generating state, which is the comparison the goal names.\nSCORE evidence: 16\nJUSTIFICATION evidence: The comparison's figures reconcile with the run logs and records I spot-checked (case/table-10.json, case/nova-fit-10.json, case/efitboth-1321516.log:1663 chi2=7.31E-002), and the record states the q95 band's failure rather than claiming it.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: The base..head diff is exactly the fragment at docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html plus the two panels in its declared figure directory, and no source, test, evidence or plan file outside them changed.\nSCORE durability: 6\nJUSTIFICATION durability: The diff adds no assertion at all \u2014 no test, script or check is committed \u2014 so nothing in the repository fails if a number in docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html or a panel is rewritten; the node was dispatched unarmed, which explains the absence but does not guard it.\nSCORE fit: 15\nJUSTIFICATION fit: The fragment follows the sibling markup and node-prefixed element ids, but docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:59 and :61 carry the identical id efit-on-nova-rows-nova-fit, which breaks the one-anchor-per-element rule the fragment ids rest on.\nSCORE reuse: 20\nJUSTIFICATION reuse: The diff adds no function, class or module to the repository, and the panels were rendered through the existing nova.media.poloidal.draw_wall/draw_flux_contours/draw_nulls and nova.media.ink owners (run-directory plot_overlay.py:48-104) rather than a new painter.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:20 non-blocking: The resolved basis and edge constraint are asserted from the run's efitOptions-nova2.xml (func=8, edge=1, ndeg=2) and from the author's reading of the Bernstein truncation, while done_when item 1 asks for the basis, live coefficient count and edge constraint as resolved by the solver's output or run log; case/efitboth-1321516.log:1487 carries DYNAMIC_NDEG and DESIGN_RANK but no line naming the resolved edge constraint, so the edge claim is a configuration read presented as a resolution.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:59 non-blocking: The section id efit-on-nova-rows-nova-fit is reused by the pre element at line 61, so the fragment carries two elements of one id and a link or composition step that anchors on the section resolves against the pre instead; rename the pre's id.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:53 non-blocking: done_when item 2 requires the magnitude of q95 within 0.1 for both codes and imas-efit measures 0.148 low (case/table-10.json bands.q95=false), so the node's own quantitative measure is not satisfied; the record discloses the miss and attributes it at :78, which is what makes it reportable, but it must not be read as a passed five-band gate.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T202050274305-efit-on-nova-rows/manifest.md:7 non-blocking: The commits field lists 470f34b2 and 86b64c13 only, while 7a2d1aa1b also lies between the recorded base 1f788362 and the head and is contained in the reviewed range; a reader reconciling the manifest against a base..head diff finds a commit the manifest does not name.\nREVIEWED_BASE_SHA: 1f788362e8e1ca19bb5691fff8b31d25ed825f0e\nREVIEWED_HEAD_SHA: 86b64c13475d0d589ff836eaec44affff1ca7d56\n",
+  "review_run_id": "r-20261117T043314861081-review-of-efit-on-nova-rows-86b64c13475d",
+  "reviewed_base_sha": "1f788362e8e1ca19bb5691fff8b31d25ed825f0e",
+  "reviewed_head_sha": "86b64c13475d0d589ff836eaec44affff1ca7d56",
+  "reviewed_run_id": "r-20261115T202050274305-efit-on-nova-rows",
+  "scores": {
+    "durability": 6,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T08:09:56.739425+00:00",
+  "total": 92
+}

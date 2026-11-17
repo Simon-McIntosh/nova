@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-17T04:37:42Z",
+  "findings": [
+    {
+      "disposition": "folded: add the case identity and the arm ('nominal' / '1.10 scaled control') to the in-image caption of both panels on the next redraw",
+      "file": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/efit-generating-overlay-11.svg",
+      "id": "f605483e609",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "F1: the 1.10 control panel carries no statement of its own arm. Its in-image caption reads 'imas-efit gauge shift +7.7 Wb (axis flux aligned); Ip -10.0 % off, axis 0.018 m off, boundary flux 0.52 % of span, |q95| -0.412', which is identical in form to the nominal panel's caption, and neither the legend nor the caption says that every magnetics row, the measured plasma current and the conductor currents were scaled by 1.10 for this run. The evidence fragment's figcaption does call the companion panel the control, but that caption is attached to the -10 figure only; read at its own project-absolute URL the -11 panel presents a 10 per cent plasma-current error as if it were imas-efit's result on consistent data, when it is the deliberately inconsistent set the section's negative control requires. The nominal panel carries the same gap in the other direction: nothing on it names the case (ITER pulse 135013, nova-written rows) or the arm. Adding the arm and the case to the in-image caption closes both, and is a caption change only."
+    },
+    {
+      "disposition": "folded: offset or key the two null sets so each state's marker is separately visible, in the same redraw as F1",
+      "file": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/efit-generating-overlay-10.svg",
+      "id": "ff6122a8d3b",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "F2: both null sets are drawn and are distinguishable by colour, but nothing inside the picture explains what the markers mean. At the magnetic axis a blue triangle sits over a grey triangle and at the lower X-point a blue cross sits over a grey cross; the legend carries only two line swatches, so a reader who does not already know the null vocabulary sees a triangle and a cross with no key saying one is the axis and one an admitted X-point. The overlap is also tight enough that the grey marker reads as a halo of the blue one rather than as a second marker, so a small disagreement in null position between the two states would not be visible, which matters because the section compares the two states position by marker. The reviewed fragment's figcaption does spell the vocabulary out ('solid triangle axis, filled cross X-point, per state in its own colour). Drawing the markers apart by a marker or two of offset, or adding a marker entry to the legend, closes it; no data change is needed."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass on both for text and for marks, measured on the rendered pixels: caption and legend glyph cores reach rgb(0,0,0) on white, and the generating contour grey renders at rgb(143,143,143), about 3.2:1, with the imas-efit blue at rgb(69,110,192), about 5.6:1. Both clear the 3:1 a data mark must hold, and the caption clears WCAG AA many times over.",
+    "data_ink": "pass on both. The ink is the data: the contour set, the two states' null markers, the vessel and the two-line caption. No gridlines, no axes, no ticks and no furniture of any kind; the measured ink extent is cols 203-1197 (image-0) and 195-1204 (image-1) of 1400 wide and rows 19-959 of 980, so the panel uses the canvas rather than floating in it.",
+    "decoration": "pass on both. White covers 94.6 (image-0) and 94.3 (image-1) per cent of the canvas, measured. There is no gradient, no texture, no background fill and no shaded band; every inked pixel belongs to a contour, a marker, the vessel outline, the legend swatch or the caption.",
+    "label_collision": "pass on both, checked at native resolution: the outer two pixel rows and columns of each image are pure white, so nothing is clipped; ink margins are 19/20/203/202 px in image-0 and 19/20/195/195 px in image-1; the two caption lines are separate bands that do not touch; the two legend entries sit in clear space above the panel. No label overlaps another label or the data.",
+    "legibility": "pass on both. 1400x980 canvas; the vessel, the contour set and both null markers read at a glance. Blue at rgb(69,110,192) and grey at rgb(143,143,143) separate clearly by colour, and the two captions sit below the panel with the level array and the four comparison numbers spelled out. Caveat recorded as finding F1: neither panel states which arm it is, so the control panel's -10.0 % current line reads as the headline result if the picture is met out of context; that is an identification gap, not a legibility failure.",
+    "table_form": "pass on both. A poloidal flux contour map is a spatial relationship that no table carries, and the two states are distinguished by the geometry they draw rather than restated as numbers. The four comparison figures live in the in-image caption, where they key the picture; the record's table holds the same measures and the panel adds the overlay, not a rendering of a table."
+  },
+  "notes": "Read-only figure review. Only the two PNGs named in this review were opened; no SVG and no other image was read, and no file was edited, created, moved, deleted, redrawn, relabelled or reformatted. Both panels are the section-8 exchange drawn as line-contour poloidal overlays on one shared level array, with the vessel and both null sets, which is the representation the plan's plotting rules require; the figures are not tables and no rubric item fails. image-0 is the nominal arm and image-1 the 1.10 control, established from the caption numbers inside each render against the reviewed run's manifest and fragment, not assumed from file order. Two non-blocking findings, no blocking finding, so the record is parsed.",
+  "project": "nova",
+  "review_run_id": "r-20261117T043700570062-review-of-efit-on-nova-rows-86b64c13475d-figure",
+  "reviewed_base_sha": "1f788362e8e1ca19bb5691fff8b31d25ed825f0e",
+  "reviewed_commits": [
+    "470f34b29bb9a51f60f1311d9968e49f679ce841",
+    "86b64c13475d0d589ff836eaec44affff1ca7d56"
+  ],
+  "reviewed_figures": [
+    {
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T043700570062-review-of-efit-on-nova-rows-86b64c13475d-figure/image-0.png",
+      "pixels": "1400x980",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/efit-generating-overlay-10.svg",
+      "state": "generating nova forward state against imas-efit's reconstruction on nova-written ITER rows, nominal arm",
+      "state_identified_by": "the in-image caption reads 'Ip 0.0 % off, axis 0.015 m off, boundary flux 0.09 % of span, |q95| -0.148', which is the reviewed run's nominal pulse-10 comparison (Ip 8.7e-7, axis 0.0152 m, boundary 0.09 %, q95 0.148 low); the reviewed evidence fragment names -10 as the nominal panel and -11 as the 1.10 control. The identification is read off the rendered PNG; the fragment body was read as text to confirm which arm each committed panel is."
+    },
+    {
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T043700570062-review-of-efit-on-nova-rows-86b64c13475d-figure/image-1.png",
+      "pixels": "1400x980",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/efit-generating-overlay-11.svg",
+      "state": "the 1.10 negative control: every magnetics row, the plasma current and the conductor currents scaled by 1.10",
+      "state_identified_by": "the in-image caption reads 'Ip -10.0 % off, axis 0.018 m off, boundary flux 0.52 % of span, |q95| -0.412' with a +7.7 Wb gauge shift, a 10 per cent current error that only the scaled arm produces; the reviewed run's manifest records the 1.10 control and the fragment names -11 as it."
+    }
+  ],
+  "reviewed_head_sha": "86b64c13475d0d589ff836eaec44affff1ca7d56",
+  "reviewed_run_id": "r-20261115T202050274305-efit-on-nova-rows",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility [efit-generating-overlay-10.svg via image-0.png]: pass. The tall ITER vessel, the contour set and both null markers read at a glance; 1400x980 canvas; grey generating contours against blue imas-efit contours separate by colour; the caption states the level array and the four comparison numbers.",
+    "RUBRIC data_ink [efit-generating-overlay-10.svg via image-0.png]: pass. The ink is the data: contour lines, two null markers, the vessel outline and a two-line caption; no axes, ticks, gridlines or spines, and the panel fills the canvas (ink spans rows 19-959 of 980).",
+    "RUBRIC decoration [efit-generating-overlay-10.svg via image-0.png]: pass. White covers 94.6 per cent of the canvas; no gradient, texture, background fill or decorative shading anywhere.",
+    "RUBRIC contrast [efit-generating-overlay-10.svg via image-0.png]: pass. Caption and legend glyphs reach rgb(0,0,0) on white; the generating grey renders at rgb(143,143,143) (about 3.2:1) and the imas-efit blue at rgb(69,110,192) (about 5.6:1), both above the 3:1 a data mark must hold.",
+    "RUBRIC table_form [efit-generating-overlay-10.svg via image-0.png]: pass. A poloidal contour overlay is a spatial comparison no table carries; the caption's four numbers key the picture rather than restating a table.",
+    "RUBRIC label_collision [efit-generating-overlay-10.svg via image-0.png]: pass. No ink in the outer 2 px border; margins 19/20/203/202 px; the caption's two lines are separate bands and the legend sits clear of the panel; nothing clipped or overlapping.",
+    "RUBRIC legibility [efit-generating-overlay-11.svg via image-1.png]: pass, with finding F1: the panel reads at a glance on the same canvas and the same two-colour vocabulary, but its caption does not say that its rows are the 1.10-scaled arm, so 'Ip -10.0 % off' reads as a headline comparison where it is the control.",
+    "RUBRIC data_ink [efit-generating-overlay-11.svg via image-1.png]: pass. The ink is the data; the contour set, both null markers, the vessel and the two-line caption are the whole content, and the panel spans rows 19-959 of 980.",
+    "RUBRIC decoration [efit-generating-overlay-11.svg via image-1.png]: pass. White covers 94.3 per cent of the canvas, measured; no gradient, fill or decorative styling.",
+    "RUBRIC contrast [efit-generating-overlay-11.svg via image-1.png]: pass. Caption and legend glyphs reach rgb(0,0,0) on white; the generating grey renders at rgb(143,143,143) and the imas-efit blue at rgb(74,112,204), both above 3:1.",
+    "RUBRIC table_form [efit-generating-overlay-11.svg via image-1.png]: pass. The same poloidal overlay, a spatial comparison no table carries.",
+    "RUBRIC label_collision [efit-generating-overlay-11.svg via image-1.png]: pass. No ink in the outer 2 px border; margins 19/20/195/195 px; the caption's two lines are separate bands and the legend is clear of the panel; nothing clipped or overlapping."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T05:55:00Z",
+  "total": null
+}

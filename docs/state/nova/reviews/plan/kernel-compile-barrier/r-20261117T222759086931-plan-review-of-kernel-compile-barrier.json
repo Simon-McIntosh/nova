@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T22:28:56.192Z",
+  "dispatched_at": "2026-11-17T22:28:36Z",
+  "findings": [
+    {
+      "anchor": "plan.html:63",
+      "id": "wiring-1",
+      "reason": "a dispatcher reading the declared graph will release node (c) before the repair lands, and its base arm and its 60 s reach are both defined on the repaired kernel.",
+      "text": "node (c) declares \"dispatched on the kernel as repaired by the polygon tangent repair of sub-millisecond-forward-path (lead ruling, 2026-11-17: wait for it)\", but s3's `data-links`/`plan-section-depends-on` name only \u00a7s2 and \u00a7s5, and the peer \u00a77 is still `implementable`",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:66",
+      "id": "done_when-1",
+      "reason": "a worker can compare the bounded rows against main's kernel and either fail a correct form or accept a moved reference, and the control arm and the reference arm must be named separately.",
+      "text": "the same paragraph makes the repaired kernel \"its base arm\" and then makes \"the consolidated program as it stands on main today (218.9 s)\" the base arm for the failing control, while clause (2) requires the built rows to \"match the base build\"; the repair deliberately moves bits, so the two readings give different pass/fail on the identity measure",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:66",
+      "id": "reasoning-1",
+      "reason": "the feasibility argument for 60 s rests on main-based stub reach (34.1 s floor) applied to a base nearly twice as slow, so a wrong factor sends the node at a lever measured only on a different kernel.",
+      "text": "the plan states the repair \"measures 1.565 times the instructions and 1.872 times the cold compile of main on this row\", which sets node (c)'s base arm at roughly 408 s against main's 217.9 s; the cited peer plan \u00a77 carries no such measurement (its only related figures are the sixth-order stencil's estimated ~1.8\u00d7 instructions and the size ratio 9,351,538/5,442,157 = 1.72), and no receipt for 1.565 or 1.872 is in the repository",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "10dea379167b6586e6ad10d20ab5f52ca1e6d6f0",
+  "plan_fingerprint": "5c52a0a8c425edb5f413007a94a81d8d2e49565b999b86617386d86c8bafb02b",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 93,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T222759086931-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "caeb914a521787a0a3b651d16c3e4d63f00e394b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `tests/equilibrium/test_bounded_point_program.py`, `scripts/prototypes/compile_pass_profile/` (with `lowered_size.py`), `tests/biot/test_production_row_compile.py`, `tests/test_moment_field_hessian.py`, `docs/evidence/fragments/kernel-compile-barrier/point-program-attribution.html`, `ordered-sharing.html` and `/nova/sub-millisecond-forward-path.html` (whose `#s7` resolves to \u00a77) all exist; the 10,000,000-byte starting ceiling is real on the repair branch (commit 764da60c2 sets it around the measured 9,351,538-byte graph), so the 6,000,000 target is a live change rather than a stale claim.",
+    "done_when": "a finding \u2014 node (c) labels two different programs \"the base arm\" at plan.html:66 (the repaired kernel, and \"the consolidated program as it stands on main today\"), so the row-identity measure has no single reference.",
+    "evidence_paths": "pass \u2014 node (b) writes `docs/evidence/fragments/kernel-compile-barrier/point-program-attribution.html`, the figure directory under `docs/figures/kernel-compile-barrier/point-program-attribution/` and receipts under `~/.cache/nova-kernel-compile-barrier/point-program-attribution/`; none is a node-local scratch path.",
+    "naming": "pass \u2014 the changed text carries the lever as a mechanism (\"one traced body per derivative\"), not a ticket or stage label into a symbol.",
+    "reasoning": "a finding \u2014 the 1.565\u00d7 instruction and 1.872\u00d7 cold-compile factors at plan.html:66 are cited only to the peer plan, whose \u00a77 states neither factor.",
+    "single_goal": "pass \u2014 (a) consolidation landed, (b) attribution measurement only, (c) one bounded form with its ceiling, each with its own verdict.",
+    "wiring": "a finding \u2014 s3's declaration at plan.html:63 (`data-links=\"kernel-compile-barrier#s2,kernel-compile-barrier#s5\"`, and `plan-section-depends-on` s3:[s2]) does not carry the wait node (c) now states on `sub-millisecond-forward-path#s7`."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "b465cef1e2cc13170ec112ecc51774aeedecf0105d30a3902a7c0ecc0a762197",
+    "s3": "2dc267988edeb8b285ae864bffb81354af6b7c4d1797d257479eae4b9f747c7b",
+    "s4": "b4c3eef27a064692dbf419c8ce536674acaafb04413c9c58789ff1b0a6338bcc",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T22:32:37.690634+00:00",
+  "total": null
+}

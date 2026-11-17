@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-17T13:49:20.577Z",
+  "dispatched_at": "2026-11-17T13:30:03Z",
+  "figures": {
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-137-diverted.svg": {
+      "contrast": "pass \u2014 #3366cc solved, #333 dashed EFIT, #929292 wall and #0b0b0b text all clear the white ground",
+      "data_ink": "pass \u2014 solved contours, EFIT reference contours, the wall and the null markers are the only marks; no furniture",
+      "decoration": "pass \u2014 no gradient, no background fill, no gridlines, no shading band anywhere in the image",
+      "label_collision": "pass \u2014 no label is clipped or overlapping; zero ink touches any canvas edge; the dark EFIT axis triangle is drawn larger and its outline reads around the coincident blue solved triangle, which is what the page caption claims",
+      "legibility": "pass \u2014 two labelled panels, a three-entry figure legend, and a two-line caption per panel reading residual and lower X-point offset; all text is legible at 1399x720",
+      "table_form": "pass \u2014 a poloidal flux comparison is spatial, not tabular"
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-146-diverted.svg": {
+      "contrast": "pass \u2014 same palette as the other flux panels, all clear of the white ground",
+      "data_ink": "pass \u2014 contours, wall and null markers only",
+      "decoration": "pass \u2014 no gradient, fill or grid",
+      "label_collision": "pass \u2014 no clipped or overlapping label; no ink at any canvas edge",
+      "legibility": "pass \u2014 the converged pair reads at a glance: both panels converged True, residuals 1.028e-11 and 1.610e-12, offsets 2.936 cm and 2.883 cm",
+      "table_form": "pass \u2014 spatial comparison"
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-146-limited.svg": {
+      "contrast": "pass \u2014 all marks and text clear the white ground",
+      "data_ink": "pass \u2014 the null cluster at lower left is the only extra ink and it carries the admitted-axis and qualified-null information",
+      "decoration": "pass \u2014 no gradient, fill or grid",
+      "label_collision": "pass \u2014 no clipped or overlapping label; the hollow blue cross and the filled dark cross at lower left are separated by a visible gap",
+      "legibility": "pass \u2014 both arms unconverged False, residuals 4.174e-3 and 1.004e-2, offsets 7.747 cm and 10.089 cm; the two panels are clearly the same frame at two couplings",
+      "table_form": "pass \u2014 spatial comparison"
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-179-limited.svg": {
+      "contrast": "pass \u2014 palette and text clear the white ground",
+      "data_ink": "pass \u2014 contours, wall, null markers; nothing else",
+      "decoration": "pass \u2014 no gradient, fill or grid",
+      "label_collision": "pass \u2014 no clipped or overlapping label. The solved hollow null and the EFIT filled saddle nearly coincide at the lower left of the left panel and the two glyphs touch; they remain distinguishable by fill and colour, and the page caption declares which is which",
+      "legibility": "pass \u2014 both arms unconverged False, residuals 1.286e-2 and 2.583e-3, offsets 2.583 cm and 3.003 cm; the improved head residual is visible as the tighter polygon panel",
+      "table_form": "pass \u2014 spatial comparison"
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/uniform-response-difference.svg": {
+      "contrast": "pass \u2014 blue on white, and the #929292 wall reads as data without competing",
+      "data_ink": "pass \u2014 five unfilled contours on a stated level array, the grey wall, and a median/max caption per panel; no furniture",
+      "decoration": "pass \u2014 no gradient, fill or grid",
+      "label_collision": "pass \u2014 the legend, the three panel titles and the three captions do not overlap each other or the data; no ink touches a canvas edge",
+      "legibility": "defect \u2014 five contour levels share one #3366cc hue and differ by dash pattern alone; at the page column width the 0.05% and 0.12% handles render as the same long-dash-plus-tick glyph, so the reader cannot give a contour its level",
+      "table_form": "pass \u2014 the finding is where the per-cell difference concentrates, which is spatial"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/uniform-response-difference.svg",
+      "line": null,
+      "severity": "blocking",
+      "summary": "Two of the five contour levels are not separable at the size the figure is read, so the level of a contour cannot be read off the map. render.py:61 declares the styles as (solid, (0,(6,2)), (0,(2,2)), dotted, dashdot) for the levels 0.04, 0.05, 0.06, 0.08, 0.12 percent, all in one blue. Measured on the rendered PNG at 1399x720 the 0.05% handle is a 21 px dash, 8 px gap, 1 px mark and the 0.12% handle is a 23 px dash, 6 px gap, 2 px mark: a 2 px difference in dash length and gap, and both read as 'long dash plus tick'. Downscaled to the 900 px page column the two handles render identically. The wall-targets panel reaches 0.146%, so 0.12% contours exist and mark the largest differences the figure was produced to show; a reader cannot tell them from the 0.05% set. The median and maximum printed under each panel survive, but the per-contour spatial reading the line-contour map exists for does not. The repair is style-only: five dash styles that separate at page width, or lightness steps of the one hue, with the data and the level array unchanged."
+    }
+  ],
+  "notes": [
+    "Read only: no file was edited, created, moved or redrawn; the record is the only artifact written.",
+    "Every quantitative label in all five figures was reconciled against the run's receipts and matches to the printed digits: frame residuals and converged flags and lower X-point offsets against gpu/comparison.json and recovery-179-head/comparison.json, and the three median/maximum pairs against gpu/base/frame-137-diverted/coupling-differences.json.",
+    "The four flux panels use one legend across both panels and one colour per quantity, so the solved, EFIT and wall semantics are consistent figure to figure and across the four frames.",
+    "The EFIT axis marker is drawn larger than the solved one and protrudes where the two coincide, so the page caption's claim that the dark reference markers remain visible beneath the blue ones is true in the rendered image."
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261117T132846710296-review-of-diiid-single-kernel-coupling-9ff3d99fd0c3-figure",
+  "reviewed_base_sha": "3b05ffb6a28c84da912bbea33035be558e714234",
+  "reviewed_head_sha": "9ff3d99fd0c3c19f03f42bcd3e7de2c338baf890",
+  "reviewed_images": {
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-137-diverted.svg": "image-3.png",
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-146-diverted.svg": "image-2.png",
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-146-limited.svg": "image-1.png",
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/frame-179-limited.svg": "image-0.png",
+    "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling/uniform-response-difference.svg": "image-4.png"
+  },
+  "reviewed_run_id": "r-20261116T224846811324-diiid-single-kernel-coupling",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T13:51:01.765232+00:00",
+  "total": null
+}

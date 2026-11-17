@@ -43,6 +43,16 @@
       "note": "Done-when (2) now requires the counterfactual to converge 137D on the single kernel to a relative residual at or below 1e-10 with CONVERGED; one that falls short is recorded as not demonstrating the mechanism",
       "reason": "",
       "when": "2026-11-17T16:20:27.890311+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "911deb77f60dd59f377ccd819594a2145bb00f3a",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a712 names docs/evidence/fragments/diiid-vertical-force-balance/diiid-137d-refusal.html for the record and docs/figures/diiid-vertical-force-balance/diiid-137d-refusal/ for the panels",
+      "reason": "",
+      "when": "2026-11-17T16:21:58.616488+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "Done-when (2) now requires the counterfactual to converge 137D on the single kernel to a relative residual at or below 1e-10 with CONVERGED; one that falls short is recorded as not demonstrating the mechanism",
       "reason": "",
       "when": "2026-11-17T16:20:27.890311+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "911deb77f60dd59f377ccd819594a2145bb00f3a",
+      "commit_basis": "edit",
+      "note": "\u00a712 names docs/evidence/fragments/diiid-vertical-force-balance/diiid-137d-refusal.html for the record and docs/figures/diiid-vertical-force-balance/diiid-137d-refusal/ for the panels",
+      "reason": "",
+      "when": "2026-11-17T16:21:58.616488+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261117T105604834692-plan-review-of-diiid-vertical-force-balance.json",

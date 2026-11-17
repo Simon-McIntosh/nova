@@ -29,6 +29,7 @@ from nova.equilibrium.solve_request import (
 )
 from nova.equilibrium.source import DomainProfile, ForwardSource, PolynomialFluxFunction
 from nova.imas.dataset import open_db_entry
+from nova.io.json import write_atomic
 from nova.jax.config import configure_dtypes
 
 INPUT_ROOT = Path("/home/ITER/mcintos/Code/imas-efit/tests/data/imas")
@@ -104,9 +105,8 @@ def _output():
 
 
 def _write(path, value):
-    pending = path.with_suffix(".pending")
-    pending.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
-    pending.replace(path)
+    json.dumps(value, allow_nan=False)
+    write_atomic(path, value, indent=2, sort_keys=False, newline=True)
 
 
 def _residual_fields(value):

@@ -41,6 +41,43 @@ def test_refused_residuals_preserve_strict_json_receipts(tmp_path):
     assert path.read_bytes() == before
 
 
+def test_comparison_receipts_delegate_to_durable_json_owner(tmp_path, monkeypatch):
+    from nova.io.json import write_atomic
+    from tests import test_magnetics_fit_efit_comparison as comparison
+
+    destination = tmp_path / "receipt.json"
+    pending = destination.with_suffix(".pending")
+    pending.write_text("another writer's pending receipt")
+    assert pending.read_text() == "another writer's pending receipt"
+    calls = []
+
+    def record_owner(path, value, **options):
+        calls.append((path, value, options))
+        return write_atomic(path, value, **options)
+
+    monkeypatch.setattr(comparison, "write_atomic", record_owner, raising=False)
+    payload = dict(marker="durable-owner-reached", nested=dict(value=2))
+    comparison._write(destination, payload)
+    print(f"ATOMIC_OWNER_CALLS={len(calls)} FIXED_PENDING_PRESERVED={pending.exists()}")
+    assert len(calls) == 1
+    assert calls[0] == (
+        destination,
+        payload,
+        dict(indent=2, sort_keys=False, newline=True),
+    )
+    assert (
+        destination.read_text() == json.dumps(payload, indent=2, allow_nan=False) + "\n"
+    )
+    assert pending.read_text() == "another writer's pending receipt"
+    assert list(tmp_path.glob("*.tmp")) == []
+    before = destination.read_bytes()
+    with pytest.raises(ValueError, match="not JSON compliant") as refusal:
+        comparison._write(destination, dict(raw=float("nan")))
+    assert len(calls) == 1
+    assert destination.read_bytes() == before
+    print(f"STRICT_JSON_BEFORE_ATOMIC_OWNER_REFUSED {refusal.value}")
+
+
 def test_passive_zero_turns_remain_zero_response_weights():
     from tests.test_magnetics_fit_efit_comparison import _passive_signed_turns
 

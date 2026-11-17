@@ -35,6 +35,16 @@
       "note": "The passing branch now reproduces 1119994.165 A within 2e-6, the tolerance the refusing branch uses",
       "reason": "",
       "when": "2026-11-17T00:42:52.271580+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "27bff094f2dc844363465b4b2509964c22ccb92f",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Done-when (3) now repairs or re-registers only for a refusing frame; a passing frame leaves the registration unchanged",
+      "reason": "",
+      "when": "2026-11-17T00:44:22.894146+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The passing branch now reproduces 1119994.165 A within 2e-6, the tolerance the refusing branch uses",
       "reason": "",
       "when": "2026-11-17T00:42:52.271580+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "27bff094f2dc844363465b4b2509964c22ccb92f",
+      "commit_basis": "edit",
+      "note": "Done-when (3) now repairs or re-registers only for a refusing frame; a passing frame leaves the registration unchanged",
+      "reason": "",
+      "when": "2026-11-17T00:44:22.894146+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261116T233958900135-plan-review-of-diiid-vertical-force-balance.json",

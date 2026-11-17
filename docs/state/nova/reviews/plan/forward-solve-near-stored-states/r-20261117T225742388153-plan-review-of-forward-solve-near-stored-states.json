@@ -1,0 +1,88 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T22:59:33.438Z",
+  "dispatched_at": "2026-11-17T22:58:50Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:88",
+      "id": "reasoning-1",
+      "reason": "each arm's starting route and solver policy must be stated per arm or the bracket, the control and the repair arm measure different states.",
+      "text": "\u00a72(1) brackets the largest perturbation at which the solve \"still qualifies\" starting from the stored coefficients and the stored flux map, but the cited record's stored-field solve is unqualified at 4.864113698736961e-10 against the unchanged 1e-10 limit (`efit-comparison.html:1593-1603`), and the 5.307643379157493e-16 qualification exists only in a continuation seeded by the banked terminal state with internal stopping tolerance 1e-12, Newton budget 40 and outer budget 64 (`efit-comparison.html:1764-1775`), so at zero perturbation \u00a72 has no qualifying point to bracket from, while \u00a71(2) declares that same unperturbed state a base-revision positive control and \u00a73(1) requires it to be repaired \u2014 one measurement cannot be both a control and a base-red arm",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:94",
+      "id": "reasoning-2",
+      "reason": "\u00a72 and \u00a73 cannot name the state they measure until \u00a71 records the perturbed coefficients, their coordinate and their sign.",
+      "text": "\u00a72(1), \u00a72(3) and \u00a73(1) all key off \"the displaced coefficients/direction at which \u00a71 recorded the refusal\", but \u00a71's done-when (`:72-79`) requires no record of the perturbed coefficient vector, and the cited record states the MAST-U refusal was a single-coordinate lower central-difference probe (`_, lower = self._evaluate(coefficients - direction, seed)`, `efit-comparison.html:1913-1920`) whose \"response-column identity\" is unavailable (`efit-comparison.html:1938-1940`), so the displacement is neither recorded nor recoverable from the stored inputs \u00a71 admits, and \"the profile-coefficient direction the inverse class perturbs\" is not a direction the class has (`magnetics_fit.py:364-369` probes each coordinate separately, then takes one combined correction)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:103",
+      "id": "done_when-1",
+      "reason": "a done-when clause that passes on unfixed code proves nothing and should be dropped or replaced by a displacement shown red at base.",
+      "text": "\u00a73(1)'s arm at \"the same amount in the opposite step\" is green at the base revision: the central-difference construction evaluated `coefficients + direction` and returned successfully before the `coefficients - direction` evaluation raised (`efit-comparison.html:1913-1920`), and the failed side is recorded as \"Refused lower response perturbation\" with residual 0.0001237999574577207 (`efit-comparison.html:1926`), so the opposite arm already qualifies at base and its repair has no endpoint",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:93",
+      "id": "done_when-2",
+      "reason": "the quantity cannot fail and must be replaced by one the trace can vary in, or the arm reduced to the terminal reason and residual.",
+      "text": "\u00a72(2) asks for \"the outer iteration at which qualification is first lost\" for TCV and ITER, but the cited record has both solves unqualified from their first recorded trip (TCV stored-field residual 0.030364200526436996, `efit-comparison.html:1651`; ITER residual non-finite with no admitted axis, `efit-comparison.html:1733-1737`), so no qualifying iteration exists from which qualification can be lost and the reported value is fixed at \"none\"/zero whatever the solve does",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:94",
+      "id": "single_goal-1",
+      "reason": "\u00a73's scope for two of its three cases cannot be decided from \u00a72's output.",
+      "text": "\u00a72(3) defines Reached as \"the displaced state at which \u00a71 recorded the refusal qualifies \u2026 when approached from the stored state through intermediate solves\", yet for TCV and ITER \u00a71 records the refusal at the stored coefficients themselves (zero displacement; \u00a71(1), `efit-comparison.html:1651`, `1932-1935`), so \"approached from the stored state\" is a sequence from a state to itself, and the verdict that decides whether \u00a73 owes those two cases a repair is undefined",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:94",
+      "id": "done_when-3",
+      "reason": "a stated search set is needed before the verdict bounds \u00a73's work.",
+      "text": "\"Not reached: no sequence tried qualifies\" states no bound on the sequence (number of intermediate solves, step size, ordering), so the verdict records how hard the worker tried rather than a property of the case; combined with \u00a73's \"a case \u00a72 marks as not reached is not forced\", the plan permits two of three cases to be parked on an arm that cannot fail",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "2492a70c603190859d6cae828039be8ae01256ed",
+  "plan_fingerprint": "4a2caf3fb326cc073189f941efee55ecf2d433c6b78122426acffe1de18258ba",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 3,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T225742388153-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "f0d072b0a1d3e68428c247fd688c43a4d9129fb4",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html` (as written in \u00a70: `inverse-equilibrium-baseline/efit-comparison.html`) resolves and `inverse-equilibrium-baseline#s2` resolves; the archive record is a future artifact named by \u00a70.",
+    "done_when": "a finding \u2014 \u00a73(1)'s opposite-step arm is green at the base revision, \u00a72(2)'s outer-iteration quantity has no qualifying iteration to lose, and \u00a72(3)'s \"Not reached\" arm states no bounded search.",
+    "evidence_paths": "pass \u2014 \u00a70 names `docs/evidence/archive/forward-solve-near-stored-states-landed.html` as the record and the cited fragment resolves; s2 and s3 name no scratchpad or node-local path.",
+    "naming": "pass \u2014 no plan label, stage name or ticket number is carried into a symbol or comment.",
+    "reasoning": "a finding \u2014 \u00a72's scan and \u00a73's displaced arms assume a qualifying stored-coefficient start that the cited record shows unqualified, and the \u00a71 displacement they all key off is not recorded and not recoverable from the record.",
+    "single_goal": "a finding \u2014 \u00a72(3)'s Reached/Not-reached verdict, which sets \u00a73's scope, is undefined for TCV and ITER.",
+    "wiring": "pass \u2014 `s1 -> inverse-equilibrium-baseline#s2`, `s2 -> forward-solve-near-stored-states#s1` and `s3 -> forward-solve-near-stored-states#s2` are declared in `plan-section-depends-on` (line 24), the section contract repeats them, and `inverse-equilibrium-baseline.html` has `id=\"s2\"` at line 102."
+  },
+  "section_digests": {
+    "_document": "9895bb348f263c92b2f814901edac43c580b128c76511f07830d01b8657777ff",
+    "s0": "66c1d333dde62b6fc022136f37cc6884c840cb88f5daacc984d0009d39c7ea47",
+    "s1": "ee1c051cf970fa5e6714498026e0dfac4e0648979b39b6858da162a5ee6f3fad",
+    "s2": "32e42752653e0ae4c6064dc01a01502be75c5fa3b2ce72771da4a0deb39ae66a",
+    "s3": "e1fddfe362aed9a59f242f7d5a52f4919b5d65d115b059eb37d17646c06c9257"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T23:06:12.736381+00:00",
+  "total": null,
+  "traced_units": [
+    "s2",
+    "s3"
+  ]
+}

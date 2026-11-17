@@ -1249,6 +1249,42 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "8e1cda23ac64ed15da5ff3aa825f94f284b1f1eb",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261117T160250124210-review-of-white-noise-covariance-ffce4cd56a91",
+    "scratch_absent": true,
+    "scratch_bytes": null,
+    "scratch_host": "98dci4-clu-3026.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261117T160250124210-review-of-white-noise-covariance-ffce4cd56a91",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/review-of-white-noise-covariance-ffce4cd56a91",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/_trash/r-20261117T160250124210-review-of-white-noise-covariance-ffce4cd56a91-20261117T161033450259Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

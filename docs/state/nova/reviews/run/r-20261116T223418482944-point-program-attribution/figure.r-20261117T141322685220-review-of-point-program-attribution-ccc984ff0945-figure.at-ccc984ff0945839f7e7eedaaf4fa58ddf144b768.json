@@ -1,0 +1,41 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-17T14:22:19.666Z",
+  "dispatched_at": "2026-11-17T14:14:41Z",
+  "figures": {
+    "docs/figures/kernel-compile-barrier/point-program-attribution/block-attribution.svg": {
+      "contrast": "passes: all text is near-black (#0b0b0b) or span grey (#595959) on white, the control bar is mid grey (#999999) against white, and the stubbed bars are blue (#3366cc), each well separated from the ground it sits on",
+      "data_ink": "passes: one flat bar per block and per arm carries the ink, and the only other marks are two thin grey span arrows and their labels; no gradient, marker cloud or second geometry competes with the bars",
+      "decoration": "passes: white ground throughout, no gridline in either panel (a column scan of both plot interiors found no uniform full-height line), no background band or fill, and only the left and bottom spines carry a scale",
+      "label_collision": "passes: no label is clipped, and the pixel scan found no collision \u2014 the corner-height span arrow stands at x=1062 with the '104.5' label at x=1105-1151, 43 px clear of the shaft, and the derivative span arrow at x=1193 is 47 px from the '34.1' label; the rotated span labels sit in the inter-bar gaps, clear of both bars and arrows",
+      "legibility": "readable at a glance: the left panel ranks five source blocks by the share of the 6,088,067-byte lowered graph their stub removes, with the erased block stated in words on its own row; the right panel shows three compiled arms in cold H200 seconds, each with a dark value label above its bar, and the two grey spans are labelled in the gaps beside the bars",
+      "table_form": "passes: both panels compare magnitudes, where the comparison itself is a length; a table would not show relative size, and the erased block states its categorical outcome in the word 'erased' rather than pretending to a bar length"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/kernel-compile-barrier/point-program-attribution/block-attribution.svg",
+      "line": 77,
+      "severity": "non-blocking",
+      "summary": "The left panel's four shares sum to 215.2 per cent, because the stubs are nested: the value-path stub removes the derivative tower, the corner-height Hessian and the elliptic terms with it. A reader who adds the bars, which the axis invites by expressing every one of them as a percentage of the same 6,088,067 bytes, gets more than the whole and has no cue on the panel that the rows are overlapping measurements rather than a partition. The new work in this commit has made the legend honest about state; the same panel still reads as a breakdown."
+    },
+    {
+      "file": "scripts/prototypes/point_program_attribution/figure.py",
+      "line": 211,
+      "severity": "non-blocking",
+      "summary": "The legend's dotted swatch for the erased state denotes a mark that appears nowhere in the picture. The erased row's bar is drawn with zero length and a solid edge at x=0, where the y-axis spine covers it, so no dotted element is rendered on either panel while the legend shows a dotted one; a reader scanning for the mark the legend describes finds nothing. The legend's own words ('zero-length bar, marked in text, no share') carry the meaning, which is why this does not hold the node."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261117T141322685220-review-of-point-program-attribution-ccc984ff0945-figure",
+  "reviewed_base_sha": "abfe563fe1792927caf79a1bc551c2915d756b33",
+  "reviewed_head_sha": "ccc984ff0945839f7e7eedaaf4fa58ddf144b768",
+  "reviewed_image": "image-0.png, a 1400x589 PNG attached to this review, rendered from docs/figures/kernel-compile-barrier/point-program-attribution/block-attribution.svg",
+  "reviewed_run_id": "r-20261116T223418482944-point-program-attribution",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T14:23:57.575255+00:00",
+  "total": null
+}

@@ -2202,3 +2202,59 @@ combined-state H200 gate of 80 passed with the pre-existing failure deselected.
 That is a supplied coordinator result; the native incomplete CPU suite receipts
 above remain unchanged and no CPU suite arm is rerun.</p>
 </section>
+
+<section id="efit-comparison-scaled-row-control-complete">
+<h2>Fitted-source row control passes on all three machines</h2>
+<p>Titan job 1323912 completed the kernel-only measurement at
+cf0309c70ae38d649515f361a7a2109909e1eae9: <code>3 passed in 556.19s
+(0:09:16)</code>, native <code>EXIT=0</code>. The lane allocated two cores,
+24 GB and one P100 for two hours; the scheduler records COMPLETED after
+10 min 49 s. These are titan P100 measurements. No equilibrium solve or
+figure generation was performed.</p>
+<p>Every family below uses nova's observation kernels applied to the stored
+plasma current density and stored fitted conductor currents. The replay is
+unchanged between comparisons. The unscaled error is
+<code>||nova − reference||2 / ||reference||2</code>; the control error is
+<code>||nova − 1.10 reference||2 / ||1.10 reference||2</code>. Each family's
+reference norm is explicitly nonzero. Whitened residuals retain the same
+per-row measurement uncertainties in both comparisons.</p>
+<table><thead><tr><th>Machine / family</th><th>Active rows</th><th>Unscaled relative L2 [%], required &lt;5</th><th>Reference ×1.10 relative L2 [%], required &gt;5</th><th>Unscaled whitened RMS</th><th>Scaled-reference whitened RMS</th></tr></thead><tbody>
+<tr><td>MAST-U / flux loops</td><td>156</td><td>0.126410</td><td>9.084413</td><td>0.131623</td><td>3.343642</td></tr>
+<tr><td>MAST-U / poloidal probes</td><td>208</td><td>0.102526</td><td>9.090420</td><td>0.047155</td><td>3.740982</td></tr>
+<tr><td>TCV / flux loops</td><td>38</td><td>0.169823</td><td>8.940950</td><td>0.093604</td><td>4.910837</td></tr>
+<tr><td>TCV / poloidal probes</td><td>38</td><td>0.190155</td><td>9.049047</td><td>0.104400</td><td>4.152045</td></tr>
+<tr><td>ITER / flux loops</td><td>261</td><td>0.724262</td><td>9.281078</td><td>0.471559</td><td>1.321174</td></tr>
+<tr><td>ITER / poloidal probes</td><td>915</td><td>0.083952</td><td>9.091733</td><td>0.111094</td><td>1.954844</td></tr>
+</tbody></table>
+<p>All six unscaled family errors are inside 5%, and all six control errors
+are outside 5%. All 1616 active rows are retained, including 65 zero-extent
+flux paths on MAST-U and four on ITER. Those zero-reference paths remain in
+the flux-loop family rather than being assigned an undefined standalone
+relative percentage. The stored fitted-current maps, signed turns and plasma
+quadrature are the same as in the inspected fitted-source panels above.</p>
+<p>The physical scaled-row refusal stage reads the completed physical receipts
+and submits each family's scaled-reference score to the unscaled 5% admission
+guard. Its native result is <code>3 failed, 2 warnings in 15.05s</code>,
+<code>EXIT=1</code>, with a failing
+<code>test_scaled_reference_rows_cannot_pass_unscaled_band</code> ID for each
+of MAST-U, TCV and ITER. For example, MAST-U refuses with
+<code>flux loops: unscaled replay outside 5%: 0.09084412774424025</code>.
+The positive gate separately asserts both families on every machine. Both
+sessions deliberately prove the solve-refusal guard and finish with
+<code>KERNEL_ONLY_FORWARD_SOLVE_CALLS=0</code>.</p>
+<p>The completed index, three per-case JSON receipts, native gate and
+<code>physical-scaled-row-negative-control.log</code> remain under the run
+evidence directory <code>scaled-row-control-1323912/</code>. Their native log
+digests and source digest were verified; the receipt assessment is
+<code>scaled-row-control-validated.json</code>. The earlier CPU timeout and
+its completed MAST-U/TCV receipts are retained separately. No execution is
+attributed to the later documentation commits.</p>
+<p>This completes the amended row-replay control for the delivered
+nonconvergence outcome. It does not assert that an inverse fit or physical
+scaled fit converged: the per-machine refusal evidence above remains in
+force, including ITER's different constraint set and profile-count age
+caveats. The lead's 2026-11-17 suite-delta waiver removes the CPU suite-count
+blocker; the incomplete native CPU arms remain recorded without a rerun.
+The worker delivers this repair as complete; plan-section closure remains
+with the coordinator.</p>
+</section>

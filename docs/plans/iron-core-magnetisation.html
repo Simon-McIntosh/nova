@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="biot,iron-core,machine-description,jax,efit">
   <meta name="plan-after" content="kernel-compile-barrier">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;iron-core-magnetisation#s2&quot;],&quot;s4&quot;:[&quot;iron-core-magnetisation#s2&quot;,&quot;iron-core-magnetisation#s3&quot;],&quot;s5&quot;:[&quot;iron-core-magnetisation#s4&quot;],&quot;s6&quot;:[&quot;iron-core-magnetisation#s3&quot;,&quot;iron-core-magnetisation#s4&quot;,&quot;iron-core-magnetisation#s5&quot;],&quot;s7&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;forward-solve-api#s1&quot;],&quot;s8&quot;:[&quot;iron-core-magnetisation#s6&quot;],&quot;s9&quot;:[&quot;iron-core-magnetisation#s6&quot;,&quot;iron-core-magnetisation#s8&quot;,&quot;iron-core-magnetisation#s10&quot;],&quot;s10&quot;:[&quot;iron-core-magnetisation#s5&quot;]}">
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="111">
+<meta name="plan-version" content="114">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -358,7 +358,7 @@
     </p>
 
     <h2 id="s5">§5 — Accuracy for thin high-permeability parts</h2>
-<section data-reckon="section" data-id="s5" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s5" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links=""></section>
     <p>
       Piecewise-constant magnetisation converges at first order and slowly for a thin
       high-&mu; shell: 2.8&nbsp;% at &mu;<sub>r</sub> = 1000 with 2&nbsp;cm cells across a 10&nbsp;cm shell. The
@@ -370,31 +370,52 @@
       formulation decision below.
     </p>
     <p>
-      Done when (1) the chosen route reaches 0.5&nbsp;% on the &mu;<sub>r</sub> = 1000 shell, and a
-      deliberately under-resolved arm of the same route (the cell-size field doubled everywhere
-      through the shell for the volume routes, graded or uniform, half the panel density on the iron surfaces for the
-      surface route) misses 0.5&nbsp;%, so the measure can fail for whichever candidate is chosen;
-      (2) the WEST
-      midplane field at 1, 2 and 4&nbsp;m outside the coil edge changes by less than 1&nbsp;% under one
-      further refinement; (3) the comparison table of the candidates, with their cost on one H200,
-      is in the plan's evidence record.
+      Done when (1) the chosen route reaches 0.5&nbsp;% on the &mu;<sub>r</sub> = 1000 shell;
+      (2) the WEST midplane field at 1, 2 and 4&nbsp;m outside the coil edge is measured with the
+      chosen route on at least two meshes on one H200, with the change between them stated;
+      (3) the comparison table of the measured candidates, with their cost on one H200, is in the
+      plan's evidence record and the formulation decision is locked.
+    </p>
+    <p>
+      The lead closed this section on 2026-11-17 with the piecewise-linear basis (the formulation
+      decision). Two checks the earlier done-when asked for remain and moved to §5b: the WEST
+      field changed 1.17&nbsp;% at +4&nbsp;m on the 80 to 40&nbsp;mm refinement, against a bar of 1&nbsp;%, and no
+      coarse linear shell arm has yet been shown to miss 0.5&nbsp;%. The surface candidate was not
+      measured; the decision makes it moot.
     </p>
 
     <h2 id="s6">§6 — Iron as a field source</h2>
 <section data-reckon="section" data-id="s6" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
     <p>
-      Let the solved magnetisation contribute &psi;, B<sub>R</sub> and B<sub>Z</sub> through one seam: the
-      edge sheets are inserted into the CoilSet as one passive frame whose currents the material
+      Let the solved magnetisation contribute &psi;, B<sub>R</sub> and B<sub>Z</sub> through one seam: its
+      bound currents are inserted into the CoilSet as one passive frame whose currents the material
       solve writes, so every existing grid and point solve, the stray-field figure, the forward map
-      and any probe read include the iron with no change to a solve path. The sheet-route decision
-      chose Part II, so the frame carries the sheet section evaluated by
-      <code>nova/biot/sheet.py</code>. Regenerate the WEST stray-field figure with iron beside the
-      air-core curve.
+      and any probe read include the iron with no change to a solve path. The formulation decision
+      chose the piecewise-linear basis, so in each cell the affine magnetisation carries a uniform
+      azimuthal bound volume current over the polygon section and a bound sheet current on each
+      edge that varies linearly along it. The frame evaluates them through the same tiled polygon
+      and edge routes the solve's interaction uses (<code>nova/biot/tiledassembly.py</code>, with the
+      Part II sheet section of <code>nova/biot/sheet.py</code>), so its field equals
+      <code>MagnetisationSolution.field</code> to round-off. Regenerate the WEST stray-field figure
+      with iron beside the air-core curve.
+    </p>
+    <p>
+      A time slice must not re-evaluate the coils on the iron. On WEST, 179&nbsp;s of a 4-minute slice
+      is the coil field evaluated at the cell quadrature points, and that field is linear in the coil
+      currents. So build, per mesh, the Galerkin projection of each coil's unit-current field onto
+      the basis, persist it beside the interaction under the same geometry digest, and form a
+      slice's external term as one matrix product with the coil currents; the plasma's contribution
+      is evaluated per slice. The loader refuses a response whose digest or coil set does not match.
+      Also restore an independent pin on the production WEST census mesh cell count (1694 cells at
+      0.08&nbsp;m) in <code>tests/test_imas_iron_read.py</code>, which the cleanup run relaxed, with a
+      negative control that changes the mesh spacing.
     </p>
     <p>
       Done when (1) <code>docs/figures/west-stray-field/</code> carries a with-iron figure whose
       curves come from the production path; (2) the iron contribution at the WEST in-vessel probes
-      and flux loops is tabulated from the same seam; (3) a control with the frame's magnetisation
+      and flux loops is tabulated from the same seam, with the external term formed from the
+      persisted coil response, which equals the direct coil evaluation to 1e-12 relative and is
+      refused for another mesh, and the slice wall with and without it recorded; (3) a control with the frame's magnetisation
       set to zero reproduces the air-core field at every grid and probe point to round-off, while
       the solved magnetisation changes it, so the seam is shown to carry the iron rather than to
       pass the air-core field through.
@@ -460,7 +481,10 @@
       defines it, &part;F/&part;M being the §4 Newton factor that is reused), not by re-running the inner solve per outer iteration. Enter through the
       public forward-solve seam (<code>ForwardSolveRequest</code> in
       <code>nova/equilibrium/solve_request.py</code>, landed as forward-solve-api §1), which this
-      section waits on.
+      section waits on. The iron uses the piecewise-linear basis the formulation decision chose,
+      and each forward state loads the interaction and the coil response that §6 persists for its
+      mesh rather than assembling them; only the plasma's contribution to the external field is
+      evaluated per state.
     </p>
     <p>
       Done when (1) a WEST forward state with iron converges through the seam on the H200 to the
@@ -476,7 +500,8 @@
 <section data-reckon="section" data-id="s8" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
     <p>
       The axisymmetric smear is right for the toroidal average far from the legs and wrong near
-      them. Magnetise six limbs of their real section in the axisymmetric field and evaluate their
+      them. Magnetise six limbs of their real section in the axisymmetric field, with the piecewise-linear
+      basis the formulation decision chose, and evaluate their
       field with nova's existing 3D route and its toroidal average in
       <code>nova/biot/toroidalaverage.py</code> (<code>toroidal_points</code>,
       <code>frame_magnetic_field</code> and <code>average_toroidal_field</code>), giving |B| along a
@@ -510,6 +535,28 @@
       data prefer and by how much, and the preference is shown to vanish when the probe positions
       are permuted, the control that it comes from the probes' geometry; (3) any external
       measurement used is cited by its source.
+    </p>
+
+    <h2 id="s11">§5b — Refinement evidence for the piecewise-linear basis</h2>
+<section data-reckon="section" data-id="s11" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>
+      The WEST H200 measurement (<code>icm-west-linear-h200</code>) left the +4&nbsp;m field moving 1.17&nbsp;%
+      between uniform 80 and 40&nbsp;mm, while graded 16/80&nbsp;mm agrees with uniform 40&nbsp;mm to 0.62&nbsp;%.
+      The next refinement, graded 8/40&nbsp;mm (11&nbsp;708 cells, 70&nbsp;248 unknowns), has a 39.5&nbsp;GB dense
+      interaction that the H200 cannot hold beside the compiled assembly's temporaries. Assemble it
+      in row blocks streamed to host memory through the existing tiled owners in
+      <code>nova/biot/tiledassembly.py</code>, persist it with the geometry digest that
+      <code>save_magnetisation_interaction</code> already writes, and solve on the card. This section
+      does not gate §6: the field source and the forward solve consume the basis, not this number.
+    </p>
+    <p>
+      Done when (1) the graded 8/40&nbsp;mm WEST linear solve on the H200 reports the midplane field
+      at 1, 2 and 4&nbsp;m and its change against graded 16/80&nbsp;mm, stated plainly against 1&nbsp;%;
+      (2) the block-assembled interaction equals the existing single-program assembly on the
+      uniform 80&nbsp;mm WEST mesh to 1e-12 relative in one process, so the blocking changes no entry;
+      (3) a linear shell arm at 80&nbsp;mm on the &mu;<sub>r</sub> = 1000 shell is measured against the
+      dipole reference, and if it still meets 0.5&nbsp;% the next coarser spacing is measured until
+      one misses, so the shell criterion is shown to be able to fail for the linear basis.
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">

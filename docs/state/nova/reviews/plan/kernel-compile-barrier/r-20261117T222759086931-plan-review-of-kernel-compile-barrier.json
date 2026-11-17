@@ -53,6 +53,16 @@
       "note": "s3 names one reference and control arm, the repaired kernel on main at 681a6ecd2, for both the identity measure and the failing control",
       "reason": "",
       "when": "2026-11-17T23:29:43.841758+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "10dea379167b6586e6ad10d20ab5f52ca1e6d6f0",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "s3 cites the repair's landed fragment for the measured multiples and says the stub reach was measured before the repair",
+      "reason": "",
+      "when": "2026-11-17T23:29:52.594338+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "s3 names one reference and control arm, the repaired kernel on main at 681a6ecd2, for both the identity measure and the failing control",
       "reason": "",
       "when": "2026-11-17T23:29:43.841758+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "10dea379167b6586e6ad10d20ab5f52ca1e6d6f0",
+      "commit_basis": "edit",
+      "note": "s3 cites the repair's landed fragment for the measured multiples and says the stub reach was measured before the repair",
+      "reason": "",
+      "when": "2026-11-17T23:29:52.594338+00:00"
     },
     "wiring-1": {
       "action": "acted",

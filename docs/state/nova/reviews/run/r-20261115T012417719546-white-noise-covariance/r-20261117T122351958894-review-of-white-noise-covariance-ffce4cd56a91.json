@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's baseline_suite and after_suite are both readable and both passed: logs/base-gate-d7676e478fc8701b036ec717f80d403c3ead86f5.log and logs/head-gate-7ef7424513cb16aab82e15908db6207ced873d22.log each end EXIT=0 with '1 passed', and neither names a failing test id. The after arm's revision label names the review base rather than the reviewed head (finding 2), but the run itself read the changed tree.",
+  "assertion_audit": "The commit adds no assertion; it changes one HTML fragment and three SVGs. The only guard that reaches these paths is tests/test_artifacts_carry_no_worktree_paths.py, whose positive control fails if its candidate enumeration returns nothing it is known to hold, and whose offender assertion reddens if a tracked file names a reckon worktree path; it says nothing about the reported values.",
+  "base_log_revision": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T12:47:28.000Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "evidence-only node: the write scope is one fragment and a figure directory, with no source or test file, so no assertion can pin the reported numbers; the rows are kept as JSONL receipts under the run directory and the path-hygiene test covers the committed artefacts.",
+      "recorded_at": "2026-11-17T12:44:52.780574+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-17T12:25:19Z",
+  "failure_delta_evidence": {
+    "after_suite": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/logs/head-gate-7ef7424513cb16aab82e15908db6207ced873d22.log",
+      "revision": "7ef7424513cb16aab82e15908db6207ced873d22"
+    },
+    "baseline_suite": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/logs/base-gate-d7676e478fc8701b036ec717f80d403c3ead86f5.log",
+      "revision": "d7676e478fc8701b036ec717f80d403c3ead86f5"
+    },
+    "baseline_summary": "1 passed in 4.37s, EXIT=0",
+    "head_summary": "1 passed in 2.55s, EXIT=0"
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "id": "reuse-criterion-overstated",
+      "line": "10",
+      "severity": "non-blocking",
+      "text": "The sentence says stored fits are reused \"where their arm, noise scale and iteration budget match\", but the generator's reuse predicate (study/full_arm.py:36-49) keys only on arm==\"main\" and a unique realisation index and carries no budget or scale field, so a mismatched earlier run would be mixed into the 32 silently while the record states the check was made."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/manifest.md",
+      "id": "after-arm-revision-label",
+      "line": "33",
+      "severity": "non-blocking",
+      "text": "The after_suite line names revision 7ef7424513cb, which is this review's base, while the reviewed head is ffce4cd56 and the worktree reflog shows HEAD advanced to ffce4cd56 at 13:09:56, so the gate log's revision label names the pre-change tree even though the 13:16 run read the changed one."
+    }
+  ],
+  "head_log_revision": "7ef7424513cb16aab82e15908db6207ced873d22",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "Read the single commit ffce4cd56 against base 7ef742451, four files with no source or test change; the fragment's six variance ratios, two bands, three mean reduced chi-square values, three mean deviations and three covariance gaps all reproduce from study/results/full-summary.json, and the chi-square bands reproduce independently from scipy.stats.chi2.",
+    "done_when": "Read the three done_when clauses; the only gate the manifest records is tests/test_artifacts_carry_no_worktree_paths.py (base 1 passed, after 1 passed), which asserts only that no tracked file names a worktree path and cannot fail on the variance band, the reduced chi-square range, the negative control or the flux scaling the done_when measures.",
+    "goal": "Read the node goal in dispatch-detail.json (admit_request.node.goal), which asks for 256 noise realisations per state and every heavy run on the H200 lane; docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:4 and :50 rest the verdict on 32 full nonlinear fits per state on a titan P100 and say so, so the landed change reports that gap rather than closing it.",
+    "manifest": "Read manifest.md; it records status complete, both suite arms passing with EXIT=0 and named log paths, and key values that match study/results/full-summary.json, but its after_suite line names revision 7ef7424513cb while the reviewed head is ffce4cd56.",
+    "write_paths": "Read the two declared write paths (the fragment file and the figure directory); every path in the diff is inside them: the fragment plus solovev.svg, mast.svg and iter.svg."
+  },
+  "justifications": {
+    "durability": "the commit adds no assertion, and the only test that touches the changed files, tests/test_artifacts_carry_no_worktree_paths.py:28, reddens only if a worktree path appears in them, not if a variance ratio or count is changed.",
+    "evidence": "every number in docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:4 and :12-13 reproduces from study/results/full-summary.json, and the two bands reproduce independently from scipy.stats.chi2, though the recorded gate at tests/test_artifacts_carry_no_worktree_paths.py measures only path hygiene.",
+    "fit": "the new sections at docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:9-15 follow the fragment's existing section idiom and add no banned name, with one grammar slip in the alt text at :45-47 (\"the covariances stated interval\").",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:7 states it runs 32 attempts per state rather than the goal's 256, and :50 keeps every wall time a titan P100 number.",
+    "reuse": "the diff adds no function, class or module, and a search over nova/ and tests/ for a consumer of the fragment or its figures found none, so there is no capability to duplicate.",
+    "scope_discipline": "git diff --name-only 7ef7424513cb16aab82e15908db6207ced873d22 ffce4cd56a91258155d61c9ada6a5d1ddfb16d81 returns only the four paths inside the declared scope."
+  },
+  "production_call_site_search": "grep -rn white-noise-covariance over nova/, tests/ and docs/evidence/archive returns no hit: no runtime code, test or archive page consumes the fragment or its three figures, so no production call site can reach the change.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read the node goal in dispatch-detail.json (admit_request.node.goal), which asks for 256 noise realisations per state and every heavy run on the H200 lane; docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:4 and :50 rest the verdict on 32 full nonlinear fits per state on a titan P100 and say so, so the landed change reports that gap rather than closing it.\nVERDICT done_when: Read the three done_when clauses; the only gate the manifest records is tests/test_artifacts_carry_no_worktree_paths.py (base 1 passed, after 1 passed), which asserts that no tracked file names a worktree path and cannot fail on the variance band, the reduced chi-square range, the negative control or the flux scaling the done_when measures.\nVERDICT write_paths: Read the two declared write paths (the fragment file and the figure directory); every path in the diff is inside them: the fragment plus solovev.svg, mast.svg and iter.svg.\nVERDICT manifest: Read manifest.md; it records status complete, both suite arms passing with EXIT=0 and named log paths, and key values that match study/results/full-summary.json, but its after_suite line names revision 7ef7424513cb while the reviewed head is ffce4cd56.\nVERDICT diff: Read the single commit ffce4cd56 against base 7ef742451, four files with no source or test change; the fragment's six variance ratios (0.873, 1.054, 0.773, 0.352, 0.673, 0.723), two bands (0.3865 to 1.9917 at 31, 0.2529 to 2.4313 at 17), mean reduced chi-square (1.008, 0.947, 0.961), mean deviations (0.18, 0.70, 0.09) and covariance gaps (0.001, 0.333, 0.000) all reproduce from study/results/full-summary.json, and the chi-square bands reproduce independently at scipy.stats.chi2.\nCALL_SITES: none\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:7 states it runs 32 attempts per state rather than the goal's 256, and :50 keeps every wall time a titan P100 number.\nSCORE evidence: 15\nJUSTIFICATION evidence: every number in docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:4 and :12-13 reproduces from study/results/full-summary.json, and the two bands reproduce independently from scipy.stats.chi2, though the recorded gate at tests/test_artifacts_carry_no_worktree_paths.py measures only path hygiene.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 7ef7424513cb16aab82e15908db6207ced873d22 ffce4cd56a91258155d61c9ada6a5d1ddfb16d81 returns only the four paths inside the declared scope.\nSCORE durability: 4\nJUSTIFICATION durability: the commit adds no assertion, and the only test that touches the changed files, tests/test_artifacts_carry_no_worktree_paths.py:28, reddens only if a worktree path appears in them, not if a variance ratio or count is changed.\nSCORE fit: 17\nJUSTIFICATION fit: the new sections at docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:9-15 follow the fragment's existing section idiom and add no banned name, with one grammar slip in the alt text at :45-47 (\"the covariances stated interval\").\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, and a search over nova/ and tests/ for a consumer of the fragment or its figures found none, so there is no capability to duplicate.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:10 non-blocking: the sentence says stored fits are reused \"where their arm, noise scale and iteration budget match\", but the generator's reuse predicate (study/full_arm.py:36-49) keys only on arm==\"main\" and a unique realisation index and carries no budget or scale field, so a mismatched earlier run would be mixed into the 32 silently while the record states the check was made.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/manifest.md:33 non-blocking: the after_suite line names revision 7ef7424513cb, which is this review's base, while the reviewed head is ffce4cd56 and the worktree reflog shows HEAD advanced to ffce4cd56 at 13:09:56, so the gate log's revision label names the pre-change tree even though the 13:16 run read the changed one.",
+  "review_run_id": "r-20261117T122351958894-review-of-white-noise-covariance-ffce4cd56a91",
+  "reviewed_base_sha": "7ef7424513cb16aab82e15908db6207ced873d22",
+  "reviewed_head_sha": "ffce4cd56a91258155d61c9ada6a5d1ddfb16d81",
+  "reviewed_run_id": "r-20261115T012417719546-white-noise-covariance",
+  "scores": {
+    "durability": 4,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T12:44:52.780549+00:00",
+  "total": 90
+}

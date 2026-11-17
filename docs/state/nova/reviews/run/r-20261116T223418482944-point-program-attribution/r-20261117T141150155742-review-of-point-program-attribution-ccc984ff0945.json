@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-17T14:13:30.421Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-17T14:13:02Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/point_program_attribution/profile_arm.py",
+      "line": 59,
+      "severity": "non-blocking",
+      "summary": "The rewrite replaces sys.argv with the owner's own four arguments and calls profile.main(), so the receipt it writes no longer carries the 'block' or 'replaced' fields the previous version recorded and its printed command omits --block. The three on-disk card receipts under ~/.cache/nova-kernel-compile-barrier/point-program-attribution/h200/<arm>/profile.json do carry both fields, so a re-run of an arm now produces a receipt that cannot be told from another arm's except by its output directory name and the stub_hook stdout line at line 37, so the receipt of record is no longer a full record of the arm."
+    },
+    {
+      "file": "scripts/prototypes/point_program_attribution/profile_arm.py",
+      "line": 7,
+      "severity": "non-blocking",
+      "summary": "The module docstring states that 'a stub that changes nothing is visible by its unchanged instruction count', but nothing in this module or in scripts/prototypes/compile_pass_profile/profile.py reads an instruction count; the count comes from the instruction field of the XLA pass dumps read separately by compile_pass_profile/analyse.py and summarise.py, so the docstring promises a check this execution path does not make."
+    },
+    {
+      "file": "scripts/prototypes/point_program_attribution/lowering_arm.py",
+      "line": 51,
+      "severity": "non-blocking",
+      "summary": "The build now comes from the owner (profile.build at line 62), but the measurement capability owned by scripts/prototypes/compile_pass_profile/lowered_size.py:37-70 is still re-emitted here: the same configure_dtypes/cache-off preamble, the same jax.jit(...).lower() and as_text() steps, and the same trace/lower/stablehlo receipt fields. The earlier review's finding is therefore only partly answered, and a change to the lowering measurement still has two sites to update."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/point-program-attribution.html",
+      "line": 61,
+      "severity": "non-blocking",
+      "summary": "The figure's alt text still says the right panel marks only 'the seconds the corner-height block holds', while the committed figure and the caption at line 62 now mark two spans (119.2 s corner-height and 189.6 s all derivative instantiations); a reader given only the alt text is told of one of the two measurements the picture carries."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261117T141150155742-review-of-point-program-attribution-ccc984ff0945",
+  "reviewed_base_sha": "abfe563fe1792927caf79a1bc551c2915d756b33",
+  "reviewed_head_sha": "ccc984ff0945839f7e7eedaaf4fa58ddf144b768",
+  "reviewed_run_id": "r-20261116T223418482944-point-program-attribution",
+  "scores": {
+    "durability": 5,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T14:25:09.501797+00:00",
+  "total": 89
+}

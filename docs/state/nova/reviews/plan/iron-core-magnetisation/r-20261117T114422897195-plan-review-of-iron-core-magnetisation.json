@@ -114,6 +114,13 @@
       "finding": "wiring-1",
       "reason": "both parents (s4, s5) are declared done, so the entry changes no dispatch order, as the finding itself states; the head meta is not writable through the plan text tools",
       "when": "2026-11-17T15:43:42.161724+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "both parents (s4, s5) are declared done, so the entry changes no dispatch order, as the finding itself states",
+      "when": "2026-11-17T15:43:59.045938+00:00"
     }
   ],
   "responses": {
@@ -165,8 +172,8 @@
     "wiring-1": {
       "action": "declined",
       "by": "",
-      "reason": "both parents (s4, s5) are declared done, so the entry changes no dispatch order, as the finding itself states; the head meta is not writable through the plan text tools",
-      "when": "2026-11-17T15:43:42.161724+00:00"
+      "reason": "both parents (s4, s5) are declared done, so the entry changes no dispatch order, as the finding itself states",
+      "when": "2026-11-17T15:43:59.045938+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261117T114422897195-plan-review-of-iron-core-magnetisation.json",

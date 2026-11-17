@@ -1,0 +1,91 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T01:10:39.141Z",
+  "dispatched_at": "2026-11-17T01:09:28Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:89",
+      "id": "anchors_resolve-1",
+      "reason": "the section names the assigned expression as well, so a worker finds the call by grep; the stale line costs a wrong first read, not a wrong endpoint.",
+      "text": "\u00a78 anchors the build-time current assignment at `benchmarks/diiid_forward_gs_match.py:1356`, but that line is inside the grid_seam receipt dictionary and the `external_current=_source_current(...)` call is at line 1487, so the only positional anchor in the section points at unrelated code",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:90",
+      "id": "reasoning-1",
+      "reason": "an implementation written into the plan that the code cannot supply (names on the operator's vector) sends the node either to an assumption or a re-architecture mid-node; stating only the refusal and its control leaves the mapping to the code read.",
+      "text": "\u00a78 prescribes the implementation rather than the endpoint: it fixes the compared domain (the 19 shipped entries), the matching key (conductor name), the comparison exactness, and that the adapter raises; the operator the seam carries holds `external_current` as a bare array with no conductor names attached, so \"matched by conductor name\" is a guess about an ordering the worker must verify against code",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:129",
+      "id": "reasoning-2",
+      "reason": "a worker reading the later DIII-D q-dependent work takes one of two opposite facts about the same field from the plan itself, and which it takes changes whether it reclassifies frames or negates q.",
+      "text": "the plan's records contradict each other on the corpus q95 sign: f-dvf-003's outcome says \"the q95 question is resolved as a signed field\" while q-dvf-cocos-q95 (answered from the same five sign tuples, resolved 2026-09-10) concludes `efit_q95` is stored as an unsigned magnitude and that the sign question is \"a data question\", and q-dvf-002's resolution says SIGNED",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:21",
+      "id": "wiring-1",
+      "reason": "the relationship is a scheduling input; a plan that both blocks and informs a downstream plan leaves its dispatch order undecidable from the declarations.",
+      "text": "the front matter carries gs-absolute-accuracy-gates in both `plan-blocks` and `plan-informs`, so the same plan is declared as gated by this work and as merely informed by it, and the 2026-09-09 review comment already recorded that blocks should be informs",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:96",
+      "id": "reasoning-3",
+      "reason": "the fitted vector's re-derivation is the endpoint itself and the committed fit is the only instrument that produces it, so the endpoint sentence and the prescription coincide.",
+      "text": "\u00a79 prescribes a step sequence (run `fit.py` at the head, then re-solve the four rows \"with that vector applied to the corpus magnetics_* columns the adapter reads\") rather than the record it delivers",
+      "type": "reasoning",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:103",
+      "id": "reasoning-4",
+      "reason": "the section body already fixes the kernel choice, so naming it in the measure does not add a mechanism the body has not already committed to; the alternative wording (\"one kernel per target set, uniform included\") measures the same thing.",
+      "text": "\u00a710's done-when pins the test to \"block 0 of the same `build_flux_blocks` evaluation\", naming the function and the block index a worker must compare against",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "27bff094f2dc844363465b4b2509964c22ccb92f",
+  "plan_fingerprint": "94d6a60f0c00939b3c2c1da1bfb8c019d81ade310d52f58befffe4607c188cef",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 107,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T004515363037-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "b134e302e2b529f737bffaa3ff6855e94a6acf1d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a78's `benchmarks/diiid_forward_gs_match.py:1356` does not resolve to the statement it names (the `external_current=_source_current(` call is at line 1487; 1356 sits inside a grid_seam receipt dict). Every file, section and extensionless href otherwise resolves: `diiid-edge-current-refusal` \u2192 `.html`, `/nova/evidence/archive/diiid-vertical-force-balance-landed` \u2192 `.html`, `diiid-external-current-propagation.html`, `diiid-inactive-compensator-recovery.html`, `diiid-xpoint-coil-correction.html`, `docs/figures/current-constrained-forward-solve/pinned-cohort/`, `tests/imas/test_diiid_current_pinned_forward.py`, `scripts/prototypes/diiid_xpoint_coil_correction/fit.py` (which does write `correction-<frame>.json` and `conductor-fit-<frame>.json` with `equivalent_error_a_turn`), `nova/imas/diiid_current.py` (`complete_profile_current_adapter`, `shipped_current_at`), `nova/equilibrium/{constraint,fixed_point,source}.py`, `nova/biot/greens.py`.",
+    "done_when": "pass \u2014 each implementable node (\u00a77\u2013\u00a711) states a measurable record plus a declared control: \u00a77 a restored-term control on the zero image and tangent, \u00a78 a check-removed control, \u00a79 both a measured-equals arm and a build-seam control that must trip \u00a78's refusal, \u00a710 a restored-hybrid-row control, \u00a711 an undo/apply differential run that can reproduce or refute the stated current.",
+    "evidence_paths": "pass \u2014 gates write under each node's evidence directory (\u00a711 additionally forbids the committed receipt directory the entry point truncates), and the cited receipts live under docs/figures and docs/evidence, with `rigel` verified as a live partition beside all_debug.",
+    "naming": "pass \u2014 the mechanism strings the nodes must produce (`diverted_branch_residual_stall_with_landmark_retention`, `ACTIVE_SET_CYCLE_DETECTED`) name a mechanism rather than a tracker entry, and no node, section or symbol in the plan text carries a ticket or plan label into code.",
+    "reasoning": "a finding \u2014 \u00a78's prescription is a mechanism the plan asserts will work as written, and the plan's own records disagree about the corpus q95 sign.",
+    "single_goal": "pass \u2014 \u00a77 (masked compensator image), \u00a78 (adapter refusal), \u00a79 (rows solved with the fitted currents), \u00a710 (one plasma kernel per target set) and \u00a711 (pinned seed current against its registration) each carry one deliverable; the extra clauses are measurement arms of that deliverable.",
+    "wiring": "a finding \u2014 the front matter declares gs-absolute-accuracy-gates in both `plan-blocks` and `plan-informs`, so the plan's graph says that plan is both gated by and merely informed by this one; every section-level depends-on (s7\u2192s6,s10; s8\u2192s6; s9\u2192s7,s8; s10\u2192s6) resolves and matches each section's `data-links`."
+  },
+  "section_digests": {
+    "_document": "8e5c0bf47364beca17fe5b540a282cd24e45ff5cb13f57dbbb5016dda75d5b7c",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "8221264aa226d15c859f15d29e63bdc333dd055f1fa3f0ad1683edb6aba86e66",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "3dc57bc53014ca0924803e72edad5a80c9db8d8548f1484de73c21e0193d0ae3",
+    "s8": "8632587216eaa0edebdbe9d2f34107c6a23a5c5d466a12ce012fb753a7b1c661",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T01:54:59.632551+00:00",
+  "total": null
+}

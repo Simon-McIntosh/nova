@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "9b016126111a5acaebca064c07432042b5a2628c",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T16:38:40.211Z",
+  "dispatched_at": "2026-11-17T16:37:55Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T154836812474-icm-census-count-pin/manifest.md",
+      "line": "20-21",
+      "severity": "non-blocking",
+      "text": "non-blocking: the recorded baseline_suite and after_suite command names only tests/test_imas_iron_read.py, while the brief requires the arms to run the node's gate command, which also names tests/test_artifacts_carry_no_worktree_paths.py; the arm pair therefore measures a narrower command than the brief, and coverage of the second file rests only on the separate scoped-gate log."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T154836812474-icm-census-count-pin/manifest.md",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "non-blocking: measurement_module names /tmp/reckon-crew-scratch/r-20261117T154836812474-icm-census-count-pin/icm-arm-1viXRh/nova/biot/magnetisation.py, but every recorded gate and arm header names a /tmp/mcintos-landing-*/tree, so the field does not correspond to the tree any recorded run imported and cannot be checked against those logs."
+    }
+  ],
+  "head_log_revision": "441a328100ce26c7a8d45d4f09b78e758318d4ee",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production runtime code reaches the landed change; the change is a test assertion and a documentation fragment, so the line records none.",
+    "diff": "read both commits against base 9b0161261: dc5441530 adds hashlib, _vertex_digest, the 1694 literal and the digest literal to test_census_mesh_matches_previous_read; 441a32810 adds the 48-line evidence fragment recording the measurement, the 1696-versus-1694 mesher distinction and the mutant result.",
+    "done_when": "the done_when asks for an independent count pin, a spacing mutant that fails it, and base/head suite arms with zero added failures; scoped-gate-1794931288575331624.log records 19 passed EXIT=0 at 441a32810, negative-control-mesh-spacing.log records 1 failed 17 passed EXIT=1 on the 0.07 m mutant, and baseline_suite/after_suite read 18 passed EXIT=0 at 9b0161261 and 441a32810.",
+    "goal": "the goal is to restore an independent cell-count pin on the WEST census mesh read test; tests/test_imas_iron_read.py:170 pins 1694 cells measured from the test's own 0.08 m construction, which is no longer a value the production mesher's output can move.",
+    "manifest": "read; status complete, commits dc5441530 and 441a32810, changed_paths the two declared files, tests the two-file gate command, three test_logs, the 1694/digest landing, baseline_suite and after_suite both exit 0 with zero failures, and the 0.07 m negative-control log path.",
+    "write_paths": "the declared paths are tests/test_imas_iron_read.py and docs/evidence/fragments/iron-core-magnetisation/icm-census-count-pin.html; git show --stat on dc5441530 and 441a32810 touches exactly those two files and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/test_imas_iron_read.py:170 reddens at 2135 against the pinned 1694 under the 0.07 m mutant recorded in negative-control-mesh-spacing.log, and the digest constant at :173 fails if the mesher reorders or moves vertices at the same cell count.",
+    "evidence": "scoped-gate-1794931288575331624.log:5 runs the brief's two-file command at 441a32810 with \"19 passed\" and EXIT=0, negative-control-mesh-spacing.log ends \"1 failed, 17 passed\" EXIT=1 with \"assert 2135 == 1694\", and both suite arms read \"18 passed\" EXIT=0; the recorded arm command is narrower than the brief's named gate command.",
+    "fit": "tests/test_imas_iron_read.py:86-92 adds one helper beside the existing _outlines helper, imports hashlib alphabetically at :4, and uses no plan, sprint or ticket identifier in the comment at :165-168.",
+    "goal_fidelity": "tests/test_imas_iron_read.py:170-173 replaces len(actual) == len(expected) > 0 with a literal 1694-cell pin and an ordered-vertex SHA-256 constant, so the census read is pinned by value rather than by a value the mesher supplies.",
+    "reuse": "the repository's only comparable digest, nova/imas/diiid_machine_ids.py:192 _chain_sha256, is a private single-chain helper in an unrelated module, so no shared owner of an ordered polygon-set digest exists for _vertex_digest to extend.",
+    "scope_discipline": "git show --stat on dc5441530 and 441a32810 lists only tests/test_imas_iron_read.py (+19 -1) and docs/evidence/fragments/iron-core-magnetisation/icm-census-count-pin.html (+48), exactly the two declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to restore an independent cell-count pin on the WEST census mesh read test; tests/test_imas_iron_read.py:170 pins 1694 cells measured from the test's own 0.08 m construction, which is no longer a value the production mesher's output can move.\nVERDICT done_when: the done_when asks for an independent count pin, a spacing mutant that fails it, and base/head suite arms with zero added failures; scoped-gate-1794931288575331624.log records 19 passed EXIT=0 at 441a32810, negative-control-mesh-spacing.log records 1 failed 17 passed EXIT=1 on the 0.07 m mutant, and baseline_suite/after_suite read 18 passed EXIT=0 at 9b0161261 and 441a32810.\nVERDICT write_paths: the declared paths are tests/test_imas_iron_read.py and docs/evidence/fragments/iron-core-magnetisation/icm-census-count-pin.html; git show --stat on dc5441530 and 441a32810 touches exactly those two files and nothing else.\nVERDICT manifest: read; status complete, commits dc5441530 and 441a32810, changed_paths the two declared files, tests the two-file gate command, three test_logs, the 1694/digest landing, baseline_suite and after_suite both exit 0 with zero failures, and the 0.07 m negative-control log path.\nVERDICT diff: read both commits against base 9b0161261: dc5441530 adds hashlib, _vertex_digest, the 1694 literal and the digest literal to test_census_mesh_matches_previous_read; 441a32810 adds the 48-line evidence fragment recording the measurement, the 1696-versus-1694 mesher distinction and the mutant result.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/test_imas_iron_read.py:170-173 replaces len(actual) == len(expected) > 0 with a literal 1694-cell pin and an ordered-vertex SHA-256 constant, so the census read is pinned by value rather than by a value the mesher supplies.\nSCORE evidence: 16\nJUSTIFICATION evidence: scoped-gate-1794931288575331624.log:5 runs the brief's two-file command at 441a32810 with \"19 passed\" and EXIT=0, negative-control-mesh-spacing.log ends \"1 failed, 17 passed\" EXIT=1 with \"assert 2135 == 1694\", and both suite arms read \"18 passed\" EXIT=0; the recorded arm command is narrower than the brief's named gate command.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat on dc5441530 and 441a32810 lists only tests/test_imas_iron_read.py (+19 -1) and docs/evidence/fragments/iron-core-magnetisation/icm-census-count-pin.html (+48), exactly the two declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_imas_iron_read.py:170 reddens at 2135 against the pinned 1694 under the 0.07 m mutant recorded in negative-control-mesh-spacing.log, and the digest constant at :173 fails if the mesher reorders or moves vertices at the same cell count.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_imas_iron_read.py:86-92 adds one helper beside the existing _outlines helper, imports hashlib alphabetically at :4, and uses no plan, sprint or ticket identifier in the comment at :165-168.\nSCORE reuse: 18\nJUSTIFICATION reuse: the repository's only comparable digest, nova/imas/diiid_machine_ids.py:192 _chain_sha256, is a private single-chain helper in an unrelated module, so no shared owner of an ordered polygon-set digest exists for _vertex_digest to extend.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T154836812474-icm-census-count-pin/manifest.md:20-21 non-blocking: the recorded baseline_suite and after_suite command names only tests/test_imas_iron_read.py, while the brief requires the arms to run the node's gate command, which also names tests/test_artifacts_carry_no_worktree_paths.py; the arm pair therefore measures a narrower command than the brief, and coverage of the second file rests only on the separate scoped-gate log.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T154836812474-icm-census-count-pin/manifest.md:16 non-blocking: measurement_module names /tmp/reckon-crew-scratch/r-20261117T154836812474-icm-census-count-pin/icm-arm-1viXRh/nova/biot/magnetisation.py, but every recorded gate and arm header names a /tmp/mcintos-landing-*/tree, so the field does not correspond to the tree any recorded run imported and cannot be checked against those logs.",
+  "review_run_id": "r-20261117T161832945832-review-of-icm-census-count-pin-441a328100ce",
+  "reviewed_base_sha": "9b016126111a5acaebca064c07432042b5a2628c",
+  "reviewed_head_sha": "441a328100ce26c7a8d45d4f09b78e758318d4ee",
+  "reviewed_run_id": "r-20261117T154836812474-icm-census-count-pin",
+  "reviewer": {
+    "backend": "local",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20261117T161832945832-review-of-icm-census-count-pin-441a328100ce",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:55:19.198931+00:00",
+  "total": 110
+}

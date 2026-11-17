@@ -22,7 +22,7 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="111">
+<meta name="plan-version" content="112">
 <meta name="plan-modified" content="2026-11-17">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
@@ -356,6 +356,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261117T132846710296-review-of-diiid-single-kernel-coupling-9ff3d99fd0c3-figure" data-who="reckon-build" data-when="2026-11-17T13:49:20.577Z">
     <div class="r-comment-body"><p>Read-only figure review of r-20261116T224846811324-diiid-single-kernel-coupling at 9ff3d99f (base 3b05ffb6): all five rendered PNGs opened and judged; four flux panels pass every rubric item, and the uniform-response-difference map revised as a style-only fix is required for the failure reported.</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261117T133317609564-review-of-diiid-single-kernel-coupling-9ff3d99fd0c3" data-who="reckon-build" data-when="2026-11-17T13:37:56.383Z">
+    <div class="r-comment-body"><p>Independent review of diiid-single-kernel-coupling at 9ff3d99fd0c3 against base 3b05ffb6: the product change takes the DIII-D builder&#x27;s uniform grid, wall and sampling rows from block 0 of the same _moment_couplings build_flux_blocks evaluation that supplies their radial and vertical rows, the committed regression reddens on the hybrid substitution (3 failed, 1 passed, EXIT=1) and passes at the head (4 passed, EXIT=0), and the eight terminal arms plus the coupling-difference map are recorded; two non-blocking findings: the fragment asserts an all_debug host no log records, and _display_coupling&#x27;s docstring still claims the solve consumes the hybrid uniform block.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

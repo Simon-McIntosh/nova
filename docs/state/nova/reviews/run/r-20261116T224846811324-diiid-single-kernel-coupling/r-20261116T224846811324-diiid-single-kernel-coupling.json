@@ -9,6 +9,13 @@
   ],
   "completed_at": "",
   "dispatched_at": "2026-11-16T22:49:58Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-single-kernel-coupling",
+      "recorded_at": "2026-11-17T20:49:20.416351+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html",

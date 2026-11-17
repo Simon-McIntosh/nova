@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T16:35:16.627Z",
+  "dispatched_at": "2026-11-17T16:34:52Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:85",
+      "id": "done_when-1",
+      "reason": "without a third branch (repair the mask's active-set interaction, or close the masked row as unconverged against \u00a712's mechanism) and a statement of which coupling the 137D arms run on, the node's whole done-when is unattainable in the branch the plan has already measured.",
+      "text": "\u00a77's done-when closes on one of two branches: \"137D converges with the mask\", or the unmasked converged 137D is not an equilibrium without the image. The section's own withdrawn-attempt record lands in neither: the masked head cycles at 2.46e-3 with ACTIVE_SET_CYCLE_DETECTED, and \u00a77 itself calls that case \"a defect to repair\", not an endpoint. The fallback branch is also unreachable on the head \u00a77 declares: \u00a77 is measured on the head carrying \u00a76 and \u00a710, and \u00a712 records that on the single kernel the same unmasked 137D seed stops at 3.3e-4 with ACTIVE_SET_STEP_REFUSED, so there is no unmasked converged 137D state on that coupling to re-solve from. A dispatched node reproducing the recorded outcome has no verdict to close on and must either stop or invent scope.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:47",
+      "id": "wiring-1",
+      "reason": "an undeclared cross-plan dependency is exactly the relationship the wiring item exists to catch; the coordinator would dispatch or expect the refresh against a traced-current seam that does not exist yet.",
+      "text": "\u00a73 records that the eleven-row receipt \"is refreshed after `millisecond-converged-solve` \u00a72 makes the prescribed current a traced argument\", yet this plan declares no `plan-depends-on`, and `millisecond-converged-solve` declares `plan-informs` = `forward-solve-api` only. The dependency is real and live \u2014 that plan's `plan-section-declarations` reads `s2: implementable` \u2014 so a coordinator composing work from this plan cannot see that the \u00a73 refresh is blocked outside the plan, and \u00a73 shows as landed while its measure is owed on another plan's open section.",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:90",
+      "id": "reasoning-1",
+      "reason": "the plan should state the endpoint (the adapter refuses to install a conductor current that differs from the one the operator was built with, an override goes through the corpus, no new public option) and leave the site and the matching rule to the node brief; as written the worker must test a plan-stated mechanism rather than a plan-stated outcome, and a wrong exactness claim costs a review round.",
+      "text": "\u00a78 is written as a method, not an endpoint: \"Make the adapter the place this is caught\", compare \"over the shipped conductors only\" as \"the 19 shipped entries, matched by conductor name\", and it raises on any difference. That fixes a code site, a comparison domain and a step sequence in plan text, and it asserts a property of the code \u2014 \"Those entries are assembled from the same corpus columns and turn multipliers, so matching inputs agree exactly and the comparison is exact\" \u2014 that the cited propagation trace does not establish, since that trace measures a disagreement only for the patched build-time vector, not that the unpatched build-time vector and the resolution agree entry by entry across all 19 shipped channels. If the exactness claim is false for any legitimate caller, an exact comparison refuses every corpus-built profile, and the done-when's clause (2) bit-identity requirement is the only thing that would catch it.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "aa5ad71570f241ad8275ca9a6e83183ad48b811e",
+  "plan_fingerprint": "5d62fbf211752677fe98bdde995b01943f0a935a8cc93f1f8d3fa43775a0fc6c",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 117,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261117T163337806401-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "9dac3845cb61ed42d8253d14c4dc66a5f449bb8c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 26 cited files and 8 cited revisions resolve in the repository, including extensionless hrefs once `.html` is appended, and the kernel call sites \u00a710 names exist at `benchmarks/diiid_forward_gs_match.py:1210` and `:1284-1294`.",
+    "done_when": "a finding \u2014 \u00a77's closing criterion offers two branches, and the outcome the plan itself already recorded (masked 137D cycles at 2.46e-3) is neither of them (plan.html:85).",
+    "evidence_paths": "pass \u2014 \u00a78, \u00a79 and \u00a712 write to `docs/evidence/fragments/diiid-vertical-force-balance/` and `docs/figures/diiid-vertical-force-balance/` under `docs/evidence/archive/...-landed.html`-style paths in git, and \u00a711 refuses the committed pinned-cohort output directory.",
+    "naming": "pass \u2014 no plan label, sprint number or ticket number reaches a symbol; \u00a77 defers the mask site to the node brief and \u00a79's receipt names are frame-scoped data names.",
+    "reasoning": "a finding \u2014 \u00a78 prescribes where the check lives and how it compares, and asserts an exactness property of the code that its cited evidence does not establish (plan.html:90).",
+    "single_goal": "pass \u2014 each of the six open sections names one endpoint; \u00a79's receipt re-derivation is a precondition of its single endpoint, not a second deliverable.",
+    "wiring": "a finding \u2014 \u00a73's owed eleven-row receipt refresh is gated on `millisecond-converged-solve` \u00a72, which is still `implementable`, and neither plan declares the relation (plan.html:47)."
+  },
+  "section_digests": {
+    "_document": "b00dd0575a27805b8e71f761a9ecda745a24fb4d3f7ac6602d7157d4e54313c1",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "8221264aa226d15c859f15d29e63bdc333dd055f1fa3f0ad1683edb6aba86e66",
+    "s12": "95c2ca272095b9a7723109be1e1906771bb259110daaf42b9ab5a27c90ee76f2",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "3dc57bc53014ca0924803e72edad5a80c9db8d8548f1484de73c21e0193d0ae3",
+    "s8": "947496a5661facc0e84af20b07da019a130e6d538d4e68c6ad9b46949d4e6693",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:49:22.410790+00:00",
+  "total": null
+}

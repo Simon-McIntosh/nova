@@ -69,6 +69,13 @@
       "summary": null
     }
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "efit-comparison",
+      "recorded_at": "2026-11-17T20:41:27.096179+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_magnetics_fit_efit_comparison.py",

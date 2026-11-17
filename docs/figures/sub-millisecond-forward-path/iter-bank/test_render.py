@@ -179,3 +179,37 @@ def test_invalid_text_is_refused(tmp_path, damage):
     with pytest.raises(ValueError, match="text outside canvas|text overlaps"):
         render.checked_save(figure, tmp_path / "refused.svg")
     assert not (tmp_path / "refused.svg").exists()
+
+
+def test_wall_is_drawn_above_the_cell_outlines(scene, geometry):
+    render.check_scene(scene, expected_labels(geometry))
+    for ax in scene.axes:
+        for line in ax.lines:
+            if line.get_gid() == render.WALL_GID:
+                line.set_zorder(1)
+    with pytest.raises(ValueError, match="first wall is not drawn above"):
+        render.check_scene(scene, expected_labels(geometry))
+
+
+def test_wall_mark_duplicating_the_coil_grey_is_refused(scene, geometry):
+    render.check_scene(scene, expected_labels(geometry))
+    for ax in scene.axes:
+        for line in ax.lines:
+            if line.get_gid() == render.WALL_GID:
+                line.set_color("#929292")
+    with pytest.raises(ValueError, match="first wall mark duplicates"):
+        render.check_scene(scene, expected_labels(geometry))
+
+
+@pytest.mark.parametrize("damage", ["colour", "style", "label"])
+def test_legend_entry_must_carry_its_component_mark(scene, geometry, damage):
+    render.check_scene(scene, expected_labels(geometry))
+    handle = scene.legends[0].legend_handles[-1]
+    if damage == "colour":
+        handle.set_color("#123456")
+    elif damage == "style":
+        handle.set_linestyle("-")
+    else:
+        handle.set_label("wall")
+    with pytest.raises(ValueError, match="legend"):
+        render.check_scene(scene, expected_labels(geometry))

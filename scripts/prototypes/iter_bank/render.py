@@ -13,7 +13,7 @@ matplotlib.use("Agg")
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.colors import to_rgb
 from matplotlib.figure import Figure
-from matplotlib.lines import Line2D
+from matplotlib.lines import Line2D, _get_dash_pattern
 from matplotlib.text import Text
 from matplotlib.transforms import Bbox
 import numpy as np
@@ -254,13 +254,16 @@ def check_scene(figure, expected_labels):
 
 
 def mark(artist, colour):
-    """Return an artist's mark as a comparable (colour, normalised linestyle)."""
-    from matplotlib.lines import Line2D
+    """Return an artist's mark as a comparable (colour, normalised dash)."""
+    return (tuple(to_rgb(colour)), _dash(artist.get_linestyle()))
 
-    return (
-        tuple(to_rgb(colour)),
-        Line2D([], [], linestyle=artist.get_linestyle()).get_linestyle(),
-    )
+
+def _dash(value):
+    """Reduce a line or collection linestyle to one dash-pattern vocabulary."""
+    if isinstance(value, str):
+        return _get_dash_pattern(value)
+    offset, sequence = value[0]
+    return (float(offset), sequence)
 
 
 def build_figure(geometry):

@@ -21,11 +21,11 @@
   <meta name="plan-tags" content="equilibrium,efit,grad-shafranov,convergence">
   <meta name="plan-after" content="converged-forward-solve">
   <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;deferred&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[],&quot;s3&quot;:[&quot;inverse-equilibrium-baseline#s8&quot;],&quot;s4&quot;:[&quot;inverse-equilibrium-baseline#s8&quot;],&quot;s5&quot;:[&quot;inverse-equilibrium-baseline#s3&quot;],&quot;s6&quot;:[],&quot;s7&quot;:[&quot;inverse-equilibrium-baseline#s6&quot;,&quot;inverse-equilibrium-baseline#s3&quot;,&quot;inverse-equilibrium-baseline#s8&quot;],&quot;s8&quot;:[],&quot;s9&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[],&quot;s3&quot;:[&quot;inverse-equilibrium-baseline#s8&quot;],&quot;s4&quot;:[&quot;inverse-equilibrium-baseline#s8&quot;,&quot;forward-solve-near-stored-states#s4&quot;],&quot;s5&quot;:[&quot;inverse-equilibrium-baseline#s3&quot;],&quot;s6&quot;:[],&quot;s7&quot;:[&quot;inverse-equilibrium-baseline#s6&quot;,&quot;inverse-equilibrium-baseline#s3&quot;,&quot;inverse-equilibrium-baseline#s8&quot;],&quot;s8&quot;:[],&quot;s9&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;]}">
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 <meta name="plan-modified" content="2026-11-18">
 </head>
 <body>
@@ -72,7 +72,7 @@
         <tr><td>§1 Known-answer recovery</td><td>8</td><td>deep</td><td>moderate</td><td>—</td></tr>
         <tr><td>§2 The same inputs as EFIT</td><td>7</td><td>deep</td><td>elevated</td><td>§1 (landed)</td></tr>
         <tr><td>§3 One scoreboard for every estimator</td><td>4</td><td>standard</td><td>low</td><td>§8</td></tr>
-        <tr><td>§4 Cost on the H200</td><td>3</td><td>standard</td><td>moderate</td><td>§8</td></tr>
+        <tr><td>§4 Cost on the H200</td><td>3</td><td>standard</td><td>moderate</td><td>§8 and forward-solve-near-stored-states §4</td></tr>
         <tr><td>§5 The reduced-model reconstructions</td><td>3</td><td>standard</td><td>moderate</td><td>§3 and a decision</td></tr>
         <tr><td>§6 White sensor noise</td><td>4</td><td>standard</td><td>moderate</td><td>§1 (landed)</td></tr>
         <tr><td>§7 Drifting sensors beside EFIT</td><td>6</td><td>deep</td><td>elevated</td><td>§6, §3 and §8</td></tr>
@@ -152,7 +152,7 @@
 
     <h2 id="s4">§4 — Cost on the H200</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>Waits on §8, the case on which the class has a fit to time; the locked fit decisions set the unknown count, and so the cost measured here.</p>
+    <p>Waits on §8, the case on which the class has a fit to time, and on the forward plan's section <code>forward-solve-near-stored-states#s4</code>: the first attempt found that the forward solve the fit calls refuses under a batch, so widths 16 and 64 cannot be timed until it does not. The locked fit decisions set the unknown count, and so the cost measured here.</p>
     <p>A baseline that cannot be run over a pulse is of little use for development. The cost of one
     reconstruction is measured where the forward solve's cost is decided, on the H200.</p>
     <p><strong>Done when.</strong> (1) The record reports, for the §8 ITER case, replicated across the batch with independent white noise at the §6 level on each copy, at batch widths 1, 16 and
@@ -326,7 +326,7 @@
     <div class="r-comment-body"><p>reviewed r-20261114T143301237025-estimator-scoreboard at base dd32048a48b754655722787346acf0471fe03cdf and head 7611f2b359221922d1c26901e735d57eb3e6e448; scores goal_fidelity 17, evidence 17, scope_discipline 19, durability 17, fit 17, reuse 5 (total 92); eight non-blocking findings, no blocking finding, so the node may land</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261114T143301237025-estimator-scoreboard" data-who="reckon-build" data-when="2026-11-17T22:39:34Z">
-    <div class="r-comment-body"><p>the row-exchange case is scored on one comparator from stored states, with imas-efit&#x27;s reconstruction passing four of five bands and failing the safety factor at 0.148 against a band of 0.1, the nova inverse-class state passing every band at the fit&#x27;s own recorded precision, a declared perturbed copy of that state failing every band, and all three reference-free checks reported for every column; each column names its state source and the receipt carries each state&#x27;s digest</p></div>
+    <div class="r-comment-body"><p>the row-exchange case is scored on one comparator from stored states, with imas-efit's reconstruction passing four of five bands and failing the safety factor at 0.148 against a band of 0.1, the nova inverse-class state passing every band at the fit's own recorded precision, a declared perturbed copy of that state failing every band, and all three reference-free checks reported for every column; each column names its state source and the receipt carries each state's digest</p></div>
 </div>
 </section>
 </main>

@@ -10,7 +10,7 @@
   <meta name="plan-summary" content="Forward solves started at or beside a stored imas-efit state refuse on MAST-U, TCV and ITER; reproduce, attribute and repair them.">
   <meta name="plan-status" content="draft">
   <meta name="plan-roi" content="high">
-  <meta name="plan-effort-hours" content="14.0">
+  <meta name="plan-effort-hours" content="20.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,efit,grad-shafranov,convergence">
   <meta name="plan-after" content="converged-forward-solve">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s1&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s2&quot;:[&quot;forward-solve-near-stored-states#s1&quot;],&quot;s3&quot;:[&quot;forward-solve-near-stored-states#s2&quot;]}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s1&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s2&quot;:[&quot;forward-solve-near-stored-states#s1&quot;],&quot;s3&quot;:[&quot;forward-solve-near-stored-states#s2&quot;],&quot;s4&quot;:[]}">
   <title>Forward Solve Near Stored States | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-11-18">
 </head>
 <body>
@@ -59,6 +59,7 @@
         <tr><td>§1 The three refusals as standing cases</td><td>3</td><td>standard</td><td>moderate</td><td>inverse-equilibrium-baseline §2</td></tr>
         <tr><td>§2 Where each solve stops qualifying</td><td>3</td><td>deep</td><td>moderate</td><td>§1</td></tr>
         <tr><td>§3 The solves qualify</td><td>8</td><td>deep</td><td>elevated</td><td>§2</td></tr>
+        <tr><td>§4 The public solve runs under a batch</td><td>6</td><td>deep</td><td>elevated</td><td>—</td></tr>
       </tbody>
     </table>
 
@@ -85,7 +86,7 @@
     section measures that distance for each case, and says which displaced states can be reached at all by
     the solve as it stands when it is led there in smaller steps. It makes no claim about whether an
     unreached state exists.</p>
-    <p><strong>Done when.</strong> (1) For MAST-U the record states, along the coordinate and sign §1 recorded, the largest fraction of the recorded displacement at which the solve qualifies below 1e-10 and the smallest at which it does not, over the fractions 1, 1/2, 1/4, 1/8, 1/16, 1/32 and 1/64, each solve started from the last state that qualified, beginning at §1's positive control and using its policy. (2) For TCV and ITER, which refuse at the stored coefficients, the record states the terminal reason and residual from two starting routes: the stored flux map under the default policy, and the same start under the positive control's policy. (3) Each case is given one of two verdicts within those stated sets. <em>Reached</em>: for MAST-U the full recorded displacement qualifies at the end of the sequence; for TCV and ITER either route qualifies. <em>Not reached</em>: otherwise, with where each solve stopped. Negative control: the direct MAST-U solve at the full displacement under the default policy, started from the stored flux map, reproduces the refusal §1 recorded.</p>
+    <p><strong>Done when.</strong> (1) For MAST-U the record states, along the coordinate and sign §1 recorded, the largest fraction of the recorded displacement at which the solve qualifies below 1e-10 and the smallest at which it does not, over the fractions 1/64, 1/32, 1/16, 1/8, 1/4, 1/2 and 1 run in that order, each solve started from the last state that qualified, beginning at §1's positive control and using its policy. (2) For TCV and ITER, which refuse at the stored coefficients, the record states the terminal reason and residual from two starting routes: the stored flux map under the default policy, and the same start under the positive control's policy. (3) Each case is given one of two verdicts within those stated sets. <em>Reached</em>: for MAST-U the last solve of that sequence, at the full recorded displacement, qualifies; for TCV and ITER either route qualifies. <em>Not reached</em>: otherwise, with where each solve stopped. Negative control: the direct MAST-U solve at the full displacement under the default policy, started from the stored flux map, reproduces the refusal §1 recorded.</p>
 
     <h2 id="s3">§3 — The solves qualify</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
@@ -101,6 +102,10 @@
     on the stored imas-efit state, on shared levels, with both null sets and the wall.</p>
 
     
+
+    <h2 id="s4">§4 — The public solve runs under a batch</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<p>Waits on nothing in this plan; the inverse baseline's cost section waits on it.</p><p>The inverse baseline could not measure what a reconstruction costs at batch widths above one. The route its fit calls through the public forward solve reports convergence by converting a traced flag on the host, so the solve refuses when it is swept over a batch of states, and the two other routes of that seam admit no axis on the case even unbatched. On the nova-written ITER case the baseline measured single-solve walls only, about 255 s on a CPU node and 270 s on a P100, and refused to report a cost it could not show converged. The lead ruled on 2026-11-18 that batching be made a section here and the cost section wait on it. The measurements are in <code>docs/evidence/fragments/inverse-equilibrium-baseline/reconstruction-cost.html</code>, which lands with that section's run.</p><p><strong>Done when.</strong> (1) The public forward solve, called as the inverse class calls it on the nova-written ITER case, runs under a batch of 16 and of 64 independent states in one traced program on the H200 and returns a per-state converged flag and residual without leaving the device, with every state qualifying below the unchanged 1e-10 threshold. (2) Each batched state agrees with the same state solved alone to within ten times the threshold in flux, and the warm wall per state at width 16 is no greater than the warm wall of one unbatched solve, both measured in one job with compile excluded and the persistent compilation cache contract printed. (3) Negative control: at the base revision the same batched call raises the host-conversion refusal the baseline recorded. Nothing already converging is lost: the forward gate that passes at base passes at head with no added failure.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>

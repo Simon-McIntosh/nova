@@ -12,6 +12,13 @@
     "scripts/iron_linear_magnetisation/reference.py:146"
   ],
   "completed_at": "2026-11-18T05:23:08.476Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "three review rounds; the remaining durability findings are record-keeping in scripts and receipts, and the measured verdict with its convergence caveat is placed in the plan by the coordinator",
+      "recorded_at": "2026-11-18T17:01:13.143038+00:00"
+    }
+  },
   "dispatched_at": "2026-11-18T05:22:52Z",
   "finding_dispositions": {
     "0": {

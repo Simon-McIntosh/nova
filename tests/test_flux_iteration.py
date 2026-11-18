@@ -75,19 +75,45 @@ class _Instrument:
         return _profile_weight(psi, self.flux_weight) @ coefficients
 
 
+class _PrescribedField:
+    """A prescribed field whose flux needs its own current vector."""
+
+    def flux(self, current):
+        if current is None:
+            raise TypeError("prescribed flux needs a current vector")
+        return np.asarray(current, dtype=np.float64)[0] * np.ones(CELLS)
+
+
 class _Operator:
-    def __init__(self, instrument, source):
+    def __init__(self, instrument, source, prescribed=False):
         self.instrument = instrument
         self.source = source
+        self.prescribed_field = _Operator.field if prescribed else None
+        self.prescribed = prescribed
+
+    field = _PrescribedField()
 
     def cell_current(self, psi, requested_class=None, target_current=None):
         return jnp.asarray(self.instrument.cell_current(self.source, psi))
 
-    def __call__(self, psi, current=None, requested_class=None, target_current=None):
+    def __call__(
+        self,
+        psi,
+        current=None,
+        requested_class=None,
+        target_current=None,
+        prescribed_current=None,
+    ):
         if current is not None:
             self.instrument.currents = np.asarray(current, dtype=np.float64)
+        external = EXTERNAL
+        if self.prescribed_field is not None:
+            self.prescribed_symbols = prescribed_current
+            external = EXTERNAL + np.asarray(
+                self.prescribed_field.flux(prescribed_current), dtype=np.float64
+            )
         return jnp.asarray(
-            EXTERNAL + COUPLING @ self.instrument.cell_current(self.source, psi)
+            external + COUPLING @ self.instrument.cell_current(self.source, psi)
         )
 
     def read(self, psi):
@@ -95,9 +121,10 @@ class _Operator:
 
 
 class _Profile:
-    def __init__(self, source, flux_weight=FLUX_WEIGHT):
+    def __init__(self, source, flux_weight=FLUX_WEIGHT, prescribed=False):
         self.instrument = _Instrument(flux_weight)
-        self.operator = _Operator(self.instrument, source)
+        self.prescribed = prescribed
+        self.operator = _Operator(self.instrument, source, prescribed)
 
     @property
     def source(self):
@@ -106,7 +133,8 @@ class _Profile:
     def _with_source(self, source):
         active = object.__new__(type(self))
         active.instrument = self.instrument
-        active.operator = _Operator(self.instrument, source)
+        active.prescribed = self.prescribed
+        active.operator = _Operator(self.instrument, source, self.prescribed)
         return active
 
 
@@ -266,3 +294,41 @@ def test_a_scaled_input_leaves_the_plasma_current_band():
     current = abs(float(np.sum(receipt.terminal_state.cell_current)))
     reference = abs(float(measurement.plasma_current))
     assert abs(current - reference) / reference > 0.015
+
+
+def test_an_operator_with_a_prescribed_field_takes_its_current_vector():
+    flux = _fixed_point(TRUTH)
+    cells = _profile_weight(flux) @ TRUTH
+    geometry = Magnetics(
+        r=np.arange(1.0, SENSORS + 1.0),
+        z=np.zeros(SENSORS),
+        angle=np.zeros(SENSORS),
+        flux_loop=LOOPS,
+    )
+    source = _source(TRUTH)
+    with pytest.raises(ValueError, match="prescribed current vector"):
+        FluxIterationFit(_Profile(source, prescribed=True), geometry, _sensor_rows)
+    fitter = FluxIterationFit(
+        _Profile(source, prescribed=True),
+        geometry,
+        _sensor_rows,
+        prescribed_current=np.array([0.5]),
+    )
+    receipt = fitter.fit(
+        SliceMeasurement(
+            measured=SENSOR @ cells,
+            vacuum=np.zeros(SENSORS),
+            mask=np.ones(SENSORS, dtype=bool),
+            scale=SCALE,
+            plasma_current=float(np.sum(cells)),
+        ),
+        np.zeros(CELLS),
+        plasma_current_scale=1.0,
+        flux_tolerance=1.0e-12,
+    )
+    assert receipt.flux_evaluations >= 1
+    assert receipt.axis_lost_pass is None
+
+
+def _sensor_rows(currents):
+    return SENSOR @ np.asarray(currents)

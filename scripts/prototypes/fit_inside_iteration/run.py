@@ -99,6 +99,8 @@ def _known_case(name, factory):
         cells=len(case["coordinate"]),
         core=np.asarray(case["generated"].terminal_state.domains.core),
         plasma_current=abs(float(case["measurement"].plasma_current)),
+        prescribed_current=getattr(case["request"], "prescribed_current", None),
+        request=case["request"],
         figure=case,
     )
 
@@ -136,6 +138,7 @@ def _stored_case(name):
         initial_flux=np.asarray(data["seed"], dtype=np.float64),
         conductor_response=response,
         conductor_names=data["conductor_names"],
+        prescribed_current=getattr(data.get("problem"), "prescribed_current", None),
         plasma_current=abs(float(data["case"].plasma_current)),
         data=data,
     )
@@ -150,6 +153,7 @@ def _run_known(case, args):
         case["magnetics"],
         case["rows"],
         coefficient_basis=case["basis"],
+        prescribed_current=case["prescribed_current"],
     )
     fitted = fitter.fit(
         case["measurement"],
@@ -240,6 +244,7 @@ def _run_stored(case, args):
         coefficient_basis=case["basis"],
         conductor_response=case["conductor_response"],
         conductor_names=case["conductor_names"],
+        prescribed_current=case["prescribed_current"],
     )
     try:
         fitted = fitter.fit(

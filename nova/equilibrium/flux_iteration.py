@@ -129,6 +129,7 @@ class FluxIterationFit:
         conductor_response: np.ndarray | None = None,
         conductor_current_field: str = "current",
         conductor_names: tuple[str, ...] | None = None,
+        prescribed_current: np.ndarray | None = None,
     ) -> None:
         configure_dtypes()
         assert jax.config.jax_enable_x64 is True
@@ -200,6 +201,19 @@ class FluxIterationFit:
             self._initial = np.r_[initial, np.zeros(response.shape[1])]
             self._names += names
         self._conductor_count = self._conductor_response.shape[1]
+        prescribed = (
+            None
+            if prescribed_current is None
+            else np.array(prescribed_current, dtype=np.float64, copy=True)
+        )
+        if profile.operator.prescribed_field is not None and prescribed is None:
+            raise ValueError(
+                "the operator carries a prescribed current field, so the map "
+                "update needs the prescribed current vector"
+            )
+        if prescribed is not None:
+            prescribed.setflags(write=False)
+        self._prescribed_current = prescribed
 
     def _source(self, coefficients) -> ForwardSource:
         coefficients = self._basis @ np.asarray(coefficients)[: self._profile_count]
@@ -387,17 +401,22 @@ class FluxIterationFit:
             )
             coefficients = coefficients + correction
             try:
-                updated = np.asarray(
-                    operator(
-                        jnp.asarray(flux),
-                        jnp.asarray(coefficients[self._profile_count :]),
-                        None,
-                        None,
-                    ),
-                    dtype=np.float64,
+                arguments = (
+                    jnp.asarray(coefficients[self._profile_count :]),
+                    None,
+                    None,
                 )
+                if self._prescribed_current is None:
+                    updated = operator(jnp.asarray(flux), *arguments)
+                else:
+                    updated = operator(
+                        jnp.asarray(flux),
+                        *arguments,
+                        jnp.asarray(self._prescribed_current),
+                    )
+                updated = np.asarray(updated, dtype=np.float64)
                 flux_evaluations += 1
-            except Exception:
+            except ValueError:
                 axis_lost_pass = index
                 break
             delta = updated - flux

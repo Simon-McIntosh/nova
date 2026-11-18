@@ -24,6 +24,11 @@
       "kind": "exempted",
       "reason": "the logs' header names the single-file command they actually ran, and both arms pass at base and head; the recorded three-file command is the brief's gate, and its separate gate log passes at the head",
       "recorded_at": "2026-11-18T02:14:31.404175+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the coordinator accepts tests/test_magnetisation.py at landing: the test guards the reference.py restoration the previous review found unguarded",
+      "recorded_at": "2026-11-18T02:14:57.008930+00:00"
     }
   },
   "findings": [

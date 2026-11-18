@@ -152,9 +152,22 @@
       "finding": "reuse_search-4",
       "reason": "Agreed and recorded for the brief: the panels use the committed painters and one level array; no plan change, as the finding itself says.",
       "when": "2026-11-18T11:27:07.668962+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "deep_module-1",
+      "reason": "The record shape is the brief to fix, as the finding itself says; the endpoint is unambiguous.",
+      "when": "2026-11-18T11:27:15.706360+00:00"
     }
   ],
   "responses": {
+    "deep_module-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The record shape is the brief to fix, as the finding itself says; the endpoint is unambiguous.",
+      "when": "2026-11-18T11:27:15.706360+00:00"
+    },
     "duplicate_owner-1": {
       "action": "acted",
       "by": "",

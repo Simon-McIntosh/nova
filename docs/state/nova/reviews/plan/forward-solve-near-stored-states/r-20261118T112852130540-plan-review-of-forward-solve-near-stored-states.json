@@ -53,6 +53,13 @@
       "note": "The record now carries a line-contour panel of one batched state on the solo state, on shared levels with both null sets and the wall.",
       "reason": "",
       "when": "2026-11-18T11:57:31.460089+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "The design review of this plan found a batched entry already exists and required the section to account for its interface surface in its own text; saying that no second batched surface is added is that account, an interface budget and not a method. How the route is repaired is left to the worker.",
+      "when": "2026-11-18T11:58:25.386813+00:00"
     }
   ],
   "responses": {
@@ -73,6 +80,12 @@
       "note": "The record now carries a line-contour panel of one batched state on the solo state, on shared levels with both null sets and the wall.",
       "reason": "",
       "when": "2026-11-18T11:57:31.460089+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The design review of this plan found a batched entry already exists and required the section to account for its interface surface in its own text; saying that no second batched surface is added is that account, an interface budget and not a method. How the route is repaired is left to the worker.",
+      "when": "2026-11-18T11:58:25.386813+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261118T112852130540-plan-review-of-forward-solve-near-stored-states.json",

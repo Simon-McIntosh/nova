@@ -115,6 +115,16 @@
       "finding": "single_goal-1",
       "reason": "node (b) states its own done-when in the Nodes paragraph, the form the review of version 68 asked for when it required the arm to be split from the compile clause",
       "when": "2026-11-18T17:26:52.445726+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "92b086a8b8bbeb157d3146fa1f53c5a88fd567b3",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "s4 clause (1) names the empty-cache arm that must exceed the miss budget and exit nonzero",
+      "reason": "",
+      "when": "2026-11-18T17:27:01.943534+00:00"
     }
   ],
   "responses": {
@@ -123,6 +133,15 @@
       "by": "plan-review-reflex",
       "reason": "each cited file resolves and each symbol is one grep away in it, so the anchor costs a worker a lookup rather than sending it at the wrong mechanism.",
       "when": "2026-11-18T17:18:55.322057+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "92b086a8b8bbeb157d3146fa1f53c5a88fd567b3",
+      "commit_basis": "edit",
+      "note": "s4 clause (1) names the empty-cache arm that must exceed the miss budget and exit nonzero",
+      "reason": "",
+      "when": "2026-11-18T17:27:01.943534+00:00"
     },
     "reasoning-1": {
       "action": "acted",

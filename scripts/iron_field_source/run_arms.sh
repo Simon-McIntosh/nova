@@ -2,13 +2,14 @@
 # Run the two suite arms for this node as one job.
 #
 # The baseline arm runs at the base revision over that revision's own tree: the
-# base is exported with git archive because this checkout's git metadata is
-# read-only to the worker. The after arm runs in this checkout at its head. Each
-# arm records the command exactly as resolved over its own tree, so promotion can
-# compare it with the template resolved the same way.
+# base is a shared clone checked out at that revision, because the tree needs its
+# git objects too (one suite test shells out to git show) and this checkout's git
+# metadata is read-only to the worker. The after arm runs in this checkout at its
+# head. Each arm records the command exactly as resolved over its own tree, so
+# promotion can compare it with the template resolved the same way.
 #
-#   env -u SLURM_JOB_ID -u SLURM_JOBID TMPDIR=/tmp /usr/bin/sbatch \
-#     --partition=rigel --time=02:00:00 --cpus-per-task=8 --mem=110G \
+#   export ICM_ROOT=$PWD
+#   sbatch --partition=rigel --time=03:00:00 --cpus-per-task=8 --mem=110G \
 #     --job-name=icm-suite-arms \
 #     --output=/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/logs/icm-arms-%j.log \
 #     scripts/iron_field_source/run_arms.sh
@@ -20,7 +21,7 @@ root=${ICM_ROOT:?export ICM_ROOT with the checkout path before submitting}
 base=9b016126111a5acaebca064c07432042b5a2628c
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 out=/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/arms
-scratch=$out/base-tree
+scratch=$out/base-tree-${SLURM_JOB_ID:-manual}
 tests=tests/test_magnetisation.py
 
 export TMPDIR=/tmp
@@ -29,12 +30,15 @@ export PYTHONUNBUFFERED=1
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH || true
 
 mkdir -p "$out"
-rm -rf "$scratch"
-# A shared clone at the base revision, not an archive: the suite shells out to
-# git show for pinned sources, and an archive has no objects to show.
-git clone --shared --no-checkout --quiet "$root" "$scratch"
-git -C "$scratch" checkout --quiet --detach "$base"
-echo "BASE-CHECKOUT $base in $scratch ($(git -C "$scratch" rev-parse HEAD))"
+
+# Prepared only by an arm that needs it, and under a job-unique path: two arms
+# sharing one scratch directory delete each other's clone mid-checkout.
+prepare_base() {
+    rm -rf "$scratch"
+    git clone --shared --no-checkout --quiet "$root" "$scratch"
+    git -C "$scratch" checkout --quiet --detach "$base"
+    echo "BASE-CHECKOUT $base in $scratch ($(git -C "$scratch" rev-parse HEAD))"
+}
 
 command_for() {
     echo "PYTHONPATH=. JAX_PLATFORMS=cpu $python -m pytest -p no:cacheprovider -q $tests"
@@ -58,9 +62,13 @@ run_arm() {
 
 arm=${1:-both}
 case "$arm" in
-    baseline) run_arm baseline "$scratch" baseline_arm ;;
+    baseline)
+        prepare_base
+        run_arm baseline "$scratch" baseline_arm
+        ;;
     after) run_arm after "$root" after_arm ;;
     both)
+        prepare_base
         run_arm baseline "$scratch" baseline_arm
         run_arm after "$root" after_arm
         ;;

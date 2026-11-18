@@ -61,9 +61,28 @@
       "note": "The reach measurement now names its job: one batch job on the H200, falling back to titan, at the mesh and route the first section recorded, with the device stated in the record.",
       "reason": "",
       "when": "2026-11-18T06:23:57.194354+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b83eca8359ac882f7d25044d116351f6581b2ee5",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "Both receipts are now cited by absolute path.",
+      "reason": "",
+      "when": "2026-11-18T06:24:30.667849+00:00"
     }
   ],
   "responses": {
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b83eca8359ac882f7d25044d116351f6581b2ee5",
+      "commit_basis": "edit",
+      "note": "Both receipts are now cited by absolute path.",
+      "reason": "",
+      "when": "2026-11-18T06:24:30.667849+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",

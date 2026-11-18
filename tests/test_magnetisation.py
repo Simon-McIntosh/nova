@@ -1481,6 +1481,39 @@ def test_linear_local_tangent_matches_differentiating_the_projected_law(fill):
     np.testing.assert_allclose(jacobian @ direction, np.ones(6), rtol=2e-14)
 
 
+def test_finite_loop_reference_module_transmits_the_shell():
+    """The shell measurement's reference module carries its own transmission.
+
+    The shell script imports ``exterior_reference`` from this module, so a
+    module that no longer defines it breaks every shell measurement while a
+    suite that only stamps committed bytes stays green. The transmitted field
+    is checked here against the closed-form shell shielding in ``controls``,
+    an independent owner, and against the recorded finite-loop vector, rather
+    than against a shorter truncation of the same series.
+    """
+    from scripts.iron_linear_magnetisation import reference
+    from scripts.iron_linear_magnetisation.controls import (
+        SHELL_PROBES,
+        exact_shielding,
+        loop,
+    )
+
+    assert callable(reference.exterior_reference)
+    vacuum, shielded = reference.exterior_reference(10)
+    owner = loop(SHELL_PROBES)
+    np.testing.assert_allclose(vacuum, owner, rtol=2e-13, atol=1e-25)
+    pure_vacuum, pure_shielded = reference.exterior_reference(1)
+    np.testing.assert_allclose(
+        pure_shielded * exact_shielding(), pure_vacuum, rtol=2e-15, atol=1e-25
+    )
+    shielding = np.linalg.norm(owner, axis=1) / np.linalg.norm(shielded, axis=1)
+    np.testing.assert_allclose(
+        shielding,
+        [61.12438346603941, 61.0718066323272, 61.109581606774945],
+        rtol=2e-12,
+    )
+
+
 def test_reference_stamp_refuses_wrong_revision_and_dirty_tree(tmp_path):
     import hashlib
     import subprocess

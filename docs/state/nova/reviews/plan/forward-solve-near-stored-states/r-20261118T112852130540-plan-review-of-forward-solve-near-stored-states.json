@@ -43,6 +43,16 @@
       "note": "The control now requires the base revision to raise the traced-array conversion the receipts recorded, on the same batched call and route, so it tests the batch path and not a signature.",
       "reason": "",
       "when": "2026-11-18T11:56:49.565612+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a148a0a9d176713a90cd24ffa7de2966b0c55654",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The record now carries a line-contour panel of one batched state on the solo state, on shared levels with both null sets and the wall.",
+      "reason": "",
+      "when": "2026-11-18T11:57:31.460089+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "The control now requires the base revision to raise the traced-array conversion the receipts recorded, on the same batched call and route, so it tests the batch path and not a signature.",
       "reason": "",
       "when": "2026-11-18T11:56:49.565612+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "a148a0a9d176713a90cd24ffa7de2966b0c55654",
+      "commit_basis": "edit",
+      "note": "The record now carries a line-contour panel of one batched state on the solo state, on shared levels with both null sets and the wall.",
+      "reason": "",
+      "when": "2026-11-18T11:57:31.460089+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261118T112852130540-plan-review-of-forward-solve-near-stored-states.json",

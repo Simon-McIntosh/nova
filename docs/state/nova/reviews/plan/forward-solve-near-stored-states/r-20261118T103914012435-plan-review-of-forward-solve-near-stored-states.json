@@ -101,6 +101,16 @@
       "note": "The batching section now states that it adds no second batched surface and works through the existing batched entry; the owning modules go into the node brief as the reuse map.",
       "reason": "",
       "when": "2026-11-18T11:26:11.217425+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "30139c214f381d3b0f451eeb29fa6e65816431ff",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-2",
+      "note": "The batching endpoint now requires the batched call to take the same request and return, per state, the same receipt fields as the unbatched public solve.",
+      "reason": "",
+      "when": "2026-11-18T11:26:20.716671+00:00"
     }
   ],
   "responses": {
@@ -112,6 +122,15 @@
       "note": "The batching section now states that it adds no second batched surface and works through the existing batched entry; the owning modules go into the node brief as the reuse map.",
       "reason": "",
       "when": "2026-11-18T11:26:11.217425+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "30139c214f381d3b0f451eeb29fa6e65816431ff",
+      "commit_basis": "edit",
+      "note": "The batching endpoint now requires the batched call to take the same request and return, per state, the same receipt fields as the unbatched public solve.",
+      "reason": "",
+      "when": "2026-11-18T11:26:20.716671+00:00"
     },
     "reuse_search-1": {
       "action": "acted",

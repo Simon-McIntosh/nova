@@ -41,7 +41,30 @@
   "plan_slug": "forward-solve-near-stored-states",
   "plan_version": 8,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b83eca8359ac882f7d25044d116351f6581b2ee5",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The batching section now declares its wait on the inverse baseline row-exchange section, whose case and record it reads, in the dependency list and in its prose.",
+      "reason": "",
+      "when": "2026-11-18T06:23:25.111095+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b83eca8359ac882f7d25044d116351f6581b2ee5",
+      "commit_basis": "edit",
+      "note": "The batching section now declares its wait on the inverse baseline row-exchange section, whose case and record it reads, in the dependency list and in its prose.",
+      "reason": "",
+      "when": "2026-11-18T06:23:25.111095+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261118T053953173474-plan-review-of-forward-solve-near-stored-states.json",
   "review_run_id": "r-20261118T053953173474-plan-review-of-forward-solve-near-stored-states",
   "reviewed_blob_sha": "bc4957283875dda27e47569bec51591a77426338",
   "rubric": "content",

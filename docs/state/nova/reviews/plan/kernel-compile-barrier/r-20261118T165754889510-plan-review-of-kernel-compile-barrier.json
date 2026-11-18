@@ -1,0 +1,111 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T17:01:11.983Z",
+  "dispatched_at": "2026-11-18T16:59:25Z",
+  "findings": [
+    {
+      "anchor": "plan.html:73",
+      "id": "reasoning-1",
+      "reason": "the two clauses state incompatible bounds on the same compile, so a \u00a74 node either deletes the xfail `because the cold compile now clears 60 s`, which the plan's own \u00a73 says no lever reached (405 s at 132 after three levers and the tangent repair), or records a cache-served first call and leaves the suite red with no clause saying which outcome closes the section.",
+      "text": "\u00a74 clause (1) says \"the cold compile that fills the cache is recorded beside it and carries no bound\", while clause (2) requires tests/equilibrium/test_topology_read.py::test_kernel_compile_growth to pass, and that test's own docstring says a strict unexpected pass \"fires exactly when the cold read compiles within 60 s and 50 MB\", its measurement child redirecting JAX_COMPILATION_CACHE_DIR to a fresh directory (tests/equilibrium/test_topology_read.py:2526-2530, :2576)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:68",
+      "id": "reasoning-2",
+      "reason": "as written the section's binding memory clause is unmet by the mechanism the section adopts, and a worker who meets 60 s from the cache will still fail 64 GB through a bound the plan never shows anyone can move.",
+      "text": "\u00a73 clause (1) requires \"64 GB peak host memory\" of the cache-served first call at the 2,132-node arm, but \u00a70's own table (plan.html:44) records 381 GB peak at that arm and the coarse-tie run records that the memory stayed held for ~11,000 s in a 4-and-533-batch node loop after the compile, so the quantity is dominated by the loop's operand store, which neither the traced-body lever nor the pre-warm cache reduces",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:74",
+      "id": "single_goal-1",
+      "reason": "a node dispatched on \u00a74 closes on (1)-(3) and drops a four-hour CPU regression arm, or carries two deliverables that one verdict cannot cover.",
+      "text": "\u00a74 lists node (a) the compile clause and node (b) \"a read-path regression arm with its own verdict\" over tests/test_tracked_read.py, tests/test_bank_newton_step.py and tests/test_support_read.py as one section, while the section's done-when (plan.html:73) contains only (a)'s clauses (1)-(3), so (b)'s criterion (\"every file has a completed pair and no failure id at head is absent from the base arm\") exists in prose and in no gate",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:73",
+      "id": "done_when-1",
+      "reason": "a 60 s first call is exactly what a cache hit or a skipped compilation also produces, so without a stated failing arm the section cannot distinguish a met bound from a guard that never ran.",
+      "text": "\u00a74's three clauses bound a first call at 60 s, 50 MB and 64 GB at 132, 300 and 550 cells and name no arm that must miss those bounds, unlike \u00a73(d)'s empty-cache arm that must exceed the miss budget and exit nonzero",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:66",
+      "id": "wiring-1",
+      "reason": "the depends-on graph is what a dispatcher uses to order nodes and choose a base, and on this graph a \u00a73 node can be dispatched onto a tree without the repair it is measured against.",
+      "text": "\u00a73 states that node (c) \"is built on the kernel as repaired by the polygon tangent repair of sub-millisecond-forward-path ... which landed on main at merge 681a6ecd2\" and makes that merge the base whose control arm must miss 60 s, but its section declares data-links \"kernel-compile-barrier#s2,kernel-compile-barrier#s5\" and the plan's section-depends-on map gives no edge to sub-millisecond-forward-path; \u00a76 declares exactly that edge for the same repair",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:66",
+      "id": "evidence_paths-1",
+      "reason": "the evidence fragment records the receipt path as its pointer, so a receipt in a pruned or quota-failing cache directory is a pointer a later reader cannot open, and moving it after the fact loses the runs that produced it.",
+      "text": "\u00a73(b), (c) and (d) send their receipts to ~/.cache/nova-kernel-compile-barrier/point-program-attribution/, /one-traced-body/ and /cached-point-program/, a per-user cache directory, while the repository's binding receipts rule puts npz, gz and json receipts above a few MB under the GPFS evidence root resolved through nova/database/filepath.py, chosen specifically to sit outside every pruner root and distinct from ~/.cache (AGENTS.md, \"Large receipts live on GPFS, not in git\")",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:53",
+      "id": "anchors_resolve-1",
+      "reason": "each cited file resolves and each symbol is one grep away in it, so the anchor costs a worker a lookup rather than sending it at the wrong mechanism.",
+      "text": "three line anchors name the wrong line inside a file that does exist: packed_analytic_moments is cited at nova/biot/polygonanalytic.py:2641 but defined at :3589, _row_program at nova/equilibrium/fixed_points.py:521 but assigned at :524, and the jit(vmap(_source_jets)) at scripts/prototypes/read_route/jets.py:321 where line 321 is blank and the expression is at :262",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "plan.html:66",
+      "id": "reasoning-3",
+      "reason": "the bound and tolerances already state what counts as done, and a section that names the mechanism makes a wrong guess the reviewer's to check and the author's to edit, which is the round the endpoint-only rule exists to save; the record also shows a prescribed lever failing (2.0e-4 against 1e-9) with no endpoint left to judge.",
+      "text": "the section fixes the lever rather than the endpoint (\"Its lever is one traced body per derivative ... evaluated through a single traced body mapped over the samples\"), and \u00a72's text likewise fixes the change (\"_source_jets and _row_program ... restructures how the point jet's kernel terms are combined ... a fixed-capacity scan\"), naming the functions to rewrite in plan text",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:114",
+      "id": "reasoning-4",
+      "reason": "with the locked decision unchanged (it names no superseding entry), the two enabled budget tests read as a gate \u00a72 failed rather than as tests authored to a rule the lead retired, and no reader can tell which bound governs the program.",
+      "text": "decision variadic-share-on-production-base still reads \"\u00a72 passes when the instruction count after the splitter halves and the cold compile falls ... to 130.8 s or less\", while \u00a72 closed (plan.html:60 and the comments) at 267,438 of 402,141 instructions (66.5%) and 218 s, superseded only in \u00a72's prose, and tests/biot/test_production_row_compile.py:76,:84 still assert exactly the retired rules (head instructions doubled are at most the base's; the head compile at most the base's minus its two variadic passes), which \u00a73 keeps enabled",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "85ea658cbc47072a439d42653aefaa9fedce159b",
+  "plan_fingerprint": "760ef202cbb2208c127da34d3799096ab152f061505f1d71da05e64b28d753ff",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 99,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261118T165754889510-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "367516f1ae425cb04b6ca9c7a5c6b816bf800cdd",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the cited files, fragments, plans and commits all resolve, but three line anchors point at the wrong line inside a resolving file (polygonanalytic.py:2641, fixed_points.py:521, read_route/jets.py:321).",
+    "done_when": "a finding \u2014 \u00a74's done-when (1)-(3) declares no arm that must miss its 60 s / 50 MB / 64 GB bounds, so nothing shows the guard fires, and \u00a73's clauses (1)-(3) otherwise carry declared controls (\u00a73(d) empty-cache refusal, \u00a76 truncated-tangent refusal, \u00a73(c) 681a6ecd2 base arm).",
+    "evidence_paths": "a finding \u2014 \u00a73(b), (c) and (d) put their receipts under ~/.cache/nova-kernel-compile-barrier/, against the repository's binding rule that large receipts live under the GPFS evidence root resolved through nova/database/filepath.py, outside every pruner root.",
+    "naming": "pass \u2014 no plan label, stage name or ticket number reaches a new symbol, and every symbol the plan names (KernelCompileBarrier, kernel_compile_expected_failure, kernel_compile_budget) already exists in the tree.",
+    "reasoning": "a finding \u2014 \u00a74 clause (1) exempts the cold compile from any bound while clause (2) requires a test whose assertion is exactly a 60 s / 50 MB cold compile, and \u00a73 states no lever reached the cold compile.",
+    "single_goal": "a finding \u2014 \u00a74 carries two deliverables, the compile clause and an independently-judged read-path regression arm whose gate the done-when block omits.",
+    "wiring": "a finding \u2014 \u00a73's own base is the landing of sub-millisecond-forward-path \u00a77, the relationship only \u00a76 declares while \u00a73's depends-on names kernel-compile-barrier#s2 alone."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "b465cef1e2cc13170ec112ecc51774aeedecf0105d30a3902a7c0ecc0a762197",
+    "s3": "503926907cf43c5f87a4f78d064db35b7c81ea4d4bb4272a84cc0af0be43251e",
+    "s4": "873b9ddf711f4daa03f88d01d45d1d8ff5eb53b234837c65f416c3f7bc828d24",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T17:18:27.253565+00:00",
+  "total": null
+}

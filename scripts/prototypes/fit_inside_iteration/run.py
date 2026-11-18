@@ -241,42 +241,56 @@ def _run_stored(case, args):
         conductor_response=case["conductor_response"],
         conductor_names=case["conductor_names"],
     )
-    fitted = fitter.fit(
-        case["measurement"],
-        case["initial_flux"],
-        plasma_current_scale=float(data["plasma_current_scale"]),
-        max_passes=args.max_passes,
-        flux_tolerance=args.flux_tolerance,
-        relaxation=args.relaxation,
-    )
-    state, centroid = study._as_equilibrium(data, fitted, fitted.source_profile)
-    scores = score_with_efit_referee(
-        state,
-        data["reference_eq"],
-        current_centroid_z_m=centroid,
-        reference_slice_index=data["reference_slice"],
-        reference_current_centroid_z_m=study._reference_centroid(data),
-    )
-    scaled_measurement = replace(
-        case["measurement"],
-        measured=case["measurement"].measured * 1.10,
-        scale=case["measurement"].scale * 1.10,
-        plasma_current=case["measurement"].plasma_current * 1.10,
-        conductor_current=case["measurement"].conductor_current * 1.10,
-        conductor_scale=case["measurement"].conductor_scale * 1.10,
-    )
-    scaled = fitter.fit(
-        scaled_measurement,
-        case["initial_flux"],
-        plasma_current_scale=float(data["plasma_current_scale"]) * 1.10,
-        max_passes=args.max_passes,
-        flux_tolerance=args.flux_tolerance,
-        relaxation=args.relaxation,
-    )
-    scaled_current = abs(float(np.sum(scaled.terminal_state.cell_current)))
-    control = abs(scaled_current - case["plasma_current"]) / case["plasma_current"]
+    try:
+        fitted = fitter.fit(
+            case["measurement"],
+            case["initial_flux"],
+            plasma_current_scale=float(data["plasma_current_scale"]),
+            max_passes=args.max_passes,
+            flux_tolerance=args.flux_tolerance,
+            relaxation=args.relaxation,
+        )
+    except Exception:
+        # the starting map is still a state worth showing beside the reference
+        data["terminal_residual"] = None
+        study._panel(data, False, flux=case["initial_flux"], suffix="-refused")
+        raise
     data["terminal_residual"] = fitted.terminal_misfit
     study._panel(data, bool(fitted.converged), flux=fitted.terminal_state.flux)
+    scores, scores_error = None, None
+    try:
+        state, centroid = study._as_equilibrium(data, fitted, fitted.source_profile)
+        scores = score_with_efit_referee(
+            state,
+            data["reference_eq"],
+            current_centroid_z_m=centroid,
+            reference_slice_index=data["reference_slice"],
+            reference_current_centroid_z_m=study._reference_centroid(data),
+        )
+    except Exception as error:
+        scores_error = f"{type(error).__name__}: {error}"
+    control, control_error = None, None
+    try:
+        scaled_measurement = replace(
+            case["measurement"],
+            measured=case["measurement"].measured * 1.10,
+            scale=case["measurement"].scale * 1.10,
+            plasma_current=case["measurement"].plasma_current * 1.10,
+            conductor_current=case["measurement"].conductor_current * 1.10,
+            conductor_scale=case["measurement"].conductor_scale * 1.10,
+        )
+        scaled = fitter.fit(
+            scaled_measurement,
+            case["initial_flux"],
+            plasma_current_scale=float(data["plasma_current_scale"]) * 1.10,
+            max_passes=args.max_passes,
+            flux_tolerance=args.flux_tolerance,
+            relaxation=args.relaxation,
+        )
+        scaled_current = abs(float(np.sum(scaled.terminal_state.cell_current)))
+        control = abs(scaled_current - case["plasma_current"]) / case["plasma_current"]
+    except Exception as error:
+        control_error = f"{type(error).__name__}: {error}"
     bands_applied = case["name"] != "iter"
     row = dict(
         case=case["name"],
@@ -299,13 +313,25 @@ def _run_stored(case, args):
         wall_seconds=fitted.wall_seconds,
         bands_applied=bands_applied,
         scores=scores,
+        scores_error=scores_error,
         reconstructed_plasma_current_a=float(
             np.sum(fitted.terminal_state.cell_current)
         ),
         stored_plasma_current_a=float(case["plasma_current"]),
         scaled_control_relative_error=control,
         scaled_control_band=0.015,
-        scaled_control_fired=bool(control > 0.015),
+        scaled_control_fired=bool(control is not None and control > 0.015),
+        scaled_control_error=control_error,
+        terminal_axis=(
+            np.asarray(fitted.terminal_state.topology.axis).tolist()
+            if fitted.terminal_state.topology is not None
+            else None
+        ),
+        terminal_flux_span=(
+            float(fitted.terminal_state.topology.flux_span)
+            if fitted.terminal_state.topology is not None
+            else None
+        ),
         relaxed=fitted.relaxation,
     )
     if not bands_applied:
@@ -330,9 +356,7 @@ def main(argv=None):
     os.environ["NOVA_MAGNETICS_FIT_FIGURES"] = str(figures / "known-states")
     os.environ["NOVA_EFIT_COMPARISON_FIGURES"] = str(figures / "stored-cases")
     os.environ["NOVA_MAGNETICS_FIT_EVIDENCE"] = str(output / "known-state-evidence")
-    os.environ["NOVA_EFIT_COMPARISON_OUTPUT"] = str(
-        output / "stored-case-evidence"
-    )
+    os.environ["NOVA_EFIT_COMPARISON_OUTPUT"] = str(output / "stored-case-evidence")
     if args.generating_receipts:
         os.environ["NOVA_MAGNETICS_FIT_GENERATING_RECEIPTS"] = str(
             Path(args.generating_receipts).resolve()

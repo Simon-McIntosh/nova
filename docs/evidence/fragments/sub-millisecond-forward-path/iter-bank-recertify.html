@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="iter-bank-recertify">
+<meta name="plan-title" content="The ITER bank is rebuilt and re-certified on the repaired polygon kernel">
+<meta name="plan-summary" content="The rebuilt bank matches the independent source-gradient reference at the retained nodes where the previous bank is 24 to 71 percent wrong; the plasma-row Hessian case passes at 1e-8 and refuses the base kernel; the first-derivative rows depart by 7.2e-8 against a 1e-10 guard, reported as measured">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s7">
+<meta name="plan-commits" content="60af91b43d3d00aea7962b2490a5983f79d09a94 ad26d7beef2d0b1d2172e724050ef09cfe0ea880 8bfb651b9f3e3540d2f1b366846edd93639cb86f 050d9d1fe14e35b041323c111cd4cecbf6d46710 b56f72eeed1130da9d5dbc74d1a6a347e956c02c 1ea0f5fa63324c984e0709c494f93dfe06409e3b f3141c438d29e61850d6e59abe4c3cecececeb11a9 5edcb1df8a62e63609c092044bd4972ecd911a10 366155652077a1cf979a0b2d8fa2c124c8e7d3d1 0a73119c5aa485f3f05e4292bd2b71dbf3c3d2ed">
+<meta name="plan-recorded-at" content="2026-11-18">
+<meta name="plan-environment" content="rigel CPU x64 bank rebuild and fresh-process suite arms">
+<title>The ITER bank is rebuilt and re-certified | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<article id="iter-bank-recertify-result">
+<h1>The rebuilt ITER bank carries the repaired polygon derivatives</h1>
+<p><strong>The bank is rebuilt on the repaired kernel and re-certified against the independent source-gradient Richardson reference.</strong> At the 64 retained interior nodes of states 220, 333 and 336 the rebuilt plasma-row contraction agrees with that reference inside every component budget, while the previously published bank is wrong in exactly the two derivatives the repair touched: its ψ<sub>RZ</sub> relative error is 0.643, 0.709 and 0.679 at the three states and its ψ<sub>ZZ</sub> 0.239, 0.292 and 0.230. The value rows and the coil-field rows are unchanged inside 1e-10; the first-derivative rows are not, departing by 7.20e-8 at their worst entry, and that miss is reported rather than absorbed. The added plasma-row Hessian case passes at head with errors 1.8217e-10 and 5.8486e-11 against a 1e-8 budget and fails on the base kernel at 8.4037e-3.</p>
+
+<section id="iter-bank-recertify-mechanism">
+<h2>One script certifies both the row builder and the published store</h2>
+<p><code>scripts/prototypes/iter_bank/recertify.py</code> (commit <code>60af91b43d3d00aea7962b2490a5983f79d09a94</code>) reads the retained reference geometry, samples the plasma filaments at the retained points through the production row builder, contracts those rows against the retained moments, and compares the four jet components with the independent source-gradient reference. Two arms are reported separately: <code>ROWS_MODE</code>, where the script evaluates the row builder itself, and <code>BANK_MODE</code>, where it reads the published bank npz and contracts the stored rows. When both a bank and a previous bank are given it also reports <code>UNCHANGED</code>, the relative departure of the value, first-derivative and coil rows from the previously published bank.</p>
+<p>The row builder path and the stored bank are independent instruments: the stored rows are what the ITER operator bank actually serves, and the builder path proves the script's own contraction. Three defects were repaired while bringing the script up, all in the script and none in product source: the content-store manifest is absent beside a retained bank copy, so the bank is read from its npz (commit <code>5edcb1df8a62e63609c092044bd4972ecd911a10</code>); the comparison reduces over the retained nodes, so each state yields one relative error rather than one per node (commit <code>0a73119c5aa485f3f05e4292bd2b71dbf3c3d2ed</code>); and the longdouble reference is cast to double before the receipt is written (commit <code>366155652077a1cf979a0b2d8fa2c124c8e7d3d1</code>).</p>
+</section>
+
+<section id="iter-bank-recertify-bank">
+<h2>The rebuilt bank carries the repaired Hessian</h2>
+<p>The bank is rebuilt at the measurement head <code>0a73119c5aa485f3f05e4292bd2b71dbf3c3d2ed</code> and published as digest <code>sha256:81ee8fdf8056855f0846f0e00b7213434451be8e9557369b74ef35a23a62fd4f</code>: 2,048 buckets over 558 clipped cells and 1,772 active nodes, with the 12 coil sections and the wall read from the ITER <code>pf_active</code> and <code>wall</code> IDSs at data-dictionary 3.38.1. The row builder is 1,376.44 s over a cached 142,383,744-byte jet matrix; publishing the store takes 3.468 s and reloading it 0.2513 s.</p>
+<table><thead><tr><th>Component</th><th>State 220</th><th>State 333</th><th>State 336</th><th>Budget</th></tr></thead><tbody>
+<tr><td>ψ<sub>R</sub></td><td>1.205e-12</td><td>1.210e-12</td><td>1.144e-12</td><td>1e-10</td></tr>
+<tr><td>ψ<sub>Z</sub></td><td>4.919e-13</td><td>5.781e-13</td><td>4.422e-13</td><td>1e-10</td></tr>
+<tr><td>ψ<sub>RZ</sub></td><td>7.001e-09</td><td>6.781e-09</td><td>6.849e-09</td><td>1e-8</td></tr>
+<tr><td>ψ<sub>ZZ</sub></td><td>1.586e-09</td><td>1.804e-09</td><td>1.409e-09</td><td>1e-8</td></tr>
+</tbody></table>
+<table><thead><tr><th>Component</th><th>State 220</th><th>State 333</th><th>State 336</th><th>Verdict at the same budgets</th></tr></thead><tbody>
+<tr><td>ψ<sub>R</sub></td><td>1.165e-12</td><td>1.161e-12</td><td>1.096e-12</td><td>inside</td></tr>
+<tr><td>ψ<sub>Z</sub></td><td>5.164e-13</td><td>5.602e-13</td><td>4.284e-13</td><td>inside</td></tr>
+<tr><td>ψ<sub>RZ</sub></td><td>0.6428</td><td>0.7086</td><td>0.6793</td><td>refused by six to eight orders</td></tr>
+<tr><td>ψ<sub>ZZ</sub></td><td>0.2394</td><td>0.2925</td><td>0.2304</td><td>refused by six to eight orders</td></tr>
+</tbody></table>
+<p>The second table is the previously published bank, certified by the same instrument against the same independent source-gradient Richardson reference. The repair's dominant effect is on the two mixed and vertical second derivatives, which move from a 24–71 % error to 7.0e-9 and 1.8e-9. The first derivatives move far less and in the opposite direction of travel: from agreeing with the same reference at 1.2e-12 to agreeing at 1.2e-12.</p>
+<h3>What the rebuild does not change</h3>
+<table><thead><tr><th>Row family</th><th>Departure from the previous bank</th><th>Done-when budget</th></tr></thead><tbody>
+<tr><td>Value rows, all nodes and cells</td><td>4.97e-13 worst entry</td><td>1e-10</td></tr>
+<tr><td>Coil-field rows, 12 sections</td><td>6.82e-12 worst entry</td><td>1e-10</td></tr>
+<tr><td>First-derivative rows</td><td>7.20e-08 worst entry (ψ<sub>R</sub>), 2.00e-08 (ψ<sub>Z</sub>), median 3e-12</td><td>1e-10</td></tr>
+</tbody></table>
+<p>The first-derivative rows do <strong>not</strong> reproduce the previous bank inside 1e-10: 53 of the 306 ψ<sub>R</sub> entries and 66 of the 297 ψ<sub>Z</sub> entries whose magnitude exceeds 1e-3 depart further, with a worst case of 7.20e-8 at a cell whose ψ<sub>R</sub> reaches 62.6. This is reported as measured rather than absorbed. Neither bank is wrong against the only independent instrument available here: both contract to the reference inside 1.3e-12 at the retained nodes, because the departing cells carry no booked moment. The rebuilt bank is thus certified where it is tested and differs from its predecessor where nothing measures. The two builder arms that would have separated the store from the kernel at two retained nodes, <code>1324664</code> and <code>1324665</code>, were both killed by the CPU allocation at 96 GB (<code>EXIT=137</code>) during the row builder's compile, so the departure is measured but not attributed between the device and the kernel. The row builder is the same expression at both revisions and the only independent instrument available at these cells is the previous bank itself, so the departure is recorded as an open question rather than explained.</p>
+<p>The requested H200 build is queued as job <code>1324409</code> and pends on <code>Priority</code> with the node's eight cards allocated for the whole fence; <code>scontrol show node 98dci4-gpu-0003</code> reads <code>AllocTRES=gres/gpu=8</code> against <code>CfgTRES=gres/gpu=8</code> throughout. The walls above are therefore a P100 measurement on <code>98dci4-gpu-0002</code> (JAX 0.11.0, <code>devices [CudaDevice(id=0)]</code>, <code>x64 True</code>), and the cache is cold there because the persistent compilation cache keys on device topology. No H200 wall is claimed.</p>
+</section>
+
+<section id="iter-bank-recertify-negative">
+<h2>The base kernel is refused by the same check</h2>
+<p>The negative-control arm runs the head tree with the polygon kernel replaced by the pre-repair revision <code>0d21b02a768db6fb2c445485e8597d144e233fcf</code>; the accuracy contract therefore discriminates the kernel and not the harness. Rigel job <code>1324564</code> completes with <strong>one failed, 13 passed, EXIT=1</strong>:</p>
+<pre>FAILED tests/test_iter_bank.py::test_plasma_row_hessian_matches_source_gradient_reference</pre>
+<pre>plasma-row Hessian errors [0.008403679427691496, 5.848686736614972e-11]</pre>
+<p>The mixed component exceeds its budget by six orders of magnitude while the vertical component remains 5.8486e-11, so the failure sits on the derivative the repair changed and not on the harness. Both arms run the same head case, so the only difference between the pass and the refusal is the polygon kernel.</p>
+</section>
+
+<section id="iter-bank-recertify-tests">
+<h2>Every accuracy case runs live</h2>
+<p>Commit <code>1ea0f5fa63324c984e0709c494f93dfe06409e3b</code> bounds the six live accuracy cases at 900 s each. The module fixture builds the seven ITER states and costs 230.770 s on eight rigel cores, which the repository's 300 s default charged to the first case as a setup timeout; the bound is raised rather than shortening any case. The cases remain marked <code>slow</code>, so a default path-free lane still excludes them, while an explicitly named path collects all fourteen.</p>
+<table><thead><tr><th>Arm</th><th>Revision</th><th>Result</th></tr></thead><tbody>
+<tr><td>Baseline</td><td><code>3a9238f0a626bec0783b4f0da32922dd0c390f4b</code></td><td>7 passed, 6 errors in 318.84 s, EXIT=1</td></tr>
+<tr><td>After, at the measurement head</td><td><code>1ea0f5fa63324c984e0709c494f93dfe06409e3b</code></td><td>14 passed, 0 skipped in 596.84 s, EXIT=0</td></tr>
+<tr><td>After, at the final head</td><td><code>0a73119c5aa485f3f05e4292bd2b71dbf3c3d2ed</code></td><td>14 passed, 0 skipped in 605.40 s, EXIT=0</td></tr>
+</tbody></table>
+<p>The baseline's six errors are setup timeouts of the six live cases at the 300 s default; they are reported as they stand rather than relabelled. The after arm runs all fourteen with no skip and no error. Each arm is a fresh Python process over a <code>git archive</code> of the named revision, submitted as one sbatch allocation on rigel with eight CPUs and 96 GB, using:</p>
+<pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_iter_bank.py</pre>
+</section>
+
+<section id="iter-bank-recertify-figure">
+<h2>The mesh figure names both coils that sit in two places</h2>
+<p><img src="/nova/figures/sub-millisecond-forward-path/iter-bank/iter-mesh-preview.png" alt="ITER poloidal mesh with labelled coil sections and the first wall" style="max-width:100%"></p>
+<p>The regenerated panel distinguishes the fourteen coil sections, including the two CS1 and two VS3 sections, which would otherwise share a label. The first wall is drawn in a grey distinct from the coil outline grey, in a dash that the legend repeats, and above the clipped plasma-cell outlines so it is not hidden by them.</p>
+<table><thead><tr><th>Check</th><th>Measured</th></tr></thead><tbody>
+<tr><td>Coil labels, distinct</td><td>14: CS3U, CS2U, CS1 upper, CS1 lower, CS2L, CS3L, PF1–PF6, VS3 upper, VS3 lower</td></tr>
+<tr><td>Wall drawn above the cells</td><td>wall zorder 6 over plasma zorder 5, wall pixels in the raster 9,282</td></tr>
+<tr><td>Wall mark distinct from the coil grey</td><td>dashed dark grey <code>#9aa2ab</code> against solid coil grey</td></tr>
+<tr><td>Legend mapping</td><td>one entry each for plasma cells, coil sections and first wall; the wall handle carries the dash</td></tr>
+<tr><td>Scene readability</td><td>median contrast 4.7044 over 73,748 mesh pixels; ink fraction 0.067544</td></tr>
+<tr><td>Figure guard set</td><td>27 passed in 9.50 s, EXIT=0 (job <code>1324450</code>)</td></tr>
+</tbody></table>
+<p>The raster is a companion to the SVG because the Figures index counts PNG and SVG and never lists the raw scene; both are published under <code>/nova/figures/sub-millisecond-forward-path/iter-bank/</code>; the vector scene is <a href="/nova/figures/sub-millisecond-forward-path/iter-bank/iter-mesh.svg">iter-mesh.svg</a>. <code>docs/figures/sub-millisecond-forward-path/iter-bank/test_render.py</code> measures the scene independently of the renderer's own report and refuses a wall drawn below the cells, a wall mark that duplicates the coil grey, a legend entry that does not carry its component's mark, a missing or renamed label, and any label sitting on geometry. Commit <code>8bfb651b9f3e3540d2f1b366846edd93639cb86f</code> gives each panel its own wall identity, so a two-panel scene cannot produce duplicate SVG ids.</p>
+</section>
+
+<section id="iter-bank-recertify-receipts">
+<h2>Durable receipts and delivery</h2>
+<p>Logs and receipts are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T110237355670-iter-bank-recertify/</code>; the reference geometry is <code>/home/ITER/mcintos/.cache/nova-hessian-diagnosis/</code>.</p>
+<ul>
+<li>Head plasma-row test receipt: <code>logs/plasma-row-head.log</code> (job <code>1324572</code>).</li>
+<li>Base-kernel negative control: <code>logs/negative-control3.log</code> (job <code>1324564</code>).</li>
+<li>Suite arms: <code>logs/suite-base2.log</code> (job <code>1324439</code>), <code>logs/suite-head3.log</code> (job <code>1324563</code>).</li>
+<li>Current-bank comparison: <code>receipts/recertify-current-bank.json</code> and <code>logs/bank-mode-check4.log</code> (job <code>1324621</code>).</li>
+<li>Rebuilt bank: <code>h200-head/receipt.json</code>, <code>h200-head/store/sha256/81ee8fdf8056855f0846f0e00b7213434451be8e9557369b74ef35a23a62fd4f/bank.npz</code>, <code>logs/p100-build.log</code> (job <code>1324641</code>).</li>
+<li>Rebuilt-bank certification: <code>receipts/recertify-head-bank.json</code>, <code>logs/bank-mode-head.log</code> (job <code>1324661</code>).</li>
+<li>Builder attribution, refused by memory: <code>logs/rows-attrib-head.log</code> (job <code>1324664</code>, <code>EXIT=137</code>) and <code>logs/rows-attrib-base.log</code> (job <code>1324665</code>, <code>EXIT=137</code>).</li>
+<li>Figure: <code>docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh.svg</code>, <code>iter-mesh-preview.png</code>, <code>geometry.json</code>, <code>test_render.py</code>; scene report in <code>logs/figure5.log</code> (job <code>1324450</code>).</li>
+</ul>
+<p>No product source changed in this node. Promotion and merged-head verification remain the coordinator's work.</p>
+</section>
+</article></main></body></html>

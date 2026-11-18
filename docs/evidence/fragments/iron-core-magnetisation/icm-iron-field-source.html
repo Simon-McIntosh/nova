@@ -96,22 +96,23 @@ difference is 1.276e-10, at quadrature points adjacent to a plasma cell where
 the kernel is largest.</p>
 
 <h2 id="icm-iron-field-source-response">The persisted coil response, its refusals and its slice wall</h2>
-<p>Measured by the state stage on a compute node (job 1324036, all_debug, 40&nbsp;mm
-mesh, 488&nbsp;592 quadrature points), from a receipt that names its operator,
-module, working directory and x64 flag:</p>
+<p>Measured by the state stage on compute nodes, 40&nbsp;mm and 80&nbsp;mm meshes
+(jobs 1324036 and 1324312), from receipts that name their operator, module,
+working directory and x64 flag:</p>
 <table><thead><tr><th>Quantity</th><th>Measured</th><th>Contract</th></tr></thead><tbody>
-<tr><td>persisted response against a direct coil evaluation</td><td><b>0.0</b> relative, and the response was reused</td><td>1e-12</td></tr>
+<tr><td>persisted response against a direct coil evaluation</td><td><b>0.0</b> relative on both meshes, response reused</td><td>1e-12</td></tr>
 <tr><td>external term against the prototype's single quadrature</td><td>1.93e-9 pointwise, 5.53e-16 Frobenius</td><td>summation order only</td></tr>
-<tr><td>slice wall with the persisted response</td><td><b>926.1 s</b></td><td>record with</td></tr>
-<tr><td>slice wall with the coils evaluated on the slice</td><td><b>1220.9 s</b></td><td>record without</td></tr>
-<tr><td>coils' field, persisted read against direct</td><td>0.022 s against 82.9 s</td><td>-</td></tr>
-<tr><td>plasma's field on the same slice</td><td>156.1 s</td><td>per slice, not persisted</td></tr>
-<tr><td>state difference between the two slices</td><td>8.74e-7 relative</td><td>same solution</td></tr>
+<tr><td>slice wall with the persisted response</td><td><b>926.1 s</b> at 40 mm, <b>23.8 s</b> at 80 mm</td><td>record with</td></tr>
+<tr><td>slice wall with the coils evaluated on the slice</td><td><b>1220.9 s</b> at 40 mm, <b>84.1 s</b> at 80 mm</td><td>record without</td></tr>
+<tr><td>coils' field, persisted read against direct</td><td>0.022 s against 82.9 s (40 mm); 0.011 s against 20.3 s (80 mm)</td><td>-</td></tr>
+<tr><td>plasma's field on the same slice</td><td>156.1 s (40 mm); 38.2 s (80 mm)</td><td>per slice, not persisted</td></tr>
+<tr><td>state difference between the two slices</td><td>8.74e-7 (40 mm); 4.14e-9 (80 mm) relative</td><td>same solution</td></tr>
 </tbody></table>
-<p>The response pays for itself inside one slice: 294.8&nbsp;s, 24&nbsp;% of a
-1221&nbsp;s solve, and the coils' field read drops from 82.9&nbsp;s to
-0.022&nbsp;s. The two states agree to 8.74e-7 relative, so the persisted term
-changes the wall and not the answer.</p>
+<p>The response pays for itself inside one slice at both meshes: 294.8&nbsp;s,
+24&nbsp;% of a 1221&nbsp;s solve at 40&nbsp;mm, and 60.3&nbsp;s, 72&nbsp;% of an 84.1&nbsp;s solve at 80&nbsp;mm, where the
+coils' field read drops from 20.3&nbsp;s to 0.011&nbsp;s. The two states agree to
+8.74e-7 and 4.14e-9 relative respectively, so the persisted term changes the
+wall and not the answer.</p>
 <p><b>Refusals, with a negative control each.</b> The stage exercises both
 refusals on every run and the receipt carries their messages: a request for any
 other quadrature raises <i>the persisted coil response serves another mesh</i>,
@@ -375,6 +376,19 @@ fixed per-process cost of several minutes on this backend; later solves in the
 same process are much cheaper per target than the first.</p>
 
 <h2 id="icm-iron-field-source-suite">Tests</h2>
+<p>The two suite arms for <code>tests/test_magnetisation.py</code> ran as scheduler
+jobs on rigel, each over its own tree: the baseline at
+<code>9b0161261</code> from a <code>git archive</code> export, the after arm in
+this checkout. <b>Baseline: 1 failed, 92 passed in 8652.31&nbsp;s.</b>
+<b>After: 1 failed, 94 passed in 8841.68&nbsp;s</b> at head
+<code>1c402b927</code>. Neither failure is a seam defect: the baseline failure is
+<code>test_linear_shell_operator_pin[compact]</code>, which shells out to
+<code>git show</code> and cannot run in an export without <code>.git</code>; the
+after failure was this node's own regression -
+<code>linear_cell_interaction</code> had been dropped from the package's imports
+when the seam reshaped them - and it is fixed and verified at
+<code>7fb035a71</code> (<code>test_linear_field_constant_mode_matches_closed_sheet_field</code>,
+1 passed in 22.15&nbsp;s). The after arm at that final head is job 1324666.</p>
 <p><code>tests/test_magnetisation.py::test_frame_carries_the_bound_currents_exactly</code>
 is the new seam contract and
 <code>::test_reloaded_coilset_accepts_the_iron_frame</code> is the same contract

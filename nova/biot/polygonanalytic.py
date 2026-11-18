@@ -3482,6 +3482,34 @@ def _packed_moments_with_stable_height(
     )
 
 
+def _compact_partial(function):
+    """Carry closed arrays through a loop in one lossless buffer per dtype."""
+    leaves, structure = jax.tree.flatten(function.args)
+    groups = {}
+    positions = []
+    for leaf in leaves:
+        dtype = leaf.dtype
+        members = groups.setdefault(dtype, [])
+        offset = sum(member.size for member in members)
+        positions.append((dtype, offset, leaf.shape, leaf.size))
+        members.append(leaf)
+    buffers = {
+        dtype: jnp.concatenate([leaf.reshape(-1) for leaf in members])
+        for dtype, members in groups.items()
+    }
+
+    def evaluate(*arguments):
+        unpacked = [
+            buffers[dtype][offset : offset + size].reshape(shape)
+            for dtype, offset, shape, size in positions
+        ]
+        return function.func(
+            *structure.unflatten(unpacked), *arguments, **function.keywords
+        )
+
+    return evaluate
+
+
 @_packed_moments_with_stable_height.defjvp
 def _packed_moments_height_tangent(nodes, primals, tangents):
     """Differentiate stable pole products, with symmetric corner-height samples.
@@ -3532,6 +3560,7 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
     # Keep primal quadrature reductions outside the tangent-direction loop.
     if staged:
         _, pushforward = jax.linearize(tangent_expression, *primals)
+        pushforward = _compact_partial(pushforward)
 
     def directional(include_height):
         direction = (

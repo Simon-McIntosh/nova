@@ -22,7 +22,7 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="133">
+<meta name="plan-version" content="134">
 <meta name="plan-modified" content="2026-11-18">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
@@ -239,6 +239,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261116T235243862922-diiid-pinned-seed-drift" data-who="reckon-build" data-when="2026-11-18T00:08:48Z">
     <div class="r-comment-body"><p>Pinned frame 102 refuses at 1119833.584176 A versus registered 1137702.226779 A; point probe reproduces 1119994.165287 A. Full historical partition/profile/point-route replay restores 1137702.076487 A, but no single-change undo meets the causal clause. Registration and 2e-6 tolerance remain frozen. Benchmark preflight and controls committed; all_debug base 11 passed, head 14 passed, zero added failures. [Causal evidence](/nova/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift#diiid-pinned-seed-drift-outcome).</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-partial-r-20261116T235243862922-diiid-pinned-seed-drift" data-who="35a66cc6-f4f1-4358-8dbb-99c9333c7249" data-when="2026-11-18T06:40:00+00:00">
+    <div class="r-comment-body"><p>Run r-20261116T235243862922-diiid-pinned-seed-drift delivered part of this section: the reproduction, the three-change causal account (edge cap, stationary normalization and domain, integration route) accepted by the lead, and the benchmark preflight with its tests. The re-registration remains, owed after §13 gives the flux functions a finite edge, because that moves the value again; the section stays implementable.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260903T190539914922-dvf-external-field-tare-scout" data-who="c-inv-diiid-tare" data-when="2026-09-03T19:10:45.016Z">
     <div class="r-comment-body"><p>reuse map of six tare and circuit drivers; banked residual: exterior current 99.6 percent explained by the label's own GS inconsistency (vessel structure not supported), dipole mode carries mean 54.8 percent of the gauge-free residual energy, three of five ohmic channels not recoverable from ECOILA, inclusion ladder closes frame 89 (2.54 m to 0.004 m) but is non-monotonic on frame 102; the ohmic currents in the corpus are cross-pulse scaled ECOILA proxies</p></div>

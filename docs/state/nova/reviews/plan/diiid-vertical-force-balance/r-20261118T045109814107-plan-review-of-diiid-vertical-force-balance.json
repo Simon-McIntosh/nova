@@ -48,6 +48,16 @@
       "finding": "done_when-1",
       "reason": "The review itself judges it does not change the plan: the four-row rerun is an observational arm, and the edge-value equality and the finite-edge test are the falsifiable measures",
       "when": "2026-11-18T06:36:06.736600+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "03d6212b45343c6044de69ef4d706d423aee2a8d",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a713 now compares against EFIT at psi_N=1 (p' -2319.18090032498, FF' +0.005842038974463571) and has the builder sample to the boundary; the 0.95 values are named as the last sample",
+      "reason": "",
+      "when": "2026-11-18T06:37:27.949253+00:00"
     }
   ],
   "responses": {
@@ -56,6 +66,15 @@
       "by": "",
       "reason": "The review itself judges it does not change the plan: the four-row rerun is an observational arm, and the edge-value equality and the finite-edge test are the falsifiable measures",
       "when": "2026-11-18T06:36:06.736600+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "03d6212b45343c6044de69ef4d706d423aee2a8d",
+      "commit_basis": "edit",
+      "note": "\u00a713 now compares against EFIT at psi_N=1 (p' -2319.18090032498, FF' +0.005842038974463571) and has the builder sample to the boundary; the 0.95 values are named as the last sample",
+      "reason": "",
+      "when": "2026-11-18T06:37:27.949253+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261118T045109814107-plan-review-of-diiid-vertical-force-balance.json",

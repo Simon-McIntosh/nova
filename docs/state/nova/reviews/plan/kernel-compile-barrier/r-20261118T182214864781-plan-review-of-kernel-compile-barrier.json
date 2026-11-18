@@ -53,6 +53,16 @@
       "note": "the opening section now says the inherited cold-compile bounds are superseded for this plan by the warm-load ruling of 2026-11-18",
       "reason": "",
       "when": "2026-11-18T18:53:14.717571+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "fc636c51cfbb7709a0abf7d5a8a8a3864a763a9c",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "s4 node (a) names its fragment, figure directory and receipt directory",
+      "reason": "",
+      "when": "2026-11-18T18:53:24.047189+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "s4 clause (3) requires the fixture compile child to enable the pinned cache and report its own hits and misses, and the fixture to fail unless the child reports zero misses",
       "reason": "",
       "when": "2026-11-18T18:53:04.342649+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "fc636c51cfbb7709a0abf7d5a8a8a3864a763a9c",
+      "commit_basis": "edit",
+      "note": "s4 node (a) names its fragment, figure directory and receipt directory",
+      "reason": "",
+      "when": "2026-11-18T18:53:24.047189+00:00"
     },
     "reasoning-1": {
       "action": "acted",

@@ -1,0 +1,77 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T05:20:44.033Z",
+  "dispatched_at": "2026-11-18T05:20:29Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:119",
+      "id": "reasoning-1",
+      "reason": "a node dispatched on this either chases an unattainable 1e-10 equality or satisfies it by holding the \u03c8_N=0.95 sample at the edge, which is the behaviour the section calls wrong, so the plan must restate the edge reference it compares against.",
+      "text": "`s13` reads \"it therefore returns zero at \u03c8_N=1, where EFIT's extracted profiles are finite: p\u2032=\u22123262.9392101572676 and FF\u2032=\u22120.013014528399534793\", but those two values are the extraction at the last sampled surface \u03c8_N=0.95 (\u22123262.915886378947, \u22120.01301474532675045 to 7.1e-6 and 1.7e-5 relative), while the extraction taken with a surface at 1.0 gives p\u2032=\u22122319.18090032498 and FF\u2032=+0.005842038974463571 there \u2014 a different sign for FF\u2032. Clause (2) then requires the builder's p\u2032 and FF\u2032 at \u03c8_N=1 to equal the 0.95 numbers to 1e-10 relative, a measure no honest finite-edge form can satisfy; the section's own cause is right (0.0 at 1.0 reproduces) but its reference quantity is misidentified",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:119",
+      "id": "anchors_resolve-1",
+      "reason": "the only cited source for the section's acceptance values is unwritten, so neither the worker nor a later reader can check where the numbers came from or whether they describe the edge.",
+      "text": "the citation `(record: <a href=\"/nova/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift\">pinned seed drift</a>)` resolves to `docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift.html`, which does not exist and never appears in git history; only run-state files name it, as a write scope of a node not yet landed, and the two numbers are found nowhere else but the plan",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:121",
+      "id": "evidence_paths-1",
+      "reason": "`s11` and `s12` were both repaired to name durable record:paths under `docs/evidence/fragments/...` and `docs/figures/...`, and without one the section's evidence is unopenable by a later reader.",
+      "text": "`s13`'s done-when requires \"One job on the H200-then-titan rule [that] reruns 137D, 146D, 146L and 179L at the base and the head, reporting convergence, terminal residual, terminal reason and the lower X-point offset to EFIT, with flux-contour panels carrying the wall and both null sets\", and names no directory for the record, the panels or the job log, so they land wherever the node chooses",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:121",
+      "id": "done_when-1",
+      "reason": "the rerun is an observational arm on a state whose outcome is not yet known, and clauses (1) and (2)'s edge-value equality are the falsifiable measures; pinning a threshold here would prescribe the outcome rather than the endpoint.",
+      "text": "the rerun sentence inside clause (2) closes on \"reporting convergence, terminal residual, terminal reason and the lower X-point offset to EFIT\" with no threshold, no expected direction and no negative control, so a record of four unchanged arms satisfies it however the finite-edge form behaves",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "13010b56be911ccd051a8b2171c3a0e432224242",
+  "plan_fingerprint": "a9dfce02cb2e81e5b0ab22a760822b61180e25c94def64eef36e7b6f209548ec",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 128,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261118T045109814107-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "c3a0898c13fffd458c000bd4deab65867f172e90",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the `pinned seed drift` record `s13` cites for its two acceptance numbers does not exist in the repository.",
+    "done_when": "a finding \u2014 `s13`'s four-frame rerun (folded into clause (2)) states no threshold, direction or negative control, so the rerun record alone cannot fail.",
+    "evidence_paths": "a finding \u2014 `s13` names no directory for the rerun receipt, its job log or the flux-contour panels.",
+    "naming": "pass \u2014 `s13` names the representation and the committed commit it has used since; no plan label, stage name or ticket number enters a symbol.",
+    "reasoning": "a finding \u2014 `s13` states the extraction at \u03c8_N=1 is \"finite\" with values that are the \u03c8_N=0.95 sample, and its clause (2) then requires a 1e-10 match at \u03c8_N=1 against those values, which the extraction does not produce there.",
+    "single_goal": "pass \u2014 `s13` lands one deliverable, a flux-function representation that carries a finite edge, with the rerun and the suite as its evidence rather than as a second product change.",
+    "wiring": "pass \u2014 `s13`'s declared `depends-on` (`s10`) matches the builder state its four-frame rerun measures, `s12`'s new dependence on `s13` orders the refusal analysis after the profile change, and every declaration in the front matter names a section that exists."
+  },
+  "section_digests": {
+    "_document": "1521260222faccb369b644ad24c59d32b09a89ffded99da40ab36806830d9b99",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "8221264aa226d15c859f15d29e63bdc333dd055f1fa3f0ad1683edb6aba86e66",
+    "s12": "95c2ca272095b9a7723109be1e1906771bb259110daaf42b9ab5a27c90ee76f2",
+    "s13": "5729f342210d6f341a547e904cb3c7e69f8196a466c7e21643389a202ee21be0",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "3dc57bc53014ca0924803e72edad5a80c9db8d8548f1484de73c21e0193d0ae3",
+    "s8": "947496a5661facc0e84af20b07da019a130e6d538d4e68c6ad9b46949d4e6693",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T05:41:34.801473+00:00",
+  "total": null
+}

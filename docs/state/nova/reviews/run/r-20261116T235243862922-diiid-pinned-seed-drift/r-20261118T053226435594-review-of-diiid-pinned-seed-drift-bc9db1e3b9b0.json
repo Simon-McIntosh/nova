@@ -77,6 +77,16 @@
       "kind": "exempted",
       "reason": "The test guards that the preflight propagates the moment sum it computed; the qualification threshold itself is tested by the passing and refusing preflight cases",
       "recorded_at": "2026-11-18T06:29:16.697758+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The reviewer confirms the benchmark blob is identical between 32edef46a and the reviewed head, so the recorded current stands",
+      "recorded_at": "2026-11-18T06:29:24.562455+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "Three construction sites of the read column set; worth a module constant in the re-registration node, not a blocker for the preflight",
+      "recorded_at": "2026-11-18T06:29:44.394928+00:00"
     }
   },
   "findings": [

@@ -1,0 +1,145 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": "waived",
+  "added_failure_ids": [],
+  "added_failure_waiver": "Explicit review dispatch waiver: lead ruling 2026-11-17 permits landing on the GPU gate; native CPU baseline and head abort in JAX compilation before summaries (both EXIT=-6/completed=false); combined-state H200 job 1324234 is reported by coordinator as 85 passed with one pre-existing failure deselected. No completed CPU failure-set pair exists; this review does not claim zero added failures or independently rerun that external H200 gate.",
+  "assertion_analysis": {
+    "conditions": {
+      "completed_comparison tests": "Different-constraint reporting fails if ITER is band-gated or hides its fixed 25% gap/prior labels; same-constraint tests fail if MAST-U/TCV are not band-gated; scaled-control tests fail if nonstationarity or unqualification is accepted, a failed control is marked fired, or a valid stationary qualified 10% displacement is refused.",
+      "test_circuit_deselection_reads_multiple_xml_fragments": "Fails if multiple top-level fragments cannot be read or an explicit false directive is treated as true.",
+      "test_comparison_receipts_delegate_to_durable_json_owner": "Fails if _write bypasses the owner (zero calls), invokes it repeatedly or with different options/payload, changes deterministic bytes, deletes another writer pending file, leaks temporary files, or calls the owner before rejecting nonfinite raw data; pending-file setup is a positive precondition rather than regression coverage.",
+      "test_conductor_currents_use_measurement_uncertainties_and_typed_requests": "Fails if conductor uncertainties, added current rows, request currents, stationary convergence, residuals or covariance dimension differ from the independent NumPy augmented design solve; unchanged original request current is a nonmutation check, not a self-confirming recovery check.",
+      "test_empty_coil_is_omitted_only_with_explicit_deselection_and_no_connection": "Fails if a measured/wired coil is dropped, missing-data deselection is applied without the explicit flag, or an empty unwired coil cannot be omitted.",
+      "test_failed_forward_history_counts_nonfinite_outer_trip": "Fails if trips are computed from the three finite residual entries instead of the four attempted iterations, or if the finite-entry diagnostic incorrectly includes NaN; comparing the reported trip count with history.active_set_iterations is not tautological because the regressed finite-count implementation returns three.",
+      "test_fit_does_not_swallow_unrelated_trial_errors": "Fails if an unrelated observation RuntimeError on call eight is swallowed or reclassified as a qualification refusal.",
+      "test_fitted_circuit_binding_preserves_output_split_and_shared_members": "Fails if active/passive arrays are split before flattening, shared contributions overwrite instead of summing (independent expected vector [2,5,3,5]), passive provenance is misidentified, or a modified measured witness of 99 A is accepted.",
+      "test_fitted_conductor_currents_refuse_missing_uncertainties": "Fails if fitted currents proceed without aligned positive uncertainties.",
+      "test_fitted_replay_family_guard_refuses_before_public_seeds": "Fails if the 7.36% nonzero reference family is admitted, or the initial 1% positive control is refused.",
+      "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts": "Fails if the independent fixed case counts change, the zero-pressure basis gains a coefficient, zero/nonzero pressure is misclassified, or the quadratic profile loses its two live coefficients.",
+      "test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature": "Fails if conversion coefficients differ from [1,-1], linear/zero profiles are refused, or a square profile is admitted into the linear live space.",
+      "test_loop_reader_preserves_polarity_and_integrates_toroidal_legs": "Fails if one-point polarity flips, a zero-extent path creates terms, the two signed half-circle terms differ from fixed coordinates/weights, or a slanted toroidal leg is accepted without distributed observations.",
+      "test_passive_current_uses_primitive_sigma_and_the_ids_clock": "Fails if the homogeneous IDS time base is ignored in favour of the empty primitive signal time, interpolation is not 15 A/0.3 A at midpoint, or empty uncertainty data is fabricated.",
+      "test_passive_zero_turns_remain_zero_response_weights": "Fails if explicit zero is replaced by one turn, negative turns lose their sign, or NaN turns are accepted.",
+      "test_probe_normal_uses_clockwise_angle_from_outward_radius": "Fails on sign-reversed probe angle using the independent readings [2,-3,-2] for cardinal directions.",
+      "test_q95_uses_physical_flux_span_for_truncated_profiles": "Fails if normalization again uses the last sample at 0.97 instead of global axis/boundary: q95 becomes 0.9215 rather than independent 0.95 (or -92.15 rather than -95), creates a nonzero same-physics magnitude error and incorrectly fails the signed high-q band.",
+      "test_reference_prior_context_does_not_add_nova_priors": "Fails if ITER prior differences are hidden, nova acquires either prior, the age caveat disappears, or TCV is labelled as carrying those priors.",
+      "test_refused_residuals_preserve_strict_json_receipts": "Fails if nonfinite residuals are emitted as raw NaN/Infinity, finite/unavailable states are mislabelled, strict serialization accepts raw NaN, or the prior receipt is overwritten on refusal.",
+      "test_row_agreement_exposes_a_reversed_current_sign_and_family_gain": "Fails if identical rows do not give zero, reversal does not give relative error two/gain minus one/three opposite signs, whitening loses its scale, or doubling does not give error one/gain two; these are arithmetic controls of the metric, not a solver-truth assertion.",
+      "test_row_replay_control_keeps_zero_extent_rows_and_refuses_missing_scaling": "Fails if the zero row is dropped from its family, the independent scaled reference error is not 1/11, replacing scaled scores by unscaled scores still passes, or replaying 1.10 times the source is admitted within 5%.",
+      "test_segmented_loop_fitter_uses_every_signed_observation_term": "Fails if either signed term is dropped or combined at the wrong radius, changing the independent design-matrix least-squares answer, or project silently accepts segmented loops at sensor-only points.",
+      "test_shared_magnetics_reconstruction": "Input assertions fail on a wrong DD, inhomogeneous reference, unsuccessful stored reconstruction, mismatched channel counts, missing Ip sigma, misaligned sample geometry or a CPU physical run; terminal assertions refuse absence of a qualified forward state, nonstationary inverse, failed same-constraint bands or an invalid scaled fit.",
+      "test_shared_magnetics_reconstruction_observation_replay": "Positive current-bearing probe assertions fail if either plasma or conductor source path goes dead; family assertions fail on empty/nonfinite/zero-reference families, unscaled relative error >=5%, or scaled-reference error <=5%, independently comparing kernel predictions with stored EFIT rows.",
+      "test_stored_density_integral_keeps_sign_and_generator_cell_area": "Fails if source-cell area, current signs, nonzero-node count or grid spacings differ from the independent density-grid arithmetic, or an all-zero source is accepted.",
+      "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands": "Fails if the known 0.3 m shift is not measured/removed correctly, a 10% current gap is miscomputed, q95 differs from -2.9, or fixed physical bands accept the excessive axis/current gaps.",
+      "test_unqualified_fit_start_is_not_backtracked": "Fails if a refused starting receipt is admitted or retried instead of raising after one call.",
+      "test_unqualified_fit_trial_backtracks_to_a_qualified_step": "Fails if an unqualified full step propagates instead of halving, no rejected-trial receipt is retained, fixed qualification fields are wrong, call counts omit evaluations, or the recovered coefficients differ from independent generating truth.",
+      "test_unqualified_fit_trials_exhaust_the_backtracking_floor": "Fails if exhaustion returns normally or without accepted-fit/refused-forward receipts, the five fractions differ from [1,.5,.25,.125,.0625], refusals lose residual/reason, or accepted coefficients change despite every trial being rejected.",
+      "test_unqualified_forward_receipt_preserves_convergence": "Fails if qualification is conflated with inner convergence, a refused receipt is returned as admitted, or residual/reason fields are lost; hardcoded expected convergence true differs deliberately from qualification false.",
+      "test_zero_extent_flux_row_retains_residual_and_fractional_response": "Fails if zero-span rows are dropped, a half-span response is treated as full, fitted coefficients differ from independent NumPy weighted least squares, or the retained zero prediction has the wrong whitened residual."
+    },
+    "method": "Read assertions at the exact reviewed head; conditions below state the regressions that would redden the named tests. No implementation mutation or test rerun was performed by this read-only review.",
+    "tautological_regression_assertions": []
+  },
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/imas/mast_efit_referee.py:run_refereed_parity_chain",
+    "nova/imas/mast_parity_gate.py:_score_completed_chain",
+    "nova/equilibrium/profile.py:ReconstructProfile.from_geometry",
+    "nova/equilibrium/harmonic.py:ReconstructHarmonic.build_sensor_matrix",
+    "nova/equilibrium/magnetics_fit.py:MagneticsFit._evaluate"
+  ],
+  "completed_at": "2026-11-18T05:05:59Z",
+  "dispatched_at": "2026-11-18T04:57:19Z",
+  "figure_review": {
+    "count": 15,
+    "previews": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T045610416300-review-of-efit-comparison-6c0ffac5faf8/read-artifacts",
+    "result": "All exact-head SVGs rendered and visually inspected; legends readable, no clipped or overlapping text; shared contours and wall visible where terminal flux permits them; blank Nova contours in refused collapsed maps are explained by captions."
+  },
+  "findings": [
+    {
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "line": "316",
+      "severity": "non-blocking",
+      "text": "non-blocking: _sample_passive repeats _sample's conversion, homogeneous-time selection, empty-data handling, length check and interpolation; _sample(loop, ids, time, field=field) already performs this primitive-field operation, so delegate to that owner to keep one time-base rule instead of two implementations that can drift."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Inspected the ordered commit changes and final source/test diff against d7676e478fc8701b036ec717f80d403c3ead86f5, the cumulative evidence and all 15 rendered SVGs at 6c0ffac5faf86c18d6c80a8fc9f683b4018f7a24; the current fitting, replay, refusal and physical-span q95 changes are coherent, with one small sampling duplication remaining.",
+    "done_when": "Read the original done_when in dispatch-detail.json and its live amended contract; tests/test_magnetics_fit_efit_comparison.py:1226 and scaled-row-control-1323912/gate.log measure all three fitted-source replays and the six family controls, while the dispatch expressly waives the unavailable CPU suite delta.",
+    "goal": "Read the per-case comparison and fit/forward split goal in the source run's dispatch-detail.json; docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html records the nonconvergence outcome explicitly accepted by live docs/plans/inverse-equilibrium-baseline.html#s2, without claiming an inverse reconstruction succeeded.",
+    "manifest": "Read the source manifest.md including its actual baseline_suite and after_suite records; both are incomplete EXIT=-6 arms with null failure counts, and its historical CPU blocker is superseded for this review by the explicit dispatch waiver rather than by an invented passing pair.",
+    "write_paths": "Compared the source dispatch-detail.json write_paths with git diff --name-only d7676e478fc8701b036ec717f80d403c3ead86f5..6c0ffac5faf86c18d6c80a8fc9f683b4018f7a24; all 22 delivered paths fall under the nine declared files or directories and tests/test_equilibrium_forward.py is unchanged."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_magnetics_fit.py:416 catches immediate propagation of unqualified trials and tests/test_magnetics_fit_efit_comparison.py:1982 catches endpoint-normalized q95, with q95-reverse-control.log actually restoring four failures; the physical nonconvergence outcome remains diagnostic evidence rather than successful inverse-fit coverage.",
+    "evidence": "tests/test_magnetics_fit_efit_comparison.py:1380 enforces both reference scales and native scaled-row-control-1323912/gate.log records 3 passed with EXIT=0 plus a separate 3-failure control, while the CPU summaries remain unavailable under the authorized waiver.",
+    "fit": "nova/equilibrium/magnetics_fit.py:101, nova/equilibrium/measurement.py:57 and nova/imas/mast_efit_referee.py:372 extend their existing typed owners, preserve the forward/measurement boundary and introduce no forbidden stage or version names.",
+    "goal_fidelity": "docs/plans/inverse-equilibrium-baseline.html#s2 explicitly accepts the measured nonconvergence outcome delivered by docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:2210, with the three refusal records and replay panels retained.",
+    "reuse": "tests/test_magnetics_fit_efit_comparison.py:316 duplicates the arbitrary-field homogeneous-time interpolation already implemented by _sample at line 279, although the larger fit, scoring, kernel, geometry and JSON mechanisms correctly extend or call their owners.",
+    "scope_discipline": "The 22 paths in the exact base/head diff all match the source dispatch-detail.json write_paths, and nova/equilibrium/magnetics_fit.py extends the authorized fitting owner without changing the public forward request."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read the per-case comparison and fit/forward split goal in the source run's dispatch-detail.json; docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html records the nonconvergence outcome explicitly accepted by live docs/plans/inverse-equilibrium-baseline.html#s2, without claiming an inverse reconstruction succeeded.\nVERDICT done_when: Read the original done_when in dispatch-detail.json and its live amended contract; tests/test_magnetics_fit_efit_comparison.py:1226 and scaled-row-control-1323912/gate.log measure all three fitted-source replays and the six family controls, while the dispatch expressly waives the unavailable CPU suite delta.\nVERDICT write_paths: Compared the source dispatch-detail.json write_paths with git diff --name-only d7676e478fc8701b036ec717f80d403c3ead86f5..6c0ffac5faf86c18d6c80a8fc9f683b4018f7a24; all 22 delivered paths fall under the nine declared files or directories and tests/test_equilibrium_forward.py is unchanged.\nVERDICT manifest: Read the source manifest.md including its actual baseline_suite and after_suite records; both are incomplete EXIT=-6 arms with null failure counts, and its historical CPU blocker is superseded for this review by the explicit dispatch waiver rather than by an invented passing pair.\nVERDICT diff: Inspected the ordered commit changes and final source/test diff against d7676e478fc8701b036ec717f80d403c3ead86f5, the cumulative evidence and all 15 rendered SVGs at 6c0ffac5faf86c18d6c80a8fc9f683b4018f7a24; the current fitting, replay, refusal and physical-span q95 changes are coherent, with one small sampling duplication remaining.\nCALL_SITES: nova/imas/mast_efit_referee.py:run_refereed_parity_chain, nova/imas/mast_parity_gate.py:_score_completed_chain, nova/equilibrium/profile.py:ReconstructProfile.from_geometry, nova/equilibrium/harmonic.py:ReconstructHarmonic.build_sensor_matrix, nova/equilibrium/magnetics_fit.py:MagneticsFit._evaluate\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/plans/inverse-equilibrium-baseline.html#s2 explicitly accepts the measured nonconvergence outcome delivered by docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:2210, with the three refusal records and replay panels retained.\nSCORE evidence: 19\nJUSTIFICATION evidence: tests/test_magnetics_fit_efit_comparison.py:1380 enforces both reference scales and native scaled-row-control-1323912/gate.log records 3 passed with EXIT=0 plus a separate 3-failure control, while the CPU summaries remain unavailable under the authorized waiver.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The 22 paths in the exact base/head diff all match the source dispatch-detail.json write_paths, and nova/equilibrium/magnetics_fit.py extends the authorized fitting owner without changing the public forward request.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_equilibrium_magnetics_fit.py:416 catches immediate propagation of unqualified trials and tests/test_magnetics_fit_efit_comparison.py:1982 catches endpoint-normalized q95, with q95-reverse-control.log actually restoring four failures; the physical nonconvergence outcome remains diagnostic evidence rather than successful inverse-fit coverage.\nSCORE fit: 20\nJUSTIFICATION fit: nova/equilibrium/magnetics_fit.py:101, nova/equilibrium/measurement.py:57 and nova/imas/mast_efit_referee.py:372 extend their existing typed owners, preserve the forward/measurement boundary and introduce no forbidden stage or version names.\nSCORE reuse: 5\nJUSTIFICATION reuse: tests/test_magnetics_fit_efit_comparison.py:316 duplicates the arbitrary-field homogeneous-time interpolation already implemented by _sample at line 279, although the larger fit, scoring, kernel, geometry and JSON mechanisms correctly extend or call their owners.\nFINDING tests/test_magnetics_fit_efit_comparison.py:316 non-blocking: _sample_passive repeats _sample's conversion, homogeneous-time selection, empty-data handling, length check and interpolation; _sample(loop, ids, time, field=field) already performs this primitive-field operation, so delegate to that owner to keep one time-base rule instead of two implementations that can drift.\n",
+  "reuse_search": {
+    "owners_opened": [
+      "nova/equilibrium/magnetics_fit.py",
+      "nova/equilibrium/measurement.py",
+      "nova/imas/mast_efit_referee.py",
+      "nova/io/json.py",
+      "nova/linalg/interpolant.py",
+      "nova/media/ink.py"
+    ],
+    "result": "Fitting/receipt, measurement quadrature, scoring, strict-JSON adapter and rendering use their owners. The linalg Bernstein evaluator evaluates basis values, whereas _profile_basis converts an edge-constrained live basis to power coefficients; it is not the same operation. No separate production owner found for EFIT fitted-array witness binding, per-case constraint context, replay scoring or refusal evidence in the searched equilibrium/IMAS/io modules. The primitive current sampler does duplicate _sample and is reported."
+  },
+  "review_run_id": "r-20261118T045610416300-review-of-efit-comparison-6c0ffac5faf8",
+  "reviewed_base_sha": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+  "reviewed_head_sha": "6c0ffac5faf86c18d6c80a8fc9f683b4018f7a24",
+  "reviewed_run_id": "r-20261114T133703375306-efit-comparison",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_receipts": {
+    "after_suite": {
+      "CPU_wall_seconds": 3386.8415296413004,
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_equilibrium_forward.py tests/test_equilibrium_magnetics_fit.py tests/test_magnetics_fit_efit_comparison.py",
+      "completed": false,
+      "exit_status": -6,
+      "failure_count": null,
+      "failure_ids": [],
+      "log_digest": "aa7b494ee0224a8cbed0ed21583053a8be8598974be03b7554e7b1316517c8e7",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/q95-review-suite-1324011/head/gate.log",
+      "measurement_cwd": "/tmp/nova-serial-suite-1324011-1vo3uqmx/head/tree",
+      "measurement_module": "/tmp/nova-serial-suite-1324011-1vo3uqmx/head/tree/nova/equilibrium/magnetics_fit.py",
+      "mutation": null,
+      "revision": "b9884b0af797a090f105f80be019cacf258ba354",
+      "summary": null
+    },
+    "baseline_suite": {
+      "CPU_wall_seconds": 3600.82033004798,
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_equilibrium_forward.py tests/test_equilibrium_magnetics_fit.py",
+      "completed": false,
+      "exit_status": -6,
+      "failure_count": null,
+      "failure_ids": [],
+      "log_digest": "89b86918d49f2a2e109c6a7fa8af3807c0d1b98783fe6b7e356ab41e11ff4781",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/q95-review-suite-1324011/original-base/gate.log",
+      "measurement_cwd": "/tmp/nova-serial-suite-1324011-1vo3uqmx/original-base/tree",
+      "measurement_module": "/tmp/nova-serial-suite-1324011-1vo3uqmx/original-base/tree/nova/equilibrium/magnetics_fit.py",
+      "mutation": null,
+      "revision": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+      "summary": null
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T05:06:41.633006+00:00",
+  "total": 103
+}

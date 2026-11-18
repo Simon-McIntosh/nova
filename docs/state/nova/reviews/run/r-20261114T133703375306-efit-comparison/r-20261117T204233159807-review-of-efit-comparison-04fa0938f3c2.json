@@ -1,0 +1,1699 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: both native source CPU suite arms aborted SIGABRT(-6) before pytest summaries; empty IDs are not zero failures. The live plan and fragment record the lead suite-delta waiver, but the delivery checker still requires an integer count. No run was repeated and no zero was fabricated.",
+  "after_suite": {
+    "CPU_wall_seconds": 2263.2871103202924,
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_equilibrium_forward.py tests/test_equilibrium_magnetics_fit.py tests/test_magnetics_fit_efit_comparison.py",
+    "completed": false,
+    "exit_status": -6,
+    "failure_count": null,
+    "failure_ids": [],
+    "log_digest": "4cfc66e874772a185a3887fc9505f7d36c1320a59ad1aeacf9d0bc2c5f9db922",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/serial-normal-suite-1322997/head/gate.log",
+    "measurement_cwd": "/tmp/nova-serial-suite-1322997-38vpwifi/head/tree",
+    "measurement_module": "/tmp/nova-serial-suite-1322997-38vpwifi/head/tree/nova/equilibrium/magnetics_fit.py",
+    "mutation": null,
+    "note": "Preserved actual incomplete CPU execution at74833da985d30006ef2607a10aafec5dc10744be, not relabelled as requested43abb0228c0a832cec2152d37011f9ffc44c977c or laterhead. No new CPU arm: lead explicitlywaived suite-delta2026-11-17; reports coordinator combined-stateH20080passed/preexistingfailureexcluded. Current kernel-only GPU gate is recorded separately under tests/artifacts.",
+    "review_verified_log_digest": "4cfc66e874772a185a3887fc9505f7d36c1320a59ad1aeacf9d0bc2c5f9db922",
+    "revision": "74833da985d30006ef2607a10aafec5dc10744be",
+    "summary": null
+  },
+  "assertion_audit": [
+    {
+      "assertion": "json.loads(path.read_text()) == dict(marker='refusal-recorded', residual=None, residual_state=state)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Return raw nonfinite residuals, mislabel their state, allow raw NaN JSON, or replace the destination before validation; finite and missing controls distinguish actual transport from an empty receipt.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 32,
+      "owner": "test_refused_residuals_preserve_strict_json_receipts"
+    },
+    {
+      "assertion": "_residual_fields(0.0) == dict(residual=0.0, residual_state='finite')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Return raw nonfinite residuals, mislabel their state, allow raw NaN JSON, or replace the destination before validation; finite and missing controls distinguish actual transport from an empty receipt.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 35,
+      "owner": "test_refused_residuals_preserve_strict_json_receipts"
+    },
+    {
+      "assertion": "_residual_fields(None) == dict(residual=None, residual_state='unavailable')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Return raw nonfinite residuals, mislabel their state, allow raw NaN JSON, or replace the destination before validation; finite and missing controls distinguish actual transport from an empty receipt.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 36,
+      "owner": "test_refused_residuals_preserve_strict_json_receipts"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='not JSON compliant')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Return raw nonfinite residuals, mislabel their state, allow raw NaN JSON, or replace the destination before validation; finite and missing controls distinguish actual transport from an empty receipt.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 38,
+      "owner": "test_refused_residuals_preserve_strict_json_receipts"
+    },
+    {
+      "assertion": "path.read_bytes() == before",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Return raw nonfinite residuals, mislabel their state, allow raw NaN JSON, or replace the destination before validation; finite and missing controls distinguish actual transport from an empty receipt.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 41,
+      "owner": "test_refused_residuals_preserve_strict_json_receipts"
+    },
+    {
+      "assertion": "pending.read_text() == \"another writer's pending receipt\"",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore the fixed .pending writer or bypass nova.io.json.write_atomic; the owner spy records zero calls or the peer pending file changes; validate NaN after calling the owner and the spy count or preserved bytes also fails.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 51,
+      "owner": "test_comparison_receipts_delegate_to_durable_json_owner"
+    },
+    {
+      "assertion": "len(calls) == 1",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore the fixed .pending writer or bypass nova.io.json.write_atomic; the owner spy records zero calls or the peer pending file changes; validate NaN after calling the owner and the spy count or preserved bytes also fails.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 62,
+      "owner": "test_comparison_receipts_delegate_to_durable_json_owner"
+    },
+    {
+      "assertion": "calls[0] == (destination, payload, dict(indent=2, sort_keys=False, newline=True))",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore the fixed .pending writer or bypass nova.io.json.write_atomic; the owner spy records zero calls or the peer pending file changes; validate NaN after calling the owner and the spy count or preserved bytes also fails.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 63,
+      "owner": "test_comparison_receipts_delegate_to_durable_json_owner"
+    },
+    {
+      "assertion": "destination.read_text() == json.dumps(payload, indent=2, allow_nan=False) + '\\n'",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore the fixed .pending writer or bypass nova.io.json.write_atomic; the owner spy records zero calls or the peer pending file changes; validate NaN after calling the owner and the spy count or preserved bytes also fails.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 68,
+      "owner": "test_comparison_receipts_delegate_to_durable_json_owner"
+    },
+    {
+      "assertion": "pending.read_text() == \"another writer's pending receipt\"",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore the fixed .pending writer or bypass nova.io.json.write_atomic; the owner spy records zero calls or the peer pending file changes; validate NaN after calling the owner and the spy count or preserved bytes also fails.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 71,
+      "owner": "test_comparison_receipts_delegate_to_durable_json_owner"
+    },
+    {
+      "assertion": "list(tmp_path.glob('*.tmp')) == []",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore the fixed .pending writer or bypass nova.io.json.write_atomic; the owner spy records zero calls or the peer pending file changes; validate NaN after calling the owner and the spy count or preserved bytes also fails.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 72,
+      "owner": "test_comparison_receipts_delegate_to_durable_json_owner"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='not JSON compliant')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore the fixed .pending writer or bypass nova.io.json.write_atomic; the owner spy records zero calls or the peer pending file changes; validate NaN after calling the owner and the spy count or preserved bytes also fails.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 74,
+      "owner": "test_comparison_receipts_delegate_to_durable_json_owner"
+    },
+    {
+      "assertion": "len(calls) == 1",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore the fixed .pending writer or bypass nova.io.json.write_atomic; the owner spy records zero calls or the peer pending file changes; validate NaN after calling the owner and the spy count or preserved bytes also fails.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 76,
+      "owner": "test_comparison_receipts_delegate_to_durable_json_owner"
+    },
+    {
+      "assertion": "destination.read_bytes() == before",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore the fixed .pending writer or bypass nova.io.json.write_atomic; the owner spy records zero calls or the peer pending file changes; validate NaN after calling the owner and the spy count or preserved bytes also fails.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 77,
+      "owner": "test_comparison_receipts_delegate_to_durable_json_owner"
+    },
+    {
+      "assertion": "_passive_signed_turns(0.0) == 0.0",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Replace zero turns by a one-turn default, discard the negative sign, or admit a nonfinite turn count.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 84,
+      "owner": "test_passive_zero_turns_remain_zero_response_weights"
+    },
+    {
+      "assertion": "_passive_signed_turns(-2.0) == -2.0",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Replace zero turns by a one-turn default, discard the negative sign, or admit a nonfinite turn count.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 85,
+      "owner": "test_passive_zero_turns_remain_zero_response_weights"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='invalid passive')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Replace zero turns by a one-turn default, discard the negative sign, or admit a nonfinite turn count.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 86,
+      "owner": "test_passive_zero_turns_remain_zero_response_weights"
+    },
+    {
+      "assertion": "comparison._attempt(data, None, 'seed') is None",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Report converged=False just because qualified=False, return the unqualified receipt as accepted, or omit its exact residual/reason; the serialized booleans and numeric constants disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 112,
+      "owner": "test_unqualified_forward_receipt_preserves_convergence"
+    },
+    {
+      "assertion": "result['qualified'] is False",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Report converged=False just because qualified=False, return the unqualified receipt as accepted, or omit its exact residual/reason; the serialized booleans and numeric constants disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 115,
+      "owner": "test_unqualified_forward_receipt_preserves_convergence"
+    },
+    {
+      "assertion": "result['converged'] is True",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Report converged=False just because qualified=False, return the unqualified receipt as accepted, or omit its exact residual/reason; the serialized booleans and numeric constants disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 116,
+      "owner": "test_unqualified_forward_receipt_preserves_convergence"
+    },
+    {
+      "assertion": "result['termination_reason'] == 1",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Report converged=False just because qualified=False, return the unqualified receipt as accepted, or omit its exact residual/reason; the serialized booleans and numeric constants disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 117,
+      "owner": "test_unqualified_forward_receipt_preserves_convergence"
+    },
+    {
+      "assertion": "result['residual'] == 4.86e-10",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Report converged=False just because qualified=False, return the unqualified receipt as accepted, or omit its exact residual/reason; the serialized booleans and numeric constants disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 118,
+      "owner": "test_unqualified_forward_receipt_preserves_convergence"
+    },
+    {
+      "assertion": "result['trips'] == history.active_set_iterations",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Count finite residual entries as trips; the stored trip count becomes 3 rather than the independent active_set_iterations value 4, while the finite-entry count must remain 3.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 136,
+      "owner": "test_failed_forward_history_counts_nonfinite_outer_trip"
+    },
+    {
+      "assertion": "result['finite_residual_entries'] == 3",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Count finite residual entries as trips; the stored trip count becomes 3 rather than the independent active_set_iterations value 4, while the finite-entry count must remain 3.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 137,
+      "owner": "test_failed_forward_history_counts_nonfinite_outer_trip"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='physical fit refused')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove the per-family 5% check; the deliberately 7.36% probe report stops raising after the valid 1% control was accepted.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 155,
+      "owner": "test_fitted_replay_family_guard_refuses_before_public_seeds"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(result['fitted_conductor_current'], [2.0, 5.0, 3.0, 5.0])",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Split by the unfiltered active count, omit an overlapping group contribution, or accept a mismatched measured witness; reconstructed currents disagree with fixed [2,5,3,5] and the altered witness must raise.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 223,
+      "owner": "test_fitted_circuit_binding_preserves_output_split_and_shared_members"
+    },
+    {
+      "assertion": "result['fitted_current_map'][2]['source_kind'] == 'passive'",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Split by the unfiltered active count, omit an overlapping group contribution, or accept a mismatched measured witness; reconstructed currents disagree with fixed [2,5,3,5] and the altered witness must raise.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 226,
+      "owner": "test_fitted_circuit_binding_preserves_output_split_and_shared_members"
+    },
+    {
+      "assertion": "result['fitted_current_map'][2]['output'] == 'pf_current[2]'",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Split by the unfiltered active count, omit an overlapping group contribution, or accept a mismatched measured witness; reconstructed currents disagree with fixed [2,5,3,5] and the altered witness must raise.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 227,
+      "owner": "test_fitted_circuit_binding_preserves_output_split_and_shared_members"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='unique measured-row witness')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Split by the unfiltered active count, omit an overlapping group contribution, or accept a mismatched measured witness; reconstructed currents disagree with fixed [2,5,3,5] and the altered witness must raise.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 229,
+      "owner": "test_fitted_circuit_binding_preserves_output_split_and_shared_members"
+    },
+    {
+      "assertion": "receipt.converged",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore immediate propagation of unqualified trial errors or accept the unqualified state; the fit cannot recover independent truth or loses its full-step refusal record.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 409,
+      "owner": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(receipt.coefficients, truth, atol=1e-08)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore immediate propagation of unqualified trial errors or accept the unqualified state; the fit cannot recover independent truth or loses its full-step refusal record.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 410,
+      "owner": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "receipt.forward_evaluations == len(calls)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore immediate propagation of unqualified trial errors or accept the unqualified state; the fit cannot recover independent truth or loses its full-step refusal record.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 411,
+      "owner": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "receipt.rejected_trials",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore immediate propagation of unqualified trial errors or accept the unqualified state; the fit cannot recover independent truth or loses its full-step refusal record.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 412,
+      "owner": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "rejected['fraction'] == 1.0",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore immediate propagation of unqualified trial errors or accept the unqualified state; the fit cannot recover independent truth or loses its full-step refusal record.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 414,
+      "owner": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "rejected['termination_reason'] == 12",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore immediate propagation of unqualified trial errors or accept the unqualified state; the fit cannot recover independent truth or loses its full-step refusal record.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 415,
+      "owner": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "rejected['residual'] > 0.08",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore immediate propagation of unqualified trial errors or accept the unqualified state; the fit cannot recover independent truth or loses its full-step refusal record.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 416,
+      "owner": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "rejected['forward'].qualified is False",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore immediate propagation of unqualified trial errors or accept the unqualified state; the fit cannot recover independent truth or loses its full-step refusal record.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 417,
+      "owner": "test_unqualified_fit_trial_backtracks_to_a_qualified_step"
+    },
+    {
+      "assertion": "pytest.raises(RuntimeError, match='line search.*12')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Stop before the declared halving floor, silently return after qualification exhaustion, or discard rejection receipts; the explicit five fractions and last accepted state disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 426,
+      "owner": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "not receipt.converged",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Stop before the declared halving floor, silently return after qualification exhaustion, or discard rejection receipts; the explicit five fractions and last accepted state disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 429,
+      "owner": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "receipt.forward.qualified",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Stop before the declared halving floor, silently return after qualification exhaustion, or discard rejection receipts; the explicit five fractions and last accepted state disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 430,
+      "owner": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "receipt.forward_evaluations == len(calls)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Stop before the declared halving floor, silently return after qualification exhaustion, or discard rejection receipts; the explicit five fractions and last accepted state disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 431,
+      "owner": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "[row['fraction'] for row in receipt.rejected_trials] == [1.0, 0.5, 0.25, 0.125, 0.0625]",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Stop before the declared halving floor, silently return after qualification exhaustion, or discard rejection receipts; the explicit five fractions and last accepted state disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 432,
+      "owner": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "all((row['termination_reason'] == 12 for row in receipt.rejected_trials))",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Stop before the declared halving floor, silently return after qualification exhaustion, or discard rejection receipts; the explicit five fractions and last accepted state disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 439,
+      "owner": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "all((row['residual'] > 0.001 for row in receipt.rejected_trials))",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Stop before the declared halving floor, silently return after qualification exhaustion, or discard rejection receipts; the explicit five fractions and last accepted state disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 440,
+      "owner": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(receipt.coefficients, fitter._initial)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Stop before the declared halving floor, silently return after qualification exhaustion, or discard rejection receipts; the explicit five fractions and last accepted state disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 441,
+      "owner": "test_unqualified_fit_trials_exhaust_the_backtracking_floor"
+    },
+    {
+      "assertion": "pytest.raises(RuntimeError, match='forward evaluation did not qualify')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Backtrack the starting refusal instead of raising immediately; the solve-call count exceeds one or refusal is absent.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 449,
+      "owner": "test_unqualified_fit_start_is_not_backtracked"
+    },
+    {
+      "assertion": "len(calls) == 1",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Backtrack the starting refusal instead of raising immediately; the solve-call count exceeds one or refusal is absent.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 453,
+      "owner": "test_unqualified_fit_start_is_not_backtracked"
+    },
+    {
+      "assertion": "not refusal.value.receipt.qualified",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Backtrack the starting refusal instead of raising immediately; the solve-call count exceeds one or refusal is absent.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 454,
+      "owner": "test_unqualified_fit_start_is_not_backtracked"
+    },
+    {
+      "assertion": "pytest.raises(RuntimeError, match='observation source is unavailable')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Treat unrelated RuntimeError as a qualification rejection; the eighth-call observation failure is swallowed instead of propagating.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 470,
+      "owner": "test_fit_does_not_swallow_unrelated_trial_errors"
+    },
+    {
+      "assertion": "calls == 8",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Treat unrelated RuntimeError as a qualification rejection; the eighth-call observation failure is swallowed instead of propagating.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 472,
+      "owner": "test_fit_does_not_swallow_unrelated_trial_errors"
+    },
+    {
+      "assertion": "result['scores']['bands']['plasma_current_relative_error'] is False",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Apply same-constraint bands to ITER, suppress its gap, or omit the constraint-prior context; the deliberately failed band must remain reported without raising.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 584,
+      "owner": "test_different_constraint_comparison_reports_band_gaps"
+    },
+    {
+      "assertion": "result['scores']['plasma_current_relative_error'] == 0.25",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Apply same-constraint bands to ITER, suppress its gap, or omit the constraint-prior context; the deliberately failed band must remain reported without raising.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 585,
+      "owner": "test_different_constraint_comparison_reports_band_gaps"
+    },
+    {
+      "assertion": "result['constraint_context']['reference_extra_priors']",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Apply same-constraint bands to ITER, suppress its gap, or omit the constraint-prior context; the deliberately failed band must remain reported without raising.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 586,
+      "owner": "test_different_constraint_comparison_reports_band_gaps"
+    },
+    {
+      "assertion": "result['bands_applied'] is False",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Apply same-constraint bands to ITER, suppress its gap, or omit the constraint-prior context; the deliberately failed band must remain reported without raising.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 587,
+      "owner": "test_different_constraint_comparison_reports_band_gaps"
+    },
+    {
+      "assertion": "pytest.raises(AssertionError)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove the MAST-U/TCV all-band assertion; a deliberately failing score returns instead of raising.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 592,
+      "owner": "test_same_constraint_comparisons_require_the_bands"
+    },
+    {
+      "assertion": "pytest.raises(AssertionError, match='scaled.*stationary')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove scaled.converged from admission or from scaled_control_fired; a nonstationary scaled fit passes or writes a true control flag.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 598,
+      "owner": "test_scaled_control_requires_a_stationary_fit"
+    },
+    {
+      "assertion": "not result['scaled_control_fired']",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove scaled.converged from admission or from scaled_control_fired; a nonstationary scaled fit passes or writes a true control flag.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 604,
+      "owner": "test_scaled_control_requires_a_stationary_fit"
+    },
+    {
+      "assertion": "pytest.raises(AssertionError, match='scaled.*qualified')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove scaled.forward.qualified from admission; the unqualified scaled result stops raising.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 608,
+      "owner": "test_scaled_control_requires_a_qualified_forward"
+    },
+    {
+      "assertion": "result['scaled_control_fired']",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Unconditionally reject or fail to recognize a stationary qualified scaled fit with a 10% current change; the positive control flag or qualification fields becomes false.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 617,
+      "owner": "test_stationary_qualified_scaled_fit_certifies_displacement"
+    },
+    {
+      "assertion": "result['scaled_fit_converged'] and result['scaled_forward_qualified']",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Unconditionally reject or fail to recognize a stationary qualified scaled fit with a 10% current change; the positive control flag or qualification fields becomes false.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 618,
+      "owner": "test_stationary_qualified_scaled_fit_certifies_displacement"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(result.coefficients, expected, atol=1e-07)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Discard the zero-extent measured row or ignore toroidal fractions; the explicit independent design-matrix least-squares answer, nonzero row residual or [0,1,0.5,1] projection changes.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 639,
+      "owner": "test_zero_extent_flux_row_retains_residual_and_fractional_response"
+    },
+    {
+      "assertion": "result.whitened_residuals[0] == pytest.approx(-measurement.measured[0] / measurement.scale[0])",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Discard the zero-extent measured row or ignore toroidal fractions; the explicit independent design-matrix least-squares answer, nonzero row residual or [0,1,0.5,1] projection changes.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 640,
+      "owner": "test_zero_extent_flux_row_retains_residual_and_fractional_response"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(fitter.magnetics.project(np.ones(4), np.ones(4), np.zeros(4)), [0.0, 1.0, 0.5, 1.0])",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Discard the zero-extent measured row or ignore toroidal fractions; the explicit independent design-matrix least-squares answer, nonzero row residual or [0,1,0.5,1] projection changes.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 643,
+      "owner": "test_zero_extent_flux_row_retains_residual_and_fractional_response"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(_flux_loop_segments(SimpleNamespace(position=[point])), [[1.0, 0.0, SIGMA_BP]])",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Drop SIGMA_BP, treat a half-turn as a full loop, erase the return-leg sign, invent a zero-extent response, or accept a slanted leg without integration.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 654,
+      "owner": "test_loop_reader_preserves_polarity_and_integrates_toroidal_legs"
+    },
+    {
+      "assertion": "_flux_loop_segments(SimpleNamespace(position=[point, point])).shape == (0, 3)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Drop SIGMA_BP, treat a half-turn as a full loop, erase the return-leg sign, invent a zero-extent response, or accept a slanted leg without integration.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 657,
+      "owner": "test_loop_reader_preserves_polarity_and_integrates_toroidal_legs"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(terms, [[1.0, 0.4, SIGMA_BP * 0.5], [1.0, 0.0, -SIGMA_BP * 0.5]])",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Drop SIGMA_BP, treat a half-turn as a full loop, erase the return-leg sign, invent a zero-extent response, or accept a slanted leg without integration.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 666,
+      "owner": "test_loop_reader_preserves_polarity_and_integrates_toroidal_legs"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='distributed segment observations')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Drop SIGMA_BP, treat a half-turn as a full loop, erase the return-leg sign, invent a zero-extent response, or accept a slanted leg without integration.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 670,
+      "owner": "test_loop_reader_preserves_polarity_and_integrates_toroidal_legs"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(result.coefficients, expected, atol=1e-07)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Evaluate a segmented loop at only its first sample or lose one signed term; the independently constructed design-matrix solution differs, or Magnetics.project stops refusing insufficient fields.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 699,
+      "owner": "test_segmented_loop_fitter_uses_every_signed_observation_term"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='loop_quadrature')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Evaluate a segmented loop at only its first sample or lose one signed term; the independently constructed design-matrix solution differs, or Magnetics.project stops refusing insufficient fields.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 700,
+      "owner": "test_segmented_loop_fitter_uses_every_signed_observation_term"
+    },
+    {
+      "assertion": "_sample_passive(loop, ids, 0.5) == 15.0",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Read a nested signal clock for primitive homogeneous passive values, confuse current with uncertainty, or fabricate absent sigma; the fixed 15A and 0.3A interpolants disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 715,
+      "owner": "test_passive_current_uses_primitive_sigma_and_the_ids_clock"
+    },
+    {
+      "assertion": "_sample_passive(loop, ids, 0.5, 'current_error_upper') == pytest.approx(0.3)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Read a nested signal clock for primitive homogeneous passive values, confuse current with uncertainty, or fabricate absent sigma; the fixed 15A and 0.3A interpolants disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 716,
+      "owner": "test_passive_current_uses_primitive_sigma_and_the_ids_clock"
+    },
+    {
+      "assertion": "_sample_passive(loop, ids, 0.5, 'current_error_upper') is None",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Read a nested signal clock for primitive homogeneous passive values, confuse current with uncertainty, or fabricate absent sigma; the fixed 15A and 0.3A interpolants disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 718,
+      "owner": "test_passive_current_uses_primitive_sigma_and_the_ids_clock"
+    },
+    {
+      "assertion": "not _omit_empty_unconnected_coil(active, 0, True)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Omit a measured or connected coil, or omit without the XML directive; one of the four independently changed input cases flips its expected decision.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 732,
+      "owner": "test_empty_coil_is_omitted_only_with_explicit_deselection_and_no_connection"
+    },
+    {
+      "assertion": "not _omit_empty_unconnected_coil(active, 1, False)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Omit a measured or connected coil, or omit without the XML directive; one of the four independently changed input cases flips its expected decision.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 733,
+      "owner": "test_empty_coil_is_omitted_only_with_explicit_deselection_and_no_connection"
+    },
+    {
+      "assertion": "_omit_empty_unconnected_coil(active, 1, True)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Omit a measured or connected coil, or omit without the XML directive; one of the four independently changed input cases flips its expected decision.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 734,
+      "owner": "test_empty_coil_is_omitted_only_with_explicit_deselection_and_no_connection"
+    },
+    {
+      "assertion": "not _omit_empty_unconnected_coil(active, 1, True)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Omit a measured or connected coil, or omit without the XML directive; one of the four independently changed input cases flips its expected decision.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 736,
+      "owner": "test_empty_coil_is_omitted_only_with_explicit_deselection_and_no_connection"
+    },
+    {
+      "assertion": "_deselect_missing_current(path)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Parse concatenated XML as a single root or ignore the ef itCircuits directive; valid true/false fixture fragments stop producing their fixed decisions.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 748,
+      "owner": "test_circuit_deselection_reads_multiple_xml_fragments"
+    },
+    {
+      "assertion": "not _deselect_missing_current(path)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Parse concatenated XML as a single root or ignore the ef itCircuits directive; valid true/false fixture fragments stop producing their fixed decisions.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 750,
+      "owner": "test_circuit_deselection_reads_multiple_xml_fragments"
+    },
+    {
+      "assertion": "CASES['mastu'][-2:] == (2, 2)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore uniform counts for every machine or retain the wrong endpoint-constrained basis; fixed tuples and independently zero/linear/quadratic inputs lose the expected degree or representability.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 760,
+      "owner": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "CASES['tcv'][-2:] == (0, 2)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore uniform counts for every machine or retain the wrong endpoint-constrained basis; fixed tuples and independently zero/linear/quadratic inputs lose the expected degree or representability.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 761,
+      "owner": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "CASES['iter'][-2:] == (2, 3)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore uniform counts for every machine or retain the wrong endpoint-constrained basis; fixed tuples and independently zero/linear/quadratic inputs lose the expected degree or representability.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 762,
+      "owner": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "_profile_basis(0).shape == (1, 0)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore uniform counts for every machine or retain the wrong endpoint-constrained basis; fixed tuples and independently zero/linear/quadratic inputs lose the expected degree or representability.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 763,
+      "owner": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "fixed['representable'] and fixed['live_coefficients'] == 0",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore uniform counts for every machine or retain the wrong endpoint-constrained basis; fixed tuples and independently zero/linear/quadratic inputs lose the expected degree or representability.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 768,
+      "owner": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "not nonzero['representable']",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore uniform counts for every machine or retain the wrong endpoint-constrained basis; fixed tuples and independently zero/linear/quadratic inputs lose the expected degree or representability.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 769,
+      "owner": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "curved['representable'] and curved['live_coefficients'] == 2",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore uniform counts for every machine or retain the wrong endpoint-constrained basis; fixed tuples and independently zero/linear/quadratic inputs lose the expected degree or representability.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 770,
+      "owner": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "curved['lowest_polynomial_degree'] == 2",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Restore uniform counts for every machine or retain the wrong endpoint-constrained basis; fixed tuples and independently zero/linear/quadratic inputs lose the expected degree or representability.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 771,
+      "owner": "test_fixed_pressure_and_quadratic_field_spaces_follow_resolved_counts"
+    },
+    {
+      "assertion": "context['comparison_label'] == 'same magnetics rows; different constraint sets'",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Describe ITER as same-constraint or add nova priors; explicit prior lists, context label and age caveat disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 778,
+      "owner": "test_reference_prior_context_does_not_add_nova_priors"
+    },
+    {
+      "assertion": "context['reference_extra_priors'] == ['synthesised pressure prior', 'q0 prior']",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Describe ITER as same-constraint or add nova priors; explicit prior lists, context label and age caveat disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 781,
+      "owner": "test_reference_prior_context_does_not_add_nova_priors"
+    },
+    {
+      "assertion": "context['nova_extra_priors'] == []",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Describe ITER as same-constraint or add nova priors; explicit prior lists, context label and age caveat disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 785,
+      "owner": "test_reference_prior_context_does_not_add_nova_priors"
+    },
+    {
+      "assertion": "'predate' in context['counts_caveat']",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Describe ITER as same-constraint or add nova priors; explicit prior lists, context label and age caveat disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 786,
+      "owner": "test_reference_prior_context_does_not_add_nova_priors"
+    },
+    {
+      "assertion": "'neither' in context['caption']",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Describe ITER as same-constraint or add nova priors; explicit prior lists, context label and age caveat disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 787,
+      "owner": "test_reference_prior_context_does_not_add_nova_priors"
+    },
+    {
+      "assertion": "_constraint_context('tcv')['reference_extra_priors'] == []",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Describe ITER as same-constraint or add nova priors; explicit prior lists, context label and age caveat disagree.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 788,
+      "owner": "test_reference_prior_context_does_not_add_nova_priors"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(current.sum(), density.sum() * 0.2 * 0.3)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use a different grid cell-area rule, flip signed current density, retain zero-density nodes or accept an allzero source; the independent sum times 0.2*0.3 and sign/count controls change.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 797,
+      "owner": "test_stored_density_integral_keeps_sign_and_generator_cell_area"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(current < 0, density[density != 0] < 0)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use a different grid cell-area rule, flip signed current density, retain zero-density nodes or accept an allzero source; the independent sum times 0.2*0.3 and sign/count controls change.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 798,
+      "owner": "test_stored_density_integral_keeps_sign_and_generator_cell_area"
+    },
+    {
+      "assertion": "len(r) == len(z) == len(current) == 4",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use a different grid cell-area rule, flip signed current density, retain zero-density nodes or accept an allzero source; the independent sum times 0.2*0.3 and sign/count controls change.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 799,
+      "owner": "test_stored_density_integral_keeps_sign_and_generator_cell_area"
+    },
+    {
+      "assertion": "dr == pytest.approx(0.2) and dz == pytest.approx(0.3)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use a different grid cell-area rule, flip signed current density, retain zero-density nodes or accept an allzero source; the independent sum times 0.2*0.3 and sign/count controls change.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 800,
+      "owner": "test_stored_density_integral_keeps_sign_and_generator_cell_area"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='nonzero')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use a different grid cell-area rule, flip signed current density, retain zero-density nodes or accept an allzero source; the independent sum times 0.2*0.3 and sign/count controls change.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 801,
+      "owner": "test_stored_density_integral_keeps_sign_and_generator_cell_area"
+    },
+    {
+      "assertion": "exact['whitened_rms'] == exact['relative_l2'] == 0",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use an absolute-valued gain, wrong relative-error denominator, or broken whitening; fixed exact/reversed/doubled vectors no longer yield 0, -1/2 and 2/1 gain/error controls.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 813,
+      "owner": "test_row_agreement_exposes_a_reversed_current_sign_and_family_gain"
+    },
+    {
+      "assertion": "reversed_rows['relative_l2'] == 2",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use an absolute-valued gain, wrong relative-error denominator, or broken whitening; fixed exact/reversed/doubled vectors no longer yield 0, -1/2 and 2/1 gain/error controls.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 814,
+      "owner": "test_row_agreement_exposes_a_reversed_current_sign_and_family_gain"
+    },
+    {
+      "assertion": "reversed_rows['signed_gain'] == -1",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use an absolute-valued gain, wrong relative-error denominator, or broken whitening; fixed exact/reversed/doubled vectors no longer yield 0, -1/2 and 2/1 gain/error controls.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 815,
+      "owner": "test_row_agreement_exposes_a_reversed_current_sign_and_family_gain"
+    },
+    {
+      "assertion": "reversed_rows['opposite_sign_rows'] == 3",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use an absolute-valued gain, wrong relative-error denominator, or broken whitening; fixed exact/reversed/doubled vectors no longer yield 0, -1/2 and 2/1 gain/error controls.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 816,
+      "owner": "test_row_agreement_exposes_a_reversed_current_sign_and_family_gain"
+    },
+    {
+      "assertion": "reversed_rows['whitened_rms'] > 50",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use an absolute-valued gain, wrong relative-error denominator, or broken whitening; fixed exact/reversed/doubled vectors no longer yield 0, -1/2 and 2/1 gain/error controls.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 817,
+      "owner": "test_row_agreement_exposes_a_reversed_current_sign_and_family_gain"
+    },
+    {
+      "assertion": "doubled['relative_l2'] == 1 and doubled['signed_gain'] == 2",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use an absolute-valued gain, wrong relative-error denominator, or broken whitening; fixed exact/reversed/doubled vectors no longer yield 0, -1/2 and 2/1 gain/error controls.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 818,
+      "owner": "test_row_agreement_exposes_a_reversed_current_sign_and_family_gain"
+    },
+    {
+      "assertion": "control['flux loops']['unscaled']['rows'] == 2",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Omit zero-extent active rows or omit 1.10 scaling; the fixed row count or 1/11 error changes, and explicit missing-scaling/baseline-10% controls stop raising.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 832,
+      "owner": "test_row_replay_control_keeps_zero_extent_rows_and_refuses_missing_scaling"
+    },
+    {
+      "assertion": "scores['unscaled']['relative_l2'] == 0",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Omit zero-extent active rows or omit 1.10 scaling; the fixed row count or 1/11 error changes, and explicit missing-scaling/baseline-10% controls stop raising.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 834,
+      "owner": "test_row_replay_control_keeps_zero_extent_rows_and_refuses_missing_scaling"
+    },
+    {
+      "assertion": "scores['scaled_reference']['relative_l2'] == pytest.approx(1 / 11)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Omit zero-extent active rows or omit 1.10 scaling; the fixed row count or 1/11 error changes, and explicit missing-scaling/baseline-10% controls stop raising.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 835,
+      "owner": "test_row_replay_control_keeps_zero_extent_rows_and_refuses_missing_scaling"
+    },
+    {
+      "assertion": "pytest.raises(AssertionError, match='scaled-reference replay did not leave')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Omit zero-extent active rows or omit 1.10 scaling; the fixed row count or 1/11 error changes, and explicit missing-scaling/baseline-10% controls stop raising.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 837,
+      "owner": "test_row_replay_control_keeps_zero_extent_rows_and_refuses_missing_scaling"
+    },
+    {
+      "assertion": "pytest.raises(AssertionError, match='unscaled replay outside')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Omit zero-extent active rows or omit 1.10 scaling; the fixed row count or 1/11 error changes, and explicit missing-scaling/baseline-10% controls stop raising.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 840,
+      "owner": "test_row_replay_control_keeps_zero_extent_rows_and_refuses_missing_scaling"
+    },
+    {
+      "assertion": "receipt.converged",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove conductor unknowns, their prior rows or unequal sigmas; coefficients and residuals differ from the independently assembled weighted np.linalg.lstsq answer, or typed requests never carry changed current.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 954,
+      "owner": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "np.max(np.abs(receipt.whitened_residuals)) > 0.01",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove conductor unknowns, their prior rows or unequal sigmas; coefficients and residuals differ from the independently assembled weighted np.linalg.lstsq answer, or typed requests never carry changed current.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 955,
+      "owner": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(receipt.coefficients, expected, atol=1e-10)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove conductor unknowns, their prior rows or unequal sigmas; coefficients and residuals differ from the independently assembled weighted np.linalg.lstsq answer, or typed requests never carry changed current.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 956,
+      "owner": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(receipt.conductor_currents, expected[-2:], atol=1e-10)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove conductor unknowns, their prior rows or unequal sigmas; coefficients and residuals differ from the independently assembled weighted np.linalg.lstsq answer, or typed requests never carry changed current.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 957,
+      "owner": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(receipt.whitened_residuals, (design @ expected - target) * weights, atol=1e-10)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove conductor unknowns, their prior rows or unequal sigmas; coefficients and residuals differ from the independently assembled weighted np.linalg.lstsq answer, or typed requests never carry changed current.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 958,
+      "owner": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "receipt.coefficient_names[-2:] == ('upper_coil', 'lower_coil')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove conductor unknowns, their prior rows or unequal sigmas; coefficients and residuals differ from the independently assembled weighted np.linalg.lstsq answer, or typed requests never carry changed current.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 961,
+      "owner": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "receipt.covariance.shape == (5, 5)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove conductor unknowns, their prior rows or unequal sigmas; coefficients and residuals differ from the independently assembled weighted np.linalg.lstsq answer, or typed requests never carry changed current.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 962,
+      "owner": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "receipt.forward_evaluations == len(calls)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove conductor unknowns, their prior rows or unequal sigmas; coefficients and residuals differ from the independently assembled weighted np.linalg.lstsq answer, or typed requests never carry changed current.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 963,
+      "owner": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "receipt.wall_seconds > 0",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove conductor unknowns, their prior rows or unequal sigmas; coefficients and residuals differ from the independently assembled weighted np.linalg.lstsq answer, or typed requests never carry changed current.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 964,
+      "owner": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "receipt.device",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove conductor unknowns, their prior rows or unequal sigmas; coefficients and residuals differ from the independently assembled weighted np.linalg.lstsq answer, or typed requests never carry changed current.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 965,
+      "owner": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "any((np.linalg.norm(call.current) > 0 for call in calls))",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove conductor unknowns, their prior rows or unequal sigmas; coefficients and residuals differ from the independently assembled weighted np.linalg.lstsq answer, or typed requests never carry changed current.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 966,
+      "owner": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(active.current, [0.0, 0.0])",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove conductor unknowns, their prior rows or unequal sigmas; coefficients and residuals differ from the independently assembled weighted np.linalg.lstsq answer, or typed requests never carry changed current.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 967,
+      "owner": "test_conductor_currents_use_measurement_uncertainties_and_typed_requests"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='positive uncertainties')",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Accept conductor current measurements without aligned positive uncertainties; the declared ValueError disappears.",
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 979,
+      "owner": "test_fitted_conductor_currents_refuse_missing_uncertainties"
+    },
+    {
+      "assertion": "str(eq.ids_properties.version_put.data_dictionary) == '4.1.0'",
+      "coverage_role": "setup/input contract; not credited as proof of physical fit recovery",
+      "failure_condition": "Read the wrong DD, nonhomogeneous equilibrium time, failed EFIT slice, misaligned constraint count, or missing positive Ip uncertainty; the input-contract assertion fails before claiming an output comparison.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 437,
+      "owner": "_read_case"
+    },
+    {
+      "assertion": "int(eq.ids_properties.homogeneous_time) == 1",
+      "coverage_role": "setup/input contract; not credited as proof of physical fit recovery",
+      "failure_condition": "Read the wrong DD, nonhomogeneous equilibrium time, failed EFIT slice, misaligned constraint count, or missing positive Ip uncertainty; the input-contract assertion fails before claiming an output comparison.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 438,
+      "owner": "_read_case"
+    },
+    {
+      "assertion": "int(eq.code.output_flag[index]) == 0",
+      "coverage_role": "setup/input contract; not credited as proof of physical fit recovery",
+      "failure_condition": "Read the wrong DD, nonhomogeneous equilibrium time, failed EFIT slice, misaligned constraint count, or missing positive Ip uncertainty; the input-contract assertion fails before claiming an output comparison.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 441,
+      "owner": "_read_case"
+    },
+    {
+      "assertion": "len(channels) == len(constraints)",
+      "coverage_role": "setup/input contract; not credited as proof of physical fit recovery",
+      "failure_condition": "Read the wrong DD, nonhomogeneous equilibrium time, failed EFIT slice, misaligned constraint count, or missing positive Ip uncertainty; the input-contract assertion fails before claiming an output comparison.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 485,
+      "owner": "_read_case"
+    },
+    {
+      "assertion": "sigma_ip is not None and sigma_ip > 0",
+      "coverage_role": "setup/input contract; not credited as proof of physical fit recovery",
+      "failure_condition": "Read the wrong DD, nonhomogeneous equilibrium time, failed EFIT slice, misaligned constraint count, or missing positive Ip uncertainty; the input-contract assertion fails before claiming an output comparison.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 676,
+      "owner": "_read_case"
+    },
+    {
+      "assertion": "np.max(distance) < 1e-12",
+      "coverage_role": "setup/input contract; not credited as proof of physical fit recovery",
+      "failure_condition": "Map carrier sample points to different physical nodes; the measured nearest-node distance exceeds 1e-12 and refuses misaligned operands.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 785,
+      "owner": "_problem"
+    },
+    {
+      "assertion": "jax.config.jax_enable_x64 is True",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Disable x64 or execute the physical inverse on a CPU backend; the environmental contract refuses before physical evidence is claimed.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 969,
+      "owner": "test_shared_magnetics_reconstruction"
+    },
+    {
+      "assertion": "jax.default_backend() == 'gpu'",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Disable x64 or execute the physical inverse on a CPU backend; the environmental contract refuses before physical evidence is claimed.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 970,
+      "owner": "test_shared_magnetics_reconstruction"
+    },
+    {
+      "assertion": "np.any(selected)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Lose all selected rows from a family; this explicit populated-family assertion refuses interpreting absence as a passing comparison.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1091,
+      "owner": "_row_replay_control"
+    },
+    {
+      "assertion": "unscaled is not None and np.isfinite(unscaled)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Permit a zero/nonfinite reference, an unscaled error >=5%, or a scaled-reference error <=5%; independently chosen bad-score fixtures and native scaled physical rows force the refusal.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1107,
+      "owner": "_assert_row_replay_control"
+    },
+    {
+      "assertion": "unscaled < 0.05",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Permit a zero/nonfinite reference, an unscaled error >=5%, or a scaled-reference error <=5%; independently chosen bad-score fixtures and native scaled physical rows force the refusal.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1110,
+      "owner": "_assert_row_replay_control"
+    },
+    {
+      "assertion": "scaled is not None and np.isfinite(scaled) and (scaled > 0.05)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Permit a zero/nonfinite reference, an unscaled error >=5%, or a scaled-reference error <=5%; independently chosen bad-score fixtures and native scaled physical rows force the refusal.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1111,
+      "owner": "_assert_row_replay_control"
+    },
+    {
+      "assertion": "jax.config.jax_enable_x64",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use wrong density sign or loop/conductor projection, omit nonzero fields, exceed an unscaled family band, or remove scaling; independent stored IMAS reconstructed rows and six family guards disagree.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1232,
+      "owner": "test_shared_magnetics_reconstruction_observation_replay"
+    },
+    {
+      "assertion": "np.any(np.abs(plasma_rows[keep & ~sensors.flux_loop]) > 0)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use wrong density sign or loop/conductor projection, omit nonzero fields, exceed an unscaled family band, or remove scaling; independent stored IMAS reconstructed rows and six family guards disagree.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1351,
+      "owner": "test_shared_magnetics_reconstruction_observation_replay"
+    },
+    {
+      "assertion": "np.any(np.abs(vacuum[keep & ~sensors.flux_loop]) > 0)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use wrong density sign or loop/conductor projection, omit nonzero fields, exceed an unscaled family band, or remove scaling; independent stored IMAS reconstructed rows and six family guards disagree.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1352,
+      "owner": "test_shared_magnetics_reconstruction_observation_replay"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(np.any(response != 0.0, axis=0), True)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Drop conductor response, accept nonstationary/unqualified fits, apply ITER bands, or let scaled current stay in-band; deliberately failing stub controls in test_equilibrium_magnetics_fit.py exercise these assertions.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1722,
+      "owner": "_compare_fit"
+    },
+    {
+      "assertion": "fitted.converged",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Drop conductor response, accept nonstationary/unqualified fits, apply ITER bands, or let scaled current stay in-band; deliberately failing stub controls in test_equilibrium_magnetics_fit.py exercise these assertions.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1899,
+      "owner": "_compare_fit"
+    },
+    {
+      "assertion": "all(scores['bands'].values())",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Drop conductor response, accept nonstationary/unqualified fits, apply ITER bands, or let scaled current stay in-band; deliberately failing stub controls in test_equilibrium_magnetics_fit.py exercise these assertions.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1901,
+      "owner": "_compare_fit"
+    },
+    {
+      "assertion": "scaled.converged",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Drop conductor response, accept nonstationary/unqualified fits, apply ITER bands, or let scaled current stay in-band; deliberately failing stub controls in test_equilibrium_magnetics_fit.py exercise these assertions.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1902,
+      "owner": "_compare_fit"
+    },
+    {
+      "assertion": "scaled.forward.qualified",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Drop conductor response, accept nonstationary/unqualified fits, apply ITER bands, or let scaled current stay in-band; deliberately failing stub controls in test_equilibrium_magnetics_fit.py exercise these assertions.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1903,
+      "owner": "_compare_fit"
+    },
+    {
+      "assertion": "scaled_error > 0.015",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Drop conductor response, accept nonstationary/unqualified fits, apply ITER bands, or let scaled current stay in-band; deliberately failing stub controls in test_equilibrium_magnetics_fit.py exercise these assertions.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1904,
+      "owner": "_compare_fit"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(geometry.project(np.zeros(3), np.full(3, 2.0), np.full(3, 3.0)), [2.0, -3.0, -2.0])",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Use the clockwise IMAS angle directly in a counterclockwise projection; explicit 0/90/negative-angle outputs disagree.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1916,
+      "owner": "test_probe_normal_uses_clockwise_angle_from_outward_radius"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(basis[:, 0], [1.0, -1.0])",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Fit a different free profile space; independent linear/zero/quadratic functions change declared representability or lowest degree.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1925,
+      "owner": "test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature"
+    },
+    {
+      "assertion": "linear['representable'] and linear['live_coefficients'] == 1",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Fit a different free profile space; independent linear/zero/quadratic functions change declared representability or lowest degree.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1929,
+      "owner": "test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature"
+    },
+    {
+      "assertion": "zero['representable'] and zero['identically_zero']",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Fit a different free profile space; independent linear/zero/quadratic functions change declared representability or lowest degree.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1930,
+      "owner": "test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature"
+    },
+    {
+      "assertion": "not curved['representable']",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Fit a different free profile space; independent linear/zero/quadratic functions change declared representability or lowest degree.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1931,
+      "owner": "test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature"
+    },
+    {
+      "assertion": "curved['lowest_polynomial_degree'] == 2",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Fit a different free profile space; independent linear/zero/quadratic functions change declared representability or lowest degree.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1932,
+      "owner": "test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature"
+    },
+    {
+      "assertion": "curved['configured_relative_sup_error'] > 0.1",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Fit a different free profile space; independent linear/zero/quadratic functions change declared representability or lowest degree.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1933,
+      "owner": "test_live_bernstein_space_admits_linear_and_zero_profiles_but_refuses_curvature"
+    },
+    {
+      "assertion": "score['magnetic_axis_distance_m'] == pytest.approx(0.3)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove physical axis/Ip metrics, apply vertical correction before scoring measured bands, or lose q sign; fixed 0.3m, 10%, -2.9 full-span expectations fail; this fixture does not cover cropped psi intervals.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1970,
+      "owner": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['aligned_magnetic_axis_distance_m'] == pytest.approx(0.0)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove physical axis/Ip metrics, apply vertical correction before scoring measured bands, or lose q sign; fixed 0.3m, 10%, -2.9 full-span expectations fail; this fixture does not cover cropped psi intervals.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1971,
+      "owner": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['aligned_boundary_distance_mm'] == pytest.approx(0.0)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove physical axis/Ip metrics, apply vertical correction before scoring measured bands, or lose q sign; fixed 0.3m, 10%, -2.9 full-span expectations fail; this fixture does not cover cropped psi intervals.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1972,
+      "owner": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['plasma_current_relative_error'] == pytest.approx(0.1)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove physical axis/Ip metrics, apply vertical correction before scoring measured bands, or lose q sign; fixed 0.3m, 10%, -2.9 full-span expectations fail; this fixture does not cover cropped psi intervals.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1973,
+      "owner": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['q95'] == pytest.approx(-2.9)",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove physical axis/Ip metrics, apply vertical correction before scoring measured bands, or lose q sign; fixed 0.3m, 10%, -2.9 full-span expectations fail; this fixture does not cover cropped psi intervals.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1974,
+      "owner": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['bands']['magnetic_axis_distance_m'] is False",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove physical axis/Ip metrics, apply vertical correction before scoring measured bands, or lose q sign; fixed 0.3m, 10%, -2.9 full-span expectations fail; this fixture does not cover cropped psi intervals.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1975,
+      "owner": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['bands']['plasma_current_relative_error'] is False",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove physical axis/Ip metrics, apply vertical correction before scoring measured bands, or lose q sign; fixed 0.3m, 10%, -2.9 full-span expectations fail; this fixture does not cover cropped psi intervals.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1976,
+      "owner": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    },
+    {
+      "assertion": "score['bands']['q95_magnitude_error'] is True",
+      "coverage_role": "regression guard or positive control",
+      "failure_condition": "Remove physical axis/Ip metrics, apply vertical correction before scoring measured bands, or lose q sign; fixed 0.3m, 10%, -2.9 full-span expectations fail; this fixture does not cover cropped psi intervals.",
+      "file": "tests/test_magnetics_fit_efit_comparison.py",
+      "independence": "Fixed fixture constants, independent design-matrix solution, separately recorded source observations, or forced refusal; no tautological output-versus-itself assertion identified.",
+      "line": 1977,
+      "owner": "test_supplied_equilibrium_reports_vertical_offset_and_physical_bands"
+    }
+  ],
+  "assertion_audit_note": "Each added or modified assert, numpy assertion and pytest.raises expression in the two changed test files is inventoried with its code regression/refusal condition; pure fixture preconditions are distinguished from regression coverage. Equality to supplied serialized fields tests transport and is not itself an independent physics validation. Full-span q95 expectations do not guard cropped-profile coordinates.",
+  "baseline_suite": {
+    "CPU_wall_seconds": 2541.3233725959435,
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_equilibrium_forward.py tests/test_equilibrium_magnetics_fit.py",
+    "completed": false,
+    "exit_status": -6,
+    "failure_count": null,
+    "failure_ids": [],
+    "log_digest": "ed8bfc18d9017379fca50fba7967b82ef9caf0a2cb576b4b2cbf56fad1a5d50f",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/serial-normal-suite-1322997/original-base/gate.log",
+    "measurement_cwd": "/tmp/nova-serial-suite-1322997-38vpwifi/original-base/tree",
+    "measurement_module": "/tmp/nova-serial-suite-1322997-38vpwifi/original-base/tree/nova/equilibrium/magnetics_fit.py",
+    "mutation": null,
+    "review_verified_log_digest": "ed8bfc18d9017379fca50fba7967b82ef9caf0a2cb576b4b2cbf56fad1a5d50f",
+    "revision": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+    "summary": null
+  },
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/harmonic.py:ReconstructHarmonic.build_sensor_matrix (line 441 calls Magnetics.project)",
+    "nova/equilibrium/profile.py:ReconstructProfile.from_geometry (lines 341-342 call Magnetics.project)",
+    "nova/imas/mast_efit_referee.py:run_refereed_parity_chain (line 495)",
+    "nova/imas/mast_parity_gate.py:_score_completed_chain (line 346); no production caller of the newly added MagneticsFit current-fit or supplied-IMAS scoring branch was found under nova/scripts/benchmarks"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-15T08:08:57Z",
+  "figure_review": {
+    "count": 15,
+    "head": "04fa0938f3c25ef05ace2f2b5004b16e627a15af",
+    "rendered_width_px": 1400,
+    "result": "All 15 SVGs rendered sequentially and inspected; no clipped or colliding labels observed. Refused states with no comparable shared-level contours are identified as refusals in the evidence captions.",
+    "sheets": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T204233159807-review-of-efit-comparison-04fa0938f3c2/rendered/sheet-0.png",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T204233159807-review-of-efit-comparison-04fa0938f3c2/rendered/sheet-1.png"
+    ]
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-efit-comparison-04fa0938f3c2",
+      "recorded_at": "2026-11-17T21:09:15.233407+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/imas/mast_efit_referee.py",
+      "id": "ff0610e7c52",
+      "line": "433",
+      "severity": "blocking",
+      "text": "blocking: q95 normalizes profiles_1d.psi by its sampled endpoints instead of global_quantities.psi_axis/psi_boundary; the new _as_equilibrium caller in tests/test_magnetics_fit_efit_comparison.py:1630 samples only through edge_psi_norm=0.97, so a profile q equal to physical normalized flux returns 0.9215 instead of 0.95 and can incorrectly pass or fail the q95 band; normalize to the physical span and add a truncated-profile regression case."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "reviewed the cumulative 22-path diff, the 49 commit inventories in order, source/test changes and evidence endpoints; nova/imas/mast_efit_referee.py:433 rescales a truncated profile interval and tests/test_magnetics_fit_efit_comparison.py:1960 only exercises full-span samples.",
+    "done_when": "the original dispatch requires converged bands and a fit/forward split, while live docs/plans/inverse-equilibrium-baseline.html#s2 accepts nonconvergence with replay and refusals; scaled-row-control-1323912/gate.log records 3 passed and its physical-scaled-row-negative-control.log records 3 failed, with the separate CPU-suite delta explicitly waived in the fragment at line 2200.",
+    "goal": "dispatch-detail.json names a shared-input three-machine inverse comparison; docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:2206 delivers the live plan's accepted nonconvergence outcome with replay controls, though the added q95 comparator is incorrect for truncated profiles.",
+    "manifest": "manifest.md states complete and retains the measured kernel revision cf0309c70ae38d649515f361a7a2109909e1eae9, while its baseline_suite and after_suite both honestly record completed=false and EXIT=-6, so their added-failure count is unknown.",
+    "write_paths": "dispatch-detail.json declares nine source/test/evidence scopes, and all 22 paths in d7676e478fc8701b036ec717f80d403c3ead86f5..04fa0938f3c25ef05ace2f2b5004b16e627a15af remain inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_magnetics_fit.py:918 compares fitted currents with an independent weighted least-squares solution and lines 401-472 force qualification refusals, but tests/test_magnetics_fit_efit_comparison.py:1936 has no truncated-profile case and therefore survives the q95 coordinate defect.",
+    "evidence": "scaled-row-control-1323912/gate.log and physical-scaled-row-negative-control.log contain native summaries and EXIT=0/1 with six independent stored-reference family measurements, while the two serial-normal-suite-1322997 gate logs abort with EXIT=-6 and cannot supply a failure-set delta despite the documented waiver at fragment line 2200.",
+    "fit": "nova/equilibrium/magnetics_fit.py extends the existing typed-request inverse and nova/equilibrium/measurement.py owns the added loop terms, with mechanism-based names, although tests/test_magnetics_fit_efit_comparison.py:1442 carries substantial experiment and reporting plumbing in a test module.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:2206 supplies the amended three-case nonconvergence deliverable, but nova/imas/mast_efit_referee.py:433 does not measure physical q95 for the profiles its new caller constructs.",
+    "reuse": "capability searches for weighted inversion, diagnostic loop integration, IMAS comparison, receipt writing, stationary points and plotting found the owners in magnetics_fit.py, measurement.py, mast_efit_referee.py, nova/io/json.py, flux_surface_connectivity.py and nova/media/poloidal.py, and the additions extend or call these owners rather than introducing another inverse or comparator.",
+    "scope_discipline": "all 22 changed paths lie within dispatch-detail.json's declared nine scopes, and nova/equilibrium/forward.py, forward_operator.py, topology.py and tests/test_equilibrium_forward.py are unchanged."
+  },
+  "physical_gate": {
+    "device": "titan P100",
+    "equilibrium_solves": 0,
+    "families": [
+      {
+        "family": "flux loops",
+        "machine": "mastu",
+        "rows": 156,
+        "scaled_reference_percent": 9.084412774424026,
+        "scaled_whitened_rms": 3.3436420907055457,
+        "unscaled_percent": 0.12641012612455413,
+        "unscaled_whitened_rms": 0.1316234713688651,
+        "zero_extent_rows": 65
+      },
+      {
+        "family": "poloidal probes",
+        "machine": "mastu",
+        "rows": 208,
+        "scaled_reference_percent": 9.09042047329501,
+        "scaled_whitened_rms": 3.740982194100973,
+        "unscaled_percent": 0.10252620601982304,
+        "unscaled_whitened_rms": 0.047154821933864964,
+        "zero_extent_rows": 0
+      },
+      {
+        "family": "flux loops",
+        "machine": "tcv",
+        "rows": 38,
+        "scaled_reference_percent": 8.940950045680518,
+        "scaled_whitened_rms": 4.910837383988104,
+        "unscaled_percent": 0.16982263557521812,
+        "unscaled_whitened_rms": 0.09360385579653545,
+        "zero_extent_rows": 0
+      },
+      {
+        "family": "poloidal probes",
+        "machine": "tcv",
+        "rows": 38,
+        "scaled_reference_percent": 9.049046763228585,
+        "scaled_whitened_rms": 4.152045475914582,
+        "unscaled_percent": 0.19015528117356548,
+        "unscaled_whitened_rms": 0.10439980665780135,
+        "zero_extent_rows": 0
+      },
+      {
+        "family": "flux loops",
+        "machine": "iter",
+        "rows": 261,
+        "scaled_reference_percent": 9.281077804338167,
+        "scaled_whitened_rms": 1.3211735390038801,
+        "unscaled_percent": 0.7242617899855864,
+        "unscaled_whitened_rms": 0.4715592997250273,
+        "zero_extent_rows": 4
+      },
+      {
+        "family": "poloidal probes",
+        "machine": "iter",
+        "rows": 915,
+        "scaled_reference_percent": 9.091733383601975,
+        "scaled_whitened_rms": 1.954843903374907,
+        "unscaled_percent": 0.08395208013880012,
+        "unscaled_whitened_rms": 0.11109419887170427,
+        "zero_extent_rows": 0
+      }
+    ],
+    "gate_summary": "3 passed in 556.19s (0:09:16)",
+    "job_id": "1323912",
+    "native_log_digests_verified": true,
+    "negative_control_summary": "3 failed, 2 warnings in 15.05s",
+    "negative_failure_ids": [
+      "../../../../../.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/test_scaled_row_refusal.py::test_scaled_reference_rows_cannot_pass_unscaled_band[mastu]",
+      "../../../../../.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/test_scaled_row_refusal.py::test_scaled_reference_rows_cannot_pass_unscaled_band[tcv]",
+      "../../../../../.config/reckon/crew/runs/r-20261114T133703375306-efit-comparison/test_scaled_row_refusal.py::test_scaled_reference_rows_cannot_pass_unscaled_band[iter]"
+    ],
+    "revision": "cf0309c70ae38d649515f361a7a2109909e1eae9"
+  },
+  "project": "nova",
+  "q95_reading": {
+    "caller_file": "tests/test_magnetics_fit_efit_comparison.py",
+    "caller_line": 1630,
+    "expected": 0.95,
+    "file": "nova/imas/mast_efit_referee.py",
+    "input": "psi_axis=0, psi_boundary=1, sampled psi=[0,0.97], q=physical normalized psi",
+    "line": 433,
+    "method": "Unmodified nested q95 helper extracted with AST from the reviewed revision; no mutation or suite rerun.",
+    "observed": 0.9215,
+    "probe": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T204233159807-review-of-efit-comparison-04fa0938f3c2/probe_q95.py"
+  },
+  "raw_text": "VERDICT goal: dispatch-detail.json names a shared-input three-machine inverse comparison; docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:2206 delivers the live plan's accepted nonconvergence outcome with replay controls, though the added q95 comparator is incorrect for truncated profiles.\nVERDICT done_when: the original dispatch requires converged bands and a fit/forward split, while live docs/plans/inverse-equilibrium-baseline.html#s2 accepts nonconvergence with replay and refusals; scaled-row-control-1323912/gate.log records 3 passed and its physical-scaled-row-negative-control.log records 3 failed, with the separate CPU-suite delta explicitly waived in the fragment at line 2200.\nVERDICT write_paths: dispatch-detail.json declares nine source/test/evidence scopes, and all 22 paths in d7676e478fc8701b036ec717f80d403c3ead86f5..04fa0938f3c25ef05ace2f2b5004b16e627a15af remain inside them.\nVERDICT manifest: manifest.md states complete and retains the measured kernel revision cf0309c70ae38d649515f361a7a2109909e1eae9, while its baseline_suite and after_suite both honestly record completed=false and EXIT=-6, so their added-failure count is unknown.\nVERDICT diff: reviewed the cumulative 22-path diff, the 49 commit inventories in order, source/test changes and evidence endpoints; nova/imas/mast_efit_referee.py:433 rescales a truncated profile interval and tests/test_magnetics_fit_efit_comparison.py:1960 only exercises full-span samples.\nCALL_SITES: nova/equilibrium/harmonic.py:ReconstructHarmonic.build_sensor_matrix (line 441 calls Magnetics.project), nova/equilibrium/profile.py:ReconstructProfile.from_geometry (lines 341-342 call Magnetics.project), nova/imas/mast_efit_referee.py:run_refereed_parity_chain (line 495), nova/imas/mast_parity_gate.py:_score_completed_chain (line 346); no production caller of the newly added MagneticsFit current-fit or supplied-IMAS scoring branch was found under nova/scripts/benchmarks\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:2206 supplies the amended three-case nonconvergence deliverable, but nova/imas/mast_efit_referee.py:433 does not measure physical q95 for the profiles its new caller constructs.\nSCORE evidence: 17\nJUSTIFICATION evidence: scaled-row-control-1323912/gate.log and physical-scaled-row-negative-control.log contain native summaries and EXIT=0/1 with six independent stored-reference family measurements, while the two serial-normal-suite-1322997 gate logs abort with EXIT=-6 and cannot supply a failure-set delta despite the documented waiver at fragment line 2200.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all 22 changed paths lie within dispatch-detail.json's declared nine scopes, and nova/equilibrium/forward.py, forward_operator.py, topology.py and tests/test_equilibrium_forward.py are unchanged.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_equilibrium_magnetics_fit.py:918 compares fitted currents with an independent weighted least-squares solution and lines 401-472 force qualification refusals, but tests/test_magnetics_fit_efit_comparison.py:1936 has no truncated-profile case and therefore survives the q95 coordinate defect.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/magnetics_fit.py extends the existing typed-request inverse and nova/equilibrium/measurement.py owns the added loop terms, with mechanism-based names, although tests/test_magnetics_fit_efit_comparison.py:1442 carries substantial experiment and reporting plumbing in a test module.\nSCORE reuse: 20\nJUSTIFICATION reuse: capability searches for weighted inversion, diagnostic loop integration, IMAS comparison, receipt writing, stationary points and plotting found the owners in magnetics_fit.py, measurement.py, mast_efit_referee.py, nova/io/json.py, flux_surface_connectivity.py and nova/media/poloidal.py, and the additions extend or call these owners rather than introducing another inverse or comparator.\nFINDING nova/imas/mast_efit_referee.py:433 blocking: q95 normalizes profiles_1d.psi by its sampled endpoints instead of global_quantities.psi_axis/psi_boundary; the new _as_equilibrium caller in tests/test_magnetics_fit_efit_comparison.py:1630 samples only through edge_psi_norm=0.97, so a profile q equal to physical normalized flux returns 0.9215 instead of 0.95 and can incorrectly pass or fail the q95 band; normalize to the physical span and add a truncated-profile regression case.\n",
+  "reuse_search": {
+    "harness": "Case/XML/current-binding/profile adapters are scoped to committed EFIT fixtures; current quadrature and scoring call existing physical kernels, source builders, flux-surface geometry, stationary-point polishing and poloidal painters. _write validates strict JSON then wraps the durable JSON owner. No existing adapter for flattened mis-split EFIT output constraints was found in nova/scripts/benchmarks.",
+    "nearby_different_capability": "nova/biot/fluxcoupling.py polygon/circular loop quadrature computes 3D mutual-flux path integrals; Magnetics.loop_quadrature collects existing axisymmetric diagnostic response samples and row weights, not that capability.",
+    "production": "Added loop_fraction/loop_quadrature extend Magnetics; nested fit_receipt extends MagneticsFit; _score_imas_equilibrium extends score_with_efit_referee and reuses existing _boundary_distance. No other production inverse call site found."
+  },
+  "review_run_id": "r-20261117T204233159807-review-of-efit-comparison-04fa0938f3c2",
+  "reviewed_base_sha": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+  "reviewed_head_sha": "04fa0938f3c25ef05ace2f2b5004b16e627a15af",
+  "reviewed_run_id": "r-20261114T133703375306-efit-comparison",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "source_changed_paths": [
+    "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/backtracking/mastu-response-refused.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/bound-inputs/mastu-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/bound-inputs/tcv-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/iter-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/mastu-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-inputs/tcv-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/mastu.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/fitted-start/tcv.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/iter.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/mastu-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/mastu.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/tcv-row-replay.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/tcv.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/terminal-state/iter-later-state.svg",
+    "docs/figures/inverse-equilibrium-baseline/efit-comparison/terminal-state/mastu-continuation.svg",
+    "nova/equilibrium/magnetics_fit.py",
+    "nova/equilibrium/measurement.py",
+    "nova/imas/mast_efit_referee.py",
+    "nova/imas/parity_tolerances.py",
+    "tests/test_equilibrium_magnetics_fit.py",
+    "tests/test_magnetics_fit_efit_comparison.py"
+  ],
+  "source_commits": [
+    "771aa8f05262ec10e059920e0f95944c578e8d67",
+    "e17ef7e0907c1cfe4eefa99935fe1f24223dc78f",
+    "8077bbf96973fe7e698c7230595fdfdce4de9846",
+    "8400735f39c7f6b181acd8e551657ba63beeca1e",
+    "852bd8e23fd58969041d17888f5508493b3ff9de",
+    "344becea0fc99f38279aa4175b3cdc7d96ad1ab7",
+    "737243338fcc4ea64061ca801a18a965f1eaa243",
+    "58053a16c388f29a7d7ef4c5e4cbe21bc865b935",
+    "255233517ea381fa63747b72f230f01574183de7",
+    "b7301af12a3994d4a7d1561e8a63c99df86fc8ed",
+    "64de5ed08fa7f22ffa50144755f40349af7c627b",
+    "d653e5185c9db846422bead8001dd5d976ddea61",
+    "db5f21c361075d8ce2aedd026bbf755f3860adcc",
+    "31c2b3a00475e6f7a0a4d80fa04b7ebafb6e7d6f",
+    "c7214eff2045cdcbe08eca9c6e5c131a4cdeb236",
+    "edc8e9b68ee585889e5c163381f8f98b90749f3e",
+    "b7d5484bb40b8c13936f12b01f47a8f37712e046",
+    "69d5e571524465324d0dc6ef6e6a04a638587288",
+    "7811d7134ae51fb5b17e0475674e69e45fbf847e",
+    "c5bc66858d9525ed5c8507b9ca5a47acf954fc06",
+    "7a06f8b22469e10fce80f339e3b9c9fb8b0833aa",
+    "75352d4bb81b3b04750d900df194483f9c29a61c",
+    "ba6e96e531ebf00b76530fd3b4a637d4b58493c0",
+    "4ecffe82bd33ad1ca15972f7f31c38c4ab904779",
+    "2a7c7c08b76b031344d9853fb3e4f2c10ed05c5f",
+    "9047a3fe50708d6dd20ebe672d0dc22f40b0ae50",
+    "632a508508c881cfbdaaeaa36da41020c73636bd",
+    "982ab04474debe44f7865814b8b37e2d64557f33",
+    "e3fc81d28267036870d67225c762827683b09388",
+    "86b3a8e6fc3e1b38217795e5258729ace0a064be",
+    "1ff2b2111cfbb846f174016b6ae14549dc77dbb2",
+    "702c48199e60921f9a8355a98b0a2791f252c9b7",
+    "682f5a90f5018e1dc3b895a3289df67175633f79",
+    "d00d41a7f19eca893ad30a842804e9a4fbd025c0",
+    "181fdfd547b15a99d3707901947a14cb02fb320c",
+    "8fdb64745f1469f68ffcbffbc7d36c0a596f28ee",
+    "24f72a6d2e95e1c91d906156ea3500bc65a9d13c",
+    "5c8ad84b91db82cd572e963b4a74863384cbdf52",
+    "77698bc5de094f64fbaf9f687c4c353428f82200",
+    "28458e75651b4ec1e263dbe76a711ccb837ab290",
+    "ee02bc413dc71e7e9fdf0c0172985c0ebb0f0313",
+    "766ac4cd1980351d51097483ccfeb1ea274beeac",
+    "2d523f30a4676eb5712510d7e4c77e7652d83aa4",
+    "74833da985d30006ef2607a10aafec5dc10744be",
+    "1936d0fe5cc5cbe5b8d6279ba97d22aaaa142f4f",
+    "ae6f253f21b0b0079e5509aa20be0158b2e66d9c",
+    "cf0309c70ae38d649515f361a7a2109909e1eae9",
+    "43abb0228c0a832cec2152d37011f9ffc44c977c",
+    "04fa0938f3c25ef05ace2f2b5004b16e627a15af"
+  ],
+  "status": "parsed",
+  "suite_delta_waiver": {
+    "claimed_combined_gate": "80 passed with pre-existing failure deselected",
+    "date": "2026-11-17",
+    "provenance": "supplied coordinator result; not independently recounted from these aborted native arms",
+    "source": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:2200"
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T20:54:43.028561+00:00",
+  "total": 109
+}

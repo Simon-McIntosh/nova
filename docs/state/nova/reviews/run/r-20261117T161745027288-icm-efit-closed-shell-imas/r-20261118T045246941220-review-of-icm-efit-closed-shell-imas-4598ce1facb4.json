@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "f9517fcc04e249939811eded8f3c8be77b54b744",
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/iron_linear_magnetisation/measure.py:130",
+    "scripts/iron_linear_magnetisation/measure.py:145",
+    "scripts/iron_linear_magnetisation/reference.py:66",
+    "scripts/iron_linear_magnetisation/reference.py:146"
+  ],
+  "completed_at": "2026-11-18T05:23:08.476Z",
+  "dispatched_at": "2026-11-18T05:22:52Z",
+  "findings": [
+    {
+      "file": "scripts/imas_efit_closed_shell/make_pulse.py",
+      "line": "26",
+      "severity": "non-blocking",
+      "text": "non-blocking: the documented usage line names only --ratio, --arc-vertices and --no-iron, but the defaults at :51 and :89-93 write magnetics/ip = 100 A with a 1 A coil, while every recorded arm was built with --current-scale 1e4 --plasma-scale 0 (receipt log.txt:52-53); the documented command therefore does not reproduce the recorded case and lands in the plasma-filled shape the fragment reports as refused."
+    },
+    {
+      "file": "scripts/imas_efit_closed_shell/summarise.py",
+      "line": "201",
+      "severity": "non-blocking",
+      "text": "non-blocking: the table verdict is computed from the finest arm's rel_error and nothing else, so summary.json declares reproduces for a/b = 0.5 while the same payload's levers carry passed false on both solver pairs (deltas 0.00515 and 0.00501) and on the 1.50 % refinement step; a machine reader of the verdict field gets an unqualified reproduction claim that the record's own convergence block contradicts."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T161745027288-icm-efit-closed-shell-imas/manifest.md",
+      "line": "24",
+      "severity": "non-blocking",
+      "text": "non-blocking: the baseline failure is reported as test_linear_shell_operator_pin[compact] on a git show that exits 128, but logs/suite-baseline.log:180 records FAILED tests/test_magnetisation.py::test_reference_stamp_refuses_wrong_revision_and_dirty_tree on a git commit CalledProcessError and no log in the run directory shows the pin test failing, so the baseline arm's one failure is unattributed and the stated attribution explains a failure that is not on disk."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-efit-closed-shell-imas.html",
+      "line": "33",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment calls scripts/iron_linear_magnetisation/controls.py the repository's one closed-shell formula, but four other script modules restate the same expression (scripts/magnetisation_high_permeability/measure.py:30, scripts/magnetisation_high_permeability/figures.py:108, scripts/west_picard_control/measure.py:217, scripts/west_iron_galerkin/measure.py:282) and scripts/prototypes/iron_magnetisation/shell.py:38; a reader relying on the claim will not maintain the other copies."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-efit-closed-shell-imas.html",
+      "line": "135",
+      "severity": "non-blocking",
+      "text": "non-blocking: done_when clause 3 asks for the one-directional verdict to be written into the plan for section 9 to read; no s10 comment in docs/plans/iron-core-magnetisation.html carries it and the fragment defers it to plan-comment.html in the receipt, so section 9 cannot read it from the plan until the coordinator places that comment."
+    }
+  ],
+  "head_log_revision": "4598ce1facb4a41ffdc129acaed55f06eb812e2f",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified the four pre-existing callers of the extended owner: scripts/iron_linear_magnetisation/measure.py:130 and :145 and scripts/iron_linear_magnetisation/reference.py:66 and :146, all of which call exact_shielding() with no arguments and are unchanged by the two-parameter signature.",
+    "diff": "read the twelve files over eighteen commits f9517fcc0..4598ce1fa, including the repair round a4e2c9e0d (owner import), 862fcb8eb (fragment), 33a8ea365 (exact factor taken from the owner) and 4598ce1fa (both levers, solver record read from the arm logs, owner parameters pinned by a test).",
+    "done_when": "read all three clauses; (1) S = 60.420 against the exact 61.101838 is recorded as rel_error -0.01115 and (2) S = 193.485 against 195.055750 as -0.00805, both inside the 2 % gate in the receipt's summary.json, and (3)'s message is on disk as owners-message.txt while its verdict is staged in plan-comment.html rather than written into the plan, so clause 3 is half met.",
+    "goal": "the node's goal is to run the closed-shell control through imas-efit's iron model from an IMAS pulse and report it to the owners; scripts/imas_efit_closed_shell/make_pulse.py writes pf_active, iron_core, wall, magnetics and tf, run_case.sh drives imas-efit in unified IMAS mode, and summarise.py:183 scores S = psi_air/psi_iron at both radius ratios.",
+    "manifest": "read; status complete, landing at 4598ce1fa, tests naming both suite arms, test_logs naming six gate logs; logs/suite-baseline.log:180 reads 1 failed, 92 passed with EXIT=1 and logs/suite-after.log records 97 passed with EXIT=0, while the tests line names test_linear_shell_operator_pin[compact] as the baseline failure, which that log does not contain.",
+    "write_paths": "declared scripts/imas_efit_closed_shell, docs/evidence/fragments/iron-core-magnetisation/icm-efit-closed-shell-imas.html and docs/figures/iron-core-magnetisation/icm-efit-closed-shell-imas; ten of the twelve changed files are inside them and scripts/iron_linear_magnetisation/controls.py:62 and tests/test_magnetisation.py:1526 sit outside the fence, both named in the manifest's scope_note as coordinator-agreed."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:1526 is the only committed guard and it fails on the pre-repair owner and on a mutant that ignores the owner's ratio (logs/negative-controls.txt records 4 failed and 3 failed), but nothing in the repository fails if make_pulse.py, summarise.py:201 or report.py regress, because their gates live only in the two run directories.",
+    "evidence": "logs/gate-reproduce.log re-solves the four headline arms and reports S = 60.420 and 193.485 against the receipt at three decimals with EXIT=0, logs/gate-summarise.log, logs/gate-report.log and logs/gate-convergence.log each diff a regenerated artefact against the receipt with EXIT=0, and logs/negative-controls.txt reddens six checks on the pre-repair files; no gate asserts the 2 % criterion itself and the manifest's baseline failure id does not match logs/suite-baseline.log:180.",
+    "fit": "the added modules follow the scripts/ idiom of argparse, Path and per-module docstrings, carry no name the repository rules forbid, and pass the shared interpreter's ruff check with the repository configuration on every added file.",
+    "goal_fidelity": "scripts/imas_efit_closed_shell/summarise.py:27-31 scores S = 60.420 and 193.485 against 61.101838 and 195.055750 and the receipt carries both, but docs/evidence/fragments/iron-core-magnetisation/icm-efit-closed-shell-imas.html:135 defers done_when clause 3's plan placement to the coordinator instead of writing the verdict into the plan.",
+    "reuse": "the closed-shell factor is taken from its owner scripts/iron_linear_magnetisation/controls.py:62, whose new ratio and mu parameters default to its own shell so its four existing callers are unchanged, and both make_pulse.py:32 and summarise.py:25 import it; the search over nova/imas/mast_geometry.py, nova/imas/diiid_machine_ids.py, nova/equilibrium/forward_operator.py:3932 and scripts/prototypes/iron_magnetisation/shell.py found no owner for authoring a case pulse or sampling an IMAS flux grid at a point.",
+    "scope_discipline": "git diff --stat f9517fcc0..4598ce1fa touches the declared scripts/imas_efit_closed_shell and the fragment, plus scripts/iron_linear_magnetisation/controls.py:62 and tests/test_magnetisation.py:1526 outside the declared fence, both declared in the manifest's scope_note."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to run the closed-shell control through imas-efit's iron model from an IMAS pulse and report it to the owners; scripts/imas_efit_closed_shell/make_pulse.py writes pf_active, iron_core, wall, magnetics and tf, run_case.sh drives imas-efit in unified IMAS mode, and summarise.py:183 scores S = psi_air/psi_iron at both radius ratios.\nVERDICT done_when: read all three clauses; (1) S = 60.420 against the exact 61.101838 is recorded as rel_error -0.01115 and (2) S = 193.485 against 195.055750 as -0.00805, both inside the 2 % gate in the receipt's summary.json, and (3)'s message is on disk as owners-message.txt while its verdict is staged in plan-comment.html rather than written into the plan, so clause 3 is half met.\nVERDICT write_paths: declared scripts/imas_efit_closed_shell, docs/evidence/fragments/iron-core-magnetisation/icm-efit-closed-shell-imas.html and docs/figures/iron-core-magnetisation/icm-efit-closed-shell-imas; ten of the twelve changed files are inside them and scripts/iron_linear_magnetisation/controls.py:62 and tests/test_magnetisation.py:1526 sit outside the fence, both named in the manifest's scope_note as coordinator-agreed.\nVERDICT manifest: read; status complete, landing at 4598ce1fa, tests naming both suite arms, test_logs naming six gate logs; logs/suite-baseline.log:180 reads 1 failed, 92 passed with EXIT=1 and logs/suite-after.log records 97 passed with EXIT=0, while the tests line names test_linear_shell_operator_pin[compact] as the baseline failure, which that log does not contain.\nVERDICT diff: read the twelve files over eighteen commits f9517fcc0..4598ce1fa, including the repair round a4e2c9e0d (owner import), 862fcb8eb (fragment), 33a8ea365 (exact factor taken from the owner) and 4598ce1fa (both levers, solver record read from the arm logs, owner parameters pinned by a test).\nCALL_SITES: scripts/iron_linear_magnetisation/measure.py:130, scripts/iron_linear_magnetisation/measure.py:145, scripts/iron_linear_magnetisation/reference.py:66, scripts/iron_linear_magnetisation/reference.py:146\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: scripts/imas_efit_closed_shell/summarise.py:27-31 scores S = 60.420 and 193.485 against 61.101838 and 195.055750 and the receipt carries both, but docs/evidence/fragments/iron-core-magnetisation/icm-efit-closed-shell-imas.html:135 defers done_when clause 3's plan placement to the coordinator instead of writing the verdict into the plan.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/gate-reproduce.log re-solves the four headline arms and reports S = 60.420 and 193.485 against the receipt at three decimals with EXIT=0, logs/gate-summarise.log, logs/gate-report.log and logs/gate-convergence.log each diff a regenerated artefact against the receipt with EXIT=0, and logs/negative-controls.txt reddens six checks on the pre-repair files; no gate asserts the 2 % criterion itself and the manifest's baseline failure id does not match logs/suite-baseline.log:180.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: git diff --stat f9517fcc0..4598ce1fa touches the declared scripts/imas_efit_closed_shell and the fragment, plus scripts/iron_linear_magnetisation/controls.py:62 and tests/test_magnetisation.py:1526 outside the declared fence, both declared in the manifest's scope_note.\nSCORE durability: 10\nJUSTIFICATION durability: tests/test_magnetisation.py:1526 is the only committed guard and it fails on the pre-repair owner and on a mutant that ignores the owner's ratio (logs/negative-controls.txt records 4 failed and 3 failed), but nothing in the repository fails if make_pulse.py, summarise.py:201 or report.py regress, because their gates live only in the two run directories.\nSCORE fit: 18\nJUSTIFICATION fit: the added modules follow the scripts/ idiom of argparse, Path and per-module docstrings, carry no name the repository rules forbid, and pass the shared interpreter's ruff check with the repository configuration on every added file.\nSCORE reuse: 20\nJUSTIFICATION reuse: the closed-shell factor is taken from its owner scripts/iron_linear_magnetisation/controls.py:62, whose new ratio and mu parameters default to its own shell so its four existing callers are unchanged, and both make_pulse.py:32 and summarise.py:25 import it; the search over nova/imas/mast_geometry.py, nova/imas/diiid_machine_ids.py, nova/equilibrium/forward_operator.py:3932 and scripts/prototypes/iron_magnetisation/shell.py found no owner for authoring a case pulse or sampling an IMAS flux grid at a point.\nFINDING scripts/imas_efit_closed_shell/make_pulse.py:26 non-blocking: the documented usage line names only --ratio, --arc-vertices and --no-iron, but the defaults at :51 and :89-93 write magnetics/ip = 100 A with a 1 A coil, while every recorded arm was built with --current-scale 1e4 --plasma-scale 0 (receipt log.txt:52-53); the documented command therefore does not reproduce the recorded case and lands in the plasma-filled shape the fragment reports as refused.\nFINDING scripts/imas_efit_closed_shell/summarise.py:201 non-blocking: the table verdict is computed from the finest arm's rel_error and nothing else, so summary.json declares reproduces for a/b = 0.5 while the same payload's levers carry passed false on both solver pairs (deltas 0.00515 and 0.00501) and on the 1.50 % refinement step; a machine reader of the verdict field gets an unqualified reproduction claim that the record's own convergence block contradicts.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T161745027288-icm-efit-closed-shell-imas/manifest.md:24 non-blocking: the baseline failure is reported as test_linear_shell_operator_pin[compact] on a git show that exits 128, but logs/suite-baseline.log:180 records FAILED tests/test_magnetisation.py::test_reference_stamp_refuses_wrong_revision_and_dirty_tree on a git commit CalledProcessError and no log in the run directory shows the pin test failing, so the baseline arm's one failure is unattributed and the stated attribution explains a failure that is not on disk.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-efit-closed-shell-imas.html:33 non-blocking: the fragment calls scripts/iron_linear_magnetisation/controls.py the repository's one closed-shell formula, but four other script modules restate the same expression (scripts/magnetisation_high_permeability/measure.py:30, scripts/magnetisation_high_permeability/figures.py:108, scripts/west_picard_control/measure.py:217, scripts/west_iron_galerkin/measure.py:282) and scripts/prototypes/iron_magnetisation/shell.py:38; a reader relying on the claim will not maintain the other copies.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-efit-closed-shell-imas.html:135 non-blocking: done_when clause 3 asks for the one-directional verdict to be written into the plan for section 9 to read; no s10 comment in docs/plans/iron-core-magnetisation.html carries it and the fragment defers it to plan-comment.html in the receipt, so section 9 cannot read it from the plan until the coordinator places that comment.\n",
+  "review_run_id": "r-20261118T045246941220-review-of-icm-efit-closed-shell-imas-4598ce1facb4",
+  "reviewed_base_sha": "f9517fcc04e249939811eded8f3c8be77b54b744",
+  "reviewed_head_sha": "4598ce1facb4a41ffdc129acaed55f06eb812e2f",
+  "reviewed_run_id": "r-20261117T161745027288-icm-efit-closed-shell-imas",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261118T045246941220-review-of-icm-efit-closed-shell-imas-4598ce1facb4"
+  },
+  "reviewer_run_id": "r-20261118T045246941220-review-of-icm-efit-closed-shell-imas-4598ce1facb4",
+  "scores": {
+    "durability": 10,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T05:57:12.643379+00:00",
+  "total": 95
+}

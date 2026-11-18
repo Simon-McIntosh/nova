@@ -108,6 +108,13 @@
       "note": "s3 holds 64 GB to the first call only and records the batch loop peak without a bound",
       "reason": "",
       "when": "2026-11-18T17:26:40.359365+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "finding": "single_goal-1",
+      "reason": "node (b) states its own done-when in the Nodes paragraph, the form the review of version 68 asked for when it required the arm to be split from the compile clause",
+      "when": "2026-11-18T17:26:52.445726+00:00"
     }
   ],
   "responses": {
@@ -134,6 +141,12 @@
       "note": "s3 holds 64 GB to the first call only and records the batch loop peak without a bound",
       "reason": "",
       "when": "2026-11-18T17:26:40.359365+00:00"
+    },
+    "single_goal-1": {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "reason": "node (b) states its own done-when in the Nodes paragraph, the form the review of version 68 asked for when it required the arm to be split from the compile clause",
+      "when": "2026-11-18T17:26:52.445726+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261118T165754889510-plan-review-of-kernel-compile-barrier.json",

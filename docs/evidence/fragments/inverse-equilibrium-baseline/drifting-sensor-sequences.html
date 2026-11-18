@@ -1,54 +1,60 @@
 <section id="drifting-sensor-sequences-record">
-<h2>Drifting sensor noise in a held ITER state: the fixture machine could not be built inside the node's wall, so neither code's sequence was measured</h2>
-<p>This node was to write 200 slices of ITER magnetics rows from one held generating state twice — once with a 1/f sequence and once with white noise of the same marginal size — and read both with the nova magnetics fit and with imas-efit, reporting the per-slice and 50-slice-mean error of the axis position, the boundary flux and q95. <strong>No sequence was measured.</strong> The blocker is upstream of the noise: the section-1 ITER fixture machine, which both codes' rows are generated from, does not build inside the node's wall on the allocation it ran on, and the sensor-row stage that follows the build exits without a traceback. What follows is the measurement of that blocker, the code that runs the study once the machine exists, and what a next run needs.</p>
+<h2>Drifting sensor noise in a held ITER state: the rows exist and the generating state qualifies, but each reconstructing code stopped at a measured limit before a sequence</h2>
+<p>This node was to write 200 slices of ITER magnetics rows from one held generating state twice — once with a 1/f sequence and once with white noise of the same marginal size — and reconstruct both with the nova magnetics fit and with imas-efit, reporting per-slice and 50-slice-mean error of the axis position, the boundary flux and q95, the lag-one controls, the noise-size crossing, and the spectral-index and corner sweeps. <strong>No sequence was measured.</strong> What did land is everything upstream of the sequence, at the full 500-cell mesh. The two arms then stopped at two different measured limits: the nova arm exceeds the 16 GB of a P100 when it instantiates the CUDA graphs of the sequence stage, and imas-efit refuses the pulse because the DD 3.39 ITER machine IDS carries no error on its passive-circuit currents.</p>
+<p>The measurement ran on the section-1 ITER fixture (<code>tests.reference_case()</code>, pulse 135011 run 7, slice 353, DD 3.39.0) through the section-1 helpers in <code>tests/test_equilibrium_magnetics_fit.py</code> at the worktree revision this fragment is committed with. The run directory holding every receipt cited below is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T202148674467-drifting-sensor-sequences/study/</code>.</p>
+</section>
 
-<section id="drifting-sensor-sequences-machine"><h3>The fixture machine build, measured twice</h3>
-<p>The generating machine is the section-1 ITER case (<code>tests.reference_case()</code>, pulse 135011 run 7, slice 353, DD 3.39.0), requested through <code>tests.test_equilibrium_forward_reference.cached_machine(case, cells, passive=True)</code>, whose plasma grid is assembled in <code>SourceBatch</code> passes reported by its own progress bar. Every figure below is that bar's own statement, read from the run's logs.</p>
-<table id="drifting-sensor-sequences-build">
-<tr><th>request</th><th>pass</th><th>wall</th><th>outcome</th></tr>
-<tr><td>500 cells</td><td>plasma grid, batch 1 of 5</td><td>18 min 53 s</td><td>process killed at the node's 40-minute guard with batches 2–5 unstarted</td></tr>
-<tr><td>120 cells</td><td>plasma grid, pass 1 (4 batches)</td><td>14 min 19 s</td><td>complete; 5 min 2 s on batch 1, 6 min 26 s to two, remainder in batch 4</td></tr>
-<tr><td>120 cells</td><td>plasma grid, pass 2 (4 batches)</td><td>52 min 16 s</td><td>complete</td></tr>
-<tr><td>120 cells</td><td>plasma wall, pass 1 (4 batches)</td><td>7 min 56 s</td><td>complete</td></tr>
-<tr><td>120 cells</td><td>plasma wall, pass 2 (4 batches)</td><td>17 min 48 s</td><td>complete; the zarr store <code>solovev_hex_machine</code> was written to the run directory</td></tr>
+<section id="drifting-sensor-sequences-generating"><h3>The generating state and the rows: both landed at 500 cells</h3>
+<p>The 500-cell machine, which the previous record could not build, built inside one titan allocation and was published as the store group <code>f0f96aa214aa9459</code> under <code>~/.local/share/nova/0.11.0/solovev_hex_machine.zarr</code>. The generating forward solve then qualified with the residual and axis below, and the sensor rows were written from it:</p>
+<pre id="drifting-sensor-sequences-solve">GENERATING residual=2.009e-15 axis=[6.288633, 0.498205]
+NOVA_REFERENCE q95=2.955747 axis=[6.288633, 0.498205]</pre>
+<table id="drifting-sensor-sequences-state">
+<tr><th>quantity</th><th>value</th></tr>
+<tr><td>cells / coordinates</td><td>500 / 566</td></tr>
+<tr><td>generating residual</td><td>2.009e-15</td></tr>
+<tr><td>axis (R, Z)</td><td>6.288633, 0.498205</td></tr>
+<tr><td>axis flux, boundary flux, span</td><td>-73.8925, 2.81128, 76.7038 Wb</td></tr>
+<tr><td>plasma current</td><td>-13.705 MA</td></tr>
+<tr><td>q95, from one flux-map calculator</td><td>2.95575</td></tr>
+<tr><td>reference sigma, flux loops (24)</td><td>83.969 Wb</td></tr>
+<tr><td>reference sigma, poloidal probes (48)</td><td>0.64941 T</td></tr>
 </table>
-<p>The 120-cell machine therefore costs <strong>1 h 32 min of build</strong> on this allocation (job 1319168, partition <code>sun</code>, 36 cores, 144 G) before any solve, and the 500-cell request is strictly larger: its first batch alone took longer than the entire first pass at 120 cells. The machine is the same object both codes' rows come from, so it is on the critical path of both arms.</p>
+<p><code>rows.npz</code> (5 250 bytes) holds <code>total</code>, <code>vacuum</code> and <code>plasma</code>, each a finite vector of the pulse's own 72 magnetics rows — 24 flux loops and 48 poloidal-field probes with their positions and poloidal angles — beside <code>loop_r</code>, <code>loop_z</code>, <code>probe_r</code>, <code>probe_z</code> and <code>probe_angle</code>. The largest row magnitudes are 64.9 Wb in the total set against 204.1 Wb of vacuum and 139.3 Wb of plasma contribution, so the plasma's contribution is the same order as the vacuum field and the rows are informative rather than a perturbation of nothing.</p>
+<p>The study's own sensitivity receipt, a central difference on a 0.001 amplitude perturbation of the same generating state, is <code>jacobian.json</code>: <code>d(axis)/d(amplitude) = (-5.2888, -0.53660) m</code> and <code>d(q95)/d(amplitude) = 2.4334</code>. That is the mapping the 50-slice covariance ratio divides by, and it exists for the state these rows came from.</p>
 </section>
 
-<section id="drifting-sensor-sequences-generating"><h3>The generating state, once the machine existed</h3>
-<p>With the 120-cell machine cached, the generating forward solve ran and qualified:</p>
-<pre id="drifting-sensor-sequences-solve">GENERATING residual=2.901e-14 axis=[6.259793, 0.505014]</pre>
-<p>That is the state the section-8 record's comparison was made against at 120 cells, and its residual is two orders below the 1e-12 qualification tolerance the case declares. It is not the 500-cell state section 8 reported at residual <code>1.17e-15</code>; the mesh is stated here as a limit of what ran, not as a choice.</p>
+<section id="drifting-sensor-sequences-nova"><h3>The nova arm: the 16 GB card cannot hold the sequence stage's CUDA graphs</h3>
+<p>The case builds and solves at 500 cells on a P100 — the build and generating solve above are that run — and the sensor stages that the previous record saw exit silently now complete: <code>point</code> 3 min 54 s, <code>poloidal_flux_loop</code> 8 s, a second <code>point</code> stage 7 min 8 s, <code>probe</code> 30 s. Their silent exit was the forked worker pool, and it is gone when the pool is pinned serial (<code>NOVA_FORCE_SERIAL_POOLS=1</code> sets the polygon-analytic worker count to one).</p>
+<p>Slices then die inside the fit with the device allocator exhausted. Two shards sharing one card produced</p>
+<pre id="drifting-sensor-sequences-oom">jax.errors.JaxRuntimeError: RESOURCE_EXHAUSTED: Underlying backend ran out of memory trying to instantiate command
+buffer with 36 (total of 9 alive graphs in the process). You can try to (a) Give more memory to the driver by
+reducing XLA_CLIENT_MEM_FRACTION (b) Disable command buffers with 'XLA_FLAGS=--xla_gpu_enable_command_buffer=' (empty set).
+Original error: Failed to instantiate CUDA graph: CUDA_ERROR_OUT_OF_MEMORY: out of memory [executable_name='jit_bitwise_and']</pre>
+<p>and one shard alone reproduces it, at the first request for device memory rather than at the end of the run: job 1327751's log opens with <code>Failed to allocate device memory of 11.92GiB (12801015808 bytes): RESOURCE_EXHAUSTED: CUDA_ERROR_OUT_OF_MEMORY</code>, walks down through 10.73, 9.66, 8.69, 7.82 and 7.04 GiB, logs <code>Retry CUDA graph instantiation after OOM error</code> twice, and then raises the exception above. The card is a <code>Tesla P100-PCIE-16GB</code>; the H200 rung of the lane could not be used because node <code>98dci4-gpu-0003</code> held 7 of its 8 cards, and the lane's H200 rung on this base fails before the payload with <code>FileNotFoundError: 'bwrap'</code> inside the reckon sbatch shim, so the arm was never given a device with memory to spare. <strong>No nova slice landed</strong>, therefore no per-code RMSE, no lag-one control, no threshold crossing and no sweep row.</p>
 </section>
 
-<section id="drifting-sensor-sequences-failure"><h3>The sensor-row stage exits without a traceback</h3>
-<p>Immediately after the solve, the case evaluates its sensor rows through the section-1 helpers: <code>_PlasmaDiagnosticSource</code> over the cell set, <code>_known_field_reader</code> over the pulse's static magnetics, and <code>_total_observations</code>. Three processes reached that stage and exited inside it, each leaving the same two lines and no exception text:</p>
-<pre id="drifting-sensor-sequences-exit">point: 100%|██████████████████████| 1/1 [05:06&lt;00:00, 306.77s/it]
-poloidal_flux_loop: 100%|█████████| 1/1 [03:32&lt;00:00, 212.73s/it]
-point:   0%|                               | 0/1 [00:00&lt;?it/s]
-...resource_tracker.py:396: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-hnaohem1'}
-  warnings.warn(</pre>
-<p>All three were started together in the one allocation and each died at the same stage, the three deaths spread over five minutes. A fourth process, started alone after two of those had exited, passed the same stage: it sat at <code>point</code> for 9 min 1 s, advanced to a <code>probe</code> stage, and was stopped by the run's cleanup when the node's window closed, without having written rows. So the stage is survivable and the exit is not deterministic. The run's step is bounded at 144 G and the killed processes held 10 G of resident memory at the last sample, so a memory limit on the step is not the explanation; the node's own kernel log records an out-of-memory kill only for a different job's cgroup step.</p>
-<p>The consequence is exact: <code>rows.npz</code> is written by the same case construction, after this stage, so no rows exist, and the imas-efit arm — which reads those rows as an IMAS magnetics pulse — was never startable. Neither code produced a slice.</p>
+<section id="drifting-sensor-sequences-efit"><h3>The imas-efit arm: the binary loads, then requires an error on the passive circuits</h3>
+<p>imas-efit now loads in the lane. Its first failure was a link error — <code>libgsl.so.25: cannot open shared object file</code> (exit 127) — and it resolves with GSL 2.7's <code>lib</code> ahead of GCCcore 13.2.0, HDF5 1.14.3, netCDF and its Fortran and C++ companions, PSPLINE 2.0.1, Mamba and Blitz++ (verified by <code>ldd</code> reporting no missing library). The next failure is inside EFIT++ itself, identical for all eleven arms and complete in seven seconds:</p>
+<pre id="drifting-sensor-sequences-efit-error">[info] [phase_timing] phase=imas_read_pulse slice=NA elapsed_ms=87.856072
+[error] The IDS field for data error has not been set :
+efit passive circuit:
+identifier=0
+[error] Terminating EFIT++ ...</pre>
+<p>The split-entry route reads the pulse's magnetics and the machine's <code>pf_passive</code>, and it requires <code>pf_passive.loop[0].current.data_error_upper</code>. Reading the machine entry directly shows why that cannot be satisfied from this machine: DD 3.39's <code>pf_passive.loop[i].current</code> is a numeric <code>FLT_1D</code> — the entry holds 103 loops, homogeneous time, and <code>loop[0].current</code> is an <code>IDSNumericArray</code> with no <code>data_error_upper</code> member at all. So the efit arm's blocker is not the rows: the pulse it was given carries 200 slices of shaped rows, the wall read succeeds (57 points, one open unit resolved into a limiter), the pulse itself parses, and the abort is on an error field the DD does not define for the machine's passive currents. <strong>No efit slice landed</strong>, so the two-code comparison the node exists to make was not made.</p>
 </section>
 
-<section id="drifting-sensor-sequences-delivered"><h3>What the node does deliver</h3>
-<p>A complete, smoke-tested study driver in the run directory <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T202148674467-drifting-sensor-sequences/study/</code>, written against the section-8 route so that the measurement is a run and not designed by its author:</p>
-<ul>
-<li><code>study.py</code> — reads the ITER pulse's own 24 flux loops and 48 poloidal-field probes (position plus poloidal angle) and the case's sensor geometry; builds the generating state through the section-1 helper; writes the noise-free rows and the generating reference; shapes white noise into a coloured sequence in the Fourier domain with a flat band below a corner at <code>4 cycles per sequence</code> and <code>f^-1</code> above it, normalising every sensor to unit standard deviation before scaling by <code>factor x sigma</code> so the two sequences carry the same marginal size; runs the nova <code>MagneticsFit</code> on the same coefficient basis <code>[1, -1]</code> section 8 established as imas-efit's resolved one for this case; writes the rows as an IMAS pulse and runs the imas-efit binary through the section-8 configuration with both degrees named and both priors at zero weight; and re-reads imas-efit's stored equilibrium for axis, fluxes and q95.</li>
-<li><code>analyse.py</code> — merges the workers' per-slice shards, and reports per code and sequence the axis RMSE, the boundary-flux RMSE as a fraction of the flux span, the |q95| RMSE, the lag-one correlation of each, the error of the mean over 50 consecutive slices, and the ratio of that realised mean error to the receipt's own <code>sqrt(dpsi^T Sigma dpsi / 50)</code> mapped through a central-difference Jacobian on the shared amplitude.</li>
-<li><code>figure.py</code> and <code>overlay_figure.py</code> — the axis-against-slice panel per code and the overlaid line contours of the two codes' states on one physical level array, with both null sets, the wall, and the axis off.</li>
-</ul>
-<p>The analysis and figure paths were exercised end to end on synthetic 200-slice, three-shard rows: the control discriminates by construction (lag-one about 0 on the white series, about 0.999 on the smooth series), the shard merge reproduces the 200 slices, and the figure is written. That establishes the machinery, not the measurement.</p>
+<section id="drifting-sensor-sequences-delivered"><h3>What exists to run again</h3>
+<p>Every stage up to the slice is exercised end to end and receipted. In the run directory:</p>
+<p><code>study.py</code> (modes <code>nova</code>, <code>efit</code>, <code>overlay</code>), <code>analyse.py</code>, <code>figure.py</code>, <code>overlay_figure.py</code>, <code>build_fragment.py</code>, <code>receipts_to_jsonl.py</code>, and the orchestrator <code>run_all.py --shards N --phases build,efit,nova,sweep</code>. Each fit writes one atomic per-slice receipt as it lands and converts a slice's failure into a named failure receipt without stopping the shard, so a cut arm still reports the slices it reached.</p>
+<p>The two fixes a next run needs are stated as the measurements above give them. The nova arm needs a card whose memory covers the sequence stage's 11.92 GiB device allocation, which a 16 GB P100 does not, or command buffers disabled in the payload's own environment; and the H200 route needs the lane's h200 rung repaired, because that rung dies before the payload (the reckon sbatch shim calls a <code>bwrap</code> binary that does not exist on this base), so a submission has to come from a session that is not fenced. The efit arm cannot be fixed by adding errors, because DD 3.39 gives the machine's passive currents no error field: it needs either a run in unified mode, where the pulse's own <code>pf_passive</code> is read and its currents can carry an error, or a passive configuration that does not read the machine's passive currents as data.</p>
 </section>
 
-<section id="drifting-sensor-sequences-limits"><h3>Limits and what a next run needs</h3>
-<p>No clause of the node's done-when is answered: no sequence, therefore no RMSE, no lag-one control, no threshold crossing, no covariance ratio, and no swept index or corner. The lead takes the work as blocked rather than partial.</p>
-<p>A next run needs, in order of leverage: (1) the machine built once and published as a store both arms load, under the evidence root rather than a per-run directory, because the build — not the fit — is the wall; (2) a wall of at least four hours on a CPU allocation for the 120-cell build alone, or a GPU allocation for the build as well as the fits; (3) the sensor-row stage's silent exit diagnosed: it is the point at which the run dies, it prints no traceback, and the section-1 helper it sits in is shared with the section-6 and section-8 records, so the cause is worth knowing independently of this node.</p>
-<p>The mesh is 120 cells, not the 500-cell section-1 reference mesh; a reader comparing costs with section 8 should hold that difference.</p>
+<section id="drifting-sensor-sequences-limits"><h3>Limits</h3>
+<p>No clause of the done-when is answered: no sequence, no RMSE, no lag-one control, no noise-size crossing, no covariance ratio, no swept index or corner, and no figure. The record therefore does not claim a drift or white sequence result, and no number above is a reconstruction error.</p>
+<p>The generating state is a held state at its own patch, not a DIII-D equilibrium, and its q95 comes from one flux-map calculator for both codes — the calculator exists, the second code never produced a map to apply it to.</p>
+<p>A reader comparing costs should note that the machine build, not the fit, is the wall: 25 minutes of the titan allocation above produced the 500-cell machine and the generating solve together.</p>
 </section>
 
 <section id="drifting-sensor-sequences-figures"><h3>Figures</h3>
-<p>None. A figure of a sequence that was never reconstructed would be an image of the driver's synthetic smoke test, and this record does not publish one.</p>
-</section>
+<p>None. A per-code axis-against-slice panel needs the sequences, and a contour panel of both codes at their largest-disagreement slice needs two reconstructions. Drawing the generating state alone would not be that figure and is not published here.</p>
 </section>

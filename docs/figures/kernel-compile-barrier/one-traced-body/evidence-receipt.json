@@ -1,0 +1,107 @@
+{
+  "sources": {
+    "profile": {
+      "path": "residual-h200/profile.json",
+      "sha256": "b8d61f38a67008ee1b80619305f098c73735203714d9b5b226d28aecc5a6310b"
+    },
+    "attribution": {
+      "path": "residual-h200/attribution.json",
+      "sha256": "85d9e8c1050d66225324f351bca5fcd513b04417c52b9221d8c7efe91a9b6723"
+    },
+    "fixture": {
+      "path": "bounded-fixture/lowered-size.json",
+      "sha256": "48549cdfd5d0c013b9f04d8b3a8181a64ed55d7a0d75ddda9d55aefd0d9490b2"
+    }
+  },
+  "residual": {
+    "profile": {
+      "program": "production_point_batch",
+      "size": 132,
+      "revision": "681a6ecd20d6a3473b02e340b6dc66dd288981c5",
+      "device": "NVIDIA H200 NVL",
+      "cache_enabled": false,
+      "phase": "done",
+      "peak_host_rss_kib": 2344752,
+      "trace_seconds": 1.4246899224817753,
+      "jaxpr_text_bytes": 957339,
+      "lower_seconds": 0.33085969649255276,
+      "stablehlo_bytes": 1980103,
+      "compile_seconds": 32.232170674949884,
+      "executable_bytes": 1717563,
+      "cache_guard_misses": 1,
+      "cache_guard_hits": 0
+    },
+    "attribution": {
+      "instructions_first": 3963,
+      "instructions_peak": 45471,
+      "sequence": [
+        {
+          "index": 136,
+          "pass": "after_pipeline-start/variadic-op-splitter",
+          "start": 4.9601,
+          "seconds": 15.9223,
+          "instructions": 55,
+          "bytes": 5240054
+        },
+        {
+          "index": 137,
+          "pass": "jit__source_jets.priority_fusion_dump.txt",
+          "start": 20.8824,
+          "seconds": 0.403,
+          "instructions": 0,
+          "bytes": 197295552
+        },
+        {
+          "index": 138,
+          "pass": "after_priority-fusion/cse",
+          "start": 21.2854,
+          "seconds": 0.168,
+          "instructions": 45471,
+          "bytes": 29787014
+        }
+      ]
+    }
+  },
+  "fixture": {
+    "revision": "098010058c0ebc6d3a1c00d144728cea4096a933",
+    "phase": "done",
+    "fixture": "tests/equilibrium/test_bounded_point_program.py",
+    "test_id": "tests/equilibrium/test_bounded_point_program.py::test_point_program_lowers_within_its_graph_budget",
+    "fixture_sha256": "a17f3ada36ef624394aaeb2420eba875a7e09b30b5d58f8fd4eec473655aca79",
+    "kernel_sha256": "0f3e7a38a365d573706c8c8eeb210f3575dda9223051514419bebd8200488e6f",
+    "stablehlo_bytes": 9351535,
+    "stablehlo_sha256": "1a35ae0900a01a106b98f68f8f1895e4e6a2f81109db7ecdf4dcddf632aa2253",
+    "lower_seconds": 22.751033008098602,
+    "ceiling": 10000000,
+    "fits_six_million": false,
+    "cells": 8,
+    "points": [
+      [
+        5.02,
+        0.01
+      ],
+      [
+        5.03,
+        -0.02
+      ],
+      [
+        4.99,
+        0.03
+      ]
+    ],
+    "platform": "cpu",
+    "device": "cpu:0",
+    "jax_version": "0.11.0",
+    "jaxlib_version": "0.11.0",
+    "x64": true,
+    "compilation_cache_enabled": false,
+    "compiled": false,
+    "host": "98dci4-clu-3026.iter.org",
+    "kernel_module": "nova/biot/polygonanalytic.py"
+  },
+  "control": {
+    "status": "not_measured",
+    "inherited_compile_seconds": 405,
+    "waiver": "The lead accepted a negative result and prohibited further jobs; no paired cold profile or compile-bound refusal was measured."
+  }
+}

@@ -41,7 +41,30 @@
   "plan_slug": "forward-solve-near-stored-states",
   "plan_version": 9,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "dee645a5d967f95841e61625fbd90c62e74ac9ba",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The first section record now also states the mesh and the solver route of every solve, so the reach measurement names a recorded mesh and route.",
+      "reason": "",
+      "when": "2026-11-18T06:56:33.982016+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "dee645a5d967f95841e61625fbd90c62e74ac9ba",
+      "commit_basis": "edit",
+      "note": "The first section record now also states the mesh and the solver route of every solve, so the reach measurement names a recorded mesh and route.",
+      "reason": "",
+      "when": "2026-11-18T06:56:33.982016+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261118T063658835939-plan-review-of-forward-solve-near-stored-states.json",
   "review_run_id": "r-20261118T063658835939-plan-review-of-forward-solve-near-stored-states",
   "reviewed_blob_sha": "71fcb7dfc46092fbd5423417d747cb978bbdd878",
   "rubric": "content",

@@ -12,6 +12,7 @@ here.
 """
 
 import argparse
+from html.parser import HTMLParser
 import json
 from pathlib import Path
 import sys
@@ -74,7 +75,28 @@ def check_receipt(receipt):
     return failures
 
 
+class RecordText(HTMLParser):
+    """Collect visible text so prose claims tolerate inline HTML markup."""
+
+    def __init__(self):
+        super().__init__()
+        self.parts = []
+
+    def handle_data(self, data):
+        self.parts.append(data)
+
+
 def check_record(receipt, record):
+    """Compare either prose claims or attribution tables with their receipt."""
+    if "required_claims" in receipt:
+        parser = RecordText()
+        parser.feed(record)
+        text = " ".join(" ".join(parser.parts).split())
+        return [
+            "record: claim missing or stale — %s" % name
+            for name, claims in receipt["required_claims"].items()
+            if any(claim not in text for claim in claims)
+        ]
     failures = []
     control = receipt["control_bytes"]
     for block in receipt["blocks"]:

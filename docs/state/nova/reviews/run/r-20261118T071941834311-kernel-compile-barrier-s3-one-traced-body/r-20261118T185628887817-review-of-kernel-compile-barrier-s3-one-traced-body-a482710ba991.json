@@ -1,0 +1,52 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-18T19:18:36.860Z",
+  "dispatched_at": "2026-11-18T19:18:14Z",
+  "findings": [
+    {
+      "file": "tests/biot/test_kernel_compile_cost.py",
+      "line": 25,
+      "severity": "non-blocking",
+      "text": "BASE_REVISION now names 681a6ecd2, the revision the landed tree's polygonanalytic.py is byte-identical to, so _baseline_kernel at :36 extracts a copy of the module under test and the maxima of zero at one-traced-body.html:17 cannot fail on this tree; the pin still discriminates a future candidate, which the brief requires, but it no longer measures this run's repair."
+    },
+    {
+      "file": "scripts/prototypes/one_traced_body/check_record.py",
+      "line": 52,
+      "severity": "non-blocking",
+      "text": "no tracked test runs this check or the required_claims branch added at scripts/prototypes/point_program_attribution/check.py:85; the two tests that do, test_record_reuse.py:26 and :38, live in the run directory, so re-forking the check or deleting the committed receipt reddens no suite."
+    },
+    {
+      "file": "manifest.md",
+      "line": 20,
+      "severity": "non-blocking",
+      "text": "the baseline arm ran in the scratch tree /tmp/nova-identity-1325846-jtQp/tree whose log names MEASUREMENT_MODULE and MEASUREMENT_CWD, but the reviewed manifest fills neither measurement_module nor measurement_cwd."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "all 14 commits of c9a2cb2d2..a482710ba read; 7 paths and 392 insertions, with the six nova/biot/polygonanalytic.py edits reverted byte for byte by 5c35fb4f6 so no product change survives.",
+    "done_when": "one-traced-body.html:63 states the paired 60 s control was not exercised and is waived, so clause (1)'s 282-cell and 2,132-node arms carry no receipt.",
+    "goal": "docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html:3 records no folded form accepted and the repaired kernel restored, so the one-traced-body fold the node was dispatched to deliver does not land.",
+    "manifest": "it records 14 commits, both suite arms at 20 passed EXIT=0, the residual at 32.232170674949884 s, and an empty negative_control_log with a written waiver.",
+    "write_paths": "six of seven delivered paths sit inside the declared ten; the seventh, scripts/prototypes/point_program_attribution/check.py:85, is the owner the prior review's reuse disposition named."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html:3 records no folded form accepted and the repaired kernel restored, so the one-traced-body fold the node was dispatched to deliver does not land.\nVERDICT done_when: one-traced-body.html:63 states the paired 60 s control was not exercised and is waived, so clause (1)'s 282-cell and 2,132-node arms carry no receipt.\nVERDICT write_paths: six of seven delivered paths sit inside the declared ten; the seventh, scripts/prototypes/point_program_attribution/check.py:85, is the owner the prior review's reuse disposition named.\nVERDICT manifest: it records 14 commits, both suite arms at 20 passed EXIT=0, the residual at 32.232170674949884 s, and an empty negative_control_log with a written waiver.\nVERDICT diff: all 14 commits of c9a2cb2d2..a482710ba read; 7 paths and 392 insertions, with the six nova/biot/polygonanalytic.py edits reverted byte for byte by 5c35fb4f6 so no product change survives.\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: one-traced-body.html:3 reports no folded form accepted, so the mechanism and the 60 s compile the goal names do not land.\nSCORE evidence: 11\nJUSTIFICATION evidence: the gate at manifest.md:21 covers only the two scoped test files at 20 passed, asserting none of the done-when's arms, while the recorded evidence is the residual receipt in evidence-receipt.json:43.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: six of the seven delivered paths sit inside the declared ten, and the seventh, scripts/prototypes/point_program_attribution/check.py:85, is the record-check owner the reuse disposition named.\nSCORE durability: 12\nJUSTIFICATION durability: reuse-full-negative-control.log shows both audit ids failing without the repair, but no committed test runs check_record.py:52 and tests/biot/test_kernel_compile_cost.py:25 pins the revision the tree already equals.\nSCORE fit: 17\nJUSTIFICATION fit: the new modules follow the sibling prototype idiom of scripts/prototypes/point_program_attribution/check.py:20-24 with argparse mains and module constants, and carry no plan label or worktree path.\nSCORE reuse: 18\nJUSTIFICATION reuse: a482710ba deletes the forked HTML text collector and delegates to scripts/prototypes/point_program_attribution/check.py:85, generalising that owner rather than copying it, and lowered_structure.py:12 imports the existing bodies counter.\nFINDING tests/biot/test_kernel_compile_cost.py:25 non-blocking: BASE_REVISION now names 681a6ecd2, the revision the landed tree's polygonanalytic.py is byte-identical to, so _baseline_kernel at :36 extracts a copy of the module under test and the maxima of zero at one-traced-body.html:17 cannot fail on this tree; the pin still discriminates a future candidate, which the brief requires, but it no longer measures this run's repair.\nFINDING scripts/prototypes/one_traced_body/check_record.py:52 non-blocking: no tracked test runs this check or the required_claims branch added at scripts/prototypes/point_program_attribution/check.py:85; the two tests that do, test_record_reuse.py:26 and :38, live in the run directory, so re-forking the check or deleting the committed receipt reddens no suite.\nFINDING manifest.md:20 non-blocking: the baseline arm ran in the scratch tree /tmp/nova-identity-1325846-jtQp/tree whose log names MEASUREMENT_MODULE and MEASUREMENT_CWD, but the reviewed manifest fills neither measurement_module nor measurement_cwd.\n",
+  "review_run_id": "r-20261118T185628887817-review-of-kernel-compile-barrier-s3-one-traced-body-a482710ba991",
+  "reviewed_base_sha": "c9a2cb2d270dfb529272bb0a3c4f38fd553d53e1",
+  "reviewed_head_sha": "a482710ba991cce33a1705fb8faa53b0cf2d2e12",
+  "reviewed_run_id": "r-20261118T071941834311-kernel-compile-barrier-s3-one-traced-body",
+  "scores": {
+    "durability": 12,
+    "evidence": 11,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "reuse": 18,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T19:53:46.144503+00:00",
+  "total": 87
+}

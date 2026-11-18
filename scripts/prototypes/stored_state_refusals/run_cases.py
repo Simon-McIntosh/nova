@@ -275,7 +275,11 @@ def main():
         working_directory=str(Path.cwd().resolve()),
     )
     _report(records)
-    selected = set(sys.argv[1].split(",")) if len(sys.argv) > 1 else set()
+    selected = (
+        {name for name in sys.argv[1].split(",") if name}
+        if len(sys.argv) > 1
+        else set()
+    )
     if not selected or "mastu" in selected:
         data, stored, qualified_terminal = _mastu(monkeypatch, records)
         _displaced(monkeypatch, records, data, stored, qualified_terminal)

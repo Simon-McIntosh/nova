@@ -1,0 +1,73 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T05:57:50.663Z",
+  "dispatched_at": "2026-11-18T05:57:35Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:24",
+      "id": "wiring-1",
+      "reason": "the plan's dispatch graph would not put the row-exchange case record and its route in the \u00a74 node's brief, and a \u00a74 node would discover the missing input after it had started.",
+      "text": "\u00a74 reads the inverse baseline's row-exchange case, its record (`docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html`) and the solver route that section used, but its declared dependency list is empty (`\"s4\":[]`) and its prose says only \"waits on nothing in this plan\"; every other section in the plan that reads another plan's landed section declares the edge (`s1` \u2192 `inverse-equilibrium-baseline#s2`), and the inverse plan declares the reverse edge (`docs/plans/inverse-equilibrium-baseline.html:24`, `s4` \u2192 `forward-solve-near-stored-states#s4`), so the graph is asymmetric at the one place \u00a74's inputs come from",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:89",
+      "id": "reasoning-1",
+      "reason": "the verdict is the plan's only gate on \u00a73's scope, so an unqualified verdict can park a case for reasons that belong to the measurement rather than to the case.",
+      "text": "\u00a72(1) commits the Reached/Not-reached verdict (which decides whether \u00a73 owes a case a repair, and which the plan permits to park a case permanently) to a chained sequence of seven solves at 1e-10, but \u00a72 names no device, mesh or solver route for those solves while \u00a71(1) names the H200/titan batch and \u00a73(1) names the H200 for the endpoint it must reach; convergence at a fixed tolerance is a device- and mesh-qualified measurement in this repository (the forward gate guidance requires the device to be stated, and a titan or CPU number is not an H200 number), so a case can be marked Not reached on one device and be reachable on the device \u00a73 is held to",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:108",
+      "id": "evidence_paths-1",
+      "reason": "a citation a later reader cannot open is not evidence, and the batching section's stated root cause (tracer-array conversion under the batched Newton-Krylov call) is checkable only through that receipt.",
+      "text": "the two route-inventory receipts that carry \u00a74's cited refusal are given as `~/.cache/nova-inverse-equilibrium-baseline/route-inventory-cpu.json` and a bare `route-inventory-titan.json` with no directory; a HOME-relative receipt does not resolve for a reader whose HOME is remapped, which is how this crew runs (measured in this run: `ls ~/.cache/nova-inverse-equilibrium-baseline` exits nonzero because HOME resolved to the run's own `omp-home`, while `/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/route-inventory-cpu.json` exists, 3248 bytes), and the project rule puts receipts that make evidence claims on the GPFS evidence root with the resolved path recorded",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:108",
+      "id": "reasoning-2",
+      "reason": "the section's single property is that a batch runs; requiring every displaced copy to converge makes that property unmeasurable whenever the pre-existing convergence defect fires, and the node would spend its gate on \u00a73's subject instead.",
+      "text": "\u00a74(1) requires 16 and then 64 independently displaced copies (each a 1 % change in profile amplitudes) of the nova-written ITER state to *every one qualify below 1e-10* in one traced programmed batch, and \u00a74 declares it waits on nothing, so no repair of displaced solves may be assumed: the positive control the section added covers only the undisplaced generating state solved alone at the reference mesh (residual 1.17e-15, `docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html`), and the plan's own evidence is that displacing profile coefficients breaks qualification (the MAST-U first perturbed solve stalls at 1.2e-4 with the active-set step refused, \u00a71(1)), which is exactly the class of failure \u00a73 exists to repair; the batched arm can therefore fail on displaced-state convergence rather than on batching, and its negative control (base revision does not return per-state flags) cannot tell the two apart",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "b83eca8359ac882f7d25044d116351f6581b2ee5",
+  "plan_fingerprint": "54c514183e035cdc02ed2e42096b761a36779a9743214c70c7fe86ef97c9357f",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 8,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261118T053953173474-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "bc4957283875dda27e47569bec51591a77426338",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html` and `efit-on-nova-rows.html` resolve at HEAD (`git cat-file -e` exits 0 for both), the scheme-less cross-plan hrefs `inverse-equilibrium-baseline#s2` and `forward-solve-near-stored-states#s4` resolve to existing sections of each plan, and the archive record named in \u00a70 is this plan's own to write.",
+    "done_when": "pass \u2014 \u00a71, \u00a72, \u00a73 and \u00a74 each name a control that must fail (the reproduced refusal, the full-displacement default-policy solve from the stored map, the base-revision reproduction of \u00a71's refusals, the base-revision batched call), and each clause states a quantity with a threshold or an exact comparison.",
+    "evidence_paths": "a finding \u2014 \u00a74 cites its refusal receipts as HOME-relative `~/.cache/nova-inverse-equilibrium-baseline/...` paths at docs/plans/forward-solve-near-stored-states.html:108, which do not resolve for a reader whose HOME is remapped.",
+    "naming": "pass \u2014 neither \u00a72 nor \u00a74 names a code path, a function, a plan label, a stage name or a ticket number that a reader would need a tracker entry to understand.",
+    "reasoning": "a finding \u2014 \u00a72's verdict on which cases \u00a73 must repair is measured on a device and mesh it does not name, and \u00a74 requires every amplitude-displaced batched state to qualify below 1e-10 in a section that waits on nothing, so a convergence property rather than batching becomes the thing measured.",
+    "single_goal": "pass \u2014 \u00a72 delivers one verdict per case and \u00a74 delivers one property (the public solve runs under a batch, including that it is not slower), each with its own positive arm.",
+    "wiring": "a finding \u2014 \u00a74's done-when consumes the inverse baseline's row-exchange section (its record and its solver route) but `plan-section-depends-on` declares `\"s4\":[]` at docs/plans/forward-solve-near-stored-states.html:24, while \u00a71 declares its equivalent cross-plan edge."
+  },
+  "section_digests": {
+    "_document": "5eaec87b2f497b8b435123ea3e8e5b8d1c88bab5cda6853f1bb3ef3ea38b75de",
+    "s0": "fe67d113b2c5e41864cb02b1f30199cabdf5f90a0b2d92d05a7a6872e03f4022",
+    "s1": "ad38a639ccff273d1e55e7b6f13b0c54dbeab542646bea92d52811c964773a64",
+    "s2": "09efafe98dfa455bea9de4f3fe013056aaaf33655fe34a79f2f4b884729bd837",
+    "s3": "c1164314d236e8fd566ce929a4f43e519d3b76ca3978d08d77b3c0ba13e6055c",
+    "s4": "7dbc6f1626544879eb3c6e0276abad0cf4df52440cba454a567df97aa9046812"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T06:13:27.743286+00:00",
+  "total": null,
+  "traced_units": [
+    "s2",
+    "s4"
+  ]
+}

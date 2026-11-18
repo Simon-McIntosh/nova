@@ -25,7 +25,30 @@
   "plan_slug": "kernel-compile-barrier",
   "plan_version": 95,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "68f9b2fee616fc3a9fb97fe3dc2104b38c0c3bab",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "s3 names the revision each pre-repair figure was measured at instead of calling it main",
+      "reason": "",
+      "when": "2026-11-18T06:12:47.250971+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "68f9b2fee616fc3a9fb97fe3dc2104b38c0c3bab",
+      "commit_basis": "edit",
+      "note": "s3 names the revision each pre-repair figure was measured at instead of calling it main",
+      "reason": "",
+      "when": "2026-11-18T06:12:47.250971+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261118T053351126564-plan-review-of-kernel-compile-barrier.json",
   "review_run_id": "r-20261118T053351126564-plan-review-of-kernel-compile-barrier",
   "reviewed_blob_sha": "2b20fe34ff2bc6d5beae5821ac8130cdea79d86e",
   "rubric": "content",

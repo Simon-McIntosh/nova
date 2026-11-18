@@ -70,7 +70,11 @@ def main():
     def local(state, operands, metric):
         result = local_owner(state, operands, metric)
         captured.update(
-            operands=operands, local=result[0], root=result[1], transform=result[2]
+            operands=operands,
+            metric=metric,
+            local=result[0],
+            root=result[1],
+            transform=result[2],
         )
         return result
 
@@ -122,6 +126,18 @@ def main():
             minimum_eigenvalue_estimate=float(values[0]),
             witness_rayleigh=float(witness @ action / (witness @ witness)),
             witness_residual=float(np.linalg.norm(action - values[0] * witness)),
+        )
+        direction = iron._local_apply(captured["transform"], jnp.asarray(witness))
+        weighted = iron._local_apply(captured["metric"], direction)
+        interaction_action = captured["operands"][0] @ direction
+        row["matrix"].update(
+            interaction_rayleigh_over_mu0=float(
+                (weighted @ interaction_action) / (iron._MU0 * (weighted @ direction))
+            ),
+            material_largest_eigenvalue_times_mu0=float(
+                jnp.max(jnp.linalg.eigvalsh(captured["root"] @ captured["transform"]))
+                * iron._MU0
+            ),
         )
         np.save(args.output / "cholesky-rayleigh-witness.npy", witness)
         row["completed"] = True

@@ -136,7 +136,8 @@ class FluxIterationFit:
         conductor_current_field: str = "current",
         conductor_names: tuple[str, ...] | None = None,
         prescribed_current: np.ndarray | None = None,
-        flux_solver: Callable[[object, np.ndarray], np.ndarray] | None = None,
+        flux_solver: Callable[[object, np.ndarray, np.ndarray | None], np.ndarray]
+        | None = None,
     ) -> None:
         configure_dtypes()
         assert jax.config.jax_enable_x64 is True
@@ -435,8 +436,12 @@ class FluxIterationFit:
                             jnp.asarray(self._prescribed_current),
                         )
                 else:
-                    # a solved map for these coefficients, not one linear step
-                    updated = self._flux_solver(active.source, np.array(flux))
+                    # a solved map for these coefficients, not one linear step;
+                    # the solver takes the fitted conductors so the map it
+                    # returns is the map these coefficients ask for
+                    updated = self._flux_solver(
+                        active.source, np.array(flux), conductor
+                    )
                 updated = np.asarray(updated, dtype=np.float64)
                 flux_evaluations += 1
             except ValueError as error:

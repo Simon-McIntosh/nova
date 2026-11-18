@@ -138,7 +138,7 @@ def _stored_case(name):
         initial_flux=np.asarray(data["seed"], dtype=np.float64),
         conductor_response=response,
         conductor_names=data["conductor_names"],
-        prescribed_current=getattr(data.get("problem"), "prescribed_current", None),
+        prescribed_current=getattr(data.get("request"), "prescribed_current", None),
         plasma_current=abs(float(data["case"].plasma_current)),
         data=data,
     )
@@ -158,14 +158,16 @@ def _flux_solver(profile, request):
     """Return the map the profile's own solve reaches for given coefficients."""
     from nova.equilibrium.solve_request import ExplicitSolveSeed
 
-    def solve(source, flux):
-        receipt = profile.solve(
-            replace(
-                request,
-                source_profile=source,
-                seed_policy=ExplicitSolveSeed(np.asarray(flux, dtype=np.float64)),
-            )
+    def solve(source, flux, conductor=None):
+        # the fitted conductors travel through the request's current= channel,
+        # which is the vector the operator's map is built from
+        kwargs = dict(
+            source_profile=source,
+            seed_policy=ExplicitSolveSeed(np.asarray(flux, dtype=np.float64)),
         )
+        if conductor is not None:
+            kwargs["current"] = np.asarray(conductor, dtype=np.float64)
+        receipt = profile.solve(replace(request, **kwargs))
         return np.asarray(receipt.terminal_state.flux, dtype=np.float64)
 
     return solve

@@ -265,6 +265,40 @@ def test_the_fitted_conductor_currents_take_their_measured_rows():
     assert np.allclose(fitter.profile.instrument.currents, TRUTH_CURRENTS, atol=1e-8)
 
 
+def test_the_solver_receives_the_fitted_conductor_currents():
+    fitter, measurement, _, _ = _instrument(
+        initial=TRUTH * 1.05, conductor=True, flux_weight=0.0
+    )
+    profile = fitter.profile
+    seen = []
+
+    def solve(source, psi, conductor=None):
+        seen.append(None if conductor is None else np.array(conductor))
+        return EXTERNAL + COUPLING @ profile.instrument.cell_current(source, psi)
+
+    solved = FluxIterationFit(
+        profile,
+        fitter.magnetics,
+        lambda currents: SENSOR @ np.asarray(currents),
+        conductor_response=CONDUCTOR_RESPONSE,
+        conductor_names=CONDUCTOR_NAMES,
+        flux_solver=solve,
+    )
+    receipt = solved.fit(
+        measurement,
+        np.zeros(CELLS),
+        plasma_current_scale=1.0,
+        flux_tolerance=1.0e-12,
+        max_passes=3,
+    )
+    assert seen
+    assert all(conductor is not None for conductor in seen)
+    np.testing.assert_allclose(
+        np.asarray(seen[-1])[-TRUTH_CURRENTS.size :], TRUTH_CURRENTS, atol=1e-6
+    )
+    assert receipt.conductor_currents.shape == TRUTH_CURRENTS.shape
+
+
 def test_a_flux_map_that_loses_its_axis_is_recorded_at_that_pass():
     fitter, measurement, _, _ = _instrument(initial=TRUTH * 1.05)
     # one residual read, one response read per coefficient and one map
@@ -287,7 +321,7 @@ def test_a_flux_solver_supplies_the_next_map():
     profile = fitter.profile
     calls = []
 
-    def solve(source, psi):
+    def solve(source, psi, conductor=None):
         calls.append(np.asarray(psi).copy())
         return EXTERNAL + COUPLING @ profile.instrument.cell_current(source, psi)
 
@@ -313,7 +347,7 @@ def test_a_map_update_beyond_the_span_is_rejected():
     profile = fitter.profile
     calls = []
 
-    def solve(source, psi):
+    def solve(source, psi, conductor=None):
         calls.append(1)
         if len(calls) == 2:  # the second solve leaves the branch entirely
             return np.asarray(psi) + 10.0

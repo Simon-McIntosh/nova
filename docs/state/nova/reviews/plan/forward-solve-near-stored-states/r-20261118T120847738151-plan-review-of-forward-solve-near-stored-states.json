@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T12:12:32.219Z",
+  "dispatched_at": "2026-11-18T12:12:12Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:108",
+      "id": "reasoning-1",
+      "reason": "the route is already fixed in \u00a74's own done-when as the public solve's default route, so the worker reads it, and only the sentence's provenance overstates the record.",
+      "text": "\u00a74 says it reads the row-exchange section's \"solver route\", while the record it cites records the generating-state solve's converged and qualified flags and never names the solve route that produced them, so the sentence claims to import a fact its evidence does not carry",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "f93e5a221ae8460bf2dd0f4dbc6efcf8dee54af6",
+  "plan_fingerprint": "fed88f994b4a72286595d2bd61ea9d931d30b5b6dabb79d312009b2e765e376d",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 13,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "reasoning-1",
+      "reason": "the route is already fixed in \u00a74's own done-when as the public solve's default route, so the worker reads it, and only the sentence's provenance overstates the record.",
+      "when": "2026-11-18T12:23:15.709356+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the route is already fixed in \u00a74's own done-when as the public solve's default route, so the worker reads it, and only the sentence's provenance overstates the record.",
+      "when": "2026-11-18T12:23:15.709356+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-forward-solve-near-stored-states.v13.json",
+  "review_run_id": "r-20261118T120847738151-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "2b2c5aa901523ed570ec68b0f97933e0342510c4",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html` exists at HEAD (`git cat-file -e HEAD:... ` exits 0) and `inverse-equilibrium-baseline#s8` resolves; both receipt files open and carry the `case`/`routes` structure \u00a74 quotes.",
+    "done_when": "pass \u2014 the changed control (\u00a74(3), `docs/plans/forward-solve-near-stored-states.html:108`) requires the base revision to raise the traced-array conversion on the same batched call and route, which can fail; that conversion is unconditional on the route (`nova/equilibrium/forward.py:1979` inside the newton_krylov ladder that `solve_batch` vmaps at :3246), so it fires for the ITER generating state even though the receipts recorded it on the MAST carrier, and the positive control is grounded in the cited record's own `SOLVED converged=True qualified=True residual=1.165769213453697e-15` (`docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:37-42`).",
+    "evidence_paths": "pass \u2014 the two refusal receipts are cited by absolute path and both exist (`/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/route-inventory-cpu.json`, `docs/plans/forward-solve-near-stored-states.html:108` and the `-titan.json` beside it); the section's own record is the repository fragment it cites.",
+    "naming": "pass \u2014 \u00a74 introduces no symbol, plan label or version tag; its vocabulary is quantities (batch width, residual, flux span, warm wall).",
+    "reasoning": "a finding \u2014 the opening sentence says \u00a74 reads the row-exchange section's \"case, record and solver route\", but that record names no forward solver route (its only \"route\" word is imas-efit's \"nine Picard iterations\" of the fit, `efit-on-nova-rows.html:48`), so one of the three things \u00a74 claims to read is not in the cited record.",
+    "single_goal": "pass \u2014 \u00a74 states one deliverable: one traced call returns the public solve's per-state receipt under a batch, with one contour panel as that state's evidence artefact.",
+    "wiring": "pass \u2014 \u00a74's declared wait on `inverse-equilibrium-baseline#s8` resolves to that plan's \"\u00a78 \u2014 imas-efit on rows written by nova\" (`docs/plans/inverse-equilibrium-baseline.html:188-189`, status `done`), and the reciprocal relationship is declared there (`s4` depends on `forward-solve-near-stored-states#s4`, :24, :75, :155), so \"the inverse baseline's cost section waits on it\" is wired from the consuming side."
+  },
+  "section_digests": {
+    "_document": "5eaec87b2f497b8b435123ea3e8e5b8d1c88bab5cda6853f1bb3ef3ea38b75de",
+    "s0": "c27d7fc92213572cc4b6dbeef33d26de213b835e03bd023faf0dd32aac6c4dab",
+    "s1": "4ede3937f9044bed180ea84429cd1a270d8adb5a56c41f6c9ad3b6588c575fd7",
+    "s2": "23d36c677399451b02820b5f23183136034878d95232b403afb78911f36d823a",
+    "s3": "c1164314d236e8fd566ce929a4f43e519d3b76ca3978d08d77b3c0ba13e6055c",
+    "s4": "9cba97846dfc813aba9484345caedda578d9504bdefc90706835ff0c26975615"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T12:23:04.950497+00:00",
+  "total": null
+}

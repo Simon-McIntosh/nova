@@ -33,7 +33,9 @@ TOLERANCE = 1e-8
 
 
 def relative(delta, scale):
-    return np.sqrt(np.sum(delta**2, axis=0) / np.sum(scale**2, axis=0))
+    """Report each column's relative norm, in double whatever the operands were."""
+    value = np.sqrt(np.sum(delta**2, axis=0) / np.sum(scale**2, axis=0))
+    return np.asarray(value, dtype=np.float64)
 
 
 def retained(root):

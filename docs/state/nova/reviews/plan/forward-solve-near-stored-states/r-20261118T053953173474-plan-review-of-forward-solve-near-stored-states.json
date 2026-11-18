@@ -51,9 +51,28 @@
       "note": "The batching section now declares its wait on the inverse baseline row-exchange section, whose case and record it reads, in the dependency list and in its prose.",
       "reason": "",
       "when": "2026-11-18T06:23:25.111095+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b83eca8359ac882f7d25044d116351f6581b2ee5",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The reach measurement now names its job: one batch job on the H200, falling back to titan, at the mesh and route the first section recorded, with the device stated in the record.",
+      "reason": "",
+      "when": "2026-11-18T06:23:57.194354+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b83eca8359ac882f7d25044d116351f6581b2ee5",
+      "commit_basis": "edit",
+      "note": "The reach measurement now names its job: one batch job on the H200, falling back to titan, at the mesh and route the first section recorded, with the device stated in the record.",
+      "reason": "",
+      "when": "2026-11-18T06:23:57.194354+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",

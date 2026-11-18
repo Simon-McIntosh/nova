@@ -51,6 +51,16 @@
       "note": "The first section record now also states the mesh and the solver route of every solve, so the reach measurement names a recorded mesh and route.",
       "reason": "",
       "when": "2026-11-18T06:56:33.982016+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "dee645a5d967f95841e61625fbd90c62e74ac9ba",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The batching section now names its route: the public solve default route, the one the inverse class calls and the receipts show refusing a batched call, with the record stating it.",
+      "reason": "",
+      "when": "2026-11-18T06:57:20.011177+00:00"
     }
   ],
   "responses": {
@@ -62,6 +72,15 @@
       "note": "The first section record now also states the mesh and the solver route of every solve, so the reach measurement names a recorded mesh and route.",
       "reason": "",
       "when": "2026-11-18T06:56:33.982016+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "dee645a5d967f95841e61625fbd90c62e74ac9ba",
+      "commit_basis": "edit",
+      "note": "The batching section now names its route: the public solve default route, the one the inverse class calls and the receipts show refusing a batched call, with the record stating it.",
+      "reason": "",
+      "when": "2026-11-18T06:57:20.011177+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261118T063658835939-plan-review-of-forward-solve-near-stored-states.json",

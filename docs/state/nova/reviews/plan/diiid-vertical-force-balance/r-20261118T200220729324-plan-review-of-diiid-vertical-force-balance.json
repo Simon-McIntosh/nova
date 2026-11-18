@@ -63,6 +63,13 @@
       "finding": "done_when-1",
       "reason": "Lead decision: \u00a77's 137D clause is restated against \u00a712's measured mechanism before \u00a77 runs, and \u00a77 cannot start until \u00a712 lands",
       "when": "2026-11-18T20:32:49.931502+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "The independent measure is clause (1): a flux function built with a finite edge must return it at psi_N=1, and restoring the zero cap reddens it; clause (2) checks the builder's plumbing against its committed extraction, and the brief sets the cross-check against the review reading at 1e-6 relative",
+      "when": "2026-11-18T20:32:57.256448+00:00"
     }
   ],
   "responses": {
@@ -71,6 +78,12 @@
       "by": "",
       "reason": "Lead decision: \u00a77's 137D clause is restated against \u00a712's measured mechanism before \u00a77 runs, and \u00a77 cannot start until \u00a712 lands",
       "when": "2026-11-18T20:32:49.931502+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The independent measure is clause (1): a flux function built with a finite edge must return it at psi_N=1, and restoring the zero cap reddens it; clause (2) checks the builder's plumbing against its committed extraction, and the brief sets the cross-check against the review reading at 1e-6 relative",
+      "when": "2026-11-18T20:32:57.256448+00:00"
     },
     "wiring-1": {
       "action": "declined",

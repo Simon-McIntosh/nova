@@ -1,0 +1,45 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T11:58:45.202Z",
+  "dispatched_at": "2026-11-18T11:58:35Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/forward-solve-near-stored-states/r-20261118T114904777082-plan-review-of-forward-solve-near-stored-states/plan.html:108",
+      "id": "reasoning-1",
+      "reason": "deleting the mechanism sentence and leaving the endpoint (a batched call that returns the unbatched receipt's fields per state, every copy below 1e-10) would remove a guessed interface from the plan and move it where it belongs.",
+      "text": "the paragraph \"adds no second batched surface and no new public entry point: it repairs that route under the existing batched entry, and widens that entry to take the request and return, per state, the receipt fields of the unbatched public solve\" prescribes the implementation \u2014 which surface is widened, what it must accept, and what it must return \u2014 and \u00a74(1) then repeats the prescription as the measure (\"takes the unbatched solve's request\"); the reuse map is the node brief's, and a wrong guess here (the code already has `solve` taking a request and `solve_batch` taking keyword arguments, so \"widen that entry to take the request\" is a claim a reviewer must test against `nova/equilibrium/forward.py`) costs a review round before any solve runs",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "a148a0a9d176713a90cd24ffa7de2966b0c55654",
+  "plan_fingerprint": "b78f57166606cb9dd5fd027b171dcaf2853536ccaa7032bd76ed3e542d4566fb",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 12,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261118T114904777082-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "ae120d29540f26f10093cc8cf795a203380754e2",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `route-inventory-cpu.json`, `route-inventory-titan.json` and `docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html` all open, and the dependency target resolves.",
+    "done_when": "pass \u2014 \u00a74(1) gates a positive control, the batch qualification and the per-state conjunction, and \u00a74(3) is a negative control that can fail (the base revision's traced call refuses), so the measure is falsifiable.",
+    "evidence_paths": "pass \u2014 both route-inventory receipts resolve at their absolute paths under `/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/` and the case record resolves in the repository.",
+    "naming": "pass \u2014 the added text carries no plan label, ticket number or version tag into a symbol.",
+    "reasoning": "a finding \u2014 the added paragraph at plan.html:108 turns the section from an endpoint into a reuse map, naming the entry to extend and the interface to widen.",
+    "single_goal": "pass \u2014 the section carries one deliverable: the public solve runs a solve request under a leading batch axis and returns per-state results.",
+    "wiring": "pass \u2014 the snapshot declares `s4` depends on `inverse-equilibrium-baseline#s8` (plan.html:24), that section exists at docs/plans/inverse-equilibrium-baseline.html:188, and the inverse plan's cost section (`\u00a74 \u2014 Cost on the H200`) declares its wait on `forward-solve-near-stored-states#s4`, matching this section's prose."
+  },
+  "section_digests": {
+    "_document": "5eaec87b2f497b8b435123ea3e8e5b8d1c88bab5cda6853f1bb3ef3ea38b75de",
+    "s0": "c27d7fc92213572cc4b6dbeef33d26de213b835e03bd023faf0dd32aac6c4dab",
+    "s1": "4ede3937f9044bed180ea84429cd1a270d8adb5a56c41f6c9ad3b6588c575fd7",
+    "s2": "23d36c677399451b02820b5f23183136034878d95232b403afb78911f36d823a",
+    "s3": "c1164314d236e8fd566ce929a4f43e519d3b76ca3978d08d77b3c0ba13e6055c",
+    "s4": "c2ac5d5f42ba10a51f2be1c24efe77b309d497edb7f1edc4c3c2dd8ecc6c1875"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T12:05:40.710120+00:00",
+  "total": null
+}

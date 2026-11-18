@@ -1,0 +1,73 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T06:42:27.763Z",
+  "dispatched_at": "2026-11-18T06:41:58Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/forward-solve-near-stored-states/r-20261118T063658835939-plan-review-of-forward-solve-near-stored-states/plan.html:89",
+      "id": "done_when-1",
+      "reason": "without a recorded mesh and route the verdict \u00a73 depends on is not reproducible, so \u00a71's record list must carry the mesh and route (or \u00a72 must name them) before the search runs.",
+      "text": "\u00a72(1) places its chained MAST-U sequence \"at the mesh and solver route \u00a71 recorded\", but \u00a71's done-when (plan.html:73) asks its record to state only the coefficient vector, the displaced coordinate/size/sign, the terminal reason and residual and the contour panel, and \u00a71(1) fixes only \"the solver's default policy\"; no mesh and no solver route is required of the record, so the mesh at which the Reached/Not-reached verdict is taken \u2014 the verdict that sets \u00a73's whole scope \u2014 is unstated and a worker must guess it or measure at one the plan does not name",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/forward-solve-near-stored-states/r-20261118T063658835939-plan-review-of-forward-solve-near-stored-states/plan.html:108",
+      "id": "done_when-2",
+      "reason": "the negative control fires only on the refusing route, so the section must name which route the head arm runs on or the control and the head measurement can be of different solves.",
+      "text": "\u00a74(1) and \u00a74(2) both key on \"the route the row-exchange section used\", but the record \u00a74 cites for that section (`docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html`) names the profile-basis route it took and no solver route (`newton_krylov`, `picard`, `anderson`, `reduced_newton`); the receipts \u00a74 cites for the refusal show the batch outcome is route-specific \u2014 `picard` and `anderson` run batched (residual 0.03218) and only `newton_krylov`/`reduced_newton` refuse (`TracerArrayConversionError` at `ForwardProfile._solve_accelerated`) \u2014 so \"that route\" is not identifiable and a worker may measure the gated batch on a route the base-revision control cannot falsify",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/forward-solve-near-stored-states/r-20261118T063658835939-plan-review-of-forward-solve-near-stored-states/plan.html:97",
+      "id": "reasoning-1",
+      "reason": "\u00a73's obligation is selected by \u00a72's verdict but names a solve \u00a72 never measures, so the plan must either state that the stored-coefficients default-policy solve is out of \u00a73's arm set or add it to \u00a72's measured set.",
+      "text": "\u00a73(1) obliges the repair to cover \"each solve \u00a71 showed refusing at the base revision \u2026 at its recorded coefficients and started from the stored flux map under the default policy\", which includes \u00a71(1)'s MAST-U stored-coefficients arm (unqualified at 4.864e-10 against 1e-10, `efit-comparison.html:1593`) as well as the displaced arm; \u00a72 renders a verdict only on the displaced state along the recorded coordinate by a chained sequence under \u00a71(2)'s tightened policy, so no \u00a72 verdict exists for the stored-coefficients default-policy arm \u2014 \u00a73 may park it with a Not-reached displaced verdict, or be obliged to repair it on a Reached verdict that measured only the displaced state's reach",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/forward-solve-near-stored-states/r-20261118T063658835939-plan-review-of-forward-solve-near-stored-states/plan.html:50",
+      "id": "reasoning-2",
+      "reason": "a worker composing \u00a74's brief reads a boundary that refuses the very case the section names, so \u00a70 must exempt the batching section (or state its case as beside imas-efit's configuration) before \u00a74 is dispatched.",
+      "text": "\u00a70's boundary sentence says the plan \"takes only the cases that arise beside a stored imas-efit state\", while \u00a74 measures the generating state of the nova-written ITER rows (plan.html:108), a case built from nova's own forward solve on the inverse baseline's ITER machine with no stored imas-efit state beside it, so the plan's declared scope excludes its own fourth section's case",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "dee645a5d967f95841e61625fbd90c62e74ac9ba",
+  "plan_fingerprint": "0bfa4a21a51ae1191b0d9b9ade6eefb9cd48a6a7854674be042acc4227f3cd53",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 9,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261118T063658835939-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "71fcb7dfc46092fbd5423417d747cb978bbdd878",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html` (280 KB), `.../efit-on-nova-rows.html` (34 KB) and `docs/plans/inverse-equilibrium-baseline.html#s8` (status done) all resolve, and the section no longer cites the unlanded `reconstruction-cost.html`; `docs/evidence/archive/forward-solve-near-stored-states-landed.html` is the plan's own future landing record, not a citation.",
+    "done_when": "a finding \u2014 \u00a72(1) takes its mesh and solver route from \"at the mesh and solver route \u00a71 recorded\", and \u00a71(3)'s record list requires neither, so \u00a72's measure cites a record field the plan never asks for.",
+    "evidence_paths": "pass \u2014 \u00a74's two route-inventory receipts exist at the absolute paths the section gives (`/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/route-inventory-cpu.json`, 3.2K, and `-titan.json`, 3.2K), and \u00a71/\u00a72/\u00a73 route their gates through named H200 batch jobs rather than node-local scratch.",
+    "naming": "pass \u2014 no plan label, section number or ticket identifier reaches a symbol, file or comment; \u00a71\u2013\u00a74 name records and quantities only.",
+    "reasoning": "findings \u2014 \u00a73's arm set (\"each solve \u00a71 showed refusing\") is wider than the case set \u00a72 renders a verdict on, and \u00a70's boundary sentence (\"takes only the cases that arise beside a stored imas-efit state\") excludes \u00a74's own case.",
+    "single_goal": "pass \u2014 \u00a72 delivers one verdict set (reach distance and Reached/Not reached per case) and \u00a74 one deliverable (the public solve runs under a batch, with the warm-wall clause as that deliverable's cost half).",
+    "wiring": "pass \u2014 s4's declared dependency on `inverse-equilibrium-baseline#s8` resolves to that plan's `id=\"s8\"` (\"imas-efit on rows written by nova\", status done), s1 \u2192 `inverse-equilibrium-baseline#s2` resolves, and s2 \u2192 s1 and s3 \u2192 s2 follow the section order the contract table states."
+  },
+  "section_digests": {
+    "_document": "5eaec87b2f497b8b435123ea3e8e5b8d1c88bab5cda6853f1bb3ef3ea38b75de",
+    "s0": "fb30c82a2f17993813b5367dd7b91585331dd929eb1e39ac17e73f2a3d49a666",
+    "s1": "ad38a639ccff273d1e55e7b6f13b0c54dbeab542646bea92d52811c964773a64",
+    "s2": "4a403d109340f775f871f679fa9f842bd8754b55bee3467f7b7158a6a4a8c731",
+    "s3": "c1164314d236e8fd566ce929a4f43e519d3b76ca3978d08d77b3c0ba13e6055c",
+    "s4": "c2f6aed712eab2b815b6e9c85a898bdb50556c943b88262166035d9b9ee758f5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T06:51:41.655335+00:00",
+  "total": null,
+  "traced_units": [
+    "s2",
+    "s4"
+  ]
+}

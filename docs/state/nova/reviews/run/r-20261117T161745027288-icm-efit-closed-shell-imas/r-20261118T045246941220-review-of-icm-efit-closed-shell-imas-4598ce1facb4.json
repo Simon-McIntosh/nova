@@ -28,6 +28,11 @@
       "kind": "exempted",
       "reason": "the baseline arm's single failure is a git-context harness failure in an exported tree and is absent from the head arm; its mislabelled id does not change the zero added-failure result",
       "recorded_at": "2026-11-18T17:00:53.412382+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the overclaim covers other scripts' copies of the closed-shell formula, outside this node's scope; this node removed its own duplicate",
+      "recorded_at": "2026-11-18T17:00:59.951495+00:00"
     }
   },
   "findings": [

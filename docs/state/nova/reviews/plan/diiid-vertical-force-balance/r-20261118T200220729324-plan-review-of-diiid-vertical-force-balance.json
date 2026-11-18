@@ -56,9 +56,22 @@
       "finding": "wiring-1",
       "reason": "The queue orders sections by plan-section-depends-on, which is correct (s7 waits on s6, s10 and s12; s11 on s8; s12 on s10 and s13); the per-section data-links are descriptive, and the queued \u00a77 and \u00a712 requests already hold awaiting those waits",
       "when": "2026-11-18T20:32:41.183096+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "Lead decision: \u00a77's 137D clause is restated against \u00a712's measured mechanism before \u00a77 runs, and \u00a77 cannot start until \u00a712 lands",
+      "when": "2026-11-18T20:32:49.931502+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Lead decision: \u00a77's 137D clause is restated against \u00a712's measured mechanism before \u00a77 runs, and \u00a77 cannot start until \u00a712 lands",
+      "when": "2026-11-18T20:32:49.931502+00:00"
+    },
     "wiring-1": {
       "action": "declined",
       "by": "",

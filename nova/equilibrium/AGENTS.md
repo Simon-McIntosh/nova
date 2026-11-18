@@ -39,31 +39,33 @@ not comparable with any production receipt.
   kernel) and `tests/test_default_wiring.py` (every production entry point
   resolves the defaults on and its launcher leaves them to the public seam).
 
-## Fit coefficients inside the iteration, and give the map the fitted conductors
+## Fit coefficients inside the iteration
 
 `FluxIterationFit` in `flux_iteration.py` solves the least-squares fit on every
-pass of the map iteration: each pass steps one profile coefficient at a time at
-the coefficient measurements the map's own solve reaches for the corrected
-coefficients. Two properties are load-bearing.
+pass of the map iteration: each pass steps one coefficient at a time at the
+held map, solves the whitened system, and applies one Grad-Shafranov
+read-write cycle at the coefficients and fitted currents that solve just chose.
+No forward solve is converged for a proposal the data did not choose, which is
+the cheaper form beside the nested class. Three properties are load-bearing.
 
-- **The fit and the map must be the same object.** A pass solves for the
-  coefficients at the held map and then asks the profile's solve for the map
-  those coefficients imply. The response columns are built at the held map, so
-  the map's dependence on the coefficients must come back through the solve; if
-  a case's operator reads its conductor currents from a stored vector rather
-  than from the vector the fit solved for, the fit is measured against one map
-  and reported against another, and the least squares absorbs the conductor
-  field into the profile basis at the wrong sign. `flux_solver` therefore has to
-  receive the pass's fitted conductor vector along with the profile source. A
-  fixture that supplies its prescribed field from a request must pass the
-  request's own `current=`, not a lookup of a key the fixture does not set.
-- **A solve that leaves the branch ends the iteration, not the state.** When a
-  pass's solve moves the map by more than `max_update` spans, the previous map
-  stays and the receipt records `rejected_pass` and `rejected_message`. A row
-  whose terminal flux error and residual are inside the recovery bands while
-  `converged` is false is a rejected final solve after a correct state landed,
-  not a failed fit: read `flux_map_error_over_span` and
-  `whitened_residual_sup` beside the flag.
+- **The map belongs to the coefficients that pass just fitted.** The operator
+  applying the update is rebuilt from the corrected coefficient vector; reusing
+  the loop head's operator lays down the pre-fit map, and the pass then reports
+  an update of 2e-16 where the map sits 5e-3 of the fix's own map away.
+  `tests/test_flux_iteration.py` builds the expected map independently and
+  asserts the reviewer's probe, [1.0, -0.4] from [1.05, -0.42].
+- **The fitted conductor currents reach the map as the operator's `current`.**
+  The response columns use `conductor_response`; the update passes the solved
+  fitted currents as `current`, so the rows and the laid-down map carry one
+  conductor state. An operator left to its stored `current` measures one state
+  and lays down another.
+- **A pass can be refused, and the receipt says so.** An update beyond
+  `max_update` spans after the first pass keeps the previous map and records
+  `rejected_pass` with its message. Read `flux_map_error_over_span` and
+  `whitened_residual_sup` beside `converged`: the flag means the update reached
+  `flux_tolerance` of the axis-to-boundary span, so a state inside a band
+  while the flag reads false is a correct state whose final update was refused,
+  not a recovered one. A case that misses its band is reported as failing.
 
 ## Keep the two reference lanes separate
 

@@ -5,10 +5,11 @@ every coefficient proposal it compares, so a proposal the data did not choose
 still has to find its own axis and boundary before a row is compared. The class
 here holds the flux map within a pass: it evaluates the measured rows that map
 drives, solves one weighted least-squares problem for the profile coefficients
-and the fitted conductor currents, lays down the plasma current that fit
-implies, and applies one Grad-Shafranov read-write cycle to update the flux map
-from it. A wrong proposal is corrected by the next fit instead of being solved
-to the end, and passes repeat until the flux map stops changing.
+and the fitted conductor currents, and applies one Grad-Shafranov read-write
+cycle at those coefficients and currents to update the flux map. A forward
+solve is never converged for a proposal the data did not choose; a wrong
+proposal is corrected by the next fit instead, and passes repeat until the flux
+map stops changing.
 
 The current distribution within a pass is the one the held flux map books, so
 the measured rows are linear in the fitted coefficients and their response
@@ -20,7 +21,7 @@ that reader two coefficient vectors apart at the same held map.
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from time import perf_counter
 from typing import TYPE_CHECKING, NamedTuple
 
@@ -28,7 +29,12 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.equilibrium.measurement import Magnetics, SliceMeasurement, whitened_solve
+from nova.equilibrium.magnetics_fit import CoefficientBasis
+from nova.equilibrium.measurement import (
+    Magnetics,
+    SliceMeasurement,
+    whitened_solve,
+)
 from nova.equilibrium.source import ForwardSource, PolynomialFluxFunction
 from nova.jax.config import configure_dtypes
 
@@ -116,9 +122,9 @@ class FluxIterationFit:
     [Wb or T], with no conductor contribution, so the same reader supplies both
     a pass's residual and its response columns. Fitted conductor currents enter
     through ``conductor_response`` [Wb/A or T/A], whose columns match the
-    request field named by ``conductor_current_field``; the measurement's
-    ``vacuum`` then carries only fixed exterior contributions and the fitted
-    currents are laid down through the same field on the flux update.
+    measurement's ``conductor_current`` vector; the measurement's ``vacuum``
+    then carries only fixed exterior contributions and the fitted currents are
+    laid down as the operator's ``current`` on the flux update.
 
     ``coefficient_basis`` optionally maps the fitted amplitudes onto the raw
     polynomial coefficient vector, exactly as :class:`MagneticsFit` does.
@@ -133,11 +139,8 @@ class FluxIterationFit:
         *,
         coefficient_basis: np.ndarray | None = None,
         conductor_response: np.ndarray | None = None,
-        conductor_current_field: str = "current",
         conductor_names: tuple[str, ...] | None = None,
         prescribed_current: np.ndarray | None = None,
-        flux_solver: Callable[[object, np.ndarray, np.ndarray | None], np.ndarray]
-        | None = None,
     ) -> None:
         configure_dtypes()
         assert jax.config.jax_enable_x64 is True
@@ -152,43 +155,13 @@ class FluxIterationFit:
         self.profile = profile
         self.magnetics = magnetics
         self.sensor_rows = sensor_rows
-        self._pressure_count = core.p_prime.coefficients.size
-        self._names = tuple(
-            f"{family}_{order}"
-            for family, function in (
-                ("pressure", core.p_prime),
-                ("diamagnetic", core.ff_prime),
-            )
-            for order in range(function.coefficients.size)
-        )
-        raw = np.r_[core.p_prime.coefficients, core.ff_prime.coefficients]
-        basis = (
-            np.eye(raw.size)
-            if coefficient_basis is None
-            else np.asarray(coefficient_basis, dtype=np.float64).copy()
-        )
-        if (
-            basis.ndim != 2
-            or basis.shape[0] != raw.size
-            or basis.shape[1] < 1
-            or not np.all(np.isfinite(basis))
-            or np.linalg.matrix_rank(basis) != basis.shape[1]
-        ):
-            raise ValueError("coefficient basis must have finite independent columns")
-        initial = np.linalg.lstsq(basis, raw, rcond=None)[0]
-        if not np.allclose(basis @ initial, raw, rtol=1e-12, atol=1e-12):
-            raise ValueError("the initial source must belong to the coefficient basis")
-        basis.setflags(write=False)
-        self._basis = basis
-        self._initial = initial
-        if coefficient_basis is not None:
-            self._names = tuple(f"basis_{index}" for index in range(basis.shape[1]))
-        self._profile_count = initial.size
-        self._conductor_field = conductor_current_field
+        space = CoefficientBasis.of(core, coefficient_basis)
+        self._space = space
+        self._names = space.names
+        self._profile_count = space.initial.size
+        self._initial = space.initial
         self._conductor_response = np.empty((magnetics.number, 0))
         if conductor_response is not None:
-            if conductor_current_field not in {"current", "prescribed_current"}:
-                raise ValueError("fitted currents require a conductor request field")
             response = np.asarray(conductor_response, dtype=np.float64).copy()
             if (
                 response.ndim != 2
@@ -206,7 +179,7 @@ class FluxIterationFit:
                 raise ValueError("conductor names must be unique and column-aligned")
             response.setflags(write=False)
             self._conductor_response = response
-            self._initial = np.r_[initial, np.zeros(response.shape[1])]
+            self._initial = np.r_[space.initial, np.zeros(response.shape[1])]
             self._names += names
         self._conductor_count = self._conductor_response.shape[1]
         prescribed = (
@@ -217,25 +190,10 @@ class FluxIterationFit:
         if prescribed is not None:
             prescribed.setflags(write=False)
         self._prescribed_current = prescribed
-        self._flux_solver = flux_solver
 
-    def _source(self, coefficients) -> ForwardSource:
-        coefficients = self._basis @ np.asarray(coefficients)[: self._profile_count]
-        source = self.profile.source
-        core = source.core
-        split = self._pressure_count
-        return replace(
-            source,
-            core=replace(
-                core,
-                p_prime=replace(
-                    core.p_prime, coefficients=jnp.asarray(coefficients[:split])
-                ),
-                ff_prime=replace(
-                    core.ff_prime, coefficients=jnp.asarray(coefficients[split:])
-                ),
-            ),
-        )
+    def _source(self, coefficients: np.ndarray) -> ForwardSource:
+        """Return the source these amplitudes name, on the fit's own geometry."""
+        return self._space.source(self.profile.source, coefficients)
 
     def _profile(self, coefficients) -> ForwardProfile:
         return self.profile._with_source(self._source(coefficients))
@@ -417,6 +375,9 @@ class FluxIterationFit:
                 rcond=rcond,
             )
             coefficients = coefficients + correction
+            # the map this pass lays down belongs to the coefficients just
+            # fitted, so the operator is rebuilt from them
+            updated_profile = self._profile(coefficients)
             try:
                 # no conductor columns means the operator keeps its own
                 # external current; an empty vector is not the same request
@@ -425,22 +386,15 @@ class FluxIterationFit:
                     if self._conductor_count
                     else None
                 )
-                arguments = (conductor, None, None)
-                if self._flux_solver is None:
-                    if self._prescribed_current is None:
-                        updated = operator(jnp.asarray(flux), *arguments)
-                    else:
-                        updated = operator(
-                            jnp.asarray(flux),
-                            *arguments,
-                            jnp.asarray(self._prescribed_current),
-                        )
+                if self._prescribed_current is None:
+                    updated = updated_profile.operator(jnp.asarray(flux), conductor)
                 else:
-                    # a solved map for these coefficients, not one linear step;
-                    # the solver takes the fitted conductors so the map it
-                    # returns is the map these coefficients ask for
-                    updated = self._flux_solver(
-                        active.source, np.array(flux), conductor
+                    updated = updated_profile.operator(
+                        jnp.asarray(flux),
+                        conductor,
+                        None,
+                        None,
+                        jnp.asarray(self._prescribed_current),
                     )
                 updated = np.asarray(updated, dtype=np.float64)
                 flux_evaluations += 1

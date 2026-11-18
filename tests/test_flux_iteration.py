@@ -63,6 +63,8 @@ class _Instrument:
         self.currents = np.zeros(2)
         self.map_current = object()
         self.flux_weight = flux_weight
+        self.map_calls = 0
+        self.map_displacements = {}
 
     def cell_current(self, source, psi):
         if self.cells_remaining is not None:
@@ -106,6 +108,11 @@ class _Operator:
         target_current=None,
         prescribed_current=None,
     ):
+        call = self.instrument.map_calls
+        self.instrument.map_calls += 1
+        displaced = self.instrument.map_displacements.get(call)
+        if displaced is not None:
+            return jnp.asarray(np.asarray(psi, dtype=np.float64) + displaced)
         self.instrument.map_current = current
         if current is not None:
             self.instrument.currents = np.asarray(current, dtype=np.float64)
@@ -265,38 +272,53 @@ def test_the_fitted_conductor_currents_take_their_measured_rows():
     assert np.allclose(fitter.profile.instrument.currents, TRUTH_CURRENTS, atol=1e-8)
 
 
-def test_the_solver_receives_the_fitted_conductor_currents():
-    fitter, measurement, _, _ = _instrument(
-        initial=TRUTH * 1.05, conductor=True, flux_weight=0.0
-    )
-    profile = fitter.profile
-    seen = []
+def test_one_pass_lays_down_the_map_its_own_coefficients_ask_for():
+    """The map a pass lays down belongs to the coefficients that pass fitted.
 
-    def solve(source, psi, conductor=None):
-        seen.append(None if conductor is None else np.array(conductor))
-        return EXTERNAL + COUPLING @ profile.instrument.cell_current(source, psi)
-
-    solved = FluxIterationFit(
-        profile,
-        fitter.magnetics,
-        lambda currents: SENSOR @ np.asarray(currents),
-        conductor_response=CONDUCTOR_RESPONSE,
-        conductor_names=CONDUCTOR_NAMES,
-        flux_solver=solve,
-    )
-    receipt = solved.fit(
+    The rows are exactly linear in the amplitudes, so one pass recovers
+    [1.0, -0.4] from [1.05, -0.42]. The expected map is built here from the
+    recovered amplitudes through the same coupling, so a map laid down from the
+    pre-fit amplitudes fails this assertion rather than passing as a small
+    update.
+    """
+    fitter, measurement, _, _ = _instrument(initial=TRUTH * 1.05, flux_weight=0.0)
+    receipt = fitter.fit(
         measurement,
         np.zeros(CELLS),
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
-        max_passes=3,
+        max_passes=1,
     )
-    assert seen
-    assert all(conductor is not None for conductor in seen)
+    assert len(receipt.passes) == 1
+    assert not receipt.converged
+    np.testing.assert_allclose(receipt.coefficients, TRUTH, atol=1.0e-9)
+    held = np.zeros(CELLS)
+    expected = EXTERNAL + COUPLING @ (_profile_weight(held) @ TRUTH)
+    np.testing.assert_allclose(receipt.terminal_state.flux, expected, atol=1.0e-12)
+    stale = EXTERNAL + COUPLING @ (_profile_weight(held) @ (TRUTH * 1.05))
+    assert not np.allclose(receipt.terminal_state.flux, stale, atol=1.0e-6)
+
+
+def test_the_fitted_conductor_currents_reach_the_laid_down_map():
+    # A map that does not read the flux it is handed leaves the held rows one
+    # exact linear system in the coefficients and the fitted currents, so one
+    # pass recovers both, and the map that pass lays down carries them.
+    fitter, measurement, _, _ = _instrument(
+        initial=TRUTH * 1.05, conductor=True, flux_weight=0.0
+    )
+    receipt = fitter.fit(
+        measurement,
+        np.zeros(CELLS),
+        plasma_current_scale=1.0,
+        flux_tolerance=1.0e-12,
+        max_passes=1,
+    )
+    np.testing.assert_allclose(receipt.coefficients[: TRUTH.size], TRUTH, atol=1e-9)
+    np.testing.assert_allclose(receipt.conductor_currents, TRUTH_CURRENTS, atol=1e-9)
     np.testing.assert_allclose(
-        np.asarray(seen[-1])[-TRUTH_CURRENTS.size :], TRUTH_CURRENTS, atol=1e-6
+        fitter.profile.instrument.currents, TRUTH_CURRENTS, atol=1e-9
     )
-    assert receipt.conductor_currents.shape == TRUTH_CURRENTS.shape
+    assert receipt.flux_evaluations == 1
 
 
 def test_a_flux_map_that_loses_its_axis_is_recorded_at_that_pass():
@@ -316,50 +338,11 @@ def test_a_flux_map_that_loses_its_axis_is_recorded_at_that_pass():
     assert len(receipt.passes) == 2
 
 
-def test_a_flux_solver_supplies_the_next_map():
-    fitter, measurement, _, _ = _instrument(initial=TRUTH * 1.05)
-    profile = fitter.profile
-    calls = []
-
-    def solve(source, psi, conductor=None):
-        calls.append(np.asarray(psi).copy())
-        return EXTERNAL + COUPLING @ profile.instrument.cell_current(source, psi)
-
-    solved = FluxIterationFit(
-        profile,
-        fitter.magnetics,
-        lambda currents: SENSOR @ np.asarray(currents),
-        flux_solver=solve,
-    )
-    receipt = solved.fit(
-        measurement,
-        np.zeros(CELLS),
-        plasma_current_scale=1.0,
-        flux_tolerance=1.0e-12,
-    )
-    assert receipt.converged
-    assert len(calls) == len(receipt.passes) == receipt.flux_evaluations
-    np.testing.assert_allclose(receipt.coefficients, TRUTH, atol=1.0e-9)
-
-
 def test_a_map_update_beyond_the_span_is_rejected():
     fitter, measurement, _, _ = _instrument(initial=TRUTH * 1.05)
-    profile = fitter.profile
-    calls = []
-
-    def solve(source, psi, conductor=None):
-        calls.append(1)
-        if len(calls) == 2:  # the second solve leaves the branch entirely
-            return np.asarray(psi) + 10.0
-        return EXTERNAL + COUPLING @ profile.instrument.cell_current(source, psi)
-
-    solved = FluxIterationFit(
-        profile,
-        fitter.magnetics,
-        lambda currents: SENSOR @ np.asarray(currents),
-        flux_solver=solve,
-    )
-    receipt = solved.fit(
+    # the second map the fit asks for leaves the branch entirely
+    fitter.profile.instrument.map_displacements[1] = 10.0
+    receipt = fitter.fit(
         measurement,
         np.zeros(CELLS),
         plasma_current_scale=1.0,
@@ -370,6 +353,13 @@ def test_a_map_update_beyond_the_span_is_rejected():
     assert receipt.rejected_message is not None
     assert len(receipt.passes) == 1
     assert receipt.last_flux_update == receipt.passes[0].flux_update
+    # the previous map stays, which is the map the first pass laid down
+    first = receipt.passes[0].coefficients
+    np.testing.assert_allclose(
+        receipt.terminal_state.flux,
+        EXTERNAL + COUPLING @ (_profile_weight(np.zeros(CELLS)) @ first),
+        atol=1.0e-12,
+    )
 
 
 def test_a_scaled_input_leaves_the_plasma_current_band():
@@ -393,6 +383,13 @@ def test_a_scaled_input_leaves_the_plasma_current_band():
 
 
 def test_an_operator_with_a_prescribed_field_takes_its_current_vector():
+    """A supplied vector replaces the field's stored one, on the map it lays down.
+
+    The instrument's prescribed field gives ``flux(current) = current[0]`` over
+    every cell, so the map a pass lays down carries that value added to the
+    exterior and the plasma coupling. The supplied vector is 2.0 where the field
+    holds 0.5, so a fit that silently kept the stored vector lands 1.5 low.
+    """
     flux = _fixed_point(TRUTH)
     cells = _profile_weight(flux) @ TRUTH
     geometry = Magnetics(
@@ -402,41 +399,43 @@ def test_an_operator_with_a_prescribed_field_takes_its_current_vector():
         flux_loop=LOOPS,
     )
     source = _source(TRUTH)
+    measurement = SliceMeasurement(
+        measured=SENSOR @ cells,
+        vacuum=np.zeros(SENSORS),
+        mask=np.ones(SENSORS, dtype=bool),
+        scale=SCALE,
+        plasma_current=float(np.sum(cells)),
+    )
     stored = FluxIterationFit(_Profile(source, prescribed=True), geometry, _sensor_rows)
     stored_receipt = stored.fit(
-        SliceMeasurement(
-            measured=SENSOR @ cells,
-            vacuum=np.zeros(SENSORS),
-            mask=np.ones(SENSORS, dtype=bool),
-            plasma_current=float(np.sum(cells)),
-            scale=SCALE,
-        ),
+        measurement,
         np.zeros(CELLS),
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
     )
     assert stored_receipt.axis_loss_message is None
-    assert stored_receipt.flux_evaluations >= 1
     fitter = FluxIterationFit(
         _Profile(source, prescribed=True),
         geometry,
         _sensor_rows,
-        prescribed_current=np.array([0.5]),
+        prescribed_current=np.array([2.0]),
     )
     receipt = fitter.fit(
-        SliceMeasurement(
-            measured=SENSOR @ cells,
-            vacuum=np.zeros(SENSORS),
-            mask=np.ones(SENSORS, dtype=bool),
-            scale=SCALE,
-            plasma_current=float(np.sum(cells)),
-        ),
+        measurement,
         np.zeros(CELLS),
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
+        max_passes=1,
     )
-    assert receipt.flux_evaluations >= 1
-    assert receipt.axis_lost_pass is None
+    assert len(receipt.passes) == 1
+    held = np.zeros(CELLS)
+    plasma = COUPLING @ (_profile_weight(held) @ receipt.coefficients[: TRUTH.size])
+    np.testing.assert_allclose(
+        receipt.terminal_state.flux - EXTERNAL - plasma, 2.0, atol=1.0e-12
+    )
+    assert not np.allclose(
+        receipt.terminal_state.flux - EXTERNAL - plasma, 0.5, atol=1.0e-3
+    )
 
 
 def _sensor_rows(currents):

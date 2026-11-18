@@ -135,6 +135,7 @@ def _stored_case(name):
         conductor_names=data["conductor_names"],
         prescribed_current=getattr(data.get("request"), "prescribed_current", None),
         plasma_current=abs(float(data["case"].plasma_current)),
+        reference_plasma_current=float(data["case"].plasma_current),
         data=data,
     )
 
@@ -147,25 +148,6 @@ def _model_rows(case, fitted):
         ).tolist()
     except ValueError as refusal:  # a terminal state without cells still has a row
         return f"{type(refusal).__name__}: {refusal}"
-
-
-def _flux_solver(profile, request):
-    """Return the map the profile's own solve reaches for given coefficients."""
-    from nova.equilibrium.solve_request import ExplicitSolveSeed
-
-    def solve(source, flux, conductor=None):
-        # the fitted conductors travel through the request's current= channel,
-        # which is the vector the operator's map is built from
-        kwargs = dict(
-            source_profile=source,
-            seed_policy=ExplicitSolveSeed(np.asarray(flux, dtype=np.float64)),
-        )
-        if conductor is not None:
-            kwargs["current"] = np.asarray(conductor, dtype=np.float64)
-        receipt = profile.solve(replace(request, **kwargs))
-        return np.asarray(receipt.terminal_state.flux, dtype=np.float64)
-
-    return solve
 
 
 def _progress(name):
@@ -191,7 +173,6 @@ def _run_known(case, args):
         case["rows"],
         coefficient_basis=case["basis"],
         prescribed_current=case["prescribed_current"],
-        flux_solver=_flux_solver(case["figure"]["profile"], case["figure"]["request"]),
     )
     fitted = fitter.fit(
         case["measurement"],
@@ -302,7 +283,6 @@ def _run_stored(case, args):
         conductor_response=case["conductor_response"],
         conductor_names=case["conductor_names"],
         prescribed_current=case["prescribed_current"],
-        flux_solver=_flux_solver(case["data"]["profile"], case["data"]["request"]),
     )
     try:
         fitted = fitter.fit(
@@ -392,7 +372,7 @@ def _run_stored(case, args):
         reconstructed_plasma_current_a=float(
             np.sum(fitted.terminal_state.cell_current)
         ),
-        stored_plasma_current_a=float(case["plasma_current"]),
+        stored_plasma_current_a=float(case["reference_plasma_current"]),
         scaled_control_relative_error=control,
         scaled_control_band=0.015,
         scaled_control_fired=bool(control is not None and control > 0.015),
@@ -479,6 +459,15 @@ def main(argv=None):
             )
             status = 1
         row["case_wall_seconds"] = perf_counter() - started
+        if name in KNOWN:
+            row["bands_met"] = bool(
+                row.get("flux_map_error_over_span", np.inf)
+                <= row.get("flux_map_band", 0.0)
+                and row.get("whitened_residual_sup", np.inf)
+                <= row.get("whitened_residual_band", 0.0)
+            )
+            if not row["bands_met"]:
+                status = 1
         rows.append(row)
         _write(output / f"{name}-result.json", row)
         print("CASE_RESULT " + json.dumps(row), flush=True)
@@ -486,6 +475,7 @@ def main(argv=None):
         device=str(jax.devices()[0]),
         cases=rows,
         converged=[row["case"] for row in rows if row.get("converged")],
+        bands_met=[row["case"] for row in rows if row.get("bands_met")],
         failed=[row["case"] for row in rows if row.get("construction") == "failed"],
         control_fired=[row["case"] for row in rows if row.get("scaled_control_fired")],
         control_unfired=[

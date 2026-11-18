@@ -32,9 +32,11 @@ ROOT = Path.home() / ".cache/nova-hessian-diagnosis"
 TOLERANCE = 1e-8
 
 
-def relative(delta, scale):
-    """Report each column's relative norm, in double whatever the operands were."""
-    value = np.sqrt(np.sum(delta**2, axis=0) / np.sum(scale**2, axis=0))
+def relative(delta, scale, axis=0):
+    """Report each remaining column's relative norm, in double."""
+    value = np.sqrt(
+        np.sum(delta**2, axis=axis) / np.sum(np.asarray(scale) ** 2, axis=axis)
+    )
     return np.asarray(value, dtype=np.float64)
 
 
@@ -104,7 +106,7 @@ def components(values, points, gradient, hessian):
         ("psi_ZZ", values[..., 5], hessian[..., 1, 1]),
     ):
         result[name] = relative(
-            np.asarray(actual, dtype=np.longdouble) - expected, expected
+            np.asarray(actual, dtype=np.longdouble) - expected, expected, axis=1
         ).tolist()
     return result
 

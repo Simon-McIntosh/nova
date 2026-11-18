@@ -14,6 +14,11 @@
       "kind": "exempted",
       "reason": "a consistency check beside the independent checks at reference.py lines 66, 86, 103 and 109, which do catch a wrong per-degree transmission",
       "recorded_at": "2026-11-18T02:13:09.615189+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the stale lane sentence describes a superseded CPU attempt; the measured numbers come from the completed titan receipt, which the fragment cites correctly",
+      "recorded_at": "2026-11-18T02:13:40.527356+00:00"
     }
   },
   "findings": [

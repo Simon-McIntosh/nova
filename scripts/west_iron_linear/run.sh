@@ -23,6 +23,10 @@ mkdir -p "$scratch/tree" "$out"
 git -C "$source_tree" archive "$revision" | tar -x -C "$scratch/tree"
 export PYTHONPATH="$scratch/tree" TMPDIR="$scratch" MPLCONFIGDIR="$scratch/matplotlib"
 export XLA_PYTHON_CLIENT_PREALLOCATE=false OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
+if [ "${IRON_REFINEMENT:-0}" = 1 ]; then
+    # The split factor uses more than the allocator's default card fraction.
+    export XLA_PYTHON_CLIENT_MEM_FRACTION=0.90
+fi
 export XLA_FLAGS=--xla_gpu_autotune_level=0
 export JAX_PLATFORMS=cuda
 export NOVA_COMPILATION_CACHE_ROOT="$scratch/compile-cache"
@@ -41,7 +45,7 @@ if [ "${IRON_REFINEMENT:-0}" = 1 ]; then
         tests/test_magnetisation.py -k test_linear_shell_operator_pin > "$out/h200-operator-pin.log" 2>&1
     /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
         --revision "$revision" --blob "$blob" --output "$out" \
-        --mesh graded-8-40 --refinement
+        --mesh graded-8-40 --refinement ${IRON_REFINEMENT_RESUME:+--resume-refinement}
     for mesh in graded-16-80 uniform-0.04; do
         /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
             --revision "$revision" --blob "$blob" --output "$out" \

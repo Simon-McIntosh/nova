@@ -186,8 +186,11 @@ def factor_capacity(cells, geometry, inputs, *, factorisation="combined"):
         programs=programs,
         compiled_live_bytes=live,
         physical_bytes=physical,
+        allocator_budget_bytes=jax.devices()[0].memory_stats()["bytes_limit"],
         reserve_bytes=int(0.1 * physical),
-        fits=bool(live < 0.9 * physical),
+        fits=bool(
+            live < min(0.9 * physical, jax.devices()[0].memory_stats()["bytes_limit"])
+        ),
     )
     gc.collect()
     return row
@@ -305,6 +308,7 @@ def main():
     parser.add_argument("--blob", required=True)
     parser.add_argument("--mesh", required=True)
     parser.add_argument("--refinement", action="store_true")
+    parser.add_argument("--resume-refinement", action="store_true")
     parser.add_argument("--compare-routes", action="store_true")
     replay_mode = parser.add_mutually_exclusive_group()
     replay_mode.add_argument("--replay", action="store_true")
@@ -337,6 +341,47 @@ def main():
         cwd=str(Path.cwd().resolve()),
     )
     assert row["constant"]["cells"] == count, "constant receipt names another mesh"
+    if args.resume_refinement:
+        assert args.refinement and args.mesh == "graded-8-40"
+        original = json.loads(path.read_text())
+        assert original["geometry_digest"] and original["operator_path"] == str(
+            operator_path
+        )
+        archive = args.output / "graded-8-40-assembly.json"
+        if not archive.exists():
+            save(archive, original)
+        assembly = json.loads(archive.read_text())
+        row = original | row
+        row["assembly_provenance"] = dict(
+            revision=assembly["revision"],
+            measure_py_blob=assembly["measure_py_blob"],
+            receipt=str(archive),
+            geometry_digest=assembly["geometry_digest"],
+        )
+        interaction = iron.load_magnetisation_interaction(
+            operator_path, region=inputs["region"], cell_size=size, basis="linear"
+        )
+        assert interaction.geometry_digest == assembly["geometry_digest"]
+        geometry = tiled.linear_magnetisation_geometry(cells.polygons)
+        row["split_capacity"] = factor_capacity(
+            cells, geometry, inputs, factorisation="split"
+        )
+        save(path, row)
+        assert row["split_capacity"]["fits"], row["split_capacity"]
+        row["full_drive"] = solve(inputs, size, interaction, factorisation="split")
+        row["solve_device_memory_stats"] = jax.devices()[0].memory_stats()
+        row["assembly_calls"] = 0
+        reference_path = args.output.parent / "graded-16-80.json"
+        row["refinement_reference"] = str(reference_path)
+        reference = json.loads(reference_path.read_text())["full_drive"]["magnitude_T"]
+        row["refinement"] = refinement_verdict(
+            reference, row["full_drive"]["magnitude_T"]
+        )
+        row["completed"] = bool(row["full_drive"]["converged"])
+        save(path, row)
+        assert row["completed"], row["full_drive"]["termination"]
+        print(json.dumps(row), flush=True)
+        return
     if args.compare_routes:
         source = args.output.parent / f"{args.mesh}-operator.npy"
         interaction = iron.load_magnetisation_interaction(

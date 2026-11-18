@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T11:03:09.292Z",
+  "dispatched_at": "2026-11-18T11:02:42Z",
+  "findings": [],
+  "plan_commit": "30139c214f381d3b0f451eeb29fa6e65816431ff",
+  "plan_fingerprint": "c30f328677cdd317399f62ffe863535ff675bdc9a9e83926038e6e9e8cb764b9",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 11,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261118T103844526501-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "1b5ce7682ce680911770e4923f0984a4334026e3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every citation resolves: `efit-comparison.html`, `efit-on-nova-rows.html` and the two receipt paths exist; s0's `docs/evidence/archive/forward-solve-near-stored-states-landed.html` is the landing record the plan will write, and naming a not-yet-written `*-landed.html` is the house convention (the same pattern appears across `docs/plans/*.html`), so a citation of it is not a stale pointer.",
+    "done_when": "pass \u2014 each of s1's four arms carries a numeric band or a categorical refusal that can fail (`4.9e-10`, `1.2e-4`, `0.030`, \"no magnetic axis admitted\"), its positive control is the discriminating pair the refusals need (same state, tightened policy: `docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1760-1778` records internal stopping tolerance 1e-8\u21921e-12, Newton 10\u219240, active-set 16\u219264 and a qualified `5.307643379157493e-16`), and s4 declares its own negative control at the base revision.",
+    "evidence_paths": "pass \u2014 s4 cites the landed record `docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html` and names both route-inventory receipts by absolute path, `/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/route-inventory-cpu.json` and `-titan.json`, both present (3248/3245 bytes) and read in this review.",
+    "naming": "pass \u2014 no plan label, stage name, ticket id or version tag reaches a symbol; s4 names its route by mechanism (\"the public solve's default route\"), not by a section label.",
+    "reasoning": "pass \u2014 s1's and s4's root causes match the cited measurements (MAST-U stored field: `4.864113698736961e-10`, converged, unqualified; displaced response perturbation: `0.0001237999574577207`, reason 12 ACTIVE_SET_STEP_REFUSED; TCV: `0.030364200526436996`, reason 12; ITER: `NoQualifiedAxisError`; batch refusal: `TracerArrayConversionError` on the newton_krylov route, with picard/anderson batched at `0.03217679842053877` and unbatched newton_krylov at `4.824438174102011e-05`, all in the named receipts), each endpoint is obtainable and falsifiable, and no code path, step sequence or function to extend is prescribed.",
+    "single_goal": "pass \u2014 s1 delivers one thing (the refusals as standing, stored-input cases), s4 delivers one thing (the public solve running under a batch).",
+    "wiring": "pass \u2014 `s1`\u2192`inverse-equilibrium-baseline#s2` and `s4`\u2192`inverse-equilibrium-baseline#s8` both resolve to landed sections (`docs/plans/inverse-equilibrium-baseline.html` marks s2 and s8 `data-status=\"done\"`), the section-contract table names the same waits, and the reverse edge the inverse plan declares (`s4`\u2192`forward-solve-near-stored-states#s4`) creates no cycle, because this plan's `s4` waits on that plan's `s4`-independent `s8`."
+  },
+  "section_digests": {
+    "_document": "5eaec87b2f497b8b435123ea3e8e5b8d1c88bab5cda6853f1bb3ef3ea38b75de",
+    "s0": "c27d7fc92213572cc4b6dbeef33d26de213b835e03bd023faf0dd32aac6c4dab",
+    "s1": "4ede3937f9044bed180ea84429cd1a270d8adb5a56c41f6c9ad3b6588c575fd7",
+    "s2": "23d36c677399451b02820b5f23183136034878d95232b403afb78911f36d823a",
+    "s3": "c1164314d236e8fd566ce929a4f43e519d3b76ca3978d08d77b3c0ba13e6055c",
+    "s4": "8ae95e0eae6e1a66818345e2034ff84c2b0cf93633c985ea16d51adbc8dc6b06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T11:19:12.489777+00:00",
+  "total": null,
+  "traced_units": [
+    "s1",
+    "s4"
+  ]
+}

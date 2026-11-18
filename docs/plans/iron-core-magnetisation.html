@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="125">
+<meta name="plan-version" content="126">
 <meta name="plan-modified" content="2026-11-18">
 </head>
 <body>
@@ -635,7 +635,7 @@ number is reported for either ratio.</p></div>
     <div class="r-comment-body"><p>review of r-20261117T161745027288-icm-efit-closed-shell-imas at head f8c29adbd262ca8f74909dbae826162db845be24 from base f9517fcc04e249939811eded8f3c8be77b54b744: parsed record scoring goal_fidelity 17, evidence 16, scope_discipline 16, durability 12, fit 17, reuse 5, added_failure_count 0 with no added_failure_ids (neither suite arm was armed), eight findings all non-blocking — the load-bearing one is that scripts/imas_efit_closed_shell/summarise.py:154 thresholds the refinement convergence flag at 5 % while the plan's section 6b requires under 0.5 %, so the 1.50 % last step at a/b = 0.5 is flagged passed.</p></div>
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261118T001305045924-review-of-icm-efit-closed-shell-imas-33a8ea36578b" data-who="reckon-build" data-when="2026-11-18T00:13:47.529Z">
-    <div class="r-comment-body"><p>Stored the parsed independent review for r-20261117T161745027288-icm-efit-closed-shell-imas at head 33a8ea36578b36475194371ef0e9db27a1ab7eac from base f9517fcc04e249939811eded8f3c8be77b54b744, scoring goal_fidelity 18 / evidence 15 / scope_discipline 14 / durability 10 / fit 15 / reuse 18 with six non-blocking findings and none blocking; added_failure_count 0 from the reviewed run&#x27;s suite-baseline and suite-after logs.</p></div>
+    <div class="r-comment-body"><p>Stored the parsed independent review for r-20261117T161745027288-icm-efit-closed-shell-imas at head 33a8ea36578b36475194371ef0e9db27a1ab7eac from base f9517fcc04e249939811eded8f3c8be77b54b744, scoring goal_fidelity 18 / evidence 15 / scope_discipline 14 / durability 10 / fit 15 / reuse 18 with six non-blocking findings and none blocking; added_failure_count 0 from the reviewed run's suite-baseline and suite-after logs.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T222130291065-review-of-icm-strip-error-sweep-43dc514d920c-figure" data-who="reckon-build" data-when="2026-11-06T22:32:39.513Z">
     <div class="r-comment-body"><p>Figure review of run r-20261106T212311176377-icm-strip-error-sweep at head 43dc514d9 is parsed with no blocking finding: the strip-error curve figure renders clean (zero ink in the outer 8 px frame, ink bbox x 35..1365 y 86..690, one frameless legend row, the 1e-10 direct label in clear space), and one non-blocking finding records that the two lightest curve stops measure 2.61:1 and 1.93:1 against white, below the 3:1 a plotted line is required to hold, so the coincident right-hand branch is drawn in the palest trace.</p></div>
@@ -915,6 +915,9 @@ number is reported for either ratio.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-s11-largest-operator-correction" data-who="reckon-build" data-when="">
     <div class="r-comment-body"><p>Correction to clause (2)'s parenthetical: graded 16/80 mm (35 184 unknowns) is not the largest mesh the existing route solves on the card. Uniform 40 mm (39 792 unknowns, 50.7 GB factor peak) is, and its operator is already persisted. The clause keeps graded 16/80 because it carries the grading boundary the 8/40 mesh shares. The node brief also asks for the uniform 40 mm comparison.</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-run-r-20261118T005532530803-review-of-icm-linear-shell-arm-2bb9e0e7f546" data-who="reckon-build" data-when="2026-11-18T00:56:05.262Z">
+    <div class="r-comment-body"><p>Reviewed r-20261117T223231577276-icm-linear-shell-arm at base c97c56ee268b8535ba58cd42b458a35d4718544b and head 2bb9e0e7f5467413d0458b57c510e362b9f204e7: the goal is met (linear-0.12.json reads 0.557274 % at 228 unknowns against the 0.5 % criterion while 80 mm reads 0.136630 %), the gate pair at both revisions reads 101 passed EXIT=0, and the review records scores goal_fidelity 20, evidence 17, scope_discipline 19, durability 7, fit 18, reuse 20 (total 101) with four non-blocking findings: the self-referential truncation assertion at reference.py:104, the unguarded restoration at reference.py:1 that no test imports, the mesher-limit claim at icm-linear-shell-arm.html:55 with no persisted probe log, and the manifest&#x27;s suite arms naming one test file where the gate named three.</p></div>
 </div>
 </section>
 </main>

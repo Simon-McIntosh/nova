@@ -35,9 +35,28 @@
       "note": "s3 names the revision each pre-repair figure was measured at instead of calling it main",
       "reason": "",
       "when": "2026-11-18T06:12:47.250971+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "68f9b2fee616fc3a9fb97fe3dc2104b38c0c3bab",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "clause (2) builds base and head rows on the H200 in one 64 GB job, where the repaired point program compiles in about 405 s, so no CPU base job and no unmeasured host memory",
+      "reason": "",
+      "when": "2026-11-18T06:12:55.514870+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "68f9b2fee616fc3a9fb97fe3dc2104b38c0c3bab",
+      "commit_basis": "edit",
+      "note": "clause (2) builds base and head rows on the H200 in one 64 GB job, where the repaired point program compiles in about 405 s, so no CPU base job and no unmeasured host memory",
+      "reason": "",
+      "when": "2026-11-18T06:12:55.514870+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",

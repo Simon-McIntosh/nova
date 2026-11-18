@@ -1,0 +1,46 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-18T18:17:50.909Z",
+  "dispatched_at": "2026-11-18T18:17:15Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/one_traced_body/check_record.py",
+      "line": 20,
+      "severity": "non-blocking",
+      "text": "check_record() re-implements the fragment-against-receipt check the repository already owns as scripts/prototypes/point_program_attribution/check.py:77 check_record(receipt, record) in the sibling prototype directory of the same investigation; the new function neither imports that owner nor generalises it, so the record-check harness is forked rather than extended. It does correctly reuse scripts/prototypes/point_program_attribution/summarise.py:splitter_instructions for the instruction measures."
+    },
+    {
+      "file": "scripts/prototypes/one_traced_body/check_record.py",
+      "line": 24,
+      "severity": "non-blocking",
+      "text": "Both receipts are read from --receipt-root beneath ~/.cache/nova-kernel-compile-barrier/one-traced-body and no copy is committed, so the three evidence checks cannot be re-run by a later reader or from CI; the sibling owner scripts/prototypes/point_program_attribution/check.py:14-17 carries its receipt in docs/figures for exactly that reason, so this guard's durability is machine-local."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read da11117a alone against its parent 098010058c0e and against the dispatch base c9a2cb2d: two files, +90 -1, both declared; the twelve earlier commits of c9a2cb2d..da11117a belong to the prior review and were read only as context.",
+    "done_when": "prompt.txt:252 names three clauses; one-traced-body.html:63 now records clause (1)'s paired 60 s control as waived and unmeasured, the reference-identity control at one-traced-body.html:18 covers clause (2), and clause (3)'s 282-cell and 2,132-node arms were not pursued, so the pytest gate the worker ran (20 passed, EXIT=0) does not assert the done_when's compile measure.",
+    "goal": "prompt.txt:38 states the source node goal (one traced body each for the corner-height Hessian samples and gradient directions, identity preserved against 681a6ecd2, H200 cold compile measured against 60 s); the gained commit da11117a records at docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html:3 that no folded form was accepted and the kernel is restored, so the mechanism the goal names does not land and the delivery is the lead-accepted negative result.",
+    "manifest": "Read the reviewed run's manifest.md; it records baseline 20 passed in 54.55 s and after 20 passed in 72.22 s, both EXIT=0 with failure_count 0 and empty failure_ids, plus evidence-check.log (0 failed, 3 passed, EXIT=0) and evidence-negative-control.log (3 failed, EXIT=1).",
+    "write_paths": "The only two paths in da11117a, docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html and scripts/prototypes/one_traced_body/check_record.py, are both inside the declared write paths of the reviewed node."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: prompt.txt:38 states the source node goal (one traced body each for the corner-height Hessian samples and gradient directions, identity preserved against 681a6ecd2, H200 cold compile against 60 s), and docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html:3 records that no folded form was accepted and the kernel is restored, so the mechanism the goal names does not land and the delivery is the lead-accepted negative result.\nVERDICT done_when: prompt.txt:252 names three clauses; one-traced-body.html:63 records clause (1)'s paired 60 s control as waived and unmeasured, one-traced-body.html:18 covers clause (2) with the reference-identity control, clause (3)'s 282-cell and 2,132-node arms were not pursued, and the pytest gate the worker ran (20 passed, EXIT=0) does not assert the done_when's compile measure.\nVERDICT write_paths: the only two paths in da11117a, docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html and scripts/prototypes/one_traced_body/check_record.py, are both inside the declared write paths of the reviewed node.\nVERDICT manifest: read the reviewed run's manifest.md; it records baseline 20 passed in 54.55 s and after 20 passed in 72.22 s, both EXIT=0 with failure_count 0 and empty failure_ids, plus evidence-check.log (0 failed, 3 passed, EXIT=0) and evidence-negative-control.log (3 failed, EXIT=1).\nVERDICT diff: read da11117a alone against its parent 098010058c0e and against the dispatch base c9a2cb2d; two files, +90 -1, both declared, and the twelve earlier commits of c9a2cb2d..da11117a belong to the prior review and were read only as context.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html:3 states the negative result and the restored kernel, so the traced-body fold and 60 s compile the goal names are not delivered, though the gained commit repairs the three prior-review documentation findings.\nSCORE evidence: 15\nJUSTIFICATION evidence: scripts/prototypes/one_traced_body/check_record.py:20 checks the fragment's instruction and fixture figures against residual-h200/attribution.json and bounded-fixture/lowered-size.json, both of which I reopened and matched to the printed values, but no gate run asserts the done_when's 60 s compile.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in da11117a is inside the declared write paths, and the commit changes nothing outside the fragment and its check script.\nSCORE durability: 13\nJUSTIFICATION durability: the three checks at scripts/prototypes/one_traced_body/check_record.py:31-66 all redden on the parent fragment (reproduced: 3 failed, EXIT=1) and pass at head, but no test invokes them and they read receipts from a machine-local cache.\nSCORE fit: 16\nJUSTIFICATION fit: scripts/prototypes/one_traced_body/check_record.py follows the per-prototype checker idiom of scripts/prototypes/read_derivatives/check_fragment.py:1-12, reuses the shared summariser, and passes ruff.\nSCORE reuse: 5\nJUSTIFICATION reuse: check_record at scripts/prototypes/one_traced_body/check_record.py:20 duplicates rather than extends the record-against-receipt check owned by scripts/prototypes/point_program_attribution/check.py:77, though it does reuse summarise.py:splitter_instructions.\nFINDING scripts/prototypes/one_traced_body/check_record.py:20 non-blocking: check_record re-implements the fragment-against-receipt check owned by scripts/prototypes/point_program_attribution/check.py:77 instead of extending it, forking the harness in a sibling prototype directory of the same investigation.\nFINDING scripts/prototypes/one_traced_body/check_record.py:24 non-blocking: both receipts are read from --receipt-root beneath ~/.cache and no copy sits in the repository, so a later reader or CI cannot re-run the three evidence checks that the sibling owner keeps reproducible by carrying its receipt in docs/figures.\n",
+  "review_run_id": "r-20261118T173555449586-review-of-kernel-compile-barrier-s3-one-traced-body-da11117ac2cc",
+  "reviewed_base_sha": "c9a2cb2d270dfb529272bb0a3c4f38fd553d53e1",
+  "reviewed_head_sha": "da11117ac2cc240a18d93cff0d404020d512454d",
+  "reviewed_run_id": "r-20261118T071941834311-kernel-compile-barrier-s3-one-traced-body",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 13,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T18:38:48.925058+00:00",
+  "total": 84
+}

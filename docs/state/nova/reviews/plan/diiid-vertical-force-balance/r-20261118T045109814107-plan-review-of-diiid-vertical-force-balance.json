@@ -68,6 +68,16 @@
       "note": "The pinned-drift record has landed on main (docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift.html), so the citation resolves",
       "reason": "",
       "when": "2026-11-18T06:38:19.891096+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "03d6212b45343c6044de69ef4d706d423aee2a8d",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a713 names docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-flux.html and docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/",
+      "reason": "",
+      "when": "2026-11-18T06:39:22.308691+00:00"
     }
   ],
   "responses": {
@@ -85,6 +95,15 @@
       "by": "",
       "reason": "The review itself judges it does not change the plan: the four-row rerun is an observational arm, and the edge-value equality and the finite-edge test are the falsifiable measures",
       "when": "2026-11-18T06:36:06.736600+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "03d6212b45343c6044de69ef4d706d423aee2a8d",
+      "commit_basis": "edit",
+      "note": "\u00a713 names docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-flux.html and docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/",
+      "reason": "",
+      "when": "2026-11-18T06:39:22.308691+00:00"
     },
     "reasoning-1": {
       "action": "acted",

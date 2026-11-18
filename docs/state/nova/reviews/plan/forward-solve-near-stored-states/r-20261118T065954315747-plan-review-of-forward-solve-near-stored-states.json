@@ -1,0 +1,65 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T07:16:48.636Z",
+  "dispatched_at": "2026-11-18T07:16:33Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:73",
+      "id": "done_when-1",
+      "reason": "the band is what decides whether the reproduction passed, and an unquantified \"near\" leaves the node's primary gate unmeasured.",
+      "text": "s1(1) admits the MAST-U stored-coefficients arm at \"unqualified near 4.9e-10\" with no tolerance, while the other three arms of the same sentence are admitted at \"within a factor of three\" of a stated value; the arm's only discriminating fact is that the residual exceeds 1e-10 (the cited receipt is `4.864113698736961e-10`, converged=true, qualified=false, `docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1593`), so \"near\" admits any value a worker declines to call far",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:109",
+      "id": "done_when-2",
+      "reason": "an undefined unit for the one cross-check between batched and solo states makes that clause either vacuous or impossible, and a worker must be told which quantity is meant.",
+      "text": "s4(2) requires each batched state to agree with the same state solved alone \"to within ten times the threshold in flux\", but the threshold is a relative terminal residual (1e-10) and the clause names no norm for the flux difference: absolute Wb, a fraction of the ~70 Wb axis-to-boundary span, and a relative residual are three numbers differing by orders of magnitude at this scale, so one reading is trivially met and another is out of reach",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:109",
+      "id": "reasoning-1",
+      "reason": "the two readings imply different repairs, and done-when clause (1) is unscorable until the one meant is fixed, since the flag must be both per-state and returned.",
+      "text": "the endpoint \"returns a per-state converged flag and residual without leaving the device\" contradicts itself and its own evidence: the base-revision refusal the receipts record is a host conversion taken inside the traced solve (`bool(np.asarray(history.converged))`, reached only for `newton_krylov`, `nova/equilibrium/forward.py:1971-1972`), whereas a flag reported in the record must reach the host after the solve returns, so \"without leaving the device\" cannot be read literally and the plan does not say whether the repaired solve may return host-resident per-state arrays or must keep each flag device-resident",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "a7cb73dde1b7870974c876f3aab0e846bd0fc44e",
+  "plan_fingerprint": "f4cd3095e04fd527722cead3e4c6ef6f392e1b169eb4498c6fe39887467becc7",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 10,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261118T065954315747-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "8c8639483de073171b3b130ea3aefcc125adb373",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html` and `.../efit-on-nova-rows.html` both exist at the reviewed revision, the two route-inventory receipts open and carry the per-route outcomes s4 quotes \u2014 newton_krylov `TracerArrayConversionError`, picard and anderson batched at `0.03217679842053877`, host newton_krylov `4.824438211171581e-05` in the P100 receipt \u2014 and every section id referenced resolves.",
+    "done_when": "a finding \u2014 s1's MAST-U stored-coefficients arm accepts \"near 4.9e-10\" with no stated band while its sibling arms state one (plan.html:73), and s4's flux-agreement clause states a tolerance in a unit it never defines (plan.html:109).",
+    "evidence_paths": "pass \u2014 s4's receipts are cited by absolute path under `/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/` (both files exist, 3248 bytes each) and the records it reads are repository fragments; no gate output depends on a session scratch or a node-local temporary directory.",
+    "naming": "pass \u2014 no plan label, sprint tag or version tag reaches a symbol, file or comment; the one receipt identifier quoted (\"titan job 1324349\") stands as an identifier in prose, not as a name.",
+    "reasoning": "a finding \u2014 s4's \"returns a per-state converged flag and residual without leaving the device\" (plan.html:109) describes an endpoint that cannot exist as worded, because a per-state flag reaching the record is a host read and the refusal it cites is exactly one taken inside the traced solve.",
+    "single_goal": "pass \u2014 s4 names one deliverable, that the public solve runs under a batch and is usable at batch width; the per-state agreement and warm-wall clauses are properties of that one deliverable rather than a second one.",
+    "wiring": "pass \u2014 s4 declares `inverse-equilibrium-baseline#s8`, which is that plan's \"imas-efit on rows written by nova\" section, so the edge is real and reciprocal; s1's edge to `inverse-equilibrium-baseline#s2` resolves to \"The same inputs as EFIT\", which carries the cited comparison record."
+  },
+  "section_digests": {
+    "_document": "5eaec87b2f497b8b435123ea3e8e5b8d1c88bab5cda6853f1bb3ef3ea38b75de",
+    "s0": "c27d7fc92213572cc4b6dbeef33d26de213b835e03bd023faf0dd32aac6c4dab",
+    "s1": "52d03a0e5fe78fea1e1d762673c9acd6338fadb8a67427864f7d5fc0e7aa9139",
+    "s2": "23d36c677399451b02820b5f23183136034878d95232b403afb78911f36d823a",
+    "s3": "c1164314d236e8fd566ce929a4f43e519d3b76ca3978d08d77b3c0ba13e6055c",
+    "s4": "abd2533ce83a800c9f106887da1a65ec80bd0829b47b92f1e6e1aeffcdbea344"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T07:28:04.160375+00:00",
+  "total": null,
+  "traced_units": [
+    "s1",
+    "s4"
+  ]
+}

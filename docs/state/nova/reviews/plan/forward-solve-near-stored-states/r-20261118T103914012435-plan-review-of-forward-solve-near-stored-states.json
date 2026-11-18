@@ -1,0 +1,130 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T11:03:30.659Z",
+  "dispatched_at": "2026-11-18T11:03:14Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/forward.py:3220",
+      "id": "reuse_search-1",
+      "reason": "\u00a74's done-when is a measurement of behaviour that already has four implementations, so the section should be a measurement plus a localised repair of the recorded host conversion, with the endpoint stated against the existing per-state arrays rather than as new capability.",
+      "text": "`ForwardProfile.solve_batch` already maps the accelerated routes (`_ACCELERATED = (\"picard\", \"anderson\", \"newton_krylov\")`, `forward.py:196`) over a leading ensemble axis with `jax.vmap`, so the plan's premise that the public solve cannot run under a batch is a premise about one call site, not about the codebase; the same type is implemented at `nova/equilibrium/batched_labeller.py:725` (`jax.vmap(one)` inside a sharded, padded, fixed-shape program whose `BatchedLabelledResult` at `batched_labeller.py:48` already carries `converged`, `termination` and `terminal_residual` as batch-width arrays, read once at `batched_labeller.py:872`), at `nova/equilibrium/support_read.py:2040` (`solve_batch` over booked support, used by `drive_continuation`), and at `nova/equilibrium/profile.py:702` (`solve_batch` for the coefficient-reconstruction path); the plan reads as if batched device solve must be built",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/drive_continuation.py:135",
+      "id": "reuse_search-2",
+      "reason": "the section's seed policy and stop rule should be stated as an application of the existing continuation owner (or a stated reason it cannot carry a coefficient amplitude), because a parallel ladder drifts from the certified warm-start contract \u2014 the plan's own \u00a72 negative control depends on that contract being the same one \u00a71's positive control used.",
+      "text": "`advance_drive` already advances a large drive change in adaptive warm-started sub-steps, seeding each sub-step from the previous converged state (`predict_seed`, `drive_continuation.py:105`), certifying at the target drive against the unchanged fresh residual; \u00a72's ladder of fractions 1/64\u20261 with \"each solve started from the last state that qualified\" is that same mechanism driven by a coefficient amplitude instead of a drive, so a bespoke ladder loop would duplicate its acceptance and adaptation logic",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/batched_labeller.py:476",
+      "id": "duplicate_owner-1",
+      "reason": "a fourth batched surface splits the padding, sharding and host-read rules that \u00a74's agreement clause (1e-9 of the axis-to-boundary span; warm wall per state at width 16 no greater than one unbatched solve) is measured against.",
+      "text": "the sharding (`batched_labeller.py:727-745`, `NamedSharding` over a device mesh), the batch-width divisibility and padding rule (`batched_labeller.py:766`) and the one-host-read result (`batched_labeller.py:872`) are shared infrastructure already owned by `BatchedLabeller`; \u00a74's \"batch of 16 and of 64 copies \u2026 one traced program \u2026 per-state converged flags and residuals as arrays of the batch width\" is exactly that owner's documented contract, so the node must extend `BatchedLabeller` (or route `ForwardProfile.solve_batch` through it) rather than add a third batched call path beside `forward.py:3220` and `support_read.py:2040`",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward.py:3220",
+      "id": "duplicate_owner-2",
+      "reason": "\u00a74 compares batched and unbatched walls and states \"the record names that route\", which is a receipt property; a batched call that cannot carry the request cannot produce a receipt comparable with the unbatched one.",
+      "text": "`solve_batch` resolves defaults through the private `_resolve_solve_defaults` and takes `route`/`**options`, while `ForwardProfile.solve` accepts a `ForwardSolveRequest` and returns a `ForwardSolveReceipt` (`forward.py:2823-2888`; the request/receipt types are `nova/equilibrium/solve_request.py:574` and the seam is declared the only supported route in `nova/equilibrium/AGENTS.md`); \u00a74's endpoint therefore needs the seam widened to a batched request/receipt, not a second entry point beside it",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward.py:3220",
+      "id": "thin_wrapper-1",
+      "reason": "the honest change is for the batched path to accept a `ForwardSolveRequest` and return one `ForwardSolveReceipt` per state (or a stacked receipt), which the section should state as its endpoint rather than leaving the batched call outside the seam.",
+      "text": "the batched entry point forwards to `_solve_accelerated` and adds nothing the seam carries: no receipt, no resolved-defaults block, no `compilation_cache` hit record, so its verdict is not comparable with a production receipt; \u00a74 then needs a wrapper to re-add exactly the fields the seam already defines",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/equilibrium.py:505",
+      "id": "reuse_search-3",
+      "reason": "the plan does describe the endpoint (stored inputs, per-solve mesh/route/coefficients, terminal reason and residual), and the reuse map belongs to the brief; recorded here so the brief names `nova/imas/equilibrium.py` rather than allowing a second reading path.",
+      "text": "\u00a71's \"stored inputs \u2026 each machine's description, imas-efit's fitted conductor currents and profile coefficients, and the stored flux map used as the starting field\" is the read `nova.imas.equilibrium.Equilibrium`/`EquilibriumData` (`equilibrium.py:848`) already performs through `Chart`/`GetSlice` (flux map, profiles, grid), with `nova/io/geqdsk.py` for the eqdsk form; the inverse baseline's comparison already reads these three cases (its record is `docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html`), so \u00a71 should name the endpoint as the reproducible receipt of that read, not as a new reader",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "nova/media/poloidal.py:138",
+      "id": "reuse_search-4",
+      "reason": "the plan already binds the correct reporting instrument; this is a brief-level instruction to reuse the painters, not a plan change.",
+      "text": "\u00a71(3) and \u00a73 ask for a line-contour panel on the stored state with both null sets and the wall, which is the committed painter vocabulary already present (`draw_flux_contours` at `poloidal.py:138`, `contours`, `draw_nulls` at `poloidal.py:540`, `draw_wall` at `poloidal.py:29`, `contour_levels` at `poloidal.py:748`); the plan is correct to require the panels but nothing in it establishes that two fields share one level array except by \"shared levels\", and `contour_levels` is the mechanism that makes that true",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html#s4",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added interface surface in its own text, and naming the merge (one batched entry point replacing the three existing `solve_batch` surfaces, or an explicit statement that no retirement is possible and why) is what turns the section from new capability into the repair its own record describes.",
+      "text": "with public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 supplied for this week, \u00a74 (\"the public solve runs under a batch\") adds a batched form to the public solve's surface \u2014 either a batched request/receipt pair or a widened `solve_batch` signature \u2014 and its text names nothing it retires or merges and states no reason nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html#s2",
+      "id": "deep_module-1",
+      "reason": "the plan's endpoint (largest qualifying fraction, smallest non-qualifying fraction, two verdicts, one negative control) is unambiguous and the record shape is the brief's to fix; the deficiency is machinery placement, not endpoint.",
+      "text": "\u00a72's measure is a ladder plus a two-route comparison against a refusal, and it is stated as per-case narrative with the seed policy restated in prose (\"each solve started from the last state that qualified \u2026 using its policy\"), which is the shallow-surface-per-row shape: three cases, two routes each, a seven-rung ladder, all resolved by hand in the record rather than by one result type that carries (case, route, fraction, qualified, residual, terminal reason)",
+      "type": "deep_module",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "30139c214f381d3b0f451eeb29fa6e65816431ff",
+  "plan_fingerprint": "c30f328677cdd317399f62ffe863535ff675bdc9a9e83926038e6e9e8cb764b9",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 11,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "30139c214f381d3b0f451eeb29fa6e65816431ff",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "The batching section now says a batched entry to the forward solve already exists and that the recorded refusal is one route breaking inside it; the section is a measurement plus a repair of that route, not a new capability.",
+      "reason": "",
+      "when": "2026-11-18T11:26:02.395363+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "30139c214f381d3b0f451eeb29fa6e65816431ff",
+      "commit_basis": "edit",
+      "note": "The batching section now says a batched entry to the forward solve already exists and that the recorded refusal is one route breaking inside it; the section is a measurement plus a repair of that route, not a new capability.",
+      "reason": "",
+      "when": "2026-11-18T11:26:02.395363+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261118T103914012435-plan-review-of-forward-solve-near-stored-states.json",
+  "review_run_id": "r-20261118T103914012435-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "1b5ce7682ce680911770e4923f0984a4334026e3",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 `nova/equilibrium/batched_labeller.py` is already the deep module this endpoint needs (sharding, padding, one host read, fixed-shape record behind three public names), so a design that reaches \u00a74 through `ForwardProfile.solve_batch` plus a new evidence path spreads the same behaviour across shallower surface.",
+    "duplicate_owner": "a finding \u2014 the batched device solve has three owners (`forward.py:3220`, `batched_labeller.py:725`, `support_read.py:2040`) and the plan's \u00a74 would add a fourth surface instead of extending one; \u00a71's stored-state read duplicates `nova/imas/equilibrium.py:505`/`:848`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74 adds a batched form of the public solve (a new request/receipt pair or a new batch entry point) without naming anything it retires or merges, and without stating why nothing can be.",
+    "reuse_search": "a finding \u2014 the endpoint of \u00a74 (a batched public forward solve returning per-state converged flags and residuals with no host conversion in the traced solve) is already implemented four times over in this repository (`nova/equilibrium/forward.py:3220`, `nova/equilibrium/batched_labeller.py:476`, `nova/equilibrium/support_read.py:2040`), and \u00a72's warm-started ladder is already owned by `nova/equilibrium/drive_continuation.py:135`.",
+    "thin_wrapper": "a finding \u2014 `ForwardProfile.solve_batch` (`nova/equilibrium/forward.py:3220`) is reachable only with raw solver keywords and cannot accept a `ForwardSolveRequest`, so a node told to \"make the public solve run under a batch\" would add a batched path beside the seam rather than widen the seam it must not route around."
+  },
+  "section_digests": {
+    "_document": "5eaec87b2f497b8b435123ea3e8e5b8d1c88bab5cda6853f1bb3ef3ea38b75de",
+    "s0": "c27d7fc92213572cc4b6dbeef33d26de213b835e03bd023faf0dd32aac6c4dab",
+    "s1": "4ede3937f9044bed180ea84429cd1a270d8adb5a56c41f6c9ad3b6588c575fd7",
+    "s2": "23d36c677399451b02820b5f23183136034878d95232b403afb78911f36d823a",
+    "s3": "c1164314d236e8fd566ce929a4f43e519d3b76ca3978d08d77b3c0ba13e6055c",
+    "s4": "8ae95e0eae6e1a66818345e2034ff84c2b0cf93633c985ea16d51adbc8dc6b06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T11:14:27.118325+00:00",
+  "total": null
+}

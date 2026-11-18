@@ -71,6 +71,16 @@
       "note": "Both receipts are now cited by absolute path.",
       "reason": "",
       "when": "2026-11-18T06:24:30.667849+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b83eca8359ac882f7d25044d116351f6581b2ee5",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The batch is now copies of the undisplaced generating state, so the gated property is that a batch runs and matches the solo solve; the count of displaced copies that qualify is reported, not gated.",
+      "reason": "",
+      "when": "2026-11-18T06:25:00.973781+00:00"
     }
   ],
   "responses": {
@@ -91,6 +101,15 @@
       "note": "The reach measurement now names its job: one batch job on the H200, falling back to titan, at the mesh and route the first section recorded, with the device stated in the record.",
       "reason": "",
       "when": "2026-11-18T06:23:57.194354+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "b83eca8359ac882f7d25044d116351f6581b2ee5",
+      "commit_basis": "edit",
+      "note": "The batch is now copies of the undisplaced generating state, so the gated property is that a batch runs and matches the solo solve; the count of displaced copies that qualify is reported, not gated.",
+      "reason": "",
+      "when": "2026-11-18T06:25:00.973781+00:00"
     },
     "wiring-1": {
       "action": "acted",

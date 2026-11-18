@@ -55,10 +55,32 @@ def row_record(folder):
     }
 
 
+EXTRACTION_LABEL = {"137D": "R137D", "146D": "R146D", "146L": "R146L", "179L": "R179L"}
+RELATIVE_TOLERANCE = 1e-10
+
+
+def boundary_agreement(base, table):
+    """Compare the builder's psi_norm = 1 value with the committed extraction."""
+
+    extraction = json.loads(base["--extraction"].read_text())["rows"]
+    agreement = {}
+    for label, arms in table.items():
+        record = extraction[EXTRACTION_LABEL[label]]
+        head = arms["head"]
+        agreement[label] = {
+            "extracted_p_prime": record["p_prime"],
+            "extracted_ff_prime": record["ff_prime"],
+            "builder_p_prime": head["p_prime_at_boundary"],
+            "builder_ff_prime": head["ff_prime_at_boundary"],
+        }
+    return agreement
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--extraction", type=Path, required=True)
     args = parser.parse_args()
     table = {}
     for frame, branch, label in ROWS:

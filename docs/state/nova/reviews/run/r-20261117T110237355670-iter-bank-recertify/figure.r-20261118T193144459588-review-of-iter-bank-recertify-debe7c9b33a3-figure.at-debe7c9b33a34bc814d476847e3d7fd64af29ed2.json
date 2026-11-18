@@ -1,0 +1,46 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-18T20:00:49.080Z",
+  "dispatched_at": "2026-11-18T19:32:15Z",
+  "figures": {
+    "docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh-preview.png": {
+      "contrast": "pass for text \u2014 label text #333333 on white measures 12.6:1 and clears its background with a wide margin; the coil outlines measure 3.1:1 and the cell mesh a median 4.70:1 from the run's own scene report, both of which read. One data mark sits below that floor: the first wall, #9aa2ab, measures 2.58:1 on white and is the faintest mark in the wall-and-cell region, recorded as a non-blocking finding because it remains visible and is a reference line rather than text.",
+      "data_ink": "pass \u2014 line art carries all the weight on a plain white field: 73,660 purple cell-mark pixels across the two panels, grey coil rectangles and a grey wall contour, no filled region, no raster imagery, no shadow. Measured ink coverage 6.8 percent of the canvas (non-white pixels), consistent with the run's own scene report of 73,748 mesh pixels at ink fraction 0.067544.",
+      "decoration": "pass \u2014 no gradient, background fill, gridline, frame or styled theme; both axes are off, the machine is drawn on white and the legend is frameless.",
+      "label_collision": "pass \u2014 measured on the 1400x1072 raster with tight colour masks, each of the fourteen label boxes holds zero line-art pixels (0 over cell marks, 0 over coil outlines, 0 over the wall), no two label boxes intersect, and the whole ink extent is inset from the canvas (x 39..1348 of 1400, y 17..1035 of 1072), so no text is clipped. The two-line CS1 and VS3 labels clear their nearest coil mark and the VS3 diamonds sit in clear space beside, not under, their labels.",
+      "legibility": "pass \u2014 two poloidal mesh panels on a 1400x1072 raster, with all fourteen coil sections labelled once each (CS3U, CS2U, CS1 upper, CS1 lower, CS2L, CS3L, PF1, PF2, PF3, PF4, PF5, PF6, VS3 upper, VS3 lower) and a three-entry legend. The duplicate sections the brief names are separated by name: CS1 upper/CS1 lower and VS3 upper/VS3 lower, fourteen labels with fourteen distinct strings. The hexagonal cell mesh resolves at delivered size in both panels. The run's second attachment (image-1.png, 1400x1074, the same scene rasterised through the server path) was measured the same way and agrees. What the image does not say is what the right panel is: recorded as a non-blocking finding.",
+      "table_form": "pass \u2014 the image is machine geometry and a plasma cell mesh, a spatial relationship that no table carries."
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "line": 303,
+      "severity": "non-blocking",
+      "summary": "The figure draws two panels of the same plasma at two different extents and names neither. build_figure loops over the overview bounds (coils plus wall) and the wall-only detail bounds and sets no title, panel label or annotation for either, and the evidence fragment's caption describes one panel only: it explains that the fourteen coil sections are distinguished and that the wall is dashed, but never says that the right-hand panel is the wall and cell detail of the same machine, scaled, and carrying no coils. A reader sees two plasma shapes at different sizes and no statement of how they relate, so the right panel can be read as a second plasma state rather than a zoom. Naming each panel, or saying in the caption that the right panel is the wall detail, removes the inference; nothing here stops a reader using either panel."
+    },
+    {
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "line": 27,
+      "severity": "non-blocking",
+      "summary": "The first wall is separated from the coil mark almost entirely by a fine dash between two closely related greys: WALL_COLOR #9aa2ab against coil #929292, dashed 5.0 pt on and 2.5 pt off at linewidth 1.7 (render.py:27-28). The dash does render \u2014 12-pixel on-runs and 3 to 6 pixel gaps measured row by row along the right boundary of the delivered raster, and 12-on/6-off in the legend swatch \u2014 and the wall is drawn above the cell outlines. But the wall measures 2.58:1 against white where the coil outline measures 3.1:1, so the wall is the faintest mark in the figure and at a page column of roughly 900 pixels its gaps shrink to 2 to 4 pixels, near-continuous where it hugs the plasma edge. A wider dash period or a stronger lightness step from the coil grey would make the first wall read as its own component at page scale."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/iter-bank",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The run publishes one scene twice: iter-mesh.svg beside iter-mesh-preview.png in the same directory, the PNG written by the same figure at render.py:390. The repository's figure rule keeps one SVG per figure and bans a PNG twin beside it, and reckon's Figures inventory builds one row per file it walks (reckon/figures.py: figure_rows collects every *.png and *.svg), so the directory yields two index entries for one scene, titled 'Iter Mesh' and 'Iter Mesh Preview', and a copy that can drift from the SVG. The promotion guard for a PNG twin matches only a PNG whose own stem has an SVG of the same stem (png[:-4] + '.svg'), so iter-mesh-preview.png passes it because the SVG is iter-mesh.svg; the guard reads the pair as clean. The evidence fragment's justification, that the raster is a companion because the index counts PNG and SVG and never lists the raw scene, does not hold: the SVG alone is listed, and adding the PNG adds a second entry. Neither file is removed by this review."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261118T193144459588-review-of-iter-bank-recertify-debe7c9b33a3-figure",
+  "reviewed_base_sha": "3a9238f0a626bec0783b4f0da32922dd0c390f4b",
+  "reviewed_head_sha": "debe7c9b33a34bc814d476847e3d7fd64af29ed2",
+  "reviewed_run_id": "r-20261117T110237355670-iter-bank-recertify",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T20:01:16.986029+00:00",
+  "total": null
+}

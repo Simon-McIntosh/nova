@@ -1,0 +1,47 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T06:55:49.185Z",
+  "dispatched_at": "2026-11-18T06:55:31Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:66",
+      "id": "reasoning-1",
+      "reason": "the node measures the residual on the repaired kernel first and its partial-result path is entered on the measured number, so correcting the estimate would move no clause, path or control.",
+      "text": "\"scaled by the repair's 1.872, the 34.1 s that remains with every derivative absent would be about 64 s\" applies the repaired kernel's whole-row cold-compile ratio to an arm with every derivative instantiation stubbed, i.e. without the Hessian block the sixth-order stencil rewrote; that block carries the repair's growth, so the residual's growth need not be 1.872, and the sentence reads as a forecast of lever failure where the section itself says the question is unproven",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "bf6f74613d3dfa91a546bcf392f334a9c0728388",
+  "plan_fingerprint": "caef71c9d5dd6f2f44cec250edf88d3f94f90b62e2d222873a69238e45f3e580",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 97,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261118T065424148063-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "bebc9a372a53e162ce439f707f4e541ca3a6ae2d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited fragments (ordered-sharing.html, polygon-stable-evaluator.html, point-program-attribution.html), the peer plan sub-millisecond-forward-path.html and the code anchors (fixed_points.py:323/:546/:611, read_route/jets.py:262, solve.py:121, census row.py:115) resolve, and 681a6ecd2 is a merge on main; 267,438, 6,088,070, 10,251,815, 9,351,538 and the 1.565/1.872 multiples match the cited evidence.",
+    "done_when": "pass \u2014 node (c) declares a failing control (the 681a6ecd2 base arm must miss 60 s in the same H200 job as clause (1)), both changed identity rows must pass on the H200 against 681a6ecd2, and the residual arm has a failure path that stops the lever rather than passing silently.",
+    "evidence_paths": "pass \u2014 node (c) names its fragment docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html, its figure directory under docs/figures/, and its receipts under ~/.cache/nova-kernel-compile-barrier/one-traced-body/, matching node (b)'s landed convention.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or changelog prose reach the names \u00a73 uses; STABLEHLO_CEILING is described by its value and mechanism.",
+    "reasoning": "a finding \u2014 the section's 64 s residual forecast applies the whole-row repair ratio to an arm that excludes the block the repair rewrote.",
+    "single_goal": "pass \u2014 \u00a73 carries one deliverable, a bounded point program serving the row window, the jets build and the operator bank, with nodes (a)-(c) as its stages.",
+    "wiring": "pass \u2014 \u00a73's declared links (kernel-compile-barrier#s2, #s5) resolve to existing sections, and its build base, the polygon tangent repair merged at 681a6ecd2, is stated as a landed base rather than an unmet dependency."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "b465cef1e2cc13170ec112ecc51774aeedecf0105d30a3902a7c0ecc0a762197",
+    "s3": "162620257d396aca1d3ac7a102b6c30cfd22e1498a5fea671cd20471ec1d4283",
+    "s4": "b4c3eef27a064692dbf419c8ce536674acaafb04413c9c58789ff1b0a6338bcc",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T07:13:44.812119+00:00",
+  "total": null
+}

@@ -51,6 +51,16 @@
       "note": "The batching section no longer cites a fragment that has not landed; it cites the landed row-exchange record for its case and the route inventory receipts on durable storage for the refusal.",
       "reason": "",
       "when": "2026-11-18T05:38:27.338142+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b432cc86733a5664aa2f18af1c6964c6d289b7b8",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The section now names its case as the generating state of the nova-written ITER rows, which the row-exchange section solved, not the stored imas-efit ITER case, and states the refusal as the cost attempt recorded it per route.",
+      "reason": "",
+      "when": "2026-11-18T05:38:35.347028+00:00"
     }
   ],
   "responses": {
@@ -62,6 +72,15 @@
       "note": "The batching section no longer cites a fragment that has not landed; it cites the landed row-exchange record for its case and the route inventory receipts on durable storage for the refusal.",
       "reason": "",
       "when": "2026-11-18T05:38:27.338142+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b432cc86733a5664aa2f18af1c6964c6d289b7b8",
+      "commit_basis": "edit",
+      "note": "The section now names its case as the generating state of the nova-written ITER rows, which the row-exchange section solved, not the stored imas-efit ITER case, and states the refusal as the cost attempt recorded it per route.",
+      "reason": "",
+      "when": "2026-11-18T05:38:35.347028+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261118T045216283717-plan-review-of-forward-solve-near-stored-states.json",

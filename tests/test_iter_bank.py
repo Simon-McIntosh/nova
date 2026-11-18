@@ -335,3 +335,83 @@ def test_plasma_row_hessian_matches_source_gradient_reference():
     )
     print("plasma_row_hessian", actual[[4, 5]].tolist(), errors.tolist())
     assert np.all(errors <= 1e-8), f"plasma-row Hessian errors {errors.tolist()}"
+
+
+# The derive_rows instrument backs every first-derivative figure the evidence
+# fragment quotes. These cases pin the three things that figure depends on: the
+# derivative slice it reads, the magnitude window its filtered statistic uses,
+# and the threshold at which an entry is listed; plus the opt-in status that
+# replaced the withdrawn 1e-7 boundary, and the single ownership of the
+# node-aggregated norm the certification script also prints.
+
+from scripts.prototypes.iter_bank import derive_rows, recertify  # noqa: E402
+
+
+def stored_rows(nodes=1, cells=1, moments=1, value=1.0):
+    """A row archive shaped like the published bank's, with every jet at value."""
+    rows = np.full((nodes, cells, moments, 6), value, dtype=np.float64)
+    return rows
+
+
+def test_derive_rows_reads_the_two_first_derivative_components():
+    rows = stored_rows(cells=2)
+    rows[..., 1] = 10.0
+    rows[..., 2] = 20.0
+    head = rows.copy()
+    head[..., 0] = 1.5
+    head[..., 3] = 5.0
+    head[..., 4] = 5.0
+    head[..., 5] = 5.0
+    report = derive_rows.compare(head, rows)
+    assert report["entries"] == 4
+    assert report["components"] == ["dpsi/dR", "dpsi/dZ"]
+    assert report["departing_count"] == 0
+    assert report["unfiltered"]["max_relative"] == 0.0
+    head[..., 2] = 30.0
+    report = derive_rows.compare(head, rows)
+    assert report["departing_count"] == 2
+    assert {row["component"] for row in report["departures"]} == {"dpsi/dZ"}
+    assert report["dpsi/dR"]["above_threshold"] == 0
+    assert report["dpsi/dZ"]["above_threshold"] == 2
+
+
+def test_derive_rows_window_keeps_near_zero_magnitudes_out_of_the_filtered_max():
+    rows = stored_rows(cells=2)
+    rows[0, 1, 0, 1] = 1e-12
+    head = rows.copy()
+    head[0, 0, 0, 1] = 1.0 + 1e-9
+    head[0, 1, 0, 1] = 1e-12 + 1e-16
+    report = derive_rows.compare(head, rows)
+    assert report["unfiltered"]["max_relative"] == pytest.approx(1e-4, rel=1e-6)
+    assert report["filtered"]["max_relative"] == pytest.approx(1e-9, rel=1e-6)
+    assert report["filtered"]["count"] == 2
+
+
+def test_derive_rows_lists_only_the_entries_above_the_relative_threshold():
+    rows = stored_rows(cells=3)
+    head = rows.copy()
+    head[0, 0, 0, 1] += 5e-11
+    head[0, 1, 0, 1] += 2e-10
+    head[0, 2, 0, 1] += 9e-11
+    report = derive_rows.compare(head, rows)
+    assert report["departing_count"] == 1
+    assert report["departures"][0]["cell"] == 1
+    assert report["filtered"]["above_threshold"] == 1
+
+
+def test_derive_rows_fails_only_on_a_named_absolute_boundary():
+    rows = stored_rows()
+    head = rows.copy()
+    head[0, 0, 0, 1] += 1e-6
+    quiet = derive_rows.compare(head, rows)
+    assert quiet["material"]["boundary"] is None
+    assert quiet["material"]["present"] is None
+    assert derive_rows.exit_status(quiet) == 0
+    loud = derive_rows.compare(head, rows, boundary=1e-7)
+    assert loud["material"]["present"] is True
+    assert loud["material"]["count"] == 1
+    assert derive_rows.exit_status(loud) == 2
+
+
+def test_derive_rows_shares_the_certification_relative_norm():
+    assert derive_rows.relative is recertify.relative

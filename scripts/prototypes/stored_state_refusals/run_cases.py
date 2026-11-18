@@ -275,10 +275,14 @@ def main():
         working_directory=str(Path.cwd().resolve()),
     )
     _report(records)
-    data, stored, qualified_terminal = _mastu(monkeypatch, records)
-    _displaced(monkeypatch, records, data, stored, qualified_terminal)
-    del data
+    selected = set(sys.argv[1].split(",")) if len(sys.argv) > 1 else set()
+    if not selected or "mastu" in selected:
+        data, stored, qualified_terminal = _mastu(monkeypatch, records)
+        _displaced(monkeypatch, records, data, stored, qualified_terminal)
+        del data
     for name in ("tcv", "iter"):
+        if selected and name not in selected:
+            continue
         case_data, _ = _stored_case(name, monkeypatch, records)
         del case_data
     records["finished"] = True

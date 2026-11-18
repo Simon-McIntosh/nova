@@ -22,7 +22,7 @@ configure_dtypes()
 assert jax.config.jax_enable_x64
 
 BASE_REVISION = os.environ.get(
-    "NOVA_KERNEL_BASE_REVISION", "01575b6b164607271c9f1d06cfa3f64f18128646"
+    "NOVA_KERNEL_BASE_REVISION", "681a6ecd20d6a3473b02e340b6dc66dd288981c5"
 )
 ROOT = Path(__file__).resolve().parents[2]
 

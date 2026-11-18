@@ -9,6 +9,13 @@
   ],
   "completed_at": "2026-11-18T01:49:23.430Z",
   "dispatched_at": "2026-11-18T01:48:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "a consistency check beside the independent checks at reference.py lines 66, 86, 103 and 109, which do catch a wrong per-degree transmission",
+      "recorded_at": "2026-11-18T02:13:09.615189+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/iron_linear_magnetisation/reference.py",

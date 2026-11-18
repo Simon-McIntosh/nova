@@ -1,0 +1,103 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived with reckon.crew.review.added_failures_from_gate_logs over the reviewed run's gate-base.log and gate-after.log: formats pytest/pytest, no failing ids on either arm; the same function returns 2 ids over negative-control.log, so the zero is measured rather than a blind parse",
+  "call_site_count": 5,
+  "call_sites": [
+    "benchmarks/estimator_scoreboard.py:main",
+    "benchmarks/estimator_scoreboard.py:score_case",
+    "nova/imas/mast_parity_gate.py",
+    "nova/imas/mast_parity_chain.py",
+    "nova/transport/parity_flux_ledger.py"
+  ],
+  "completed_at": "2026-11-17T23:57:28.942Z",
+  "dispatched_at": "2026-11-17T23:57:05Z",
+  "findings": [
+    {
+      "file": "benchmarks/estimator_scoreboard.py",
+      "line": "52",
+      "severity": "non-blocking",
+      "text": "non-blocking: DEFAULT_PERTURBATION sets flux_fraction 0.02, the axis-flux band's own bound, so the published perturbed-copy axis-flux cell is marked FAIL on a 1.6e-15 excess (receipt.json:138 reads 0.020000000000001638) and the table prints \"0.02 of span FAIL\"; the done-when's \"ranked worse\" holds robustly but the every-band FAIL rests on float rounding rather than a declared margin."
+    },
+    {
+      "file": "benchmarks/estimator_scoreboard.py",
+      "line": "149",
+      "severity": "non-blocking",
+      "text": "non-blocking: map_boundary re-implements the largest-closed-flux-contour capability owned by nova/imas/profiles.py:56 closed_plasma_boundary, which already walks descending edge fractions of a stored grid and returns the largest closed loop; the addition duplicates that owner rather than extending or wrapping it."
+    },
+    {
+      "file": "nova/imas/mast_efit_referee.py",
+      "line": "540",
+      "severity": "non-blocking",
+      "text": "non-blocking: read_equilibrium_wall re-implements the limiter-ring read from a wall IDS owned by nova/equilibrium/wall_mask.py:209 wall_units_from_ids, duplicating the owner rather than extending or wrapping it and diverging from it on multi-description IDSs and closure flags."
+    },
+    {
+      "file": "nova/imas/mast_efit_referee.py",
+      "line": "757",
+      "severity": "non-blocking",
+      "text": "non-blocking: _polygon_area is a fourth shoelace area in nova after nova/imas/diiid_machine_ids.py:196 _shoelace_area and nova/equilibrium/separatrix_clip.py:102 _signed_area, and it duplicates _loop_area added at benchmarks/estimator_scoreboard.py:139 in the same change."
+    },
+    {
+      "file": "nova/imas/parity_tolerances.py",
+      "line": "342",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new bands cite docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json, whose band keys are axis_metres, current_fraction, flux_fraction and q95, while the registry states plasma_current_fraction, axis_flux_fraction, boundary_flux_fraction and q95_difference, so the evidence pointer cannot be resolved key-for-key and MetricTolerance.field was widened to ScorecardField | str to carry names outside the registered vocabulary."
+    },
+    {
+      "file": "nova/imas/mast_efit_referee.py",
+      "line": "615",
+      "severity": "non-blocking",
+      "text": "non-blocking: read_equilibrium_state reads equilibrium.time without checking ids_properties.homogeneous_time, so a non-homogeneous IDS raises IndexError at times[index] instead of the module's EfitRefereeError, against the repository's rule that homogeneous_time is checked on every IMAS read."
+    },
+    {
+      "file": "tests/test_estimator_scoreboard.py",
+      "line": "363",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert state.q95 == -1.5 compares the reader's echo against the -1.5 the test handed read_equilibrium_state on line 356, so it holds for any scoring regression and fails only if the reader rewrites its own argument."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/receipt.json",
+      "line": "121",
+      "severity": "non-blocking",
+      "text": "non-blocking: the committed receipt records its states under the worker's run directory (~/.config/reckon/crew/runs/r-20261114T143301237025-estimator-scoreboard/states) and cases.json:20 names ~/.cache inputs, both removed or machine-local, so the digest-naming receipt cannot be re-opened or the table regenerated from the committed artefacts alone."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read both commits against dd32048a48b754655722787346acf0471fe03cdf; feefe19b3 adds the state reader, comparator and command and 7611f2b35 re-points the case to the row-exchange copy, 7 paths and 1753 insertions, with no path outside the declared scope.",
+    "done_when": "docs/plans/inverse-equilibrium-baseline.html s3 asks one command whose receipt names each state's digest, a third estimator ranked worse on every case, and reference-free checks for every column; docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/receipt.json carries a digest per state, the perturbed-copy column at receipt.json:138-164 ranking worse on all five metrics, and reference_free blocks for all three columns, and gate-after.log records 11 passed at 7611f2b.",
+    "goal": "the node goal is one scoreboard that scores any state supplied as an IMAS equilibrium against a case reference with the registered comparator and the three reference-free checks; docs/evidence/fragments/inverse-equilibrium-baseline/estimator-scoreboard.html publishes one case with imas-efit, nova-inverse-class and perturbed-copy column groups read from stored states, which is that deliverable.",
+    "manifest": "read the reviewed run's manifest.md, which names commits feefe19b3 and 7611f2b35, records gate-after.log at 11 passed and gate-base.log at exit 4 with no tests collected because the test file is added by the change, and records negative-control.log at 2 failed.",
+    "write_paths": "the reviewed node declared nova/imas/mast_efit_referee.py, nova/imas/parity_tolerances.py, benchmarks/estimator_scoreboard.py, tests/test_estimator_scoreboard.py, the estimator-scoreboard fragment and the estimator-scoreboard figure directory; every one of the seven paths in the delivered diff lies inside that list."
+  },
+  "justifications": {
+    "durability": "negative-control.log reddens test_declared_perturbation_is_ranked_worse_on_every_metric and test_a_column_group_is_added_without_a_scoring_change when the declared perturbation is neutralised, so the guards fire, but tests/test_estimator_scoreboard.py:363 states a value the test itself passed in.",
+    "evidence": "the committed fragment is byte-identical to the command's stdout captured in the run's scoreboard.log and gate-after.log records \"11 passed\" at 7611f2b, so the table and its gate are recorded rather than claimed, at the cost that the gate exercises a synthetic corpus rather than the published case, whose regeneration is recorded only in the fragment.",
+    "fit": "the new dataclasses and helpers follow nova/imas/mast_efit_referee.py:39 _readonly and the module's existing idiom, and the sibling-except form at nova/imas/mast_efit_referee.py:515 is already used at nova/imas/dataset.py:775.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/estimator-scoreboard.html renders the three required column groups for the row-exchange case from stored states, though the two scalar-record columns take q95 beside the dataset rather than from it as cases.json:24 records.",
+    "reuse": "benchmarks/estimator_scoreboard.py:149, nova/imas/mast_efit_referee.py:540 and nova/imas/mast_efit_referee.py:757 duplicate capabilities owned by nova/imas/profiles.py:56, nova/equilibrium/wall_mask.py:209 and nova/imas/diiid_machine_ids.py:196 without extending them.",
+    "scope_discipline": "git diff --stat dd32048a48b7..7611f2b lists only the seven declared paths, 1753 insertions and 2 deletions."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is one scoreboard that scores any state supplied as an IMAS equilibrium against a case reference with the registered comparator and the three reference-free checks; docs/evidence/fragments/inverse-equilibrium-baseline/estimator-scoreboard.html publishes one case with imas-efit, nova-inverse-class and perturbed-copy column groups read from stored states, which is that deliverable.\nVERDICT done_when: docs/plans/inverse-equilibrium-baseline.html s3 asks one command whose receipt names each state's digest, a third estimator ranked worse on every case, and reference-free checks for every column; docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/receipt.json carries a digest per state, the perturbed-copy column at receipt.json:138-164 ranking worse on all five metrics, and reference_free blocks for all three columns, and gate-after.log records 11 passed at 7611f2b.\nVERDICT write_paths: the reviewed node declared nova/imas/mast_efit_referee.py, nova/imas/parity_tolerances.py, benchmarks/estimator_scoreboard.py, tests/test_estimator_scoreboard.py, the estimator-scoreboard fragment and the estimator-scoreboard figure directory; every one of the seven paths in the delivered diff lies inside that list.\nVERDICT manifest: read the reviewed run's manifest.md, which names commits feefe19b3 and 7611f2b35, records gate-after.log at 11 passed and gate-base.log at exit 4 with no tests collected because the test file is added by the change, and records negative-control.log at 2 failed.\nVERDICT diff: read both commits against dd32048a48b754655722787346acf0471fe03cdf; feefe19b3 adds the state reader, comparator and command and 7611f2b35 re-points the case to the row-exchange copy, 7 paths and 1753 insertions, with no path outside the declared scope.\nCALL_SITES: benchmarks/estimator_scoreboard.py:main, benchmarks/estimator_scoreboard.py:score_case, nova/imas/mast_parity_gate.py, nova/imas/mast_parity_chain.py, nova/transport/parity_flux_ledger.py\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/estimator-scoreboard.html renders the three required column groups for the row-exchange case from stored states, though the two scalar-record columns take q95 beside the dataset rather than from it as cases.json:24 records.\nSCORE evidence: 17\nJUSTIFICATION evidence: the committed fragment is byte-identical to the command's stdout captured in the run's scoreboard.log and gate-after.log records \"11 passed\" at 7611f2b, so the table and its gate are recorded rather than claimed, at the cost that the gate exercises a synthetic corpus rather than the published case, whose regeneration is recorded only in the fragment.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat dd32048a48b7..7611f2b lists only the seven declared paths, 1753 insertions and 2 deletions.\nSCORE durability: 17\nJUSTIFICATION durability: negative-control.log reddens test_declared_perturbation_is_ranked_worse_on_every_metric and test_a_column_group_is_added_without_a_scoring_change when the declared perturbation is neutralised, so the guards fire, but tests/test_estimator_scoreboard.py:363 states a value the test itself passed in.\nSCORE fit: 17\nJUSTIFICATION fit: the new dataclasses and helpers follow nova/imas/mast_efit_referee.py:39 _readonly and the module's existing idiom, and the sibling-except form at nova/imas/mast_efit_referee.py:515 is already used at nova/imas/dataset.py:775.\nSCORE reuse: 5\nJUSTIFICATION reuse: benchmarks/estimator_scoreboard.py:149, nova/imas/mast_efit_referee.py:540 and nova/imas/mast_efit_referee.py:757 duplicate capabilities owned by nova/imas/profiles.py:56, nova/equilibrium/wall_mask.py:209 and nova/imas/diiid_machine_ids.py:196 without extending them.\nFINDING benchmarks/estimator_scoreboard.py:52 non-blocking: DEFAULT_PERTURBATION sets flux_fraction 0.02, the axis-flux band's own bound, so the published perturbed-copy axis-flux cell is marked FAIL on a 1.6e-15 excess (receipt.json:138 reads 0.020000000000001638) and the table prints \"0.02 of span FAIL\"; the done-when's \"ranked worse\" holds robustly but the every-band FAIL rests on float rounding rather than a declared margin.\nFINDING benchmarks/estimator_scoreboard.py:149 non-blocking: map_boundary re-implements the largest-closed-flux-contour capability owned by nova/imas/profiles.py:56 closed_plasma_boundary, which already walks descending edge fractions of a stored grid and returns the largest closed loop; the addition duplicates that owner rather than extending or wrapping it.\nFINDING nova/imas/mast_efit_referee.py:540 non-blocking: read_equilibrium_wall re-implements the limiter-ring read from a wall IDS owned by nova/equilibrium/wall_mask.py:209 wall_units_from_ids, duplicating the owner rather than extending or wrapping it and diverging from it on multi-description IDSs and closure flags.\nFINDING nova/imas/mast_efit_referee.py:757 non-blocking: _polygon_area is a fourth shoelace area in nova after nova/imas/diiid_machine_ids.py:196 _shoelace_area and nova/equilibrium/separatrix_clip.py:102 _signed_area, and it duplicates _loop_area added at benchmarks/estimator_scoreboard.py:139 in the same change.\nFINDING nova/imas/parity_tolerances.py:342 non-blocking: the new bands cite docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json, whose band keys are axis_metres, current_fraction, flux_fraction and q95, while the registry states plasma_current_fraction, axis_flux_fraction, boundary_flux_fraction and q95_difference, so the evidence pointer cannot be resolved key-for-key and MetricTolerance.field was widened to ScorecardField | str to carry names outside the registered vocabulary.\nFINDING nova/imas/mast_efit_referee.py:615 non-blocking: read_equilibrium_state reads equilibrium.time without checking ids_properties.homogeneous_time, so a non-homogeneous IDS raises IndexError at times[index] instead of the module's EfitRefereeError, against the repository's rule that homogeneous_time is checked on every IMAS read.\nFINDING tests/test_estimator_scoreboard.py:363 non-blocking: assert state.q95 == -1.5 compares the reader's echo against the -1.5 the test handed read_equilibrium_state on line 356, so it holds for any scoring regression and fails only if the reader rewrites its own argument.\nFINDING docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/receipt.json:121 non-blocking: the committed receipt records its states under the worker's run directory (~/.config/reckon/crew/runs/r-20261114T143301237025-estimator-scoreboard/states) and cases.json:20 names ~/.cache inputs, both removed or machine-local, so the digest-naming receipt cannot be re-opened or the table regenerated from the committed artefacts alone.\n",
+  "review_method": "Read-only review of the two landed commits, the reviewed manifest and its gate and negative-control logs, the published fragment, cases manifest and receipt; the fragment was compared byte-for-byte with the command stdout in the run's scoreboard.log; no suite was re-run and no mutation applied to the node",
+  "review_run_id": "r-20261117T235623557829-review-of-estimator-scoreboard-7611f2b35922",
+  "reviewed_base_sha": "dd32048a48b754655722787346acf0471fe03cdf",
+  "reviewed_head_sha": "7611f2b359221922d1c26901e735d57eb3e6e448",
+  "reviewed_run_id": "r-20261114T143301237025-estimator-scoreboard",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T00:11:08.337263+00:00",
+  "total": 92
+}

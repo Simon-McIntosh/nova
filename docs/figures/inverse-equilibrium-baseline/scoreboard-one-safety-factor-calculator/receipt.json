@@ -156,7 +156,7 @@
       "q95_difference": 0.24414243587272955
      },
      "name": "perturbed-copy",
-     "note": "a deliberately defective copy of the nova inverse-class state: current scaled by 1.06, boundary and axis shifted 0.03 m radially, flux span grown 2% at each end, and the stored flux map's minor radius about the axis scaled by 1.06, so the defect reaches the map the safety-factor calculator reads rather than only the scalar q profile",
+     "note": "a deliberately defective copy of the nova inverse-class state: current scaled by 1.06, boundary and axis shifted 0.03 m radially, flux span grown 2% at each end, and the stored flux map's minor radius about the axis scaled by 1.1, so the defect reaches the map the safety-factor calculator reads rather than only the scalar q profile",
      "q95_flux_map": 3.2277536273295744,
      "q95_stored": -3.2077755688992244,
      "reference_free": {

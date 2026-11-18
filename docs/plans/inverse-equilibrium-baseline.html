@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="61">
+<meta name="plan-version" content="62">
 <meta name="plan-modified" content="2026-11-18">
 </head>
 <body>
@@ -280,6 +280,12 @@
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261118T045610416300-review-of-efit-comparison-6c0ffac5faf8" data-who="reckon-build" data-when="2026-11-18T05:05:59Z">
     <div class="r-comment-body"><p>Independent review of d7676e478fc8701b036ec717f80d403c3ead86f5..6c0ffac5faf86c18d6c80a8fc9f683b4018f7a24 stored under the reviewed run; all six dimensions scored, one non-blocking reuse finding, no blocking findings; CPU added failure count waived, not zero.</p></div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261117T235623557829-review-of-estimator-scoreboard-7611f2b35922" data-who="reckon-build" data-when="2026-11-17T23:57:28.942Z">
+    <div class="r-comment-body"><p>reviewed r-20261114T143301237025-estimator-scoreboard at base dd32048a48b754655722787346acf0471fe03cdf and head 7611f2b359221922d1c26901e735d57eb3e6e448; scores goal_fidelity 17, evidence 17, scope_discipline 19, durability 17, fit 17, reuse 5 (total 92); eight non-blocking findings, no blocking finding, so the node may land</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261114T143301237025-estimator-scoreboard" data-who="reckon-build" data-when="2026-11-17T22:39:34Z">
+    <div class="r-comment-body"><p>the row-exchange case is scored on one comparator from stored states, with imas-efit's reconstruction passing four of five bands and failing the safety factor at 0.148 against a band of 0.1, the nova inverse-class state passing every band at the fit's own recorded precision, a declared perturbed copy of that state failing every band, and all three reference-free checks reported for every column; each column names its state source and the receipt carries each state's digest</p></div>
+</div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261116T014730916750-review-of-white-noise-covariance-f0cd75cbf01a" data-who="reckon-build" data-when="2026-11-16T02:11:16.404Z">
     <div class="r-comment-body"><p>review of run r-20261115T012417719546-white-noise-covariance over b15155f8d0361efce262ded60fd0b54a95133cf4..f0cd75cbf01ac4af6f497d543edc033df1309dd1: scores 13/13/20/4/18/20 (total 88), one blocking finding that the provenance dates job 1318468 to 2026-11-16 while its own log header reads 2026-11-15T20:47:16+0100, and two non-blocking findings (the linearised arm is a self-consistency check stated as a validation; the record names no reproduction path).</p></div>
 </div>
@@ -307,6 +313,9 @@
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261118T055850784365-review-of-white-noise-covariance-65af0b010db1" data-who="reckon-build" data-when="2026-11-18T06:07:06Z">
     <div class="r-comment-body"><p>Parsed independent review of d7676e478fc8701b036ec717f80d403c3ead86f5..65af0b010db137b05137b6fd8fc9dd183cb273d9: all six dimensions scored, zero added failures in the recorded artifact-path gate, one blocking nonlinear flux-scaling evidence gap and four non-blocking findings.</p></div>
 </div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261115T012417719546-white-noise-covariance" data-who="reckon-build" data-when="2026-11-18T06:20:42Z">
+    <div class="r-comment-body"><p>not claimed by this node. The fragment cites software revision ffce4cd56a91258155d61c9ada6a5d1ddfb16d81, and every wall time in it is a titan P100 number.</p></div>
+</div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261117T043314861081-review-of-efit-on-nova-rows-86b64c13475d" data-who="reckon-build" data-when="2026-11-17T04:38:15.860Z">
     <div class="r-comment-body"><p>independent review of r-20261115T202050274305-efit-on-nova-rows stored at review-records/r-20261115T202050274305-efit-on-nova-rows.json (and its .at-86b64c13 sibling) with status parsed, scores goal_fidelity 17, evidence 16, scope_discipline 18, durability 6, fit 15, reuse 20 (total 92), reviewed_base_sha 1f788362e8e1ca19bb5691fff8b31d25ed825f0e and reviewed_head_sha 86b64c13475d0d589ff836eaec44affff1ca7d56, added_failure_count 0 over an unarmed reviewed run, and four non-blocking findings.</p></div>
 </div>
@@ -327,12 +336,6 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261115T202050274305-efit-on-nova-rows" data-who="reckon-build" data-when="2026-11-15T20:23:51Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html - the full section-8 exchange, with the explicit-degree basis that makes a qualified state exist, the generating state at the reference mesh, imas-efit's reconstruction per band with the q95 band judged on one calculator and the stored values reported beside it as a definition difference, the nova fit on the same rows, and the 1.10 negative control. Two poloidal panels under docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/, both states on one level array with both null sets and the vessel, pinned by receipt.json; tests/test_efit_on_nova_rows_receipt.py is the reconciliation check that fails when a quoted number, solver line, q95 row or edge endpoint moves.</p></div>
-</div>
-<div class="r-comment" data-section="s3" data-id="c-run-r-20261117T235623557829-review-of-estimator-scoreboard-7611f2b35922" data-who="reckon-build" data-when="2026-11-17T23:57:28.942Z">
-    <div class="r-comment-body"><p>reviewed r-20261114T143301237025-estimator-scoreboard at base dd32048a48b754655722787346acf0471fe03cdf and head 7611f2b359221922d1c26901e735d57eb3e6e448; scores goal_fidelity 17, evidence 17, scope_discipline 19, durability 17, fit 17, reuse 5 (total 92); eight non-blocking findings, no blocking finding, so the node may land</p></div>
-</div>
-<div class="r-comment" data-section="s3" data-id="c-run-r-20261114T143301237025-estimator-scoreboard" data-who="reckon-build" data-when="2026-11-17T22:39:34Z">
-    <div class="r-comment-body"><p>the row-exchange case is scored on one comparator from stored states, with imas-efit's reconstruction passing four of five bands and failing the safety factor at 0.148 against a band of 0.1, the nova inverse-class state passing every band at the fit's own recorded precision, a declared perturbed copy of that state failing every band, and all three reference-free checks reported for every column; each column names its state source and the receipt carries each state's digest</p></div>
 </div>
 </section>
 </main>

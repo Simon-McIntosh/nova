@@ -235,7 +235,7 @@ def _run_known(case, args):
         ).tolist(),
     )
     if not fitted.converged:
-        row["not_converged_reason" = "flux update did not reach its tolerance"
+        row["not_converged_reason"] = "flux update did not reach its tolerance"
     return row
 
 

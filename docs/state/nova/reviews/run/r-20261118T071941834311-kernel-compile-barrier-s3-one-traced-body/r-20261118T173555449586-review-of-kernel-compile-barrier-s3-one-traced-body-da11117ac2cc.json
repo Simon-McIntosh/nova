@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "call_sites": [],
   "completed_at": "2026-11-18T18:17:50.909Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "the low reuse score is a duplicated record checker in a prototype directory of a negative-result node; sharing one checker across the prototype directories is carried as a follow-up, and repairing it here would start another round on a run whose product change is nil",
+      "recorded_at": "2026-11-18T18:52:18.626910+00:00"
+    }
+  },
   "dispatched_at": "2026-11-18T18:17:15Z",
   "findings": [
     {

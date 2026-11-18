@@ -185,7 +185,7 @@ def test_wall_is_drawn_above_the_cell_outlines(scene, geometry):
     render.check_scene(scene, expected_labels(geometry))
     for ax in scene.axes:
         for line in ax.lines:
-            if line.get_gid() == render.WALL_GID:
+            if (line.get_gid() or "").startswith(render.WALL_GID):
                 line.set_zorder(1)
     with pytest.raises(ValueError, match="first wall is not drawn above"):
         render.check_scene(scene, expected_labels(geometry))
@@ -195,7 +195,7 @@ def test_wall_mark_duplicating_the_coil_grey_is_refused(scene, geometry):
     render.check_scene(scene, expected_labels(geometry))
     for ax in scene.axes:
         for line in ax.lines:
-            if line.get_gid() == render.WALL_GID:
+            if (line.get_gid() or "").startswith(render.WALL_GID):
                 line.set_color("#929292")
     with pytest.raises(ValueError, match="first wall mark duplicates"):
         render.check_scene(scene, expected_labels(geometry))

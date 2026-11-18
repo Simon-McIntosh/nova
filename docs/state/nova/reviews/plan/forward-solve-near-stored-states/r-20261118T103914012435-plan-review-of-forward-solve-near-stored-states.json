@@ -131,6 +131,13 @@
       "note": "The section now accounts for its surface in its own text: no new public entry point, the existing batched entry is widened to the request and receipt of the unbatched solve.",
       "reason": "",
       "when": "2026-11-18T11:26:38.589363+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reuse_search-2",
+      "reason": "The reach section states the endpoint and its search set; whether the sequence is run through the existing drive-continuation owner is the worker to settle, and that owner is cited in the node brief as the reuse map.",
+      "when": "2026-11-18T11:26:48.645959+00:00"
     }
   ],
   "responses": {
@@ -169,6 +176,12 @@
       "note": "The batching section now says a batched entry to the forward solve already exists and that the recorded refusal is one route breaking inside it; the section is a measurement plus a repair of that route, not a new capability.",
       "reason": "",
       "when": "2026-11-18T11:26:02.395363+00:00"
+    },
+    "reuse_search-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The reach section states the endpoint and its search set; whether the sequence is run through the existing drive-continuation owner is the worker to settle, and that owner is cited in the node brief as the reuse map.",
+      "when": "2026-11-18T11:26:48.645959+00:00"
     },
     "thin_wrapper-1": {
       "action": "acted",

@@ -207,6 +207,7 @@ def test_map_check_refuses_nonfinite_and_missing_coils():
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(900)
 @pytest.mark.parametrize("sample", range(3))
 def test_iter_nodal_jets_match_analytic_map(iter_bank, sample):
     """Check the live plasma contraction alone and with runtime coil currents."""
@@ -252,6 +253,7 @@ def test_reentrant_wall_mesh_keeps_all_clipped_fragments():
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(900)
 @pytest.mark.parametrize("sample", range(3))
 def test_iter_coil_jets_match_analytic_map(iter_bank, sample):
     """Qualify every driven jet entry against the direct analytic kernels."""

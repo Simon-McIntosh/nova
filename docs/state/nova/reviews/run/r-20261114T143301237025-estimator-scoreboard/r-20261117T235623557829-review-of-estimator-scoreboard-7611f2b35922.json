@@ -14,6 +14,14 @@
   ],
   "completed_at": "2026-11-17T23:57:28.942Z",
   "dispatched_at": "2026-11-17T23:57:05Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-18T00:15:56.655662+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261114T143301237025-estimator-scoreboard"
+    }
+  },
   "findings": [
     {
       "file": "benchmarks/estimator_scoreboard.py",
